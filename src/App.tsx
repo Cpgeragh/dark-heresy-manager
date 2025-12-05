@@ -4,7 +4,14 @@ import viteLogo from '/vite.svg'
 import './App.css'
 
 // Firestore
-import { collection, addDoc } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  doc,
+  setDoc,
+  getDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 import { db, auth } from "./firebase";
 
 // Auth
@@ -13,27 +20,55 @@ import type { User } from "firebase/auth";
 
 function App() {
   const [count, setCount] = useState(0)
+
   const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [authReady, setAuthReady] = useState(false)
+  const [userRole, setUserRole] = useState<"player" | "dm" | "unknown">("unknown")
 
-  // Set up anonymous auth on app load
+  const [campaignName, setCampaignName] = useState("")
+  const [activeCampaignId, setActiveCampaignId] = useState<string | null>(null)
+  const [creatingCampaign, setCreatingCampaign] = useState(false)
+
+  // Auth + user document setup
   useEffect(() => {
-    // Listen for auth state changes
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        // Already signed in (or just signed in)
-        setCurrentUser(user)
-        setAuthReady(true)
-      } else {
-        // Not signed in yet: sign in anonymously
-        try {
+      try {
+        if (!user) {
+          // Not signed in yet → sign in anonymously
           const cred = await signInAnonymously(auth)
-          setCurrentUser(cred.user)
-          setAuthReady(true)
-        } catch (error) {
-          console.error("Error with anonymous sign-in:", error)
-          setAuthReady(true)
+          user = cred.user
         }
+
+        setCurrentUser(user)
+
+        // Create or load user document
+        const userRef = doc(db, "users", user.uid)
+        const snap = await getDoc(userRef)
+
+        if (!snap.exists()) {
+          // New user → default to "player"
+          await setDoc(userRef, {
+            role: "player",
+            createdAt: serverTimestamp(),
+            lastSeen: serverTimestamp(),
+          })
+          setUserRole("player")
+        } else {
+          const data = snap.data() as { role?: string }
+          const role = data.role === "dm" ? "dm" : "player"
+          setUserRole(role)
+
+          // Update lastSeen
+          await setDoc(
+            userRef,
+            { lastSeen: serverTimestamp() },
+            { merge: true }
+          )
+        }
+      } catch (err) {
+        console.error("Error during auth/user setup:", err)
+      } finally {
+        setAuthReady(true)
       }
     })
 
@@ -60,6 +95,54 @@ function App() {
     }
   }
 
+  // TEMP: promote this device to DM
+  async function becomeDM() {
+    if (!currentUser) return
+    try {
+      await setDoc(
+        doc(db, "users", currentUser.uid),
+        { role: "dm" },
+        { merge: true }
+      )
+      setUserRole("dm")
+      alert("This device is now marked as DM (temporary).")
+    } catch (err) {
+      console.error("Error setting DM role:", err)
+      alert("Failed to set DM role.")
+    }
+  }
+
+  // Create a campaign (DM only)
+  async function createCampaign() {
+    if (!currentUser) {
+      alert("User not ready.")
+      return
+    }
+    if (userRole !== "dm") {
+      alert("Only the DM can create campaigns.")
+      return
+    }
+
+    const trimmedName = campaignName.trim() || "Untitled campaign"
+
+    try {
+      setCreatingCampaign(true)
+      const docRef = await addDoc(collection(db, "campaigns"), {
+        name: trimmedName,
+        dmId: currentUser.uid,
+        createdAt: serverTimestamp(),
+      })
+      setActiveCampaignId(docRef.id)
+      setCampaignName("")
+      alert(`Campaign "${trimmedName}" created.`)
+    } catch (err) {
+      console.error("Error creating campaign:", err)
+      alert("Failed to create campaign.")
+    } finally {
+      setCreatingCampaign(false)
+    }
+  }
+
   return (
     <>
       <div>
@@ -71,7 +154,7 @@ function App() {
         </a>
       </div>
 
-      <h1>Vite + React + Firebase</h1>
+      <h1>Dark Heresy Manager (Prototype)</h1>
 
       <div className="card">
         <button onClick={() => setCount((count) => count + 1)}>
@@ -86,24 +169,56 @@ function App() {
           Edit <code>src/App.tsx</code> and save to test HMR
         </p>
 
-        <div style={{ marginTop: "1rem", fontSize: "0.9rem" }}>
+        <div style={{ marginTop: "1.5rem", textAlign: "left" }}>
+          <h3>Current User</h3>
           {authReady ? (
             currentUser ? (
-              <div>
-                <div><strong>Anon user ID:</strong></div>
-                <code>{currentUser.uid}</code>
-              </div>
+              <>
+                <div><strong>UID:</strong> <code>{currentUser.uid}</code></div>
+                <div><strong>Role:</strong> {userRole}</div>
+              </>
             ) : (
-              <span>Auth ready, but no user.</span>
+              <div>No user (this should be rare).</div>
             )
           ) : (
-            <span>Initialising auth…</span>
+            <div>Initialising auth…</div>
+          )}
+        </div>
+
+        <div style={{ marginTop: "1.5rem", textAlign: "left" }}>
+          <h3>DM Controls (temporary)</h3>
+          <button onClick={becomeDM} disabled={!currentUser}>
+            Make this device DM
+          </button>
+        </div>
+
+        <div style={{ marginTop: "1.5rem", textAlign: "left" }}>
+          <h3>Create Campaign (DM only)</h3>
+          <input
+            type="text"
+            placeholder="Campaign name"
+            value={campaignName}
+            onChange={(e) => setCampaignName(e.target.value)}
+            style={{ width: "100%", marginBottom: "0.5rem" }}
+          />
+          <button
+            onClick={createCampaign}
+            disabled={!currentUser || userRole !== "dm" || creatingCampaign}
+          >
+            {creatingCampaign ? "Creating..." : "Create Campaign"}
+          </button>
+
+          {activeCampaignId && (
+            <div style={{ marginTop: "0.75rem" }}>
+              <strong>Last created campaign ID:</strong>
+              <div><code>{activeCampaignId}</code></div>
+            </div>
           )}
         </div>
       </div>
 
       <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
+        This is a prototype. We’ll split DM/Player views and proper routing later.
       </p>
     </>
   )
