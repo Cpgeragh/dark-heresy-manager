@@ -35,6 +35,9 @@ function App() {
     { id: string; name: string; userId: string | null; recoveryCode: string }[]
   >([]);
 
+  const [claimCode, setClaimCode] = useState("");
+  const [claimedCharacter, setClaimedCharacter] = useState<any | null>(null);
+
 
   // -------------------------------
   // Auth + user document setup
@@ -43,19 +46,16 @@ function App() {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       try {
         if (!user) {
-          // Not signed in yet → sign in anonymously
           const cred = await signInAnonymously(auth)
           user = cred.user
         }
 
         setCurrentUser(user)
 
-        // Create or load user document
         const userRef = doc(db, "users", user.uid)
         const snap = await getDoc(userRef)
 
         if (!snap.exists()) {
-          // New user → default to "player"
           await setDoc(userRef, {
             role: "player",
             createdAt: serverTimestamp(),
@@ -67,7 +67,6 @@ function App() {
           const role = data.role === "dm" ? "dm" : "player"
           setUserRole(role)
 
-          // Update lastSeen
           await setDoc(
             userRef,
             { lastSeen: serverTimestamp() },
@@ -75,7 +74,7 @@ function App() {
           )
         }
       } catch (err) {
-        console.error("Error during auth/user setup:", err)
+        console.error("Auth setup error:", err)
       } finally {
         setAuthReady(true)
       }
@@ -89,10 +88,7 @@ function App() {
   // Test Firestore write
   // -------------------------------
   async function createTestEntry() {
-    if (!currentUser) {
-      alert("User not ready yet, please wait a moment.")
-      return
-    }
+    if (!currentUser) return alert("User not ready.")
 
     try {
       await addDoc(collection(db, "testCollection"), {
@@ -102,14 +98,13 @@ function App() {
       })
       alert("Test document created!")
     } catch (error) {
-      console.error("Error writing document: ", error)
-      alert("Failed to write document — see console for details.")
+      console.error("Error writing document:", error)
     }
   }
 
 
   // -------------------------------
-  // TEMP: promote this device to DM
+  // TEMP: promote to DM
   // -------------------------------
   async function becomeDM() {
     if (!currentUser) return
@@ -120,26 +115,19 @@ function App() {
         { merge: true }
       )
       setUserRole("dm")
-      alert("This device is now marked as DM (temporary).")
+      alert("This device is now DM.")
     } catch (err) {
-      console.error("Error setting DM role:", err)
-      alert("Failed to set DM role.")
+      console.error("DM set error:", err)
     }
   }
 
 
   // -------------------------------
-  // Campaign creation (DM only)
+  // Create campaign
   // -------------------------------
   async function createCampaign() {
-    if (!currentUser) {
-      alert("User not ready.")
-      return
-    }
-    if (userRole !== "dm") {
-      alert("Only the DM can create campaigns.")
-      return
-    }
+    if (!currentUser) return alert("User not ready.")
+    if (userRole !== "dm") return alert("Only the DM can create campaigns.")
 
     const trimmedName = campaignName.trim() || "Untitled campaign"
 
@@ -154,8 +142,7 @@ function App() {
       setCampaignName("")
       alert(`Campaign "${trimmedName}" created.`)
     } catch (err) {
-      console.error("Error creating campaign:", err)
-      alert("Failed to create campaign.")
+      console.error("Campaign creation error:", err)
     } finally {
       setCreatingCampaign(false)
     }
@@ -163,7 +150,7 @@ function App() {
 
 
   // -------------------------------
-  // Character creation helpers
+  // Character recovery code generator
   // -------------------------------
   function generateRecoveryCode() {
     const segment = () =>
@@ -171,26 +158,24 @@ function App() {
     return `DH-${segment()}-${segment()}`;
   }
 
+
+  // -------------------------------
+  // Create Character (DM only)
+  // -------------------------------
   async function createCharacter() {
-    if (!currentUser || !activeCampaignId) {
-      alert("No campaign or user loaded.");
-      return;
-    }
-    if (userRole !== "dm") {
-      alert("Only the DM can create characters.");
-      return;
-    }
+    if (!currentUser || !activeCampaignId)
+      return alert("No campaign or user loaded.")
 
-    const trimmedName = characterName.trim();
-    if (!trimmedName) {
-      alert("Character name cannot be empty.");
-      return;
-    }
+    if (userRole !== "dm")
+      return alert("Only the DM can create characters.")
 
-    const recoveryCode = generateRecoveryCode();
+    const trimmedName = characterName.trim()
+    if (!trimmedName) return alert("Character name cannot be empty.")
+
+    const recoveryCode = generateRecoveryCode()
 
     try {
-      await addDoc(
+      const characterRef = await addDoc(
         collection(db, "campaigns", activeCampaignId, "characters"),
         {
           name: trimmedName,
@@ -199,25 +184,30 @@ function App() {
           isEditableByPlayer: false,
           createdAt: serverTimestamp(),
 
-          // Placeholder stats
           stats: {
             ws: 0, bs: 0, str: 0, tou: 0, agi: 0,
             int: 0, per: 0, wp: 0, fel: 0,
           },
         }
-      );
+      )
 
-      alert(`Character "${trimmedName}" created! Recovery code: ${recoveryCode}`);
-      setCharacterName("");
+      // Register global recovery lookup
+      await setDoc(doc(db, "recoveryCodes", recoveryCode), {
+        campaignId: activeCampaignId,
+        characterId: characterRef.id,
+      })
+
+      alert(`Character "${trimmedName}" created!\nRecovery Code: ${recoveryCode}`)
+      setCharacterName("")
     } catch (err) {
-      console.error("Error creating character:", err);
-      alert("Failed to create character.");
+      console.error("Character creation error:", err)
+      alert("Failed to create character.")
     }
   }
 
 
   // -------------------------------
-  // Live character list for active campaign
+  // Watch characters in campaign
   // -------------------------------
   useEffect(() => {
     if (!activeCampaignId) {
@@ -240,7 +230,65 @@ function App() {
 
 
   // -------------------------------
-  // UI
+  // Claim character using recovery code
+  // -------------------------------
+  async function claimCharacter() {
+    if (!currentUser) return alert("User not ready.")
+
+    const code = claimCode.trim().toUpperCase()
+    if (!code) return alert("Please enter a recovery code.")
+
+    try {
+      // Lookup code
+      const lookupRef = doc(db, "recoveryCodes", code)
+      const lookupSnap = await getDoc(lookupRef)
+
+      if (!lookupSnap.exists()) {
+        alert("Invalid recovery code.")
+        return
+      }
+
+      const { campaignId, characterId } = lookupSnap.data() as {
+        campaignId: string
+        characterId: string
+      }
+
+      const charRef = doc(
+        db,
+        "campaigns",
+        campaignId,
+        "characters",
+        characterId
+      )
+      const charSnap = await getDoc(charRef)
+
+      if (!charSnap.exists()) {
+        alert("Character not found.")
+        return
+      }
+
+      const charData = charSnap.data()
+
+      // Assign to this user
+      await setDoc(charRef, { userId: currentUser.uid }, { merge: true })
+
+      setClaimedCharacter({
+        id: characterId,
+        campaignId,
+        ...charData,
+        userId: currentUser.uid,
+      })
+
+      alert(`Character "${charData.name}" claimed!`)
+    } catch (err) {
+      console.error("Claim error:", err)
+      alert("Failed to claim character.")
+    }
+  }
+
+
+  // -------------------------------
+  // UI Rendering
   // -------------------------------
   return (
     <>
@@ -256,6 +304,8 @@ function App() {
       <h1>Dark Heresy Manager (Prototype)</h1>
 
       <div className="card">
+
+        {/* Counter + test write */}
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
         </button>
@@ -263,10 +313,6 @@ function App() {
         <button onClick={createTestEntry} style={{ marginTop: "1rem" }}>
           Create Firestore Test Document
         </button>
-
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
 
         {/* USER INFO */}
         <div style={{ marginTop: "1.5rem", textAlign: "left" }}>
@@ -278,22 +324,24 @@ function App() {
                 <div><strong>Role:</strong> {userRole}</div>
               </>
             ) : (
-              <div>No user (this should be rare).</div>
+              <div>No user.</div>
             )
           ) : (
             <div>Initialising auth…</div>
           )}
         </div>
 
+
         {/* DM CONTROLS */}
         <div style={{ marginTop: "1.5rem", textAlign: "left" }}>
-          <h3>DM Controls (temporary)</h3>
+          <h3>DM Controls</h3>
           <button onClick={becomeDM} disabled={!currentUser}>
             Make this device DM
           </button>
         </div>
 
-        {/* CREATE CAMPAIGN */}
+
+        {/* CAMPAIGN CREATION */}
         <div style={{ marginTop: "1.5rem", textAlign: "left" }}>
           <h3>Create Campaign (DM only)</h3>
           <input
@@ -312,13 +360,14 @@ function App() {
 
           {activeCampaignId && (
             <div style={{ marginTop: "0.75rem" }}>
-              <strong>Last created campaign ID:</strong>
+              <strong>Campaign ID:</strong>
               <div><code>{activeCampaignId}</code></div>
             </div>
           )}
         </div>
 
-        {/* CREATE CHARACTER */}
+
+        {/* CHARACTER CREATION */}
         <div style={{ marginTop: "2rem", textAlign: "left" }}>
           <h3>Create Character (DM only)</h3>
 
@@ -351,7 +400,7 @@ function App() {
                   <ul>
                     {characters.map((c) => (
                       <li key={c.id}>
-                        <strong>{c.name}</strong> — Recovery Code: {c.recoveryCode}
+                        <strong>{c.name}</strong> — Code: {c.recoveryCode}
                       </li>
                     ))}
                   </ul>
@@ -360,10 +409,36 @@ function App() {
             </>
           )}
         </div>
+
+
+        {/* CHARACTER CLAIMING */}
+        <div style={{ marginTop: "2rem", textAlign: "left" }}>
+          <h3>Claim Character</h3>
+          <input
+            type="text"
+            placeholder="Enter recovery code"
+            value={claimCode}
+            onChange={(e) => setClaimCode(e.target.value)}
+            style={{ width: "100%", marginBottom: "0.5rem" }}
+          />
+
+          <button onClick={claimCharacter} disabled={!claimCode.trim()}>
+            Claim Character
+          </button>
+
+          {claimedCharacter && (
+            <div style={{ marginTop: "1rem" }}>
+              <h4>Claimed Character:</h4>
+              <strong>{claimedCharacter.name}</strong>
+              <p>Campaign: <code>{claimedCharacter.campaignId}</code></p>
+              <p>Character ID: <code>{claimedCharacter.id}</code></p>
+            </div>
+          )}
+        </div>
       </div>
 
       <p className="read-the-docs">
-        This is a prototype. We’ll split DM/Player views and proper routing later.
+        This is a prototype. We will split DM/Player dashboards next.
       </p>
     </>
   )
