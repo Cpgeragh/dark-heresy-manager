@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from "react";
+import reactLogo from "./assets/react.svg";
+import viteLogo from "/vite.svg";
+import "./App.css";
 
 // Firestore
 import {
@@ -23,15 +23,17 @@ import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
 import type { User } from "firebase/auth";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = useState(0);
 
-  const [currentUser, setCurrentUser] = useState<User | null>(null)
-  const [authReady, setAuthReady] = useState(false)
-  const [userRole, setUserRole] = useState<"player" | "dm" | "unknown">("unknown")
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [authReady, setAuthReady] = useState(false);
+  const [userRole, setUserRole] = useState<"player" | "dm" | "unknown">(
+    "unknown"
+  );
 
-  const [campaignName, setCampaignName] = useState("")
-  const [activeCampaignId, setActiveCampaignId] = useState<string | null>(null)
-  const [creatingCampaign, setCreatingCampaign] = useState(false)
+  const [campaignName, setCampaignName] = useState("");
+  const [activeCampaignId, setActiveCampaignId] = useState<string | null>(null);
+  const [creatingCampaign, setCreatingCampaign] = useState(false);
 
   const [characterName, setCharacterName] = useState("");
   const [characters, setCharacters] = useState<
@@ -41,119 +43,114 @@ function App() {
   const [claimCode, setClaimCode] = useState("");
   const [claimedCharacter, setClaimedCharacter] = useState<any | null>(null);
 
-
   // -------------------------------
-  // Auth + user document setup
+  // Auth + User Setup
   // -------------------------------
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       try {
         if (!user) {
-          const cred = await signInAnonymously(auth)
-          user = cred.user
+          const cred = await signInAnonymously(auth);
+          user = cred.user;
         }
 
-        setCurrentUser(user)
+        setCurrentUser(user);
 
-        const userRef = doc(db, "users", user.uid)
-        const snap = await getDoc(userRef)
+        const userRef = doc(db, "users", user.uid);
+        const snap = await getDoc(userRef);
 
         if (!snap.exists()) {
           await setDoc(userRef, {
             role: "player",
             createdAt: serverTimestamp(),
             lastSeen: serverTimestamp(),
-          })
-          setUserRole("player")
+          });
+          setUserRole("player");
         } else {
-          const data = snap.data() as { role?: string }
-          const role = data.role === "dm" ? "dm" : "player"
-          setUserRole(role)
+          const data = snap.data() as { role?: string };
+          const role = data.role === "dm" ? "dm" : "player";
+          setUserRole(role);
 
           await setDoc(
             userRef,
             { lastSeen: serverTimestamp() },
             { merge: true }
-          )
+          );
         }
       } catch (err) {
-        console.error("Auth setup error:", err)
+        console.error("Auth setup error:", err);
       } finally {
-        setAuthReady(true)
+        setAuthReady(true);
       }
-    })
+    });
 
-    return () => unsubscribe()
-  }, [])
-
+    return () => unsubscribe();
+  }, []);
 
   // -------------------------------
-  // Test Firestore write
+  // Test Firestore Write
   // -------------------------------
   async function createTestEntry() {
-    if (!currentUser) return alert("User not ready.")
+    if (!currentUser) return alert("User not ready.");
 
     try {
       await addDoc(collection(db, "testCollection"), {
         message: "Hello Firestore",
         createdAt: new Date(),
         userId: currentUser.uid,
-      })
-      alert("Test document created!")
+      });
+      alert("Test document created!");
     } catch (error) {
-      console.error("Error writing document:", error)
+      console.error("Error writing document:", error);
     }
   }
 
-
   // -------------------------------
-  // TEMP: promote to DM
+  // TEMP: Become DM
   // -------------------------------
   async function becomeDM() {
-    if (!currentUser) return
+    if (!currentUser) return;
     try {
       await setDoc(
         doc(db, "users", currentUser.uid),
         { role: "dm" },
         { merge: true }
-      )
-      setUserRole("dm")
-      alert("This device is now DM.")
+      );
+      setUserRole("dm");
+      alert("This device is now DM.");
     } catch (err) {
-      console.error("DM set error:", err)
+      console.error("DM set error:", err);
     }
   }
 
-
   // -------------------------------
-  // Create campaign
+  // Create Campaign
   // -------------------------------
   async function createCampaign() {
-    if (!currentUser) return alert("User not ready.")
-    if (userRole !== "dm") return alert("Only the DM can create campaigns.")
+    if (!currentUser) return alert("User not ready.");
+    if (userRole !== "dm") return alert("Only the DM can create campaigns.");
 
-    const trimmedName = campaignName.trim() || "Untitled campaign"
+    const trimmedName = campaignName.trim() || "Untitled campaign";
 
     try {
-      setCreatingCampaign(true)
+      setCreatingCampaign(true);
       const docRef = await addDoc(collection(db, "campaigns"), {
         name: trimmedName,
         dmId: currentUser.uid,
         createdAt: serverTimestamp(),
-      })
-      setActiveCampaignId(docRef.id)
-      setCampaignName("")
-      alert(`Campaign "${trimmedName}" created.`)
+      });
+      setActiveCampaignId(docRef.id);
+      setCampaignName("");
+      alert(`Campaign "${trimmedName}" created.`);
     } catch (err) {
-      console.error("Campaign creation error:", err)
+      console.error("Campaign creation error:", err);
     } finally {
-      setCreatingCampaign(false)
+      setCreatingCampaign(false);
     }
   }
 
-
   // -------------------------------
-  // Character recovery code generator
+  // Generate Recovery Code
   // -------------------------------
   function generateRecoveryCode() {
     const segment = () =>
@@ -161,21 +158,20 @@ function App() {
     return `DH-${segment()}-${segment()}`;
   }
 
-
   // -------------------------------
-  // Create Character (DM only)
+  // Create Character (DM Only)
   // -------------------------------
   async function createCharacter() {
     if (!currentUser || !activeCampaignId)
-      return alert("No campaign or user loaded.")
+      return alert("No campaign or user loaded.");
 
     if (userRole !== "dm")
-      return alert("Only the DM can create characters.")
+      return alert("Only the DM can create characters.");
 
-    const trimmedName = characterName.trim()
-    if (!trimmedName) return alert("Character name cannot be empty.")
+    const trimmedName = characterName.trim();
+    if (!trimmedName) return alert("Character name cannot be empty.");
 
-    const recoveryCode = generateRecoveryCode()
+    const recoveryCode = generateRecoveryCode();
 
     try {
       const characterRef = await addDoc(
@@ -188,29 +184,37 @@ function App() {
           createdAt: serverTimestamp(),
 
           stats: {
-            ws: 0, bs: 0, str: 0, tou: 0, agi: 0,
-            int: 0, per: 0, wp: 0, fel: 0,
+            ws: 0,
+            bs: 0,
+            str: 0,
+            tou: 0,
+            agi: 0,
+            int: 0,
+            per: 0,
+            wp: 0,
+            fel: 0,
           },
         }
-      )
+      );
 
       // Register global recovery lookup
       await setDoc(doc(db, "recoveryCodes", recoveryCode), {
         campaignId: activeCampaignId,
         characterId: characterRef.id,
-      })
+      });
 
-      alert(`Character "${trimmedName}" created!\nRecovery Code: ${recoveryCode}`)
-      setCharacterName("")
+      alert(
+        `Character "${trimmedName}" created!\nRecovery Code: ${recoveryCode}`
+      );
+      setCharacterName("");
     } catch (err) {
-      console.error("Character creation error:", err)
-      alert("Failed to create character.")
+      console.error("Character creation error:", err);
+      alert("Failed to create character.");
     }
   }
 
-
   // -------------------------------
-  // Watch characters in campaign
+  // Watch Characters in Active Campaign
   // -------------------------------
   useEffect(() => {
     if (!activeCampaignId) {
@@ -218,7 +222,12 @@ function App() {
       return;
     }
 
-    const charsRef = collection(db, "campaigns", activeCampaignId, "characters");
+    const charsRef = collection(
+      db,
+      "campaigns",
+      activeCampaignId,
+      "characters"
+    );
 
     const unsubscribe = onSnapshot(charsRef, (snapshot) => {
       const list = snapshot.docs.map((doc) => ({
@@ -231,68 +240,73 @@ function App() {
     return () => unsubscribe();
   }, [activeCampaignId]);
 
-
   // -------------------------------
-  // Claim character using recovery code
+  // Claim Character (Global Search)
   // -------------------------------
-  // Player claims a character using the recovery code
   async function claimCharacter() {
-  if (!currentUser) {
-    alert("User not ready yet.");
-    return;
-  }
+    if (!currentUser) return alert("User not ready.");
 
-  const code = claimCode.trim().toUpperCase();
-  if (!code) {
-    alert("Enter a recovery code.");
-    return;
-  }
+    const code = claimCode.trim().toUpperCase();
+    if (!code) return alert("Enter a recovery code.");
 
-  try {
-    // 1) Get all campaigns
-    const campaignsSnap = await getDocs(collection(db, "campaigns"));
+    try {
+      const campaignsSnap = await getDocs(collection(db, "campaigns"));
+      let found = null;
 
-    let foundDocRef = null;
+      // Search all campaigns
+      for (const campaign of campaignsSnap.docs) {
+        const charsSnap = await getDocs(
+          collection(db, `campaigns/${campaign.id}/characters`)
+        );
 
-    // 2) Search inside each campaign's characters subcollection
-    for (const campaign of campaignsSnap.docs) {
-      const charsRef = collection(db, `campaigns/${campaign.id}/characters`);
-      const charsSnap = await getDocs(charsRef);
+        for (const char of charsSnap.docs) {
+          const data = char.data();
 
-      for (const char of charsSnap.docs) {
-        const data = char.data();
-
-        if (data.recoveryCode === code) {
-          foundDocRef = doc(db, `campaigns/${campaign.id}/characters/${char.id}`);
-          break;
+          if (data.recoveryCode === code) {
+            found = {
+              campaignId: campaign.id,
+              characterId: char.id,
+              name: data.name,
+            };
+            break;
+          }
         }
+
+        if (found) break;
       }
 
-      if (foundDocRef) break;
+      if (!found) return alert("Invalid recovery code.");
+
+      const charRef = doc(
+        db,
+        `campaigns/${found.campaignId}/characters/${found.characterId}`
+      );
+
+      const existing = await getDoc(charRef);
+      if (existing.data()?.userId) {
+        return alert("This character has already been claimed.");
+      }
+
+      await updateDoc(charRef, {
+        userId: currentUser.uid,
+        isEditableByPlayer: true,
+      });
+
+      setClaimedCharacter({
+        id: found.characterId,
+        campaignId: found.campaignId,
+        name: found.name,
+      });
+
+      alert("Character successfully claimed!");
+    } catch (err) {
+      console.error("Claim error:", err);
+      alert("Failed to claim character.");
     }
-
-    if (!foundDocRef) {
-      alert("Invalid recovery code.");
-      return;
-    }
-
-    // 3) Update the character with the player's userId
-    await updateDoc(foundDocRef, {
-      userId: currentUser.uid,
-      isEditableByPlayer: true,
-    });
-
-    alert("Character successfully claimed!");
-  } catch (err) {
-    console.error("Claim error:", err);
-    alert("Failed to claim character.");
   }
-}
-
-
 
   // -------------------------------
-  // UI Rendering
+  // UI
   // -------------------------------
   return (
     <>
@@ -308,8 +322,7 @@ function App() {
       <h1>Dark Heresy Manager (Prototype)</h1>
 
       <div className="card">
-
-        {/* Counter + test write */}
+        {/* Counter + test */}
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
         </button>
@@ -324,8 +337,12 @@ function App() {
           {authReady ? (
             currentUser ? (
               <>
-                <div><strong>UID:</strong> <code>{currentUser.uid}</code></div>
-                <div><strong>Role:</strong> {userRole}</div>
+                <div>
+                  <strong>UID:</strong> <code>{currentUser.uid}</code>
+                </div>
+                <div>
+                  <strong>Role:</strong> {userRole}
+                </div>
               </>
             ) : (
               <div>No user.</div>
@@ -335,8 +352,7 @@ function App() {
           )}
         </div>
 
-
-        {/* DM CONTROLS */}
+        {/* DM Controls */}
         <div style={{ marginTop: "1.5rem", textAlign: "left" }}>
           <h3>DM Controls</h3>
           <button onClick={becomeDM} disabled={!currentUser}>
@@ -344,8 +360,7 @@ function App() {
           </button>
         </div>
 
-
-        {/* CAMPAIGN CREATION */}
+        {/* Campaign Creation */}
         <div style={{ marginTop: "1.5rem", textAlign: "left" }}>
           <h3>Create Campaign (DM only)</h3>
           <input
@@ -364,14 +379,15 @@ function App() {
 
           {activeCampaignId && (
             <div style={{ marginTop: "0.75rem" }}>
-              <strong>Campaign ID:</strong>
-              <div><code>{activeCampaignId}</code></div>
+              <strong>Selected Campaign:</strong>
+              <div>
+                <code>{activeCampaignId}</code>
+              </div>
             </div>
           )}
         </div>
 
-
-        {/* CHARACTER CREATION */}
+        {/* Character Creation */}
         <div style={{ marginTop: "2rem", textAlign: "left" }}>
           <h3>Create Character (DM only)</h3>
 
@@ -404,7 +420,9 @@ function App() {
                   <ul>
                     {characters.map((c) => (
                       <li key={c.id}>
-                        <strong>{c.name}</strong> — Code: {c.recoveryCode}
+                        <strong>{c.name}</strong> — Code:{" "}
+                        <code>{c.recoveryCode}</code>{" "}
+                        {c.userId && <span>(Claimed)</span>}
                       </li>
                     ))}
                   </ul>
@@ -414,8 +432,7 @@ function App() {
           )}
         </div>
 
-
-        {/* CHARACTER CLAIMING */}
+        {/* Claim Character */}
         <div style={{ marginTop: "2rem", textAlign: "left" }}>
           <h3>Claim Character</h3>
           <input
@@ -433,9 +450,14 @@ function App() {
           {claimedCharacter && (
             <div style={{ marginTop: "1rem" }}>
               <h4>Claimed Character:</h4>
-              <strong>{claimedCharacter.name}</strong>
-              <p>Campaign: <code>{claimedCharacter.campaignId}</code></p>
-              <p>Character ID: <code>{claimedCharacter.id}</code></p>
+              <p><strong>{claimedCharacter.name}</strong></p>
+              <p>
+                Campaign ID:{" "}
+                <code>{claimedCharacter.campaignId}</code>
+              </p>
+              <p>
+                Character ID: <code>{claimedCharacter.id}</code>
+              </p>
             </div>
           )}
         </div>
@@ -445,7 +467,7 @@ function App() {
         This is a prototype. We will split DM/Player dashboards next.
       </p>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
