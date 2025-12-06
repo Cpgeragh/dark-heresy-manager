@@ -10,9 +10,12 @@ import {
   doc,
   setDoc,
   getDoc,
+  getDocs,
+  updateDoc,
   serverTimestamp,
   onSnapshot,
 } from "firebase/firestore";
+
 import { db, auth } from "./firebase";
 
 // Auth
@@ -232,59 +235,60 @@ function App() {
   // -------------------------------
   // Claim character using recovery code
   // -------------------------------
+  // Player claims a character using the recovery code
   async function claimCharacter() {
-    if (!currentUser) return alert("User not ready.")
-
-    const code = claimCode.trim().toUpperCase()
-    if (!code) return alert("Please enter a recovery code.")
-
-    try {
-      // Lookup code
-      const lookupRef = doc(db, "recoveryCodes", code)
-      const lookupSnap = await getDoc(lookupRef)
-
-      if (!lookupSnap.exists()) {
-        alert("Invalid recovery code.")
-        return
-      }
-
-      const { campaignId, characterId } = lookupSnap.data() as {
-        campaignId: string
-        characterId: string
-      }
-
-      const charRef = doc(
-        db,
-        "campaigns",
-        campaignId,
-        "characters",
-        characterId
-      )
-      const charSnap = await getDoc(charRef)
-
-      if (!charSnap.exists()) {
-        alert("Character not found.")
-        return
-      }
-
-      const charData = charSnap.data()
-
-      // Assign to this user
-      await setDoc(charRef, { userId: currentUser.uid }, { merge: true })
-
-      setClaimedCharacter({
-        id: characterId,
-        campaignId,
-        ...charData,
-        userId: currentUser.uid,
-      })
-
-      alert(`Character "${charData.name}" claimed!`)
-    } catch (err) {
-      console.error("Claim error:", err)
-      alert("Failed to claim character.")
-    }
+  if (!currentUser) {
+    alert("User not ready yet.");
+    return;
   }
+
+  const code = claimCode.trim().toUpperCase();
+  if (!code) {
+    alert("Enter a recovery code.");
+    return;
+  }
+
+  try {
+    // 1) Get all campaigns
+    const campaignsSnap = await getDocs(collection(db, "campaigns"));
+
+    let foundDocRef = null;
+
+    // 2) Search inside each campaign's characters subcollection
+    for (const campaign of campaignsSnap.docs) {
+      const charsRef = collection(db, `campaigns/${campaign.id}/characters`);
+      const charsSnap = await getDocs(charsRef);
+
+      for (const char of charsSnap.docs) {
+        const data = char.data();
+
+        if (data.recoveryCode === code) {
+          foundDocRef = doc(db, `campaigns/${campaign.id}/characters/${char.id}`);
+          break;
+        }
+      }
+
+      if (foundDocRef) break;
+    }
+
+    if (!foundDocRef) {
+      alert("Invalid recovery code.");
+      return;
+    }
+
+    // 3) Update the character with the player's userId
+    await updateDoc(foundDocRef, {
+      userId: currentUser.uid,
+      isEditableByPlayer: true,
+    });
+
+    alert("Character successfully claimed!");
+  } catch (err) {
+    console.error("Claim error:", err);
+    alert("Failed to claim character.");
+  }
+}
+
 
 
   // -------------------------------
