@@ -11,6 +11,7 @@ import {
   setDoc,
   getDoc,
   serverTimestamp,
+  onSnapshot,
 } from "firebase/firestore";
 import { db, auth } from "./firebase";
 
@@ -29,7 +30,15 @@ function App() {
   const [activeCampaignId, setActiveCampaignId] = useState<string | null>(null)
   const [creatingCampaign, setCreatingCampaign] = useState(false)
 
+  const [characterName, setCharacterName] = useState("");
+  const [characters, setCharacters] = useState<
+    { id: string; name: string; userId: string | null; recoveryCode: string }[]
+  >([]);
+
+
+  // -------------------------------
   // Auth + user document setup
+  // -------------------------------
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       try {
@@ -75,7 +84,10 @@ function App() {
     return () => unsubscribe()
   }, [])
 
+
+  // -------------------------------
   // Test Firestore write
+  // -------------------------------
   async function createTestEntry() {
     if (!currentUser) {
       alert("User not ready yet, please wait a moment.")
@@ -95,7 +107,10 @@ function App() {
     }
   }
 
+
+  // -------------------------------
   // TEMP: promote this device to DM
+  // -------------------------------
   async function becomeDM() {
     if (!currentUser) return
     try {
@@ -112,7 +127,10 @@ function App() {
     }
   }
 
-  // Create a campaign (DM only)
+
+  // -------------------------------
+  // Campaign creation (DM only)
+  // -------------------------------
   async function createCampaign() {
     if (!currentUser) {
       alert("User not ready.")
@@ -143,6 +161,87 @@ function App() {
     }
   }
 
+
+  // -------------------------------
+  // Character creation helpers
+  // -------------------------------
+  function generateRecoveryCode() {
+    const segment = () =>
+      Math.random().toString(36).substring(2, 6).toUpperCase();
+    return `DH-${segment()}-${segment()}`;
+  }
+
+  async function createCharacter() {
+    if (!currentUser || !activeCampaignId) {
+      alert("No campaign or user loaded.");
+      return;
+    }
+    if (userRole !== "dm") {
+      alert("Only the DM can create characters.");
+      return;
+    }
+
+    const trimmedName = characterName.trim();
+    if (!trimmedName) {
+      alert("Character name cannot be empty.");
+      return;
+    }
+
+    const recoveryCode = generateRecoveryCode();
+
+    try {
+      await addDoc(
+        collection(db, "campaigns", activeCampaignId, "characters"),
+        {
+          name: trimmedName,
+          userId: null,
+          recoveryCode,
+          isEditableByPlayer: false,
+          createdAt: serverTimestamp(),
+
+          // Placeholder stats
+          stats: {
+            ws: 0, bs: 0, str: 0, tou: 0, agi: 0,
+            int: 0, per: 0, wp: 0, fel: 0,
+          },
+        }
+      );
+
+      alert(`Character "${trimmedName}" created! Recovery code: ${recoveryCode}`);
+      setCharacterName("");
+    } catch (err) {
+      console.error("Error creating character:", err);
+      alert("Failed to create character.");
+    }
+  }
+
+
+  // -------------------------------
+  // Live character list for active campaign
+  // -------------------------------
+  useEffect(() => {
+    if (!activeCampaignId) {
+      setCharacters([]);
+      return;
+    }
+
+    const charsRef = collection(db, "campaigns", activeCampaignId, "characters");
+
+    const unsubscribe = onSnapshot(charsRef, (snapshot) => {
+      const list = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...(doc.data() as any),
+      }));
+      setCharacters(list);
+    });
+
+    return () => unsubscribe();
+  }, [activeCampaignId]);
+
+
+  // -------------------------------
+  // UI
+  // -------------------------------
   return (
     <>
       <div>
@@ -169,6 +268,7 @@ function App() {
           Edit <code>src/App.tsx</code> and save to test HMR
         </p>
 
+        {/* USER INFO */}
         <div style={{ marginTop: "1.5rem", textAlign: "left" }}>
           <h3>Current User</h3>
           {authReady ? (
@@ -185,6 +285,7 @@ function App() {
           )}
         </div>
 
+        {/* DM CONTROLS */}
         <div style={{ marginTop: "1.5rem", textAlign: "left" }}>
           <h3>DM Controls (temporary)</h3>
           <button onClick={becomeDM} disabled={!currentUser}>
@@ -192,6 +293,7 @@ function App() {
           </button>
         </div>
 
+        {/* CREATE CAMPAIGN */}
         <div style={{ marginTop: "1.5rem", textAlign: "left" }}>
           <h3>Create Campaign (DM only)</h3>
           <input
@@ -213,6 +315,49 @@ function App() {
               <strong>Last created campaign ID:</strong>
               <div><code>{activeCampaignId}</code></div>
             </div>
+          )}
+        </div>
+
+        {/* CREATE CHARACTER */}
+        <div style={{ marginTop: "2rem", textAlign: "left" }}>
+          <h3>Create Character (DM only)</h3>
+
+          {!activeCampaignId && (
+            <p style={{ color: "gray" }}>Create or select a campaign first.</p>
+          )}
+
+          {activeCampaignId && (
+            <>
+              <input
+                type="text"
+                placeholder="Character name"
+                value={characterName}
+                onChange={(e) => setCharacterName(e.target.value)}
+                style={{ width: "100%", marginBottom: "0.5rem" }}
+              />
+
+              <button
+                onClick={createCharacter}
+                disabled={userRole !== "dm" || !characterName.trim()}
+              >
+                Create Character
+              </button>
+
+              <div style={{ marginTop: "1rem" }}>
+                <h4>Characters in Campaign:</h4>
+                {characters.length === 0 ? (
+                  <p>No characters yet.</p>
+                ) : (
+                  <ul>
+                    {characters.map((c) => (
+                      <li key={c.id}>
+                        <strong>{c.name}</strong> — Recovery Code: {c.recoveryCode}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </>
           )}
         </div>
       </div>
