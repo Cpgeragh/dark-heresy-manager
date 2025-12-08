@@ -1,0 +1,62 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // USERS
+    match /users/{userId} {
+      allow read, write: if request.auth != null &&
+                         request.auth.uid == userId;
+    }
+
+    // CAMPAIGNS
+    match /campaigns/{campaignId} {
+
+      allow read: if request.auth != null;
+
+      // Allow DM to create/update campaign
+      allow create, update: if request.auth != null &&
+                            request.resource.data.dmId == request.auth.uid;
+
+      // CHARACTERS
+      match /characters/{characterId} {
+
+        allow read: if request.auth != null;
+
+        // Helpers
+        function isDM() {
+          return request.auth != null &&
+            request.auth.uid ==
+              get(/databases/$(database)/documents/campaigns/$(campaignId)).data.dmId;
+        }
+
+        function isOwner() {
+          return request.auth != null &&
+                 request.resource.data.userId == request.auth.uid;
+        }
+
+        // DM full control
+        allow create, update, delete: if isDM();
+
+        // Player can update only their own editable character
+        allow update: if isOwner() &&
+                       request.resource.data.isEditableByPlayer == true;
+
+        // CLAIM LOGS
+        match /claimLog/{logId} {
+
+          // Only DM reads
+          allow read: if isDM();
+
+          // DM may create anything
+          allow create: if isDM() ||
+            (
+              request.auth != null &&
+              request.resource.data.actorUid == request.auth.uid &&
+              request.resource.data.action in ['claim', 'release']
+            );
+        }
+      }
+    }
+  }
+}
