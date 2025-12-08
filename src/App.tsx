@@ -1,84 +1,321 @@
+// src/App.tsx
+
 import { useEffect, useState } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, Link, useLocation } from "react-router-dom";
+import type { User } from "firebase/auth";
 
 import { auth, db } from "./firebase";
-import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
+import {
+  onAuthStateChanged,
+  signInAnonymously,
+  signOut,
+} from "firebase/auth";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 
 import DMDashboard from "./pages/DMDashboard";
 import PlayerDashboard from "./pages/PlayerDashboard";
 import ClaimCharacter from "./pages/ClaimCharacter";
 import SelectCampaign from "./pages/SelectCampaign";
+import CharacterSheet from "./pages/CharacterSheet"; // NEW
+
+type Role = "player" | "dm";
 
 export default function App() {
-  const [currentUser, setCurrentUser] = useState<any>(null);
-  const [userRole, setUserRole] = useState<"player" | "dm" | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [userRole, setUserRole] = useState<Role | null>(null);
+  const [activeCampaignId, setActiveCampaignId] = useState<string | null>(null);
 
+  const [loading, setLoading] = useState(true);
+  const location = useLocation();
+
+  // ------------------------------
+  // AUTH + USER DOCUMENT SETUP
+  // ------------------------------
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        const cred = await signInAnonymously(auth);
-        user = cred.user;
-      }
+      try {
+        if (!user) {
+          const cred = await signInAnonymously(auth);
+          user = cred.user;
+        }
 
-      setCurrentUser(user);
+        setCurrentUser(user);
 
-      const ref = doc(db, "users", user.uid);
-      const snap = await getDoc(ref);
+        const ref = doc(db, "users", user.uid);
+        const snap = await getDoc(ref);
 
-      if (!snap.exists()) {
-        await setDoc(ref, {
-          role: "player",
-          createdAt: serverTimestamp(),
-          lastSeen: serverTimestamp(),
-        });
-        setUserRole("player");
-      } else {
-        const data = snap.data() as any;
-        const role = data.role === "dm" ? "dm" : "player";
-        setUserRole(role);
+        if (!snap.exists()) {
+          await setDoc(ref, {
+            role: "player",
+            activeCampaignId: null,
+            createdAt: serverTimestamp(),
+            lastSeen: serverTimestamp(),
+          });
+
+          setUserRole("player");
+          setActiveCampaignId(null);
+        } else {
+          const data = snap.data() as any;
+          const role: Role = data.role === "dm" ? "dm" : "player";
+          setUserRole(role);
+          setActiveCampaignId(data.activeCampaignId ?? null);
+        }
 
         await setDoc(ref, { lastSeen: serverTimestamp() }, { merge: true });
+      } catch (err) {
+        console.error("Auth error:", err);
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     });
 
     return () => unsub();
   }, []);
 
-  if (loading) return <div>Loading…</div>;
-  if (!userRole) return <div>Verifying user…</div>;
+  // ------------------------------
+  // ACTIVE CAMPAIGN HANDLER
+  // ------------------------------
+  function handleActiveCampaignChange(id: string | null) {
+    setActiveCampaignId(id);
+    if (!currentUser) return;
 
+    const ref = doc(db, "users", currentUser.uid);
+    setDoc(ref, { activeCampaignId: id }, { merge: true });
+  }
+
+  // ------------------------------
+  // DEV-ONLY REAL ROLE SWITCHER
+  // ------------------------------
+  async function switchTo(role: Role) {
+    try {
+      console.log(`Switching to ${role.toUpperCase()}…`);
+
+      // Completely reset user
+      await signOut(auth);
+
+      const cred = await signInAnonymously(auth);
+      const newUser = cred.user;
+
+      await setDoc(
+        doc(db, "users", newUser.uid),
+        {
+          role,
+          activeCampaignId: null,
+          createdAt: serverTimestamp(),
+          lastSeen: serverTimestamp(),
+        },
+        { merge: true }
+      );
+
+      setCurrentUser(newUser);
+      setUserRole(role);
+      setActiveCampaignId(null);
+
+      console.log(`Now acting as ${role.toUpperCase()}:`, newUser.uid);
+    } catch (err) {
+      console.error("Role switch error:", err);
+    }
+  }
+
+  // ------------------------------
+  // LOADING STATES
+  // ------------------------------
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-100">
+        Loading…
+      </div>
+    );
+  }
+
+  if (!currentUser || !userRole) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-100">
+        Initialising user…
+      </div>
+    );
+  }
+
+  const isDM = userRole === "dm";
+
+  // ------------------------------
+  // MAIN APP
+  // ------------------------------
   return (
-    <Routes>
-      {/* DM view */}
-      {userRole === "dm" && (
-        <>
-          <Route path="/dm" element={<DMDashboard user={currentUser} />} />
-          <Route path="/select" element={<SelectCampaign user={currentUser} />} />
-        </>
-      )}
+    <div className="min-h-screen bg-slate-950 text-slate-100">
+      {/* TOP NAVIGATION */}
+      <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur">
+        <nav className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+          {/* Left logo + title */}
+          <div className="flex items-center gap-2">
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500 text-slate-900 font-bold">
+              DH
+            </span>
+            <div>
+              <div className="font-semibold">Dark Heresy Manager</div>
+              <div className="text-xs text-slate-400">
+                {isDM ? "DM View" : "Player View"}
+              </div>
+            </div>
+          </div>
 
-      {/* Player View */}
-      {userRole === "player" && (
-        <>
-          <Route path="/player" element={<PlayerDashboard user={currentUser} />} />
-          <Route path="/claim" element={<ClaimCharacter user={currentUser} />} />
-          <Route path="/select" element={<SelectCampaign user={currentUser} />} />
-        </>
-      )}
+          {/* Navigation + Dev Switch */}
+          <div className="flex items-center gap-3">
+            {/* Page navigation */}
+            <div className="flex gap-2">
+              {isDM ? (
+                <>
+                  <NavLinkButton
+                    to="/dm"
+                    label="DM Dashboard"
+                    current={location.pathname === "/dm"}
+                  />
+                  <NavLinkButton
+                    to="/select"
+                    label="Select Campaign"
+                    current={location.pathname === "/select"}
+                  />
+                </>
+              ) : (
+                <>
+                  <NavLinkButton
+                    to="/player"
+                    label="My Characters"
+                    current={location.pathname === "/player"}
+                  />
+                  <NavLinkButton
+                    to="/claim"
+                    label="Claim"
+                    current={location.pathname === "/claim"}
+                  />
+                  <NavLinkButton
+                    to="/select"
+                    label="Select Campaign"
+                    current={location.pathname === "/select"}
+                  />
+                </>
+              )}
+            </div>
 
-      {/* Default Route → redirect based on role */}
-      <Route
-        path="*"
-        element={
-          userRole === "dm"
-            ? <Navigate to="/dm" />
-            : <Navigate to="/player" />
-        }
-      />
-    </Routes>
+            {/* REAL DEV ROLE SWITCHER */}
+            {import.meta.env.DEV && (
+              <div className="flex gap-2">
+                <button
+                  onClick={() => switchTo("player")}
+                  className="px-3 py-1 text-xs rounded-full bg-blue-600 text-white border border-blue-500 hover:bg-blue-500 transition"
+                >
+                  Switch to Player
+                </button>
+
+                <button
+                  onClick={() => switchTo("dm")}
+                  className="px-3 py-1 text-xs rounded-full bg-green-600 text-white border border-green-500 hover:bg-green-500 transition"
+                >
+                  Switch to DM
+                </button>
+              </div>
+            )}
+          </div>
+        </nav>
+      </header>
+
+      {/* ROUTES */}
+      <main className="max-w-5xl mx-auto px-4 py-6">
+        <Routes>
+          {/* DM ROUTES */}
+          {isDM && (
+            <>
+              <Route
+                path="/dm"
+                element={
+                  <DMDashboard
+                    user={currentUser}
+                    activeCampaignId={activeCampaignId}
+                    onActiveCampaignChange={handleActiveCampaignChange}
+                  />
+                }
+              />
+              <Route
+                path="/select"
+                element={
+                  <SelectCampaign
+                    user={currentUser}
+                    role="dm"
+                    activeCampaignId={activeCampaignId}
+                    onActiveCampaignChange={handleActiveCampaignChange}
+                  />
+                }
+              />
+            </>
+          )}
+
+          {/* PLAYER ROUTES */}
+          {!isDM && (
+            <>
+              <Route
+                path="/player"
+                element={
+                  <PlayerDashboard
+                    user={currentUser}
+                    activeCampaignId={activeCampaignId}
+                  />
+                }
+              />
+              <Route
+                path="/claim"
+                element={
+                  <ClaimCharacter
+                    user={currentUser}
+                    onActiveCampaignChange={handleActiveCampaignChange}
+                  />
+                }
+              />
+              <Route
+                path="/select"
+                element={
+                  <SelectCampaign
+                    user={currentUser}
+                    role="player"
+                    activeCampaignId={activeCampaignId}
+                    onActiveCampaignChange={handleActiveCampaignChange}
+                  />
+                }
+              />
+            </>
+          )}
+
+          {/* SHARED CHARACTER SHEET ROUTE */}
+          <Route
+            path="/campaign/:campaignId/character/:characterId"
+            element={<CharacterSheet user={currentUser} role={userRole} />}
+          />
+
+          {/* CATCH-ALL REDIRECT */}
+          <Route
+            path="*"
+            element={<Navigate to={isDM ? "/dm" : "/player"} replace />}
+          />
+        </Routes>
+      </main>
+    </div>
+  );
+}
+
+// ------------------------------
+// NAV LINK BUTTON COMPONENT
+// ------------------------------
+function NavLinkButton(props: { to: string; label: string; current?: boolean }) {
+  return (
+    <Link
+      to={props.to}
+      className={`px-3 py-1 rounded-full text-sm border transition
+        ${
+          props.current
+            ? "bg-amber-500 text-slate-900 border-amber-400 shadow"
+            : "border-slate-600 text-slate-200 hover:bg-slate-800"
+        }`}
+    >
+      {props.label}
+    </Link>
   );
 }
