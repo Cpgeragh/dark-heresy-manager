@@ -1,6 +1,5 @@
 // src/pages/characterSheet/types.ts
-
-import type { CharField } from "../../utils/defaultCharacter";
+import type { CharField } from "../../utils/characterFactory";
 
 export type Role = "player" | "dm";
 

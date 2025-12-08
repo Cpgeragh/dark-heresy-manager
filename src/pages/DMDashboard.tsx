@@ -11,7 +11,7 @@ import {
 
 import type { User } from "firebase/auth";
 import { db } from "../firebase";
-import { createDefaultCharacter } from "../utils/defaultCharacter";
+import { createEmptyCharacterData } from "../utils/characterFactory";
 
 interface Props {
   user: User;
@@ -109,11 +109,12 @@ export default function DMDashboard({
     const recoveryCode = generateRecoveryCode();
 
     try {
-      const characterData = createDefaultCharacter(
-        trimmedName,
+      const characterData = createEmptyCharacterData({
+        campaignId: activeCampaignId,
         recoveryCode,
-        null
-      );
+        userId: null,
+        characterName: trimmedName,
+      });
 
       const ref = doc(
         collection(db, "campaigns", activeCampaignId, "characters")

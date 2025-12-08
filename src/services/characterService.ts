@@ -5,8 +5,6 @@ import {
   setDoc,
   updateDoc,
   addDoc,
-  onSnapshot,
-  getDocs,
 } from "firebase/firestore";
 
 import {
@@ -16,92 +14,78 @@ import {
 
 import type { Character } from "../types/Character";
 
-
-// ------------------------------------------------------------
-// Load a character (typed)
-// ------------------------------------------------------------
+/**
+ * Load a single character with full typing.
+ * Returns undefined if the doc does not exist.
+ */
 export async function loadCharacter(
   campaignId: string,
   characterId: string
-): Promise<Character | null> {
+): Promise<Character | undefined> {
   const snap = await getDoc(characterDocRef(campaignId, characterId));
-  return snap.exists() ? snap.data()! : null;
+  return snap.data();
 }
 
+/**
+ * Save (overwrite) a full character document.
+ *
+ * Assumes:
+ * - character.id is the Firestore document id
+ * - character.campaignId matches the campaign path
+ */
+export async function saveCharacter(character: Character): Promise<void> {
+  if (!character.id) {
+    throw new Error("saveCharacter: Character must have an id");
+  }
 
-// ------------------------------------------------------------
-// Save (overwrite) the entire character
-// ------------------------------------------------------------
-export async function saveCharacter(
-  campaignId: string,
-  character: Character
-): Promise<void> {
-  if (!character.id) throw new Error("Character must have id");
-
-  const ref = characterDocRef(campaignId, character.id);
+  const ref = characterDocRef(character.campaignId, character.id);
   await setDoc(ref, character);
 }
 
-
-// ------------------------------------------------------------
-// Patch update on the character
-// ------------------------------------------------------------
+/**
+ * Patch update a character document with a partial object.
+ * Only the fields in `partial` will be updated.
+ */
 export async function updateCharacter(
   campaignId: string,
   characterId: string,
   partial: Partial<Character>
 ): Promise<void> {
   const ref = characterDocRef(campaignId, characterId);
-  await updateDoc(ref, partial);
+  await updateDoc(ref, partial as any);
 }
 
-
-// ------------------------------------------------------------
-// Field-level update (fine-grained stat updates)
-// ------------------------------------------------------------
-export async function updateCharacterField(
-  campaignId: string,
-  characterId: string,
-  path: string,
-  value: any
-): Promise<void> {
-  const ref = characterDocRef(campaignId, characterId);
-  await updateDoc(ref, { [path]: value });
-}
-
-
-// ------------------------------------------------------------
-// Create a new character
-// ------------------------------------------------------------
+/**
+ * Create a new character document from a payload that has no `id`.
+ *
+ * Returns the full Character object including the generated id.
+ */
 export async function createCharacter(
   campaignId: string,
   data: Omit<Character, "id">
-): Promise<string> {
-  const ref = await addDoc(charactersCollectionRef(campaignId), data);
-  return ref.id;
-}
+): Promise<Character> {
+  const colRef = charactersCollectionRef(campaignId);
 
+  // Ensure campaignId inside the payload matches the path
+  const payload: Omit<Character, "id"> = {
+    ...data,
+    campaignId,
+  };
 
-// ------------------------------------------------------------
-// List all characters in a campaign
-// ------------------------------------------------------------
-export async function listCharacters(
-  campaignId: string
-): Promise<Character[]> {
-  const snap = await getDocs(charactersCollectionRef(campaignId));
-  return snap.docs.map((d) => d.data());
-}
+  const docRef = await addDoc(colRef, payload);
+  const snap = await getDoc(docRef);
 
+  const stored = snap.data();
+  if (!stored) {
+    // This should not happen, but keeps typing sane
+    return {
+      id: docRef.id,
+      ...(payload as Omit<Character, "id">),
+    };
+  }
 
-// ------------------------------------------------------------
-// Realtime listener for UI auto-updates
-// ------------------------------------------------------------
-export function watchCharacter(
-  campaignId: string,
-  characterId: string,
-  callback: (char: Character | null) => void
-) {
-  return onSnapshot(characterDocRef(campaignId, characterId), (snap) => {
-    callback(snap.exists() ? snap.data()! : null);
-  });
+  return {
+    id: docRef.id,
+    ...(stored as Omit<Character, "id">),
+  };
 }

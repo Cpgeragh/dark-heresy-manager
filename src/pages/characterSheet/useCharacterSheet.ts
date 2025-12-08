@@ -14,7 +14,7 @@ import {
 } from "firebase/firestore";
 
 import { db } from "../../firebase";
-import type { CharField } from "../../utils/defaultCharacter";
+import type { CharField } from "../../utils/characterFactory";
 import type {
   Role,
   CharacteristicsBlock,

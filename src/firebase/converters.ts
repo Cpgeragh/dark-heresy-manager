@@ -7,7 +7,7 @@ import {
   type SnapshotOptions,
 } from "firebase/firestore";
 
-import { db } from "./index";
+import { db } from "../firebase";
 import type { Character } from "../types/Character";
 import type { Campaign } from "../types/Campaign";
 import type { User } from "../types/User";

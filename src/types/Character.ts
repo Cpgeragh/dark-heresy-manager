@@ -1,7 +1,7 @@
 // src/types/character.ts
 
 import type { Timestamp } from "firebase/firestore";
-import type { CharField } from "../utils/defaultCharacter";
+import type { CharField } from "../utils/characterFactory";
 
 /**
  * CAMPAIGN
