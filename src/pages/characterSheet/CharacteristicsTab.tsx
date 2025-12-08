@@ -1,13 +1,13 @@
 // src/pages/characterSheet/CharacteristicsTab.tsx
 import type { CharField } from "../../utils/characterFactory";
-import type { CharacteristicsBlock } from "./types";
+import type { Characteristics } from "../../types/Character";
 import CharacteristicField from "../../components/CharacteristicField";
 
 interface CharacteristicsTabProps {
-  getCharField: (statKey: keyof CharacteristicsBlock) => CharField;
+  getCharField: (statKey: keyof Characteristics) => CharField;
   editable: boolean;
   updateCharacteristic: (
-    statKey: keyof CharacteristicsBlock,
+    statKey: keyof Characteristics,
     value: CharField
   ) => void;
 }

@@ -1,5 +1,5 @@
 // src/pages/characterSheet/OverviewTab.tsx
-import type { Character } from "./types";
+import type { Character } from "../../types/Character";
 
 interface OverviewTabProps {
   character: Character;

@@ -1,31 +1,9 @@
 // src/pages/characterSheet/types.ts
-import type { CharField } from "../../utils/characterFactory";
 
+/** DM vs Player — UI logic only */
 export type Role = "player" | "dm";
 
-export type CharacteristicsBlock = {
-  ws: CharField;
-  bs: CharField;
-  s: CharField;
-  t: CharField;
-  ag: CharField;
-  int: CharField;
-  per: CharField;
-  wp: CharField;
-  fel: CharField;
-};
-
-export type Character = {
-  id: string;
-  name: string;
-  userId: string | null;
-  recoveryCode?: string;
-  isEditableByPlayer?: boolean;
-  notes?: string;
-  characteristics?: CharacteristicsBlock;
-  [key: string]: any;
-};
-
+/** UI-only claim log type */
 export type ClaimLogEntry = {
   id: string;
   action: "claim" | "release" | "force-assign" | "force-release";
@@ -35,6 +13,7 @@ export type ClaimLogEntry = {
   timestamp?: any;
 };
 
+/** Tab identifiers for CharacterSheet */
 export type TabId =
   | "overview"
   | "stats"

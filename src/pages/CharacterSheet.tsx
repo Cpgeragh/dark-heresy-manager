@@ -1,5 +1,3 @@
-// src/pages/CharacterSheet.tsx
-
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import type { User } from "firebase/auth";
@@ -65,7 +63,10 @@ export default function CharacterSheet({ user, role }: Props) {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-1">{character.name}</h1>
+      <h1 className="text-3xl font-bold mb-1">
+        {character.header?.characterName ?? "Unnamed Character"}
+      </h1>
+
       <p className="text-xs text-slate-400 mb-4">
         Campaign: <code>{path.campaignId}</code> — Character ID:{" "}
         <code>{character.id}</code>
@@ -108,6 +109,7 @@ export default function CharacterSheet({ user, role }: Props) {
           active={activeTab === "notes"}
           onClick={() => setActiveTab("notes")}
         />
+
         {isDM && (
           <TabButton
             label="Admin"

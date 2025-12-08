@@ -1,6 +1,7 @@
 // src/pages/characterSheet/AdminTab.tsx
 import { useState } from "react";
-import type { Character, ClaimLogEntry } from "./types";
+import type { Character } from "../../types/Character";
+import type { ClaimLogEntry } from "./types";
 
 interface AdminTabProps {
   character: Character;
