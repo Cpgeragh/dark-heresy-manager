@@ -15,19 +15,15 @@ import {
 
 import { db } from "../../firebase";
 
-import type { Role, ClaimLogEntry } from "./types";
-import type {
-  Character,
-  Characteristics,
-} from "../../types/Character";
-
+import type { ClaimLog } from "../../types/ClaimLog";
+import type { Character, Characteristics } from "../../types/Character";
 import type { CharField } from "../../utils/characterFactory";
 
 type Path = { campaignId: string; characterId: string } | null;
 
 interface UseCharacterSheetArgs {
   user: User;
-  role: Role;
+  role: "player" | "dm";
   campaignIdParam?: string;
   characterIdParam?: string;
 }
@@ -41,16 +37,15 @@ export function useCharacterSheet({
   const [path, setPath] = useState<Path>(null);
   const [character, setCharacter] = useState<Character | null>(null);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
-  const [claimLog, setClaimLog] = useState<ClaimLogEntry[]>([]);
+  const [claimLog, setClaimLog] = useState<ClaimLog[]>([]);
 
   const isDM = role === "dm";
 
-  //----------------------------------------------------------------------
-  // Load character in real time
-  //----------------------------------------------------------------------
+  // ----------------------------------------------------------------------
+  // Load character live
+  // ----------------------------------------------------------------------
   useEffect(() => {
     if (!campaignIdParam || !characterIdParam) {
-      console.error("Missing campaignId or characterId in route.");
       setPath(null);
       setCharacter(null);
       setAllowedToEdit(false);
@@ -74,39 +69,31 @@ export function useCharacterSheet({
 
     const unsub = onSnapshot(ref, (snap) => {
       if (!snap.exists()) {
-        console.error("Character document does not exist.");
         setCharacter(null);
         setAllowedToEdit(false);
         return;
       }
 
+      // Converter ensures all required fields exist
       const data = snap.data() as Character;
 
-      // Always trust Firestore snapshot.id, never stored data.id
-      const merged: Character = {
-        ...data,
-        id: snap.id,
-      };
+      setCharacter(data);
 
-
-      setCharacter(merged);
-
-      // Permission logic
       if (isDM) {
         setAllowedToEdit(true);
       } else {
-        const owns = merged.userId === user.uid;
-        const editable = merged.isEditableByPlayer === true;
-        setAllowedToEdit(owns && editable);
+        setAllowedToEdit(
+          data.userId === user.uid && data.isEditableByPlayer === true
+        );
       }
     });
 
     return () => unsub();
   }, [campaignIdParam, characterIdParam, user.uid, isDM]);
 
-  //----------------------------------------------------------------------
-  // Load claim history (DM only)
-  //----------------------------------------------------------------------
+  // ----------------------------------------------------------------------
+  // Load claim log (DM only)
+  // ----------------------------------------------------------------------
   useEffect(() => {
     if (!path || !isDM) return;
 
@@ -122,30 +109,20 @@ export function useCharacterSheet({
     const q = query(logsRef, orderBy("timestamp", "desc"));
 
     const unsub = onSnapshot(q, (snap) => {
-      const list: ClaimLogEntry[] = snap.docs.map((d) => {
-        const data = d.data() as any;
-        return {
-          id: d.id,
-          action: data.action,
-          actorUid: data.actorUid,
-          previousOwnerUid:
-            typeof data.previousOwnerUid === "string"
-              ? data.previousOwnerUid
-              : null,
-          newOwnerUid:
-            typeof data.newOwnerUid === "string" ? data.newOwnerUid : null,
-          timestamp: data.timestamp,
-        };
+      const list: ClaimLog[] = snap.docs.map((d) => {
+        const data = d.data() as Omit<ClaimLog, "id">;
+        return { id: d.id, ...data };
       });
+
       setClaimLog(list);
     });
 
     return () => unsub();
   }, [path, isDM]);
 
-  //----------------------------------------------------------------------
-  // Generic field update
-  //----------------------------------------------------------------------
+  // ----------------------------------------------------------------------
+  // Update single field
+  // ----------------------------------------------------------------------
   async function updateField(field: string, value: any) {
     if (!allowedToEdit || !path || !character) return;
 
@@ -157,17 +134,16 @@ export function useCharacterSheet({
       path.characterId
     );
 
-    try {
-      await updateDoc(ref, { [field]: value });
-      setCharacter((prev) => (prev ? { ...prev, [field]: value } : prev));
-    } catch (err) {
-      console.error("Error updating field:", err);
-    }
+    await updateDoc(ref, { [field]: value });
+
+    setCharacter((prev) =>
+      prev ? { ...prev, [field]: value } : prev
+    );
   }
 
-  //----------------------------------------------------------------------
-  // Update CHARACTERISTICS correctly
-  //----------------------------------------------------------------------
+  // ----------------------------------------------------------------------
+  // Update characteristic
+  // ----------------------------------------------------------------------
   async function updateCharacteristic(
     statKey: keyof Characteristics,
     value: CharField
@@ -182,203 +158,116 @@ export function useCharacterSheet({
       path.characterId
     );
 
-    try {
-      await updateDoc(ref, {
-        [`characteristics.${statKey}.base`]: value.base,
-        [`characteristics.${statKey}.advances`]: value.advances,
-      });
+    await updateDoc(ref, {
+      [`characteristics.${statKey}.base`]: value.base,
+      [`characteristics.${statKey}.advances`]: value.advances,
+    });
 
-      setCharacter((prev) => {
-        if (!prev) return prev;
-
-        return {
-          ...prev,
-          characteristics: {
-            ...prev.characteristics,
-            [statKey]: value,
-          },
-        };
-      });
-    } catch (err) {
-      console.error("Error updating characteristic:", err);
-    }
+    setCharacter((prev) =>
+      prev
+        ? {
+            ...prev,
+            characteristics: {
+              ...prev.characteristics,
+              [statKey]: value,
+            },
+          }
+        : prev
+    );
   }
 
-  //----------------------------------------------------------------------
-  // Read a characteristic safely
-  //----------------------------------------------------------------------
+  // ----------------------------------------------------------------------
+  // Safe read characteristic
+  // ----------------------------------------------------------------------
   function getCharField(statKey: keyof Characteristics): CharField {
-    const chars = character?.characteristics;
-    const v = chars?.[statKey];
-
+    const v = character?.characteristics?.[statKey];
     return {
       base: typeof v?.base === "number" ? v.base : 0,
       advances: typeof v?.advances === "number" ? v.advances : 0,
     };
   }
 
-  //----------------------------------------------------------------------
-  // PLAYER RELEASE CHARACTER
-  //----------------------------------------------------------------------
+  // ----------------------------------------------------------------------
+  // Player release
+  // ----------------------------------------------------------------------
   async function releaseCharacter() {
-    if (!character || !path) return;
-    const owns = character.userId === user.uid;
+    if (!character || !path || isDM) return;
+    if (character.userId !== user.uid) return;
 
-    if (!owns || isDM) return;
+    const ref = doc(db, "campaigns", path.campaignId, "characters", path.characterId);
+    const logsRef = collection(db, "campaigns", path.campaignId, "characters", path.characterId, "claimLog");
 
-    const ref = doc(
-      db,
-      "campaigns",
-      path.campaignId,
-      "characters",
-      path.characterId
-    );
+    await updateDoc(ref, {
+      userId: null,
+      isEditableByPlayer: false,
+      recoveryCode: character.recoveryCode,
+    });
 
-    const logsRef = collection(
-      db,
-      "campaigns",
-      path.campaignId,
-      "characters",
-      path.characterId,
-      "claimLog"
-    );
-
-    const previousOwnerUid = character.userId;
-
-    try {
-      await updateDoc(ref, {
-        userId: null,
-        isEditableByPlayer: false,
-        recoveryCode: character.recoveryCode,
-      });
-
-      await addDoc(logsRef, {
-        action: "release",
-        actorUid: user.uid,
-        previousOwnerUid,
-        newOwnerUid: null,
-        timestamp: serverTimestamp(),
-      });
-    } catch (err) {
-      console.error("Release error:", err);
-    }
+    await addDoc(logsRef, {
+      action: "release",
+      actorUid: user.uid,
+      timestamp: serverTimestamp(),
+    });
   }
 
-  //----------------------------------------------------------------------
-  // DM FORCE RELEASE
-  //----------------------------------------------------------------------
+  // ----------------------------------------------------------------------
+  // DM force release
+  // ----------------------------------------------------------------------
   async function dmForceRelease() {
     if (!character || !path || !isDM) return;
 
-    const ref = doc(
-      db,
-      "campaigns",
-      path.campaignId,
-      "characters",
-      path.characterId
-    );
+    const ref = doc(db, "campaigns", path.campaignId, "characters", path.characterId);
+    const logsRef = collection(db, "campaigns", path.campaignId, "characters", path.characterId, "claimLog");
 
-    const logsRef = collection(
-      db,
-      "campaigns",
-      path.campaignId,
-      "characters",
-      path.characterId,
-      "claimLog"
-    );
+    await updateDoc(ref, {
+      userId: null,
+      isEditableByPlayer: false,
+    });
 
-    const previousOwnerUid = character.userId;
-
-    try {
-      await updateDoc(ref, {
-        userId: null,
-        isEditableByPlayer: false,
-      });
-
-      await addDoc(logsRef, {
-        action: "force-release",
-        actorUid: user.uid,
-        previousOwnerUid,
-        newOwnerUid: null,
-        timestamp: serverTimestamp(),
-      });
-    } catch (err) {
-      console.error("DM force release error:", err);
-    }
+    await addDoc(logsRef, {
+      action: "release",
+      actorUid: user.uid,
+      timestamp: serverTimestamp(),
+    });
   }
 
-  //----------------------------------------------------------------------
-  // DM FORCE ASSIGN
-  //----------------------------------------------------------------------
+  // ----------------------------------------------------------------------
+  // DM force assign (mapped to "claim")
+  // ----------------------------------------------------------------------
   async function dmForceAssign(uid: string) {
     if (!character || !path || !isDM) return;
 
     const clean = uid.trim();
     if (!clean) return;
 
-    const ref = doc(
-      db,
-      "campaigns",
-      path.campaignId,
-      "characters",
-      path.characterId
-    );
+    const ref = doc(db, "campaigns", path.campaignId, "characters", path.characterId);
+    const logsRef = collection(db, "campaigns", path.campaignId, "characters", path.characterId, "claimLog");
 
-    const logsRef = collection(
-      db,
-      "campaigns",
-      path.campaignId,
-      "characters",
-      path.characterId,
-      "claimLog"
-    );
+    await updateDoc(ref, {
+      userId: clean,
+      isEditableByPlayer: true,
+    });
 
-    const previousOwnerUid = character.userId;
-
-    try {
-      await updateDoc(ref, {
-        userId: clean,
-        isEditableByPlayer: true,
-      });
-
-      await addDoc(logsRef, {
-        action: "force-assign",
-        actorUid: user.uid,
-        previousOwnerUid,
-        newOwnerUid: clean,
-        timestamp: serverTimestamp(),
-      });
-    } catch (err) {
-      console.error("DM assign error:", err);
-    }
+    await addDoc(logsRef, {
+      action: "claim",
+      actorUid: user.uid,
+      timestamp: serverTimestamp(),
+    });
   }
 
-  //----------------------------------------------------------------------
-  // DM TOGGLE PLAYER EDIT PERMISSION
-  //----------------------------------------------------------------------
+  // ----------------------------------------------------------------------
+  // DM toggle edit flag
+  // ----------------------------------------------------------------------
   async function dmToggleEdit() {
     if (!character || !path || !isDM) return;
 
-    const ref = doc(
-      db,
-      "campaigns",
-      path.campaignId,
-      "characters",
-      path.characterId
-    );
+    const ref = doc(db, "campaigns", path.campaignId, "characters", path.characterId);
 
-    try {
-      await updateDoc(ref, {
-        isEditableByPlayer: !character.isEditableByPlayer,
-      });
-    } catch (err) {
-      console.error("DM toggle edit error:", err);
-    }
+    await updateDoc(ref, {
+      isEditableByPlayer: !character.isEditableByPlayer,
+    });
   }
 
-  //----------------------------------------------------------------------
-  // RETURN API TO THE COMPONENT
-  //----------------------------------------------------------------------
   return {
     path,
     character,

@@ -14,16 +14,18 @@ import type { Character } from "../types/Character";
 /**
  * CHARACTER CONVERTER
  * - Strips `id`
- * - Leaves `campaignId` intact (Option A)
+ * - Leaves `campaignId` stored in Firestore (Option A)
  */
 export const characterConverter: FirestoreDataConverter<Character> = {
   toFirestore(character: Character) {
+    // Do not store `id` in document data
     const { id, ...rest } = character;
     return rest;
   },
 
   fromFirestore(snapshot: QueryDocumentSnapshot, options: SnapshotOptions) {
     const data = snapshot.data(options);
+    // Add `id` from the document id; `campaignId` comes from Firestore
     return {
       ...data,
       id: snapshot.id,

@@ -7,6 +7,12 @@ import { OverviewTab } from "./characterSheet/OverviewTab";
 import { CharacteristicsTab } from "./characterSheet/CharacteristicsTab";
 import { NotesTab } from "./characterSheet/NotesTab";
 import { AdminTab } from "./characterSheet/AdminTab";
+
+import { SkillsTab } from "./characterSheet/SkillsTab";
+import { TalentsTab } from "./characterSheet/TalentsTab";
+import { GearTab } from "./characterSheet/GearTab";
+import { ExperienceTab } from "./characterSheet/ExperienceTab";
+
 import type { TabId } from "./characterSheet/types";
 import { TabButton } from "../components/TabButton";
 
@@ -138,19 +144,37 @@ export default function CharacterSheet({ user, role }: Props) {
         )}
 
         {activeTab === "skills" && (
-          <div className="text-slate-300">Skills tab placeholder.</div>
+          <SkillsTab
+            skills={character.skills}
+            editable={allowedToEdit}
+            onUpdate={(next) => updateField("skills", next)}
+          />
         )}
 
         {activeTab === "talents" && (
-          <div className="text-slate-300">Talents tab placeholder.</div>
+          <TalentsTab
+            talents={character.talentsAndTraits}
+            weaponTraining={character.weaponTraining}
+            editable={allowedToEdit}
+            onUpdateTalents={(next) => updateField("talentsAndTraits", next)}
+            onUpdateTraining={(next) => updateField("weaponTraining", next)}
+          />
         )}
 
         {activeTab === "gear" && (
-          <div className="text-slate-300">Gear tab placeholder.</div>
+          <GearTab
+            gear={character.gear}
+            editable={allowedToEdit}
+            onUpdate={(next) => updateField("gear", next)}
+          />
         )}
 
         {activeTab === "xp" && (
-          <div className="text-slate-300">XP tab placeholder.</div>
+          <ExperienceTab
+            experience={character.experience}
+            editable={allowedToEdit}
+            onUpdate={(next) => updateField("experience", next)}
+          />
         )}
 
         {activeTab === "notes" && (

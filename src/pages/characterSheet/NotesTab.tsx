@@ -17,8 +17,8 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
 
   return (
     <textarea
-      defaultValue={notes}
-      onBlur={(e) => onSave(e.target.value)}
+      value={notes}
+      onChange={(e) => onSave(e.target.value)}
       className="w-full h-40 bg-slate-800 border border-slate-600 p-2 rounded text-slate-100"
     />
   );

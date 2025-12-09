@@ -1,11 +1,11 @@
 // src/pages/characterSheet/AdminTab.tsx
 import { useState } from "react";
 import type { Character } from "../../types/Character";
-import type { ClaimLogEntry } from "./types";
+import type { ClaimLog } from "../../types/ClaimLog";
 
 interface AdminTabProps {
   character: Character;
-  claimLog: ClaimLogEntry[];
+  claimLog: ClaimLog[];
   onDMForceRelease: () => void;
   onDMForceAssign: (uid: string) => void;
   onDMToggleEdit: () => void;
@@ -24,14 +24,17 @@ export function AdminTab({
     <div className="space-y-4 text-slate-300">
       <h2 className="text-xl font-semibold mb-2">Admin</h2>
 
+      {/* OWNERSHIP BLOCK */}
       <div className="p-3 rounded border border-red-600 bg-red-900/30">
         <h3 className="font-semibold text-red-300 mb-2">Ownership</h3>
+
         <p className="text-sm mb-1">
           Current owner UID:{" "}
           <span className="font-mono">
             {character.userId || "None (unclaimed)"}
           </span>
         </p>
+
         <p className="text-sm mb-3">
           Player editable:{" "}
           <span className="font-mono">
@@ -39,6 +42,7 @@ export function AdminTab({
           </span>
         </p>
 
+        {/* Buttons */}
         <div className="flex flex-wrap gap-2 mb-3">
           <button
             onClick={onDMForceRelease}
@@ -55,6 +59,7 @@ export function AdminTab({
           </button>
         </div>
 
+        {/* Assign UID */}
         <div className="flex flex-wrap items-center gap-2">
           <input
             value={assignUID}
@@ -63,7 +68,10 @@ export function AdminTab({
             placeholder="Enter player UID"
           />
           <button
-            onClick={() => onDMForceAssign(assignUID)}
+            onClick={() => {
+              const clean = assignUID.trim();
+              if (clean) onDMForceAssign(clean);
+            }}
             className="px-3 py-1 bg-blue-600 text-white rounded border border-blue-500 hover:bg-blue-500 text-sm"
           >
             Assign to Player
@@ -71,8 +79,10 @@ export function AdminTab({
         </div>
       </div>
 
+      {/* CLAIM HISTORY */}
       <div className="mt-4">
         <h3 className="font-semibold mb-2">Claim History</h3>
+
         {claimLog.length === 0 && (
           <p className="text-sm text-slate-400">
             No claim events recorded yet.
@@ -81,31 +91,23 @@ export function AdminTab({
 
         <ul className="space-y-2 max-h-64 overflow-y-auto pr-1">
           {claimLog.map((entry) => {
-            const ts = entry.timestamp;
-            let when = "Unknown time";
-            if (ts && ts.toDate) {
-              when = ts.toDate().toLocaleString();
-            }
+            const when =
+              typeof entry.timestamp === "number"
+                ? new Date(entry.timestamp).toLocaleString()
+                : "Unknown time";
+
             return (
               <li
-                key={entry.id}
+                key={entry.id ?? Math.random()}
                 className="border border-slate-700 rounded p-2 bg-slate-900/60 text-xs"
               >
                 <div className="font-mono text-slate-200">
                   {entry.action} @ {when}
                 </div>
+
                 <div className="text-slate-400">
-                  Actor: <span className="font-mono">{entry.actorUid}</span>
-                </div>
-                <div className="text-slate-400">
-                  From:{" "}
-                  <span className="font-mono">
-                    {entry.previousOwnerUid || "none"}
-                  </span>{" "}
-                  → To:{" "}
-                  <span className="font-mono">
-                    {entry.newOwnerUid || "none"}
-                  </span>
+                  Actor:{" "}
+                  <span className="font-mono">{entry.actorUid}</span>
                 </div>
               </li>
             );
