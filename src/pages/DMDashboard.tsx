@@ -120,7 +120,16 @@ export default function DMDashboard({
         collection(db, "campaigns", activeCampaignId, "characters")
       );
 
+      // Write the full character document
       await setDoc(ref, characterData);
+
+      // -----------------------------------------
+      // NEW: Write recovery index (instant lookup)
+      // -----------------------------------------
+      await setDoc(doc(db, "recoveryIndex", recoveryCode), {
+        campaignId: activeCampaignId,
+        characterId: ref.id,
+      });
 
       alert(`Character created.\nRecovery Code: ${recoveryCode}`);
       setCharacterName("");

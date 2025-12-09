@@ -1,8 +1,11 @@
+// src/pages/CharacterSheet.tsx
+
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import type { User } from "firebase/auth";
+import { auth } from "../firebase";
 
 import { useCharacterSheet } from "./characterSheet/useCharacterSheet";
+
 import { OverviewTab } from "./characterSheet/OverviewTab";
 import { CharacteristicsTab } from "./characterSheet/CharacteristicsTab";
 import { NotesTab } from "./characterSheet/NotesTab";
@@ -16,14 +19,7 @@ import { ExperienceTab } from "./characterSheet/ExperienceTab";
 import type { TabId } from "./characterSheet/types";
 import { TabButton } from "../components/TabButton";
 
-type Role = "player" | "dm";
-
-type Props = {
-  user: User;
-  role: Role;
-};
-
-export default function CharacterSheet({ user, role }: Props) {
+export default function CharacterSheet() {
   const params = useParams<{ campaignId: string; characterId: string }>();
 
   const {
@@ -40,8 +36,6 @@ export default function CharacterSheet({ user, role }: Props) {
     dmForceAssign,
     dmToggleEdit,
   } = useCharacterSheet({
-    user,
-    role,
     campaignIdParam: params.campaignId,
     characterIdParam: params.characterId,
   });
@@ -64,7 +58,8 @@ export default function CharacterSheet({ user, role }: Props) {
     );
   }
 
-  const isOwner = character.userId === user.uid;
+  const currentUser = auth.currentUser;
+  const isOwner = !!(currentUser && character.userId === currentUser.uid);
   const canPlayerRelease = isOwner && !isDM;
 
   return (
@@ -85,31 +80,37 @@ export default function CharacterSheet({ user, role }: Props) {
           active={activeTab === "overview"}
           onClick={() => setActiveTab("overview")}
         />
+
         <TabButton
           label="Characteristics"
           active={activeTab === "stats"}
           onClick={() => setActiveTab("stats")}
         />
+
         <TabButton
           label="Skills"
           active={activeTab === "skills"}
           onClick={() => setActiveTab("skills")}
         />
+
         <TabButton
           label="Talents"
           active={activeTab === "talents"}
           onClick={() => setActiveTab("talents")}
         />
+
         <TabButton
           label="Gear"
           active={activeTab === "gear"}
           onClick={() => setActiveTab("gear")}
         />
+
         <TabButton
           label="XP"
           active={activeTab === "xp"}
           onClick={() => setActiveTab("xp")}
         />
+
         <TabButton
           label="Notes"
           active={activeTab === "notes"}
@@ -127,6 +128,7 @@ export default function CharacterSheet({ user, role }: Props) {
 
       {/* Content */}
       <div className="border border-slate-700 p-4 rounded-lg bg-slate-900/40">
+
         {activeTab === "overview" && (
           <OverviewTab
             character={character}
@@ -148,6 +150,7 @@ export default function CharacterSheet({ user, role }: Props) {
             skills={character.skills}
             editable={allowedToEdit}
             onUpdate={(next) => updateField("skills", next)}
+            getCharField={getCharField}  // <-- REQUIRED FIX
           />
         )}
 

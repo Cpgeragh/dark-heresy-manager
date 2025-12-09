@@ -1,4 +1,5 @@
 // src/pages/characterSheet/AdminTab.tsx
+
 import { useState } from "react";
 import type { Character } from "../../types/Character";
 import type { ClaimLog } from "../../types/ClaimLog";
@@ -20,9 +21,21 @@ export function AdminTab({
 }: AdminTabProps) {
   const [assignUID, setAssignUID] = useState("");
 
+  const latest = claimLog.length > 0 ? claimLog[0] : null;
+
   return (
     <div className="space-y-4 text-slate-300">
       <h2 className="text-xl font-semibold mb-2">Admin</h2>
+
+      {/* Latest event */}
+      {latest && (
+        <p className="text-xs text-slate-400">
+          Last ownership event:{" "}
+          <span className="font-mono text-slate-300">
+            {latest.action} by {latest.actorUid}
+          </span>
+        </p>
+      )}
 
       {/* OWNERSHIP BLOCK */}
       <div className="p-3 rounded border border-red-600 bg-red-900/30">
@@ -106,8 +119,7 @@ export function AdminTab({
                 </div>
 
                 <div className="text-slate-400">
-                  Actor:{" "}
-                  <span className="font-mono">{entry.actorUid}</span>
+                  Actor: <span className="font-mono">{entry.actorUid}</span>
                 </div>
               </li>
             );

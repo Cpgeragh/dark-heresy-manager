@@ -1,4 +1,7 @@
+// src/pages/characterSheet/OverviewTab.tsx
+
 import type { Character } from "../../types/Character";
+import { useState } from "react";
 
 interface OverviewTabProps {
   character: Character;
@@ -11,6 +14,18 @@ export function OverviewTab({
   canPlayerRelease,
   onPlayerRelease,
 }: OverviewTabProps) {
+  const [copied, setCopied] = useState(false);
+  const [showCode, setShowCode] = useState(false);
+
+  const recoveryCode = character.recoveryCode ?? null;
+
+  async function copyCode() {
+    if (!recoveryCode) return;
+    await navigator.clipboard.writeText(recoveryCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1200);
+  }
+
   return (
     <div className="space-y-4 text-slate-300">
 
@@ -21,7 +36,9 @@ export function OverviewTab({
         </h2>
 
         {character.header?.career && (
-          <p className="text-sm text-slate-400">Career: {character.header.career}</p>
+          <p className="text-sm text-slate-400">
+            Career: {character.header.career}
+          </p>
         )}
 
         {character.userId && (
@@ -31,14 +48,44 @@ export function OverviewTab({
         )}
       </div>
 
-      {/* Placeholder for future data */}
+      {/* Placeholder for future stats */}
       <p>This will later show wounds, fate, insanity, corruption, movement, etc.</p>
 
       {/* Recovery Code */}
-      {character.recoveryCode && (
-        <p className="text-xs text-slate-500">
-          Recovery code: {character.recoveryCode}
-        </p>
+      {recoveryCode && (
+        <div className="p-3 rounded border border-slate-700 bg-slate-900/40 space-y-1">
+          <div className="text-xs text-slate-400">Recovery Code</div>
+
+          <div className="flex items-center gap-2">
+            {showCode ? (
+              <code className="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-amber-300">
+                {recoveryCode}
+              </code>
+            ) : (
+              <code className="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-slate-400">
+                ••••••••••
+              </code>
+            )}
+
+            <button
+              onClick={() => setShowCode(!showCode)}
+              className="px-2 py-1 text-xs rounded bg-slate-700 border border-slate-600 hover:bg-slate-600"
+            >
+              {showCode ? "Hide" : "Show"}
+            </button>
+
+            <button
+              onClick={copyCode}
+              className="px-2 py-1 text-xs rounded bg-slate-700 border border-slate-600 hover:bg-slate-600"
+            >
+              {copied ? "Copied" : "Copy"}
+            </button>
+          </div>
+
+          <p className="text-xs text-slate-500">
+            Use this code to claim this character on another device.
+          </p>
+        </div>
       )}
 
       {/* Player Release Button */}

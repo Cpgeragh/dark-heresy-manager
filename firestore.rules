@@ -12,14 +12,34 @@ service cloud.firestore {
     }
 
     // --------------------
+    // RECOVERY INDEX
+    // --------------------
+    match /recoveryIndex/{code} {
+
+      // Any authenticated user may read (needed for claiming)
+      allow read: if request.auth != null;
+
+      // Utility: check if requester is the DM for the associated campaign.
+      function isDMForTarget() {
+        return request.auth != null &&
+          get(/databases/$(database)/documents/campaigns/$(request.resource.data.campaignId)).data.dmId
+            == request.auth.uid;
+      }
+
+      /**
+       * DM dashboard creates characters AND writes to recoveryIndex.
+       * So DM must be allowed to create/update/delete entries.
+       */
+      allow create, update, delete: if isDMForTarget();
+    }
+
+    // --------------------
     // CAMPAIGNS
     // --------------------
     match /campaigns/{campaignId} {
 
-      // Any authenticated user may read campaigns
       allow read: if request.auth != null;
 
-      // Only DM may create/update a campaign
       allow create, update: if request.auth != null &&
                             request.resource.data.dmId == request.auth.uid;
 
@@ -30,7 +50,6 @@ service cloud.firestore {
 
         allow read: if request.auth != null;
 
-        // Helper functions
         function isDM() {
           return request.auth != null &&
             request.auth.uid ==
@@ -39,13 +58,13 @@ service cloud.firestore {
 
         function isOwner() {
           return request.auth != null &&
-                 request.resource.data.userId == request.auth.uid;
+                 resource.data.userId == request.auth.uid;
         }
 
         // DM full control
         allow create, update, delete: if isDM();
 
-        // Player can update only their own editable character
+        // Player updates ONLY if they own it AND editing is enabled
         allow update: if isOwner() &&
                        request.resource.data.isEditableByPlayer == true;
 
@@ -54,19 +73,19 @@ service cloud.firestore {
         // --------------------
         match /claimLog/{logId} {
 
-          // Only DM can read logs
+          // DM may read all logs
           allow read: if isDM();
 
           // DM can create any log entry
-          // Player can create only minimal entries:
-          // - action: "claim" | "release"
-          // - actorUid == request.auth.uid
-          allow create: if isDM() ||
+          allow create: if isDM()
+            ||
             (
               request.auth != null &&
               request.resource.data.actorUid == request.auth.uid &&
               request.resource.data.action in ['claim', 'release']
             );
+
+          allow update, delete: if false;
         }
       }
     }

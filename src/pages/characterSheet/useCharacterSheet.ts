@@ -1,7 +1,8 @@
 // src/pages/characterSheet/useCharacterSheet.ts
 
 import { useEffect, useState } from "react";
-import type { User } from "firebase/auth";
+import { auth, db } from "../../firebase";
+
 import {
   collection,
   doc,
@@ -11,9 +12,8 @@ import {
   updateDoc,
   addDoc,
   serverTimestamp,
+  getDoc,
 } from "firebase/firestore";
-
-import { db } from "../../firebase";
 
 import type { ClaimLog } from "../../types/ClaimLog";
 import type { Character, Characteristics } from "../../types/Character";
@@ -22,15 +22,11 @@ import type { CharField } from "../../utils/characterFactory";
 type Path = { campaignId: string; characterId: string } | null;
 
 interface UseCharacterSheetArgs {
-  user: User;
-  role: "player" | "dm";
   campaignIdParam?: string;
   characterIdParam?: string;
 }
 
 export function useCharacterSheet({
-  user,
-  role,
   campaignIdParam,
   characterIdParam,
 }: UseCharacterSheetArgs) {
@@ -38,14 +34,35 @@ export function useCharacterSheet({
   const [character, setCharacter] = useState<Character | null>(null);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [claimLog, setClaimLog] = useState<ClaimLog[]>([]);
+  const [isDM, setIsDM] = useState(false);
 
-  const isDM = role === "dm";
+  const user = auth.currentUser;
+  const userId = user?.uid ?? null;
+
+  // ----------------------------------------------------------------------
+  // Load user role (dm / player)
+  // ----------------------------------------------------------------------
+  useEffect(() => {
+    async function loadRole() {
+      if (!userId) return;
+
+      const userRef = doc(db, "users", userId);
+      const snap = await getDoc(userRef);
+
+      if (snap.exists()) {
+        const role = snap.data().role;
+        setIsDM(role === "dm");
+      }
+    }
+
+    loadRole();
+  }, [userId]);
 
   // ----------------------------------------------------------------------
   // Load character live
   // ----------------------------------------------------------------------
   useEffect(() => {
-    if (!campaignIdParam || !characterIdParam) {
+    if (!campaignIdParam || !characterIdParam || !userId) {
       setPath(null);
       setCharacter(null);
       setAllowedToEdit(false);
@@ -74,22 +91,20 @@ export function useCharacterSheet({
         return;
       }
 
-      // Converter ensures all required fields exist
       const data = snap.data() as Character;
-
       setCharacter(data);
 
       if (isDM) {
         setAllowedToEdit(true);
       } else {
         setAllowedToEdit(
-          data.userId === user.uid && data.isEditableByPlayer === true
+          data.userId === userId && data.isEditableByPlayer === true
         );
       }
     });
 
     return () => unsub();
-  }, [campaignIdParam, characterIdParam, user.uid, isDM]);
+  }, [campaignIdParam, characterIdParam, userId, isDM]);
 
   // ----------------------------------------------------------------------
   // Load claim log (DM only)
@@ -192,10 +207,24 @@ export function useCharacterSheet({
   // ----------------------------------------------------------------------
   async function releaseCharacter() {
     if (!character || !path || isDM) return;
-    if (character.userId !== user.uid) return;
+    if (!userId || character.userId !== userId) return;
 
-    const ref = doc(db, "campaigns", path.campaignId, "characters", path.characterId);
-    const logsRef = collection(db, "campaigns", path.campaignId, "characters", path.characterId, "claimLog");
+    const ref = doc(
+      db,
+      "campaigns",
+      path.campaignId,
+      "characters",
+      path.characterId
+    );
+
+    const logsRef = collection(
+      db,
+      "campaigns",
+      path.campaignId,
+      "characters",
+      path.characterId,
+      "claimLog"
+    );
 
     await updateDoc(ref, {
       userId: null,
@@ -205,7 +234,7 @@ export function useCharacterSheet({
 
     await addDoc(logsRef, {
       action: "release",
-      actorUid: user.uid,
+      actorUid: userId,
       timestamp: serverTimestamp(),
     });
   }
@@ -216,8 +245,22 @@ export function useCharacterSheet({
   async function dmForceRelease() {
     if (!character || !path || !isDM) return;
 
-    const ref = doc(db, "campaigns", path.campaignId, "characters", path.characterId);
-    const logsRef = collection(db, "campaigns", path.campaignId, "characters", path.characterId, "claimLog");
+    const ref = doc(
+      db,
+      "campaigns",
+      path.campaignId,
+      "characters",
+      path.characterId
+    );
+
+    const logsRef = collection(
+      db,
+      "campaigns",
+      path.campaignId,
+      "characters",
+      path.characterId,
+      "claimLog"
+    );
 
     await updateDoc(ref, {
       userId: null,
@@ -226,7 +269,7 @@ export function useCharacterSheet({
 
     await addDoc(logsRef, {
       action: "release",
-      actorUid: user.uid,
+      actorUid: userId,
       timestamp: serverTimestamp(),
     });
   }
@@ -240,8 +283,22 @@ export function useCharacterSheet({
     const clean = uid.trim();
     if (!clean) return;
 
-    const ref = doc(db, "campaigns", path.campaignId, "characters", path.characterId);
-    const logsRef = collection(db, "campaigns", path.campaignId, "characters", path.characterId, "claimLog");
+    const ref = doc(
+      db,
+      "campaigns",
+      path.campaignId,
+      "characters",
+      path.characterId
+    );
+
+    const logsRef = collection(
+      db,
+      "campaigns",
+      path.campaignId,
+      "characters",
+      path.characterId,
+      "claimLog"
+    );
 
     await updateDoc(ref, {
       userId: clean,
@@ -250,7 +307,7 @@ export function useCharacterSheet({
 
     await addDoc(logsRef, {
       action: "claim",
-      actorUid: user.uid,
+      actorUid: userId,
       timestamp: serverTimestamp(),
     });
   }
@@ -261,7 +318,13 @@ export function useCharacterSheet({
   async function dmToggleEdit() {
     if (!character || !path || !isDM) return;
 
-    const ref = doc(db, "campaigns", path.campaignId, "characters", path.characterId);
+    const ref = doc(
+      db,
+      "campaigns",
+      path.campaignId,
+      "characters",
+      path.characterId
+    );
 
     await updateDoc(ref, {
       isEditableByPlayer: !character.isEditableByPlayer,

@@ -1,149 +1,179 @@
 // src/pages/ClaimCharacter.tsx
 
 import { useState } from "react";
-import type { User } from "firebase/auth";
-import { db } from "../firebase";
+import { useNavigate } from "react-router-dom";
 import {
-  collection,
-  getDocs,
-  updateDoc,
   doc,
+  getDoc,
+  updateDoc,
+  collection,
   addDoc,
-  serverTimestamp,
 } from "firebase/firestore";
 
-type Props = {
-  user: User;
-  onActiveCampaignChange: (id: string | null, name?: string) => void;
-};
+import { auth, db } from "../firebase";
+import { buildClaimLogPayload } from "../utils/claimLog";
 
-export default function ClaimCharacter({ user, onActiveCampaignChange }: Props) {
+export default function ClaimCharacterPage() {
+  const navigate = useNavigate();
+
   const [code, setCode] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  async function claim() {
-    console.log("=== CLAIM START ===");
-    console.log("Player UID:", user.uid);
+  function normalize(input: string) {
+    return input.trim().toUpperCase();
+  }
 
-    const recoveryCode = code.trim().toUpperCase();
-    console.log("Recovery code entered:", recoveryCode);
+  async function handleClaim() {
+    setErrorMsg(null);
 
-    if (!recoveryCode) return alert("Enter a code.");
-
-    const campaignsSnap = await getDocs(collection(db, "campaigns"));
-
-    let foundCampaignId: string | null = null;
-    let foundCharacterId: string | null = null;
-
-    // First pass: find the matching character
-    for (const campaign of campaignsSnap.docs) {
-      const charsRef = collection(db, "campaigns", campaign.id, "characters");
-      const charSnap = await getDocs(charsRef);
-
-      for (const ch of charSnap.docs) {
-        const data = ch.data();
-        if (data.recoveryCode === recoveryCode) {
-          foundCampaignId = campaign.id;
-          foundCharacterId = ch.id;
-          console.log("Match found in campaign:", foundCampaignId);
-          console.log("Character ID:", foundCharacterId);
-          break;
-        }
-      }
-
-      if (foundCampaignId && foundCharacterId) break;
-    }
-
-    if (!foundCampaignId || !foundCharacterId) {
-      alert("Invalid recovery code.");
+    const user = auth.currentUser;
+    if (!user) {
+      setErrorMsg("You must be signed in to claim a character.");
       return;
     }
 
-    // Safe: both are now guaranteed strings
-    const charRef = doc(
-      db,
-      "campaigns",
-      foundCampaignId,
-      "characters",
-      foundCharacterId
-    );
+    const formatted = normalize(code);
 
-    // Load the character document directly instead of re-querying whole campaign
-    const charactersSnap = await getDocs(
-      collection(db, "campaigns", foundCampaignId, "characters")
-    );
-
-    const existingDoc = charactersSnap.docs.find((d) => d.id === foundCharacterId);
-
-    if (!existingDoc) {
-      alert("Character not found.");
+    if (!/^DH-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(formatted)) {
+      setErrorMsg("Invalid recovery code format.");
       return;
     }
 
-    const existingData = existingDoc.data();
-    console.log("Existing character document:", existingData);
-
-    if (existingData.userId) {
-      alert("This character is already claimed by another player.");
-      return;
-    }
-
-    // Payload for claim
-    const payload = {
-      userId: user.uid,
-      isEditableByPlayer: true,
-    };
-
-    console.log("Attempting update with payload:", payload);
+    setLoading(true);
 
     try {
-      await updateDoc(charRef, payload);
+      // 1. Lookup recovery index
+      const indexRef = doc(db, "recoveryIndex", formatted);
+      const indexSnap = await getDoc(indexRef);
 
-      // Write claim log entry
-      const logsRef = collection(
+      if (!indexSnap.exists()) {
+        setErrorMsg("No character found with that recovery code.");
+        setLoading(false);
+        return;
+      }
+
+      const { campaignId, characterId } = indexSnap.data() as {
+        campaignId: string;
+        characterId: string;
+      };
+
+      // 2. Load campaign
+      const campaignSnap = await getDoc(doc(db, "campaigns", campaignId));
+      const campaignData = campaignSnap.data();
+
+      // If DM enters a recovery code, redirect without claiming
+      if (campaignData?.dmId === user.uid) {
+        setErrorMsg(null);
+        setLoading(true);
+
+        setTimeout(() => {
+          navigate(`/campaign/${campaignId}/character/${characterId}`);
+        }, 1200);
+
+        return;
+      }
+
+      // 3. Load character
+      const charRef = doc(
         db,
         "campaigns",
-        foundCampaignId,
+        campaignId,
         "characters",
-        foundCharacterId,
+        characterId
+      );
+
+      const charSnap = await getDoc(charRef);
+
+      if (!charSnap.exists()) {
+        setErrorMsg("Character not found. (Corrupted index)");
+        setLoading(false);
+        return;
+      }
+
+      const charData = charSnap.data() as any;
+
+      // Character belongs to someone else
+      if (charData.userId && charData.userId !== user.uid) {
+        setErrorMsg("This character is already claimed by another player.");
+        setLoading(false);
+        return;
+      }
+
+      // Character already owned by this user (new device)
+      if (charData.userId === user.uid) {
+        setErrorMsg(null);
+        setLoading(true);
+
+        setTimeout(() => {
+          navigate(`/campaign/${campaignId}/character/${characterId}`);
+        }, 1200);
+
+        return;
+      }
+
+      // 4. Claim ownership
+      await updateDoc(charRef, {
+        userId: user.uid,
+      });
+
+      // 5. Write claim log
+      const logRef = collection(
+        db,
+        "campaigns",
+        campaignId,
+        "characters",
+        characterId,
         "claimLog"
       );
 
-      await addDoc(logsRef, {
-        action: "claim",
-        actorUid: user.uid,
-        previousOwnerUid: null,
-        newOwnerUid: user.uid,
-        timestamp: serverTimestamp(),
-      });
+      await addDoc(
+        logRef,
+        buildClaimLogPayload("claim", user.uid, charData.userId ?? null, user.uid)
+      );
 
-      console.log("=== CLAIM SUCCESS ===");
-
-      // Reset campaign selection for consistency
-      onActiveCampaignChange(null);
-
-      alert("Character claimed successfully.");
+      // 6. Redirect to character sheet
+      navigate(`/campaign/${campaignId}/character/${characterId}`);
     } catch (err) {
       console.error("Claim error:", err);
-      alert("Claim failed. See console for details.");
+      setErrorMsg("An unexpected error occurred. Try again.");
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
-    <div>
-      <h1 className="text-4xl font-bold mb-6">Claim Character</h1>
+    <div className="max-w-md mx-auto text-slate-100 mt-10">
+      <h1 className="text-3xl font-bold mb-6">Claim Character</h1>
 
-      <input
-        value={code}
-        onChange={(e) => setCode(e.target.value)}
-        className="px-3 py-2 bg-slate-900 border border-slate-700 rounded w-full max-w-sm"
-        placeholder="Enter recovery code"
-      />
+      <div className="mb-4">
+        <label className="block mb-1 text-sm text-slate-300">
+          Recovery Code
+        </label>
+        <input
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+          className="w-full px-3 py-2 rounded bg-slate-800 border border-slate-600 text-slate-100"
+          placeholder="DH-XXXX-XXXX"
+        />
+      </div>
+
+      {errorMsg && (
+        <div className="mb-4 text-red-400 border border-red-600 bg-red-900/30 p-3 rounded">
+          {errorMsg}
+        </div>
+      )}
+
+      {loading && !errorMsg && (
+        <p className="text-xs text-slate-400 mb-3">Checking character ownership…</p>
+      )}
 
       <button
-        onClick={claim}
-        className="px-4 py-2 bg-amber-500 text-black font-semibold rounded mt-3"
+        onClick={handleClaim}
+        disabled={loading}
+        className="w-full py-2 bg-amber-500 text-slate-900 font-semibold rounded disabled:opacity-50"
       >
-        Claim
+        {loading ? "Claiming..." : "Claim Character"}
       </button>
     </div>
   );

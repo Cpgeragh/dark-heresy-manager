@@ -1,98 +1,89 @@
 // src/pages/characterSheet/SkillsTab.tsx
 
-import type { SkillEntry } from "../../types/Character";
+import type { Character } from "../../types/Character";
+import type { CharField } from "../../utils/characterFactory";
 
 interface SkillsTabProps {
-  skills: SkillEntry[];
+  skills: Character["skills"]; // SkillEntry[]
   editable: boolean;
-  onUpdate: (next: SkillEntry[]) => void;
+  onUpdate: (next: Character["skills"]) => void;
+  getCharField: (statKey: keyof Character["characteristics"]) => CharField;
 }
 
-export function SkillsTab({ skills, editable, onUpdate }: SkillsTabProps) {
-  if (!skills || skills.length === 0) {
-    return <p className="text-slate-300">No skills recorded.</p>;
-  }
+export function SkillsTab({
+  skills,
+  editable,
+  onUpdate,
+  getCharField,
+}: SkillsTabProps) {
 
-  // Sorted for display only
-  const sorted = [...skills].sort((a, b) =>
-    a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
+  // Sorted COPY for display only (do NOT mutate original)
+  const sortedSkills = [...skills].sort((a, b) =>
+    a.name.localeCompare(b.name)
   );
 
-  const updateSkill = (id: string, updated: SkillEntry) => {
-    const next = sorted.map((s) => (s.id === id ? updated : s));
+  function updateLevel(skillId: string, newLevel: string) {
+    const next = skills.map((s) =>
+      s.id === skillId ? { ...s, level: newLevel as any } : s
+    );
     onUpdate(next);
-  };
+  }
+
+  function computeSkillTotal(skill: Character["skills"][number]) {
+    const { characteristic, level, miscModifier = 0 } = skill;
+
+    const field = getCharField(characteristic);
+    const baseTotal = field.base + field.advances;
+
+    const lvlMod =
+      level === "trained" ? 0 :
+      level === "+10" ? 10 :
+      level === "+20" ? 20 :
+      -20; // untrained
+
+    return baseTotal + lvlMod + miscModifier;
+  }
 
   return (
-    <div className="space-y-4 text-slate-300">
-      {sorted.map((skill) => (
-        <div
-          key={skill.id}
-          className="border border-slate-700 p-3 rounded bg-slate-900/40"
-        >
-          {/* NAME & CHARACTERISTIC */}
-          <div className="flex justify-between mb-2">
-            <h3 className="font-semibold text-slate-200">{skill.name}</h3>
-            <span className="text-xs text-slate-500">
-              Stat: {skill.characteristic.toUpperCase()}
-            </span>
+    <div>
+      <h2 className="text-xl font-semibold mb-4">Skills</h2>
+
+      <div className="space-y-3">
+        {sortedSkills.map((skill) => (
+          <div
+            key={skill.id}
+            className="p-3 border border-slate-700 bg-slate-900/40 rounded"
+          >
+            <div className="font-semibold text-slate-200">{skill.name}</div>
+
+            <div className="text-xs text-slate-400">
+              Uses: {skill.characteristic.toUpperCase()}
+            </div>
+
+            <div className="flex flex-wrap gap-2 mt-2 text-sm">
+              {["untrained", "trained", "+10", "+20"].map((lvl) => (
+                <button
+                  key={lvl}
+                  disabled={!editable}
+                  onClick={() => updateLevel(skill.id, lvl)}
+                  className={`px-2 py-1 rounded border text-xs ${
+                    skill.level === lvl
+                      ? "bg-amber-500 text-slate-900 border-amber-400"
+                      : "border-slate-600 text-slate-300 hover:bg-slate-800"
+                  }`}
+                >
+                  {lvl}
+                </button>
+              ))}
+            </div>
+
+            <div className="text-xs text-slate-400 mt-2">
+              Total:{" "}
+              <span className="text-slate-200">{computeSkillTotal(skill)}</span>
+            </div>
           </div>
-
-          {/* LEVEL */}
-          <label className="block mb-2">
-            <span className="text-sm text-slate-400">Training Level:</span>
-            <select
-              disabled={!editable}
-              value={skill.level}
-              onChange={(e) =>
-                updateSkill(skill.id, {
-                  ...skill,
-                  level: e.target.value as SkillEntry["level"],
-                })
-              }
-              className="mt-1 p-1 bg-slate-800 border border-slate-600 rounded text-slate-100"
-            >
-              <option value="untrained">Untrained</option>
-              <option value="trained">Trained</option>
-              <option value="+10">+10</option>
-              <option value="+20">+20</option>
-            </select>
-          </label>
-
-          {/* MISC MODIFIER */}
-          <label className="block mb-2">
-            <span className="text-sm text-slate-400">Misc Modifier:</span>
-            <input
-              disabled={!editable}
-              type="number"
-              value={skill.miscModifier ?? 0}
-              onChange={(e) =>
-                updateSkill(skill.id, {
-                  ...skill,
-                  miscModifier: Number(e.target.value),
-                })
-              }
-              className="mt-1 p-1 w-20 bg-slate-800 border border-slate-600 rounded text-slate-100"
-            />
-          </label>
-
-          {/* NOTES */}
-          <label className="block">
-            <span className="text-sm text-slate-400">Notes:</span>
-            <textarea
-              disabled={!editable}
-              value={skill.notes ?? ""}
-              onChange={(e) =>
-                updateSkill(skill.id, {
-                  ...skill,
-                  notes: e.target.value,
-                })
-              }
-              className="mt-1 w-full h-16 p-1 bg-slate-800 border border-slate-600 rounded text-slate-100"
-            />
-          </label>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }

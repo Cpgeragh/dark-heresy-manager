@@ -8,7 +8,6 @@ import { auth, db } from "./firebase";
 import {
   onAuthStateChanged,
   signInAnonymously,
-  signOut,
 } from "firebase/auth";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 
@@ -16,7 +15,7 @@ import DMDashboard from "./pages/DMDashboard";
 import PlayerDashboard from "./pages/PlayerDashboard";
 import ClaimCharacter from "./pages/ClaimCharacter";
 import SelectCampaign from "./pages/SelectCampaign";
-import CharacterSheet from "./pages/CharacterSheet"; // NEW
+import CharacterSheet from "./pages/CharacterSheet";
 
 type Role = "player" | "dm";
 
@@ -28,9 +27,9 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const location = useLocation();
 
-  // ------------------------------
+  // -------------------------------------------------
   // AUTH + USER DOCUMENT SETUP
-  // ------------------------------
+  // -------------------------------------------------
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
       try {
@@ -45,6 +44,7 @@ export default function App() {
         const snap = await getDoc(ref);
 
         if (!snap.exists()) {
+          // First-time user creation
           await setDoc(ref, {
             role: "player",
             activeCampaignId: null,
@@ -61,6 +61,7 @@ export default function App() {
           setActiveCampaignId(data.activeCampaignId ?? null);
         }
 
+        // always update lastSeen
         await setDoc(ref, { lastSeen: serverTimestamp() }, { merge: true });
       } catch (err) {
         console.error("Auth error:", err);
@@ -72,9 +73,9 @@ export default function App() {
     return () => unsub();
   }, []);
 
-  // ------------------------------
+  // -------------------------------------------------
   // ACTIVE CAMPAIGN HANDLER
-  // ------------------------------
+  // -------------------------------------------------
   function handleActiveCampaignChange(id: string | null) {
     setActiveCampaignId(id);
     if (!currentUser) return;
@@ -83,43 +84,64 @@ export default function App() {
     setDoc(ref, { activeCampaignId: id }, { merge: true });
   }
 
-  // ------------------------------
-  // DEV-ONLY REAL ROLE SWITCHER
-  // ------------------------------
-  async function switchTo(role: Role) {
-    try {
-      console.log(`Switching to ${role.toUpperCase()}…`);
+  // -------------------------------------------------
+  // DEV-ONLY DM / PLAYER SWITCHER (Option 1)
+  // -------------------------------------------------
+  async function switchToDM() {
+    if (!currentUser) return;
 
-      // Completely reset user
-      await signOut(auth);
+    console.log("Switching to DM (dev)…");
 
-      const cred = await signInAnonymously(auth);
-      const newUser = cred.user;
+    // 1. Update user's role
+    await setDoc(
+      doc(db, "users", currentUser.uid),
+      { role: "dm" },
+      { merge: true }
+    );
+    setUserRole("dm");
 
+    // 2. Make current campaign belong to this DM (if any)
+    if (activeCampaignId) {
+      const campRef = doc(db, "campaigns", activeCampaignId);
       await setDoc(
-        doc(db, "users", newUser.uid),
-        {
-          role,
-          activeCampaignId: null,
-          createdAt: serverTimestamp(),
-          lastSeen: serverTimestamp(),
-        },
+        campRef,
+        { dmId: currentUser.uid },
         { merge: true }
       );
-
-      setCurrentUser(newUser);
-      setUserRole(role);
-      setActiveCampaignId(null);
-
-      console.log(`Now acting as ${role.toUpperCase()}:`, newUser.uid);
-    } catch (err) {
-      console.error("Role switch error:", err);
     }
+
+    console.log("Now acting as DM");
   }
 
-  // ------------------------------
+  async function switchToPlayer() {
+    if (!currentUser) return;
+
+    console.log("Switching to Player (dev)…");
+
+    // 1. Update user's role
+    await setDoc(
+      doc(db, "users", currentUser.uid),
+      { role: "player" },
+      { merge: true }
+    );
+    setUserRole("player");
+
+    // 2. Remove them from DM ownership for active campaign (if any)
+    if (activeCampaignId) {
+      const campRef = doc(db, "campaigns", activeCampaignId);
+      await setDoc(
+        campRef,
+        { dmId: null },
+        { merge: true }
+      );
+    }
+
+    console.log("Now acting as Player");
+  }
+
+  // -------------------------------------------------
   // LOADING STATES
-  // ------------------------------
+  // -------------------------------------------------
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-100">
@@ -138,15 +160,15 @@ export default function App() {
 
   const isDM = userRole === "dm";
 
-  // ------------------------------
-  // MAIN APP
-  // ------------------------------
+  // -------------------------------------------------
+  // MAIN APP UI
+  // -------------------------------------------------
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
       {/* TOP NAVIGATION */}
       <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur">
         <nav className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-          {/* Left logo + title */}
+          {/* Left - Logo */}
           <div className="flex items-center gap-2">
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500 text-slate-900 font-bold">
               DH
@@ -159,9 +181,8 @@ export default function App() {
             </div>
           </div>
 
-          {/* Navigation + Dev Switch */}
+          {/* Navigation + DEV Switcher */}
           <div className="flex items-center gap-3">
-            {/* Page navigation */}
             <div className="flex gap-2">
               {isDM ? (
                 <>
@@ -197,18 +218,18 @@ export default function App() {
               )}
             </div>
 
-            {/* REAL DEV ROLE SWITCHER */}
+            {/* DEV SWITCHER BUTTONS */}
             {import.meta.env.DEV && (
               <div className="flex gap-2">
                 <button
-                  onClick={() => switchTo("player")}
+                  onClick={switchToPlayer}
                   className="px-3 py-1 text-xs rounded-full bg-blue-600 text-white border border-blue-500 hover:bg-blue-500 transition"
                 >
                   Switch to Player
                 </button>
 
                 <button
-                  onClick={() => switchTo("dm")}
+                  onClick={switchToDM}
                   className="px-3 py-1 text-xs rounded-full bg-green-600 text-white border border-green-500 hover:bg-green-500 transition"
                 >
                   Switch to DM
@@ -235,6 +256,7 @@ export default function App() {
                   />
                 }
               />
+
               <Route
                 path="/select"
                 element={
@@ -261,15 +283,9 @@ export default function App() {
                   />
                 }
               />
-              <Route
-                path="/claim"
-                element={
-                  <ClaimCharacter
-                    user={currentUser}
-                    onActiveCampaignChange={handleActiveCampaignChange}
-                  />
-                }
-              />
+
+              <Route path="/claim" element={<ClaimCharacter />} />
+
               <Route
                 path="/select"
                 element={
@@ -284,13 +300,13 @@ export default function App() {
             </>
           )}
 
-          {/* SHARED CHARACTER SHEET ROUTE */}
+          {/* SHARED CHARACTER SHEET */}
           <Route
             path="/campaign/:campaignId/character/:characterId"
-            element={<CharacterSheet user={currentUser} role={userRole} />}
+            element={<CharacterSheet />}
           />
 
-          {/* CATCH-ALL REDIRECT */}
+          {/* FALLBACK */}
           <Route
             path="*"
             element={<Navigate to={isDM ? "/dm" : "/player"} replace />}
@@ -301,10 +317,15 @@ export default function App() {
   );
 }
 
-// ------------------------------
+// -------------------------------------------------
 // NAV LINK BUTTON COMPONENT
-// ------------------------------
-function NavLinkButton(props: { to: string; label: string; current?: boolean }) {
+// -------------------------------------------------
+
+function NavLinkButton(props: {
+  to: string;
+  label: string;
+  current?: boolean;
+}) {
   return (
     <Link
       to={props.to}
