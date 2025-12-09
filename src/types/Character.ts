@@ -1,23 +1,10 @@
-// src/types/character.ts
+// src/types/Character.ts
 
 import type { Timestamp } from "firebase/firestore";
 import type { CharField } from "../utils/characterFactory";
 
 /**
- * CAMPAIGN
- * Root-level document in /campaigns
- */
-export interface Campaign {
-  id: string;
-  name: string;
-  dmId: string; // UID of DM
-  createdAt?: Timestamp;
-  updatedAt?: Timestamp;
-}
-
-/**
  * CHARACTERISTICS
- * Matches the circles + 4 advance boxes on the sheet.
  */
 export interface Characteristics {
   ws: CharField;
@@ -33,23 +20,20 @@ export interface Characteristics {
 
 /**
  * SKILLS
- * Each row on the skills area.
- * level: "untrained" | "trained" | "+10" | "+20"
  */
 export type SkillAdvanceLevel = "untrained" | "trained" | "+10" | "+20";
 
 export interface SkillEntry {
-  id: string; // stable key, e.g. "awareness"
-  name: string; // display name, e.g. "Awareness"
-  characteristic: keyof Characteristics; // "per", "int", etc.
+  id: string;
+  name: string;
+  characteristic: keyof Characteristics;
   level: SkillAdvanceLevel;
-  miscModifier?: number; // optional extra modifier
+  miscModifier?: number;
   notes?: string;
 }
 
 /**
- * WOUNDS / FATE / INSANITY / CORRUPTION / MOVEMENT
- * All from page 1.
+ * PAGE 1 BLOCKS
  */
 export interface WoundsBlock {
   total: number;
@@ -65,12 +49,12 @@ export interface FateBlock {
 
 export interface InsanityBlock {
   points: number;
-  disorders: string; // free-text
+  disorders: string;
 }
 
 export interface CorruptionBlock {
   points: number;
-  malignancies: string; // free-text
+  malignancies: string;
 }
 
 export interface MovementBlock {
@@ -81,9 +65,8 @@ export interface MovementBlock {
 }
 
 /**
- * WEAPONS + ARMOUR (page 2)
+ * WEAPONS + ARMOUR
  */
-
 export interface RangedWeapon {
   id: string;
   name: string;
@@ -109,8 +92,8 @@ export interface MeleeWeapon {
 }
 
 export interface ArmourLocation {
-  name: string; // Head, Body, Right Arm, etc.
-  ap: number;   // armour points
+  name: string;
+  ap: number;
   type?: string;
 }
 
@@ -124,36 +107,20 @@ export interface ArmourBlock {
 }
 
 /**
- * TALENTS / GEAR / WEAPON TRAINING (page 2 bottom)
+ * TALENTS + TRAINING + GEAR
  */
-
 export interface TalentsAndTraitsBlock {
   homeworldBackground: string;
   advancesTalentsAndTraits: string;
 }
 
 export type WeaponTrainingTalentId =
-  | "basic-bolt"
-  | "basic-flame"
-  | "basic-las"
-  | "basic-launcher"
-  | "basic-melta"
-  | "basic-plasma"
-  | "basic-primitive"
-  | "basic-sp"
-  | "pistol-bolt"
-  | "pistol-flame"
-  | "pistol-las"
-  | "pistol-launcher"
-  | "pistol-melta"
-  | "pistol-plasma"
-  | "pistol-primitive"
-  | "pistol-sp"
-  | "melee-primitive"
-  | "melee-chain"
-  | "melee-shock"
-  | "melee-power"
-  | "exotic"; // plus free-text below
+  | "basic-bolt" | "basic-flame" | "basic-las" | "basic-launcher"
+  | "basic-melta" | "basic-plasma" | "basic-primitive" | "basic-sp"
+  | "pistol-bolt" | "pistol-flame" | "pistol-las" | "pistol-launcher"
+  | "pistol-melta" | "pistol-plasma" | "pistol-primitive" | "pistol-sp"
+  | "melee-primitive" | "melee-chain" | "melee-shock" | "melee-power"
+  | "exotic";
 
 export interface WeaponTrainingBlock {
   trained: WeaponTrainingTalentId[];
@@ -161,9 +128,8 @@ export interface WeaponTrainingBlock {
 }
 
 /**
- * ADVANCES + XP (page 3)
+ * EXPERIENCE
  */
-
 export interface AdvanceEntry {
   id: string;
   name: string;
@@ -183,9 +149,8 @@ export interface ExperienceBlock {
 }
 
 /**
- * PSYCHIC POWERS (pages 4–5)
+ * PSYCHIC
  */
-
 export interface PsychicPower {
   id: string;
   name: string;
@@ -206,7 +171,7 @@ export interface PsychicBlock {
 }
 
 /**
- * CHARACTER HEADER (top of page 1)
+ * HEADER
  */
 export interface CharacterHeader {
   characterName: string;
@@ -219,23 +184,20 @@ export interface CharacterHeader {
 }
 
 /**
- * MAIN CHARACTER DOCUMENT
- * This is what lives in /campaigns/{campaignId}/characters/{characterId}
+ * MAIN CHARACTER TYPE
+ * Firestore stores everything except `id`.
  */
 export interface Character {
-  id: string;              // firestore doc id
-  campaignId: string;      // convenience; also encoded in path
+  id: string;            // added by converter
+  campaignId: string;    // stored in Firestore (Option A)
 
-  // Ownership / permissions
   userId: string | null;
   recoveryCode: string;
   isEditableByPlayer: boolean;
 
-  // Metadata
   createdAt?: Timestamp;
   updatedAt?: Timestamp;
 
-  // Sheet content
   header: CharacterHeader;
   characteristics: Characteristics;
   skills: SkillEntry[];
@@ -251,12 +213,11 @@ export interface Character {
   armour: ArmourBlock;
 
   talentsAndTraits: TalentsAndTraitsBlock;
-  gear: string[]; // simple list of lines
+  gear: string[];
 
   weaponTraining: WeaponTrainingBlock;
   experience: ExperienceBlock;
   psychic: PsychicBlock;
 
-  // Free-form area used in your current UI
   notes?: string;
 }

@@ -15,36 +15,36 @@ import {
 import type { Character } from "../types/Character";
 
 /**
- * Load a single character with full typing.
- * Returns undefined if the doc does not exist.
+ * Load a character.
  */
 export async function loadCharacter(
   campaignId: string,
   characterId: string
 ): Promise<Character | undefined> {
   const snap = await getDoc(characterDocRef(campaignId, characterId));
-  return snap.data();
+  const data = snap.data();
+
+  if (!data) return undefined;
+
+  return {
+    ...data,
+    id: snap.id,
+  };
 }
 
 /**
- * Save (overwrite) a full character document.
- *
- * Assumes:
- * - character.id is the Firestore document id
- * - character.campaignId matches the campaign path
+ * Save (overwrite) a character.
+ * Converter strips id automatically.
  */
 export async function saveCharacter(character: Character): Promise<void> {
-  if (!character.id) {
-    throw new Error("saveCharacter: Character must have an id");
-  }
+  if (!character.id) throw new Error("saveCharacter: missing id");
 
   const ref = characterDocRef(character.campaignId, character.id);
   await setDoc(ref, character);
 }
 
 /**
- * Patch update a character document with a partial object.
- * Only the fields in `partial` will be updated.
+ * Patch update.
  */
 export async function updateCharacter(
   campaignId: string,
@@ -56,9 +56,7 @@ export async function updateCharacter(
 }
 
 /**
- * Create a new character document from a payload that has no `id`.
- *
- * Returns the full Character object including the generated id.
+ * Create a new character.
  */
 export async function createCharacter(
   campaignId: string,
@@ -66,26 +64,17 @@ export async function createCharacter(
 ): Promise<Character> {
   const colRef = charactersCollectionRef(campaignId);
 
-  // Ensure campaignId inside the payload matches the path
-  const payload: Omit<Character, "id"> = {
-    ...data,
-    campaignId,
-  };
+  // Write the document
+  const docRef = await addDoc(colRef, data);
 
-  const docRef = await addDoc(colRef, payload);
+  // Fetch the typed version
   const snap = await getDoc(docRef);
-
   const stored = snap.data();
-  if (!stored) {
-    // This should not happen, but keeps typing sane
-    return {
-      id: docRef.id,
-      ...(payload as Omit<Character, "id">),
-    };
-  }
+
+  if (!stored) throw new Error("Character creation failed");
 
   return {
+    ...stored,
     id: docRef.id,
-    ...(stored as Omit<Character, "id">),
   };
 }

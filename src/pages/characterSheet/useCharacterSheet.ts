@@ -1,3 +1,5 @@
+// src/pages/characterSheet/useCharacterSheet.ts
+
 import { useEffect, useState } from "react";
 import type { User } from "firebase/auth";
 import {
@@ -12,10 +14,14 @@ import {
 } from "firebase/firestore";
 
 import { db } from "../../firebase";
-import type { CharField } from "../../utils/characterFactory";
 
 import type { Role, ClaimLogEntry } from "./types";
-import type { Character, Characteristics } from "../../types/Character";
+import type {
+  Character,
+  Characteristics,
+} from "../../types/Character";
+
+import type { CharField } from "../../utils/characterFactory";
 
 type Path = { campaignId: string; characterId: string } | null;
 
@@ -39,9 +45,9 @@ export function useCharacterSheet({
 
   const isDM = role === "dm";
 
-  //
-  // LOAD CHARACTER
-  //
+  //----------------------------------------------------------------------
+  // Load character in real time
+  //----------------------------------------------------------------------
   useEffect(() => {
     if (!campaignIdParam || !characterIdParam) {
       console.error("Missing campaignId or characterId in route.");
@@ -51,11 +57,20 @@ export function useCharacterSheet({
       return;
     }
 
-    const campaignId = campaignIdParam;
-    const characterId = characterIdParam;
-    setPath({ campaignId, characterId });
+    const pathObj = {
+      campaignId: campaignIdParam,
+      characterId: characterIdParam,
+    };
 
-    const ref = doc(db, "campaigns", campaignId, "characters", characterId);
+    setPath(pathObj);
+
+    const ref = doc(
+      db,
+      "campaigns",
+      pathObj.campaignId,
+      "characters",
+      pathObj.characterId
+    );
 
     const unsub = onSnapshot(ref, (snap) => {
       if (!snap.exists()) {
@@ -65,30 +80,33 @@ export function useCharacterSheet({
         return;
       }
 
-      const data = snap.data() as any;
+      const data = snap.data() as Character;
 
+      // Always trust Firestore snapshot.id, never stored data.id
       const merged: Character = {
-        id: snap.id,
         ...data,
+        id: snap.id,
       };
+
 
       setCharacter(merged);
 
+      // Permission logic
       if (isDM) {
         setAllowedToEdit(true);
       } else {
-        const ownsCharacter = merged.userId === user.uid;
-        const playerEditable = merged.isEditableByPlayer === true;
-        setAllowedToEdit(ownsCharacter && playerEditable);
+        const owns = merged.userId === user.uid;
+        const editable = merged.isEditableByPlayer === true;
+        setAllowedToEdit(owns && editable);
       }
     });
 
     return () => unsub();
   }, [campaignIdParam, characterIdParam, user.uid, isDM]);
 
-  //
-  // LOAD CLAIM LOG (DM ONLY)
-  //
+  //----------------------------------------------------------------------
+  // Load claim history (DM only)
+  //----------------------------------------------------------------------
   useEffect(() => {
     if (!path || !isDM) return;
 
@@ -125,9 +143,9 @@ export function useCharacterSheet({
     return () => unsub();
   }, [path, isDM]);
 
-  //
-  // GENERIC FIELD UPDATE
-  //
+  //----------------------------------------------------------------------
+  // Generic field update
+  //----------------------------------------------------------------------
   async function updateField(field: string, value: any) {
     if (!allowedToEdit || !path || !character) return;
 
@@ -147,9 +165,9 @@ export function useCharacterSheet({
     }
   }
 
-  //
-  // CHARACTERISTIC UPDATE
-  //
+  //----------------------------------------------------------------------
+  // Update CHARACTERISTICS correctly
+  //----------------------------------------------------------------------
   async function updateCharacteristic(
     statKey: keyof Characteristics,
     value: CharField
@@ -166,19 +184,17 @@ export function useCharacterSheet({
 
     try {
       await updateDoc(ref, {
-        [`characteristics.${String(statKey)}.base`]: value.base,
-        [`characteristics.${String(statKey)}.advances`]: value.advances,
+        [`characteristics.${statKey}.base`]: value.base,
+        [`characteristics.${statKey}.advances`]: value.advances,
       });
 
       setCharacter((prev) => {
         if (!prev) return prev;
-        const prevChars =
-          (prev.characteristics as Characteristics) ?? ({} as Characteristics);
 
         return {
           ...prev,
           characteristics: {
-            ...prevChars,
+            ...prev.characteristics,
             [statKey]: value,
           },
         };
@@ -188,31 +204,27 @@ export function useCharacterSheet({
     }
   }
 
-  //
-  // READ A CHARACTERISTIC
-  //
+  //----------------------------------------------------------------------
+  // Read a characteristic safely
+  //----------------------------------------------------------------------
   function getCharField(statKey: keyof Characteristics): CharField {
-    const chars = character?.characteristics as Characteristics | undefined;
-    const value = chars?.[statKey];
-
-    if (!value) {
-      return { base: 0, advances: 0 };
-    }
+    const chars = character?.characteristics;
+    const v = chars?.[statKey];
 
     return {
-      base: typeof value.base === "number" ? value.base : 0,
-      advances: typeof value.advances === "number" ? value.advances : 0,
+      base: typeof v?.base === "number" ? v.base : 0,
+      advances: typeof v?.advances === "number" ? v.advances : 0,
     };
   }
 
-  //
-  // PLAYER RELEASE
-  //
+  //----------------------------------------------------------------------
+  // PLAYER RELEASE CHARACTER
+  //----------------------------------------------------------------------
   async function releaseCharacter() {
     if (!character || !path) return;
+    const owns = character.userId === user.uid;
 
-    const isOwner = character.userId === user.uid;
-    if (!isOwner || isDM) return;
+    if (!owns || isDM) return;
 
     const ref = doc(
       db,
@@ -247,16 +259,14 @@ export function useCharacterSheet({
         newOwnerUid: null,
         timestamp: serverTimestamp(),
       });
-
-      alert("You have released this character.");
     } catch (err) {
       console.error("Release error:", err);
     }
   }
 
-  //
+  //----------------------------------------------------------------------
   // DM FORCE RELEASE
-  //
+  //----------------------------------------------------------------------
   async function dmForceRelease() {
     if (!character || !path || !isDM) return;
 
@@ -292,24 +302,19 @@ export function useCharacterSheet({
         newOwnerUid: null,
         timestamp: serverTimestamp(),
       });
-
-      alert("DM: Character ownership cleared.");
     } catch (err) {
       console.error("DM force release error:", err);
     }
   }
 
-  //
+  //----------------------------------------------------------------------
   // DM FORCE ASSIGN
-  //
+  //----------------------------------------------------------------------
   async function dmForceAssign(uid: string) {
     if (!character || !path || !isDM) return;
 
-    const cleaned = uid.trim();
-    if (!cleaned) {
-      alert("Enter a UID.");
-      return;
-    }
+    const clean = uid.trim();
+    if (!clean) return;
 
     const ref = doc(
       db,
@@ -332,7 +337,7 @@ export function useCharacterSheet({
 
     try {
       await updateDoc(ref, {
-        userId: cleaned,
+        userId: clean,
         isEditableByPlayer: true,
       });
 
@@ -340,19 +345,17 @@ export function useCharacterSheet({
         action: "force-assign",
         actorUid: user.uid,
         previousOwnerUid,
-        newOwnerUid: cleaned,
+        newOwnerUid: clean,
         timestamp: serverTimestamp(),
       });
-
-      alert("DM: Character assigned.");
     } catch (err) {
       console.error("DM assign error:", err);
     }
   }
 
-  //
-  // DM TOGGLE EDIT PERMISSION
-  //
+  //----------------------------------------------------------------------
+  // DM TOGGLE PLAYER EDIT PERMISSION
+  //----------------------------------------------------------------------
   async function dmToggleEdit() {
     if (!character || !path || !isDM) return;
 
@@ -368,13 +371,14 @@ export function useCharacterSheet({
       await updateDoc(ref, {
         isEditableByPlayer: !character.isEditableByPlayer,
       });
-
-      alert("DM: Edit permission toggled.");
     } catch (err) {
       console.error("DM toggle edit error:", err);
     }
   }
 
+  //----------------------------------------------------------------------
+  // RETURN API TO THE COMPONENT
+  //----------------------------------------------------------------------
   return {
     path,
     character,
