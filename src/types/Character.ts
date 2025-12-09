@@ -21,14 +21,31 @@ export interface Characteristics {
 /**
  * SKILLS
  */
+/**
+ * SKILLS
+ */
 export type SkillAdvanceLevel = "untrained" | "trained" | "+10" | "+20";
 
 export interface SkillEntry {
   id: string;
   name: string;
+
+  // What characteristic determines this skill
   characteristic: keyof Characteristics;
+
+  // Training level
   level: SkillAdvanceLevel;
+
+  // NEW — skill grouping category (General, Common Lore, Trade, etc.)
+  category: string;
+
+  // NEW — whether this is an Advanced Skill
+  advanced: boolean;
+
+  // Optional bonus modifier
   miscModifier?: number;
+
+  // User-entered notes
   notes?: string;
 }
 
