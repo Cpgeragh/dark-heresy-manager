@@ -2,115 +2,129 @@
 
 import { describe, it, expect } from "vitest";
 import { getTestEnv } from "../setup";
-import type {
-  RulesTestEnvironment,
-  RulesTestContext
-} from "@firebase/rules-unit-testing";
+import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
+import { dbAs, createCampaign, createCharacter } from "../helpers";
 
 describe("Firestore Rules: Character Rules", () => {
   const campaignId = "camp1";
 
-  // Create campaign helper
-  async function createCampaign(env: RulesTestEnvironment) {
-    await env.withSecurityRulesDisabled(async (ctx: RulesTestContext) => {
-      await ctx.firestore().collection("campaigns").doc(campaignId).set({
-        dmId: "dm-1",
-        name: "Test Campaign"
-      });
-    });
-  }
-
-  // Create character helper
-  async function createCharacter(
-    env: RulesTestEnvironment,
-    id: string,
-    data: Record<string, unknown>
-  ) {
-    await env.withSecurityRulesDisabled(async (ctx: RulesTestContext) => {
-      await ctx
-        .firestore()
-        .collection(`campaigns/${campaignId}/characters`)
-        .doc(id)
-        .set(data);
-    });
-  }
-
   it("any authenticated user may read characters", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    await createCampaign(env);
+    const env = await getTestEnv() as RulesTestEnvironment;
 
-    await createCharacter(env, "char1", {
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, "char1", {
       userId: "player-1",
-      isEditableByPlayer: true
+      isEditableByPlayer: true,
     });
 
-    const user = env.authenticatedContext("reader");
+    const readerDb = dbAs(env, "reader");
 
     await expect(
-      user
-        .firestore()
-        .collection(`campaigns/${campaignId}/characters`)
-        .doc("char1")
-        .get()
+      readerDb.collection(`campaigns/${campaignId}/characters`).doc("char1").get()
+    ).resolves.toBeDefined();
+  });
+
+  it("any authenticated user may list characters in a campaign", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, "char1", {
+      userId: "player-1",
+      isEditableByPlayer: true,
+    });
+    await createCharacter(env, campaignId, "char2", {
+      userId: "player-2",
+      isEditableByPlayer: false,
+    });
+
+    const readerDb = dbAs(env, "reader");
+
+    await expect(
+      readerDb.collection(`campaigns/${campaignId}/characters`).get()
     ).resolves.toBeDefined();
   });
 
   it("player may update their own character when editable", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    await createCampaign(env);
+    const env = await getTestEnv() as RulesTestEnvironment;
 
-    await createCharacter(env, "char1", {
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, "char1", {
       userId: "player-1",
       isEditableByPlayer: true,
-      name: "Original"
+      name: "Original",
+      recoveryCode: "RCODE",
     });
 
-    const player = env.authenticatedContext("player-1");
+    const playerDb = dbAs(env, "player-1");
 
     await expect(
-      player
-        .firestore()
+      playerDb
         .collection(`campaigns/${campaignId}/characters`)
         .doc("char1")
         .update({ name: "Updated" })
     ).resolves.toBeUndefined();
   });
 
-  it("player cannot update their character when NOT editable", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    await createCampaign(env);
+  it("player may update multiple normal editable fields at once", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
 
-    await createCharacter(env, "char1", {
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, "char1", {
       userId: "player-1",
-      isEditableByPlayer: false,
-      name: "Original"
+      isEditableByPlayer: true,
+      recoveryCode: "RCODE",
+      name: "Original",
+      career: "Adept",
     });
 
-    const player = env.authenticatedContext("player-1");
+    const playerDb = dbAs(env, "player-1");
 
     await expect(
-      player
-        .firestore()
+      playerDb
         .collection(`campaigns/${campaignId}/characters`)
         .doc("char1")
-        .update({ name: "Updated" })
+        .update({
+          name: "Updated",
+          career: "Guardsman",
+        })
+    ).resolves.toBeUndefined();
+  });
+
+  it("player cannot update their character when NOT editable", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, "char1", {
+      userId: "player-1",
+      isEditableByPlayer: false,
+      name: "Original",
+      recoveryCode: "RCODE",
+    });
+
+    const playerDb = dbAs(env, "player-1");
+
+    await expect(
+      playerDb
+        .collection(`campaigns/${campaignId}/characters`)
+        .doc("char1")
+        .update({ name: "NewName" })
     ).rejects.toThrow();
   });
 
-  it("player cannot update another user's character", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    await createCampaign(env);
+  it("player cannot update another user's character even if editable", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
 
-    await createCharacter(env, "char1", {
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, "char1", {
       userId: "player-1",
-      isEditableByPlayer: true
+      isEditableByPlayer: true,
+      recoveryCode: "RCODE",
     });
 
-    const p2 = env.authenticatedContext("player-2");
+    const otherPlayerDb = dbAs(env, "player-2");
 
     await expect(
-      p2
-        .firestore()
+      otherPlayerDb
         .collection(`campaigns/${campaignId}/characters`)
         .doc("char1")
         .update({ name: "Illegal update" })
@@ -118,22 +132,91 @@ describe("Firestore Rules: Character Rules", () => {
   });
 
   it("DM can update any character", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    await createCampaign(env);
+    const env = await getTestEnv() as RulesTestEnvironment;
 
-    await createCharacter(env, "char1", {
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, "char1", {
       userId: "player-1",
-      isEditableByPlayer: false
+      isEditableByPlayer: false,
     });
 
-    const dm = env.authenticatedContext("dm-1");
+    const dmDb = dbAs(env, "dm-1");
 
     await expect(
-      dm
-        .firestore()
+      dmDb
         .collection(`campaigns/${campaignId}/characters`)
         .doc("char1")
         .update({ name: "DM update" })
     ).resolves.toBeUndefined();
   });
+
+  it("DM can create a character in an existing campaign", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+
+    await createCampaign(env, campaignId, "dm-1");
+
+    const dmDb = dbAs(env, "dm-1");
+
+    await expect(
+      dmDb
+        .collection(`campaigns/${campaignId}/characters`)
+        .doc("dm-char")
+        .set({
+          userId: "player-1",
+          isEditableByPlayer: false,
+          recoveryCode: "RCODE",
+        })
+    ).resolves.toBeUndefined();
+  });
+
+  it("DM cannot create a character in a non-existent campaign", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+
+    const dmDb = dbAs(env, "dm-1");
+
+    await expect(
+      dmDb
+        .collection(`campaigns/nonexistent/characters`)
+        .doc("dm-char")
+        .set({
+          userId: "player-1",
+          isEditableByPlayer: false,
+          recoveryCode: "RCODE",
+        })
+    ).rejects.toThrow();
+  });
+
+  it("player cannot create a character directly", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+
+    await createCampaign(env, campaignId, "dm-1");
+
+    const db = dbAs(env, "player-1");
+
+    await expect(
+      db.collection(`campaigns/${campaignId}/characters`).doc("char-new").set({
+        userId: "player-1",
+      })
+    ).rejects.toThrow();
+  });
+
+  it("player cannot delete their character even if editable", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, "char1", {
+      userId: "player-1",
+      isEditableByPlayer: true,
+    });
+
+    const playerDb = dbAs(env, "player-1");
+
+    await expect(
+      playerDb
+        .collection(`campaigns/${campaignId}/characters`)
+        .doc("char1")
+        .delete()
+    ).rejects.toThrow();
+  });
+
 });

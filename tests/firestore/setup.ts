@@ -23,3 +23,5 @@ export async function getTestEnv() {
 
   return testEnv;
 }
+
+// NO global cleanup - it overwhelms the emulator

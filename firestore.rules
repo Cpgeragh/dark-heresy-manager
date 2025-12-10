@@ -3,91 +3,138 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // --------------------
+    // ============================
     // USERS
-    // --------------------
+    // ============================
     match /users/{userId} {
-      allow read, write: if request.auth != null &&
-                         request.auth.uid == userId;
+      allow read, create, update, delete:
+        if request.auth != null &&
+           request.auth.uid == userId;
     }
 
-    // --------------------
-    // RECOVERY INDEX
-    // --------------------
-    match /recoveryIndex/{code} {
-
-      // Any authenticated user may read (needed for claiming)
-      allow read: if request.auth != null;
-
-      // Utility: check if requester is the DM for the associated campaign.
-      function isDMForTarget() {
-        return request.auth != null &&
-          get(/databases/$(database)/documents/campaigns/$(request.resource.data.campaignId)).data.dmId
-            == request.auth.uid;
-      }
-
-      /**
-       * DM dashboard creates characters AND writes to recoveryIndex.
-       * So DM must be allowed to create/update/delete entries.
-       */
-      allow create, update, delete: if isDMForTarget();
-    }
-
-    // --------------------
+    // ============================
     // CAMPAIGNS
-    // --------------------
+    // ============================
     match /campaigns/{campaignId} {
 
-      allow read: if request.auth != null;
+      allow read, list: if request.auth != null;
 
-      allow create, update: if request.auth != null &&
-                            request.resource.data.dmId == request.auth.uid;
+      allow create:
+        if request.auth != null &&
+           request.resource.data.dmId == request.auth.uid;
 
-      // --------------------
+      allow update:
+        if request.auth != null &&
+           resource.data.dmId == request.auth.uid &&
+           (
+             !("dmId" in request.resource.data) ||
+             request.resource.data.dmId == resource.data.dmId
+           );
+
+      allow delete: if false;
+
+      // ============================
       // CHARACTERS
-      // --------------------
+      // ============================
       match /characters/{characterId} {
 
-        allow read: if request.auth != null;
+        allow read, list: if request.auth != null;
 
-        function isDM() {
+        function dmOwnsCampaign() {
           return request.auth != null &&
-            request.auth.uid ==
-              get(/databases/$(database)/documents/campaigns/$(campaignId)).data.dmId;
+                 get(/databases/$(database)/documents/campaigns/$(campaignId))
+                   .data.dmId == request.auth.uid;
         }
 
-        function isOwner() {
-          return request.auth != null &&
-                 resource.data.userId == request.auth.uid;
-        }
+        allow create: if dmOwnsCampaign();
 
-        // DM full control
-        allow create, update, delete: if isDM();
+        allow update:
+          if (
+            dmOwnsCampaign()   // DM can update anything
+          ) ||
+          (
+            request.auth != null &&
+            resource != null &&
+            resource.data != null &&
+            resource.data.userId == request.auth.uid &&
+            resource.data.isEditableByPlayer == true &&
+            
+            // --- SUPER Safe Field Checks - handle null request.resource.data ---
+            (
+              request.resource.data == null ||
+              !("userId" in request.resource.data) ||
+              request.resource.data.userId == resource.data.userId
+            ) &&
+            (
+              request.resource.data == null ||
+              !("isEditableByPlayer" in request.resource.data) ||
+              request.resource.data.isEditableByPlayer == resource.data.isEditableByPlayer
+            ) &&
+            (
+              request.resource.data == null ||
+              !("recoveryCode" in request.resource.data) ||
+              request.resource.data.recoveryCode == resource.data.recoveryCode
+            )
+          );
 
-        // Player updates ONLY if they own it AND editing is enabled
-        allow update: if isOwner() &&
-                       request.resource.data.isEditableByPlayer == true;
+        allow delete: if dmOwnsCampaign();
 
-        // --------------------
+        // ============================
         // CLAIM LOGS
-        // --------------------
+        // ============================
         match /claimLog/{logId} {
 
-          // DM may read all logs
-          allow read: if isDM();
+          function dmOwnsCampaign() {
+            return request.auth != null &&
+                   get(/databases/$(database)/documents/campaigns/$(campaignId))
+                     .data.dmId == request.auth.uid;
+          }
 
-          // DM can create any log entry
-          allow create: if isDM()
+          allow read, list: if dmOwnsCampaign();
+
+          allow create:
+            if (
+              dmOwnsCampaign() &&
+              ("action" in request.resource.data) &&
+              request.resource.data.action in [
+                "claim",
+                "release",
+                "force-assign",
+                "force-release"
+              ]
+            )
             ||
             (
               request.auth != null &&
+              ("actorUid" in request.resource.data) &&
               request.resource.data.actorUid == request.auth.uid &&
-              request.resource.data.action in ['claim', 'release']
+              request.resource.data.action in ["claim", "release"]
             );
 
-          allow update, delete: if false;
+          allow update: if false;
+          allow delete: if false;
         }
       }
+    }
+
+    // ============================
+    // recoveryIndex — top-level
+    // ============================
+    match /recoveryIndex/{code} {
+
+      allow read, list: if request.auth != null;
+
+      allow create, update:
+        if request.auth != null &&
+           ("campaignId" in request.resource.data) &&
+           get(/databases/$(database)/documents/campaigns/$(request.resource.data.campaignId))
+             .data.dmId == request.auth.uid &&
+           // Prevent overwriting another DM's entry on update
+           (request.method == "create" ||
+            get(/databases/$(database)/documents/campaigns/$(resource.data.campaignId))
+              .data.dmId == request.auth.uid);
+
+      allow delete: if false;
     }
   }
 }

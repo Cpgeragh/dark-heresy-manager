@@ -11,13 +11,15 @@ import {
   orderBy,
   updateDoc,
   addDoc,
-  serverTimestamp,
   getDoc,
 } from "firebase/firestore";
 
 import type { ClaimLog } from "../../types/ClaimLog";
 import type { Character, Characteristics } from "../../types/Character";
 import type { CharField } from "../../utils/characterFactory";
+
+// NEW: import log builder
+import { buildClaimLogPayload } from "../../utils/claimLog";
 
 type Path = { campaignId: string; characterId: string } | null;
 
@@ -226,17 +228,22 @@ export function useCharacterSheet({
       "claimLog"
     );
 
+    const previous = character.userId;
+
     await updateDoc(ref, {
       userId: null,
       isEditableByPlayer: false,
-      recoveryCode: character.recoveryCode,
     });
 
-    await addDoc(logsRef, {
-      action: "release",
-      actorUid: userId,
-      timestamp: serverTimestamp(),
-    });
+    await addDoc(
+      logsRef,
+      buildClaimLogPayload(
+        "release",
+        userId,
+        previous,
+        null
+      )
+    );
   }
 
   // ----------------------------------------------------------------------
@@ -262,20 +269,26 @@ export function useCharacterSheet({
       "claimLog"
     );
 
+    const previous = character.userId;
+
     await updateDoc(ref, {
       userId: null,
       isEditableByPlayer: false,
     });
 
-    await addDoc(logsRef, {
-      action: "release",
-      actorUid: userId,
-      timestamp: serverTimestamp(),
-    });
+    await addDoc(
+      logsRef,
+      buildClaimLogPayload(
+        "force-release",
+        userId!,
+        previous,
+        null
+      )
+    );
   }
 
   // ----------------------------------------------------------------------
-  // DM force assign (mapped to "claim")
+  // DM force assign
   // ----------------------------------------------------------------------
   async function dmForceAssign(uid: string) {
     if (!character || !path || !isDM) return;
@@ -300,16 +313,22 @@ export function useCharacterSheet({
       "claimLog"
     );
 
+    const previous = character.userId;
+
     await updateDoc(ref, {
       userId: clean,
       isEditableByPlayer: true,
     });
 
-    await addDoc(logsRef, {
-      action: "claim",
-      actorUid: userId,
-      timestamp: serverTimestamp(),
-    });
+    await addDoc(
+      logsRef,
+      buildClaimLogPayload(
+        "force-assign",
+        userId!,
+        previous,
+        clean
+      )
+    );
   }
 
   // ----------------------------------------------------------------------
