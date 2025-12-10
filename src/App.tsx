@@ -13,7 +13,7 @@ import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 
 import DMDashboard from "./pages/DMDashboard";
 import PlayerDashboard from "./pages/PlayerDashboard";
-import ClaimCharacter from "./pages/ClaimCharacter";
+import ClaimCharacterPage from "./pages/ClaimCharacter/ClaimCharacterPage";
 import SelectCampaign from "./pages/SelectCampaign";
 import CharacterSheet from "./pages/CharacterSheet";
 
@@ -284,7 +284,7 @@ export default function App() {
                 }
               />
 
-              <Route path="/claim" element={<ClaimCharacter />} />
+              <Route path="/claim" element={<ClaimCharacterPage />} />
 
               <Route
                 path="/select"
