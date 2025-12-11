@@ -29,6 +29,7 @@ export default function CharacterSheet() {
     claimLog,
     isDM,
     getCharField,
+    getCharTotal,
     updateCharacteristic,
     updateField,
     releaseCharacter,
@@ -129,14 +130,21 @@ export default function CharacterSheet() {
       {/* Content */}
       <div className="border border-slate-700 p-4 rounded-lg bg-slate-900/40">
 
+        {/* OVERVIEW */}
         {activeTab === "overview" && (
           <OverviewTab
             character={character}
+            editable={allowedToEdit}
             canPlayerRelease={canPlayerRelease}
             onPlayerRelease={releaseCharacter}
+            onUpdateHeader={(next) => updateField("header", next)}
+            onUpdateWounds={(next) => updateField("wounds", next)}
+            onUpdateFate={(next) => updateField("fate", next)}
+            getCharTotal={getCharTotal}
           />
         )}
 
+        {/* CHARACTERISTICS */}
         {activeTab === "stats" && (
           <CharacteristicsTab
             getCharField={getCharField}
@@ -145,15 +153,17 @@ export default function CharacterSheet() {
           />
         )}
 
+        {/* SKILLS */}
         {activeTab === "skills" && (
           <SkillsTab
             skills={character.skills}
             editable={allowedToEdit}
             onUpdate={(next) => updateField("skills", next)}
-            getCharField={getCharField}  // <-- REQUIRED FIX
+            getCharField={getCharField}
           />
         )}
 
+        {/* TALENTS */}
         {activeTab === "talents" && (
           <TalentsTab
             talents={character.talentsAndTraits}
@@ -164,6 +174,7 @@ export default function CharacterSheet() {
           />
         )}
 
+        {/* GEAR */}
         {activeTab === "gear" && (
           <GearTab
             gear={character.gear}
@@ -172,6 +183,7 @@ export default function CharacterSheet() {
           />
         )}
 
+        {/* EXPERIENCE */}
         {activeTab === "xp" && (
           <ExperienceTab
             experience={character.experience}
@@ -180,6 +192,7 @@ export default function CharacterSheet() {
           />
         )}
 
+        {/* NOTES */}
         {activeTab === "notes" && (
           <NotesTab
             notes={character.notes ?? ""}
@@ -188,6 +201,7 @@ export default function CharacterSheet() {
           />
         )}
 
+        {/* ADMIN */}
         {activeTab === "admin" && isDM && (
           <AdminTab
             character={character}

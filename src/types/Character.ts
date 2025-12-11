@@ -2,6 +2,7 @@
 
 import type { Timestamp } from "firebase/firestore";
 import type { CharField } from "../utils/characterFactory";
+import { SkillSource } from "./SkillSource";   // ← NEW
 
 /**
  * CHARACTERISTICS
@@ -21,9 +22,6 @@ export interface Characteristics {
 /**
  * SKILLS
  */
-/**
- * SKILLS
- */
 export type SkillAdvanceLevel = "untrained" | "trained" | "+10" | "+20";
 
 export interface SkillEntry {
@@ -36,11 +34,14 @@ export interface SkillEntry {
   // Training level
   level: SkillAdvanceLevel;
 
-  // NEW — skill grouping category (General, Common Lore, Trade, etc.)
+  // Skill category (General, Common Lore, Trade, etc.)
   category: string;
 
-  // NEW — whether this is an Advanced Skill
+  // Whether this is an Advanced Skill
   advanced: boolean;
+
+  // NEW — which book this skill originates from
+  source: SkillSource;
 
   // Optional bonus modifier
   miscModifier?: number;
@@ -205,8 +206,8 @@ export interface CharacterHeader {
  * Firestore stores everything except `id`.
  */
 export interface Character {
-  id: string;            // added by converter
-  campaignId: string;    // stored in Firestore (Option A)
+  id: string;           
+  campaignId: string;   
 
   userId: string | null;
   recoveryCode: string;

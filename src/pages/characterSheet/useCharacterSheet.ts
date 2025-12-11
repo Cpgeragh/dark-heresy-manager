@@ -18,7 +18,6 @@ import type { ClaimLog } from "../../types/ClaimLog";
 import type { Character, Characteristics } from "../../types/Character";
 import type { CharField } from "../../utils/characterFactory";
 
-// NEW: import log builder
 import { buildClaimLogPayload } from "../../utils/claimLog";
 
 type Path = { campaignId: string; characterId: string } | null;
@@ -41,9 +40,9 @@ export function useCharacterSheet({
   const user = auth.currentUser;
   const userId = user?.uid ?? null;
 
-  // ----------------------------------------------------------------------
-  // Load user role (dm / player)
-  // ----------------------------------------------------------------------
+  // -------------------------------------------------------------
+  // Load DM role
+  // -------------------------------------------------------------
   useEffect(() => {
     async function loadRole() {
       if (!userId) return;
@@ -60,9 +59,9 @@ export function useCharacterSheet({
     loadRole();
   }, [userId]);
 
-  // ----------------------------------------------------------------------
-  // Load character live
-  // ----------------------------------------------------------------------
+  // -------------------------------------------------------------
+  // Live character subscription
+  // -------------------------------------------------------------
   useEffect(() => {
     if (!campaignIdParam || !characterIdParam || !userId) {
       setPath(null);
@@ -108,9 +107,9 @@ export function useCharacterSheet({
     return () => unsub();
   }, [campaignIdParam, characterIdParam, userId, isDM]);
 
-  // ----------------------------------------------------------------------
-  // Load claim log (DM only)
-  // ----------------------------------------------------------------------
+  // -------------------------------------------------------------
+  // Claim log subscription
+  // -------------------------------------------------------------
   useEffect(() => {
     if (!path || !isDM) return;
 
@@ -137,9 +136,9 @@ export function useCharacterSheet({
     return () => unsub();
   }, [path, isDM]);
 
-  // ----------------------------------------------------------------------
-  // Update single field
-  // ----------------------------------------------------------------------
+  // -------------------------------------------------------------
+  // Update a field safely
+  // -------------------------------------------------------------
   async function updateField(field: string, value: any) {
     if (!allowedToEdit || !path || !character) return;
 
@@ -153,14 +152,12 @@ export function useCharacterSheet({
 
     await updateDoc(ref, { [field]: value });
 
-    setCharacter((prev) =>
-      prev ? { ...prev, [field]: value } : prev
-    );
+    setCharacter((prev) => (prev ? { ...prev, [field]: value } : prev));
   }
 
-  // ----------------------------------------------------------------------
+  // -------------------------------------------------------------
   // Update characteristic
-  // ----------------------------------------------------------------------
+  // -------------------------------------------------------------
   async function updateCharacteristic(
     statKey: keyof Characteristics,
     value: CharField
@@ -193,9 +190,9 @@ export function useCharacterSheet({
     );
   }
 
-  // ----------------------------------------------------------------------
-  // Safe read characteristic
-  // ----------------------------------------------------------------------
+  // -------------------------------------------------------------
+  // Compute characteristic total
+  // -------------------------------------------------------------
   function getCharField(statKey: keyof Characteristics): CharField {
     const v = character?.characteristics?.[statKey];
     return {
@@ -204,9 +201,14 @@ export function useCharacterSheet({
     };
   }
 
-  // ----------------------------------------------------------------------
+  function getCharTotal(statKey: keyof Characteristics): number {
+    const v = getCharField(statKey);
+    return v.base + v.advances;
+  }
+
+  // -------------------------------------------------------------
   // Player release
-  // ----------------------------------------------------------------------
+  // -------------------------------------------------------------
   async function releaseCharacter() {
     if (!character || !path || isDM) return;
     if (!userId || character.userId !== userId) return;
@@ -237,18 +239,13 @@ export function useCharacterSheet({
 
     await addDoc(
       logsRef,
-      buildClaimLogPayload(
-        "release",
-        userId,
-        previous,
-        null
-      )
+      buildClaimLogPayload("release", userId, previous, null)
     );
   }
 
-  // ----------------------------------------------------------------------
+  // -------------------------------------------------------------
   // DM force release
-  // ----------------------------------------------------------------------
+  // -------------------------------------------------------------
   async function dmForceRelease() {
     if (!character || !path || !isDM) return;
 
@@ -278,18 +275,13 @@ export function useCharacterSheet({
 
     await addDoc(
       logsRef,
-      buildClaimLogPayload(
-        "force-release",
-        userId!,
-        previous,
-        null
-      )
+      buildClaimLogPayload("force-release", userId!, previous, null)
     );
   }
 
-  // ----------------------------------------------------------------------
+  // -------------------------------------------------------------
   // DM force assign
-  // ----------------------------------------------------------------------
+  // -------------------------------------------------------------
   async function dmForceAssign(uid: string) {
     if (!character || !path || !isDM) return;
 
@@ -322,18 +314,13 @@ export function useCharacterSheet({
 
     await addDoc(
       logsRef,
-      buildClaimLogPayload(
-        "force-assign",
-        userId!,
-        previous,
-        clean
-      )
+      buildClaimLogPayload("force-assign", userId!, previous, clean)
     );
   }
 
-  // ----------------------------------------------------------------------
-  // DM toggle edit flag
-  // ----------------------------------------------------------------------
+  // -------------------------------------------------------------
+  // DM toggle player edit
+  // -------------------------------------------------------------
   async function dmToggleEdit() {
     if (!character || !path || !isDM) return;
 
@@ -357,6 +344,7 @@ export function useCharacterSheet({
     claimLog,
     isDM,
     getCharField,
+    getCharTotal,
     updateCharacteristic,
     updateField,
     releaseCharacter,

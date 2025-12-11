@@ -25,7 +25,6 @@ const GROUP_ORDER: (keyof Characteristics)[] = [
   "fel",
 ];
 
-// Human-readable characteristic labels
 const CHAR_LABEL: Record<keyof Characteristics, string> = {
   ws: "WS",
   bs: "BS",
@@ -75,21 +74,40 @@ export function SkillsTab({
   const [sortMode, setSortMode] = useState<SortMode>("category");
   const [showOnlyTrained, setShowOnlyTrained] = useState(false);
   const [compact, setCompact] = useState(false);
-  const [collapsedCategory, setCollapsedCategory] = useState<
-    Record<string, boolean>
-  >({});
-  const [collapsedChar, setCollapsedChar] = useState<
-    Partial<Record<keyof Characteristics, boolean>>
-  >({});
 
-  // Compute total per skill
+  const [collapsedCategory, setCollapsedCategory] = useState<Record<string, boolean>>({});
+  const [collapsedChar, setCollapsedChar] =
+    useState<Partial<Record<keyof Characteristics, boolean>>>({});
+
+  // Expand/Collapse All (Category mode)
+  function expandAllCategories() {
+    const next: Record<string, boolean> = {};
+    ALL_CATEGORIES.forEach((c) => (next[c] = false));
+    setCollapsedCategory(next);
+  }
+  function collapseAllCategories() {
+    const next: Record<string, boolean> = {};
+    ALL_CATEGORIES.forEach((c) => (next[c] = true));
+    setCollapsedCategory(next);
+  }
+
+  // Expand/Collapse All (Characteristic mode)
+  function expandAllCharacteristics() {
+    const next: Partial<Record<keyof Characteristics, boolean>> = {};
+    GROUP_ORDER.forEach((c) => (next[c] = false));
+    setCollapsedChar(next);
+  }
+  function collapseAllCharacteristics() {
+    const next: Partial<Record<keyof Characteristics, boolean>> = {};
+    GROUP_ORDER.forEach((c) => (next[c] = true));
+    setCollapsedChar(next);
+  }
+
   function computeTotal(skill: SkillEntry): number | null {
     const charField = getCharField(skill.characteristic);
     const charTotal = charField.base + charField.advances;
-
     const misc = skill.miscModifier ?? 0;
 
-    // Level modifier
     const levelMod =
       skill.level === "trained"
         ? 0
@@ -117,7 +135,6 @@ export function SkillsTab({
     [skills]
   );
 
-  // Build set of categories dynamically from data
   const ALL_CATEGORIES = useMemo(() => {
     const set = new Set<string>();
     computedSkills.forEach((s) => set.add(s.category ?? "Other"));
@@ -141,7 +158,6 @@ export function SkillsTab({
     onUpdate(next);
   }
 
-  // Filtering + sorting pipeline
   const filteredAndSorted = useMemo(() => {
     const q = search.trim().toLowerCase();
 
@@ -157,7 +173,7 @@ export function SkillsTab({
       arr = [...arr].sort((a, b) => {
         const at = a.total ?? -999;
         const bt = b.total ?? -999;
-        return bt - at; // highest first
+        return bt - at;
       });
     } else if (sortMode === "characteristic") {
       arr = [...arr].sort((a, b) => {
@@ -186,23 +202,26 @@ export function SkillsTab({
         key={skill.id}
         className="border border-slate-700 bg-slate-900/40 rounded px-3 py-2 space-y-1"
       >
-        {/* Header row: name + stat badge + category + advanced/basic */}
         <div className="flex flex-wrap items-center gap-2">
           <div className="font-semibold text-slate-200">{skill.name}</div>
 
-          {/* Stat icon */}
           <span className="px-1.5 py-0.5 rounded border border-slate-600 text-[10px] font-mono text-slate-200 bg-slate-800">
             {CHAR_LABEL[skill.characteristic]}
           </span>
 
-          {/* Category pill */}
           {skill.category && (
             <span className="px-1.5 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-[10px] text-slate-300">
               {skill.category}
             </span>
           )}
 
-          {/* Advanced/basic badge */}
+          {/* SOURCE BADGE */}
+          {skill.source && (
+            <span className="px-1.5 py-0.5 rounded-full bg-slate-700 border border-slate-600 text-[10px] text-slate-200">
+              {skill.source}
+            </span>
+          )}
+
           <span
             className={`px-1.5 py-0.5 rounded text-[10px] ${
               skill.advanced
@@ -214,7 +233,6 @@ export function SkillsTab({
           </span>
         </div>
 
-        {/* Compact mode */}
         {compact ? (
           <div className="flex flex-wrap gap-3 text-xs text-slate-400 mt-1">
             <div>
@@ -235,7 +253,6 @@ export function SkillsTab({
           </div>
         ) : (
           <>
-            {/* Level buttons */}
             <div className="flex flex-wrap gap-2 mt-2 text-xs">
               {["untrained", "trained", "+10", "+20"].map((lvl) => (
                 <button
@@ -255,7 +272,6 @@ export function SkillsTab({
               ))}
             </div>
 
-            {/* Misc + totals */}
             <div className="flex flex-wrap gap-4 items-center text-xs text-slate-400 mt-2">
               <div className="flex items-center gap-1">
                 <span>Misc:</span>
@@ -285,7 +301,6 @@ export function SkillsTab({
               </div>
             </div>
 
-            {/* Notes */}
             <div className="mt-2">
               <textarea
                 placeholder="Notes (optional)…"
@@ -301,19 +316,32 @@ export function SkillsTab({
     );
   }
 
-  // CATEGORY GROUP MODE ===================================================
+  // CATEGORY GROUP MODE
   const renderCategoryGroups = () => (
     <div className="space-y-5">
+      <div className="flex gap-3 mb-2 text-xs">
+        <button
+          onClick={expandAllCategories}
+          className="px-3 py-1 rounded border border-slate-600 bg-slate-800 text-slate-200"
+        >
+          Expand all
+        </button>
+        <button
+          onClick={collapseAllCategories}
+          className="px-3 py-1 rounded border border-slate-600 bg-slate-800 text-slate-200"
+        >
+          Collapse all
+        </button>
+      </div>
+
       {ALL_CATEGORIES.map((cat) => {
         const groupSkills = filteredAndSorted.filter(
           (s) => (s.category ?? "Other") === cat
         );
-
         if (groupSkills.length === 0) return null;
 
         const trainedCount = groupSkills.filter(
-          (s) =>
-            s.level === "trained" || s.level === "+10" || s.level === "+20"
+          (s) => s.level !== "untrained"
         ).length;
 
         return (
@@ -354,9 +382,24 @@ export function SkillsTab({
     </div>
   );
 
-  // CHARACTERISTIC GROUP MODE (legacy mode)
+  // CHARACTERISTIC GROUP MODE
   const renderCharacteristicGroups = () => (
     <div className="space-y-5">
+      <div className="flex gap-3 mb-2 text-xs">
+        <button
+          onClick={expandAllCharacteristics}
+          className="px-3 py-1 rounded border border-slate-600 bg-slate-800 text-slate-200"
+        >
+          Expand all
+        </button>
+        <button
+          onClick={collapseAllCharacteristics}
+          className="px-3 py-1 rounded border border-slate-600 bg-slate-800 text-slate-200"
+        >
+          Collapse all
+        </button>
+      </div>
+
       {GROUP_ORDER.map((charKey) => {
         const groupSkills = filteredAndSorted.filter(
           (s) => s.characteristic === charKey
@@ -368,8 +411,7 @@ export function SkillsTab({
         const charTotal = charField.base + charField.advances;
 
         const trainedCount = groupSkills.filter(
-          (s) =>
-            s.level === "trained" || s.level === "+10" || s.level === "+20"
+          (s) => s.level !== "untrained"
         ).length;
 
         return (
@@ -463,7 +505,6 @@ export function SkillsTab({
         </button>
       </div>
 
-      {/* BODY OUTPUT */}
       {sortMode === "category"
         ? renderCategoryGroups()
         : sortMode === "characteristic"
