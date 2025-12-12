@@ -1,11 +1,10 @@
-// src/pages/characterSheet/types.ts
-
-/** Tab identifiers for CharacterSheet */
 export type TabId =
   | "overview"
   | "stats"
   | "skills"
   | "talents"
+  | "weapons"
+  | "armour"
   | "gear"
   | "xp"
   | "notes"

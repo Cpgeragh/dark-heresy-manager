@@ -16,6 +16,9 @@ import { TalentsTab } from "./characterSheet/TalentsTab";
 import { GearTab } from "./characterSheet/GearTab";
 import { ExperienceTab } from "./characterSheet/ExperienceTab";
 
+import { WeaponsTab } from "./characterSheet/WeaponsTab";
+import { ArmourTab } from "./characterSheet/ArmourTab";
+
 import type { TabId } from "./characterSheet/types";
 import { TabButton } from "../components/TabButton";
 
@@ -74,7 +77,7 @@ export default function CharacterSheet() {
         <code>{character.id}</code>
       </p>
 
-      {/* Tabs */}
+      {/* TABS */}
       <div className="flex flex-wrap gap-2 mb-6">
         <TabButton
           label="Overview"
@@ -98,6 +101,18 @@ export default function CharacterSheet() {
           label="Talents"
           active={activeTab === "talents"}
           onClick={() => setActiveTab("talents")}
+        />
+
+        <TabButton
+          label="Weapons"
+          active={activeTab === "weapons"}
+          onClick={() => setActiveTab("weapons")}
+        />
+
+        <TabButton
+          label="Armour"
+          active={activeTab === "armour"}
+          onClick={() => setActiveTab("armour")}
         />
 
         <TabButton
@@ -127,9 +142,8 @@ export default function CharacterSheet() {
         )}
       </div>
 
-      {/* Content */}
+      {/* CONTENT */}
       <div className="border border-slate-700 p-4 rounded-lg bg-slate-900/40">
-
         {/* OVERVIEW */}
         {activeTab === "overview" && (
           <OverviewTab
@@ -169,8 +183,36 @@ export default function CharacterSheet() {
             talents={character.talentsAndTraits}
             weaponTraining={character.weaponTraining}
             editable={allowedToEdit}
-            onUpdateTalents={(next) => updateField("talentsAndTraits", next)}
-            onUpdateTraining={(next) => updateField("weaponTraining", next)}
+            onUpdateTalents={(next) =>
+              updateField("talentsAndTraits", next)
+            }
+            onUpdateTraining={(next) =>
+              updateField("weaponTraining", next)
+            }
+          />
+        )}
+
+        {/* WEAPONS */}
+        {activeTab === "weapons" && (
+          <WeaponsTab
+            rangedWeapons={character.rangedWeapons}
+            meleeWeapons={character.meleeWeapons}
+            editable={allowedToEdit}
+            onUpdateRanged={(next) =>
+              updateField("rangedWeapons", next)
+            }
+            onUpdateMelee={(next) =>
+              updateField("meleeWeapons", next)
+            }
+          />
+        )}
+
+        {/* ARMOUR */}
+        {activeTab === "armour" && (
+          <ArmourTab
+            armour={character.armour}
+            editable={allowedToEdit}
+            onUpdate={(next) => updateField("armour", next)}
           />
         )}
 
