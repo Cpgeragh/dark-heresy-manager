@@ -1,5 +1,3 @@
-// src/pages/characterSheet/OverviewTab.tsx
-
 import { useState } from "react";
 import { Tooltip } from "../../components/Tooltip";
 import type {
@@ -17,8 +15,6 @@ interface OverviewTabProps {
   onUpdateHeader: (next: CharacterHeader) => void;
   onUpdateWounds: (next: WoundsBlock) => void;
   onUpdateFate: (next: FateBlock) => void;
-
-  // Auto-calculation
   getCharTotal: (statKey: keyof Character["characteristics"]) => number;
 }
 
@@ -34,13 +30,10 @@ export function OverviewTab({
 }: OverviewTabProps) {
   const [copied, setCopied] = useState(false);
 
-  const header = character.header;
-  const wounds = character.wounds;
-  const fate = character.fate;
-  const recoveryCode = character.recoveryCode ?? null;
+  const { header, wounds, fate, recoveryCode } = character;
 
   // ------------------------------
-  // Safe update helpers
+  // Update helpers
   // ------------------------------
   function updateHeaderField<K extends keyof CharacterHeader>(
     key: K,
@@ -49,17 +42,30 @@ export function OverviewTab({
     onUpdateHeader({ ...header, [key]: value });
   }
 
-  function updateWoundsField<K extends keyof WoundsBlock>(
-    key: K,
-    value: number
-  ) {
-    onUpdateWounds({ ...wounds, [key]: value });
+  function adjustWounds(delta: number) {
+    const next = wounds.current + delta;
+    onUpdateWounds({ ...wounds, current: next });
   }
 
-  function updateFateField<K extends keyof FateBlock>(key: K, value: number) {
-    onUpdateFate({ ...fate, [key]: value });
+  function adjustFate(delta: number) {
+    const next = Math.max(0, fate.current + delta);
+    onUpdateFate({ ...fate, current: next });
   }
 
+  // ------------------------------
+  // Danger state helpers
+  // ------------------------------
+  function woundsDangerClass(value: number) {
+    return value <= 3 ? "text-red-400 font-semibold" : "";
+  }
+
+  function fateDangerClass(value: number) {
+    return value === 0 ? "text-red-400 font-semibold" : "";
+  }
+
+  // ------------------------------
+  // Clipboard
+  // ------------------------------
   async function copyCode() {
     if (!recoveryCode) return;
     await navigator.clipboard.writeText(recoveryCode);
@@ -67,34 +73,9 @@ export function OverviewTab({
     setTimeout(() => setCopied(false), 1200);
   }
 
-  // Input helper component
-  function NumInput({
-    label,
-    value,
-    onChange
-  }: {
-    label: string;
-    value: number;
-    onChange: (v: number) => void;
-  }) {
-    return (
-      <label className="text-xs text-slate-400 flex flex-col gap-1">
-        {label}
-        <input
-          type="number"
-          disabled={!editable}
-          value={value}
-          onChange={(e) => onChange(Number(e.target.value))}
-          className={`w-full px-2 py-1 rounded bg-slate-900 border border-slate-700 text-slate-100
-            ${!editable ? "opacity-50 cursor-not-allowed" : ""}`}
-        />
-      </label>
-    );
-  }
-
-  // ---------------------------------
-  // Movement auto-calculation
-  // ---------------------------------
+  // ------------------------------
+  // Movement (auto-calculated)
+  // ------------------------------
   const agiTotal = getCharTotal("ag");
   const AB = Math.floor(agiTotal / 10);
 
@@ -108,125 +89,141 @@ export function OverviewTab({
   return (
     <div className="space-y-8 text-slate-300">
 
-      {/* HEADER BLOCK */}
+      {/* HEADER */}
       <section className="space-y-3">
-        <div>
-          <label className="block text-xs text-slate-400 mb-1">
-            Character Name
-          </label>
+        <label className="block text-xs text-slate-400">
+          Character Name
           <input
             disabled={!editable}
-            className={`w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded text-slate-100`}
+            className="mt-1 w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded text-slate-100"
             value={header.characterName ?? ""}
-            onChange={(e) => updateHeaderField("characterName", e.target.value)}
+            onChange={(e) =>
+              updateHeaderField("characterName", e.target.value)
+            }
           />
-        </div>
-
-        {/* Header grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Player Name */}
-          <div>
-            <label className="block text-xs text-slate-400 mb-1">Player Name</label>
-            <input
-              disabled={!editable}
-              className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded text-slate-100"
-              value={header.playerName ?? ""}
-              onChange={(e) => updateHeaderField("playerName", e.target.value)}
-            />
-          </div>
-
-          {/* Career */}
-          <div>
-            <label className="block text-xs text-slate-400 mb-1">Career</label>
-            <input
-              disabled={!editable}
-              className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded text-slate-100"
-              value={header.career ?? ""}
-              onChange={(e) => updateHeaderField("career", e.target.value)}
-            />
-          </div>
-
-          {/* Rank */}
-          <div>
-            <label className="block text-xs text-slate-400 mb-1">Rank</label>
-            <input
-              disabled={!editable}
-              className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded text-slate-100"
-              value={header.rank ?? ""}
-              onChange={(e) => updateHeaderField("rank", e.target.value)}
-            />
-          </div>
-
-          {/* Homeworld */}
-          <div>
-            <label className="block text-xs text-slate-400 mb-1">Homeworld</label>
-            <input
-              disabled={!editable}
-              className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded text-slate-100"
-              value={header.homeWorld ?? ""}
-              onChange={(e) => updateHeaderField("homeWorld", e.target.value)}
-            />
-          </div>
-
-          {/* Divination */}
-          <div className="sm:col-span-2">
-            <label className="block text-xs text-slate-400 mb-1">Divination</label>
-            <input
-              disabled={!editable}
-              className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded text-slate-100"
-              value={header.divination ?? ""}
-              onChange={(e) => updateHeaderField("divination", e.target.value)}
-            />
-          </div>
-        </div>
-
-        {/* Description */}
-        <div>
-          <label className="block text-xs text-slate-400 mb-1">Description</label>
-          <textarea
-            disabled={!editable}
-            className="w-full min-h-[80px] px-3 py-2 bg-slate-900 border border-slate-700 rounded text-slate-100 resize-y"
-            value={header.description ?? ""}
-            onChange={(e) => updateHeaderField("description", e.target.value)}
-          />
-        </div>
+        </label>
       </section>
 
       {/* WOUNDS */}
-      <section>
-        <h2 className="text-lg font-semibold mb-2">Wounds</h2>
+      <section className="space-y-3">
+        <h2 className="text-lg font-semibold">Wounds</h2>
+
+        <div className="flex items-center gap-3 text-sm">
+          <span className="text-slate-400">
+            Total: <span className="text-slate-200">{wounds.total}</span>
+          </span>
+
+          <span className="text-slate-400 ml-4">Current:</span>
+
+          <button
+            disabled={!editable}
+            onClick={() => adjustWounds(-1)}
+            className="px-2 py-0.5 border border-slate-600 rounded text-xs disabled:opacity-40"
+          >
+            −
+          </button>
+
+          <span
+            className={`min-w-[2ch] text-center font-mono ${woundsDangerClass(
+              wounds.current
+            )}`}
+          >
+            {wounds.current}
+          </span>
+
+          <button
+            disabled={!editable}
+            onClick={() => adjustWounds(1)}
+            className="px-2 py-0.5 border border-slate-600 rounded text-xs disabled:opacity-40"
+          >
+            +
+          </button>
+        </div>
+
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <NumInput label="Total" value={wounds.total} onChange={(v) => updateWoundsField("total", v)} />
-          <NumInput label="Current" value={wounds.current} onChange={(v) => updateWoundsField("current", v)} />
-          <NumInput label="Critical" value={wounds.criticalDamage} onChange={(v) => updateWoundsField("criticalDamage", v)} />
-          <NumInput label="Fatigue" value={wounds.fatigue} onChange={(v) => updateWoundsField("fatigue", v)} />
+          <label className="text-xs text-slate-400">
+            Critical Damage
+            <input
+              type="number"
+              disabled={!editable}
+              className="mt-1 w-full px-2 py-1 bg-slate-900 border border-slate-700 rounded text-slate-100"
+              value={wounds.criticalDamage}
+              onChange={(e) =>
+                onUpdateWounds({
+                  ...wounds,
+                  criticalDamage: Number(e.target.value)
+                })
+              }
+            />
+          </label>
+
+          <label className="text-xs text-slate-400">
+            Fatigue
+            <input
+              type="number"
+              disabled={!editable}
+              className="mt-1 w-full px-2 py-1 bg-slate-900 border border-slate-700 rounded text-slate-100"
+              value={wounds.fatigue}
+              onChange={(e) =>
+                onUpdateWounds({
+                  ...wounds,
+                  fatigue: Number(e.target.value)
+                })
+              }
+            />
+          </label>
         </div>
       </section>
 
       {/* FATE */}
-      <section>
-        <h2 className="text-lg font-semibold mb-2">Fate Points</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <NumInput label="Total" value={fate.total} onChange={(v) => updateFateField("total", v)} />
-          <NumInput label="Current" value={fate.current} onChange={(v) => updateFateField("current", v)} />
+      <section className="space-y-3">
+        <h2 className="text-lg font-semibold">Fate Points</h2>
+
+        <div className="flex items-center gap-3 text-sm">
+          <span className="text-slate-400">
+            Total: <span className="text-slate-200">{fate.total}</span>
+          </span>
+
+          <span className="text-slate-400 ml-4">Current:</span>
+
+          <button
+            disabled={!editable}
+            onClick={() => adjustFate(-1)}
+            className="px-2 py-0.5 border border-slate-600 rounded text-xs disabled:opacity-40"
+          >
+            −
+          </button>
+
+          <span
+            className={`min-w-[2ch] text-center font-mono ${fateDangerClass(
+              fate.current
+            )}`}
+          >
+            {fate.current}
+          </span>
+
+          <button
+            disabled={!editable}
+            onClick={() => adjustFate(1)}
+            className="px-2 py-0.5 border border-slate-600 rounded text-xs disabled:opacity-40"
+          >
+            +
+          </button>
         </div>
       </section>
 
-      {/* MOVEMENT — AUTO CALCULATED */}
+      {/* MOVEMENT */}
       <section>
         <div className="flex items-center gap-2 mb-2">
           <h2 className="text-lg font-semibold">Movement</h2>
-
-          {/* Tooltip Icon */}
           <Tooltip
             content={
               <>
-                <div className="font-semibold mb-1">Movement is auto-calculated:</div>
-                <div>AB = Agility Total ÷ 10 (rounded down)</div>
-                <div>Half = AB</div>
-                <div>Full = AB × 2</div>
-                <div>Charge = AB × 3</div>
-                <div>Run = AB × 6</div>
+                <div>AB = Agility ÷ 10</div>
+                <div>Half: AB</div>
+                <div>Full: AB × 2</div>
+                <div>Charge: AB × 3</div>
+                <div>Run: AB × 6</div>
               </>
             }
           >
@@ -234,12 +231,11 @@ export function OverviewTab({
           </Tooltip>
         </div>
 
-        {/* Movement values */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-2">
-          <NumInput label="Half" value={move.half} onChange={() => {}} />
-          <NumInput label="Full" value={move.full} onChange={() => {}} />
-          <NumInput label="Charge" value={move.charge} onChange={() => {}} />
-          <NumInput label="Run" value={move.run} onChange={() => {}} />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+          <div>Half: {move.half}</div>
+          <div>Full: {move.full}</div>
+          <div>Charge: {move.charge}</div>
+          <div>Run: {move.run}</div>
         </div>
       </section>
 
@@ -263,16 +259,14 @@ export function OverviewTab({
         </section>
       )}
 
-      {/* RELEASE BUTTON */}
+      {/* RELEASE */}
       {canPlayerRelease && (
-        <section>
-          <button
-            onClick={onPlayerRelease}
-            className="px-3 py-2 bg-red-600 text-white rounded border border-red-700 hover:bg-red-500 text-sm"
-          >
-            Release Character
-          </button>
-        </section>
+        <button
+          onClick={onPlayerRelease}
+          className="px-3 py-2 bg-red-600 text-white rounded border border-red-700 hover:bg-red-500 text-sm"
+        >
+          Release Character
+        </button>
       )}
     </div>
   );
