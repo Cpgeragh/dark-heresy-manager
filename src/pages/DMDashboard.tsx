@@ -1,6 +1,7 @@
 // src/pages/DMDashboard.tsx
 
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   collection,
   doc,
@@ -19,22 +20,34 @@ interface Props {
   onActiveCampaignChange: (id: string | null) => void;
 }
 
+interface CharacterListItem {
+  id: string;
+  recoveryCode: string;
+  userId: string | null;
+  isEditableByPlayer: boolean;
+  header?: {
+    characterName?: string;
+  };
+}
+
 export default function DMDashboard({
   user,
   activeCampaignId,
   onActiveCampaignChange,
 }: Props) {
+  const navigate = useNavigate();
+
   const [campaigns, setCampaigns] = useState<
     { id: string; name: string; dmId: string }[]
   >([]);
   const [newCampaignName, setNewCampaignName] = useState("");
   const [characterName, setCharacterName] = useState("");
 
-  const [characters, setCharacters] = useState<
-    { id: string; name: string; recoveryCode: string; userId: string | null }[]
-  >([]);
+  const [characters, setCharacters] = useState<CharacterListItem[]>([]);
 
+  // ----------------------------------
   // Load campaigns owned by this DM
+  // ----------------------------------
   useEffect(() => {
     async function loadCampaigns() {
       const snap = await getDocs(collection(db, "campaigns"));
@@ -57,7 +70,9 @@ export default function DMDashboard({
     loadCampaigns();
   }, [user.uid]);
 
-  // Watch characters inside the active campaign
+  // ----------------------------------
+  // Watch characters in active campaign
+  // ----------------------------------
   useEffect(() => {
     if (!activeCampaignId) {
       setCharacters([]);
@@ -67,7 +82,7 @@ export default function DMDashboard({
     const ref = collection(db, "campaigns", activeCampaignId, "characters");
 
     const unsub = onSnapshot(ref, (snap) => {
-      const list: any[] = snap.docs.map((c) => ({
+      const list = snap.docs.map((c) => ({
         id: c.id,
         ...(c.data() as any),
       }));
@@ -77,7 +92,9 @@ export default function DMDashboard({
     return () => unsub();
   }, [activeCampaignId]);
 
-  // Create a campaign
+  // ----------------------------------
+  // Create campaign
+  // ----------------------------------
   async function createCampaign() {
     const name = newCampaignName.trim() || "Untitled campaign";
     const newRef = doc(collection(db, "campaigns"));
@@ -92,14 +109,18 @@ export default function DMDashboard({
     onActiveCampaignChange(newRef.id);
   }
 
-  // Generate recovery code
+  // ----------------------------------
+  // Recovery code helper
+  // ----------------------------------
   function generateRecoveryCode() {
     const seg = () =>
       Math.random().toString(36).substring(2, 6).toUpperCase();
     return `DH-${seg()}-${seg()}`;
   }
 
-  // Create Character (FULL OBJECT)
+  // ----------------------------------
+  // Create character
+  // ----------------------------------
   async function createCharacter() {
     if (!activeCampaignId) return alert("No campaign selected.");
 
@@ -120,12 +141,8 @@ export default function DMDashboard({
         collection(db, "campaigns", activeCampaignId, "characters")
       );
 
-      // Write the full character document
       await setDoc(ref, characterData);
 
-      // -----------------------------------------
-      // NEW: Write recovery index (instant lookup)
-      // -----------------------------------------
       await setDoc(doc(db, "recoveryIndex", recoveryCode), {
         campaignId: activeCampaignId,
         characterId: ref.id,
@@ -188,7 +205,7 @@ export default function DMDashboard({
         </div>
       </div>
 
-      {/* CREATE CHARACTER */}
+      {/* CREATE CHARACTER + LIST */}
       {activeCampaignId && (
         <div>
           <h2 className="text-2xl font-semibold mb-3">Create Character</h2>
@@ -209,8 +226,7 @@ export default function DMDashboard({
             </button>
           </div>
 
-          {/* Character List */}
-          <h3 className="text-xl mb-2">Characters in campaign:</h3>
+          <h3 className="text-xl mb-2">Characters in campaign</h3>
 
           {characters.length === 0 ? (
             <p className="text-slate-400">No characters yet.</p>
@@ -219,15 +235,33 @@ export default function DMDashboard({
               {characters.map((ch) => (
                 <li
                   key={ch.id}
-                  className="border border-slate-700 rounded px-4 py-2 bg-slate-900"
+                  className="flex items-center justify-between border border-slate-700 rounded px-4 py-3 bg-slate-900/60"
                 >
-                  <div className="font-semibold">{ch.name}</div>
-                  <div className="text-sm text-slate-400">
-                    Recovery Code: {ch.recoveryCode}
+                  <div>
+                    <div className="font-semibold">
+                      {ch.header?.characterName ?? "Unnamed Character"}
+                    </div>
+
+                    <div className="text-xs text-slate-400">
+                      Owner: {ch.userId ?? "Unclaimed"} · Editable:{" "}
+                      {ch.isEditableByPlayer ? "Yes" : "No"}
+                    </div>
+
+                    <div className="text-xs text-slate-500 font-mono">
+                      Recovery: {ch.recoveryCode}
+                    </div>
                   </div>
-                  <div className="text-sm text-slate-400">
-                    Claimed by: {ch.userId || "Unclaimed"}
-                  </div>
+
+                  <button
+                    onClick={() =>
+                      navigate(
+                        `/campaign/${activeCampaignId}/character/${ch.id}`
+                      )
+                    }
+                    className="px-3 py-1 text-xs rounded bg-blue-600 text-white hover:bg-blue-500"
+                  >
+                    View
+                  </button>
                 </li>
               ))}
             </ul>
