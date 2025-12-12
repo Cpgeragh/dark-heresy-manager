@@ -12,65 +12,102 @@ import { ClaimPreview } from "./ClaimPreview";
 import DMTools from "./DMTools";
 
 export default function ClaimCharacterPage() {
-    const [code, setCode] = useState("");
-    const navigate = useNavigate();
+  const [code, setCode] = useState("");
+  const [claiming, setClaiming] = useState(false);
+  const [claimError, setClaimError] = useState<string | null>(null);
 
-    const { loading, error, data, lookup } = useRecoveryLookup();
-    const { claimCharacter } = useClaimActions();
-    const { forceAssign, forceRelease } = useDmActions();
+  const navigate = useNavigate();
 
-    async function handleClaim() {
-        if (!data) return;
+  const { loading, error, data, lookup } = useRecoveryLookup();
+  const { claimCharacter } = useClaimActions();
+  const { forceAssign, forceRelease } = useDmActions();
 
-        await claimCharacter(data.campaignId, data.character);
+  async function handleClaim() {
+    if (!data || claiming) return;
 
-        // Redirect to the newly claimed character sheet
-        navigate(`/campaign/${data.campaignId}/character/${data.characterId}`);
+    // Ownership gate (final safety net)
+    if (data.ownership !== "unclaimed") {
+      setClaimError("This character cannot be claimed.");
+      return;
     }
 
-    return (
-        <div className="max-w-lg mx-auto space-y-6 text-slate-200">
-            <h1 className="text-3xl font-bold text-center mb-4">
-                Claim Character
-            </h1>
+    try {
+      setClaiming(true);
+      setClaimError(null);
 
-            {/* CLAIM FORM */}
-            <ClaimForm
-                code={code}
-                onCodeChange={setCode}
-                onSubmit={() => lookup(code)}
-                loading={loading}
-            />
+      await claimCharacter(data.campaignId, data.character);
 
-            {/* ERROR MESSAGE */}
-            {error && (
-                <p className="text-red-400 text-sm border border-red-600 bg-red-900/20 p-2 rounded">
-                    {error}
-                </p>
-            )}
+      // Redirect only after successful ownership write
+      navigate(
+        `/campaign/${data.campaignId}/character/${data.characterId}`
+      );
+    } catch (err: any) {
+      console.error(err);
+      setClaimError(
+        err?.message ??
+          "Failed to claim character. It may have been claimed already."
+      );
+    } finally {
+      setClaiming(false);
+    }
+  }
 
-            {/* CHARACTER PREVIEW */}
-            {data && (
-                <ClaimPreview
-                    character={data.character}
-                    campaign={data.campaign}
-                    ownership={data.ownership}
-                    onClaim={handleClaim}
-                />
-            )}
+  return (
+    <div className="max-w-lg mx-auto space-y-6 text-slate-200">
+      <h1 className="text-3xl font-bold text-center mb-4">
+        Claim Character
+      </h1>
 
-            {/* DM TOOLS - Only shown when data exists */}
-            {data && (
-                <DMTools
-                    recovery={data}
-                    onForceAssign={(uid) =>
-                        forceAssign(data.campaignId, data.character.id, uid)
-                    }
-                    onForceRelease={() =>
-                        forceRelease(data.campaignId, data.character.id)
-                    }
-                />
-            )}
-        </div>
-    );
+      {/* CLAIM FORM */}
+      <ClaimForm
+        code={code}
+        onCodeChange={setCode}
+        onSubmit={() => lookup(code)}
+        loading={loading}
+      />
+
+      {/* LOOKUP ERROR */}
+      {error && (
+        <p className="text-red-400 text-sm border border-red-600 bg-red-900/20 p-2 rounded">
+          {error}
+        </p>
+      )}
+
+      {/* CLAIM ERROR */}
+      {claimError && (
+        <p className="text-red-400 text-sm border border-red-600 bg-red-900/20 p-2 rounded">
+          {claimError}
+        </p>
+      )}
+
+      {/* PREVIEW */}
+      {data && (
+        <ClaimPreview
+          character={data.character}
+          campaign={data.campaign}
+          ownership={data.ownership}
+          onClaim={handleClaim}
+        />
+      )}
+
+      {/* DM TOOLS */}
+      {data && (
+        <DMTools
+          recovery={data}
+          onForceAssign={(uid) =>
+            forceAssign(data.campaignId, data.character.id, uid)
+          }
+          onForceRelease={() =>
+            forceRelease(data.campaignId, data.character.id)
+          }
+        />
+      )}
+
+      {claiming && (
+        <p className="text-xs text-slate-400 text-center">
+          Claiming character…
+        </p>
+      )}
+    </div>
+  );
 }
