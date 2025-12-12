@@ -1,6 +1,6 @@
 // src/pages/DMDashboard.tsx
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   collection,
@@ -91,6 +91,14 @@ export default function DMDashboard({
 
     return () => unsub();
   }, [activeCampaignId]);
+
+  // ----------------------------------
+  // Character order for PR-A5
+  // ----------------------------------
+  const characterOrder = useMemo(
+    () => characters.map((c) => c.id),
+    [characters]
+  );
 
   // ----------------------------------
   // Create campaign
@@ -255,7 +263,10 @@ export default function DMDashboard({
                   <button
                     onClick={() =>
                       navigate(
-                        `/campaign/${activeCampaignId}/character/${ch.id}`
+                        `/campaign/${activeCampaignId}/character/${ch.id}`,
+                        {
+                          state: { characterOrder },
+                        }
                       )
                     }
                     className="px-3 py-1 text-xs rounded bg-blue-600 text-white hover:bg-blue-500"

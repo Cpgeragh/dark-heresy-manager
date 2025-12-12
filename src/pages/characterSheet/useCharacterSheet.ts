@@ -1,5 +1,3 @@
-// src/pages/characterSheet/useCharacterSheet.ts
-
 import { useEffect, useState } from "react";
 import { auth, db } from "../../firebase";
 
@@ -37,6 +35,15 @@ export function useCharacterSheet({
   const [claimLog, setClaimLog] = useState<ClaimLog[]>([]);
   const [isDM, setIsDM] = useState(false);
 
+  // ----------------------------------
+  // DM read-only override (PR-A6+)
+  // ----------------------------------
+  const [dmReadOnly, setDmReadOnly] = useState(true);
+
+  function toggleDmReadOnly() {
+    setDmReadOnly((v) => !v);
+  }
+
   const user = auth.currentUser;
   const userId = user?.uid ?? null;
 
@@ -58,6 +65,15 @@ export function useCharacterSheet({
 
     loadRole();
   }, [userId]);
+
+  // -------------------------------------------------------------
+  // Auto-enable DM read-only when opening character (PR-A7)
+  // -------------------------------------------------------------
+  useEffect(() => {
+    if (isDM) {
+      setDmReadOnly(true);
+    }
+  }, [isDM, characterIdParam]);
 
   // -------------------------------------------------------------
   // Live character subscription
@@ -95,8 +111,11 @@ export function useCharacterSheet({
       const data = snap.data() as Character;
       setCharacter(data);
 
+      // ----------------------------------
+      // CENTRALIZED EDIT PERMISSION LOGIC
+      // ----------------------------------
       if (isDM) {
-        setAllowedToEdit(true);
+        setAllowedToEdit(!dmReadOnly);
       } else {
         setAllowedToEdit(
           data.userId === userId && data.isEditableByPlayer === true
@@ -105,10 +124,16 @@ export function useCharacterSheet({
     });
 
     return () => unsub();
-  }, [campaignIdParam, characterIdParam, userId, isDM]);
+  }, [
+    campaignIdParam,
+    characterIdParam,
+    userId,
+    isDM,
+    dmReadOnly,
+  ]);
 
   // -------------------------------------------------------------
-  // Claim log subscription
+  // Claim log subscription (DM only)
   // -------------------------------------------------------------
   useEffect(() => {
     if (!path || !isDM) return;
@@ -152,7 +177,9 @@ export function useCharacterSheet({
 
     await updateDoc(ref, { [field]: value });
 
-    setCharacter((prev) => (prev ? { ...prev, [field]: value } : prev));
+    setCharacter((prev) =>
+      prev ? { ...prev, [field]: value } : prev
+    );
   }
 
   // -------------------------------------------------------------
@@ -191,7 +218,7 @@ export function useCharacterSheet({
   }
 
   // -------------------------------------------------------------
-  // Compute characteristic total
+  // Characteristic helpers
   // -------------------------------------------------------------
   function getCharField(statKey: keyof Characteristics): CharField {
     const v = character?.characteristics?.[statKey];
@@ -343,6 +370,11 @@ export function useCharacterSheet({
     allowedToEdit,
     claimLog,
     isDM,
+
+    // DM override controls
+    dmReadOnly,
+    toggleDmReadOnly,
+
     getCharField,
     getCharTotal,
     updateCharacteristic,
