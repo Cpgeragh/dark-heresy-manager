@@ -18,6 +18,7 @@ import { ExperienceTab } from "./characterSheet/ExperienceTab";
 
 import { WeaponsTab } from "./characterSheet/WeaponsTab";
 import { ArmourTab } from "./characterSheet/ArmourTab";
+import { PsychicTab } from "./characterSheet/PsychicTab";
 
 import type { TabId } from "./characterSheet/types";
 import { TabButton } from "../components/TabButton";
@@ -113,6 +114,12 @@ export default function CharacterSheet() {
           label="Armour"
           active={activeTab === "armour"}
           onClick={() => setActiveTab("armour")}
+        />
+
+        <TabButton
+          label="Psychic"
+          active={activeTab === "psychic"}
+          onClick={() => setActiveTab("psychic")}
         />
 
         <TabButton
@@ -213,6 +220,15 @@ export default function CharacterSheet() {
             armour={character.armour}
             editable={allowedToEdit}
             onUpdate={(next) => updateField("armour", next)}
+          />
+        )}
+
+        {/* PSYCHIC */}
+        {activeTab === "psychic" && (
+          <PsychicTab
+            psychic={character.psychic}
+            editable={allowedToEdit}
+            onUpdate={(next) => updateField("psychic", next)}
           />
         )}
 
