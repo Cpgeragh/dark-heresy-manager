@@ -11,7 +11,7 @@ import { CharacteristicsTab } from "./characterSheet/CharacteristicsTab";
 import { NotesTab } from "./characterSheet/NotesTab";
 import { AdminTab } from "./characterSheet/AdminTab";
 
-import { SkillsTab } from "./characterSheet/SkillsTab";
+import { SkillsTab } from "./characterSheet/tabs/skills/SkillsTab";
 import { TalentsTab } from "./characterSheet/TalentsTab";
 import { GearTab } from "./characterSheet/GearTab";
 import { ExperienceTab } from "./characterSheet/ExperienceTab";
