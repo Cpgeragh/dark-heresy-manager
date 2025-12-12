@@ -2,17 +2,26 @@
 
 import { useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
-import { db } from "../../../firebase";
+import { auth, db } from "../../../firebase";
+
+export type OwnershipState =
+  | "unclaimed"
+  | "claimed-by-you"
+  | "claimed-by-other"
+  | "locked";
+
+export interface RecoveryLookupResult {
+  campaignId: string;
+  characterId: string;
+  character: any;
+  campaign: any;
+  ownership: OwnershipState;
+}
 
 export function useRecoveryLookup() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<{
-    campaignId: string;
-    characterId: string;
-    character: any;
-    campaign: any;
-  } | null>(null);
+  const [data, setData] = useState<RecoveryLookupResult | null>(null);
 
   async function lookup(code: string) {
     setError(null);
@@ -25,11 +34,13 @@ export function useRecoveryLookup() {
 
       if (!indexSnap.exists()) {
         setError("No character found with this recovery code.");
-        setLoading(false);
         return;
       }
 
-      const { campaignId, characterId } = indexSnap.data() as any;
+      const { campaignId, characterId } = indexSnap.data() as {
+        campaignId: string;
+        characterId: string;
+      };
 
       const campSnap = await getDoc(doc(db, "campaigns", campaignId));
       const charSnap = await getDoc(
@@ -37,18 +48,40 @@ export function useRecoveryLookup() {
       );
 
       if (!campSnap.exists() || !charSnap.exists()) {
-        setError("Recovery index points to missing data.");
-        setLoading(false);
+        setError("Recovery code points to missing data.");
         return;
+      }
+
+      const characterData = charSnap.data() as any;
+      const campaignData = campSnap.data() as any;
+
+      const currentUser = auth.currentUser;
+      const uid = currentUser?.uid ?? null;
+
+      // ---------------------------------------
+      // Ownership derivation (single source of truth)
+      // ---------------------------------------
+      let ownership: OwnershipState;
+
+      if (!characterData.userId) {
+        ownership = "unclaimed";
+      } else if (uid && characterData.userId === uid) {
+        ownership = "claimed-by-you";
+      } else if (characterData.isEditableByPlayer === false) {
+        ownership = "locked";
+      } else {
+        ownership = "claimed-by-other";
       }
 
       setData({
         campaignId,
         characterId,
-        character: { id: characterId, ...charSnap.data() },
-        campaign: campSnap.data(),
+        character: { id: characterId, ...characterData },
+        campaign: campaignData,
+        ownership,
       });
-    } catch (_) {
+    } catch (err) {
+      console.error(err);
       setError("Unexpected error during lookup.");
     } finally {
       setLoading(false);
