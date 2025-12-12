@@ -1,3 +1,5 @@
+// src/pages/characterSheet/OverviewTab.tsx
+
 import { useState } from "react";
 import { Tooltip } from "../../components/Tooltip";
 import type {
@@ -43,13 +45,14 @@ export function OverviewTab({
   }
 
   function adjustWounds(delta: number) {
-    const next = wounds.current + delta;
-    onUpdateWounds({ ...wounds, current: next });
+    onUpdateWounds({ ...wounds, current: wounds.current + delta });
   }
 
   function adjustFate(delta: number) {
-    const next = Math.max(0, fate.current + delta);
-    onUpdateFate({ ...fate, current: next });
+    onUpdateFate({
+      ...fate,
+      current: Math.max(0, fate.current + delta)
+    });
   }
 
   // ------------------------------
@@ -87,10 +90,9 @@ export function OverviewTab({
   };
 
   return (
-    <div className="space-y-8 text-slate-300">
-
+    <div className="space-y-6 text-slate-300">
       {/* HEADER */}
-      <section className="space-y-3">
+      <section>
         <label className="block text-xs text-slate-400">
           Character Name
           <input
@@ -105,15 +107,15 @@ export function OverviewTab({
       </section>
 
       {/* WOUNDS */}
-      <section className="space-y-3">
+      <section className="space-y-2">
         <h2 className="text-lg font-semibold">Wounds</h2>
 
-        <div className="flex items-center gap-3 text-sm">
+        <div className="flex items-center gap-2 text-sm">
           <span className="text-slate-400">
             Total: <span className="text-slate-200">{wounds.total}</span>
           </span>
 
-          <span className="text-slate-400 ml-4">Current:</span>
+          <span className="text-slate-400 ml-3">Current:</span>
 
           <button
             disabled={!editable}
@@ -140,7 +142,7 @@ export function OverviewTab({
           </button>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <label className="text-xs text-slate-400">
             Critical Damage
             <input
@@ -176,15 +178,15 @@ export function OverviewTab({
       </section>
 
       {/* FATE */}
-      <section className="space-y-3">
+      <section className="space-y-2">
         <h2 className="text-lg font-semibold">Fate Points</h2>
 
-        <div className="flex items-center gap-3 text-sm">
+        <div className="flex items-center gap-2 text-sm">
           <span className="text-slate-400">
             Total: <span className="text-slate-200">{fate.total}</span>
           </span>
 
-          <span className="text-slate-400 ml-4">Current:</span>
+          <span className="text-slate-400 ml-3">Current:</span>
 
           <button
             disabled={!editable}
@@ -213,8 +215,8 @@ export function OverviewTab({
       </section>
 
       {/* MOVEMENT */}
-      <section>
-        <div className="flex items-center gap-2 mb-2">
+      <section className="space-y-2">
+        <div className="flex items-center gap-2">
           <h2 className="text-lg font-semibold">Movement</h2>
           <Tooltip
             content={
@@ -231,7 +233,7 @@ export function OverviewTab({
           </Tooltip>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
           <div>Half: {move.half}</div>
           <div>Full: {move.full}</div>
           <div>Charge: {move.charge}</div>

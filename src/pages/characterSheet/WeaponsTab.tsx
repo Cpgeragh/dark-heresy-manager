@@ -1,4 +1,7 @@
-import type { RangedWeapon, MeleeWeapon } from "../../types/Character";
+import type {
+  RangedWeapon,
+  MeleeWeapon,
+} from "../../types/Character";
 
 interface WeaponsTabProps {
   rangedWeapons: RangedWeapon[];
@@ -45,174 +48,169 @@ export function WeaponsTab({
     ]);
   }
 
-  function deleteRanged(index: number) {
+  function removeRanged(index: number) {
     if (!editable) return;
     const next = [...rangedWeapons];
     next.splice(index, 1);
     onUpdateRanged(next);
   }
 
-  function deleteMelee(index: number) {
+  function removeMelee(index: number) {
     if (!editable) return;
     const next = [...meleeWeapons];
     next.splice(index, 1);
     onUpdateMelee(next);
   }
 
+  function Field({
+    label,
+    value,
+    onChange,
+  }: {
+    label: string;
+    value?: string;
+    onChange: (v: string) => void;
+  }) {
+    return (
+      <label className="flex flex-col gap-0.5 text-xs text-slate-400">
+        {label}
+        <input
+          disabled={!editable}
+          value={value ?? ""}
+          onChange={(e) => onChange(e.target.value)}
+          className="rounded border border-slate-700 bg-slate-900 px-2 py-1 text-slate-200"
+        />
+      </label>
+    );
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 text-slate-300">
       <h2 className="text-xl font-semibold">Weapons</h2>
 
+      {/* RANGED + MELEE GRID */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* RANGED WEAPONS */}
-        <section className="space-y-3">
-          <h3 className="text-lg font-semibold">Ranged Weapons</h3>
-
-          {rangedWeapons.length === 0 && (
-            <p className="text-sm text-slate-400">No ranged weapons.</p>
-          )}
-
-          <div className="space-y-2">
-            {rangedWeapons.map((w, idx) => (
-              <div
-                key={w.id}
-                className="border border-slate-700 rounded p-2 bg-slate-900/40 space-y-1"
+        {/* RANGED */}
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Ranged Weapons</h3>
+            {editable && (
+              <button
+                onClick={addRanged}
+                className="text-xs px-3 py-1 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700"
               >
-                <input
-                  disabled={!editable}
-                  placeholder="Weapon name"
-                  value={w.name}
-                  onChange={(e) =>
-                    updateRanged(idx, "name", e.target.value)
-                  }
-                  className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100 text-sm"
-                />
-
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <input
-                    disabled={!editable}
-                    placeholder="Damage"
-                    value={w.damage ?? ""}
-                    onChange={(e) =>
-                      updateRanged(idx, "damage", e.target.value)
-                    }
-                    className="bg-slate-800 border border-slate-700 rounded px-2 py-1"
-                  />
-                  <input
-                    disabled={!editable}
-                    placeholder="Range"
-                    value={w.range ?? ""}
-                    onChange={(e) =>
-                      updateRanged(idx, "range", e.target.value)
-                    }
-                    className="bg-slate-800 border border-slate-700 rounded px-2 py-1"
-                  />
-                  <input
-                    disabled={!editable}
-                    placeholder="Pen"
-                    value={w.pen ?? ""}
-                    onChange={(e) =>
-                      updateRanged(idx, "pen", e.target.value)
-                    }
-                    className="bg-slate-800 border border-slate-700 rounded px-2 py-1"
-                  />
-                  <input
-                    disabled={!editable}
-                    placeholder="RoF"
-                    value={w.rof ?? ""}
-                    onChange={(e) =>
-                      updateRanged(idx, "rof", e.target.value)
-                    }
-                    className="bg-slate-800 border border-slate-700 rounded px-2 py-1"
-                  />
-                </div>
-
-                {editable && (
-                  <button
-                    onClick={() => deleteRanged(idx)}
-                    className="text-xs text-red-400 hover:text-red-300"
-                  >
-                    Remove
-                  </button>
-                )}
-              </div>
-            ))}
+                + Add
+              </button>
+            )}
           </div>
 
-          {editable && (
-            <button
-              onClick={addRanged}
-              className="px-3 py-1 text-sm rounded bg-slate-800 border border-slate-600 hover:bg-slate-700"
-            >
-              + Add Ranged Weapon
-            </button>
+          {rangedWeapons.length === 0 ? (
+            <p className="text-sm text-slate-400">
+              No ranged weapons recorded.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {rangedWeapons.map((w, i) => (
+                <div
+                  key={w.id}
+                  className="rounded border border-slate-700 bg-slate-900/40 p-3 space-y-2"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <Field
+                      label="Weapon"
+                      value={w.name}
+                      onChange={(v) => updateRanged(i, "name", v)}
+                    />
+
+                    {editable && (
+                      <button
+                        onClick={() => removeRanged(i)}
+                        className="text-xs text-red-400 hover:text-red-300"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    <Field label="Class" value={w.class} onChange={(v) => updateRanged(i, "class", v)} />
+                    <Field label="Damage" value={w.damage} onChange={(v) => updateRanged(i, "damage", v)} />
+                    <Field label="Type" value={w.type} onChange={(v) => updateRanged(i, "type", v)} />
+                    <Field label="Pen" value={w.pen} onChange={(v) => updateRanged(i, "pen", v)} />
+                    <Field label="Range" value={w.range} onChange={(v) => updateRanged(i, "range", v)} />
+                    <Field label="RoF" value={w.rof} onChange={(v) => updateRanged(i, "rof", v)} />
+                    <Field label="Clip" value={w.clip} onChange={(v) => updateRanged(i, "clip", v)} />
+                    <Field label="Reload" value={w.rld} onChange={(v) => updateRanged(i, "rld", v)} />
+                  </div>
+
+                  <Field
+                    label="Special"
+                    value={w.specialRules}
+                    onChange={(v) => updateRanged(i, "specialRules", v)}
+                  />
+                </div>
+              ))}
+            </div>
           )}
         </section>
 
-        {/* MELEE WEAPONS */}
-        <section className="space-y-3">
-          <h3 className="text-lg font-semibold">Melee Weapons</h3>
-
-          {meleeWeapons.length === 0 && (
-            <p className="text-sm text-slate-400">No melee weapons.</p>
-          )}
-
-          <div className="space-y-2">
-            {meleeWeapons.map((w, idx) => (
-              <div
-                key={w.id}
-                className="border border-slate-700 rounded p-2 bg-slate-900/40 space-y-1"
+        {/* MELEE */}
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Melee Weapons</h3>
+            {editable && (
+              <button
+                onClick={addMelee}
+                className="text-xs px-3 py-1 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700"
               >
-                <input
-                  disabled={!editable}
-                  placeholder="Weapon name"
-                  value={w.name}
-                  onChange={(e) =>
-                    updateMelee(idx, "name", e.target.value)
-                  }
-                  className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100 text-sm"
-                />
-
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <input
-                    disabled={!editable}
-                    placeholder="Damage"
-                    value={w.damage ?? ""}
-                    onChange={(e) =>
-                      updateMelee(idx, "damage", e.target.value)
-                    }
-                    className="bg-slate-800 border border-slate-700 rounded px-2 py-1"
-                  />
-                  <input
-                    disabled={!editable}
-                    placeholder="Pen"
-                    value={w.pen ?? ""}
-                    onChange={(e) =>
-                      updateMelee(idx, "pen", e.target.value)
-                    }
-                    className="bg-slate-800 border border-slate-700 rounded px-2 py-1"
-                  />
-                </div>
-
-                {editable && (
-                  <button
-                    onClick={() => deleteMelee(idx)}
-                    className="text-xs text-red-400 hover:text-red-300"
-                  >
-                    Remove
-                  </button>
-                )}
-              </div>
-            ))}
+                + Add
+              </button>
+            )}
           </div>
 
-          {editable && (
-            <button
-              onClick={addMelee}
-              className="px-3 py-1 text-sm rounded bg-slate-800 border border-slate-600 hover:bg-slate-700"
-            >
-              + Add Melee Weapon
-            </button>
+          {meleeWeapons.length === 0 ? (
+            <p className="text-sm text-slate-400">
+              No melee weapons recorded.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {meleeWeapons.map((w, i) => (
+                <div
+                  key={w.id}
+                  className="rounded border border-slate-700 bg-slate-900/40 p-3 space-y-2"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <Field
+                      label="Weapon"
+                      value={w.name}
+                      onChange={(v) => updateMelee(i, "name", v)}
+                    />
+
+                    {editable && (
+                      <button
+                        onClick={() => removeMelee(i)}
+                        className="text-xs text-red-400 hover:text-red-300"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    <Field label="Class" value={w.class} onChange={(v) => updateMelee(i, "class", v)} />
+                    <Field label="Damage" value={w.damage} onChange={(v) => updateMelee(i, "damage", v)} />
+                    <Field label="Type" value={w.type} onChange={(v) => updateMelee(i, "type", v)} />
+                    <Field label="Pen" value={w.pen} onChange={(v) => updateMelee(i, "pen", v)} />
+                  </div>
+
+                  <Field
+                    label="Special"
+                    value={w.specialRules}
+                    onChange={(v) => updateMelee(i, "specialRules", v)}
+                  />
+                </div>
+              ))}
+            </div>
           )}
         </section>
       </div>

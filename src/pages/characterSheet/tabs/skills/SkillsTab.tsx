@@ -42,62 +42,59 @@ export function SkillsTab({
   >({});
 
   const [collapsedChar, setCollapsedChar] =
-  useState<Partial<Record<keyof Characteristics, boolean>>>(() =>
-    Object.fromEntries(
-      GROUP_ORDER.map((k) => [k, true])
-    )
-  );
+    useState<Partial<Record<keyof Characteristics, boolean>>>(() =>
+      Object.fromEntries(GROUP_ORDER.map((k) => [k, true]))
+    );
 
-  //
-  // COMPUTE SKILL TOTALS
-  //
+  // ------------------------------
+  // COMPUTE TOTALS
+  // ------------------------------
   const computedSkills: SkillWithComputed[] = useMemo(
     () =>
-      skills.map((s) => ({
-        ...s,
-        total: computeTotal(s, getCharField),
-        half:
-          computeTotal(s, getCharField) !== null
-            ? Math.floor(computeTotal(s, getCharField)! / 2)
-            : null,
-        full: computeTotal(s, getCharField),
-        opposed: computeTotal(s, getCharField),
-      })),
+      skills.map((s) => {
+        const total = computeTotal(s, getCharField);
+        return {
+          ...s,
+          total,
+          half: total !== null ? Math.floor(total / 2) : null,
+          full: total,
+          opposed: total,
+        };
+      }),
     [skills, getCharField]
   );
 
-  //
+  // ------------------------------
   // CATEGORY LIST
-  //
+  // ------------------------------
   const ALL_CATEGORIES = useMemo(() => {
     const set = new Set<string>();
     computedSkills.forEach((s) => set.add(s.category ?? "Other"));
     return Array.from(set).sort();
   }, [computedSkills]);
 
-  //
-  // UPDATE FUNCTIONS
-  //
+  // ------------------------------
+  // UPDATE HELPERS
+  // ------------------------------
   function updateLevel(id: string, level: SkillEntry["level"]) {
-    const next = skills.map((s) => (s.id === id ? { ...s, level } : s));
-    onUpdate(next);
+    onUpdate(skills.map((s) => (s.id === id ? { ...s, level } : s)));
   }
 
   function updateMisc(id: string, value: number) {
-    const next = skills.map((s) =>
-      s.id === id ? { ...s, miscModifier: value } : s
+    onUpdate(
+      skills.map((s) =>
+        s.id === id ? { ...s, miscModifier: value } : s
+      )
     );
-    onUpdate(next);
   }
 
   function updateNotes(id: string, notes: string) {
-    const next = skills.map((s) => (s.id === id ? { ...s, notes } : s));
-    onUpdate(next);
+    onUpdate(skills.map((s) => (s.id === id ? { ...s, notes } : s)));
   }
 
-  //
+  // ------------------------------
   // FILTER + SORT
-  //
+  // ------------------------------
   const filteredAndSorted = useMemo(() => {
     const q = search.trim().toLowerCase();
 
@@ -132,37 +129,39 @@ export function SkillsTab({
     return arr;
   }, [computedSkills, search, showOnlyTrained, sortMode]);
 
-  //
-  // EXPAND / COLLAPSE ALL
-  //
+  // ------------------------------
+  // EXPAND / COLLAPSE HELPERS
+  // ------------------------------
   function expandAllCategories() {
-    const next: Record<string, boolean> = {};
-    ALL_CATEGORIES.forEach((c) => (next[c] = false));
-    setCollapsedCategory(next);
+    setCollapsedCategory(
+      Object.fromEntries(ALL_CATEGORIES.map((c) => [c, false]))
+    );
   }
+
   function collapseAllCategories() {
-    const next: Record<string, boolean> = {};
-    ALL_CATEGORIES.forEach((c) => (next[c] = true));
-    setCollapsedCategory(next);
+    setCollapsedCategory(
+      Object.fromEntries(ALL_CATEGORIES.map((c) => [c, true]))
+    );
   }
 
   function expandAllCharacteristics() {
-    const next: Partial<Record<keyof Characteristics, boolean>> = {};
-    GROUP_ORDER.forEach((c) => (next[c] = false));
-    setCollapsedChar(next);
-  }
-  function collapseAllCharacteristics() {
-    const next: Partial<Record<keyof Characteristics, boolean>> = {};
-    GROUP_ORDER.forEach((c) => (next[c] = true));
-    setCollapsedChar(next);
+    setCollapsedChar(
+      Object.fromEntries(GROUP_ORDER.map((c) => [c, false]))
+    );
   }
 
-  //
+  function collapseAllCharacteristics() {
+    setCollapsedChar(
+      Object.fromEntries(GROUP_ORDER.map((c) => [c, true]))
+    );
+  }
+
+  // ------------------------------
   // RENDER
-  //
+  // ------------------------------
   return (
-    <div>
-      <h2 className="text-xl font-semibold mb-4">Skills</h2>
+    <div className="space-y-6 text-slate-300">
+      <h2 className="text-xl font-semibold">Skills</h2>
 
       <SkillsControlBar
         search={search}
@@ -177,29 +176,27 @@ export function SkillsTab({
 
       {sortMode === "category" ? (
         <>
-          <div className="flex gap-3 mb-3 text-xs">
+          <div className="flex gap-2 text-xs">
             <button
               onClick={expandAllCategories}
-              className="px-3 py-1 rounded border border-slate-600 bg-slate-800 text-slate-200"
+              className="px-3 py-1 rounded border border-slate-600 bg-slate-800"
             >
               Expand all
             </button>
-
             <button
               onClick={collapseAllCategories}
-              className="px-3 py-1 rounded border border-slate-600 bg-slate-800 text-slate-200"
+              className="px-3 py-1 rounded border border-slate-600 bg-slate-800"
             >
               Collapse all
             </button>
           </div>
 
-          <div className="space-y-5">
+          <div className="space-y-4">
             {ALL_CATEGORIES.map((cat) => {
               const groupSkills = filteredAndSorted.filter(
                 (s) => (s.category ?? "Other") === cat
               );
-
-              if (groupSkills.length === 0) return null;
+              if (!groupSkills.length) return null;
 
               return (
                 <CategoryGroup
@@ -222,29 +219,27 @@ export function SkillsTab({
         </>
       ) : sortMode === "characteristic" ? (
         <>
-          <div className="flex gap-3 mb-3 text-xs">
+          <div className="flex gap-2 text-xs">
             <button
               onClick={expandAllCharacteristics}
-              className="px-3 py-1 rounded border border-slate-600 bg-slate-800 text-slate-200"
+              className="px-3 py-1 rounded border border-slate-600 bg-slate-800"
             >
               Expand all
             </button>
-
             <button
               onClick={collapseAllCharacteristics}
-              className="px-3 py-1 rounded border border-slate-600 bg-slate-800 text-slate-200"
+              className="px-3 py-1 rounded border border-slate-600 bg-slate-800"
             >
               Collapse all
             </button>
           </div>
 
-          <div className="space-y-5">
+          <div className="space-y-4">
             {GROUP_ORDER.map((charKey) => {
               const groupSkills = filteredAndSorted.filter(
                 (s) => s.characteristic === charKey
               );
-
-              if (groupSkills.length === 0) return null;
+              if (!groupSkills.length) return null;
 
               const charField = getCharField(charKey);
               const charTotal = charField.base + charField.advances;

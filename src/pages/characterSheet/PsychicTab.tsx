@@ -16,13 +16,11 @@ export function PsychicTab({
     id: string,
     next: Partial<PsychicPower>
   ) {
-    const updated = psychic[list].map((p) =>
-      p.id === id ? { ...p, ...next } : p
-    );
-
     onUpdate({
       ...psychic,
-      [list]: updated,
+      [list]: psychic[list].map((p) =>
+        p.id === id ? { ...p, ...next } : p
+      ),
     });
   }
 
@@ -63,12 +61,13 @@ export function PsychicTab({
   }) {
     return (
       <div
-        className={`rounded border p-3 space-y-2 ${
+        className={`rounded border px-3 py-2 space-y-2 ${
           subtle
             ? "border-slate-700 bg-slate-900/30"
-            : "border-indigo-600/40 bg-indigo-900/30"
+            : "border-indigo-600/40 bg-indigo-900/25"
         }`}
       >
+        {/* HEADER */}
         <div className="flex items-center gap-2">
           <input
             type="checkbox"
@@ -86,19 +85,20 @@ export function PsychicTab({
             onChange={(e) =>
               updatePower(list, power.id, { name: e.target.value })
             }
-            className="flex-1 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100 text-sm"
+            className="flex-1 rounded border border-slate-700 bg-slate-800 px-2 py-1 text-sm text-slate-100"
           />
 
           {editable && (
             <button
               onClick={() => deletePower(list, power.id)}
-              className="text-xs px-2 py-1 rounded bg-red-700 text-white hover:bg-red-600"
+              className="text-xs text-red-400 hover:text-red-300"
             >
               Delete
             </button>
           )}
         </div>
 
+        {/* MAJOR METADATA */}
         {!subtle && (
           <div className="grid grid-cols-2 gap-2 text-xs">
             <input
@@ -110,7 +110,7 @@ export function PsychicTab({
                   threshold: e.target.value,
                 })
               }
-              className="bg-slate-800 border border-slate-700 rounded px-2 py-1"
+              className="rounded border border-slate-700 bg-slate-800 px-2 py-1"
             />
 
             <input
@@ -122,7 +122,7 @@ export function PsychicTab({
                   focusTime: e.target.value,
                 })
               }
-              className="bg-slate-800 border border-slate-700 rounded px-2 py-1"
+              className="rounded border border-slate-700 bg-slate-800 px-2 py-1"
             />
 
             <input
@@ -132,7 +132,7 @@ export function PsychicTab({
               onChange={(e) =>
                 updatePower(list, power.id, { range: e.target.value })
               }
-              className="bg-slate-800 border border-slate-700 rounded px-2 py-1"
+              className="rounded border border-slate-700 bg-slate-800 px-2 py-1"
             />
 
             <input
@@ -144,11 +144,12 @@ export function PsychicTab({
                   sustained: e.target.value,
                 })
               }
-              className="bg-slate-800 border border-slate-700 rounded px-2 py-1"
+              className="rounded border border-slate-700 bg-slate-800 px-2 py-1"
             />
           </div>
         )}
 
+        {/* DESCRIPTION */}
         <textarea
           disabled={!editable}
           value={power.description ?? ""}
@@ -158,22 +159,20 @@ export function PsychicTab({
               description: e.target.value,
             })
           }
-          className="w-full min-h-[60px] bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs resize-y"
+          className="w-full min-h-[56px] resize-y rounded border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-200"
         />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-slate-300">
       <h2 className="text-xl font-semibold">Psychic Powers</h2>
 
       {/* HEADER */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-        <div>
-          <label className="block text-xs text-slate-400 mb-1">
-            Psy Rating
-          </label>
+        <label className="flex flex-col gap-1 text-xs text-slate-400">
+          Psy Rating
           <input
             type="number"
             disabled={!editable}
@@ -184,14 +183,12 @@ export function PsychicTab({
                 psyRating: Number(e.target.value),
               })
             }
-            className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1"
+            className="rounded border border-slate-700 bg-slate-800 px-2 py-1 text-slate-100"
           />
-        </div>
+        </label>
 
-        <div>
-          <label className="block text-xs text-slate-400 mb-1">
-            Discipline
-          </label>
+        <label className="flex flex-col gap-1 text-xs text-slate-400">
+          Discipline
           <input
             disabled={!editable}
             value={psychic.discipline ?? ""}
@@ -201,9 +198,9 @@ export function PsychicTab({
                 discipline: e.target.value,
               })
             }
-            className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1"
+            className="rounded border border-slate-700 bg-slate-800 px-2 py-1 text-slate-100"
           />
-        </div>
+        </label>
       </div>
 
       {/* POWERS */}
@@ -218,9 +215,9 @@ export function PsychicTab({
             {editable && (
               <button
                 onClick={() => addPower("minorPowers")}
-                className="text-xs px-3 py-1 rounded bg-slate-700 text-slate-100 hover:bg-slate-600"
+                className="text-xs rounded border border-slate-600 bg-slate-800 px-3 py-1 hover:bg-slate-700"
               >
-                + Add Minor
+                + Add
               </button>
             )}
           </div>
@@ -253,9 +250,9 @@ export function PsychicTab({
             {editable && (
               <button
                 onClick={() => addPower("majorPowers")}
-                className="text-xs px-3 py-1 rounded bg-indigo-700 text-white hover:bg-indigo-600"
+                className="text-xs rounded border border-indigo-500 bg-indigo-700 px-3 py-1 text-white hover:bg-indigo-600"
               >
-                + Add Major
+                + Add
               </button>
             )}
           </div>

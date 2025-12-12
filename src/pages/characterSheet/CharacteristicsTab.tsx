@@ -1,3 +1,5 @@
+// src/pages/characterSheet/CharacteristicsTab.tsx
+
 import type { CharField } from "../../utils/characterFactory";
 import type { Characteristics } from "../../types/Character";
 import CharacteristicField from "../../components/CharacteristicField";
@@ -16,13 +18,13 @@ export function CharacteristicsTab({
   editable,
   updateCharacteristic,
 }: CharacteristicsTabProps) {
-  // Helper: total of a char field (authoritative roll value)
+  // Helper: authoritative total
   function total(stat: keyof Characteristics) {
     const v = getCharField(stat);
     return v.base + v.advances;
   }
 
-  // Derived stat helpers (unchanged)
+  // Derived stat helpers
   const SB = Math.floor(total("s") / 10);
   const TB = Math.floor(total("t") / 10);
   const AgB = Math.floor(total("ag") / 10);
@@ -42,16 +44,16 @@ export function CharacteristicsTab({
     const statTotal = value.base + value.advances;
 
     return (
-      <div className="p-3 rounded border border-slate-700 bg-slate-900/40">
-        {/* Total (primary) */}
-        <div className="flex items-baseline justify-between mb-2">
+      <div className="p-3 rounded border border-slate-700 bg-slate-900/40 space-y-2">
+        {/* Header: label + total */}
+        <div className="flex items-baseline justify-between">
           <span className="text-sm text-slate-400">{label}</span>
-          <span className="text-2xl font-semibold text-slate-100 font-mono">
+          <span className="text-2xl font-semibold font-mono text-slate-100">
             {statTotal}
           </span>
         </div>
 
-        {/* Base / Advances (secondary) */}
+        {/* Base / Advances */}
         <CharacteristicField
           label=""
           value={value}
@@ -63,11 +65,11 @@ export function CharacteristicsTab({
   }
 
   return (
-    <div>
-      <h2 className="text-xl font-semibold mb-4">Characteristics</h2>
+    <div className="space-y-6 text-slate-300">
+      <h2 className="text-xl font-semibold">Characteristics</h2>
 
       {/* Main Stat Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <StatBlock label="Weapon Skill (WS)" statKey="ws" />
         <StatBlock label="Ballistic Skill (BS)" statKey="bs" />
         <StatBlock label="Strength (S)" statKey="s" />
@@ -79,11 +81,11 @@ export function CharacteristicsTab({
         <StatBlock label="Fellowship (Fel)" statKey="fel" />
       </div>
 
-      {/* Derived Stats Block */}
-      <div className="p-4 rounded-lg border border-slate-700 bg-slate-900/40">
-        <h3 className="text-lg font-semibold mb-3">Derived Stats</h3>
+      {/* Derived Stats */}
+      <section className="p-4 rounded border border-slate-700 bg-slate-900/40 space-y-3">
+        <h3 className="text-lg font-semibold">Derived Stats</h3>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-2 text-slate-300">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-2 text-sm">
           <div>Strength Bonus (SB): <strong>{SB}</strong></div>
           <div>Toughness Bonus (TB): <strong>{TB}</strong></div>
           <div>Agility Bonus (AgB): <strong>{AgB}</strong></div>
@@ -92,8 +94,8 @@ export function CharacteristicsTab({
           <div>Willpower Bonus (WPB): <strong>{WPB}</strong></div>
           <div>Fellowship Bonus (FB): <strong>{FB}</strong></div>
 
-          {/* Movement block */}
-          <div className="col-span-full mt-3 font-semibold text-slate-200">
+          {/* Movement */}
+          <div className="col-span-full mt-2 font-semibold text-slate-200">
             Movement
           </div>
           <div>Half Move: <strong>{AgB}</strong></div>
@@ -101,7 +103,7 @@ export function CharacteristicsTab({
           <div>Charge: <strong>{AgB * 3}</strong></div>
           <div>Run: <strong>{AgB * 6}</strong></div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

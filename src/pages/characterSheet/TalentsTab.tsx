@@ -47,12 +47,18 @@ export function TalentsTab({
 
   return (
     <div className="space-y-6 text-slate-300">
+      <h2 className="text-xl font-semibold">Talents & Training</h2>
+
       {/* HOMEWORLD / BACKGROUND */}
-      <div>
-        <h3 className="font-semibold mb-1">Homeworld / Background</h3>
+      <section className="space-y-2">
+        <h3 className="text-lg font-semibold text-slate-200">
+          Homeworld / Background
+        </h3>
+
         {editable ? (
           <textarea
-            className="w-full h-20 bg-slate-800 border border-slate-600 p-2 rounded"
+            className="w-full min-h-[80px] bg-slate-900 border border-slate-700
+                       rounded px-3 py-2 text-sm text-slate-100 resize-y"
             value={talents.homeworldBackground}
             onChange={(e) =>
               onUpdateTalents({
@@ -62,18 +68,22 @@ export function TalentsTab({
             }
           />
         ) : (
-          <p className="whitespace-pre-wrap">
+          <div className="rounded border border-slate-700 bg-slate-900/40 p-3 text-sm">
             {talents.homeworldBackground || "None"}
-          </p>
+          </div>
         )}
-      </div>
+      </section>
 
       {/* TALENTS / TRAITS */}
-      <div>
-        <h3 className="font-semibold mb-1">Talents / Traits / Advances</h3>
+      <section className="space-y-2">
+        <h3 className="text-lg font-semibold text-slate-200">
+          Talents, Traits & Advances
+        </h3>
+
         {editable ? (
           <textarea
-            className="w-full h-28 bg-slate-800 border border-slate-600 p-2 rounded"
+            className="w-full min-h-[120px] bg-slate-900 border border-slate-700
+                       rounded px-3 py-2 text-sm text-slate-100 resize-y"
             value={talents.advancesTalentsAndTraits}
             onChange={(e) =>
               onUpdateTalents({
@@ -83,28 +93,36 @@ export function TalentsTab({
             }
           />
         ) : (
-          <p className="whitespace-pre-wrap">
+          <div className="rounded border border-slate-700 bg-slate-900/40 p-3 text-sm whitespace-pre-wrap">
             {talents.advancesTalentsAndTraits || "None"}
-          </p>
+          </div>
         )}
-      </div>
+      </section>
 
       {/* WEAPON TRAINING */}
-      <div>
-        <h3 className="font-semibold mb-2">Weapon Training</h3>
+      <section className="space-y-4">
+        <h3 className="text-lg font-semibold text-slate-200">
+          Weapon Training
+        </h3>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2
+                        rounded border border-slate-700 bg-slate-900/30 p-3">
           {weaponList.map((id) => {
             const trained = weaponTraining.trained.includes(id);
+
             return (
-              <label key={id} className="flex items-center gap-2">
+              <label
+                key={id}
+                className={`flex items-center gap-2 text-sm cursor-pointer
+                  ${trained ? "text-slate-100" : "text-slate-500"}`}
+              >
                 <input
                   type="checkbox"
                   disabled={!editable}
                   checked={trained}
                   onChange={() => toggleTraining(id)}
                 />
-                <span className={trained ? "text-white" : "text-slate-500"}>
+                <span className="font-mono text-xs">
                   {id}
                 </span>
               </label>
@@ -113,11 +131,15 @@ export function TalentsTab({
         </div>
 
         {/* EXOTIC NOTES */}
-        <div className="mt-3">
-          <h4 className="font-semibold mb-1">Exotic Notes</h4>
+        <div className="space-y-1">
+          <h4 className="text-sm font-semibold text-slate-300">
+            Exotic Weapon Notes
+          </h4>
+
           {editable ? (
             <textarea
-              className="w-full h-16 bg-slate-800 border border-slate-600 p-2 rounded"
+              className="w-full min-h-[60px] bg-slate-900 border border-slate-700
+                         rounded px-3 py-2 text-sm text-slate-100 resize-y"
               value={weaponTraining.exoticNotes ?? ""}
               onChange={(e) =>
                 onUpdateTraining({
@@ -127,12 +149,12 @@ export function TalentsTab({
               }
             />
           ) : (
-            <p className="whitespace-pre-wrap">
+            <div className="rounded border border-slate-700 bg-slate-900/40 p-3 text-sm">
               {weaponTraining.exoticNotes || "None"}
-            </p>
+            </div>
           )}
         </div>
-      </div>
+      </section>
     </div>
   );
 }

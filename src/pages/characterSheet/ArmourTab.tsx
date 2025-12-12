@@ -35,22 +35,31 @@ export function ArmourTab({
 
     return (
       <div className="flex items-center gap-3">
-        <div className="w-24 text-sm text-slate-300">{label}</div>
+        {/* Location label */}
+        <div className="w-24 text-sm text-slate-300">
+          {label}
+        </div>
 
-        <input
-          type="number"
-          min={0}
-          disabled={!editable}
-          value={loc.ap}
-          onChange={(e) =>
-            updateLocation(locKey, {
-              ...loc,
-              ap: Number(e.target.value),
-            })
-          }
-          className="w-16 px-2 py-1 bg-slate-900 border border-slate-700 rounded text-slate-100 text-sm"
-        />
+        {/* AP (primary) */}
+        <div className="flex items-center gap-1">
+          <span className="text-xs text-slate-500">AP</span>
+          <input
+            type="number"
+            min={0}
+            disabled={!editable}
+            value={loc.ap}
+            onChange={(e) =>
+              updateLocation(locKey, {
+                ...loc,
+                ap: Number(e.target.value),
+              })
+            }
+            className="w-16 px-2 py-1 bg-slate-900 border border-slate-700 rounded
+                       text-slate-100 text-sm font-mono"
+          />
+        </div>
 
+        {/* Armour type (secondary) */}
         <input
           type="text"
           placeholder="Type (e.g. Flak)"
@@ -62,7 +71,8 @@ export function ArmourTab({
               type: e.target.value,
             })
           }
-          className="flex-1 px-2 py-1 bg-slate-900 border border-slate-700 rounded text-slate-100 text-sm"
+          className="flex-1 px-2 py-1 bg-slate-800 border border-slate-700 rounded
+                     text-slate-100 text-sm"
         />
       </div>
     );
@@ -76,8 +86,9 @@ export function ArmourTab({
         Armour Points (AP) are applied per hit location as per Dark Heresy 1st Edition.
       </p>
 
-      {/* GRID */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* ARMOUR GRID */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6
+                      rounded border border-slate-700 bg-slate-900/30 p-4">
         {/* LEFT COLUMN */}
         <div className="space-y-3">
           <LocationRow label="Head" locKey="head" />
