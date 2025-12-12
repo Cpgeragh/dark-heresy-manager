@@ -1,5 +1,12 @@
 // src/pages/ClaimCharacter/ClaimForm.tsx
 
+const RECOVERY_CODE_REGEX = /^DH-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
+
+function normalizeRecoveryCode(input: string) {
+  // Uppercase, trim, remove whitespace
+  return input.toUpperCase().trim().replace(/\s+/g, "");
+}
+
 interface ClaimFormProps {
   code: string;
   onCodeChange: (v: string) => void;
@@ -7,7 +14,15 @@ interface ClaimFormProps {
   loading: boolean;
 }
 
-export function ClaimForm({ code, onCodeChange, onSubmit, loading }: ClaimFormProps) {
+export function ClaimForm({
+  code,
+  onCodeChange,
+  onSubmit,
+  loading,
+}: ClaimFormProps) {
+  const normalized = normalizeRecoveryCode(code);
+  const isValid = RECOVERY_CODE_REGEX.test(normalized);
+
   return (
     <div className="border border-slate-700 bg-slate-900 p-4 rounded space-y-3">
       <label className="block text-sm text-slate-300">
@@ -19,14 +34,35 @@ export function ClaimForm({ code, onCodeChange, onSubmit, loading }: ClaimFormPr
         placeholder="DH-XXXX-XXXX"
         value={code}
         onChange={(e) => onCodeChange(e.target.value)}
+        inputMode="text"
+        autoCapitalize="characters"
+        spellCheck={false}
       />
 
+      {/* Format helper */}
+      <div className="text-xs text-slate-400">
+        Format: <span className="font-mono">DH-XXXX-XXXX</span>{" "}
+        <span
+          className={isValid ? "text-green-400" : "text-slate-500"}
+        >
+          {isValid ? "Valid" : "Not valid yet"}
+        </span>
+      </div>
+
       <button
-        disabled={loading}
-        onClick={onSubmit}
-        className={`w-full px-4 py-2 rounded font-semibold text-slate-900 
-          ${loading ? "bg-amber-300 cursor-wait" : "bg-amber-500 hover:bg-amber-400"}
-        `}
+        disabled={loading || !isValid}
+        onClick={() => {
+          if (!isValid || loading) return;
+          onSubmit();
+        }}
+        className={`w-full px-4 py-2 rounded font-semibold text-slate-900
+          ${
+            loading
+              ? "bg-amber-300 cursor-wait"
+              : !isValid
+              ? "bg-slate-700 text-slate-300 cursor-not-allowed"
+              : "bg-amber-500 hover:bg-amber-400"
+          }`}
       >
         {loading ? "Checking..." : "Look Up Character"}
       </button>
