@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom";
 import { auth } from "../firebase";
 
 import { useCharacterSheet } from "./characterSheet/useCharacterSheet";
+import { ErrorBoundary } from "../components/ErrorBoundary";
 
 import { OverviewTab } from "./characterSheet/OverviewTab";
 import { CharacteristicsTab } from "./characterSheet/CharacteristicsTab";
@@ -140,115 +141,134 @@ export default function CharacterSheet() {
 
       {/* CONTENT CONTAINER — VISUAL DIFF WRAP */}
       <div className={containerClass}>
-        {activeTab === "overview" && (
-          <OverviewTab
-            character={character}
-            editable={allowedToEdit}
-            canPlayerRelease={canPlayerRelease}
-            onPlayerRelease={releaseCharacter}
-            onUpdateHeader={(next) => updateField("header", next)}
-            onUpdateWounds={(next) => updateField("wounds", next)}
-            onUpdateFate={(next) => updateField("fate", next)}
-            getCharTotal={getCharTotal}
-          />
-        )}
+        <ErrorBoundary
+          fallback={
+            <div className="p-6 text-center space-y-4">
+              <div className="text-slate-300">
+                <p className="text-lg font-semibold mb-2">Failed to load this tab</p>
+                <p className="text-sm text-slate-400">
+                  An error occurred while displaying this content.
+                </p>
+              </div>
+              <button
+                onClick={() => setActiveTab("overview")}
+                className="px-4 py-2 bg-slate-800 text-slate-200 rounded border border-slate-700 hover:bg-slate-700 transition"
+              >
+                Back to Overview
+              </button>
+            </div>
+          }
+        >
+          {activeTab === "overview" && (
+            <OverviewTab
+              character={character}
+              editable={allowedToEdit}
+              canPlayerRelease={canPlayerRelease}
+              onPlayerRelease={releaseCharacter}
+              onUpdateHeader={(next) => updateField("header", next)}
+              onUpdateWounds={(next) => updateField("wounds", next)}
+              onUpdateFate={(next) => updateField("fate", next)}
+              getCharTotal={getCharTotal}
+            />
+          )}
 
-        {activeTab === "stats" && (
-          <CharacteristicsTab
-            getCharField={getCharField}
-            editable={allowedToEdit}
-            updateCharacteristic={updateCharacteristic}
-          />
-        )}
+          {activeTab === "stats" && (
+            <CharacteristicsTab
+              getCharField={getCharField}
+              editable={allowedToEdit}
+              updateCharacteristic={updateCharacteristic}
+            />
+          )}
 
-        {activeTab === "skills" && (
-          <SkillsTab
-            skills={character.skills}
-            editable={allowedToEdit}
-            onUpdate={(next) => updateField("skills", next)}
-            getCharField={getCharField}
-          />
-        )}
+          {activeTab === "skills" && (
+            <SkillsTab
+              skills={character.skills}
+              editable={allowedToEdit}
+              onUpdate={(next) => updateField("skills", next)}
+              getCharField={getCharField}
+            />
+          )}
 
-        {activeTab === "talents" && (
-          <TalentsTab
-            talents={character.talentsAndTraits}
-            weaponTraining={character.weaponTraining}
-            editable={allowedToEdit}
-            onUpdateTalents={(next) =>
-              updateField("talentsAndTraits", next)
-            }
-            onUpdateTraining={(next) =>
-              updateField("weaponTraining", next)
-            }
-          />
-        )}
+          {activeTab === "talents" && (
+            <TalentsTab
+              talents={character.talentsAndTraits}
+              weaponTraining={character.weaponTraining}
+              editable={allowedToEdit}
+              onUpdateTalents={(next) =>
+                updateField("talentsAndTraits", next)
+              }
+              onUpdateTraining={(next) =>
+                updateField("weaponTraining", next)
+              }
+            />
+          )}
 
-        {activeTab === "weapons" && (
-          <WeaponsTab
-            rangedWeapons={character.rangedWeapons}
-            meleeWeapons={character.meleeWeapons}
-            editable={allowedToEdit}
-            onUpdateRanged={(next) =>
-              updateField("rangedWeapons", next)
-            }
-            onUpdateMelee={(next) =>
-              updateField("meleeWeapons", next)
-            }
-          />
-        )}
+          {activeTab === "weapons" && (
+            <WeaponsTab
+              rangedWeapons={character.rangedWeapons}
+              meleeWeapons={character.meleeWeapons}
+              editable={allowedToEdit}
+              onUpdateRanged={(next) =>
+                updateField("rangedWeapons", next)
+              }
+              onUpdateMelee={(next) =>
+                updateField("meleeWeapons", next)
+              }
+            />
+          )}
 
-        {activeTab === "armour" && (
-          <ArmourTab
-            armour={character.armour}
-            editable={allowedToEdit}
-            onUpdate={(next) => updateField("armour", next)}
-          />
-        )}
+          {activeTab === "armour" && (
+            <ArmourTab
+              armour={character.armour}
+              editable={allowedToEdit}
+              onUpdate={(next) => updateField("armour", next)}
+            />
+          )}
 
-        {activeTab === "psychic" && (
-          <PsychicTab
-            psychic={character.psychic}
-            editable={allowedToEdit}
-            onUpdate={(next) => updateField("psychic", next)}
-          />
-        )}
+          {activeTab === "psychic" && (
+            <PsychicTab
+              psychic={character.psychic}
+              editable={allowedToEdit}
+              onUpdate={(next) => updateField("psychic", next)}
+            />
+          )}
 
-        {activeTab === "gear" && (
-          <GearTab
-            gear={character.gear}
-            editable={allowedToEdit}
-            onUpdate={(next) => updateField("gear", next)}
-          />
-        )}
+          {activeTab === "gear" && (
+            <GearTab
+              gear={character.gear}
+              editable={allowedToEdit}
+              onUpdate={(next) => updateField("gear", next)}
+            />
+          )}
 
-        {activeTab === "xp" && (
-          <ExperienceTab
-            experience={character.experience}
-            editable={allowedToEdit}
-            onUpdate={(next) =>
-              updateField("experience", next)
-            }
-          />
-        )}
+          {activeTab === "xp" && (
+            <ExperienceTab
+              experience={character.experience}
+              editable={allowedToEdit}
+              onUpdate={(next) =>
+                updateField("experience", next)
+              }
+            />
+          )}
 
-        {activeTab === "notes" && (
-          <NotesTab
-            notes={character.notes ?? ""}
-            editable={allowedToEdit}
-            onSave={(value) => updateField("notes", value)}
-          />
-        )}
+          {activeTab === "notes" && (
+            <NotesTab
+              notes={character.notes ?? ""}
+              editable={allowedToEdit}
+              onSave={(value) => updateField("notes", value)}
+            />
+          )}
 
-        {activeTab === "admin" && isDM && (
-          <AdminTab
-            character={character}
-            claimLog={claimLog}
-            onDMForceRelease={dmForceRelease}
-            onDMForceAssign={dmForceAssign}
-            onDMToggleEdit={dmToggleEdit}
-          />
-        )}
+          {activeTab === "admin" && isDM && (
+            <AdminTab
+              character={character}
+              claimLog={claimLog}
+              onDMForceRelease={dmForceRelease}
+              onDMForceAssign={dmForceAssign}
+              onDMToggleEdit={dmToggleEdit}
+            />
+          )}
+        </ErrorBoundary>
       </div>
     </div>
   );

@@ -8,6 +8,7 @@ import { auth, db } from "./firebase";
 import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import type { UserDocument } from "./types/Firestore";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 
 import DMDashboard from "./pages/DMDashboard";
 import PlayerDashboard from "./pages/PlayerDashboard";
@@ -225,69 +226,71 @@ export default function App() {
 
       {/* ================= ROUTES ================= */}
       <main className="max-w-5xl mx-auto px-4 py-6">
-        <Routes>
-          {isDM && (
-            <>
-              <Route
-                path="/dm"
-                element={
-                  <DMDashboard
-                    user={currentUser}
-                    activeCampaignId={activeCampaignId}
-                    onActiveCampaignChange={handleActiveCampaignChange}
-                  />
-                }
-              />
-              <Route
-                path="/select"
-                element={
-                  <SelectCampaign
-                    user={currentUser}
-                    role="dm"
-                    activeCampaignId={activeCampaignId}
-                    onActiveCampaignChange={handleActiveCampaignChange}
-                  />
-                }
-              />
-            </>
-          )}
+        <ErrorBoundary>
+          <Routes>
+            {isDM && (
+              <>
+                <Route
+                  path="/dm"
+                  element={
+                    <DMDashboard
+                      user={currentUser}
+                      activeCampaignId={activeCampaignId}
+                      onActiveCampaignChange={handleActiveCampaignChange}
+                    />
+                  }
+                />
+                <Route
+                  path="/select"
+                  element={
+                    <SelectCampaign
+                      user={currentUser}
+                      role="dm"
+                      activeCampaignId={activeCampaignId}
+                      onActiveCampaignChange={handleActiveCampaignChange}
+                    />
+                  }
+                />
+              </>
+            )}
 
-          {!isDM && (
-            <>
-              <Route
-                path="/player"
-                element={
-                  <PlayerDashboard
-                    user={currentUser}
-                    activeCampaignId={activeCampaignId}
-                  />
-                }
-              />
-              <Route path="/claim" element={<ClaimCharacterPage />} />
-              <Route
-                path="/select"
-                element={
-                  <SelectCampaign
-                    user={currentUser}
-                    role="player"
-                    activeCampaignId={activeCampaignId}
-                    onActiveCampaignChange={handleActiveCampaignChange}
-                  />
-                }
-              />
-            </>
-          )}
+            {!isDM && (
+              <>
+                <Route
+                  path="/player"
+                  element={
+                    <PlayerDashboard
+                      user={currentUser}
+                      activeCampaignId={activeCampaignId}
+                    />
+                  }
+                />
+                <Route path="/claim" element={<ClaimCharacterPage />} />
+                <Route
+                  path="/select"
+                  element={
+                    <SelectCampaign
+                      user={currentUser}
+                      role="player"
+                      activeCampaignId={activeCampaignId}
+                      onActiveCampaignChange={handleActiveCampaignChange}
+                    />
+                  }
+                />
+              </>
+            )}
 
-          <Route
-            path="/campaign/:campaignId/character/:characterId"
-            element={<CharacterSheet />}
-          />
+            <Route
+              path="/campaign/:campaignId/character/:characterId"
+              element={<CharacterSheet />}
+            />
 
-          <Route
-            path="*"
-            element={<Navigate to={isDM ? "/dm" : "/player"} replace />}
-          />
-        </Routes>
+            <Route
+              path="*"
+              element={<Navigate to={isDM ? "/dm" : "/player"} replace />}
+            />
+          </Routes>
+        </ErrorBoundary>
       </main>
     </div>
   );
