@@ -5,10 +5,8 @@ import type {
   RangedWeapon,
   MeleeWeapon,
 } from "../../types/Character";
-import {
-  editableInputClass,
-  sectionContainerClass,
-} from "../../ui/editableStyles";
+import { sectionContainerClass } from "../../ui/editableStyles";
+import { FormField } from "../../components/FormField";
 
 interface WeaponsTabProps {
   rangedWeapons: RangedWeapon[];
@@ -90,28 +88,6 @@ export function WeaponsTab({
     onUpdateMelee(next);
   }
 
-  function Field({
-    label,
-    value,
-    onChange,
-  }: {
-    label: string;
-    value?: string;
-    onChange: (v: string) => void;
-  }) {
-    return (
-      <label className="flex flex-col gap-0.5 text-xs text-slate-400">
-        {label}
-        <input
-          disabled={!editable}
-          value={value ?? ""}
-          onChange={(e) => onChange(e.target.value)}
-          className={editableInputClass(editable)}
-        />
-      </label>
-    );
-  }
-
   return (
     <div className="space-y-8 text-slate-300">
       <h2 className="text-xl font-semibold">Weapons</h2>
@@ -143,10 +119,11 @@ export function WeaponsTab({
                   className={sectionContainerClass(editable) + " space-y-2"}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <Field
+                    <FormField
                       label="Weapon"
-                      value={w.name}
+                      value={w.name ?? ""}
                       onChange={createRangedFieldHandler(i, "name")}
+                      editable={editable}
                     />
 
                     {editable && (
@@ -160,20 +137,21 @@ export function WeaponsTab({
                   </div>
 
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    <Field label="Class" value={w.class} onChange={createRangedFieldHandler(i, "class")} />
-                    <Field label="Damage" value={w.damage} onChange={createRangedFieldHandler(i, "damage")} />
-                    <Field label="Type" value={w.type} onChange={createRangedFieldHandler(i, "type")} />
-                    <Field label="Pen" value={w.pen} onChange={createRangedFieldHandler(i, "pen")} />
-                    <Field label="Range" value={w.range} onChange={createRangedFieldHandler(i, "range")} />
-                    <Field label="RoF" value={w.rof} onChange={createRangedFieldHandler(i, "rof")} />
-                    <Field label="Clip" value={w.clip} onChange={createRangedFieldHandler(i, "clip")} />
-                    <Field label="Reload" value={w.rld} onChange={createRangedFieldHandler(i, "rld")} />
+                    <FormField label="Class" value={w.class ?? ""} onChange={createRangedFieldHandler(i, "class")} editable={editable} />
+                    <FormField label="Damage" value={w.damage ?? ""} onChange={createRangedFieldHandler(i, "damage")} editable={editable} />
+                    <FormField label="Type" value={w.type ?? ""} onChange={createRangedFieldHandler(i, "type")} editable={editable} />
+                    <FormField label="Pen" value={w.pen ?? ""} onChange={createRangedFieldHandler(i, "pen")} editable={editable} />
+                    <FormField label="Range" value={w.range ?? ""} onChange={createRangedFieldHandler(i, "range")} editable={editable} />
+                    <FormField label="RoF" value={w.rof ?? ""} onChange={createRangedFieldHandler(i, "rof")} editable={editable} />
+                    <FormField label="Clip" value={w.clip ?? ""} onChange={createRangedFieldHandler(i, "clip")} editable={editable} />
+                    <FormField label="Reload" value={w.rld ?? ""} onChange={createRangedFieldHandler(i, "rld")} editable={editable} />
                   </div>
 
-                  <Field
+                  <FormField
                     label="Special"
-                    value={w.specialRules}
+                    value={w.specialRules ?? ""}
                     onChange={createRangedFieldHandler(i, "specialRules")}
+                    editable={editable}
                   />
                 </div>
               ))}
@@ -207,10 +185,11 @@ export function WeaponsTab({
                   className={sectionContainerClass(editable) + " space-y-2"}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <Field
+                    <FormField
                       label="Weapon"
-                      value={w.name}
+                      value={w.name ?? ""}
                       onChange={createMeleeFieldHandler(i, "name")}
+                      editable={editable}
                     />
 
                     {editable && (
@@ -224,16 +203,17 @@ export function WeaponsTab({
                   </div>
 
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    <Field label="Class" value={w.class} onChange={createMeleeFieldHandler(i, "class")} />
-                    <Field label="Damage" value={w.damage} onChange={createMeleeFieldHandler(i, "damage")} />
-                    <Field label="Type" value={w.type} onChange={createMeleeFieldHandler(i, "type")} />
-                    <Field label="Pen" value={w.pen} onChange={createMeleeFieldHandler(i, "pen")} />
+                    <FormField label="Class" value={w.class ?? ""} onChange={createMeleeFieldHandler(i, "class")} editable={editable} />
+                    <FormField label="Damage" value={w.damage ?? ""} onChange={createMeleeFieldHandler(i, "damage")} editable={editable} />
+                    <FormField label="Type" value={w.type ?? ""} onChange={createMeleeFieldHandler(i, "type")} editable={editable} />
+                    <FormField label="Pen" value={w.pen ?? ""} onChange={createMeleeFieldHandler(i, "pen")} editable={editable} />
                   </div>
 
-                  <Field
+                  <FormField
                     label="Special"
-                    value={w.specialRules}
+                    value={w.specialRules ?? ""}
                     onChange={createMeleeFieldHandler(i, "specialRules")}
+                    editable={editable}
                   />
                 </div>
               ))}

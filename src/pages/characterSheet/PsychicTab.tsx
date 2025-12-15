@@ -3,9 +3,9 @@
 import type { PsychicBlock, PsychicPower } from "../../types/Character";
 import {
   editableInputClass,
-  editableTextareaClass,
   sectionContainerClass,
 } from "../../ui/editableStyles";
+import { FormField } from "../../components/FormField";
 
 interface PsychicTabProps {
   psychic: PsychicBlock;
@@ -13,279 +13,275 @@ interface PsychicTabProps {
   onUpdate: (next: PsychicBlock) => void;
 }
 
-export function PsychicTab({
-  psychic,
-  editable,
-  onUpdate,
-}: PsychicTabProps) {
-  function updatePower(
-    list: "minorPowers" | "majorPowers",
-    id: string,
-    next: Partial<PsychicPower>
-  ) {
+export function PsychicTab({ psychic, editable, onUpdate }: PsychicTabProps) {
+  function updateField(key: keyof PsychicBlock, value: string | number) {
     if (!editable) return;
+    onUpdate({ ...psychic, [key]: value });
+  }
 
+  function addMinorPower() {
+    if (!editable) return;
+    const newPower: PsychicPower = {
+      id: crypto.randomUUID(),
+      name: "",
+      known: true,
+      isMinor: true,
+    };
     onUpdate({
       ...psychic,
-      [list]: psychic[list].map((p) =>
-        p.id === id ? { ...p, ...next } : p
-      ),
+      minorPowers: [...psychic.minorPowers, newPower],
     });
   }
 
-  function addPower(list: "minorPowers" | "majorPowers") {
+  function addMajorPower() {
     if (!editable) return;
-
+    const newPower: PsychicPower = {
+      id: crypto.randomUUID(),
+      name: "",
+      known: true,
+      isMinor: false,
+    };
     onUpdate({
       ...psychic,
-      [list]: [
-        ...psychic[list],
-        {
-          id: crypto.randomUUID(),
-          name: "",
-          known: false,
-          isMinor: list === "minorPowers",
-        },
-      ],
+      majorPowers: [...psychic.majorPowers, newPower],
     });
   }
 
-  function deletePower(list: "minorPowers" | "majorPowers", id: string) {
+  function removeMinorPower(index: number) {
     if (!editable) return;
-
-    onUpdate({
-      ...psychic,
-      [list]: psychic[list].filter((p) => p.id !== id),
-    });
+    const powers = [...psychic.minorPowers];
+    powers.splice(index, 1);
+    onUpdate({ ...psychic, minorPowers: powers });
   }
 
-  function PowerCard({
-    power,
-    list,
-    subtle,
-  }: {
-    power: PsychicPower;
-    list: "minorPowers" | "majorPowers";
-    subtle?: boolean;
-  }) {
-    return (
-      <div
-        className={`rounded border p-3 space-y-2 ${
-          subtle
-            ? "border-slate-700 bg-slate-900/30"
-            : "border-indigo-600/40 bg-indigo-900/25"
-        }`}
-      >
-        {/* HEADER */}
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            disabled={!editable}
-            checked={power.known}
-            onChange={(e) =>
-              updatePower(list, power.id, { known: e.target.checked })
-            }
-            className={!editable ? "cursor-not-allowed opacity-60" : ""}
-          />
+  function removeMajorPower(index: number) {
+    if (!editable) return;
+    const powers = [...psychic.majorPowers];
+    powers.splice(index, 1);
+    onUpdate({ ...psychic, majorPowers: powers });
+  }
 
-          <input
-            disabled={!editable}
-            value={power.name}
-            placeholder="Power name"
-            onChange={(e) =>
-              updatePower(list, power.id, { name: e.target.value })
-            }
-            className={editableInputClass(editable)}
-          />
+  function updateMinorPower(index: number, key: keyof PsychicPower, value: any) {
+    if (!editable) return;
+    const powers = [...psychic.minorPowers];
+    powers[index] = { ...powers[index], [key]: value };
+    onUpdate({ ...psychic, minorPowers: powers });
+  }
 
-          {editable && (
-            <button
-              onClick={() => deletePower(list, power.id)}
-              className="text-xs text-red-400 hover:text-red-300"
-            >
-              Delete
-            </button>
-          )}
-        </div>
-
-        {/* MAJOR METADATA */}
-        {!subtle && (
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <input
-              disabled={!editable}
-              value={power.threshold ?? ""}
-              placeholder="Threshold"
-              onChange={(e) =>
-                updatePower(list, power.id, {
-                  threshold: e.target.value,
-                })
-              }
-              className={editableInputClass(editable)}
-            />
-
-            <input
-              disabled={!editable}
-              value={power.focusTime ?? ""}
-              placeholder="Focus Time"
-              onChange={(e) =>
-                updatePower(list, power.id, {
-                  focusTime: e.target.value,
-                })
-              }
-              className={editableInputClass(editable)}
-            />
-
-            <input
-              disabled={!editable}
-              value={power.range ?? ""}
-              placeholder="Range"
-              onChange={(e) =>
-                updatePower(list, power.id, { range: e.target.value })
-              }
-              className={editableInputClass(editable)}
-            />
-
-            <input
-              disabled={!editable}
-              value={power.sustained ?? ""}
-              placeholder="Sustained"
-              onChange={(e) =>
-                updatePower(list, power.id, {
-                  sustained: e.target.value,
-                })
-              }
-              className={editableInputClass(editable)}
-            />
-          </div>
-        )}
-
-        {/* DESCRIPTION */}
-        <textarea
-          disabled={!editable}
-          value={power.description ?? ""}
-          placeholder="Description / effects"
-          onChange={(e) =>
-            updatePower(list, power.id, {
-              description: e.target.value,
-            })
-          }
-          className={editableTextareaClass(editable) + " text-xs min-h-[56px]"}
-        />
-      </div>
-    );
+  function updateMajorPower(index: number, key: keyof PsychicPower, value: any) {
+    if (!editable) return;
+    const powers = [...psychic.majorPowers];
+    powers[index] = { ...powers[index], [key]: value };
+    onUpdate({ ...psychic, majorPowers: powers });
   }
 
   return (
     <div className="space-y-6 text-slate-300">
       <h2 className="text-xl font-semibold">Psychic Powers</h2>
 
-      {/* HEADER */}
-      <section className={sectionContainerClass(editable)}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-          <label className="flex flex-col gap-1 text-xs text-slate-400">
+      {/* PSY RATING & DISCIPLINE */}
+      <div className={sectionContainerClass(editable) + " space-y-3"}>
+        <div className="grid grid-cols-2 gap-3">
+          <label className="flex flex-col gap-0.5 text-xs text-slate-400">
             Psy Rating
             <input
-              type="number"
               disabled={!editable}
-              value={psychic.psyRating}
-              onChange={(e) =>
-                onUpdate({
-                  ...psychic,
-                  psyRating: Number(e.target.value),
-                })
-              }
-              className={editableInputClass(editable)}
+              type="number"
+              value={psychic.psyRating ?? 0}
+              onChange={(e) => updateField("psyRating", Number(e.target.value))}
+              className={editableInputClass(editable) + " w-24"}
             />
           </label>
 
-          <label className="flex flex-col gap-1 text-xs text-slate-400">
-            Discipline
-            <input
-              disabled={!editable}
-              value={psychic.discipline ?? ""}
-              onChange={(e) =>
-                onUpdate({
-                  ...psychic,
-                  discipline: e.target.value,
-                })
-              }
-              className={editableInputClass(editable)}
-            />
-          </label>
+          <FormField
+            label="Discipline"
+            value={psychic.discipline ?? ""}
+            onChange={(v) => updateField("discipline", v)}
+            editable={editable}
+            placeholder="e.g., Biomancy, Telekinesis"
+          />
         </div>
+      </div>
+
+      {/* MINOR POWERS */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold">Minor Powers</h3>
+          {editable && (
+            <button
+              onClick={addMinorPower}
+              className="text-xs px-3 py-1 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700"
+            >
+              + Add Minor Power
+            </button>
+          )}
+        </div>
+
+        {psychic.minorPowers.length === 0 ? (
+          <p className="text-sm text-slate-400">No minor powers recorded.</p>
+        ) : (
+          <div className="space-y-3">
+            {psychic.minorPowers.map((p, i) => (
+              <div
+                key={p.id}
+                className={sectionContainerClass(editable) + " space-y-2"}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <FormField
+                    label="Power Name"
+                    value={p.name ?? ""}
+                    onChange={(v) => updateMinorPower(i, "name", v)}
+                    editable={editable}
+                    className="flex-1"
+                  />
+
+                  {editable && (
+                    <button
+                      onClick={() => removeMinorPower(i)}
+                      className="text-xs text-red-400 hover:text-red-300 mt-5"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <FormField
+                    label="Threshold"
+                    value={p.threshold ?? ""}
+                    onChange={(v) => updateMinorPower(i, "threshold", v)}
+                    editable={editable}
+                    placeholder="e.g., 7"
+                  />
+
+                  <FormField
+                    label="Focus Time"
+                    value={p.focusTime ?? ""}
+                    onChange={(v) => updateMinorPower(i, "focusTime", v)}
+                    editable={editable}
+                    placeholder="e.g., Half Action"
+                  />
+
+                  <FormField
+                    label="Range"
+                    value={p.range ?? ""}
+                    onChange={(v) => updateMinorPower(i, "range", v)}
+                    editable={editable}
+                    placeholder="e.g., 20m"
+                  />
+
+                  <FormField
+                    label="Sustained"
+                    value={p.sustained ?? ""}
+                    onChange={(v) => updateMinorPower(i, "sustained", v)}
+                    editable={editable}
+                    placeholder="e.g., Free Action"
+                  />
+                </div>
+
+                <FormField
+                  label="Effect"
+                  value={p.description ?? ""}
+                  onChange={(v) => updateMinorPower(i, "description", v)}
+                  editable={editable}
+                  type="textarea"
+                  rows={3}
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </section>
 
-      {/* POWERS */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* MINOR */}
-        <section className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-slate-300">
-              Minor Powers
-            </h3>
-
-            {editable && (
-              <button
-                onClick={() => addPower("minorPowers")}
-                className="text-xs rounded border border-slate-600 bg-slate-800 px-3 py-1 hover:bg-slate-700"
-              >
-                + Add
-              </button>
-            )}
-          </div>
-
-          {psychic.minorPowers.length === 0 && (
-            <p className="text-xs text-slate-500">
-              No minor powers recorded.
-            </p>
+      {/* MAJOR POWERS */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold">Major Powers</h3>
+          {editable && (
+            <button
+              onClick={addMajorPower}
+              className="text-xs px-3 py-1 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700"
+            >
+              + Add Major Power
+            </button>
           )}
+        </div>
 
+        {psychic.majorPowers.length === 0 ? (
+          <p className="text-sm text-slate-400">No major powers recorded.</p>
+        ) : (
           <div className="space-y-3">
-            {psychic.minorPowers.map((p) => (
-              <PowerCard
+            {psychic.majorPowers.map((p, i) => (
+              <div
                 key={p.id}
-                power={p}
-                list="minorPowers"
-                subtle
-              />
+                className={sectionContainerClass(editable) + " space-y-2"}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <FormField
+                    label="Power Name"
+                    value={p.name ?? ""}
+                    onChange={(v) => updateMajorPower(i, "name", v)}
+                    editable={editable}
+                    className="flex-1"
+                  />
+
+                  {editable && (
+                    <button
+                      onClick={() => removeMajorPower(i)}
+                      className="text-xs text-red-400 hover:text-red-300 mt-5"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <FormField
+                    label="Threshold"
+                    value={p.threshold ?? ""}
+                    onChange={(v) => updateMajorPower(i, "threshold", v)}
+                    editable={editable}
+                    placeholder="e.g., 12"
+                  />
+
+                  <FormField
+                    label="Focus Time"
+                    value={p.focusTime ?? ""}
+                    onChange={(v) => updateMajorPower(i, "focusTime", v)}
+                    editable={editable}
+                    placeholder="e.g., Full Action"
+                  />
+
+                  <FormField
+                    label="Range"
+                    value={p.range ?? ""}
+                    onChange={(v) => updateMajorPower(i, "range", v)}
+                    editable={editable}
+                    placeholder="e.g., 50m"
+                  />
+
+                  <FormField
+                    label="Sustained"
+                    value={p.sustained ?? ""}
+                    onChange={(v) => updateMajorPower(i, "sustained", v)}
+                    editable={editable}
+                    placeholder="e.g., Half Action"
+                  />
+                </div>
+
+                <FormField
+                  label="Effect"
+                  value={p.description ?? ""}
+                  onChange={(v) => updateMajorPower(i, "description", v)}
+                  editable={editable}
+                  type="textarea"
+                  rows={3}
+                />
+              </div>
             ))}
           </div>
-        </section>
-
-        {/* MAJOR */}
-        <section className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-indigo-300">
-              Major Powers
-            </h3>
-
-            {editable && (
-              <button
-                onClick={() => addPower("majorPowers")}
-                className="text-xs rounded border border-indigo-500 bg-indigo-700 px-3 py-1 text-white hover:bg-indigo-600"
-              >
-                + Add
-              </button>
-            )}
-          </div>
-
-          {psychic.majorPowers.length === 0 && (
-            <p className="text-xs text-slate-500">
-              No major powers recorded.
-            </p>
-          )}
-
-          <div className="space-y-3">
-            {psychic.majorPowers.map((p) => (
-              <PowerCard
-                key={p.id}
-                power={p}
-                list="majorPowers"
-              />
-            ))}
-          </div>
-        </section>
-      </div>
+        )}
+      </section>
     </div>
   );
 }
