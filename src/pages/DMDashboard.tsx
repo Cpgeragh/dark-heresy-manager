@@ -14,6 +14,7 @@ import type { User } from "firebase/auth";
 import { db } from "../firebase";
 import { createEmptyCharacterData } from "../utils/characterFactory";
 import type { CampaignDocument, CharacterListItem } from "../types/Firestore";
+import { useToast } from "../components/Toast";
 
 // Type alias for cleaner code
 type CampaignWithId = CampaignDocument & { id: string };
@@ -30,6 +31,7 @@ export default function DMDashboard({
   onActiveCampaignChange,
 }: Props) {
   const navigate = useNavigate();
+  const toast = useToast();
 
   const [campaigns, setCampaigns] = useState<CampaignWithId[]>([]);
   const [newCampaignName, setNewCampaignName] = useState("");
@@ -126,10 +128,16 @@ export default function DMDashboard({
   // Create character
   // ----------------------------------
   async function createCharacter() {
-    if (!activeCampaignId) return alert("No campaign selected.");
+    if (!activeCampaignId) {
+      toast.error("No campaign selected.");
+      return;
+    }
 
     const trimmedName = characterName.trim();
-    if (!trimmedName) return alert("Enter a character name.");
+    if (!trimmedName) {
+      toast.warning("Please enter a character name.");
+      return;
+    }
 
     const recoveryCode = generateRecoveryCode();
 
@@ -152,11 +160,14 @@ export default function DMDashboard({
         characterId: ref.id,
       });
 
-      alert(`Character created.\nRecovery Code: ${recoveryCode}`);
+      toast.success(
+        `Character created successfully!\n\nRecovery Code: ${recoveryCode}\n\n(Click the copy button to save this code)`,
+        8000 // Show for 8 seconds
+      );
       setCharacterName("");
     } catch (err) {
       console.error("Character creation error:", err);
-      alert("Failed to create character.");
+      toast.error("Failed to create character. Please try again.");
     }
   }
 
