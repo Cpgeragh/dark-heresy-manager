@@ -1,3 +1,6 @@
+// src/pages/characterSheet/tabs/skills/CategoryGroup.tsx
+
+import { useCallback } from "react";
 import type { SkillWithComputed } from "./constants";
 import { SkillCard } from "./SkillCard";
 
@@ -27,11 +30,15 @@ export function CategoryGroup({
 }: CategoryGroupProps) {
   const trainedCount = skills.filter((s) => s.level !== "untrained").length;
 
+  const handleToggle = useCallback(() => {
+    setCollapsed(!collapsed);
+  }, [collapsed, setCollapsed]);
+
   return (
     <div className="border border-slate-700 rounded bg-slate-950/40">
       {/* HEADER */}
       <button
-        onClick={() => setCollapsed(!collapsed)}
+        onClick={handleToggle}
         className="w-full flex justify-between items-center px-3 py-2 bg-slate-900 hover:bg-slate-800 border-b border-slate-700"
       >
         <span className="font-semibold text-slate-100">{category}</span>

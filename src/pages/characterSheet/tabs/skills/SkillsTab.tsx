@@ -1,6 +1,6 @@
 // src/pages/characterSheet/tabs/skills/SkillsTab.tsx
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import type { Characteristics, SkillEntry } from "../../../../types/Character";
 import type { CharField } from "../../../../utils/characterFactory";
 
@@ -64,11 +64,25 @@ export function SkillsTab({
     return Array.from(set).sort();
   }, [computedSkills]);
 
-  // ------------------------------
-  // COLLAPSE STATE using hooks
-  // ------------------------------
   const categoryCollapse = useSkillGroupCollapse(ALL_CATEGORIES);
   const charCollapse = useSkillGroupCollapse(GROUP_ORDER);
+
+  // ------------------------------
+  // MEMOIZED COLLAPSE HANDLERS
+  // ------------------------------
+  const handleCategoryCollapse = useCallback(
+    (category: string) => (value: boolean) => {
+      categoryCollapse.setGroupCollapsed(category, value);
+    },
+    [categoryCollapse]
+  );
+
+  const handleCharCollapse = useCallback(
+    (charKey: string) => (value: boolean) => {
+      charCollapse.setGroupCollapsed(charKey, value);
+    },
+    [charCollapse]
+  );
 
   // ------------------------------
   // UPDATE HELPERS
@@ -139,9 +153,7 @@ export function SkillsTab({
                   editable={editable}
                   compact={compact}
                   collapsed={categoryCollapse.collapsed[cat] ?? false}
-                  setCollapsed={(v) =>
-                    categoryCollapse.setGroupCollapsed(cat, v)
-                  }
+                  setCollapsed={handleCategoryCollapse(cat)}
                   updateLevel={updateLevel}
                   updateMisc={updateMisc}
                   updateNotes={updateNotes}
@@ -188,9 +200,7 @@ export function SkillsTab({
                   editable={editable}
                   compact={compact}
                   collapsed={charCollapse.collapsed[charKey] ?? false}
-                  setCollapsed={(v) =>
-                    charCollapse.setGroupCollapsed(charKey, v)
-                  }
+                  setCollapsed={handleCharCollapse(charKey)}
                   updateLevel={updateLevel}
                   updateMisc={updateMisc}
                   updateNotes={updateNotes}

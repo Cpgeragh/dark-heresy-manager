@@ -1,5 +1,6 @@
 // src/pages/characterSheet/WeaponsTab.tsx
 
+import { useCallback } from "react";
 import type {
   RangedWeapon,
   MeleeWeapon,
@@ -24,19 +25,40 @@ export function WeaponsTab({
   onUpdateRanged,
   onUpdateMelee,
 }: WeaponsTabProps) {
-  function updateRanged(index: number, key: keyof RangedWeapon, value: string) {
-    if (!editable) return;
-    const next = [...rangedWeapons];
-    next[index] = { ...next[index], [key]: value };
-    onUpdateRanged(next);
-  }
+  const updateRanged = useCallback(
+    (index: number, key: keyof RangedWeapon, value: string) => {
+      if (!editable) return;
+      const next = [...rangedWeapons];
+      next[index] = { ...next[index], [key]: value };
+      onUpdateRanged(next);
+    },
+    [editable, rangedWeapons, onUpdateRanged]
+  );
 
-  function updateMelee(index: number, key: keyof MeleeWeapon, value: string) {
-    if (!editable) return;
-    const next = [...meleeWeapons];
-    next[index] = { ...next[index], [key]: value };
-    onUpdateMelee(next);
-  }
+  const updateMelee = useCallback(
+    (index: number, key: keyof MeleeWeapon, value: string) => {
+      if (!editable) return;
+      const next = [...meleeWeapons];
+      next[index] = { ...next[index], [key]: value };
+      onUpdateMelee(next);
+    },
+    [editable, meleeWeapons, onUpdateMelee]
+  );
+
+  // Memoized handler factories
+  const createRangedFieldHandler = useCallback(
+    (index: number, key: keyof RangedWeapon) => (value: string) => {
+      updateRanged(index, key, value);
+    },
+    [updateRanged]
+  );
+
+  const createMeleeFieldHandler = useCallback(
+    (index: number, key: keyof MeleeWeapon) => (value: string) => {
+      updateMelee(index, key, value);
+    },
+    [updateMelee]
+  );
 
   function addRanged() {
     if (!editable) return;
@@ -124,7 +146,7 @@ export function WeaponsTab({
                     <Field
                       label="Weapon"
                       value={w.name}
-                      onChange={(v) => updateRanged(i, "name", v)}
+                      onChange={createRangedFieldHandler(i, "name")}
                     />
 
                     {editable && (
@@ -138,20 +160,20 @@ export function WeaponsTab({
                   </div>
 
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    <Field label="Class" value={w.class} onChange={(v) => updateRanged(i, "class", v)} />
-                    <Field label="Damage" value={w.damage} onChange={(v) => updateRanged(i, "damage", v)} />
-                    <Field label="Type" value={w.type} onChange={(v) => updateRanged(i, "type", v)} />
-                    <Field label="Pen" value={w.pen} onChange={(v) => updateRanged(i, "pen", v)} />
-                    <Field label="Range" value={w.range} onChange={(v) => updateRanged(i, "range", v)} />
-                    <Field label="RoF" value={w.rof} onChange={(v) => updateRanged(i, "rof", v)} />
-                    <Field label="Clip" value={w.clip} onChange={(v) => updateRanged(i, "clip", v)} />
-                    <Field label="Reload" value={w.rld} onChange={(v) => updateRanged(i, "rld", v)} />
+                    <Field label="Class" value={w.class} onChange={createRangedFieldHandler(i, "class")} />
+                    <Field label="Damage" value={w.damage} onChange={createRangedFieldHandler(i, "damage")} />
+                    <Field label="Type" value={w.type} onChange={createRangedFieldHandler(i, "type")} />
+                    <Field label="Pen" value={w.pen} onChange={createRangedFieldHandler(i, "pen")} />
+                    <Field label="Range" value={w.range} onChange={createRangedFieldHandler(i, "range")} />
+                    <Field label="RoF" value={w.rof} onChange={createRangedFieldHandler(i, "rof")} />
+                    <Field label="Clip" value={w.clip} onChange={createRangedFieldHandler(i, "clip")} />
+                    <Field label="Reload" value={w.rld} onChange={createRangedFieldHandler(i, "rld")} />
                   </div>
 
                   <Field
                     label="Special"
                     value={w.specialRules}
-                    onChange={(v) => updateRanged(i, "specialRules", v)}
+                    onChange={createRangedFieldHandler(i, "specialRules")}
                   />
                 </div>
               ))}
@@ -188,7 +210,7 @@ export function WeaponsTab({
                     <Field
                       label="Weapon"
                       value={w.name}
-                      onChange={(v) => updateMelee(i, "name", v)}
+                      onChange={createMeleeFieldHandler(i, "name")}
                     />
 
                     {editable && (
@@ -202,16 +224,16 @@ export function WeaponsTab({
                   </div>
 
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    <Field label="Class" value={w.class} onChange={(v) => updateMelee(i, "class", v)} />
-                    <Field label="Damage" value={w.damage} onChange={(v) => updateMelee(i, "damage", v)} />
-                    <Field label="Type" value={w.type} onChange={(v) => updateMelee(i, "type", v)} />
-                    <Field label="Pen" value={w.pen} onChange={(v) => updateMelee(i, "pen", v)} />
+                    <Field label="Class" value={w.class} onChange={createMeleeFieldHandler(i, "class")} />
+                    <Field label="Damage" value={w.damage} onChange={createMeleeFieldHandler(i, "damage")} />
+                    <Field label="Type" value={w.type} onChange={createMeleeFieldHandler(i, "type")} />
+                    <Field label="Pen" value={w.pen} onChange={createMeleeFieldHandler(i, "pen")} />
                   </div>
 
                   <Field
                     label="Special"
                     value={w.specialRules}
-                    onChange={(v) => updateMelee(i, "specialRules", v)}
+                    onChange={createMeleeFieldHandler(i, "specialRules")}
                   />
                 </div>
               ))}

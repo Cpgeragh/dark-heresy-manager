@@ -1,5 +1,6 @@
 // src/pages/characterSheet/tabs/skills/CharacteristicGroup.tsx
 
+import { useCallback } from "react";
 import type { SkillWithComputed } from "./constants";
 import type { Characteristics } from "../../../../types/Character";
 import { SkillCard } from "./SkillCard";
@@ -37,11 +38,15 @@ export function CharacteristicGroup({
 }: CharacteristicGroupProps) {
   const trainedCount = skills.filter((s) => s.level !== "untrained").length;
 
+  const handleToggle = useCallback(() => {
+    setCollapsed(!collapsed);
+  }, [collapsed, setCollapsed]);
+
   return (
     <div className="border border-slate-700 rounded bg-slate-950/40">
       {/* HEADER */}
       <button
-        onClick={() => setCollapsed(!collapsed)}
+        onClick={handleToggle}
         className="w-full flex justify-between items-center px-3 py-2 bg-slate-900 hover:bg-slate-800 border-b border-slate-700"
       >
         <div className="flex items-center gap-2">

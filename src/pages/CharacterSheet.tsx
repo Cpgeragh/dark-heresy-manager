@@ -124,18 +124,18 @@ export default function CharacterSheet() {
 
       {/* TABS */}
       <div className="flex flex-wrap gap-2 mb-6">
-        <TabButton label="Overview" active={activeTab === "overview"} onClick={() => setActiveTab("overview")} />
-        <TabButton label="Characteristics" active={activeTab === "stats"} onClick={() => setActiveTab("stats")} />
-        <TabButton label="Skills" active={activeTab === "skills"} onClick={() => setActiveTab("skills")} />
-        <TabButton label="Talents" active={activeTab === "talents"} onClick={() => setActiveTab("talents")} />
-        <TabButton label="Weapons" active={activeTab === "weapons"} onClick={() => setActiveTab("weapons")} />
-        <TabButton label="Armour" active={activeTab === "armour"} onClick={() => setActiveTab("armour")} />
-        <TabButton label="Psychic" active={activeTab === "psychic"} onClick={() => setActiveTab("psychic")} />
-        <TabButton label="Gear" active={activeTab === "gear"} onClick={() => setActiveTab("gear")} />
-        <TabButton label="XP" active={activeTab === "xp"} onClick={() => setActiveTab("xp")} />
-        <TabButton label="Notes" active={activeTab === "notes"} onClick={() => setActiveTab("notes")} />
+        <TabButton label="Overview" tabId="overview" active={activeTab === "overview"} onTabChange={setActiveTab} />
+        <TabButton label="Characteristics" tabId="stats" active={activeTab === "stats"} onTabChange={setActiveTab} />
+        <TabButton label="Skills" tabId="skills" active={activeTab === "skills"} onTabChange={setActiveTab} />
+        <TabButton label="Talents" tabId="talents" active={activeTab === "talents"} onTabChange={setActiveTab} />
+        <TabButton label="Weapons" tabId="weapons" active={activeTab === "weapons"} onTabChange={setActiveTab} />
+        <TabButton label="Armour" tabId="armour" active={activeTab === "armour"} onTabChange={setActiveTab} />
+        <TabButton label="Psychic" tabId="psychic" active={activeTab === "psychic"} onTabChange={setActiveTab} />
+        <TabButton label="Gear" tabId="gear" active={activeTab === "gear"} onTabChange={setActiveTab} />
+        <TabButton label="XP" tabId="xp" active={activeTab === "xp"} onTabChange={setActiveTab} />
+        <TabButton label="Notes" tabId="notes" active={activeTab === "notes"} onTabChange={setActiveTab} />
         {isDM && (
-          <TabButton label="Admin" active={activeTab === "admin"} onClick={() => setActiveTab("admin")} />
+          <TabButton label="Admin" tabId="admin" active={activeTab === "admin"} onTabChange={setActiveTab} />
         )}
       </div>
 
