@@ -11,6 +11,7 @@ import { ErrorBoundary } from "./components/ErrorBoundary";
 import { AppHeader } from "./components/AppHeader";
 import { AppBreadcrumbs } from "./components/AppBreadcrumbs";
 import { ToastProvider, ToastContainer } from "./components/Toast";
+import { ToastTester } from "./components/ToastTester";
 
 import DMDashboard from "./pages/DMDashboard";
 import PlayerDashboard from "./pages/PlayerDashboard";
@@ -164,7 +165,8 @@ export default function App() {
         </main>
 
         <ToastContainer />
-      </div>
+      {import.meta.env.DEV && <ToastTester />}
+    </div>
     </ToastProvider>
   );
 }
