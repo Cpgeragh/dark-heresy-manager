@@ -5,18 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { db } from "../firebase";
 import { collection, onSnapshot } from "firebase/firestore";
 import type { User } from "firebase/auth";
-
-type CharacterData = {
-  header?: {
-    characterName?: string;
-  };
-  userId: string | null;
-  recoveryCode: string;
-};
-
-type Character = CharacterData & {
-  id: string;
-};
+import type { CharacterListItem } from "../types/Firestore";
 
 type Props = {
   user: User;
@@ -25,7 +14,7 @@ type Props = {
 
 export default function PlayerDashboard({ user, activeCampaignId }: Props) {
   const navigate = useNavigate();
-  const [characters, setCharacters] = useState<Character[]>([]);
+  const [characters, setCharacters] = useState<CharacterListItem[]>([]);
 
   useEffect(() => {
     if (!activeCampaignId) {
@@ -41,9 +30,9 @@ export default function PlayerDashboard({ user, activeCampaignId }: Props) {
     );
 
     const unsubscribe = onSnapshot(charsRef, (snapshot) => {
-      const list: Character[] = snapshot.docs
+      const list: CharacterListItem[] = snapshot.docs
         .map((docSnap) => {
-          const data = docSnap.data() as CharacterData;
+          const data = docSnap.data() as Omit<CharacterListItem, 'id'>;
           return {
             id: docSnap.id,
             ...data,
@@ -63,7 +52,7 @@ export default function PlayerDashboard({ user, activeCampaignId }: Props) {
 
       {!activeCampaignId && (
         <p className="text-slate-400">
-          No campaign selected. Use “Select Campaign” in the top navigation.
+          No campaign selected. Use "Select Campaign" in the top navigation.
         </p>
       )}
 

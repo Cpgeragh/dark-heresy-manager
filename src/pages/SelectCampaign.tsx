@@ -1,16 +1,16 @@
+// src/pages/SelectCampaign.tsx
+
 import { useEffect, useState } from "react";
-
-import {
-  collection,
-  getDocs,
-} from "firebase/firestore";
-
-import type { DocumentData } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 import type { User } from "firebase/auth";
 import { db } from "../firebase";
+import type { CampaignDocument } from "../types/Firestore";
+
+// Type alias for cleaner code
+type CampaignWithId = CampaignDocument & { id: string };
 
 type Props = {
-  user: User; 
+  user: User;
   role: "player" | "dm";
   activeCampaignId: string | null;
   onActiveCampaignChange: (id: string | null) => void;
@@ -22,20 +22,16 @@ export default function SelectCampaign({
   activeCampaignId,
   onActiveCampaignChange,
 }: Props) {
-
-  const [campaigns, setCampaigns] = useState<
-    { id: string; name: string; dmId: string }[]
-  >([]);
+  const [campaigns, setCampaigns] = useState<CampaignWithId[]>([]);
 
   useEffect(() => {
     async function load() {
       const snap = await getDocs(collection(db, "campaigns"));
-      const list = snap.docs.map((docSnap) => {
-        const data = docSnap.data() as DocumentData;
+      const list: CampaignWithId[] = snap.docs.map((docSnap) => {
+        const data = docSnap.data() as Omit<CampaignDocument, 'id'>;
         return {
           id: docSnap.id,
-          name: data.name ?? "Unnamed Campaign",
-          dmId: data.dmId ?? "",
+          ...data,
         };
       });
 

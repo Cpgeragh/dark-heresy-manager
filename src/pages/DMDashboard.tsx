@@ -13,21 +13,15 @@ import {
 import type { User } from "firebase/auth";
 import { db } from "../firebase";
 import { createEmptyCharacterData } from "../utils/characterFactory";
+import type { CampaignDocument, CharacterListItem } from "../types/Firestore";
+
+// Type alias for cleaner code
+type CampaignWithId = CampaignDocument & { id: string };
 
 interface Props {
   user: User;
   activeCampaignId: string | null;
   onActiveCampaignChange: (id: string | null) => void;
-}
-
-interface CharacterListItem {
-  id: string;
-  recoveryCode: string;
-  userId: string | null;
-  isEditableByPlayer: boolean;
-  header?: {
-    characterName?: string;
-  };
 }
 
 export default function DMDashboard({
@@ -37,9 +31,7 @@ export default function DMDashboard({
 }: Props) {
   const navigate = useNavigate();
 
-  const [campaigns, setCampaigns] = useState<
-    { id: string; name: string; dmId: string }[]
-  >([]);
+  const [campaigns, setCampaigns] = useState<CampaignWithId[]>([]);
   const [newCampaignName, setNewCampaignName] = useState("");
   const [characterName, setCharacterName] = useState("");
 
@@ -51,15 +43,14 @@ export default function DMDashboard({
   useEffect(() => {
     async function loadCampaigns() {
       const snap = await getDocs(collection(db, "campaigns"));
-      const list: { id: string; name: string; dmId: string }[] = [];
+      const list: CampaignWithId[] = [];
 
       snap.forEach((docSnap) => {
-        const data = docSnap.data() as any;
+        const data = docSnap.data() as Omit<CampaignDocument, 'id'>;
         if (data.dmId === user.uid) {
           list.push({
             id: docSnap.id,
-            name: data.name ?? "Untitled",
-            dmId: data.dmId,
+            ...data,
           });
         }
       });
@@ -82,10 +73,13 @@ export default function DMDashboard({
     const ref = collection(db, "campaigns", activeCampaignId, "characters");
 
     const unsub = onSnapshot(ref, (snap) => {
-      const list = snap.docs.map((c) => ({
-        id: c.id,
-        ...(c.data() as any),
-      }));
+      const list: CharacterListItem[] = snap.docs.map((c) => {
+        const data = c.data() as Omit<CharacterListItem, 'id'>;
+        return {
+          id: c.id,
+          ...data,
+        };
+      });
       setCharacters(list);
     });
 
@@ -107,11 +101,13 @@ export default function DMDashboard({
     const name = newCampaignName.trim() || "Untitled campaign";
     const newRef = doc(collection(db, "campaigns"));
 
-    await setDoc(newRef, {
+    const campaignData: CampaignDocument = {
       name,
       dmId: user.uid,
       createdAt: new Date(),
-    });
+    };
+
+    await setDoc(newRef, campaignData);
 
     setNewCampaignName("");
     onActiveCampaignChange(newRef.id);

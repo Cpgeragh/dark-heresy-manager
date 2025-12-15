@@ -3,6 +3,11 @@
 import { useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../../../firebase";
+import type {
+  RecoveryIndexDocument,
+  CampaignDocument,
+  CharacterDocument,
+} from "../../../types/Firestore";
 
 export type OwnershipState =
   | "unclaimed"
@@ -13,8 +18,8 @@ export type OwnershipState =
 export interface RecoveryLookupResult {
   campaignId: string;
   characterId: string;
-  character: any;
-  campaign: any;
+  character: CharacterDocument & { id: string };
+  campaign: CampaignDocument;
   ownership: OwnershipState;
 }
 
@@ -37,10 +42,8 @@ export function useRecoveryLookup() {
         return;
       }
 
-      const { campaignId, characterId } = indexSnap.data() as {
-        campaignId: string;
-        characterId: string;
-      };
+      const { campaignId, characterId } =
+        indexSnap.data() as RecoveryIndexDocument;
 
       const campSnap = await getDoc(doc(db, "campaigns", campaignId));
       const charSnap = await getDoc(
@@ -52,8 +55,8 @@ export function useRecoveryLookup() {
         return;
       }
 
-      const characterData = charSnap.data() as any;
-      const campaignData = campSnap.data() as any;
+      const characterData = charSnap.data() as CharacterDocument;
+      const campaignData = campSnap.data() as CampaignDocument;
 
       const currentUser = auth.currentUser;
       const uid = currentUser?.uid ?? null;
@@ -76,7 +79,7 @@ export function useRecoveryLookup() {
       setData({
         campaignId,
         characterId,
-        character: { id: characterId, ...characterData },
+        character: { ...characterData, id: characterId },
         campaign: campaignData,
         ownership,
       });

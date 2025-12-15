@@ -3,8 +3,11 @@
 import { useEffect, useState } from "react";
 import { doc, collection, onSnapshot, query, orderBy } from "firebase/firestore";
 import { db } from "../firebase";
-import type { Character } from "../types/Character";
-import type { ClaimLog } from "../types/ClaimLog";
+import type { CharacterDocument, ClaimLogDocument } from "../types/Firestore";
+
+// Type aliases for clarity
+type Character = CharacterDocument;
+type ClaimLog = ClaimLogDocument;
 
 interface UseCharacterDataArgs {
   campaignId?: string;

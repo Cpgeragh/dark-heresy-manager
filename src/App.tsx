@@ -5,11 +5,9 @@ import { Routes, Route, Navigate, Link, useLocation } from "react-router-dom";
 import type { User } from "firebase/auth";
 
 import { auth, db } from "./firebase";
-import {
-  onAuthStateChanged,
-  signInAnonymously,
-} from "firebase/auth";
+import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
+import type { UserDocument } from "./types/Firestore";
 
 import DMDashboard from "./pages/DMDashboard";
 import PlayerDashboard from "./pages/PlayerDashboard";
@@ -44,17 +42,19 @@ export default function App() {
         const snap = await getDoc(ref);
 
         if (!snap.exists()) {
-          await setDoc(ref, {
+          const newUserDoc: UserDocument = {
             role: "player",
             activeCampaignId: null,
             createdAt: serverTimestamp(),
             lastSeen: serverTimestamp(),
-          });
+          };
+
+          await setDoc(ref, newUserDoc);
 
           setUserRole("player");
           setActiveCampaignId(null);
         } else {
-          const data = snap.data() as any;
+          const data = snap.data() as UserDocument;
           const role: Role = data.role === "dm" ? "dm" : "player";
           setUserRole(role);
           setActiveCampaignId(data.activeCampaignId ?? null);
@@ -296,10 +296,7 @@ export default function App() {
 // -------------------------------------------------
 // BREADCRUMBS (STRUCTURE ONLY)
 // -------------------------------------------------
-function Breadcrumbs(props: {
-  isDM: boolean;
-  pathname: string;
-}) {
+function Breadcrumbs(props: { isDM: boolean; pathname: string }) {
   const segments = props.pathname.split("/").filter(Boolean);
 
   // No breadcrumbs on root dashboards
@@ -342,10 +339,7 @@ function Breadcrumbs(props: {
       {crumbs.map((crumb, index) => (
         <span key={index} className="flex items-center gap-2">
           {crumb.to ? (
-            <Link
-              to={crumb.to}
-              className="hover:text-slate-200 transition"
-            >
+            <Link to={crumb.to} className="hover:text-slate-200 transition">
               {crumb.label}
             </Link>
           ) : (
