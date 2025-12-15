@@ -44,7 +44,6 @@ export default function App() {
         const snap = await getDoc(ref);
 
         if (!snap.exists()) {
-          // First-time user creation
           await setDoc(ref, {
             role: "player",
             activeCampaignId: null,
@@ -61,7 +60,6 @@ export default function App() {
           setActiveCampaignId(data.activeCampaignId ?? null);
         }
 
-        // always update lastSeen
         await setDoc(ref, { lastSeen: serverTimestamp() }, { merge: true });
       } catch (err) {
         console.error("Auth error:", err);
@@ -85,14 +83,11 @@ export default function App() {
   }
 
   // -------------------------------------------------
-  // DEV-ONLY DM / PLAYER SWITCHER (Option 1)
+  // DEV-ONLY ROLE SWITCHER
   // -------------------------------------------------
   async function switchToDM() {
     if (!currentUser) return;
 
-    console.log("Switching to DM (dev)…");
-
-    // 1. Update user's role
     await setDoc(
       doc(db, "users", currentUser.uid),
       { role: "dm" },
@@ -100,25 +95,15 @@ export default function App() {
     );
     setUserRole("dm");
 
-    // 2. Make current campaign belong to this DM (if any)
     if (activeCampaignId) {
       const campRef = doc(db, "campaigns", activeCampaignId);
-      await setDoc(
-        campRef,
-        { dmId: currentUser.uid },
-        { merge: true }
-      );
+      await setDoc(campRef, { dmId: currentUser.uid }, { merge: true });
     }
-
-    console.log("Now acting as DM");
   }
 
   async function switchToPlayer() {
     if (!currentUser) return;
 
-    console.log("Switching to Player (dev)…");
-
-    // 1. Update user's role
     await setDoc(
       doc(db, "users", currentUser.uid),
       { role: "player" },
@@ -126,17 +111,10 @@ export default function App() {
     );
     setUserRole("player");
 
-    // 2. Remove them from DM ownership for active campaign (if any)
     if (activeCampaignId) {
       const campRef = doc(db, "campaigns", activeCampaignId);
-      await setDoc(
-        campRef,
-        { dmId: null },
-        { merge: true }
-      );
+      await setDoc(campRef, { dmId: null }, { merge: true });
     }
-
-    console.log("Now acting as Player");
   }
 
   // -------------------------------------------------
@@ -165,11 +143,17 @@ export default function App() {
   // -------------------------------------------------
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
-      {/* TOP NAVIGATION */}
+      {/* ================= HEADER ================= */}
       <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur">
-        <nav className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-          {/* Left - Logo */}
-          <div className="flex items-center gap-2">
+        <nav
+          className="
+            max-w-5xl mx-auto px-4 py-3
+            flex flex-col gap-3
+            sm:flex-row sm:items-center sm:justify-between
+          "
+        >
+          {/* Logo */}
+          <div className="flex items-center gap-2 flex-shrink-0">
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500 text-slate-900 font-bold">
               DH
             </span>
@@ -181,56 +165,52 @@ export default function App() {
             </div>
           </div>
 
-          {/* Navigation + DEV Switcher */}
-          <div className="flex items-center gap-3">
-            <div className="flex gap-2">
-              {isDM ? (
-                <>
-                  <NavLinkButton
-                    to="/dm"
-                    label="DM Dashboard"
-                    current={location.pathname === "/dm"}
-                  />
-                  <NavLinkButton
-                    to="/select"
-                    label="Select Campaign"
-                    current={location.pathname === "/select"}
-                  />
-                </>
-              ) : (
-                <>
-                  <NavLinkButton
-                    to="/player"
-                    label="My Characters"
-                    current={location.pathname === "/player"}
-                  />
-                  <NavLinkButton
-                    to="/claim"
-                    label="Claim"
-                    current={location.pathname === "/claim"}
-                  />
-                  <NavLinkButton
-                    to="/select"
-                    label="Select Campaign"
-                    current={location.pathname === "/select"}
-                  />
-                </>
-              )}
-            </div>
+          {/* Navigation */}
+          <div className="flex flex-wrap items-center gap-2">
+            {isDM ? (
+              <>
+                <NavLinkButton
+                  to="/dm"
+                  label="DM Dashboard"
+                  current={location.pathname === "/dm"}
+                />
+                <NavLinkButton
+                  to="/select"
+                  label="Select Campaign"
+                  current={location.pathname === "/select"}
+                />
+              </>
+            ) : (
+              <>
+                <NavLinkButton
+                  to="/player"
+                  label="My Characters"
+                  current={location.pathname === "/player"}
+                />
+                <NavLinkButton
+                  to="/claim"
+                  label="Claim"
+                  current={location.pathname === "/claim"}
+                />
+                <NavLinkButton
+                  to="/select"
+                  label="Select Campaign"
+                  current={location.pathname === "/select"}
+                />
+              </>
+            )}
 
-            {/* DEV SWITCHER BUTTONS */}
             {import.meta.env.DEV && (
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <button
                   onClick={switchToPlayer}
-                  className="px-3 py-1 text-xs rounded-full bg-blue-600 text-white border border-blue-500 hover:bg-blue-500 transition"
+                  className="px-3 py-1 text-xs rounded-full bg-blue-600 text-white border border-blue-500 hover:bg-blue-500"
                 >
                   Switch to Player
                 </button>
-
                 <button
                   onClick={switchToDM}
-                  className="px-3 py-1 text-xs rounded-full bg-green-600 text-white border border-green-500 hover:bg-green-500 transition"
+                  className="px-3 py-1 text-xs rounded-full bg-green-600 text-white border border-green-500 hover:bg-green-500"
                 >
                   Switch to DM
                 </button>
@@ -240,10 +220,12 @@ export default function App() {
         </nav>
       </header>
 
-      {/* ROUTES */}
+      {/* ================= BREADCRUMBS ================= */}
+      <Breadcrumbs isDM={isDM} pathname={location.pathname} />
+
+      {/* ================= ROUTES ================= */}
       <main className="max-w-5xl mx-auto px-4 py-6">
         <Routes>
-          {/* DM ROUTES */}
           {isDM && (
             <>
               <Route
@@ -256,7 +238,6 @@ export default function App() {
                   />
                 }
               />
-
               <Route
                 path="/select"
                 element={
@@ -271,7 +252,6 @@ export default function App() {
             </>
           )}
 
-          {/* PLAYER ROUTES */}
           {!isDM && (
             <>
               <Route
@@ -283,9 +263,7 @@ export default function App() {
                   />
                 }
               />
-
               <Route path="/claim" element={<ClaimCharacterPage />} />
-
               <Route
                 path="/select"
                 element={
@@ -300,13 +278,11 @@ export default function App() {
             </>
           )}
 
-          {/* SHARED CHARACTER SHEET */}
           <Route
             path="/campaign/:campaignId/character/:characterId"
             element={<CharacterSheet />}
           />
 
-          {/* FALLBACK */}
           <Route
             path="*"
             element={<Navigate to={isDM ? "/dm" : "/player"} replace />}
@@ -318,9 +294,73 @@ export default function App() {
 }
 
 // -------------------------------------------------
-// NAV LINK BUTTON COMPONENT
+// BREADCRUMBS (STRUCTURE ONLY)
 // -------------------------------------------------
+function Breadcrumbs(props: {
+  isDM: boolean;
+  pathname: string;
+}) {
+  const segments = props.pathname.split("/").filter(Boolean);
 
+  // No breadcrumbs on root dashboards
+  if (segments.length === 0) return null;
+
+  const crumbs: { label: string; to?: string }[] = [];
+
+  // Root
+  if (props.isDM) {
+    crumbs.push({ label: "DM Dashboard", to: "/dm" });
+  } else {
+    crumbs.push({ label: "My Characters", to: "/player" });
+  }
+
+  // Campaign context
+  if (segments.includes("campaign")) {
+    crumbs.push({
+      label: "Campaign",
+      to: props.isDM ? "/dm" : "/player",
+    });
+  }
+
+  // Character context
+  if (segments.includes("character")) {
+    crumbs.push({ label: "Character" });
+  }
+
+  if (crumbs.length <= 1) return null;
+
+  return (
+    <nav
+      className="
+        max-w-5xl mx-auto px-4
+        text-sm text-slate-400
+        flex flex-wrap items-center gap-2
+        mt-3
+      "
+      aria-label="Breadcrumb"
+    >
+      {crumbs.map((crumb, index) => (
+        <span key={index} className="flex items-center gap-2">
+          {crumb.to ? (
+            <Link
+              to={crumb.to}
+              className="hover:text-slate-200 transition"
+            >
+              {crumb.label}
+            </Link>
+          ) : (
+            <span className="text-slate-200">{crumb.label}</span>
+          )}
+          {index < crumbs.length - 1 && <span>→</span>}
+        </span>
+      ))}
+    </nav>
+  );
+}
+
+// -------------------------------------------------
+// NAV LINK BUTTON
+// -------------------------------------------------
 function NavLinkButton(props: {
   to: string;
   label: string;

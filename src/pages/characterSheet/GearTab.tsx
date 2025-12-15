@@ -1,4 +1,7 @@
-// src/pages/characterSheet/GearTab.tsx
+import {
+  editableInputClass,
+  sectionContainerClass,
+} from "../../ui/editableStyles";
 
 interface GearTabProps {
   gear: string[];
@@ -40,7 +43,7 @@ export function GearTab({ gear, editable, onUpdate }: GearTabProps) {
         {gear.map((item, idx) => (
           <li
             key={idx}
-            className="flex items-center gap-2 rounded border border-slate-700 bg-slate-900/40 px-3 py-2"
+            className={sectionContainerClass(editable) + " flex items-center gap-2"}
           >
             {editable ? (
               <>
@@ -48,7 +51,7 @@ export function GearTab({ gear, editable, onUpdate }: GearTabProps) {
                   value={item}
                   placeholder="Equipment item…"
                   onChange={(e) => updateItem(idx, e.target.value)}
-                  className="flex-1 rounded border border-slate-700 bg-slate-800 px-2 py-1 text-sm text-slate-100"
+                  className={editableInputClass(true) + " flex-1"}
                 />
 
                 <button
@@ -59,7 +62,9 @@ export function GearTab({ gear, editable, onUpdate }: GearTabProps) {
                 </button>
               </>
             ) : (
-              <span className="text-sm">{item}</span>
+              <span className="text-sm text-slate-200">
+                {item || "—"}
+              </span>
             )}
           </li>
         ))}

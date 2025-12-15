@@ -6,6 +6,11 @@ import type {
   WeaponTrainingTalentId,
 } from "../../types/Character";
 
+import {
+  editableTextareaClass,
+  sectionContainerClass,
+} from "../../ui/editableStyles";
+
 interface TalentsTabProps {
   talents: TalentsAndTraitsBlock;
   weaponTraining: WeaponTrainingBlock;
@@ -31,90 +36,83 @@ export function TalentsTab({
     "exotic",
   ];
 
-  const toggleTraining = (id: WeaponTrainingTalentId) => {
+  function toggleTraining(id: WeaponTrainingTalentId) {
     if (!editable) return;
 
     const trained = new Set(weaponTraining.trained);
-
-    if (trained.has(id)) trained.delete(id);
-    else trained.add(id);
+    trained.has(id) ? trained.delete(id) : trained.add(id);
 
     onUpdateTraining({
       ...weaponTraining,
       trained: Array.from(trained),
     });
-  };
+  }
 
   return (
     <div className="space-y-6 text-slate-300">
       <h2 className="text-xl font-semibold">Talents & Training</h2>
 
       {/* HOMEWORLD / BACKGROUND */}
-      <section className="space-y-2">
-        <h3 className="text-lg font-semibold text-slate-200">
+      <section className={sectionContainerClass(editable)}>
+        <h3 className="text-lg font-semibold text-slate-200 mb-2">
           Homeworld / Background
         </h3>
 
-        {editable ? (
-          <textarea
-            className="w-full min-h-[80px] bg-slate-900 border border-slate-700
-                       rounded px-3 py-2 text-sm text-slate-100 resize-y"
-            value={talents.homeworldBackground}
-            onChange={(e) =>
-              onUpdateTalents({
-                ...talents,
-                homeworldBackground: e.target.value,
-              })
-            }
-          />
-        ) : (
-          <div className="rounded border border-slate-700 bg-slate-900/40 p-3 text-sm">
-            {talents.homeworldBackground || "None"}
-          </div>
-        )}
+        <textarea
+          disabled={!editable}
+          className={editableTextareaClass(editable) + " min-h-[80px]"}
+          value={talents.homeworldBackground}
+          onChange={(e) =>
+            onUpdateTalents({
+              ...talents,
+              homeworldBackground: e.target.value,
+            })
+          }
+          placeholder={!editable ? "Read-only" : undefined}
+        />
       </section>
 
       {/* TALENTS / TRAITS */}
-      <section className="space-y-2">
-        <h3 className="text-lg font-semibold text-slate-200">
+      <section className={sectionContainerClass(editable)}>
+        <h3 className="text-lg font-semibold text-slate-200 mb-2">
           Talents, Traits & Advances
         </h3>
 
-        {editable ? (
-          <textarea
-            className="w-full min-h-[120px] bg-slate-900 border border-slate-700
-                       rounded px-3 py-2 text-sm text-slate-100 resize-y"
-            value={talents.advancesTalentsAndTraits}
-            onChange={(e) =>
-              onUpdateTalents({
-                ...talents,
-                advancesTalentsAndTraits: e.target.value,
-              })
-            }
-          />
-        ) : (
-          <div className="rounded border border-slate-700 bg-slate-900/40 p-3 text-sm whitespace-pre-wrap">
-            {talents.advancesTalentsAndTraits || "None"}
-          </div>
-        )}
+        <textarea
+          disabled={!editable}
+          className={editableTextareaClass(editable) + " min-h-[120px]"}
+          value={talents.advancesTalentsAndTraits}
+          onChange={(e) =>
+            onUpdateTalents({
+              ...talents,
+              advancesTalentsAndTraits: e.target.value,
+            })
+          }
+          placeholder={!editable ? "Read-only" : undefined}
+        />
       </section>
 
       {/* WEAPON TRAINING */}
-      <section className="space-y-4">
-        <h3 className="text-lg font-semibold text-slate-200">
+      <section className={sectionContainerClass(editable)}>
+        <h3 className="text-lg font-semibold text-slate-200 mb-3">
           Weapon Training
         </h3>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2
-                        rounded border border-slate-700 bg-slate-900/30 p-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
           {weaponList.map((id) => {
             const trained = weaponTraining.trained.includes(id);
 
             return (
               <label
                 key={id}
-                className={`flex items-center gap-2 text-sm cursor-pointer
-                  ${trained ? "text-slate-100" : "text-slate-500"}`}
+                className={`flex items-center gap-2 text-sm
+                  ${
+                    editable
+                      ? "cursor-pointer"
+                      : "cursor-not-allowed opacity-60"
+                  }
+                  ${trained ? "text-slate-100" : "text-slate-500"}
+                `}
               >
                 <input
                   type="checkbox"
@@ -122,37 +120,30 @@ export function TalentsTab({
                   checked={trained}
                   onChange={() => toggleTraining(id)}
                 />
-                <span className="font-mono text-xs">
-                  {id}
-                </span>
+                <span className="font-mono text-xs">{id}</span>
               </label>
             );
           })}
         </div>
 
         {/* EXOTIC NOTES */}
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold text-slate-300">
+        <div className="mt-4">
+          <h4 className="text-sm font-semibold text-slate-300 mb-1">
             Exotic Weapon Notes
           </h4>
 
-          {editable ? (
-            <textarea
-              className="w-full min-h-[60px] bg-slate-900 border border-slate-700
-                         rounded px-3 py-2 text-sm text-slate-100 resize-y"
-              value={weaponTraining.exoticNotes ?? ""}
-              onChange={(e) =>
-                onUpdateTraining({
-                  ...weaponTraining,
-                  exoticNotes: e.target.value,
-                })
-              }
-            />
-          ) : (
-            <div className="rounded border border-slate-700 bg-slate-900/40 p-3 text-sm">
-              {weaponTraining.exoticNotes || "None"}
-            </div>
-          )}
+          <textarea
+            disabled={!editable}
+            className={editableTextareaClass(editable) + " min-h-[60px]"}
+            value={weaponTraining.exoticNotes ?? ""}
+            onChange={(e) =>
+              onUpdateTraining({
+                ...weaponTraining,
+                exoticNotes: e.target.value,
+              })
+            }
+            placeholder={!editable ? "Read-only" : undefined}
+          />
         </div>
       </section>
     </div>

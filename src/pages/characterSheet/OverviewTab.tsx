@@ -1,13 +1,15 @@
-// src/pages/characterSheet/OverviewTab.tsx
-
 import { useState } from "react";
 import { Tooltip } from "../../components/Tooltip";
 import type {
   Character,
   CharacterHeader,
   WoundsBlock,
-  FateBlock
+  FateBlock,
 } from "../../types/Character";
+import {
+  editableInputClass,
+  sectionContainerClass,
+} from "../../ui/editableStyles";
 
 interface OverviewTabProps {
   character: Character;
@@ -28,7 +30,7 @@ export function OverviewTab({
   onUpdateHeader,
   onUpdateWounds,
   onUpdateFate,
-  getCharTotal
+  getCharTotal,
 }: OverviewTabProps) {
   const [copied, setCopied] = useState(false);
 
@@ -45,13 +47,15 @@ export function OverviewTab({
   }
 
   function adjustWounds(delta: number) {
+    if (!editable) return;
     onUpdateWounds({ ...wounds, current: wounds.current + delta });
   }
 
   function adjustFate(delta: number) {
+    if (!editable) return;
     onUpdateFate({
       ...fate,
-      current: Math.max(0, fate.current + delta)
+      current: Math.max(0, fate.current + delta),
     });
   }
 
@@ -86,18 +90,18 @@ export function OverviewTab({
     half: AB,
     full: AB * 2,
     charge: AB * 3,
-    run: AB * 6
+    run: AB * 6,
   };
 
   return (
     <div className="space-y-6 text-slate-300">
-      {/* HEADER */}
-      <section>
+      {/* CHARACTER NAME */}
+      <section className={sectionContainerClass(editable)}>
         <label className="block text-xs text-slate-400">
           Character Name
           <input
             disabled={!editable}
-            className="mt-1 w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded text-slate-100"
+            className={editableInputClass(editable) + " mt-1"}
             value={header.characterName ?? ""}
             onChange={(e) =>
               updateHeaderField("characterName", e.target.value)
@@ -107,8 +111,8 @@ export function OverviewTab({
       </section>
 
       {/* WOUNDS */}
-      <section className="space-y-2">
-        <h2 className="text-lg font-semibold">Wounds</h2>
+      <section className={sectionContainerClass(editable)}>
+        <h2 className="text-lg font-semibold mb-2">Wounds</h2>
 
         <div className="flex items-center gap-2 text-sm">
           <span className="text-slate-400">
@@ -120,7 +124,12 @@ export function OverviewTab({
           <button
             disabled={!editable}
             onClick={() => adjustWounds(-1)}
-            className="px-2 py-0.5 border border-slate-600 rounded text-xs disabled:opacity-40"
+            className={`px-2 py-0.5 border rounded text-xs transition
+              ${
+                editable
+                  ? "border-slate-600 hover:bg-slate-800"
+                  : "border-slate-700 opacity-50 cursor-not-allowed"
+              }`}
           >
             −
           </button>
@@ -136,24 +145,29 @@ export function OverviewTab({
           <button
             disabled={!editable}
             onClick={() => adjustWounds(1)}
-            className="px-2 py-0.5 border border-slate-600 rounded text-xs disabled:opacity-40"
+            className={`px-2 py-0.5 border rounded text-xs transition
+              ${
+                editable
+                  ? "border-slate-600 hover:bg-slate-800"
+                  : "border-slate-700 opacity-50 cursor-not-allowed"
+              }`}
           >
             +
           </button>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">
           <label className="text-xs text-slate-400">
             Critical Damage
             <input
               type="number"
               disabled={!editable}
-              className="mt-1 w-full px-2 py-1 bg-slate-900 border border-slate-700 rounded text-slate-100"
+              className={editableInputClass(editable) + " mt-1"}
               value={wounds.criticalDamage}
               onChange={(e) =>
                 onUpdateWounds({
                   ...wounds,
-                  criticalDamage: Number(e.target.value)
+                  criticalDamage: Number(e.target.value),
                 })
               }
             />
@@ -164,12 +178,12 @@ export function OverviewTab({
             <input
               type="number"
               disabled={!editable}
-              className="mt-1 w-full px-2 py-1 bg-slate-900 border border-slate-700 rounded text-slate-100"
+              className={editableInputClass(editable) + " mt-1"}
               value={wounds.fatigue}
               onChange={(e) =>
                 onUpdateWounds({
                   ...wounds,
-                  fatigue: Number(e.target.value)
+                  fatigue: Number(e.target.value),
                 })
               }
             />
@@ -178,8 +192,8 @@ export function OverviewTab({
       </section>
 
       {/* FATE */}
-      <section className="space-y-2">
-        <h2 className="text-lg font-semibold">Fate Points</h2>
+      <section className={sectionContainerClass(editable)}>
+        <h2 className="text-lg font-semibold mb-2">Fate Points</h2>
 
         <div className="flex items-center gap-2 text-sm">
           <span className="text-slate-400">
@@ -191,7 +205,12 @@ export function OverviewTab({
           <button
             disabled={!editable}
             onClick={() => adjustFate(-1)}
-            className="px-2 py-0.5 border border-slate-600 rounded text-xs disabled:opacity-40"
+            className={`px-2 py-0.5 border rounded text-xs transition
+              ${
+                editable
+                  ? "border-slate-600 hover:bg-slate-800"
+                  : "border-slate-700 opacity-50 cursor-not-allowed"
+              }`}
           >
             −
           </button>
@@ -207,7 +226,12 @@ export function OverviewTab({
           <button
             disabled={!editable}
             onClick={() => adjustFate(1)}
-            className="px-2 py-0.5 border border-slate-600 rounded text-xs disabled:opacity-40"
+            className={`px-2 py-0.5 border rounded text-xs transition
+              ${
+                editable
+                  ? "border-slate-600 hover:bg-slate-800"
+                  : "border-slate-700 opacity-50 cursor-not-allowed"
+              }`}
           >
             +
           </button>
@@ -215,8 +239,8 @@ export function OverviewTab({
       </section>
 
       {/* MOVEMENT */}
-      <section className="space-y-2">
-        <div className="flex items-center gap-2">
+      <section className={sectionContainerClass(false)}>
+        <div className="flex items-center gap-2 mb-2">
           <h2 className="text-lg font-semibold">Movement</h2>
           <Tooltip
             content={
@@ -243,10 +267,10 @@ export function OverviewTab({
 
       {/* RECOVERY CODE */}
       {recoveryCode && (
-        <section className="p-3 rounded border border-slate-700 bg-slate-900/40 space-y-1">
+        <section className={sectionContainerClass(false)}>
           <div className="text-xs text-slate-400">Recovery Code</div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mt-1">
             <code className="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-amber-300">
               {recoveryCode}
             </code>

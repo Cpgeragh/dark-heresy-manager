@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
+// src/pages/characterSheet/tabs/skills/SkillsTab.tsx
 
+import { useMemo, useState } from "react";
 import type { Characteristics, SkillEntry } from "../../../../types/Character";
 import type { CharField } from "../../../../utils/characterFactory";
 

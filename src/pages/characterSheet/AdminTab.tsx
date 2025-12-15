@@ -3,6 +3,11 @@
 import { useState } from "react";
 import type { Character } from "../../types/Character";
 import type { ClaimLog } from "../../types/ClaimLog";
+import {
+  editableInputClass,
+  sectionContainerClass,
+  readOnlyBadgeClass,
+} from "../../ui/editableStyles";
 
 interface AdminTabProps {
   character: Character;
@@ -24,10 +29,15 @@ export function AdminTab({
   const latest = claimLog.length > 0 ? claimLog[0] : null;
 
   return (
-    <div className="space-y-4 text-slate-300">
-      <h2 className="text-xl font-semibold mb-2">Admin</h2>
+    <div className="space-y-6 text-slate-300">
+      <h2 className="text-xl font-semibold">Admin</h2>
 
-      {/* Latest event */}
+      {/* CONTEXT NOTE */}
+      <p className="text-xs text-slate-400">
+        DM-only controls. Changes here immediately affect player access.
+      </p>
+
+      {/* LATEST EVENT */}
       {latest && (
         <p className="text-xs text-slate-400">
           Last ownership event:{" "}
@@ -37,64 +47,83 @@ export function AdminTab({
         </p>
       )}
 
-      {/* OWNERSHIP BLOCK */}
-      <div className="p-3 rounded border border-red-600 bg-red-900/30">
-        <h3 className="font-semibold text-red-300 mb-2">Ownership</h3>
-
-        <p className="text-sm mb-1">
-          Current owner UID:{" "}
-          <span className="font-mono">
-            {character.userId || "None (unclaimed)"}
+      {/* OWNERSHIP */}
+      <section className={sectionContainerClass(true)}>
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="font-semibold text-red-300">Ownership</h3>
+          <span className={readOnlyBadgeClass()}>
+            DM authority
           </span>
-        </p>
+        </div>
 
-        <p className="text-sm mb-3">
-          Player editable:{" "}
-          <span className="font-mono">
-            {character.isEditableByPlayer ? "true" : "false"}
-          </span>
-        </p>
+        <div className="space-y-1 text-sm">
+          <div>
+            Current owner UID:{" "}
+            <span className="font-mono text-slate-200">
+              {character.userId || "None (unclaimed)"}
+            </span>
+          </div>
 
-        {/* Buttons */}
-        <div className="flex flex-wrap gap-2 mb-3">
+          <div>
+            Player editable:{" "}
+            <span className="font-mono text-slate-200">
+              {character.isEditableByPlayer ? "true" : "false"}
+            </span>
+          </div>
+        </div>
+
+        {/* ACTIONS */}
+        <div className="flex flex-wrap gap-2 mt-4">
           <button
             onClick={onDMForceRelease}
-            className="px-3 py-1 bg-red-700 text-white rounded border border-red-500 hover:bg-red-600"
+            className="px-3 py-1 text-sm rounded border
+                       bg-red-700 border-red-500 text-white
+                       hover:bg-red-600"
           >
             Force Release Ownership
           </button>
 
           <button
             onClick={onDMToggleEdit}
-            className="px-3 py-1 bg-yellow-600 text-black rounded border border-yellow-500 hover:bg-yellow-500"
+            className="px-3 py-1 text-sm rounded border
+                       bg-yellow-600 border-yellow-500 text-black
+                       hover:bg-yellow-500"
           >
             Toggle Player Edit Permission
           </button>
         </div>
 
-        {/* Assign UID */}
-        <div className="flex flex-wrap items-center gap-2">
+        {/* FORCE ASSIGN */}
+        <div className="flex flex-wrap items-center gap-2 mt-4">
           <input
             value={assignUID}
             onChange={(e) => setAssignUID(e.target.value)}
-            className="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-slate-100 font-mono text-xs"
             placeholder="Enter player UID"
+            className={editableInputClass(true) + " font-mono text-xs max-w-xs"}
           />
+
           <button
             onClick={() => {
               const clean = assignUID.trim();
               if (clean) onDMForceAssign(clean);
             }}
-            className="px-3 py-1 bg-blue-600 text-white rounded border border-blue-500 hover:bg-blue-500 text-sm"
+            className="px-3 py-1 text-sm rounded border
+                       bg-blue-600 border-blue-500 text-white
+                       hover:bg-blue-500"
           >
             Assign to Player
           </button>
         </div>
-      </div>
+      </section>
 
       {/* CLAIM HISTORY */}
-      <div className="mt-4">
-        <h3 className="font-semibold mb-2">Claim History</h3>
+      <section className={sectionContainerClass(false)}>
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="font-semibold">Claim History</h3>
+          <span className={readOnlyBadgeClass()}>
+            Immutable
+          </span>
+        </div>
 
         {claimLog.length === 0 && (
           <p className="text-sm text-slate-400">
@@ -111,21 +140,25 @@ export function AdminTab({
 
             return (
               <li
-                key={entry.id ?? Math.random()}
-                className="border border-slate-700 rounded p-2 bg-slate-900/60 text-xs"
+                key={entry.id ?? crypto.randomUUID()}
+                className="rounded border border-slate-700
+                           bg-slate-900/60 p-2 text-xs"
               >
                 <div className="font-mono text-slate-200">
                   {entry.action} @ {when}
                 </div>
 
                 <div className="text-slate-400">
-                  Actor: <span className="font-mono">{entry.actorUid}</span>
+                  Actor:{" "}
+                  <span className="font-mono">
+                    {entry.actorUid}
+                  </span>
                 </div>
               </li>
             );
           })}
         </ul>
-      </div>
+      </section>
     </div>
   );
 }

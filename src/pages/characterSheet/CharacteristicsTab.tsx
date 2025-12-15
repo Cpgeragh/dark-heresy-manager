@@ -1,8 +1,7 @@
-// src/pages/characterSheet/CharacteristicsTab.tsx
-
 import type { CharField } from "../../utils/characterFactory";
 import type { Characteristics } from "../../types/Character";
 import CharacteristicField from "../../components/CharacteristicField";
+import { sectionContainerClass } from "../../ui/editableStyles";
 
 interface CharacteristicsTabProps {
   getCharField: (statKey: keyof Characteristics) => CharField;
@@ -18,13 +17,13 @@ export function CharacteristicsTab({
   editable,
   updateCharacteristic,
 }: CharacteristicsTabProps) {
-  // Helper: authoritative total
+  // Authoritative total
   function total(stat: keyof Characteristics) {
     const v = getCharField(stat);
     return v.base + v.advances;
   }
 
-  // Derived stat helpers
+  // Derived bonuses
   const SB = Math.floor(total("s") / 10);
   const TB = Math.floor(total("t") / 10);
   const AgB = Math.floor(total("ag") / 10);
@@ -44,8 +43,8 @@ export function CharacteristicsTab({
     const statTotal = value.base + value.advances;
 
     return (
-      <div className="p-3 rounded border border-slate-700 bg-slate-900/40 space-y-2">
-        {/* Header: label + total */}
+      <div className={sectionContainerClass(editable) + " space-y-2"}>
+        {/* Header */}
         <div className="flex items-baseline justify-between">
           <span className="text-sm text-slate-400">{label}</span>
           <span className="text-2xl font-semibold font-mono text-slate-100">
@@ -68,7 +67,7 @@ export function CharacteristicsTab({
     <div className="space-y-6 text-slate-300">
       <h2 className="text-xl font-semibold">Characteristics</h2>
 
-      {/* Main Stat Grid */}
+      {/* Main stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <StatBlock label="Weapon Skill (WS)" statKey="ws" />
         <StatBlock label="Ballistic Skill (BS)" statKey="bs" />
@@ -81,8 +80,8 @@ export function CharacteristicsTab({
         <StatBlock label="Fellowship (Fel)" statKey="fel" />
       </div>
 
-      {/* Derived Stats */}
-      <section className="p-4 rounded border border-slate-700 bg-slate-900/40 space-y-3">
+      {/* Derived stats */}
+      <section className={sectionContainerClass(false) + " space-y-3"}>
         <h3 className="text-lg font-semibold">Derived Stats</h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-2 text-sm">
@@ -94,7 +93,6 @@ export function CharacteristicsTab({
           <div>Willpower Bonus (WPB): <strong>{WPB}</strong></div>
           <div>Fellowship Bonus (FB): <strong>{FB}</strong></div>
 
-          {/* Movement */}
           <div className="col-span-full mt-2 font-semibold text-slate-200">
             Movement
           </div>

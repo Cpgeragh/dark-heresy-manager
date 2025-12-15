@@ -1,6 +1,10 @@
 // src/pages/characterSheet/ArmourTab.tsx
 
 import type { ArmourBlock, ArmourLocation } from "../../types/Character";
+import {
+  editableInputClass,
+  sectionContainerClass,
+} from "../../ui/editableStyles";
 
 interface ArmourTabProps {
   armour: ArmourBlock;
@@ -40,7 +44,7 @@ export function ArmourTab({
           {label}
         </div>
 
-        {/* AP (primary) */}
+        {/* AP */}
         <div className="flex items-center gap-1">
           <span className="text-xs text-slate-500">AP</span>
           <input
@@ -54,12 +58,11 @@ export function ArmourTab({
                 ap: Number(e.target.value),
               })
             }
-            className="w-16 px-2 py-1 bg-slate-900 border border-slate-700 rounded
-                       text-slate-100 text-sm font-mono"
+            className={editableInputClass(editable) + " w-16 font-mono"}
           />
         </div>
 
-        {/* Armour type (secondary) */}
+        {/* Armour type */}
         <input
           type="text"
           placeholder="Type (e.g. Flak)"
@@ -71,8 +74,7 @@ export function ArmourTab({
               type: e.target.value,
             })
           }
-          className="flex-1 px-2 py-1 bg-slate-800 border border-slate-700 rounded
-                     text-slate-100 text-sm"
+          className={editableInputClass(editable) + " flex-1"}
         />
       </div>
     );
@@ -87,8 +89,12 @@ export function ArmourTab({
       </p>
 
       {/* ARMOUR GRID */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6
-                      rounded border border-slate-700 bg-slate-900/30 p-4">
+      <div
+        className={
+          sectionContainerClass(editable) +
+          " grid grid-cols-1 md:grid-cols-2 gap-6"
+        }
+      >
         {/* LEFT COLUMN */}
         <div className="space-y-3">
           <LocationRow label="Head" locKey="head" />

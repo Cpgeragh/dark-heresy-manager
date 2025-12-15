@@ -1,4 +1,11 @@
+// src/pages/characterSheet/PsychicTab.tsx
+
 import type { PsychicBlock, PsychicPower } from "../../types/Character";
+import {
+  editableInputClass,
+  editableTextareaClass,
+  sectionContainerClass,
+} from "../../ui/editableStyles";
 
 interface PsychicTabProps {
   psychic: PsychicBlock;
@@ -16,6 +23,8 @@ export function PsychicTab({
     id: string,
     next: Partial<PsychicPower>
   ) {
+    if (!editable) return;
+
     onUpdate({
       ...psychic,
       [list]: psychic[list].map((p) =>
@@ -61,7 +70,7 @@ export function PsychicTab({
   }) {
     return (
       <div
-        className={`rounded border px-3 py-2 space-y-2 ${
+        className={`rounded border p-3 space-y-2 ${
           subtle
             ? "border-slate-700 bg-slate-900/30"
             : "border-indigo-600/40 bg-indigo-900/25"
@@ -76,6 +85,7 @@ export function PsychicTab({
             onChange={(e) =>
               updatePower(list, power.id, { known: e.target.checked })
             }
+            className={!editable ? "cursor-not-allowed opacity-60" : ""}
           />
 
           <input
@@ -85,7 +95,7 @@ export function PsychicTab({
             onChange={(e) =>
               updatePower(list, power.id, { name: e.target.value })
             }
-            className="flex-1 rounded border border-slate-700 bg-slate-800 px-2 py-1 text-sm text-slate-100"
+            className={editableInputClass(editable)}
           />
 
           {editable && (
@@ -110,7 +120,7 @@ export function PsychicTab({
                   threshold: e.target.value,
                 })
               }
-              className="rounded border border-slate-700 bg-slate-800 px-2 py-1"
+              className={editableInputClass(editable)}
             />
 
             <input
@@ -122,7 +132,7 @@ export function PsychicTab({
                   focusTime: e.target.value,
                 })
               }
-              className="rounded border border-slate-700 bg-slate-800 px-2 py-1"
+              className={editableInputClass(editable)}
             />
 
             <input
@@ -132,7 +142,7 @@ export function PsychicTab({
               onChange={(e) =>
                 updatePower(list, power.id, { range: e.target.value })
               }
-              className="rounded border border-slate-700 bg-slate-800 px-2 py-1"
+              className={editableInputClass(editable)}
             />
 
             <input
@@ -144,7 +154,7 @@ export function PsychicTab({
                   sustained: e.target.value,
                 })
               }
-              className="rounded border border-slate-700 bg-slate-800 px-2 py-1"
+              className={editableInputClass(editable)}
             />
           </div>
         )}
@@ -159,7 +169,7 @@ export function PsychicTab({
               description: e.target.value,
             })
           }
-          className="w-full min-h-[56px] resize-y rounded border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-200"
+          className={editableTextareaClass(editable) + " text-xs min-h-[56px]"}
         />
       </div>
     );
@@ -170,38 +180,40 @@ export function PsychicTab({
       <h2 className="text-xl font-semibold">Psychic Powers</h2>
 
       {/* HEADER */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-        <label className="flex flex-col gap-1 text-xs text-slate-400">
-          Psy Rating
-          <input
-            type="number"
-            disabled={!editable}
-            value={psychic.psyRating}
-            onChange={(e) =>
-              onUpdate({
-                ...psychic,
-                psyRating: Number(e.target.value),
-              })
-            }
-            className="rounded border border-slate-700 bg-slate-800 px-2 py-1 text-slate-100"
-          />
-        </label>
+      <section className={sectionContainerClass(editable)}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+          <label className="flex flex-col gap-1 text-xs text-slate-400">
+            Psy Rating
+            <input
+              type="number"
+              disabled={!editable}
+              value={psychic.psyRating}
+              onChange={(e) =>
+                onUpdate({
+                  ...psychic,
+                  psyRating: Number(e.target.value),
+                })
+              }
+              className={editableInputClass(editable)}
+            />
+          </label>
 
-        <label className="flex flex-col gap-1 text-xs text-slate-400">
-          Discipline
-          <input
-            disabled={!editable}
-            value={psychic.discipline ?? ""}
-            onChange={(e) =>
-              onUpdate({
-                ...psychic,
-                discipline: e.target.value,
-              })
-            }
-            className="rounded border border-slate-700 bg-slate-800 px-2 py-1 text-slate-100"
-          />
-        </label>
-      </div>
+          <label className="flex flex-col gap-1 text-xs text-slate-400">
+            Discipline
+            <input
+              disabled={!editable}
+              value={psychic.discipline ?? ""}
+              onChange={(e) =>
+                onUpdate({
+                  ...psychic,
+                  discipline: e.target.value,
+                })
+              }
+              className={editableInputClass(editable)}
+            />
+          </label>
+        </div>
+      </section>
 
       {/* POWERS */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

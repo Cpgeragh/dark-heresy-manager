@@ -1,7 +1,13 @@
+// src/pages/characterSheet/WeaponsTab.tsx
+
 import type {
   RangedWeapon,
   MeleeWeapon,
 } from "../../types/Character";
+import {
+  editableInputClass,
+  sectionContainerClass,
+} from "../../ui/editableStyles";
 
 interface WeaponsTabProps {
   rangedWeapons: RangedWeapon[];
@@ -78,7 +84,7 @@ export function WeaponsTab({
           disabled={!editable}
           value={value ?? ""}
           onChange={(e) => onChange(e.target.value)}
-          className="rounded border border-slate-700 bg-slate-900 px-2 py-1 text-slate-200"
+          className={editableInputClass(editable)}
         />
       </label>
     );
@@ -88,7 +94,6 @@ export function WeaponsTab({
     <div className="space-y-8 text-slate-300">
       <h2 className="text-xl font-semibold">Weapons</h2>
 
-      {/* RANGED + MELEE GRID */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* RANGED */}
         <section className="space-y-4">
@@ -113,7 +118,7 @@ export function WeaponsTab({
               {rangedWeapons.map((w, i) => (
                 <div
                   key={w.id}
-                  className="rounded border border-slate-700 bg-slate-900/40 p-3 space-y-2"
+                  className={sectionContainerClass(editable) + " space-y-2"}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <Field
@@ -177,7 +182,7 @@ export function WeaponsTab({
               {meleeWeapons.map((w, i) => (
                 <div
                   key={w.id}
-                  className="rounded border border-slate-700 bg-slate-900/40 p-3 space-y-2"
+                  className={sectionContainerClass(editable) + " space-y-2"}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <Field

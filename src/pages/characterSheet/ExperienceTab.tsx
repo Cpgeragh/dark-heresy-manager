@@ -1,40 +1,45 @@
-// src/pages/characterSheet/ExperienceTab.tsx
-
 import type { ExperienceBlock } from "../../types/Character";
+import {
+  sectionContainerClass,
+  readOnlyBadgeClass,
+} from "../../ui/editableStyles";
 
 interface ExperienceTabProps {
   experience: ExperienceBlock;
-  editable: boolean;
+  editable: boolean; // intentionally unused for now (read-only by design)
   onUpdate: (exp: ExperienceBlock) => void;
 }
 
 export function ExperienceTab({
   experience,
-  editable,
 }: ExperienceTabProps) {
   const remaining = experience.total - experience.spent;
 
   return (
     <div className="space-y-6 text-slate-300">
-      <h2 className="text-xl font-semibold">Experience</h2>
+      {/* HEADER */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold">Experience</h2>
+        <span className={readOnlyBadgeClass()}>Read-only</span>
+      </div>
 
       {/* SUMMARY */}
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="rounded border border-slate-700 bg-slate-900/40 p-4 text-center">
+        <div className={sectionContainerClass(false) + " text-center"}>
           <div className="text-xs text-slate-400 mb-1">Total XP</div>
           <div className="text-2xl font-semibold font-mono text-slate-100">
             {experience.total}
           </div>
         </div>
 
-        <div className="rounded border border-slate-700 bg-slate-900/40 p-4 text-center">
+        <div className={sectionContainerClass(false) + " text-center"}>
           <div className="text-xs text-slate-400 mb-1">Spent XP</div>
           <div className="text-2xl font-semibold font-mono text-slate-100">
             {experience.spent}
           </div>
         </div>
 
-        <div className="rounded border border-slate-700 bg-slate-900/40 p-4 text-center">
+        <div className={sectionContainerClass(false) + " text-center"}>
           <div className="text-xs text-slate-400 mb-1">Remaining XP</div>
           <div
             className={`text-2xl font-semibold font-mono ${
@@ -62,7 +67,7 @@ export function ExperienceTab({
           {experience.ranks.map((rankBlock) => (
             <div
               key={rankBlock.rank}
-              className="rounded border border-slate-700 bg-slate-900/40 p-4"
+              className={sectionContainerClass(false)}
             >
               <h4 className="text-sm font-semibold text-slate-300 mb-2">
                 Rank {rankBlock.rank}
@@ -102,11 +107,10 @@ export function ExperienceTab({
         </div>
       </section>
 
-      {!editable && (
-        <p className="text-xs text-slate-500">
-          Experience editing will be added in a later phase.
-        </p>
-      )}
+      {/* FOOTER NOTE */}
+      <p className="text-xs text-slate-500">
+        Experience editing will be added in a later phase.
+      </p>
     </div>
   );
 }
