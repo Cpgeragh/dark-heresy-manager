@@ -1,3 +1,5 @@
+// src/pages/characterSheet/CharacteristicsTab.tsx
+
 import type { CharField } from "../../utils/characterFactory";
 import type { Characteristics } from "../../types/Character";
 import CharacteristicField from "../../components/CharacteristicField";

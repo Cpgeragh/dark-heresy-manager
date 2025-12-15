@@ -4,19 +4,22 @@ import { useMemo, useState } from "react";
 import type { Characteristics, SkillEntry } from "../../../../types/Character";
 import type { CharField } from "../../../../utils/characterFactory";
 
+// Import our new hooks
+import { useSkillComputation } from "../../../../hooks/useSkillComputation";
+import { useSkillFiltering } from "../../../../hooks/useSkillFiltering";
+import { useSkillSorting } from "../../../../hooks/useSkillSorting";
+import { useSkillGroupCollapse } from "../../../../hooks/useSkillGroupCollapse";
+
 import {
   GROUP_ORDER,
   CHAR_LABEL,
   CHAR_FULL_LABEL,
-  computeTotal,
 } from "./constants";
 
 import { SkillCard } from "./SkillCard";
 import { SkillsControlBar } from "./SkillsControlBar";
 import { CategoryGroup } from "./CategoryGroup";
 import { CharacteristicGroup } from "./CharacteristicGroup";
-
-import type { SkillWithComputed } from "./constants";
 
 type SortMode = "category" | "characteristic" | "name" | "total";
 
@@ -38,32 +41,19 @@ export function SkillsTab({
   const [showOnlyTrained, setShowOnlyTrained] = useState(false);
   const [compact, setCompact] = useState(false);
 
-  const [collapsedCategory, setCollapsedCategory] = useState<
-    Record<string, boolean>
-  >({});
-
-  const [collapsedChar, setCollapsedChar] =
-    useState<Partial<Record<keyof Characteristics, boolean>>>(() =>
-      Object.fromEntries(GROUP_ORDER.map((k) => [k, true]))
-    );
-
   // ------------------------------
-  // COMPUTE TOTALS
+  // COMPUTE, FILTER, SORT using hooks
   // ------------------------------
-  const computedSkills: SkillWithComputed[] = useMemo(
-    () =>
-      skills.map((s) => {
-        const total = computeTotal(s, getCharField);
-        return {
-          ...s,
-          total,
-          half: total !== null ? Math.floor(total / 2) : null,
-          full: total,
-          opposed: total,
-        };
-      }),
-    [skills, getCharField]
-  );
+  const computedSkills = useSkillComputation({ skills, getCharField });
+  const filteredSkills = useSkillFiltering({
+    skills: computedSkills,
+    searchQuery: search,
+    showOnlyTrained,
+  });
+  const sortedSkills = useSkillSorting({
+    skills: filteredSkills,
+    sortMode,
+  });
 
   // ------------------------------
   // CATEGORY LIST
@@ -73,6 +63,12 @@ export function SkillsTab({
     computedSkills.forEach((s) => set.add(s.category ?? "Other"));
     return Array.from(set).sort();
   }, [computedSkills]);
+
+  // ------------------------------
+  // COLLAPSE STATE using hooks
+  // ------------------------------
+  const categoryCollapse = useSkillGroupCollapse(ALL_CATEGORIES);
+  const charCollapse = useSkillGroupCollapse(GROUP_ORDER);
 
   // ------------------------------
   // UPDATE HELPERS
@@ -91,70 +87,6 @@ export function SkillsTab({
 
   function updateNotes(id: string, notes: string) {
     onUpdate(skills.map((s) => (s.id === id ? { ...s, notes } : s)));
-  }
-
-  // ------------------------------
-  // FILTER + SORT
-  // ------------------------------
-  const filteredAndSorted = useMemo(() => {
-    const q = search.trim().toLowerCase();
-
-    let arr = computedSkills.filter((s) => {
-      if (showOnlyTrained && s.level === "untrained") return false;
-      if (q && !s.name.toLowerCase().includes(q)) return false;
-      return true;
-    });
-
-    if (sortMode === "name") {
-      arr = [...arr].sort((a, b) => a.name.localeCompare(b.name));
-    } else if (sortMode === "total") {
-      arr = [...arr].sort(
-        (a, b) => (b.total ?? -999) - (a.total ?? -999)
-      );
-    } else if (sortMode === "characteristic") {
-      arr = [...arr].sort((a, b) => {
-        const ai = GROUP_ORDER.indexOf(a.characteristic);
-        const bi = GROUP_ORDER.indexOf(b.characteristic);
-        if (ai !== bi) return ai - bi;
-        return a.name.localeCompare(b.name);
-      });
-    } else if (sortMode === "category") {
-      arr = [...arr].sort((a, b) => {
-        const ac = a.category ?? "";
-        const bc = b.category ?? "";
-        if (ac !== bc) return ac.localeCompare(bc);
-        return a.name.localeCompare(b.name);
-      });
-    }
-
-    return arr;
-  }, [computedSkills, search, showOnlyTrained, sortMode]);
-
-  // ------------------------------
-  // EXPAND / COLLAPSE HELPERS
-  // ------------------------------
-  function expandAllCategories() {
-    setCollapsedCategory(
-      Object.fromEntries(ALL_CATEGORIES.map((c) => [c, false]))
-    );
-  }
-
-  function collapseAllCategories() {
-    setCollapsedCategory(
-      Object.fromEntries(ALL_CATEGORIES.map((c) => [c, true]))
-    );
-  }
-
-  function expandAllCharacteristics() {
-    setCollapsedChar(
-      Object.fromEntries(GROUP_ORDER.map((c) => [c, false]))
-    );
-  }
-
-  function collapseAllCharacteristics() {
-    setCollapsedChar(
-      Object.fromEntries(GROUP_ORDER.map((c) => [c, true]))
-    );
   }
 
   // ------------------------------
@@ -179,13 +111,13 @@ export function SkillsTab({
         <>
           <div className="flex gap-2 text-xs">
             <button
-              onClick={expandAllCategories}
+              onClick={categoryCollapse.expandAll}
               className="px-3 py-1 rounded border border-slate-600 bg-slate-800"
             >
               Expand all
             </button>
             <button
-              onClick={collapseAllCategories}
+              onClick={categoryCollapse.collapseAll}
               className="px-3 py-1 rounded border border-slate-600 bg-slate-800"
             >
               Collapse all
@@ -194,7 +126,7 @@ export function SkillsTab({
 
           <div className="space-y-4">
             {ALL_CATEGORIES.map((cat) => {
-              const groupSkills = filteredAndSorted.filter(
+              const groupSkills = sortedSkills.filter(
                 (s) => (s.category ?? "Other") === cat
               );
               if (!groupSkills.length) return null;
@@ -206,9 +138,9 @@ export function SkillsTab({
                   skills={groupSkills}
                   editable={editable}
                   compact={compact}
-                  collapsed={collapsedCategory[cat] ?? false}
+                  collapsed={categoryCollapse.collapsed[cat] ?? false}
                   setCollapsed={(v) =>
-                    setCollapsedCategory((p) => ({ ...p, [cat]: v }))
+                    categoryCollapse.setGroupCollapsed(cat, v)
                   }
                   updateLevel={updateLevel}
                   updateMisc={updateMisc}
@@ -222,13 +154,13 @@ export function SkillsTab({
         <>
           <div className="flex gap-2 text-xs">
             <button
-              onClick={expandAllCharacteristics}
+              onClick={charCollapse.expandAll}
               className="px-3 py-1 rounded border border-slate-600 bg-slate-800"
             >
               Expand all
             </button>
             <button
-              onClick={collapseAllCharacteristics}
+              onClick={charCollapse.collapseAll}
               className="px-3 py-1 rounded border border-slate-600 bg-slate-800"
             >
               Collapse all
@@ -237,7 +169,7 @@ export function SkillsTab({
 
           <div className="space-y-4">
             {GROUP_ORDER.map((charKey) => {
-              const groupSkills = filteredAndSorted.filter(
+              const groupSkills = sortedSkills.filter(
                 (s) => s.characteristic === charKey
               );
               if (!groupSkills.length) return null;
@@ -255,9 +187,9 @@ export function SkillsTab({
                   skills={groupSkills}
                   editable={editable}
                   compact={compact}
-                  collapsed={collapsedChar[charKey] ?? false}
+                  collapsed={charCollapse.collapsed[charKey] ?? false}
                   setCollapsed={(v) =>
-                    setCollapsedChar((p) => ({ ...p, [charKey]: v }))
+                    charCollapse.setGroupCollapsed(charKey, v)
                   }
                   updateLevel={updateLevel}
                   updateMisc={updateMisc}
@@ -269,7 +201,7 @@ export function SkillsTab({
         </>
       ) : (
         <div className="space-y-3">
-          {filteredAndSorted.map((skill) => (
+          {sortedSkills.map((skill) => (
             <SkillCard
               key={skill.id}
               skill={skill}

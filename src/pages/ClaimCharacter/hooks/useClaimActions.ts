@@ -1,6 +1,6 @@
 // src/pages/ClaimCharacter/hooks/useClaimActions.ts
 
-import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
+import { addDoc, collection, doc, runTransaction } from "firebase/firestore";
 import { db, auth } from "../../../firebase";
 import { buildClaimLogPayload } from "../../../utils/claimLog";
 
@@ -17,11 +17,6 @@ export function useClaimActions() {
       throw new Error("Not signed in.");
     }
 
-    // Defensive: character must be unclaimed at call time
-    if (character.userId) {
-      throw new Error("Character is already claimed.");
-    }
-
     const charRef = doc(
       db,
       "campaigns",
@@ -30,25 +25,47 @@ export function useClaimActions() {
       character.id
     );
 
-    // Step 1: claim ownership
-    await updateDoc(charRef, {
-      userId: user.uid,
+    const logsRef = collection(
+      db,
+      "campaigns",
+      campaignId,
+      "characters",
+      character.id,
+      "claimLog"
+    );
+
+    // Use transaction to prevent race conditions
+    await runTransaction(db, async (transaction) => {
+      // Step 1: Read current state
+      const charDoc = await transaction.get(charRef);
+      
+      if (!charDoc.exists()) {
+        throw new Error("Character does not exist.");
+      }
+
+      const currentData = charDoc.data();
+      
+      // Step 2: Check if already claimed (inside transaction = safe)
+      if (currentData.userId) {
+        throw new Error("Character is already claimed.");
+      }
+
+      // Step 3: Claim ownership (atomic write)
+      transaction.update(charRef, {
+        userId: user.uid,
+      });
+
+      // Note: We cannot write to subcollections in transactions,
+      // so claim log is written after the transaction completes
     });
 
-    // Step 2: write claim log
+    // Step 4: Write claim log (after successful transaction)
     await addDoc(
-      collection(
-        db,
-        "campaigns",
-        campaignId,
-        "characters",
-        character.id,
-        "claimLog"
-      ),
+      logsRef,
       buildClaimLogPayload(
         "claim",
         user.uid,
-        character.userId ?? null,
+        null, // previous owner was null
         user.uid
       )
     );
