@@ -127,12 +127,14 @@ export function SkillsTab({
             <button
               onClick={categoryCollapse.expandAll}
               className="px-3 py-1 rounded border border-slate-600 bg-slate-800"
+              aria-label="Expand all skill categories"
             >
               Expand all
             </button>
             <button
               onClick={categoryCollapse.collapseAll}
               className="px-3 py-1 rounded border border-slate-600 bg-slate-800"
+              aria-label="Collapse all skill categories"
             >
               Collapse all
             </button>

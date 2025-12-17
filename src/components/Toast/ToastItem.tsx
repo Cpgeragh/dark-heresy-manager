@@ -37,6 +37,9 @@ export function ToastItem({ toast }: ToastItemProps) {
 
   return (
     <div
+      role="alert"
+      aria-live="polite"
+      aria-atomic="true"
       className={`
         ${styles[toast.type]}
         border rounded-lg p-4 shadow-lg
@@ -61,17 +64,19 @@ export function ToastItem({ toast }: ToastItemProps) {
         <button
           onClick={handleCopy}
           className="p-1 hover:bg-white/10 rounded transition text-xs"
+          aria-label="Copy message to clipboard"
           title="Copy to clipboard"
         >
-          {copied ? "✓" : "📋"}
+          <span aria-hidden="true">{copied ? "✓" : "📋"}</span>
         </button>
 
         <button
           onClick={() => removeToast(toast.id)}
           className="p-1 hover:bg-white/10 rounded transition text-xs"
+          aria-label="Dismiss notification"
           title="Dismiss"
         >
-          ✕
+          <span aria-hidden="true">✕</span>
         </button>
       </div>
     </div>

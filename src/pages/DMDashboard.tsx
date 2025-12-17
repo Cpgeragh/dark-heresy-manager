@@ -186,14 +186,17 @@ export default function DMDashboard({
 
         <div className="flex gap-2">
           <input
+            id="campaign-name-input"
             className="px-3 py-2 bg-slate-800 border border-slate-600 rounded w-64"
             placeholder="Campaign Name"
             value={newCampaignName}
             onChange={(e) => setNewCampaignName(e.target.value)}
+            aria-label="New campaign name"
           />
           <button
             className="px-4 py-2 bg-amber-500 text-slate-900 font-semibold rounded"
             onClick={createCampaign}
+            aria-label="Create new campaign"
           >
             Create Campaign
           </button>
@@ -231,15 +234,18 @@ export default function DMDashboard({
 
           <div className="flex gap-2 mb-4">
             <input
+              id="character-name-input"
               className="px-3 py-2 bg-slate-800 border border-slate-600 rounded w-64"
               placeholder="Character Name"
               value={characterName}
               onChange={(e) => setCharacterName(e.target.value)}
+              aria-label="New character name"
             />
 
             <button
               className="px-4 py-2 bg-amber-500 text-slate-900 font-semibold rounded"
               onClick={createCharacter}
+              aria-label="Create new character"
             >
               Create
             </button>
@@ -248,9 +254,13 @@ export default function DMDashboard({
           <h3 className="text-xl mb-2">Characters in campaign</h3>
 
           {characters.length === 0 ? (
-            <p className="text-slate-400">No characters yet.</p>
+            <p className="text-slate-400" role="status">No characters yet.</p>
           ) : (
-            <ul className="flex flex-col gap-2">
+            <ul 
+              className="flex flex-col gap-2"
+              role="list"
+              aria-label="Characters in this campaign"
+            >
               {characters.map((ch) => (
                 <li
                   key={ch.id}
@@ -281,6 +291,7 @@ export default function DMDashboard({
                       )
                     }
                     className="px-3 py-1 text-xs rounded bg-blue-600 text-white hover:bg-blue-500"
+                    aria-label={`View ${ch.header?.characterName ?? "character"}`}
                   >
                     View
                   </button>

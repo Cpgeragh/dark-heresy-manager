@@ -18,6 +18,9 @@ export function TabButton({ label, active, tabId, onTabChange }: TabButtonProps)
   return (
     <button
       onClick={handleClick}
+      role="tab"
+      aria-selected={active}
+      aria-label={`${label} tab`}
       className={`px-3 py-1 rounded text-sm border transition ${
         active
           ? "bg-amber-500 text-slate-900 border-amber-400 font-semibold"

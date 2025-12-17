@@ -111,6 +111,8 @@ export default function CharacterSheet() {
 
           <button
             onClick={toggleDmReadOnly}
+            aria-label={dmReadOnly ? "Enable editing mode" : "Disable editing mode"}
+            aria-pressed={!dmReadOnly}
             className={`text-xs px-3 py-1 rounded border ${
               dmReadOnly
                 ? "border-slate-600 bg-slate-800 text-slate-300"
@@ -123,7 +125,11 @@ export default function CharacterSheet() {
       )}
 
       {/* TABS */}
-      <div className="flex flex-wrap gap-2 mb-6">
+      <div 
+        className="flex flex-wrap gap-2 mb-6"
+        role="tablist"
+        aria-label="Character sheet sections"
+      >
         <TabButton label="Overview" tabId="overview" active={activeTab === "overview"} onTabChange={setActiveTab} />
         <TabButton label="Characteristics" tabId="stats" active={activeTab === "stats"} onTabChange={setActiveTab} />
         <TabButton label="Skills" tabId="skills" active={activeTab === "skills"} onTabChange={setActiveTab} />
@@ -140,7 +146,11 @@ export default function CharacterSheet() {
       </div>
 
       {/* CONTENT CONTAINER — VISUAL DIFF WRAP */}
-      <div className={containerClass}>
+      <div 
+        className={containerClass}
+        role="tabpanel"
+        aria-label={`${activeTab} content`}
+      >
         <ErrorBoundary
           fallback={
             <div className="p-6 text-center space-y-4">
