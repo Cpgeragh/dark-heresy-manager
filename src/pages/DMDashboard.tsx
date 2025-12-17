@@ -1,6 +1,6 @@
 // src/pages/DMDashboard.tsx
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   collection,
@@ -97,12 +97,9 @@ export default function DMDashboard({
   }, [activeCampaignId]);
 
   // ----------------------------------
-  // Character order for PR-A5
+  // Character order for navigation state
   // ----------------------------------
-  const characterOrder = useMemo(
-    () => characters.map((c) => c.id),
-    [characters]
-  );
+  const characterOrder = characters.map((c) => c.id);
 
   // ----------------------------------
   // Create campaign
