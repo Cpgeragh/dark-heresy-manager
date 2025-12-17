@@ -43,6 +43,8 @@ export default function DMDashboard({
   // Load campaigns owned by this DM
   // ----------------------------------
   useEffect(() => {
+    let isMounted = true;
+
     async function loadCampaigns() {
       const snap = await getDocs(collection(db, "campaigns"));
       const list: CampaignWithId[] = [];
@@ -57,10 +59,16 @@ export default function DMDashboard({
         }
       });
 
-      setCampaigns(list);
+      if (isMounted) {
+        setCampaigns(list);
+      }
     }
 
     loadCampaigns();
+
+    return () => {
+      isMounted = false;
+    };
   }, [user.uid]);
 
   // ----------------------------------
@@ -207,11 +215,10 @@ export default function DMDashboard({
           {campaigns.map((c) => (
             <div
               key={c.id}
-              className={`px-4 py-2 border rounded cursor-pointer ${
-                activeCampaignId === c.id
+              className={`px-4 py-2 border rounded cursor-pointer ${activeCampaignId === c.id
                   ? "border-amber-400 bg-amber-500/20"
                   : "border-slate-600 hover:bg-slate-800"
-              }`}
+                }`}
               onClick={() => onActiveCampaignChange(c.id)}
             >
               {c.name}

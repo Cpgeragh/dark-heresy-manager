@@ -10,69 +10,85 @@ import type { UserDocument } from "../types/Firestore";
 type Role = "player" | "dm";
 
 interface UseAuthResult {
-  currentUser: User | null;
-  userRole: Role | null;
-  activeCampaignId: string | null;
-  loading: boolean;
-  setUserRole: (role: Role) => void;
-  setActiveCampaignId: (id: string | null) => void;
+    currentUser: User | null;
+    userRole: Role | null;
+    activeCampaignId: string | null;
+    loading: boolean;
+    setUserRole: (role: Role) => void;
+    setActiveCampaignId: (id: string | null) => void;
 }
 
 export function useAuth(): UseAuthResult {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [userRole, setUserRole] = useState<Role | null>(null);
-  const [activeCampaignId, setActiveCampaignId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+    const [currentUser, setCurrentUser] = useState<User | null>(null);
+    const [userRole, setUserRole] = useState<Role | null>(null);
+    const [activeCampaignId, setActiveCampaignId] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (user) => {
-      try {
-        if (!user) {
-          const cred = await signInAnonymously(auth);
-          user = cred.user;
-        }
+    useEffect(() => {
+        let isMounted = true;
 
-        setCurrentUser(user);
+        const unsub = onAuthStateChanged(auth, async (user) => {
+            try {
+                if (!user) {
+                    const cred = await signInAnonymously(auth);
+                    user = cred.user;
+                }
 
-        const ref = doc(db, "users", user.uid);
-        const snap = await getDoc(ref);
+                if (!isMounted) return;
 
-        if (!snap.exists()) {
-          const newUserDoc: UserDocument = {
-            role: "player",
-            activeCampaignId: null,
-            createdAt: serverTimestamp(),
-            lastSeen: serverTimestamp(),
-          };
+                setCurrentUser(user);
 
-          await setDoc(ref, newUserDoc);
+                const ref = doc(db, "users", user.uid);
+                const snap = await getDoc(ref);
 
-          setUserRole("player");
-          setActiveCampaignId(null);
-        } else {
-          const data = snap.data() as UserDocument;
-          const role: Role = data.role === "dm" ? "dm" : "player";
-          setUserRole(role);
-          setActiveCampaignId(data.activeCampaignId ?? null);
-        }
+                if (!isMounted) return;
 
-        await setDoc(ref, { lastSeen: serverTimestamp() }, { merge: true });
-      } catch (err) {
-        console.error("Auth error:", err);
-      } finally {
-        setLoading(false);
-      }
-    });
+                if (!snap.exists()) {
+                    const newUserDoc: UserDocument = {
+                        role: "player",
+                        activeCampaignId: null,
+                        createdAt: serverTimestamp(),
+                        lastSeen: serverTimestamp(),
+                    };
 
-    return () => unsub();
-  }, []);
+                    await setDoc(ref, newUserDoc);
 
-  return {
-    currentUser,
-    userRole,
-    activeCampaignId,
-    loading,
-    setUserRole,
-    setActiveCampaignId,
-  };
+                    if (!isMounted) return;
+
+                    setUserRole("player");
+                    setActiveCampaignId(null);
+                } else {
+                    const data = snap.data() as UserDocument;
+                    const role: Role = data.role === "dm" ? "dm" : "player";
+
+                    if (!isMounted) return;
+
+                    setUserRole(role);
+                    setActiveCampaignId(data.activeCampaignId ?? null);
+                }
+
+                await setDoc(ref, { lastSeen: serverTimestamp() }, { merge: true });
+            } catch (err) {
+                console.error("Auth error:", err);
+            } finally {
+                if (isMounted) {
+                    setLoading(false);
+                }
+            }
+        });
+
+        return () => {
+            isMounted = false;
+            unsub();
+        };
+    }, []);
+
+    return {
+        currentUser,
+        userRole,
+        activeCampaignId,
+        loading,
+        setUserRole,
+        setActiveCampaignId,
+    };
 }

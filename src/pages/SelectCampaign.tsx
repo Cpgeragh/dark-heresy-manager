@@ -25,6 +25,8 @@ export default function SelectCampaign({
   const [campaigns, setCampaigns] = useState<CampaignWithId[]>([]);
 
   useEffect(() => {
+    let isMounted = true;
+
     async function load() {
       const snap = await getDocs(collection(db, "campaigns"));
       const list: CampaignWithId[] = snap.docs.map((docSnap) => {
@@ -35,10 +37,16 @@ export default function SelectCampaign({
         };
       });
 
-      setCampaigns(list);
+      if (isMounted) {
+        setCampaigns(list);
+      }
     }
 
     load();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (
@@ -58,10 +66,9 @@ export default function SelectCampaign({
               key={c.id}
               onClick={() => onActiveCampaignChange(c.id)}
               className={`px-4 py-2 rounded border text-left transition
-                ${
-                  isActive
-                    ? "bg-amber-500 text-slate-900 border-amber-400"
-                    : "bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700"
+                ${isActive
+                  ? "bg-amber-500 text-slate-900 border-amber-400"
+                  : "bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700"
                 }`}
             >
               <div className="font-semibold">{c.name}</div>

@@ -1,6 +1,6 @@
 // src/pages/ClaimCharacter/hooks/useRecoveryLookup.ts
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../../../firebase";
 import type {
@@ -28,17 +28,25 @@ export function useRecoveryLookup() {
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<RecoveryLookupResult | null>(null);
 
-  async function lookup(code: string) {
+  const lookup = useCallback(async (code: string) => {
     setError(null);
     setLoading(true);
     setData(null);
+
+    // Track if this lookup has been superseded
+    const lookupId = Date.now();
+    let currentLookupId = lookupId;
 
     try {
       const indexRef = doc(db, "recoveryIndex", code);
       const indexSnap = await getDoc(indexRef);
 
+      // Check if a new lookup started
+      if (currentLookupId !== lookupId) return;
+
       if (!indexSnap.exists()) {
         setError("No character found with this recovery code.");
+        setLoading(false);
         return;
       }
 
@@ -50,8 +58,12 @@ export function useRecoveryLookup() {
         doc(db, "campaigns", campaignId, "characters", characterId)
       );
 
+      // Check if a new lookup started
+      if (currentLookupId !== lookupId) return;
+
       if (!campSnap.exists() || !charSnap.exists()) {
         setError("Recovery code points to missing data.");
+        setLoading(false);
         return;
       }
 
@@ -61,9 +73,7 @@ export function useRecoveryLookup() {
       const currentUser = auth.currentUser;
       const uid = currentUser?.uid ?? null;
 
-      // ---------------------------------------
-      // Ownership derivation (single source of truth)
-      // ---------------------------------------
+      // Ownership derivation
       let ownership: OwnershipState;
 
       if (!characterData.userId) {
@@ -76,6 +86,9 @@ export function useRecoveryLookup() {
         ownership = "claimed-by-other";
       }
 
+      // Final check before setting state
+      if (currentLookupId !== lookupId) return;
+
       setData({
         campaignId,
         characterId,
@@ -84,12 +97,23 @@ export function useRecoveryLookup() {
         ownership,
       });
     } catch (err) {
-      console.error(err);
-      setError("Unexpected error during lookup.");
+      // Only set error if this is still the current lookup
+      if (currentLookupId === lookupId) {
+        console.error(err);
+        setError("Unexpected error during lookup.");
+      }
     } finally {
-      setLoading(false);
+      // Only update loading if this is still the current lookup
+      if (currentLookupId === lookupId) {
+        setLoading(false);
+      }
     }
-  }
+
+    // Cleanup: mark this lookup as superseded
+    return () => {
+      currentLookupId = -1;
+    };
+  }, []);
 
   return { loading, error, data, lookup };
 }
