@@ -15,6 +15,12 @@ import { db } from "../firebase";
 import { createEmptyCharacterData } from "../utils/characterFactory";
 import type { CampaignDocument, CharacterListItem } from "../types/Firestore";
 import { useToast } from "../components/Toast";
+import { 
+  IMPORTANT_TOAST_DURATION,
+  RECOVERY_CODE_PREFIX,
+  RECOVERY_CODE_SEGMENT_LENGTH,
+  RECOVERY_CODE_SEGMENTS 
+} from "../constants/ui";
 
 // Type alias for cleaner code
 type CampaignWithId = CampaignDocument & { id: string };
@@ -125,8 +131,17 @@ export default function DMDashboard({
   // ----------------------------------
   function generateRecoveryCode() {
     const seg = () =>
-      Math.random().toString(36).substring(2, 6).toUpperCase();
-    return `DH-${seg()}-${seg()}`;
+      Math.random()
+        .toString(36)
+        .substring(2, 2 + RECOVERY_CODE_SEGMENT_LENGTH)
+        .toUpperCase();
+    
+    const segments = Array.from(
+      { length: RECOVERY_CODE_SEGMENTS }, 
+      () => seg()
+    ).join('-');
+    
+    return `${RECOVERY_CODE_PREFIX}-${segments}`;
   }
 
   // ----------------------------------
@@ -167,7 +182,7 @@ export default function DMDashboard({
 
       toast.success(
         `Character created successfully!\n\nRecovery Code: ${recoveryCode}\n\n(Click the copy button to save this code)`,
-        8000 // Show for 8 seconds
+        IMPORTANT_TOAST_DURATION
       );
       setCharacterName("");
     } catch (err) {

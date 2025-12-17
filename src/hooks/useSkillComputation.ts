@@ -3,6 +3,10 @@
 import { useMemo } from "react";
 import type { SkillEntry, Characteristics } from "../types/Character";
 import type { CharField } from "../utils/characterFactory";
+import {
+  SKILL_ADVANCE_VALUES,
+  SKILL_HALF_DIVISOR
+} from "../constants/gameRules";
 
 export type SkillWithComputed = SkillEntry & {
   total: number | null;
@@ -21,12 +25,12 @@ function computeTotal(
 
   const levelMod =
     skill.level === "trained"
-      ? 0
+      ? SKILL_ADVANCE_VALUES.trained
       : skill.level === "+10"
-      ? 10
+      ? SKILL_ADVANCE_VALUES["+10"]
       : skill.level === "+20"
-      ? 20
-      : -20;
+      ? SKILL_ADVANCE_VALUES["+20"]
+      : SKILL_ADVANCE_VALUES.untrained;
 
   return charTotal + levelMod + misc;
 }
@@ -47,7 +51,7 @@ export function useSkillComputation({
         return {
           ...s,
           total,
-          half: total !== null ? Math.floor(total / 2) : null,
+          half: total !== null ? Math.floor(total / SKILL_HALF_DIVISOR) : null,
           full: total,
           opposed: total,
         };

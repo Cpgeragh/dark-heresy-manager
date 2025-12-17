@@ -4,6 +4,11 @@ import { useCallback } from "react";
 import type { SkillWithComputed } from "./constants";
 import type { Characteristics } from "../../../../types/Character";
 import { SkillCard } from "./SkillCard";
+import {
+  SKILL_EXPERT_THRESHOLD,
+  SKILL_TRAINED_THRESHOLD,
+  SKILL_BASIC_THRESHOLD,
+} from "../../../../constants/gameRules";
 
 interface CharacteristicGroupProps {
   charKey: keyof Characteristics;
@@ -59,10 +64,12 @@ export function CharacteristicGroup({
         </div>
 
         <div className="flex items-center gap-4 text-xs text-slate-300">
-          <span className={charTotal >= 40 ? "text-green-400" :
-                           charTotal >= 30 ? "text-amber-300" :
-                           charTotal >= 20 ? "text-slate-200" :
-                           "text-red-400"}>
+          <span className={
+            charTotal >= SKILL_EXPERT_THRESHOLD ? "text-green-400" :
+            charTotal >= SKILL_TRAINED_THRESHOLD ? "text-amber-300" :
+            charTotal >= SKILL_BASIC_THRESHOLD ? "text-slate-200" :
+            "text-red-400"
+          }>
             Base total: {charTotal}
           </span>
 

@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useCallback } from "react";
 import type { ReactNode } from "react";
+import { DEFAULT_TOAST_DURATION } from "../../constants/ui";
 
 export type ToastType = "success" | "error" | "info" | "warning";
 
@@ -32,7 +33,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const addToast = useCallback(
-    (message: string, type: ToastType = "info", duration = 5000) => {
+    (message: string, type: ToastType = "info", duration = DEFAULT_TOAST_DURATION) => {
       const id = crypto.randomUUID();
       const toast: Toast = { id, message, type, duration };
 

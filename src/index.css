@@ -45,5 +45,6 @@ body {
 }
 
 .animate-slide-in-right {
+  /* Duration matches TOAST_ANIMATION_DURATION in src/constants/ui.ts */
   animation: slide-in-right 0.3s ease-out;
 }

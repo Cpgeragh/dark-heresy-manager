@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useToast, type Toast } from "./ToastContext";
+import { COPY_FEEDBACK_DURATION } from "../../constants/ui";
 
 interface ToastItemProps {
   toast: Toast;
@@ -15,7 +16,7 @@ export function ToastItem({ toast }: ToastItemProps) {
     try {
       await navigator.clipboard.writeText(toast.message);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setTimeout(() => setCopied(false), COPY_FEEDBACK_DURATION);
     } catch (err) {
       console.error("Failed to copy:", err);
     }
