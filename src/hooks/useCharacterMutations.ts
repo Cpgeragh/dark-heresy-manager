@@ -6,6 +6,7 @@ import { db, auth } from "../firebase";
 import type { Character, Characteristics } from "../types/Character";
 import type { CharField } from "../utils/characterFactory";
 import { buildClaimLogPayload } from "../utils/claimLog";
+import { useToast } from "../components/Toast";
 
 interface UseCharacterMutationsProps {
   campaignId: string;
@@ -20,13 +21,25 @@ export function useCharacterMutations({
   character,
   allowedToEdit,
 }: UseCharacterMutationsProps) {
+  // Loading states
   const [isUpdating, setIsUpdating] = useState(false);
   const [isReleasing, setIsReleasing] = useState(false);
   const [isDmForceReleasing, setIsDmForceReleasing] = useState(false);
   const [isDmForceAssigning, setIsDmForceAssigning] = useState(false);
   const [isDmTogglingEdit, setIsDmTogglingEdit] = useState(false);
 
+  // Error states
+  const [error, setError] = useState<string | null>(null);
+
+  // Toast notifications
+  const toast = useToast();
+
   const charRef = doc(db, "campaigns", campaignId, "characters", characterId);
+
+  // Clear error helper
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
 
   // ================================================================
   // UPDATE FIELD (GENERIC)
@@ -39,16 +52,19 @@ export function useCharacterMutations({
       if (!allowedToEdit || !character) return;
 
       setIsUpdating(true);
+      setError(null);
       try {
         await updateDoc(charRef, { [field]: value });
-      } catch (error) {
-        console.error("Failed to update field:", error);
-        throw error;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Failed to update field";
+        setError(message);
+        toast.error(`Update failed: ${message}`);
+        console.error("Failed to update field:", err);
       } finally {
         setIsUpdating(false);
       }
     },
-    [allowedToEdit, character, charRef]
+    [allowedToEdit, character, charRef, toast]
   );
 
   // ================================================================
@@ -62,6 +78,7 @@ export function useCharacterMutations({
       if (!allowedToEdit || !character) return;
 
       setIsUpdating(true);
+      setError(null);
       try {
         const updated = {
           ...character.characteristics,
@@ -69,14 +86,16 @@ export function useCharacterMutations({
         };
 
         await updateDoc(charRef, { characteristics: updated });
-      } catch (error) {
-        console.error("Failed to update characteristic:", error);
-        throw error;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Failed to update characteristic";
+        setError(message);
+        toast.error(`Update failed: ${message}`);
+        console.error("Failed to update characteristic:", err);
       } finally {
         setIsUpdating(false);
       }
     },
-    [allowedToEdit, character, charRef]
+    [allowedToEdit, character, charRef, toast]
   );
 
   // ================================================================
@@ -87,6 +106,7 @@ export function useCharacterMutations({
     if (!user || !character) return;
 
     setIsReleasing(true);
+    setError(null);
     try {
       const previousOwner = character.userId;
 
@@ -108,13 +128,17 @@ export function useCharacterMutations({
         logsRef,
         buildClaimLogPayload("release", user.uid, previousOwner, null)
       );
-    } catch (error) {
-      console.error("Failed to release character:", error);
-      throw error;
+
+      toast.success("Character released successfully");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to release character";
+      setError(message);
+      toast.error(`Release failed: ${message}`);
+      console.error("Failed to release character:", err);
     } finally {
       setIsReleasing(false);
     }
-  }, [character, charRef, campaignId, characterId]);
+  }, [character, charRef, campaignId, characterId, toast]);
 
   // ================================================================
   // DM FORCE RELEASE
@@ -124,6 +148,7 @@ export function useCharacterMutations({
     if (!user || !character) return;
 
     setIsDmForceReleasing(true);
+    setError(null);
     try {
       const previousOwner = character.userId;
 
@@ -145,13 +170,17 @@ export function useCharacterMutations({
         logsRef,
         buildClaimLogPayload("force-release", user.uid, previousOwner, null)
       );
-    } catch (error) {
-      console.error("Failed to force release:", error);
-      throw error;
+
+      toast.success("Character force-released");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to force release";
+      setError(message);
+      toast.error(`Force release failed: ${message}`);
+      console.error("Failed to force release:", err);
     } finally {
       setIsDmForceReleasing(false);
     }
-  }, [character, charRef, campaignId, characterId]);
+  }, [character, charRef, campaignId, characterId, toast]);
 
   // ================================================================
   // DM FORCE ASSIGN
@@ -162,6 +191,7 @@ export function useCharacterMutations({
       if (!user || !character) return;
 
       setIsDmForceAssigning(true);
+      setError(null);
       try {
         const previousOwner = character.userId;
 
@@ -183,14 +213,18 @@ export function useCharacterMutations({
           logsRef,
           buildClaimLogPayload("force-assign", user.uid, previousOwner, targetUid)
         );
-      } catch (error) {
-        console.error("Failed to force assign:", error);
-        throw error;
+
+        toast.success("Character assigned successfully");
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Failed to assign character";
+        setError(message);
+        toast.error(`Assignment failed: ${message}`);
+        console.error("Failed to force assign:", err);
       } finally {
         setIsDmForceAssigning(false);
       }
     },
-    [character, charRef, campaignId, characterId]
+    [character, charRef, campaignId, characterId, toast]
   );
 
   // ================================================================
@@ -200,30 +234,45 @@ export function useCharacterMutations({
     if (!character) return;
 
     setIsDmTogglingEdit(true);
+    setError(null);
     try {
+      const newValue = !character.isEditableByPlayer;
+      
       await updateDoc(charRef, {
-        isEditableByPlayer: !character.isEditableByPlayer,
+        isEditableByPlayer: newValue,
       });
-    } catch (error) {
-      console.error("Failed to toggle edit permission:", error);
-      throw error;
+
+      toast.success(
+        newValue ? "Player editing enabled" : "Player editing disabled"
+      );
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to toggle edit permission";
+      setError(message);
+      toast.error(`Toggle failed: ${message}`);
+      console.error("Failed to toggle edit permission:", err);
     } finally {
       setIsDmTogglingEdit(false);
     }
-  }, [character, charRef]);
+  }, [character, charRef, toast]);
 
   return {
+    // Mutations
     updateField,
     updateCharacteristic,
     releaseCharacter,
     dmForceRelease,
     dmForceAssign,
     dmToggleEdit,
+    
     // Loading states
     isUpdating,
     isReleasing,
     isDmForceReleasing,
     isDmForceAssigning,
     isDmTogglingEdit,
+    
+    // Error state
+    error,
+    clearError,
   };
 }

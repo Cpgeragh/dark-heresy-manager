@@ -112,5 +112,9 @@ export function useCharacterSheet({
     isDmForceReleasing: mutations.isDmForceReleasing,
     isDmForceAssigning: mutations.isDmForceAssigning,
     isDmTogglingEdit: mutations.isDmTogglingEdit,
+
+    // Error handling
+    error: mutations.error,
+    clearError: mutations.clearError,
   };
 }

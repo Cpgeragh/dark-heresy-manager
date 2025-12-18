@@ -1,6 +1,6 @@
 // src/components/Toast/ToastContext.tsx
 
-import { createContext, useContext, useState, useCallback } from "react";
+import { createContext, useContext, useState, useCallback, useRef } from "react";
 import type { ReactNode } from "react";
 import { DEFAULT_TOAST_DURATION } from "../../constants/ui";
 
@@ -27,8 +27,18 @@ const ToastContext = createContext<ToastContextValue | null>(null);
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  
+  // Store timer IDs to enable cleanup
+  const timersRef = useRef<Map<string, number>>(new Map());
 
   const removeToast = useCallback((id: string) => {
+    // Clear the timer if it exists
+    const timer = timersRef.current.get(id);
+    if (timer) {
+      clearTimeout(timer);
+      timersRef.current.delete(id);
+    }
+    
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
@@ -40,9 +50,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       setToasts((prev) => [...prev, toast]);
 
       if (duration > 0) {
-        setTimeout(() => {
+        const timer = setTimeout(() => {
           removeToast(id);
         }, duration);
+        
+        // Store timer ID for cleanup
+        timersRef.current.set(id, timer);
       }
     },
     [removeToast]
