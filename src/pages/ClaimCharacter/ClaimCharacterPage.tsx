@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { buildRoute } from "../../constants/routes";
 
 import { useRecoveryLookup } from "./hooks/useRecoveryLookup";
 import { useClaimActions } from "./hooks/useClaimActions";
@@ -50,9 +51,7 @@ export default function ClaimCharacterPage() {
 
       await claimCharacter(data.campaignId, data.character);
 
-      navigate(
-        `/campaign/${data.campaignId}/character/${data.characterId}`
-      );
+      navigate(buildRoute.characterSheet(data.campaignId, data.characterId));
     } catch (err: any) {
       console.error(err);
       setClaimError(

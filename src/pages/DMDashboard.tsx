@@ -5,8 +5,8 @@ import { collection, getDocs, onSnapshot } from "firebase/firestore";
 import type { User } from "firebase/auth";
 import { db } from "../firebase";
 import type { CampaignDocument, CharacterListItem } from "../types/Firestore";
-import { CampaignSection } from "./DMDashboard/CampaignSection";
-import { CharacterSection } from "./DMDashboard/CharacterSection";
+import CampaignSection from "./DMDashboard/CampaignSection";
+import CharacterSection from "./DMDashboard/CharacterSection";
 
 type CampaignWithId = CampaignDocument & { id: string };
 

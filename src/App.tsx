@@ -12,6 +12,7 @@ import { AppHeader } from "./components/AppHeader";
 import { AppBreadcrumbs } from "./components/AppBreadcrumbs";
 import { ToastProvider, ToastContainer } from "./components/Toast";
 import { ToastTester } from "./components/ToastTester";
+import { ROUTES, ROUTE_PATTERNS } from "./constants/routes";
 
 import DMDashboard from "./pages/DMDashboard";
 import PlayerDashboard from "./pages/PlayerDashboard";
@@ -102,7 +103,7 @@ export default function App() {
               {isDM && (
                 <>
                   <Route
-                    path="/dm"
+                    path={ROUTES.DM_DASHBOARD}
                     element={
                       <DMDashboard
                         user={currentUser}
@@ -112,7 +113,7 @@ export default function App() {
                     }
                   />
                   <Route
-                    path="/select"
+                    path={ROUTES.SELECT_CAMPAIGN}
                     element={
                       <SelectCampaign
                         user={currentUser}
@@ -128,7 +129,7 @@ export default function App() {
               {!isDM && (
                 <>
                   <Route
-                    path="/player"
+                    path={ROUTES.PLAYER_DASHBOARD}
                     element={
                       <PlayerDashboard
                         user={currentUser}
@@ -136,9 +137,9 @@ export default function App() {
                       />
                     }
                   />
-                  <Route path="/claim" element={<ClaimCharacterPage />} />
+                  <Route path={ROUTES.CLAIM_CHARACTER} element={<ClaimCharacterPage />} />
                   <Route
-                    path="/select"
+                    path={ROUTES.SELECT_CAMPAIGN}
                     element={
                       <SelectCampaign
                         user={currentUser}
@@ -152,13 +153,18 @@ export default function App() {
               )}
 
               <Route
-                path="/campaign/:campaignId/character/:characterId"
+                path={ROUTE_PATTERNS.CHARACTER_SHEET}
                 element={<CharacterSheet />}
               />
 
               <Route
                 path="*"
-                element={<Navigate to={isDM ? "/dm" : "/player"} replace />}
+                element={
+                  <Navigate 
+                    to={isDM ? ROUTES.DM_DASHBOARD : ROUTES.PLAYER_DASHBOARD} 
+                    replace 
+                  />
+                }
               />
             </Routes>
           </ErrorBoundary>

@@ -14,7 +14,7 @@ interface CampaignSectionProps {
   onCampaignSelect: (campaignId: string) => void;
 }
 
-export function CampaignSection({
+function CampaignSection({
   userUid,
   campaigns,
   activeCampaignId,
@@ -98,3 +98,5 @@ export function CampaignSection({
     </div>
   );
 }
+
+export default CampaignSection;

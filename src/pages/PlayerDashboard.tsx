@@ -6,6 +6,7 @@ import { db } from "../firebase";
 import { collection, onSnapshot } from "firebase/firestore";
 import type { User } from "firebase/auth";
 import type { CharacterListItem } from "../types/Firestore";
+import { buildRoute } from "../constants/routes";
 
 type Props = {
   user: User;
@@ -16,9 +17,13 @@ export default function PlayerDashboard({ user, activeCampaignId }: Props) {
   const navigate = useNavigate();
   const [characters, setCharacters] = useState<CharacterListItem[]>([]);
 
-  const handleCharacterView = useCallback((characterId: string) => {
-    navigate(`/campaign/${activeCampaignId}/character/${characterId}`);
-  }, [navigate, activeCampaignId]);
+  const handleCharacterView = useCallback(
+    (characterId: string) => {
+      if (!activeCampaignId) return;
+      navigate(buildRoute.characterSheet(activeCampaignId, characterId));
+    },
+    [navigate, activeCampaignId]
+  );
 
   useEffect(() => {
     if (!activeCampaignId) {
@@ -36,7 +41,7 @@ export default function PlayerDashboard({ user, activeCampaignId }: Props) {
     const unsubscribe = onSnapshot(charsRef, (snapshot) => {
       const list: CharacterListItem[] = snapshot.docs
         .map((docSnap) => {
-          const data = docSnap.data() as Omit<CharacterListItem, 'id'>;
+          const data = docSnap.data() as Omit<CharacterListItem, "id">;
           return {
             id: docSnap.id,
             ...data,

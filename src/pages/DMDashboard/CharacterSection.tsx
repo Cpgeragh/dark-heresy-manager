@@ -7,6 +7,7 @@ import { db } from "../../firebase";
 import { createEmptyCharacterData } from "../../utils/characterFactory";
 import type { CharacterListItem } from "../../types/Firestore";
 import { useToast } from "../../components/Toast";
+import { buildRoute } from "../../constants/routes";
 import {
   IMPORTANT_TOAST_DURATION,
   RECOVERY_CODE_PREFIX,
@@ -36,7 +37,7 @@ function generateRecoveryCode(): string {
   return `${RECOVERY_CODE_PREFIX}-${segments}`;
 }
 
-export function CharacterSection({ campaignId, characters }: CharacterSectionProps) {
+function CharacterSection({ campaignId, characters }: CharacterSectionProps) {
   const navigate = useNavigate();
   const toast = useToast();
   
@@ -48,7 +49,7 @@ export function CharacterSection({ campaignId, characters }: CharacterSectionPro
 
   const handleCharacterView = useCallback(
     (characterId: string) => {
-      navigate(`/campaign/${campaignId}/character/${characterId}`, {
+      navigate(buildRoute.characterSheet(campaignId, characterId), {
         state: { characterOrder: characters.map((c) => c.id) },
       });
     },
@@ -165,3 +166,5 @@ export function CharacterSection({ campaignId, characters }: CharacterSectionPro
     </div>
   );
 }
+
+export default CharacterSection;
