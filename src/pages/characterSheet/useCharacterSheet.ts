@@ -1,84 +1,62 @@
 // src/pages/characterSheet/useCharacterSheet.ts
 
-import { useState, useMemo, useCallback, useEffect } from "react";
-import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "../../firebase";
+import { useMemo } from "react";
+import { auth } from "../../firebase";
+import { useIsDM } from "../../hooks/useIsDM";
+import { useDMOverride } from "../../hooks/useDMOverride";
 import { useCharacterData } from "../../hooks/useCharacterData";
 import { useCharacterPermissions } from "../../hooks/useCharacterPermissions";
 import { useCharacterMutations } from "../../hooks/useCharacterMutations";
-import type { CharField } from "../../utils/characterFactory";
-import type { Characteristics } from "../../types/Character";
+import { useCharacterHelpers } from "../../hooks/useCharacterHelpers";
 
 interface UseCharacterSheetProps {
   campaignIdParam: string | undefined;
   characterIdParam: string | undefined;
 }
 
+/**
+ * Domain hook that orchestrates all character sheet functionality.
+ * 
+ * Composes multiple focused hooks to provide:
+ * - Character data (live subscriptions)
+ * - Permission checking (DM/player, editable state)
+ * - Mutation operations (updates, releases, DM overrides)
+ * - Helper functions (characteristic calculations)
+ * 
+ * @param campaignIdParam - Campaign ID from route params
+ * @param characterIdParam - Character ID from route params
+ */
 export function useCharacterSheet({
   campaignIdParam,
   characterIdParam,
 }: UseCharacterSheetProps) {
-  const [dmReadOnly, setDmReadOnly] = useState(true);
-  const [isDM, setIsDM] = useState(false);
-
-  // Validate params
+  // ================================================================
+  // PATH VALIDATION
+  // ================================================================
   const path = useMemo(() => {
     if (!campaignIdParam || !characterIdParam) return null;
     return { campaignId: campaignIdParam, characterId: characterIdParam };
   }, [campaignIdParam, characterIdParam]);
 
-  // Check if current user is DM of this campaign
-  useEffect(() => {
-    if (!path?.campaignId) {
-      setIsDM(false);
-      return;
-    }
-
-    const user = auth.currentUser;
-    if (!user) {
-      setIsDM(false);
-      return;
-    }
-
-    // Capture uid to avoid null issues in async closure
-    const userUid = user.uid;
-    let isMounted = true;
-
-    async function checkDM() {
-      try {
-        const campRef = doc(db, "campaigns", path!.campaignId);
-        const campSnap = await getDoc(campRef);
-        
-        if (campSnap.exists() && isMounted) {
-          const data = campSnap.data();
-          setIsDM(data.dmId === userUid); // FIX: Use captured uid
-        }
-      } catch (error) {
-        console.error("Failed to check DM status:", error);
-        if (isMounted) {
-          setIsDM(false);
-        }
-      }
-    }
-
-    checkDM();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [path?.campaignId]);
-
-  // Get current user ID
+  // ================================================================
+  // USER & ROLE
+  // ================================================================
   const userId = auth.currentUser?.uid ?? null;
+  const isDM = useIsDM(path?.campaignId);
+  const { dmReadOnly, toggleDmReadOnly } = useDMOverride();
 
-  // Load character + claim log
+  // ================================================================
+  // DATA LOADING
+  // ================================================================
   const { character, claimLog } = useCharacterData({
     campaignId: path?.campaignId,
     characterId: path?.characterId,
     isDM,
   });
 
-  // Permissions
+  // ================================================================
+  // PERMISSIONS
+  // ================================================================
   const { allowedToEdit } = useCharacterPermissions({
     character,
     userId,
@@ -86,25 +64,10 @@ export function useCharacterSheet({
     dmReadOnly,
   });
 
-  // Toggle DM read-only mode
-  const toggleDmReadOnly = useCallback(() => {
-    setDmReadOnly((prev) => !prev);
-  }, []);
-
-  // Mutations
-  const {
-    updateField,
-    updateCharacteristic,
-    releaseCharacter,
-    dmForceRelease,
-    dmForceAssign,
-    dmToggleEdit,
-    isUpdating,
-    isReleasing,
-    isDmForceReleasing,
-    isDmForceAssigning,
-    isDmTogglingEdit,
-  } = useCharacterMutations({
+  // ================================================================
+  // MUTATIONS
+  // ================================================================
+  const mutations = useCharacterMutations({
     campaignId: path?.campaignId ?? "",
     characterId: path?.characterId ?? "",
     character,
@@ -112,55 +75,42 @@ export function useCharacterSheet({
   });
 
   // ================================================================
-  // DERIVED HELPERS
+  // HELPERS
   // ================================================================
+  const { getCharField, getCharTotal } = useCharacterHelpers({ character });
 
-  /**
-   * Get a characteristic field (base + advances)
-   */
-  const getCharField = useCallback(
-    (statKey: keyof Characteristics): CharField => {
-      if (!character) return { base: 0, advances: 0 };
-      return character.characteristics[statKey] ?? { base: 0, advances: 0 };
-    },
-    [character]
-  );
-
-  /**
-   * Get computed total for a characteristic
-   */
-  const getCharTotal = useCallback(
-    (statKey: keyof Characteristics): number => {
-      const field = getCharField(statKey);
-      return field.base + field.advances * 5;
-    },
-    [getCharField]
-  );
-
+  // ================================================================
+  // PUBLIC API
+  // ================================================================
   return {
+    // Path & data
     path,
     character,
-    allowedToEdit,
     claimLog,
-    isDM,
 
+    // Role & permissions
+    isDM,
     dmReadOnly,
     toggleDmReadOnly,
+    allowedToEdit,
 
+    // Helpers
     getCharField,
     getCharTotal,
-    updateCharacteristic,
-    updateField,
-    releaseCharacter,
-    dmForceRelease,
-    dmForceAssign,
-    dmToggleEdit,
+
+    // Mutations
+    updateField: mutations.updateField,
+    updateCharacteristic: mutations.updateCharacteristic,
+    releaseCharacter: mutations.releaseCharacter,
+    dmForceRelease: mutations.dmForceRelease,
+    dmForceAssign: mutations.dmForceAssign,
+    dmToggleEdit: mutations.dmToggleEdit,
 
     // Loading states
-    isUpdating,
-    isReleasing,
-    isDmForceReleasing,
-    isDmForceAssigning,
-    isDmTogglingEdit,
+    isUpdating: mutations.isUpdating,
+    isReleasing: mutations.isReleasing,
+    isDmForceReleasing: mutations.isDmForceReleasing,
+    isDmForceAssigning: mutations.isDmForceAssigning,
+    isDmTogglingEdit: mutations.isDmTogglingEdit,
   };
 }
