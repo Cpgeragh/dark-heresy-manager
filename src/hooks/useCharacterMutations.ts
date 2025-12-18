@@ -1,8 +1,9 @@
 // src/hooks/useCharacterMutations.ts
 
 import { useState, useCallback } from "react";
-import { doc, updateDoc, addDoc, collection } from "firebase/firestore";
+import { updateDoc, addDoc, collection } from "firebase/firestore";
 import { db, auth } from "../firebase";
+import { characterDocRef } from "../firebase/converters";
 import type { Character, Characteristics } from "../types/Character";
 import type { CharField } from "../utils/characterFactory";
 import { buildClaimLogPayload } from "../utils/claimLog";
@@ -34,7 +35,8 @@ export function useCharacterMutations({
   // Toast notifications
   const toast = useToast();
 
-  const charRef = doc(db, "campaigns", campaignId, "characters", characterId);
+  // Use converter for type safety
+  const charRef = characterDocRef(campaignId, characterId);
 
   // Clear error helper
   const clearError = useCallback(() => {

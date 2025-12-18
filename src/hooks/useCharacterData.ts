@@ -1,8 +1,9 @@
 // src/hooks/useCharacterData.ts
 
 import { useEffect, useState } from "react";
-import { doc, collection, onSnapshot, query, orderBy } from "firebase/firestore";
+import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
 import { db } from "../firebase";
+import { characterDocRef } from "../firebase/converters";
 import type { CharacterDocument, ClaimLogDocument } from "../types/Firestore";
 
 // Type aliases for clarity
@@ -42,7 +43,8 @@ export function useCharacterData({
 
     setLoading(true);
 
-    const ref = doc(db, "campaigns", campaignId, "characters", characterId);
+    // Use converter for type safety and consistent data transformation
+    const ref = characterDocRef(campaignId, characterId);
 
     const unsub = onSnapshot(ref, (snap) => {
       if (!snap.exists()) {
@@ -51,7 +53,8 @@ export function useCharacterData({
         return;
       }
 
-      const data = snap.data() as Character;
+      // Converter handles data transformation (adds id, handles types)
+      const data = snap.data();
       setCharacter(data);
       setLoading(false);
     });
