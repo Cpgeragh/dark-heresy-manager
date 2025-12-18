@@ -36,6 +36,34 @@ import type {
 import { TabButton } from "../components/TabButton";
 import { CharacterBreadcrumb } from "../components/CharacterBreadcrumb";
 
+// ================================================================
+// TAB CONFIGURATION
+// ================================================================
+
+interface TabConfig {
+  id: TabId;
+  label: string;
+  dmOnly?: boolean;
+}
+
+const TABS: TabConfig[] = [
+  { id: "overview", label: "Overview" },
+  { id: "stats", label: "Characteristics" },
+  { id: "skills", label: "Skills" },
+  { id: "talents", label: "Talents" },
+  { id: "weapons", label: "Weapons" },
+  { id: "armour", label: "Armour" },
+  { id: "psychic", label: "Psychic" },
+  { id: "gear", label: "Gear" },
+  { id: "xp", label: "XP" },
+  { id: "notes", label: "Notes" },
+  { id: "admin", label: "Admin", dmOnly: true },
+];
+
+// ================================================================
+// COMPONENT
+// ================================================================
+
 export default function CharacterSheet() {
   const params = useParams<{ campaignId: string; characterId: string }>();
 
@@ -208,25 +236,26 @@ export default function CharacterSheet() {
         </div>
       )}
 
-      {/* TABS */}
+      {/* TABS - NOW USING CONFIGURATION */}
       <div 
         className="flex flex-wrap gap-2 mb-6"
         role="tablist"
         aria-label="Character sheet sections"
       >
-        <TabButton label="Overview" tabId="overview" active={activeTab === "overview"} onTabChange={setActiveTab} />
-        <TabButton label="Characteristics" tabId="stats" active={activeTab === "stats"} onTabChange={setActiveTab} />
-        <TabButton label="Skills" tabId="skills" active={activeTab === "skills"} onTabChange={setActiveTab} />
-        <TabButton label="Talents" tabId="talents" active={activeTab === "talents"} onTabChange={setActiveTab} />
-        <TabButton label="Weapons" tabId="weapons" active={activeTab === "weapons"} onTabChange={setActiveTab} />
-        <TabButton label="Armour" tabId="armour" active={activeTab === "armour"} onTabChange={setActiveTab} />
-        <TabButton label="Psychic" tabId="psychic" active={activeTab === "psychic"} onTabChange={setActiveTab} />
-        <TabButton label="Gear" tabId="gear" active={activeTab === "gear"} onTabChange={setActiveTab} />
-        <TabButton label="XP" tabId="xp" active={activeTab === "xp"} onTabChange={setActiveTab} />
-        <TabButton label="Notes" tabId="notes" active={activeTab === "notes"} onTabChange={setActiveTab} />
-        {isDM && (
-          <TabButton label="Admin" tabId="admin" active={activeTab === "admin"} onTabChange={setActiveTab} />
-        )}
+        {TABS.map((tab) => {
+          // Skip DM-only tabs if not DM
+          if (tab.dmOnly && !isDM) return null;
+
+          return (
+            <TabButton
+              key={tab.id}
+              label={tab.label}
+              tabId={tab.id}
+              active={activeTab === tab.id}
+              onTabChange={setActiveTab}
+            />
+          );
+        })}
       </div>
 
       {/* CONTENT CONTAINER */}
