@@ -1,9 +1,14 @@
 // src/pages/characterSheet/CharacteristicsTab.tsx
 
+import { useCallback } from "react";
 import type { CharField } from "../../utils/characterFactory";
 import type { Characteristics } from "../../types/Character";
 import CharacteristicField from "../../components/CharacteristicField";
 import { sectionContainerClass } from "../../ui/editableStyles";
+import { 
+  CHARACTERISTIC_BONUS_DIVISOR,
+  CHARACTERISTIC_ADVANCE_INCREMENT
+} from "../../constants/gameRules";
 
 interface CharacteristicsTabProps {
   getCharField: (statKey: keyof Characteristics) => CharField;
@@ -22,17 +27,17 @@ export function CharacteristicsTab({
   // Authoritative total
   function total(stat: keyof Characteristics) {
     const v = getCharField(stat);
-    return v.base + v.advances;
+    return v.base + v.advances * CHARACTERISTIC_ADVANCE_INCREMENT;
   }
 
   // Derived bonuses
-  const SB = Math.floor(total("s") / 10);
-  const TB = Math.floor(total("t") / 10);
-  const AgB = Math.floor(total("ag") / 10);
-  const IB = Math.floor(total("int") / 10);
-  const PB = Math.floor(total("per") / 10);
-  const WPB = Math.floor(total("wp") / 10);
-  const FB = Math.floor(total("fel") / 10);
+  const SB = Math.floor(total("s") / CHARACTERISTIC_BONUS_DIVISOR);
+  const TB = Math.floor(total("t") / CHARACTERISTIC_BONUS_DIVISOR);
+  const AgB = Math.floor(total("ag") / CHARACTERISTIC_BONUS_DIVISOR);
+  const IB = Math.floor(total("int") / CHARACTERISTIC_BONUS_DIVISOR);
+  const PB = Math.floor(total("per") / CHARACTERISTIC_BONUS_DIVISOR);
+  const WPB = Math.floor(total("wp") / CHARACTERISTIC_BONUS_DIVISOR);
+  const FB = Math.floor(total("fel") / CHARACTERISTIC_BONUS_DIVISOR);
 
   function StatBlock({
     label,
@@ -42,7 +47,11 @@ export function CharacteristicsTab({
     statKey: keyof Characteristics;
   }) {
     const value = getCharField(statKey);
-    const statTotal = value.base + value.advances;
+    const statTotal = value.base + value.advances * CHARACTERISTIC_ADVANCE_INCREMENT;
+
+    const handleChange = useCallback((v: CharField) => {
+      updateCharacteristic(statKey, v);
+    }, [statKey]);
 
     return (
       <div className={sectionContainerClass(editable) + " space-y-2"}>
@@ -59,7 +68,7 @@ export function CharacteristicsTab({
           label=""
           value={value}
           editable={editable}
-          onChange={(v) => updateCharacteristic(statKey, v)}
+          onChange={handleChange}
         />
       </div>
     );

@@ -1,5 +1,6 @@
 // src/pages/characterSheet/ArmourTab.tsx
 
+import { useCallback } from "react";
 import type { ArmourBlock, ArmourLocation } from "../../types/Character";
 import {
   editableInputClass,
@@ -17,16 +18,16 @@ export function ArmourTab({
   editable,
   onUpdate,
 }: ArmourTabProps) {
-  function updateLocation(
+  const updateLocation = useCallback((
     key: keyof ArmourBlock,
     next: ArmourLocation
-  ) {
+  ) => {
     if (!editable) return;
     onUpdate({
       ...armour,
       [key]: next,
     });
-  }
+  }, [editable, armour, onUpdate]);
 
   function LocationRow({
     label,
@@ -36,6 +37,20 @@ export function ArmourTab({
     locKey: keyof ArmourBlock;
   }) {
     const loc = armour[locKey];
+
+    const handleAPChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+      updateLocation(locKey, {
+        ...loc,
+        ap: Number(e.target.value),
+      });
+    }, [loc]);
+
+    const handleTypeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+      updateLocation(locKey, {
+        ...loc,
+        type: e.target.value,
+      });
+    }, [loc]);
 
     return (
       <div className="flex items-center gap-3">
@@ -52,12 +67,7 @@ export function ArmourTab({
             min={0}
             disabled={!editable}
             value={loc.ap}
-            onChange={(e) =>
-              updateLocation(locKey, {
-                ...loc,
-                ap: Number(e.target.value),
-              })
-            }
+            onChange={handleAPChange}
             className={editableInputClass(editable) + " w-16 font-mono"}
           />
         </div>
@@ -68,12 +78,7 @@ export function ArmourTab({
           placeholder="Type (e.g. Flak)"
           disabled={!editable}
           value={loc.type ?? ""}
-          onChange={(e) =>
-            updateLocation(locKey, {
-              ...loc,
-              type: e.target.value,
-            })
-          }
+          onChange={handleTypeChange}
           className={editableInputClass(editable) + " flex-1"}
         />
       </div>

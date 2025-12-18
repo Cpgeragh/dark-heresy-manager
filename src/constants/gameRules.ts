@@ -27,6 +27,30 @@ export const MAX_CHARACTERISTIC_VALUE = 100;
  */
 export const MIN_CHARACTERISTIC_VALUE = 0;
 
+/**
+ * Maximum number of advances per characteristic
+ */
+export const MAX_CHARACTERISTIC_ADVANCES = 4;
+
+/**
+ * Value added per characteristic advance
+ */
+export const CHARACTERISTIC_ADVANCE_INCREMENT = 5;
+
+// ============================================
+// WOUNDS & FATE
+// ============================================
+
+/**
+ * Wounds threshold for critical danger (red warning)
+ */
+export const WOUNDS_CRITICAL_THRESHOLD = 3;
+
+/**
+ * Fate points at zero is critical (red warning)
+ */
+export const FATE_CRITICAL_THRESHOLD = 0;
+
 // ============================================
 // SKILL THRESHOLDS
 // ============================================
@@ -86,17 +110,3 @@ export const MOVEMENT_HALF_MULTIPLIER = 1; // AB × 1
 export const MOVEMENT_FULL_MULTIPLIER = 2; // AB × 2
 export const MOVEMENT_CHARGE_MULTIPLIER = 3; // AB × 3
 export const MOVEMENT_RUN_MULTIPLIER = 6; // AB × 6
-
-// ============================================
-// DICE MECHANICS
-// ============================================
-
-/**
- * Standard percentile die (d100)
- */
-export const PERCENTILE_DIE_MAX = 100;
-
-/**
- * Degrees of success/failure are calculated per 10 points
- */
-export const DEGREES_DIVISOR = 10;

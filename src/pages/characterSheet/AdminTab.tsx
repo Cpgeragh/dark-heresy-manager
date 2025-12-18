@@ -1,6 +1,6 @@
 // src/pages/characterSheet/AdminTab.tsx
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import type { Character } from "../../types/Character";
 import type { ClaimLog } from "../../types/ClaimLog";
 import {
@@ -25,6 +25,17 @@ export function AdminTab({
   onDMToggleEdit,
 }: AdminTabProps) {
   const [assignUID, setAssignUID] = useState("");
+
+  const handleAssignUIDChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setAssignUID(e.target.value);
+  }, []);
+
+  const handleForceAssign = useCallback(() => {
+    const clean = assignUID.trim();
+    if (clean) {
+      onDMForceAssign(clean);
+    }
+  }, [assignUID, onDMForceAssign]);
 
   const latest = claimLog.length > 0 ? claimLog[0] : null;
 
@@ -60,7 +71,7 @@ export function AdminTab({
           <div>
             Current owner UID:{" "}
             <span className="font-mono text-slate-200">
-              {character.userId || "None (unclaimed)"}
+              {character.userId ?? "None (unclaimed)"} {/* FIXED: Changed from || to ?? */}
             </span>
           </div>
 
@@ -97,16 +108,13 @@ export function AdminTab({
         <div className="flex flex-wrap items-center gap-2 mt-4">
           <input
             value={assignUID}
-            onChange={(e) => setAssignUID(e.target.value)}
+            onChange={handleAssignUIDChange}
             placeholder="Enter player UID"
             className={editableInputClass(true) + " font-mono text-xs max-w-xs"}
           />
 
           <button
-            onClick={() => {
-              const clean = assignUID.trim();
-              if (clean) onDMForceAssign(clean);
-            }}
+            onClick={handleForceAssign}
             className="px-3 py-1 text-sm rounded border
                        bg-blue-600 border-blue-500 text-white
                        hover:bg-blue-500"

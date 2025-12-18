@@ -1,12 +1,11 @@
 // src/pages/SelectCampaign.tsx
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import type { User } from "firebase/auth";
 import { db } from "../firebase";
 import type { CampaignDocument } from "../types/Firestore";
 
-// Type alias for cleaner code
 type CampaignWithId = CampaignDocument & { id: string };
 
 type Props = {
@@ -17,12 +16,16 @@ type Props = {
 };
 
 export default function SelectCampaign({
-  user: _user,          // intentionally unused (no warning)
-  role: _role,          // intentionally unused (no warning)
+  user: _user,
+  role: _role,
   activeCampaignId,
   onActiveCampaignChange,
 }: Props) {
   const [campaigns, setCampaigns] = useState<CampaignWithId[]>([]);
+
+  const handleCampaignSelect = useCallback((campaignId: string) => {
+    onActiveCampaignChange(campaignId);
+  }, [onActiveCampaignChange]);
 
   useEffect(() => {
     let isMounted = true;
@@ -64,7 +67,7 @@ export default function SelectCampaign({
           return (
             <button
               key={c.id}
-              onClick={() => onActiveCampaignChange(c.id)}
+              onClick={() => handleCampaignSelect(c.id)}
               className={`px-4 py-2 rounded border text-left transition
                 ${isActive
                   ? "bg-amber-500 text-slate-900 border-amber-400"

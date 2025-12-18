@@ -1,5 +1,6 @@
 // src/pages/ClaimCharacter/ClaimPreview.tsx
 
+import { useCallback } from "react";
 import type { OwnershipState } from "./hooks/useRecoveryLookup";
 
 interface ClaimPreviewProps {
@@ -56,6 +57,11 @@ export function ClaimPreview({
     return ownership === "unclaimed";
   }
 
+  const handleClaim = useCallback(() => {
+    if (!canClaim()) return;
+    onClaim();
+  }, [ownership, onClaim]);
+
   return (
     <div className="border border-slate-700 bg-slate-900 p-4 rounded space-y-4">
       <h2 className="text-xl font-semibold text-slate-100">
@@ -82,10 +88,7 @@ export function ClaimPreview({
       {/* Action */}
       <button
         disabled={!canClaim()}
-        onClick={() => {
-          if (!canClaim()) return;
-          onClaim();
-        }}
+        onClick={handleClaim}
         className={`w-full px-4 py-2 rounded font-semibold
           ${
             canClaim()

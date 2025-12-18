@@ -1,6 +1,6 @@
 // src/pages/PlayerDashboard.tsx
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { db } from "../firebase";
 import { collection, onSnapshot } from "firebase/firestore";
@@ -15,6 +15,10 @@ type Props = {
 export default function PlayerDashboard({ user, activeCampaignId }: Props) {
   const navigate = useNavigate();
   const [characters, setCharacters] = useState<CharacterListItem[]>([]);
+
+  const handleCharacterView = useCallback((characterId: string) => {
+    navigate(`/campaign/${activeCampaignId}/character/${characterId}`);
+  }, [navigate, activeCampaignId]);
 
   useEffect(() => {
     if (!activeCampaignId) {
@@ -79,11 +83,7 @@ export default function PlayerDashboard({ user, activeCampaignId }: Props) {
             </div>
 
             <button
-              onClick={() =>
-                navigate(
-                  `/campaign/${activeCampaignId}/character/${c.id}`
-                )
-              }
+              onClick={() => handleCharacterView(c.id)}
               className="px-3 py-1 text-xs rounded bg-blue-600 text-white hover:bg-blue-500"
             >
               View

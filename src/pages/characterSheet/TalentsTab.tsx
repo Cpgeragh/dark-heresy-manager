@@ -1,5 +1,6 @@
 // src/pages/characterSheet/TalentsTab.tsx
 
+import { useCallback } from "react";
 import type { TalentsAndTraitsBlock, WeaponTrainingBlock } from "../../types/Character";
 import { sectionContainerClass } from "../../ui/editableStyles";
 import { FormField } from "../../components/FormField";
@@ -19,15 +20,23 @@ export function TalentsTab({
   onUpdateTalents,
   onUpdateTraining,
 }: TalentsTabProps) {
-  function updateTalents(key: keyof TalentsAndTraitsBlock, value: string) {
+  const updateTalents = useCallback((key: keyof TalentsAndTraitsBlock, value: string) => {
     if (!editable) return;
     onUpdateTalents({ ...talents, [key]: value });
-  }
+  }, [editable, talents, onUpdateTalents]);
 
-  function updateWeaponTrainingNotes(value: string) {
+  const handleHomeworldChange = useCallback((v: string) => {
+    updateTalents("homeworldBackground", v);
+  }, [updateTalents]);
+
+  const handleAdvancesChange = useCallback((v: string) => {
+    updateTalents("advancesTalentsAndTraits", v);
+  }, [updateTalents]);
+
+  const updateWeaponTrainingNotes = useCallback((value: string) => {
     if (!editable) return;
     onUpdateTraining({ ...weaponTraining, exoticNotes: value });
-  }
+  }, [editable, weaponTraining, onUpdateTraining]);
 
   return (
     <div className="space-y-8 text-slate-300">
@@ -40,7 +49,7 @@ export function TalentsTab({
         <FormField
           label="Homeworld Background"
           value={talents.homeworldBackground ?? ""}
-          onChange={(v) => updateTalents("homeworldBackground", v)}
+          onChange={handleHomeworldChange}
           editable={editable}
           type="textarea"
           rows={3}
@@ -55,7 +64,7 @@ export function TalentsTab({
         <FormField
           label="Talents, Traits, and Special Abilities"
           value={talents.advancesTalentsAndTraits ?? ""}
-          onChange={(v) => updateTalents("advancesTalentsAndTraits", v)}
+          onChange={handleAdvancesChange}
           editable={editable}
           type="textarea"
           rows={8}

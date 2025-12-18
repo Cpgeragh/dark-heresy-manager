@@ -1,6 +1,6 @@
 // src/pages/ClaimCharacter/ClaimCharacterPage.tsx
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useRecoveryLookup } from "./hooks/useRecoveryLookup";
@@ -22,10 +22,23 @@ export default function ClaimCharacterPage() {
   const { claimCharacter } = useClaimActions();
   const { forceAssign, forceRelease } = useDmActions();
 
+  const handleLookup = useCallback(() => {
+    lookup(code);
+  }, [lookup, code]);
+
+  const handleForceAssign = useCallback(async (uid: string) => {
+    if (!data) return;
+    await forceAssign(data.campaignId, data.character, uid);
+  }, [data, forceAssign]);
+
+  const handleForceRelease = useCallback(async () => {
+    if (!data) return;
+    await forceRelease(data.campaignId, data.character);
+  }, [data, forceRelease]);
+
   async function handleClaim() {
     if (!data || claiming) return;
 
-    // Ownership gate (final safety net)
     if (data.ownership !== "unclaimed") {
       setClaimError("This character cannot be claimed.");
       return;
@@ -37,7 +50,6 @@ export default function ClaimCharacterPage() {
 
       await claimCharacter(data.campaignId, data.character);
 
-      // Redirect only after successful ownership write
       navigate(
         `/campaign/${data.campaignId}/character/${data.characterId}`
       );
@@ -62,7 +74,7 @@ export default function ClaimCharacterPage() {
       <ClaimForm
         code={code}
         onCodeChange={setCode}
-        onSubmit={() => lookup(code)}
+        onSubmit={handleLookup}
         loading={loading}
       />
 
@@ -94,12 +106,8 @@ export default function ClaimCharacterPage() {
       {data && (
         <DMTools
           recovery={data}
-          onForceAssign={(uid) =>
-            forceAssign(data.campaignId, data.character.id, uid)
-          }
-          onForceRelease={() =>
-            forceRelease(data.campaignId, data.character.id)
-          }
+          onForceAssign={handleForceAssign}
+          onForceRelease={handleForceRelease}
         />
       )}
 

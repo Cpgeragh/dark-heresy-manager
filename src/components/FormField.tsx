@@ -1,5 +1,7 @@
 // src/components/FormField.tsx
 
+import { useCallback } from "react";
+
 interface FormFieldProps {
     label: string;
     value: string;
@@ -33,6 +35,10 @@ export function FormField({
 
     const inputId = `field-${label.toLowerCase().replace(/\s+/g, '-')}`;
 
+    const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        onChange(e.target.value);
+    }, [onChange]);
+
     return (
         <label
             htmlFor={inputId}
@@ -41,38 +47,38 @@ export function FormField({
             {label}
 
             {type === "textarea" ? (
-        <textarea
-          id={inputId}
-          disabled={!editable}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          rows={rows}
-          aria-label={label}
-          aria-describedby={description ? `${inputId}-desc` : undefined}
-          aria-invalid={editable ? undefined : "false"}
-          className={baseInputClass + " resize-y"}
-        />
-      ) : (
-        <input
-          id={inputId}
-          disabled={!editable}
-          type={type}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          aria-label={label}
-          aria-describedby={description ? `${inputId}-desc` : undefined}
-          aria-invalid={editable ? undefined : "false"}
-          className={baseInputClass}
-        />
-      )}
+                <textarea
+                    id={inputId}
+                    disabled={!editable}
+                    value={value}
+                    onChange={handleChange}
+                    placeholder={placeholder}
+                    rows={rows}
+                    aria-label={label}
+                    aria-describedby={description ? `${inputId}-desc` : undefined}
+                    aria-invalid={editable ? undefined : "false"}
+                    className={baseInputClass + " resize-y"}
+                />
+            ) : (
+                <input
+                    id={inputId}
+                    disabled={!editable}
+                    type={type}
+                    value={value}
+                    onChange={handleChange}
+                    placeholder={placeholder}
+                    aria-label={label}
+                    aria-describedby={description ? `${inputId}-desc` : undefined}
+                    aria-invalid={editable ? undefined : "false"}
+                    className={baseInputClass}
+                />
+            )}
 
-      {description && (
-        <span id={`${inputId}-desc`} className="text-[10px] text-slate-500 mt-0.5">
-          {description}
-        </span>
-      )}
+            {description && (
+                <span id={`${inputId}-desc`} className="text-[10px] text-slate-500 mt-0.5">
+                    {description}
+                </span>
+            )}
         </label>
     );
 }

@@ -1,9 +1,10 @@
 // src/pages/ClaimCharacter/ClaimForm.tsx
 
+import { useCallback } from "react";
+
 const RECOVERY_CODE_REGEX = /^DH-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
 
 function normalizeRecoveryCode(input: string) {
-  // Uppercase, trim, remove whitespace
   return input.toUpperCase().trim().replace(/\s+/g, "");
 }
 
@@ -23,6 +24,15 @@ export function ClaimForm({
   const normalized = normalizeRecoveryCode(code);
   const isValid = RECOVERY_CODE_REGEX.test(normalized);
 
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    onCodeChange(e.target.value);
+  }, [onCodeChange]);
+
+  const handleSubmit = useCallback(() => {
+    if (!isValid || loading) return;
+    onSubmit();
+  }, [isValid, loading, onSubmit]);
+
   return (
     <div className="border border-slate-700 bg-slate-900 p-4 rounded space-y-3">
       <label className="block text-sm text-slate-300">
@@ -33,7 +43,7 @@ export function ClaimForm({
         className="px-3 py-2 bg-slate-800 border border-slate-600 rounded w-full font-mono text-slate-100"
         placeholder="DH-XXXX-XXXX"
         value={code}
-        onChange={(e) => onCodeChange(e.target.value)}
+        onChange={handleChange}
         inputMode="text"
         autoCapitalize="characters"
         spellCheck={false}
@@ -51,10 +61,7 @@ export function ClaimForm({
 
       <button
         disabled={loading || !isValid}
-        onClick={() => {
-          if (!isValid || loading) return;
-          onSubmit();
-        }}
+        onClick={handleSubmit}
         className={`w-full px-4 py-2 rounded font-semibold text-slate-900
           ${
             loading

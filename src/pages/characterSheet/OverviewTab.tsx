@@ -1,6 +1,6 @@
 // src/pages/characterSheet/OverviewTab.tsx
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Tooltip } from "../../components/Tooltip";
 import type {
   Character,
@@ -12,6 +12,16 @@ import {
   editableInputClass,
   sectionContainerClass,
 } from "../../ui/editableStyles";
+import {
+  CHARACTERISTIC_BONUS_DIVISOR,
+  MOVEMENT_HALF_MULTIPLIER,
+  MOVEMENT_FULL_MULTIPLIER,
+  MOVEMENT_CHARGE_MULTIPLIER,
+  MOVEMENT_RUN_MULTIPLIER,
+  WOUNDS_CRITICAL_THRESHOLD,
+  FATE_CRITICAL_THRESHOLD,
+} from "../../constants/gameRules";
+import { COPY_FEEDBACK_DURATION } from "../../constants/ui";
 
 interface OverviewTabProps {
   character: Character;
@@ -41,35 +51,69 @@ export function OverviewTab({
   // ------------------------------
   // Update helpers
   // ------------------------------
-  function updateHeaderField<K extends keyof CharacterHeader>(
+  const updateHeaderField = useCallback(<K extends keyof CharacterHeader>(
     key: K,
     value: CharacterHeader[K]
-  ) {
+  ) => {
     onUpdateHeader({ ...header, [key]: value });
-  }
+  }, [header, onUpdateHeader]);
 
-  function adjustWounds(delta: number) {
+  const handleCharacterNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    updateHeaderField("characterName", e.target.value);
+  }, [updateHeaderField]);
+
+  const adjustWounds = useCallback((delta: number) => {
     if (!editable) return;
     onUpdateWounds({ ...wounds, current: wounds.current + delta });
-  }
+  }, [editable, wounds, onUpdateWounds]);
 
-  function adjustFate(delta: number) {
+  const handleWoundsMinus = useCallback(() => {
+    adjustWounds(-1);
+  }, [adjustWounds]);
+
+  const handleWoundsPlus = useCallback(() => {
+    adjustWounds(1);
+  }, [adjustWounds]);
+
+  const handleCriticalDamageChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    onUpdateWounds({
+      ...wounds,
+      criticalDamage: Number(e.target.value),
+    });
+  }, [wounds, onUpdateWounds]);
+
+  const handleFatigueChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    onUpdateWounds({
+      ...wounds,
+      fatigue: Number(e.target.value),
+    });
+  }, [wounds, onUpdateWounds]);
+
+  const adjustFate = useCallback((delta: number) => {
     if (!editable) return;
     onUpdateFate({
       ...fate,
       current: Math.max(0, fate.current + delta),
     });
-  }
+  }, [editable, fate, onUpdateFate]);
+
+  const handleFateMinus = useCallback(() => {
+    adjustFate(-1);
+  }, [adjustFate]);
+
+  const handleFatePlus = useCallback(() => {
+    adjustFate(1);
+  }, [adjustFate]);
 
   // ------------------------------
   // Danger state helpers
   // ------------------------------
   function woundsDangerClass(value: number) {
-    return value <= 3 ? "text-red-400 font-semibold" : "";
+    return value <= WOUNDS_CRITICAL_THRESHOLD ? "text-red-400 font-semibold" : "";
   }
 
   function fateDangerClass(value: number) {
-    return value === 0 ? "text-red-400 font-semibold" : "";
+    return value === FATE_CRITICAL_THRESHOLD ? "text-red-400 font-semibold" : "";
   }
 
   // ------------------------------
@@ -79,20 +123,20 @@ export function OverviewTab({
     if (!recoveryCode) return;
     await navigator.clipboard.writeText(recoveryCode);
     setCopied(true);
-    setTimeout(() => setCopied(false), 1200);
+    setTimeout(() => setCopied(false), COPY_FEEDBACK_DURATION);
   }
 
   // ------------------------------
   // Movement (auto-calculated)
   // ------------------------------
   const agiTotal = getCharTotal("ag");
-  const AB = Math.floor(agiTotal / 10);
+  const AB = Math.floor(agiTotal / CHARACTERISTIC_BONUS_DIVISOR);
 
   const move = {
-    half: AB,
-    full: AB * 2,
-    charge: AB * 3,
-    run: AB * 6,
+    half: AB * MOVEMENT_HALF_MULTIPLIER,
+    full: AB * MOVEMENT_FULL_MULTIPLIER,
+    charge: AB * MOVEMENT_CHARGE_MULTIPLIER,
+    run: AB * MOVEMENT_RUN_MULTIPLIER,
   };
 
   return (
@@ -105,9 +149,7 @@ export function OverviewTab({
             disabled={!editable}
             className={editableInputClass(editable) + " mt-1"}
             value={header.characterName ?? ""}
-            onChange={(e) =>
-              updateHeaderField("characterName", e.target.value)
-            }
+            onChange={handleCharacterNameChange}
           />
         </label>
       </section>
@@ -125,7 +167,8 @@ export function OverviewTab({
 
           <button
             disabled={!editable}
-            onClick={() => adjustWounds(-1)}
+            onClick={handleWoundsMinus}
+            aria-label="Decrease current wounds"
             className={`px-2 py-0.5 border rounded text-xs transition
               ${
                 editable
@@ -146,7 +189,8 @@ export function OverviewTab({
 
           <button
             disabled={!editable}
-            onClick={() => adjustWounds(1)}
+            onClick={handleWoundsPlus}
+            aria-label="Increase current wounds"
             className={`px-2 py-0.5 border rounded text-xs transition
               ${
                 editable
@@ -166,12 +210,8 @@ export function OverviewTab({
               disabled={!editable}
               className={editableInputClass(editable) + " mt-1"}
               value={wounds.criticalDamage}
-              onChange={(e) =>
-                onUpdateWounds({
-                  ...wounds,
-                  criticalDamage: Number(e.target.value),
-                })
-              }
+              onChange={handleCriticalDamageChange}
+              aria-label="Critical damage points"
             />
           </label>
 
@@ -182,12 +222,8 @@ export function OverviewTab({
               disabled={!editable}
               className={editableInputClass(editable) + " mt-1"}
               value={wounds.fatigue}
-              onChange={(e) =>
-                onUpdateWounds({
-                  ...wounds,
-                  fatigue: Number(e.target.value),
-                })
-              }
+              onChange={handleFatigueChange}
+              aria-label="Fatigue points"
             />
           </label>
         </div>
@@ -206,7 +242,8 @@ export function OverviewTab({
 
           <button
             disabled={!editable}
-            onClick={() => adjustFate(-1)}
+            onClick={handleFateMinus}
+            aria-label="Decrease current fate points"
             className={`px-2 py-0.5 border rounded text-xs transition
               ${
                 editable
@@ -227,7 +264,8 @@ export function OverviewTab({
 
           <button
             disabled={!editable}
-            onClick={() => adjustFate(1)}
+            onClick={handleFatePlus}
+            aria-label="Increase current fate points"
             className={`px-2 py-0.5 border rounded text-xs transition
               ${
                 editable
@@ -247,11 +285,11 @@ export function OverviewTab({
           <Tooltip
             content={
               <>
-                <div>AB = Agility ÷ 10</div>
-                <div>Half: AB</div>
-                <div>Full: AB × 2</div>
-                <div>Charge: AB × 3</div>
-                <div>Run: AB × 6</div>
+                <div>AB = Agility ÷ {CHARACTERISTIC_BONUS_DIVISOR}</div>
+                <div>Half: AB × {MOVEMENT_HALF_MULTIPLIER}</div>
+                <div>Full: AB × {MOVEMENT_FULL_MULTIPLIER}</div>
+                <div>Charge: AB × {MOVEMENT_CHARGE_MULTIPLIER}</div>
+                <div>Run: AB × {MOVEMENT_RUN_MULTIPLIER}</div>
               </>
             }
           >
@@ -279,6 +317,7 @@ export function OverviewTab({
 
             <button
               onClick={copyCode}
+              aria-label="Copy recovery code to clipboard"
               className="px-2 py-1 text-xs rounded bg-slate-700 border border-slate-600 hover:bg-slate-600"
             >
               {copied ? "Copied" : "Copy"}

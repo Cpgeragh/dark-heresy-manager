@@ -4,9 +4,9 @@ import { useState, useRef, useEffect } from "react";
 import type { ReactNode } from "react";
 
 interface TooltipProps {
-  children: ReactNode;     // The element the user taps (e.g., ⓘ)
-  content: ReactNode;      // Tooltip content
-  maxWidth?: number;       // Optional override
+  children: ReactNode;
+  content: ReactNode;
+  maxWidth?: number;
 }
 
 export function Tooltip({ children, content, maxWidth = 240 }: TooltipProps) {
@@ -15,13 +15,12 @@ export function Tooltip({ children, content, maxWidth = 240 }: TooltipProps) {
 
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
+  const tooltipId = useRef(`tooltip-${Math.random().toString(36).slice(2, 9)}`);
 
-  // Toggle tooltip
   function toggle() {
     setOpen((s) => !s);
   }
 
-  // Position tooltip when opened
   useEffect(() => {
     if (!open) return;
 
@@ -35,13 +34,11 @@ export function Tooltip({ children, content, maxWidth = 240 }: TooltipProps) {
     let left = rect.left;
     let top = rect.bottom + 8;
 
-    // Keep onscreen horizontally
     if (left + ttRect.width > window.innerWidth - 8) {
       left = window.innerWidth - ttRect.width - 8;
     }
     if (left < 8) left = 8;
 
-    // Keep onscreen vertically
     if (top + ttRect.height > window.innerHeight - 8) {
       top = rect.top - ttRect.height - 8;
     }
@@ -49,7 +46,6 @@ export function Tooltip({ children, content, maxWidth = 240 }: TooltipProps) {
     setPosition({ left, top });
   }, [open]);
 
-  // Close when clicking outside
   useEffect(() => {
     function handleOutside(e: MouseEvent | TouchEvent) {
       if (!tooltipRef.current || !triggerRef.current) return;
@@ -79,6 +75,9 @@ export function Tooltip({ children, content, maxWidth = 240 }: TooltipProps) {
       <button
         ref={triggerRef}
         onClick={toggle}
+        aria-expanded={open}
+        aria-controls={tooltipId.current}
+        aria-label="Show additional information"
         className="text-slate-300 px-2 py-0.5 rounded bg-slate-700 border border-slate-600 hover:bg-slate-600 text-xs"
       >
         {children}
@@ -86,7 +85,9 @@ export function Tooltip({ children, content, maxWidth = 240 }: TooltipProps) {
 
       {open && (
         <div
+          id={tooltipId.current}
           ref={tooltipRef}
+          role="tooltip"
           style={{
             position: "fixed",
             left: position.left,

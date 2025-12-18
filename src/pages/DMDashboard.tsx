@@ -1,6 +1,6 @@
 // src/pages/DMDashboard.tsx
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   collection,
@@ -22,7 +22,6 @@ import {
   RECOVERY_CODE_SEGMENTS 
 } from "../constants/ui";
 
-// Type alias for cleaner code
 type CampaignWithId = CampaignDocument & { id: string };
 
 interface Props {
@@ -42,8 +41,29 @@ export default function DMDashboard({
   const [campaigns, setCampaigns] = useState<CampaignWithId[]>([]);
   const [newCampaignName, setNewCampaignName] = useState("");
   const [characterName, setCharacterName] = useState("");
-
   const [characters, setCharacters] = useState<CharacterListItem[]>([]);
+
+  // ----------------------------------
+  // STABLE CALLBACKS
+  // ----------------------------------
+  const handleCampaignNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewCampaignName(e.target.value);
+  }, []);
+
+  const handleCharacterNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setCharacterName(e.target.value);
+  }, []);
+
+  const handleCampaignClick = useCallback((campaignId: string) => {
+    onActiveCampaignChange(campaignId);
+  }, [onActiveCampaignChange]);
+
+  const handleCharacterView = useCallback((characterId: string) => {
+    navigate(
+      `/campaign/${activeCampaignId}/character/${characterId}`,
+      { state: { characterOrder: characters.map((c) => c.id) } }
+    );
+  }, [navigate, activeCampaignId, characters]);
 
   // ----------------------------------
   // Load campaigns owned by this DM
@@ -103,9 +123,22 @@ export default function DMDashboard({
   }, [activeCampaignId]);
 
   // ----------------------------------
-  // Character order for navigation state
+  // Recovery code helper
   // ----------------------------------
-  const characterOrder = characters.map((c) => c.id);
+  function generateRecoveryCode() {
+    const seg = () =>
+      Math.random()
+        .toString(36)
+        .substring(2, 2 + RECOVERY_CODE_SEGMENT_LENGTH)
+        .toUpperCase();
+    
+    const segments = Array.from(
+      { length: RECOVERY_CODE_SEGMENTS }, 
+      () => seg()
+    ).join('-');
+    
+    return `${RECOVERY_CODE_PREFIX}-${segments}`;
+  }
 
   // ----------------------------------
   // Create campaign
@@ -124,24 +157,6 @@ export default function DMDashboard({
 
     setNewCampaignName("");
     onActiveCampaignChange(newRef.id);
-  }
-
-  // ----------------------------------
-  // Recovery code helper
-  // ----------------------------------
-  function generateRecoveryCode() {
-    const seg = () =>
-      Math.random()
-        .toString(36)
-        .substring(2, 2 + RECOVERY_CODE_SEGMENT_LENGTH)
-        .toUpperCase();
-    
-    const segments = Array.from(
-      { length: RECOVERY_CODE_SEGMENTS }, 
-      () => seg()
-    ).join('-');
-    
-    return `${RECOVERY_CODE_PREFIX}-${segments}`;
   }
 
   // ----------------------------------
@@ -205,7 +220,7 @@ export default function DMDashboard({
             className="px-3 py-2 bg-slate-800 border border-slate-600 rounded w-64"
             placeholder="Campaign Name"
             value={newCampaignName}
-            onChange={(e) => setNewCampaignName(e.target.value)}
+            onChange={handleCampaignNameChange}
             aria-label="New campaign name"
           />
           <button
@@ -230,11 +245,12 @@ export default function DMDashboard({
           {campaigns.map((c) => (
             <div
               key={c.id}
-              className={`px-4 py-2 border rounded cursor-pointer ${activeCampaignId === c.id
+              className={`px-4 py-2 border rounded cursor-pointer ${
+                activeCampaignId === c.id
                   ? "border-amber-400 bg-amber-500/20"
                   : "border-slate-600 hover:bg-slate-800"
-                }`}
-              onClick={() => onActiveCampaignChange(c.id)}
+              }`}
+              onClick={() => handleCampaignClick(c.id)}
             >
               {c.name}
             </div>
@@ -253,7 +269,7 @@ export default function DMDashboard({
               className="px-3 py-2 bg-slate-800 border border-slate-600 rounded w-64"
               placeholder="Character Name"
               value={characterName}
-              onChange={(e) => setCharacterName(e.target.value)}
+              onChange={handleCharacterNameChange}
               aria-label="New character name"
             />
 
@@ -297,14 +313,7 @@ export default function DMDashboard({
                   </div>
 
                   <button
-                    onClick={() =>
-                      navigate(
-                        `/campaign/${activeCampaignId}/character/${ch.id}`,
-                        {
-                          state: { characterOrder },
-                        }
-                      )
-                    }
+                    onClick={() => handleCharacterView(ch.id)}
                     className="px-3 py-1 text-xs rounded bg-blue-600 text-white hover:bg-blue-500"
                     aria-label={`View ${ch.header?.characterName ?? "character"}`}
                   >

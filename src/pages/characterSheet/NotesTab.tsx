@@ -1,5 +1,6 @@
 // src/pages/characterSheet/NotesTab.tsx
 
+import { useCallback } from "react";
 import {
   editableTextareaClass,
   sectionContainerClass,
@@ -13,6 +14,10 @@ interface NotesTabProps {
 }
 
 export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    onSave(e.target.value);
+  }, [onSave]);
+
   return (
     <div className="space-y-3 text-slate-300">
       <div className="flex items-center justify-between">
@@ -39,7 +44,7 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
       ) : (
         <textarea
           value={notes}
-          onChange={(e) => onSave(e.target.value)}
+          onChange={handleChange}
           placeholder="Campaign notes, reminders, character details, or anything else…"
           className={editableTextareaClass(true) + " min-h-[240px] p-4 leading-relaxed"}
         />

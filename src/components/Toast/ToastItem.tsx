@@ -1,6 +1,6 @@
 // src/components/Toast/ToastItem.tsx
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useToast, type Toast } from "./ToastContext";
 import { COPY_FEEDBACK_DURATION } from "../../constants/ui";
 
@@ -12,7 +12,7 @@ export function ToastItem({ toast }: ToastItemProps) {
   const { removeToast } = useToast();
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = async () => {
+  const handleCopy = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(toast.message);
       setCopied(true);
@@ -20,7 +20,11 @@ export function ToastItem({ toast }: ToastItemProps) {
     } catch (err) {
       console.error("Failed to copy:", err);
     }
-  };
+  }, [toast.message]);
+
+  const handleDismiss = useCallback(() => {
+    removeToast(toast.id);
+  }, [removeToast, toast.id]);
 
   const styles = {
     success: "bg-green-500/20 border-green-500 text-green-100",
@@ -72,7 +76,7 @@ export function ToastItem({ toast }: ToastItemProps) {
         </button>
 
         <button
-          onClick={() => removeToast(toast.id)}
+          onClick={handleDismiss}
           className="p-1 hover:bg-white/10 rounded transition text-xs"
           aria-label="Dismiss notification"
           title="Dismiss"

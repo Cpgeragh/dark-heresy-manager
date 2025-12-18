@@ -1,6 +1,6 @@
 // src/pages/CharacterSheet.tsx
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { auth } from "../firebase";
 
@@ -20,6 +20,19 @@ import { NotesTab } from "./characterSheet/NotesTab";
 import { AdminTab } from "./characterSheet/AdminTab";
 
 import type { TabId } from "./characterSheet/types";
+import type {
+  CharacterHeader,
+  WoundsBlock,
+  FateBlock,
+  SkillEntry,
+  TalentsAndTraitsBlock,
+  WeaponTrainingBlock,
+  RangedWeapon,
+  MeleeWeapon,
+  ArmourBlock,
+  PsychicBlock,
+  ExperienceBlock,
+} from "../types/Character";
 import { TabButton } from "../components/TabButton";
 import { CharacterBreadcrumb } from "../components/CharacterBreadcrumb";
 
@@ -51,6 +64,79 @@ export default function CharacterSheet() {
 
   const [activeTab, setActiveTab] = useState<TabId>("overview");
 
+  // ================================================================
+  // STABLE UPDATE CALLBACKS (eliminate inline functions)
+  // ================================================================
+  
+  const handleUpdateHeader = useCallback(
+    (next: CharacterHeader) => updateField("header", next),
+    [updateField]
+  );
+
+  const handleUpdateWounds = useCallback(
+    (next: WoundsBlock) => updateField("wounds", next),
+    [updateField]
+  );
+
+  const handleUpdateFate = useCallback(
+    (next: FateBlock) => updateField("fate", next),
+    [updateField]
+  );
+
+  const handleUpdateSkills = useCallback(
+    (next: SkillEntry[]) => updateField("skills", next),
+    [updateField]
+  );
+
+  const handleUpdateTalents = useCallback(
+    (next: TalentsAndTraitsBlock) => updateField("talentsAndTraits", next),
+    [updateField]
+  );
+
+  const handleUpdateWeaponTraining = useCallback(
+    (next: WeaponTrainingBlock) => updateField("weaponTraining", next),
+    [updateField]
+  );
+
+  const handleUpdateRangedWeapons = useCallback(
+    (next: RangedWeapon[]) => updateField("rangedWeapons", next),
+    [updateField]
+  );
+
+  const handleUpdateMeleeWeapons = useCallback(
+    (next: MeleeWeapon[]) => updateField("meleeWeapons", next),
+    [updateField]
+  );
+
+  const handleUpdateArmour = useCallback(
+    (next: ArmourBlock) => updateField("armour", next),
+    [updateField]
+  );
+
+  const handleUpdatePsychic = useCallback(
+    (next: PsychicBlock) => updateField("psychic", next),
+    [updateField]
+  );
+
+  const handleUpdateGear = useCallback(
+    (next: string[]) => updateField("gear", next),
+    [updateField]
+  );
+
+  const handleUpdateExperience = useCallback(
+    (next: ExperienceBlock) => updateField("experience", next),
+    [updateField]
+  );
+
+  const handleUpdateNotes = useCallback(
+    (value: string) => updateField("notes", value),
+    [updateField]
+  );
+
+  // ================================================================
+  // RENDERING LOGIC
+  // ================================================================
+
   if (!path) {
     return (
       <div className="text-slate-300 text-center py-10">
@@ -73,9 +159,7 @@ export default function CharacterSheet() {
 
   const canPlayerRelease = isOwner && !isDM;
 
-  // --------------------------------------------------
-  // Visual cue for DM override mode (PR-A10)
-  // --------------------------------------------------
+  // Visual cue for DM override mode
   const dmOverrideActive = isDM && !dmReadOnly;
 
   const containerClass = [
@@ -145,7 +229,7 @@ export default function CharacterSheet() {
         )}
       </div>
 
-      {/* CONTENT CONTAINER — VISUAL DIFF WRAP */}
+      {/* CONTENT CONTAINER */}
       <div 
         className={containerClass}
         role="tabpanel"
@@ -175,9 +259,9 @@ export default function CharacterSheet() {
               editable={allowedToEdit}
               canPlayerRelease={canPlayerRelease}
               onPlayerRelease={releaseCharacter}
-              onUpdateHeader={(next) => updateField("header", next)}
-              onUpdateWounds={(next) => updateField("wounds", next)}
-              onUpdateFate={(next) => updateField("fate", next)}
+              onUpdateHeader={handleUpdateHeader}
+              onUpdateWounds={handleUpdateWounds}
+              onUpdateFate={handleUpdateFate}
               getCharTotal={getCharTotal}
             />
           )}
@@ -194,7 +278,7 @@ export default function CharacterSheet() {
             <SkillsTab
               skills={character.skills}
               editable={allowedToEdit}
-              onUpdate={(next) => updateField("skills", next)}
+              onUpdate={handleUpdateSkills}
               getCharField={getCharField}
             />
           )}
@@ -204,12 +288,8 @@ export default function CharacterSheet() {
               talents={character.talentsAndTraits}
               weaponTraining={character.weaponTraining}
               editable={allowedToEdit}
-              onUpdateTalents={(next) =>
-                updateField("talentsAndTraits", next)
-              }
-              onUpdateTraining={(next) =>
-                updateField("weaponTraining", next)
-              }
+              onUpdateTalents={handleUpdateTalents}
+              onUpdateTraining={handleUpdateWeaponTraining}
             />
           )}
 
@@ -218,12 +298,8 @@ export default function CharacterSheet() {
               rangedWeapons={character.rangedWeapons}
               meleeWeapons={character.meleeWeapons}
               editable={allowedToEdit}
-              onUpdateRanged={(next) =>
-                updateField("rangedWeapons", next)
-              }
-              onUpdateMelee={(next) =>
-                updateField("meleeWeapons", next)
-              }
+              onUpdateRanged={handleUpdateRangedWeapons}
+              onUpdateMelee={handleUpdateMeleeWeapons}
             />
           )}
 
@@ -231,7 +307,7 @@ export default function CharacterSheet() {
             <ArmourTab
               armour={character.armour}
               editable={allowedToEdit}
-              onUpdate={(next) => updateField("armour", next)}
+              onUpdate={handleUpdateArmour}
             />
           )}
 
@@ -239,7 +315,7 @@ export default function CharacterSheet() {
             <PsychicTab
               psychic={character.psychic}
               editable={allowedToEdit}
-              onUpdate={(next) => updateField("psychic", next)}
+              onUpdate={handleUpdatePsychic}
             />
           )}
 
@@ -247,7 +323,7 @@ export default function CharacterSheet() {
             <GearTab
               gear={character.gear}
               editable={allowedToEdit}
-              onUpdate={(next) => updateField("gear", next)}
+              onUpdate={handleUpdateGear}
             />
           )}
 
@@ -255,9 +331,7 @@ export default function CharacterSheet() {
             <ExperienceTab
               experience={character.experience}
               editable={allowedToEdit}
-              onUpdate={(next) =>
-                updateField("experience", next)
-              }
+              onUpdate={handleUpdateExperience}
             />
           )}
 
@@ -265,7 +339,7 @@ export default function CharacterSheet() {
             <NotesTab
               notes={character.notes ?? ""}
               editable={allowedToEdit}
-              onSave={(value) => updateField("notes", value)}
+              onSave={handleUpdateNotes}
             />
           )}
 

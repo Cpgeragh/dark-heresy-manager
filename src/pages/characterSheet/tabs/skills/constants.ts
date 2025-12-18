@@ -1,6 +1,11 @@
 // src/pages/characterSheet/tabs/skills/constants.ts
 
 import type { Characteristics } from "../../../../types/Character";
+import {
+  SKILL_EXPERT_THRESHOLD,
+  SKILL_TRAINED_THRESHOLD,
+  SKILL_BASIC_THRESHOLD,
+} from "../../../../constants/gameRules";
 
 // Re-export type from hook (so existing imports don't break)
 export type { SkillWithComputed } from "../../../../hooks/useSkillComputation";
@@ -44,11 +49,11 @@ export const CHAR_FULL_LABEL: Record<keyof Characteristics, string> = {
   fel: "Fellowship (Fel)",
 };
 
-// Color helper for skill totals (used by SkillCard)
+// Color helper for skill totals (uses imported constants)
 export function getTotalColor(total: number | null): string {
   if (total === null) return "text-slate-400";
-  if (total >= 40) return "text-green-400";
-  if (total >= 30) return "text-amber-300";
-  if (total >= 20) return "text-slate-200";
+  if (total >= SKILL_EXPERT_THRESHOLD) return "text-green-400";
+  if (total >= SKILL_TRAINED_THRESHOLD) return "text-amber-300";
+  if (total >= SKILL_BASIC_THRESHOLD) return "text-slate-200";
   return "text-red-400";
 }

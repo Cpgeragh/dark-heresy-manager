@@ -1,5 +1,6 @@
 // src/pages/characterSheet/GearTab.tsx
 
+import { useCallback } from "react";
 import { sectionContainerClass } from "../../ui/editableStyles";
 import { FormField } from "../../components/FormField";
 
@@ -10,24 +11,24 @@ interface GearTabProps {
 }
 
 export function GearTab({ gear, editable, onUpdate }: GearTabProps) {
-  function addItem() {
+  const addItem = useCallback(() => {
     if (!editable) return;
     onUpdate([...gear, ""]);
-  }
+  }, [editable, gear, onUpdate]);
 
-  function removeItem(index: number) {
+  const removeItem = useCallback((index: number) => {
     if (!editable) return;
     const next = [...gear];
     next.splice(index, 1);
     onUpdate(next);
-  }
+  }, [editable, gear, onUpdate]);
 
-  function updateItem(index: number, value: string) {
+  const updateItem = useCallback((index: number, value: string) => {
     if (!editable) return;
     const next = [...gear];
     next[index] = value;
     onUpdate(next);
-  }
+  }, [editable, gear, onUpdate]);
 
   return (
     <div className="space-y-6 text-slate-300">
@@ -56,32 +57,14 @@ export function GearTab({ gear, editable, onUpdate }: GearTabProps) {
         ) : (
           <div className="space-y-3">
             {gear.map((item, i) => (
-              <div
+              <GearItem
                 key={i}
-                className={sectionContainerClass(editable) + " space-y-2"}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <FormField
-                    label={`Item ${i + 1}`}
-                    value={item}
-                    onChange={(v) => updateItem(i, v)}
-                    editable={editable}
-                    type="textarea"
-                    rows={2}
-                    placeholder="Item name, weight, craftsmanship, and description..."
-                    className="flex-1"
-                  />
-
-                  {editable && (
-                    <button
-                      onClick={() => removeItem(i)}
-                      className="text-xs text-red-400 hover:text-red-300 mt-5"
-                    >
-                      Remove
-                    </button>
-                  )}
-                </div>
-              </div>
+                index={i}
+                item={item}
+                editable={editable}
+                onUpdate={updateItem}
+                onRemove={removeItem}
+              />
             ))}
           </div>
         )}
@@ -92,6 +75,54 @@ export function GearTab({ gear, editable, onUpdate }: GearTabProps) {
         <p className="font-mono bg-slate-900 p-2 rounded">
           Laspistol (Basic, 1.5kg, Common) - Las weapon, 30m range, 1d10+2 E damage, Pen 0, Clip 30, Reload Full
         </p>
+      </div>
+    </div>
+  );
+}
+
+function GearItem({
+  index,
+  item,
+  editable,
+  onUpdate,
+  onRemove,
+}: {
+  index: number;
+  item: string;
+  editable: boolean;
+  onUpdate: (index: number, value: string) => void;
+  onRemove: (index: number) => void;
+}) {
+  const handleChange = useCallback((v: string) => {
+    onUpdate(index, v);
+  }, [index, onUpdate]);
+
+  const handleRemove = useCallback(() => {
+    onRemove(index);
+  }, [index, onRemove]);
+
+  return (
+    <div className={sectionContainerClass(editable) + " space-y-2"}>
+      <div className="flex items-start justify-between gap-2">
+        <FormField
+          label={`Item ${index + 1}`}
+          value={item}
+          onChange={handleChange}
+          editable={editable}
+          type="textarea"
+          rows={2}
+          placeholder="Item name, weight, craftsmanship, and description..."
+          className="flex-1"
+        />
+
+        {editable && (
+          <button
+            onClick={handleRemove}
+            className="text-xs text-red-400 hover:text-red-300 mt-5"
+          >
+            Remove
+          </button>
+        )}
       </div>
     </div>
   );

@@ -1,5 +1,7 @@
 // src/pages/characterSheet/tabs/skills/SkillsControlBar.tsx
 
+import { useCallback } from "react";
+
 type SortMode = "category" | "characteristic" | "name" | "total";
 
 interface SkillsControlBarProps {
@@ -23,6 +25,22 @@ export function SkillsControlBar({
   compact,
   setCompact,
 }: SkillsControlBarProps) {
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value);
+  }, [setSearch]);
+
+  const handleSortChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSortMode(e.target.value as SortMode);
+  }, [setSortMode]);
+
+  const handleTrainedChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setShowOnlyTrained(e.target.checked);
+  }, [setShowOnlyTrained]);
+
+  const handleCompactToggle = useCallback(() => {
+    setCompact(!compact);
+  }, [compact, setCompact]);
+
   return (
     <div className="flex flex-wrap items-center gap-3 mb-4 text-sm">
       <input
@@ -30,7 +48,7 @@ export function SkillsControlBar({
         type="text"
         placeholder="Search skills…"
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={handleSearchChange}
         aria-label="Search skills by name"
         className="px-2 py-1 bg-slate-900 border border-slate-700 rounded text-slate-200"
       />
@@ -38,11 +56,10 @@ export function SkillsControlBar({
       <select
         id="skill-sort"
         value={sortMode}
-        onChange={(e) => setSortMode(e.target.value as SortMode)}
+        onChange={handleSortChange}
         aria-label="Sort skills by"
         className="px-2 py-1 bg-slate-900 border border-slate-700 rounded text-slate-200"
       >
-        {/* Characteristic moved to the top */}
         <option value="characteristic">Sort: By Characteristic</option>
         <option value="category">Sort: By Category</option>
         <option value="name">Sort: Alphabetical</option>
@@ -57,7 +74,7 @@ export function SkillsControlBar({
           id="trained-only-checkbox"
           type="checkbox"
           checked={showOnlyTrained}
-          onChange={(e) => setShowOnlyTrained(e.target.checked)}
+          onChange={handleTrainedChange}
           aria-label="Show only trained skills"
           className="mr-1"
         />
@@ -65,7 +82,7 @@ export function SkillsControlBar({
       </label>
 
       <button
-        onClick={() => setCompact(!compact)}
+        onClick={handleCompactToggle}
         aria-label={compact ? "Switch to detailed view" : "Switch to compact view"}
         aria-pressed={compact}
         className="px-3 py-1 border border-slate-600 rounded bg-slate-900 text-slate-200 hover:bg-slate-800 text-xs"

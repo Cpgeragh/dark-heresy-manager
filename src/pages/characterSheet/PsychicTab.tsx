@@ -1,5 +1,6 @@
 // src/pages/characterSheet/PsychicTab.tsx
 
+import { useCallback } from "react";
 import type { PsychicBlock, PsychicPower } from "../../types/Character";
 import {
   editableInputClass,
@@ -14,12 +15,20 @@ interface PsychicTabProps {
 }
 
 export function PsychicTab({ psychic, editable, onUpdate }: PsychicTabProps) {
-  function updateField(key: keyof PsychicBlock, value: string | number) {
+  const updateField = useCallback((key: keyof PsychicBlock, value: string | number) => {
     if (!editable) return;
     onUpdate({ ...psychic, [key]: value });
-  }
+  }, [editable, psychic, onUpdate]);
 
-  function addMinorPower() {
+  const handlePsyRatingChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    updateField("psyRating", Number(e.target.value));
+  }, [updateField]);
+
+  const handleDisciplineChange = useCallback((v: string) => {
+    updateField("discipline", v);
+  }, [updateField]);
+
+  const addMinorPower = useCallback(() => {
     if (!editable) return;
     const newPower: PsychicPower = {
       id: crypto.randomUUID(),
@@ -31,9 +40,9 @@ export function PsychicTab({ psychic, editable, onUpdate }: PsychicTabProps) {
       ...psychic,
       minorPowers: [...psychic.minorPowers, newPower],
     });
-  }
+  }, [editable, psychic, onUpdate]);
 
-  function addMajorPower() {
+  const addMajorPower = useCallback(() => {
     if (!editable) return;
     const newPower: PsychicPower = {
       id: crypto.randomUUID(),
@@ -45,35 +54,35 @@ export function PsychicTab({ psychic, editable, onUpdate }: PsychicTabProps) {
       ...psychic,
       majorPowers: [...psychic.majorPowers, newPower],
     });
-  }
+  }, [editable, psychic, onUpdate]);
 
-  function removeMinorPower(index: number) {
+  const removeMinorPower = useCallback((index: number) => {
     if (!editable) return;
     const powers = [...psychic.minorPowers];
     powers.splice(index, 1);
     onUpdate({ ...psychic, minorPowers: powers });
-  }
+  }, [editable, psychic, onUpdate]);
 
-  function removeMajorPower(index: number) {
+  const removeMajorPower = useCallback((index: number) => {
     if (!editable) return;
     const powers = [...psychic.majorPowers];
     powers.splice(index, 1);
     onUpdate({ ...psychic, majorPowers: powers });
-  }
+  }, [editable, psychic, onUpdate]);
 
-  function updateMinorPower(index: number, key: keyof PsychicPower, value: any) {
+  const updateMinorPower = useCallback((index: number, key: keyof PsychicPower, value: any) => {
     if (!editable) return;
     const powers = [...psychic.minorPowers];
     powers[index] = { ...powers[index], [key]: value };
     onUpdate({ ...psychic, minorPowers: powers });
-  }
+  }, [editable, psychic, onUpdate]);
 
-  function updateMajorPower(index: number, key: keyof PsychicPower, value: any) {
+  const updateMajorPower = useCallback((index: number, key: keyof PsychicPower, value: any) => {
     if (!editable) return;
     const powers = [...psychic.majorPowers];
     powers[index] = { ...powers[index], [key]: value };
     onUpdate({ ...psychic, majorPowers: powers });
-  }
+  }, [editable, psychic, onUpdate]);
 
   return (
     <div className="space-y-6 text-slate-300">
@@ -88,7 +97,7 @@ export function PsychicTab({ psychic, editable, onUpdate }: PsychicTabProps) {
               disabled={!editable}
               type="number"
               value={psychic.psyRating ?? 0}
-              onChange={(e) => updateField("psyRating", Number(e.target.value))}
+              onChange={handlePsyRatingChange}
               className={editableInputClass(editable) + " w-24"}
             />
           </label>
@@ -96,7 +105,7 @@ export function PsychicTab({ psychic, editable, onUpdate }: PsychicTabProps) {
           <FormField
             label="Discipline"
             value={psychic.discipline ?? ""}
-            onChange={(v) => updateField("discipline", v)}
+            onChange={handleDisciplineChange}
             editable={editable}
             placeholder="e.g., Biomancy, Telekinesis"
           />

@@ -1,6 +1,11 @@
 // src/components/CharacteristicField.tsx
 
-import type { CharField } from "../utils/defaultCharacter";
+import { useCallback } from "react";
+import type { CharField } from "../utils/characterFactory";
+import { 
+  MAX_CHARACTERISTIC_ADVANCES,
+  CHARACTERISTIC_ADVANCE_INCREMENT 
+} from "../constants/gameRules";
 
 interface Props {
   label: string;
@@ -17,29 +22,31 @@ export default function CharacteristicField({
 }: Props) {
   const { base, advances } = value;
 
-  function toggleAdvance(index: number) {
+  const toggleAdvance = useCallback((index: number) => {
     if (!editable) return;
 
-    // if clicking inside current advance range => shrink
-    // if clicking beyond => expand
     let newAdvances = index < advances ? index : index + 1;
 
     if (newAdvances < 0) newAdvances = 0;
-    if (newAdvances > 4) newAdvances = 4;
+    if (newAdvances > MAX_CHARACTERISTIC_ADVANCES) newAdvances = MAX_CHARACTERISTIC_ADVANCES;
 
     onChange({ base, advances: newAdvances });
-  }
+  }, [editable, base, advances, onChange]);
 
-  function updateBase(raw: string) {
+  const updateBase = useCallback((raw: string) => {
     if (!editable) return;
 
     const num = parseInt(raw, 10);
     if (isNaN(num)) return;
 
     onChange({ base: num, advances });
-  }
+  }, [editable, advances, onChange]);
 
-  const total = base + advances * 5;
+  const handleBaseChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    updateBase(e.target.value);
+  }, [updateBase]);
+
+  const total = base + advances * CHARACTERISTIC_ADVANCE_INCREMENT;
 
   return (
     <div className="mb-4 p-3 border border-slate-700 rounded-md bg-slate-900/60">
@@ -52,7 +59,8 @@ export default function CharacteristicField({
           type="number"
           value={base}
           disabled={!editable}
-          onChange={(e) => updateBase(e.target.value)}
+          onChange={handleBaseChange}
+          aria-label={`${label} base value`}
           className="w-20 px-2 py-1 bg-slate-800 border border-slate-600 rounded text-slate-100"
         />
       </div>
@@ -60,12 +68,17 @@ export default function CharacteristicField({
       {/* Advances */}
       <div className="flex items-center gap-2 mb-2">
         <span className="text-sm text-slate-400">Advances:</span>
-        {Array.from({ length: 4 }).map((_, idx) => {
+        {Array.from({ length: MAX_CHARACTERISTIC_ADVANCES }).map((_, idx) => {
           const filled = idx < advances;
           return (
-            <div
+            <button
               key={idx}
               onClick={() => toggleAdvance(idx)}
+              disabled={!editable}
+              role="button"
+              aria-label={`${label} advance ${idx + 1} of ${MAX_CHARACTERISTIC_ADVANCES}`}
+              aria-pressed={filled}
+              tabIndex={editable ? 0 : -1}
               className={`h-5 w-5 border rounded flex items-center justify-center
                 ${
                   filled
@@ -74,7 +87,7 @@ export default function CharacteristicField({
                 }
                 ${
                   editable
-                    ? "cursor-pointer hover:bg-slate-700"
+                    ? "cursor-pointer hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-500"
                     : "opacity-50 cursor-not-allowed"
                 }`}
             />

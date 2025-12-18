@@ -21,7 +21,6 @@ export default function CampaignOverview() {
   const [characters, setCharacters] = useState<CharacterSummary[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Runtime guard AND TS narrowing
   if (!campaignId) {
     return (
       <div className="text-slate-300 text-center py-10">
@@ -30,7 +29,6 @@ export default function CampaignOverview() {
     );
   }
 
-  // TS now knows this is always a string
   const safeCampaignId: string = campaignId;
 
   useEffect(() => {
@@ -45,7 +43,7 @@ export default function CampaignOverview() {
         return {
           id: d.id,
           name: data.name || "Unnamed",
-          userId: data.userId || null,
+          userId: data.userId ?? null, // FIXED: Changed from || to ??
         };
       });
 
@@ -111,7 +109,7 @@ function CampaignOverviewCharacterRow({
             Character ID: <code>{characterId}</code>
           </p>
           <p className="text-xs text-slate-400">
-            Owner UID: <code>{userId || "Unclaimed"}</code>
+            Owner UID: <code>{userId ?? "Unclaimed"}</code> {/* FIXED: Changed from || to ?? */}
           </p>
 
           {latest && (

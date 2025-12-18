@@ -1,6 +1,6 @@
 // src/pages/ClaimCharacter/DMTools.tsx
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 interface Props {
   recovery: {
@@ -15,6 +15,16 @@ interface Props {
 
 export default function DMTools({ recovery, onForceAssign, onForceRelease }: Props) {
   const [uid, setUid] = useState("");
+
+  const handleUidChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setUid(e.target.value);
+  }, []);
+
+  const handleForceAssign = useCallback(() => {
+    if (uid.trim()) {
+      onForceAssign(uid.trim());
+    }
+  }, [uid, onForceAssign]);
 
   return (
     <div className="border border-amber-600 bg-amber-900/20 p-4 rounded mt-6">
@@ -34,12 +44,12 @@ export default function DMTools({ recovery, onForceAssign, onForceRelease }: Pro
           className="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-slate-100 font-mono text-xs flex-1"
           placeholder="Enter player UID"
           value={uid}
-          onChange={(e) => setUid(e.target.value)}
+          onChange={handleUidChange}
         />
 
         <button
           className="px-3 py-1 bg-blue-600 text-white rounded border border-blue-500 hover:bg-blue-500 text-xs"
-          onClick={() => uid.trim() && onForceAssign(uid.trim())}
+          onClick={handleForceAssign}
         >
           Force Assign
         </button>

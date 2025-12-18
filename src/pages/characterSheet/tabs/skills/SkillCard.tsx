@@ -1,9 +1,15 @@
 // src/pages/characterSheet/Skills/SkillCard.tsx
 
+import { useCallback } from "react";
 import type { SkillEntry, SkillAdvanceLevel } from "../../../../types/Character";
 import { Tooltip } from "../../../../components/Tooltip";
 import { SKILL_DESCRIPTIONS } from "../../../../data/skillDescriptions";
 import type { SkillWithComputed } from "./constants";
+import {
+  SKILL_EXPERT_THRESHOLD,
+  SKILL_TRAINED_THRESHOLD,
+  SKILL_BASIC_THRESHOLD,
+} from "../../../../constants/gameRules";
 
 import {
   editableInputClass,
@@ -33,9 +39,9 @@ const CHAR_LABEL: Record<SkillEntry["characteristic"], string> = {
 
 function getTotalColor(total: number | null): string {
   if (total === null) return "text-slate-400";
-  if (total >= 40) return "text-green-400";
-  if (total >= 30) return "text-amber-300";
-  if (total >= 20) return "text-slate-200";
+  if (total >= SKILL_EXPERT_THRESHOLD) return "text-green-400";
+  if (total >= SKILL_TRAINED_THRESHOLD) return "text-amber-300";
+  if (total >= SKILL_BASIC_THRESHOLD) return "text-slate-200";
   return "text-red-400";
 }
 
@@ -49,6 +55,18 @@ export function SkillCard({
 }: SkillCardProps) {
   const description = SKILL_DESCRIPTIONS[skill.name];
   const totalColor = getTotalColor(skill.total);
+
+  const handleLevelClick = useCallback((value: SkillAdvanceLevel) => {
+    updateLevel(skill.id, value);
+  }, [skill.id, updateLevel]);
+
+  const handleMiscChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    updateMisc(skill.id, Number(e.target.value));
+  }, [skill.id, updateMisc]);
+
+  const handleNotesChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    updateNotes(skill.id, e.target.value);
+  }, [skill.id, updateNotes]);
 
   return (
     <div
@@ -138,9 +156,9 @@ export function SkillCard({
                 <button
                   key={value}
                   disabled={!editable}
-                  onClick={() =>
-                    updateLevel(skill.id, value as SkillAdvanceLevel)
-                  }
+                  onClick={() => handleLevelClick(value)}
+                  aria-label={`Set skill level to ${label}`}
+                  aria-pressed={active}
                   className={`px-2 py-1 rounded border transition ${
                     active
                       ? "bg-amber-500 text-slate-900 border-amber-400"
@@ -163,9 +181,8 @@ export function SkillCard({
                 type="number"
                 disabled={!editable}
                 value={skill.miscModifier ?? 0}
-                onChange={(e) =>
-                  updateMisc(skill.id, Number(e.target.value))
-                }
+                onChange={handleMiscChange}
+                aria-label={`${skill.name} miscellaneous modifier`}
                 className={
                   editableInputClass(editable) +
                   " w-16 px-1 py-0.5 text-xs"
@@ -194,7 +211,8 @@ export function SkillCard({
               placeholder="Notes (optional)…"
               disabled={!editable}
               value={skill.notes ?? ""}
-              onChange={(e) => updateNotes(skill.id, e.target.value)}
+              onChange={handleNotesChange}
+              aria-label={`${skill.name} notes`}
               className={
                 editableTextareaClass(editable) +
                 " min-h-[36px] text-xs"
