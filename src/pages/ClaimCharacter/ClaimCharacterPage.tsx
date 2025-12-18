@@ -20,7 +20,7 @@ export default function ClaimCharacterPage() {
 
   const { loading, error, data, lookup } = useRecoveryLookup();
   const { claimCharacter } = useClaimActions();
-  const { forceAssign, forceRelease } = useDmActions();
+  const { forceAssign, forceRelease, isForceAssigning, isForceReleasing } = useDmActions();
 
   const handleLookup = useCallback(() => {
     lookup(code);
@@ -108,6 +108,8 @@ export default function ClaimCharacterPage() {
           recovery={data}
           onForceAssign={handleForceAssign}
           onForceRelease={handleForceRelease}
+          isForceAssigning={isForceAssigning}
+          isForceReleasing={isForceReleasing}
         />
       )}
 

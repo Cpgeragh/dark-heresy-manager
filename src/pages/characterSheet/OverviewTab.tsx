@@ -32,6 +32,7 @@ interface OverviewTabProps {
   onUpdateWounds: (next: WoundsBlock) => void;
   onUpdateFate: (next: FateBlock) => void;
   getCharTotal: (statKey: keyof Character["characteristics"]) => number;
+  isReleasing?: boolean;
 }
 
 export function OverviewTab({
@@ -43,6 +44,7 @@ export function OverviewTab({
   onUpdateWounds,
   onUpdateFate,
   getCharTotal,
+  isReleasing = false,
 }: OverviewTabProps) {
   const [copied, setCopied] = useState(false);
 
@@ -330,9 +332,14 @@ export function OverviewTab({
       {canPlayerRelease && (
         <button
           onClick={onPlayerRelease}
-          className="px-3 py-2 bg-red-600 text-white rounded border border-red-700 hover:bg-red-500 text-sm"
+          disabled={isReleasing}
+          className={`px-3 py-2 rounded border text-sm transition ${
+            isReleasing
+              ? "bg-red-800 border-red-900 text-red-300 cursor-wait"
+              : "bg-red-600 border-red-700 text-white hover:bg-red-500"
+          }`}
         >
-          Release Character
+          {isReleasing ? "Releasing..." : "Release Character"}
         </button>
       )}
     </div>

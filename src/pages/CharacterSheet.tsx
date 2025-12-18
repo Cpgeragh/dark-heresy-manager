@@ -85,6 +85,12 @@ export default function CharacterSheet() {
     dmForceRelease,
     dmForceAssign,
     dmToggleEdit,
+
+    // Loading states
+    isReleasing,
+    isDmForceReleasing,
+    isDmForceAssigning,
+    isDmTogglingEdit,
   } = useCharacterSheet({
     campaignIdParam: params.campaignId,
     characterIdParam: params.characterId,
@@ -292,6 +298,7 @@ export default function CharacterSheet() {
               onUpdateWounds={handleUpdateWounds}
               onUpdateFate={handleUpdateFate}
               getCharTotal={getCharTotal}
+              isReleasing={isReleasing}
             />
           )}
 
@@ -379,6 +386,9 @@ export default function CharacterSheet() {
               onDMForceRelease={dmForceRelease}
               onDMForceAssign={dmForceAssign}
               onDMToggleEdit={dmToggleEdit}
+              isDmForceReleasing={isDmForceReleasing}
+              isDmForceAssigning={isDmForceAssigning}
+              isDmTogglingEdit={isDmTogglingEdit}
             />
           )}
         </ErrorBoundary>

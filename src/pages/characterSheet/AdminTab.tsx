@@ -15,6 +15,9 @@ interface AdminTabProps {
   onDMForceRelease: () => void;
   onDMForceAssign: (uid: string) => void;
   onDMToggleEdit: () => void;
+  isDmForceReleasing?: boolean;
+  isDmForceAssigning?: boolean;
+  isDmTogglingEdit?: boolean;
 }
 
 export function AdminTab({
@@ -23,6 +26,9 @@ export function AdminTab({
   onDMForceRelease,
   onDMForceAssign,
   onDMToggleEdit,
+  isDmForceReleasing = false,
+  isDmForceAssigning = false,
+  isDmTogglingEdit = false,
 }: AdminTabProps) {
   const [assignUID, setAssignUID] = useState("");
 
@@ -71,7 +77,7 @@ export function AdminTab({
           <div>
             Current owner UID:{" "}
             <span className="font-mono text-slate-200">
-              {character.userId ?? "None (unclaimed)"} {/* FIXED: Changed from || to ?? */}
+              {character.userId ?? "None (unclaimed)"}
             </span>
           </div>
 
@@ -87,20 +93,26 @@ export function AdminTab({
         <div className="flex flex-wrap gap-2 mt-4">
           <button
             onClick={onDMForceRelease}
-            className="px-3 py-1 text-sm rounded border
-                       bg-red-700 border-red-500 text-white
-                       hover:bg-red-600"
+            disabled={isDmForceReleasing}
+            className={`px-3 py-1 text-sm rounded border transition ${
+              isDmForceReleasing
+                ? "bg-red-900 border-red-800 text-red-300 cursor-wait"
+                : "bg-red-700 border-red-500 text-white hover:bg-red-600"
+            }`}
           >
-            Force Release Ownership
+            {isDmForceReleasing ? "Releasing..." : "Force Release Ownership"}
           </button>
 
           <button
             onClick={onDMToggleEdit}
-            className="px-3 py-1 text-sm rounded border
-                       bg-yellow-600 border-yellow-500 text-black
-                       hover:bg-yellow-500"
+            disabled={isDmTogglingEdit}
+            className={`px-3 py-1 text-sm rounded border transition ${
+              isDmTogglingEdit
+                ? "bg-yellow-800 border-yellow-700 text-yellow-900 cursor-wait"
+                : "bg-yellow-600 border-yellow-500 text-black hover:bg-yellow-500"
+            }`}
           >
-            Toggle Player Edit Permission
+            {isDmTogglingEdit ? "Updating..." : "Toggle Player Edit Permission"}
           </button>
         </div>
 
@@ -110,16 +122,20 @@ export function AdminTab({
             value={assignUID}
             onChange={handleAssignUIDChange}
             placeholder="Enter player UID"
-            className={editableInputClass(true) + " font-mono text-xs max-w-xs"}
+            disabled={isDmForceAssigning}
+            className={editableInputClass(!isDmForceAssigning) + " font-mono text-xs max-w-xs"}
           />
 
           <button
             onClick={handleForceAssign}
-            className="px-3 py-1 text-sm rounded border
-                       bg-blue-600 border-blue-500 text-white
-                       hover:bg-blue-500"
+            disabled={isDmForceAssigning}
+            className={`px-3 py-1 text-sm rounded border transition ${
+              isDmForceAssigning
+                ? "bg-blue-800 border-blue-700 text-blue-300 cursor-wait"
+                : "bg-blue-600 border-blue-500 text-white hover:bg-blue-500"
+            }`}
           >
-            Assign to Player
+            {isDmForceAssigning ? "Assigning..." : "Assign to Player"}
           </button>
         </div>
       </section>

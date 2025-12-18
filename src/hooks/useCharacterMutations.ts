@@ -1,152 +1,216 @@
 // src/hooks/useCharacterMutations.ts
 
-import { useCallback } from "react";
+import { useState, useCallback } from "react";
 import { doc, updateDoc, addDoc, collection } from "firebase/firestore";
-import { db } from "../firebase";
-import type { Characteristics } from "../types/Character";
+import { db, auth } from "../firebase";
+import type { Character, Characteristics } from "../types/Character";
 import type { CharField } from "../utils/characterFactory";
 import { buildClaimLogPayload } from "../utils/claimLog";
 
-interface UseCharacterMutationsArgs {
-  campaignId: string | null;
-  characterId: string | null;
-  userId: string | null;
+interface UseCharacterMutationsProps {
+  campaignId: string;
+  characterId: string;
+  character: Character | null;
   allowedToEdit: boolean;
-  character: any; // We'll type this better in Fix #5
 }
 
 export function useCharacterMutations({
   campaignId,
   characterId,
-  userId,
-  allowedToEdit,
   character,
-}: UseCharacterMutationsArgs) {
-  
-  // -------------------------------------------------------------
-  // Update a field safely
-  // -------------------------------------------------------------
+  allowedToEdit,
+}: UseCharacterMutationsProps) {
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isReleasing, setIsReleasing] = useState(false);
+  const [isDmForceReleasing, setIsDmForceReleasing] = useState(false);
+  const [isDmForceAssigning, setIsDmForceAssigning] = useState(false);
+  const [isDmTogglingEdit, setIsDmTogglingEdit] = useState(false);
+
+  const charRef = doc(db, "campaigns", campaignId, "characters", characterId);
+
+  // ================================================================
+  // UPDATE FIELD (GENERIC)
+  // ================================================================
   const updateField = useCallback(
-    async (field: string, value: any) => {
-      if (!allowedToEdit || !campaignId || !characterId) return;
+    async <K extends keyof Character>(
+      field: K,
+      value: Character[K]
+    ): Promise<void> => {
+      if (!allowedToEdit || !character) return;
 
-      const ref = doc(db, "campaigns", campaignId, "characters", characterId);
-      await updateDoc(ref, { [field]: value });
+      setIsUpdating(true);
+      try {
+        await updateDoc(charRef, { [field]: value });
+      } catch (error) {
+        console.error("Failed to update field:", error);
+        throw error;
+      } finally {
+        setIsUpdating(false);
+      }
     },
-    [allowedToEdit, campaignId, characterId]
+    [allowedToEdit, character, charRef]
   );
 
-  // -------------------------------------------------------------
-  // Update characteristic
-  // -------------------------------------------------------------
+  // ================================================================
+  // UPDATE CHARACTERISTIC
+  // ================================================================
   const updateCharacteristic = useCallback(
-    async (statKey: keyof Characteristics, value: CharField) => {
-      if (!allowedToEdit || !campaignId || !characterId) return;
+    async (
+      statKey: keyof Characteristics,
+      value: CharField
+    ): Promise<void> => {
+      if (!allowedToEdit || !character) return;
 
-      const ref = doc(db, "campaigns", campaignId, "characters", characterId);
+      setIsUpdating(true);
+      try {
+        const updated = {
+          ...character.characteristics,
+          [statKey]: value,
+        };
 
-      await updateDoc(ref, {
-        [`characteristics.${statKey}.base`]: value.base,
-        [`characteristics.${statKey}.advances`]: value.advances,
-      });
+        await updateDoc(charRef, { characteristics: updated });
+      } catch (error) {
+        console.error("Failed to update characteristic:", error);
+        throw error;
+      } finally {
+        setIsUpdating(false);
+      }
     },
-    [allowedToEdit, campaignId, characterId]
+    [allowedToEdit, character, charRef]
   );
 
-  // -------------------------------------------------------------
-  // Player release
-  // -------------------------------------------------------------
-  const releaseCharacter = useCallback(
-    async () => {
-      if (!character || !campaignId || !characterId) return;
-      if (!userId || character.userId !== userId) return;
+  // ================================================================
+  // RELEASE CHARACTER (PLAYER ACTION)
+  // ================================================================
+  const releaseCharacter = useCallback(async (): Promise<void> => {
+    const user = auth.currentUser;
+    if (!user || !character) return;
 
-      const ref = doc(db, "campaigns", campaignId, "characters", characterId);
-      const logsRef = collection(db, "campaigns", campaignId, "characters", characterId, "claimLog");
+    setIsReleasing(true);
+    try {
+      const previousOwner = character.userId;
 
-      const previous = character.userId;
-
-      await updateDoc(ref, {
+      await updateDoc(charRef, {
         userId: null,
         isEditableByPlayer: false,
       });
 
+      const logsRef = collection(
+        db,
+        "campaigns",
+        campaignId,
+        "characters",
+        characterId,
+        "claimLog"
+      );
+
       await addDoc(
         logsRef,
-        buildClaimLogPayload("release", userId, previous, null)
+        buildClaimLogPayload("release", user.uid, previousOwner, null)
       );
-    },
-    [character, campaignId, characterId, userId]
-  );
+    } catch (error) {
+      console.error("Failed to release character:", error);
+      throw error;
+    } finally {
+      setIsReleasing(false);
+    }
+  }, [character, charRef, campaignId, characterId]);
 
-  // -------------------------------------------------------------
-  // DM force release
-  // -------------------------------------------------------------
-  const dmForceRelease = useCallback(
-    async () => {
-      if (!character || !campaignId || !characterId || !userId) return;
+  // ================================================================
+  // DM FORCE RELEASE
+  // ================================================================
+  const dmForceRelease = useCallback(async (): Promise<void> => {
+    const user = auth.currentUser;
+    if (!user || !character) return;
 
-      const ref = doc(db, "campaigns", campaignId, "characters", characterId);
-      const logsRef = collection(db, "campaigns", campaignId, "characters", characterId, "claimLog");
+    setIsDmForceReleasing(true);
+    try {
+      const previousOwner = character.userId;
 
-      const previous = character.userId;
-
-      await updateDoc(ref, {
+      await updateDoc(charRef, {
         userId: null,
         isEditableByPlayer: false,
       });
 
+      const logsRef = collection(
+        db,
+        "campaigns",
+        campaignId,
+        "characters",
+        characterId,
+        "claimLog"
+      );
+
       await addDoc(
         logsRef,
-        buildClaimLogPayload("force-release", userId, previous, null)
+        buildClaimLogPayload("force-release", user.uid, previousOwner, null)
       );
-    },
-    [character, campaignId, characterId, userId]
-  );
+    } catch (error) {
+      console.error("Failed to force release:", error);
+      throw error;
+    } finally {
+      setIsDmForceReleasing(false);
+    }
+  }, [character, charRef, campaignId, characterId]);
 
-  // -------------------------------------------------------------
-  // DM force assign
-  // -------------------------------------------------------------
+  // ================================================================
+  // DM FORCE ASSIGN
+  // ================================================================
   const dmForceAssign = useCallback(
-    async (uid: string) => {
-      if (!character || !campaignId || !characterId || !userId) return;
+    async (targetUid: string): Promise<void> => {
+      const user = auth.currentUser;
+      if (!user || !character) return;
 
-      const clean = uid.trim();
-      if (!clean) return;
+      setIsDmForceAssigning(true);
+      try {
+        const previousOwner = character.userId;
 
-      const ref = doc(db, "campaigns", campaignId, "characters", characterId);
-      const logsRef = collection(db, "campaigns", campaignId, "characters", characterId, "claimLog");
+        await updateDoc(charRef, {
+          userId: targetUid,
+          isEditableByPlayer: true,
+        });
 
-      const previous = character.userId;
+        const logsRef = collection(
+          db,
+          "campaigns",
+          campaignId,
+          "characters",
+          characterId,
+          "claimLog"
+        );
 
-      await updateDoc(ref, {
-        userId: clean,
-        isEditableByPlayer: true,
-      });
-
-      await addDoc(
-        logsRef,
-        buildClaimLogPayload("force-assign", userId, previous, clean)
-      );
+        await addDoc(
+          logsRef,
+          buildClaimLogPayload("force-assign", user.uid, previousOwner, targetUid)
+        );
+      } catch (error) {
+        console.error("Failed to force assign:", error);
+        throw error;
+      } finally {
+        setIsDmForceAssigning(false);
+      }
     },
-    [character, campaignId, characterId, userId]
+    [character, charRef, campaignId, characterId]
   );
 
-  // -------------------------------------------------------------
-  // DM toggle player edit
-  // -------------------------------------------------------------
-  const dmToggleEdit = useCallback(
-    async () => {
-      if (!character || !campaignId || !characterId) return;
+  // ================================================================
+  // DM TOGGLE EDIT PERMISSION
+  // ================================================================
+  const dmToggleEdit = useCallback(async (): Promise<void> => {
+    if (!character) return;
 
-      const ref = doc(db, "campaigns", campaignId, "characters", characterId);
-
-      await updateDoc(ref, {
+    setIsDmTogglingEdit(true);
+    try {
+      await updateDoc(charRef, {
         isEditableByPlayer: !character.isEditableByPlayer,
       });
-    },
-    [character, campaignId, characterId]
-  );
+    } catch (error) {
+      console.error("Failed to toggle edit permission:", error);
+      throw error;
+    } finally {
+      setIsDmTogglingEdit(false);
+    }
+  }, [character, charRef]);
 
   return {
     updateField,
@@ -155,5 +219,11 @@ export function useCharacterMutations({
     dmForceRelease,
     dmForceAssign,
     dmToggleEdit,
+    // Loading states
+    isUpdating,
+    isReleasing,
+    isDmForceReleasing,
+    isDmForceAssigning,
+    isDmTogglingEdit,
   };
 }

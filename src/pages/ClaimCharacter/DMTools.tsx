@@ -11,9 +11,17 @@ interface Props {
   };
   onForceAssign: (uid: string) => Promise<void>;
   onForceRelease: () => Promise<void>;
+  isForceAssigning?: boolean;
+  isForceReleasing?: boolean;
 }
 
-export default function DMTools({ recovery, onForceAssign, onForceRelease }: Props) {
+export default function DMTools({ 
+  recovery, 
+  onForceAssign, 
+  onForceRelease,
+  isForceAssigning = false,
+  isForceReleasing = false,
+}: Props) {
   const [uid, setUid] = useState("");
 
   const handleUidChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,21 +53,32 @@ export default function DMTools({ recovery, onForceAssign, onForceRelease }: Pro
           placeholder="Enter player UID"
           value={uid}
           onChange={handleUidChange}
+          disabled={isForceAssigning}
         />
 
         <button
-          className="px-3 py-1 bg-blue-600 text-white rounded border border-blue-500 hover:bg-blue-500 text-xs"
+          className={`px-3 py-1 rounded border text-xs transition ${
+            isForceAssigning
+              ? "bg-blue-800 border-blue-700 text-blue-300 cursor-wait"
+              : "bg-blue-600 border-blue-500 text-white hover:bg-blue-500"
+          }`}
           onClick={handleForceAssign}
+          disabled={isForceAssigning}
         >
-          Force Assign
+          {isForceAssigning ? "Assigning..." : "Force Assign"}
         </button>
       </div>
 
       <button
-        className="px-3 py-1 bg-red-700 text-white rounded border border-red-500 hover:bg-red-600 text-xs"
+        className={`px-3 py-1 rounded border text-xs transition ${
+          isForceReleasing
+            ? "bg-red-900 border-red-800 text-red-300 cursor-wait"
+            : "bg-red-700 border-red-500 text-white hover:bg-red-600"
+        }`}
         onClick={onForceRelease}
+        disabled={isForceReleasing}
       >
-        Force Release
+        {isForceReleasing ? "Releasing..." : "Force Release"}
       </button>
     </div>
   );

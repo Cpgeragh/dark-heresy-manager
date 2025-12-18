@@ -1,84 +1,97 @@
 // src/pages/characterSheet/useCharacterSheet.ts
 
-import { useEffect, useState, useCallback } from "react";
-import { auth, db } from "../../firebase";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { doc, getDoc } from "firebase/firestore";
-import type { Characteristics } from "../../types/Character";
-import type { CharField } from "../../utils/characterFactory";
-
-// Import our new hooks
+import { auth, db } from "../../firebase";
 import { useCharacterData } from "../../hooks/useCharacterData";
 import { useCharacterPermissions } from "../../hooks/useCharacterPermissions";
 import { useCharacterMutations } from "../../hooks/useCharacterMutations";
+import type { CharField } from "../../utils/characterFactory";
+import type { Characteristics } from "../../types/Character";
 
-interface UseCharacterSheetArgs {
-  campaignIdParam?: string;
-  characterIdParam?: string;
+interface UseCharacterSheetProps {
+  campaignIdParam: string | undefined;
+  characterIdParam: string | undefined;
 }
 
 export function useCharacterSheet({
   campaignIdParam,
   characterIdParam,
-}: UseCharacterSheetArgs) {
-  
-  const user = auth.currentUser;
-  const userId = user?.uid ?? null;
-
-  // Path state
-  const path = campaignIdParam && characterIdParam
-    ? { campaignId: campaignIdParam, characterId: characterIdParam }
-    : null;
-
-  // DM role state
+}: UseCharacterSheetProps) {
+  const [dmReadOnly, setDmReadOnly] = useState(true);
   const [isDM, setIsDM] = useState(false);
 
-  // DM read-only override state
-  const [dmReadOnly, setDmReadOnly] = useState(true);
+  // Validate params
+  const path = useMemo(() => {
+    if (!campaignIdParam || !characterIdParam) return null;
+    return { campaignId: campaignIdParam, characterId: characterIdParam };
+  }, [campaignIdParam, characterIdParam]);
 
-  // -------------------------------------------------------------
-  // Load DM role
-  // -------------------------------------------------------------
+  // Check if current user is DM of this campaign
   useEffect(() => {
-    async function loadRole() {
-      if (!userId) return;
+    if (!path?.campaignId) {
+      setIsDM(false);
+      return;
+    }
 
-      const userRef = doc(db, "users", userId);
-      const snap = await getDoc(userRef);
+    const user = auth.currentUser;
+    if (!user) {
+      setIsDM(false);
+      return;
+    }
 
-      if (snap.exists()) {
-        const role = snap.data().role;
-        setIsDM(role === "dm");
+    // Capture uid to avoid null issues in async closure
+    const userUid = user.uid;
+    let isMounted = true;
+
+    async function checkDM() {
+      try {
+        const campRef = doc(db, "campaigns", path!.campaignId);
+        const campSnap = await getDoc(campRef);
+        
+        if (campSnap.exists() && isMounted) {
+          const data = campSnap.data();
+          setIsDM(data.dmId === userUid); // FIX: Use captured uid
+        }
+      } catch (error) {
+        console.error("Failed to check DM status:", error);
+        if (isMounted) {
+          setIsDM(false);
+        }
       }
     }
 
-    loadRole();
-  }, [userId]);
+    checkDM();
 
-  // -------------------------------------------------------------
-  // Auto-enable DM read-only when opening character
-  // -------------------------------------------------------------
-  useEffect(() => {
-    if (isDM) {
-      setDmReadOnly(true);
-    }
-  }, [isDM, characterIdParam]);
+    return () => {
+      isMounted = false;
+    };
+  }, [path?.campaignId]);
 
-  // -------------------------------------------------------------
-  // Use our extracted hooks
-  // -------------------------------------------------------------
-  const { character, claimLog, loading } = useCharacterData({
-    campaignId: campaignIdParam,
-    characterId: characterIdParam,
+  // Get current user ID
+  const userId = auth.currentUser?.uid ?? null;
+
+  // Load character + claim log
+  const { character, claimLog } = useCharacterData({
+    campaignId: path?.campaignId,
+    characterId: path?.characterId,
     isDM,
   });
 
-  const { allowedToEdit, isOwner, canPlayerRelease } = useCharacterPermissions({
+  // Permissions
+  const { allowedToEdit } = useCharacterPermissions({
     character,
     userId,
     isDM,
     dmReadOnly,
   });
 
+  // Toggle DM read-only mode
+  const toggleDmReadOnly = useCallback(() => {
+    setDmReadOnly((prev) => !prev);
+  }, []);
+
+  // Mutations
   const {
     updateField,
     updateCharacteristic,
@@ -86,42 +99,43 @@ export function useCharacterSheet({
     dmForceRelease,
     dmForceAssign,
     dmToggleEdit,
+    isUpdating,
+    isReleasing,
+    isDmForceReleasing,
+    isDmForceAssigning,
+    isDmTogglingEdit,
   } = useCharacterMutations({
-    campaignId: path?.campaignId ?? null,
-    characterId: path?.characterId ?? null,
-    userId,
-    allowedToEdit,
+    campaignId: path?.campaignId ?? "",
+    characterId: path?.characterId ?? "",
     character,
+    allowedToEdit,
   });
 
-  // -------------------------------------------------------------
-  // Characteristic helpers (memoized from Fix #1)
-  // -------------------------------------------------------------
+  // ================================================================
+  // DERIVED HELPERS
+  // ================================================================
+
+  /**
+   * Get a characteristic field (base + advances)
+   */
   const getCharField = useCallback(
     (statKey: keyof Characteristics): CharField => {
-      const v = character?.characteristics?.[statKey];
-      return {
-        base: typeof v?.base === "number" ? v.base : 0,
-        advances: typeof v?.advances === "number" ? v.advances : 0,
-      };
+      if (!character) return { base: 0, advances: 0 };
+      return character.characteristics[statKey] ?? { base: 0, advances: 0 };
     },
-    [character?.characteristics]
+    [character]
   );
 
+  /**
+   * Get computed total for a characteristic
+   */
   const getCharTotal = useCallback(
     (statKey: keyof Characteristics): number => {
-      const v = getCharField(statKey);
-      return v.base + v.advances;
+      const field = getCharField(statKey);
+      return field.base + field.advances * 5;
     },
     [getCharField]
   );
-
-  // -------------------------------------------------------------
-  // DM override toggle
-  // -------------------------------------------------------------
-  function toggleDmReadOnly() {
-    setDmReadOnly((v) => !v);
-  }
 
   return {
     path,
@@ -129,24 +143,24 @@ export function useCharacterSheet({
     allowedToEdit,
     claimLog,
     isDM,
-    loading,
-    isOwner,
-    canPlayerRelease,
 
-    // DM override controls
     dmReadOnly,
     toggleDmReadOnly,
 
-    // Helpers
     getCharField,
     getCharTotal,
-
-    // Mutations
     updateCharacteristic,
     updateField,
     releaseCharacter,
     dmForceRelease,
     dmForceAssign,
     dmToggleEdit,
+
+    // Loading states
+    isUpdating,
+    isReleasing,
+    isDmForceReleasing,
+    isDmForceAssigning,
+    isDmTogglingEdit,
   };
 }
