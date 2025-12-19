@@ -8,6 +8,7 @@ import { createEmptyCharacterData } from "../../utils/characterFactory";
 import type { CharacterListItem } from "../../types/Firestore";
 import { useToast } from "../../components/Toast";
 import { buildRoute } from "../../constants/routes";
+import { validateCharacterName } from "../../utils/validation";
 import {
   IMPORTANT_TOAST_DURATION,
   RECOVERY_CODE_PREFIX,
@@ -58,8 +59,11 @@ function CharacterSection({ campaignId, characters }: CharacterSectionProps) {
 
   const handleCreate = useCallback(async () => {
     const trimmedName = characterName.trim();
-    if (!trimmedName) {
-      toast.warning("Please enter a character name.");
+
+    // Validate character name
+    const validation = validateCharacterName(trimmedName);
+    if (!validation.isValid) {
+      toast.warning(validation.error || "Invalid character name");
       return;
     }
 

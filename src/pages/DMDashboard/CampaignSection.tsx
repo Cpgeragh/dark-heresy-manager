@@ -4,6 +4,8 @@ import { useState, useCallback } from "react";
 import { collection, doc, setDoc } from "firebase/firestore";
 import { db } from "../../firebase";
 import type { CampaignDocument } from "../../types/Firestore";
+import { validateCampaignName } from "../../utils/validation";
+import { useToast } from "../../components/Toast";
 
 type CampaignWithId = CampaignDocument & { id: string };
 
@@ -21,26 +23,41 @@ function CampaignSection({
   onCampaignSelect,
 }: CampaignSectionProps) {
   const [newCampaignName, setNewCampaignName] = useState("");
+  const toast = useToast();
 
   const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setNewCampaignName(e.target.value);
   }, []);
 
   const handleCreate = useCallback(async () => {
-    const name = newCampaignName.trim() || "Untitled campaign";
-    const newRef = doc(collection(db, "campaigns"));
+    const name = newCampaignName.trim();
 
-    const campaignData: CampaignDocument = {
-      name,
-      dmId: userUid,
-      createdAt: new Date(),
-    };
+    // Validate campaign name
+    const validation = validateCampaignName(name);
+    if (!validation.isValid) {
+      toast.warning(validation.error || "Invalid campaign name");
+      return;
+    }
 
-    await setDoc(newRef, campaignData);
+    try {
+      const newRef = doc(collection(db, "campaigns"));
 
-    setNewCampaignName("");
-    onCampaignSelect(newRef.id);
-  }, [newCampaignName, userUid, onCampaignSelect]);
+      const campaignData: CampaignDocument = {
+        name,
+        dmId: userUid,
+        createdAt: new Date(),
+      };
+
+      await setDoc(newRef, campaignData);
+
+      setNewCampaignName("");
+      onCampaignSelect(newRef.id);
+      toast.success("Campaign created successfully");
+    } catch (error) {
+      console.error("Failed to create campaign:", error);
+      toast.error("Failed to create campaign");
+    }
+  }, [newCampaignName, userUid, onCampaignSelect, toast]);
 
   const handleCampaignClick = useCallback((campaignId: string) => {
     onCampaignSelect(campaignId);

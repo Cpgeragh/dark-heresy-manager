@@ -1,11 +1,17 @@
 // src/components/CharacteristicField.tsx
 
-import { useCallback } from "react";
+import { useState, useCallback } from "react";
 import type { CharField } from "../utils/characterFactory";
-import { 
+import {
   MAX_CHARACTERISTIC_ADVANCES,
-  CHARACTERISTIC_ADVANCE_INCREMENT 
+  CHARACTERISTIC_ADVANCE_INCREMENT,
+  MAX_CHARACTERISTIC_VALUE,
+  MIN_CHARACTERISTIC_VALUE,
 } from "../constants/gameRules";
+import {
+  validateCharacteristicBase,
+  validateCharacteristicTotal,
+} from "../utils/validation";
 
 interface Props {
   label: string;
@@ -21,30 +27,89 @@ export default function CharacteristicField({
   onChange,
 }: Props) {
   const { base, advances } = value;
+  const [error, setError] = useState<string | undefined>();
 
-  const toggleAdvance = useCallback((index: number) => {
-    if (!editable) return;
+  const toggleAdvance = useCallback(
+    (index: number) => {
+      if (!editable) return;
 
-    let newAdvances = index < advances ? index : index + 1;
+      let newAdvances = index < advances ? index : index + 1;
 
-    if (newAdvances < 0) newAdvances = 0;
-    if (newAdvances > MAX_CHARACTERISTIC_ADVANCES) newAdvances = MAX_CHARACTERISTIC_ADVANCES;
+      if (newAdvances < 0) newAdvances = 0;
+      if (newAdvances > MAX_CHARACTERISTIC_ADVANCES)
+        newAdvances = MAX_CHARACTERISTIC_ADVANCES;
 
-    onChange({ base, advances: newAdvances });
-  }, [editable, base, advances, onChange]);
+      // Validate total won't exceed max
+      const totalCheck = validateCharacteristicTotal(base, newAdvances);
+      if (!totalCheck.isValid) {
+        setError(totalCheck.error);
+        return;
+      }
 
-  const updateBase = useCallback((raw: string) => {
-    if (!editable) return;
+      setError(undefined);
+      onChange({ base, advances: newAdvances });
+    },
+    [editable, base, advances, onChange]
+  );
 
-    const num = parseInt(raw, 10);
-    if (isNaN(num)) return;
+  const updateBase = useCallback(
+    (raw: string) => {
+      if (!editable) return;
 
-    onChange({ base: num, advances });
-  }, [editable, advances, onChange]);
+      const num = parseInt(raw, 10);
 
-  const handleBaseChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    updateBase(e.target.value);
-  }, [updateBase]);
+      // Allow empty during typing
+      if (raw === "") {
+        setError(undefined);
+        return;
+      }
+
+      // Validate it's a number
+      if (isNaN(num)) {
+        setError("Must be a number");
+        return;
+      }
+
+      // Validate base value range
+      const baseCheck = validateCharacteristicBase(num);
+      if (!baseCheck.isValid) {
+        setError(baseCheck.error);
+        return;
+      }
+
+      // Validate total won't exceed max
+      const totalCheck = validateCharacteristicTotal(num, advances);
+      if (!totalCheck.isValid) {
+        setError(totalCheck.error);
+        return;
+      }
+
+      setError(undefined);
+      onChange({ base: num, advances });
+    },
+    [editable, advances, onChange]
+  );
+
+  const handleBaseChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      updateBase(e.target.value);
+    },
+    [updateBase]
+  );
+
+  const handleBaseBlur = useCallback(() => {
+    // On blur, validate current value
+    const baseCheck = validateCharacteristicBase(base);
+    if (!baseCheck.isValid) {
+      setError(baseCheck.error);
+      return;
+    }
+
+    const totalCheck = validateCharacteristicTotal(base, advances);
+    if (!totalCheck.isValid) {
+      setError(totalCheck.error);
+    }
+  }, [base, advances]);
 
   const total = base + advances * CHARACTERISTIC_ADVANCE_INCREMENT;
 
@@ -60,8 +125,17 @@ export default function CharacteristicField({
           value={base}
           disabled={!editable}
           onChange={handleBaseChange}
+          onBlur={handleBaseBlur}
+          min={MIN_CHARACTERISTIC_VALUE}
+          max={MAX_CHARACTERISTIC_VALUE}
           aria-label={`${label} base value`}
-          className="w-20 px-2 py-1 bg-slate-800 border border-slate-600 rounded text-slate-100"
+          aria-invalid={!!error}
+          aria-describedby={error ? `${label}-error` : undefined}
+          className={`w-20 px-2 py-1 rounded text-slate-100 ${
+            error && editable
+              ? "bg-slate-800 border border-red-500 focus:border-red-400"
+              : "bg-slate-800 border border-slate-600 focus:border-amber-400"
+          } focus:outline-none`}
         />
       </div>
 
@@ -100,6 +174,17 @@ export default function CharacteristicField({
         <span className="text-slate-400">Total:</span>
         <span className="ml-2 font-bold">{total}</span>
       </div>
+
+      {/* Error message */}
+      {error && editable && (
+        <div
+          id={`${label}-error`}
+          className="text-xs text-red-400 mt-2"
+          role="alert"
+        >
+          {error}
+        </div>
+      )}
     </div>
   );
 }
