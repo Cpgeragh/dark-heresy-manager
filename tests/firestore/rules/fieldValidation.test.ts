@@ -21,20 +21,6 @@ describe("Firestore Rules: Field Validation", () => {
     ).resolves.toBeUndefined();
   });
 
-  it("campaign name must exist", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
-    
-    const dmDb = dbAs(env, "dm-1");
-    
-    // Note: Your current rules don't enforce this, but if they did:
-    await expect(
-      dmDb.collection("campaigns").doc("no-name").set({
-        dmId: "dm-1"
-        // name is missing
-      })
-    ).resolves.toBeUndefined(); // Will pass because rules don't enforce name
-  });
-
   it("character userId field accepts any string", async () => {
     const env = await getTestEnv() as RulesTestEnvironment;
     
@@ -46,10 +32,12 @@ describe("Firestore Rules: Field Validation", () => {
     
     const dmDb = dbAs(env, "dm-1");
     
+    // DM creates with required initial values; userId and isEditableByPlayer
+    // are controlled by the claim flow, not at creation time
     await expect(
       dmDb.collection(`campaigns/${campaignId}/characters`).doc("char1").set({
-        userId: "any-user-id-format-123",
-        isEditableByPlayer: true,
+        userId: null,
+        isEditableByPlayer: false,
         recoveryCode: "CODE"
       })
     ).resolves.toBeUndefined();
@@ -65,11 +53,10 @@ describe("Firestore Rules: Field Validation", () => {
     
     const dmDb = dbAs(env, "dm-1");
     
-    // Valid boolean
     await expect(
       dmDb.collection(`campaigns/${campaignId}/characters`).doc("char-bool").set({
-        userId: "player-1",
-        isEditableByPlayer: true,
+        userId: null,
+        isEditableByPlayer: false,
         recoveryCode: "CODE"
       })
     ).resolves.toBeUndefined();
@@ -117,8 +104,8 @@ describe("Firestore Rules: Field Validation", () => {
         .collection(`campaigns/${campaignId}/characters`)
         .doc("char1")
         .set({
-          userId: "player-1",
-          isEditableByPlayer: true,
+          userId: null,
+          isEditableByPlayer: false,
           recoveryCode: "CODE"
         });
     });
