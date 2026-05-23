@@ -3,14 +3,14 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
-import { db } from "../firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { getDocs } from "firebase/firestore";
+import { charactersCollectionRef } from "../firebase/converters";
 
 import { useClaimLogs } from "../hooks/useClaimLogs";
 
 type CharacterSummary = {
   id: string;
-  name: string;
+  characterName: string;
   userId: string | null;
 };
 
@@ -21,6 +21,26 @@ export default function CampaignOverview() {
   const [characters, setCharacters] = useState<CharacterSummary[]>([]);
   const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    if (!campaignId) return;
+
+    async function load() {
+      setLoading(true);
+
+      const snap = await getDocs(charactersCollectionRef(campaignId));
+      const list: CharacterSummary[] = snap.docs.map((d) => ({
+        id: d.id,
+        characterName: d.data().header?.characterName ?? "Unnamed Character",
+        userId: d.data().userId ?? null,
+      }));
+
+      setCharacters(list);
+      setLoading(false);
+    }
+
+    load();
+  }, [campaignId]);
+
   if (!campaignId) {
     return (
       <div className="text-slate-300 text-center py-10">
@@ -28,31 +48,6 @@ export default function CampaignOverview() {
       </div>
     );
   }
-
-  const safeCampaignId: string = campaignId;
-
-  useEffect(() => {
-    async function load() {
-      setLoading(true);
-
-      const charsRef = collection(db, "campaigns", safeCampaignId, "characters");
-      const snap = await getDocs(charsRef);
-
-      const list: CharacterSummary[] = snap.docs.map((d) => {
-        const data = d.data() as any;
-        return {
-          id: d.id,
-          name: data.name || "Unnamed",
-          userId: data.userId ?? null, // FIXED: Changed from || to ??
-        };
-      });
-
-      setCharacters(list);
-      setLoading(false);
-    }
-
-    load();
-  }, [safeCampaignId]);
 
   if (loading) {
     return (
@@ -74,9 +69,9 @@ export default function CampaignOverview() {
         {characters.map((char) => (
           <CampaignOverviewCharacterRow
             key={char.id}
-            campaignId={safeCampaignId}
+            campaignId={campaignId}
             characterId={char.id}
-            name={char.name}
+            characterName={char.characterName}
             userId={char.userId}
           />
         ))}
@@ -88,12 +83,12 @@ export default function CampaignOverview() {
 function CampaignOverviewCharacterRow({
   campaignId,
   characterId,
-  name,
+  characterName,
   userId,
 }: {
   campaignId: string;
   characterId: string;
-  name: string;
+  characterName: string;
   userId: string | null;
 }) {
   const { logs } = useClaimLogs(campaignId, characterId);
@@ -104,7 +99,7 @@ function CampaignOverviewCharacterRow({
     <div className="border border-slate-700 p-4 rounded bg-slate-900/40">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-xl font-semibold">{name}</h2>
+          <h2 className="text-xl font-semibold">{characterName}</h2>
           <p className="text-xs text-slate-400">
             Character ID: <code>{characterId}</code>
           </p>

@@ -1,7 +1,7 @@
 // src/pages/SelectCampaign.tsx
 
 import { useEffect, useState, useCallback } from "react";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, collectionGroup, doc, getDocs, getDoc, query, where } from "firebase/firestore";
 import type { User } from "firebase/auth";
 import { db } from "../firebase";
 import type { CampaignDocument } from "../types/Firestore";
@@ -16,8 +16,8 @@ type Props = {
 };
 
 export default function SelectCampaign({
-  user: _user,
-  role: _role,
+  user,
+  role,
   activeCampaignId,
   onActiveCampaignChange,
 }: Props) {
@@ -31,17 +31,29 @@ export default function SelectCampaign({
     let isMounted = true;
 
     async function load() {
-      const snap = await getDocs(collection(db, "campaigns"));
-      const list: CampaignWithId[] = snap.docs.map((docSnap) => {
-        const data = docSnap.data() as Omit<CampaignDocument, 'id'>;
-        return {
-          id: docSnap.id,
-          ...data,
-        };
-      });
-
-      if (isMounted) {
-        setCampaigns(list);
+      if (role === "dm") {
+        const snap = await getDocs(
+          query(collection(db, "campaigns"), where("dmId", "==", user.uid))
+        );
+        const list: CampaignWithId[] = snap.docs.map((d) => ({
+          id: d.id,
+          ...(d.data() as Omit<CampaignDocument, "id">),
+        }));
+        if (isMounted) setCampaigns(list);
+      } else {
+        const charSnap = await getDocs(
+          query(collectionGroup(db, "characters"), where("userId", "==", user.uid))
+        );
+        const campaignIds = [
+          ...new Set(charSnap.docs.map((d) => d.ref.parent.parent!.id)),
+        ];
+        const campaignDocs = await Promise.all(
+          campaignIds.map((id) => getDoc(doc(db, "campaigns", id)))
+        );
+        const list: CampaignWithId[] = campaignDocs
+          .filter((d) => d.exists())
+          .map((d) => ({ id: d.id, ...(d.data() as Omit<CampaignDocument, "id">) }));
+        if (isMounted) setCampaigns(list);
       }
     }
 
@@ -50,14 +62,18 @@ export default function SelectCampaign({
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [user.uid, role]);
 
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-bold">Select Campaign</h2>
 
       {campaigns.length === 0 && (
-        <p className="text-slate-400">No campaigns exist yet.</p>
+        <p className="text-slate-400">
+          {role === "dm"
+            ? "You have no campaigns yet. Create one from the dashboard."
+            : "You have no claimed characters in any campaign."}
+        </p>
       )}
 
       <div className="grid gap-3">
