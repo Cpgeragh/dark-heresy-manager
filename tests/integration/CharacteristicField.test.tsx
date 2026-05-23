@@ -22,13 +22,9 @@ describe("CharacteristicField", () => {
 
     const inputs = screen.getAllByRole("spinbutton");
 
-    expect(inputs.length).toBeGreaterThan(0);
+    expect(inputs).toHaveLength(2);
     expect(inputs[0]).toHaveValue(30);
-
-    // Only assert second input if it exists (so the test does not fail)
-    if (inputs[1]) {
-      expect(inputs[1]).toHaveValue(5);
-    }
+    expect(inputs[1]).toHaveValue(5);
   });
 
   it("calls onChange when values change", () => {
