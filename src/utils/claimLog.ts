@@ -1,6 +1,6 @@
 // src/utils/claimLog.ts
 
-import { serverTimestamp } from "firebase/firestore";
+import { serverTimestamp, type FieldValue, type Timestamp } from "firebase/firestore";
 
 export type ClaimLogAction =
   | "claim"
@@ -14,16 +14,15 @@ export type ClaimLogEntry = {
   actorUid: string;
   previousOwnerUid: string | null;
   newOwnerUid: string | null;
-  timestamp?: any;
+  timestamp?: FieldValue | Timestamp;
 };
 
-export function validateClaimLogPayload(data: any): data is ClaimLogEntry {
+export function validateClaimLogPayload(data: unknown): data is ClaimLogEntry {
   if (typeof data !== "object" || data === null) return false;
-  if (typeof data.action !== "string") return false;
-  if (!["claim", "release", "force-assign", "force-release"].includes(data.action))
-    return false;
-  if (typeof data.actorUid !== "string") return false;
-
+  const d = data as Record<string, unknown>;
+  if (typeof d.action !== "string") return false;
+  if (!["claim", "release", "force-assign", "force-release"].includes(d.action)) return false;
+  if (typeof d.actorUid !== "string") return false;
   return true;
 }
 

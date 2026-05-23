@@ -8,6 +8,7 @@ import {
   writeBatch,
   collection,
   doc,
+  type UpdateData,
 } from "firebase/firestore";
 
 import { db, auth } from "../firebase";
@@ -70,7 +71,7 @@ export async function updateCharacter(
   partial: Partial<Character>
 ): Promise<void> {
   const ref = characterDocRef(campaignId, characterId);
-  await updateDoc(ref, partial as any);
+  await updateDoc(ref, partial as UpdateData<Character>);
 }
 
 /**
