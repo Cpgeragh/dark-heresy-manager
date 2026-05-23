@@ -1,19 +1,59 @@
+import { useState, useCallback } from "react";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import type { ExperienceBlock } from "../../types/Character";
 import {
   sectionContainerClass,
   readOnlyBadgeClass,
 } from "../../ui/editableStyles";
+import { auth, db } from "../../firebase";
+import { useXpProposals } from "../../hooks/useXpProposals";
 
 interface ExperienceTabProps {
   experience: ExperienceBlock;
-  editable: boolean; // intentionally unused for now (read-only by design)
+  editable: boolean;
   onUpdate: (exp: ExperienceBlock) => void;
+  campaignId: string;
+  characterId: string;
+  isOwnedByCurrentPlayer: boolean;
 }
 
 export function ExperienceTab({
   experience,
+  campaignId,
+  characterId,
+  isOwnedByCurrentPlayer,
 }: ExperienceTabProps) {
   const remaining = experience.total - experience.spent;
+  const { proposals } = useXpProposals(campaignId, characterId);
+  const [description, setDescription] = useState("");
+  const [xpCost, setXpCost] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handlePropose = useCallback(async () => {
+    if (!description.trim() || xpCost <= 0) return;
+    const user = auth.currentUser;
+    if (!user) return;
+
+    setSubmitting(true);
+    try {
+      await addDoc(
+        collection(db, "campaigns", campaignId, "characters", characterId, "xpProposals"),
+        {
+          playerId: user.uid,
+          description: description.trim(),
+          xpCost,
+          status: "pending",
+          proposedAt: serverTimestamp(),
+        }
+      );
+      setDescription("");
+      setXpCost(0);
+    } catch (err) {
+      console.error("XP proposal error:", err);
+    } finally {
+      setSubmitting(false);
+    }
+  }, [campaignId, characterId, description, xpCost]);
 
   return (
     <div className="space-y-6 text-slate-300">
@@ -107,10 +147,60 @@ export function ExperienceTab({
         </div>
       </section>
 
-      {/* FOOTER NOTE */}
-      <p className="text-xs text-slate-500">
-        Experience editing will be added in a later phase.
-      </p>
+      {/* XP PROPOSALS — player only */}
+      {isOwnedByCurrentPlayer && (
+        <section className="space-y-3">
+          <h3 className="text-lg font-semibold text-slate-200">Propose XP Spend</h3>
+
+          <div className="flex gap-2">
+            <input
+              placeholder="What are you buying?"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="flex-1 px-2 py-1 bg-slate-800 border border-slate-600 rounded text-sm"
+            />
+            <input
+              type="number"
+              min={0}
+              placeholder="Cost"
+              value={xpCost}
+              onChange={(e) => setXpCost(Math.max(0, Number(e.target.value)))}
+              className="w-24 px-2 py-1 bg-slate-800 border border-slate-600 rounded text-sm"
+            />
+            <button
+              onClick={handlePropose}
+              disabled={submitting || !description.trim() || xpCost <= 0}
+              className="px-3 py-1 bg-amber-500 text-slate-900 font-semibold rounded text-sm disabled:opacity-50"
+            >
+              {submitting ? "…" : "Propose"}
+            </button>
+          </div>
+
+          {proposals.length > 0 && (
+            <div className="space-y-2">
+              {proposals.map((p) => (
+                <div
+                  key={p.id}
+                  className="flex items-center justify-between border border-slate-700 rounded px-3 py-2 text-sm"
+                >
+                  <span>{p.description} — {p.xpCost} XP</span>
+                  <span
+                    className={
+                      p.status === "approved"
+                        ? "text-green-400"
+                        : p.status === "rejected"
+                        ? "text-red-400"
+                        : "text-slate-400"
+                    }
+                  >
+                    {p.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
     </div>
   );
 }

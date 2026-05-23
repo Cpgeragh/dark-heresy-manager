@@ -380,6 +380,9 @@ export default function CharacterSheet() {
               experience={character.experience}
               editable={allowedToEdit}
               onUpdate={handleUpdateExperience}
+              campaignId={path.campaignId}
+              characterId={character.id}
+              isOwnedByCurrentPlayer={isOwner && !isDM}
             />
           )}
 
