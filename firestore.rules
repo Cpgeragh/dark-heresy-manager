@@ -7,7 +7,7 @@ service cloud.firestore {
     // USERS
     // ============================
     match /users/{userId} {
-      allow read, create, update, delete:
+      allow read, create, update:
         if request.auth != null &&
            request.auth.uid == userId;
     }
@@ -46,11 +46,15 @@ service cloud.firestore {
                    .data.dmId == request.auth.uid;
         }
 
-        allow create: if dmOwnsCampaign();
+        allow create:
+          if dmOwnsCampaign() &&
+             request.resource.data.userId == null &&
+             request.resource.data.isEditableByPlayer == false &&
+             request.resource.data.recoveryCode is string;
 
         allow update:
           if (
-            dmOwnsCampaign()   // DM can update anything
+            dmOwnsCampaign()
           ) ||
           (
             request.auth != null &&
@@ -58,20 +62,15 @@ service cloud.firestore {
             resource.data != null &&
             resource.data.userId == request.auth.uid &&
             resource.data.isEditableByPlayer == true &&
-            
-            // --- SUPER Safe Field Checks - handle null request.resource.data ---
             (
-              request.resource.data == null ||
               !("userId" in request.resource.data) ||
               request.resource.data.userId == resource.data.userId
             ) &&
             (
-              request.resource.data == null ||
               !("isEditableByPlayer" in request.resource.data) ||
               request.resource.data.isEditableByPlayer == resource.data.isEditableByPlayer
             ) &&
             (
-              request.resource.data == null ||
               !("recoveryCode" in request.resource.data) ||
               request.resource.data.recoveryCode == resource.data.recoveryCode
             )
@@ -94,21 +93,29 @@ service cloud.firestore {
 
           allow create:
             if (
+              // DM writes force-assign / force-release only
               dmOwnsCampaign() &&
+              ("actorUid" in request.resource.data) &&
+              request.resource.data.actorUid == request.auth.uid &&
               ("action" in request.resource.data) &&
-              request.resource.data.action in [
-                "claim",
-                "release",
-                "force-assign",
-                "force-release"
-              ]
+              request.resource.data.action in ["force-assign", "force-release"]
             )
             ||
             (
+              // Player writes claim / release, scoped to their own character
               request.auth != null &&
               ("actorUid" in request.resource.data) &&
               request.resource.data.actorUid == request.auth.uid &&
-              request.resource.data.action in ["claim", "release"]
+              (
+                (
+                  request.resource.data.action == "claim" &&
+                  get(/databases/$(database)/documents/campaigns/$(campaignId)/characters/$(characterId)).data.userId == null
+                ) ||
+                (
+                  request.resource.data.action == "release" &&
+                  get(/databases/$(database)/documents/campaigns/$(campaignId)/characters/$(characterId)).data.userId == request.auth.uid
+                )
+              )
             );
 
           allow update: if false;
@@ -127,14 +134,20 @@ service cloud.firestore {
       allow create, update:
         if request.auth != null &&
            ("campaignId" in request.resource.data) &&
+           ("characterId" in request.resource.data) &&
            get(/databases/$(database)/documents/campaigns/$(request.resource.data.campaignId))
              .data.dmId == request.auth.uid &&
-           // Prevent overwriting another DM's entry on update
            (request.method == "create" ||
             get(/databases/$(database)/documents/campaigns/$(resource.data.campaignId))
               .data.dmId == request.auth.uid);
 
       allow delete: if false;
     }
+
+    // ============================
+    // Phase C collections (future)
+    // Sessions, attendance, etc. will be added here.
+    // All unlisted paths are denied by default.
+    // ============================
   }
 }
