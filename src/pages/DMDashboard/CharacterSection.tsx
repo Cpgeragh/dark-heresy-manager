@@ -50,11 +50,9 @@ function CharacterSection({ campaignId, characters }: CharacterSectionProps) {
 
   const handleCharacterView = useCallback(
     (characterId: string) => {
-      navigate(buildRoute.characterSheet(campaignId, characterId), {
-        state: { characterOrder: characters.map((c) => c.id) },
-      });
+      navigate(buildRoute.characterSheet(campaignId, characterId));
     },
-    [navigate, campaignId, characters]
+    [navigate, campaignId]
   );
 
   const handleCreate = useCallback(async () => {
