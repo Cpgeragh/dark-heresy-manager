@@ -1,7 +1,7 @@
 // src/hooks/useCharacterMutations.ts
 
 import { useState, useCallback } from "react";
-import { updateDoc, addDoc, collection } from "firebase/firestore";
+import { updateDoc, writeBatch, collection, doc } from "firebase/firestore";
 import { db, auth } from "../firebase";
 import { characterDocRef } from "../firebase/converters";
 import type { Character, Characteristics } from "../types/Character";
@@ -112,24 +112,12 @@ export function useCharacterMutations({
     try {
       const previousOwner = character.userId;
 
-      await updateDoc(charRef, {
-        userId: null,
-        isEditableByPlayer: false,
-      });
+      const logsRef = collection(db, "campaigns", campaignId, "characters", characterId, "claimLog");
 
-      const logsRef = collection(
-        db,
-        "campaigns",
-        campaignId,
-        "characters",
-        characterId,
-        "claimLog"
-      );
-
-      await addDoc(
-        logsRef,
-        buildClaimLogPayload("release", user.uid, previousOwner, null)
-      );
+      const batch = writeBatch(db);
+      batch.update(charRef, { userId: null, isEditableByPlayer: false });
+      batch.set(doc(logsRef), buildClaimLogPayload("release", user.uid, previousOwner, null));
+      await batch.commit();
 
       toast.success("Character released successfully");
     } catch (err) {
@@ -154,24 +142,12 @@ export function useCharacterMutations({
     try {
       const previousOwner = character.userId;
 
-      await updateDoc(charRef, {
-        userId: null,
-        isEditableByPlayer: false,
-      });
+      const logsRef = collection(db, "campaigns", campaignId, "characters", characterId, "claimLog");
 
-      const logsRef = collection(
-        db,
-        "campaigns",
-        campaignId,
-        "characters",
-        characterId,
-        "claimLog"
-      );
-
-      await addDoc(
-        logsRef,
-        buildClaimLogPayload("force-release", user.uid, previousOwner, null)
-      );
+      const batch = writeBatch(db);
+      batch.update(charRef, { userId: null, isEditableByPlayer: false });
+      batch.set(doc(logsRef), buildClaimLogPayload("force-release", user.uid, previousOwner, null));
+      await batch.commit();
 
       toast.success("Character force-released");
     } catch (err) {
@@ -197,24 +173,12 @@ export function useCharacterMutations({
       try {
         const previousOwner = character.userId;
 
-        await updateDoc(charRef, {
-          userId: targetUid,
-          isEditableByPlayer: true,
-        });
+        const logsRef = collection(db, "campaigns", campaignId, "characters", characterId, "claimLog");
 
-        const logsRef = collection(
-          db,
-          "campaigns",
-          campaignId,
-          "characters",
-          characterId,
-          "claimLog"
-        );
-
-        await addDoc(
-          logsRef,
-          buildClaimLogPayload("force-assign", user.uid, previousOwner, targetUid)
-        );
+        const batch = writeBatch(db);
+        batch.update(charRef, { userId: targetUid, isEditableByPlayer: true });
+        batch.set(doc(logsRef), buildClaimLogPayload("force-assign", user.uid, previousOwner, targetUid));
+        await batch.commit();
 
         toast.success("Character assigned successfully");
       } catch (err) {

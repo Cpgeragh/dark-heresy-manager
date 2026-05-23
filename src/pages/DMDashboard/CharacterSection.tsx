@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { collection, doc, setDoc } from "firebase/firestore";
+import { collection, doc, setDoc, writeBatch } from "firebase/firestore";
 import { db } from "../../firebase";
 import { createEmptyCharacterData } from "../../utils/characterFactory";
 import type { CharacterListItem } from "../../types/Firestore";
@@ -77,14 +77,13 @@ function CharacterSection({ campaignId, characters }: CharacterSectionProps) {
         characterName: trimmedName,
       });
 
-      const ref = doc(collection(db, "campaigns", campaignId, "characters"));
+      const charRef = doc(collection(db, "campaigns", campaignId, "characters"));
+      const recoveryRef = doc(db, "recoveryIndex", recoveryCode);
 
-      await setDoc(ref, characterData);
-
-      await setDoc(doc(db, "recoveryIndex", recoveryCode), {
-        campaignId,
-        characterId: ref.id,
-      });
+      const batch = writeBatch(db);
+      batch.set(charRef, characterData);
+      batch.set(recoveryRef, { campaignId, characterId: charRef.id });
+      await batch.commit();
 
       toast.success(
         `Character created successfully!\n\nRecovery Code: ${recoveryCode}\n\n(Click the copy button to save this code)`,

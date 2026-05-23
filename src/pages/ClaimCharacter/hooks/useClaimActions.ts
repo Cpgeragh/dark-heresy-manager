@@ -1,6 +1,6 @@
 // src/pages/ClaimCharacter/hooks/useClaimActions.ts
 
-import { addDoc, collection, doc, runTransaction } from "firebase/firestore";
+import { collection, doc, runTransaction } from "firebase/firestore";
 import { db, auth } from "../../../firebase";
 import { buildClaimLogPayload } from "../../../utils/claimLog";
 
@@ -50,25 +50,13 @@ export function useClaimActions() {
         throw new Error("Character is already claimed.");
       }
 
-      // Step 3: Claim ownership (atomic write)
-      transaction.update(charRef, {
-        userId: user.uid,
-      });
-
-      // Note: We cannot write to subcollections in transactions,
-      // so claim log is written after the transaction completes
+      // Step 3: Claim ownership and write audit log atomically
+      transaction.update(charRef, { userId: user.uid });
+      transaction.set(
+        doc(logsRef),
+        buildClaimLogPayload("claim", user.uid, null, user.uid)
+      );
     });
-
-    // Step 4: Write claim log (after successful transaction)
-    await addDoc(
-      logsRef,
-      buildClaimLogPayload(
-        "claim",
-        user.uid,
-        null, // previous owner was null
-        user.uid
-      )
-    );
   }
 
   return { claimCharacter };
