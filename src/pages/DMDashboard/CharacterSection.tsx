@@ -61,7 +61,7 @@ function CharacterSection({ campaignId, characters }: CharacterSectionProps) {
     // Validate character name
     const validation = validateCharacterName(trimmedName);
     if (!validation.isValid) {
-      toast.warning(validation.error || "Invalid character name");
+      toast.warning(validation.error ?? "Invalid character name");
       return;
     }
 

@@ -35,7 +35,7 @@ function CampaignSection({
     // Validate campaign name
     const validation = validateCampaignName(name);
     if (!validation.isValid) {
-      toast.warning(validation.error || "Invalid campaign name");
+      toast.warning(validation.error ?? "Invalid campaign name");
       return;
     }
 
