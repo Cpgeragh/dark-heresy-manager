@@ -404,6 +404,8 @@ export default function CharacterSheet() {
               isDmForceReleasing={isDmForceReleasing}
               isDmForceAssigning={isDmForceAssigning}
               isDmTogglingEdit={isDmTogglingEdit}
+              campaignId={path.campaignId}
+              characterId={character.id}
             />
           )}
         </ErrorBoundary>

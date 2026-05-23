@@ -1,6 +1,7 @@
 // src/pages/characterSheet/AdminTab.tsx
 
 import { useState, useCallback } from "react";
+import { doc, increment, updateDoc, writeBatch } from "firebase/firestore";
 import type { Character } from "../../types/Character";
 import type { ClaimLog } from "../../types/ClaimLog";
 import {
@@ -8,6 +9,8 @@ import {
   sectionContainerClass,
   readOnlyBadgeClass,
 } from "../../ui/editableStyles";
+import { db } from "../../firebase";
+import { useXpProposals } from "../../hooks/useXpProposals";
 
 interface AdminTabProps {
   character: Character;
@@ -18,6 +21,8 @@ interface AdminTabProps {
   isDmForceReleasing?: boolean;
   isDmForceAssigning?: boolean;
   isDmTogglingEdit?: boolean;
+  campaignId: string;
+  characterId: string;
 }
 
 export function AdminTab({
@@ -29,8 +34,32 @@ export function AdminTab({
   isDmForceReleasing = false,
   isDmForceAssigning = false,
   isDmTogglingEdit = false,
+  campaignId,
+  characterId,
 }: AdminTabProps) {
   const [assignUID, setAssignUID] = useState("");
+  const { proposals } = useXpProposals(campaignId, characterId);
+  const pendingProposals = proposals.filter((p) => p.status === "pending");
+
+  const handleApprove = useCallback(async (proposalId: string, xpCost: number) => {
+    const batch = writeBatch(db);
+    batch.update(
+      doc(db, "campaigns", campaignId, "characters", characterId, "xpProposals", proposalId),
+      { status: "approved" }
+    );
+    batch.update(
+      doc(db, "campaigns", campaignId, "characters", characterId),
+      { "experience.spent": increment(xpCost) }
+    );
+    await batch.commit();
+  }, [campaignId, characterId]);
+
+  const handleReject = useCallback(async (proposalId: string) => {
+    await updateDoc(
+      doc(db, "campaigns", campaignId, "characters", characterId, "xpProposals", proposalId),
+      { status: "rejected" }
+    );
+  }, [campaignId, characterId]);
 
   const handleAssignUIDChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setAssignUID(e.target.value);
@@ -138,6 +167,43 @@ export function AdminTab({
             {isDmForceAssigning ? "Assigning..." : "Assign to Player"}
           </button>
         </div>
+      </section>
+
+      {/* PENDING XP PROPOSALS */}
+      <section className={sectionContainerClass(false)}>
+        <h3 className="font-semibold mb-2">Pending XP Proposals</h3>
+
+        {pendingProposals.length === 0 ? (
+          <p className="text-sm text-slate-400">No pending proposals.</p>
+        ) : (
+          <ul className="space-y-2">
+            {pendingProposals.map((p) => (
+              <li
+                key={p.id}
+                className="flex items-center justify-between border border-slate-700 rounded px-3 py-2 text-sm"
+              >
+                <div>
+                  <span className="text-slate-200">{p.description}</span>
+                  <span className="text-slate-400 ml-2">— {p.xpCost} XP</span>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleApprove(p.id, p.xpCost)}
+                    className="px-2 py-1 text-xs rounded bg-green-700 text-white hover:bg-green-600"
+                  >
+                    Approve
+                  </button>
+                  <button
+                    onClick={() => handleReject(p.id)}
+                    className="px-2 py-1 text-xs rounded bg-red-800 text-red-200 hover:bg-red-700"
+                  >
+                    Reject
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       {/* CLAIM HISTORY */}
