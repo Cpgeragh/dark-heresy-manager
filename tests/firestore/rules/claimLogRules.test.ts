@@ -138,7 +138,12 @@ describe("Firestore Rules: ClaimLog Rules", () => {
 
   it("player may create claim logs for themselves (claim)", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
-    await setupCampaignAndCharacter(env);
+    // Character must be unclaimed for a "claim" log to pass rules
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, characterId, {
+      userId: null,
+      isEditableByPlayer: false,
+    });
 
     const playerDb = dbAs(env, "player-1");
 
@@ -224,7 +229,7 @@ describe("Firestore Rules: ClaimLog Rules", () => {
     ).rejects.toThrow();
   });
 
-  it("DM can create logs with any valid action", async () => {
+  it("DM can write force-assign and force-release logs", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
     await setupCampaignAndCharacter(env);
 
@@ -233,14 +238,28 @@ describe("Firestore Rules: ClaimLog Rules", () => {
       `campaigns/${campaignId}/characters/${characterId}/claimLog`
     );
 
-    for (const action of ["claim", "release", "force-assign", "force-release"]) {
+    for (const action of ["force-assign", "force-release"]) {
       // eslint-disable-next-line no-await-in-loop
       await expect(
-        col.doc(`dm-${action}`).set({
-          action,
-          actorUid: "dm-1",
-        })
+        col.doc(`dm-${action}`).set({ action, actorUid: "dm-1" })
       ).resolves.toBeUndefined();
+    }
+  });
+
+  it("DM cannot write claim or release logs", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await setupCampaignAndCharacter(env);
+
+    const dmDb = dbAs(env, "dm-1");
+    const col = dmDb.collection(
+      `campaigns/${campaignId}/characters/${characterId}/claimLog`
+    );
+
+    for (const action of ["claim", "release"]) {
+      // eslint-disable-next-line no-await-in-loop
+      await expect(
+        col.doc(`dm-${action}`).set({ action, actorUid: "dm-1" })
+      ).rejects.toThrow();
     }
   });
 
