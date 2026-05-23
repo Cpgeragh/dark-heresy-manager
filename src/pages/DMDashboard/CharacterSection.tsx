@@ -43,6 +43,7 @@ function CharacterSection({ campaignId, characters }: CharacterSectionProps) {
   const toast = useToast();
   
   const [characterName, setCharacterName] = useState("");
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setCharacterName(e.target.value);
@@ -54,6 +55,21 @@ function CharacterSection({ campaignId, characters }: CharacterSectionProps) {
     },
     [navigate, campaignId]
   );
+
+  const handleDelete = useCallback(async (character: CharacterListItem) => {
+    try {
+      const charRef = doc(db, "campaigns", campaignId, "characters", character.id);
+      const recoveryRef = doc(db, "recoveryIndex", character.recoveryCode);
+      const batch = writeBatch(db);
+      batch.delete(charRef);
+      batch.delete(recoveryRef);
+      await batch.commit();
+      setConfirmDeleteId(null);
+    } catch (err) {
+      console.error("Character deletion error:", err);
+      toast.error("Failed to delete character. Please try again.");
+    }
+  }, [campaignId, toast]);
 
   const handleCreate = useCallback(async () => {
     const trimmedName = characterName.trim();
@@ -152,13 +168,40 @@ function CharacterSection({ campaignId, characters }: CharacterSectionProps) {
                   </div>
                 </div>
 
-                <button
-                  onClick={() => handleCharacterView(character.id)}
-                  className="px-3 py-1 text-xs rounded bg-blue-600 text-white hover:bg-blue-500"
-                  aria-label={`View ${character.header?.characterName ?? "character"}`}
-                >
-                  View
-                </button>
+                {confirmDeleteId === character.id ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-red-400">Delete?</span>
+                    <button
+                      onClick={() => handleDelete(character)}
+                      className="px-2 py-1 text-xs rounded bg-red-600 text-white hover:bg-red-500"
+                    >
+                      Yes
+                    </button>
+                    <button
+                      onClick={() => setConfirmDeleteId(null)}
+                      className="px-2 py-1 text-xs rounded bg-slate-700 text-slate-300 hover:bg-slate-600"
+                    >
+                      No
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleCharacterView(character.id)}
+                      className="px-3 py-1 text-xs rounded bg-blue-600 text-white hover:bg-blue-500"
+                      aria-label={`View ${character.header?.characterName ?? "character"}`}
+                    >
+                      View
+                    </button>
+                    <button
+                      onClick={() => setConfirmDeleteId(character.id)}
+                      className="px-3 py-1 text-xs rounded bg-red-900/60 text-red-400 hover:bg-red-800/60"
+                      aria-label={`Delete ${character.header?.characterName ?? "character"}`}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                )}
               </li>
             ))}
           </ul>
