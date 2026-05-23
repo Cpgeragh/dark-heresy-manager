@@ -2,12 +2,13 @@
 
 import { useState, useCallback } from "react";
 import { forceAssignCharacter, forceReleaseCharacter } from "../../../services/characterService";
+import type { CharacterDocument } from "../../../types/Firestore";
 
 export function useDmActions() {
   const [isForceAssigning, setIsForceAssigning] = useState(false);
   const [isForceReleasing, setIsForceReleasing] = useState(false);
 
-  const forceAssign = useCallback(async (campaignId: string, character: any, uid: string) => {
+  const forceAssign = useCallback(async (campaignId: string, character: CharacterDocument & { id: string }, uid: string) => {
     setIsForceAssigning(true);
     try {
       await forceAssignCharacter(campaignId, character.id, character.userId, uid);
@@ -19,7 +20,7 @@ export function useDmActions() {
     }
   }, []);
 
-  const forceRelease = useCallback(async (campaignId: string, character: any) => {
+  const forceRelease = useCallback(async (campaignId: string, character: CharacterDocument & { id: string }) => {
     setIsForceReleasing(true);
     try {
       await forceReleaseCharacter(campaignId, character.id, character.userId);

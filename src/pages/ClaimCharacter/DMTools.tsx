@@ -1,14 +1,10 @@
 // src/pages/ClaimCharacter/DMTools.tsx
 
 import { useState, useCallback } from "react";
+import type { RecoveryLookupResult } from "./hooks/useRecoveryLookup";
 
 interface Props {
-  recovery: {
-    campaignId: string;
-    characterId: string;
-    character: any;
-    campaign: any;
-  };
+  recovery: RecoveryLookupResult;
   onForceAssign: (uid: string) => Promise<void>;
   onForceRelease: () => Promise<void>;
   isForceAssigning?: boolean;

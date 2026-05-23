@@ -2,10 +2,11 @@
 
 import { useCallback } from "react";
 import type { OwnershipState } from "./hooks/useRecoveryLookup";
+import type { CharacterDocument, CampaignDocument } from "../../types/Firestore";
 
 interface ClaimPreviewProps {
-  character: any;
-  campaign: any;
+  character: CharacterDocument & { id: string };
+  campaign: CampaignDocument;
   ownership: OwnershipState;
   onClaim: () => Promise<void> | void;
 }
@@ -16,10 +17,7 @@ export function ClaimPreview({
   ownership,
   onClaim,
 }: ClaimPreviewProps) {
-  const name =
-    character.header?.characterName ??
-    character.name ??
-    "Unnamed Character";
+  const name = character.header?.characterName ?? "Unnamed Character";
 
   function renderStatus() {
     switch (ownership) {
