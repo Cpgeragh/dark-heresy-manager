@@ -70,6 +70,7 @@ export default function CharacterSheet() {
   const {
     path,
     character,
+    characterLoading,
     allowedToEdit,
     claimLog,
     isDM,
@@ -179,10 +180,21 @@ export default function CharacterSheet() {
     );
   }
 
-  if (!character) {
+  if (characterLoading) {
     return (
       <div className="text-slate-300 text-center py-10">
         Loading character…
+      </div>
+    );
+  }
+
+  if (!character) {
+    return (
+      <div className="text-slate-300 text-center py-10 space-y-4">
+        <p className="text-lg font-semibold">Character not found.</p>
+        <p className="text-sm text-slate-400">
+          This character may have been deleted or the link is invalid.
+        </p>
       </div>
     );
   }

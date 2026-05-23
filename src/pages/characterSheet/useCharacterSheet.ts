@@ -48,7 +48,7 @@ export function useCharacterSheet({
   // ================================================================
   // DATA LOADING
   // ================================================================
-  const { character, claimLog } = useCharacterData({
+  const { character, claimLog, loading: characterLoading } = useCharacterData({
     campaignId: path?.campaignId,
     characterId: path?.characterId,
     isDM,
@@ -87,6 +87,7 @@ export function useCharacterSheet({
     path,
     character,
     claimLog,
+    characterLoading,
 
     // Role & permissions
     isDM,
