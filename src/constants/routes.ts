@@ -20,6 +20,7 @@ export const ROUTES = {
 // Route patterns (for React Router)
 export const ROUTE_PATTERNS = {
   CHARACTER_SHEET: "/campaign/:campaignId/character/:characterId",
+  CAMPAIGN_OVERVIEW: "/campaign/:campaignId",
 } as const;
 
 // Route builders (for navigation)
@@ -31,4 +32,11 @@ export const buildRoute = {
    */
   characterSheet: (campaignId: string, characterId: string) =>
     `/campaign/${campaignId}/character/${characterId}`,
+
+  /**
+   * Build URL for campaign overview
+   * @example buildRoute.campaignOverview("camp-123")
+   * => "/campaign/camp-123"
+   */
+  campaignOverview: (campaignId: string) => `/campaign/${campaignId}`,
 } as const;

@@ -1,11 +1,13 @@
 // src/pages/DMDashboard/CampaignSection.tsx
 
 import { useState, useCallback } from "react";
+import { Link } from "react-router-dom";
 import { collection, doc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase";
 import type { CampaignDocument } from "../../types/Firestore";
 import { validateCampaignName } from "../../utils/validation";
 import { useToast } from "../../components/Toast";
+import { buildRoute } from "../../constants/routes";
 
 type CampaignWithId = CampaignDocument & { id: string };
 
@@ -164,6 +166,13 @@ function CampaignSection({
                     >
                       {campaign.name}
                     </span>
+                    <Link
+                      to={buildRoute.campaignOverview(campaign.id)}
+                      className="text-xs px-2 py-1 bg-slate-700 text-slate-300 rounded hover:bg-slate-600"
+                      aria-label={`View ${campaign.name}`}
+                    >
+                      View
+                    </Link>
                     <button
                       onClick={() => handleEditStart(campaign)}
                       className="text-xs px-2 py-1 bg-slate-700 text-slate-300 rounded hover:bg-slate-600"

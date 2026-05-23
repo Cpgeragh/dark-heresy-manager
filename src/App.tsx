@@ -19,6 +19,7 @@ import PlayerDashboard from "./pages/PlayerDashboard";
 import ClaimCharacterPage from "./pages/ClaimCharacter/ClaimCharacterPage";
 import SelectCampaign from "./pages/SelectCampaign";
 import CharacterSheet from "./pages/CharacterSheet";
+import CampaignOverview from "./pages/CampaignOverview";
 
 export default function App() {
   const location = useLocation();
@@ -155,6 +156,11 @@ export default function App() {
               <Route
                 path={ROUTE_PATTERNS.CHARACTER_SHEET}
                 element={<CharacterSheet />}
+              />
+
+              <Route
+                path={ROUTE_PATTERNS.CAMPAIGN_OVERVIEW}
+                element={<CampaignOverview />}
               />
 
               <Route

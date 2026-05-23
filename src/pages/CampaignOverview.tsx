@@ -7,6 +7,8 @@ import { getDocs } from "firebase/firestore";
 import { charactersCollectionRef } from "../firebase/converters";
 
 import { useClaimLogs } from "../hooks/useClaimLogs";
+import { useIsDM } from "../hooks/useIsDM";
+import { SessionForm } from "./CampaignOverview/SessionForm";
 
 type CharacterSummary = {
   id: string;
@@ -18,8 +20,10 @@ export default function CampaignOverview() {
   const params = useParams<{ campaignId: string }>();
   const campaignId = params.campaignId;
 
+  const isDM = useIsDM(campaignId);
   const [characters, setCharacters] = useState<CharacterSummary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showSessionForm, setShowSessionForm] = useState(false);
 
   useEffect(() => {
     if (!campaignId) return;
@@ -58,23 +62,40 @@ export default function CampaignOverview() {
   }
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-4">Campaign Overview</h1>
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">Campaign Overview</h1>
+        {isDM && !showSessionForm && (
+          <button
+            onClick={() => setShowSessionForm(true)}
+            className="px-4 py-2 bg-amber-500 text-slate-900 font-semibold rounded text-sm"
+          >
+            New Session
+          </button>
+        )}
+      </div>
 
-      <p className="text-slate-400 text-sm mb-4">
-        Campaign ID: <code>{safeCampaignId}</code>
-      </p>
+      {isDM && showSessionForm && (
+        <SessionForm
+          campaignId={campaignId}
+          characters={characters}
+          onClose={() => setShowSessionForm(false)}
+        />
+      )}
 
-      <div className="space-y-4">
-        {characters.map((char) => (
-          <CampaignOverviewCharacterRow
-            key={char.id}
-            campaignId={campaignId}
-            characterId={char.id}
-            characterName={char.characterName}
-            userId={char.userId}
-          />
-        ))}
+      <div>
+        <h2 className="text-xl font-semibold mb-3">Characters</h2>
+        <div className="space-y-4">
+          {characters.map((char) => (
+            <CampaignOverviewCharacterRow
+              key={char.id}
+              campaignId={campaignId}
+              characterId={char.id}
+              characterName={char.characterName}
+              userId={char.userId}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
