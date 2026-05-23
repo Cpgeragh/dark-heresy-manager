@@ -1,74 +1,55 @@
 // src/pages/ClaimCharacter/hooks/useDmActions.ts
 
 import { useState, useCallback } from "react";
-import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
+import { writeBatch, collection, doc } from "firebase/firestore";
 import { db, auth } from "../../../firebase";
 import { buildClaimLogPayload } from "../../../utils/claimLog";
 
 export function useDmActions() {
-  const user = auth.currentUser;
   const [isForceAssigning, setIsForceAssigning] = useState(false);
   const [isForceReleasing, setIsForceReleasing] = useState(false);
 
   const forceAssign = useCallback(async (campaignId: string, character: any, uid: string) => {
+    const user = auth.currentUser;
+    if (!user) throw new Error("Not signed in.");
     setIsForceAssigning(true);
     try {
-      const charRef = doc(
-        db,
-        "campaigns",
-        campaignId,
-        "characters",
-        character.id
-      );
-
+      const charRef = doc(db, "campaigns", campaignId, "characters", character.id);
       const previous = character.userId;
 
-      await updateDoc(charRef, {
-        userId: uid,
-        isEditableByPlayer: true,
-      });
-
-      await addDoc(
-        collection(db, "campaigns", campaignId, "characters", character.id, "claimLog"),
-        buildClaimLogPayload("force-assign", user!.uid, previous, uid)
-      );
+      const logsRef = collection(db, "campaigns", campaignId, "characters", character.id, "claimLog");
+      const batch = writeBatch(db);
+      batch.update(charRef, { userId: uid, isEditableByPlayer: true });
+      batch.set(doc(logsRef), buildClaimLogPayload("force-assign", user.uid, previous, uid));
+      await batch.commit();
     } catch (error) {
       console.error("Force assign failed:", error);
       throw error;
     } finally {
       setIsForceAssigning(false);
     }
-  }, [user]);
+  }, []);
 
   const forceRelease = useCallback(async (campaignId: string, character: any) => {
+    const user = auth.currentUser;
+    if (!user) throw new Error("Not signed in.");
     setIsForceReleasing(true);
     try {
-      const charRef = doc(
-        db,
-        "campaigns",
-        campaignId,
-        "characters",
-        character.id
-      );
-
+      const charRef = doc(db, "campaigns", campaignId, "characters", character.id);
       const previous = character.userId;
 
-      await updateDoc(charRef, {
-        userId: null,
-        isEditableByPlayer: false,
-      });
-
-      await addDoc(
-        collection(db, "campaigns", campaignId, "characters", character.id, "claimLog"),
-        buildClaimLogPayload("force-release", user!.uid, previous, null)
-      );
+      const logsRef = collection(db, "campaigns", campaignId, "characters", character.id, "claimLog");
+      const batch = writeBatch(db);
+      batch.update(charRef, { userId: null, isEditableByPlayer: false });
+      batch.set(doc(logsRef), buildClaimLogPayload("force-release", user.uid, previous, null));
+      await batch.commit();
     } catch (error) {
       console.error("Force release failed:", error);
       throw error;
     } finally {
       setIsForceReleasing(false);
     }
-  }, [user]);
+  }, []);
 
   return { 
     forceAssign, 
