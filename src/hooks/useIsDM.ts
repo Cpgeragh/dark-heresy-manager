@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../firebase";
+import { useIsMounted } from "./useIsMounted";
 
 /**
  * Hook to check if the current user is the DM of a specific campaign.
@@ -12,6 +13,7 @@ import { auth, db } from "../firebase";
  */
 export function useIsDM(campaignId: string | undefined): boolean {
   const [isDM, setIsDM] = useState(false);
+  const isMounted = useIsMounted();
 
   useEffect(() => {
     if (!campaignId) {
@@ -25,36 +27,30 @@ export function useIsDM(campaignId: string | undefined): boolean {
       return;
     }
 
-    // Capture values to avoid null/undefined issues in async closure
     const userUid = user.uid;
-    const campaignIdValue = campaignId; // Capture to ensure TypeScript knows it's defined
-    let isMounted = true;
+    const campaignIdValue = campaignId;
 
     async function checkDM() {
       try {
         const campRef = doc(db, "campaigns", campaignIdValue);
         const campSnap = await getDoc(campRef);
-        
-        if (campSnap.exists() && isMounted) {
+
+        if (campSnap.exists() && isMounted()) {
           const data = campSnap.data();
           setIsDM(data.dmId === userUid);
-        } else if (isMounted) {
+        } else if (isMounted()) {
           setIsDM(false);
         }
       } catch (error) {
         console.error("Failed to check DM status:", error);
-        if (isMounted) {
+        if (isMounted()) {
           setIsDM(false);
         }
       }
     }
 
     checkDM();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [campaignId]);
+  }, [campaignId, isMounted]);
 
   return isDM;
 }

@@ -7,6 +7,7 @@ import { db } from "../firebase";
 import type { CampaignDocument, CharacterListItem } from "../types/Firestore";
 import CampaignSection from "./DMDashboard/CampaignSection";
 import CharacterSection from "./DMDashboard/CharacterSection";
+import { useIsMounted } from "../hooks/useIsMounted";
 
 type CampaignWithId = CampaignDocument & { id: string };
 
@@ -23,13 +24,12 @@ export default function DMDashboard({
 }: Props) {
   const [campaigns, setCampaigns] = useState<CampaignWithId[]>([]);
   const [characters, setCharacters] = useState<CharacterListItem[]>([]);
+  const isMounted = useIsMounted();
 
   // ----------------------------------
   // Load campaigns owned by this DM
   // ----------------------------------
   useEffect(() => {
-    let isMounted = true;
-
     async function loadCampaigns() {
       const snap = await getDocs(collection(db, "campaigns"));
       const list: CampaignWithId[] = [];
@@ -44,17 +44,13 @@ export default function DMDashboard({
         }
       });
 
-      if (isMounted) {
+      if (isMounted()) {
         setCampaigns(list);
       }
     }
 
     loadCampaigns();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [user.uid]);
+  }, [user.uid, isMounted]);
 
   // ----------------------------------
   // Watch characters in active campaign

@@ -6,6 +6,7 @@ import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import type { User } from "firebase/auth";
 import { auth, db } from "../firebase";
 import type { UserDocument } from "../types/Firestore";
+import { useIsMounted } from "./useIsMounted";
 
 type Role = "player" | "dm";
 
@@ -23,10 +24,9 @@ export function useAuth(): UseAuthResult {
     const [userRole, setUserRole] = useState<Role | null>(null);
     const [activeCampaignId, setActiveCampaignId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
+    const isMounted = useIsMounted();
 
     useEffect(() => {
-        let isMounted = true;
-
         const unsub = onAuthStateChanged(auth, async (user) => {
             try {
                 if (!user) {
@@ -34,14 +34,14 @@ export function useAuth(): UseAuthResult {
                     user = cred.user;
                 }
 
-                if (!isMounted) return;
+                if (!isMounted()) return;
 
                 setCurrentUser(user);
 
                 const ref = doc(db, "users", user.uid);
                 const snap = await getDoc(ref);
 
-                if (!isMounted) return;
+                if (!isMounted()) return;
 
                 if (!snap.exists()) {
                     const newUserDoc: UserDocument = {
@@ -53,7 +53,7 @@ export function useAuth(): UseAuthResult {
 
                     await setDoc(ref, newUserDoc);
 
-                    if (!isMounted) return;
+                    if (!isMounted()) return;
 
                     setUserRole("player");
                     setActiveCampaignId(null);
@@ -61,7 +61,7 @@ export function useAuth(): UseAuthResult {
                     const data = snap.data() as UserDocument;
                     const role: Role = data.role === "dm" ? "dm" : "player";
 
-                    if (!isMounted) return;
+                    if (!isMounted()) return;
 
                     setUserRole(role);
                     setActiveCampaignId(data.activeCampaignId ?? null);
@@ -71,17 +71,16 @@ export function useAuth(): UseAuthResult {
             } catch (err) {
                 console.error("Auth error:", err);
             } finally {
-                if (isMounted) {
+                if (isMounted()) {
                     setLoading(false);
                 }
             }
         });
 
         return () => {
-            isMounted = false;
             unsub();
         };
-    }, []);
+    }, [isMounted]);
 
     return {
         currentUser,

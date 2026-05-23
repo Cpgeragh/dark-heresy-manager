@@ -5,6 +5,7 @@ import { collection, collectionGroup, doc, getDocs, getDoc, query, where } from 
 import type { User } from "firebase/auth";
 import { db } from "../firebase";
 import type { CampaignDocument } from "../types/Firestore";
+import { useIsMounted } from "../hooks/useIsMounted";
 
 type CampaignWithId = CampaignDocument & { id: string };
 
@@ -22,14 +23,13 @@ export default function SelectCampaign({
   onActiveCampaignChange,
 }: Props) {
   const [campaigns, setCampaigns] = useState<CampaignWithId[]>([]);
+  const isMounted = useIsMounted();
 
   const handleCampaignSelect = useCallback((campaignId: string) => {
     onActiveCampaignChange(campaignId);
   }, [onActiveCampaignChange]);
 
   useEffect(() => {
-    let isMounted = true;
-
     async function load() {
       if (role === "dm") {
         const snap = await getDocs(
@@ -39,7 +39,7 @@ export default function SelectCampaign({
           id: d.id,
           ...(d.data() as Omit<CampaignDocument, "id">),
         }));
-        if (isMounted) setCampaigns(list);
+        if (isMounted()) setCampaigns(list);
       } else {
         const charSnap = await getDocs(
           query(collectionGroup(db, "characters"), where("userId", "==", user.uid))
@@ -53,16 +53,12 @@ export default function SelectCampaign({
         const list: CampaignWithId[] = campaignDocs
           .filter((d) => d.exists())
           .map((d) => ({ id: d.id, ...(d.data() as Omit<CampaignDocument, "id">) }));
-        if (isMounted) setCampaigns(list);
+        if (isMounted()) setCampaigns(list);
       }
     }
 
     load();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [user.uid, role]);
+  }, [user.uid, role, isMounted]);
 
   return (
     <div className="space-y-6">
