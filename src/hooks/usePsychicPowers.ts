@@ -69,7 +69,7 @@ export function usePsychicPowers({
    * Generic function to update a specific field of a power
    */
   const updatePower = useCallback(
-    (type: PowerType, index: number, key: keyof PsychicPower, value: any) => {
+    <K extends keyof PsychicPower>(type: PowerType, index: number, key: K, value: PsychicPower[K]) => {
       if (!editable) return;
 
       const powers = [...psychic[type]];
@@ -100,12 +100,12 @@ export function usePsychicPowers({
   );
 
   const updateMinorPower = useCallback(
-    (index: number, key: keyof PsychicPower, value: any) =>
+    <K extends keyof PsychicPower>(index: number, key: K, value: PsychicPower[K]) =>
       updatePower("minorPowers", index, key, value),
     [updatePower]
   );
   const updateMajorPower = useCallback(
-    (index: number, key: keyof PsychicPower, value: any) =>
+    <K extends keyof PsychicPower>(index: number, key: K, value: PsychicPower[K]) =>
       updatePower("majorPowers", index, key, value),
     [updatePower]
   );
