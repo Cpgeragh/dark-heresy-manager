@@ -1,6 +1,6 @@
 // tests/firestore/rules/dmPrivilegeRules.test.ts
 
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
 import { getTestEnv } from "../setup";
 import type {
   RulesTestEnvironment,
@@ -10,6 +10,11 @@ import type {
 describe("Firestore Rules: DM Privileges", () => {
   const campaignId = "camp1";
   const characterId = "char1";
+
+  afterEach(async () => {
+    const env = await getTestEnv();
+    await env.clearFirestore();
+  });
 
   async function setupAll(env: RulesTestEnvironment) {
     await env.withSecurityRulesDisabled(async (ctx: RulesTestContext) => {

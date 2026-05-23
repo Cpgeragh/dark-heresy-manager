@@ -1,9 +1,14 @@
 // tests/firestore/rules/playerEdit.test.ts
 
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
 import { getTestEnv } from "../setup";
 
 describe("Firestore Rules: Player Editing Permissions", () => {
+
+  afterEach(async () => {
+    const env = await getTestEnv();
+    await env.clearFirestore();
+  });
 
   it("player cannot edit another player's character", async () => {
     const env = await getTestEnv();

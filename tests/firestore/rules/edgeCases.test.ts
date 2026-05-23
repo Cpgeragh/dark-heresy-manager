@@ -1,11 +1,16 @@
 // tests/firestore/rules/edgeCases.test.ts
 
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
 import { getTestEnv } from "../setup";
 import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
 import { dbAs, createCampaign } from "../helpers";
 
 describe("Firestore Rules: Edge Cases", () => {
+
+  afterEach(async () => {
+    const env = await getTestEnv();
+    await env.clearFirestore();
+  });
 
   it("cannot update non-existent campaign even as authenticated user", async () => {
     const env = await getTestEnv() as RulesTestEnvironment;

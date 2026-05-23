@@ -1,11 +1,16 @@
 // tests/firestore/rules/campaignRules.test.ts
 
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
 import { getTestEnv } from "../setup";
 import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
 import { dbAs, createCampaign } from "../helpers";
 
 describe("Firestore Rules: Campaigns", () => {
+
+  afterEach(async () => {
+    const env = await getTestEnv();
+    await env.clearFirestore();
+  });
 
   it("authenticated users may read campaign documents", async () => {
     const env = await getTestEnv() as RulesTestEnvironment;

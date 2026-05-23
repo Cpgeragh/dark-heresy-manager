@@ -1,6 +1,6 @@
 // tests/firestore/rules/characterOwnershipProtection.test.ts
 
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
 import { getTestEnv } from "../setup";
 import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
 import { dbAs, createCampaign, createCharacter } from "../helpers";
@@ -8,6 +8,11 @@ import { dbAs, createCampaign, createCharacter } from "../helpers";
 describe("Firestore Rules: Character Ownership Protection", () => {
   const campaignId = "camp1";
   const characterId = "char1";
+
+  afterEach(async () => {
+    const env = await getTestEnv();
+    await env.clearFirestore();
+  });
 
   async function setup(env: RulesTestEnvironment) {
     await createCampaign(env, campaignId, "dm-1");
