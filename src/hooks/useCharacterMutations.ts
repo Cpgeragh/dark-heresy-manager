@@ -7,6 +7,7 @@ import { characterDocRef } from "../firebase/converters";
 import type { Character, Characteristics } from "../types/Character";
 import type { CharField } from "../utils/characterFactory";
 import { buildClaimLogPayload } from "../utils/claimLog";
+import { forceAssignCharacter, forceReleaseCharacter } from "../services/characterService";
 import { useToast } from "../components/Toast";
 
 interface UseCharacterMutationsProps {
@@ -134,21 +135,12 @@ export function useCharacterMutations({
   // DM FORCE RELEASE
   // ================================================================
   const dmForceRelease = useCallback(async (): Promise<void> => {
-    const user = auth.currentUser;
-    if (!user || !character) return;
+    if (!character) return;
 
     setIsDmForceReleasing(true);
     setError(null);
     try {
-      const previousOwner = character.userId;
-
-      const logsRef = collection(db, "campaigns", campaignId, "characters", characterId, "claimLog");
-
-      const batch = writeBatch(db);
-      batch.update(charRef, { userId: null, isEditableByPlayer: false });
-      batch.set(doc(logsRef), buildClaimLogPayload("force-release", user.uid, previousOwner, null));
-      await batch.commit();
-
+      await forceReleaseCharacter(campaignId, characterId, character.userId);
       toast.success("Character force-released");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to force release";
@@ -158,28 +150,19 @@ export function useCharacterMutations({
     } finally {
       setIsDmForceReleasing(false);
     }
-  }, [character, charRef, campaignId, characterId, toast]);
+  }, [character, campaignId, characterId, toast]);
 
   // ================================================================
   // DM FORCE ASSIGN
   // ================================================================
   const dmForceAssign = useCallback(
     async (targetUid: string): Promise<void> => {
-      const user = auth.currentUser;
-      if (!user || !character) return;
+      if (!character) return;
 
       setIsDmForceAssigning(true);
       setError(null);
       try {
-        const previousOwner = character.userId;
-
-        const logsRef = collection(db, "campaigns", campaignId, "characters", characterId, "claimLog");
-
-        const batch = writeBatch(db);
-        batch.update(charRef, { userId: targetUid, isEditableByPlayer: true });
-        batch.set(doc(logsRef), buildClaimLogPayload("force-assign", user.uid, previousOwner, targetUid));
-        await batch.commit();
-
+        await forceAssignCharacter(campaignId, characterId, character.userId, targetUid);
         toast.success("Character assigned successfully");
       } catch (err) {
         const message = err instanceof Error ? err.message : "Failed to assign character";
@@ -190,7 +173,7 @@ export function useCharacterMutations({
         setIsDmForceAssigning(false);
       }
     },
-    [character, charRef, campaignId, characterId, toast]
+    [character, campaignId, characterId, toast]
   );
 
   // ================================================================

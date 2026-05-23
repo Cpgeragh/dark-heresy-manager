@@ -5,14 +5,19 @@ import {
   setDoc,
   updateDoc,
   addDoc,
+  writeBatch,
+  collection,
+  doc,
 } from "firebase/firestore";
 
+import { db, auth } from "../firebase";
 import {
   characterDocRef,
   charactersCollectionRef,
 } from "../firebase/converters";
 
 import type { Character } from "../types/Character";
+import { buildClaimLogPayload } from "../utils/claimLog";
 
 /**
  * Load a single character with full typing.
@@ -101,4 +106,39 @@ export async function createCharacter(
   }
 
   return stored;
+}
+
+export async function forceAssignCharacter(
+  campaignId: string,
+  characterId: string,
+  previousOwner: string | null,
+  targetUid: string
+): Promise<void> {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Not signed in.");
+
+  const charRef = characterDocRef(campaignId, characterId);
+  const logsRef = collection(db, "campaigns", campaignId, "characters", characterId, "claimLog");
+
+  const batch = writeBatch(db);
+  batch.update(charRef, { userId: targetUid, isEditableByPlayer: true });
+  batch.set(doc(logsRef), buildClaimLogPayload("force-assign", user.uid, previousOwner, targetUid));
+  await batch.commit();
+}
+
+export async function forceReleaseCharacter(
+  campaignId: string,
+  characterId: string,
+  previousOwner: string | null
+): Promise<void> {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Not signed in.");
+
+  const charRef = characterDocRef(campaignId, characterId);
+  const logsRef = collection(db, "campaigns", campaignId, "characters", characterId, "claimLog");
+
+  const batch = writeBatch(db);
+  batch.update(charRef, { userId: null, isEditableByPlayer: false });
+  batch.set(doc(logsRef), buildClaimLogPayload("force-release", user.uid, previousOwner, null));
+  await batch.commit();
 }
