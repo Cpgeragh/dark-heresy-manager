@@ -55,3 +55,27 @@ export interface CharacterListItem {
     characterName?: string;
   };
 }
+
+/**
+ * Session document stored in /campaigns/{campaignId}/sessions/{sessionId}
+ */
+export interface SessionDocument {
+  date: Timestamp | Date | FieldValue;
+  summary: string;
+  dmNotes: string;
+  xpAwarded: number;
+  attendees: string[];
+  createdAt: Timestamp | Date | FieldValue;
+}
+
+/**
+ * XP proposal document stored in
+ * /campaigns/{campaignId}/characters/{characterId}/xpProposals/{proposalId}
+ */
+export interface XpProposalDocument {
+  playerId: string;
+  description: string;
+  xpCost: number;
+  status: "pending" | "approved" | "rejected";
+  proposedAt: Timestamp | Date | FieldValue;
+}

@@ -145,9 +145,49 @@ service cloud.firestore {
     }
 
     // ============================
-    // Phase C collections (future)
-    // Sessions, attendance, etc. will be added here.
-    // All unlisted paths are denied by default.
+    // SESSIONS
     // ============================
+    match /campaigns/{campaignId}/sessions/{sessionId} {
+
+      function dmOwnsCampaign() {
+        return request.auth != null &&
+               get(/databases/$(database)/documents/campaigns/$(campaignId))
+                 .data.dmId == request.auth.uid;
+      }
+
+      allow read, list: if request.auth != null;
+      allow create, update, delete: if dmOwnsCampaign();
+    }
+
+    // ============================
+    // XP PROPOSALS
+    // ============================
+    match /campaigns/{campaignId}/characters/{characterId}/xpProposals/{proposalId} {
+
+      function dmOwnsCampaign() {
+        return request.auth != null &&
+               get(/databases/$(database)/documents/campaigns/$(campaignId))
+                 .data.dmId == request.auth.uid;
+      }
+
+      allow read, list:
+        if dmOwnsCampaign() ||
+        (
+          request.auth != null &&
+          get(/databases/$(database)/documents/campaigns/$(campaignId)/characters/$(characterId))
+            .data.userId == request.auth.uid
+        );
+
+      allow create:
+        if request.auth != null &&
+           request.resource.data.playerId == request.auth.uid &&
+           request.resource.data.status == "pending" &&
+           get(/databases/$(database)/documents/campaigns/$(campaignId)/characters/$(characterId))
+             .data.userId == request.auth.uid;
+
+      allow update, delete: if dmOwnsCampaign();
+    }
+
+    // All unlisted paths are denied by default.
   }
 }
