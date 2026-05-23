@@ -1,7 +1,7 @@
 // src/pages/DMDashboard/CampaignSection.tsx
 
 import { useState, useCallback } from "react";
-import { collection, doc, setDoc } from "firebase/firestore";
+import { collection, doc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase";
 import type { CampaignDocument } from "../../types/Firestore";
 import { validateCampaignName } from "../../utils/validation";
@@ -23,6 +23,8 @@ function CampaignSection({
   onCampaignSelect,
 }: CampaignSectionProps) {
   const [newCampaignName, setNewCampaignName] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
   const toast = useToast();
 
   const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,6 +65,33 @@ function CampaignSection({
     onCampaignSelect(campaignId);
   }, [onCampaignSelect]);
 
+  const handleEditStart = useCallback((campaign: CampaignWithId) => {
+    setEditingId(campaign.id);
+    setEditName(campaign.name);
+  }, []);
+
+  const handleEditCancel = useCallback(() => {
+    setEditingId(null);
+    setEditName("");
+  }, []);
+
+  const handleEditSave = useCallback(async () => {
+    if (!editingId) return;
+    const name = editName.trim();
+    const validation = validateCampaignName(name);
+    if (!validation.isValid) {
+      toast.warning(validation.error ?? "Invalid campaign name");
+      return;
+    }
+    try {
+      await updateDoc(doc(db, "campaigns", editingId), { name });
+      setEditingId(null);
+      setEditName("");
+    } catch {
+      toast.error("Failed to update campaign name");
+    }
+  }, [editingId, editName, toast]);
+
   return (
     <div className="space-y-10">
       {/* CREATE CAMPAIGN */}
@@ -99,14 +128,51 @@ function CampaignSection({
             {campaigns.map((campaign) => (
               <div
                 key={campaign.id}
-                className={`px-4 py-2 border rounded cursor-pointer ${
+                className={`px-4 py-2 border rounded flex items-center gap-2 ${
                   activeCampaignId === campaign.id
                     ? "border-amber-400 bg-amber-500/20"
                     : "border-slate-600 hover:bg-slate-800"
                 }`}
-                onClick={() => handleCampaignClick(campaign.id)}
               >
-                {campaign.name}
+                {editingId === campaign.id ? (
+                  <>
+                    <input
+                      className="px-2 py-1 bg-slate-700 border border-slate-500 rounded text-sm flex-1"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      autoFocus
+                      aria-label="Edit campaign name"
+                    />
+                    <button
+                      onClick={handleEditSave}
+                      className="text-xs px-2 py-1 bg-amber-500 text-slate-900 rounded font-semibold"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={handleEditCancel}
+                      className="text-xs px-2 py-1 bg-slate-700 text-slate-300 rounded hover:bg-slate-600"
+                    >
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <span
+                      className="flex-1 cursor-pointer"
+                      onClick={() => handleCampaignClick(campaign.id)}
+                    >
+                      {campaign.name}
+                    </span>
+                    <button
+                      onClick={() => handleEditStart(campaign)}
+                      className="text-xs px-2 py-1 bg-slate-700 text-slate-300 rounded hover:bg-slate-600"
+                      aria-label={`Edit ${campaign.name}`}
+                    >
+                      Edit
+                    </button>
+                  </>
+                )}
               </div>
             ))}
           </div>
