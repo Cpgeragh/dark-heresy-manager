@@ -8,7 +8,9 @@ import { charactersCollectionRef } from "../firebase/converters";
 
 import { useClaimLogs } from "../hooks/useClaimLogs";
 import { useIsDM } from "../hooks/useIsDM";
+import { useSessions } from "../hooks/useSessions";
 import { SessionForm } from "./CampaignOverview/SessionForm";
+import { SessionCard } from "./CampaignOverview/SessionCard";
 
 type CharacterSummary = {
   id: string;
@@ -21,6 +23,7 @@ export default function CampaignOverview() {
   const campaignId = params.campaignId;
 
   const isDM = useIsDM(campaignId);
+  const { sessions, loading: sessionsLoading } = useSessions(campaignId);
   const [characters, setCharacters] = useState<CharacterSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [showSessionForm, setShowSessionForm] = useState(false);
@@ -96,6 +99,26 @@ export default function CampaignOverview() {
             />
           ))}
         </div>
+      </div>
+
+      <div>
+        <h2 className="text-xl font-semibold mb-3">Session History</h2>
+        {sessionsLoading ? (
+          <p className="text-slate-400 text-sm">Loading sessions…</p>
+        ) : sessions.length === 0 ? (
+          <p className="text-slate-400 text-sm">No sessions recorded yet.</p>
+        ) : (
+          <div className="space-y-3">
+            {sessions.map((session) => (
+              <SessionCard
+                key={session.id}
+                session={session}
+                characters={characters}
+                isDM={isDM}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
