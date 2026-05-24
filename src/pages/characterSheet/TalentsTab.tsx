@@ -347,15 +347,23 @@ export function TalentsTab({
     [editable, weaponTraining, onUpdateTraining]
   );
 
-  const handleExoticNotesChange = useCallback(
-    (value: string) => {
-      if (!editable) return;
-      onUpdateTraining({ ...weaponTraining, exoticNotes: value });
-    },
-    [editable, weaponTraining, onUpdateTraining]
-  );
+  const [newExotic, setNewExotic] = useState("");
 
-  const exoticActive = weaponTraining.trained.includes("exotic");
+  const handleAddExotic = useCallback(() => {
+    if (!newExotic.trim()) return;
+    onUpdateTraining({
+      ...weaponTraining,
+      exoticWeapons: [...weaponTraining.exoticWeapons, newExotic.trim()],
+    });
+    setNewExotic("");
+  }, [newExotic, weaponTraining, onUpdateTraining]);
+
+  const handleRemoveExotic = useCallback((index: number) => {
+    onUpdateTraining({
+      ...weaponTraining,
+      exoticWeapons: weaponTraining.exoticWeapons.filter((_, i) => i !== index),
+    });
+  }, [weaponTraining, onUpdateTraining]);
 
   return (
     <div className="space-y-8 text-slate-300">
@@ -457,37 +465,53 @@ export function TalentsTab({
           </div>
         ))}
 
-        {/* Exotic */}
+        {/* Exotic Weapon Training */}
         <div>
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">
-            Exotic
+            Exotic Weapon Training
           </p>
-          <button
-            disabled={!editable}
-            onClick={() => handleToggleTraining("exotic")}
-            aria-pressed={exoticActive}
-            className={`px-2.5 py-1 rounded border text-xs transition ${
-              exoticActive
-                ? "bg-amber-500 border-amber-400 text-slate-900 font-semibold"
-                : editable
-                ? "border-slate-600 text-slate-300 hover:bg-slate-800"
-                : "border-slate-700 text-slate-500 opacity-60 cursor-not-allowed"
-            }`}
-          >
-            Exotic
-          </button>
 
-          {exoticActive && (
-            <div className="mt-2">
-              <FormField
-                label="Exotic Weapon Notes"
-                value={weaponTraining.exoticNotes ?? ""}
-                onChange={handleExoticNotesChange}
-                editable={editable}
-                type="textarea"
-                rows={2}
-                placeholder="e.g. Needle Pistol, Web Pistol…"
+          {weaponTraining.exoticWeapons.length === 0 && !editable && (
+            <p className="text-sm text-slate-500 italic">None.</p>
+          )}
+
+          <div className="space-y-1.5 mb-2">
+            {weaponTraining.exoticWeapons.map((weapon, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-between rounded border border-slate-700 bg-slate-900/30 px-3 py-1.5 text-sm"
+              >
+                <span className="text-slate-200">{weapon}</span>
+                {editable && (
+                  <button
+                    onClick={() => handleRemoveExotic(index)}
+                    aria-label={`Remove ${weapon}`}
+                    className="text-slate-500 hover:text-red-400 transition text-xs"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {editable && (
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newExotic}
+                onChange={(e) => setNewExotic(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") handleAddExotic(); }}
+                placeholder="e.g. Needle Pistol"
+                className={editableInputClass(true) + " flex-1"}
               />
+              <button
+                onClick={handleAddExotic}
+                disabled={!newExotic.trim()}
+                className="px-3 py-1 text-sm rounded border border-amber-500 bg-amber-600 text-white hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed transition"
+              >
+                Add
+              </button>
             </div>
           )}
         </div>

@@ -14,7 +14,7 @@ export interface WeaponTrainingGroup {
 
 export const WEAPON_TRAINING_GROUPS: readonly WeaponTrainingGroup[] = [
   {
-    label: "Basic",
+    label: "Basic Weapon Training",
     items: [
       { id: "basic-las",       display: "Las" },
       { id: "basic-sp",        display: "SP" },
@@ -27,7 +27,20 @@ export const WEAPON_TRAINING_GROUPS: readonly WeaponTrainingGroup[] = [
     ],
   },
   {
-    label: "Pistol",
+    label: "Heavy Weapon Training",
+    items: [
+      { id: "heavy-las",       display: "Las" },
+      { id: "heavy-sp",        display: "SP" },
+      { id: "heavy-bolt",      display: "Bolt" },
+      { id: "heavy-flame",     display: "Flame" },
+      { id: "heavy-plasma",    display: "Plasma" },
+      { id: "heavy-melta",     display: "Melta" },
+      { id: "heavy-launcher",  display: "Launcher" },
+      { id: "heavy-primitive", display: "Primitive" },
+    ],
+  },
+  {
+    label: "Pistol Training",
     items: [
       { id: "pistol-las",       display: "Las" },
       { id: "pistol-sp",        display: "SP" },
@@ -40,7 +53,7 @@ export const WEAPON_TRAINING_GROUPS: readonly WeaponTrainingGroup[] = [
     ],
   },
   {
-    label: "Melee",
+    label: "Melee Weapon Training",
     items: [
       { id: "melee-primitive", display: "Primitive" },
       { id: "melee-chain",     display: "Chain" },
@@ -48,4 +61,13 @@ export const WEAPON_TRAINING_GROUPS: readonly WeaponTrainingGroup[] = [
       { id: "melee-power",     display: "Power" },
     ],
   },
-] as const;
+  {
+    label: "Thrown Weapon Training",
+    items: [
+      { id: "thrown-primitive", display: "Primitive" },
+      { id: "thrown-chain",     display: "Chain" },
+      { id: "thrown-shock",     display: "Shock" },
+      { id: "thrown-power",     display: "Power" },
+    ],
+  },
+];
