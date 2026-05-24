@@ -11,13 +11,14 @@ export interface Toast {
   message: string;
   type: ToastType;
   duration?: number;
+  copyText?: string; // if set, the copy button uses this instead of the full message
 }
 
 interface ToastContextValue {
   toasts: Toast[];
-  addToast: (message: string, type?: ToastType, duration?: number) => void;
+  addToast: (message: string, type?: ToastType, duration?: number, copyText?: string) => void;
   removeToast: (id: string) => void;
-  success: (message: string, duration?: number) => void;
+  success: (message: string, duration?: number, copyText?: string) => void;
   error: (message: string, duration?: number) => void;
   info: (message: string, duration?: number) => void;
   warning: (message: string, duration?: number) => void;
@@ -43,9 +44,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const addToast = useCallback(
-    (message: string, type: ToastType = "info", duration = DEFAULT_TOAST_DURATION) => {
+    (message: string, type: ToastType = "info", duration = DEFAULT_TOAST_DURATION, copyText?: string) => {
       const id = crypto.randomUUID();
-      const toast: Toast = { id, message, type, duration };
+      const toast: Toast = { id, message, type, duration, ...(copyText ? { copyText } : {}) };
 
       setToasts((prev) => [...prev, toast]);
 
@@ -62,7 +63,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   );
 
   const success = useCallback(
-    (message: string, duration?: number) => addToast(message, "success", duration),
+    (message: string, duration?: number, copyText?: string) => addToast(message, "success", duration, copyText),
     [addToast]
   );
 

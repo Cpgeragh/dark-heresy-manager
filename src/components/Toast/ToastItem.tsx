@@ -14,7 +14,7 @@ export function ToastItem({ toast }: ToastItemProps) {
 
   const handleCopy = useCallback(async () => {
     try {
-      await navigator.clipboard.writeText(toast.message);
+      await navigator.clipboard.writeText(toast.copyText ?? toast.message);
       setCopied(true);
       setTimeout(() => setCopied(false), COPY_FEEDBACK_DURATION);
     } catch (err) {
