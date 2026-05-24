@@ -162,7 +162,8 @@ function CharacterSection({ campaignId, characters }: CharacterSectionProps) {
 
       toast.success(
         `Character created successfully!\n\nRecovery Code: ${recoveryCode}\n\n(Click the copy button to save this code)`,
-        IMPORTANT_TOAST_DURATION
+        IMPORTANT_TOAST_DURATION,
+        recoveryCode,
       );
       setCharacterName("");
     } catch (err) {
