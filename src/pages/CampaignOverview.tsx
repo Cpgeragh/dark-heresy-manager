@@ -27,6 +27,7 @@ export default function CampaignOverview() {
   const [characters, setCharacters] = useState<CharacterSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [showSessionForm, setShowSessionForm] = useState(false);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     if (!campaignId) return;
@@ -87,17 +88,38 @@ export default function CampaignOverview() {
       )}
 
       <div>
-        <h2 className="text-xl font-semibold mb-3">Characters</h2>
+        <div className="flex items-center gap-3 mb-3">
+          <h2 className="text-xl font-semibold">Characters</h2>
+          <input
+            placeholder="Search by name…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-sm w-48"
+          />
+        </div>
         <div className="space-y-4">
-          {characters.map((char) => (
-            <CampaignOverviewCharacterRow
-              key={char.id}
-              campaignId={campaignId}
-              characterId={char.id}
-              characterName={char.characterName}
-              userId={char.userId}
-            />
-          ))}
+          {(() => {
+            const filtered = search.trim()
+              ? characters.filter((c) =>
+                  c.characterName.toLowerCase().includes(search.trim().toLowerCase())
+                )
+              : characters;
+            return filtered.length === 0 ? (
+              <p className="text-slate-400 text-sm">
+                {search.trim() ? `No characters match "${search}".` : "No characters yet."}
+              </p>
+            ) : (
+              filtered.map((char) => (
+                <CampaignOverviewCharacterRow
+                  key={char.id}
+                  campaignId={campaignId}
+                  characterId={char.id}
+                  characterName={char.characterName}
+                  userId={char.userId}
+                />
+              ))
+            );
+          })()}
         </div>
       </div>
 
