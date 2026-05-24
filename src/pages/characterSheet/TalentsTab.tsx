@@ -75,13 +75,14 @@ function AddEntryForm({ listData, singular, onAdd, onCancel }: AddEntryFormProps
       selected.hasSpecialisation && specialisation.trim()
         ? `${selected.name} (${specialisation.trim()})`
         : selected.name;
-    onAdd({
+    const entry: TalentEntry = {
       uid: crypto.randomUUID(),
       talentId: selected.id,
       name: displayName,
-      specialisation: specialisation.trim() || undefined,
-      notes: notes.trim() || undefined,
-    });
+    };
+    if (specialisation.trim()) entry.specialisation = specialisation.trim();
+    if (notes.trim()) entry.notes = notes.trim();
+    onAdd(entry);
     // keep form open for multi-adding — reset selections only
     setSelectedId("");
     setSpecialisation("");
