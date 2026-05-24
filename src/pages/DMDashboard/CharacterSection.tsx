@@ -105,6 +105,33 @@ function CharacterSection({ campaignId, characters }: CharacterSectionProps) {
     }
   }, [campaignId, toast]);
 
+  const handleImport = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      if (typeof data.recoveryCode !== "string" || typeof data.isEditableByPlayer !== "boolean") {
+        toast.error("Invalid character file.");
+        return;
+      }
+      const recoveryCode = generateRecoveryCode();
+      const importData = { ...data, userId: null, isEditableByPlayer: false, recoveryCode };
+      const charRef = doc(collection(db, "campaigns", campaignId, "characters"));
+      const batch = writeBatch(db);
+      batch.set(charRef, importData);
+      batch.set(doc(db, "recoveryIndex", recoveryCode), { campaignId, characterId: charRef.id });
+      await batch.commit();
+      toast.success(
+        `Imported "${data.header?.characterName ?? "character"}" successfully`,
+        IMPORTANT_TOAST_DURATION
+      );
+    } catch {
+      toast.error("Failed to import character. Check the file and try again.");
+    }
+    e.target.value = "";
+  }, [campaignId, toast]);
+
   const handleCreate = useCallback(async () => {
     const trimmedName = characterName.trim();
 
@@ -166,6 +193,16 @@ function CharacterSection({ campaignId, characters }: CharacterSectionProps) {
         >
           Create
         </button>
+
+        <label className="px-4 py-2 bg-slate-700 text-slate-200 font-semibold rounded cursor-pointer hover:bg-slate-600">
+          Import JSON
+          <input
+            type="file"
+            accept=".json"
+            className="hidden"
+            onChange={handleImport}
+          />
+        </label>
       </div>
 
       {/* CHARACTER LIST */}

@@ -20,6 +20,18 @@ import { NotesTab } from "./characterSheet/NotesTab";
 import { AdminTab } from "./characterSheet/AdminTab";
 
 import type { TabId } from "./characterSheet/types";
+import type { CharacterDocument } from "../types/Firestore";
+
+function exportCharacterJson(character: CharacterDocument) {
+  const { id, ...data } = character;
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${character.header?.characterName ?? "character"}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 import type {
   CharacterHeader,
   WoundsBlock,
@@ -222,9 +234,19 @@ export default function CharacterSheet() {
 
       {/* HEADER */}
       <div className="mb-4">
-        <h1 className="text-3xl font-bold mb-1">
-          {character.header?.characterName ?? "Unnamed Character"}
-        </h1>
+        <div className="flex items-center justify-between gap-4">
+          <h1 className="text-3xl font-bold mb-1">
+            {character.header?.characterName ?? "Unnamed Character"}
+          </h1>
+          {(isDM || isOwner) && (
+            <button
+              onClick={() => exportCharacterJson(character)}
+              className="text-xs px-2 py-1 bg-slate-700 text-slate-300 rounded hover:bg-slate-600 shrink-0"
+            >
+              Export JSON
+            </button>
+          )}
+        </div>
 
         <p className="text-xs text-slate-400">
           Campaign: <code>{path.campaignId}</code> — Character ID:{" "}
