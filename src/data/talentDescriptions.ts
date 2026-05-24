@@ -1,30 +1,77 @@
 // src/data/talentDescriptions.ts
+// Keyed by TalentData.id. Expand entries as needed.
 
 export const TALENT_DESCRIPTIONS: Record<string, string> = {
-  "Ambidextrous":
-    "Allows you to use your off-hand without the usual –20 penalty.",
-  "Combat Sense":
-    "Adds +2 to Initiative and helps detect surprise attacks.",
-  "Die Hard":
-    "Allows survival against critical wounds that would normally kill.",
-  "Quick Draw":
-    "You can ready a weapon as a Free Action.",
-  "Rapid Reload":
-    "Halves the reload time of all ranged weapons you are proficient with.",
-  "Resistance":
-    "You gain +10 to resist a specific threat (fear, poison, etc.).",
-  "Sound Constitution":
-    "Adds +1 Wound each time the talent is taken.",
-  "Sprint":
-    "Allows you to move at double speed for one round after a Running move.",
-  "Melee Weapon Training (Primitive)":
-    "Allows use of all primitive melee weapons without penalty.",
-  "Melee Weapon Training (Chain)":
-    "Allows use of chain weapons such as chainblades or chainaxes.",
-  "Pistol Training (SP)":
-    "Allows use of solid projectile pistols.",
-  "Basic Weapon Training (Las)":
-    "Allows use of las-based basic weapons like the lasgun.",
-  "Exotic Weapon Training":
-    "Allows use of a specific unusual weapon type, specified individually."
+  "air-of-authority":      "When using the Command skill, you affect 10 additional targets per degree of success.",
+  "ambidextrous":          "You suffer no penalty for using your off-hand when making Weapon Skill or Ballistic Skill tests.",
+  "armour-of-contempt":    "You may re-roll failed Willpower tests to resist the effects of Fear caused by daemons and warp entities.",
+  "arms-master":           "You are proficient with all weapon classes and do not suffer the –20 penalty for using unfamiliar weapon types.",
+  "assassin-strike":       "After a melee attack, you may make an Agility test to move at Half Move rate as a Free Action.",
+  "autosanguine":          "Your mechadendrite systems automatically repair you, healing 2 additional Wounds per day.",
+  "battle-rage":           "You may parry while Frenzied.",
+  "berserk-charge":        "You gain +10 to Weapon Skill when charging, rather than the usual bonus.",
+  "blademaster":           "When using any bladed weapon, you may re-roll one missed attack per round.",
+  "blind-fighting":        "You suffer no penalty to Weapon Skill tests when fighting in darkness or while blinded.",
+  "bulging-biceps":        "You may fire heavy weapons without bracing.",
+  "catfall":               "Reduce the effective distance of any fall by metres equal to your Agility bonus.",
+  "combat-master":         "Opponents gain no bonuses for outnumbering you in melee combat.",
+  "counter-attack":        "After a successful Parry, you may immediately make one free attack against that opponent.",
+  "crack-shot":            "You add +2 to all damage rolls with ranged weapons.",
+  "crippling-strike":      "Each degree of success on a melee attack can be spent to deal +2 extra damage.",
+  "crushing-blow":         "You add +2 to all damage rolls with melee weapons.",
+  "dark-soul":             "You are immune to Corruption and Malignancy caused by daemonic or chaotic influences.",
+  "deadeye-shot":          "You reduce the penalty for called shots by 10.",
+  "decadence":             "You may consume alcohol and other substances without suffering their negative effects.",
+  "die-hard":              "When you would be killed by Critical Damage, roll on the Critical table twice and take the lower result.",
+  "disarm":                "As a Full Action, make an opposed Weapon Skill test to knock a weapon from an opponent's hands.",
+  "disturbing-voice":      "You gain +10 to Intimidation and Interrogation skill tests.",
+  "double-team":           "You and an ally both gain +10 to Weapon Skill when attacking the same target.",
+  "dual-shot":             "When firing two pistols simultaneously, you may target two separate enemies.",
+  "dual-strike":           "When attacking with two melee weapons, you may target two separate enemies.",
+  "fearless":              "You are immune to the effects of Fear and Pinning.",
+  "foresight":             "Spend one minute in thought to gain +10 to your next Intelligence-based test.",
+  "frenzy":                "Spend a Full Action to enter Frenzy: gain +10 WS, S, T and WP, but cannot Parry, retreat, or use psychic powers.",
+  "furious-assault":       "After hitting with a melee attack, spend your Reaction to make one additional attack against the same target.",
+  "gunslinger":            "The penalty for firing two pistols simultaneously is reduced from –20 to –10.",
+  "hard-target":           "When you run or charge, opponents suffer –20 to Ballistic Skill tests when shooting at you.",
+  "hardy":                 "You only begin suffering Critical Damage effects at Wounds lower than your Toughness bonus.",
+  "hatred":                "You gain +10 to Weapon Skill against the chosen group, but must pass a Willpower test to show mercy.",
+  "heightened-senses":     "You gain +10 to all Perception tests involving the chosen sense.",
+  "hip-shooting":          "After running, you may fire a ranged weapon as a Free Action at –20 to Ballistic Skill.",
+  "independent-targeting": "When firing a weapon with a blast quality, you may target different enemies with each shot.",
+  "iron-jaw":              "You may re-roll failed Toughness tests to avoid being Stunned.",
+  "jaded":                 "You are immune to mundane horrors and gain +10 to Fear tests against non-supernatural sources.",
+  "leap-up":               "You may rise from a prone position as a Free Action rather than a Half Action.",
+  "lightning-attack":      "You may make three melee attacks as a Full Action.",
+  "lightning-reflexes":    "You double your Agility bonus when rolling for Initiative.",
+  "litany-of-hate":        "You may extend the benefits of your Hatred talent to all allies within earshot.",
+  "marksman":              "You do not suffer the –10 or –20 penalties for shooting at long or extreme range.",
+  "mighty-shot":           "You add +2 to all damage rolls with ranged weapons.",
+  "nerves-of-steel":       "You may re-roll failed Willpower tests to avoid Pinning.",
+  "paranoia":              "You gain +2 to Initiative rolls and are never surprised.",
+  "quick-draw":            "You may ready a weapon as a Free Action instead of a Half Action.",
+  "rapid-reaction":        "You may make an Agility test to act normally when surprised, rather than being caught flat-footed.",
+  "rapid-reload":          "You halve all reload times, rounding down.",
+  "sharpshooter":          "You reduce the penalty for called shots by a further 10 (stacks with Deadeye Shot).",
+  "sound-constitution":    "Gain +1 Wound. May be taken multiple times.",
+  "sprint":                "When running, move an extra number of metres equal to your Agility bonus; gain 1 Fatigue per round of sprinting.",
+  "step-aside":            "Once per round, when an attack misses you, make a Dodge test as a Free Action.",
+  "street-fighting":       "Add +2 damage when attacking with improvised weapons or unarmed strikes.",
+  "strong-minded":         "You may re-roll failed Willpower tests to resist psychic powers.",
+  "sure-strike":           "You may choose to automatically hit in melee, but your attack deals no bonus damage.",
+  "swift-attack":          "You may make two melee attacks as a Full Action.",
+  "takedown":              "Instead of dealing damage, make a Weapon Skill test to Stun an opponent for one round.",
+  "talented":              "Gain +10 to all tests with the chosen skill.",
+  "technical-knock":       "You may un-jam a ranged weapon as a Half Action rather than a Full Action.",
+  "total-recall":          "You have perfect memory and can recall anything you have seen, heard, or read.",
+  "true-grit":             "Reduce all Critical Damage you suffer by your Toughness bonus (minimum 1).",
+  "two-weapon-wielder":    "You may attack with both weapons simultaneously, each at –20 to hit.",
+  "unshakeable-faith":     "You may re-roll failed Willpower tests to resist Fear and Corruption.",
+  "wall-of-steel":         "You may parry any number of times per round rather than just once.",
+  "shield-of-faith":       "Your faith grants protection. You gain +10 to Willpower tests to resist psychic powers.",
+  "fervent-belief":        "Your devotion is palpable. You gain +10 to Willpower tests against Fear and Corruption.",
+  "pure-faith":            "Your faith is absolute. Once per session you may ignore the effects of one failed Fear or Corruption test.",
+  "hammer-of-witches":     "You deal +2 damage per degree of success when attacking psykers or daemonic creatures.",
+  "adamantine-will":       "You are virtually unshakeable. You may re-roll any failed Willpower test once per scene.",
+  "warp-conduit":          "You may channel far more warp energy than normal, increasing your effective Psy Rating by 2 for one round.",
 };

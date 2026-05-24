@@ -8,6 +8,7 @@ export interface TraitData {
   source: SkillSource;
   hasSpecialisation: boolean;
   specialisationLabel?: string;
+  description?: string;
 }
 
 export const TRAIT_LIST: readonly TraitData[] = [

@@ -10,6 +10,7 @@ export interface TalentData {
   specialisationLabel?: string; // e.g. "Group", "Sense", "Skill"
   prerequisites?: string;
   repeatable?: boolean;         // true = can be taken more than once (e.g. Sound Constitution)
+  description?: string;
 }
 
 export const TALENT_LIST: readonly TalentData[] = [
