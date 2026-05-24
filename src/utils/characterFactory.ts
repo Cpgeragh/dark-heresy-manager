@@ -118,7 +118,7 @@ export function createEmptyCharacterData(params: {
 
     weaponTraining: {
       trained: [],
-      exoticNotes: "",
+      exoticWeapons: [],
     },
 
     experience: {

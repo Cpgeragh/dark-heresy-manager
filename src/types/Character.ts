@@ -147,14 +147,16 @@ export interface TalentsAndTraitsBlock {
 export type WeaponTrainingTalentId =
   | "basic-bolt" | "basic-flame" | "basic-las" | "basic-launcher"
   | "basic-melta" | "basic-plasma" | "basic-primitive" | "basic-sp"
+  | "heavy-bolt" | "heavy-flame" | "heavy-las" | "heavy-launcher"
+  | "heavy-melta" | "heavy-plasma" | "heavy-primitive" | "heavy-sp"
   | "pistol-bolt" | "pistol-flame" | "pistol-las" | "pistol-launcher"
   | "pistol-melta" | "pistol-plasma" | "pistol-primitive" | "pistol-sp"
   | "melee-primitive" | "melee-chain" | "melee-shock" | "melee-power"
-  | "exotic";
+  | "thrown-primitive" | "thrown-chain" | "thrown-shock" | "thrown-power";
 
 export interface WeaponTrainingBlock {
   trained: WeaponTrainingTalentId[];
-  exoticNotes?: string;
+  exoticWeapons: string[]; // one entry per exotic weapon e.g. ["Needle Pistol"]
 }
 
 /**
