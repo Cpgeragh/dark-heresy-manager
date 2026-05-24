@@ -153,7 +153,7 @@ describe("Firestore Rules: recoveryIndex", () => {
     ).rejects.toThrow();
   });
 
-  it("DM can write recoveryIndex if characterId is missing (rules do not enforce it)", async () => {
+  it("DM cannot write recoveryIndex if characterId is missing", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, "camp1", "dm-1");
@@ -165,6 +165,6 @@ describe("Firestore Rules: recoveryIndex", () => {
         campaignId: "camp1",
         // characterId omitted
       } as any)
-    ).resolves.toBeUndefined();
+    ).rejects.toThrow();
   });
 });

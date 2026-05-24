@@ -84,8 +84,8 @@ describe("Firestore Rules: Field Validation", () => {
       // eslint-disable-next-line no-await-in-loop
       await expect(
         dmDb.collection(`campaigns/${campaignId}/characters`).doc(`char-${i}`).set({
-          userId: "player-1",
-          isEditableByPlayer: true,
+          userId: null,
+          isEditableByPlayer: false,
           recoveryCode: testCodes[i]
         })
       ).resolves.toBeUndefined();

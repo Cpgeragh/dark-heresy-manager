@@ -167,7 +167,7 @@ describe("Firestore Rules: Character Rules", () => {
         .collection(`campaigns/${campaignId}/characters`)
         .doc("dm-char")
         .set({
-          userId: "player-1",
+          userId: null,
           isEditableByPlayer: false,
           recoveryCode: "RCODE",
         })

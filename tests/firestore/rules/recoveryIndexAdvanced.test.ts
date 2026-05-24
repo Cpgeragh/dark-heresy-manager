@@ -148,7 +148,7 @@ describe("Firestore Rules: RecoveryIndex Advanced Tests", () => {
     expect(snapshot.docs.length).toBe(2);
   });
 
-  it("DM cannot delete recoveryIndex entries", async () => {
+  it("DM can delete their own campaign's recoveryIndex entries", async () => {
     const env = await getTestEnv() as RulesTestEnvironment;
     
     const timestamp = Date.now();
@@ -164,6 +164,6 @@ describe("Firestore Rules: RecoveryIndex Advanced Tests", () => {
     
     await expect(
       dmDb.collection("recoveryIndex").doc(deleteCode).delete()
-    ).rejects.toThrow();
+    ).resolves.toBeUndefined();
   });
 });

@@ -92,17 +92,17 @@ describe("Firestore Rules: Batch Operations", () => {
     batch.set(
       dmDb.collection(`campaigns/${campaignId}/characters`).doc("batch-char1"),
       {
-        userId: "player-1",
-        isEditableByPlayer: true,
+        userId: null,
+        isEditableByPlayer: false,
         recoveryCode: "CODE1"
       }
     );
-    
+
     batch.set(
       dmDb.collection(`campaigns/${campaignId}/characters`).doc("batch-char2"),
       {
-        userId: "player-2",
-        isEditableByPlayer: true,
+        userId: null,
+        isEditableByPlayer: false,
         recoveryCode: "CODE2"
       }
     );

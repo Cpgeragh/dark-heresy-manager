@@ -11,7 +11,7 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
-    "test:rules": "vitest run src/tests/firestore"
+    "test:rules": "vitest run tests/firestore"
   },
   "dependencies": {
     "firebase": "^12.6.0",
