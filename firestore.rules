@@ -141,7 +141,10 @@ service cloud.firestore {
             get(/databases/$(database)/documents/campaigns/$(resource.data.campaignId))
               .data.dmId == request.auth.uid);
 
-      allow delete: if false;
+      allow delete:
+        if request.auth != null &&
+           get(/databases/$(database)/documents/campaigns/$(resource.data.campaignId))
+             .data.dmId == request.auth.uid;
     }
 
     // ============================
