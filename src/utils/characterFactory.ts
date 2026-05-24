@@ -108,8 +108,10 @@ export function createEmptyCharacterData(params: {
     },
 
     talentsAndTraits: {
-      homeworldBackground: "",
-      advancesTalentsAndTraits: "",
+      homeworld: "",
+      homeworldNotes: "",
+      talents: [],
+      traits: [],
     },
 
     gear: [],

@@ -127,9 +127,21 @@ export interface ArmourBlock {
 /**
  * TALENTS + TRAINING + GEAR
  */
+
+/** A single talent or trait instance on a character sheet. */
+export interface TalentEntry {
+  uid: string;             // unique per-character instance (crypto.randomUUID())
+  talentId: string;        // references TalentData.id or TraitData.id
+  name: string;            // display name, e.g. "Hatred (Heretics)"
+  specialisation?: string; // chosen value when hasSpecialisation is true
+  notes?: string;          // optional player notes
+}
+
 export interface TalentsAndTraitsBlock {
-  homeworldBackground: string;
-  advancesTalentsAndTraits: string;
+  homeworld: string;        // HomeworldId (e.g. "hive-world") or "" if unset
+  homeworldNotes?: string;  // optional freeform background notes
+  talents: TalentEntry[];
+  traits: TalentEntry[];
 }
 
 export type WeaponTrainingTalentId =
