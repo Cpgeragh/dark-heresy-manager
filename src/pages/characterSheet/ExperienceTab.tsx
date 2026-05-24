@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import type { ExperienceBlock } from "../../types/Character";
 import {
@@ -28,6 +28,10 @@ export function ExperienceTab({
   const [description, setDescription] = useState("");
   const [xpCost, setXpCost] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+
+  const pendingProposals = useMemo(() => proposals.filter((p) => p.status === "pending"), [proposals]);
+  const resolvedProposals = useMemo(() => proposals.filter((p) => p.status !== "pending"), [proposals]);
 
   const handlePropose = useCallback(async () => {
     if (!description.trim() || xpCost <= 0) return;
@@ -176,27 +180,48 @@ export function ExperienceTab({
             </button>
           </div>
 
-          {proposals.length > 0 && (
+          {pendingProposals.length === 0 && resolvedProposals.length === 0 && (
+            <p className="text-sm text-slate-400">No proposals yet.</p>
+          )}
+
+          {pendingProposals.length > 0 && (
             <div className="space-y-2">
-              {proposals.map((p) => (
+              {pendingProposals.map((p) => (
                 <div
                   key={p.id}
                   className="flex items-center justify-between border border-slate-700 rounded px-3 py-2 text-sm"
                 >
                   <span>{p.description} — {p.xpCost} XP</span>
-                  <span
-                    className={
-                      p.status === "approved"
-                        ? "text-green-400"
-                        : p.status === "rejected"
-                        ? "text-red-400"
-                        : "text-slate-400"
-                    }
-                  >
-                    {p.status}
-                  </span>
+                  <span className="text-slate-400">pending</span>
                 </div>
               ))}
+            </div>
+          )}
+
+          {resolvedProposals.length > 0 && (
+            <div className="space-y-2">
+              <button
+                onClick={() => setShowHistory((v) => !v)}
+                className="text-xs text-slate-400 hover:text-slate-200"
+              >
+                {showHistory ? "Hide" : "Show"} history ({resolvedProposals.length})
+              </button>
+
+              {showHistory && (
+                <div className="space-y-2">
+                  {resolvedProposals.map((p) => (
+                    <div
+                      key={p.id}
+                      className="flex items-center justify-between border border-slate-700/50 rounded px-3 py-2 text-sm opacity-60"
+                    >
+                      <span>{p.description} — {p.xpCost} XP</span>
+                      <span className={p.status === "approved" ? "text-green-400" : "text-red-400"}>
+                        {p.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </section>

@@ -191,6 +191,11 @@ service cloud.firestore {
       allow update, delete: if dmOwnsCampaign();
     }
 
+    // Required for collectionGroup("characters") queries across all campaigns.
+    match /{path=**}/characters/{characterId} {
+      allow read: if request.auth != null;
+    }
+
     // All unlisted paths are denied by default.
   }
 }

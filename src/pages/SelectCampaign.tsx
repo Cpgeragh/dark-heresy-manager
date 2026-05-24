@@ -23,6 +23,7 @@ export default function SelectCampaign({
   onActiveCampaignChange,
 }: Props) {
   const [campaigns, setCampaigns] = useState<CampaignWithId[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const isMounted = useIsMounted();
 
   const handleCampaignSelect = useCallback((campaignId: string) => {
@@ -57,14 +58,23 @@ export default function SelectCampaign({
       }
     }
 
-    load();
+    load().catch((err) => {
+      console.error("SelectCampaign load error:", err);
+      if (isMounted()) setError("Failed to load campaigns. A Firestore index may be missing — check the console.");
+    });
   }, [user.uid, role, isMounted]);
 
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-bold">Select Campaign</h2>
 
-      {campaigns.length === 0 && (
+      {error && (
+        <p className="text-red-400 text-sm border border-red-700 bg-red-900/20 rounded p-2">
+          {error}
+        </p>
+      )}
+
+      {!error && campaigns.length === 0 && (
         <p className="text-slate-400">
           {role === "dm"
             ? "You have no campaigns yet. Create one from the dashboard."
