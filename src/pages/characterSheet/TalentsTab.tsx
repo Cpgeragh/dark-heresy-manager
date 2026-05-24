@@ -20,6 +20,9 @@ import {
   sectionContainerClass,
 } from "../../ui/editableStyles";
 import { FormField } from "../../components/FormField";
+import { Tooltip } from "../../components/Tooltip";
+import { TALENT_DESCRIPTIONS } from "../../data/talentDescriptions";
+import { TRAIT_DESCRIPTIONS } from "../../data/traitDescriptions";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -182,10 +185,17 @@ interface EntryCardProps {
 }
 
 function EntryCard({ entry, editable, onRemove }: EntryCardProps) {
+  const description = TALENT_DESCRIPTIONS[entry.talentId] ?? TRAIT_DESCRIPTIONS[entry.talentId];
+
   return (
     <div className="flex items-start justify-between gap-2 rounded border border-slate-700 bg-slate-900/30 px-3 py-2 text-sm">
       <div className="space-y-0.5 min-w-0">
-        <span className="font-medium text-slate-200 break-words">{entry.name}</span>
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="font-medium text-slate-200 break-words">{entry.name}</span>
+          {description && (
+            <Tooltip content={description}>ⓘ</Tooltip>
+          )}
+        </div>
         {entry.notes && (
           <p className="text-xs text-slate-400 break-words">{entry.notes}</p>
         )}
