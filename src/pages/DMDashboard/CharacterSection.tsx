@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { collection, doc, setDoc, writeBatch } from "firebase/firestore";
+import { collection, doc, getDoc, setDoc, writeBatch } from "firebase/firestore";
 import { db } from "../../firebase";
 import { createEmptyCharacterData } from "../../utils/characterFactory";
 import type { CharacterListItem } from "../../types/Firestore";
@@ -68,6 +68,40 @@ function CharacterSection({ campaignId, characters }: CharacterSectionProps) {
     } catch (err) {
       console.error("Character deletion error:", err);
       toast.error("Failed to delete character. Please try again.");
+    }
+  }, [campaignId, toast]);
+
+  const handleClone = useCallback(async (character: CharacterListItem) => {
+    try {
+      const sourceSnap = await getDoc(
+        doc(db, "campaigns", campaignId, "characters", character.id)
+      );
+      if (!sourceSnap.exists()) {
+        toast.error("Character not found.");
+        return;
+      }
+
+      const recoveryCode = generateRecoveryCode();
+      const originalName = character.header?.characterName ?? "Unnamed Character";
+      const sourceData = sourceSnap.data();
+      const cloneData = {
+        ...sourceData,
+        userId: null,
+        isEditableByPlayer: false,
+        recoveryCode,
+        header: { ...sourceData.header, characterName: `Copy of ${originalName}` },
+      };
+
+      const newCharRef = doc(collection(db, "campaigns", campaignId, "characters"));
+      const batch = writeBatch(db);
+      batch.set(newCharRef, cloneData);
+      batch.set(doc(db, "recoveryIndex", recoveryCode), { campaignId, characterId: newCharRef.id });
+      await batch.commit();
+
+      toast.success(`Character cloned as "Copy of ${originalName}"`);
+    } catch (err) {
+      console.error("Character clone error:", err);
+      toast.error("Failed to clone character. Please try again.");
     }
   }, [campaignId, toast]);
 
@@ -192,6 +226,13 @@ function CharacterSection({ campaignId, characters }: CharacterSectionProps) {
                       aria-label={`View ${character.header?.characterName ?? "character"}`}
                     >
                       View
+                    </button>
+                    <button
+                      onClick={() => handleClone(character)}
+                      className="px-3 py-1 text-xs rounded bg-slate-600 text-slate-200 hover:bg-slate-500"
+                      aria-label={`Clone ${character.header?.characterName ?? "character"}`}
+                    >
+                      Clone
                     </button>
                     <button
                       onClick={() => setConfirmDeleteId(character.id)}
