@@ -1,15 +1,18 @@
 // src/hooks/useSessions.ts
 
-import { useEffect, useState } from "react";
-import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import { useCallback, useEffect, useState } from "react";
+import { collection, deleteDoc, doc, onSnapshot, orderBy, query, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import type { SessionDocument } from "../types/Firestore";
 
 type SessionWithId = SessionDocument & { id: string };
+type SessionUpdateData = Partial<Pick<SessionDocument, "date" | "summary" | "dmNotes" | "xpAwarded" | "attendees">>;
 
 export function useSessions(campaignId: string | undefined): {
   sessions: SessionWithId[];
   loading: boolean;
+  deleteSession: (sessionId: string) => Promise<void>;
+  updateSession: (sessionId: string, data: SessionUpdateData) => Promise<void>;
 } {
   const [sessions, setSessions] = useState<SessionWithId[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,5 +43,15 @@ export function useSessions(campaignId: string | undefined): {
     return () => unsub();
   }, [campaignId]);
 
-  return { sessions, loading };
+  const deleteSession = useCallback(async (sessionId: string) => {
+    if (!campaignId) return;
+    await deleteDoc(doc(db, "campaigns", campaignId, "sessions", sessionId));
+  }, [campaignId]);
+
+  const updateSession = useCallback(async (sessionId: string, data: SessionUpdateData) => {
+    if (!campaignId) return;
+    await updateDoc(doc(db, "campaigns", campaignId, "sessions", sessionId), data as Record<string, unknown>);
+  }, [campaignId]);
+
+  return { sessions, loading, deleteSession, updateSession };
 }

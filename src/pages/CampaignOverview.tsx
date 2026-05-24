@@ -23,7 +23,7 @@ export default function CampaignOverview() {
   const campaignId = params.campaignId;
 
   const isDM = useIsDM(campaignId);
-  const { sessions, loading: sessionsLoading } = useSessions(campaignId);
+  const { sessions, loading: sessionsLoading, deleteSession, updateSession } = useSessions(campaignId);
   const [characters, setCharacters] = useState<CharacterSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [showSessionForm, setShowSessionForm] = useState(false);
@@ -137,6 +137,8 @@ export default function CampaignOverview() {
                 session={session}
                 characters={characters}
                 isDM={isDM}
+                onDelete={isDM ? () => deleteSession(session.id) : undefined}
+                onSave={isDM ? (data) => updateSession(session.id, data) : undefined}
               />
             ))}
           </div>
