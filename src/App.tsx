@@ -11,6 +11,7 @@ import { ErrorBoundary } from "./components/ErrorBoundary";
 import { AppHeader } from "./components/AppHeader";
 import { AppBreadcrumbs } from "./components/AppBreadcrumbs";
 import { ToastProvider, ToastContainer } from "./components/Toast";
+import { OfflineIndicator } from "./components/OfflineIndicator";
 import { ToastTester } from "./components/ToastTester";
 import { ROUTES, ROUTE_PATTERNS } from "./constants/routes";
 
@@ -177,6 +178,7 @@ export default function App() {
         </main>
 
         <ToastContainer />
+        <OfflineIndicator />
       {import.meta.env.DEV && <ToastTester />}
     </div>
     </ToastProvider>
