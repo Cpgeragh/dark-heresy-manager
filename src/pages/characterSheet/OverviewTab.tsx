@@ -1,7 +1,7 @@
 // src/pages/characterSheet/OverviewTab.tsx
 
 import { useState, useCallback } from "react";
-import { Tooltip } from "../../components/Tooltip";
+import { InfoModal } from "../../components/InfoModal";
 import type {
   Character,
   CharacterHeader,
@@ -284,7 +284,8 @@ export function OverviewTab({
       <section className={sectionContainerClass(false)}>
         <div className="flex items-center gap-2 mb-2">
           <h2 className="text-lg font-semibold">Movement</h2>
-          <Tooltip
+          <InfoModal
+            title="Movement"
             content={
               <>
                 <div>AB = Agility ÷ {CHARACTERISTIC_BONUS_DIVISOR}</div>
@@ -294,9 +295,7 @@ export function OverviewTab({
                 <div>Run: AB × {MOVEMENT_RUN_MULTIPLIER}</div>
               </>
             }
-          >
-            ⓘ
-          </Tooltip>
+          />
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
