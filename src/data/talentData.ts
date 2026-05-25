@@ -147,6 +147,7 @@ export const TALENT_LIST: readonly TalentData[] = [
   { id: "and-they-shall-know-no-fear", name: "And They Shall Know No Fear...", source: SkillSource.BoM, hasSpecialisation: false },
   { id: "aura-of-faith",         name: "Aura of Faith",         source: SkillSource.BoM, hasSpecialisation: false },
   { id: "blessed-flame",         name: "Blessed Flame",         source: SkillSource.BoM, hasSpecialisation: false, prerequisites: "Basic Weapon Training (Flame)" },
+  { id: "blessed-ignorance",     name: "Blessed Ignorance",     source: SkillSource.BoM, hasSpecialisation: false, prerequisites: "Pure Faith, Holy Radiance" },
   { id: "brotherhood-of-psykers",name: "Brotherhood of Psykers",source: SkillSource.BoM, hasSpecialisation: false },
   { id: "burden-of-guilt",       name: "Burden of Guilt",       source: SkillSource.BoM, hasSpecialisation: false, prerequisites: "Pure Faith" },
   { id: "chain-weapon-expert",   name: "Chain Weapon Expert",   source: SkillSource.BoM, hasSpecialisation: false, prerequisites: "Melee Weapon Training" },
