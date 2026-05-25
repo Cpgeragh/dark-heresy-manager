@@ -20,7 +20,7 @@ import {
   sectionContainerClass,
 } from "../../ui/editableStyles";
 import { FormField } from "../../components/FormField";
-import { Tooltip } from "../../components/Tooltip";
+import { InfoModal } from "../../components/InfoModal";
 import { TALENT_DESCRIPTIONS } from "../../data/talentDescriptions";
 import { TRAIT_DESCRIPTIONS } from "../../data/traitDescriptions";
 
@@ -193,7 +193,7 @@ function EntryCard({ entry, editable, onRemove }: EntryCardProps) {
         <div className="flex items-center gap-2 flex-wrap">
           <span className="font-medium text-slate-200 break-words">{entry.name}</span>
           {description && (
-            <Tooltip content={description}>ⓘ</Tooltip>
+            <InfoModal title={entry.name} content={description} />
           )}
         </div>
         {entry.notes && (

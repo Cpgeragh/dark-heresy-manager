@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import type { SkillEntry, SkillAdvanceLevel } from "../../../../types/Character";
-import { Tooltip } from "../../../../components/Tooltip";
+import { InfoModal } from "../../../../components/InfoModal";
 import { SKILL_DESCRIPTIONS } from "../../../../data/skillDescriptions";
 import type { SkillWithComputed } from "./constants";
 import {
@@ -110,9 +110,7 @@ export function SkillCard({
           </span>
 
           {description && (
-            <Tooltip content={description}>
-              ⓘ
-            </Tooltip>
+            <InfoModal title={skill.name} content={description} />
           )}
         </div>
 
