@@ -10,6 +10,7 @@ export const TALENT_DESCRIPTIONS: Record<string, string> = {
   "arms-master":             "Use ranged weapons you lack training in at –10 rather than the normal –20.",
   "assassin-strike":         "After a melee attack, test Acrobatics to move at Half Move rate as a Free Action. Your opponent cannot take their free attack.",
   "autosanguine":            "Always count as Lightly Wounded for healing purposes. Naturally heals 2 additional Damage per day.",
+  "basic-weapon-training":   "Use one group of Basic weapons without penalty.",
   "battle-rage":             "You may spend Reactions to Parry while in a Frenzied state.",
   "berserk-charge":          "Gain +20 to Weapon Skill when Charging instead of the usual +10.",
   "binary-chatter":          "Gain +10 to any attempt to instruct, program, or question servitors.",
@@ -81,6 +82,7 @@ export const TALENT_DESCRIPTIONS: Record<string, string> = {
   "master-orator":           "Fellowship Tests affect ten times the normal number of targets.",
   "mechadendrite-use":       "Trained and hypno-conditioned to use one type of mechadendrite without penalty.",
   "meditation":              "Enter a trance and test Willpower to remove one level of Fatigue per ten minutes.",
+  "melee-weapon-training":   "Use one group of melee weapons without penalty.",
   "mental-fortress":         "When targeted by a psychic attack, force the psyker to test Willpower or take 1d10+WP Bonus Impact Damage to the head, bypassing Armour and Toughness.",
   "mental-rage":             "You may use Psychic Powers while in a Frenzied state.",
   "mighty-shot":             "Add +2 to all ranged Damage rolls.",
@@ -90,6 +92,7 @@ export const TALENT_DESCRIPTIONS: Record<string, string> = {
   "orthoproxy":              "+20 to Willpower Tests to resist mind control or interrogation.",
   "paranoia":                "+2 to Initiative rolls. GM may secretly test Perception for hidden threats.",
   "peer":                    "+10 to Fellowship Tests when interacting with your chosen group.",
+  "pistol-training":         "Use one group of pistols without penalty.",
   "power-well":              "+1 to Manifesting rolls when using Psychic Powers. May be taken multiple times; effects stack.",
   "precise-blow":            "No penalty for Called Shots in melee combat.",
   "prosanguine":             "Once per 12 hours, test Tech-Use to remove 1d5 Damage. On 96–100, implants fail for one week.",
@@ -129,8 +132,6 @@ export const TALENT_DESCRIPTIONS: Record<string, string> = {
   "the-reaping":             "Full Action: make one attack against every opponent in melee in sequence, rolling separately for each. Stops if any attack is successfully Parried.",
 
   // ─── Blood of Martyrs ───────────────────────────────────────────────────────
-  "shield-of-faith":         "Your faith grants protection. You gain +10 to Willpower tests to resist psychic powers.",
-  "fervent-belief":          "Your devotion is palpable. You gain +10 to Willpower tests against Fear and Corruption.",
   "pure-faith":              "Immune to Daemonic Presence. Spend Fate Points to ignore Fear Tests, avoid Insanity/Corruption for an encounter, or negate a daemonic psychic attack.",
   "blessed-flame":           "All your Flame weapons count as Sanctified. You may use an Astartes Incinerator without penalty.",
   "burden-of-guilt":         "Channel your guilt and sin as spiritual strength against the warp.",
@@ -163,16 +164,11 @@ export const TALENT_DESCRIPTIONS: Record<string, string> = {
   "visions-of-the-abyss":    "Reduce Corruption Points suffered from Warp Shock and similar circumstances by 1.",
   "warped-psyker":           "Your warp-tainted soul makes you immune to the effects of Daemonic Presence.",
 
-  // ─── Daemon Hunter ──────────────────────────────────────────────────────────
-  "hammer-of-witches":       "+2 Damage per degree of success when attacking psykers or daemonic creatures.",
-
   // ─── Ascension ──────────────────────────────────────────────────────────────
-  "adamantine-will":         "You are virtually unshakeable. You may re-roll any failed Willpower test once per scene.",
   "enemy":                   "You are despised by a specific group, suffering an additional –10 to Fellowship Tests with them. Cumulative with Rival for –20 total.",
-  "rival":                   "Aggressive competition with a group gives –10 to Fellowship Tests when interacting with them.",
+  "rival":                   "Suffer –10 to Fellowship Tests when interacting with your chosen group. Cumulative with Enemy for a total –20 penalty. May be removed with an Elite Advance and GM approval.",
   "unarmed-warrior":         "Unarmed attacks deal 1d10–3+Strength Bonus Damage.",
   "unarmed-master":          "Unarmed attacks deal 1d10+Strength Bonus Damage and lose the Primitive quality.",
-  "warp-conduit":            "You may channel far more warp energy than normal, increasing your effective Psy Rating by 2 for one round.",
 
   // ─── Disciples of the Dark Gods ─────────────────────────────────────────────
   "consumed-by-spite":       "+10 to resist Fear and mind control; +30 to resist Intimidation and Interrogation. May ignore Stun effects with a Difficult (–10) WP Test.",
