@@ -165,6 +165,19 @@ export interface GearItem {
 }
 
 /**
+ * AMMUNITION
+ */
+export interface AmmoItem {
+  id: string;
+  name: string;
+  compatibleWith?: string;  // e.g. "Bolt", "SP Pistol" — free text
+  amount: number;
+  weight?: string;
+  value?: string;
+  rarity?: string;
+}
+
+/**
  * TALENTS + TRAINING
  */
 
@@ -282,6 +295,7 @@ export interface Character {
 
   rangedWeapons: RangedWeapon[];
   meleeWeapons: MeleeWeapon[];
+  ammo: AmmoItem[];
   armour: WornArmourPiece[];
 
   talentsAndTraits: TalentsAndTraitsBlock;
