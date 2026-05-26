@@ -158,131 +158,139 @@ export function OverviewTab({
 
       {/* WOUNDS */}
       <section className={sectionContainerClass(editable)}>
-        <h2 className="text-lg font-semibold mb-2">Wounds</h2>
+        <h2 className="text-lg font-semibold mb-3">Wounds</h2>
 
-        <div className="flex items-center gap-2 text-sm">
-          <span className="text-slate-400">
-            Total: <span className="text-slate-200">{wounds.total}</span>
-          </span>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {/* Total */}
+          <div className={sectionContainerClass(false) + " text-center"}>
+            <div className="text-xs text-slate-400 mb-1">Total</div>
+            <div className="text-2xl font-semibold font-mono text-slate-100">
+              {wounds.total}
+            </div>
+          </div>
 
-          <span className="text-slate-400 ml-3">Current:</span>
+          {/* Current */}
+          <div className={sectionContainerClass(false) + " text-center"}>
+            <div className="text-xs text-slate-400 mb-2">Current</div>
+            <div className="flex items-center justify-center gap-1">
+              <button
+                disabled={!editable}
+                onClick={handleWoundsMinus}
+                aria-label="Decrease current wounds"
+                className={`px-2 py-0.5 border rounded text-xs transition
+                  ${editable
+                    ? "border-slate-600 hover:bg-slate-800"
+                    : "border-slate-700 opacity-50 cursor-not-allowed"
+                  }`}
+              >
+                −
+              </button>
+              <span
+                className={`min-w-[2ch] text-center text-xl font-semibold font-mono ${woundsDangerClass(wounds.current)}`}
+              >
+                {wounds.current}
+              </span>
+              <button
+                disabled={!editable}
+                onClick={handleWoundsPlus}
+                aria-label="Increase current wounds"
+                className={`px-2 py-0.5 border rounded text-xs transition
+                  ${editable
+                    ? "border-slate-600 hover:bg-slate-800"
+                    : "border-slate-700 opacity-50 cursor-not-allowed"
+                  }`}
+              >
+                +
+              </button>
+            </div>
+          </div>
 
-          <button
-            disabled={!editable}
-            onClick={handleWoundsMinus}
-            aria-label="Decrease current wounds"
-            className={`px-2 py-0.5 border rounded text-xs transition
-              ${
-                editable
-                  ? "border-slate-600 hover:bg-slate-800"
-                  : "border-slate-700 opacity-50 cursor-not-allowed"
-              }`}
-          >
-            −
-          </button>
+          {/* Critical Damage */}
+          <div className={sectionContainerClass(false) + " text-center"}>
+            <label className="text-xs text-slate-400">
+              Critical Damage
+              <input
+                type="number"
+                disabled={!editable}
+                className={editableInputClass(editable) + " mt-2 text-center"}
+                value={wounds.criticalDamage}
+                onChange={handleCriticalDamageChange}
+                aria-label="Critical damage points"
+              />
+            </label>
+          </div>
 
-          <span
-            className={`min-w-[2ch] text-center font-mono ${woundsDangerClass(
-              wounds.current
-            )}`}
-          >
-            {wounds.current}
-          </span>
-
-          <button
-            disabled={!editable}
-            onClick={handleWoundsPlus}
-            aria-label="Increase current wounds"
-            className={`px-2 py-0.5 border rounded text-xs transition
-              ${
-                editable
-                  ? "border-slate-600 hover:bg-slate-800"
-                  : "border-slate-700 opacity-50 cursor-not-allowed"
-              }`}
-          >
-            +
-          </button>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">
-          <label className="text-xs text-slate-400">
-            Critical Damage
-            <input
-              type="number"
-              disabled={!editable}
-              className={editableInputClass(editable) + " mt-1"}
-              value={wounds.criticalDamage}
-              onChange={handleCriticalDamageChange}
-              aria-label="Critical damage points"
-            />
-          </label>
-
-          <label className="text-xs text-slate-400">
-            Fatigue
-            <input
-              type="number"
-              disabled={!editable}
-              className={editableInputClass(editable) + " mt-1"}
-              value={wounds.fatigue}
-              onChange={handleFatigueChange}
-              aria-label="Fatigue points"
-            />
-          </label>
+          {/* Fatigue */}
+          <div className={sectionContainerClass(false) + " text-center"}>
+            <label className="text-xs text-slate-400">
+              Fatigue
+              <input
+                type="number"
+                disabled={!editable}
+                className={editableInputClass(editable) + " mt-2 text-center"}
+                value={wounds.fatigue}
+                onChange={handleFatigueChange}
+                aria-label="Fatigue points"
+              />
+            </label>
+          </div>
         </div>
       </section>
 
       {/* FATE */}
       <section className={sectionContainerClass(editable)}>
-        <h2 className="text-lg font-semibold mb-2">Fate Points</h2>
+        <h2 className="text-lg font-semibold mb-3">Fate Points</h2>
 
-        <div className="flex items-center gap-2 text-sm">
-          <span className="text-slate-400">
-            Total: <span className="text-slate-200">{fate.total}</span>
-          </span>
+        <div className="grid grid-cols-2 gap-3">
+          {/* Total */}
+          <div className={sectionContainerClass(false) + " text-center"}>
+            <div className="text-xs text-slate-400 mb-1">Total</div>
+            <div className="text-2xl font-semibold font-mono text-slate-100">
+              {fate.total}
+            </div>
+          </div>
 
-          <span className="text-slate-400 ml-3">Current:</span>
-
-          <button
-            disabled={!editable}
-            onClick={handleFateMinus}
-            aria-label="Decrease current fate points"
-            className={`px-2 py-0.5 border rounded text-xs transition
-              ${
-                editable
-                  ? "border-slate-600 hover:bg-slate-800"
-                  : "border-slate-700 opacity-50 cursor-not-allowed"
-              }`}
-          >
-            −
-          </button>
-
-          <span
-            className={`min-w-[2ch] text-center font-mono ${fateDangerClass(
-              fate.current
-            )}`}
-          >
-            {fate.current}
-          </span>
-
-          <button
-            disabled={!editable}
-            onClick={handleFatePlus}
-            aria-label="Increase current fate points"
-            className={`px-2 py-0.5 border rounded text-xs transition
-              ${
-                editable
-                  ? "border-slate-600 hover:bg-slate-800"
-                  : "border-slate-700 opacity-50 cursor-not-allowed"
-              }`}
-          >
-            +
-          </button>
+          {/* Current */}
+          <div className={sectionContainerClass(false) + " text-center"}>
+            <div className="text-xs text-slate-400 mb-2">Current</div>
+            <div className="flex items-center justify-center gap-1">
+              <button
+                disabled={!editable}
+                onClick={handleFateMinus}
+                aria-label="Decrease current fate points"
+                className={`px-2 py-0.5 border rounded text-xs transition
+                  ${editable
+                    ? "border-slate-600 hover:bg-slate-800"
+                    : "border-slate-700 opacity-50 cursor-not-allowed"
+                  }`}
+              >
+                −
+              </button>
+              <span
+                className={`min-w-[2ch] text-center text-xl font-semibold font-mono ${fateDangerClass(fate.current)}`}
+              >
+                {fate.current}
+              </span>
+              <button
+                disabled={!editable}
+                onClick={handleFatePlus}
+                aria-label="Increase current fate points"
+                className={`px-2 py-0.5 border rounded text-xs transition
+                  ${editable
+                    ? "border-slate-600 hover:bg-slate-800"
+                    : "border-slate-700 opacity-50 cursor-not-allowed"
+                  }`}
+              >
+                +
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* MOVEMENT */}
       <section className={sectionContainerClass(false)}>
-        <div className="flex items-center gap-2 mb-2">
+        <div className="flex items-center gap-2 mb-3">
           <h2 className="text-lg font-semibold">Movement</h2>
           <InfoModal
             title="Movement"
@@ -298,11 +306,23 @@ export function OverviewTab({
           />
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
-          <div>Half: {move.half}</div>
-          <div>Full: {move.full}</div>
-          <div>Charge: {move.charge}</div>
-          <div>Run: {move.run}</div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className={sectionContainerClass(false) + " text-center"}>
+            <div className="text-xs text-slate-400 mb-1">Half</div>
+            <div className="text-2xl font-semibold font-mono text-slate-100">{move.half}</div>
+          </div>
+          <div className={sectionContainerClass(false) + " text-center"}>
+            <div className="text-xs text-slate-400 mb-1">Full</div>
+            <div className="text-2xl font-semibold font-mono text-slate-100">{move.full}</div>
+          </div>
+          <div className={sectionContainerClass(false) + " text-center"}>
+            <div className="text-xs text-slate-400 mb-1">Charge</div>
+            <div className="text-2xl font-semibold font-mono text-slate-100">{move.charge}</div>
+          </div>
+          <div className={sectionContainerClass(false) + " text-center"}>
+            <div className="text-xs text-slate-400 mb-1">Run</div>
+            <div className="text-2xl font-semibold font-mono text-slate-100">{move.run}</div>
+          </div>
         </div>
       </section>
 
