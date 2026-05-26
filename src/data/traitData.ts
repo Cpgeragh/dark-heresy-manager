@@ -54,6 +54,9 @@ export const TRAIT_LIST: readonly TraitData[] = [
   // ─── Radical's Handbook ─────────────────────────────────────────────────────
   { id: "touched-by-the-fates",     name: "Touched by the Fates",     source: SkillSource.RH, hasSpecialisation: false },
 
+  // ─── Creatures Anathema ──────────────────────────────────────────────────────
+  { id: "improved-natural-weapons", name: "Improved Natural Weapons", source: SkillSource.CA, hasSpecialisation: false },
+
   // ─── Career Traits (purchasable) ────────────────────────────────────────────
   { id: "encarta-maleficarum",      name: "Encarta Maleficarum",      source: SkillSource.IH, hasSpecialisation: false },
   { id: "feared-and-loathed",       name: "Feared and Loathed",       source: SkillSource.IH, hasSpecialisation: false },
