@@ -410,24 +410,25 @@ export function ArmourTab({
       </section>
 
       {/* STOWED PIECES ────────────────────────────────────────────────────── */}
-      {stowed.length > 0 && (
-        <section className="space-y-2">
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
-            Stowed ({stowed.length})
-          </h3>
-          {stowed.map((piece) => (
-            <PieceRow
-              key={piece.id}
-              piece={piece}
-              editable={editable}
-              worn={false}
-              onToggle={toggleWorn}
-              onRemove={removePiece}
-              onInfo={setInfoTarget}
-            />
-          ))}
-        </section>
-      )}
+      <section className="space-y-2">
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+          Stowed ({stowed.length})
+        </h3>
+        {stowed.length === 0 && (
+          <p className="text-sm text-slate-500 italic">No armour stowed.</p>
+        )}
+        {stowed.map((piece) => (
+          <PieceRow
+            key={piece.id}
+            piece={piece}
+            editable={editable}
+            worn={false}
+            onToggle={toggleWorn}
+            onRemove={removePiece}
+            onInfo={setInfoTarget}
+          />
+        ))}
+      </section>
 
       {/* ADD BUTTON + CUSTOM FORM ─────────────────────────────────────────── */}
       {editable && (
