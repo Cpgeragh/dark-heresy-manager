@@ -342,6 +342,28 @@ function StatChip({ label, value }: { label: string; value: string }) {
   );
 }
 
+function parseDamageType(damage: string): { label: string; colour: string } | null {
+  const letter = damage.trim().slice(-1).toUpperCase();
+  switch (letter) {
+    case "I": return { label: "Impact",    colour: "text-blue-400" };
+    case "R": return { label: "Rending",   colour: "text-red-400" };
+    case "E": return { label: "Energy",    colour: "text-orange-400" };
+    case "X": return { label: "Explosive", colour: "text-yellow-400" };
+    default:  return null;
+  }
+}
+
+function DamageTypeChip({ damage }: { damage: string }) {
+  const dt = parseDamageType(damage);
+  if (!dt) return null;
+  return (
+    <div className="flex flex-col items-center bg-slate-800/60 rounded px-2 py-1 min-w-[52px]">
+      <span className="text-[10px] text-slate-500 uppercase tracking-wide">Type</span>
+      <span className={`text-sm font-semibold mt-0.5 ${dt.colour}`}>{dt.label}</span>
+    </div>
+  );
+}
+
 function RangedCard({
   weapon,
   editable,
@@ -376,6 +398,7 @@ function RangedCard({
         {weapon.range && <StatChip label="Range" value={weapon.range} />}
         {weapon.rof && <StatChip label="RoF" value={weapon.rof} />}
         {weapon.damage && <StatChip label="Damage" value={weapon.damage} />}
+        {weapon.damage && <DamageTypeChip damage={weapon.damage} />}
         {weapon.pen && <StatChip label="Pen" value={weapon.pen} />}
         {weapon.clip && <StatChip label="Clip" value={weapon.clip} />}
         {weapon.rld && <StatChip label="Reload" value={weapon.rld} />}
@@ -444,6 +467,7 @@ function MeleeCard({
 
       <div className="flex flex-wrap gap-1.5">
         {weapon.damage && <StatChip label="Damage" value={weapon.damage} />}
+        {weapon.damage && <DamageTypeChip damage={weapon.damage} />}
         {weapon.pen && <StatChip label="Pen" value={weapon.pen} />}
       </div>
 
