@@ -87,45 +87,73 @@ export interface MovementBlock {
  */
 export interface RangedWeapon {
   id: string;
+  referenceId?: string;   // set when created from RANGED_WEAPON_REFERENCE
   name: string;
   class?: string;
   damage?: string;
-  type?: string;
   pen?: string;
   range?: string;
   rof?: string;
   clip?: string;
   rld?: string;
   specialRules?: string;
+  custom?: boolean;       // true when created via "Add Custom"
 }
 
 export interface MeleeWeapon {
   id: string;
+  referenceId?: string;   // set when created from MELEE_WEAPON_REFERENCE
   name: string;
   class?: string;
   damage?: string;
-  type?: string;
   pen?: string;
   specialRules?: string;
-}
-
-export interface ArmourLocation {
-  name: string;
-  ap: number;
-  type?: string;
-}
-
-export interface ArmourBlock {
-  head: ArmourLocation;
-  body: ArmourLocation;
-  rightArm: ArmourLocation;
-  leftArm: ArmourLocation;
-  rightLeg: ArmourLocation;
-  leftLeg: ArmourLocation;
+  custom?: boolean;
 }
 
 /**
- * TALENTS + TRAINING + GEAR
+ * ARMOUR
+ *
+ * Characters carry a list of armour pieces rather than a fixed location block.
+ * This supports layering (e.g. underarmour beneath carapace) and lets players
+ * stow looted pieces without discarding them.
+ */
+export type ArmourLocationKey =
+  | "head"
+  | "body"
+  | "rightArm"
+  | "leftArm"
+  | "rightLeg"
+  | "leftLeg";
+
+export interface WornArmourPiece {
+  id: string;
+  referenceId?: string;   // links back to ArmourRef.id
+  name: string;
+  /** Locations this piece covers */
+  locations: ArmourLocationKey[];
+  /** Base AP applied to all covered locations */
+  ap: number;
+  /** Per-location AP override when a piece is asymmetric */
+  apOverrides?: Partial<Record<ArmourLocationKey, number>>;
+  /** true = currently worn; false = stowed in pack */
+  worn: boolean;
+  notes?: string;
+  custom?: boolean;       // true when created via "Add Custom"
+}
+
+/**
+ * GEAR
+ */
+export interface GearItem {
+  id: string;
+  referenceId?: string;   // links back to GearRef.id
+  name: string;
+  description?: string;
+}
+
+/**
+ * TALENTS + TRAINING
  */
 
 /** A single talent or trait instance on a character sheet. */
@@ -242,10 +270,10 @@ export interface Character {
 
   rangedWeapons: RangedWeapon[];
   meleeWeapons: MeleeWeapon[];
-  armour: ArmourBlock;
+  armour: WornArmourPiece[];
 
   talentsAndTraits: TalentsAndTraitsBlock;
-  gear: string[];
+  gear: GearItem[];
 
   weaponTraining: WeaponTrainingBlock;
   experience: ExperienceBlock;
