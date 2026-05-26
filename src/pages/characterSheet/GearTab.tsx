@@ -9,6 +9,23 @@ import {
   sectionContainerClass,
 } from "../../ui/editableStyles";
 
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function rarityColour(rarity: string | undefined): string {
+  switch (rarity) {
+    case "Plentiful":
+    case "Abundant":
+    case "Common":        return "text-slate-400";
+    case "Average":       return "text-slate-300";
+    case "Scarce":        return "text-yellow-400";
+    case "Rare":          return "text-orange-400";
+    case "Very Rare":     return "text-red-400";
+    case "Extremely Rare":return "text-purple-400";
+    case "Near Unique":   return "text-pink-400";
+    default:              return "text-slate-400";
+  }
+}
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface GearTabProps {
@@ -189,6 +206,13 @@ function ItemRow({
           {hasDesc && !expanded && (
             <p className="text-xs text-slate-500 mt-0.5 truncate">{item.description}</p>
           )}
+          {(item.weight || item.value || item.rarity) && (
+            <div className="flex flex-wrap gap-3 text-xs mt-1">
+              {item.weight && <span className="text-slate-600">⚖ {item.weight}</span>}
+              {item.value  && <span className="text-slate-600">₮ {item.value}</span>}
+              {item.rarity && <span className={rarityColour(item.rarity)}>{item.rarity}</span>}
+            </div>
+          )}
         </div>
 
         {editable && (
@@ -220,6 +244,9 @@ export function GearTab({ gear, editable, onUpdate }: GearTabProps) {
           referenceId: ref.id,
           name: ref.name,
           description: ref.description,
+          weight: ref.weight,
+          value: ref.value,
+          rarity: ref.rarity,
         },
       ]);
       setShowPicker(false);

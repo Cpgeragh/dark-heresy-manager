@@ -26,6 +26,23 @@ interface WeaponsTabProps {
 
 type PickerTarget = "ranged" | "melee" | null;
 
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function rarityColour(rarity: string | undefined): string {
+  switch (rarity) {
+    case "Plentiful":
+    case "Abundant":
+    case "Common":     return "text-slate-400";
+    case "Average":    return "text-slate-300";
+    case "Scarce":     return "text-yellow-400";
+    case "Rare":       return "text-orange-400";
+    case "Very Rare":  return "text-red-400";
+    case "Extremely Rare": return "text-purple-400";
+    case "Near Unique":    return "text-pink-400";
+    default:           return "text-slate-400";
+  }
+}
+
 // ─── Special Rules Modal ──────────────────────────────────────────────────────
 
 function SpecialRulesModal({
@@ -377,6 +394,15 @@ function RangedCard({
         </div>
       )}
 
+      {/* Weight / Value / Rarity */}
+      {(weapon.weight || weapon.value || weapon.rarity) && (
+        <div className="flex flex-wrap gap-3 text-xs border-t border-slate-800 pt-2 mt-1">
+          {weapon.weight && <span className="text-slate-500">⚖ {weapon.weight}</span>}
+          {weapon.value  && <span className="text-slate-500">₮ {weapon.value}</span>}
+          {weapon.rarity && <span className={rarityColour(weapon.rarity)}>{weapon.rarity}</span>}
+        </div>
+      )}
+
       {showRules && weapon.specialRules && (
         <SpecialRulesModal
           rules={weapon.specialRules}
@@ -433,6 +459,15 @@ function MeleeCard({
         </div>
       )}
 
+      {/* Weight / Value / Rarity */}
+      {(weapon.weight || weapon.value || weapon.rarity) && (
+        <div className="flex flex-wrap gap-3 text-xs border-t border-slate-800 pt-2 mt-1">
+          {weapon.weight && <span className="text-slate-500">⚖ {weapon.weight}</span>}
+          {weapon.value  && <span className="text-slate-500">₮ {weapon.value}</span>}
+          {weapon.rarity && <span className={rarityColour(weapon.rarity)}>{weapon.rarity}</span>}
+        </div>
+      )}
+
       {showRules && weapon.specialRules && (
         <SpecialRulesModal
           rules={weapon.specialRules}
@@ -475,6 +510,9 @@ export function WeaponsTab({
           clip: String(ref.clip),
           rld: ref.reload,
           specialRules: ref.specialRules,
+          weight: ref.weight,
+          value: ref.value,
+          rarity: ref.rarity,
         },
       ]);
       setPicker(null);
@@ -495,6 +533,9 @@ export function WeaponsTab({
           damage: ref.damage,
           pen: String(ref.pen),
           specialRules: ref.specialRules,
+          weight: ref.weight,
+          value: ref.value,
+          rarity: ref.rarity,
         },
       ]);
       setPicker(null);

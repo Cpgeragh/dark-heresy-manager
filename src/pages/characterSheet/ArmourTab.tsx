@@ -17,6 +17,23 @@ interface ArmourTabProps {
   onUpdate: (next: WornArmourPiece[]) => void;
 }
 
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function rarityColour(rarity: string | undefined): string {
+  switch (rarity) {
+    case "Plentiful":
+    case "Abundant":
+    case "Common":        return "text-slate-400";
+    case "Average":       return "text-slate-300";
+    case "Scarce":        return "text-yellow-400";
+    case "Rare":          return "text-orange-400";
+    case "Very Rare":     return "text-red-400";
+    case "Extremely Rare":return "text-purple-400";
+    case "Near Unique":   return "text-pink-400";
+    default:              return "text-slate-400";
+  }
+}
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const LOCATION_LABELS: Record<ArmourLocationKey, string> = {
@@ -155,9 +172,12 @@ function PieceNotesModal({
           <button onClick={onClose} className="text-slate-400 hover:text-slate-200 text-lg leading-none">×</button>
         </div>
         <div className="px-4 py-3 space-y-3">
-          <div className="flex gap-4 text-xs text-slate-400">
+          <div className="flex flex-wrap gap-4 text-xs text-slate-400">
             <span>AP: <span className="text-slate-200 font-mono">{piece.ap}</span></span>
             <span>Covers: <span className="text-slate-200">{locationLabel(piece.locations)}</span></span>
+            {piece.weight && <span>⚖ <span className="text-slate-200">{piece.weight}</span></span>}
+            {piece.value  && <span>₮ <span className="text-slate-200">{piece.value}</span></span>}
+            {piece.rarity && <span className={rarityColour(piece.rarity)}>{piece.rarity}</span>}
           </div>
           {Object.keys(piece.apOverrides ?? {}).length > 0 && (
             <div className="text-xs text-slate-400">
@@ -320,6 +340,9 @@ export function ArmourTab({
         ap: ref.ap,
         ...(ref.apOverrides ? { apOverrides: ref.apOverrides } : {}),
         worn: true,
+        weight: ref.weight,
+        value: ref.value,
+        rarity: ref.rarity,
       });
     },
     [addPiece]
@@ -512,6 +535,13 @@ function PieceRow({
         <span className="text-xs text-slate-500">
           {locationLabel(piece.locations)} · {apDesc}
         </span>
+        {(piece.weight || piece.value || piece.rarity) && (
+          <span className="text-xs flex gap-2 mt-0.5">
+            {piece.weight && <span className="text-slate-600">⚖ {piece.weight}</span>}
+            {piece.value  && <span className="text-slate-600">₮ {piece.value}</span>}
+            {piece.rarity && <span className={rarityColour(piece.rarity)}>{piece.rarity}</span>}
+          </span>
+        )}
       </div>
 
       {/* Info */}
