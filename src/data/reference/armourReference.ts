@@ -240,4 +240,20 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     rarity: "Very Rare",
   },
 
+  // ── Creatures Anathema ───────────────────────────────────────────────────
+  {
+    id: "ca-ork-mega-armour",
+    name: "Ork Mega Armour",
+    source: SkillSource.CA,
+    locations: ALL,
+    ap: 10,
+    apOverrides: { head: 6, body: 14 },
+    notes:
+      "AP 14 Body, AP 10 Arms and Legs, AP 6 Head. " +
+      "Completely unavailable — Ork-only wargear that cannot be acquired through normal means.",
+    weight: "60 kg",
+    value: "—",
+    rarity: "Unavailable",
+  },
+
 ];

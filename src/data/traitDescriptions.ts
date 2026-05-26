@@ -40,4 +40,7 @@ export const TRAIT_DESCRIPTIONS: Record<string, string> = {
   "unnatural-speed":         "Doubles Agility Bonus for movement purposes.",
   "warp-instability":        "If the creature ends its Turn without having dealt Damage or Insanity Points to another creature, it must Test Willpower or take 1 Damage plus 1 per degree of failure. If this equals its Wounds, it is destroyed and cast back into the warp.",
   "warp-weapon":             "Attacks ignore physical armour unless made from psychoactive materials or carrying the holy quality. Force fields still work normally.",
+
+  // ─── Creatures Anathema ──────────────────────────────────────────────────
+  "improved-natural-weapons": "This creature's attacks are powerful enough to crush plasteel or punch through armour. The creature's natural weapons no longer count as Primitive.",
 };
