@@ -98,14 +98,7 @@ export function createEmptyCharacterData(params: {
     rangedWeapons: [],
     meleeWeapons: [],
 
-    armour: {
-      head: { name: "Head", ap: 0, type: "" },
-      body: { name: "Body", ap: 0, type: "" },
-      rightArm: { name: "Right Arm", ap: 0, type: "" },
-      leftArm: { name: "Left Arm", ap: 0, type: "" },
-      rightLeg: { name: "Right Leg", ap: 0, type: "" },
-      leftLeg: { name: "Left Leg", ap: 0, type: "" },
-    },
+    armour: [],
 
     talentsAndTraits: {
       homeworld: "",

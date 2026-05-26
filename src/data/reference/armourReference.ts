@@ -1,8 +1,9 @@
 // src/data/reference/armourReference.ts
 // Reference data for armour items, organised by source book.
-// Feeds into the future reference-lookup UI on the Armour tab.
+// Feeds into the reference-lookup UI on the Armour tab.
 
 import { SkillSource } from "../../types/SkillSource";
+import type { ArmourLocationKey } from "../../types/Character";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -10,13 +11,18 @@ export interface ArmourRef {
   id: string;
   name: string;
   source: SkillSource;
-  /** Body locations covered, e.g. "All", "Body", "Arms, Body" */
-  locations: string;
-  /** Armour Points granted. Use a string when AP varies by location (e.g. "5 (4 on Head)"). */
-  ap: number | string;
+  /** Locations this piece covers */
+  locations: ArmourLocationKey[];
+  /** Base AP applied to all covered locations */
+  ap: number;
+  /** Per-location AP override when a piece is asymmetric (e.g. 5 everywhere but 4 on head) */
+  apOverrides?: Partial<Record<ArmourLocationKey, number>>;
   /** Any special rules, properties, or notes for the armour. */
   notes?: string;
 }
+
+// Convenience shorthand for "all locations"
+const ALL: ArmourLocationKey[] = ["head", "body", "rightArm", "leftArm", "rightLeg", "leftLeg"];
 
 // ─── Armour Reference ────────────────────────────────────────────────────────
 
@@ -27,7 +33,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     id: "blessed-sackcloth-tunic",
     name: "Blessed Sackcloth Tunic",
     source: SkillSource.BoM,
-    locations: "Body",
+    locations: ["body"],
     ap: 2,
     notes:
       "Sanctified. +10 to Tests to resist any direct psychic attack or manipulation. " +
@@ -38,7 +44,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     id: "ecclesiarchy-overlay",
     name: "Ecclesiarchy Overlay",
     source: SkillSource.BoM,
-    locations: "Over any existing armour",
+    locations: ALL,
     ap: 0,
     notes:
       "Adds no AP of its own. Applied over normal armour, it carries Ministrorum mottos, " +
@@ -49,8 +55,9 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     id: "hospitaller-carapace",
     name: "Hospitaller Carapace",
     source: SkillSource.BoM,
-    locations: "All",
-    ap: "5 (4 on Head)",
+    locations: ALL,
+    ap: 5,
+    apOverrides: { head: 4 },
     notes:
       "Sanctified and sealed with sacred oils. +20 to resist toxins or diseases that do " +
       "not directly penetrate the armour (e.g. poison gas, rotting bodies). " +
@@ -60,19 +67,20 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     id: "praesidium-protectiva",
     name: "Praesidium Protectiva",
     source: SkillSource.BoM,
-    locations: "One arm (see notes)",
+    locations: ["rightArm"],
     ap: 8,
     notes:
       "Defensive quality. Spend a Reaction to add the Praesidium's AP to attacks from " +
       "either side. Ranged attacks from outside melee range have a –10 penalty to hit the " +
       "protected arm. An attacking Party in melee gains an extra AP from the parry. " +
-      "Allows the Sister to bash with a one-handed weapon for 1d10+1 I (plus SB) damage.",
+      "Allows the Sister to bash with a one-handed weapon for 1d10+1 I (plus SB) damage. " +
+      "Can be worn on either arm — adjust the covered location accordingly.",
   },
   {
     id: "sanctified-carapace",
     name: "Sanctified Carapace",
     source: SkillSource.BoM,
-    locations: "All",
+    locations: ALL,
     ap: 6,
     notes:
       "Sanctified. Provides full AP against psychic force or warp energy attacks. " +
@@ -83,7 +91,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     id: "sanctified-chain-coat",
     name: "Sanctified Chain Coat",
     source: SkillSource.BoM,
-    locations: "Arms, Body",
+    locations: ["body", "rightArm", "leftArm"],
     ap: 4,
     notes:
       "Sanctified. Prayers engraved into individual rings. Provides full AP against " +
@@ -94,7 +102,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     id: "shield-robes",
     name: "Shield Robes",
     source: SkillSource.BoM,
-    locations: "Arms, Legs, Body",
+    locations: ["body", "rightArm", "leftArm", "rightLeg", "leftLeg"],
     ap: 2,
     notes:
       "Worn by non-militant Sisters and novices of the Adepta Sororitas. Exchanging " +
@@ -105,8 +113,9 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     id: "sororitas-power-armour",
     name: "Sororitas Power Armour",
     source: SkillSource.BoM,
-    locations: "All",
-    ap: "7 (8 on Body)",
+    locations: ALL,
+    ap: 7,
+    apOverrides: { body: 8 },
     notes:
       "Power armour using a standard power supply as a backpack. Helmet includes an " +
       "integrated targeting system (+20 Sight), rebreather, and comm-link. " +
