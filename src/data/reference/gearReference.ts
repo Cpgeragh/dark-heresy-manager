@@ -20,6 +20,327 @@ export interface GearRef {
 
 export const GEAR_REFERENCE: GearRef[] = [
 
+  // ── Book of Judgement — Gear ──────────────────────────────────────────────
+  {
+    id: "gene-printer",
+    name: "Gene Printer",
+    source: SkillSource.BoJ,
+    description:
+      "Backpack-sized device that confirms whether two biological samples (hair, skin, etc.) " +
+      "come from the same person. Requires an Ordinary (+20) Tech-Use Test. " +
+      "Complex genetic factors (twins, manipulation, xenos tampering) may interfere at GM's discretion.",
+    weight: "15 kg",
+    value: "1,500 Thrones",
+    rarity: "Rare",
+  },
+  {
+    id: "goreman-carta-sanguine",
+    name: "Lord Marshal Goreman's Carta Sanguine",
+    source: SkillSource.BoJ,
+    description:
+      "A bounty warrant issued by Lord Marshal Goreman. Permits the bearer to travel world to world " +
+      "in pursuit of the named criminal and to carry locally permitted weapons. " +
+      "Availability is Rare; base cost at least 100 Thrones. " +
+      "Once the terms are met, redeem for ten times the original value.",
+    weight: "0.1 kg",
+    value: "100+ Thrones",
+    rarity: "Rare",
+  },
+  {
+    id: "lock-punch",
+    name: "Lock-Punch",
+    source: SkillSource.BoJ,
+    description:
+      "Two-handed cylinder with a salvaged grav-plate generator. Press against a lock and trigger " +
+      "to destroy it (Challenging +0 Tech-Use Test). Works on doors AP 16 or less. " +
+      "On 4+ Degrees of Failure, the device misfires and throws the user 2d10 metres (falling damage applies).",
+    weight: "0.2 kg",
+    value: "300 Thrones",
+    rarity: "Scarce",
+  },
+  {
+    id: "magnacles",
+    name: "Magnacles",
+    source: SkillSource.BoJ,
+    description:
+      "Magnetised handclamps that can be locked to lampposts, vehicles, or other metal surfaces. " +
+      "All Tests to escape (Contortionist, Security, or Strength) take at least a Very Hard (–30) " +
+      "penalty and take three times as long as normal.",
+    weight: "1.5 kg",
+    value: "120 Thrones",
+    rarity: "Rare",
+  },
+  {
+    id: "magnetic-harness",
+    name: "Magnetic Harness",
+    source: SkillSource.BoJ,
+    description:
+      "Multiple magnetic plates worn on the body. Each plate can be individually activated to hold " +
+      "a weapon, piece of equipment, or even a suspect. " +
+      "Bearer is treated as having the Quick Draw Talent for any item stored on the harness. " +
+      "If Quick Draw is already possessed, stowing is also a Free Action.",
+    weight: "10 kg",
+    value: "500 Thrones",
+    rarity: "Scarce",
+  },
+  {
+    id: "pinner",
+    name: "Pinner",
+    source: SkillSource.BoJ,
+    description: "No description available — consult the Book of Judgement.",
+    weight: "5 kg",
+    value: "2,000 Thrones",
+    rarity: "Near Unique",
+  },
+  {
+    id: "strait-cape",
+    name: "Strait Cape",
+    source: SkillSource.BoJ,
+    description: "No description available — consult the Book of Judgement.",
+    weight: "5 kg",
+    value: "100 Thrones",
+    rarity: "Scarce",
+  },
+  {
+    id: "vertical-spindle-set",
+    name: "Vertical Spindle Set",
+    source: SkillSource.BoJ,
+    description: "No description available — consult the Book of Judgement.",
+    weight: "20 kg",
+    value: "1,500 Thrones",
+    rarity: "Rare",
+  },
+  {
+    id: "vox-pickup",
+    name: "Vox-Pickup",
+    source: SkillSource.BoJ,
+    description: "No description available — consult the Book of Judgement.",
+    weight: "0.01 kg",
+    value: "100 Thrones",
+    rarity: "Very Rare",
+  },
+  {
+    id: "vox-privacy-field",
+    name: "Vox-Privacy Field",
+    source: SkillSource.BoJ,
+    description:
+      "Generates a dome of flickering blue light with a 10-foot radius that cannot be seen through " +
+      "or eavesdropped upon. Offers no physical protection. " +
+      "Usually mounted in a small handheld case or on a Servo-Skull.",
+    weight: "1 kg",
+    value: "500 Thrones",
+    rarity: "Rare",
+  },
+  {
+    id: "wall-eater",
+    name: "Wall Eater",
+    source: SkillSource.BoJ,
+    description: "No description available — consult the Book of Judgement.",
+    weight: "1 kg",
+    value: "500 Thrones",
+    rarity: "Very Rare",
+  },
+
+  // ── Book of Judgement — Drugs ─────────────────────────────────────────────
+  {
+    id: "drug-sandstone",
+    name: "Sandstone (Drug)",
+    source: SkillSource.BoJ,
+    description:
+      "Yellowish granules rubbed into the gums or injected. Lasts 1d5+3 hours. " +
+      "Grants +30 to all Willpower-based Tests and +10 to resist Interrogation. " +
+      "On wearing off, must pass a Difficult (–10) Toughness Test or gain 1 Fatigue.",
+    weight: "—",
+    value: "95 Thrones",
+    rarity: "Scarce",
+  },
+  {
+    id: "drug-clear",
+    name: "Clear (Drug)",
+    source: SkillSource.BoJ,
+    description:
+      "Tar-like bitter gum chewed to resist alcohol and common poisons. " +
+      "Grants the Decadence Talent and +30 to Toughness-based Tests vs passing out or poison effects. " +
+      "Causes a powerful migraine ~3 hours after use; user must refrain from strenuous work for 1d5 hours.",
+    weight: "—",
+    value: "110 Thrones",
+    rarity: "Rare",
+  },
+  {
+    id: "drug-eazille",
+    name: "Eazille (Drug)",
+    source: SkillSource.BoJ,
+    description:
+      "Powerful inhibition reducer, possibly alien in origin. Lasts 1d5 hours (+1 per dose taken that week). " +
+      "User ignores moral constraints and must pass an Ordinary (+10) Willpower Test to resist baser instincts. " +
+      "Repeated use increases effects permanently over time.",
+    weight: "—",
+    value: "230 Thrones",
+    rarity: "Very Rare",
+  },
+  {
+    id: "drug-holdfast",
+    name: "Holdfast (Drug)",
+    source: SkillSource.BoJ,
+    description:
+      "Greasy bluish liquid injected to stiffen the mind. Lasts 2d5 hours. " +
+      "Neurological drugs are at –30 to their normal effects, " +
+      "but the user also suffers –20 to all Willpower-based Tests.",
+    weight: "—",
+    value: "165 Thrones",
+    rarity: "Very Rare",
+  },
+  {
+    id: "drug-hyperexia",
+    name: "Hyperexia (Drug)",
+    source: SkillSource.BoJ,
+    description:
+      "Thickens skin to a rubbery texture. Must be taken at least a dozen times over as many days before it takes effect. " +
+      "Grants Resistance (Cold, Heat) and inflicts 1 Fatigue. " +
+      "One dose per week required to maintain the effect.",
+    weight: "—",
+    value: "80 Thrones",
+    rarity: "Scarce",
+  },
+  {
+    id: "drug-karrikian-red-eye",
+    name: "Karrikian Red-Eye (Drug)",
+    source: SkillSource.BoJ,
+    description:
+      "Extends vision into the infra-red spectrum. Lasts 1d5 hours. " +
+      "+20 to Awareness Tests to detect heat-based images. " +
+      "If used more than once per day, must pass a Difficult (–10) Toughness Test " +
+      "or suffer –20 to all vision-based Tests for that day.",
+    weight: "—",
+    value: "185 Thrones",
+    rarity: "Rare",
+  },
+  {
+    id: "drug-leatherwort",
+    name: "Leatherwort (Drug)",
+    source: SkillSource.BoJ,
+    description:
+      "Dried fungal powder rubbed into skin. Treated areas count as having 2 additional AP " +
+      "(stacks with regular armour) and user gains +10 to Toughness-based Tests. " +
+      "Applied areas turn mottled dark green then slowly return to normal.",
+    weight: "—",
+    value: "115 Thrones",
+    rarity: "Scarce",
+  },
+  {
+    id: "drug-scav-glysten",
+    name: "Scav-Glysten (Drug)",
+    source: SkillSource.BoJ,
+    description:
+      "Injected chemical that eliminates all scent and pheromone output. Lasts 1d10 hours. " +
+      "–30 to any tracking attempts by scent against the user. " +
+      "Also grants Concealment and Shadowing when hiding from or tracking animals.",
+    weight: "—",
+    value: "155 Thrones",
+    rarity: "Rare",
+  },
+  {
+    id: "drug-scraper-ripper",
+    name: "Scraper-Ripper (Drug)",
+    source: SkillSource.BoJ,
+    description:
+      "Rendered underhive fish paste, injected or inhaled. Lasts 1d5 hours. " +
+      "+30 to all Agility-based Tests, but user must pass a Hard (–20) Willpower Test " +
+      "to avoid reacting violently when surprised by any stimuli.",
+    weight: "—",
+    value: "90 Thrones",
+    rarity: "Scarce",
+  },
+  {
+    id: "drug-sisk-ash",
+    name: "Sisk Ash (Drug)",
+    source: SkillSource.BoJ,
+    description:
+      "Burnt bush-plant mixed with lho and smoked. Lasts 1d5 hours. Induces calm; " +
+      "user may need an Easy (+30) Willpower Test to perform reluctant tasks. " +
+      "Pure (unmixed) version causes unconsciousness for 1 hour on a failed Hard (–20) Toughness Test. " +
+      "Smoke also interferes with Cybermastiff scent-tracking.",
+    weight: "—",
+    value: "80 Thrones",
+    rarity: "Scarce",
+  },
+  {
+    id: "drug-truth-revealed",
+    name: "The Truth Revealed (Drug)",
+    source: SkillSource.BoJ,
+    description: "No description available — consult the Book of Judgement.",
+    weight: "—",
+    value: "135 Thrones",
+    rarity: "Rare",
+  },
+  {
+    id: "drug-zumthorian-greyve",
+    name: "Zumthorian Greyve (Drug)",
+    source: SkillSource.BoJ,
+    description: "No description available — consult the Book of Judgement.",
+    weight: "—",
+    value: "125 Thrones",
+    rarity: "Rare",
+  },
+
+  // ── Book of Judgement — Cybernetics ───────────────────────────────────────
+  {
+    id: "constructer-interface",
+    name: "Constructer Interface (Cybernetic)",
+    source: SkillSource.BoJ,
+    description:
+      "Required to interface with Subrique-pattern Cyber-Mastiffs and Grapple-Hawks. At least Good Quality. " +
+      "Allows silent Command Tests using Tech-Use in place of Command skill. " +
+      "Uplinks up to 5 constructs; actively commands 2 (Best Quality: 3). " +
+      "Full Action to upload a pattern: Defence (+10 WS), Restrain (+20 WS grapple), " +
+      "Harass (+10 Dodge, Dodge Training), Alpha (+10 Per, Awareness Training), " +
+      "Beta (+10 Per, Track Training), Pursuit (+1 AgB, Accustomed to Crowds).",
+    weight: "—",
+    value: "—",
+    rarity: "—",
+  },
+  {
+    id: "karrikian-lock-arm",
+    name: "Karrikian Lock-Arm (Cybernetic)",
+    source: SkillSource.BoJ,
+    description:
+      "Servo-enhanced augmetic arm. Treated as Unnatural Strength (×3) for grappling or restraining. " +
+      "+20 Strength on melee attacks made with the arm. " +
+      "Contains magnetic grapple stakes that brace against nearby supports to prevent the user being lifted " +
+      "when restraining abnormally strong suspects.",
+    weight: "—",
+    value: "—",
+    rarity: "—",
+  },
+  {
+    id: "landrian-revealer",
+    name: "Landrian Revealer (Cybernetic)",
+    source: SkillSource.BoJ,
+    description:
+      "Ocular augmetic that allows the user to literally see scents and biological markers. " +
+      "Grants Heightened Sense (Smell) and Talented (Tracking). " +
+      "When blinded, may locate targets by smell with only –10 to BS/WS Tests. " +
+      "Half Action to activate. Good Quality: no penalty when blinded. " +
+      "Best Quality: also includes Photo-visor or Infra-red goggles.",
+    weight: "—",
+    value: "—",
+    rarity: "—",
+  },
+  {
+    id: "malfian-dermaguise",
+    name: "Malfian Dermaguise (Cybernetic)",
+    source: SkillSource.BoJ,
+    description:
+      "Electro-flexible plates beneath the skin linked to micro-servos, reshaping facial structure. " +
+      "Requires 5 Rounds and a Challenging (+0) Tech-Use Test: +20 to Disguise (rising to +30 after healing). " +
+      "Failed Test: 1 Tearing Damage per DoF (not reduced by Toughness). " +
+      "3+ DoF: Hard (–20) Toughness Test or lose 1d5 Fellowship permanently. " +
+      "Process can be shortened to 1 Round at –10 per Round reduced. Good Quality: also alters skin tone.",
+    weight: "—",
+    value: "—",
+    rarity: "—",
+  },
+
   // ── Blood of Martyrs ──────────────────────────────────────────────────────
   {
     id: "chaplet-ecclesiasticus",
