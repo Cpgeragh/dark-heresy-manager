@@ -318,7 +318,7 @@ export function ArmourTab({
         name: ref.name,
         locations: ref.locations,
         ap: ref.ap,
-        apOverrides: ref.apOverrides,
+        ...(ref.apOverrides ? { apOverrides: ref.apOverrides } : {}),
         worn: true,
       });
     },
