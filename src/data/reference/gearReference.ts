@@ -1,6 +1,6 @@
 // src/data/reference/gearReference.ts
 // Reference data for gear and equipment items, organised by source book.
-// Feeds into the future reference-lookup UI on the Gear tab.
+// Feeds into the reference-lookup UI on the Gear tab.
 
 import { SkillSource } from "../../types/SkillSource";
 
@@ -11,6 +11,9 @@ export interface GearRef {
   name: string;
   source: SkillSource;
   description: string;
+  weight: string;
+  value: string;
+  rarity: string;
 }
 
 // ─── Gear Reference ──────────────────────────────────────────────────────────
@@ -26,6 +29,9 @@ export const GEAR_REFERENCE: GearRef[] = [
       "A string of adamantium beads worn around the neck or waist as a reminder of acts " +
       "of penitence. When openly displayed, the bearer may re-roll any failed Charm Tests " +
       "made against members of the Ecclesiarchy of equal or lower status (GM's discretion).",
+    weight: "—",
+    value: "10 Thrones",
+    rarity: "Average",
   },
   {
     id: "cilice",
@@ -37,6 +43,9 @@ export const GEAR_REFERENCE: GearRef[] = [
       "an act of penance, not pride. Characters who wear a cilice for an extended period " +
       "(usually twice their Toughness Bonus in hours) must make a Toughness Test or suffer " +
       "1 level of Fatigue.",
+    weight: "—",
+    value: "5 Thrones",
+    rarity: "Common",
   },
   {
     id: "dialogous-staff",
@@ -46,6 +55,9 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Carried by Sisters of the Ordo Dialogous. Fitted with a Laud Hailer and an audio " +
       "recording device. Sturdy enough to use in combat as a Staff. Grants +10 to " +
       "understand sounds at a distance.",
+    weight: "3kg",
+    value: "200 Thrones",
+    rarity: "Rare",
   },
   {
     id: "eikon",
@@ -56,6 +68,9 @@ export const GEAR_REFERENCE: GearRef[] = [
       "covers to large triptychs meant to be displayed on tabletops or altars. Sold in " +
       "great numbers throughout the Sector; common among native militia who often attach " +
       "them to their weapons and vehicles.",
+    weight: "0.5kg",
+    value: "10 Thrones",
+    rarity: "Common",
   },
   {
     id: "hospitaller-medicae-tools",
@@ -67,6 +82,9 @@ export const GEAR_REFERENCE: GearRef[] = [
       "De-tox, and 2 doses of Stimm. A Hospitaller may also amputate a damaged limb (Hard " +
       "(–10) Medicae Test); if successful, the patient is missing the limb but all other " +
       "critical effects caused by damage to that limb are removed.",
+    weight: "3kg",
+    value: "250 Thrones",
+    rarity: "Rare",
   },
   {
     id: "liber-heresius",
@@ -77,6 +95,9 @@ export const GEAR_REFERENCE: GearRef[] = [
       "and natures of many infernal heretical cults, as well as how they were detected and " +
       "destroyed. Provides +20 to Research Tests involving Forbidden Lore (Cults, Heresy). " +
       "Issued only to proven Witch Hunters.",
+    weight: "1kg",
+    value: "150 Thrones",
+    rarity: "Rare",
   },
   {
     id: "litanies-of-faith",
@@ -87,6 +108,9 @@ export const GEAR_REFERENCE: GearRef[] = [
       "provides +20 on Research Tests involving Common Lore (Ecclesiarchy) and Scholastic " +
       "Lore (Imperial Creed). Abridged versions (concentrating primarily on prayers) " +
       "provide only a +10 bonus.",
+    weight: "0.5kg",
+    value: "10 Thrones",
+    rarity: "Common",
   },
   {
     id: "pilgrims-travel-staff",
@@ -97,6 +121,9 @@ export const GEAR_REFERENCE: GearRef[] = [
       "adorned with a small vox-caster containing chants, prayers, and songs dedicated to " +
       "the God-Emperor. The staff head typically carries a badge of the pilgrim's intended " +
       "shrine. Can be used as a weapon (treat as a Staff).",
+    weight: "2kg",
+    value: "15 Thrones",
+    rarity: "Common",
   },
   {
     id: "psyocculum",
@@ -106,6 +133,9 @@ export const GEAR_REFERENCE: GearRef[] = [
       "A form of photo-visor designed to enhance the wearer's ability to detect psykers. " +
       "The user gains the Psyniscience Skill with a +20 bonus. Using the psyocculum " +
       "requires a Full Action.",
+    weight: "0.5kg",
+    value: "300 Thrones",
+    rarity: "Very Rare",
   },
   {
     id: "questing-pilgrim-badge",
@@ -116,6 +146,9 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Worlds. Common badges are simple mass-produced emblems; elaborate versions can be " +
       "ordered by the wealthy. The best badges have small glass vials built in containing " +
       "blessed water, sacred oils, planetary dust, or similar materials.",
+    weight: "—",
+    value: "5 Thrones",
+    rarity: "Common",
   },
   {
     id: "reliquary",
@@ -126,6 +159,9 @@ export const GEAR_REFERENCE: GearRef[] = [
       "holographic images of actual relics. The most common are cheaply made containing " +
       "only a holo, model, or painting. A reliquary designed to hold an authenticated holy " +
       "relic can easily cost thousands of Thrones.",
+    weight: "1kg",
+    value: "30 Thrones",
+    rarity: "Average",
   },
   {
     id: "ring-of-suffrage",
@@ -133,6 +169,9 @@ export const GEAR_REFERENCE: GearRef[] = [
     source: SkillSource.BoM,
     description:
       "Designed to cause minor discomfort when twisted. Treated as a charm.",
+    weight: "—",
+    value: "5 Thrones",
+    rarity: "Common",
   },
   {
     id: "rule-of-sororitas",
@@ -142,6 +181,9 @@ export const GEAR_REFERENCE: GearRef[] = [
       "A collection of treatises, litanies, and assorted holy directives. Provides +10 " +
       "bonus to all Common Lore Tests on the subject of Ecclesiarchy, Heretics, Mutants, " +
       "or the Adepta Sororitas.",
+    weight: "0.5kg",
+    value: "50 Thrones",
+    rarity: "Rare",
   },
   {
     id: "sarissa",
@@ -151,6 +193,9 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Heavy spiked blades attached to bolters to allow close-combat engagement without " +
       "switching weapons. When mounted on a bolter, a sarissa counts as an axe in close " +
       "combat.",
+    weight: "2kg",
+    value: "30 Thrones",
+    rarity: "Scarce",
   },
   {
     id: "seraphim-jump-pack",
@@ -162,6 +207,9 @@ export const GEAR_REFERENCE: GearRef[] = [
       "of avenging angels. The bearer can jump from any height without injury and make any " +
       "number of short jumps. At maximal thrust, duplicates the Flyer (12) trait for a " +
       "number of turns up to the character's Agility Bonus.",
+    weight: "20kg",
+    value: "3,000 Thrones",
+    rarity: "Extremely Rare",
   },
   {
     id: "simulacrum-imperialis",
@@ -173,6 +221,9 @@ export const GEAR_REFERENCE: GearRef[] = [
       "character within 20 metres spends a Fate Point, they immediately recover it on a " +
       "dice roll of 8, 9, or 10. Characters with more than 20 Corruption Points cannot " +
       "benefit from this effect.",
+    weight: "3kg",
+    value: "5,000 Thrones",
+    rarity: "Extremely Rare",
   },
   {
     id: "witch-cage",
@@ -183,6 +234,9 @@ export const GEAR_REFERENCE: GearRef[] = [
       "hearing. Runes inscribed within prevent effective psychic use. A psyker wearing a " +
       "Witch Cage deducts 4 from their effective Psy Rating, takes –40 to all Invocation " +
       "Tests, and is considered Blind and Deaf.",
+    weight: "2kg",
+    value: "100 Thrones",
+    rarity: "Rare",
   },
 
 ];

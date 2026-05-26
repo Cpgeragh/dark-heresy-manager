@@ -97,6 +97,9 @@ export interface RangedWeapon {
   clip?: string;
   rld?: string;
   specialRules?: string;
+  weight?: string;
+  value?: string;
+  rarity?: string;
   custom?: boolean;       // true when created via "Add Custom"
 }
 
@@ -108,6 +111,9 @@ export interface MeleeWeapon {
   damage?: string;
   pen?: string;
   specialRules?: string;
+  weight?: string;
+  value?: string;
+  rarity?: string;
   custom?: boolean;
 }
 
@@ -139,6 +145,9 @@ export interface WornArmourPiece {
   /** true = currently worn; false = stowed in pack */
   worn: boolean;
   notes?: string;
+  weight?: string;
+  value?: string;
+  rarity?: string;
   custom?: boolean;       // true when created via "Add Custom"
 }
 
@@ -150,6 +159,9 @@ export interface GearItem {
   referenceId?: string;   // links back to GearRef.id
   name: string;
   description?: string;
+  weight?: string;
+  value?: string;
+  rarity?: string;
 }
 
 /**
