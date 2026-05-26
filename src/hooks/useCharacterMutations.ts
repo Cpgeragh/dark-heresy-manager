@@ -7,6 +7,7 @@ import { characterDocRef } from "../firebase/converters";
 import type { Character, Characteristics } from "../types/Character";
 import type { CharField } from "../utils/characterFactory";
 import { buildClaimLogPayload } from "../utils/claimLog";
+import { stripUndefined } from "../utils/stripUndefined";
 import { forceAssignCharacter, forceReleaseCharacter } from "../services/characterService";
 import { useToast } from "../components/Toast";
 
@@ -57,7 +58,7 @@ export function useCharacterMutations({
       setIsUpdating(true);
       setError(null);
       try {
-        await updateDoc(charRef, { [field]: value });
+        await updateDoc(charRef, { [field]: stripUndefined(value) });
       } catch (err) {
         const message = err instanceof Error ? err.message : "Failed to update field";
         setError(message);
