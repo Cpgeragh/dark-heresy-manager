@@ -249,7 +249,7 @@ function EntrySection({
         <p className="text-sm text-slate-500 italic">None added yet.</p>
       )}
 
-      <div className="space-y-1.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {entries.map((entry) => (
           <EntryCard
             key={entry.uid}

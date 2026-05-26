@@ -42,7 +42,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "must make a Toughness Test or suffer 1 Level of Fatigue.",
     weight: "Varies",
     value: "Varies",
-    rarity: "—",
+    rarity: "Rare",
   },
   {
     id: "dialogous-staff",
@@ -51,7 +51,7 @@ export const GEAR_REFERENCE: GearRef[] = [
     description:
       "Fitted with a Laud Hailer and an audio recording device. " +
       "Sturdy enough to use in combat as a Staff. Grants +10 to understand sounds at a distance.",
-    weight: "—",
+    weight: "4 kg",
     value: "—",
     rarity: "Issued Only",
   },
@@ -85,7 +85,7 @@ export const GEAR_REFERENCE: GearRef[] = [
     description:
       "+20 on Research Tests involving Forbidden Lore (Cults, Heresy). " +
       "Issued only to proven Witch Hunters.",
-    weight: "—",
+    weight: "10 kg",
     value: "—",
     rarity: "Issued Only",
   },
@@ -97,9 +97,9 @@ export const GEAR_REFERENCE: GearRef[] = [
       "A complete copy provides +20 on Research Tests involving Common Lore (Ecclesiarchy) " +
       "and Scholastic Lore (Imperial Creed). " +
       "Abridged versions (concentrating primarily on prayers) provide only +10.",
-    weight: "—",
-    value: "—",
-    rarity: "Common",
+    weight: "10 kg",
+    value: "500 Thrones",
+    rarity: "Uncommon",
   },
   {
     id: "pilgrims-travel-staff",
@@ -108,7 +108,7 @@ export const GEAR_REFERENCE: GearRef[] = [
     description:
       "Can be used as a Staff in combat.",
     weight: "3 kg",
-    value: "500 Thrones",
+    value: "15 Thrones",
     rarity: "Common",
   },
   {
@@ -148,8 +148,8 @@ export const GEAR_REFERENCE: GearRef[] = [
     source: SkillSource.BoM,
     description:
       "Treated as a charm.",
-    weight: "—",
-    value: "100 Thrones",
+    weight: "0 kg",
+    value: "10 Thrones",
     rarity: "Rare",
   },
   {
@@ -159,18 +159,28 @@ export const GEAR_REFERENCE: GearRef[] = [
     description:
       "+10 bonus to all Common Lore Tests on the subject of Ecclesiarchy, Heretics, " +
       "Mutants, or the Adepta Sororitas.",
-    weight: "—",
+    weight: "5 kg",
     value: "100 Thrones",
     rarity: "Rare",
   },
   {
     id: "sarissa",
-    name: "Sarissa",
+    name: "Sarissa (Bolter Attachment)",
     source: SkillSource.BoM,
     description:
       "When mounted on a bolter, a sarissa counts as an axe in close combat.",
     weight: "+2 kg",
     value: "50 Thrones",
+    rarity: "Rare",
+  },
+  {
+    id: "sarissa-standalone",
+    name: "Sarissa",
+    source: SkillSource.BoM,
+    description:
+      "A long-bladed spear used by Ecclesiarchy warriors.",
+    weight: "2 kg",
+    value: "200 Thrones",
     rarity: "Rare",
   },
   {

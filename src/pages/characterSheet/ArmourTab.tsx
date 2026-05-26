@@ -542,16 +542,13 @@ function PieceRow({
         <span className="text-sm font-medium text-slate-200 truncate block">
           {piece.name}
         </span>
-        <span className="text-xs text-slate-500">
-          {locationLabel(piece.locations)} · {apDesc}
-        </span>
-        {(piece.weight || piece.value || piece.rarity) && (
-          <span className="text-xs flex gap-2 mt-0.5">
-            {piece.weight && <span className="text-slate-600">⚖ {piece.weight}</span>}
-            {piece.value  && <span className="text-slate-600">₮ {piece.value}</span>}
-            {piece.rarity && <span className={rarityColour(piece.rarity)}>{piece.rarity}</span>}
-          </span>
-        )}
+        <div className="flex flex-wrap gap-1.5 mt-1">
+          <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-300">{locationLabel(piece.locations)}</span>
+          <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 font-mono text-slate-200">{apDesc}</span>
+          {piece.weight && <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">⚖ {piece.weight}</span>}
+          {piece.value  && <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">₮ {piece.value}</span>}
+          {piece.rarity && <span className={`text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 ${rarityColour(piece.rarity)}`}>{piece.rarity}</span>}
+        </div>
       </div>
 
       {/* Info */}

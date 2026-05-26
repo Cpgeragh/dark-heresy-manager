@@ -124,18 +124,14 @@ export function SkillCard({
 
       {/* COMPACT MODE */}
       {compact ? (
-        <div className="flex gap-4 text-xs text-slate-400">
-          <div>
-            Half:{" "}
-            <span className={getTotalColor(skill.half)}>
-              {skill.half ?? "--"}
-            </span>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="text-center rounded border border-slate-700 bg-slate-800/40 px-2 py-1">
+            <div className="text-[10px] text-slate-500 uppercase tracking-wide">Half</div>
+            <div className={`text-sm font-mono font-semibold ${getTotalColor(skill.half)}`}>{skill.half ?? "--"}</div>
           </div>
-          <div>
-            Opposed:{" "}
-            <span className={getTotalColor(skill.opposed)}>
-              {skill.opposed ?? "--"}
-            </span>
+          <div className="text-center rounded border border-slate-700 bg-slate-800/40 px-2 py-1">
+            <div className="text-[10px] text-slate-500 uppercase tracking-wide">Opposed</div>
+            <div className={`text-sm font-mono font-semibold ${getTotalColor(skill.opposed)}`}>{skill.opposed ?? "--"}</div>
           </div>
         </div>
       ) : (
@@ -172,34 +168,25 @@ export function SkillCard({
           </div>
 
           {/* MODIFIERS */}
-          <div className="flex flex-wrap items-center gap-4 text-xs text-slate-400">
-            <div className="flex items-center gap-1">
-              <span>Misc:</span>
+          <div className="grid grid-cols-3 gap-2">
+            <div className="text-center rounded border border-slate-700 bg-slate-800/40 px-2 py-1.5">
+              <div className="text-[10px] text-slate-500 uppercase tracking-wide mb-1">Misc</div>
               <input
                 type="number"
                 disabled={!editable}
                 value={skill.miscModifier ?? 0}
                 onChange={handleMiscChange}
                 aria-label={`${skill.name} miscellaneous modifier`}
-                className={
-                  editableInputClass(editable) +
-                  " w-16 px-1 py-0.5 text-xs"
-                }
+                className={editableInputClass(editable) + " text-center text-xs py-0.5"}
               />
             </div>
-
-            <div>
-              Half:{" "}
-              <span className={getTotalColor(skill.half)}>
-                {skill.half ?? "--"}
-              </span>
+            <div className="text-center rounded border border-slate-700 bg-slate-800/40 px-2 py-1.5">
+              <div className="text-[10px] text-slate-500 uppercase tracking-wide">Half</div>
+              <div className={`text-sm font-mono font-semibold mt-1 ${getTotalColor(skill.half)}`}>{skill.half ?? "--"}</div>
             </div>
-
-            <div>
-              Opposed:{" "}
-              <span className={getTotalColor(skill.opposed)}>
-                {skill.opposed ?? "--"}
-              </span>
+            <div className="text-center rounded border border-slate-700 bg-slate-800/40 px-2 py-1.5">
+              <div className="text-[10px] text-slate-500 uppercase tracking-wide">Opposed</div>
+              <div className={`text-sm font-mono font-semibold mt-1 ${getTotalColor(skill.opposed)}`}>{skill.opposed ?? "--"}</div>
             </div>
           </div>
 

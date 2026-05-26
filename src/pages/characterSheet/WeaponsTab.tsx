@@ -420,10 +420,10 @@ function RangedCard({
 
       {/* Weight / Value / Rarity */}
       {(weapon.weight || weapon.value || weapon.rarity) && (
-        <div className="flex flex-wrap gap-3 text-xs border-t border-slate-800 pt-2 mt-1">
-          {weapon.weight && <span className="text-slate-500">⚖ {weapon.weight}</span>}
-          {weapon.value  && <span className="text-slate-500">₮ {weapon.value}</span>}
-          {weapon.rarity && <span className={rarityColour(weapon.rarity)}>{weapon.rarity}</span>}
+        <div className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1">
+          {weapon.weight && <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">⚖ {weapon.weight}</span>}
+          {weapon.value  && <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">₮ {weapon.value}</span>}
+          {weapon.rarity && <span className={`text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 ${rarityColour(weapon.rarity)}`}>{weapon.rarity}</span>}
         </div>
       )}
 
@@ -486,10 +486,10 @@ function MeleeCard({
 
       {/* Weight / Value / Rarity */}
       {(weapon.weight || weapon.value || weapon.rarity) && (
-        <div className="flex flex-wrap gap-3 text-xs border-t border-slate-800 pt-2 mt-1">
-          {weapon.weight && <span className="text-slate-500">⚖ {weapon.weight}</span>}
-          {weapon.value  && <span className="text-slate-500">₮ {weapon.value}</span>}
-          {weapon.rarity && <span className={rarityColour(weapon.rarity)}>{weapon.rarity}</span>}
+        <div className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1">
+          {weapon.weight && <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">⚖ {weapon.weight}</span>}
+          {weapon.value  && <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">₮ {weapon.value}</span>}
+          {weapon.rarity && <span className={`text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 ${rarityColour(weapon.rarity)}`}>{weapon.rarity}</span>}
         </div>
       )}
 
