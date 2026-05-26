@@ -313,8 +313,8 @@ export default function CharacterSheet() {
       )}
 
       {/* TABS - NOW USING CONFIGURATION */}
-      <div 
-        className="flex flex-wrap gap-2 mb-6"
+      <div
+        className="flex gap-2 mb-6 overflow-x-auto pb-1"
         role="tablist"
         aria-label="Character sheet sections"
       >

@@ -21,7 +21,7 @@ export function TabButton({ label, active, tabId, onTabChange }: TabButtonProps)
       role="tab"
       aria-selected={active}
       aria-label={`${label} tab`}
-      className={`px-3 py-1 rounded text-sm border transition ${
+      className={`shrink-0 whitespace-nowrap px-3 py-1 rounded text-sm border transition ${
         active
           ? "bg-amber-500 text-slate-900 border-amber-400 font-semibold"
           : "border-slate-600 text-slate-200 hover:bg-slate-700"
