@@ -181,6 +181,14 @@ function ItemRow({
   const [expanded, setExpanded] = useState(false);
   const hasDesc = !!(item.description?.trim());
 
+  // Fall back to reference data for items saved before weight/value/rarity were stored
+  const ref = item.referenceId
+    ? GEAR_REFERENCE.find((r) => r.id === item.referenceId)
+    : undefined;
+  const weight = item.weight ?? ref?.weight;
+  const value  = item.value  ?? ref?.value;
+  const rarity = item.rarity ?? ref?.rarity;
+
   return (
     <div className={sectionContainerClass(editable)}>
       <div className="flex items-start gap-2">
@@ -207,11 +215,11 @@ function ItemRow({
           {hasDesc && !expanded && (
             <p className="text-xs text-slate-500 mt-0.5 truncate">{item.description}</p>
           )}
-          {(item.weight || item.value || item.rarity) && (
-            <div className="flex flex-wrap gap-3 text-xs mt-1">
-              {item.weight && <span className="text-slate-600">⚖ {item.weight}</span>}
-              {item.value  && <span className="text-slate-600">₮ {item.value}</span>}
-              {item.rarity && <span className={rarityColour(item.rarity)}>{item.rarity}</span>}
+          {(weight || value || rarity) && (
+            <div className="flex flex-wrap gap-1.5 mt-1">
+              {weight && <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">⚖ {weight}</span>}
+              {value  && <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">₮ {value}</span>}
+              {rarity && <span className={`text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 ${rarityColour(rarity)}`}>{rarity}</span>}
             </div>
           )}
         </div>
