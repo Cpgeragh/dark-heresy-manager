@@ -41,6 +41,7 @@ import type {
   WeaponTrainingBlock,
   RangedWeapon,
   MeleeWeapon,
+  AmmoItem,
   WornArmourPiece,
   ArmourLocationKey,
   GearItem,
@@ -188,6 +189,11 @@ export default function CharacterSheet() {
 
   const handleUpdateMeleeWeapons = useCallback(
     (next: MeleeWeapon[]) => updateField("meleeWeapons", next),
+    [updateField]
+  );
+
+  const handleUpdateAmmo = useCallback(
+    (next: AmmoItem[]) => updateField("ammo", next),
     [updateField]
   );
 
@@ -403,9 +409,11 @@ export default function CharacterSheet() {
             <WeaponsTab
               rangedWeapons={character.rangedWeapons}
               meleeWeapons={character.meleeWeapons}
+              ammo={character.ammo ?? []}
               editable={allowedToEdit}
               onUpdateRanged={handleUpdateRangedWeapons}
               onUpdateMelee={handleUpdateMeleeWeapons}
+              onUpdateAmmo={handleUpdateAmmo}
             />
           )}
 
