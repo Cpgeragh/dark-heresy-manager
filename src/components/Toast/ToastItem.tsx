@@ -50,7 +50,7 @@ export function ToastItem({ toast }: ToastItemProps) {
         border rounded-lg p-4 shadow-lg
         backdrop-blur-sm
         animate-slide-in-right
-        flex items-start gap-3
+        flex items-start gap-3 overflow-hidden
         min-w-[300px] max-w-sm
       `}
     >
@@ -60,7 +60,7 @@ export function ToastItem({ toast }: ToastItemProps) {
       </div>
 
       {/* Message */}
-      <div className="flex-1 text-sm whitespace-pre-wrap break-words">
+      <div className="flex-1 min-w-0 text-sm whitespace-pre-wrap break-all">
         {toast.message}
       </div>
 
