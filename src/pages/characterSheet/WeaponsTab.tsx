@@ -342,13 +342,13 @@ function StatChip({ label, value }: { label: string; value: string }) {
   );
 }
 
-function parseDamageType(damage: string): { label: string; colour: string } | null {
+function parseDamageType(damage: string): { letter: string; label: string; colour: string } | null {
   const letter = damage.trim().slice(-1).toUpperCase();
   switch (letter) {
-    case "I": return { label: "Impact",    colour: "text-blue-400" };
-    case "R": return { label: "Rending",   colour: "text-red-400" };
-    case "E": return { label: "Energy",    colour: "text-orange-400" };
-    case "X": return { label: "Explosive", colour: "text-yellow-400" };
+    case "I": return { letter: "I", label: "Impact",    colour: "text-blue-400" };
+    case "R": return { letter: "R", label: "Rending",   colour: "text-red-400" };
+    case "E": return { letter: "E", label: "Energy",    colour: "text-orange-400" };
+    case "X": return { letter: "X", label: "Explosive", colour: "text-yellow-400" };
     default:  return null;
   }
 }
@@ -359,7 +359,7 @@ function DamageTypeChip({ damage }: { damage: string }) {
   return (
     <div className="flex flex-col items-center bg-slate-800/60 rounded px-2 py-1 min-w-[52px]">
       <span className="text-[10px] text-slate-500 uppercase tracking-wide">Type</span>
-      <span className={`text-sm font-semibold mt-0.5 ${dt.colour}`}>{dt.label}</span>
+      <span className={`text-sm font-semibold mt-0.5 ${dt.colour}`} title={dt.label}>{dt.letter}</span>
     </div>
   );
 }
