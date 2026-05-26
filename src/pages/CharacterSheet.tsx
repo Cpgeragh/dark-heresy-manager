@@ -270,21 +270,21 @@ export default function CharacterSheet() {
 
       {/* HEADER */}
       <div className="mb-4">
-        <div className="flex items-center justify-between gap-4">
-          <h1 className="text-3xl font-bold mb-1">
+        <div className="flex items-start justify-between gap-3">
+          <h1 className="text-2xl sm:text-3xl font-bold leading-tight min-w-0">
             {character.header?.characterName ?? "Unnamed Character"}
           </h1>
           {(isDM || isOwner) && (
             <button
               onClick={() => exportCharacterJson(character)}
-              className="text-xs px-2 py-1 bg-slate-700 text-slate-300 rounded hover:bg-slate-600 shrink-0"
+              className="text-xs px-2 py-1 bg-slate-700 text-slate-300 rounded hover:bg-slate-600 shrink-0 mt-1"
             >
               Export JSON
             </button>
           )}
         </div>
 
-        <p className="text-xs text-slate-400">
+        <p className="hidden sm:block text-xs text-slate-400 mt-1">
           Campaign: <code>{path.campaignId}</code> — Character ID:{" "}
           <code>{character.id}</code>
         </p>

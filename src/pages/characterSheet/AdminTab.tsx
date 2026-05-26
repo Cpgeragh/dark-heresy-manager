@@ -105,7 +105,7 @@ export function AdminTab({
         <div className="space-y-1 text-sm">
           <div>
             Current owner UID:{" "}
-            <span className="font-mono text-slate-200">
+            <span className="font-mono text-slate-200 break-all">
               {character.userId ?? "None (unclaimed)"}
             </span>
           </div>
@@ -180,7 +180,7 @@ export function AdminTab({
             {pendingProposals.map((p) => (
               <li
                 key={p.id}
-                className="flex items-center justify-between border border-slate-700 rounded px-3 py-2 text-sm"
+                className="flex flex-col sm:flex-row sm:items-center gap-2 border border-slate-700 rounded px-3 py-2 text-sm"
               >
                 <div>
                   <span className="text-slate-200">{p.description}</span>
@@ -240,7 +240,7 @@ export function AdminTab({
 
                 <div className="text-slate-400">
                   Actor:{" "}
-                  <span className="font-mono">
+                  <span className="font-mono break-all">
                     {entry.actorUid}
                   </span>
                 </div>

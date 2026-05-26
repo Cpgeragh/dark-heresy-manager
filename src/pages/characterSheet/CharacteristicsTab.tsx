@@ -78,6 +78,33 @@ export function CharacteristicsTab({
     <div className="space-y-6 text-slate-300">
       <h2 className="text-xl font-semibold">Characteristics</h2>
 
+      {/* QUICK VIEW */}
+      <section className={sectionContainerClass(false)}>
+        <p className="text-xs text-slate-500 uppercase tracking-wide mb-3">Quick View</p>
+        <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-2">
+          {(
+            [
+              { label: "WS",  key: "ws"  },
+              { label: "BS",  key: "bs"  },
+              { label: "S",   key: "s"   },
+              { label: "T",   key: "t"   },
+              { label: "Ag",  key: "ag"  },
+              { label: "Int", key: "int" },
+              { label: "Per", key: "per" },
+              { label: "WP",  key: "wp"  },
+              { label: "Fel", key: "fel" },
+            ] as { label: string; key: keyof Characteristics }[]
+          ).map(({ label, key }) => (
+            <div key={key} className={sectionContainerClass(false) + " text-center"}>
+              <div className="text-xs text-slate-400 mb-1">{label}</div>
+              <div className="text-2xl font-semibold font-mono text-slate-100">
+                {total(key)}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Main stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <StatBlock label="Weapon Skill (WS)" statKey="ws" />
@@ -92,25 +119,46 @@ export function CharacteristicsTab({
       </div>
 
       {/* Derived stats */}
-      <section className={sectionContainerClass(false) + " space-y-3"}>
+      <section className={sectionContainerClass(false) + " space-y-4"}>
         <h3 className="text-lg font-semibold">Derived Stats</h3>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-2 text-sm">
-          <div>Strength Bonus (SB): <strong>{SB}</strong></div>
-          <div>Toughness Bonus (TB): <strong>{TB}</strong></div>
-          <div>Agility Bonus (AgB): <strong>{AgB}</strong></div>
-          <div>Intelligence Bonus (IB): <strong>{IB}</strong></div>
-          <div>Perception Bonus (PB): <strong>{PB}</strong></div>
-          <div>Willpower Bonus (WPB): <strong>{WPB}</strong></div>
-          <div>Fellowship Bonus (FB): <strong>{FB}</strong></div>
-
-          <div className="col-span-full mt-2 font-semibold text-slate-200">
-            Movement
+        {/* Characteristic Bonuses */}
+        <div>
+          <p className="text-xs text-slate-500 uppercase tracking-wide mb-2">Characteristic Bonuses</p>
+          <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
+            {[
+              { label: "SB",  value: SB },
+              { label: "TB",  value: TB },
+              { label: "AgB", value: AgB },
+              { label: "IB",  value: IB },
+              { label: "PB",  value: PB },
+              { label: "WPB", value: WPB },
+              { label: "FB",  value: FB },
+            ].map(({ label, value }) => (
+              <div key={label} className={sectionContainerClass(false) + " text-center"}>
+                <div className="text-xs text-slate-400 mb-1">{label}</div>
+                <div className="text-2xl font-semibold font-mono text-slate-100">{value}</div>
+              </div>
+            ))}
           </div>
-          <div>Half Move: <strong>{AgB}</strong></div>
-          <div>Full Move: <strong>{AgB * 2}</strong></div>
-          <div>Charge: <strong>{AgB * 3}</strong></div>
-          <div>Run: <strong>{AgB * 6}</strong></div>
+        </div>
+
+        {/* Movement */}
+        <div>
+          <p className="text-xs text-slate-500 uppercase tracking-wide mb-2">Movement</p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { label: "Half",   value: AgB },
+              { label: "Full",   value: AgB * 2 },
+              { label: "Charge", value: AgB * 3 },
+              { label: "Run",    value: AgB * 6 },
+            ].map(({ label, value }) => (
+              <div key={label} className={sectionContainerClass(false) + " text-center"}>
+                <div className="text-xs text-slate-400 mb-1">{label}</div>
+                <div className="text-2xl font-semibold font-mono text-slate-100">{value}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </div>

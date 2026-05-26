@@ -156,28 +156,30 @@ export function ExperienceTab({
         <section className="space-y-3">
           <h3 className="text-lg font-semibold text-slate-200">Propose XP Spend</h3>
 
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <input
               placeholder="What are you buying?"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="flex-1 px-2 py-1 bg-slate-800 border border-slate-600 rounded text-sm"
+              className="flex-1 min-w-0 px-2 py-1 bg-slate-800 border border-slate-600 rounded text-sm"
             />
-            <input
-              type="number"
-              min={0}
-              placeholder="Cost"
-              value={xpCost}
-              onChange={(e) => setXpCost(Math.max(0, Number(e.target.value)))}
-              className="w-24 px-2 py-1 bg-slate-800 border border-slate-600 rounded text-sm"
-            />
-            <button
-              onClick={handlePropose}
-              disabled={submitting || !description.trim() || xpCost <= 0}
-              className="px-3 py-1 bg-amber-500 text-slate-900 font-semibold rounded text-sm disabled:opacity-50"
-            >
-              {submitting ? "…" : "Propose"}
-            </button>
+            <div className="flex gap-2">
+              <input
+                type="number"
+                min={0}
+                placeholder="Cost"
+                value={xpCost}
+                onChange={(e) => setXpCost(Math.max(0, Number(e.target.value)))}
+                className="w-24 px-2 py-1 bg-slate-800 border border-slate-600 rounded text-sm"
+              />
+              <button
+                onClick={handlePropose}
+                disabled={submitting || !description.trim() || xpCost <= 0}
+                className="px-3 py-1 bg-amber-500 text-slate-900 font-semibold rounded text-sm disabled:opacity-50"
+              >
+                {submitting ? "…" : "Propose"}
+              </button>
+            </div>
           </div>
 
           {pendingProposals.length === 0 && resolvedProposals.length === 0 && (

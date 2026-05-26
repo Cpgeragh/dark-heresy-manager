@@ -50,7 +50,7 @@ export function SkillsControlBar({
         value={search}
         onChange={handleSearchChange}
         aria-label="Search skills by name"
-        className="px-2 py-1 bg-slate-900 border border-slate-700 rounded text-slate-200"
+        className="w-full sm:w-auto px-2 py-1 bg-slate-900 border border-slate-700 rounded text-slate-200"
       />
 
       <select

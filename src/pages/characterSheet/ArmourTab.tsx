@@ -318,17 +318,18 @@ export function ArmourTab({
   const [showPicker, setShowPicker] = useState(false);
   const [showCustomForm, setShowCustomForm] = useState(false);
   const [infoTarget, setInfoTarget] = useState<WornArmourPiece | null>(null);
+  const [pickerMode, setPickerMode] = useState<"worn" | "stowed">("worn");
 
   // ── Piece actions ──────────────────────────────────────────────────────────
 
   const addPiece = useCallback(
     (piece: WornArmourPiece) => {
       if (!editable) return;
-      onUpdate([...armour, piece]);
+      onUpdate([...armour, { ...piece, worn: pickerMode === "worn" }]);
       setShowPicker(false);
       setShowCustomForm(false);
     },
-    [editable, armour, onUpdate]
+    [editable, armour, onUpdate, pickerMode]
   );
 
   const fromReference = useCallback(
@@ -414,9 +415,19 @@ export function ArmourTab({
 
       {/* WORN PIECES ──────────────────────────────────────────────────────── */}
       <section className="space-y-2">
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
-          Worn ({worn.length})
-        </h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+            Worn ({worn.length})
+          </h3>
+          {editable && !showCustomForm && (
+            <button
+              onClick={() => { setPickerMode("worn"); setShowPicker(true); }}
+              className="text-xs px-3 py-1 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 transition"
+            >
+              + Equip
+            </button>
+          )}
+        </div>
         {worn.length === 0 && (
           <p className="text-sm text-slate-500 italic">No armour worn.</p>
         )}
@@ -435,9 +446,19 @@ export function ArmourTab({
 
       {/* STOWED PIECES ────────────────────────────────────────────────────── */}
       <section className="space-y-2">
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
-          Stowed ({stowed.length})
-        </h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+            Stowed ({stowed.length})
+          </h3>
+          {editable && !showCustomForm && (
+            <button
+              onClick={() => { setPickerMode("stowed"); setShowPicker(true); }}
+              className="text-xs px-3 py-1 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 transition"
+            >
+              + Stow
+            </button>
+          )}
+        </div>
         {stowed.length === 0 && (
           <p className="text-sm text-slate-500 italic">No armour stowed.</p>
         )}
@@ -454,25 +475,13 @@ export function ArmourTab({
         ))}
       </section>
 
-      {/* ADD BUTTON + CUSTOM FORM ─────────────────────────────────────────── */}
-      {editable && (
-        <section className="space-y-3">
-          {!showCustomForm && (
-            <button
-              onClick={() => setShowPicker(true)}
-              className="flex items-center gap-2 text-sm px-4 py-2 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 transition"
-            >
-              <span className="text-amber-400 font-bold">+</span>
-              Add Armour
-            </button>
-          )}
-
-          {showCustomForm && (
-            <CustomPieceForm
-              onAdd={addPiece}
-              onCancel={() => setShowCustomForm(false)}
-            />
-          )}
+      {/* CUSTOM FORM ──────────────────────────────────────────────────────── */}
+      {editable && showCustomForm && (
+        <section>
+          <CustomPieceForm
+            onAdd={addPiece}
+            onCancel={() => setShowCustomForm(false)}
+          />
         </section>
       )}
 
