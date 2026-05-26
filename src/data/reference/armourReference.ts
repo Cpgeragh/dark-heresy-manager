@@ -39,12 +39,12 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     locations: ["body"],
     ap: 2,
     notes:
-      "Sanctified. +10 to Tests to resist any direct psychic attack or manipulation. " +
-      "Wearing next to skin causes intense irritation — characters who must suppress " +
-      "their Toughness Bonus in hours must make a Toughness Test or gain 1 Fatigue.",
-    weight: "1kg",
-    value: "50 Thrones",
-    rarity: "Scarce",
+      "+10 on Tests to resist any direct psychic attack or manipulation. " +
+      "When worn for longer than the wearer's Toughness Bonus in hours, they must make a " +
+      "Toughness Test or gain 1 Level of Fatigue.",
+    weight: "4 kg",
+    value: "500 Thrones",
+    rarity: "Rare",
   },
   {
     id: "ecclesiarchy-overlay",
@@ -53,12 +53,11 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     locations: ALL,
     ap: 0,
     notes:
-      "Adds no AP of its own. Applied over normal armour, it carries Ministrorum mottos, " +
-      "prayers, and purity seals. +10 to Command and Fellowship Tests when seeking to " +
-      "inspire, lead, or rally the faithful.",
-    weight: "1kg",
-    value: "40 Thrones",
-    rarity: "Scarce",
+      "Applied over any normal suit of armour; adds no AP of its own. " +
+      "+10 bonus to Command and Fellowship Tests when inspiring, leading, or rallying the faithful.",
+    weight: "+2 kg",
+    value: "1,000 Thrones",
+    rarity: "Rare",
   },
   {
     id: "hospitaller-carapace",
@@ -68,11 +67,11 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     ap: 5,
     apOverrides: { head: 4 },
     notes:
-      "Sanctified and sealed with sacred oils. +20 to resist toxins or diseases that do " +
-      "not directly penetrate the armour (e.g. poison gas, rotting bodies). " +
+      "AP 5 all locations (AP 4 on Head). " +
+      "+20 to resist toxins or diseases that do not penetrate the armour (e.g. poison gas, rotting bodies). " +
       "Helmet incorporates a re-breather.",
-    weight: "12kg",
-    value: "1,200 Thrones",
+    weight: "20 kg",
+    value: "7,500 Thrones",
     rarity: "Very Rare",
   },
   {
@@ -82,13 +81,13 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     locations: ["rightArm"],
     ap: 8,
     notes:
-      "Defensive quality. Spend a Reaction to add the Praesidium's AP to attacks from " +
-      "either side. Ranged attacks from outside melee range have a –10 penalty to hit the " +
-      "protected arm. An attacking Party in melee gains an extra AP from the parry. " +
-      "Allows the Sister to bash with a one-handed weapon for 1d10+1 I (plus SB) damage. " +
+      "Defensive quality. Requires Sororitas Power Armour to use. " +
+      "Spend a Reaction to Parry attacks (including Ranged Weapon attacks) using Weapon Skill. " +
+      "A successful Parry grants the wearer the Praesidium's AP as additional protection. " +
+      "The wearer may also bash with a one-handed weapon for 1d10+2 I (plus Strength Bonus). " +
       "Can be worn on either arm — adjust the covered location accordingly.",
-    weight: "5kg",
-    value: "300 Thrones",
+    weight: "14 kg",
+    value: "7,500 Thrones",
     rarity: "Very Rare",
   },
   {
@@ -98,11 +97,11 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     locations: ALL,
     ap: 6,
     notes:
-      "Sanctified. Provides full AP against psychic force or warp energy attacks. " +
-      "Blessed with sacred oils — all warp-sourced damage that does not penetrate the " +
-      "armour is entirely negated.",
-    weight: "14kg",
-    value: "1,500 Thrones",
+      "Sanctified. Provides full Armour Points against attacks of psychic force or warp energy. " +
+      "Warp-sourced damage that does not penetrate the armour is entirely negated. " +
+      "Also effective against attacks with the Warp Weapon quality.",
+    weight: "18 kg",
+    value: "20,000 Thrones",
     rarity: "Very Rare",
   },
   {
@@ -112,11 +111,10 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     locations: ["body", "rightArm", "leftArm"],
     ap: 4,
     notes:
-      "Sanctified. Prayers engraved into individual rings. Provides full AP against " +
-      "attacks of psychic force or warp energy that deal damage directly as well as " +
-      "attacks made with the Warp Weapon effect.",
-    weight: "8kg",
-    value: "400 Thrones",
+      "Sanctified. Provides full Armour Points against attacks of psychic force or warp energy " +
+      "that deal damage directly, and against attacks made with the Warp Weapon quality.",
+    weight: "15 kg",
+    value: "750 Thrones",
     rarity: "Rare",
   },
   {
@@ -125,13 +123,9 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.BoM,
     locations: ["body", "rightArm", "leftArm", "rightLeg", "leftLeg"],
     ap: 2,
-    notes:
-      "Worn by non-militant Sisters and novices of the Adepta Sororitas. Exchanging " +
-      "armour for shield robes typically occurs when the armour is being maintained. " +
-      "Iconography dedicated to a single cult.",
-    weight: "4kg",
-    value: "30 Thrones",
-    rarity: "Scarce",
+    weight: "6 kg",
+    value: "250 Thrones",
+    rarity: "Rare",
   },
   {
     id: "sororitas-power-armour",
@@ -141,13 +135,17 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     ap: 7,
     apOverrides: { body: 8 },
     notes:
-      "Power armour using a standard power supply as a backpack. Helmet includes an " +
-      "integrated targeting system (+20 Sight), rebreather, and comm-link. " +
-      "Users with a Heavy weapon count as Braced. Typically not issued until the Sister " +
-      "proves herself. Cannot be used without a helmet.",
-    weight: "35kg",
-    value: "10,000 Thrones",
-    rarity: "Extremely Rare",
+      "AP 7 all locations (AP 8 on Body). " +
+      "Integrated targeter (+5 BS), re-breather, and comm-link. " +
+      "Users with a Heavy weapon count as Braced. " +
+      "Critical Damage to the Body location triggers the Damaging Power Armour table: " +
+      "1–3 unaffected; 4–5 all armour bonuses (except inherent AP) lost, –10 penalty, Base Movement –2; " +
+      "6+ suit shuts down entirely — all benefits including AP lost, wearer must pass a Strength Test " +
+      "(+20, –10 per failure) to move, Base Movement reduced to 1, –20 to all physical actions. " +
+      "Problems continue until repaired with a Challenging (+0) Tech-Use Test.",
+    weight: "35 kg",
+    value: "20,000 Thrones",
+    rarity: "Very Rare",
   },
 
 ];

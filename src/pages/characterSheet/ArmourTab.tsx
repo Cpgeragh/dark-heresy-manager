@@ -30,6 +30,7 @@ function rarityColour(rarity: string | undefined): string {
     case "Very Rare":     return "text-red-400";
     case "Extremely Rare":return "text-purple-400";
     case "Near Unique":   return "text-pink-400";
+    case "Issued Only":   return "text-cyan-400";
     default:              return "text-slate-400";
   }
 }
