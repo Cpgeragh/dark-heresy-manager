@@ -31,6 +31,98 @@ const ALL: ArmourLocationKey[] = ["head", "body", "rightArm", "leftArm", "rightL
 
 export const ARMOUR_REFERENCE: ArmourRef[] = [
 
+  // ── Book of Judgement ─────────────────────────────────────────────────────
+  {
+    id: "adeptus-arbites-carapace",
+    name: "Adeptus Arbites Carapace Armour",
+    source: SkillSource.BoJ,
+    locations: ALL,
+    ap: 6,
+    notes:
+      "Includes integrated micro-bead (vox-torc), polarising lenses (negates photon flash grenades), " +
+      "rebreather mountings, and mag-strips for attaching weapons and equipment. " +
+      "Lock gloves count as recoil gloves. Helmet can be hermetically sealed.",
+    weight: "14 kg",
+    value: "3,000 Thrones",
+    rarity: "Very Rare",
+  },
+  {
+    id: "arbites-riot-armour",
+    name: "Arbites Riot Armour",
+    source: SkillSource.BoJ,
+    locations: ALL,
+    ap: 1,
+    notes:
+      "Worn over Carapace armour. The +1 AP only protects against Impact Damage — " +
+      "all other damage types bypass it entirely. Reduces Agility by 10 while worn.",
+    weight: "4 kg",
+    value: "270 Thrones",
+    rarity: "Very Rare",
+  },
+  {
+    id: "ballistic-cloth-surcoat",
+    name: "Ballistic Cloth Surcoat",
+    source: SkillSource.BoJ,
+    locations: ["body", "rightArm", "leftArm"],
+    ap: 1,
+    notes:
+      "Worn over Carapace armour. Must be tailor-made for the wearer and their equipment. " +
+      "Adds +1 AP to Arms and Body.",
+    weight: "1 kg",
+    value: "275 Thrones",
+    rarity: "Rare",
+  },
+  {
+    id: "gutterforged-armour",
+    name: "Gutterforged Armour",
+    source: SkillSource.BoJ,
+    locations: ["head", "body", "rightArm", "leftArm"],
+    ap: 5,
+    notes:
+      "Crudely home-forged carapace of hammered pig iron. Extremely heavy — " +
+      "wearer suffers –15 to Agility.",
+    weight: "41.5 kg",
+    value: "350 Thrones",
+    rarity: "Scarce",
+  },
+  {
+    id: "judge-armour",
+    name: "Judge Armour",
+    source: SkillSource.BoJ,
+    locations: ALL,
+    ap: 6,
+    notes:
+      "Finest artisan-crafted carapace with theatrical robes and headdress. " +
+      "+5 bonus to Interrogation and Intimidate Tests against individuals " +
+      "from the planet where the Judge is stationed.",
+    weight: "16.5 kg",
+    value: "5,500 Thrones",
+    rarity: "Very Rare",
+  },
+  {
+    id: "verispex-armour",
+    name: "Verispex Armour",
+    source: SkillSource.BoJ,
+    locations: ["body", "rightArm", "leftArm"],
+    ap: 2,
+    notes:
+      "Contains an auspex, chrono, combi-tool, and data-slate. " +
+      "+10 to Awareness and Medicae Tests made to find information in the field.",
+    weight: "5.5 kg",
+    value: "500 Thrones",
+    rarity: "Very Rare",
+  },
+  {
+    id: "verispex-helm",
+    name: "Verispex Helm",
+    source: SkillSource.BoJ,
+    locations: ["head"],
+    ap: 4,
+    weight: "2.5 kg",
+    value: "750 Thrones",
+    rarity: "Very Rare",
+  },
+
   // ── Blood of Martyrs ──────────────────────────────────────────────────────
   {
     id: "blessed-sackcloth-tunic",
