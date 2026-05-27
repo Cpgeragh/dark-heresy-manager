@@ -541,4 +541,221 @@ export const GEAR_REFERENCE: GearRef[] = [
     rarity: "Very Rare",
   },
 
+  // ── Daemon Hunter — Gear ──────────────────────────────────────────────────
+  {
+    id: "dh-unguents-of-warding",
+    name: "Unguents of Warding",
+    source: SkillSource.DH,
+    description:
+      "Inscribe onto armour (10 min/location, Hard –20 Scholastic Lore Occult or Imperial Creed Test per location). " +
+      "+20 to Fear Tests vs daemonic entities; +10 to WP Tests to resist psychic powers. " +
+      "Wards last one month (GM may remove earlier if armour is soaked, burned, etc.).",
+    weight: "—",
+    value: "50 Thrones",
+    rarity: "Common",
+  },
+  {
+    id: "dh-consecrated-scrolls",
+    name: "Consecrated Scrolls",
+    source: SkillSource.DH,
+    description:
+      "One reroll on the Psychic Phenomena table. Single use — crumbles to dust after. " +
+      "Must be prepared specifically for the bearer.",
+    weight: "1 kg",
+    value: "100 Thrones",
+    rarity: "Scarce",
+  },
+  {
+    id: "dh-grimoire-of-true-names",
+    name: "Grimoire of True Names",
+    source: SkillSource.DH,
+    description:
+      "Two successes on a Hard (–20) Forbidden Lore (Daemonology) Test (30 min per attempt) " +
+      "reveals a notable daemon's True Name. Calling out portions of the True Name during attacks " +
+      "allows auto-confirmation of Righteous Fury against that daemon. " +
+      "Knowledge fades after 2d10+Intelligence Bonus days and must be re-studied.",
+    weight: "10 kg",
+    value: "5,000 Thrones",
+    rarity: "Very Rare",
+  },
+  {
+    id: "dh-litany-micro-beads",
+    name: "Litany Micro-Beads",
+    source: SkillSource.DH,
+    description:
+      "Blessed vox-caster (1-mile range) broadcasts prayers over the micro-bead. " +
+      "Three channels (Half Action to switch): " +
+      "Catechism of Devotion and Sanctity (Chem-Geld talent benefit); " +
+      "Prayers of St Drusus (Jaded talent benefit); " +
+      "Petitions of Redemption (+10 WP to resist mind control). " +
+      "Wearer is Deafened while not transmitting.",
+    weight: "—",
+    value: "100 Thrones",
+    rarity: "Scarce",
+  },
+  {
+    id: "dh-neural-scourge",
+    name: "Neural Scourge",
+    source: SkillSource.DH,
+    description:
+      "Metal gauntlet with burrowing wires. Requires Difficult (–10) Tech-Use or Challenging (+0) Medicae Test to use. " +
+      "Target must be restrained or controlled. Grants +20 to Interrogation Tests against the subject. " +
+      "If the subject wins the opposed Test, they take 1d5 Wounds ignoring Toughness Bonus.",
+    weight: "2 kg",
+    value: "1,700 Thrones",
+    rarity: "Rare",
+  },
+  {
+    id: "dh-psyocculum",
+    name: "Psyocculum (Witch-Glasses)",
+    source: SkillSource.DH,
+    description:
+      "Challenging (+10) Awareness Test reveals psykers and Warp-creatures in a corona of white light. " +
+      "Grants Dark Sight for perceiving revealed psykers; +10 BS on single shots at revealed targets. " +
+      "–20 to all other sight-based Awareness Tests while worn. " +
+      "Using for more than one minute causes 1 Fatigue; cannot remove this fatigue while worn.",
+    weight: "1.5 kg",
+    value: "1,200 Thrones",
+    rarity: "Rare",
+  },
+  {
+    id: "dh-sacred-incense-burner",
+    name: "Sacred Incense Burner",
+    source: SkillSource.DH,
+    description:
+      "Daemons within 10m of the bearer suffer –10 WS and –10 to all Warp Instability Tests. " +
+      "Can also be swung as a melee weapon (Flexible, Sanctified, 1d10+2 I — see Weapons tab).",
+    weight: "3 kg",
+    value: "800 Thrones",
+    rarity: "Rare",
+  },
+  {
+    id: "dh-soubirous-power-pack",
+    name: "Soubirous Power Pack",
+    source: SkillSource.DH,
+    description:
+      "A lasgun charge blessed at the eternal flame of the Shrine of Soubirous. " +
+      "Renders the las-weapon Sanctified for its remaining charges. " +
+      "Creatures with Warp Instability must Test after taking any damage from the weapon. " +
+      "Cannot be recharged once blessed. Single use.",
+    weight: "—",
+    value: "150 Thrones",
+    rarity: "Very Rare",
+  },
+  {
+    id: "dh-ulumeathi-plasma-siphon",
+    name: "Ulumeathi Plasma Siphon",
+    source: SkillSource.DH,
+    description:
+      "Crystal arrangement of unknown origin. Anyone firing a plasma weapon at a target within 10m, " +
+      "or firing a plasma weapon from within 10m, suffers –30 BS. " +
+      "Plasma weapons affected also lose the Volatile quality.",
+    weight: "10 kg",
+    value: "8,000 Thrones",
+    rarity: "Near Unique",
+  },
+
+  // Drugs
+  {
+    id: "dh-dreamjuice",
+    name: "Dreamjuice (Drug)",
+    source: SkillSource.DH,
+    description:
+      "+10 to all Intelligence Tests for 30 minutes. " +
+      "–20 to all Willpower Tests while under effect. " +
+      "After the effect wears off: –10 to all Perception Tests. Not physically addictive.",
+    weight: "—",
+    value: "75 Thrones",
+    rarity: "Scarce",
+  },
+  {
+    id: "dh-imperiums-fervour",
+    name: "Imperium's Fervour (Drug)",
+    source: SkillSource.DH,
+    description:
+      "Lasts 24 hours (12 hours if taken orally). " +
+      "Fear Tests reduced by one degree of severity. Insanity Points gained are reduced by 2 (minimum 1). " +
+      "–10 to Perception Tests while active. " +
+      "Memories of events during effect become hazy — Hard (–20) Intelligence Test to recall; Very Hard after one month.",
+    weight: "—",
+    value: "20 Thrones",
+    rarity: "Scarce",
+  },
+
+  // Ammunition
+  {
+    id: "dh-cryptus-shotgun-shells",
+    name: "Cryptus Shotgun Shells (Ammunition)",
+    source: SkillSource.DH,
+    description:
+      "Shotgun shells made from the glass of the destroyed Templum of Cryptus, naturally resistant to the Warp. " +
+      "Attack counts as Sanctified. Daemonic or Warp creatures struck at short range must pass " +
+      "a Challenging (+0) Toughness Test or be blinded for 1d5 rounds. Cost: 50 Thrones per 5 shells.",
+    weight: "—",
+    value: "50 per 5 Thrones",
+    rarity: "Rare",
+  },
+  {
+    id: "dh-psybolt-ammunition",
+    name: "Psybolt Ammunition (Ammunition)",
+    source: SkillSource.DH,
+    description:
+      "Psychically charged bolt shells tipped with truesilver, for use in bolt weapons. " +
+      "Ignores any protection granted by psychic powers or Sorcery. " +
+      "Counts as Sanctified. Adds the user's Psy Rating to damage dealt. Cost: 100 Thrones per bolt.",
+    weight: "—",
+    value: "100 per bolt Thrones",
+    rarity: "Very Rare",
+  },
+  {
+    id: "dh-psyflame-ammunition",
+    name: "Psyflame Ammunition (Ammunition)",
+    source: SkillSource.DH,
+    description:
+      "Psychically charged promethium for flamer weapons. " +
+      "Ignores protection from psychic powers or Sorcery. Counts as Sanctified. " +
+      "Targets in the area of effect suffer –5 to their Agility Test per point of the user's Psy Rating. " +
+      "Cost: 100 Thrones per charge.",
+    weight: "—",
+    value: "100 per charge Thrones",
+    rarity: "Very Rare",
+  },
+
+  // Force Fields
+  {
+    id: "dh-refraction-bracer",
+    name: "Refraction Bracer (Force Field, PR 30)",
+    source: SkillSource.DH,
+    description:
+      "Protection Rating 30. Provides a shield-like wall of force protecting body and arms only — " +
+      "head and legs are unprotected. Does not function against area attacks.",
+    weight: "0.3 kg",
+    value: "5,000 Thrones",
+    rarity: "Rare",
+  },
+  {
+    id: "dh-refraction-field-brontian",
+    name: "Refraction Field, Brontian Pattern (Force Field, PR 30)",
+    source: SkillSource.DH,
+    description:
+      "Protection Rating 30. Standard refraction field. " +
+      "Ordo Malleus agents treat availability as Rare (instead of Very Rare) and reduce cost by 25%.",
+    weight: "0.4 kg",
+    value: "15,000 Thrones",
+    rarity: "Very Rare",
+  },
+  {
+    id: "dh-jokaerian-field",
+    name: "Jokaerian Field (Force Field, PR 70)",
+    source: SkillSource.DH,
+    description:
+      "Protection Rating 70 — but functions only against psychic attacks " +
+      "(including friendly ones originating more than 5m away). " +
+      "Also deals 1d10 damage ignoring Armour and Toughness Bonus to any creature with the Daemonic trait " +
+      "that passes or remains within 5m of the user. Jokaero-modified Imperial technology.",
+    weight: "0.5 kg",
+    value: "50,000 Thrones",
+    rarity: "Near Unique",
+  },
+
 ];
