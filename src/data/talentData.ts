@@ -311,6 +311,19 @@ export const TALENT_LIST: readonly TalentData[] = [
   { id: "seen-this-before",      name: "Seen This Before",      source: SkillSource.BoJ, hasSpecialisation: false },
   { id: "unparalleled-proficiency", name: "Unparalleled Proficiency", source: SkillSource.BoJ, hasSpecialisation: false },
   { id: "wolf-pack-tactics",     name: "Wolf Pack Tactics",     source: SkillSource.BoJ, hasSpecialisation: false },
+
+  // ─── Daemon Hunter ───────────────────────────────────────────────────────────
+  { id: "emperors-tarot",               name: "Emperor's Tarot",              source: SkillSource.DH, hasSpecialisation: false },
+  { id: "malleus-conditioning",         name: "Malleus Conditioning",         source: SkillSource.DH, hasSpecialisation: false },
+  { id: "intellectualization",          name: "Intellectualization",          source: SkillSource.DH, hasSpecialisation: false },
+  { id: "speed-reading",                name: "Speed Reading",                source: SkillSource.DH, hasSpecialisation: false },
+  { id: "aura-of-faith",                name: "Aura of Faith",                source: SkillSource.DH, hasSpecialisation: false },
+  { id: "rite-of-banishment",           name: "Rite of Banishment",           source: SkillSource.DH, hasSpecialisation: false },
+  { id: "cult-briefing",                name: "Cult Briefing",                source: SkillSource.DH, hasSpecialisation: true,  specialisationLabel: "Type" },
+  { id: "sicarius-tutoring",            name: "Sicarius Tutoring",            source: SkillSource.DH, hasSpecialisation: true,  specialisationLabel: "Career" },
+  { id: "blessed-flame",                name: "Blessed Flame",                source: SkillSource.DH, hasSpecialisation: false },
+  { id: "flames-of-faith",              name: "Flames of Faith",              source: SkillSource.DH, hasSpecialisation: false },
+  { id: "mechadendrite-use-techsorcist", name: "Mechadendrite Use (Techsorcist)", source: SkillSource.DH, hasSpecialisation: false },
 ];
 
 export type TalentId = (typeof TALENT_LIST)[number]["id"];

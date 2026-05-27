@@ -240,6 +240,51 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     rarity: "Very Rare",
   },
 
+  // ── Daemon Hunter ─────────────────────────────────────────────────────────
+  {
+    id: "dh-iron-collar",
+    name: "Iron Collar",
+    source: SkillSource.DH,
+    locations: ["head"],
+    ap: 3,
+    notes:
+      "Rigid metal gorget. –10 penalty to Dodge Tests. " +
+      "Critical damage to the Head location is reduced by 2.",
+    weight: "3 kg",
+    value: "20 Thrones",
+    rarity: "Common",
+  },
+  {
+    id: "dh-malleus-power-armour",
+    name: "Malleus Power Armour",
+    source: SkillSource.DH,
+    locations: ALL,
+    ap: 9,
+    notes:
+      "Best Craftsmanship. Inscribed with pentagrammatic wards — any Daemon striking the wearer " +
+      "with its natural weapons takes 1d5 damage ignoring Armour and Toughness Bonus. " +
+      "Power pack lasts one week without recharging. Otherwise identical to standard Power Armour.",
+    weight: "180 kg",
+    value: "25,000 Thrones",
+    rarity: "Near Unique",
+  },
+  {
+    id: "dh-malleus-terminator-armour",
+    name: "Malleus Terminator Armour",
+    source: SkillSource.DH,
+    locations: ALL,
+    ap: 12,
+    notes:
+      "Auto-Stabilised; Heavy and Mounted weapons may be fired one-handed. +30 Strength (not +20). " +
+      "Integrated sensorium (as auspex). Built-in Refraction Field (PR 35, does not overload normally). " +
+      "Cannot run; –20 Agility; cannot Dodge (may still Parry). " +
+      "Weapon configuration requires senior Tech-Priests with ceremonial facilities to change. " +
+      "Daemons striking the wearer with natural weapons take 1d5 damage ignoring Armour and Toughness Bonus.",
+    weight: "400 kg",
+    value: "—",
+    rarity: "Unique",
+  },
+
   // ── Creatures Anathema ───────────────────────────────────────────────────
   {
     id: "ca-ork-mega-armour",
