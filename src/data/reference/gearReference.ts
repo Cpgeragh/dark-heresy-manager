@@ -682,45 +682,6 @@ export const GEAR_REFERENCE: GearRef[] = [
     rarity: "Scarce",
   },
 
-  // Ammunition
-  {
-    id: "dh-cryptus-shotgun-shells",
-    name: "Cryptus Shotgun Shells (Ammunition)",
-    source: SkillSource.DH,
-    description:
-      "Shotgun shells made from the glass of the destroyed Templum of Cryptus, naturally resistant to the Warp. " +
-      "Attack counts as Sanctified. Daemonic or Warp creatures struck at short range must pass " +
-      "a Challenging (+0) Toughness Test or be blinded for 1d5 rounds. Cost: 50 Thrones per 5 shells.",
-    weight: "—",
-    value: "50 per 5 Thrones",
-    rarity: "Rare",
-  },
-  {
-    id: "dh-psybolt-ammunition",
-    name: "Psybolt Ammunition (Ammunition)",
-    source: SkillSource.DH,
-    description:
-      "Psychically charged bolt shells tipped with truesilver, for use in bolt weapons. " +
-      "Ignores any protection granted by psychic powers or Sorcery. " +
-      "Counts as Sanctified. Adds the user's Psy Rating to damage dealt. Cost: 100 Thrones per bolt.",
-    weight: "—",
-    value: "100 per bolt Thrones",
-    rarity: "Very Rare",
-  },
-  {
-    id: "dh-psyflame-ammunition",
-    name: "Psyflame Ammunition (Ammunition)",
-    source: SkillSource.DH,
-    description:
-      "Psychically charged promethium for flamer weapons. " +
-      "Ignores protection from psychic powers or Sorcery. Counts as Sanctified. " +
-      "Targets in the area of effect suffer –5 to their Agility Test per point of the user's Psy Rating. " +
-      "Cost: 100 Thrones per charge.",
-    weight: "—",
-    value: "100 per charge Thrones",
-    rarity: "Very Rare",
-  },
-
   // Force Fields
   {
     id: "dh-refraction-bracer",
