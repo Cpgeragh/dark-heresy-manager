@@ -411,6 +411,11 @@ export default function CharacterSheet() {
               meleeWeapons={character.meleeWeapons}
               ammo={character.ammo ?? []}
               editable={allowedToEdit}
+              strengthBonus={Math.floor(
+                (character.characteristics.s.base +
+                  character.characteristics.s.advances * 5) /
+                  10
+              )}
               onUpdateRanged={handleUpdateRangedWeapons}
               onUpdateMelee={handleUpdateMeleeWeapons}
               onUpdateAmmo={handleUpdateAmmo}

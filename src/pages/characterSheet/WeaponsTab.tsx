@@ -26,6 +26,7 @@ interface WeaponsTabProps {
   meleeWeapons: MeleeWeapon[];
   ammo: AmmoItem[];
   editable: boolean;
+  strengthBonus: number;
   onUpdateRanged: (next: RangedWeapon[]) => void;
   onUpdateMelee: (next: MeleeWeapon[]) => void;
   onUpdateAmmo: (next: AmmoItem[]) => void;
@@ -295,7 +296,7 @@ function AmmoPicker({
                 <div className="flex items-center gap-1.5 text-xs shrink-0">
                   <span className={rarityColour(ref.rarity)}>{ref.rarity}</span>
                   <span className="text-slate-600">·</span>
-                  <span className="text-amber-400/80 font-mono">{ref.cost}</span>
+                  <span className="text-amber-400/80 font-mono">₮ {ref.cost}</span>
                   <span className="text-slate-500">×</span>
                   <span className="text-slate-200 font-mono">{ref.purchaseAmount}</span>
                 </div>
@@ -439,7 +440,7 @@ function DamageTypeChip({ damage }: { damage: string }) {
   return (
     <div className="flex flex-col items-center bg-slate-800/60 rounded px-2 py-1 min-w-[52px]">
       <span className="text-[10px] text-slate-500 uppercase tracking-wide">Type</span>
-      <span className={`text-sm font-semibold mt-0.5 ${dt.colour}`} title={dt.label}>{dt.letter}</span>
+      <span className={`text-sm font-semibold mt-0.5 ${dt.colour}`}>{dt.label}</span>
     </div>
   );
 }
@@ -477,7 +478,7 @@ function RangedCard({
       <div className="flex flex-wrap gap-1.5">
         {weapon.range && <StatChip label="Range" value={weapon.range} />}
         {weapon.rof && <StatChip label="RoF" value={weapon.rof} />}
-        {weapon.damage && <StatChip label="Damage" value={weapon.damage} />}
+        {weapon.damage && <StatChip label="Damage" value={weapon.damage.replace(/\s*[IREX]$/i, "").trim()} />}
         {weapon.damage && <DamageTypeChip damage={weapon.damage} />}
         {weapon.pen && <StatChip label="Pen" value={weapon.pen} />}
         {weapon.clip && <StatChip label="Clip" value={weapon.clip} />}
@@ -520,10 +521,12 @@ function RangedCard({
 function MeleeCard({
   weapon,
   editable,
+  strengthBonus,
   onRemove,
 }: {
   weapon: MeleeWeapon;
   editable: boolean;
+  strengthBonus: number;
   onRemove: () => void;
 }) {
   const [showRules, setShowRules] = useState(false);
@@ -546,9 +549,10 @@ function MeleeCard({
       </div>
 
       <div className="flex flex-wrap gap-1.5">
-        {weapon.damage && <StatChip label="Damage" value={weapon.damage} />}
+        {weapon.damage && <StatChip label="Damage" value={weapon.damage.replace(/\s*[IREX]$/i, "").trim()} />}
         {weapon.damage && <DamageTypeChip damage={weapon.damage} />}
         {weapon.pen && <StatChip label="Pen" value={weapon.pen} />}
+        <StatChip label="SB" value={`+${strengthBonus}`} />
       </div>
 
       {hasRules && (
@@ -596,6 +600,24 @@ function AmmoCard({
   onRemove: () => void;
   onUpdateAmount: (amount: number) => void;
 }) {
+  const [editingQty, setEditingQty] = useState(false);
+  const [qtyDraft, setQtyDraft] = useState("");
+
+  const startQtyEdit = () => {
+    setQtyDraft(String(item.amount));
+    setEditingQty(true);
+  };
+
+  const commitQtyEdit = () => {
+    const val = parseInt(qtyDraft, 10);
+    onUpdateAmount(!isNaN(val) && val >= 0 ? val : item.amount);
+    setEditingQty(false);
+  };
+
+  const handleQtyKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") commitQtyEdit();
+    if (e.key === "Escape") setEditingQty(false);
+  };
   return (
     <div className={sectionContainerClass(editable)}>
       {/* Header */}
@@ -652,9 +674,25 @@ function AmmoCard({
               −
             </button>
           )}
-          <span className="font-mono text-lg text-slate-100 min-w-[2.5rem] text-center">
-            {item.amount}
-          </span>
+          {editingQty ? (
+            <input
+              type="text"
+              autoFocus
+              value={qtyDraft}
+              onChange={(e) => setQtyDraft(e.target.value.replace(/\D/g, ""))}
+              onBlur={commitQtyEdit}
+              onKeyDown={handleQtyKeyDown}
+              className="font-mono text-lg text-slate-100 w-16 text-center bg-slate-800 border border-slate-600 rounded focus:outline-none focus:border-indigo-500"
+            />
+          ) : (
+            <span
+              onClick={startQtyEdit}
+              title="Click to set amount"
+              className="font-mono text-lg text-slate-100 min-w-[2.5rem] text-center cursor-pointer hover:text-white hover:underline decoration-slate-500 decoration-dotted underline-offset-2"
+            >
+              {item.amount}
+            </span>
+          )}
           {editable && (
             <button
               onClick={() => onUpdateAmount(item.amount + 1)}
@@ -674,11 +712,23 @@ function AmmoCard({
               ⚖ {item.weight}
             </span>
           )}
-          {item.value && (
-            <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">
-              ₮ {item.value}
-            </span>
-          )}
+          {item.value && (() => {
+            const parts = item.value!.split(" / ");
+            if (parts.length === 2) {
+              return (
+                <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5">
+                  <span className="text-amber-400/80 font-mono">₮ {parts[0]}</span>
+                  <span className="text-slate-500"> × </span>
+                  <span className="text-slate-200 font-mono">{parts[1]}</span>
+                </span>
+              );
+            }
+            return (
+              <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">
+                ₮ {item.value}
+              </span>
+            );
+          })()}
           {item.rarity && (
             <span className={`text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 ${rarityColour(item.rarity)}`}>
               {item.rarity}
@@ -818,6 +868,7 @@ export function WeaponsTab({
   meleeWeapons,
   ammo,
   editable,
+  strengthBonus,
   onUpdateRanged,
   onUpdateMelee,
   onUpdateAmmo,
@@ -1032,6 +1083,7 @@ export function WeaponsTab({
               key={w.id}
               weapon={w}
               editable={editable}
+              strengthBonus={strengthBonus}
               onRemove={() => removeMelee(i)}
             />
           ))}
