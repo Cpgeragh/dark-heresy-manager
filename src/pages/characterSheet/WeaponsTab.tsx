@@ -423,6 +423,17 @@ function StatChip({ label, value }: { label: string; value: string }) {
   );
 }
 
+function computeMeleeTotalDamage(damage: string, sb: number): string {
+  const base = damage.replace(/\s*[IREX]$/i, "").trim();
+  const match = base.match(/^(\d*d\d+)([+-]\d+)?$/i);
+  if (!match) return base;
+  const dice = match[1];
+  const mod = match[2] ? parseInt(match[2], 10) : 0;
+  const total = mod + sb;
+  if (total === 0) return dice;
+  return `${dice}${total > 0 ? "+" : ""}${total}`;
+}
+
 function parseDamageType(damage: string): { letter: string; label: string; colour: string } | null {
   const letter = damage.trim().slice(-1).toUpperCase();
   switch (letter) {
@@ -553,6 +564,9 @@ function MeleeCard({
         {weapon.damage && <DamageTypeChip damage={weapon.damage} />}
         {weapon.pen && <StatChip label="Pen" value={weapon.pen} />}
         <StatChip label="SB" value={`+${strengthBonus}`} />
+        {weapon.damage && (
+          <StatChip label="Total" value={computeMeleeTotalDamage(weapon.damage, strengthBonus)} />
+        )}
       </div>
 
       {hasRules && (
