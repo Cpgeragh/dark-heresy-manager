@@ -158,26 +158,24 @@ export function PsychicTab({ psychic, editable, onUpdate }: PsychicTabProps) {
 
   // ── Field updates ────────────────────────────────────────────────────────
 
-  const updateField = useCallback(
-    (key: keyof PsychicBlock, value: string | number) => {
+  const handlePsyRatingChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       if (!editable) return;
-      onUpdate({ ...psychic, [key]: value });
+      onUpdate({ ...psychic, psyRating: Number(e.target.value) });
     },
     [editable, psychic, onUpdate]
   );
 
-  const handlePsyRatingChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      updateField("psyRating", Number(e.target.value));
+  const handleToggleDiscipline = useCallback(
+    (d: string) => {
+      if (!editable) return;
+      const current = psychic.disciplines ?? [];
+      const next = current.includes(d)
+        ? current.filter((x) => x !== d)
+        : [...current, d];
+      onUpdate({ ...psychic, disciplines: next });
     },
-    [updateField]
-  );
-
-  const handleDisciplineChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      updateField("discipline", e.target.value);
-    },
-    [updateField]
+    [editable, psychic, onUpdate]
   );
 
   // ── Power array operations ────────────────────────────────────────────────
@@ -187,8 +185,6 @@ export function PsychicTab({ psychic, editable, onUpdate }: PsychicTabProps) {
     addMajorPower,
     removeMinorPower,
     removeMajorPower,
-    updateMinorPower,
-    updateMajorPower,
   } = usePsychicPowers({ psychic, editable, onUpdate });
 
   /** Add a power from the reference picker */
@@ -229,49 +225,52 @@ export function PsychicTab({ psychic, editable, onUpdate }: PsychicTabProps) {
     <div className="space-y-6 text-slate-300">
       <h2 className="text-xl font-semibold">Psychic Powers</h2>
 
-      {/* PSY RATING & DISCIPLINE ──────────────────────────────────────────── */}
+      {/* PSY RATING & DISCIPLINES ────────────────────────────────────────── */}
       <div className={sectionContainerClass(editable) + " space-y-3"}>
-        <div className="grid grid-cols-2 gap-3">
 
-          {/* Psy Rating */}
-          <label className="flex flex-col gap-0.5 text-xs text-slate-400">
-            Psy Rating
-            <input
-              disabled={!editable}
-              type="number"
-              min={0}
-              max={10}
-              value={psychic.psyRating ?? 0}
-              onChange={handlePsyRatingChange}
-              className={editableInputClass(editable) + " w-24"}
-              aria-label="Psy Rating"
-            />
-          </label>
+        {/* Psy Rating */}
+        <label className="flex flex-col gap-0.5 text-xs text-slate-400">
+          Psy Rating
+          <input
+            disabled={!editable}
+            type="number"
+            min={0}
+            max={10}
+            value={psychic.psyRating ?? 0}
+            onChange={handlePsyRatingChange}
+            className={editableInputClass(editable) + " w-24"}
+            aria-label="Psy Rating"
+          />
+        </label>
 
-          {/* Discipline */}
-          <label className="flex flex-col gap-0.5 text-xs text-slate-400">
-            Discipline
-            {editable ? (
-              <select
-                value={psychic.discipline ?? ""}
-                onChange={handleDisciplineChange}
-                className={editableInputClass(true)}
-              >
-                <option value="">— None —</option>
-                {PSYCHIC_DISCIPLINES.map((d) => (
-                  <option key={d} value={d}>
-                    {d}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <span className="text-sm text-slate-200">
-                {psychic.discipline || <span className="text-slate-500 italic">—</span>}
-              </span>
-            )}
-          </label>
-
+        {/* Disciplines — toggle chips, one per major discipline */}
+        <div>
+          <p className="text-xs text-slate-400 mb-1.5">Disciplines</p>
+          <div className="flex flex-wrap gap-1.5">
+            {PSYCHIC_DISCIPLINES.filter((d) => d !== "Minor").map((d) => {
+              const active = (psychic.disciplines ?? []).includes(d);
+              return (
+                <button
+                  key={d}
+                  disabled={!editable}
+                  onClick={() => handleToggleDiscipline(d)}
+                  aria-pressed={active}
+                  className={[
+                    "px-2.5 py-1 rounded border text-xs transition",
+                    active
+                      ? "bg-indigo-600 border-indigo-500 text-white font-semibold"
+                      : editable
+                      ? "border-slate-600 text-slate-300 hover:bg-slate-800"
+                      : "border-slate-700 text-slate-500 opacity-60 cursor-not-allowed",
+                  ].join(" ")}
+                >
+                  {d}
+                </button>
+              );
+            })}
+          </div>
         </div>
+
       </div>
 
       {/* MINOR POWERS ────────────────────────────────────────────────────── */}
@@ -299,7 +298,6 @@ export function PsychicTab({ psychic, editable, onUpdate }: PsychicTabProps) {
                 power={power}
                 index={index}
                 editable={editable}
-                onUpdate={updateMinorPower}
                 onRemove={removeMinorPower}
               />
             ))}
@@ -332,7 +330,6 @@ export function PsychicTab({ psychic, editable, onUpdate }: PsychicTabProps) {
                 power={power}
                 index={index}
                 editable={editable}
-                onUpdate={updateMajorPower}
                 onRemove={removeMajorPower}
               />
             ))}
