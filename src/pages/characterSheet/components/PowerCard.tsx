@@ -1,92 +1,103 @@
 // src/pages/characterSheet/components/PowerCard.tsx
 
-import { FormField } from "../../../components/FormField";
-import { sectionContainerClass } from "../../../ui/editableStyles";
+import { InfoModal } from "../../../components/InfoModal";
 import type { PsychicPower } from "../../../types/Character";
 
 interface PowerCardProps {
   power: PsychicPower;
   index: number;
   editable: boolean;
-  onUpdate: (index: number, key: keyof PsychicPower, value: any) => void;
   onRemove: (index: number) => void;
 }
 
-/**
- * Reusable card component for displaying/editing a single psychic power.
- * Used for both minor and major powers.
- */
+/** Shared stat row — used in both the card and the InfoModal header. */
+function PowerStats({ power }: { power: PsychicPower }) {
+  const hasAny =
+    power.discipline ||
+    power.threshold ||
+    power.focusTime ||
+    power.range ||
+    power.sustained;
+
+  if (!hasAny) return null;
+
+  return (
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs">
+      {power.discipline && (
+        <span className="text-indigo-400">{power.discipline}</span>
+      )}
+      {power.threshold && (
+        <span>
+          <span className="text-slate-500">PT </span>
+          <span className="text-slate-200 font-mono">{power.threshold}</span>
+        </span>
+      )}
+      {power.focusTime && (
+        <span className="text-slate-300">{power.focusTime}</span>
+      )}
+      {power.range && (
+        <span>
+          <span className="text-slate-500">Range: </span>
+          <span className="text-slate-200">{power.range}</span>
+        </span>
+      )}
+      {power.sustained && (
+        <span>
+          <span className="text-slate-500">Sustained: </span>
+          <span className="text-slate-200">{power.sustained}</span>
+        </span>
+      )}
+    </div>
+  );
+}
+
 export function PowerCard({
   power,
   index,
   editable,
-  onUpdate,
   onRemove,
 }: PowerCardProps) {
-  return (
-    <div className={sectionContainerClass(editable) + " space-y-2"}>
-      <div className="flex items-start justify-between gap-2">
-        <FormField
-          label="Power Name"
-          value={power.name ?? ""}
-          onChange={(v) => onUpdate(index, "name", v)}
-          editable={editable}
-          className="flex-1"
-        />
+  const modalContent = (
+    <>
+      <div className="pb-2 mb-2 border-b border-slate-700">
+        <PowerStats power={power} />
+      </div>
+      {power.description ? (
+        <p className="text-sm text-slate-300 leading-relaxed">
+          {power.description}
+        </p>
+      ) : (
+        <p className="text-sm text-slate-500 italic">No description recorded.</p>
+      )}
+    </>
+  );
 
+  return (
+    <div className="flex items-start justify-between gap-2 rounded border border-slate-700 bg-slate-900/30 px-3 py-2 text-sm">
+      <div className="space-y-1 min-w-0 flex-1">
+        <p className="font-medium text-slate-200">
+          {power.name || (
+            <span className="italic text-slate-500">Unnamed power</span>
+          )}
+        </p>
+        <PowerStats power={power} />
+      </div>
+
+      <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
+        <InfoModal
+          title={power.name || "Psychic Power"}
+          content={modalContent}
+        />
         {editable && (
           <button
             onClick={() => onRemove(index)}
-            className="text-xs text-red-400 hover:text-red-300 mt-5"
             aria-label={`Remove ${power.name || "power"}`}
+            className="text-slate-500 hover:text-red-400 transition text-xs"
           >
-            Remove
+            ✕
           </button>
         )}
       </div>
-
-      <div className="grid grid-cols-2 gap-2">
-        <FormField
-          label="Threshold"
-          value={power.threshold ?? ""}
-          onChange={(v) => onUpdate(index, "threshold", v)}
-          editable={editable}
-          placeholder="e.g., 7"
-        />
-
-        <FormField
-          label="Focus Time"
-          value={power.focusTime ?? ""}
-          onChange={(v) => onUpdate(index, "focusTime", v)}
-          editable={editable}
-          placeholder="e.g., Half Action"
-        />
-
-        <FormField
-          label="Range"
-          value={power.range ?? ""}
-          onChange={(v) => onUpdate(index, "range", v)}
-          editable={editable}
-          placeholder="e.g., 20m"
-        />
-
-        <FormField
-          label="Sustained"
-          value={power.sustained ?? ""}
-          onChange={(v) => onUpdate(index, "sustained", v)}
-          editable={editable}
-          placeholder="e.g., Free Action"
-        />
-      </div>
-
-      <FormField
-        label="Effect"
-        value={power.description ?? ""}
-        onChange={(v) => onUpdate(index, "description", v)}
-        editable={editable}
-        type="textarea"
-        rows={3}
-      />
     </div>
   );
 }

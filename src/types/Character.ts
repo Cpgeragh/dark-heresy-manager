@@ -251,7 +251,7 @@ export interface PsychicPower {
 
 export interface PsychicBlock {
   psyRating: number;
-  discipline?: string;
+  disciplines?: string[];
   minorPowers: PsychicPower[];
   majorPowers: PsychicPower[];
 }
