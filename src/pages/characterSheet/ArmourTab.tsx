@@ -22,8 +22,8 @@ interface ArmourTabProps {
 function rarityColour(rarity: string | undefined): string {
   switch (rarity) {
     case "Plentiful":
-    case "Abundant":
-    case "Common":        return "text-slate-400";
+    case "Abundant":      return "text-slate-400";
+    case "Common":        return "text-green-400";
     case "Average":       return "text-slate-300";
     case "Scarce":        return "text-yellow-400";
     case "Rare":          return "text-orange-400";
