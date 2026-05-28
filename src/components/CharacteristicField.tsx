@@ -1,6 +1,6 @@
 // src/components/CharacteristicField.tsx
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import type { CharField } from "../utils/characterFactory";
 import {
   MAX_CHARACTERISTIC_ADVANCES,
@@ -28,6 +28,67 @@ export default function CharacteristicField({
 }: Props) {
   const { base, advances } = value;
   const [error, setError] = useState<string | undefined>();
+  const [draft, setDraft] = useState(String(base));
+  const isFocused = useRef(false);
+
+  // ── Base input handlers ────────────────────────────────────────────────────
+
+  function commitBase(raw: string) {
+    const num = parseInt(raw, 10);
+
+    if (raw.trim() === "" || isNaN(num)) {
+      setDraft(String(base)); // revert to last committed value
+      setError(undefined);
+      return;
+    }
+
+    const baseCheck = validateCharacteristicBase(num);
+    if (!baseCheck.isValid) {
+      setError(baseCheck.error);
+      setDraft(String(base));
+      return;
+    }
+
+    const totalCheck = validateCharacteristicTotal(num, advances);
+    if (!totalCheck.isValid) {
+      setError(totalCheck.error);
+      setDraft(String(base));
+      return;
+    }
+
+    setError(undefined);
+    onChange({ base: num, advances });
+  }
+
+  const handleBaseFocus = useCallback(() => {
+    isFocused.current = true;
+    setDraft(String(base)); // sync to current committed value on focus
+  }, [base]);
+
+  const handleBaseChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      // Strip anything that isn't a digit — no minus, no decimal, no letters
+      setDraft(e.target.value.replace(/\D/g, ""));
+    },
+    []
+  );
+
+  const handleBaseBlur = useCallback(() => {
+    isFocused.current = false;
+    commitBase(draft);
+  }, [draft, base, advances, onChange]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleBaseKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter") commitBase(draft);
+      if (e.key === "Escape") {
+        setDraft(String(base));
+        setError(undefined);
+        (e.target as HTMLInputElement).blur();
+      }
+    },
+    [draft, base, advances, onChange] // eslint-disable-line react-hooks/exhaustive-deps
+  );
 
   const toggleAdvance = useCallback(
     (index: number) => {
@@ -52,64 +113,6 @@ export default function CharacteristicField({
     [editable, base, advances, onChange]
   );
 
-  const updateBase = useCallback(
-    (raw: string) => {
-      if (!editable) return;
-
-      const num = parseInt(raw, 10);
-
-      // Allow empty during typing
-      if (raw === "") {
-        setError(undefined);
-        return;
-      }
-
-      // Validate it's a number
-      if (isNaN(num)) {
-        setError("Must be a number");
-        return;
-      }
-
-      // Validate base value range
-      const baseCheck = validateCharacteristicBase(num);
-      if (!baseCheck.isValid) {
-        setError(baseCheck.error);
-        return;
-      }
-
-      // Validate total won't exceed max
-      const totalCheck = validateCharacteristicTotal(num, advances);
-      if (!totalCheck.isValid) {
-        setError(totalCheck.error);
-        return;
-      }
-
-      setError(undefined);
-      onChange({ base: num, advances });
-    },
-    [editable, advances, onChange]
-  );
-
-  const handleBaseChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      updateBase(e.target.value);
-    },
-    [updateBase]
-  );
-
-  const handleBaseBlur = useCallback(() => {
-    // On blur, validate current value
-    const baseCheck = validateCharacteristicBase(base);
-    if (!baseCheck.isValid) {
-      setError(baseCheck.error);
-      return;
-    }
-
-    const totalCheck = validateCharacteristicTotal(base, advances);
-    if (!totalCheck.isValid) {
-      setError(totalCheck.error);
-    }
-  }, [base, advances]);
 
   const total = base + advances * CHARACTERISTIC_ADVANCE_INCREMENT;
 
@@ -121,13 +124,14 @@ export default function CharacteristicField({
       <div className="flex items-center gap-2 mb-2">
         <span className="text-sm text-slate-400">Base:</span>
         <input
-          type="number"
-          value={base}
+          type="text"
+          inputMode="numeric"
+          value={draft}
           disabled={!editable}
+          onFocus={handleBaseFocus}
           onChange={handleBaseChange}
           onBlur={handleBaseBlur}
-          min={MIN_CHARACTERISTIC_VALUE}
-          max={MAX_CHARACTERISTIC_VALUE}
+          onKeyDown={handleBaseKeyDown}
           aria-label={`${label} base value`}
           aria-invalid={!!error}
           aria-describedby={error ? `${label}-error` : undefined}
