@@ -1,8 +1,9 @@
 // src/pages/characterSheet/GearTab.tsx
 
 import { useState, useCallback } from "react";
-import type { GearItem } from "../../types/Character";
+import type { GearItem, ConsumableItem } from "../../types/Character";
 import { GEAR_REFERENCE, type GearRef } from "../../data/reference/gearReference";
+import { CONSUMABLES_REFERENCE, type ConsumableRef } from "../../data/reference/consumablesReference";
 import {
   editableInputClass,
   editableTextareaClass,
@@ -31,11 +32,185 @@ function rarityColour(rarity: string | undefined): string {
 
 interface GearTabProps {
   gear: GearItem[];
+  consumables: ConsumableItem[];
   editable: boolean;
   onUpdate: (next: GearItem[]) => void;
+  onUpdateConsumables: (next: ConsumableItem[]) => void;
 }
 
-// ─── Reference Picker ─────────────────────────────────────────────────────────
+// ─── Consumable Picker ────────────────────────────────────────────────────────
+
+function ConsumablePicker({
+  onSelect,
+  onClose,
+}: {
+  onSelect: (ref: ConsumableRef) => void;
+  onClose: () => void;
+}) {
+  const [query, setQuery] = useState("");
+  const filtered = CONSUMABLES_REFERENCE.filter((r) =>
+    r.name.toLowerCase().includes(query.toLowerCase())
+  );
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+      <div className="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-xl shadow-2xl flex flex-col max-h-[80vh]">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
+          <h3 className="text-sm font-semibold text-slate-200">Add Consumable</h3>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-200 text-lg leading-none">×</button>
+        </div>
+        <div className="px-4 py-2 border-b border-slate-800">
+          <input
+            type="text"
+            autoFocus
+            placeholder="Search consumables…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className={editableInputClass(true)}
+          />
+        </div>
+        <div className="overflow-y-auto flex-1 divide-y divide-slate-800">
+          {filtered.length === 0 && (
+            <p className="p-4 text-sm text-slate-500 text-center">No matches.</p>
+          )}
+          {filtered.map((ref) => (
+            <button
+              key={ref.id}
+              onClick={() => onSelect(ref)}
+              className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-sm font-medium text-slate-200 group-hover:text-white">
+                  {ref.name}
+                </p>
+                <span className="text-xs shrink-0">
+                  <span className="text-amber-400/80 font-mono">₮ {ref.value}</span>
+                  <span className={`ml-2 ${rarityColour(ref.rarity)}`}>{ref.rarity}</span>
+                </span>
+              </div>
+              {ref.description && (
+                <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{ref.description}</p>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Consumable Row ───────────────────────────────────────────────────────────
+
+function ConsumableRow({
+  item,
+  editable,
+  onUpdateQty,
+  onRemove,
+}: {
+  item: ConsumableItem;
+  editable: boolean;
+  onUpdateQty: (id: string, qty: number) => void;
+  onRemove: (id: string) => void;
+}) {
+  const [editingQty, setEditingQty] = useState(false);
+  const [qtyDraft, setQtyDraft]     = useState("");
+  const [expanded, setExpanded]     = useState(false);
+
+  const hasDesc = !!(item.description?.trim());
+
+  function commitQty() {
+    const n = parseInt(qtyDraft, 10);
+    if (!isNaN(n) && n >= 0) onUpdateQty(item.id, n);
+    setEditingQty(false);
+  }
+
+  return (
+    <div className={sectionContainerClass(editable)}>
+      <div className="flex items-start gap-3">
+        {/* Quantity */}
+        <div className="flex flex-col items-center shrink-0 min-w-[40px]">
+          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Qty</span>
+          {editable && editingQty ? (
+            <input
+              type="text"
+              inputMode="numeric"
+              autoFocus
+              value={qtyDraft}
+              onChange={(e) => setQtyDraft(e.target.value.replace(/\D/g, ""))}
+              onBlur={commitQty}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") commitQty();
+                if (e.key === "Escape") setEditingQty(false);
+              }}
+              className="w-10 text-center text-sm font-mono bg-slate-800 border border-amber-500 rounded px-1 py-0.5 text-slate-200 outline-none"
+            />
+          ) : (
+            <span
+              onClick={() => {
+                if (!editable) return;
+                setQtyDraft(String(item.quantity));
+                setEditingQty(true);
+              }}
+              title={editable ? "Click to edit" : undefined}
+              className={`text-sm font-mono font-semibold text-slate-200 ${editable ? "cursor-pointer underline decoration-dotted underline-offset-2 decoration-slate-600 hover:decoration-amber-500" : ""}`}
+            >
+              {item.quantity}
+            </span>
+          )}
+        </div>
+
+        {/* Name + description + chips */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-medium text-slate-200">{item.name}</p>
+            {hasDesc && (
+              <button
+                onClick={() => setExpanded((v) => !v)}
+                className="text-slate-500 hover:text-slate-300 text-xs transition"
+              >
+                {expanded ? "▲" : "▼"}
+              </button>
+            )}
+          </div>
+          {hasDesc && expanded && (
+            <p className="text-xs text-slate-400 mt-1 leading-relaxed">{item.description}</p>
+          )}
+          {hasDesc && !expanded && (
+            <p className="text-xs text-slate-500 mt-0.5 truncate">{item.description}</p>
+          )}
+          <div className="flex flex-wrap gap-1.5 mt-1">
+            {item.weight && (
+              <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">
+                ⚖ {item.weight}
+              </span>
+            )}
+            {item.value && (
+              <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-amber-400/80 font-mono">
+                ₮ {item.value}
+              </span>
+            )}
+            {item.rarity && (
+              <span className={`text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 ${rarityColour(item.rarity)}`}>
+                {item.rarity}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {editable && (
+          <button
+            onClick={() => onRemove(item.id)}
+            className="text-xs text-red-400 hover:text-red-300 transition shrink-0"
+          >
+            Remove
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Gear Picker ──────────────────────────────────────────────────────────────
 
 function GearPicker({
   onSelect,
@@ -239,9 +414,53 @@ function ItemRow({
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export function GearTab({ gear, editable, onUpdate }: GearTabProps) {
-  const [showPicker, setShowPicker] = useState(false);
-  const [showCustomForm, setShowCustomForm] = useState(false);
+export function GearTab({ gear, consumables, editable, onUpdate, onUpdateConsumables }: GearTabProps) {
+  const [showGearPicker, setShowGearPicker]           = useState(false);
+  const [showCustomForm, setShowCustomForm]           = useState(false);
+  const [showConsumablePicker, setShowConsumablePicker] = useState(false);
+
+  // ── Consumable handlers ──────────────────────────────────────────────────
+
+  const addConsumableFromRef = useCallback(
+    (ref: ConsumableRef) => {
+      if (!editable) return;
+      onUpdateConsumables([
+        ...consumables,
+        {
+          id: crypto.randomUUID(),
+          referenceId: ref.id,
+          name: ref.name,
+          quantity: 1,
+          description: ref.description,
+          weight: ref.weight,
+          value: ref.value,
+          rarity: ref.rarity,
+        },
+      ]);
+      setShowConsumablePicker(false);
+    },
+    [editable, consumables, onUpdateConsumables]
+  );
+
+  const updateConsumableQty = useCallback(
+    (id: string, qty: number) => {
+      if (!editable) return;
+      onUpdateConsumables(
+        consumables.map((c) => (c.id === id ? { ...c, quantity: qty } : c))
+      );
+    },
+    [editable, consumables, onUpdateConsumables]
+  );
+
+  const removeConsumable = useCallback(
+    (id: string) => {
+      if (!editable) return;
+      onUpdateConsumables(consumables.filter((c) => c.id !== id));
+    },
+    [editable, consumables, onUpdateConsumables]
+  );
+
+  // ── Gear handlers ────────────────────────────────────────────────────────
 
   const addFromRef = useCallback(
     (ref: GearRef) => {
@@ -258,7 +477,7 @@ export function GearTab({ gear, editable, onUpdate }: GearTabProps) {
           rarity: ref.rarity,
         },
       ]);
-      setShowPicker(false);
+      setShowGearPicker(false);
     },
     [editable, gear, onUpdate]
   );
@@ -284,6 +503,38 @@ export function GearTab({ gear, editable, onUpdate }: GearTabProps) {
     <div className="space-y-6 text-slate-300">
       <h2 className="text-xl font-semibold">Gear &amp; Equipment</h2>
 
+      {/* CONSUMABLES ──────────────────────────────────────────────────────── */}
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+            Consumables ({consumables.length})
+          </h3>
+          {editable && (
+            <button
+              onClick={() => setShowConsumablePicker(true)}
+              className="text-xs px-3 py-1 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700"
+            >
+              + Add
+            </button>
+          )}
+        </div>
+
+        {consumables.length === 0 && (
+          <p className="text-sm text-slate-500 italic">No consumables recorded.</p>
+        )}
+
+        {consumables.map((item) => (
+          <ConsumableRow
+            key={item.id}
+            item={item}
+            editable={editable}
+            onUpdateQty={updateConsumableQty}
+            onRemove={removeConsumable}
+          />
+        ))}
+      </section>
+
+      {/* GEAR ─────────────────────────────────────────────────────────────── */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
@@ -291,7 +542,7 @@ export function GearTab({ gear, editable, onUpdate }: GearTabProps) {
           </h3>
           {editable && !showCustomForm && (
             <button
-              onClick={() => setShowPicker(true)}
+              onClick={() => setShowGearPicker(true)}
               className="text-xs px-3 py-1 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700"
             >
               + Add Item
@@ -320,14 +571,22 @@ export function GearTab({ gear, editable, onUpdate }: GearTabProps) {
         )}
       </section>
 
-      {showPicker && (
+      {/* MODALS ───────────────────────────────────────────────────────────── */}
+      {showConsumablePicker && (
+        <ConsumablePicker
+          onSelect={addConsumableFromRef}
+          onClose={() => setShowConsumablePicker(false)}
+        />
+      )}
+
+      {showGearPicker && (
         <GearPicker
           onSelect={addFromRef}
           onCustom={() => {
-            setShowPicker(false);
+            setShowGearPicker(false);
             setShowCustomForm(true);
           }}
-          onClose={() => setShowPicker(false)}
+          onClose={() => setShowGearPicker(false)}
         />
       )}
     </div>

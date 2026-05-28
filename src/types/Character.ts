@@ -165,6 +165,20 @@ export interface GearItem {
 }
 
 /**
+ * CONSUMABLES
+ */
+export interface ConsumableItem {
+  id: string;
+  referenceId?: string;  // links back to ConsumableRef.id
+  name: string;
+  quantity: number;
+  description?: string;
+  weight?: string;
+  value?: string;        // cost per dose/unit
+  rarity?: string;
+}
+
+/**
  * AMMUNITION
  */
 export interface AmmoItem {
@@ -303,6 +317,7 @@ export interface Character {
 
   talentsAndTraits: TalentsAndTraitsBlock;
   gear: GearItem[];
+  consumables?: ConsumableItem[];
 
   weaponTraining: WeaponTrainingBlock;
   experience: ExperienceBlock;
