@@ -58,11 +58,13 @@ function pieceApAt(piece: WornArmourPiece, loc: ArmourLocationKey): number {
   return piece.apOverrides?.[loc] ?? piece.ap;
 }
 
-/** Total worn AP for a given location */
+/** Total worn AP for a given location — highest value wins, pieces do not stack */
 function wornApAt(pieces: WornArmourPiece[], loc: ArmourLocationKey): number {
-  return pieces
+  const values = pieces
     .filter((p) => p.worn)
-    .reduce((sum, p) => sum + pieceApAt(p, loc), 0);
+    .map((p) => pieceApAt(p, loc))
+    .filter((ap) => ap > 0);
+  return values.length === 0 ? 0 : Math.max(...values);
 }
 
 /** Human-readable list of locations a piece covers */
