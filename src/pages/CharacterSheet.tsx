@@ -45,6 +45,7 @@ import type {
   WornArmourPiece,
   ArmourLocationKey,
   GearItem,
+  ConsumableItem,
   PsychicBlock,
   ExperienceBlock,
 } from "../types/Character";
@@ -209,6 +210,11 @@ export default function CharacterSheet() {
 
   const handleUpdateGear = useCallback(
     (next: GearItem[]) => updateField("gear", next),
+    [updateField]
+  );
+
+  const handleUpdateConsumables = useCallback(
+    (next: ConsumableItem[]) => updateField("consumables", next),
     [updateField]
   );
 
@@ -446,8 +452,10 @@ export default function CharacterSheet() {
           {activeTab === "gear" && (
             <GearTab
               gear={normaliseGear(character.gear)}
+              consumables={character.consumables ?? []}
               editable={allowedToEdit}
               onUpdate={handleUpdateGear}
+              onUpdateConsumables={handleUpdateConsumables}
             />
           )}
 
