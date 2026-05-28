@@ -24,12 +24,344 @@ export interface ArmourRef {
   rarity: string;
 }
 
-// Convenience shorthand for "all locations"
-const ALL: ArmourLocationKey[] = ["head", "body", "rightArm", "leftArm", "rightLeg", "leftLeg"];
+// Convenience shorthands for common location sets
+const ALL: ArmourLocationKey[]          = ["head", "body", "rightArm", "leftArm", "rightLeg", "leftLeg"];
+const ARMS_BODY_LEGS: ArmourLocationKey[] = ["body", "rightArm", "leftArm", "rightLeg", "leftLeg"];
+const ARMS: ArmourLocationKey[]          = ["rightArm", "leftArm"];
+const LEGS: ArmourLocationKey[]          = ["rightLeg", "leftLeg"];
 
 // ─── Armour Reference ────────────────────────────────────────────────────────
 
+const PRIMITIVE_NOTE =
+  "Primitive. Only provides full AP against weapons that also have the Primitive quality. " +
+  "Against all other attacks, AP is halved (round up).";
+
+const FLAK_NOTE =
+  "Counts as AP 5 against any hit from a weapon with the Blast quality, " +
+  "provided the wearer was not at the point where the blast originated.";
+
+const MESH_NOTE =
+  "Mesh. Formed from thousands of thermoplas cells linked together. " +
+  "Becomes momentarily rigid to spread and dissipate impacts and heat energy.";
+
 export const ARMOUR_REFERENCE: ArmourRef[] = [
+
+  // ── Core Rulebook — Primitive Armour ─────────────────────────────────────
+  {
+    id: "cr-gang-leathers",
+    name: "Gang Leathers",
+    source: SkillSource.CR,
+    locations: ARMS_BODY_LEGS,
+    ap: 1,
+    notes: PRIMITIVE_NOTE,
+    weight: "5 kg",
+    value: "25 Thrones",
+    rarity: "Average",
+  },
+  {
+    id: "cr-heavy-leathers",
+    name: "Heavy Leathers",
+    source: SkillSource.CR,
+    locations: ARMS_BODY_LEGS,
+    ap: 2,
+    notes: PRIMITIVE_NOTE,
+    weight: "7 kg",
+    value: "100 Thrones",
+    rarity: "Common",
+  },
+  {
+    id: "cr-quilted-vest",
+    name: "Quilted Vest",
+    source: SkillSource.CR,
+    locations: ["body"],
+    ap: 2,
+    notes: PRIMITIVE_NOTE,
+    weight: "2 kg",
+    value: "10 Thrones",
+    rarity: "Common",
+  },
+  {
+    id: "cr-beast-furs",
+    name: "Beast Furs",
+    source: SkillSource.CR,
+    locations: ["body"],
+    ap: 2,
+    notes: PRIMITIVE_NOTE,
+    weight: "10 kg",
+    value: "5 Thrones",
+    rarity: "Average",
+  },
+  {
+    id: "cr-grox-hides",
+    name: "Grox Hides",
+    source: SkillSource.CR,
+    locations: ["body"],
+    ap: 3,
+    notes: PRIMITIVE_NOTE,
+    weight: "14 kg",
+    value: "60 Thrones",
+    rarity: "Common",
+  },
+  {
+    id: "cr-chain-coat",
+    name: "Chain Coat",
+    source: SkillSource.CR,
+    locations: ARMS_BODY_LEGS,
+    ap: 3,
+    notes: PRIMITIVE_NOTE,
+    weight: "18 kg",
+    value: "50 Thrones",
+    rarity: "Average",
+  },
+  {
+    id: "cr-feudal-plate",
+    name: "Feudal Plate",
+    source: SkillSource.CR,
+    locations: ALL,
+    ap: 5,
+    notes: PRIMITIVE_NOTE,
+    weight: "30 kg",
+    value: "120 Thrones",
+    rarity: "Scarce",
+  },
+  {
+    id: "cr-xeno-hides",
+    name: "Xeno Hides",
+    source: SkillSource.CR,
+    locations: ["body"],
+    ap: 6,
+    notes: PRIMITIVE_NOTE,
+    weight: "22 kg",
+    value: "5,000 Thrones",
+    rarity: "Very Rare",
+  },
+
+  // ── Core Rulebook — Flak Armour ───────────────────────────────────────────
+  {
+    id: "cr-flak-helmet",
+    name: "Flak Helmet",
+    source: SkillSource.CR,
+    locations: ["head"],
+    ap: 2,
+    notes: FLAK_NOTE,
+    weight: "2 kg",
+    value: "25 Thrones",
+    rarity: "Average",
+  },
+  {
+    id: "cr-flak-gauntlets",
+    name: "Flak Gauntlets",
+    source: SkillSource.CR,
+    locations: ARMS,
+    ap: 2,
+    notes: FLAK_NOTE,
+    weight: "1 kg",
+    value: "50 Thrones",
+    rarity: "Average",
+  },
+  {
+    id: "cr-light-flak-coat",
+    name: "Light Flak Coat",
+    source: SkillSource.CR,
+    locations: ARMS_BODY_LEGS,
+    ap: 2,
+    notes: FLAK_NOTE,
+    weight: "4 kg",
+    value: "80 Thrones",
+    rarity: "Scarce",
+  },
+  {
+    id: "cr-flak-vest",
+    name: "Flak Vest",
+    source: SkillSource.CR,
+    locations: ["body"],
+    ap: 3,
+    notes: FLAK_NOTE,
+    weight: "5 kg",
+    value: "50 Thrones",
+    rarity: "Average",
+  },
+  {
+    id: "cr-flak-jacket",
+    name: "Flak Jacket",
+    source: SkillSource.CR,
+    locations: ARMS_BODY_LEGS,
+    ap: 3,
+    notes: FLAK_NOTE,
+    weight: "6 kg",
+    value: "100 Thrones",
+    rarity: "Average",
+  },
+  {
+    id: "cr-flak-cloak",
+    name: "Flak Cloak",
+    source: SkillSource.CR,
+    locations: ["body"],
+    ap: 3,
+    notes: FLAK_NOTE,
+    weight: "8 kg",
+    value: "80 Thrones",
+    rarity: "Scarce",
+  },
+  {
+    id: "cr-guard-flak-armour",
+    name: "Guard Flak Armour",
+    source: SkillSource.CR,
+    locations: ALL,
+    ap: 4,
+    notes: FLAK_NOTE,
+    weight: "11 kg",
+    value: "300 Thrones",
+    rarity: "Scarce",
+  },
+
+  // ── Core Rulebook — Mesh Armour ───────────────────────────────────────────
+  {
+    id: "cr-mesh-cowl",
+    name: "Mesh Cowl",
+    source: SkillSource.CR,
+    locations: ["head"],
+    ap: 3,
+    notes: MESH_NOTE,
+    weight: "0.5 kg",
+    value: "100 Thrones",
+    rarity: "Rare",
+  },
+  {
+    id: "cr-mesh-gloves",
+    name: "Mesh Gloves",
+    source: SkillSource.CR,
+    locations: ARMS,
+    ap: 3,
+    notes: MESH_NOTE,
+    weight: "0.5 kg",
+    value: "120 Thrones",
+    rarity: "Rare",
+  },
+  {
+    id: "cr-xeno-mesh",
+    name: "Xeno Mesh",
+    source: SkillSource.CR,
+    locations: ARMS_BODY_LEGS,
+    ap: 4,
+    notes: MESH_NOTE,
+    weight: "2 kg",
+    value: "375 Thrones",
+    rarity: "Rare",
+  },
+  {
+    id: "cr-mesh-vest",
+    name: "Mesh Vest",
+    source: SkillSource.CR,
+    locations: ["body"],
+    ap: 4,
+    notes: MESH_NOTE,
+    weight: "1 kg",
+    value: "150 Thrones",
+    rarity: "Rare",
+  },
+  {
+    id: "cr-mesh-combat-cloak",
+    name: "Mesh Combat Cloak",
+    source: SkillSource.CR,
+    locations: ["body", "rightArm", "leftArm"],
+    ap: 4,
+    notes: MESH_NOTE,
+    weight: "1.5 kg",
+    value: "350 Thrones",
+    rarity: "Very Rare",
+  },
+
+  // ── Core Rulebook — Carapace Armour ──────────────────────────────────────
+  {
+    id: "cr-carapace-helm",
+    name: "Carapace Helm",
+    source: SkillSource.CR,
+    locations: ["head"],
+    ap: 4,
+    notes: "Densely layered armaplas, ceramite, or other highly durable material.",
+    weight: "2 kg",
+    value: "250 Thrones",
+    rarity: "Rare",
+  },
+  {
+    id: "cr-carapace-vambraces",
+    name: "Carapace Vambraces",
+    source: SkillSource.CR,
+    locations: ARMS,
+    ap: 5,
+    weight: "2 kg",
+    value: "300 Thrones",
+    rarity: "Rare",
+  },
+  {
+    id: "cr-carapace-greaves",
+    name: "Carapace Greaves",
+    source: SkillSource.CR,
+    locations: LEGS,
+    ap: 5,
+    weight: "3 kg",
+    value: "375 Thrones",
+    rarity: "Rare",
+  },
+  {
+    id: "cr-enforcer-light-carapace",
+    name: "Enforcer Light Carapace",
+    source: SkillSource.CR,
+    locations: ARMS_BODY_LEGS,
+    ap: 5,
+    weight: "15 kg",
+    value: "575 Thrones",
+    rarity: "Rare",
+  },
+  {
+    id: "cr-carapace-chest-plate",
+    name: "Carapace Chest Plate",
+    source: SkillSource.CR,
+    locations: ["body"],
+    ap: 6,
+    weight: "7 kg",
+    value: "600 Thrones",
+    rarity: "Rare",
+  },
+  {
+    id: "cr-storm-trooper-carapace",
+    name: "Storm Trooper Carapace",
+    source: SkillSource.CR,
+    locations: ALL,
+    ap: 6,
+    weight: "17 kg",
+    value: "3,750 Thrones",
+    rarity: "Very Rare",
+  },
+
+  // ── Core Rulebook — Power Armour ──────────────────────────────────────────
+  {
+    id: "cr-light-power-armour",
+    name: "Light Power Armour",
+    source: SkillSource.CR,
+    locations: ALL,
+    ap: 7,
+    notes:
+      "+20 Strength. Increases wearer's size by one step. " +
+      "Requires a constant power supply; a standard non-military supply lasts 1d5 hours before needing replacement or recharging.",
+    weight: "40 kg",
+    value: "8,500 Thrones",
+    rarity: "Very Rare",
+  },
+  {
+    id: "cr-power-armour",
+    name: "Power Armour",
+    source: SkillSource.CR,
+    locations: ALL,
+    ap: 8,
+    notes:
+      "+20 Strength. Increases wearer's size by one step. " +
+      "Requires a constant power supply; a standard non-military supply lasts 1d5 hours before needing replacement or recharging.",
+    weight: "65 kg",
+    value: "15,000 Thrones",
+    rarity: "Very Rare",
+  },
 
   // ── Book of Judgement ─────────────────────────────────────────────────────
   {
