@@ -239,6 +239,7 @@ export interface ExperienceBlock {
 export interface PsychicPower {
   id: string;
   name: string;
+  discipline?: string;
   threshold?: string;
   focusTime?: string;
   sustained?: string;
