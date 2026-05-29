@@ -8,6 +8,7 @@ export type TabId =
   | "cybernetics"
   | "psychic"
   | "gear"
+  | "drugs"
   | "xp"
   | "notes"
   | "admin";

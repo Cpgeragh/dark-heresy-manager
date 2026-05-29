@@ -182,6 +182,19 @@ export interface GearItem {
 }
 
 /**
+ * DRUGS
+ */
+export interface DrugItem {
+  id: string;
+  referenceId?: string;  // links back to DrugRef.id
+  name: string;
+  quantity: number;
+  value?: string;
+  rarity?: string;
+  notes?: string;        // player-added notes
+}
+
+/**
  * CONSUMABLES
  */
 export interface ConsumableItem {
@@ -335,6 +348,7 @@ export interface Character {
   talentsAndTraits: TalentsAndTraitsBlock;
   gear: GearItem[];
   consumables?: ConsumableItem[];
+  drugs?: DrugItem[];
   cybernetics?: CyberneticItem[];
 
   weaponTraining: WeaponTrainingBlock;
