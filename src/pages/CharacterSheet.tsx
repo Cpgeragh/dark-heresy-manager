@@ -13,6 +13,7 @@ import { SkillsTab } from "./characterSheet/tabs/skills/SkillsTab";
 import { TalentsTab } from "./characterSheet/TalentsTab";
 import { WeaponsTab } from "./characterSheet/WeaponsTab";
 import { ArmourTab } from "./characterSheet/ArmourTab";
+import { CyberneticsTab } from "./characterSheet/CyberneticsTab";
 import { PsychicTab } from "./characterSheet/PsychicTab";
 import { GearTab } from "./characterSheet/GearTab";
 import { ExperienceTab } from "./characterSheet/ExperienceTab";
@@ -46,6 +47,7 @@ import type {
   ArmourLocationKey,
   GearItem,
   ConsumableItem,
+  CyberneticItem,
   PsychicBlock,
   ExperienceBlock,
 } from "../types/Character";
@@ -103,6 +105,7 @@ const TABS: TabConfig[] = [
   { id: "talents", label: "Talents" },
   { id: "weapons", label: "Weapons" },
   { id: "armour", label: "Armour" },
+  { id: "cybernetics", label: "Cybernetics" },
   { id: "psychic", label: "Psychic" },
   { id: "gear", label: "Gear" },
   { id: "xp", label: "XP" },
@@ -215,6 +218,11 @@ export default function CharacterSheet() {
 
   const handleUpdateConsumables = useCallback(
     (next: ConsumableItem[]) => updateField("consumables", next),
+    [updateField]
+  );
+
+  const handleUpdateCybernetics = useCallback(
+    (next: CyberneticItem[]) => updateField("cybernetics", next),
     [updateField]
   );
 
@@ -425,6 +433,7 @@ export default function CharacterSheet() {
               onUpdateRanged={handleUpdateRangedWeapons}
               onUpdateMelee={handleUpdateMeleeWeapons}
               onUpdateAmmo={handleUpdateAmmo}
+              cybernetics={character.cybernetics ?? []}
             />
           )}
 
@@ -438,6 +447,15 @@ export default function CharacterSheet() {
               )}
               editable={allowedToEdit}
               onUpdate={handleUpdateArmour}
+              cybernetics={character.cybernetics ?? []}
+            />
+          )}
+
+          {activeTab === "cybernetics" && (
+            <CyberneticsTab
+              cybernetics={character.cybernetics ?? []}
+              editable={allowedToEdit}
+              onUpdate={handleUpdateCybernetics}
             />
           )}
 

@@ -1,7 +1,8 @@
 // src/pages/characterSheet/WeaponsTab.tsx
 
 import { useState, useCallback } from "react";
-import type { RangedWeapon, MeleeWeapon, AmmoItem } from "../../types/Character";
+import type { RangedWeapon, MeleeWeapon, AmmoItem, CyberneticItem } from "../../types/Character";
+import { CYBERNETICS_REFERENCE, type CyberneticWeapon } from "../../data/reference/cyberneticsReference";
 import {
   RANGED_WEAPON_REFERENCE,
   MELEE_WEAPON_REFERENCE,
@@ -30,6 +31,7 @@ interface WeaponsTabProps {
   onUpdateRanged: (next: RangedWeapon[]) => void;
   onUpdateMelee: (next: MeleeWeapon[]) => void;
   onUpdateAmmo: (next: AmmoItem[]) => void;
+  cybernetics?: CyberneticItem[];
 }
 
 type PickerTarget = "ranged" | "melee" | "ammo" | null;
@@ -875,6 +877,67 @@ function CustomAmmoForm({
   );
 }
 
+// ─── Cybernetic Weapon Card ───────────────────────────────────────────────────
+
+function CyberneticWeaponCard({
+  cyberneticName,
+  weapon,
+}: {
+  cyberneticName: string;
+  weapon: CyberneticWeapon;
+}) {
+  const [showRules, setShowRules] = useState(false);
+  const hasRules = !!(weapon.specialRules?.trim());
+
+  return (
+    <div className="border border-cyan-700/40 bg-cyan-900/10 rounded-lg p-3 space-y-3">
+      <div>
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-semibold text-slate-200">{weapon.name}</p>
+          <span className="text-[10px] uppercase tracking-wide text-cyan-400 border border-cyan-700/50 rounded px-1.5 py-0.5 font-medium">
+            Cybernetic
+          </span>
+        </div>
+        <p className="text-xs text-slate-500">
+          {cyberneticName}{weapon.class ? ` · ${weapon.class}` : ""}
+        </p>
+      </div>
+
+      <div className="flex flex-wrap gap-1.5">
+        {weapon.type === "ranged" && weapon.range && <StatChip label="Range"  value={weapon.range} />}
+        {weapon.type === "ranged" && weapon.rof   && <StatChip label="RoF"    value={weapon.rof}   />}
+        {weapon.damage && (
+          <StatChip label="Damage" value={weapon.damage.replace(/\s*[IREX]$/i, "").trim()} />
+        )}
+        {weapon.damage && <DamageTypeChip damage={weapon.damage} />}
+        {weapon.pen    && <StatChip label="Pen"    value={weapon.pen}    />}
+        {weapon.type === "ranged" && weapon.clip && <StatChip label="Clip"   value={weapon.clip}   />}
+        {weapon.type === "ranged" && weapon.rld  && <StatChip label="Reload" value={weapon.rld}    />}
+      </div>
+
+      {hasRules && (
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-slate-400 italic flex-1">{weapon.specialRules}</span>
+          <button
+            onClick={() => setShowRules(true)}
+            title="Explain special rules"
+            className="text-slate-500 hover:text-amber-400 text-sm transition"
+          >
+            ⓘ
+          </button>
+        </div>
+      )}
+
+      {showRules && weapon.specialRules && (
+        <SpecialRulesModal
+          rules={weapon.specialRules}
+          onClose={() => setShowRules(false)}
+        />
+      )}
+    </div>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export function WeaponsTab({
@@ -886,8 +949,16 @@ export function WeaponsTab({
   onUpdateRanged,
   onUpdateMelee,
   onUpdateAmmo,
+  cybernetics,
 }: WeaponsTabProps) {
   const [picker, setPicker] = useState<PickerTarget>(null);
+
+  // ── Cybernetic weapons ─────────────────────────────────────────────────────
+  const cyberneticWeaponItems = (cybernetics ?? []).flatMap((c) => {
+    const ref = CYBERNETICS_REFERENCE.find((r) => r.id === c.referenceId);
+    if (!ref?.weapon) return [];
+    return [{ cybernetic: c, weapon: ref.weapon }];
+  });
   const [showCustomRanged, setShowCustomRanged] = useState(false);
   const [showCustomMelee, setShowCustomMelee] = useState(false);
   const [showCustomAmmo, setShowCustomAmmo] = useState(false);
@@ -1151,6 +1222,28 @@ export function WeaponsTab({
           />
         )}
       </section>
+
+      {/* ── CYBERNETIC WEAPONS ──────────────────────────────────────────── */}
+      {cyberneticWeaponItems.length > 0 && (
+        <section className="space-y-3">
+          <div>
+            <h3 className="text-base font-semibold text-slate-200">Cybernetic Weapons</h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Granted by installed implants — managed in the Cybernetics tab.
+              Melee damage shown before Strength Bonus.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            {cyberneticWeaponItems.map(({ cybernetic, weapon }) => (
+              <CyberneticWeaponCard
+                key={cybernetic.id}
+                cyberneticName={cybernetic.name}
+                weapon={weapon}
+              />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* ── Pickers ─────────────────────────────────────────────────────── */}
       {picker === "ranged" && (

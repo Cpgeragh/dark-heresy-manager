@@ -1,7 +1,7 @@
 // src/pages/characterSheet/ArmourTab.tsx
 
 import { useState, useCallback } from "react";
-import type { WornArmourPiece, ArmourLocationKey } from "../../types/Character";
+import type { WornArmourPiece, ArmourLocationKey, CyberneticItem } from "../../types/Character";
 import { ARMOUR_REFERENCE, type ArmourRef } from "../../data/reference/armourReference";
 import {
   editableInputClass,
@@ -15,6 +15,7 @@ interface ArmourTabProps {
   toughnessBonus: number;
   editable: boolean;
   onUpdate: (next: WornArmourPiece[]) => void;
+  cybernetics?: CyberneticItem[];
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -56,6 +57,11 @@ const LOCATION_ORDER: ArmourLocationKey[] = [
 function pieceApAt(piece: WornArmourPiece, loc: ArmourLocationKey): number {
   if (!piece.locations.includes(loc)) return 0;
   return piece.apOverrides?.[loc] ?? piece.ap;
+}
+
+/** +2 TB bonus for each bionic limb installed at this location */
+function bionicBonusAt(loc: ArmourLocationKey, cybernetics: CyberneticItem[]): number {
+  return cybernetics.some((c) => c.bodyLocation?.includes(loc)) ? 2 : 0;
 }
 
 /** Total worn AP for a given location — highest value wins, pieces do not stack */
@@ -316,6 +322,7 @@ export function ArmourTab({
   toughnessBonus,
   editable,
   onUpdate,
+  cybernetics = [],
 }: ArmourTabProps) {
   const [showPicker, setShowPicker] = useState(false);
   const [showCustomForm, setShowCustomForm] = useState(false);
@@ -391,18 +398,23 @@ export function ArmourTab({
                 <th className="text-left py-1.5 pr-4 font-medium">Location</th>
                 <th className="text-center py-1.5 px-3 font-medium">AP</th>
                 <th className="text-center py-1.5 px-3 font-medium">TB</th>
+                <th className="text-center py-1.5 px-3 font-medium">Bionic</th>
                 <th className="text-center py-1.5 px-3 font-medium">Total</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800">
               {LOCATION_ORDER.map((loc) => {
-                const ap = wornApAt(armour, loc);
-                const total = ap + toughnessBonus;
+                const ap     = wornApAt(armour, loc);
+                const bionic = bionicBonusAt(loc, cybernetics);
+                const total  = ap + toughnessBonus + bionic;
                 return (
                   <tr key={loc} className="hover:bg-slate-800/40 transition">
                     <td className="py-2 pr-4 text-slate-300">{LOCATION_LABELS[loc]}</td>
                     <td className="py-2 px-3 text-center font-mono text-slate-200">{ap}</td>
                     <td className="py-2 px-3 text-center font-mono text-slate-400">{toughnessBonus}</td>
+                    <td className={`py-2 px-3 text-center font-mono ${bionic > 0 ? "text-cyan-400" : "text-slate-700"}`}>
+                      {bionic > 0 ? `+${bionic}` : "—"}
+                    </td>
                     <td className="py-2 px-3 text-center font-mono font-semibold text-amber-300">{total}</td>
                   </tr>
                 );
@@ -411,7 +423,7 @@ export function ArmourTab({
           </table>
         </div>
         <p className="text-xs text-slate-600 mt-1">
-          Total = Armour Points (worn only) + Toughness Bonus
+          Total = Armour Points (worn only) + Toughness Bonus + Bionic (+2 per installed bionic limb)
         </p>
       </section>
 
