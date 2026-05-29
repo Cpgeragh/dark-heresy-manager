@@ -152,6 +152,23 @@ export interface WornArmourPiece {
 }
 
 /**
+ * CYBERNETICS
+ */
+export type CyberneticCraftsmanship = "Poor" | "Common" | "Good";
+
+export interface CyberneticItem {
+  id: string;
+  referenceId?: string;  // links back to CyberneticRef.id
+  name: string;
+  craftsmanship: CyberneticCraftsmanship;
+  notes?: string;        // player-added notes
+  value?: string;
+  rarity?: string;
+  /** Specific body locations where this implant is installed (e.g. ["rightArm"]) */
+  bodyLocation?: ArmourLocationKey[];
+}
+
+/**
  * GEAR
  */
 export interface GearItem {
@@ -318,6 +335,7 @@ export interface Character {
   talentsAndTraits: TalentsAndTraitsBlock;
   gear: GearItem[];
   consumables?: ConsumableItem[];
+  cybernetics?: CyberneticItem[];
 
   weaponTraining: WeaponTrainingBlock;
   experience: ExperienceBlock;

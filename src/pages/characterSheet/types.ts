@@ -5,6 +5,7 @@ export type TabId =
   | "talents"
   | "weapons"
   | "armour"
+  | "cybernetics"
   | "psychic"
   | "gear"
   | "xp"
