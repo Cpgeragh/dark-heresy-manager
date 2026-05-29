@@ -123,4 +123,189 @@ export const DRUGS_REFERENCE: DrugRef[] = [
       "A powerful drug that works to mask pain and drive fighters on when their bodies would " +
       "otherwise give up.",
   },
+
+  // ── Book of Judgement ─────────────────────────────────────────────────────
+
+  {
+    id: "boj-sandstone",
+    name: "Sandstone",
+    source: SkillSource.BoJ,
+    value: "95 Thrones",
+    rarity: "Scarce",
+    effect: "+30 to all Willpower-based Tests and +10 to resist Interrogation.",
+    duration: "1d5+3 hours",
+    sideEffect:
+      "Must pass a Difficult (–10) Toughness Test or gain 1 Fatigue when the drug wears off.",
+    notes: "Yellowish granules rubbed into the gums or injected.",
+  },
+
+  {
+    id: "boj-clear",
+    name: "Clear",
+    source: SkillSource.BoJ,
+    value: "110 Thrones",
+    rarity: "Rare",
+    effect:
+      "Grants the Decadence Talent and +30 to Toughness-based Tests vs passing out or poison effects.",
+    sideEffect:
+      "Causes a powerful migraine approximately 3 hours after use; must refrain from strenuous work for 1d5 hours.",
+    notes: "Tar-like bitter gum, chewed to resist alcohol and common poisons.",
+  },
+
+  {
+    id: "boj-eazille",
+    name: "Eazille",
+    source: SkillSource.BoJ,
+    value: "230 Thrones",
+    rarity: "Very Rare",
+    effect:
+      "Powerful inhibition reducer. User ignores moral constraints and must pass an Ordinary (+10) " +
+      "Willpower Test to resist baser instincts.",
+    duration: "1d5 hours (+1 per dose taken that week)",
+    sideEffect: "Repeated use increases the effects permanently over time.",
+    notes: "Possibly alien in origin.",
+  },
+
+  {
+    id: "boj-holdfast",
+    name: "Holdfast",
+    source: SkillSource.BoJ,
+    value: "165 Thrones",
+    rarity: "Very Rare",
+    effect: "Neurological drugs are at –30 to their normal effects.",
+    duration: "2d5 hours",
+    sideEffect: "–20 to all Willpower-based Tests while under effect.",
+    notes: "Greasy bluish liquid, injected to stiffen the mind.",
+  },
+
+  {
+    id: "boj-hyperexia",
+    name: "Hyperexia",
+    source: SkillSource.BoJ,
+    value: "80 Thrones",
+    rarity: "Scarce",
+    effect: "Thickens skin to a rubbery texture. Grants Resistance (Cold, Heat) and inflicts 1 Fatigue.",
+    duration: "Ongoing — one dose per week required to maintain the effect.",
+    notes:
+      "Must be taken at least a dozen times over as many days before it takes effect.",
+  },
+
+  {
+    id: "boj-karrikian-red-eye",
+    name: "Karrikian Red-Eye",
+    source: SkillSource.BoJ,
+    value: "185 Thrones",
+    rarity: "Rare",
+    effect:
+      "Extends vision into the infra-red spectrum. +20 to Awareness Tests to detect heat-based images.",
+    duration: "1d5 hours",
+    sideEffect:
+      "If used more than once per day, must pass a Difficult (–10) Toughness Test or suffer –20 to " +
+      "all vision-based Tests for that day.",
+  },
+
+  {
+    id: "boj-leatherwort",
+    name: "Leatherwort",
+    source: SkillSource.BoJ,
+    value: "115 Thrones",
+    rarity: "Scarce",
+    effect:
+      "Treated areas count as having 2 additional AP (stacks with regular armour) and +10 to " +
+      "Toughness-based Tests.",
+    duration: "Until treated areas return to normal colour.",
+    notes:
+      "Dried fungal powder rubbed into skin. Treated areas turn mottled dark green then slowly " +
+      "return to normal.",
+  },
+
+  {
+    id: "boj-scav-glysten",
+    name: "Scav-Glysten",
+    source: SkillSource.BoJ,
+    value: "155 Thrones",
+    rarity: "Rare",
+    effect:
+      "–30 to any tracking attempts by scent against the user. Grants Concealment and Shadowing " +
+      "bonuses when hiding from or tracking animals.",
+    duration: "1d10 hours",
+    notes: "Injected chemical that eliminates all scent and pheromone output.",
+  },
+
+  {
+    id: "boj-scraper-ripper",
+    name: "Scraper-Ripper",
+    source: SkillSource.BoJ,
+    value: "90 Thrones",
+    rarity: "Scarce",
+    effect: "+30 to all Agility-based Tests.",
+    duration: "1d5 hours",
+    sideEffect:
+      "Must pass a Hard (–20) Willpower Test to avoid reacting violently when surprised by any stimuli.",
+    notes: "Rendered underhive fish paste, injected or inhaled.",
+  },
+
+  {
+    id: "boj-sisk-ash",
+    name: "Sisk Ash",
+    source: SkillSource.BoJ,
+    value: "80 Thrones",
+    rarity: "Scarce",
+    effect:
+      "Induces calm; user may need an Easy (+30) Willpower Test to perform reluctant tasks. " +
+      "Smoke interferes with Cybermastiff scent-tracking.",
+    duration: "1d5 hours",
+    notes:
+      "Burnt bush-plant mixed with lho, smoked. Pure (unmixed) version causes unconsciousness for " +
+      "1 hour on a failed Hard (–20) Toughness Test.",
+  },
+
+  {
+    id: "boj-truth-revealed",
+    name: "The Truth Revealed",
+    source: SkillSource.BoJ,
+    value: "135 Thrones",
+    rarity: "Rare",
+    effect: "Consult the Book of Judgement for full rules.",
+  },
+
+  {
+    id: "boj-zumthorian-greyve",
+    name: "Zumthorian Greyve",
+    source: SkillSource.BoJ,
+    value: "125 Thrones",
+    rarity: "Rare",
+    effect: "Consult the Book of Judgement for full rules.",
+  },
+
+  // ── Daemon Hunter ─────────────────────────────────────────────────────────
+
+  {
+    id: "dh-dreamjuice",
+    name: "Dreamjuice",
+    source: SkillSource.DH,
+    value: "75 Thrones",
+    rarity: "Scarce",
+    effect: "+10 to all Intelligence Tests.",
+    duration: "30 minutes",
+    sideEffect:
+      "–20 to all Willpower Tests while under effect. After the effect wears off: –10 to all " +
+      "Perception Tests.",
+    notes: "Not physically addictive.",
+  },
+
+  {
+    id: "dh-imperiums-fervour",
+    name: "Imperium's Fervour",
+    source: SkillSource.DH,
+    value: "20 Thrones",
+    rarity: "Scarce",
+    effect:
+      "Fear Tests reduced by one degree of severity. Insanity Points gained are reduced by 2 " +
+      "(minimum 1). –10 to Perception Tests while active.",
+    duration: "24 hours (12 hours if taken orally)",
+    sideEffect:
+      "Memories of events during the effect become hazy — Hard (–20) Intelligence Test to recall; " +
+      "Very Hard after one month.",
+  },
 ];

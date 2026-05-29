@@ -48,7 +48,7 @@ function PowerPicker({
     const matchesQuery = r.name.toLowerCase().includes(query.toLowerCase());
     const matchesDiscipline = discipline === "All" || r.discipline === discipline;
     return matchesQuery && matchesDiscipline;
-  });
+  }).sort((a, b) => a.name.localeCompare(b.name));
 
   const allFilters: DisciplineFilter[] = ["All", ...PSYCHIC_DISCIPLINES];
 

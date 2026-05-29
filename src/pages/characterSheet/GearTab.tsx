@@ -51,7 +51,7 @@ function ConsumablePicker({
   const [query, setQuery] = useState("");
   const filtered = CONSUMABLES_REFERENCE.filter((r) =>
     r.name.toLowerCase().includes(query.toLowerCase())
-  );
+  ).sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
@@ -246,7 +246,7 @@ function GearPicker({
   const [query, setQuery] = useState("");
   const filtered = GEAR_REFERENCE.filter((r) =>
     r.name.toLowerCase().includes(query.toLowerCase())
-  );
+  ).sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">

@@ -130,7 +130,7 @@ function RangedPicker({
   const [query, setQuery] = useState("");
   const filtered = RANGED_WEAPON_REFERENCE.filter((r) =>
     r.name.toLowerCase().includes(query.toLowerCase())
-  );
+  ).sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
@@ -196,7 +196,7 @@ function MeleePicker({
   const [query, setQuery] = useState("");
   const filtered = MELEE_WEAPON_REFERENCE.filter((r) =>
     r.name.toLowerCase().includes(query.toLowerCase())
-  );
+  ).sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
@@ -267,7 +267,7 @@ function AmmoPicker({
   const filtered = AMMO_REFERENCE.filter((r) =>
     r.name.toLowerCase().includes(query.toLowerCase()) ||
     r.compatibleWith.toLowerCase().includes(query.toLowerCase())
-  );
+  ).sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
@@ -337,7 +337,7 @@ function GrenadePicker({
   const [query, setQuery] = useState("");
   const filtered = GRENADE_REFERENCE.filter((r) =>
     r.name.toLowerCase().includes(query.toLowerCase())
-  );
+  ).sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">

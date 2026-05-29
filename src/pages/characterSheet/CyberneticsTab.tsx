@@ -151,7 +151,7 @@ function ImplantPicker({
 
   const filtered = CYBERNETICS_REFERENCE.filter((r) =>
     r.name.toLowerCase().includes(query.toLowerCase())
-  );
+  ).sort((a, b) => a.name.localeCompare(b.name));
 
   // Reset to list
   const resetPicker = () => { setSelected(null); setLocation(null); };
