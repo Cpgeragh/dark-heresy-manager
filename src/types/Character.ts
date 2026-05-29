@@ -100,6 +100,7 @@ export interface RangedWeapon {
   weight?: string;
   value?: string;
   rarity?: string;
+  source?: string;        // e.g. "CR", "BoJ" — which book to look this up in
   custom?: boolean;       // true when created via "Add Custom"
 }
 
@@ -114,6 +115,7 @@ export interface MeleeWeapon {
   weight?: string;
   value?: string;
   rarity?: string;
+  source?: string;
   custom?: boolean;
 }
 
@@ -148,6 +150,7 @@ export interface WornArmourPiece {
   weight?: string;
   value?: string;
   rarity?: string;
+  source?: string;
   custom?: boolean;       // true when created via "Add Custom"
 }
 
@@ -164,6 +167,7 @@ export interface CyberneticItem {
   notes?: string;        // player-added notes
   value?: string;
   rarity?: string;
+  source?: string;
   /** Specific body locations where this implant is installed (e.g. ["rightArm"]) */
   bodyLocation?: ArmourLocationKey[];
 }
@@ -179,6 +183,7 @@ export interface GearItem {
   weight?: string;
   value?: string;
   rarity?: string;
+  source?: string;
 }
 
 /**
@@ -191,6 +196,7 @@ export interface DrugItem {
   quantity: number;
   value?: string;
   rarity?: string;
+  source?: string;
   notes?: string;        // player-added notes
 }
 
@@ -206,6 +212,7 @@ export interface ConsumableItem {
   weight?: string;
   value?: string;        // cost per dose/unit
   rarity?: string;
+  source?: string;
 }
 
 /**
@@ -220,6 +227,7 @@ export interface AmmoItem {
   weight?: string;
   value?: string;
   rarity?: string;
+  source?: string;
   description?: string;     // game-mechanical effects for special ammo
 }
 
@@ -238,6 +246,7 @@ export interface GrenadeItem {
   weight?: string;
   value?: string;        // cost per grenade
   rarity?: string;
+  source?: string;
 }
 
 /**

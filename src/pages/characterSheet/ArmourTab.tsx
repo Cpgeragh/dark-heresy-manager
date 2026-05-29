@@ -7,6 +7,7 @@ import {
   editableInputClass,
   sectionContainerClass,
 } from "../../ui/editableStyles";
+import { sourceColour } from "../../ui/sourceStyles";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -354,6 +355,7 @@ export function ArmourTab({
         weight: ref.weight,
         value: ref.value,
         rarity: ref.rarity,
+        source: ref.source,
       });
     },
     [addPiece]
@@ -562,6 +564,7 @@ function PieceRow({
           {piece.weight && <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">⚖ {piece.weight}</span>}
           {piece.value  && <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">₮ {piece.value}</span>}
           {piece.rarity && <span className={`text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 ${rarityColour(piece.rarity)}`}>{piece.rarity}</span>}
+          {piece.source && <span className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(piece.source)}`}>{piece.source}</span>}
         </div>
       </div>
 

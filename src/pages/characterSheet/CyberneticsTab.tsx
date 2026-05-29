@@ -7,6 +7,7 @@ import {
   editableInputClass,
   sectionContainerClass,
 } from "../../ui/editableStyles";
+import { sourceColour } from "../../ui/sourceStyles";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -362,6 +363,11 @@ function ImplantRow({
               {item.rarity ?? ref?.rarity}
             </span>
           )}
+          {(item.source ?? ref?.source) && (
+            <span className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(item.source ?? ref?.source ?? "")}`}>
+              {item.source ?? ref?.source}
+            </span>
+          )}
         </div>
       </div>
 
@@ -419,6 +425,7 @@ export function CyberneticsTab({ cybernetics, editable, onUpdate }: CyberneticsT
           craftsmanship,
           value: ref.value,
           rarity: ref.rarity,
+          source: ref.source,
           ...(bodyLocation ? { bodyLocation } : {}),
         },
       ]);
