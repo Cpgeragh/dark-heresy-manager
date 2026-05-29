@@ -801,22 +801,48 @@ function RangedCard({
           {attachmentRefs.length === 0 ? (
             <p className="text-xs text-slate-600 italic">None fitted</p>
           ) : (
-            <div className="flex flex-wrap gap-1.5">
-              {attachmentRefs.map(ref => (
+            <div className="space-y-1.5">
+              {attachmentRefs.map(u => (
                 <div
-                  key={ref.id}
-                  className="flex items-center gap-1 bg-slate-800/60 rounded border border-slate-700 px-2 py-0.5"
+                  key={u.id}
+                  className="bg-slate-800/60 rounded border border-slate-700 px-2 py-1.5"
                 >
-                  <span className="text-xs text-slate-300">{ref.name}</span>
-                  {editable && (
-                    <button
-                      onClick={() => onRemoveAttachment(ref.id)}
-                      className="text-slate-500 hover:text-red-400 leading-none ml-1"
-                      title={`Remove ${ref.name}`}
-                    >
-                      ×
-                    </button>
-                  )}
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-medium text-slate-300">{u.name}</span>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <InfoModal
+                        title={u.name}
+                        content={
+                          <div className="space-y-2">
+                            <p className="text-sm text-slate-300 leading-relaxed">{u.description}</p>
+                            <p className="text-xs text-slate-500 italic">{u.applicableTo}</p>
+                          </div>
+                        }
+                      />
+                      {editable && (
+                        <button
+                          onClick={() => onRemoveAttachment(u.id)}
+                          className="text-slate-500 hover:text-red-400 leading-none text-sm"
+                          title={`Remove ${u.name}`}
+                        >
+                          ×
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {u.weightModifier !== "—" && (
+                      <span className="text-[10px] rounded border border-slate-700 bg-slate-900/40 px-1 py-0.5 text-slate-400">
+                        ⚖ {u.weightModifier}
+                      </span>
+                    )}
+                    <span className="text-[10px] rounded border border-slate-700 bg-slate-900/40 px-1 py-0.5 text-amber-400/80 font-mono">
+                      ₮ {u.value}
+                    </span>
+                    <span className={`text-[10px] rounded border bg-slate-900/40 px-1 py-0.5 font-mono ${sourceColour(u.source)}`}>
+                      {u.source}
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -932,22 +958,48 @@ function MeleeCard({
           {attachmentRefs.length === 0 ? (
             <p className="text-xs text-slate-600 italic">None fitted</p>
           ) : (
-            <div className="flex flex-wrap gap-1.5">
-              {attachmentRefs.map(ref => (
+            <div className="space-y-1.5">
+              {attachmentRefs.map(u => (
                 <div
-                  key={ref.id}
-                  className="flex items-center gap-1 bg-slate-800/60 rounded border border-slate-700 px-2 py-0.5"
+                  key={u.id}
+                  className="bg-slate-800/60 rounded border border-slate-700 px-2 py-1.5"
                 >
-                  <span className="text-xs text-slate-300">{ref.name}</span>
-                  {editable && (
-                    <button
-                      onClick={() => onRemoveAttachment(ref.id)}
-                      className="text-slate-500 hover:text-red-400 leading-none ml-1"
-                      title={`Remove ${ref.name}`}
-                    >
-                      ×
-                    </button>
-                  )}
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-medium text-slate-300">{u.name}</span>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <InfoModal
+                        title={u.name}
+                        content={
+                          <div className="space-y-2">
+                            <p className="text-sm text-slate-300 leading-relaxed">{u.description}</p>
+                            <p className="text-xs text-slate-500 italic">{u.applicableTo}</p>
+                          </div>
+                        }
+                      />
+                      {editable && (
+                        <button
+                          onClick={() => onRemoveAttachment(u.id)}
+                          className="text-slate-500 hover:text-red-400 leading-none text-sm"
+                          title={`Remove ${u.name}`}
+                        >
+                          ×
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {u.weightModifier !== "—" && (
+                      <span className="text-[10px] rounded border border-slate-700 bg-slate-900/40 px-1 py-0.5 text-slate-400">
+                        ⚖ {u.weightModifier}
+                      </span>
+                    )}
+                    <span className="text-[10px] rounded border border-slate-700 bg-slate-900/40 px-1 py-0.5 text-amber-400/80 font-mono">
+                      ₮ {u.value}
+                    </span>
+                    <span className={`text-[10px] rounded border bg-slate-900/40 px-1 py-0.5 font-mono ${sourceColour(u.source)}`}>
+                      {u.source}
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>
