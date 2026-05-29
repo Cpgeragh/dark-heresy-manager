@@ -329,6 +329,9 @@ export const TALENT_LIST: readonly TalentData[] = [
   { id: "blessed-flame",                name: "Blessed Flame",                source: SkillSource.DH, hasSpecialisation: false },
   { id: "flames-of-faith",              name: "Flames of Faith",              source: SkillSource.DH, hasSpecialisation: false },
   { id: "mechadendrite-use-techsorcist", name: "Mechadendrite Use (Techsorcist)", source: SkillSource.DH, hasSpecialisation: false },
+
+  // ─── The Black Sepulchre ─────────────────────────────────────────────────────
+  { id: "into-the-breach", name: "Into the Breach", source: SkillSource.BSep, hasSpecialisation: false },
 ];
 
 export type TalentId = (typeof TALENT_LIST)[number]["id"];
