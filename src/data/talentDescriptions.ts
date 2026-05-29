@@ -244,4 +244,7 @@ export const TALENT_DESCRIPTIONS: Record<string, string> = {
   "blessed-flame":                "Flame weapons wielded by this character count as Sanctified against daemons. May also use an Astartes Incinerator without the penalty for not being Adeptus Astartes.",
   "flames-of-faith":              "When using weapons loaded with Psyflame Ammunition, the character is treated as having Psy Rating 3 for the purposes of that weapon's effects.",
   "mechadendrite-use-techsorcist":"One mechadendrite is modified with anti-corruption wards and a secure memory unit (auto-wipes on removal or death). +10 to Forbidden Lore (Tech-Heresy) rolls; +10 to Tech-Use Tests when interfacing with corrupted machine spirits.",
+
+  // ─── The Black Sepulchre ─────────────────────────────────────────────────────
+  "into-the-breach":          "When confronted by Daemonic foes with the Fear trait, treat the Fear Rating as 1 lower (minimum 1) if accompanied by at least two other characters with this talent.",
 };
