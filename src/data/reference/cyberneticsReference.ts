@@ -306,4 +306,65 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
       specialRules: "Defensive, Mono",
     },
   },
+
+  // ── Book of Judgement ─────────────────────────────────────────────────────
+
+  {
+    id: "boj-constructer-interface",
+    name: "Constructer Interface",
+    source: SkillSource.BoJ,
+    value: "—",
+    rarity: "—",
+    notes:
+      "Required to interface with Subrique-pattern Cyber-Mastiffs and Grapple-Hawks. " +
+      "Allows silent Command Tests using Tech-Use in place of Command skill. " +
+      "Uplinks up to 5 constructs; actively commands 2. " +
+      "Full Action to upload a pattern: Defence (+10 WS), Restrain (+20 WS grapple), " +
+      "Harass (+10 Dodge, Dodge Training), Alpha (+10 Per, Awareness Training), " +
+      "Beta (+10 Per, Track Training), Pursuit (+1 AgB, Accustomed to Crowds).",
+    good: "Can actively command 3 constructs instead of 2.",
+  },
+
+  {
+    id: "boj-karrikian-lock-arm",
+    name: "Karrikian Lock-Arm",
+    source: SkillSource.BoJ,
+    value: "—",
+    rarity: "—",
+    requiresLocation: "arm",
+    notes:
+      "Servo-enhanced augmetic arm. Treated as Unnatural Strength (×3) for grappling or restraining. " +
+      "+20 Strength on melee attacks made with the arm. " +
+      "Contains magnetic grapple stakes that brace against nearby supports to prevent the user " +
+      "being lifted when restraining abnormally strong suspects.",
+  },
+
+  {
+    id: "boj-landrian-revealer",
+    name: "Landrian Revealer",
+    source: SkillSource.BoJ,
+    value: "—",
+    rarity: "—",
+    notes:
+      "Ocular augmetic that allows the user to literally see scents and biological markers. " +
+      "Grants Heightened Sense (Smell) and Talented (Tracking). " +
+      "When blinded, may locate targets by smell with only –10 to BS/WS Tests. " +
+      "Half Action to activate.",
+    good: "No penalty when blinded. Also includes Photo-visor or Infra-red goggles.",
+  },
+
+  {
+    id: "boj-malfian-dermaguise",
+    name: "Malfian Dermaguise",
+    source: SkillSource.BoJ,
+    value: "—",
+    rarity: "—",
+    notes:
+      "Electro-flexible plates beneath the skin linked to micro-servos, reshaping facial structure. " +
+      "Requires 5 Rounds and a Challenging (+0) Tech-Use Test: +20 to Disguise (rising to +30 after healing). " +
+      "Failed Test: 1 Tearing Damage per DoF (not reduced by Toughness). " +
+      "3+ DoF: Hard (–20) Toughness Test or lose 1d5 Fellowship permanently. " +
+      "Process can be shortened to 1 Round at –10 per Round reduced.",
+    good: "Also alters skin tone in addition to facial structure.",
+  },
 ];
