@@ -16,6 +16,7 @@ import { ArmourTab } from "./characterSheet/ArmourTab";
 import { CyberneticsTab } from "./characterSheet/CyberneticsTab";
 import { PsychicTab } from "./characterSheet/PsychicTab";
 import { GearTab } from "./characterSheet/GearTab";
+import { DrugsTab } from "./characterSheet/DrugsTab";
 import { ExperienceTab } from "./characterSheet/ExperienceTab";
 import { NotesTab } from "./characterSheet/NotesTab";
 import { AdminTab } from "./characterSheet/AdminTab";
@@ -47,6 +48,7 @@ import type {
   ArmourLocationKey,
   GearItem,
   ConsumableItem,
+  DrugItem,
   CyberneticItem,
   PsychicBlock,
   ExperienceBlock,
@@ -108,6 +110,7 @@ const TABS: TabConfig[] = [
   { id: "cybernetics", label: "Cybernetics" },
   { id: "psychic", label: "Psychic" },
   { id: "gear", label: "Gear" },
+  { id: "drugs", label: "Drugs" },
   { id: "xp", label: "XP" },
   { id: "notes", label: "Notes" },
   { id: "admin", label: "Admin", dmOnly: true },
@@ -218,6 +221,11 @@ export default function CharacterSheet() {
 
   const handleUpdateConsumables = useCallback(
     (next: ConsumableItem[]) => updateField("consumables", next),
+    [updateField]
+  );
+
+  const handleUpdateDrugs = useCallback(
+    (next: DrugItem[]) => updateField("drugs", next),
     [updateField]
   );
 
@@ -474,6 +482,14 @@ export default function CharacterSheet() {
               editable={allowedToEdit}
               onUpdate={handleUpdateGear}
               onUpdateConsumables={handleUpdateConsumables}
+            />
+          )}
+
+          {activeTab === "drugs" && (
+            <DrugsTab
+              drugs={character.drugs ?? []}
+              editable={allowedToEdit}
+              onUpdate={handleUpdateDrugs}
             />
           )}
 

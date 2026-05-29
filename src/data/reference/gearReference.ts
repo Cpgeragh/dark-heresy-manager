@@ -20,6 +20,406 @@ export interface GearRef {
 
 export const GEAR_REFERENCE: GearRef[] = [
 
+  // ── Core Rulebook — Clothing & Personal Items ─────────────────────────────
+
+  {
+    id: "cr-backpack",
+    name: "Backpack",
+    source: SkillSource.CR,
+    description: "A personal carrying device, usually a bag with attached straps. Can carry approximately 50 kilograms.",
+    weight: "1 kg",
+    value: "10 Thrones",
+    rarity: "Plentiful",
+  },
+  {
+    id: "cr-cameleoline-cloak",
+    name: "Cameleoline Cloak",
+    source: SkillSource.CR,
+    description:
+      "Made of mimic fibres that blend the wearer's colouration into their surroundings. " +
+      "Grants a +20 bonus to Concealment Tests. If the wearer remains stationary, he counts as " +
+      "being at Extreme Range when targeted by ranged weapons.",
+    weight: "0.5 kg",
+    value: "500 Thrones",
+    rarity: "Rare",
+  },
+  {
+    id: "cr-charm",
+    name: "Charm",
+    source: SkillSource.CR,
+    description:
+      "A keepsake, holy relic or good luck token intended to draw the benevolent eye of the Emperor. " +
+      "No tangible game benefits. However, when the adventure calls for something bad to happen to a " +
+      "random character, at the GM's discretion a character with a charm will be exempt.",
+    weight: "—",
+    value: "Variable",
+    rarity: "Average",
+  },
+  {
+    id: "cr-chrono",
+    name: "Chrono",
+    source: SkillSource.CR,
+    description: "A hand-held or wrist-worn timepiece, generally dependable and simple to use.",
+    weight: "—",
+    value: "40 Thrones",
+    rarity: "Abundant",
+  },
+  {
+    id: "cr-clip-drop-harness",
+    name: "Clip/Drop Harness",
+    source: SkillSource.CR,
+    description:
+      "A compact spool-stored safety line with a magnetic or hooked clasp, ideal for safety on " +
+      "rooftops or rappelling. A character using a clip harness to descend a vertical surface gains " +
+      "a +30 bonus to Climb Tests and cannot fall if he fails.",
+    weight: "2 kg",
+    value: "25 Thrones",
+    rarity: "Common",
+  },
+  {
+    id: "cr-clothing",
+    name: "Clothing",
+    source: SkillSource.CR,
+    description:
+      "Practical street wear, military uniform, religious garb or any other attire. " +
+      "Cost varies from a few Thrones for basic rags up to thousands for exquisite attire.",
+    weight: "—",
+    value: "Variable",
+    rarity: "Abundant",
+  },
+  {
+    id: "cr-explosive-collar",
+    name: "Explosive Collar",
+    source: SkillSource.CR,
+    description:
+      "Most often attached to penal legionnaires as an additional incentive. Comes with a remote " +
+      "trigger (up to 1,000m range). When detonated, instantly kills the wearer and inflicts " +
+      "1d10 Explosive Damage on anyone within three metres. Removing the collar without the trigger " +
+      "requires a Hard (–20) Tech-Use Test; a serious or worse failure causes it to explode.",
+    weight: "1 kg",
+    value: "55 Thrones",
+    rarity: "Rare",
+  },
+  {
+    id: "cr-filtration-plugs",
+    name: "Filtration Plugs",
+    source: SkillSource.CR,
+    description:
+      "Simple plugs worn in each nostril to screen out most pollutants and harmful gases. " +
+      "Grants a +20 bonus to any Toughness Test made to resist the effects of gas.",
+    weight: "—",
+    value: "15 Thrones",
+    rarity: "Common",
+  },
+  {
+    id: "cr-infra-red-goggles",
+    name: "Infra-Red Goggles",
+    source: SkillSource.CR,
+    description:
+      "Allows the wearer to see thermal images from warm bodies, revealing hiding enemies. " +
+      "The wearer suffers no penalties due to darkness and gains a +20 bonus to vision-based " +
+      "Perception Tests at night. Advanced models can be disguised as simple eyeglasses.",
+    weight: "0.5 kg",
+    value: "275 Thrones",
+    rarity: "Rare",
+  },
+  {
+    id: "cr-photo-visors",
+    name: "Photo-Visors/Contacts",
+    source: SkillSource.CR,
+    description:
+      "Advanced lenses that enhance low-level light — users can see in the dark almost as well as " +
+      "in daylight. Characters wearing these gain the Dark Sight trait. " +
+      "Good Quality visors also make the wearer immune to the effects of photon ash grenades.",
+    weight: "0.5 kg",
+    value: "100 Thrones",
+    rarity: "Scarce",
+  },
+  {
+    id: "cr-re-breather",
+    name: "Re-Breather",
+    source: SkillSource.CR,
+    description:
+      "A mask or helmet with its own air supply, designed to preserve the user in even the most " +
+      "toxic atmospheres. The wearer is immune to the effects of gases and can even survive " +
+      "underwater. Air canisters last about one hour then must be replaced (Full Action). " +
+      "Replacement canisters cost 25 Thrones and are Scarce.",
+    weight: "1 kg",
+    value: "50 Thrones",
+    rarity: "Scarce",
+  },
+  {
+    id: "cr-recoil-glove",
+    name: "Recoil Glove",
+    source: SkillSource.CR,
+    description:
+      "Interlocking plates connected with memory wire that lock into a rigid strut around the " +
+      "hand and wrist when gripping a weapon. A character using a recoil glove can fire a Basic " +
+      "weapon with one hand without the normal –20 penalty. In addition, Pistol weapons that " +
+      "require two hands can be used one-handed without penalty.",
+    weight: "0.5 kg",
+    value: "85 Thrones",
+    rarity: "Common",
+  },
+  {
+    id: "cr-respirator",
+    name: "Respirator/Gas Mask",
+    source: SkillSource.CR,
+    description:
+      "A breathing mask that covers the nose and mouth or entire face, offering much better " +
+      "protection than filtration plugs. A character wearing a respirator or gas mask gains a " +
+      "+30 bonus to Toughness Tests made to resist the effects of gas, and may re-roll failed results.",
+    weight: "0.5 kg",
+    value: "25 Thrones",
+    rarity: "Average",
+  },
+  {
+    id: "cr-void-suit",
+    name: "Void Suit",
+    source: SkillSource.CR,
+    description:
+      "A sealed suit intended to preserve the wearer in the most hostile environments. " +
+      "Incorporates a re-breather and allows the wearer to survive in vacuum.",
+    weight: "8 kg",
+    value: "100 Thrones",
+    rarity: "Plentiful",
+  },
+  {
+    id: "cr-synskin",
+    name: "Synskin",
+    source: SkillSource.CR,
+    description:
+      "A bio-reactive bodyglove with an inert non-reactive surface that moulds itself to the " +
+      "wearer's form. Adds 2 Armour Points to all locations and grants a +10 bonus to Concealment " +
+      "and Silent Move Tests. Renders the wearer invisible to the effects of infra-red goggles " +
+      "and Dark Sight.",
+    weight: "2 kg",
+    value: "2,500 Thrones",
+    rarity: "Very Rare",
+  },
+
+  // ── Core Rulebook — Tools ─────────────────────────────────────────────────
+
+  {
+    id: "cr-auspex",
+    name: "Auspex/Scanner",
+    source: SkillSource.CR,
+    description:
+      "Used to detect energy emissions, motion and biological life signs. Grants a +20 bonus to " +
+      "Awareness Tests. A Tech-Use Test allows detection of things not normally detectable " +
+      "(invisible gases, bio-signs, ambient radiation). Standard range 50m; walls more than 50cm " +
+      "thick and certain shielding materials can block the scanner.",
+    weight: "0.5 kg",
+    value: "145 Thrones",
+    rarity: "Scarce",
+  },
+  {
+    id: "cr-auto-quill",
+    name: "Auto Quill",
+    source: SkillSource.CR,
+    description:
+      "An arcane-looking scribing device that allows the user to copy text at an impressive rate " +
+      "with great accuracy. A character with the Trade (Copyist) skill gains +10 to their Skill Tests.",
+    weight: "—",
+    value: "55 Thrones",
+    rarity: "Scarce",
+  },
+  {
+    id: "cr-combi-tool",
+    name: "Combi-tool",
+    source: SkillSource.CR,
+    description:
+      "A versatile mechanical device commonly found in the hands of the Adeptus Mechanicus. " +
+      "Grants a +10 bonus to Tech-Use Tests.",
+    weight: "1 kg",
+    value: "200 Thrones",
+    rarity: "Rare",
+  },
+  {
+    id: "cr-data-slate",
+    name: "Data-slate",
+    source: SkillSource.CR,
+    description:
+      "The primary means of storing and reading printed text, video or audio in the Imperium. " +
+      "Some contain only a single media recording; others can re-record, transmit and receive data " +
+      "from other devices.",
+    weight: "0.5 kg",
+    value: "25 Thrones",
+    rarity: "Common",
+  },
+  {
+    id: "cr-demolition-charge",
+    name: "Demolition Charge",
+    source: SkillSource.CR,
+    description:
+      "A simple explosive device used for blowing open doors, breaching walls and destroying " +
+      "bridges. Cost and weight represent 1 kg of explosives; charges can be rigged together for " +
+      "greater effect. When detonated: 3d10 Explosive Damage plus +2 per kilogram used. " +
+      "Blast radius = kilograms used × 5 metres.",
+    weight: "1 kg",
+    value: "250 Thrones",
+    rarity: "Scarce",
+  },
+  {
+    id: "cr-excruciator-kit",
+    name: "Excruciator Kit",
+    source: SkillSource.CR,
+    description:
+      "An array of blades, needles, chemicals, drugs, thermal prongs and neural links used in " +
+      "the questioning of captured enemies. Grants a +20 bonus to all Interrogation Tests.",
+    weight: "1 kg",
+    value: "375 Thrones",
+    rarity: "Very Rare",
+  },
+  {
+    id: "cr-glow-globe",
+    name: "Glow-globe/Lamp Pack",
+    source: SkillSource.CR,
+    description:
+      "A common source of light, able to illuminate an area a dozen or more metres in diameter. " +
+      "Lasts 1d5 hours before needing to be recharged or have its power cell replaced.",
+    weight: "0.5 kg",
+    value: "15 Thrones",
+    rarity: "Abundant",
+  },
+  {
+    id: "cr-grapnel",
+    name: "Grapnel",
+    source: SkillSource.CR,
+    description:
+      "Fires a hooked or magnetic grapnel connected to 100m of thin but strong wire. Once attached, " +
+      "the user can manually climb the line or activate a powered winch. Can also be used as a crude " +
+      "projectile weapon, counting as a single-shot crossbow.",
+    weight: "2 kg",
+    value: "30 Thrones",
+    rarity: "Common",
+  },
+  {
+    id: "cr-lascutter",
+    name: "Lascutter",
+    source: SkillSource.CR,
+    description:
+      "A short-range device that emits an intense laser beam, capable of cutting through rock, " +
+      "steel and armour plate. Can cut through or weld shut 10 cm of metal per Turn. " +
+      "Too unwieldy to be used in combat.",
+    weight: "4 kg",
+    value: "65 Thrones",
+    rarity: "Average",
+  },
+  {
+    id: "cr-magnoculars",
+    name: "Magnoculars",
+    source: SkillSource.CR,
+    description:
+      "Powerful vision aids that magnify distant objects. Advanced models can provide range " +
+      "read-outs, detect heat sources, calculate target location positioning and take image " +
+      "snapshots for later analysis.",
+    weight: "0.5 kg",
+    value: "55 Thrones",
+    rarity: "Average",
+  },
+  {
+    id: "cr-manacles",
+    name: "Manacles",
+    source: SkillSource.CR,
+    description:
+      "Solid restraints often used by bounty hunters and enforcers, and equally found in the " +
+      "hands of more nefarious individuals for darker purposes.",
+    weight: "1 kg",
+    value: "35 Thrones",
+    rarity: "Plentiful",
+  },
+  {
+    id: "cr-micro-bead",
+    name: "Micro-bead",
+    source: SkillSource.CR,
+    description:
+      "A short-range communication device worn in the ear, good out to about one kilometre. " +
+      "Bad weather, dense terrain and intervening rock or plasteel can greatly reduce this range.",
+    weight: "—",
+    value: "20 Thrones",
+    rarity: "Average",
+  },
+  {
+    id: "cr-multikey",
+    name: "Multikey",
+    source: SkillSource.CR,
+    description:
+      "Can open most standard Imperial locks — not a standard item for honest Imperial citizens. " +
+      "Grants a +30 bonus to any Security Test when trying to open locks.",
+    weight: "—",
+    value: "150 Thrones",
+    rarity: "Scarce",
+  },
+  {
+    id: "cr-pict-recorder",
+    name: "Pict Recorder",
+    source: SkillSource.CR,
+    description:
+      "A live-media recording device, some with holographic capabilities. Most allow for playback " +
+      "as well as recording.",
+    weight: "1 kg",
+    value: "100 Thrones",
+    rarity: "Average",
+  },
+  {
+    id: "cr-psy-focus",
+    name: "Psy-focus",
+    source: SkillSource.CR,
+    description:
+      "A device used by psykers to focus their powers — sacred bones, carved wyth staves, blessed " +
+      "icons or crystals. When a Psyker with a Psy-focus makes an Invocation Test, he gains a " +
+      "+10 bonus.",
+    weight: "—",
+    value: "100 Thrones",
+    rarity: "Rare",
+  },
+  {
+    id: "cr-screamers",
+    name: "Screamers",
+    source: SkillSource.CR,
+    description:
+      "Proximity alarms that detect motion or sound (depending on the model). Requires a Tech-Use " +
+      "Test to set (GM rolls secretly). Once set, has a Perception of 75 for detecting sounds or " +
+      "motions. If triggered, sounds an alarm audible up to one kilometre away.",
+    weight: "2 kg",
+    value: "140 Thrones",
+    rarity: "Scarce",
+  },
+  {
+    id: "cr-stummers",
+    name: "Stummers",
+    source: SkillSource.CR,
+    description:
+      "Generate sound waves to cancel out ambient sounds and noises made by moving personnel. " +
+      "Grants a +30 bonus to Silent Move Tests. Has enough power for 20 minutes of continuous use " +
+      "before needing to be recharged (approximately one hour).",
+    weight: "2 kg",
+    value: "25 Thrones",
+    rarity: "Average",
+  },
+  {
+    id: "cr-vox-caster",
+    name: "Vox-caster",
+    source: SkillSource.CR,
+    description:
+      "A communication device capable of sending signals over great distances, including to ships " +
+      "in orbit from a planet's surface. Using a vox to receive or transmit requires a successful " +
+      "Ordinary (+10) Tech-Use Test.",
+    weight: "4 kg",
+    value: "300 Thrones",
+    rarity: "Scarce",
+  },
+  {
+    id: "cr-writing-kit",
+    name: "Writing Kit",
+    source: SkillSource.CR,
+    description: "Contains papers, inks and quills.",
+    weight: "2 kg",
+    value: "20 Thrones",
+    rarity: "Common",
+  },
+
   // ── Book of Judgement — Gear ──────────────────────────────────────────────
   {
     id: "gene-printer",
