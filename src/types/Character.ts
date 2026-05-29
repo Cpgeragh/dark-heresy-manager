@@ -102,6 +102,7 @@ export interface RangedWeapon {
   rarity?: string;
   source?: string;        // e.g. "CR", "BoJ" — which book to look this up in
   custom?: boolean;       // true when created via "Add Custom"
+  attachments?: string[]; // WeaponUpgradeRef.id values for fitted upgrades
 }
 
 export interface MeleeWeapon {
@@ -117,6 +118,7 @@ export interface MeleeWeapon {
   rarity?: string;
   source?: string;
   custom?: boolean;
+  attachments?: string[]; // WeaponUpgradeRef.id values for fitted upgrades
 }
 
 /**

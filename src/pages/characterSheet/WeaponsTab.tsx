@@ -17,6 +17,10 @@ import {
   type AmmoRef,
 } from "../../data/reference/ammoReference";
 import {
+  WEAPON_UPGRADE_REFERENCE,
+  type WeaponUpgradeRef,
+} from "../../data/reference/weaponUpgradeReference";
+import {
   editableInputClass,
   sectionContainerClass,
 } from "../../ui/editableStyles";
@@ -57,6 +61,126 @@ function rarityColour(rarity: string | undefined): string {
     case "Issued Only":    return "text-cyan-400";
     default:           return "text-slate-400";
   }
+}
+
+// ─── Attachment Stat Helpers ─────────────────────────────────────────────────
+
+function modifyDamageBonus(damage: string, delta: number): string {
+  const m = damage.trim().match(/^(\d*d\d+)([+-]\d+)?\s*([IREX])?$/i);
+  if (!m) return damage;
+  const dice = m[1];
+  const bonus = (m[2] ? parseInt(m[2]) : 0) + delta;
+  const type = m[3] ? ` ${m[3].toUpperCase()}` : "";
+  if (bonus === 0) return `${dice}${type}`.trim();
+  return `${dice}${bonus > 0 ? "+" : ""}${bonus}${type}`.trim();
+}
+
+function halveRange(range: string): string {
+  const m = range.match(/^(\d+)m$/i);
+  if (!m) return range;
+  return `${Math.ceil(parseInt(m[1]) / 2)}m`;
+}
+
+function halveClip(clip: string): string {
+  const n = parseInt(clip);
+  return isNaN(n) ? clip : String(Math.max(1, Math.ceil(n / 2)));
+}
+
+function modifyPen(pen: string, delta: number): string {
+  const n = parseInt(pen);
+  return isNaN(n) ? pen : String(Math.max(0, n + delta));
+}
+
+function removeSpecialRule(rules: string, toRemove: string): string {
+  const result = rules
+    .split(",")
+    .map(r => r.trim())
+    .filter(r => r.toLowerCase() !== toRemove.toLowerCase())
+    .filter(Boolean)
+    .join(", ");
+  return result || "—";
+}
+
+function effectiveRangedStats(
+  weapon: RangedWeapon,
+  attachmentRefs: WeaponUpgradeRef[]
+): { damage: string; range: string; clip: string; pen: string; specialRules: string } {
+  let damage = weapon.damage ?? "";
+  let range = weapon.range ?? "";
+  let clip = weapon.clip ?? "";
+  let pen = weapon.pen ?? "";
+  let specialRules = weapon.specialRules ?? "";
+  for (const ref of attachmentRefs) {
+    if (ref.id === "cr-compact") {
+      damage = modifyDamageBonus(damage, -1);
+      range = halveRange(range);
+      clip = halveClip(clip);
+    } else if (ref.id === "cr-extra-grip") {
+      range = halveRange(range);
+    } else if (ref.id === "cr-overcharge-pack") {
+      damage = modifyDamageBonus(damage, +1);
+      clip = halveClip(clip);
+    }
+  }
+  return { damage, range, clip, pen, specialRules };
+}
+
+function effectiveMeleeStats(
+  weapon: MeleeWeapon,
+  attachmentRefs: WeaponUpgradeRef[]
+): { pen: string; specialRules: string } {
+  let pen = weapon.pen ?? "";
+  let specialRules = weapon.specialRules ?? "";
+  for (const ref of attachmentRefs) {
+    if (ref.id === "cr-mono") {
+      pen = modifyPen(pen, +2);
+      specialRules = removeSpecialRule(specialRules, "Primitive");
+    }
+  }
+  return { pen, specialRules };
+}
+
+function getCompatibleUpgrades(
+  weaponClass: string,
+  weaponName: string,
+  isMelee: boolean,
+  currentIds: string[]
+): WeaponUpgradeRef[] {
+  const cls = weaponClass.toLowerCase();
+  const name = weaponName.toLowerCase();
+  const hasSight = currentIds.some(
+    id => id === "cr-red-dot-laser-sight" || id === "cr-telescopic-sight"
+  );
+  return WEAPON_UPGRADE_REFERENCE.filter(u => {
+    if (currentIds.includes(u.id)) return false;
+    switch (u.id) {
+      case "cr-compact":
+        return !isMelee && (cls === "pistol" || cls === "basic");
+      case "cr-exterminator":
+        return true;
+      case "cr-extra-grip":
+        return !isMelee && cls === "basic";
+      case "cr-fire-selector":
+        return !isMelee && (cls === "pistol" || cls === "basic");
+      case "cr-melee-attachment":
+        return !isMelee && cls === "basic";
+      case "cr-mono":
+        return isMelee;
+      case "cr-overcharge-pack":
+        return !isMelee && (cls === "pistol" || cls === "basic");
+      case "cr-red-dot-laser-sight":
+        return !isMelee && !hasSight && (cls === "pistol" || cls === "basic");
+      case "cr-silencer":
+        return !isMelee && (
+          name.includes("stub") || name.includes("hand cannon") ||
+          name.includes("autogun") || name.includes("hunting rifle")
+        );
+      case "cr-telescopic-sight":
+        return !isMelee && !hasSight && cls === "basic";
+      default:
+        return false;
+    }
+  });
 }
 
 // ─── Special Rules Modal ──────────────────────────────────────────────────────
@@ -109,6 +233,64 @@ function SpecialRulesModal({
             className="w-full py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-sm text-slate-200"
           >
             Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Attachment Picker ────────────────────────────────────────────────────────
+
+function AttachmentPicker({
+  compatibleUpgrades,
+  onSelect,
+  onClose,
+}: {
+  compatibleUpgrades: WeaponUpgradeRef[];
+  onSelect: (id: string) => void;
+  onClose: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+      <div className="w-full max-w-md bg-slate-900 border border-slate-700 rounded-xl shadow-2xl flex flex-col max-h-[80vh]">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
+          <h3 className="text-sm font-semibold text-slate-200">Add Attachment</h3>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-200 text-lg leading-none">×</button>
+        </div>
+        <div className="overflow-y-auto flex-1 divide-y divide-slate-800">
+          {compatibleUpgrades.length === 0 && (
+            <p className="p-4 text-sm text-slate-500 text-center">No compatible upgrades available.</p>
+          )}
+          {compatibleUpgrades.map(upgrade => (
+            <button
+              key={upgrade.id}
+              onClick={() => onSelect(upgrade.id)}
+              className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group"
+            >
+              <div className="flex items-center justify-between gap-2 mb-1">
+                <span className="text-sm font-medium text-slate-200 group-hover:text-white">
+                  {upgrade.name}
+                </span>
+                <div className="flex items-center gap-1.5 text-xs shrink-0">
+                  <span className={rarityColour(upgrade.rarity)}>{upgrade.rarity}</span>
+                  <span className="text-slate-600">·</span>
+                  <span className="text-amber-400/80 font-mono">₮ {upgrade.value}</span>
+                  <span className="text-slate-600">·</span>
+                  <span className="text-slate-400">{upgrade.weightModifier}</span>
+                </div>
+              </div>
+              <p className="text-xs text-slate-400 leading-relaxed">{upgrade.description}</p>
+              <p className="text-xs text-slate-600 mt-1 italic">{upgrade.applicableTo}</p>
+            </button>
+          ))}
+        </div>
+        <div className="px-4 py-3 border-t border-slate-700">
+          <button
+            onClick={onClose}
+            className="w-full py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-sm text-slate-300"
+          >
+            Cancel
           </button>
         </div>
       </div>
@@ -532,13 +714,23 @@ function RangedCard({
   weapon,
   editable,
   onRemove,
+  onAddAttachment,
+  onRemoveAttachment,
 }: {
   weapon: RangedWeapon;
   editable: boolean;
   onRemove: () => void;
+  onAddAttachment: (upgradeId: string) => void;
+  onRemoveAttachment: (upgradeId: string) => void;
 }) {
   const [showRules, setShowRules] = useState(false);
-  const hasRules = !!(weapon.specialRules?.trim());
+  const [showAttachPicker, setShowAttachPicker] = useState(false);
+
+  const attachmentIds = weapon.attachments ?? [];
+  const attachmentRefs = WEAPON_UPGRADE_REFERENCE.filter(u => attachmentIds.includes(u.id));
+  const effective = effectiveRangedStats(weapon, attachmentRefs);
+  const compatible = getCompatibleUpgrades(weapon.class ?? "", weapon.name, false, attachmentIds);
+  const hasRules = !!(effective.specialRules?.trim());
 
   return (
     <div className={sectionContainerClass(editable) + " space-y-3"}>
@@ -559,19 +751,19 @@ function RangedCard({
 
       {/* Stats grid */}
       <div className="flex flex-wrap gap-1.5">
-        {weapon.range && <StatChip label="Range" value={weapon.range} />}
+        {effective.range && <StatChip label="Range" value={effective.range} />}
         {weapon.rof && <StatChip label="RoF" value={weapon.rof} />}
-        {weapon.damage && <StatChip label="Damage" value={weapon.damage.replace(/\s*[IREX]$/i, "").trim()} />}
-        {weapon.damage && <DamageTypeChip damage={weapon.damage} />}
-        {weapon.pen && <StatChip label="Pen" value={weapon.pen} />}
-        {weapon.clip && <StatChip label="Clip" value={weapon.clip} />}
+        {effective.damage && <StatChip label="Damage" value={effective.damage.replace(/\s*[IREX]$/i, "").trim()} />}
+        {effective.damage && <DamageTypeChip damage={effective.damage} />}
+        {effective.pen && <StatChip label="Pen" value={effective.pen} />}
+        {effective.clip && <StatChip label="Clip" value={effective.clip} />}
         {weapon.rld && <StatChip label="Reload" value={weapon.rld} />}
       </div>
 
       {/* Special rules */}
       {hasRules && (
         <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-400 italic flex-1">{weapon.specialRules}</span>
+          <span className="text-xs text-slate-400 italic flex-1">{effective.specialRules}</span>
           <button
             onClick={() => setShowRules(true)}
             title="Explain special rules"
@@ -592,10 +784,58 @@ function RangedCard({
         </div>
       )}
 
-      {showRules && weapon.specialRules && (
+      {/* Attachments */}
+      {(attachmentRefs.length > 0 || (editable && compatible.length > 0)) && (
+        <div className="border-t border-slate-800 pt-2 space-y-1.5">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-slate-500 uppercase tracking-wide">Attachments</span>
+            {editable && compatible.length > 0 && (
+              <button
+                onClick={() => setShowAttachPicker(true)}
+                className="text-xs text-amber-400 hover:text-amber-300"
+              >
+                + Add
+              </button>
+            )}
+          </div>
+          {attachmentRefs.length === 0 ? (
+            <p className="text-xs text-slate-600 italic">None fitted</p>
+          ) : (
+            <div className="flex flex-wrap gap-1.5">
+              {attachmentRefs.map(ref => (
+                <div
+                  key={ref.id}
+                  className="flex items-center gap-1 bg-slate-800/60 rounded border border-slate-700 px-2 py-0.5"
+                >
+                  <span className="text-xs text-slate-300">{ref.name}</span>
+                  {editable && (
+                    <button
+                      onClick={() => onRemoveAttachment(ref.id)}
+                      className="text-slate-500 hover:text-red-400 leading-none ml-1"
+                      title={`Remove ${ref.name}`}
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {showRules && effective.specialRules && (
         <SpecialRulesModal
-          rules={weapon.specialRules}
+          rules={effective.specialRules}
           onClose={() => setShowRules(false)}
+        />
+      )}
+
+      {showAttachPicker && (
+        <AttachmentPicker
+          compatibleUpgrades={compatible}
+          onSelect={(id) => { onAddAttachment(id); setShowAttachPicker(false); }}
+          onClose={() => setShowAttachPicker(false)}
         />
       )}
     </div>
@@ -607,14 +847,24 @@ function MeleeCard({
   editable,
   strengthBonus,
   onRemove,
+  onAddAttachment,
+  onRemoveAttachment,
 }: {
   weapon: MeleeWeapon;
   editable: boolean;
   strengthBonus: number;
   onRemove: () => void;
+  onAddAttachment: (upgradeId: string) => void;
+  onRemoveAttachment: (upgradeId: string) => void;
 }) {
   const [showRules, setShowRules] = useState(false);
-  const hasRules = !!(weapon.specialRules?.trim());
+  const [showAttachPicker, setShowAttachPicker] = useState(false);
+
+  const attachmentIds = weapon.attachments ?? [];
+  const attachmentRefs = WEAPON_UPGRADE_REFERENCE.filter(u => attachmentIds.includes(u.id));
+  const effective = effectiveMeleeStats(weapon, attachmentRefs);
+  const compatible = getCompatibleUpgrades(weapon.class ?? "", weapon.name, true, attachmentIds);
+  const hasRules = !!(effective.specialRules?.trim());
 
   return (
     <div className={sectionContainerClass(editable) + " space-y-3"}>
@@ -635,7 +885,7 @@ function MeleeCard({
       <div className="flex flex-wrap gap-1.5">
         {weapon.damage && <StatChip label="Damage" value={weapon.damage.replace(/\s*[IREX]$/i, "").trim()} />}
         {weapon.damage && <DamageTypeChip damage={weapon.damage} />}
-        {weapon.pen && <StatChip label="Pen" value={weapon.pen} />}
+        {effective.pen && <StatChip label="Pen" value={effective.pen} />}
         <StatChip label="SB" value={`+${strengthBonus}`} />
         {weapon.damage && (
           <StatChip label="Total" value={computeMeleeTotalDamage(weapon.damage, strengthBonus)} />
@@ -644,7 +894,7 @@ function MeleeCard({
 
       {hasRules && (
         <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-400 italic flex-1">{weapon.specialRules}</span>
+          <span className="text-xs text-slate-400 italic flex-1">{effective.specialRules}</span>
           <button
             onClick={() => setShowRules(true)}
             title="Explain special rules"
@@ -665,10 +915,58 @@ function MeleeCard({
         </div>
       )}
 
-      {showRules && weapon.specialRules && (
+      {/* Attachments */}
+      {(attachmentRefs.length > 0 || (editable && compatible.length > 0)) && (
+        <div className="border-t border-slate-800 pt-2 space-y-1.5">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-slate-500 uppercase tracking-wide">Attachments</span>
+            {editable && compatible.length > 0 && (
+              <button
+                onClick={() => setShowAttachPicker(true)}
+                className="text-xs text-amber-400 hover:text-amber-300"
+              >
+                + Add
+              </button>
+            )}
+          </div>
+          {attachmentRefs.length === 0 ? (
+            <p className="text-xs text-slate-600 italic">None fitted</p>
+          ) : (
+            <div className="flex flex-wrap gap-1.5">
+              {attachmentRefs.map(ref => (
+                <div
+                  key={ref.id}
+                  className="flex items-center gap-1 bg-slate-800/60 rounded border border-slate-700 px-2 py-0.5"
+                >
+                  <span className="text-xs text-slate-300">{ref.name}</span>
+                  {editable && (
+                    <button
+                      onClick={() => onRemoveAttachment(ref.id)}
+                      className="text-slate-500 hover:text-red-400 leading-none ml-1"
+                      title={`Remove ${ref.name}`}
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {showRules && effective.specialRules && (
         <SpecialRulesModal
-          rules={weapon.specialRules}
+          rules={effective.specialRules}
           onClose={() => setShowRules(false)}
+        />
+      )}
+
+      {showAttachPicker && (
+        <AttachmentPicker
+          compatibleUpgrades={compatible}
+          onSelect={(id) => { onAddAttachment(id); setShowAttachPicker(false); }}
+          onClose={() => setShowAttachPicker(false)}
         />
       )}
     </div>
@@ -1405,6 +1703,54 @@ export function WeaponsTab({
     [editable, ammo, onUpdateAmmo]
   );
 
+  const addAttachmentToRanged = useCallback(
+    (weaponId: string, upgradeId: string) => {
+      if (!editable) return;
+      onUpdateRanged(rangedWeapons.map(w =>
+        w.id === weaponId
+          ? { ...w, attachments: [...(w.attachments ?? []), upgradeId] }
+          : w
+      ));
+    },
+    [editable, rangedWeapons, onUpdateRanged]
+  );
+
+  const removeAttachmentFromRanged = useCallback(
+    (weaponId: string, upgradeId: string) => {
+      if (!editable) return;
+      onUpdateRanged(rangedWeapons.map(w =>
+        w.id === weaponId
+          ? { ...w, attachments: (w.attachments ?? []).filter(id => id !== upgradeId) }
+          : w
+      ));
+    },
+    [editable, rangedWeapons, onUpdateRanged]
+  );
+
+  const addAttachmentToMelee = useCallback(
+    (weaponId: string, upgradeId: string) => {
+      if (!editable) return;
+      onUpdateMelee(meleeWeapons.map(w =>
+        w.id === weaponId
+          ? { ...w, attachments: [...(w.attachments ?? []), upgradeId] }
+          : w
+      ));
+    },
+    [editable, meleeWeapons, onUpdateMelee]
+  );
+
+  const removeAttachmentFromMelee = useCallback(
+    (weaponId: string, upgradeId: string) => {
+      if (!editable) return;
+      onUpdateMelee(meleeWeapons.map(w =>
+        w.id === weaponId
+          ? { ...w, attachments: (w.attachments ?? []).filter(id => id !== upgradeId) }
+          : w
+      ));
+    },
+    [editable, meleeWeapons, onUpdateMelee]
+  );
+
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
@@ -1437,6 +1783,8 @@ export function WeaponsTab({
               weapon={w}
               editable={editable}
               onRemove={() => removeRanged(i)}
+              onAddAttachment={(upgradeId) => addAttachmentToRanged(w.id, upgradeId)}
+              onRemoveAttachment={(upgradeId) => removeAttachmentFromRanged(w.id, upgradeId)}
             />
           ))}
 
@@ -1473,6 +1821,8 @@ export function WeaponsTab({
               editable={editable}
               strengthBonus={strengthBonus}
               onRemove={() => removeMelee(i)}
+              onAddAttachment={(upgradeId) => addAttachmentToMelee(w.id, upgradeId)}
+              onRemoveAttachment={(upgradeId) => removeAttachmentFromMelee(w.id, upgradeId)}
             />
           ))}
 
