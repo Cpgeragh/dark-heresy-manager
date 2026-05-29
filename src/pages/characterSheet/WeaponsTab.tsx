@@ -1,13 +1,15 @@
 // src/pages/characterSheet/WeaponsTab.tsx
 
 import { useState, useCallback } from "react";
-import type { RangedWeapon, MeleeWeapon, AmmoItem, CyberneticItem } from "../../types/Character";
+import type { RangedWeapon, MeleeWeapon, AmmoItem, GrenadeItem, CyberneticItem } from "../../types/Character";
 import { CYBERNETICS_REFERENCE, type CyberneticWeapon } from "../../data/reference/cyberneticsReference";
 import {
   RANGED_WEAPON_REFERENCE,
   MELEE_WEAPON_REFERENCE,
+  GRENADE_REFERENCE,
   type RangedWeaponRef,
   type MeleeWeaponRef,
+  type GrenadeRef,
 } from "../../data/reference/weaponReference";
 import { WEAPON_SPECIAL_RULES } from "../../data/reference/weaponSpecialRules";
 import {
@@ -26,15 +28,17 @@ interface WeaponsTabProps {
   rangedWeapons: RangedWeapon[];
   meleeWeapons: MeleeWeapon[];
   ammo: AmmoItem[];
+  grenades: GrenadeItem[];
   editable: boolean;
   strengthBonus: number;
   onUpdateRanged: (next: RangedWeapon[]) => void;
   onUpdateMelee: (next: MeleeWeapon[]) => void;
   onUpdateAmmo: (next: AmmoItem[]) => void;
+  onUpdateGrenades: (next: GrenadeItem[]) => void;
   cybernetics?: CyberneticItem[];
 }
 
-type PickerTarget = "ranged" | "melee" | "ammo" | null;
+type PickerTarget = "ranged" | "melee" | "ammo" | "grenades" | null;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -314,6 +318,71 @@ function AmmoPicker({
           >
             + Add custom ammunition
           </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Grenade Picker ───────────────────────────────────────────────────────────
+
+function GrenadePicker({
+  onSelect,
+  onClose,
+}: {
+  onSelect: (ref: GrenadeRef) => void;
+  onClose: () => void;
+}) {
+  const [query, setQuery] = useState("");
+  const filtered = GRENADE_REFERENCE.filter((r) =>
+    r.name.toLowerCase().includes(query.toLowerCase())
+  );
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+      <div className="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-xl shadow-2xl flex flex-col max-h-[80vh]">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
+          <h3 className="text-sm font-semibold text-slate-200">Add Grenade</h3>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-200 text-lg leading-none">×</button>
+        </div>
+        <div className="px-4 py-2 border-b border-slate-800">
+          <input
+            type="text"
+            autoFocus
+            placeholder="Search grenades…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className={editableInputClass(true)}
+          />
+        </div>
+        <p className="px-4 pt-2 pb-1 text-xs text-slate-500 italic border-b border-slate-800">
+          Range for all thrown grenades: SBx3 (Strength Bonus × 3 metres)
+        </p>
+        <div className="overflow-y-auto flex-1 divide-y divide-slate-800">
+          {filtered.length === 0 && (
+            <p className="p-4 text-sm text-slate-500 text-center">No matches.</p>
+          )}
+          {filtered.map((ref) => (
+            <button
+              key={ref.id}
+              onClick={() => onSelect(ref)}
+              className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-sm font-medium text-slate-200 group-hover:text-white">
+                  {ref.name}
+                </span>
+                <div className="flex items-center gap-1.5 text-xs shrink-0">
+                  <span className={rarityColour(ref.rarity)}>{ref.rarity}</span>
+                  <span className="text-slate-600">·</span>
+                  <span className="text-amber-400/80 font-mono">₮ {ref.value}</span>
+                </div>
+              </div>
+              <div className="text-xs text-slate-500 mt-0.5 font-mono">
+                {ref.damage !== "—" ? `${ref.damage}` : "No damage"} · Pen {ref.pen} · {ref.specialRules}
+              </div>
+            </button>
+          ))}
         </div>
       </div>
     </div>
@@ -756,6 +825,183 @@ function AmmoCard({
   );
 }
 
+// ─── Grenade Card ─────────────────────────────────────────────────────────────
+
+function GrenadeCard({
+  item,
+  editable,
+  onRemove,
+  onUpdateQty,
+}: {
+  item: GrenadeItem;
+  editable: boolean;
+  onRemove: () => void;
+  onUpdateQty: (qty: number) => void;
+}) {
+  const [showRules, setShowRules] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
+  const [editingQty, setEditingQty] = useState(false);
+  const [qtyDraft, setQtyDraft] = useState("");
+
+  const ref = GRENADE_REFERENCE.find((r) => r.id === item.referenceId);
+  const hasRules = !!(item.specialRules?.trim() && item.specialRules !== "—");
+  const hasInfo = !!(ref?.description);
+
+  const startQtyEdit = () => {
+    setQtyDraft(String(item.quantity));
+    setEditingQty(true);
+  };
+  const commitQtyEdit = () => {
+    const val = parseInt(qtyDraft, 10);
+    onUpdateQty(!isNaN(val) && val >= 0 ? val : item.quantity);
+    setEditingQty(false);
+  };
+  const handleQtyKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") commitQtyEdit();
+    if (e.key === "Escape") setEditingQty(false);
+  };
+
+  return (
+    <div className={sectionContainerClass(editable) + " space-y-2"}>
+      {/* Header */}
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <p className="text-sm font-semibold text-slate-200">{item.name}</p>
+          <p className="text-xs text-slate-500">Thrown · Range SBx3</p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {hasInfo && (
+            <button
+              onClick={() => setShowInfo(true)}
+              title="View rules"
+              className="text-slate-500 hover:text-slate-300 text-sm transition"
+            >
+              ⓘ
+            </button>
+          )}
+          {editable && (
+            <button onClick={onRemove} className="text-xs text-red-400 hover:text-red-300">
+              Remove
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Stat chips */}
+      {(item.damage && item.damage !== "—") || (item.pen && item.pen !== "—") ? (
+        <div className="flex flex-wrap gap-1.5">
+          {item.damage && item.damage !== "—" && item.damage !== "Special" && (
+            <>
+              <StatChip label="Damage" value={item.damage.replace(/\s*[IREX]$/i, "").trim()} />
+              <DamageTypeChip damage={item.damage} />
+            </>
+          )}
+          {item.damage === "Special" && (
+            <div className="flex flex-col items-center bg-slate-800/60 rounded px-2 py-1 min-w-[52px]">
+              <span className="text-[10px] text-slate-500 uppercase tracking-wide">Damage</span>
+              <span className="text-sm font-mono text-amber-400 mt-0.5">Special</span>
+            </div>
+          )}
+          {item.pen && item.pen !== "—" && (
+            <StatChip label="Pen" value={item.pen} />
+          )}
+        </div>
+      ) : null}
+
+      {/* Special rules */}
+      {hasRules && (
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-slate-400 italic flex-1">{item.specialRules}</span>
+          <button
+            onClick={() => setShowRules(true)}
+            title="Explain special rules"
+            className="text-slate-500 hover:text-amber-400 text-sm transition"
+          >
+            ⓘ
+          </button>
+        </div>
+      )}
+
+      {/* Quantity row */}
+      <div className="flex items-center gap-3 pt-1">
+        <span className="text-xs text-slate-400 uppercase tracking-wide">Qty</span>
+        <div className="flex items-center gap-1.5">
+          {editable && (
+            <button
+              onClick={() => onUpdateQty(Math.max(0, item.quantity - 1))}
+              className="w-6 h-6 rounded bg-slate-700 hover:bg-slate-600 text-slate-300 text-sm leading-none flex items-center justify-center"
+            >
+              −
+            </button>
+          )}
+          {editingQty ? (
+            <input
+              type="text"
+              autoFocus
+              value={qtyDraft}
+              onChange={(e) => setQtyDraft(e.target.value.replace(/\D/g, ""))}
+              onBlur={commitQtyEdit}
+              onKeyDown={handleQtyKeyDown}
+              className="font-mono text-lg text-slate-100 w-16 text-center bg-slate-800 border border-slate-600 rounded focus:outline-none focus:border-indigo-500"
+            />
+          ) : (
+            <span
+              onClick={startQtyEdit}
+              title="Click to set quantity"
+              className="font-mono text-lg text-slate-100 min-w-[2.5rem] text-center cursor-pointer hover:text-white hover:underline decoration-slate-500 decoration-dotted underline-offset-2"
+            >
+              {item.quantity}
+            </span>
+          )}
+          {editable && (
+            <button
+              onClick={() => onUpdateQty(item.quantity + 1)}
+              className="w-6 h-6 rounded bg-slate-700 hover:bg-slate-600 text-slate-300 text-sm leading-none flex items-center justify-center"
+            >
+              +
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Weight / Value / Rarity */}
+      {(item.weight || item.value || item.rarity) && (
+        <div className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1">
+          {item.weight && <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">⚖ {item.weight}</span>}
+          {item.value  && <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-amber-400/80 font-mono">₮ {item.value}</span>}
+          {item.rarity && <span className={`text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 ${rarityColour(item.rarity)}`}>{item.rarity}</span>}
+        </div>
+      )}
+
+      {showRules && item.specialRules && (
+        <SpecialRulesModal rules={item.specialRules} onClose={() => setShowRules(false)} />
+      )}
+
+      {showInfo && ref?.description && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <div className="w-full max-w-md bg-slate-900 border border-slate-700 rounded-xl shadow-2xl">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
+              <h3 className="text-sm font-semibold text-slate-200">{item.name}</h3>
+              <button onClick={() => setShowInfo(false)} className="text-slate-400 hover:text-slate-200 text-lg leading-none">×</button>
+            </div>
+            <div className="px-4 py-3">
+              <p className="text-sm text-slate-300 leading-relaxed">{ref.description}</p>
+            </div>
+            <div className="px-4 py-3 border-t border-slate-700">
+              <button
+                onClick={() => setShowInfo(false)}
+                className="w-full py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-sm text-slate-200"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Custom Ammo Form ─────────────────────────────────────────────────────────
 
 function CustomAmmoForm({
@@ -944,11 +1190,13 @@ export function WeaponsTab({
   rangedWeapons,
   meleeWeapons,
   ammo,
+  grenades,
   editable,
   strengthBonus,
   onUpdateRanged,
   onUpdateMelee,
   onUpdateAmmo,
+  onUpdateGrenades,
   cybernetics,
 }: WeaponsTabProps) {
   const [picker, setPicker] = useState<PickerTarget>(null);
@@ -962,6 +1210,48 @@ export function WeaponsTab({
   const [showCustomRanged, setShowCustomRanged] = useState(false);
   const [showCustomMelee, setShowCustomMelee] = useState(false);
   const [showCustomAmmo, setShowCustomAmmo] = useState(false);
+
+  // ── Grenade handlers ───────────────────────────────────────────────────────
+
+  const addFromGrenadeRef = useCallback(
+    (ref: GrenadeRef) => {
+      if (!editable) return;
+      onUpdateGrenades([
+        ...grenades,
+        {
+          id: crypto.randomUUID(),
+          referenceId: ref.id,
+          name: ref.name,
+          quantity: 1,
+          class: ref.class,
+          damage: ref.damage,
+          pen: ref.pen,
+          specialRules: ref.specialRules,
+          weight: ref.weight,
+          value: ref.value,
+          rarity: ref.rarity,
+        },
+      ]);
+      setPicker(null);
+    },
+    [editable, grenades, onUpdateGrenades]
+  );
+
+  const removeGrenade = useCallback(
+    (id: string) => {
+      if (!editable) return;
+      onUpdateGrenades(grenades.filter((g) => g.id !== id));
+    },
+    [editable, grenades, onUpdateGrenades]
+  );
+
+  const updateGrenadeQty = useCallback(
+    (id: string, quantity: number) => {
+      if (!editable) return;
+      onUpdateGrenades(grenades.map((g) => (g.id === id ? { ...g, quantity } : g)));
+    },
+    [editable, grenades, onUpdateGrenades]
+  );
 
   // ── Add handlers ───────────────────────────────────────────────────────────
 
@@ -1223,6 +1513,39 @@ export function WeaponsTab({
         )}
       </section>
 
+      {/* ── GRENADES ────────────────────────────────────────────────────── */}
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="text-base font-semibold text-slate-200">
+            Grenades ({grenades.length})
+          </h3>
+          {editable && (
+            <button
+              onClick={() => setPicker("grenades")}
+              className="text-xs px-3 py-1 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700"
+            >
+              + Add
+            </button>
+          )}
+        </div>
+
+        {grenades.length === 0 && (
+          <p className="text-sm text-slate-500 italic">No grenades carried.</p>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {grenades.map((item) => (
+            <GrenadeCard
+              key={item.id}
+              item={item}
+              editable={editable}
+              onRemove={() => removeGrenade(item.id)}
+              onUpdateQty={(qty) => updateGrenadeQty(item.id, qty)}
+            />
+          ))}
+        </div>
+      </section>
+
       {/* ── CYBERNETIC WEAPONS ──────────────────────────────────────────── */}
       {cyberneticWeaponItems.length > 0 && (
         <section className="space-y-3">
@@ -1273,6 +1596,12 @@ export function WeaponsTab({
             setPicker(null);
             setShowCustomAmmo(true);
           }}
+          onClose={() => setPicker(null)}
+        />
+      )}
+      {picker === "grenades" && (
+        <GrenadePicker
+          onSelect={addFromGrenadeRef}
           onClose={() => setPicker(null)}
         />
       )}

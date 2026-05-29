@@ -44,6 +44,7 @@ import type {
   RangedWeapon,
   MeleeWeapon,
   AmmoItem,
+  GrenadeItem,
   WornArmourPiece,
   ArmourLocationKey,
   GearItem,
@@ -226,6 +227,11 @@ export default function CharacterSheet() {
 
   const handleUpdateDrugs = useCallback(
     (next: DrugItem[]) => updateField("drugs", next),
+    [updateField]
+  );
+
+  const handleUpdateGrenades = useCallback(
+    (next: GrenadeItem[]) => updateField("grenades", next),
     [updateField]
   );
 
@@ -432,6 +438,7 @@ export default function CharacterSheet() {
               rangedWeapons={character.rangedWeapons}
               meleeWeapons={character.meleeWeapons}
               ammo={character.ammo ?? []}
+              grenades={character.grenades ?? []}
               editable={allowedToEdit}
               strengthBonus={Math.floor(
                 (character.characteristics.s.base +
@@ -441,6 +448,7 @@ export default function CharacterSheet() {
               onUpdateRanged={handleUpdateRangedWeapons}
               onUpdateMelee={handleUpdateMeleeWeapons}
               onUpdateAmmo={handleUpdateAmmo}
+              onUpdateGrenades={handleUpdateGrenades}
               cybernetics={character.cybernetics ?? []}
             />
           )}

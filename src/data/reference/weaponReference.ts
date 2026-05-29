@@ -6,6 +6,24 @@ import { SkillSource } from "../../types/SkillSource";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
+export interface GrenadeRef {
+  id: string;
+  name: string;
+  source: string;
+  class: string;
+  /** Damage string, "—" if no damage, or "Special" */
+  damage: string;
+  /** Penetration, "—" if not applicable */
+  pen: string;
+  /** Special rules string, "—" if none */
+  specialRules: string;
+  weight: string;
+  value: string;
+  rarity: string;
+  /** Full rules text for info modal */
+  description?: string;
+}
+
 export interface RangedWeaponRef {
   id: string;
   name: string;
@@ -1034,6 +1052,112 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     weight: "3 kg",
     value: "—",
     rarity: "Very Rare",
+  },
+
+];
+
+// ─── Grenades ────────────────────────────────────────────────────────────────
+// Range for all thrown grenades is SBx3 (Strength Bonus × 3 metres).
+
+export const GRENADE_REFERENCE: GrenadeRef[] = [
+
+  // ── Core Rulebook ──────────────────────────────────────────────────────────
+  {
+    id: "cr-frag-grenade",
+    name: "Frag Grenade",
+    source: SkillSource.CR,
+    class: "Thrown",
+    damage: "2d10 X",
+    pen: "0",
+    specialRules: "Blast (4)",
+    weight: "0.5 kg",
+    value: "10 Thrones",
+    rarity: "Common",
+    description:
+      "Uses an explosive charge and shrapnel fragments to shred targets " +
+      "over a wide area. The Blast (4) quality affects all within 4 metres.",
+  },
+  {
+    id: "cr-krak-grenade",
+    name: "Krak Grenade",
+    source: SkillSource.CR,
+    class: "Thrown",
+    damage: "2d10+4 X",
+    pen: "6",
+    specialRules: "—",
+    weight: "0.5 kg",
+    value: "50 Thrones",
+    rarity: "Rare",
+    description:
+      "Concentrated explosives designed to punch through armoured targets " +
+      "such as vehicles or bunkers. Krak detonations do not produce a Blast " +
+      "effect — their focused explosion makes them impractical against people.",
+  },
+  {
+    id: "cr-blind-grenade",
+    name: "Blind Grenade",
+    source: SkillSource.CR,
+    class: "Thrown",
+    damage: "—",
+    pen: "—",
+    specialRules: "Smoke",
+    weight: "0.5 kg",
+    value: "25 Thrones",
+    rarity: "Scarce",
+    description:
+      "Explodes with dense smoke, IR baffles and broadband EM chaff. " +
+      "In calm conditions the cloud is roughly 3m wide and 2m tall and lasts " +
+      "3 Rounds. High winds may reduce this. Sensors and vision that would " +
+      "normally pierce smoke cannot see through the blind grenade's haze.",
+  },
+  {
+    id: "cr-photon-flash-grenade",
+    name: "Photon Flash Grenade",
+    source: SkillSource.CR,
+    class: "Thrown",
+    damage: "Special",
+    pen: "0",
+    specialRules: "—",
+    weight: "0.5 kg",
+    value: "60 Thrones",
+    rarity: "Scarce",
+    description:
+      "Detonates like a small star, blinding anyone nearby and overloading " +
+      "cheap or primitive vision systems. Anyone within 15 metres must succeed " +
+      "on a Toughness Test or be blinded for 1d5 Rounds.",
+  },
+  {
+    id: "cr-hallucinogen-grenade",
+    name: "Hallucinogen Grenade",
+    source: SkillSource.CR,
+    class: "Thrown",
+    damage: "Special",
+    pen: "0",
+    specialRules: "—",
+    weight: "0.5 kg",
+    value: "40 Thrones",
+    rarity: "Rare",
+    description:
+      "Induces short-lived psychological delusions. Anyone within 10 metres " +
+      "must succeed on a Difficult (–10) Toughness Test or be overcome with " +
+      "hallucinations for 1d10 Rounds. Roll 1d100 each turn: 01–50 act " +
+      "normally; 51–75 run screaming; 76–100 attack the nearest creature.",
+  },
+  {
+    id: "cr-fire-bomb",
+    name: "Fire Bomb",
+    source: SkillSource.CR,
+    class: "Thrown",
+    damage: "1d10+3 E",
+    pen: "6",
+    specialRules: "Blast (3)",
+    weight: "0.5 kg",
+    value: "5 Thrones",
+    rarity: "Plentiful",
+    description:
+      "A breakable canister of flammable liquid with a cloth fuse. " +
+      "The canister breaks open on impact and the burning liquid spreads. " +
+      "A target struck must make an Agility Test or catch on fire.",
   },
 
 ];
