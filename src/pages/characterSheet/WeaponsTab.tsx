@@ -20,6 +20,7 @@ import {
   editableInputClass,
   sectionContainerClass,
 } from "../../ui/editableStyles";
+import { sourceColour } from "../../ui/sourceStyles";
 import { InfoModal } from "../../components/InfoModal";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -581,12 +582,13 @@ function RangedCard({
         </div>
       )}
 
-      {/* Weight / Value / Rarity */}
-      {(weapon.weight || weapon.value || weapon.rarity) && (
+      {/* Weight / Value / Rarity / Source */}
+      {(weapon.weight || weapon.value || weapon.rarity || weapon.source) && (
         <div className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1">
           {weapon.weight && <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">⚖ {weapon.weight}</span>}
           {weapon.value  && <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">₮ {weapon.value}</span>}
           {weapon.rarity && <span className={`text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 ${rarityColour(weapon.rarity)}`}>{weapon.rarity}</span>}
+          {weapon.source && <span className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(weapon.source)}`}>{weapon.source}</span>}
         </div>
       )}
 
@@ -653,12 +655,13 @@ function MeleeCard({
         </div>
       )}
 
-      {/* Weight / Value / Rarity */}
-      {(weapon.weight || weapon.value || weapon.rarity) && (
+      {/* Weight / Value / Rarity / Source */}
+      {(weapon.weight || weapon.value || weapon.rarity || weapon.source) && (
         <div className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1">
           {weapon.weight && <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">⚖ {weapon.weight}</span>}
           {weapon.value  && <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">₮ {weapon.value}</span>}
           {weapon.rarity && <span className={`text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 ${rarityColour(weapon.rarity)}`}>{weapon.rarity}</span>}
+          {weapon.source && <span className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(weapon.source)}`}>{weapon.source}</span>}
         </div>
       )}
 
@@ -789,8 +792,8 @@ function AmmoCard({
         </div>
       </div>
 
-      {/* Weight / Value / Rarity */}
-      {(item.weight || item.value || item.rarity) && (
+      {/* Weight / Value / Rarity / Source */}
+      {(item.weight || item.value || item.rarity || item.source) && (
         <div className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-2">
           {item.weight && (
             <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">
@@ -817,6 +820,11 @@ function AmmoCard({
           {item.rarity && (
             <span className={`text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 ${rarityColour(item.rarity)}`}>
               {item.rarity}
+            </span>
+          )}
+          {item.source && (
+            <span className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(item.source)}`}>
+              {item.source}
             </span>
           )}
         </div>
@@ -964,12 +972,13 @@ function GrenadeCard({
         </div>
       </div>
 
-      {/* Weight / Value / Rarity */}
-      {(item.weight || item.value || item.rarity) && (
+      {/* Weight / Value / Rarity / Source */}
+      {(item.weight || item.value || item.rarity || item.source) && (
         <div className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1">
           {item.weight && <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">⚖ {item.weight}</span>}
           {item.value  && <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-amber-400/80 font-mono">₮ {item.value}</span>}
           {item.rarity && <span className={`text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 ${rarityColour(item.rarity)}`}>{item.rarity}</span>}
+          {item.source && <span className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(item.source)}`}>{item.source}</span>}
         </div>
       )}
 
@@ -1230,6 +1239,7 @@ export function WeaponsTab({
           weight: ref.weight,
           value: ref.value,
           rarity: ref.rarity,
+          source: ref.source,
         },
       ]);
       setPicker(null);
@@ -1275,6 +1285,7 @@ export function WeaponsTab({
           weight: ref.weight,
           value: ref.value,
           rarity: ref.rarity,
+          source: ref.source,
         },
       ]);
       setPicker(null);
@@ -1298,6 +1309,7 @@ export function WeaponsTab({
           weight: ref.weight,
           value: ref.value,
           rarity: ref.rarity,
+          source: ref.source,
         },
       ]);
       setPicker(null);
@@ -1359,6 +1371,7 @@ export function WeaponsTab({
           amount: Number.isFinite(numericAmount) && numericAmount > 0 ? numericAmount : 1,
           value: `${ref.cost} / ${ref.purchaseAmount}`,
           rarity: ref.rarity,
+          source: ref.source,
           description: ref.description,
         },
       ]);

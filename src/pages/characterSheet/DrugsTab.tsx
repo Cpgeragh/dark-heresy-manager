@@ -7,6 +7,7 @@ import {
   editableInputClass,
   sectionContainerClass,
 } from "../../ui/editableStyles";
+import { sourceColour } from "../../ui/sourceStyles";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -258,6 +259,11 @@ function DrugRow({
               {item.rarity ?? ref?.rarity}
             </span>
           )}
+          {item.source && (
+            <span className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(item.source)}`}>
+              {item.source}
+            </span>
+          )}
         </div>
       </div>
 
@@ -340,6 +346,7 @@ export function DrugsTab({ drugs, editable, onUpdate }: DrugsTabProps) {
           quantity: 1,
           value: ref.value,
           rarity: ref.rarity,
+          source: ref.source,
         },
       ]);
       setShowPicker(false);
