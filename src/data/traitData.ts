@@ -63,17 +63,12 @@ export const TRAIT_LIST: readonly TraitData[] = [
   { id: "knave-of-pistols",         name: "Knave of Pistols",         source: SkillSource.IH, hasSpecialisation: false },
   { id: "mechanus-implants",        name: "Mechanus Implants",        source: SkillSource.CR, hasSpecialisation: false },
   { id: "power-of-the-daemon",      name: "Power of the Daemon",      source: SkillSource.IH, hasSpecialisation: false },
-  { id: "psychic-blank",            name: "Psychic Blank",            source: SkillSource.CR, hasSpecialisation: false },
-  { id: "psychic-disruption",       name: "Psychic Disruption",       source: SkillSource.CR, hasSpecialisation: false },
-  { id: "psychic-invulnerability",  name: "Psychic Invulnerability",  source: SkillSource.CR, hasSpecialisation: false },
   { id: "sanctioned-psyker",        name: "Sanctioned Psyker",        source: SkillSource.IH, hasSpecialisation: false },
   { id: "sin-scarred",              name: "Sin Scarred",              source: SkillSource.IH, hasSpecialisation: false },
   { id: "the-bloody-edge",          name: "The Bloody Edge",          source: SkillSource.IH, hasSpecialisation: false },
   { id: "unnatural-intelligence",   name: "Unnatural Intelligence",   source: SkillSource.IH, hasSpecialisation: false },
   { id: "unreadable-mind",          name: "Unreadable Mind",          source: SkillSource.IH, hasSpecialisation: false },
-  { id: "unsettling-presence",      name: "Unsettling Presence",      source: SkillSource.CR, hasSpecialisation: false },
   { id: "witch-sight",              name: "Witch Sight",              source: SkillSource.BoM, hasSpecialisation: false },
-  { id: "wyrd-power",               name: "Wyrd Power",               source: SkillSource.CR, hasSpecialisation: false },
 
   // ─── Starting / Background Traits ───────────────────────────────────────────
   { id: "accustomed-to-crowds",     name: "Accustomed to Crowds",     source: SkillSource.IH, hasSpecialisation: false },
