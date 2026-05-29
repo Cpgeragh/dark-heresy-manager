@@ -11,6 +11,7 @@ import {
   SKILL_BASIC_THRESHOLD,
 } from "../../../../constants/gameRules";
 
+import { sourceColour, charColour } from "../../../../ui/sourceStyles";
 import {
   editableInputClass,
   editableTextareaClass,
@@ -83,7 +84,7 @@ export function SkillCard({
             {skill.name}
           </div>
 
-          <span className="px-1.5 py-0.5 rounded border border-slate-600 bg-slate-800 text-[10px] font-mono text-slate-200">
+          <span className={`px-1.5 py-0.5 rounded border bg-slate-800/40 text-[10px] font-mono ${charColour(skill.characteristic)}`}>
             {CHAR_LABEL[skill.characteristic]}
           </span>
 
@@ -94,16 +95,16 @@ export function SkillCard({
           )}
 
           {skill.source && (
-            <span className="px-1.5 py-0.5 rounded-full bg-slate-700 border border-slate-600 text-[10px] text-slate-200">
+            <span className={`px-1.5 py-0.5 rounded border bg-slate-800/40 text-[10px] font-mono ${sourceColour(skill.source)}`}>
               {skill.source}
             </span>
           )}
 
           <span
-            className={`px-1.5 py-0.5 rounded text-[10px] ${
+            className={`px-1.5 py-0.5 rounded text-[10px] border ${
               skill.advanced
-                ? "bg-purple-700/40 border border-purple-500 text-purple-300"
-                : "bg-slate-800 border border-slate-600 text-slate-300"
+                ? "bg-purple-700/40 border-purple-500 text-purple-300"
+                : "bg-teal-900/40 border-teal-700/50 text-teal-300"
             }`}
           >
             {skill.advanced ? "Advanced" : "Basic"}
