@@ -23,6 +23,7 @@ import { FormField } from "../../components/FormField";
 import { InfoModal } from "../../components/InfoModal";
 import { TALENT_DESCRIPTIONS } from "../../data/talentDescriptions";
 import { TRAIT_DESCRIPTIONS } from "../../data/traitDescriptions";
+import { sourceColour } from "../../ui/sourceStyles";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -186,12 +187,19 @@ interface EntryCardProps {
 
 function EntryCard({ entry, editable, onRemove }: EntryCardProps) {
   const description = TALENT_DESCRIPTIONS[entry.talentId] ?? TRAIT_DESCRIPTIONS[entry.talentId];
+  const refSource = ([...TALENT_LIST, ...TRAIT_LIST] as Array<{ id: string; source: string }>)
+    .find((r) => r.id === entry.talentId)?.source ?? "";
 
   return (
     <div className="flex items-start justify-between gap-2 rounded border border-slate-700 bg-slate-900/30 px-3 py-2 text-sm">
       <div className="space-y-0.5 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="font-medium text-slate-200 break-words">{entry.name}</span>
+          {refSource && (
+            <span className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(refSource)}`}>
+              {refSource}
+            </span>
+          )}
           {description && (
             <InfoModal title={entry.name} content={description} />
           )}
