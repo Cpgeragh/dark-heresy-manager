@@ -224,6 +224,23 @@ export interface AmmoItem {
 }
 
 /**
+ * GRENADES
+ */
+export interface GrenadeItem {
+  id: string;
+  referenceId?: string;  // links back to GrenadeRef.id
+  name: string;
+  quantity: number;
+  class?: string;
+  damage?: string;
+  pen?: string;
+  specialRules?: string;
+  weight?: string;
+  value?: string;        // cost per grenade
+  rarity?: string;
+}
+
+/**
  * TALENTS + TRAINING
  */
 
@@ -349,6 +366,7 @@ export interface Character {
   gear: GearItem[];
   consumables?: ConsumableItem[];
   drugs?: DrugItem[];
+  grenades?: GrenadeItem[];
   cybernetics?: CyberneticItem[];
 
   weaponTraining: WeaponTrainingBlock;
