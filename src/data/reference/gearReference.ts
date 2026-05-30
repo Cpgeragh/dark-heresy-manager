@@ -582,7 +582,7 @@ export const GEAR_REFERENCE: GearRef[] = [
     name: "Cilice",
     source: SkillSource.BoM,
     description:
-      "+10 on Tests to resist Intimidation and other kinds of social manipulation. " +
+      "+10 on Willpower Tests to resist Fear, Charm, Intimidation, and other kinds of social manipulation. " +
       "Characters who wear a cilice for longer than twice their Toughness Bonus in hours " +
       "must make a Toughness Test or suffer 1 Level of Fatigue.",
     weight: "Varies",
@@ -615,10 +615,10 @@ export const GEAR_REFERENCE: GearRef[] = [
     name: "Hospitaller Medicae Tools",
     source: SkillSource.BoM,
     description:
-      "Contains sacred oils, unguents, surgical tools, sterilisers, 2 doses of De-tox, " +
-      "and 2 doses of Stimm. The Sister Hospitaller may amputate a damaged limb with a " +
-      "Hard (–10) Medicae Test. If successful, the patient loses the limb but all other " +
-      "Critical Effects caused by damage to that limb are removed (including Fatigue and Blood Loss).",
+      "Counts as a medkit, 2 doses of De-tox, and 2 doses of Stimm. " +
+      "The Sister Hospitaller may amputate a damaged limb with a Hard (–10) Medicae Test. " +
+      "If successful, the patient loses the limb but all Critical Effects caused by damage to that limb are removed " +
+      "(including Fatigue and Blood Loss), and may (GM discretion) heal 1d5 wounds suffered in the loss of the limb.",
     weight: "10 kg",
     value: "—",
     rarity: "Issued Only",
@@ -693,8 +693,8 @@ export const GEAR_REFERENCE: GearRef[] = [
     source: SkillSource.BoM,
     description:
       "Treated as a charm.",
-    weight: "0 kg",
-    value: "10 Thrones",
+    weight: "—",
+    value: "100 Thrones",
     rarity: "Rare",
   },
   {
@@ -723,7 +723,7 @@ export const GEAR_REFERENCE: GearRef[] = [
     name: "Sarissa",
     source: SkillSource.BoM,
     description:
-      "A long-bladed spear used by Ecclesiarchy warriors.",
+      "A heavy spiked blade; when not mounted on a bolter, counts as an axe in close combat.",
     weight: "2 kg",
     value: "200 Thrones",
     rarity: "Rare",
@@ -735,8 +735,8 @@ export const GEAR_REFERENCE: GearRef[] = [
     description:
       "Requires Pilot (Jump Pack) skill and Sororitas Power Armour. " +
       "Allows a safe, guided fall from any height and any number of short jumps (Move Action; " +
-      "must end by end of Turn). At maximal thrust, duplicates the Flyer (12) trait for a " +
-      "number of Turns up to the character's Agility Bonus.",
+      "must end by end of Turn). At maximal thrust, duplicates the Flyer (12) trait for up to " +
+      "one minute before the turbines require one minute to cool.",
     weight: "15 kg",
     value: "5,000 Thrones",
     rarity: "Very Rare",

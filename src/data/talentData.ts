@@ -206,7 +206,7 @@ export const TALENT_LIST: readonly TalentData[] = [
   { id: "soul-decay",            name: "Soul Decay",            source: SkillSource.BoM, hasSpecialisation: false, prerequisites: "Pure Faith, Burden of Guilt" },
   { id: "soul-storm",            name: "Soul Storm",            source: SkillSource.BoM, hasSpecialisation: false, prerequisites: "Pure Faith, Divine Touch, Flames of Faith" },
   { id: "speed-reading",         name: "Speed Reading",         source: SkillSource.BoM, hasSpecialisation: false },
-  { id: "spirit-of-the-martyr",  name: "Spirit of the Martyr",  source: SkillSource.BoM, hasSpecialisation: false, prerequisites: "Pure Faith, Blessed Ignorance" },
+  { id: "spirit-of-the-martyr",  name: "Self of the Martyr",    source: SkillSource.BoM, hasSpecialisation: false, prerequisites: "Pure Faith, Blessed Ignorance" },
   { id: "spiritual-cleansing",   name: "Spiritual Cleansing",   source: SkillSource.BoM, hasSpecialisation: false, prerequisites: "Pure Faith, Divine Endurance" },
   { id: "spiritual-mirror",      name: "Spiritual Mirror",      source: SkillSource.BoM, hasSpecialisation: false, prerequisites: "Pure Faith, Light of the Emperor" },
   { id: "storm-bolter-specialization", name: "Storm Bolter Specialization", source: SkillSource.BoM, hasSpecialisation: false },

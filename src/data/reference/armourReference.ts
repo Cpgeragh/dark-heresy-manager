@@ -464,8 +464,10 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     ap: 2,
     notes:
       "+10 on Tests to resist any direct psychic attack or manipulation. " +
-      "When worn for longer than the wearer's Toughness Bonus in hours, they must make a " +
-      "Toughness Test or gain 1 Level of Fatigue.",
+      "Provides full Armour Points against attacks of psychic force or warp energy that deal damage directly, " +
+      "and against attacks made with the Warp Weapon quality. " +
+      "Can be worn under other armour, but prolonged wear causes irritation: after more than Toughness Bonus " +
+      "hours in such a combination, the wearer must pass a Toughness Test or gain 1 Level of Fatigue.",
     weight: "4 kg",
     value: "500 Thrones",
     rarity: "Rare",
@@ -492,10 +494,11 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     apOverrides: { head: 4 },
     notes:
       "AP 5 all locations (AP 4 on Head). " +
-      "+20 to resist toxins or diseases that do not penetrate the armour (e.g. poison gas, rotting bodies). " +
+      "+20 to resist toxins or diseases that do not penetrate the armour. " +
+      "+10 on Fear Tests with an olfactory component (e.g. rotting bodies). " +
       "Helmet incorporates a re-breather.",
     weight: "20 kg",
-    value: "7,500 Thrones",
+    value: "10,000 Thrones",
     rarity: "Very Rare",
   },
   {
@@ -521,11 +524,13 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     locations: ALL,
     ap: 6,
     notes:
-      "Sanctified. Provides full Armour Points against attacks of psychic force or warp energy. " +
-      "Warp-sourced damage that does not penetrate the armour is entirely negated. " +
-      "Also effective against attacks with the Warp Weapon quality.",
+      "+10 on Tests to resist any direct psychic attack or manipulation. " +
+      "Provides full Armour Points against attacks of psychic force or warp energy that deal damage directly, " +
+      "and against attacks made with the Warp Weapon quality. " +
+      "Gauntlet strikes count as Holy. " +
+      "All supernatural creatures within 20 metres take a –10 penalty to Willpower Tests.",
     weight: "18 kg",
-    value: "20,000 Thrones",
+    value: "6,000 Thrones",
     rarity: "Very Rare",
   },
   {
@@ -546,10 +551,13 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     name: "Shield Robes",
     source: SkillSource.BoM,
     locations: ["body", "rightArm", "leftArm", "rightLeg", "leftLeg"],
-    ap: 2,
-    weight: "6 kg",
-    value: "250 Thrones",
-    rarity: "Rare",
+    ap: 3,
+    notes:
+      "Consecrated mesh robes worn by Orders Non-militant and noviciates; also used by Clerics in combat. " +
+      "Can be worn as secondary clothing while Power Armour is under maintenance.",
+    weight: "2 kg",
+    value: "5,000 Thrones",
+    rarity: "Very Rare",
   },
   {
     id: "sororitas-power-armour",
@@ -559,13 +567,13 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     ap: 7,
     apOverrides: { body: 8 },
     notes:
-      "AP 7 all locations (AP 8 on Body). " +
+      "AP 7 all locations (AP 8 on Body). +10 Strength. " +
       "Integrated targeter (+5 BS), re-breather, and comm-link. " +
       "Users with a Heavy weapon count as Braced. " +
-      "Critical Damage to the Body location triggers the Damaging Power Armour table: " +
-      "1–3 unaffected; 4–5 all armour bonuses (except inherent AP) lost, –10 penalty, Base Movement –2; " +
-      "6+ suit shuts down entirely — all benefits including AP lost, wearer must pass a Strength Test " +
-      "(+20, –10 per failure) to move, Base Movement reduced to 1, –20 to all physical actions. " +
+      "Critical Damage to the Body from behind triggers the Power Unit table: " +
+      "1–3 unaffected; 4–5 all armour bonuses (except inherent AP) lost, –10 to all physical actions, Base Movement –2; " +
+      "6+ suit shuts down — all benefits (except inherent AP) lost, wearer must pass a Hard (–20) Strength Test to move at all; " +
+      "on success, Base Movement is reduced to 1 and all physical actions suffer –20. " +
       "Problems continue until repaired with a Challenging (+0) Tech-Use Test.",
     weight: "35 kg",
     value: "20,000 Thrones",
