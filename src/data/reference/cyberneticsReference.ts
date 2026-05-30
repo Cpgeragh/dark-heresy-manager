@@ -353,6 +353,40 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
     good: "No penalty when blinded. Also includes Photo-visor or Infra-red goggles.",
   },
 
+  // ── Lost Dataslate ────────────────────────────────────────────────────────
+
+  {
+    id: "ld-cranial-armour",
+    name: "Cranial Armour",
+    source: SkillSource.LD,
+    value: "600 Thrones",
+    rarity: "Rare",
+    notes:
+      "Inserted just beneath the skin. Adds +1 AP to the head location, stacking with other armour " +
+      "and Talents that provide Armour Points (such as The Flesh is Weak).",
+    poor:
+      "Crude and obvious. Permanently reduces the user's Fellowship by 1d10.",
+    common:
+      "Adds +1 AP to the head, stacking with all other sources of head protection.",
+    good:
+      "Adds an additional +1 AP to the head (total of +2).",
+  },
+
+  {
+    id: "ld-synthmuscle-graft",
+    name: "Synthmuscle Graft",
+    source: SkillSource.LD,
+    value: "2,000 Thrones",
+    rarity: "Very Rare",
+    notes:
+      "Dense vat-grown muscle tissue augmented with flakweave, implanted into existing muscle tissue.",
+    common:
+      "Grants +1 to the user's Strength Bonus.",
+    good:
+      "Grants the Unnatural Strength (×2) Trait, but imposes a –10 penalty to all Agility Tests " +
+      "due to the misshapen nature of the body.",
+  },
+
   {
     id: "boj-malfian-dermaguise",
     name: "Malfian Dermaguise",

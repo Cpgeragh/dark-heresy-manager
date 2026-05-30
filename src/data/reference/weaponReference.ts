@@ -2018,6 +2018,43 @@ export const GRENADE_REFERENCE: GrenadeRef[] = [
       "A target struck must make an Agility Test or catch on fire.",
   },
 
+  // ── Lost Dataslate ────────────────────────────────────────────────────────
+  {
+    id: "ld-stasis-grenade",
+    name: "Belecane-Pattern Stasis Grenade",
+    source: SkillSource.LD,
+    class: "Thrown",
+    damage: "—",
+    pen: "—",
+    specialRules: "Exotic, Indirect, Stasis (2 m radius, 1d5 Rounds)",
+    weight: "0.5 kg",
+    value: "8,000 Thrones",
+    rarity: "Very Rare",
+    description:
+      "Produced in small quantities on the Calixian forge world of Belecane. Traps everything within 2 metres " +
+      "in a bubble of slowed time for 1d5 Rounds. Targets cannot take any Actions; those outside cannot attack " +
+      "or interact with anyone inside the field. " +
+      "Requires the appropriate Exotic Weapon Training Talent.",
+  },
+  {
+    id: "ld-stasis-mine",
+    name: "Belecane-Pattern Stasis Mine",
+    source: SkillSource.LD,
+    class: "Placed",
+    damage: "—",
+    pen: "—",
+    specialRules: "Exotic, Blast (6), Stasis (6 m radius, 3d10 minutes)",
+    weight: "20 kg",
+    value: "19,000 Thrones",
+    rarity: "Very Rare",
+    description:
+      "A large rechargeable stasis device. Detects creatures of a specified Size within 5 metres and activates " +
+      "when triggered. Everything within 6 metres is trapped in stasis for 3d10 minutes. " +
+      "Good-Craftsmanship versions include a remote detonator. Once used, recharge with a Difficult (–10) " +
+      "Tech-Use Test; 3+ DoF permanently burns out the generator. " +
+      "Requires the appropriate Exotic Weapon Training Talent.",
+  },
+
 ];
 
 // ─── Shields ─────────────────────────────────────────────────────────────────

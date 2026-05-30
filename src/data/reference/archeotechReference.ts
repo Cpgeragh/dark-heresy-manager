@@ -25,36 +25,38 @@ export const ARCHEOTECH_REFERENCE: ArcheotechRef[] = [
 
   // ── Lost Dataslate ──────────────────────────────────────────────────────────
   {
-    id: "ld-stasis-grenade",
-    name: "Belecane-Pattern Stasis Grenade",
+    id: "ld-cameleoline-grid",
+    name: "Cameleoline Grid",
     source: SkillSource.LD,
-    type: "Grenade",
-    specialRules: "Exotic, Indirect, Stasis (2 m radius, 1d5 Rounds)",
-    weight: "0.5 kg",
-    value: "8,000 Thrones",
-    rarity: "Very Rare",
+    type: "Device",
+    weight: "Varies",
+    value: "—",
+    rarity: "—",
     description:
-      "Produced in very small quantities on the Calixian forge world of Belecane, " +
-      "this grenade traps everything within 2 metres in a bubble of slowed time for 1d5 Rounds. " +
-      "Targets cannot take any Actions; those outside cannot attack or interact with anyone inside the field. " +
-      "Counts as an Exotic Weapon — the appropriate Exotic Weapon Training Talent is required to use it effectively.",
+      "A series of flexible interlocking screens held up by tungsten rods up to six metres high. " +
+      "No two grids are alike, varying in size from several metres to several hundred metres across. " +
+      "When an electrical current is run across the screens they almost instantaneously change colour " +
+      "to match their surroundings, hiding everything underneath. Any power source supplying a steady " +
+      "electrical current will activate the grid. Those beneath it gain +50 to Concealment Tests. " +
+      "The grid itself provides no cover and individual panels (usually ~2m across) cannot be repaired if damaged.",
   },
+
   {
-    id: "ld-stasis-mine",
-    name: "Belecane-Pattern Stasis Mine",
+    id: "ld-voidbane-generator",
+    name: "Voidbane Generator",
     source: SkillSource.LD,
-    type: "Mine",
-    specialRules: "Exotic, Blast (6), Stasis (6 m radius, 3d10 minutes)",
+    type: "Device",
     weight: "20 kg",
-    value: "19,000 Thrones",
-    rarity: "Very Rare",
+    value: "—",
+    rarity: "—",
     description:
-      "A large rechargeable stasis device. Can be set to detect creatures of a specified Size category " +
-      "within 5 metres, activating automatically when triggered. Everything within 6 metres is trapped in stasis " +
-      "for 3d10 minutes; those outside cannot attack or interact with anyone within the field. " +
-      "Good-Craftsmanship versions include a remote detonator to activate/deactivate the field at will. " +
-      "Once used, recharge with a Difficult (–10) Tech-Use Test; 3+ Degrees of Failure burns out the generator permanently. " +
-      "Counts as an Exotic Weapon — the appropriate Exotic Weapon Training Talent is required to use it effectively.",
+      "Officially: the Hades-Pattern Rotating Gravimetric Harmonic Disruption Device. Uses gravimetric and " +
+      "soundwave transmissions to disrupt and eventually overload a voidship's Gellar Field, spilling raw Warp " +
+      "into the craft. Can be activated to trigger the moment a voidship enters the Warp; takes roughly an hour " +
+      "to reach full power. Larger ships are more likely to detect the disruption in time. Once active, the " +
+      "generator must be physically destroyed before the Gellar Field collapses entirely. Tracking it down " +
+      "requires an auspex and a Very Hard (–30) Tech-Use Test every five minutes as it constantly switches " +
+      "frequencies. Only the Inquisition may authorise its use.",
   },
 
 ];

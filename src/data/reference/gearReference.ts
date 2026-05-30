@@ -868,4 +868,35 @@ export const GEAR_REFERENCE: GearRef[] = [
     rarity: "Near Unique",
   },
 
+  // ── Lost Dataslate ────────────────────────────────────────────────────────
+
+  {
+    id: "ld-dark-mask",
+    name: "Dark Mask",
+    source: SkillSource.LD,
+    description:
+      "A rare substance known as Dark Mask or Lacuna dust, darker than the void itself. " +
+      "Applied to anything — weapons, clothing, bare skin. When hiding in shadow or low-light, " +
+      "grants +60 to Concealment Tests. Scanning equipment (e.g. auspex) can only locate a coated " +
+      "target with a Very Hard (–30) Tech-Use Test. One canister covers a standard-sized human " +
+      "plus clothing and basic equipment.",
+    weight: "—",
+    value: "450 Thrones",
+    rarity: "Very Rare",
+  },
+
+  {
+    id: "ld-luma-crete",
+    name: "Luma-Crete",
+    source: SkillSource.LD,
+    description:
+      "A chemical compound injected at several points in the body, turning flesh a glowing dullish grey " +
+      "and hardening it against punishment. Grants The Flesh is Weak equal to half the character's Toughness Bonus " +
+      "(round up), the Resistance (Heat) Trait, and a +10 bonus to Tests made to resist radiation. " +
+      "Effects last 1d5 hours; when they wear off, the character gains 1d5 levels of Fatigue.",
+    weight: "—",
+    value: "600 Thrones",
+    rarity: "Very Rare",
+  },
+
 ];
