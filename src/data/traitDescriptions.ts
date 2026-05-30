@@ -47,6 +47,30 @@ export const TRAIT_DESCRIPTIONS: Record<string, string> = {
   // ─── Creatures Anathema ──────────────────────────────────────────────────────
   "improved-natural-weapons": "This creature's attacks are powerful enough to crush plasteel or punch through armour. The creature's natural weapons no longer count as Primitive.",
 
+  // ─── Disciples of the Dark Gods ─────────────────────────────────────────────
+  "dotdg-untouchable":
+    "Psychic Invulnerability: Completely immune to Psychic Powers, warp effects, possession, sorcery, and Corruption from warp shock. " +
+    "Cannot be detected by Psyniscience, Sense Presence, or similar abilities — such powers simply fail to affect them. " +
+    "Area psychic powers that catch an Untouchable in their radius fail to affect them, but may affect others normally. " +
+    "Psychic Disruption: All Psychic Powers manifested within a radius equal to the Untouchable's Willpower Bonus in metres " +
+    "have their Threshold increased by 10, and any associated psyker Tests have their Difficulty increased by 20. " +
+    "Entities subject to Warp Instability suffer double damage from its effects while within this area. " +
+    "Note: Indirect effects (e.g. a telekinetically hurled boulder) may still affect an Untouchable at GM discretion.",
+
+  "dotdg-cryptos-possession":
+    "The Possession Attack: The Cryptos must be in contact with its victim and use a Full Action. " +
+    "Both make Opposed Willpower Tests each Round, accumulating degrees of success. " +
+    "The first to reach five cumulative degrees wins. " +
+    "If the Cryptos wins, it possesses the victim. If the victim wins, the Cryptos is repelled for 24 hours and Stunned for 1d10 Rounds. " +
+    "Effects of Possession: The Cryptos takes complete control with full access to the victim's memories and body. " +
+    "Modifications: +10 Toughness; the Cryptos's Intelligence, Perception, and Willpower replace the victim's; " +
+    "the Cryptos's Psy Rating and powers replace the victim's; the Cryptos's Skills and Talents are added to the victim's; " +
+    "+20 to Deceive Tests to impersonate the victim. The victim's mind is crushed into an oblivious state. " +
+    "Casting Off: The Cryptos is expelled if it suffers Critical Damage or the victim receives a powerful electrical shock — leaving it with 1 Wound. " +
+    "It may also leave voluntarily, inflicting 1d5 Wounds on itself. Cannot be expelled by methods that affect daemons (it is not a warp entity). " +
+    "Surviving Possession: When the Cryptos departs, 25% chance the host dies (apparent multi-organ failure). " +
+    "Survivors suffer 1d10 permanent Damage to both Toughness and Willpower, gain 1d10 Insanity Points, and have no memory of the possession.",
+
   // ─── Book of Judgement ─────────────────────────────────────────────────────
   "blank-slate": "The Acolyte is imprinted with psychic triggers known only to their handler. One trigger wipes all previous imprinting; another prepares the mind for re-programming. When imprinted, the GM and player choose three Common Lore, Forbidden Lore, Scholastic Lore, or Trade skills appropriate to the assumed identity. Until wiped clean, the Slate-Agent is treated as possessing all chosen Skills and gains +10 to related Tests.",
 };

@@ -220,8 +220,7 @@ export const TALENT_DESCRIPTIONS: Record<string, string> = {
 
   // ─── Disciples of the Dark Gods ─────────────────────────────────────────────
   "consumed-by-spite":       "+10 to resist Fear and mind control; +30 to resist Intimidation and Interrogation. May ignore Stun effects with a Difficult (–10) WP Test.",
-  "fuelled-by-flesh":        "Re-roll a failed Arcana manifestation by dealing 1d5 Damage to yourself (ignores protection). Side effect: –20 to resist disease and poison; extra Damage from Toxic wounds.",
-  "last-killer-standing":    "Immune to Pinning from small arms fire. While hiding behind cover, add +1 AP to its defensive value against ranged attacks.",
+
   "psychic-spite":           "When using a damaging Psychic Power in conjunction with Corpus Conversion, that attack gains the Tearing quality.",
   "psychic-supremacy":       "When using half or fewer Power Dice for your chosen Discipline, ignore the first 9 rolled for Psychic Phenomena. Detection of the power suffers –10.",
   "psychic-vampire":         "Each time you kill an intelligent creature directly with psychic energy, test WP to heal 1d5–1 Wounds. Addictive: each use costs 1d5–2 Corruption Points.",

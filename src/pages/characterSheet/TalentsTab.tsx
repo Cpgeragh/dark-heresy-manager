@@ -39,9 +39,15 @@ type AnyListItem = TalentData | TraitData;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
+function normaliseSources(s: SkillSource | SkillSource[]): SkillSource[] {
+  return Array.isArray(s) ? s : [s];
+}
+
 function groupBySource(items: readonly AnyListItem[]): Record<string, AnyListItem[]> {
   return items.reduce<Record<string, AnyListItem[]>>((acc, item) => {
-    (acc[item.source] ??= []).push(item);
+    for (const src of normaliseSources(item.source as SkillSource | SkillSource[])) {
+      (acc[src] ??= []).push(item);
+    }
     return acc;
   }, {});
 }
@@ -209,19 +215,20 @@ interface EntryCardProps {
 
 function EntryCard({ entry, editable, onRemove }: EntryCardProps) {
   const description = TALENT_DESCRIPTIONS[entry.talentId] ?? TRAIT_DESCRIPTIONS[entry.talentId];
-  const refSource = ([...TALENT_LIST, ...TRAIT_LIST] as Array<{ id: string; source: string }>)
-    .find((r) => r.id === entry.talentId)?.source ?? "";
+  const refData = ([...TALENT_LIST, ...TRAIT_LIST] as Array<{ id: string; source: SkillSource | SkillSource[] }>)
+    .find((r) => r.id === entry.talentId);
+  const refSources = refData ? normaliseSources(refData.source) : [];
 
   return (
     <div className="flex items-start justify-between gap-2 rounded border border-slate-700 bg-slate-900/30 px-3 py-2 text-sm">
       <div className="space-y-0.5 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="font-medium text-slate-200 break-words">{entry.name}</span>
-          {refSource && (
-            <span className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(refSource)}`}>
-              {refSource}
+          {refSources.map((src) => (
+            <span key={src} className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(src)}`}>
+              {src}
             </span>
-          )}
+          ))}
           {description && (
             <InfoModal title={entry.name} content={description} />
           )}
