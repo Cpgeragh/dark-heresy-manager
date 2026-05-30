@@ -5,7 +5,7 @@ import { SkillSource } from "../types/SkillSource";
 export interface TalentData {
   id: string;
   name: string;
-  source: SkillSource;
+  source: SkillSource | SkillSource[];
   hasSpecialisation: boolean;
   specialisationLabel?: string; // e.g. "Group", "Sense", "Skill"
   prerequisites?: string;
@@ -225,19 +225,19 @@ export const TALENT_LIST: readonly TalentData[] = [
   { id: "wrath-of-the-righteous",name: "Wrath of the Righteous",source: SkillSource.BoM, hasSpecialisation: false, prerequisites: "Pure Faith",                                           faithGroup: "wrath" },
 
   // ─── Radical's Handbook ─────────────────────────────────────────────────────
-  { id: "touched-by-the-fates",  name: "Touched by the Fates",  source: SkillSource.RH, hasSpecialisation: false },
+  { id: "touched-by-the-fates",  name: "Touched by the Fates",  source: [SkillSource.DotDG, SkillSource.RH], hasSpecialisation: false },
   { id: "aetheric-resonator",    name: "Aetheric Resonator",    source: SkillSource.RH, hasSpecialisation: false, prerequisites: "Tech-Priest (Potentia Coil/Electoo Conductor)" },
   { id: "anima-aura",            name: "Anima Aura",            source: SkillSource.RH, hasSpecialisation: false, prerequisites: "Tech-Priest (Potentia Coil)" },
   { id: "daemonic-essence",      name: "Daemonic Essence",      source: SkillSource.RH, hasSpecialisation: false, prerequisites: "Daemon Vessel" },
-  { id: "major-arcana",          name: "Major Arcana",          source: SkillSource.RH, hasSpecialisation: false, prerequisites: "WP 45+, Sorcerer", repeatable: true },
-  { id: "master-sorcerer",       name: "Master Sorcerer",       source: SkillSource.RH, hasSpecialisation: false, prerequisites: "Int 40+, WP 50+, Sorcerer, Forbidden Lore (Demonology or Warp) +20" },
-  { id: "minor-arcana",          name: "Minor Arcana",          source: SkillSource.RH, hasSpecialisation: false, prerequisites: "Sorcerer", repeatable: true },
+  { id: "major-arcana",          name: "Major Arcana",          source: [SkillSource.DotDG, SkillSource.RH], hasSpecialisation: false, prerequisites: "WP 45+, Sorcerer", repeatable: true },
+  { id: "master-sorcerer",       name: "Master Sorcerer",       source: [SkillSource.DotDG, SkillSource.RH], hasSpecialisation: false, prerequisites: "Int 40+, WP 50+, Sorcerer, Forbidden Lore (Demonology or Warp) +20" },
+  { id: "minor-arcana",          name: "Minor Arcana",          source: [SkillSource.DotDG, SkillSource.RH], hasSpecialisation: false, prerequisites: "Sorcerer", repeatable: true },
   { id: "monster-beneath-the-skin", name: "Monster Beneath the Skin", source: SkillSource.RH, hasSpecialisation: false, prerequisites: "Daemonic Essence" },
   { id: "nightmare-field",       name: "Nightmare Field",       source: SkillSource.RH, hasSpecialisation: false, prerequisites: "Tech-Priest (Potentia Coil/Cranial Circuitry)" },
   { id: "power-of-the-warp",     name: "Power of the Warp",     source: SkillSource.RH, hasSpecialisation: false, prerequisites: "Daemonic Essence" },
   { id: "ruin-incarnate",        name: "Ruin Incarnate",        source: SkillSource.RH, hasSpecialisation: false, prerequisites: "Daemonic Essence, 91+ Corruption Points" },
-  { id: "sorcerer",              name: "Sorcerer",              source: SkillSource.RH, hasSpecialisation: false, prerequisites: "Int 35+, WP 35+, Forbidden Lore (Demonology or Warp) +10" },
-  { id: "sublime-arts",          name: "Sublime Arts",          source: SkillSource.RH, hasSpecialisation: false, prerequisites: "Per 40+, Int 45+, Sorcerer" },
+  { id: "sorcerer",              name: "Sorcerer",              source: [SkillSource.DotDG, SkillSource.RH], hasSpecialisation: false, prerequisites: "Int 35+, WP 35+, Forbidden Lore (Demonology or Warp) +10" },
+  { id: "sublime-arts",          name: "Sublime Arts",          source: [SkillSource.DotDG, SkillSource.RH], hasSpecialisation: false, prerequisites: "Per 40+, Int 45+, Sorcerer" },
   { id: "visions-of-the-abyss",  name: "Visions of the Abyss",  source: SkillSource.RH, hasSpecialisation: false, prerequisites: "Personal Augury" },
   { id: "warped-psyker",         name: "Warped Psyker",         source: SkillSource.RH, hasSpecialisation: false, prerequisites: "Psy Rating 2, Corruption from Perils of the Warp" },
 
@@ -312,8 +312,7 @@ export const TALENT_LIST: readonly TalentData[] = [
 
   // ─── Disciples of the Dark Gods ─────────────────────────────────────────────
   { id: "consumed-by-spite",     name: "Consumed by Spite",     source: SkillSource.DotDG, hasSpecialisation: false },
-  { id: "fuelled-by-flesh",      name: "Fuelled by Flesh",      source: SkillSource.DotDG, hasSpecialisation: false, prerequisites: "Sorcerer" },
-  { id: "last-killer-standing",  name: "Last Killer Standing",  source: SkillSource.DotDG, hasSpecialisation: false, prerequisites: "Nerves of Steel" },
+
   { id: "psychic-spite",         name: "Psychic Spite",         source: SkillSource.DotDG, hasSpecialisation: false, prerequisites: "Psy Rating 4, Corpus Conversion" },
   { id: "psychic-supremacy",     name: "Psychic Supremacy",     source: SkillSource.DotDG, hasSpecialisation: true,  specialisationLabel: "Discipline", prerequisites: "Psy Rating 5, Discipline Focus (chosen)" },
   { id: "psychic-vampire",       name: "Psychic Vampire",       source: SkillSource.DotDG, hasSpecialisation: false, prerequisites: "Psy Rating 4, 30+ Corruption Points, lethal Psychic Powers" },

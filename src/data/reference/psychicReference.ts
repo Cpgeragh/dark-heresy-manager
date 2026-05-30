@@ -1340,4 +1340,230 @@ export const PSYCHIC_POWER_REFERENCE: PsychicPowerRef[] = [
       "Each target must pass a Willpower Test or roll on the Shock Table. " +
       "Overbleed: For every 5 points by which you exceed the Threshold, the target adds +10 to their roll on the Shock Table.",
   },
+
+  // ── Disciples of the Dark Gods ────────────────────────────────────────────
+
+  // Minor Powers
+  {
+    id: "dotdg-endure-flames",
+    name: "Endure Flames",
+    source: SkillSource.DotDG,
+    discipline: "Minor",
+    threshold: 8,
+    focusTime: "Half Action",
+    sustained: true,
+    range: "You",
+    description:
+      "You can endure the most severe flames, walking unscathed through fire. " +
+      "You are immune to Damage from fire and Flame weaponry and reduce the Damage inflicted by Plasma or Melta weapons by half before reduction for armour and Toughness Bonus. " +
+      "The effects of this power extend to your clothing and equipment.",
+  },
+  {
+    id: "dotdg-open-wounds",
+    name: "Open Wounds",
+    source: SkillSource.DotDG,
+    discipline: "Minor",
+    threshold: 9,
+    focusTime: "Half Action",
+    sustained: false,
+    range: "10m",
+    description:
+      "You cause a previously injured victim's wounds to burst open and gush with blood. " +
+      "The victim must pass a Difficult (–10) Toughness Test or suffer 1d5 R Damage, bypassing their Toughness Bonus and armour " +
+      "(applied to their most recently wounded Location). " +
+      "Additionally, if the target is Heavily Wounded, it immediately suffers Blood Loss. " +
+      "This power is useless against an unwounded or unliving target.",
+  },
+  {
+    id: "dotdg-space-slip",
+    name: "Space Slip",
+    source: SkillSource.DotDG,
+    discipline: "Minor",
+    threshold: 11,
+    focusTime: "Half Action",
+    sustained: false,
+    range: "You",
+    description:
+      "You push yourself through the edge of the warp, slipping out of reality and reappearing in a different nearby location. " +
+      "If successfully manifested, you are immediately moved to a point 1d5 or 1d10+2 metres away (chosen before rolling) in a direction of your choice, " +
+      "without regard to any intervening matter. You may not bypass warded barriers, void shields, or Geller Fields. " +
+      "Special: If you would appear inside solid matter, pass a Challenging (+0) Toughness Test or be hurled back 1d5 metres and Stunned for 1d5 Rounds. " +
+      "On a failed Test you are also hurled back and Stunned, but additionally take 1d10 X Damage to the Body Location (not reduced by Toughness Bonus or armour). " +
+      "If the solid object is a living thing, it too must pass a Challenging (+0) Toughness Test or become Stunned.",
+  },
+  {
+    id: "dotdg-suggestion",
+    name: "Suggestion",
+    source: SkillSource.DotDG,
+    discipline: "Minor",
+    threshold: 9,
+    focusTime: "Half Action",
+    sustained: false,
+    range: "6m",
+    description:
+      "You introduce a single telepathic suggestion into a target's psyche — making them more open to a line of thought, " +
+      "experience a brief sensation, lend credence to what you are saying, or momentarily feel an emotional state of your choosing. " +
+      "The psyker and the target make Opposed Willpower Tests. If the psyker wins, the suggestion is planted. " +
+      "This is subtle manipulation, not true mind control: you could convince a target they like you, that they are hungry, " +
+      "or that your identity card looks genuine, but you cannot make them perform actions entirely out of character, " +
+      "believe utterly implausible things, change fundamental beliefs, or harm themselves. " +
+      "Special: Gain a +20 bonus when using this power in conjunction with an Interaction Skill.",
+  },
+  {
+    id: "dotdg-time-fade",
+    name: "Time Fade",
+    source: SkillSource.DotDG,
+    discipline: "Minor",
+    threshold: 13,
+    focusTime: "Full Action",
+    sustained: false,
+    range: "You",
+    description:
+      "You remove yourself briefly from the normal flow of space and time, flickering out of existence and returning to exactly the same spot 1d5 Rounds later. " +
+      "If that location is now occupied, a repulsion effect occurs identical to the Space Slip power. " +
+      "Special: On the round you return, pass a Challenging (+0) Willpower Test to act. " +
+      "If this Test is failed by more than three degrees, roll on the Shock Table as if from a failed Fear Test.",
+  },
+
+  // Biomancy Powers
+  {
+    id: "dotdg-agony",
+    name: "Agony",
+    source: SkillSource.DotDG,
+    discipline: "Biomancy",
+    threshold: 13,
+    focusTime: "Full Action",
+    sustained: true,
+    range: "10m",
+    description:
+      "You lash out at your enemy with acute and all-consuming pain. " +
+      "The target must make a Challenging (+0) Toughness Test at the beginning of each of its Rounds. " +
+      "On a failure it may only take a Half Action that Round. " +
+      "On a failure by more than three degrees, it may take no Actions and suffers a level of Fatigue. " +
+      "While sustained, this power grants a +10 bonus to the psyker's Interrogation Tests. " +
+      "This power has no effect on unliving matter or targets incapable of feeling pain. " +
+      "Overbleed: For every 5 points by which the Threshold is exceeded, a second target within range and line of sight may be affected.",
+  },
+  {
+    id: "dotdg-drain-vigour",
+    name: "Drain Vigour",
+    source: SkillSource.DotDG,
+    discipline: "Biomancy",
+    threshold: 20,
+    focusTime: "Half Action",
+    sustained: true,
+    range: "20m",
+    description:
+      "You drain the vigour and energy of a living creature, sapping its vitality and strength. " +
+      "The target must pass a Difficult (–10) Willpower Test or its Strength, Toughness and Agility Characteristics are all reduced by 1d10 (roll once for all). " +
+      "On a failure the target must Test again the following Round, risking further Characteristic Damage. " +
+      "This continues until it passes the Test or one of its Characteristics reaches zero. " +
+      "The effects last for the power's duration plus 1d10 Rounds. " +
+      "This power has no effect on unliving matter.",
+  },
+  {
+    id: "dotdg-flesh-like-iron",
+    name: "Flesh Like Iron",
+    source: SkillSource.DotDG,
+    discipline: "Biomancy",
+    threshold: 18,
+    focusTime: "Half Action",
+    sustained: true,
+    range: "You",
+    description:
+      "You draw on the power of the warp to make your flesh as hard as metal. " +
+      "For the duration of the power, your Toughness Bonus is increased by 2 and your Agility Bonus is reduced by 1. " +
+      "Overbleed: For every 5 points by which the Threshold is exceeded, gain an additional +1 Toughness Bonus, up to a maximum of triple your normal Toughness Bonus.",
+  },
+
+  // Pyromancy Powers
+  {
+    id: "dotdg-molten-man",
+    name: "Molten Man",
+    source: SkillSource.DotDG,
+    discipline: "Pyromancy",
+    threshold: 27,
+    focusTime: "Full Action",
+    sustained: true,
+    range: "You",
+    description:
+      "You become a thing of pure heat and flame. For the duration of the power: " +
+      "all worn or carried clothes and equipment are permanently destroyed; " +
+      "you are completely immune to fire and Flame weapons and suffer only half Damage (before armour and TB reduction) from Plasma, Las, and Melta weapons; " +
+      "you gain the Stuff of Nightmares trait and +3 Toughness Bonus; " +
+      "anything within 5 metres suffers 1d5 E Damage each Round and flammable objects quickly ignite; " +
+      "your unarmed attacks inflict 1d10+SB E Damage with Pen 5 and the Power Field quality; " +
+      "any weapon that strikes you has a 75% chance of being destroyed as by the Power Field quality. " +
+      "Special: After this power lapses, the psyker suffers 1d5 levels of Fatigue.",
+  },
+
+  // Telekinetics Powers
+  {
+    id: "dotdg-psychokinetic-storm",
+    name: "Psychokinetic Storm",
+    source: SkillSource.DotDG,
+    discipline: "Telekinetics",
+    threshold: 12,
+    focusTime: "Half Action",
+    sustained: true,
+    range: "10m radius",
+    description:
+      "You manifest an uncontrolled storm of unleashed psychokinetic potential around yourself, " +
+      "raising squalling winds, causing small objects to jump and topple, glass to shatter, electrical contacts to short out and spark, " +
+      "flames to leap, cogitators to spit gibberish, and other distracting phenomena. " +
+      "Everyone within the radius other than the manifesting psyker suffers a –10 penalty to all physical actions while the power is in effect. " +
+      "Overbleed: For every 10 points by which the Threshold is exceeded, the radius of the storm is doubled.",
+  },
+
+  // Telepathy Powers
+  {
+    id: "dotdg-seed-mind",
+    name: "Seed Mind",
+    source: SkillSource.DotDG,
+    discipline: "Telepathy",
+    threshold: 26,
+    focusTime: "Extended Action",
+    sustained: false,
+    range: "Touch",
+    description:
+      "You plant a seed of influence within a person's mind — a psychic keyhole you can later use to enslave their will. " +
+      "The psyker must maintain physical contact with the target throughout. If contact is broken before either side wins, the power must be restarted. " +
+      "Each Round both make Opposed Willpower Tests, accumulating degrees of success. " +
+      "The first to reach a cumulative total of five degrees wins. " +
+      "If the target wins, the process fails and their mind is locked off — the psyker may not use this power on them again. " +
+      "If the psyker wins, the target will automatically be affected by Compel, Dominate, Suggestion and Zone of Compulsion when those powers are successfully manifested by the psyker, with no resistance rolls allowed. " +
+      "Overbleed: For every 10 points by which the Threshold is exceeded, gain an additional +10 bonus to the Opposed Willpower Test.",
+  },
+  {
+    id: "dotdg-soul-killer",
+    name: "Soul Killer",
+    source: SkillSource.DotDG,
+    discipline: "Telepathy",
+    threshold: 25,
+    focusTime: "Full Action",
+    sustained: false,
+    range: "5m × Willpower Bonus",
+    description:
+      "You slay your enemy with an invisible splinter of annihilating psychic force. " +
+      "The attack inflicts 1d10 X Damage plus double the psyker's Willpower Bonus, ignoring armour unless it is warded. " +
+      "Any Critical Hits scored are applied simultaneously to the victim's Body and Head Locations, though Critical Damage is not doubled. " +
+      "This power has no effect on inanimate matter but may be used against warp entities. " +
+      "Overbleed: For every 10 points by which the Threshold is exceeded, another splinter of force is created, which may be directed at the same or a different target.",
+  },
+  {
+    id: "dotdg-zone-of-compulsion",
+    name: "Zone of Compulsion",
+    source: SkillSource.DotDG,
+    discipline: "Telepathy",
+    threshold: 19,
+    focusTime: "Half Action",
+    sustained: false,
+    range: "(5 + Willpower Bonus)m radius",
+    description:
+      "You send out a wave of telepathic force carrying a single command. " +
+      "Every person (friend and foe alike) within range must make an Opposed Willpower Test against you — you roll only once to oppose all. " +
+      "Anyone who loses the contest of wills must follow your command as per the Compel psychic power. " +
+      "The command must be identical for all those within the zone. " +
+      "Overbleed: For every 10 points by which the Threshold is exceeded, gain a +10 bonus to your Opposed Willpower Test.",
+  },
 ];

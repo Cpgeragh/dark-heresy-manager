@@ -125,6 +125,10 @@ export const TRAIT_LIST: readonly TraitData[] = [
   { id: "wealth",                   name: "Wealth",                   source: SkillSource.IH, hasSpecialisation: false },
   { id: "wilderness-savvy",         name: "Wilderness Savvy",         source: SkillSource.IH, hasSpecialisation: false },
 
+  // ─── Disciples of the Dark Gods ─────────────────────────────────────────────
+  { id: "dotdg-untouchable",         name: "Untouchable",              source: SkillSource.DotDG, hasSpecialisation: false },
+  { id: "dotdg-cryptos-possession",  name: "Cryptos Possession",       source: SkillSource.DotDG, hasSpecialisation: false },
+
   // ─── Book of Judgement ─────────────────────────────────────────────────────
   { id: "blank-slate",              name: "Blank Slate",              source: SkillSource.BoJ, hasSpecialisation: false },
 ];
