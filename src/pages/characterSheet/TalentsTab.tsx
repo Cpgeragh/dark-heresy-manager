@@ -50,6 +50,24 @@ function bookLabel(source: string): string {
   return BOOK_METADATA[source as SkillSource]?.name ?? source;
 }
 
+// ─── Faith Talent constants ───────────────────────────────────────────────────
+
+const FAITH_GROUP_LABELS: Record<string, string> = {
+  sign:  "Emperor's Sign",
+  mercy: "Emperor's Mercy",
+  wrath: "Emperor's Wrath",
+};
+
+const FAITH_GROUP_ORDER = ["sign", "mercy", "wrath"] as const;
+
+const REGULAR_TALENT_LIST = TALENT_LIST.filter((t) => !t.faithGroup);
+const FAITH_TALENT_LIST   = TALENT_LIST.filter((t) => !!t.faithGroup);
+const FAITH_TALENT_IDS    = new Set(FAITH_TALENT_LIST.map((t) => t.id));
+
+function getFaithGroup(talentId: string): string | undefined {
+  return FAITH_TALENT_LIST.find((t) => t.id === talentId)?.faithGroup;
+}
+
 // ─── AddEntryForm ─────────────────────────────────────────────────────────────
 
 interface AddEntryFormProps {
@@ -110,15 +128,19 @@ function AddEntryForm({ listData, singular, onAdd, onCancel }: AddEntryFormProps
             className={editableInputClass(true) + " appearance-none"}
           >
             <option value="">— Choose —</option>
-            {Object.entries(grouped).map(([source, items]) => (
-              <optgroup key={source} label={bookLabel(source)}>
-                {items.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
+            {Object.entries(grouped)
+              .sort(([a], [b]) => bookLabel(a).localeCompare(bookLabel(b)))
+              .map(([source, items]) => (
+                <optgroup key={source} label={bookLabel(source)}>
+                  {[...items]
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name}
+                      </option>
+                    ))}
+                </optgroup>
+              ))}
           </select>
         </div>
 
@@ -288,6 +310,168 @@ function EntrySection({
   );
 }
 
+// ─── AddFaithTalentForm ───────────────────────────────────────────────────────
+
+function AddFaithTalentForm({
+  onAdd,
+  onCancel,
+}: {
+  onAdd: (entry: TalentEntry) => void;
+  onCancel: () => void;
+}) {
+  const [selectedId, setSelectedId] = useState("");
+  const [notes, setNotes] = useState("");
+
+  const selected = FAITH_TALENT_LIST.find((t) => t.id === selectedId);
+
+  const grouped = FAITH_GROUP_ORDER.reduce<Record<string, TalentData[]>>(
+    (acc, group) => {
+      acc[group] = FAITH_TALENT_LIST.filter((t) => t.faithGroup === group);
+      return acc;
+    },
+    {}
+  );
+
+  const canAdd = !!selectedId;
+
+  const handleAdd = () => {
+    if (!selected || !canAdd) return;
+    const entry: TalentEntry = {
+      uid: crypto.randomUUID(),
+      talentId: selected.id,
+      name: selected.name,
+    };
+    if (notes.trim()) entry.notes = notes.trim();
+    onAdd(entry);
+    setSelectedId("");
+    setNotes("");
+  };
+
+  return (
+    <div className="rounded border border-amber-700/40 bg-slate-900/60 p-3 space-y-2 mt-2">
+      <p className="text-xs font-medium text-amber-400/80">Add Faith Talent</p>
+
+      <div className="flex flex-wrap gap-2 items-end">
+        <div className="flex-1 min-w-[200px]">
+          <label className="block text-xs text-slate-400 mb-1">Select</label>
+          <select
+            value={selectedId}
+            onChange={(e) => setSelectedId(e.target.value)}
+            className={editableInputClass(true) + " appearance-none"}
+          >
+            <option value="">— Choose —</option>
+            {[...FAITH_GROUP_ORDER]
+              .sort((a, b) => FAITH_GROUP_LABELS[a].localeCompare(FAITH_GROUP_LABELS[b]))
+              .map((group) => (
+                <optgroup key={group} label={FAITH_GROUP_LABELS[group]}>
+                  {[...grouped[group]]
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map((t) => (
+                      <option key={t.id} value={t.id}>{t.name}</option>
+                    ))}
+                </optgroup>
+              ))}
+          </select>
+        </div>
+      </div>
+
+      {selected?.prerequisites && (
+        <p className="text-xs text-slate-500">Prerequisites: {selected.prerequisites}</p>
+      )}
+
+      <div>
+        <label className="block text-xs text-slate-400 mb-1">Notes (optional)</label>
+        <input
+          type="text"
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder="Optional notes…"
+          className={editableInputClass(true)}
+        />
+      </div>
+
+      <div className="flex gap-2 pt-1">
+        <button
+          onClick={handleAdd}
+          disabled={!canAdd}
+          className="px-3 py-1 text-sm rounded border border-amber-500 bg-amber-600 text-white hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed transition"
+        >
+          Add
+        </button>
+        <button
+          onClick={onCancel}
+          className="px-3 py-1 text-sm rounded border border-slate-600 text-slate-400 hover:bg-slate-800 transition"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── FaithTalentSection ───────────────────────────────────────────────────────
+
+function FaithTalentSection({
+  entries,
+  editable,
+  onAdd,
+  onRemove,
+}: {
+  entries: TalentEntry[];
+  editable: boolean;
+  onAdd: (entry: TalentEntry) => void;
+  onRemove: (uid: string) => void;
+}) {
+  const [adding, setAdding] = useState(false);
+
+  return (
+    <section className={sectionContainerClass(editable) + " space-y-4"}>
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold">Faith Talents</h3>
+        <span className="text-xs text-slate-500">
+          {entries.length} {entries.length === 1 ? "talent" : "faith talents"}
+        </span>
+      </div>
+
+      {FAITH_GROUP_ORDER.map((group) => {
+        const groupEntries = entries.filter((e) => getFaithGroup(e.talentId) === group);
+        return (
+          <div key={group}>
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">
+              {FAITH_GROUP_LABELS[group]}
+            </p>
+            {groupEntries.length === 0 && (
+              <p className="text-sm text-slate-500 italic">None.</p>
+            )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {groupEntries.map((entry) => (
+                <EntryCard
+                  key={entry.uid}
+                  entry={entry}
+                  editable={editable}
+                  onRemove={onRemove}
+                />
+              ))}
+            </div>
+          </div>
+        );
+      })}
+
+      {editable &&
+        (adding ? (
+          <AddFaithTalentForm onAdd={onAdd} onCancel={() => setAdding(false)} />
+        ) : (
+          <button
+            onClick={() => setAdding(true)}
+            className="mt-1 px-3 py-1 text-xs rounded border border-slate-600 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition"
+          >
+            + Add Faith Talent
+          </button>
+        ))}
+    </section>
+  );
+}
+
 // ─── Main Component ──────────────────────────────────────────────────────────
 
 export function TalentsTab({
@@ -400,7 +584,7 @@ export function TalentsTab({
             className={editableInputClass(editable) + " appearance-none"}
           >
             <option value="">— Select homeworld —</option>
-            {HOMEWORLD_LIST.map((hw) => (
+            {[...HOMEWORLD_LIST].sort((a, b) => a.name.localeCompare(b.name)).map((hw) => (
               <option key={hw.id} value={hw.id}>
                 {hw.name} ({hw.source})
               </option>
@@ -429,8 +613,16 @@ export function TalentsTab({
       <EntrySection
         title="Talents"
         singular="Talent"
-        entries={talents.talents}
-        listData={TALENT_LIST}
+        entries={talents.talents.filter((e) => !FAITH_TALENT_IDS.has(e.talentId))}
+        listData={REGULAR_TALENT_LIST}
+        editable={editable}
+        onAdd={handleAddTalent}
+        onRemove={handleRemoveTalent}
+      />
+
+      {/* FAITH TALENTS */}
+      <FaithTalentSection
+        entries={talents.talents.filter((e) => FAITH_TALENT_IDS.has(e.talentId))}
         editable={editable}
         onAdd={handleAddTalent}
         onRemove={handleRemoveTalent}

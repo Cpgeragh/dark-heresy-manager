@@ -843,17 +843,6 @@ export const GEAR_REFERENCE: GearRef[] = [
     rarity: "Rare",
   },
   {
-    id: "dh-sacred-incense-burner",
-    name: "Sacred Incense Burner",
-    source: SkillSource.DH,
-    description:
-      "Daemons within 10m of the bearer suffer –10 WS and –10 to all Warp Instability Tests. " +
-      "Can also be swung as a melee weapon (Flexible, Sanctified, 1d10+2 I — see Weapons tab).",
-    weight: "3 kg",
-    value: "800 Thrones",
-    rarity: "Rare",
-  },
-  {
     id: "dh-soubirous-power-pack",
     name: "Soubirous Power Pack",
     source: SkillSource.DH,
@@ -876,43 +865,6 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Plasma weapons affected also lose the Volatile quality.",
     weight: "10 kg",
     value: "8,000 Thrones",
-    rarity: "Near Unique",
-  },
-
-  // Force Fields
-  {
-    id: "dh-refraction-bracer",
-    name: "Refraction Bracer (Force Field, PR 30)",
-    source: SkillSource.DH,
-    description:
-      "Protection Rating 30. Provides a shield-like wall of force protecting body and arms only — " +
-      "head and legs are unprotected. Does not function against area attacks.",
-    weight: "0.3 kg",
-    value: "5,000 Thrones",
-    rarity: "Rare",
-  },
-  {
-    id: "dh-refraction-field-brontian",
-    name: "Refraction Field, Brontian Pattern (Force Field, PR 30)",
-    source: SkillSource.DH,
-    description:
-      "Protection Rating 30. Standard refraction field. " +
-      "Ordo Malleus agents treat availability as Rare (instead of Very Rare) and reduce cost by 25%.",
-    weight: "0.4 kg",
-    value: "15,000 Thrones",
-    rarity: "Very Rare",
-  },
-  {
-    id: "dh-jokaerian-field",
-    name: "Jokaerian Field (Force Field, PR 70)",
-    source: SkillSource.DH,
-    description:
-      "Protection Rating 70 — but functions only against psychic attacks " +
-      "(including friendly ones originating more than 5m away). " +
-      "Also deals 1d10 damage ignoring Armour and Toughness Bonus to any creature with the Daemonic trait " +
-      "that passes or remains within 5m of the user. Jokaero-modified Imperial technology.",
-    weight: "0.5 kg",
-    value: "50,000 Thrones",
     rarity: "Near Unique",
   },
 

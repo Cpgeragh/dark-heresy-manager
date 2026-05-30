@@ -22,6 +22,10 @@ export interface ArmourRef {
   weight: string;
   value: string;
   rarity: string;
+  /** true for force fields — they have a Protection Rating, not AP, and cover no fixed locations */
+  isForceField?: boolean;
+  /** Protection Rating for force fields */
+  protectionRating?: number;
 }
 
 // Convenience shorthands for common location sets
@@ -623,6 +627,55 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     weight: "400 kg",
     value: "—",
     rarity: "Unique",
+  },
+
+  // ── Daemon Hunter — Force Fields ─────────────────────────────────────────
+  {
+    id: "dh-refraction-bracer",
+    name: "Refraction Bracer",
+    source: SkillSource.DH,
+    isForceField: true,
+    protectionRating: 30,
+    locations: [],
+    ap: 0,
+    notes:
+      "Protection Rating 30. Protects body and arms only — head and legs are unprotected. " +
+      "Does not function against area attacks.",
+    weight: "0.3 kg",
+    value: "5,000 Thrones",
+    rarity: "Rare",
+  },
+  {
+    id: "dh-refraction-field-brontian",
+    name: "Refraction Field (Brontian Pattern)",
+    source: SkillSource.DH,
+    isForceField: true,
+    protectionRating: 30,
+    locations: [],
+    ap: 0,
+    notes:
+      "Protection Rating 30. Standard refraction field. " +
+      "Ordo Malleus agents treat availability as Rare (instead of Very Rare) and reduce cost by 25%.",
+    weight: "0.4 kg",
+    value: "15,000 Thrones",
+    rarity: "Very Rare",
+  },
+  {
+    id: "dh-jokaerian-field",
+    name: "Jokaerian Field",
+    source: SkillSource.DH,
+    isForceField: true,
+    protectionRating: 70,
+    locations: [],
+    ap: 0,
+    notes:
+      "Protection Rating 70 — functions only against psychic attacks (including friendly ones " +
+      "originating more than 5m away). Deals 1d10 damage ignoring Armour and Toughness Bonus " +
+      "to any creature with the Daemonic trait that passes or remains within 5m. " +
+      "Jokaero-modified Imperial technology.",
+    weight: "0.5 kg",
+    value: "50,000 Thrones",
+    rarity: "Near Unique",
   },
 
   // ── Creatures Anathema ───────────────────────────────────────────────────
