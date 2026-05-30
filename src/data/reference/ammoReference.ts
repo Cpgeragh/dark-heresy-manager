@@ -298,4 +298,18 @@ export const AMMO_REFERENCE: AmmoRef[] = [
       "Psychically charged promethium for flamer weapons. Ignores protection from psychic powers or Sorcery. " +
       "Counts as Sanctified. Targets in the area of effect suffer –5 to their Agility Test per point of the user's Psy Rating.",
   },
+
+  // ── Creatures Anathema ───────────────────────────────────────────────────
+  {
+    id: "ca-shuriken-clip",
+    name: "Shuriken Clip",
+    source: SkillSource.CA,
+    compatibleWith: "Shuriken Pistol, Avenger Shuriken Catapult",
+    cost: "500 Thrones",
+    purchaseAmount: "full clip",
+    rarity: "Very Rare",
+    description:
+      "Solid core monomolecular discs. Imperial technology cannot replicate this ammunition — " +
+      "it is only available through xenos sources.",
+  },
 ];
