@@ -82,7 +82,7 @@ function locationLabel(locations: ArmourLocationKey[]): string {
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-/** Inline reference picker modal */
+/** Inline reference picker modal — regular armour only (no force fields) */
 function ArmourPicker({
   onSelect,
   onCustom,
@@ -94,7 +94,7 @@ function ArmourPicker({
 }) {
   const [query, setQuery] = useState("");
   const filtered = ARMOUR_REFERENCE.filter((r) =>
-    r.name.toLowerCase().includes(query.toLowerCase())
+    !r.isForceField && r.name.toLowerCase().includes(query.toLowerCase())
   ).sort((a, b) => a.name.localeCompare(b.name));
 
   return (
@@ -157,6 +157,65 @@ function ArmourPicker({
           >
             + Add custom piece
           </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Force field reference picker modal */
+function ForceFieldPicker({
+  onSelect,
+  onClose,
+}: {
+  onSelect: (ref: ArmourRef) => void;
+  onClose: () => void;
+}) {
+  const [query, setQuery] = useState("");
+  const filtered = ARMOUR_REFERENCE.filter((r) =>
+    r.isForceField && r.name.toLowerCase().includes(query.toLowerCase())
+  ).sort((a, b) => a.name.localeCompare(b.name));
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+      <div className="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-xl shadow-2xl flex flex-col max-h-[80vh]">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
+          <h3 className="text-sm font-semibold text-slate-200">Add Force Field</h3>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-200 text-lg leading-none">×</button>
+        </div>
+        <div className="px-4 py-2 border-b border-slate-800">
+          <input
+            type="text"
+            autoFocus
+            placeholder="Search force fields…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className={editableInputClass(true)}
+          />
+        </div>
+        <div className="overflow-y-auto flex-1 divide-y divide-slate-800">
+          {filtered.length === 0 && (
+            <p className="p-4 text-sm text-slate-500 text-center">No matches.</p>
+          )}
+          {filtered.map((ref) => (
+            <button
+              key={ref.id}
+              onClick={() => onSelect(ref)}
+              className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-sm font-medium text-slate-200 group-hover:text-white">
+                  {ref.name}
+                </span>
+                <span className="text-xs text-slate-500 shrink-0">
+                  PR {ref.protectionRating}
+                </span>
+              </div>
+              {ref.notes && (
+                <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{ref.notes}</p>
+              )}
+            </button>
+          ))}
         </div>
       </div>
     </div>
@@ -326,6 +385,7 @@ export function ArmourTab({
   cybernetics = [],
 }: ArmourTabProps) {
   const [showPicker, setShowPicker] = useState(false);
+  const [showFieldPicker, setShowFieldPicker] = useState(false);
   const [showCustomForm, setShowCustomForm] = useState(false);
   const [infoTarget, setInfoTarget] = useState<WornArmourPiece | null>(null);
   const [pickerMode, setPickerMode] = useState<"worn" | "stowed">("worn");
@@ -351,6 +411,8 @@ export function ArmourTab({
         locations: ref.locations,
         ap: ref.ap,
         ...(ref.apOverrides ? { apOverrides: ref.apOverrides } : {}),
+        ...(ref.isForceField ? { isForceField: true } : {}),
+        ...(ref.protectionRating !== undefined ? { protectionRating: ref.protectionRating } : {}),
         worn: true,
         weight: ref.weight,
         value: ref.value,
@@ -379,8 +441,10 @@ export function ArmourTab({
 
   // ── Data ───────────────────────────────────────────────────────────────────
 
-  const worn = armour.filter((p) => p.worn);
-  const stowed = armour.filter((p) => !p.worn);
+  const regularArmour = armour.filter((p) => !p.isForceField);
+  const forceFields   = armour.filter((p) => p.isForceField);
+  const worn   = regularArmour.filter((p) => p.worn);
+  const stowed = regularArmour.filter((p) => !p.worn);
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
@@ -406,7 +470,7 @@ export function ArmourTab({
             </thead>
             <tbody className="divide-y divide-slate-800">
               {LOCATION_ORDER.map((loc) => {
-                const ap     = wornApAt(armour, loc);
+                const ap     = wornApAt(regularArmour, loc);
                 const bionic = bionicBonusAt(loc, cybernetics);
                 const total  = ap + toughnessBonus + bionic;
                 return (
@@ -491,6 +555,36 @@ export function ArmourTab({
         ))}
       </section>
 
+      {/* FORCE FIELDS ────────────────────────────────────────────────────── */}
+      <section className="space-y-2">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+            Force Fields ({forceFields.length})
+          </h3>
+          {editable && (
+            <button
+              onClick={() => setShowFieldPicker(true)}
+              className="text-xs px-3 py-1 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 transition"
+            >
+              + Add
+            </button>
+          )}
+        </div>
+        {forceFields.length === 0 && (
+          <p className="text-sm text-slate-500 italic">No force field equipped.</p>
+        )}
+        {forceFields.map((piece) => (
+          <ForceFieldRow
+            key={piece.id}
+            piece={piece}
+            editable={editable}
+            onToggle={toggleWorn}
+            onRemove={removePiece}
+            onInfo={setInfoTarget}
+          />
+        ))}
+      </section>
+
       {/* CUSTOM FORM ──────────────────────────────────────────────────────── */}
       {editable && showCustomForm && (
         <section>
@@ -513,11 +607,86 @@ export function ArmourTab({
         />
       )}
 
+      {showFieldPicker && (
+        <ForceFieldPicker
+          onSelect={(ref) => { fromReference(ref); setShowFieldPicker(false); }}
+          onClose={() => setShowFieldPicker(false)}
+        />
+      )}
+
       {infoTarget && (
         <PieceNotesModal
           piece={infoTarget}
           onClose={() => setInfoTarget(null)}
         />
+      )}
+    </div>
+  );
+}
+
+// ─── Force Field Row ──────────────────────────────────────────────────────────
+
+function ForceFieldRow({
+  piece,
+  editable,
+  onToggle,
+  onRemove,
+  onInfo,
+}: {
+  piece: WornArmourPiece;
+  editable: boolean;
+  onToggle: (id: string) => void;
+  onRemove: (id: string) => void;
+  onInfo: (piece: WornArmourPiece) => void;
+}) {
+  const active = piece.worn;
+  return (
+    <div
+      className={[
+        sectionContainerClass(editable),
+        "flex items-center gap-3",
+        !active ? "opacity-60" : "",
+      ].join(" ")}
+    >
+      <div className="flex-1 min-w-0">
+        <span className="text-sm font-medium text-slate-200 truncate block">{piece.name}</span>
+        <div className="flex flex-wrap gap-1.5 mt-1">
+          {piece.protectionRating !== undefined && (
+            <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 font-mono text-slate-200">
+              PR {piece.protectionRating}
+            </span>
+          )}
+          {piece.weight && <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">⚖ {piece.weight}</span>}
+          {piece.value  && <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">₮ {piece.value}</span>}
+          {piece.rarity && <span className={`text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 ${rarityColour(piece.rarity)}`}>{piece.rarity}</span>}
+          {piece.source && <span className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(piece.source)}`}>{piece.source}</span>}
+        </div>
+      </div>
+
+      <button
+        onClick={() => onInfo(piece)}
+        title="View rules"
+        className="text-slate-500 hover:text-slate-300 text-sm px-1 transition"
+      >
+        ⓘ
+      </button>
+
+      {editable && (
+        <button
+          onClick={() => onToggle(piece.id)}
+          className="text-xs px-2 py-1 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 transition whitespace-nowrap"
+        >
+          {active ? "Deactivate" : "Activate"}
+        </button>
+      )}
+
+      {editable && (
+        <button
+          onClick={() => onRemove(piece.id)}
+          className="text-xs text-red-400 hover:text-red-300 transition"
+        >
+          Remove
+        </button>
       )}
     </div>
   );

@@ -173,6 +173,10 @@ export interface WornArmourPiece {
   rarity?: string;
   source?: string;
   custom?: boolean;       // true when created via "Add Custom"
+  /** true for force fields — no locations or AP, tracked separately in the Armour tab */
+  isForceField?: boolean;
+  /** Protection Rating for force fields */
+  protectionRating?: number;
 }
 
 /**

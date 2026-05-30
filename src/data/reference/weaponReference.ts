@@ -1761,7 +1761,7 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
   },
   {
     id: "dh-sacred-incense",
-    name: "Sacred Incense (as weapon)",
+    name: "Sacred Incense Burner",
     source: SkillSource.DH,
     class: "Melee",
     damage: "1d10+2 I",
