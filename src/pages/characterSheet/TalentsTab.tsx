@@ -1,6 +1,6 @@
 // src/pages/characterSheet/TalentsTab.tsx
 
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type {
   TalentsAndTraitsBlock,
   TalentEntry,
@@ -79,23 +79,46 @@ function getFaithGroup(talentId: string): string | undefined {
 interface AddEntryFormProps {
   listData: readonly AnyListItem[];
   singular: string;
+  selectedIds: ReadonlySet<string>;
   onAdd: (entry: TalentEntry) => void;
   onCancel: () => void;
 }
 
-function AddEntryForm({ listData, singular, onAdd, onCancel }: AddEntryFormProps) {
+function AddEntryForm({ listData, singular, selectedIds, onAdd, onCancel }: AddEntryFormProps) {
   const [selectedId, setSelectedId] = useState("");
   const [specialisation, setSpecialisation] = useState("");
   const [notes, setNotes] = useState("");
+  const [search, setSearch] = useState("");
 
   const selected = listData.find((t) => t.id === selectedId) as
     | (TalentData & TraitData)
     | undefined;
-  const grouped = groupBySource(listData);
+
+  // Flat deduplicated list — filtered by search query and already-selected non-repeatable ids
+  const filteredList = useMemo(() => {
+    const seen = new Set<string>();
+    const q = search.trim().toLowerCase();
+    return [...listData]
+      .filter((t) => {
+        if (seen.has(t.id)) return false;
+        seen.add(t.id);
+        const repeatable = "repeatable" in t ? (t as TalentData).repeatable : false;
+        if (!repeatable && selectedIds.has(t.id)) return false;
+        if (q) return t.name.toLowerCase().includes(q);
+        return true;
+      })
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [listData, selectedIds, search]);
 
   const canAdd =
     !!selectedId &&
     (!selected?.hasSpecialisation || specialisation.trim().length > 0);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value);
+    setSelectedId("");
+    setSpecialisation("");
+  };
 
   const handleAdd = () => {
     if (!selected || !canAdd) return;
@@ -111,20 +134,33 @@ function AddEntryForm({ listData, singular, onAdd, onCancel }: AddEntryFormProps
     if (specialisation.trim()) entry.specialisation = specialisation.trim();
     if (notes.trim()) entry.notes = notes.trim();
     onAdd(entry);
-    // keep form open for multi-adding — reset selections only
     setSelectedId("");
     setSpecialisation("");
     setNotes("");
+    setSearch("");
   };
 
   return (
     <div className="rounded border border-amber-700/40 bg-slate-900/60 p-3 space-y-2 mt-2">
       <p className="text-xs font-medium text-amber-400/80">Add {singular}</p>
 
+      {/* Search filter */}
+      <div>
+        <input
+          type="text"
+          value={search}
+          onChange={handleSearchChange}
+          placeholder={`Search ${singular.toLowerCase()}s…`}
+          className={editableInputClass(true)}
+        />
+      </div>
+
       <div className="flex flex-wrap gap-2 items-end">
-        {/* Selector */}
+        {/* Selector — flat alphabetical list */}
         <div className="flex-1 min-w-[200px]">
-          <label className="block text-xs text-slate-400 mb-1">Select</label>
+          <label className="block text-xs text-slate-400 mb-1">
+            Select{filteredList.length === 0 ? " (no matches)" : ` (${filteredList.length})`}
+          </label>
           <select
             value={selectedId}
             onChange={(e) => {
@@ -134,19 +170,11 @@ function AddEntryForm({ listData, singular, onAdd, onCancel }: AddEntryFormProps
             className={editableInputClass(true) + " appearance-none"}
           >
             <option value="">— Choose —</option>
-            {Object.entries(grouped)
-              .sort(([a], [b]) => bookLabel(a).localeCompare(bookLabel(b)))
-              .map(([source, items]) => (
-                <optgroup key={source} label={bookLabel(source)}>
-                  {[...items]
-                    .sort((a, b) => a.name.localeCompare(b.name))
-                    .map((t) => (
-                      <option key={t.id} value={t.id}>
-                        {t.name}
-                      </option>
-                    ))}
-                </optgroup>
-              ))}
+            {filteredList.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -273,6 +301,11 @@ function EntrySection({
 }: EntrySectionProps) {
   const [adding, setAdding] = useState(false);
 
+  const selectedIds = useMemo(
+    () => new Set(entries.map((e) => e.talentId)),
+    [entries]
+  );
+
   return (
     <section className={sectionContainerClass(editable) + " space-y-2"}>
       <div className="flex items-center justify-between">
@@ -302,6 +335,7 @@ function EntrySection({
           <AddEntryForm
             listData={listData}
             singular={singular}
+            selectedIds={selectedIds}
             onAdd={onAdd}
             onCancel={() => setAdding(false)}
           />
@@ -320,26 +354,39 @@ function EntrySection({
 // ─── AddFaithTalentForm ───────────────────────────────────────────────────────
 
 function AddFaithTalentForm({
+  selectedIds,
   onAdd,
   onCancel,
 }: {
+  selectedIds: ReadonlySet<string>;
   onAdd: (entry: TalentEntry) => void;
   onCancel: () => void;
 }) {
   const [selectedId, setSelectedId] = useState("");
   const [notes, setNotes] = useState("");
+  const [search, setSearch] = useState("");
 
   const selected = FAITH_TALENT_LIST.find((t) => t.id === selectedId);
 
-  const grouped = FAITH_GROUP_ORDER.reduce<Record<string, TalentData[]>>(
-    (acc, group) => {
-      acc[group] = FAITH_TALENT_LIST.filter((t) => t.faithGroup === group);
+  const grouped = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return FAITH_GROUP_ORDER.reduce<Record<string, TalentData[]>>((acc, group) => {
+      acc[group] = FAITH_TALENT_LIST
+        .filter((t) => t.faithGroup === group && !selectedIds.has(t.id))
+        .filter((t) => !q || t.name.toLowerCase().includes(q))
+        .sort((a, b) => a.name.localeCompare(b.name));
       return acc;
-    },
-    {}
-  );
+    }, {});
+  }, [selectedIds, search]);
+
+  const totalVisible = FAITH_GROUP_ORDER.reduce((n, g) => n + grouped[g].length, 0);
 
   const canAdd = !!selectedId;
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value);
+    setSelectedId("");
+  };
 
   const handleAdd = () => {
     if (!selected || !canAdd) return;
@@ -352,15 +399,29 @@ function AddFaithTalentForm({
     onAdd(entry);
     setSelectedId("");
     setNotes("");
+    setSearch("");
   };
 
   return (
     <div className="rounded border border-amber-700/40 bg-slate-900/60 p-3 space-y-2 mt-2">
       <p className="text-xs font-medium text-amber-400/80">Add Faith Talent</p>
 
+      {/* Search filter */}
+      <div>
+        <input
+          type="text"
+          value={search}
+          onChange={handleSearchChange}
+          placeholder="Search faith talents…"
+          className={editableInputClass(true)}
+        />
+      </div>
+
       <div className="flex flex-wrap gap-2 items-end">
         <div className="flex-1 min-w-[200px]">
-          <label className="block text-xs text-slate-400 mb-1">Select</label>
+          <label className="block text-xs text-slate-400 mb-1">
+            Select{totalVisible === 0 ? " (no matches)" : ` (${totalVisible})`}
+          </label>
           <select
             value={selectedId}
             onChange={(e) => setSelectedId(e.target.value)}
@@ -369,13 +430,12 @@ function AddFaithTalentForm({
             <option value="">— Choose —</option>
             {[...FAITH_GROUP_ORDER]
               .sort((a, b) => FAITH_GROUP_LABELS[a].localeCompare(FAITH_GROUP_LABELS[b]))
+              .filter((group) => grouped[group].length > 0)
               .map((group) => (
                 <optgroup key={group} label={FAITH_GROUP_LABELS[group]}>
-                  {[...grouped[group]]
-                    .sort((a, b) => a.name.localeCompare(b.name))
-                    .map((t) => (
-                      <option key={t.id} value={t.id}>{t.name}</option>
-                    ))}
+                  {grouped[group].map((t) => (
+                    <option key={t.id} value={t.id}>{t.name}</option>
+                  ))}
                 </optgroup>
               ))}
           </select>
@@ -431,6 +491,11 @@ function FaithTalentSection({
 }) {
   const [adding, setAdding] = useState(false);
 
+  const selectedIds = useMemo(
+    () => new Set(entries.map((e) => e.talentId)),
+    [entries]
+  );
+
   return (
     <section className={sectionContainerClass(editable) + " space-y-4"}>
       <div className="flex items-center justify-between">
@@ -466,7 +531,7 @@ function FaithTalentSection({
 
       {editable &&
         (adding ? (
-          <AddFaithTalentForm onAdd={onAdd} onCancel={() => setAdding(false)} />
+          <AddFaithTalentForm selectedIds={selectedIds} onAdd={onAdd} onCancel={() => setAdding(false)} />
         ) : (
           <button
             onClick={() => setAdding(true)}
