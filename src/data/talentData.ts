@@ -217,6 +217,7 @@ export const TALENT_LIST: readonly TalentData[] = [
   { id: "wrath-of-the-righteous",name: "Wrath of the Righteous",source: SkillSource.BoM, hasSpecialisation: false, prerequisites: "Pure Faith" },
 
   // ─── Radical's Handbook ─────────────────────────────────────────────────────
+  { id: "touched-by-the-fates",  name: "Touched by the Fates",  source: SkillSource.RH, hasSpecialisation: false },
   { id: "aetheric-resonator",    name: "Aetheric Resonator",    source: SkillSource.RH, hasSpecialisation: false, prerequisites: "Tech-Priest (Potentia Coil/Electoo Conductor)" },
   { id: "anima-aura",            name: "Anima Aura",            source: SkillSource.RH, hasSpecialisation: false, prerequisites: "Tech-Priest (Potentia Coil)" },
   { id: "daemonic-essence",      name: "Daemonic Essence",      source: SkillSource.RH, hasSpecialisation: false, prerequisites: "Daemon Vessel" },

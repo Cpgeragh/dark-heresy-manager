@@ -19,6 +19,7 @@ export function sourceColour(source: string): string {
     case "Asc":   return "text-yellow-400 border-yellow-700/50";
     case "DotDG": return "text-pink-400 border-pink-700/50";
     case "BSep":  return "text-blue-400 border-blue-700/50";
+    case "CC":    return "text-rose-400 border-rose-700/50";
     default:      return "text-slate-400 border-slate-600";
   }
 }

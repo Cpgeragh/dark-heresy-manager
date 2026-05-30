@@ -196,6 +196,7 @@ export const TALENT_DESCRIPTIONS: Record<string, string> = {
   "wrath-of-the-righteous":      "The faithful and allies up to his Fellowship Bonus who can see and hear him add +1d5 to all melee damage. Righteous Fury now triggers on a roll of 9 rather than 10, and always triggers automatically on the first damage roll. Burn: The melee damage bonus increases to +2d10.",
 
   // ─── Radical's Handbook ─────────────────────────────────────────────────────
+  "touched-by-the-fates":    "NPC only. The NPC gains Fate Points equal to half their Willpower Bonus (rounded up), used exactly as Player Characters — including burning to survive death (off-camera). If defeated while the scenario resolves in the Acolytes' favour, they simply return another day. Righteous Fury rules also apply to this NPC.",
   "aetheric-resonator":      "Pass a Difficult (–10) Toughness Test to activate a warp-disruption field, counting your body and armour as Hexagramatically Warded. Each round active, roll 1d10 — on a 9, suffer 1d5 Corruption Points.",
   "anima-aura":              "Half Action: activate an aura granting Stuff of Nightmares for 1d10+TB rounds. Each use costs 1d5 Insanity Points and a level of Fatigue.",
   "daemonic-essence":        "Unleash the daemon within for 10 rounds, gaining Daemonic, Dark Sight, From Beyond, and Warp Instability traits, plus a Daemonic Presence affecting nearby characters.",

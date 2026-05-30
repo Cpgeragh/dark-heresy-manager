@@ -52,7 +52,6 @@ export const TRAIT_LIST: readonly TraitData[] = [
   { id: "warp-weapon",              name: "Warp Weapon",              source: SkillSource.CR, hasSpecialisation: false },
 
   // ─── Radical's Handbook ─────────────────────────────────────────────────────
-  { id: "touched-by-the-fates",     name: "Touched by the Fates",     source: SkillSource.RH, hasSpecialisation: false },
 
   // ─── Creatures Anathema ──────────────────────────────────────────────────────
   { id: "improved-natural-weapons", name: "Improved Natural Weapons", source: SkillSource.CA, hasSpecialisation: false },

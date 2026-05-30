@@ -12,6 +12,7 @@ export const SkillSource = {
   Asc: "Asc",
   DotDG: "DotDG",
   BSep:  "BSep",
+  CC:    "CC",
 } as const;
 
 // A type of all source keys (safe, no runtime code)
