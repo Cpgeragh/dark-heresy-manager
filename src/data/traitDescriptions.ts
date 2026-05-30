@@ -74,6 +74,16 @@ export const TRAIT_DESCRIPTIONS: Record<string, string> = {
   // ─── Haarlock's Legacy III ──────────────────────────────────────────────────
   "shadow-shrouded":         "+10 to all Concealment and Silent Move Tests. Regenerates 1 lost Wound per combat round while still alive.",
 
+  // ─── Lathe Worlds ────────────────────────────────────────────────────────────
+  "rigor-mentis":             "Re-roll any Interaction Test made to resist Interrogation, Charm, Deceive, or any other method used to extract information relating to the Lords Dragon, the Panopticon Orbital, or the Praecursator Grid. This is an unconscious defence — the character cannot suppress it intentionally.",
+  "outside-looking-in":       "Treat the Disposition of any member of the Adeptus Mechanicus as two steps lower than normal. This effect is cumulative with other Malateks in the same cell.",
+  "heart-of-steel":           "Substitute Intelligence for Fellowship whenever interacting with other members of the Cult Mechanicus.",
+  "skin-of-iron":             "Upon selecting this Alternate Rank, automatically gain one Common-Quality cybernetic. Every two Ranks thereafter (Ranks 3, 5, and 7) either gain an additional cybernetic or upgrade one existing cybernetic to Good Quality.",
+  "excommunicate-mechanicum": "If discovered as a member of the Cult of the Pure Form, all members of the Mechanicum treat the character with the lowest possible Disposition (and vice versa). All Interaction with the Machine Cult — even conversation — is treated as Arduous (–40) before other modifiers.",
+  "fabricated-flesh":         "Prerequisites: Tech-Priest. Cybernetics and augmetics appear as natural or common implants. Requires a Hard (–20) Scrutiny or Tech-Use Test to detect any tellingly mechanical signs. Mechadendrites and large attachments may be attached or removed in 1d5 hours at the cost of 1 Fatigue. Grants +5 to Fellowship Tests with Imperial citizens outside the Adeptus Mechanicus so long as augmentations are not conspicuous.",
+  "genetic-pantropy":         "Re-roll any Test resulting from extreme environments (intense heat or cold, low oxygen, toxic atmospheres, etc.). Suffer no adverse effects in areas of slightly higher or lower gravity and move normally in them.",
+  "labourer-build":           "Does not use the Fit for Purpose Trait. Instead, gain +3 Strength and +3 Toughness at character creation, but start with –5 Agility.",
+
   // ─── Book of Judgement ─────────────────────────────────────────────────────
   "blank-slate": "The Acolyte is imprinted with psychic triggers known only to their handler. One trigger wipes all previous imprinting; another prepares the mind for re-programming. When imprinted, the GM and player choose three Common Lore, Forbidden Lore, Scholastic Lore, or Trade skills appropriate to the assumed identity. Until wiped clean, the Slate-Agent is treated as possessing all chosen Skills and gains +10 to related Tests.",
 };

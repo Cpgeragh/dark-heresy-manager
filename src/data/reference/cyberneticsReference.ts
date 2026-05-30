@@ -353,6 +353,109 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
     good: "No penalty when blinded. Also includes Photo-visor or Infra-red goggles.",
   },
 
+  // ── Lathe Worlds ──────────────────────────────────────────────────────────
+
+  {
+    id: "lw-alatus-jump-pack",
+    name: "Alatus-Pattern Jump Pack",
+    source: SkillSource.LW,
+    value: "3,000 Thrones",
+    rarity: "Adeptus Mechanicus Only",
+    notes:
+      "Surgically attached and powered internally by the user's Potentia Coil, with plugs linking " +
+      "directly into the nervous system. Often styled as sweeping mechanical wings. " +
+      "Doubles the user's base Movement, or grants the Flyer (12) Trait for up to one minute. " +
+      "After using Flyer, must pass a Challenging (+0) Toughness Test or gain one level of Fatigue. " +
+      "The wings grant the Fear (1) Trait and can buffet enemies in combat, granting +10 to all Parry Tests. " +
+      "Requires the Pilot (Alatus Jump Pack) Skill and the Mechanicus Implants Trait.",
+  },
+
+  {
+    id: "lw-enhanced-potentia-coil",
+    name: "Enhanced Potentia Coil",
+    source: SkillSource.LW,
+    value: "6,000 Thrones",
+    rarity: "Adeptus Mechanicus Only",
+    notes:
+      "Heavy-duty replacement for the standard internal power unit. Installation is invasive — takes 1d5+1 weeks. " +
+      "Enhances Machine Cult abilities: Luminen Blast/Flare gains +1d10 Damage, Pen equal to WPB, and Shocking; " +
+      "Luminen Shock/Surge gains Pen equal to WPB plus Shocking and Tearing; " +
+      "Luminen Shield/Barrier can be activated as a Reaction; " +
+      "Luminen Charge Tests are 2 steps easier; " +
+      "Maglev Grace/Transcendence maintenance becomes a Free Action (Grace once/6h, Transcendence twice/6h); " +
+      "Electrical Succour takes half a minute and becomes Easy (+30); " +
+      "Ferric Lure/Summons become Free Actions; " +
+      "Integrated Weapon gains the Reliable quality.",
+    poor:
+      "Noticeably hunched form — permanently reduces the user's Agility by 1d10.",
+    common:
+      "Provides all Enhanced Potentia Coil benefits at standard efficiency.",
+  },
+
+  {
+    id: "lw-lathes-stabilisers",
+    name: "Lathes Mechadendrite Stabilisers",
+    source: SkillSource.LW,
+    value: "300 Thrones",
+    rarity: "Adeptus Mechanicus Only",
+    notes:
+      "Pairs of gyroscopically stabilised, heavily clawed talon mechadendrites for anchoring to surfaces. " +
+      "Half Action to activate or deactivate. While active and stationary: counts as Braced and gains the Sturdy Trait. " +
+      "Ignores movement modifiers from High, Low, or Zero Gravity, Tremors, and other unstable terrain. " +
+      "Also grants a bonus to Climb Tests. " +
+      "Requires the Mechadendrite Use (Utility) Talent. All mechadendrites are Good craftsmanship unless noted.",
+    common: "All mechadendrites are considered Good craftsmanship by default.",
+    good:
+      "Standard quality for mechadendrites. Grants Braced, Sturdy, and gravity/terrain immunity while active.",
+  },
+
+  {
+    id: "lw-perinetus-servo-harness",
+    name: "Perinetus-Pattern Servo-Harness",
+    source: SkillSource.LW,
+    value: "1,500 Thrones",
+    rarity: "Adeptus Mechanicus Only",
+    notes:
+      "Large backpack cybernetic for zero-gravity operations. Includes: one Manipulator Mechadendrite, " +
+      "one Utility Mechadendrite, a Combi-tool, a Fyeeline Torch (counts as a Flamer), and a Plasma Cutter " +
+      "(burns through 1m of adamantine up to 20cm thick per minute; doubles as a Plasma Pistol at 10m range). " +
+      "Manoeuvring thrusters grant the Flyer (6) Trait in very low or zero gravity. " +
+      "Characters with Multiple Attacks may use harness weapons for any of those attacks. " +
+      "May use one harness weapon as a Reaction. Attachments can be swapped for other mechadendrites, " +
+      "Bulkhead Cutters, Servo-Arms, etc. " +
+      "Requires Mechadendrite Use (Manipulator) and (Utility) Talents, and the Mechanicus Implants Trait. " +
+      "All mechadendrites are Good craftsmanship unless noted.",
+    common: "All mechadendrites are considered Good craftsmanship by default.",
+    good:
+      "Standard quality for mechadendrites. Full harness with torch, plasma cutter, and manoeuvring thrusters.",
+  },
+
+  {
+    id: "lw-servo-claw",
+    name: "Servo-Claw",
+    source: SkillSource.LW,
+    value: "600 Thrones",
+    rarity: "Adeptus Mechanicus Only",
+    notes:
+      "Combat-focused mechadendrite mounted at waist height, leaving the hands free. " +
+      "Can make any normal Attack Action as a melee weapon, or a Standard Attack as a Reaction " +
+      "(never both in the same Round). Does not add the user's Strength to damage. " +
+      "Can grip and lift objects using Strength 50 and Unnatural Strength (×2). " +
+      "Can substitute as a Manipulator Mechadendrite at –10 to all associated Tests. " +
+      "Requires the Mechadendrite Use (Manipulator) Talent. All mechadendrites are Good craftsmanship unless noted.",
+    common: "All mechadendrites are considered Good craftsmanship by default.",
+    good:
+      "Standard quality for mechadendrites. Deals 1d10+10 R, Pen 4, Tearing; can attack as a Reaction.",
+    weapon: {
+      type: "melee",
+      name: "Servo-Claw",
+      class: "Melee",
+      damage: "1d10+10 R",
+      pen: "4",
+      specialRules: "Tearing",
+    },
+  },
+
   // ── Lost Dataslate ────────────────────────────────────────────────────────
 
   {

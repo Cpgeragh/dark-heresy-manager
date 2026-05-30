@@ -678,6 +678,23 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     rarity: "Near Unique",
   },
 
+  // ── Lathe Worlds ─────────────────────────────────────────────────────────
+  {
+    id: "lw-crimson-armour",
+    name: "Crimson Armour",
+    source: SkillSource.LW,
+    locations: ALL,
+    ap: 6,
+    notes:
+      "Issued exclusively to the Crimson Guard. Based on Storm Trooper carapace but significantly " +
+      "lighter thanks to the extraordinary manufacturing techniques of the Lathes. Equipped with a " +
+      "Good-Quality photo-visor, granting the Dark Sight trait and immunity to flash grenades. " +
+      "The intimidating skull-shaped mask also grants +10 to Intimidate Tests.",
+    weight: "6 kg",
+    value: "12,500 Thrones",
+    rarity: "Extremely Rare",
+  },
+
   // ── Creatures Anathema ───────────────────────────────────────────────────
   {
     id: "ca-ork-mega-armour",

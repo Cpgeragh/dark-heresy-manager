@@ -41,6 +41,94 @@ export const ARCHEOTECH_REFERENCE: ArcheotechRef[] = [
       "The grid itself provides no cover and individual panels (usually ~2m across) cannot be repaired if damaged.",
   },
 
+  // ── Lathe Worlds ─────────────────────────────────────────────────────────
+
+  {
+    id: "lw-holo-clone",
+    name: "Holo-Clone",
+    source: SkillSource.LW,
+    type: "Device",
+    weight: "0.5 kg",
+    value: "—",
+    rarity: "—",
+    description:
+      "Creates a duplicate holographic image of the user, fooling attackers into thinking the user " +
+      "is in two places at once. While active, grants +30 to all Dodge and Parry Tests. An attacker " +
+      "who passes a Very Hard (–30) Perception Test as a Half Action can identify the hologram, " +
+      "negating this bonus for that Round. Has enough power for 1d10+6 minutes; takes 1d5 hours to " +
+      "recharge. Small enough to clip to a belt or wear around the neck.",
+  },
+
+  {
+    id: "lw-vision-cowl",
+    name: "Lucius-Pattern Vision Cowl",
+    source: SkillSource.LW,
+    type: "Device",
+    weight: "3 kg",
+    value: "—",
+    rarity: "—",
+    description:
+      "A hyper-advanced auspex worn as a hood, with data-displays over each eye and an augmented " +
+      "reality interface. Half Action to activate. Once active: see any living creature within 50m " +
+      "even through walls; ascertain vital signs (Wounds, Critical Damage, Fatigue) with an " +
+      "Ordinary (+10) Medicae Test; locate structural weak points with an Ordinary (+10) Evaluate " +
+      "Test; track chemicals and radiation trails and isolate vox-transmissions within 5km with an " +
+      "Ordinary (+10) Tech-Use Test. Imposes –10 to all WS and BS Tests; limits normal vision to " +
+      "50m. Cannot be worn over or under a helmet.",
+  },
+
+  {
+    id: "lw-midath-power-glove",
+    name: "Midath-Pattern Power Glove",
+    source: SkillSource.LW,
+    type: "Weapon",
+    weight: "1 kg",
+    value: "—",
+    rarity: "—",
+    specialRules: "Special, Power Field",
+    description:
+      "Melee — 2d10 E, Pen 7, Power Field. A single sheath of unknown golden material extending " +
+      "to the shoulder. Functions like a low-powered power fist and can parry effectively due to " +
+      "the power field surrounding the full arm. Imposes –10 to WS Tests when attacking but grants " +
+      "+10 to Parry Tests. Each Round the glove remains active, the user must pass an Ordinary " +
+      "(+10) Toughness Test or suffer 1d10 Toxic damage that ignores Armour and Toughness Bonus. " +
+      "Requires Exotic Weapon Training to use.",
+  },
+
+  {
+    id: "lw-psybernetics",
+    name: "Psybernetics",
+    source: SkillSource.LW,
+    type: "Implant",
+    weight: "—",
+    value: "—",
+    rarity: "—",
+    description:
+      "Heretical cybernetic implants installed in the head following standard cybernetic implantation " +
+      "rules. On implantation the user gains 2d10 Insanity and 1d10 Corruption Points. If they " +
+      "survive, they gain a Psy Rating equal to half their Willpower Bonus (round up) and one " +
+      "randomly generated Minor Psychic Power per point of Psy Rating. New Minor Powers are gained " +
+      "as Psy Rating increases; Discipline Powers cannot be taken. Possession is extremely heretical " +
+      "and unauthorised use is highly dangerous.",
+  },
+
+  {
+    id: "lw-reclamator-rifle",
+    name: "Reclamator Rifle",
+    source: SkillSource.LW,
+    type: "Weapon",
+    weight: "8 kg",
+    value: "—",
+    rarity: "—",
+    specialRules: "Special, Shocking, Toxic",
+    description:
+      "Basic — 35m, S/–/–, 3d10 R, Pen —, Clip 18. Completely ignores Armour and has no effect " +
+      "on technological items. Targets killed by this weapon leave all non-living items (weapons, " +
+      "armour, cybernetics) completely intact and undamaged. Requires 6 hours and a power source " +
+      "to recharge. In areas of high or low gravity, also gains the Inaccurate, Overheats, and " +
+      "Unreliable qualities. Requires Exotic Weapon Training to use.",
+  },
+
   {
     id: "ld-voidbane-generator",
     name: "Voidbane Generator",

@@ -136,6 +136,16 @@ export const TRAIT_LIST: readonly TraitData[] = [
   // ─── Haarlock's Legacy III ──────────────────────────────────────────────────
   { id: "shadow-shrouded",          name: "Shadow Shrouded",          source: SkillSource.H3,  hasSpecialisation: false },
 
+  // ─── Lathe Worlds ────────────────────────────────────────────────────────────
+  { id: "rigor-mentis",             name: "Rigor Mentis",             source: SkillSource.LW, hasSpecialisation: false },
+  { id: "outside-looking-in",       name: "Outside Looking In",       source: SkillSource.LW, hasSpecialisation: false },
+  { id: "heart-of-steel",           name: "Heart of Steel",           source: SkillSource.LW, hasSpecialisation: false },
+  { id: "skin-of-iron",             name: "Skin of Iron",             source: SkillSource.LW, hasSpecialisation: false },
+  { id: "excommunicate-mechanicum", name: "Excommunicate Mechanicum", source: SkillSource.LW, hasSpecialisation: false },
+  { id: "fabricated-flesh",         name: "Fabricated Flesh",         source: SkillSource.LW, hasSpecialisation: false },
+  { id: "genetic-pantropy",         name: "Genetic Pantropy",         source: SkillSource.LW, hasSpecialisation: false },
+  { id: "labourer-build",           name: "Labourer Build",           source: SkillSource.LW, hasSpecialisation: false },
+
   // ─── Book of Judgement ─────────────────────────────────────────────────────
   { id: "blank-slate",              name: "Blank Slate",              source: SkillSource.BoJ, hasSpecialisation: false },
 ];
