@@ -8,6 +8,10 @@ export interface TraitData {
   source: SkillSource;
   hasSpecialisation: boolean;
   specialisationLabel?: string;
+  /** Present on numeric specialisations — signals integer-only input and sets the lower bound. */
+  specialisationMin?: number;
+  /** Present on numeric specialisations with a defined upper bound. */
+  specialisationMax?: number;
   description?: string;
 }
 
@@ -24,14 +28,14 @@ export const TRAIT_LIST: readonly TraitData[] = [
   { id: "crawler",                  name: "Crawler",                  source: SkillSource.CR, hasSpecialisation: false },
   { id: "daemonic",                 name: "Daemonic",                 source: SkillSource.CR, hasSpecialisation: false },
   { id: "dark-sight",               name: "Dark Sight",               source: SkillSource.CR, hasSpecialisation: false },
-  { id: "fear",                     name: "Fear",                     source: SkillSource.CR, hasSpecialisation: true,  specialisationLabel: "Rating (1–4)" },
+  { id: "fear",                     name: "Fear",                     source: SkillSource.CR, hasSpecialisation: true,  specialisationLabel: "Rating (1–4)", specialisationMin: 1, specialisationMax: 4 },
   { id: "flyer",                    name: "Flyer",                    source: SkillSource.CR, hasSpecialisation: false },
   { id: "from-beyond",              name: "From Beyond",              source: SkillSource.CR, hasSpecialisation: false },
   { id: "hoverer",                  name: "Hoverer",                  source: SkillSource.CR, hasSpecialisation: false },
   { id: "incorporeal",              name: "Incorporeal",              source: SkillSource.CR, hasSpecialisation: false },
-  { id: "machine",                  name: "Machine",                  source: SkillSource.CR, hasSpecialisation: true,  specialisationLabel: "Armour Value" },
+  { id: "machine",                  name: "Machine",                  source: SkillSource.CR, hasSpecialisation: true,  specialisationLabel: "Armour Value", specialisationMin: 1 },
   { id: "multiple-arms",            name: "Multiple Arms",            source: SkillSource.CR, hasSpecialisation: false },
-  { id: "natural-armour",           name: "Natural Armour",           source: SkillSource.CR, hasSpecialisation: true,  specialisationLabel: "Armour Value" },
+  { id: "natural-armour",           name: "Natural Armour",           source: SkillSource.CR, hasSpecialisation: true,  specialisationLabel: "Armour Value", specialisationMin: 1 },
   { id: "natural-weapons",          name: "Natural Weapons",          source: SkillSource.CR, hasSpecialisation: false },
   { id: "phase",                    name: "Phase",                    source: SkillSource.CR, hasSpecialisation: false },
   { id: "possession",               name: "Possession",               source: SkillSource.CR, hasSpecialisation: false },

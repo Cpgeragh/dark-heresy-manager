@@ -12,7 +12,7 @@ import type { TraitData } from "../../data/traitData";
 import { HOMEWORLD_LIST } from "../../data/homeworldData";
 import { TALENT_LIST } from "../../data/talentData";
 import { TRAIT_LIST } from "../../data/traitData";
-import { BOOK_METADATA } from "../../data/bookMetadata";
+
 import { WEAPON_TRAINING_GROUPS } from "../../data/weaponTrainingData";
 import type { SkillSource } from "../../types/SkillSource";
 import {
@@ -43,19 +43,6 @@ function normaliseSources(s: SkillSource | SkillSource[]): SkillSource[] {
   return Array.isArray(s) ? s : [s];
 }
 
-function groupBySource(items: readonly AnyListItem[]): Record<string, AnyListItem[]> {
-  return items.reduce<Record<string, AnyListItem[]>>((acc, item) => {
-    for (const src of normaliseSources(item.source as SkillSource | SkillSource[])) {
-      (acc[src] ??= []).push(item);
-    }
-    return acc;
-  }, {});
-}
-
-function bookLabel(source: string): string {
-  return BOOK_METADATA[source as SkillSource]?.name ?? source;
-}
-
 // ─── Faith Talent constants ───────────────────────────────────────────────────
 
 const FAITH_GROUP_LABELS: Record<string, string> = {
@@ -74,160 +61,192 @@ function getFaithGroup(talentId: string): string | undefined {
   return FAITH_TALENT_LIST.find((t) => t.id === talentId)?.faithGroup;
 }
 
-// ─── AddEntryForm ─────────────────────────────────────────────────────────────
+// ─── TalentPickerModal ────────────────────────────────────────────────────────
 
-interface AddEntryFormProps {
+function TalentPickerModal({
+  title,
+  listData,
+  selectedIds,
+  onAdd,
+  onClose,
+}: {
+  title: string;
   listData: readonly AnyListItem[];
-  singular: string;
   selectedIds: ReadonlySet<string>;
   onAdd: (entry: TalentEntry) => void;
-  onCancel: () => void;
-}
+  onClose: () => void;
+}) {
+  const [query, setQuery]         = useState("");
+  const [picked, setPicked]       = useState<AnyListItem | null>(null);
+  const [specialisation, setSpec] = useState("");
 
-function AddEntryForm({ listData, singular, selectedIds, onAdd, onCancel }: AddEntryFormProps) {
-  const [selectedId, setSelectedId] = useState("");
-  const [specialisation, setSpecialisation] = useState("");
-  const [notes, setNotes] = useState("");
-  const [search, setSearch] = useState("");
-
-  const selected = listData.find((t) => t.id === selectedId) as
-    | (TalentData & TraitData)
-    | undefined;
-
-  // Flat deduplicated list — filtered by search query and already-selected non-repeatable ids
-  const filteredList = useMemo(() => {
+  const filtered = useMemo(() => {
     const seen = new Set<string>();
-    const q = search.trim().toLowerCase();
+    const q = query.trim().toLowerCase();
     return [...listData]
       .filter((t) => {
         if (seen.has(t.id)) return false;
         seen.add(t.id);
         const repeatable = "repeatable" in t ? (t as TalentData).repeatable : false;
         if (!repeatable && selectedIds.has(t.id)) return false;
-        if (q) return t.name.toLowerCase().includes(q);
-        return true;
+        return !q || t.name.toLowerCase().includes(q);
       })
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, [listData, selectedIds, search]);
+  }, [listData, selectedIds, query]);
 
-  const canAdd =
-    !!selectedId &&
-    (!selected?.hasSpecialisation || specialisation.trim().length > 0);
+  const td = picked as TalentData | null;
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearch(e.target.value);
-    setSelectedId("");
-    setSpecialisation("");
+  // Numeric specialisation: signalled by specialisationMin being defined on the item.
+  const isNumeric = td?.specialisationMin !== undefined;
+
+  const numericValid = (): boolean => {
+    const raw = specialisation.trim();
+    if (!raw) return false;
+    const v = Number(raw);
+    if (!Number.isInteger(v)) return false;
+    if (td!.specialisationMin !== undefined && v < td!.specialisationMin) return false;
+    if (td!.specialisationMax !== undefined && v > td!.specialisationMax) return false;
+    return true;
   };
 
-  const handleAdd = () => {
-    if (!selected || !canAdd) return;
-    const displayName =
-      selected.hasSpecialisation && specialisation.trim()
-        ? `${selected.name} (${specialisation.trim()})`
-        : selected.name;
+  const canAdd = !!picked && td?.hasSpecialisation
+    ? (isNumeric ? numericValid() : specialisation.trim().length > 0)
+    : false;
+
+  const addImmediate = (item: AnyListItem) => {
+    onAdd({ uid: crypto.randomUUID(), talentId: item.id, name: item.name });
+  };
+
+  const handleSpecAdd = () => {
+    if (!picked || !canAdd) return;
     const entry: TalentEntry = {
       uid: crypto.randomUUID(),
-      talentId: selected.id,
-      name: displayName,
+      talentId: picked.id,
+      name: `${picked.name} (${specialisation.trim()})`,
+      specialisation: specialisation.trim(),
     };
-    if (specialisation.trim()) entry.specialisation = specialisation.trim();
-    if (notes.trim()) entry.notes = notes.trim();
     onAdd(entry);
-    setSelectedId("");
-    setSpecialisation("");
-    setNotes("");
-    setSearch("");
+    setPicked(null);
+    setSpec("");
   };
 
   return (
-    <div className="rounded border border-amber-700/40 bg-slate-900/60 p-3 space-y-2 mt-2">
-      <p className="text-xs font-medium text-amber-400/80">Add {singular}</p>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+      <div className="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-xl shadow-2xl flex flex-col max-h-[80vh]">
 
-      {/* Search filter */}
-      <div>
-        <input
-          type="text"
-          value={search}
-          onChange={handleSearchChange}
-          placeholder={`Search ${singular.toLowerCase()}s…`}
-          className={editableInputClass(true)}
-        />
-      </div>
-
-      <div className="flex flex-wrap gap-2 items-end">
-        {/* Selector — flat alphabetical list */}
-        <div className="flex-1 min-w-[200px]">
-          <label className="block text-xs text-slate-400 mb-1">
-            Select{filteredList.length === 0 ? " (no matches)" : ` (${filteredList.length})`}
-          </label>
-          <select
-            value={selectedId}
-            onChange={(e) => {
-              setSelectedId(e.target.value);
-              setSpecialisation("");
-            }}
-            className={editableInputClass(true) + " appearance-none"}
-          >
-            <option value="">— Choose —</option>
-            {filteredList.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name}
-              </option>
-            ))}
-          </select>
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
+          <h3 className="text-sm font-semibold text-slate-200">{title}</h3>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-200 text-lg leading-none">×</button>
         </div>
 
-        {/* Specialisation input (conditional) */}
-        {selected?.hasSpecialisation && (
-          <div className="flex-1 min-w-[140px]">
-            <label className="block text-xs text-slate-400 mb-1">
-              {selected.specialisationLabel ?? "Specialisation"}
-            </label>
-            <input
-              type="text"
-              value={specialisation}
-              onChange={(e) => setSpecialisation(e.target.value)}
-              placeholder={selected.specialisationLabel ?? ""}
-              className={editableInputClass(true)}
-            />
+        {/* Search */}
+        <div className="px-4 py-2 border-b border-slate-800">
+          <input
+            type="text"
+            autoFocus
+            placeholder="Search…"
+            value={query}
+            onChange={(e) => { setQuery(e.target.value); setPicked(null); setSpec(""); }}
+            className={editableInputClass(true)}
+          />
+        </div>
+
+        {/* List */}
+        <div className="overflow-y-auto flex-1 divide-y divide-slate-800">
+          {filtered.length === 0 && (
+            <p className="p-4 text-sm text-slate-500 text-center">No matches.</p>
+          )}
+          {filtered.map((t) => {
+            const row = t as TalentData;
+            const sources = normaliseSources(t.source as SkillSource | SkillSource[]);
+            const isSelected = picked?.id === t.id;
+            return (
+              <button
+                key={t.id}
+                onClick={() => {
+                  if ((t as TalentData).hasSpecialisation) {
+                    setPicked(t);
+                    setSpec("");
+                  } else {
+                    addImmediate(t);
+                  }
+                }}
+                className={`w-full text-left px-4 py-3 hover:bg-slate-800 transition group ${
+                  isSelected ? "bg-slate-800 ring-1 ring-inset ring-amber-500/40" : ""
+                }`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm font-medium text-slate-200 group-hover:text-white">
+                    {t.name}
+                  </span>
+                  <div className="flex gap-1 shrink-0">
+                    {sources.map((src) => (
+                      <span key={src} className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(src)}`}>
+                        {src}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                {row.prerequisites && (
+                  <div className="text-xs text-slate-500 mt-0.5">
+                    Prerequisites: {row.prerequisites}
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Footer — specialisation confirm (only when needed) */}
+        {picked && td?.hasSpecialisation && (
+          <div className="px-4 py-3 border-t border-slate-700 space-y-2">
+            <p className="text-xs text-slate-400">
+              Adding: <span className="text-slate-200 font-medium">{picked.name}</span>
+            </p>
+
+            {isNumeric ? (
+              <>
+                <input
+                  type="number"
+                  value={specialisation}
+                  onChange={(e) => setSpec(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter" && canAdd) handleSpecAdd(); }}
+                  min={td.specialisationMin}
+                  max={td.specialisationMax}
+                  step={1}
+                  placeholder={td.specialisationLabel ?? "Value…"}
+                  className={editableInputClass(true)}
+                  autoFocus
+                />
+                <p className="text-xs text-slate-500">
+                  {td.specialisationMax !== undefined
+                    ? `Whole number ${td.specialisationMin}–${td.specialisationMax}.`
+                    : `Whole number, ${td.specialisationMin} or higher.`}
+                </p>
+              </>
+            ) : (
+              <input
+                type="text"
+                value={specialisation}
+                onChange={(e) => setSpec(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter" && canAdd) handleSpecAdd(); }}
+                placeholder={td.specialisationLabel ?? "Specialisation…"}
+                className={editableInputClass(true)}
+                autoFocus
+              />
+            )}
+
+            <button
+              onClick={handleSpecAdd}
+              disabled={!canAdd}
+              className="w-full px-3 py-1.5 text-sm rounded border border-amber-500 bg-amber-600 text-white hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed transition"
+            >
+              Add {picked.name}
+            </button>
           </div>
         )}
-      </div>
 
-      {/* Prerequisites hint */}
-      {selected && "prerequisites" in selected && selected.prerequisites && (
-        <p className="text-xs text-slate-500">
-          Prerequisites: {selected.prerequisites}
-        </p>
-      )}
-
-      {/* Optional notes */}
-      <div>
-        <label className="block text-xs text-slate-400 mb-1">Notes (optional)</label>
-        <input
-          type="text"
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder="Optional notes…"
-          className={editableInputClass(true)}
-        />
-      </div>
-
-      <div className="flex gap-2 pt-1">
-        <button
-          onClick={handleAdd}
-          disabled={!canAdd}
-          className="px-3 py-1 text-sm rounded border border-amber-500 bg-amber-600 text-white hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed transition"
-        >
-          Add
-        </button>
-        <button
-          onClick={onCancel}
-          className="px-3 py-1 text-sm rounded border border-slate-600 text-slate-400 hover:bg-slate-800 transition"
-        >
-          Cancel
-        </button>
       </div>
     </div>
   );
@@ -261,9 +280,6 @@ function EntryCard({ entry, editable, onRemove }: EntryCardProps) {
             <InfoModal title={entry.name} content={description} />
           )}
         </div>
-        {entry.notes && (
-          <p className="text-xs text-slate-400 break-words">{entry.notes}</p>
-        )}
       </div>
       {editable && (
         <button
@@ -299,7 +315,7 @@ function EntrySection({
   onAdd,
   onRemove,
 }: EntrySectionProps) {
-  const [adding, setAdding] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
 
   const selectedIds = useMemo(
     () => new Set(entries.map((e) => e.talentId)),
@@ -315,7 +331,7 @@ function EntrySection({
         </span>
       </div>
 
-      {entries.length === 0 && !adding && (
+      {entries.length === 0 && (
         <p className="text-sm text-slate-500 italic">None added yet.</p>
       )}
 
@@ -330,149 +346,25 @@ function EntrySection({
         ))}
       </div>
 
-      {editable &&
-        (adding ? (
-          <AddEntryForm
-            listData={listData}
-            singular={singular}
-            selectedIds={selectedIds}
-            onAdd={onAdd}
-            onCancel={() => setAdding(false)}
-          />
-        ) : (
-          <button
-            onClick={() => setAdding(true)}
-            className="mt-1 px-3 py-1 text-xs rounded border border-slate-600 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition"
-          >
-            + Add {singular}
-          </button>
-        ))}
-    </section>
-  );
-}
-
-// ─── AddFaithTalentForm ───────────────────────────────────────────────────────
-
-function AddFaithTalentForm({
-  selectedIds,
-  onAdd,
-  onCancel,
-}: {
-  selectedIds: ReadonlySet<string>;
-  onAdd: (entry: TalentEntry) => void;
-  onCancel: () => void;
-}) {
-  const [selectedId, setSelectedId] = useState("");
-  const [notes, setNotes] = useState("");
-  const [search, setSearch] = useState("");
-
-  const selected = FAITH_TALENT_LIST.find((t) => t.id === selectedId);
-
-  const grouped = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return FAITH_GROUP_ORDER.reduce<Record<string, TalentData[]>>((acc, group) => {
-      acc[group] = FAITH_TALENT_LIST
-        .filter((t) => t.faithGroup === group && !selectedIds.has(t.id))
-        .filter((t) => !q || t.name.toLowerCase().includes(q))
-        .sort((a, b) => a.name.localeCompare(b.name));
-      return acc;
-    }, {});
-  }, [selectedIds, search]);
-
-  const totalVisible = FAITH_GROUP_ORDER.reduce((n, g) => n + grouped[g].length, 0);
-
-  const canAdd = !!selectedId;
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearch(e.target.value);
-    setSelectedId("");
-  };
-
-  const handleAdd = () => {
-    if (!selected || !canAdd) return;
-    const entry: TalentEntry = {
-      uid: crypto.randomUUID(),
-      talentId: selected.id,
-      name: selected.name,
-    };
-    if (notes.trim()) entry.notes = notes.trim();
-    onAdd(entry);
-    setSelectedId("");
-    setNotes("");
-    setSearch("");
-  };
-
-  return (
-    <div className="rounded border border-amber-700/40 bg-slate-900/60 p-3 space-y-2 mt-2">
-      <p className="text-xs font-medium text-amber-400/80">Add Faith Talent</p>
-
-      {/* Search filter */}
-      <div>
-        <input
-          type="text"
-          value={search}
-          onChange={handleSearchChange}
-          placeholder="Search faith talents…"
-          className={editableInputClass(true)}
-        />
-      </div>
-
-      <div className="flex flex-wrap gap-2 items-end">
-        <div className="flex-1 min-w-[200px]">
-          <label className="block text-xs text-slate-400 mb-1">
-            Select{totalVisible === 0 ? " (no matches)" : ` (${totalVisible})`}
-          </label>
-          <select
-            value={selectedId}
-            onChange={(e) => setSelectedId(e.target.value)}
-            className={editableInputClass(true) + " appearance-none"}
-          >
-            <option value="">— Choose —</option>
-            {[...FAITH_GROUP_ORDER]
-              .sort((a, b) => FAITH_GROUP_LABELS[a].localeCompare(FAITH_GROUP_LABELS[b]))
-              .filter((group) => grouped[group].length > 0)
-              .map((group) => (
-                <optgroup key={group} label={FAITH_GROUP_LABELS[group]}>
-                  {grouped[group].map((t) => (
-                    <option key={t.id} value={t.id}>{t.name}</option>
-                  ))}
-                </optgroup>
-              ))}
-          </select>
-        </div>
-      </div>
-
-      {selected?.prerequisites && (
-        <p className="text-xs text-slate-500">Prerequisites: {selected.prerequisites}</p>
+      {editable && (
+        <button
+          onClick={() => setShowPicker(true)}
+          className="mt-1 px-3 py-1 text-xs rounded border border-slate-600 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition"
+        >
+          + Add {singular}
+        </button>
       )}
 
-      <div>
-        <label className="block text-xs text-slate-400 mb-1">Notes (optional)</label>
-        <input
-          type="text"
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder="Optional notes…"
-          className={editableInputClass(true)}
+      {showPicker && (
+        <TalentPickerModal
+          title={`Add ${singular}`}
+          listData={listData}
+          selectedIds={selectedIds}
+          onAdd={onAdd}
+          onClose={() => setShowPicker(false)}
         />
-      </div>
-
-      <div className="flex gap-2 pt-1">
-        <button
-          onClick={handleAdd}
-          disabled={!canAdd}
-          className="px-3 py-1 text-sm rounded border border-amber-500 bg-amber-600 text-white hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed transition"
-        >
-          Add
-        </button>
-        <button
-          onClick={onCancel}
-          className="px-3 py-1 text-sm rounded border border-slate-600 text-slate-400 hover:bg-slate-800 transition"
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
+      )}
+    </section>
   );
 }
 
@@ -489,7 +381,7 @@ function FaithTalentSection({
   onAdd: (entry: TalentEntry) => void;
   onRemove: (uid: string) => void;
 }) {
-  const [adding, setAdding] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
 
   const selectedIds = useMemo(
     () => new Set(entries.map((e) => e.talentId)),
@@ -529,17 +421,24 @@ function FaithTalentSection({
         );
       })}
 
-      {editable &&
-        (adding ? (
-          <AddFaithTalentForm selectedIds={selectedIds} onAdd={onAdd} onCancel={() => setAdding(false)} />
-        ) : (
-          <button
-            onClick={() => setAdding(true)}
-            className="mt-1 px-3 py-1 text-xs rounded border border-slate-600 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition"
-          >
-            + Add Faith Talent
-          </button>
-        ))}
+      {editable && (
+        <button
+          onClick={() => setShowPicker(true)}
+          className="mt-1 px-3 py-1 text-xs rounded border border-slate-600 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition"
+        >
+          + Add Faith Talent
+        </button>
+      )}
+
+      {showPicker && (
+        <TalentPickerModal
+          title="Add Faith Talent"
+          listData={FAITH_TALENT_LIST}
+          selectedIds={selectedIds}
+          onAdd={onAdd}
+          onClose={() => setShowPicker(false)}
+        />
+      )}
     </section>
   );
 }
