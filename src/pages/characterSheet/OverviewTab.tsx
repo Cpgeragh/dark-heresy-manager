@@ -7,11 +7,14 @@ import type {
   CharacterHeader,
   WoundsBlock,
   FateBlock,
+  TalentsAndTraitsBlock,
 } from "../../types/Character";
 import {
   editableInputClass,
   sectionContainerClass,
 } from "../../ui/editableStyles";
+import { HOMEWORLD_LIST } from "../../data/homeworldData";
+import { FormField } from "../../components/FormField";
 import {
   CHARACTERISTIC_BONUS_DIVISOR,
   MOVEMENT_HALF_MULTIPLIER,
@@ -31,7 +34,9 @@ interface OverviewTabProps {
   onUpdateHeader: (next: CharacterHeader) => void;
   onUpdateWounds: (next: WoundsBlock) => void;
   onUpdateFate: (next: FateBlock) => void;
+  onUpdateTalents: (next: TalentsAndTraitsBlock) => void;
   getCharTotal: (statKey: keyof Character["characteristics"]) => number;
+  talents: TalentsAndTraitsBlock;
   isReleasing?: boolean;
 }
 
@@ -43,12 +48,32 @@ export function OverviewTab({
   onUpdateHeader,
   onUpdateWounds,
   onUpdateFate,
+  onUpdateTalents,
   getCharTotal,
+  talents,
   isReleasing = false,
 }: OverviewTabProps) {
   const [copied, setCopied] = useState(false);
 
   const { header, wounds, fate, recoveryCode } = character;
+
+  const selectedHomeworld = HOMEWORLD_LIST.find((hw) => hw.id === talents.homeworld);
+
+  const handleHomeworldChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      if (!editable) return;
+      onUpdateTalents({ ...talents, homeworld: e.target.value });
+    },
+    [editable, talents, onUpdateTalents]
+  );
+
+  const handleHomeworldNotesChange = useCallback(
+    (v: string) => {
+      if (!editable) return;
+      onUpdateTalents({ ...talents, homeworldNotes: v });
+    },
+    [editable, talents, onUpdateTalents]
+  );
 
   // ------------------------------
   // Update helpers
@@ -154,6 +179,44 @@ export function OverviewTab({
             onChange={handleCharacterNameChange}
           />
         </label>
+      </section>
+
+      {/* HOMEWORLD */}
+      <section className={sectionContainerClass(editable) + " space-y-3"}>
+        <h2 className="text-lg font-semibold">Homeworld</h2>
+
+        <div>
+          <label className="block text-xs text-slate-400 mb-1">Homeworld</label>
+          <select
+            disabled={!editable}
+            value={talents.homeworld}
+            onChange={handleHomeworldChange}
+            className={editableInputClass(editable) + " appearance-none"}
+          >
+            <option value="">— Select homeworld —</option>
+            {[...HOMEWORLD_LIST].sort((a, b) => a.name.localeCompare(b.name)).map((hw) => (
+              <option key={hw.id} value={hw.id}>
+                {hw.name} ({hw.source})
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {selectedHomeworld && (
+          <p className="text-xs text-slate-400 italic px-1">
+            {selectedHomeworld.description}
+          </p>
+        )}
+
+        <FormField
+          label="Background Notes"
+          value={talents.homeworldNotes ?? ""}
+          onChange={handleHomeworldNotesChange}
+          editable={editable}
+          type="textarea"
+          rows={2}
+          placeholder="Additional background notes…"
+        />
       </section>
 
       {/* WOUNDS */}
