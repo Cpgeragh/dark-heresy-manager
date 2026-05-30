@@ -3,6 +3,7 @@ export type TabId =
   | "stats"
   | "skills"
   | "talents"
+  | "traits"
   | "weapons"
   | "armour"
   | "cybernetics"

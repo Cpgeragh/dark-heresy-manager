@@ -11,6 +11,7 @@ import { OverviewTab } from "./characterSheet/OverviewTab";
 import { CharacteristicsTab } from "./characterSheet/CharacteristicsTab";
 import { SkillsTab } from "./characterSheet/tabs/skills/SkillsTab";
 import { TalentsTab } from "./characterSheet/TalentsTab";
+import { TraitsTab } from "./characterSheet/TraitsTab";
 import { WeaponsTab } from "./characterSheet/WeaponsTab";
 import { ArmourTab } from "./characterSheet/ArmourTab";
 import { CyberneticsTab } from "./characterSheet/CyberneticsTab";
@@ -109,6 +110,7 @@ const TABS: TabConfig[] = [
   { id: "stats", label: "Characteristics" },
   { id: "skills", label: "Skills" },
   { id: "talents", label: "Talents" },
+  { id: "traits", label: "Traits" },
   { id: "weapons", label: "Weapons" },
   { id: "armour", label: "Armour" },
   { id: "cybernetics", label: "Cybernetics" },
@@ -415,7 +417,9 @@ export default function CharacterSheet() {
               onUpdateHeader={handleUpdateHeader}
               onUpdateWounds={handleUpdateWounds}
               onUpdateFate={handleUpdateFate}
+              onUpdateTalents={handleUpdateTalents}
               getCharTotal={getCharTotal}
+              talents={character.talentsAndTraits}
               isReleasing={isReleasing}
             />
           )}
@@ -444,6 +448,14 @@ export default function CharacterSheet() {
               editable={allowedToEdit}
               onUpdateTalents={handleUpdateTalents}
               onUpdateTraining={handleUpdateWeaponTraining}
+            />
+          )}
+
+          {activeTab === "traits" && (
+            <TraitsTab
+              talents={character.talentsAndTraits}
+              editable={allowedToEdit}
+              onUpdateTalents={handleUpdateTalents}
             />
           )}
 

@@ -362,6 +362,9 @@ export const TALENT_LIST: readonly TalentData[] = [
   { id: "luminen-shield",         name: "Luminen Shield",         source: SkillSource.LW, hasSpecialisation: false, prerequisites: "Electoo Inductors, Potentia Coil" },
   { id: "luminen-surge",          name: "Luminen Surge",          source: SkillSource.LW, hasSpecialisation: false, prerequisites: "Luminen Shock, Electoo Inductors, Potentia Coil" },
   { id: "the-flesh-is-weak",      name: "The Flesh is Weak",      source: SkillSource.LW, hasSpecialisation: true, specialisationLabel: "Level", specialisationMin: 1, specialisationMax: 4 },
+
+  // ─── Salvation Demands Sacrifice ────────────────────────────────────────────
+  { id: "inspire-wrath",          name: "Inspire Wrath",          source: SkillSource.SDS, hasSpecialisation: false, prerequisites: "Fellowship 30+" },
 ];
 
 export type TalentId = (typeof TALENT_LIST)[number]["id"];
