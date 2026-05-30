@@ -212,6 +212,24 @@ export interface GearItem {
 }
 
 /**
+ * ARCHEOTECH
+ */
+export interface ArcheotechItem {
+  id: string;
+  referenceId?: string;   // links back to ArcheotechRef.id
+  name: string;
+  /** Broad category: "Weapon", "Device", "Tool", "Other" */
+  type?: string;
+  description?: string;
+  /** Player-added notes separate from the rules description */
+  notes?: string;
+  weight?: string;
+  value?: string;
+  rarity?: string;
+  source?: string;
+}
+
+/**
  * DRUGS
  */
 export interface DrugItem {
@@ -403,6 +421,7 @@ export interface Character {
   grenades?: GrenadeItem[];
   shields?: ShieldItem[];
   cybernetics?: CyberneticItem[];
+  archeotech?: ArcheotechItem[];
 
   weaponTraining: WeaponTrainingBlock;
   experience: ExperienceBlock;

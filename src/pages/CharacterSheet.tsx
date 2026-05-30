@@ -20,6 +20,7 @@ import { DrugsTab } from "./characterSheet/DrugsTab";
 import { ExperienceTab } from "./characterSheet/ExperienceTab";
 import { NotesTab } from "./characterSheet/NotesTab";
 import { AdminTab } from "./characterSheet/AdminTab";
+import { ArcheotechTab } from "./characterSheet/ArcheotechTab";
 
 import type { TabId } from "./characterSheet/types";
 import type { CharacterDocument } from "../types/Firestore";
@@ -52,6 +53,7 @@ import type {
   ConsumableItem,
   DrugItem,
   CyberneticItem,
+  ArcheotechItem,
   PsychicBlock,
   ExperienceBlock,
 } from "../types/Character";
@@ -115,6 +117,7 @@ const TABS: TabConfig[] = [
   { id: "drugs", label: "Drugs" },
   { id: "xp", label: "XP" },
   { id: "notes", label: "Notes" },
+  { id: "archeotech", label: "Archeotech" },
   { id: "admin", label: "Admin", dmOnly: true },
 ];
 
@@ -253,6 +256,11 @@ export default function CharacterSheet() {
 
   const handleUpdateNotes = useCallback(
     (value: string) => updateField("notes", value),
+    [updateField]
+  );
+
+  const handleUpdateArcheotech = useCallback(
+    (next: ArcheotechItem[]) => updateField("archeotech", next),
     [updateField]
   );
 
@@ -525,6 +533,14 @@ export default function CharacterSheet() {
               notes={character.notes ?? ""}
               editable={allowedToEdit}
               onSave={handleUpdateNotes}
+            />
+          )}
+
+          {activeTab === "archeotech" && (
+            <ArcheotechTab
+              archeotech={character.archeotech ?? []}
+              editable={allowedToEdit}
+              onUpdate={handleUpdateArcheotech}
             />
           )}
 

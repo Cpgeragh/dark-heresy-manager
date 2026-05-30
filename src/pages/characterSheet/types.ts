@@ -11,4 +11,5 @@ export type TabId =
   | "drugs"
   | "xp"
   | "notes"
+  | "archeotech"
   | "admin";
