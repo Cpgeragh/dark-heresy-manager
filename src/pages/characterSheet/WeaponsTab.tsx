@@ -1,15 +1,17 @@
 // src/pages/characterSheet/WeaponsTab.tsx
 
 import { useState, useCallback } from "react";
-import type { RangedWeapon, MeleeWeapon, AmmoItem, GrenadeItem, CyberneticItem } from "../../types/Character";
+import type { RangedWeapon, MeleeWeapon, AmmoItem, GrenadeItem, CyberneticItem, ShieldItem } from "../../types/Character";
 import { CYBERNETICS_REFERENCE, type CyberneticWeapon } from "../../data/reference/cyberneticsReference";
 import {
   RANGED_WEAPON_REFERENCE,
   MELEE_WEAPON_REFERENCE,
   GRENADE_REFERENCE,
+  SHIELD_REFERENCE,
   type RangedWeaponRef,
   type MeleeWeaponRef,
   type GrenadeRef,
+  type ShieldRef,
 } from "../../data/reference/weaponReference";
 import { WEAPON_SPECIAL_RULES } from "../../data/reference/weaponSpecialRules";
 import {
@@ -41,9 +43,11 @@ interface WeaponsTabProps {
   onUpdateAmmo: (next: AmmoItem[]) => void;
   onUpdateGrenades: (next: GrenadeItem[]) => void;
   cybernetics?: CyberneticItem[];
+  shields?: ShieldItem[];
+  onUpdateShields?: (next: ShieldItem[]) => void;
 }
 
-type PickerTarget = "ranged" | "melee" | "ammo" | "grenades" | null;
+type PickerTarget = "ranged" | "melee" | "ammo" | "grenades" | "shields" | null;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -566,6 +570,72 @@ function GrenadePicker({
               </div>
             </button>
           ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Shield Picker ────────────────────────────────────────────────────────────
+
+function ShieldPicker({
+  onSelect,
+  onClose,
+}: {
+  onSelect: (ref: ShieldRef) => void;
+  onClose: () => void;
+}) {
+  const [query, setQuery] = useState("");
+  const filtered = SHIELD_REFERENCE.filter((r) =>
+    r.name.toLowerCase().includes(query.toLowerCase())
+  ).sort((a, b) => a.name.localeCompare(b.name));
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+      <div className="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-xl shadow-2xl flex flex-col max-h-[80vh]">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
+          <h3 className="text-sm font-semibold text-slate-200">Add Shield</h3>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-200 text-lg leading-none">×</button>
+        </div>
+        <div className="px-4 py-2 border-b border-slate-800">
+          <input
+            type="text"
+            autoFocus
+            placeholder="Search shields…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className={editableInputClass(true)}
+          />
+        </div>
+        <div className="overflow-y-auto flex-1 divide-y divide-slate-800">
+          {filtered.length === 0 && (
+            <p className="p-4 text-sm text-slate-500 text-center">No matches.</p>
+          )}
+          {filtered.map((ref) => (
+            <button
+              key={ref.id}
+              onClick={() => onSelect(ref)}
+              className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-sm font-medium text-slate-200 group-hover:text-white">
+                  {ref.name}
+                </span>
+                <span className="text-xs text-cyan-400 shrink-0 font-mono">AP {ref.ap}</span>
+              </div>
+              <div className="text-xs text-slate-500 mt-0.5 font-mono">
+                {ref.locations} · {ref.damage} · Pen {ref.pen} · {ref.specialRules}
+              </div>
+            </button>
+          ))}
+        </div>
+        <div className="px-4 py-3 border-t border-slate-700">
+          <button
+            onClick={onClose}
+            className="w-full py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-sm text-slate-300"
+          >
+            Cancel
+          </button>
         </div>
       </div>
     </div>
@@ -1543,6 +1613,90 @@ function CyberneticWeaponCard({
   );
 }
 
+// ─── Shield Card ──────────────────────────────────────────────────────────────
+
+function ShieldCard({
+  item,
+  editable,
+  onRemove,
+}: {
+  item: ShieldItem;
+  editable: boolean;
+  onRemove: () => void;
+}) {
+  const [showRules, setShowRules] = useState(false);
+  const hasRules = !!(item.specialRules?.trim() && item.specialRules !== "—");
+
+  return (
+    <div className={sectionContainerClass(editable) + " space-y-3"}>
+      {/* Header */}
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <p className="text-sm font-semibold text-slate-200">{item.name}</p>
+          <p className="text-xs text-slate-500">
+            Shield{item.locations ? ` · ${item.locations}` : ""}
+          </p>
+        </div>
+        <div className="flex items-center gap-1.5 shrink-0">
+          {item.notes && (
+            <InfoModal
+              title={item.name}
+              content={<p className="text-sm text-slate-300 leading-relaxed">{item.notes}</p>}
+            />
+          )}
+          {editable && (
+            <button onClick={onRemove} className="text-xs text-red-400 hover:text-red-300">
+              Remove
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="flex flex-wrap gap-1.5">
+        {/* AP chip — cyan to distinguish from weapon damage */}
+        <div className="flex flex-col items-center bg-slate-800/60 rounded px-2 py-1 min-w-[52px]">
+          <span className="text-[10px] text-cyan-500 uppercase tracking-wide">AP</span>
+          <span className="text-sm font-mono text-cyan-300 mt-0.5">{item.ap}</span>
+        </div>
+        {item.damage && (
+          <StatChip label="Bash" value={item.damage.replace(/\s*[IREX]$/i, "").trim()} />
+        )}
+        {item.damage && <DamageTypeChip damage={item.damage} />}
+        {item.pen && <StatChip label="Pen" value={item.pen} />}
+      </div>
+
+      {/* Special rules */}
+      {hasRules && (
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-slate-400 italic flex-1">{item.specialRules}</span>
+          <button
+            onClick={() => setShowRules(true)}
+            title="Explain special rules"
+            className="text-slate-500 hover:text-amber-400 text-sm transition"
+          >
+            ⓘ
+          </button>
+        </div>
+      )}
+
+      {/* Weight / Value / Rarity / Source */}
+      {(item.weight || item.value || item.rarity || item.source) && (
+        <div className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1">
+          {item.weight && <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">⚖ {item.weight}</span>}
+          {item.value  && <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-amber-400/80 font-mono">₮ {item.value}</span>}
+          {item.rarity && <span className={`text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 ${rarityColour(item.rarity)}`}>{item.rarity}</span>}
+          {item.source && <span className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(item.source)}`}>{item.source}</span>}
+        </div>
+      )}
+
+      {showRules && item.specialRules && (
+        <SpecialRulesModal rules={item.specialRules} onClose={() => setShowRules(false)} />
+      )}
+    </div>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export function WeaponsTab({
@@ -1557,6 +1711,8 @@ export function WeaponsTab({
   onUpdateAmmo,
   onUpdateGrenades,
   cybernetics,
+  shields,
+  onUpdateShields,
 }: WeaponsTabProps) {
   const [picker, setPicker] = useState<PickerTarget>(null);
 
@@ -1803,6 +1959,40 @@ export function WeaponsTab({
     [editable, meleeWeapons, onUpdateMelee]
   );
 
+  const addFromShieldRef = useCallback(
+    (ref: ShieldRef) => {
+      if (!editable || !onUpdateShields) return;
+      onUpdateShields([
+        ...(shields ?? []),
+        {
+          id: crypto.randomUUID(),
+          referenceId: ref.id,
+          name: ref.name,
+          ap: ref.ap,
+          locations: ref.locations,
+          damage: ref.damage,
+          pen: String(ref.pen),
+          specialRules: ref.specialRules,
+          notes: ref.notes,
+          weight: ref.weight,
+          value: ref.value,
+          rarity: ref.rarity,
+          source: ref.source,
+        },
+      ]);
+      setPicker(null);
+    },
+    [editable, shields, onUpdateShields]
+  );
+
+  const removeShield = useCallback(
+    (id: string) => {
+      if (!editable || !onUpdateShields) return;
+      onUpdateShields((shields ?? []).filter((s) => s.id !== id));
+    },
+    [editable, shields, onUpdateShields]
+  );
+
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
@@ -1887,6 +2077,40 @@ export function WeaponsTab({
         </section>
 
       </div>
+
+      {/* ── SHIELDS ─────────────────────────────────────────────────────── */}
+      {((shields ?? []).length > 0 || editable) && (
+        <section className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-base font-semibold text-slate-200">
+              Shields
+            </h3>
+            {editable && (
+              <button
+                onClick={() => setPicker("shields")}
+                className="text-xs px-3 py-1 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700"
+              >
+                + Add
+              </button>
+            )}
+          </div>
+
+          {(shields ?? []).length === 0 && (
+            <p className="text-sm text-slate-500 italic">No shields carried.</p>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {(shields ?? []).map((item) => (
+              <ShieldCard
+                key={item.id}
+                item={item}
+                editable={editable}
+                onRemove={() => removeShield(item.id)}
+              />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* ── AMMUNITION ──────────────────────────────────────────────────── */}
       <section className="space-y-3">
@@ -2017,6 +2241,12 @@ export function WeaponsTab({
       {picker === "grenades" && (
         <GrenadePicker
           onSelect={addFromGrenadeRef}
+          onClose={() => setPicker(null)}
+        />
+      )}
+      {picker === "shields" && (
+        <ShieldPicker
+          onSelect={addFromShieldRef}
           onClose={() => setPicker(null)}
         />
       )}

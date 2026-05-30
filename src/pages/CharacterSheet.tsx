@@ -45,6 +45,7 @@ import type {
   MeleeWeapon,
   AmmoItem,
   GrenadeItem,
+  ShieldItem,
   WornArmourPiece,
   ArmourLocationKey,
   GearItem,
@@ -232,6 +233,11 @@ export default function CharacterSheet() {
 
   const handleUpdateGrenades = useCallback(
     (next: GrenadeItem[]) => updateField("grenades", next),
+    [updateField]
+  );
+
+  const handleUpdateShields = useCallback(
+    (next: ShieldItem[]) => updateField("shields", next),
     [updateField]
   );
 
@@ -449,6 +455,8 @@ export default function CharacterSheet() {
               onUpdateMelee={handleUpdateMeleeWeapons}
               onUpdateAmmo={handleUpdateAmmo}
               onUpdateGrenades={handleUpdateGrenades}
+              shields={character.shields ?? []}
+              onUpdateShields={handleUpdateShields}
               cybernetics={character.cybernetics ?? []}
             />
           )}
