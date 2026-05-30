@@ -310,7 +310,6 @@ export const TALENT_LIST: readonly TalentData[] = [
   { id: "psychic-vampire",       name: "Psychic Vampire",       source: SkillSource.DotDG, hasSpecialisation: false, prerequisites: "Psy Rating 4, 30+ Corruption Points, lethal Psychic Powers" },
 
   // ─── Book of Judgement ──────────────────────────────────────────────────────
-  { id: "blank-slate",           name: "Blank Slate",           source: SkillSource.BoJ, hasSpecialisation: false },
   { id: "legalese",              name: "Legalese",              source: SkillSource.BoJ, hasSpecialisation: false },
   { id: "pack-hunter",           name: "Pack Hunter",           source: SkillSource.BoJ, hasSpecialisation: false },
   { id: "seen-this-before",      name: "Seen This Before",      source: SkillSource.BoJ, hasSpecialisation: false },

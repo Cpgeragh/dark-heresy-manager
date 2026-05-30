@@ -46,4 +46,7 @@ export const TRAIT_DESCRIPTIONS: Record<string, string> = {
 
   // ─── Creatures Anathema ──────────────────────────────────────────────────────
   "improved-natural-weapons": "This creature's attacks are powerful enough to crush plasteel or punch through armour. The creature's natural weapons no longer count as Primitive.",
+
+  // ─── Book of Judgement ─────────────────────────────────────────────────────
+  "blank-slate": "The Acolyte is imprinted with psychic triggers known only to their handler. One trigger wipes all previous imprinting; another prepares the mind for re-programming. When imprinted, the GM and player choose three Common Lore, Forbidden Lore, Scholastic Lore, or Trade skills appropriate to the assumed identity. Until wiped clean, the Slate-Agent is treated as possessing all chosen Skills and gains +10 to related Tests.",
 };

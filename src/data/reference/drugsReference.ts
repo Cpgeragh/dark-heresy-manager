@@ -266,7 +266,9 @@ export const DRUGS_REFERENCE: DrugRef[] = [
     source: SkillSource.BoJ,
     value: "135 Thrones",
     rarity: "Rare",
-    effect: "Consult the Book of Judgement for full rules.",
+    effect: "–50 to all Tests made to resist Interrogation or other attempts to extract information.",
+    duration: "3d5 hours minus Toughness Bonus",
+    notes: "Powerful serum that depresses resistance to questioning. Also known as Verity or Veal.",
   },
 
   {
@@ -275,7 +277,9 @@ export const DRUGS_REFERENCE: DrugRef[] = [
     source: SkillSource.BoJ,
     value: "125 Thrones",
     rarity: "Rare",
-    effect: "Consult the Book of Judgement for full rules.",
+    effect: "Ignore Fatigue for the duration. +40 to all Toughness-based Tests and to resist Interrogation.",
+    duration: "2d5 hours",
+    sideEffect: "Must pass a Very Hard (–30) Toughness Test or gain 2 Fatigue when the effect wears off.",
   },
 
   // ── Daemon Hunter ─────────────────────────────────────────────────────────

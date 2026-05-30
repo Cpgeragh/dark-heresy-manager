@@ -125,6 +125,9 @@ export const TRAIT_LIST: readonly TraitData[] = [
   { id: "way-of-the-gun",           name: "Way of the Gun",           source: SkillSource.IH, hasSpecialisation: false },
   { id: "wealth",                   name: "Wealth",                   source: SkillSource.IH, hasSpecialisation: false },
   { id: "wilderness-savvy",         name: "Wilderness Savvy",         source: SkillSource.IH, hasSpecialisation: false },
+
+  // ─── Book of Judgement ─────────────────────────────────────────────────────
+  { id: "blank-slate",              name: "Blank Slate",              source: SkillSource.BoJ, hasSpecialisation: false },
 ];
 
 export type TraitId = (typeof TRAIT_LIST)[number]["id"];

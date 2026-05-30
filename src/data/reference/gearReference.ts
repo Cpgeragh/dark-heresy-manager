@@ -487,7 +487,11 @@ export const GEAR_REFERENCE: GearRef[] = [
     id: "pinner",
     name: "Pinner",
     source: SkillSource.BoJ,
-    description: "No description available — consult the Book of Judgement.",
+    description:
+      "Coil-generator that emits a charged fluctuating mag-field, affecting all magnetic devices " +
+      "within 30 metres for 2d10 Rounds, supercharging them. Separating any activated magnet from " +
+      "its attached surface requires a Hellish (–60) Strength Test. " +
+      "Good/Best Craftsmanship increase the radius by 5 m / 10 m. Poor Craftsmanship reduces it by 10 m.",
     weight: "5 kg",
     value: "2,000 Thrones",
     rarity: "Near Unique",
@@ -496,7 +500,12 @@ export const GEAR_REFERENCE: GearRef[] = [
     id: "strait-cape",
     name: "Strait Cape",
     source: SkillSource.BoJ,
-    description: "No description available — consult the Book of Judgement.",
+    description:
+      "A heavy sack of strong synthetic canvas thrown over a suspect. Limbs are pulled through " +
+      "holes and immobilised with internal chains; an attached hood provides a blindfold, gag, and " +
+      "earmuffs. All Tests to escape (Contortionist, Security, or Strength) are at a Very Hard (–30) " +
+      "penalty and take five times as long. The captive cannot use any Skill or Talent requiring " +
+      "sight, sound, voice, limbs, or hands.",
     weight: "5 kg",
     value: "100 Thrones",
     rarity: "Scarce",
@@ -505,7 +514,13 @@ export const GEAR_REFERENCE: GearRef[] = [
     id: "vertical-spindle-set",
     name: "Vertical Spindle Set",
     source: SkillSource.BoJ,
-    description: "No description available — consult the Book of Judgement.",
+    description:
+      "Reinforced gloves and boots connected to a central back unit via feed-lines. Electro-magnets " +
+      "in the plates activate on contact with ferromagnetic surfaces, allowing the wearer to climb " +
+      "them at 25% normal speed without the Climb Skill — even upside down. Imposes –5 to Silent " +
+      "Move Tests. Plates can detach to lower the user up to 50 m on adamantium-weave monoline. " +
+      "Good: compressor launchers fire plates at distant surfaces (Half Action, Challenging +0 BS). " +
+      "Best: monofibre hairs allow climbing any surface. Poor: no detachable plates or monoline.",
     weight: "20 kg",
     value: "1,500 Thrones",
     rarity: "Rare",
@@ -514,7 +529,11 @@ export const GEAR_REFERENCE: GearRef[] = [
     id: "vox-pickup",
     name: "Vox-Pickup",
     source: SkillSource.BoJ,
-    description: "No description available — consult the Book of Judgement.",
+    description:
+      "A black box no larger than a child's thumb-joint. Eavesdrops on all conversation within " +
+      "10 metres — records up to 100 hours or transmits in short secure bursts to a waiting receiver. " +
+      "Activating is a Full Action; no Tech-Use Test required. Detecting a planted vox-pickup requires " +
+      "an Opposed Search Test pitting the searcher's Search against the planter's Intelligence.",
     weight: "0.01 kg",
     value: "100 Thrones",
     rarity: "Very Rare",
@@ -535,7 +554,12 @@ export const GEAR_REFERENCE: GearRef[] = [
     id: "wall-eater",
     name: "Wall Eater",
     source: SkillSource.BoJ,
-    description: "No description available — consult the Book of Judgement.",
+    description:
+      "An insectoid creature the size of a thumb that generates an acid harmless to flesh but " +
+      "corrosive to stone and metal. Squeeze its thorax to force acid through its mandibles onto a " +
+      "surface. One creature generates enough acid to draw a 2-metre line, eating through up to 30 cm " +
+      "of adamantium before dissipating. Takes one week to replenish its acid reserves. Must be kept " +
+      "in wooden, bone, or ivory cages. No craftsmanship variants exist.",
     weight: "1 kg",
     value: "500 Thrones",
     rarity: "Very Rare",
