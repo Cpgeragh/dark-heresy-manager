@@ -868,6 +868,37 @@ export const GEAR_REFERENCE: GearRef[] = [
     rarity: "Near Unique",
   },
 
+  // ── Lathe Worlds ─────────────────────────────────────────────────────────
+
+  {
+    id: "lw-core-gel",
+    name: "Core-Gel",
+    source: SkillSource.LW,
+    description:
+      "A transparent, viscous and highly conductive material that acts as a surrogate for Electoo-Inducers " +
+      "and MIU links. Allows a character to access machinery that would otherwise require an Electro-Graft " +
+      "or MIU interface, even without those implants. Decays quickly — must be cleaned away and reapplied " +
+      "every hour. Each canister contains enough for two applications.",
+    weight: "—",
+    value: "500 Thrones",
+    rarity: "Rare",
+  },
+
+  {
+    id: "lw-scatter-caster",
+    name: "Scatter-Caster",
+    source: SkillSource.LW,
+    description:
+      "Also known as binary bombs or cant grenades. A heavy generator that pumps out discordant frequencies, " +
+      "lingua technis gibberish, and invalid scrapcode across a wide area. Range 25m: anyone with Mechanicus " +
+      "Implants suffers –10 to all Tests while within range. Giving orders to servitors, Servo-Skulls, and " +
+      "other familiars imposes a –50 penalty to all control Tests. " +
+      "Good Quality: range 50m. Best Quality: range 100m.",
+    weight: "10 kg",
+    value: "450 Thrones",
+    rarity: "Rare",
+  },
+
   // ── Lost Dataslate ────────────────────────────────────────────────────────
 
   {

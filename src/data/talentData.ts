@@ -343,6 +343,25 @@ export const TALENT_LIST: readonly TalentData[] = [
 
   // ─── The Black Sepulchre ─────────────────────────────────────────────────────
   { id: "into-the-breach", name: "Into the Breach", source: SkillSource.BSep, hasSpecialisation: false },
+
+  // ─── Lathe Worlds ────────────────────────────────────────────────────────────
+  { id: "commune-with-cogs",      name: "Commune with Cogs",      source: SkillSource.LW, hasSpecialisation: false, prerequisites: "Int 35" },
+  { id: "whisper-of-samadhi",     name: "Whisper of Samadhi",     source: SkillSource.LW, hasSpecialisation: false, prerequisites: "Int 35, Mimic, Deceive" },
+  { id: "all-seeing-eye",         name: "All-Seeing Eye",         source: SkillSource.LW, hasSpecialisation: false },
+  { id: "metal-fatigue",          name: "Metal Fatigue",          source: SkillSource.LW, hasSpecialisation: false },
+  { id: "the-power-within",       name: "The Power Within",       source: SkillSource.LW, hasSpecialisation: false },
+  { id: "the-power-without",      name: "The Power Without",      source: SkillSource.LW, hasSpecialisation: false },
+  { id: "the-power-beyond",       name: "The Power Beyond",       source: SkillSource.LW, hasSpecialisation: false },
+  { id: "reformed-skin",          name: "Reformed Skin",          source: SkillSource.LW, hasSpecialisation: false },
+  { id: "gift-of-purity",         name: "Gift of Purity",         source: SkillSource.LW, hasSpecialisation: false },
+  { id: "purity-of-flesh",        name: "Purity of Flesh",        source: SkillSource.LW, hasSpecialisation: false },
+  { id: "rite-of-ignition",       name: "Rite of Ignition",       source: SkillSource.LW, hasSpecialisation: false },
+  { id: "strength-of-the-lathes", name: "Strength of the Lathes", source: SkillSource.LW, hasSpecialisation: false },
+  { id: "luminen-barrier",        name: "Luminen Barrier",        source: SkillSource.LW, hasSpecialisation: false, prerequisites: "Luminen Shield, Electoo Inductors, Potentia Coil" },
+  { id: "luminen-flare",          name: "Luminen Flare",          source: SkillSource.LW, hasSpecialisation: false, prerequisites: "Luminen Blast, Electoo Inductors, Potentia Coil" },
+  { id: "luminen-shield",         name: "Luminen Shield",         source: SkillSource.LW, hasSpecialisation: false, prerequisites: "Electoo Inductors, Potentia Coil" },
+  { id: "luminen-surge",          name: "Luminen Surge",          source: SkillSource.LW, hasSpecialisation: false, prerequisites: "Luminen Shock, Electoo Inductors, Potentia Coil" },
+  { id: "the-flesh-is-weak",      name: "The Flesh is Weak",      source: SkillSource.LW, hasSpecialisation: true, specialisationLabel: "Level", specialisationMin: 1, specialisationMax: 4 },
 ];
 
 export type TalentId = (typeof TALENT_LIST)[number]["id"];
