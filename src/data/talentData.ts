@@ -8,6 +8,10 @@ export interface TalentData {
   source: SkillSource | SkillSource[];
   hasSpecialisation: boolean;
   specialisationLabel?: string; // e.g. "Group", "Sense", "Skill"
+  /** Present on numeric specialisations — signals integer-only input and sets the lower bound. */
+  specialisationMin?: number;
+  /** Present on numeric specialisations with a defined upper bound. */
+  specialisationMax?: number;
   prerequisites?: string;
   repeatable?: boolean;         // true = can be taken more than once (e.g. Sound Constitution)
   description?: string;
@@ -225,7 +229,7 @@ export const TALENT_LIST: readonly TalentData[] = [
   { id: "wrath-of-the-righteous",name: "Wrath of the Righteous",source: SkillSource.BoM, hasSpecialisation: false, prerequisites: "Pure Faith",                                           faithGroup: "wrath" },
 
   // ─── Radical's Handbook ─────────────────────────────────────────────────────
-  { id: "touched-by-the-fates",  name: "Touched by the Fates",  source: [SkillSource.DotDG, SkillSource.RH], hasSpecialisation: false },
+  { id: "touched-by-the-fates",  name: "Touched by the Fates",  source: [SkillSource.DotDG, SkillSource.RH, SkillSource.H3], hasSpecialisation: false },
   { id: "aetheric-resonator",    name: "Aetheric Resonator",    source: SkillSource.RH, hasSpecialisation: false, prerequisites: "Tech-Priest (Potentia Coil/Electoo Conductor)" },
   { id: "anima-aura",            name: "Anima Aura",            source: SkillSource.RH, hasSpecialisation: false, prerequisites: "Tech-Priest (Potentia Coil)" },
   { id: "daemonic-essence",      name: "Daemonic Essence",      source: SkillSource.RH, hasSpecialisation: false, prerequisites: "Daemon Vessel" },
@@ -311,7 +315,7 @@ export const TALENT_LIST: readonly TalentData[] = [
   { id: "worthy-of-the-calixian-elite", name: "Worthy of the Calixian Elite", source: SkillSource.Asc, hasSpecialisation: false },
 
   // ─── Disciples of the Dark Gods ─────────────────────────────────────────────
-  { id: "consumed-by-spite",     name: "Consumed by Spite",     source: SkillSource.DotDG, hasSpecialisation: false },
+  { id: "consumed-by-spite",     name: "Consumed by Spite",     source: [SkillSource.DotDG, SkillSource.H3], hasSpecialisation: false },
 
   { id: "psychic-spite",         name: "Psychic Spite",         source: SkillSource.DotDG, hasSpecialisation: false, prerequisites: "Psy Rating 4, Corpus Conversion" },
   { id: "psychic-supremacy",     name: "Psychic Supremacy",     source: SkillSource.DotDG, hasSpecialisation: true,  specialisationLabel: "Discipline", prerequisites: "Psy Rating 5, Discipline Focus (chosen)" },
