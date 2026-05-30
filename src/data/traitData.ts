@@ -133,6 +133,9 @@ export const TRAIT_LIST: readonly TraitData[] = [
   { id: "dotdg-untouchable",         name: "Untouchable",              source: SkillSource.DotDG, hasSpecialisation: false },
   { id: "dotdg-cryptos-possession",  name: "Cryptos Possession",       source: SkillSource.DotDG, hasSpecialisation: false },
 
+  // ─── Haarlock's Legacy III ──────────────────────────────────────────────────
+  { id: "shadow-shrouded",          name: "Shadow Shrouded",          source: SkillSource.H3,  hasSpecialisation: false },
+
   // ─── Book of Judgement ─────────────────────────────────────────────────────
   { id: "blank-slate",              name: "Blank Slate",              source: SkillSource.BoJ, hasSpecialisation: false },
 ];

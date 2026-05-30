@@ -71,6 +71,9 @@ export const TRAIT_DESCRIPTIONS: Record<string, string> = {
     "Surviving Possession: When the Cryptos departs, 25% chance the host dies (apparent multi-organ failure). " +
     "Survivors suffer 1d10 permanent Damage to both Toughness and Willpower, gain 1d10 Insanity Points, and have no memory of the possession.",
 
+  // ─── Haarlock's Legacy III ──────────────────────────────────────────────────
+  "shadow-shrouded":         "+10 to all Concealment and Silent Move Tests. Regenerates 1 lost Wound per combat round while still alive.",
+
   // ─── Book of Judgement ─────────────────────────────────────────────────────
   "blank-slate": "The Acolyte is imprinted with psychic triggers known only to their handler. One trigger wipes all previous imprinting; another prepares the mind for re-programming. When imprinted, the GM and player choose three Common Lore, Forbidden Lore, Scholastic Lore, or Trade skills appropriate to the assumed identity. Until wiped clean, the Slate-Agent is treated as possessing all chosen Skills and gains +10 to related Tests.",
 };
