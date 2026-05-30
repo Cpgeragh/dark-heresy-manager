@@ -33,12 +33,30 @@ export const WEAPON_SPECIAL_RULES: Record<string, string> = {
   "Flexible":
     "Flexible weapons cannot be Parried.",
 
+  "Haywire":
+    "Uses blasts of electromagnetic radiation to destroy the inner workings of machines and " +
+    "technological devices. Everything within the field's radius in metres (the number in " +
+    "parentheses) is affected. Roll 1d10: 1–2 Insignificant (no effect); 3–4 Minor Disruption " +
+    "(–10 to all actions using technology, including driving, firing non-Primitive ranged weapons, " +
+    "Tech-Use, power armour and cybernetics; power armour Move –1); 5–6 Major Disruption (–20 " +
+    "penalty, power armour Move –3, technological melee weapons count as Primitive); 7–8 Dead " +
+    "Zone (technology ceases to function entirely, power armour Move 1, characters with internal " +
+    "cybernetics suffer 1 level of Fatigue per round in the zone); 9–10 Prolonged Dead Zone (as " +
+    "Dead Zone but lasts two rounds before lessening). The effect lessens one step each round. " +
+    "Additional Haywire hits do not stack — a higher result replaces a lower one.",
+
   "Holy":
     "Against creatures of the Warp (Daemons, Possessed), this weapon counts as having " +
     "the Sanctified quality. Against other targets it has no special effect.",
 
   "Inaccurate":
     "This weapon gains no benefit from the Aim action.",
+
+  "Maximal":
+    "The weapon has two fire settings. Before attacking, choose to fire normally (standard profile) " +
+    "or on Maximal. Maximal adds 10 to range, +1d10 to damage, and +2 to Penetration; if the weapon " +
+    "has the Blast quality, its radius increases by 2. Maximal fire uses three times the normal " +
+    "ammunition per shot and adds the Recharge quality.",
 
   "Overheats":
     "Roll a 91–00 when firing and the weapon overheats. The wielder takes Energy damage " +
@@ -48,6 +66,15 @@ export const WEAPON_SPECIAL_RULES: Record<string, string> = {
   "Primitive":
     "The weapon's damage dice cap at 5. When rolling for damage, treat any die result " +
     "above 5 as 5. This does not affect bonuses added to the roll.",
+
+  "Proven":
+    "This weapon always inflicts massive trauma. Any die roll for damage lower than the Proven " +
+    "rating (the number in parentheses) is treated as if it were that rating instead. For example, " +
+    "a Proven (3) weapon treats any die roll of 1 or 2 as a 3 when calculating damage.",
+
+  "Razor Sharp":
+    "When the attack roll results in two or more Degrees of Success, double the weapon's " +
+    "Penetration value for that attack.",
 
   "Reliable":
     "The weapon only jams on a roll of 00. If it does jam, it can be cleared with a " +
@@ -74,8 +101,9 @@ export const WEAPON_SPECIAL_RULES: Record<string, string> = {
     "full details.",
 
   "Storm":
-    "When fired on Semi-Auto or Full-Auto, this weapon doubles the number of hits " +
-    "scored. Full-Auto fire produces twice the normal maximum hits.",
+    "Doubles the number of hits inflicted on the target. In fully automatic mode, each Degree " +
+    "of Success yields two additional hits (up to the weapon's firing rate, as normal). " +
+    "Storm weapons consume ammunition at twice the normal rate.",
 
   "Tearing":
     "Roll one additional damage die and discard the lowest result.",
@@ -85,8 +113,8 @@ export const WEAPON_SPECIAL_RULES: Record<string, string> = {
     "(see weapon entry for specific effects).",
 
   "Twin-linked":
-    "When fired, roll to hit twice and use the better result. If both hit, the target " +
-    "takes damage from each hit separately.",
+    "Gains +20 to hit when fired and uses twice the normal ammunition. On a successful attack " +
+    "with two or more Degrees of Success, scores one additional hit. Reload time is doubled.",
 
   "Unbalanced":
     "This weapon is unwieldy and cannot be used to Parry.",

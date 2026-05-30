@@ -299,6 +299,22 @@ export const AMMO_REFERENCE: AmmoRef[] = [
       "Counts as Sanctified. Targets in the area of effect suffer –5 to their Agility Test per point of the user's Psy Rating.",
   },
 
+  // ── Lathe Worlds ─────────────────────────────────────────────────────────
+  {
+    id: "lw-purity-round",
+    name: "Purity Round",
+    source: SkillSource.LW,
+    compatibleWith: "Crossbow, Hand Bow (or Stub Revolver / Stub Automatic at double cost)",
+    cost: "300 Thrones",
+    purchaseAmount: "1",
+    rarity: "Very Rare",
+    description:
+      "Favoured by the Cult of the Pure Form, each round contains a small haywire generator that " +
+      "activates on impact. Grants the Haywire (2) quality to the attack. " +
+      "Purchased like regular crossbow and hand bow quarrels; can be adapted for stub revolvers " +
+      "and stub automatics but the cost is doubled.",
+  },
+
   // ── Creatures Anathema ───────────────────────────────────────────────────
   {
     id: "ca-shuriken-clip",
