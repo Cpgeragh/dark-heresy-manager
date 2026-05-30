@@ -2018,6 +2018,23 @@ export const GRENADE_REFERENCE: GrenadeRef[] = [
       "A target struck must make an Agility Test or catch on fire.",
   },
 
+  // ── Lathe Worlds ─────────────────────────────────────────────────────────
+  {
+    id: "lw-haywire-grenade",
+    name: "Haywire Grenade",
+    source: SkillSource.LW,
+    class: "Thrown",
+    damage: "—",
+    pen: "0",
+    specialRules: "Haywire (3)",
+    weight: "0.5 kg",
+    value: "200 Thrones",
+    rarity: "Very Rare",
+    description:
+      "On detonation this grenade floods the area with disruptive electromagnetic pulses. " +
+      "All electronic and mechanical devices within the blast radius are affected by the Haywire quality.",
+  },
+
   // ── Lost Dataslate ────────────────────────────────────────────────────────
   {
     id: "ld-stasis-grenade",
