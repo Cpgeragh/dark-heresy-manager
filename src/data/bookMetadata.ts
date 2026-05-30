@@ -12,4 +12,5 @@ export const BOOK_METADATA = {
   [SkillSource.Asc]: { code: "Asc", name: "Ascension", year: 2010 },
   [SkillSource.DotDG]: { code: "DotDG", name: "Disciples of the Dark Gods", year: 2008 },
   [SkillSource.BSep]:  { code: "BSep",  name: "The Black Sepulchre",        year: 2009 },
+  [SkillSource.CC]:    { code: "CC",    name: "The Chaos Commandment",      year: 2010 },
 } as const;
