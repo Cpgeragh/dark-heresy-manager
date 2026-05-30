@@ -2020,3 +2020,65 @@ export const GRENADE_REFERENCE: GrenadeRef[] = [
   },
 
 ];
+
+// ─── Shields ─────────────────────────────────────────────────────────────────
+
+export interface ShieldRef {
+  id: string;
+  name: string;
+  source: SkillSource;
+  /** AP provided to covered locations while actively using the shield */
+  ap: number;
+  /** Human-readable location summary */
+  locations: string;
+  damage: string;
+  pen: number;
+  specialRules: string;
+  notes?: string;
+  weight: string;
+  value: string;
+  rarity: string;
+}
+
+export const SHIELD_REFERENCE: ShieldRef[] = [
+
+  // ── Book of Judgement ─────────────────────────────────────────────────────
+  {
+    id: "boj-synford-lockshield",
+    name: 'Synford-Pattern "Lockshield"',
+    source: SkillSource.BoJ,
+    ap: 4,
+    locations: "Arm & Body (head when moving / legs when stationary)",
+    damage: "1d10 I",
+    pen: 0,
+    specialRules: "Defensive",
+    notes:
+      "Provides +4 AP to the carrying arm and body. Its height also covers the head when in " +
+      "motion, or the legs when stationary. Contains an armoured viewport and firing port " +
+      "(Basic or Pistol weapons may be fired without penalty), a powered vox-hailer, and " +
+      "mag-strips for securing prisoners with magnacles. Adjacent lockshields can be locked " +
+      "together to form an armoured wall. Requires one hand to use.",
+    weight: "4 kg",
+    value: "90 Thrones",
+    rarity: "Rare",
+  },
+  {
+    id: "boj-enforcer-riot-shield",
+    name: "Enforcer Riot Shield",
+    source: SkillSource.BoJ,
+    ap: 1,
+    locations: "Arm & Body",
+    damage: "1d10 I",
+    pen: 0,
+    specialRules: "Defensive, Primitive",
+    notes:
+      "Transparent polycarbonate circular shield (~2 ft diameter), worn at the wrist. " +
+      "Provides +3 AP to body and carrying arm against attacks with the Primitive quality; " +
+      "+1 AP against all other attack types to the same locations. " +
+      "The carrying hand remains free to use a vox or pistol-sized weapon.",
+    weight: "1.5 kg",
+    value: "40 Thrones",
+    rarity: "Scarce",
+  },
+
+];

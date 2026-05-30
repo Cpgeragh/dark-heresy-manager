@@ -121,6 +121,25 @@ export interface MeleeWeapon {
   attachments?: string[]; // WeaponUpgradeRef.id values for fitted upgrades
 }
 
+export interface ShieldItem {
+  id: string;
+  referenceId?: string;   // set when created from SHIELD_REFERENCE
+  name: string;
+  /** AP provided while actively using the shield */
+  ap: number;
+  /** Human-readable locations covered, e.g. "Arm & Body" */
+  locations?: string;
+  damage?: string;        // melee bash damage
+  pen?: string;
+  specialRules?: string;
+  notes?: string;         // full rules text
+  weight?: string;
+  value?: string;
+  rarity?: string;
+  source?: string;
+  custom?: boolean;
+}
+
 /**
  * ARMOUR
  *
@@ -378,6 +397,7 @@ export interface Character {
   consumables?: ConsumableItem[];
   drugs?: DrugItem[];
   grenades?: GrenadeItem[];
+  shields?: ShieldItem[];
   cybernetics?: CyberneticItem[];
 
   weaponTraining: WeaponTrainingBlock;
