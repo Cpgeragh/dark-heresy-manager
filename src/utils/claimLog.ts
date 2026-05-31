@@ -19,10 +19,10 @@ export type ClaimLogEntry = {
 
 export function validateClaimLogPayload(data: unknown): data is ClaimLogEntry {
   if (typeof data !== "object" || data === null) return false;
-  const d = data as Record<string, unknown>;
-  if (typeof d.action !== "string") return false;
-  if (!["claim", "release", "force-assign", "force-release"].includes(d.action)) return false;
-  if (typeof d.actorUid !== "string") return false;
+  const record = data as Record<string, unknown>;
+  if (typeof record.action !== "string") return false;
+  if (!["claim", "release", "force-assign", "force-release"].includes(record.action)) return false;
+  if (typeof record.actorUid !== "string") return false;
   return true;
 }
 

@@ -80,9 +80,9 @@ export function useCharacterData({
       "claimLog"
     );
 
-    const q = query(logsRef, orderBy("timestamp", "desc"));
+    const logsQuery = query(logsRef, orderBy("timestamp", "desc"));
 
-    const unsub = onSnapshot(q, (snap) => {
+    const unsub = onSnapshot(logsQuery, (snap) => {
       const list: ClaimLog[] = snap.docs.map((d) => {
         const data = d.data() as Omit<ClaimLog, "id">;
         return { id: d.id, ...data };

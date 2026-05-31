@@ -6,6 +6,7 @@ import {
 } from "../../ui/editableStyles";
 import { useXpProposals } from "../../hooks/useXpProposals";
 import { proposeXpSpend } from "../../services/xpService";
+import { useToast } from "../../components/Toast/ToastContext";
 
 interface ExperienceTabProps {
   experience: ExperienceBlock;
@@ -20,6 +21,7 @@ export function ExperienceTab({
   characterId,
   isOwnedByCurrentPlayer,
 }: ExperienceTabProps) {
+  const { error: toastError, success: toastSuccess } = useToast();
   const remaining = experience.total - experience.spent;
   const { proposals } = useXpProposals(campaignId, characterId);
   const [description, setDescription] = useState("");
@@ -38,8 +40,10 @@ export function ExperienceTab({
       await proposeXpSpend(campaignId, characterId, description.trim(), xpCost);
       setDescription("");
       setXpCost(0);
+      toastSuccess("Proposal submitted.");
     } catch (err) {
       console.error("XP proposal error:", err);
+      toastError("Failed to submit proposal. Please try again.");
     } finally {
       setSubmitting(false);
     }

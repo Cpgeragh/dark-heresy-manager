@@ -91,7 +91,7 @@ export function CustomMeleeForm({
     name: "", class: "", damage: "", pen: "", specialRules: "",
   });
 
-  const set =
+  const makeFieldSetter =
     (k: keyof typeof fields) => (e: React.ChangeEvent<HTMLInputElement>) =>
       setFields((f) => ({ ...f, [k]: e.target.value }));
 
@@ -107,7 +107,7 @@ export function CustomMeleeForm({
             <input
               type="text"
               value={fields[k] ?? ""}
-              onChange={set(k)}
+              onChange={makeFieldSetter(k)}
               className={editableInputClass(true) + " mt-0.5"}
             />
           </div>

@@ -37,10 +37,10 @@ export function useClaimLogs(
       "claimLog"
     );
 
-    const q = query(ref, orderBy("timestamp", "desc"));
+    const logsQuery = query(ref, orderBy("timestamp", "desc"));
 
     const unsub = onSnapshot(
-      q,
+      logsQuery,
       (snapshot) => {
         const results: ClaimLogEntry[] = [];
 

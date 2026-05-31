@@ -26,12 +26,12 @@ export function useSessions(campaignId: string | undefined): {
 
     setLoading(true);
 
-    const q = query(
+    const sessionsQuery = query(
       collection(db, "campaigns", campaignId, "sessions"),
       orderBy("date", "desc")
     );
 
-    const unsub = onSnapshot(q, (snap) => {
+    const unsub = onSnapshot(sessionsQuery, (snap) => {
       const list: SessionWithId[] = snap.docs.map((d) => ({
         id: d.id,
         ...(d.data() as Omit<SessionDocument, "id">),

@@ -26,12 +26,12 @@ export function useXpProposals(
 
     setLoading(true);
 
-    const q = query(
+    const proposalsQuery = query(
       collection(db, "campaigns", campaignId, "characters", characterId, "xpProposals"),
       orderBy("proposedAt", "desc")
     );
 
-    const unsub = onSnapshot(q, (snap) => {
+    const unsub = onSnapshot(proposalsQuery, (snap) => {
       const list: XpProposalWithId[] = snap.docs.map((d) => ({
         id: d.id,
         ...(d.data() as Omit<XpProposalDocument, "id">),
