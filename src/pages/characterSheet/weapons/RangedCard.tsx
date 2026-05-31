@@ -88,7 +88,7 @@ export function CustomRangedForm({
     name: "", class: "", damage: "", pen: "", range: "", rof: "", clip: "", rld: "", specialRules: "",
   });
 
-  const set =
+  const makeFieldSetter =
     (k: keyof typeof fields) => (e: React.ChangeEvent<HTMLInputElement>) =>
       setFields((f) => ({ ...f, [k]: e.target.value }));
 
@@ -108,7 +108,7 @@ export function CustomRangedForm({
             <input
               type="text"
               value={fields[k] ?? ""}
-              onChange={set(k)}
+              onChange={makeFieldSetter(k)}
               className={editableInputClass(true) + " mt-0.5"}
             />
           </div>

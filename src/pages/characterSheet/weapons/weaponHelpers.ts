@@ -10,29 +10,29 @@ import {
 // ─── Attachment Stat Modifiers ────────────────────────────────────────────────
 
 export function modifyDamageBonus(damage: string, delta: number): string {
-  const m = damage.trim().match(/^(\d*d\d+)([+-]\d+)?\s*([IREX])?$/i);
-  if (!m) return damage;
-  const dice = m[1];
-  const bonus = (m[2] ? parseInt(m[2]) : 0) + delta;
-  const type = m[3] ? ` ${m[3].toUpperCase()}` : "";
+  const dmgMatch = damage.trim().match(/^(\d*d\d+)([+-]\d+)?\s*([IREX])?$/i);
+  if (!dmgMatch) return damage;
+  const dice = dmgMatch[1];
+  const bonus = (dmgMatch[2] ? parseInt(dmgMatch[2]) : 0) + delta;
+  const type = dmgMatch[3] ? ` ${dmgMatch[3].toUpperCase()}` : "";
   if (bonus === 0) return `${dice}${type}`.trim();
   return `${dice}${bonus > 0 ? "+" : ""}${bonus}${type}`.trim();
 }
 
 export function halveRange(range: string): string {
-  const m = range.match(/^(\d+)m$/i);
-  if (!m) return range;
-  return `${Math.ceil(parseInt(m[1]) / 2)}m`;
+  const rangeMatch = range.match(/^(\d+)m$/i);
+  if (!rangeMatch) return range;
+  return `${Math.ceil(parseInt(rangeMatch[1]) / 2)}m`;
 }
 
 export function halveClip(clip: string): string {
-  const n = parseInt(clip);
-  return isNaN(n) ? clip : String(Math.max(1, Math.ceil(n / 2)));
+  const clipVal = parseInt(clip);
+  return isNaN(clipVal) ? clip : String(Math.max(1, Math.ceil(clipVal / 2)));
 }
 
 export function modifyPen(pen: string, delta: number): string {
-  const n = parseInt(pen);
-  return isNaN(n) ? pen : String(Math.max(0, n + delta));
+  const penVal = parseInt(pen);
+  return isNaN(penVal) ? pen : String(Math.max(0, penVal + delta));
 }
 
 export function removeSpecialRule(rules: string, toRemove: string): string {

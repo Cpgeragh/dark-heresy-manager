@@ -265,7 +265,7 @@ export function DrugsTab({ drugs, editable, onUpdate }: DrugsTabProps) {
     [editable, drugs, onUpdate]
   );
 
-  const remove = useCallback(
+  const removeDrug = useCallback(
     (id: string) => {
       if (!editable) return;
       onUpdate(drugs.filter((d) => d.id !== id));
@@ -313,7 +313,7 @@ export function DrugsTab({ drugs, editable, onUpdate }: DrugsTabProps) {
             item={item}
             editable={editable}
             onUpdateQty={updateQty}
-            onRemove={remove}
+            onRemove={removeDrug}
             onInfo={setInfoTarget}
           />
         ))}

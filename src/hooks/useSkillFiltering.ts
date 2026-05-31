@@ -15,11 +15,11 @@ export function useSkillFiltering({
   showOnlyTrained,
 }: UseSkillFilteringArgs): SkillWithComputed[] {
   return useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
+    const normalizedQuery = searchQuery.trim().toLowerCase();
 
     return skills.filter((s) => {
       if (showOnlyTrained && s.level === "untrained") return false;
-      if (q && !s.name.toLowerCase().includes(q)) return false;
+      if (normalizedQuery && !s.name.toLowerCase().includes(normalizedQuery)) return false;
       return true;
     });
   }, [skills, searchQuery, showOnlyTrained]);

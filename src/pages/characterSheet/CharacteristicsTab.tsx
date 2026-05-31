@@ -33,7 +33,7 @@ export function CharacteristicsTab({
   // Derived bonuses
   const SB = Math.floor(total("s") / CHARACTERISTIC_BONUS_DIVISOR);
   const TB = Math.floor(total("t") / CHARACTERISTIC_BONUS_DIVISOR);
-  const AgB = Math.floor(total("ag") / CHARACTERISTIC_BONUS_DIVISOR);
+  const AB = Math.floor(total("ag") / CHARACTERISTIC_BONUS_DIVISOR);
   const IB = Math.floor(total("int") / CHARACTERISTIC_BONUS_DIVISOR);
   const PB = Math.floor(total("per") / CHARACTERISTIC_BONUS_DIVISOR);
   const WPB = Math.floor(total("wp") / CHARACTERISTIC_BONUS_DIVISOR);
@@ -129,7 +129,7 @@ export function CharacteristicsTab({
             {[
               { label: "SB",  value: SB },
               { label: "TB",  value: TB },
-              { label: "AgB", value: AgB },
+              { label: "AB",  value: AB },
               { label: "IB",  value: IB },
               { label: "PB",  value: PB },
               { label: "WPB", value: WPB },
@@ -148,10 +148,10 @@ export function CharacteristicsTab({
           <p className="text-xs text-slate-500 uppercase tracking-wide mb-2">Movement</p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { label: "Half",   value: AgB },
-              { label: "Full",   value: AgB * 2 },
-              { label: "Charge", value: AgB * 3 },
-              { label: "Run",    value: AgB * 6 },
+              { label: "Half",   value: AB },
+              { label: "Full",   value: AB * 2 },
+              { label: "Charge", value: AB * 3 },
+              { label: "Run",    value: AB * 6 },
             ].map(({ label, value }) => (
               <div key={label} className={sectionContainerClass(false) + " text-center"}>
                 <div className="text-xs text-slate-400 mb-1">{label}</div>

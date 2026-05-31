@@ -48,9 +48,9 @@ function ArcheotechPickerModal({
   const [gmRarity, setGmRarity] = useState("");
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const normalizedQuery = query.trim().toLowerCase();
     return [...ARCHEOTECH_REFERENCE]
-      .filter((r) => !q || r.name.toLowerCase().includes(q) || r.type.toLowerCase().includes(q))
+      .filter((r) => !normalizedQuery || r.name.toLowerCase().includes(normalizedQuery) || r.type.toLowerCase().includes(normalizedQuery))
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [query]);
 

@@ -43,14 +43,14 @@ export function TalentPickerModal({
 
   const filtered = useMemo(() => {
     const seen = new Set<string>();
-    const q = query.trim().toLowerCase();
+    const normalizedQuery = query.trim().toLowerCase();
     return [...listData]
       .filter((t) => {
         if (seen.has(t.id)) return false;
         seen.add(t.id);
         const repeatable = "repeatable" in t ? (t as TalentData).repeatable : false;
         if (!repeatable && selectedIds.has(t.id)) return false;
-        return !q || t.name.toLowerCase().includes(q);
+        return !normalizedQuery || t.name.toLowerCase().includes(normalizedQuery);
       })
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [listData, selectedIds, query]);

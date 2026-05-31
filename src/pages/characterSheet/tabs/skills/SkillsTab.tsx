@@ -59,9 +59,9 @@ export function SkillsTab({
   // CATEGORY LIST
   // ------------------------------
   const ALL_CATEGORIES = useMemo(() => {
-    const set = new Set<string>();
-    computedSkills.forEach((s) => set.add(s.category ?? "Other"));
-    return Array.from(set).sort();
+    const seen = new Set<string>();
+    computedSkills.forEach((s) => seen.add(s.category ?? "Other"));
+    return Array.from(seen).sort();
   }, [computedSkills]);
 
   const categoryCollapse = useSkillGroupCollapse(ALL_CATEGORIES);
