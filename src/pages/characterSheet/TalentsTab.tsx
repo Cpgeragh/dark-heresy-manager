@@ -30,7 +30,7 @@ const FAITH_GROUP_LABELS: Record<string, string> = {
   wrath: "Emperor's Wrath",
 };
 
-const FAITH_GROUP_ORDER = ["sign", "mercy", "wrath"] as const;
+const FAITH_GROUP_ORDER = ["mercy", "sign", "wrath"] as const;
 
 const REGULAR_TALENT_LIST = TALENT_LIST.filter((t) => !t.faithGroup);
 const FAITH_TALENT_LIST   = TALENT_LIST.filter((t) => !!t.faithGroup);

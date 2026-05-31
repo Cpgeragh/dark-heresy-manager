@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { buildRoute } from "../../constants/routes";
+import { useToast } from "../../components/Toast";
 
 import { useRecoveryLookup } from "./hooks/useRecoveryLookup";
 import { useClaimActions } from "./hooks/useClaimActions";
@@ -18,6 +19,7 @@ export default function ClaimCharacterPage() {
   const [claimError, setClaimError] = useState<string | null>(null);
 
   const navigate = useNavigate();
+  const toast = useToast();
 
   const { loading, error, data, lookup } = useRecoveryLookup();
   const { claimCharacter } = useClaimActions();
@@ -52,12 +54,10 @@ export default function ClaimCharacterPage() {
       await claimCharacter(data.campaignId, data.character);
 
       navigate(buildRoute.characterSheet(data.campaignId, data.characterId));
-    } catch (err: any) {
-      console.error(err);
-      setClaimError(
-        err?.message ??
-          "Failed to claim character. It may have been claimed already."
-      );
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to claim character. It may have been claimed already.";
+      toast.error(message);
+      setClaimError(message);
     } finally {
       setClaiming(false);
     }

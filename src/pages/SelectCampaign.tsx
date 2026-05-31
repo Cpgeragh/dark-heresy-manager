@@ -5,7 +5,6 @@ import { collection, collectionGroup, doc, getDocs, getDoc, query, where } from 
 import type { User } from "firebase/auth";
 import { db } from "../firebase";
 import type { CampaignDocument } from "../types/Firestore";
-import { useIsMounted } from "../hooks/useIsMounted";
 
 type CampaignWithId = CampaignDocument & { id: string };
 
@@ -24,13 +23,14 @@ export default function SelectCampaign({
 }: Props) {
   const [campaigns, setCampaigns] = useState<CampaignWithId[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const isMounted = useIsMounted();
 
   const handleCampaignSelect = useCallback((campaignId: string) => {
     onActiveCampaignChange(campaignId);
   }, [onActiveCampaignChange]);
 
   useEffect(() => {
+    let ignore = false;
+
     async function load() {
       if (role === "dm") {
         const snap = await getDocs(
@@ -40,7 +40,7 @@ export default function SelectCampaign({
           id: d.id,
           ...(d.data() as Omit<CampaignDocument, "id">),
         }));
-        if (isMounted()) setCampaigns(list);
+        if (!ignore) setCampaigns(list);
       } else {
         const charSnap = await getDocs(
           query(collectionGroup(db, "characters"), where("userId", "==", user.uid))
@@ -54,15 +54,17 @@ export default function SelectCampaign({
         const list: CampaignWithId[] = campaignDocs
           .filter((d) => d.exists())
           .map((d) => ({ id: d.id, ...(d.data() as Omit<CampaignDocument, "id">) }));
-        if (isMounted()) setCampaigns(list);
+        if (!ignore) setCampaigns(list);
       }
     }
 
     load().catch((err) => {
       console.error("SelectCampaign load error:", err);
-      if (isMounted()) setError("Failed to load campaigns. A Firestore index may be missing — check the console.");
+      if (!ignore) setError("Failed to load campaigns. A Firestore index may be missing — check the console.");
     });
-  }, [user.uid, role, isMounted]);
+
+    return () => { ignore = true; };
+  }, [user.uid, role]);
 
   return (
     <div className="space-y-6">
