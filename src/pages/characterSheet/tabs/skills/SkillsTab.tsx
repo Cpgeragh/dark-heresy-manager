@@ -3,6 +3,7 @@
 import { useMemo, useState, useCallback } from "react";
 import type { Characteristics, SkillEntry } from "../../../../types/Character";
 import type { CharField } from "../../../../utils/characterFactory";
+import { CHARACTERISTIC_ADVANCE_INCREMENT } from "../../../../constants/gameRules";
 
 // Import our new hooks
 import { useSkillComputation } from "../../../../hooks/useSkillComputation";
@@ -189,7 +190,7 @@ export function SkillsTab({
               if (!groupSkills.length) return null;
 
               const charField = getCharField(charKey);
-              const charTotal = charField.base + charField.advances;
+              const charTotal = charField.base + charField.advances * CHARACTERISTIC_ADVANCE_INCREMENT;
 
               return (
                 <CharacteristicGroup

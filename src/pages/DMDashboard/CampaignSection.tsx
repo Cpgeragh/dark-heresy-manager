@@ -2,12 +2,11 @@
 
 import { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { collection, doc, setDoc, updateDoc } from "firebase/firestore";
-import { db } from "../../firebase";
 import type { CampaignDocument } from "../../types/Firestore";
 import { validateCampaignName } from "../../utils/validation";
 import { useToast } from "../../components/Toast";
 import { buildRoute } from "../../constants/routes";
+import { createCampaign, updateCampaignName } from "../../services/campaignService";
 
 type CampaignWithId = CampaignDocument & { id: string };
 
@@ -44,18 +43,9 @@ function CampaignSection({
     }
 
     try {
-      const newRef = doc(collection(db, "campaigns"));
-
-      const campaignData: CampaignDocument = {
-        name,
-        dmId: userUid,
-        createdAt: new Date(),
-      };
-
-      await setDoc(newRef, campaignData);
-
+      const newId = await createCampaign(name, userUid);
       setNewCampaignName("");
-      onCampaignSelect(newRef.id);
+      onCampaignSelect(newId);
       toast.success("Campaign created successfully");
     } catch (error) {
       console.error("Failed to create campaign:", error);
@@ -63,9 +53,6 @@ function CampaignSection({
     }
   }, [newCampaignName, userUid, onCampaignSelect, toast]);
 
-  const handleCampaignClick = useCallback((campaignId: string) => {
-    onCampaignSelect(campaignId);
-  }, [onCampaignSelect]);
 
   const handleEditStart = useCallback((campaign: CampaignWithId) => {
     setEditingId(campaign.id);
@@ -86,10 +73,11 @@ function CampaignSection({
       return;
     }
     try {
-      await updateDoc(doc(db, "campaigns", editingId), { name });
+      await updateCampaignName(editingId, name);
       setEditingId(null);
       setEditName("");
-    } catch {
+    } catch (err) {
+      console.error("Failed to update campaign name:", err);
       toast.error("Failed to update campaign name");
     }
   }, [editingId, editName, toast]);
@@ -162,7 +150,7 @@ function CampaignSection({
                   <>
                     <span
                       className="flex-1 cursor-pointer"
-                      onClick={() => handleCampaignClick(campaign.id)}
+                      onClick={() => onCampaignSelect(campaign.id)}
                     >
                       {campaign.name}
                     </span>

@@ -49,11 +49,11 @@ export function Tooltip({ children, content, maxWidth = 240 }: TooltipProps) {
   useEffect(() => {
     function handleOutside(e: MouseEvent | TouchEvent) {
       if (!tooltipRef.current || !triggerRef.current) return;
-      const t = e.target as Node;
+      const target = e.target as Node;
 
       if (
-        !tooltipRef.current.contains(t) &&
-        !triggerRef.current.contains(t)
+        !tooltipRef.current.contains(target) &&
+        !triggerRef.current.contains(target)
       ) {
         setOpen(false);
       }

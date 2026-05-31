@@ -1,9 +1,8 @@
 // src/pages/CampaignOverview/SessionForm.tsx
 
 import { useState, useCallback } from "react";
-import { collection, doc, increment, serverTimestamp, writeBatch } from "firebase/firestore";
-import { db } from "../../firebase";
 import { useToast } from "../../components/Toast";
+import { createSession } from "../../services/sessionService";
 
 interface Character {
   id: string;
@@ -42,28 +41,13 @@ export function SessionForm({ campaignId, characters, onClose }: Props) {
 
     setSaving(true);
     try {
-      const batch = writeBatch(db);
-      const sessionRef = doc(collection(db, "campaigns", campaignId, "sessions"));
-
-      batch.set(sessionRef, {
+      await createSession(campaignId, {
         date: new Date(date),
         summary,
         dmNotes,
         xpAwarded,
         attendees: [...attendees],
-        createdAt: serverTimestamp(),
       });
-
-      if (xpAwarded > 0) {
-        for (const charId of attendees) {
-          batch.update(
-            doc(db, "campaigns", campaignId, "characters", charId),
-            { "experience.total": increment(xpAwarded) }
-          );
-        }
-      }
-
-      await batch.commit();
       toast.success("Session saved");
       onClose();
     } catch (err) {

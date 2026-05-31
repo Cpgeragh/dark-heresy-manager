@@ -1,22 +1,14 @@
 // src/pages/CampaignOverview.tsx
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-
-import { getDocs } from "firebase/firestore";
-import { charactersCollectionRef } from "../firebase/converters";
 
 import { useClaimLogs } from "../hooks/useClaimLogs";
 import { useIsDM } from "../hooks/useIsDM";
 import { useSessions } from "../hooks/useSessions";
+import { useCharacterSummaries, type CharacterSummary } from "../hooks/useCharacterSummaries";
 import { SessionForm } from "./CampaignOverview/SessionForm";
 import { SessionCard } from "./CampaignOverview/SessionCard";
-
-type CharacterSummary = {
-  id: string;
-  characterName: string;
-  userId: string | null;
-};
 
 export default function CampaignOverview() {
   const params = useParams<{ campaignId: string }>();
@@ -24,30 +16,9 @@ export default function CampaignOverview() {
 
   const isDM = useIsDM(campaignId);
   const { sessions, loading: sessionsLoading, deleteSession, updateSession } = useSessions(campaignId);
-  const [characters, setCharacters] = useState<CharacterSummary[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { characters, loading } = useCharacterSummaries(campaignId);
   const [showSessionForm, setShowSessionForm] = useState(false);
   const [search, setSearch] = useState("");
-
-  useEffect(() => {
-    if (!campaignId) return;
-
-    async function load() {
-      setLoading(true);
-
-      const snap = await getDocs(charactersCollectionRef(campaignId));
-      const list: CharacterSummary[] = snap.docs.map((d) => ({
-        id: d.id,
-        characterName: d.data().header?.characterName ?? "Unnamed Character",
-        userId: d.data().userId ?? null,
-      }));
-
-      setCharacters(list);
-      setLoading(false);
-    }
-
-    load();
-  }, [campaignId]);
 
   if (!campaignId) {
     return (

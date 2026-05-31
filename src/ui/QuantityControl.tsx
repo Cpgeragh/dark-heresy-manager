@@ -35,7 +35,7 @@ const SIZE = {
 } as const;
 
 export function QuantityControl({ quantity, editable, onUpdate, size = "md" }: Props) {
-  const s = SIZE[size];
+  const sizeStyles = SIZE[size];
   const { editing, draft, setDraft, start, commit, handleKeyDown } = useQuantityEdit(
     quantity,
     onUpdate,
@@ -46,7 +46,7 @@ export function QuantityControl({ quantity, editable, onUpdate, size = "md" }: P
       {editable && (
         <button
           onClick={() => onUpdate(Math.max(0, quantity - 1))}
-          className={`${s.btn} rounded bg-slate-700 hover:bg-slate-600 text-slate-300 leading-none flex items-center justify-center`}
+          className={`${sizeStyles.btn} rounded bg-slate-700 hover:bg-slate-600 text-slate-300 leading-none flex items-center justify-center`}
         >
           −
         </button>
@@ -61,13 +61,13 @@ export function QuantityControl({ quantity, editable, onUpdate, size = "md" }: P
           onChange={(e) => setDraft(e.target.value.replace(/\D/g, ""))}
           onBlur={commit}
           onKeyDown={handleKeyDown}
-          className={`${s.input} font-mono text-slate-100 text-center bg-slate-800 border border-slate-600 rounded focus:outline-none focus:border-indigo-500`}
+          className={`${sizeStyles.input} font-mono text-slate-100 text-center bg-slate-800 border border-slate-600 rounded focus:outline-none focus:border-indigo-500`}
         />
       ) : (
         <span
           onClick={editable ? start : undefined}
           title={editable ? "Click to set quantity" : undefined}
-          className={`${s.display} font-mono text-slate-100 text-center ${
+          className={`${sizeStyles.display} font-mono text-slate-100 text-center ${
             editable
               ? "cursor-pointer hover:text-white hover:underline decoration-slate-500 decoration-dotted underline-offset-2"
               : ""
@@ -80,7 +80,7 @@ export function QuantityControl({ quantity, editable, onUpdate, size = "md" }: P
       {editable && (
         <button
           onClick={() => onUpdate(quantity + 1)}
-          className={`${s.btn} rounded bg-slate-700 hover:bg-slate-600 text-slate-300 leading-none flex items-center justify-center`}
+          className={`${sizeStyles.btn} rounded bg-slate-700 hover:bg-slate-600 text-slate-300 leading-none flex items-center justify-center`}
         >
           +
         </button>

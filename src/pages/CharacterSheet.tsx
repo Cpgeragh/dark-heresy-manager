@@ -6,6 +6,8 @@ import { auth } from "../firebase";
 
 import { useCharacterSheet } from "./characterSheet/useCharacterSheet";
 import { ErrorBoundary } from "../components/ErrorBoundary";
+import { TabButton } from "../components/TabButton";
+import { CharacterBreadcrumb } from "../components/CharacterBreadcrumb";
 
 import { OverviewTab } from "./characterSheet/OverviewTab";
 import { CharacteristicsTab } from "./characterSheet/CharacteristicsTab";
@@ -25,17 +27,6 @@ import { ArcheotechTab } from "./characterSheet/ArcheotechTab";
 
 import type { TabId } from "./characterSheet/types";
 import type { CharacterDocument } from "../types/Firestore";
-
-function exportCharacterJson(character: CharacterDocument) {
-  const { id, ...data } = character;
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${character.header?.characterName ?? "character"}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
 import type {
   CharacterHeader,
   WoundsBlock,
@@ -49,7 +40,6 @@ import type {
   GrenadeItem,
   ShieldItem,
   WornArmourPiece,
-  ArmourLocationKey,
   GearItem,
   ConsumableItem,
   DrugItem,
@@ -58,41 +48,8 @@ import type {
   PsychicBlock,
 } from "../types/Character";
 
-// ─── Migration helpers ────────────────────────────────────────────────────────
-// Old Firestore documents store armour as ArmourBlock (fixed 6-location object)
-// and gear as string[]. These functions normalise both to the new shapes.
-
-const LOCATION_KEYS: ArmourLocationKey[] = [
-  "head", "body", "rightArm", "leftArm", "rightLeg", "leftLeg",
-];
-
-function normaliseArmour(raw: unknown): WornArmourPiece[] {
-  if (Array.isArray(raw)) return raw as WornArmourPiece[];
-  // Legacy ArmourBlock — convert each non-zero location into a piece
-  const block = raw as Record<string, { name?: string; ap?: number; type?: string }> | null;
-  if (!block) return [];
-  return LOCATION_KEYS
-    .filter((k) => (block[k]?.ap ?? 0) > 0)
-    .map((k) => ({
-      id: crypto.randomUUID(),
-      name: block[k]?.type || block[k]?.name || k,
-      locations: [k],
-      ap: block[k]?.ap ?? 0,
-      worn: true,
-    }));
-}
-
-function normaliseGear(raw: unknown): GearItem[] {
-  if (!Array.isArray(raw)) return [];
-  return (raw as unknown[]).map((item) => {
-    if (typeof item === "string") {
-      return { id: crypto.randomUUID(), name: item };
-    }
-    return item as GearItem;
-  });
-}
-import { TabButton } from "../components/TabButton";
-import { CharacterBreadcrumb } from "../components/CharacterBreadcrumb";
+import { exportCharacterJson } from "../utils/exportCharacter";
+import { normaliseArmour, normaliseGear } from "../utils/characterMigration";
 
 // ================================================================
 // TAB CONFIGURATION
@@ -474,11 +431,7 @@ export default function CharacterSheet() {
           {activeTab === "armour" && (
             <ArmourTab
               armour={normaliseArmour(character.armour)}
-              toughnessBonus={Math.floor(
-                (character.characteristics.t.base +
-                  character.characteristics.t.advances * 5) /
-                  10
-              )}
+              toughnessBonus={Math.floor(getCharTotal("t") / 10)}
               editable={allowedToEdit}
               onUpdate={handleUpdateArmour}
               cybernetics={character.cybernetics ?? []}

@@ -30,7 +30,7 @@ function proposalDocRef(campaignId: string, characterId: string, proposalId: str
   return doc(proposalsRef(campaignId, characterId), proposalId);
 }
 
-function characterDocRef(campaignId: string, characterId: string) {
+function characterPlainRef(campaignId: string, characterId: string) {
   return doc(db, "campaigns", campaignId, "characters", characterId);
 }
 
@@ -72,7 +72,7 @@ export async function approveXpProposal(
   batch.update(proposalDocRef(campaignId, characterId, proposalId), {
     status: "approved",
   });
-  batch.update(characterDocRef(campaignId, characterId), {
+  batch.update(characterPlainRef(campaignId, characterId), {
     "experience.spent": increment(xpCost),
   });
   await batch.commit();

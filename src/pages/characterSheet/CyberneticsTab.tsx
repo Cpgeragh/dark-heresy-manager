@@ -408,7 +408,7 @@ export function CyberneticsTab({ cybernetics, editable, onUpdate }: CyberneticsT
     [editable, cybernetics, onUpdate]
   );
 
-  const remove = useCallback(
+  const removeImplant = useCallback(
     (id: string) => {
       if (!editable) return;
       onUpdate(cybernetics.filter((c) => c.id !== id));
@@ -445,7 +445,7 @@ export function CyberneticsTab({ cybernetics, editable, onUpdate }: CyberneticsT
             item={item}
             editable={editable}
             onCycleQuality={cycleQuality}
-            onRemove={remove}
+            onRemove={removeImplant}
             onInfo={setInfoTarget}
           />
         ))}
