@@ -1,12 +1,11 @@
 import { useState, useCallback, useMemo } from "react";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import type { ExperienceBlock } from "../../types/Character";
 import {
   sectionContainerClass,
   readOnlyBadgeClass,
 } from "../../ui/editableStyles";
-import { auth, db } from "../../firebase";
 import { useXpProposals } from "../../hooks/useXpProposals";
+import { proposeXpSpend } from "../../services/xpService";
 
 interface ExperienceTabProps {
   experience: ExperienceBlock;
@@ -33,21 +32,10 @@ export function ExperienceTab({
 
   const handlePropose = useCallback(async () => {
     if (!description.trim() || xpCost <= 0) return;
-    const user = auth.currentUser;
-    if (!user) return;
 
     setSubmitting(true);
     try {
-      await addDoc(
-        collection(db, "campaigns", campaignId, "characters", characterId, "xpProposals"),
-        {
-          playerId: user.uid,
-          description: description.trim(),
-          xpCost,
-          status: "pending",
-          proposedAt: serverTimestamp(),
-        }
-      );
+      await proposeXpSpend(campaignId, characterId, description.trim(), xpCost);
       setDescription("");
       setXpCost(0);
     } catch (err) {

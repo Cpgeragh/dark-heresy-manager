@@ -1,7 +1,6 @@
 // src/pages/characterSheet/AdminTab.tsx
 
 import { useState, useCallback } from "react";
-import { doc, increment, updateDoc, writeBatch } from "firebase/firestore";
 import type { Character } from "../../types/Character";
 import type { ClaimLog } from "../../types/ClaimLog";
 import {
@@ -9,8 +8,8 @@ import {
   sectionContainerClass,
   readOnlyBadgeClass,
 } from "../../ui/editableStyles";
-import { db } from "../../firebase";
 import { useXpProposals } from "../../hooks/useXpProposals";
+import { approveXpProposal, rejectXpProposal } from "../../services/xpService";
 
 interface AdminTabProps {
   character: Character;
@@ -42,23 +41,11 @@ export function AdminTab({
   const pendingProposals = proposals.filter((p) => p.status === "pending");
 
   const handleApprove = useCallback(async (proposalId: string, xpCost: number) => {
-    const batch = writeBatch(db);
-    batch.update(
-      doc(db, "campaigns", campaignId, "characters", characterId, "xpProposals", proposalId),
-      { status: "approved" }
-    );
-    batch.update(
-      doc(db, "campaigns", campaignId, "characters", characterId),
-      { "experience.spent": increment(xpCost) }
-    );
-    await batch.commit();
+    await approveXpProposal(campaignId, characterId, proposalId, xpCost);
   }, [campaignId, characterId]);
 
   const handleReject = useCallback(async (proposalId: string) => {
-    await updateDoc(
-      doc(db, "campaigns", campaignId, "characters", characterId, "xpProposals", proposalId),
-      { status: "rejected" }
-    );
+    await rejectXpProposal(campaignId, characterId, proposalId);
   }, [campaignId, characterId]);
 
   const handleAssignUIDChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
