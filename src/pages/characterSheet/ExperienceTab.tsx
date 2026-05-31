@@ -10,8 +10,6 @@ import { useXpProposals } from "../../hooks/useXpProposals";
 
 interface ExperienceTabProps {
   experience: ExperienceBlock;
-  editable: boolean;
-  onUpdate: (exp: ExperienceBlock) => void;
   campaignId: string;
   characterId: string;
   isOwnedByCurrentPlayer: boolean;
