@@ -12,6 +12,7 @@ import {
   sectionContainerClass,
 } from "../../ui/editableStyles";
 import { rarityColour, sourceColour } from "../../ui/sourceStyles";
+import { ItemMetaChips } from "../../ui/ItemMetaChips";
 import { InfoModal } from "../../components/InfoModal";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -281,28 +282,11 @@ function ItemCard({
           )}
 
           {/* Chips */}
-          <div className="flex flex-wrap gap-1.5 mt-1.5">
-            {weight && (
-              <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">
-                ⚖ {weight}
-              </span>
-            )}
-            {value && (
-              <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-amber-400/80 font-mono">
-                ₮ {value}
-              </span>
-            )}
-            {rarity && (
-              <span className={`text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 ${rarityColour(rarity)}`}>
-                {rarity}
-              </span>
-            )}
-            {source && (
-              <span className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(source)}`}>
-                {source}
-              </span>
-            )}
-          </div>
+          <ItemMetaChips
+            weight={weight} value={value} rarity={rarity} source={source}
+            valueAmber
+            className="flex flex-wrap gap-1.5 mt-1.5"
+          />
         </div>
 
         {editable && (

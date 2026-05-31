@@ -10,6 +10,7 @@ import {
   sectionContainerClass,
 } from "../../ui/editableStyles";
 import { rarityColour, sourceColour } from "../../ui/sourceStyles";
+import { ItemMetaChips } from "../../ui/ItemMetaChips";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -394,14 +395,10 @@ function ItemRow({
           {hasDesc && !expanded && (
             <p className="text-xs text-slate-500 mt-0.5 truncate">{item.description}</p>
           )}
-          {(weight || value || rarity || item.source) && (
-            <div className="flex flex-wrap gap-1.5 mt-1">
-              {weight && <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">⚖ {weight}</span>}
-              {value  && <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">₮ {value}</span>}
-              {rarity && <span className={`text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 ${rarityColour(rarity)}`}>{rarity}</span>}
-              {item.source && <span className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(item.source)}`}>{item.source}</span>}
-            </div>
-          )}
+          <ItemMetaChips
+            weight={weight} value={value} rarity={rarity} source={item.source}
+            className="flex flex-wrap gap-1.5 mt-1"
+          />
         </div>
 
         {editable && (

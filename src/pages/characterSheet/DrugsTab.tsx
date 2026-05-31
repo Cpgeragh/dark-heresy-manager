@@ -7,7 +7,8 @@ import {
   editableInputClass,
   sectionContainerClass,
 } from "../../ui/editableStyles";
-import { rarityColour, sourceColour } from "../../ui/sourceStyles";
+import { rarityColour } from "../../ui/sourceStyles";
+import { ItemMetaChips } from "../../ui/ItemMetaChips";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -229,25 +230,13 @@ function DrugRow({
         {ref?.duration && (
           <p className="text-xs text-slate-500 mt-0.5">⏱ {ref.duration}</p>
         )}
-        <div className="flex flex-wrap gap-1.5 mt-1">
-          {(item.value ?? ref?.value) && (
-            <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-amber-400/80 font-mono">
-              ₮ {item.value ?? ref?.value}
-            </span>
-          )}
-          {(item.rarity ?? ref?.rarity) && (
-            <span
-              className={`text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 ${rarityColour(item.rarity ?? ref?.rarity)}`}
-            >
-              {item.rarity ?? ref?.rarity}
-            </span>
-          )}
-          {item.source && (
-            <span className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(item.source)}`}>
-              {item.source}
-            </span>
-          )}
-        </div>
+        <ItemMetaChips
+          value={item.value ?? ref?.value}
+          rarity={item.rarity ?? ref?.rarity}
+          source={item.source}
+          valueAmber
+          className="flex flex-wrap gap-1.5 mt-1"
+        />
       </div>
 
       {/* Quantity controls */}
