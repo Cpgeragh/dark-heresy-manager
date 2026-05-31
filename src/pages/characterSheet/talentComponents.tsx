@@ -62,10 +62,10 @@ export function TalentPickerModal({
   const numericValid = (): boolean => {
     const raw = specialisation.trim();
     if (!raw) return false;
-    const v = Number(raw);
-    if (!Number.isInteger(v)) return false;
-    if (td!.specialisationMin !== undefined && v < td!.specialisationMin) return false;
-    if (td!.specialisationMax !== undefined && v > td!.specialisationMax) return false;
+    const numericValue = Number(raw);
+    if (!Number.isInteger(numericValue)) return false;
+    if (td!.specialisationMin !== undefined && numericValue < td!.specialisationMin) return false;
+    if (td!.specialisationMax !== undefined && numericValue > td!.specialisationMax) return false;
     return true;
   };
 

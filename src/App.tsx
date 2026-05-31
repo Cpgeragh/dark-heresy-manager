@@ -2,10 +2,9 @@
 
 import { useCallback } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { doc, setDoc } from "firebase/firestore";
 
-import { db } from "./firebase";
 import { useAuth } from "./hooks/useAuth";
+import { updateActiveCampaign } from "./services/userService";
 import { useUserRole } from "./hooks/useUserRole";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { AppHeader } from "./components/AppHeader";
@@ -53,9 +52,7 @@ export default function App() {
     (id: string | null) => {
       setActiveCampaignId(id);
       if (!currentUser) return;
-
-      const ref = doc(db, "users", currentUser.uid);
-      setDoc(ref, { activeCampaignId: id }, { merge: true });
+      updateActiveCampaign(currentUser.uid, id);
     },
     [currentUser, setActiveCampaignId]
   );

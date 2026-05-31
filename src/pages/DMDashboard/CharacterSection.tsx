@@ -2,40 +2,21 @@
 
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { collection, doc, getDoc, setDoc, writeBatch } from "firebase/firestore";
-import { db } from "../../firebase";
-import { createEmptyCharacterData } from "../../utils/characterFactory";
 import type { CharacterListItem } from "../../types/Firestore";
 import { useToast } from "../../components/Toast";
 import { buildRoute } from "../../constants/routes";
 import { validateCharacterName } from "../../utils/validation";
+import { IMPORTANT_TOAST_DURATION } from "../../constants/ui";
 import {
-  IMPORTANT_TOAST_DURATION,
-  RECOVERY_CODE_PREFIX,
-  RECOVERY_CODE_SEGMENT_LENGTH,
-  RECOVERY_CODE_SEGMENTS,
-} from "../../constants/ui";
+  deleteCharacter,
+  cloneCharacter,
+  importCharacter,
+  createNewCharacter,
+} from "../../services/characterService";
 
 interface CharacterSectionProps {
   campaignId: string;
   characters: CharacterListItem[];
-}
-
-/**
- * Generate a recovery code in format: DH-XXXX-YYYY
- */
-function generateRecoveryCode(): string {
-  const seg = () =>
-    Math.random()
-      .toString(36)
-      .substring(2, 2 + RECOVERY_CODE_SEGMENT_LENGTH)
-      .toUpperCase();
-
-  const segments = Array.from({ length: RECOVERY_CODE_SEGMENTS }, () => seg()).join(
-    "-"
-  );
-
-  return `${RECOVERY_CODE_PREFIX}-${segments}`;
 }
 
 function CharacterSection({ campaignId, characters }: CharacterSectionProps) {
@@ -58,12 +39,7 @@ function CharacterSection({ campaignId, characters }: CharacterSectionProps) {
 
   const handleDelete = useCallback(async (character: CharacterListItem) => {
     try {
-      const charRef = doc(db, "campaigns", campaignId, "characters", character.id);
-      const recoveryRef = doc(db, "recoveryIndex", character.recoveryCode);
-      const batch = writeBatch(db);
-      batch.delete(charRef);
-      batch.delete(recoveryRef);
-      await batch.commit();
+      await deleteCharacter(campaignId, character.id, character.recoveryCode);
       setConfirmDeleteId(null);
     } catch (err) {
       console.error("Character deletion error:", err);
@@ -73,32 +49,8 @@ function CharacterSection({ campaignId, characters }: CharacterSectionProps) {
 
   const handleClone = useCallback(async (character: CharacterListItem) => {
     try {
-      const sourceSnap = await getDoc(
-        doc(db, "campaigns", campaignId, "characters", character.id)
-      );
-      if (!sourceSnap.exists()) {
-        toast.error("Character not found.");
-        return;
-      }
-
-      const recoveryCode = generateRecoveryCode();
-      const originalName = character.header?.characterName ?? "Unnamed Character";
-      const sourceData = sourceSnap.data();
-      const cloneData = {
-        ...sourceData,
-        userId: null,
-        isEditableByPlayer: false,
-        recoveryCode,
-        header: { ...sourceData.header, characterName: `Copy of ${originalName}` },
-      };
-
-      const newCharRef = doc(collection(db, "campaigns", campaignId, "characters"));
-      const batch = writeBatch(db);
-      batch.set(newCharRef, cloneData);
-      batch.set(doc(db, "recoveryIndex", recoveryCode), { campaignId, characterId: newCharRef.id });
-      await batch.commit();
-
-      toast.success(`Character cloned as "Copy of ${originalName}"`);
+      const cloneName = await cloneCharacter(campaignId, character.id);
+      toast.success(`Character cloned as "${cloneName}"`);
     } catch (err) {
       console.error("Character clone error:", err);
       toast.error("Failed to clone character. Please try again.");
@@ -115,18 +67,10 @@ function CharacterSection({ campaignId, characters }: CharacterSectionProps) {
         toast.error("Invalid character file.");
         return;
       }
-      const recoveryCode = generateRecoveryCode();
-      const importData = { ...data, userId: null, isEditableByPlayer: false, recoveryCode };
-      const charRef = doc(collection(db, "campaigns", campaignId, "characters"));
-      const batch = writeBatch(db);
-      batch.set(charRef, importData);
-      batch.set(doc(db, "recoveryIndex", recoveryCode), { campaignId, characterId: charRef.id });
-      await batch.commit();
-      toast.success(
-        `Imported "${data.header?.characterName ?? "character"}" successfully`,
-        IMPORTANT_TOAST_DURATION
-      );
-    } catch {
+      const characterName = await importCharacter(campaignId, data);
+      toast.success(`Imported "${characterName}" successfully`, IMPORTANT_TOAST_DURATION);
+    } catch (err) {
+      console.error("Failed to import character:", err);
       toast.error("Failed to import character. Check the file and try again.");
     }
     e.target.value = "";
@@ -142,24 +86,8 @@ function CharacterSection({ campaignId, characters }: CharacterSectionProps) {
       return;
     }
 
-    const recoveryCode = generateRecoveryCode();
-
     try {
-      const characterData = createEmptyCharacterData({
-        campaignId,
-        recoveryCode,
-        userId: null,
-        characterName: trimmedName,
-      });
-
-      const charRef = doc(collection(db, "campaigns", campaignId, "characters"));
-      const recoveryRef = doc(db, "recoveryIndex", recoveryCode);
-
-      const batch = writeBatch(db);
-      batch.set(charRef, characterData);
-      batch.set(recoveryRef, { campaignId, characterId: charRef.id });
-      await batch.commit();
-
+      const recoveryCode = await createNewCharacter(campaignId, trimmedName);
       toast.success(
         `Character created successfully!\n\nRecovery Code: ${recoveryCode}\n\n(Click the copy button to save this code)`,
         IMPORTANT_TOAST_DURATION,

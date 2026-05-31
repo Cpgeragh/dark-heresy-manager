@@ -19,6 +19,8 @@ import {
 
 import type { Character } from "../types/Character";
 import { buildClaimLogPayload } from "../utils/claimLog";
+import { generateRecoveryCode } from "../utils/recoveryCode";
+import { createEmptyCharacterData } from "../utils/characterFactory";
 
 /**
  * Load a single character with full typing.
@@ -142,4 +144,96 @@ export async function forceReleaseCharacter(
   batch.update(charRef, { userId: null, isEditableByPlayer: false });
   batch.set(doc(logsRef), buildClaimLogPayload("force-release", user.uid, previousOwner, null));
   await batch.commit();
+}
+
+/**
+ * Deletes a character and its recovery index entry atomically.
+ */
+export async function deleteCharacter(
+  campaignId: string,
+  characterId: string,
+  recoveryCode: string
+): Promise<void> {
+  const charRef = doc(db, "campaigns", campaignId, "characters", characterId);
+  const recoveryRef = doc(db, "recoveryIndex", recoveryCode);
+  const batch = writeBatch(db);
+  batch.delete(charRef);
+  batch.delete(recoveryRef);
+  await batch.commit();
+}
+
+/**
+ * Clones a character within a campaign.
+ * Generates a new recovery code, copies all data, and registers the clone
+ * in the recovery index atomically.
+ * Returns the clone's character name.
+ */
+export async function cloneCharacter(
+  campaignId: string,
+  characterId: string
+): Promise<string> {
+  const sourceRef = doc(db, "campaigns", campaignId, "characters", characterId);
+  const sourceSnap = await getDoc(sourceRef);
+  if (!sourceSnap.exists()) throw new Error("Source character not found.");
+
+  const sourceData = sourceSnap.data();
+  const originalName = sourceData.header?.characterName ?? "Unnamed Character";
+  const cloneName = `Copy of ${originalName}`;
+  const recoveryCode = generateRecoveryCode();
+
+  const cloneData = {
+    ...sourceData,
+    userId: null,
+    isEditableByPlayer: false,
+    recoveryCode,
+    header: { ...sourceData.header, characterName: cloneName },
+  };
+
+  const newCharRef = doc(collection(db, "campaigns", campaignId, "characters"));
+  const batch = writeBatch(db);
+  batch.set(newCharRef, cloneData);
+  batch.set(doc(db, "recoveryIndex", recoveryCode), { campaignId, characterId: newCharRef.id });
+  await batch.commit();
+
+  return cloneName;
+}
+
+/**
+ * Imports a character from a parsed JSON object into a campaign.
+ * Assigns a fresh recovery code and registers it in the recovery index.
+ * Returns the imported character's name.
+ */
+export async function importCharacter(
+  campaignId: string,
+  data: Record<string, unknown>
+): Promise<string> {
+  const recoveryCode = generateRecoveryCode();
+  const importData = { ...data, userId: null, isEditableByPlayer: false, recoveryCode };
+  const charRef = doc(collection(db, "campaigns", campaignId, "characters"));
+  const batch = writeBatch(db);
+  batch.set(charRef, importData);
+  batch.set(doc(db, "recoveryIndex", recoveryCode), { campaignId, characterId: charRef.id });
+  await batch.commit();
+
+  return (data.header as Record<string, unknown>)?.characterName as string ?? "character";
+}
+
+/**
+ * Creates a new empty character in a campaign with a recovery code.
+ * Returns the recovery code so the caller can display it to the DM.
+ */
+export async function createNewCharacter(
+  campaignId: string,
+  name: string
+): Promise<string> {
+  const recoveryCode = generateRecoveryCode();
+  const characterData = createEmptyCharacterData({ campaignId, recoveryCode, userId: null, characterName: name });
+  const charRef = doc(collection(db, "campaigns", campaignId, "characters"));
+  const recoveryRef = doc(db, "recoveryIndex", recoveryCode);
+  const batch = writeBatch(db);
+  batch.set(charRef, characterData);
+  batch.set(recoveryRef, { campaignId, characterId: charRef.id });
+  await batch.commit();
+
+  return recoveryCode;
 }

@@ -47,7 +47,7 @@ export function ExperienceTab({
     } finally {
       setSubmitting(false);
     }
-  }, [campaignId, characterId, description, xpCost]);
+  }, [campaignId, characterId, description, xpCost, toastError, toastSuccess]);
 
   return (
     <div className="space-y-6 text-slate-300">

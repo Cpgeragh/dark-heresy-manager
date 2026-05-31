@@ -1,14 +1,10 @@
 // src/pages/DMDashboard.tsx
 
-import { useEffect, useState } from "react";
-import { collection, getDocs, onSnapshot } from "firebase/firestore";
 import type { User } from "firebase/auth";
-import { db } from "../firebase";
-import type { CampaignDocument, CharacterListItem } from "../types/Firestore";
+import { useCampaigns } from "../hooks/useCampaigns";
+import { useCampaignCharacters } from "../hooks/useCampaignCharacters";
 import CampaignSection from "./DMDashboard/CampaignSection";
 import CharacterSection from "./DMDashboard/CharacterSection";
-
-type CampaignWithId = CampaignDocument & { id: string };
 
 interface Props {
   user: User;
@@ -21,57 +17,8 @@ export default function DMDashboard({
   activeCampaignId,
   onActiveCampaignChange,
 }: Props) {
-  const [campaigns, setCampaigns] = useState<CampaignWithId[]>([]);
-  const [characters, setCharacters] = useState<CharacterListItem[]>([]);
-
-  // ----------------------------------
-  // Load campaigns owned by this DM
-  // ----------------------------------
-  useEffect(() => {
-    let ignore = false;
-
-    async function loadCampaigns() {
-      const snap = await getDocs(collection(db, "campaigns"));
-      const list: CampaignWithId[] = [];
-
-      snap.forEach((docSnap) => {
-        const data = docSnap.data() as Omit<CampaignDocument, "id">;
-        if (data.dmId === user.uid) {
-          list.push({ id: docSnap.id, ...data });
-        }
-      });
-
-      if (!ignore) setCampaigns(list);
-    }
-
-    loadCampaigns();
-    return () => { ignore = true; };
-  }, [user.uid]);
-
-  // ----------------------------------
-  // Watch characters in active campaign
-  // ----------------------------------
-  useEffect(() => {
-    if (!activeCampaignId) {
-      setCharacters([]);
-      return;
-    }
-
-    const ref = collection(db, "campaigns", activeCampaignId, "characters");
-
-    const unsub = onSnapshot(ref, (snap) => {
-      const list: CharacterListItem[] = snap.docs.map((c) => {
-        const data = c.data() as Omit<CharacterListItem, "id">;
-        return {
-          id: c.id,
-          ...data,
-        };
-      });
-      setCharacters(list);
-    });
-
-    return () => unsub();
-  }, [activeCampaignId]);
+  const { campaigns } = useCampaigns(user.uid);
+  const { characters } = useCampaignCharacters(activeCampaignId);
 
   return (
     <div className="text-slate-100">

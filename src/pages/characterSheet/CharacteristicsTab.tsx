@@ -26,8 +26,8 @@ export function CharacteristicsTab({
 }: CharacteristicsTabProps) {
   // Authoritative total
   function total(stat: keyof Characteristics) {
-    const v = getCharField(stat);
-    return v.base + v.advances * CHARACTERISTIC_ADVANCE_INCREMENT;
+    const field = getCharField(stat);
+    return field.base + field.advances * CHARACTERISTIC_ADVANCE_INCREMENT;
   }
 
   // Derived bonuses
