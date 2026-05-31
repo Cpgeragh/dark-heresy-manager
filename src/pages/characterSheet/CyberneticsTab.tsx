@@ -7,7 +7,8 @@ import {
   editableInputClass,
   sectionContainerClass,
 } from "../../ui/editableStyles";
-import { rarityColour, sourceColour } from "../../ui/sourceStyles";
+import { rarityColour } from "../../ui/sourceStyles";
+import { ItemMetaChips } from "../../ui/ItemMetaChips";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -337,21 +338,13 @@ function ImplantRow({
               {item.bodyLocation.map((l) => LOCATION_DISPLAY[l]).join(" & ")}
             </span>
           )}
-          {(item.value ?? ref?.value) && (
-            <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-amber-400/80 font-mono">
-              ₮ {item.value ?? ref?.value}
-            </span>
-          )}
-          {(item.rarity ?? ref?.rarity) && (
-            <span className={`text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 ${rarityColour(item.rarity ?? ref?.rarity)}`}>
-              {item.rarity ?? ref?.rarity}
-            </span>
-          )}
-          {(item.source ?? ref?.source) && (
-            <span className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(item.source ?? ref?.source ?? "")}`}>
-              {item.source ?? ref?.source}
-            </span>
-          )}
+          <ItemMetaChips
+            bare
+            valueAmber
+            value={item.value ?? ref?.value}
+            rarity={item.rarity ?? ref?.rarity}
+            source={item.source ?? ref?.source}
+          />
         </div>
       </div>
 

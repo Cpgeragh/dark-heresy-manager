@@ -27,6 +27,7 @@ import {
   sectionContainerClass,
 } from "../../ui/editableStyles";
 import { rarityColour, sourceColour } from "../../ui/sourceStyles";
+import { ItemMetaChips } from "../../ui/ItemMetaChips";
 import { InfoModal } from "../../components/InfoModal";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -829,14 +830,11 @@ function RangedCard({
       )}
 
       {/* Weight / Value / Rarity / Source */}
-      {(weapon.weight || weapon.value || weapon.rarity || weapon.source) && (
-        <div className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1">
-          {weapon.weight && <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">⚖ {weapon.weight}</span>}
-          {weapon.value  && <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">₮ {weapon.value}</span>}
-          {weapon.rarity && <span className={`text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 ${rarityColour(weapon.rarity)}`}>{weapon.rarity}</span>}
-          {weapon.source && <span className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(weapon.source)}`}>{weapon.source}</span>}
-        </div>
-      )}
+      <ItemMetaChips
+        weight={weapon.weight} value={weapon.value}
+        rarity={weapon.rarity} source={weapon.source}
+        className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1"
+      />
 
       {/* Attachments */}
       {(attachmentRefs.length > 0 || (editable && compatible.length > 0)) && (
@@ -986,14 +984,11 @@ function MeleeCard({
       )}
 
       {/* Weight / Value / Rarity / Source */}
-      {(weapon.weight || weapon.value || weapon.rarity || weapon.source) && (
-        <div className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1">
-          {weapon.weight && <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">⚖ {weapon.weight}</span>}
-          {weapon.value  && <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">₮ {weapon.value}</span>}
-          {weapon.rarity && <span className={`text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 ${rarityColour(weapon.rarity)}`}>{weapon.rarity}</span>}
-          {weapon.source && <span className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(weapon.source)}`}>{weapon.source}</span>}
-        </div>
-      )}
+      <ItemMetaChips
+        weight={weapon.weight} value={weapon.value}
+        rarity={weapon.rarity} source={weapon.source}
+        className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1"
+      />
 
       {/* Attachments */}
       {(attachmentRefs.length > 0 || (editable && compatible.length > 0)) && (

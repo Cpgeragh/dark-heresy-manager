@@ -7,7 +7,8 @@ import {
   editableInputClass,
   sectionContainerClass,
 } from "../../ui/editableStyles";
-import { rarityColour, sourceColour } from "../../ui/sourceStyles";
+import { rarityColour } from "../../ui/sourceStyles";
+import { ItemMetaChips } from "../../ui/ItemMetaChips";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -638,10 +639,7 @@ function ForceFieldRow({
               PR {piece.protectionRating}
             </span>
           )}
-          {piece.weight && <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">⚖ {piece.weight}</span>}
-          {piece.value  && <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">₮ {piece.value}</span>}
-          {piece.rarity && <span className={`text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 ${rarityColour(piece.rarity)}`}>{piece.rarity}</span>}
-          {piece.source && <span className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(piece.source)}`}>{piece.source}</span>}
+          <ItemMetaChips bare weight={piece.weight} value={piece.value} rarity={piece.rarity} source={piece.source} />
         </div>
       </div>
 
@@ -712,10 +710,7 @@ function PieceRow({
         <div className="flex flex-wrap gap-1.5 mt-1">
           <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-300">{locationLabel(piece.locations)}</span>
           <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 font-mono text-slate-200">{apDesc}</span>
-          {piece.weight && <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">⚖ {piece.weight}</span>}
-          {piece.value  && <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">₮ {piece.value}</span>}
-          {piece.rarity && <span className={`text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 ${rarityColour(piece.rarity)}`}>{piece.rarity}</span>}
-          {piece.source && <span className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(piece.source)}`}>{piece.source}</span>}
+          <ItemMetaChips bare weight={piece.weight} value={piece.value} rarity={piece.rarity} source={piece.source} />
         </div>
       </div>
 
