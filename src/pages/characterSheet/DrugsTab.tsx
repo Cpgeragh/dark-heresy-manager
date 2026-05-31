@@ -10,6 +10,7 @@ import {
 import { rarityColour } from "../../ui/sourceStyles";
 import { ItemMetaChips } from "../../ui/ItemMetaChips";
 import { QuantityControl } from "../../ui/QuantityControl";
+import { PickerModal } from "../../ui/PickerModal";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -132,59 +133,38 @@ function DrugPicker({
   ).sort((a, b) => a.name.localeCompare(b.name));
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-xl shadow-2xl flex flex-col max-h-[80vh]">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
-          <h3 className="text-sm font-semibold text-slate-200">Add Drug</h3>
-          <button
-            onClick={onClose}
-            className="text-slate-400 hover:text-slate-200 text-lg leading-none"
-          >
-            ×
-          </button>
-        </div>
-
-        <div className="px-4 py-2 border-b border-slate-800">
-          <input
-            type="text"
-            autoFocus
-            placeholder="Search drugs…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className={editableInputClass(true)}
-          />
-        </div>
-
-        <div className="overflow-y-auto flex-1 divide-y divide-slate-800">
-          {filtered.length === 0 && (
-            <p className="p-4 text-sm text-slate-500 text-center">No matches.</p>
+    <PickerModal
+      title="Add Drug"
+      placeholder="Search drugs…"
+      query={query}
+      onQueryChange={setQuery}
+      onClose={onClose}
+      isEmpty={filtered.length === 0}
+    >
+      {filtered.map((ref) => (
+        <button
+          key={ref.id}
+          onClick={() => onSelect(ref)}
+          className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm font-medium text-slate-200 group-hover:text-white">
+              {ref.name}
+            </span>
+            <div className="flex items-center gap-2 shrink-0 text-xs">
+              <span className="text-amber-400/80 font-mono">₮ {ref.value}</span>
+              <span className={rarityColour(ref.rarity)}>{ref.rarity}</span>
+            </div>
+          </div>
+          {ref.duration && (
+            <p className="text-xs text-slate-500 mt-0.5">⏱ {ref.duration}</p>
           )}
-          {filtered.map((ref) => (
-            <button
-              key={ref.id}
-              onClick={() => onSelect(ref)}
-              className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group"
-            >
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium text-slate-200 group-hover:text-white">
-                  {ref.name}
-                </span>
-                <div className="flex items-center gap-2 shrink-0 text-xs">
-                  <span className="text-amber-400/80 font-mono">₮ {ref.value}</span>
-                  <span className={rarityColour(ref.rarity)}>{ref.rarity}</span>
-                </div>
-              </div>
-              {ref.duration && (
-                <p className="text-xs text-slate-500 mt-0.5">⏱ {ref.duration}</p>
-              )}
-              {ref.effect && (
-                <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">{ref.effect}</p>
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
+          {ref.effect && (
+            <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">{ref.effect}</p>
+          )}
+        </button>
+      ))}
+    </PickerModal>
   );
 }
 

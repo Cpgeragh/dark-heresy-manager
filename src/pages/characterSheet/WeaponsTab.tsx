@@ -29,6 +29,7 @@ import {
 import { rarityColour, sourceColour } from "../../ui/sourceStyles";
 import { ItemMetaChips } from "../../ui/ItemMetaChips";
 import { QuantityControl } from "../../ui/QuantityControl";
+import { PickerModal } from "../../ui/PickerModal";
 import { InfoModal } from "../../components/InfoModal";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -305,54 +306,35 @@ function RangedPicker({
   ).sort((a, b) => a.name.localeCompare(b.name));
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-xl shadow-2xl flex flex-col max-h-[80vh]">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
-          <h3 className="text-sm font-semibold text-slate-200">Add Ranged Weapon</h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-200 text-lg leading-none">×</button>
-        </div>
-        <div className="px-4 py-2 border-b border-slate-800">
-          <input
-            type="text"
-            autoFocus
-            placeholder="Search weapons…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className={editableInputClass(true)}
-          />
-        </div>
-        <div className="overflow-y-auto flex-1 divide-y divide-slate-800">
-          {filtered.length === 0 && (
-            <p className="p-4 text-sm text-slate-500 text-center">No matches.</p>
-          )}
-          {filtered.map((ref) => (
-            <button
-              key={ref.id}
-              onClick={() => onSelect(ref)}
-              className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group"
-            >
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium text-slate-200 group-hover:text-white">
-                  {ref.name}
-                </span>
-                <span className="text-xs text-slate-500 shrink-0">{ref.class}</span>
-              </div>
-              <div className="text-xs text-slate-500 mt-0.5 font-mono">
-                {ref.range} · {ref.rof} · {ref.damage} · Pen {ref.pen} · Clip {ref.clip}
-              </div>
-            </button>
-          ))}
-        </div>
-        <div className="px-4 py-3 border-t border-slate-700">
-          <button
-            onClick={onCustom}
-            className="w-full text-sm text-amber-400 hover:text-amber-300 text-center py-1"
-          >
-            + Add custom weapon
-          </button>
-        </div>
-      </div>
-    </div>
+    <PickerModal
+      title="Add Ranged Weapon"
+      placeholder="Search weapons…"
+      query={query}
+      onQueryChange={setQuery}
+      onClose={onClose}
+      isEmpty={filtered.length === 0}
+      footer={
+        <button onClick={onCustom} className="w-full text-sm text-amber-400 hover:text-amber-300 text-center py-1">
+          + Add custom weapon
+        </button>
+      }
+    >
+      {filtered.map((ref) => (
+        <button
+          key={ref.id}
+          onClick={() => onSelect(ref)}
+          className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm font-medium text-slate-200 group-hover:text-white">{ref.name}</span>
+            <span className="text-xs text-slate-500 shrink-0">{ref.class}</span>
+          </div>
+          <div className="text-xs text-slate-500 mt-0.5 font-mono">
+            {ref.range} · {ref.rof} · {ref.damage} · Pen {ref.pen} · Clip {ref.clip}
+          </div>
+        </button>
+      ))}
+    </PickerModal>
   );
 }
 
@@ -371,56 +353,37 @@ function MeleePicker({
   ).sort((a, b) => a.name.localeCompare(b.name));
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-xl shadow-2xl flex flex-col max-h-[80vh]">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
-          <h3 className="text-sm font-semibold text-slate-200">Add Melee Weapon</h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-200 text-lg leading-none">×</button>
-        </div>
-        <div className="px-4 py-2 border-b border-slate-800">
-          <input
-            type="text"
-            autoFocus
-            placeholder="Search weapons…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className={editableInputClass(true)}
-          />
-        </div>
-        <div className="overflow-y-auto flex-1 divide-y divide-slate-800">
-          {filtered.length === 0 && (
-            <p className="p-4 text-sm text-slate-500 text-center">No matches.</p>
-          )}
-          {filtered.map((ref) => (
-            <button
-              key={ref.id}
-              onClick={() => onSelect(ref)}
-              className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group"
-            >
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium text-slate-200 group-hover:text-white">
-                  {ref.name}
-                </span>
-                <span className="text-xs text-slate-500 shrink-0">
-                  {ref.twoHanded ? "Two-Handed" : ref.class}
-                </span>
-              </div>
-              <div className="text-xs text-slate-500 mt-0.5 font-mono">
-                {ref.damage} · Pen {ref.pen}
-              </div>
-            </button>
-          ))}
-        </div>
-        <div className="px-4 py-3 border-t border-slate-700">
-          <button
-            onClick={onCustom}
-            className="w-full text-sm text-amber-400 hover:text-amber-300 text-center py-1"
-          >
-            + Add custom weapon
-          </button>
-        </div>
-      </div>
-    </div>
+    <PickerModal
+      title="Add Melee Weapon"
+      placeholder="Search weapons…"
+      query={query}
+      onQueryChange={setQuery}
+      onClose={onClose}
+      isEmpty={filtered.length === 0}
+      footer={
+        <button onClick={onCustom} className="w-full text-sm text-amber-400 hover:text-amber-300 text-center py-1">
+          + Add custom weapon
+        </button>
+      }
+    >
+      {filtered.map((ref) => (
+        <button
+          key={ref.id}
+          onClick={() => onSelect(ref)}
+          className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm font-medium text-slate-200 group-hover:text-white">{ref.name}</span>
+            <span className="text-xs text-slate-500 shrink-0">
+              {ref.twoHanded ? "Two-Handed" : ref.class}
+            </span>
+          </div>
+          <div className="text-xs text-slate-500 mt-0.5 font-mono">
+            {ref.damage} · Pen {ref.pen}
+          </div>
+        </button>
+      ))}
+    </PickerModal>
   );
 }
 
@@ -442,58 +405,39 @@ function AmmoPicker({
   ).sort((a, b) => a.name.localeCompare(b.name));
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-xl shadow-2xl flex flex-col max-h-[80vh]">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
-          <h3 className="text-sm font-semibold text-slate-200">Add Ammunition</h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-200 text-lg leading-none">×</button>
-        </div>
-        <div className="px-4 py-2 border-b border-slate-800">
-          <input
-            type="text"
-            autoFocus
-            placeholder="Search by name or weapon type…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className={editableInputClass(true)}
-          />
-        </div>
-        <div className="overflow-y-auto flex-1 divide-y divide-slate-800">
-          {filtered.length === 0 && (
-            <p className="p-4 text-sm text-slate-500 text-center">No matches.</p>
-          )}
-          {filtered.map((ref) => (
-            <button
-              key={ref.id}
-              onClick={() => onSelect(ref)}
-              className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group"
-            >
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium text-slate-200 group-hover:text-white">
-                  {ref.name}
-                </span>
-                <div className="flex items-center gap-1.5 text-xs shrink-0">
-                  <span className={rarityColour(ref.rarity)}>{ref.rarity}</span>
-                  <span className="text-slate-600">·</span>
-                  <span className="text-amber-400/80 font-mono">₮ {ref.cost}</span>
-                  <span className="text-slate-500">×</span>
-                  <span className="text-slate-200 font-mono">{ref.purchaseAmount}</span>
-                </div>
-              </div>
-              <p className="text-xs text-slate-500 mt-0.5 text-left">{ref.compatibleWith}</p>
-            </button>
-          ))}
-        </div>
-        <div className="px-4 py-3 border-t border-slate-700">
-          <button
-            onClick={onCustom}
-            className="w-full text-sm text-amber-400 hover:text-amber-300 text-center py-1"
-          >
-            + Add custom ammunition
-          </button>
-        </div>
-      </div>
-    </div>
+    <PickerModal
+      title="Add Ammunition"
+      placeholder="Search by name or weapon type…"
+      query={query}
+      onQueryChange={setQuery}
+      onClose={onClose}
+      isEmpty={filtered.length === 0}
+      footer={
+        <button onClick={onCustom} className="w-full text-sm text-amber-400 hover:text-amber-300 text-center py-1">
+          + Add custom ammunition
+        </button>
+      }
+    >
+      {filtered.map((ref) => (
+        <button
+          key={ref.id}
+          onClick={() => onSelect(ref)}
+          className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm font-medium text-slate-200 group-hover:text-white">{ref.name}</span>
+            <div className="flex items-center gap-1.5 text-xs shrink-0">
+              <span className={rarityColour(ref.rarity)}>{ref.rarity}</span>
+              <span className="text-slate-600">·</span>
+              <span className="text-amber-400/80 font-mono">₮ {ref.cost}</span>
+              <span className="text-slate-500">×</span>
+              <span className="text-slate-200 font-mono">{ref.purchaseAmount}</span>
+            </div>
+          </div>
+          <p className="text-xs text-slate-500 mt-0.5 text-left">{ref.compatibleWith}</p>
+        </button>
+      ))}
+    </PickerModal>
   );
 }
 
@@ -512,53 +456,39 @@ function GrenadePicker({
   ).sort((a, b) => a.name.localeCompare(b.name));
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-xl shadow-2xl flex flex-col max-h-[80vh]">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
-          <h3 className="text-sm font-semibold text-slate-200">Add Grenade</h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-200 text-lg leading-none">×</button>
-        </div>
-        <div className="px-4 py-2 border-b border-slate-800">
-          <input
-            type="text"
-            autoFocus
-            placeholder="Search grenades…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className={editableInputClass(true)}
-          />
-        </div>
-        <p className="px-4 pt-2 pb-1 text-xs text-slate-500 italic border-b border-slate-800">
+    <PickerModal
+      title="Add Grenade"
+      placeholder="Search grenades…"
+      query={query}
+      onQueryChange={setQuery}
+      onClose={onClose}
+      isEmpty={filtered.length === 0}
+      filterRow={
+        <p className="text-xs text-slate-500 italic">
           Range for all thrown grenades: SBx3 (Strength Bonus × 3 metres)
         </p>
-        <div className="overflow-y-auto flex-1 divide-y divide-slate-800">
-          {filtered.length === 0 && (
-            <p className="p-4 text-sm text-slate-500 text-center">No matches.</p>
-          )}
-          {filtered.map((ref) => (
-            <button
-              key={ref.id}
-              onClick={() => onSelect(ref)}
-              className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group"
-            >
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium text-slate-200 group-hover:text-white">
-                  {ref.name}
-                </span>
-                <div className="flex items-center gap-1.5 text-xs shrink-0">
-                  <span className={rarityColour(ref.rarity)}>{ref.rarity}</span>
-                  <span className="text-slate-600">·</span>
-                  <span className="text-amber-400/80 font-mono">₮ {ref.value}</span>
-                </div>
-              </div>
-              <div className="text-xs text-slate-500 mt-0.5 font-mono">
-                {ref.damage !== "—" ? `${ref.damage}` : "No damage"} · Pen {ref.pen} · {ref.specialRules}
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
+      }
+    >
+      {filtered.map((ref) => (
+        <button
+          key={ref.id}
+          onClick={() => onSelect(ref)}
+          className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm font-medium text-slate-200 group-hover:text-white">{ref.name}</span>
+            <div className="flex items-center gap-1.5 text-xs shrink-0">
+              <span className={rarityColour(ref.rarity)}>{ref.rarity}</span>
+              <span className="text-slate-600">·</span>
+              <span className="text-amber-400/80 font-mono">₮ {ref.value}</span>
+            </div>
+          </div>
+          <div className="text-xs text-slate-500 mt-0.5 font-mono">
+            {ref.damage !== "—" ? `${ref.damage}` : "No damage"} · Pen {ref.pen} · {ref.specialRules}
+          </div>
+        </button>
+      ))}
+    </PickerModal>
   );
 }
 
