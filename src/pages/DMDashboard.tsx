@@ -7,7 +7,6 @@ import { db } from "../firebase";
 import type { CampaignDocument, CharacterListItem } from "../types/Firestore";
 import CampaignSection from "./DMDashboard/CampaignSection";
 import CharacterSection from "./DMDashboard/CharacterSection";
-import { useIsMounted } from "../hooks/useIsMounted";
 
 type CampaignWithId = CampaignDocument & { id: string };
 
@@ -24,12 +23,13 @@ export default function DMDashboard({
 }: Props) {
   const [campaigns, setCampaigns] = useState<CampaignWithId[]>([]);
   const [characters, setCharacters] = useState<CharacterListItem[]>([]);
-  const isMounted = useIsMounted();
 
   // ----------------------------------
   // Load campaigns owned by this DM
   // ----------------------------------
   useEffect(() => {
+    let ignore = false;
+
     async function loadCampaigns() {
       const snap = await getDocs(collection(db, "campaigns"));
       const list: CampaignWithId[] = [];
@@ -37,20 +37,16 @@ export default function DMDashboard({
       snap.forEach((docSnap) => {
         const data = docSnap.data() as Omit<CampaignDocument, "id">;
         if (data.dmId === user.uid) {
-          list.push({
-            id: docSnap.id,
-            ...data,
-          });
+          list.push({ id: docSnap.id, ...data });
         }
       });
 
-      if (isMounted()) {
-        setCampaigns(list);
-      }
+      if (!ignore) setCampaigns(list);
     }
 
     loadCampaigns();
-  }, [user.uid, isMounted]);
+    return () => { ignore = true; };
+  }, [user.uid]);
 
   // ----------------------------------
   // Watch characters in active campaign
