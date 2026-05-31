@@ -26,7 +26,7 @@ import {
   editableInputClass,
   sectionContainerClass,
 } from "../../ui/editableStyles";
-import { sourceColour } from "../../ui/sourceStyles";
+import { rarityColour, sourceColour } from "../../ui/sourceStyles";
 import { InfoModal } from "../../components/InfoModal";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -50,22 +50,6 @@ interface WeaponsTabProps {
 type PickerTarget = "ranged" | "melee" | "ammo" | "grenades" | "shields" | null;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function rarityColour(rarity: string | undefined): string {
-  switch (rarity) {
-    case "Plentiful":
-    case "Abundant":   return "text-slate-400";
-    case "Common":     return "text-green-400";
-    case "Average":    return "text-slate-300";
-    case "Scarce":     return "text-yellow-400";
-    case "Rare":       return "text-orange-400";
-    case "Very Rare":  return "text-red-400";
-    case "Extremely Rare": return "text-purple-400";
-    case "Near Unique":    return "text-pink-400";
-    case "Issued Only":    return "text-cyan-400";
-    default:           return "text-slate-400";
-  }
-}
 
 // ─── Attachment Stat Helpers ─────────────────────────────────────────────────
 

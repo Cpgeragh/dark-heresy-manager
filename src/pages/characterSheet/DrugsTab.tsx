@@ -7,7 +7,7 @@ import {
   editableInputClass,
   sectionContainerClass,
 } from "../../ui/editableStyles";
-import { sourceColour } from "../../ui/sourceStyles";
+import { rarityColour, sourceColour } from "../../ui/sourceStyles";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -15,23 +15,6 @@ interface DrugsTabProps {
   drugs: DrugItem[];
   editable: boolean;
   onUpdate: (next: DrugItem[]) => void;
-}
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function rarityColour(rarity: string | undefined): string {
-  switch (rarity) {
-    case "Plentiful":
-    case "Abundant":       return "text-slate-400";
-    case "Common":         return "text-green-400";
-    case "Average":        return "text-slate-300";
-    case "Scarce":         return "text-yellow-400";
-    case "Rare":           return "text-orange-400";
-    case "Very Rare":      return "text-red-400";
-    case "Extremely Rare": return "text-purple-400";
-    case "Near Unique":    return "text-pink-400";
-    default:               return "text-slate-400";
-  }
 }
 
 // ─── Drug Info Modal ──────────────────────────────────────────────────────────

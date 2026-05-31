@@ -1,5 +1,5 @@
 // src/ui/sourceStyles.ts
-// Colour classes for source-book badges and characteristic chips across all tabs.
+// Colour classes for source-book badges, rarity chips, and characteristic chips across all tabs.
 
 /**
  * Returns Tailwind text + border classes for a given SkillSource code.
@@ -22,7 +22,31 @@ export function sourceColour(source: string): string {
     case "CC":    return "text-rose-400 border-rose-700/50";
     case "H3":    return "text-indigo-400 border-indigo-700/50";
     case "LD":    return "text-sky-400 border-sky-700/50";
+    case "SDS":   return "text-emerald-400 border-emerald-700/50";
     default:      return "text-slate-400 border-slate-600";
+  }
+}
+
+/**
+ * Returns a Tailwind text colour class for a given rarity string.
+ * Used inline as:
+ *   <span className={`… ${rarityColour(item.rarity)}`}>{item.rarity}</span>
+ */
+export function rarityColour(rarity: string | undefined): string {
+  switch (rarity) {
+    case "Plentiful":
+    case "Abundant":               return "text-slate-400";
+    case "Common":                 return "text-green-400";
+    case "Average":                return "text-slate-300";
+    case "Scarce":                 return "text-yellow-400";
+    case "Rare":                   return "text-orange-400";
+    case "Very Rare":              return "text-red-400";
+    case "Extremely Rare":         return "text-purple-400";
+    case "Near Unique":
+    case "Unique":                 return "text-pink-400";
+    case "Issued Only":
+    case "Adeptus Mechanicus Only": return "text-cyan-400";
+    default:                       return "text-slate-400";
   }
 }
 
