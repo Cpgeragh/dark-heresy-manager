@@ -13,6 +13,7 @@ import {
   sectionContainerClass,
 } from "../../ui/editableStyles";
 import { PowerCard } from "./components/PowerCard";
+import { PickerModal } from "../../ui/PickerModal";
 import { usePsychicPowers } from "../../hooks/usePsychicPowers";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -53,85 +54,30 @@ function PowerPicker({
   const allFilters: DisciplineFilter[] = ["All", ...PSYCHIC_DISCIPLINES];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-xl shadow-2xl flex flex-col max-h-[85vh]">
-
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
-          <h3 className="text-sm font-semibold text-slate-200">Add Psychic Power</h3>
-          <button
-            onClick={onClose}
-            className="text-slate-400 hover:text-slate-200 text-xl leading-none"
-            aria-label="Close"
-          >
-            ×
-          </button>
-        </div>
-
-        {/* Search */}
-        <div className="px-4 py-2 border-b border-slate-800">
-          <input
-            type="text"
-            autoFocus
-            placeholder="Search powers…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className={editableInputClass(true)}
-          />
-        </div>
-
-        {/* Discipline filter chips */}
-        <div className="px-4 py-2 border-b border-slate-800 flex flex-wrap gap-1.5">
-          {allFilters.map((d) => (
-            <button
-              key={d}
-              onClick={() => setDiscipline(d)}
-              className={[
-                "text-xs px-2.5 py-0.5 rounded border transition",
-                discipline === d
-                  ? "border-indigo-500 bg-indigo-500/20 text-indigo-300"
-                  : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
-              ].join(" ")}
-            >
-              {d}
-            </button>
-          ))}
-        </div>
-
-        {/* List */}
-        <div className="overflow-y-auto flex-1 divide-y divide-slate-800">
-          {filtered.length === 0 && (
-            <p className="p-4 text-sm text-slate-500 text-center">No matches.</p>
-          )}
-          {filtered.map((ref) => (
-            <button
-              key={ref.id}
-              onClick={() => onSelect(ref)}
-              className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group"
-            >
-              <div className="flex items-center justify-between gap-2 flex-wrap">
-                <span className="text-sm font-medium text-slate-200 group-hover:text-white">
-                  {ref.name}
-                </span>
-                <div className="flex items-center gap-2 text-xs text-slate-500 shrink-0 flex-wrap justify-end">
-                  <span className="text-indigo-400/80">{ref.discipline}</span>
-                  <span className="font-mono">PT {ref.threshold}</span>
-                  <span>{ref.focusTime}</span>
-                  <span>{ref.range}</span>
-                  {ref.sustained && (
-                    <span className="text-amber-500/80">Sustained</span>
-                  )}
-                </div>
-              </div>
-              <p className="text-xs text-slate-500 mt-0.5 line-clamp-2 text-left">
-                {ref.description}
-              </p>
-            </button>
-          ))}
-        </div>
-
-        {/* Custom options */}
-        <div className="px-4 py-3 border-t border-slate-700 flex gap-2">
+    <PickerModal
+      title="Add Psychic Power"
+      placeholder="Search powers…"
+      query={query}
+      onQueryChange={setQuery}
+      onClose={onClose}
+      isEmpty={filtered.length === 0}
+      maxHeight="max-h-[85vh]"
+      filterRow={allFilters.map((d) => (
+        <button
+          key={d}
+          onClick={() => setDiscipline(d)}
+          className={[
+            "text-xs px-2.5 py-0.5 rounded border transition",
+            discipline === d
+              ? "border-indigo-500 bg-indigo-500/20 text-indigo-300"
+              : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
+          ].join(" ")}
+        >
+          {d}
+        </button>
+      ))}
+      footer={
+        <div className="flex gap-2">
           <button
             onClick={onCustomMinor}
             className="flex-1 text-sm text-amber-400 hover:text-amber-300 text-center py-1 transition"
@@ -146,8 +92,34 @@ function PowerPicker({
             + Custom major power
           </button>
         </div>
-      </div>
-    </div>
+      }
+    >
+      {filtered.map((ref) => (
+        <button
+          key={ref.id}
+          onClick={() => onSelect(ref)}
+          className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group"
+        >
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <span className="text-sm font-medium text-slate-200 group-hover:text-white">
+              {ref.name}
+            </span>
+            <div className="flex items-center gap-2 text-xs text-slate-500 shrink-0 flex-wrap justify-end">
+              <span className="text-indigo-400/80">{ref.discipline}</span>
+              <span className="font-mono">PT {ref.threshold}</span>
+              <span>{ref.focusTime}</span>
+              <span>{ref.range}</span>
+              {ref.sustained && (
+                <span className="text-amber-500/80">Sustained</span>
+              )}
+            </div>
+          </div>
+          <p className="text-xs text-slate-500 mt-0.5 line-clamp-2 text-left">
+            {ref.description}
+          </p>
+        </button>
+      ))}
+    </PickerModal>
   );
 }
 
