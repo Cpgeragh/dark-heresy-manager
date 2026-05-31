@@ -11,6 +11,7 @@ import {
 } from "../../ui/editableStyles";
 import { rarityColour, sourceColour } from "../../ui/sourceStyles";
 import { ItemMetaChips } from "../../ui/ItemMetaChips";
+import { QuantityControl } from "../../ui/QuantityControl";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -96,17 +97,9 @@ function ConsumableRow({
   onUpdateQty: (id: string, qty: number) => void;
   onRemove: (id: string) => void;
 }) {
-  const [editingQty, setEditingQty] = useState(false);
-  const [qtyDraft, setQtyDraft]     = useState("");
-  const [expanded, setExpanded]     = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   const hasDesc = !!(item.description?.trim());
-
-  function commitQty() {
-    const n = parseInt(qtyDraft, 10);
-    if (!isNaN(n) && n >= 0) onUpdateQty(item.id, n);
-    setEditingQty(false);
-  }
 
   return (
     <div className={sectionContainerClass(editable)}>
@@ -114,51 +107,12 @@ function ConsumableRow({
         {/* Quantity */}
         <div className="flex flex-col items-center shrink-0">
           <span className="text-[10px] text-slate-500 uppercase tracking-wide mb-0.5">Qty</span>
-          <div className="flex items-center gap-1">
-            {editable && (
-              <button
-                onClick={() => onUpdateQty(item.id, Math.max(0, item.quantity - 1))}
-                className="w-5 h-5 rounded bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs flex items-center justify-center leading-none"
-              >
-                −
-              </button>
-            )}
-            {editable && editingQty ? (
-              <input
-                type="text"
-                inputMode="numeric"
-                autoFocus
-                value={qtyDraft}
-                onChange={(e) => setQtyDraft(e.target.value.replace(/\D/g, ""))}
-                onBlur={commitQty}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") commitQty();
-                  if (e.key === "Escape") setEditingQty(false);
-                }}
-                className="w-8 text-center text-sm font-mono bg-slate-800 border border-amber-500 rounded px-1 py-0.5 text-slate-200 outline-none"
-              />
-            ) : (
-              <span
-                onClick={() => {
-                  if (!editable) return;
-                  setQtyDraft(String(item.quantity));
-                  setEditingQty(true);
-                }}
-                title={editable ? "Click to edit" : undefined}
-                className={`w-8 text-center text-sm font-mono font-semibold text-slate-200 ${editable ? "cursor-pointer underline decoration-dotted underline-offset-2 decoration-slate-600 hover:decoration-amber-500" : ""}`}
-              >
-                {item.quantity}
-              </span>
-            )}
-            {editable && (
-              <button
-                onClick={() => onUpdateQty(item.id, item.quantity + 1)}
-                className="w-5 h-5 rounded bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs flex items-center justify-center leading-none"
-              >
-                +
-              </button>
-            )}
-          </div>
+          <QuantityControl
+            quantity={item.quantity}
+            editable={editable}
+            size="sm"
+            onUpdate={(q) => onUpdateQty(item.id, q)}
+          />
         </div>
 
         {/* Name + description + chips */}

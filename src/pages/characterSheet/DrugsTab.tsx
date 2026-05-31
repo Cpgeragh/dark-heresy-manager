@@ -9,6 +9,7 @@ import {
 } from "../../ui/editableStyles";
 import { rarityColour } from "../../ui/sourceStyles";
 import { ItemMetaChips } from "../../ui/ItemMetaChips";
+import { QuantityControl } from "../../ui/QuantityControl";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -202,25 +203,7 @@ function DrugRow({
   onRemove: (id: string) => void;
   onInfo: (item: DrugItem) => void;
 }) {
-  const [editingQty, setEditingQty] = useState(false);
-  const [qtyDraft, setQtyDraft] = useState("");
   const ref = DRUGS_REFERENCE.find((r) => r.id === item.referenceId);
-
-  const startEdit = () => {
-    setQtyDraft(String(item.quantity));
-    setEditingQty(true);
-  };
-
-  const commitEdit = () => {
-    const val = parseInt(qtyDraft, 10);
-    onUpdateQty(item.id, !isNaN(val) && val >= 0 ? val : item.quantity);
-    setEditingQty(false);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") commitEdit();
-    if (e.key === "Escape") setEditingQty(false);
-  };
 
   return (
     <div className={[sectionContainerClass(editable), "flex items-center gap-3"].join(" ")}>
@@ -240,43 +223,11 @@ function DrugRow({
       </div>
 
       {/* Quantity controls */}
-      <div className="flex items-center gap-1 shrink-0">
-        {editable && (
-          <button
-            onClick={() => onUpdateQty(item.id, Math.max(0, item.quantity - 1))}
-            className="w-6 h-6 rounded bg-slate-700 hover:bg-slate-600 text-slate-300 text-sm leading-none flex items-center justify-center"
-          >
-            −
-          </button>
-        )}
-        {editingQty ? (
-          <input
-            type="text"
-            autoFocus
-            value={qtyDraft}
-            onChange={(e) => setQtyDraft(e.target.value.replace(/\D/g, ""))}
-            onBlur={commitEdit}
-            onKeyDown={handleKeyDown}
-            className="font-mono text-base text-slate-100 w-12 text-center bg-slate-800 border border-slate-600 rounded focus:outline-none focus:border-indigo-500"
-          />
-        ) : (
-          <span
-            onClick={startEdit}
-            title="Click to set quantity"
-            className="font-mono text-base text-slate-100 min-w-[2rem] text-center cursor-pointer hover:text-white hover:underline decoration-slate-500 decoration-dotted underline-offset-2"
-          >
-            {item.quantity}
-          </span>
-        )}
-        {editable && (
-          <button
-            onClick={() => onUpdateQty(item.id, item.quantity + 1)}
-            className="w-6 h-6 rounded bg-slate-700 hover:bg-slate-600 text-slate-300 text-sm leading-none flex items-center justify-center"
-          >
-            +
-          </button>
-        )}
-      </div>
+      <QuantityControl
+        quantity={item.quantity}
+        editable={editable}
+        onUpdate={(q) => onUpdateQty(item.id, q)}
+      />
 
       {/* Info */}
       <button

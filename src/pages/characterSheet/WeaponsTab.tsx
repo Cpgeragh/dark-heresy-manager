@@ -28,6 +28,7 @@ import {
 } from "../../ui/editableStyles";
 import { rarityColour, sourceColour } from "../../ui/sourceStyles";
 import { ItemMetaChips } from "../../ui/ItemMetaChips";
+import { QuantityControl } from "../../ui/QuantityControl";
 import { InfoModal } from "../../components/InfoModal";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -1087,24 +1088,6 @@ function AmmoCard({
   onRemove: () => void;
   onUpdateAmount: (amount: number) => void;
 }) {
-  const [editingQty, setEditingQty] = useState(false);
-  const [qtyDraft, setQtyDraft] = useState("");
-
-  const startQtyEdit = () => {
-    setQtyDraft(String(item.amount));
-    setEditingQty(true);
-  };
-
-  const commitQtyEdit = () => {
-    const val = parseInt(qtyDraft, 10);
-    onUpdateAmount(!isNaN(val) && val >= 0 ? val : item.amount);
-    setEditingQty(false);
-  };
-
-  const handleQtyKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") commitQtyEdit();
-    if (e.key === "Escape") setEditingQty(false);
-  };
   return (
     <div className={sectionContainerClass(editable)}>
       {/* Header */}
@@ -1152,43 +1135,12 @@ function AmmoCard({
       {/* Quantity */}
       <div className="flex items-center gap-3">
         <span className="text-xs text-slate-400 uppercase tracking-wide">Qty</span>
-        <div className="flex items-center gap-1.5">
-          {editable && (
-            <button
-              onClick={() => onUpdateAmount(Math.max(0, item.amount - 1))}
-              className="w-6 h-6 rounded bg-slate-700 hover:bg-slate-600 text-slate-300 text-sm leading-none flex items-center justify-center"
-            >
-              −
-            </button>
-          )}
-          {editingQty ? (
-            <input
-              type="text"
-              autoFocus
-              value={qtyDraft}
-              onChange={(e) => setQtyDraft(e.target.value.replace(/\D/g, ""))}
-              onBlur={commitQtyEdit}
-              onKeyDown={handleQtyKeyDown}
-              className="font-mono text-lg text-slate-100 w-16 text-center bg-slate-800 border border-slate-600 rounded focus:outline-none focus:border-indigo-500"
-            />
-          ) : (
-            <span
-              onClick={startQtyEdit}
-              title="Click to set amount"
-              className="font-mono text-lg text-slate-100 min-w-[2.5rem] text-center cursor-pointer hover:text-white hover:underline decoration-slate-500 decoration-dotted underline-offset-2"
-            >
-              {item.amount}
-            </span>
-          )}
-          {editable && (
-            <button
-              onClick={() => onUpdateAmount(item.amount + 1)}
-              className="w-6 h-6 rounded bg-slate-700 hover:bg-slate-600 text-slate-300 text-sm leading-none flex items-center justify-center"
-            >
-              +
-            </button>
-          )}
-        </div>
+        <QuantityControl
+          quantity={item.amount}
+          editable={editable}
+          size="lg"
+          onUpdate={onUpdateAmount}
+        />
       </div>
 
       {/* Weight / Value / Rarity / Source */}
@@ -1247,26 +1199,10 @@ function GrenadeCard({
 }) {
   const [showRules, setShowRules] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
-  const [editingQty, setEditingQty] = useState(false);
-  const [qtyDraft, setQtyDraft] = useState("");
 
   const ref = GRENADE_REFERENCE.find((r) => r.id === item.referenceId);
   const hasRules = !!(item.specialRules?.trim() && item.specialRules !== "—");
   const hasInfo = !!(ref?.description);
-
-  const startQtyEdit = () => {
-    setQtyDraft(String(item.quantity));
-    setEditingQty(true);
-  };
-  const commitQtyEdit = () => {
-    const val = parseInt(qtyDraft, 10);
-    onUpdateQty(!isNaN(val) && val >= 0 ? val : item.quantity);
-    setEditingQty(false);
-  };
-  const handleQtyKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") commitQtyEdit();
-    if (e.key === "Escape") setEditingQty(false);
-  };
 
   return (
     <div className={sectionContainerClass(editable) + " space-y-2"}>
@@ -1332,43 +1268,12 @@ function GrenadeCard({
       {/* Quantity row */}
       <div className="flex items-center gap-3 pt-1">
         <span className="text-xs text-slate-400 uppercase tracking-wide">Qty</span>
-        <div className="flex items-center gap-1.5">
-          {editable && (
-            <button
-              onClick={() => onUpdateQty(Math.max(0, item.quantity - 1))}
-              className="w-6 h-6 rounded bg-slate-700 hover:bg-slate-600 text-slate-300 text-sm leading-none flex items-center justify-center"
-            >
-              −
-            </button>
-          )}
-          {editingQty ? (
-            <input
-              type="text"
-              autoFocus
-              value={qtyDraft}
-              onChange={(e) => setQtyDraft(e.target.value.replace(/\D/g, ""))}
-              onBlur={commitQtyEdit}
-              onKeyDown={handleQtyKeyDown}
-              className="font-mono text-lg text-slate-100 w-16 text-center bg-slate-800 border border-slate-600 rounded focus:outline-none focus:border-indigo-500"
-            />
-          ) : (
-            <span
-              onClick={startQtyEdit}
-              title="Click to set quantity"
-              className="font-mono text-lg text-slate-100 min-w-[2.5rem] text-center cursor-pointer hover:text-white hover:underline decoration-slate-500 decoration-dotted underline-offset-2"
-            >
-              {item.quantity}
-            </span>
-          )}
-          {editable && (
-            <button
-              onClick={() => onUpdateQty(item.quantity + 1)}
-              className="w-6 h-6 rounded bg-slate-700 hover:bg-slate-600 text-slate-300 text-sm leading-none flex items-center justify-center"
-            >
-              +
-            </button>
-          )}
-        </div>
+        <QuantityControl
+          quantity={item.quantity}
+          editable={editable}
+          size="lg"
+          onUpdate={onUpdateQty}
+        />
       </div>
 
       {/* Weight / Value / Rarity / Source */}
