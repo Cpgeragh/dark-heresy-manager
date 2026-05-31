@@ -56,7 +56,6 @@ import type {
   CyberneticItem,
   ArcheotechItem,
   PsychicBlock,
-  ExperienceBlock,
 } from "../types/Character";
 
 // ─── Migration helpers ────────────────────────────────────────────────────────
@@ -248,11 +247,6 @@ export default function CharacterSheet() {
 
   const handleUpdateCybernetics = useCallback(
     (next: CyberneticItem[]) => updateField("cybernetics", next),
-    [updateField]
-  );
-
-  const handleUpdateExperience = useCallback(
-    (next: ExperienceBlock) => updateField("experience", next),
     [updateField]
   );
 
@@ -466,11 +460,7 @@ export default function CharacterSheet() {
               ammo={character.ammo ?? []}
               grenades={character.grenades ?? []}
               editable={allowedToEdit}
-              strengthBonus={Math.floor(
-                (character.characteristics.s.base +
-                  character.characteristics.s.advances * 5) /
-                  10
-              )}
+              strengthBonus={Math.floor(getCharTotal("s") / 10)}
               onUpdateRanged={handleUpdateRangedWeapons}
               onUpdateMelee={handleUpdateMeleeWeapons}
               onUpdateAmmo={handleUpdateAmmo}
@@ -532,8 +522,6 @@ export default function CharacterSheet() {
           {activeTab === "xp" && (
             <ExperienceTab
               experience={character.experience}
-              editable={allowedToEdit}
-              onUpdate={handleUpdateExperience}
               campaignId={path.campaignId}
               characterId={character.id}
               isOwnedByCurrentPlayer={isOwner && !isDM}
