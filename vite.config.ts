@@ -10,7 +10,7 @@ export default defineConfig({
       includeAssets: ['icon-192.png', 'icon-512.png'],
       manifest: {
         name: 'Dark Heresy Manager',
-        short_name: 'DH Manager',
+        short_name: 'Dark Heresy Manager',
         description: 'Campaign and character management for Dark Heresy',
         start_url: '/',
         scope: '/',
