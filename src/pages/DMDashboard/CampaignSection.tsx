@@ -6,7 +6,7 @@ import type { CampaignDocument } from "../../types/Firestore";
 import { validateCampaignName } from "../../utils/validation";
 import { useToast } from "../../components/Toast";
 import { buildRoute } from "../../constants/routes";
-import { createCampaign, updateCampaignName } from "../../services/campaignService";
+import { createCampaign, deleteCampaign, updateCampaignName } from "../../services/campaignService";
 
 type CampaignWithId = CampaignDocument & { id: string };
 
@@ -14,7 +14,7 @@ interface CampaignSectionProps {
   userUid: string;
   campaigns: CampaignWithId[];
   activeCampaignId: string | null;
-  onCampaignSelect: (campaignId: string) => void;
+  onCampaignSelect: (campaignId: string | null) => void;
 }
 
 function CampaignSection({
@@ -26,6 +26,8 @@ function CampaignSection({
   const [newCampaignName, setNewCampaignName] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const toast = useToast();
 
   const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,6 +64,23 @@ function CampaignSection({
     setEditingId(null);
     setEditName("");
   }, []);
+
+  const handleDeleteConfirm = useCallback(async (campaignId: string) => {
+    setDeleting(true);
+    try {
+      await deleteCampaign(campaignId);
+      if (activeCampaignId === campaignId) {
+        onCampaignSelect(null);
+      }
+      setConfirmDeleteId(null);
+      toast.success("Campaign deleted.");
+    } catch (err) {
+      console.error("Failed to delete campaign:", err);
+      toast.error("Failed to delete campaign. Please try again.");
+    } finally {
+      setDeleting(false);
+    }
+  }, [activeCampaignId, onCampaignSelect, toast]);
 
   const handleEditSave = useCallback(async () => {
     if (!editingId) return;
@@ -167,6 +186,33 @@ function CampaignSection({
                     >
                       Edit
                     </button>
+                    {confirmDeleteId === campaign.id ? (
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-red-400">Delete?</span>
+                        <button
+                          onClick={() => handleDeleteConfirm(campaign.id)}
+                          disabled={deleting}
+                          className="text-xs px-2 py-1 bg-red-700 text-white rounded hover:bg-red-600 disabled:opacity-50"
+                        >
+                          {deleting ? "…" : "Yes"}
+                        </button>
+                        <button
+                          onClick={() => setConfirmDeleteId(null)}
+                          disabled={deleting}
+                          className="text-xs px-2 py-1 bg-slate-700 text-slate-300 rounded hover:bg-slate-600"
+                        >
+                          No
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setConfirmDeleteId(campaign.id)}
+                        className="text-xs px-2 py-1 bg-red-900/40 text-red-400 rounded hover:bg-red-900/70"
+                        aria-label={`Delete ${campaign.name}`}
+                      >
+                        Delete
+                      </button>
+                    )}
                   </>
                 )}
               </div>
