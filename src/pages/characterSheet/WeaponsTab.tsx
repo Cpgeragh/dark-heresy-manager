@@ -149,9 +149,9 @@ export function WeaponsTab({
   );
 
   const addCustomRanged = useCallback(
-    (w: RangedWeapon) => {
+    (weapon: RangedWeapon) => {
       if (!editable) return;
-      onUpdateRanged([...rangedWeapons, w]);
+      onUpdateRanged([...rangedWeapons, weapon]);
       setShowCustomRanged(false);
     },
     [editable, rangedWeapons, onUpdateRanged]
@@ -171,10 +171,10 @@ export function WeaponsTab({
     (weaponId: string, upgradeId: string) => {
       if (!editable) return;
       onUpdateRanged(
-        rangedWeapons.map((w) =>
-          w.id === weaponId
-            ? { ...w, attachments: [...(w.attachments ?? []), upgradeId] }
-            : w
+        rangedWeapons.map((weapon) =>
+          weapon.id === weaponId
+            ? { ...weapon, attachments: [...(weapon.attachments ?? []), upgradeId] }
+            : weapon
         )
       );
     },
@@ -185,10 +185,10 @@ export function WeaponsTab({
     (weaponId: string, upgradeId: string) => {
       if (!editable) return;
       onUpdateRanged(
-        rangedWeapons.map((w) =>
-          w.id === weaponId
-            ? { ...w, attachments: (w.attachments ?? []).filter((id) => id !== upgradeId) }
-            : w
+        rangedWeapons.map((weapon) =>
+          weapon.id === weaponId
+            ? { ...weapon, attachments: (weapon.attachments ?? []).filter((id) => id !== upgradeId) }
+            : weapon
         )
       );
     },
@@ -222,9 +222,9 @@ export function WeaponsTab({
   );
 
   const addCustomMelee = useCallback(
-    (w: MeleeWeapon) => {
+    (weapon: MeleeWeapon) => {
       if (!editable) return;
-      onUpdateMelee([...meleeWeapons, w]);
+      onUpdateMelee([...meleeWeapons, weapon]);
       setShowCustomMelee(false);
     },
     [editable, meleeWeapons, onUpdateMelee]
@@ -244,10 +244,10 @@ export function WeaponsTab({
     (weaponId: string, upgradeId: string) => {
       if (!editable) return;
       onUpdateMelee(
-        meleeWeapons.map((w) =>
-          w.id === weaponId
-            ? { ...w, attachments: [...(w.attachments ?? []), upgradeId] }
-            : w
+        meleeWeapons.map((weapon) =>
+          weapon.id === weaponId
+            ? { ...weapon, attachments: [...(weapon.attachments ?? []), upgradeId] }
+            : weapon
         )
       );
     },
@@ -258,10 +258,10 @@ export function WeaponsTab({
     (weaponId: string, upgradeId: string) => {
       if (!editable) return;
       onUpdateMelee(
-        meleeWeapons.map((w) =>
-          w.id === weaponId
-            ? { ...w, attachments: (w.attachments ?? []).filter((id) => id !== upgradeId) }
-            : w
+        meleeWeapons.map((weapon) =>
+          weapon.id === weaponId
+            ? { ...weapon, attachments: (weapon.attachments ?? []).filter((id) => id !== upgradeId) }
+            : weapon
         )
       );
     },
@@ -380,14 +380,14 @@ export function WeaponsTab({
             <p className="text-sm text-slate-500 italic">No ranged weapons.</p>
           )}
 
-          {rangedWeapons.map((w, i) => (
+          {rangedWeapons.map((weapon, i) => (
             <RangedCard
-              key={w.id}
-              weapon={w}
+              key={weapon.id}
+              weapon={weapon}
               editable={editable}
               onRemove={() => removeRanged(i)}
-              onAddAttachment={(upgradeId) => addAttachmentToRanged(w.id, upgradeId)}
-              onRemoveAttachment={(upgradeId) => removeAttachmentFromRanged(w.id, upgradeId)}
+              onAddAttachment={(upgradeId) => addAttachmentToRanged(weapon.id, upgradeId)}
+              onRemoveAttachment={(upgradeId) => removeAttachmentFromRanged(weapon.id, upgradeId)}
             />
           ))}
 
@@ -417,15 +417,15 @@ export function WeaponsTab({
             <p className="text-sm text-slate-500 italic">No melee weapons.</p>
           )}
 
-          {meleeWeapons.map((w, i) => (
+          {meleeWeapons.map((weapon, i) => (
             <MeleeCard
-              key={w.id}
-              weapon={w}
+              key={weapon.id}
+              weapon={weapon}
               editable={editable}
               strengthBonus={strengthBonus}
               onRemove={() => removeMelee(i)}
-              onAddAttachment={(upgradeId) => addAttachmentToMelee(w.id, upgradeId)}
-              onRemoveAttachment={(upgradeId) => removeAttachmentFromMelee(w.id, upgradeId)}
+              onAddAttachment={(upgradeId) => addAttachmentToMelee(weapon.id, upgradeId)}
+              onRemoveAttachment={(upgradeId) => removeAttachmentFromMelee(weapon.id, upgradeId)}
             />
           ))}
 

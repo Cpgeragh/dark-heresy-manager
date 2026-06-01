@@ -9,15 +9,14 @@ import {
 } from "../../../data/reference/weaponReference";
 import { WEAPON_UPGRADE_REFERENCE } from "../../../data/reference/weaponUpgradeReference";
 import { editableInputClass, sectionContainerClass } from "../../../ui/editableStyles";
-import { sourceColour } from "../../../ui/sourceStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
-import { InfoModal } from "../../../components/InfoModal";
 import {
   StatChip,
   DamageTypeChip,
   SpecialRulesModal,
   AttachmentPicker,
+  AttachmentCard,
 } from "./weaponShared";
 import { effectiveRangedStats, getCompatibleUpgrades } from "./weaponHelpers";
 
@@ -90,7 +89,7 @@ export function CustomRangedForm({
 
   const makeFieldSetter =
     (k: keyof typeof fields) => (e: React.ChangeEvent<HTMLInputElement>) =>
-      setFields((f) => ({ ...f, [k]: e.target.value }));
+      setFields((prev) => ({ ...prev, [k]: e.target.value }));
 
   return (
     <div className="border border-amber-500/30 bg-slate-900/60 rounded-lg p-4 space-y-3">
@@ -152,8 +151,8 @@ export function RangedCard({
   const [showAttachPicker, setShowAttachPicker] = useState(false);
 
   const attachmentIds = weapon.attachments ?? [];
-  const attachmentRefs = WEAPON_UPGRADE_REFERENCE.filter((u) =>
-    attachmentIds.includes(u.id)
+  const attachmentRefs = WEAPON_UPGRADE_REFERENCE.filter((upgrade) =>
+    attachmentIds.includes(upgrade.id)
   );
   const effective = effectiveRangedStats(weapon, attachmentRefs);
   const compatible = getCompatibleUpgrades(
@@ -245,54 +244,13 @@ export function RangedCard({
             <p className="text-xs text-slate-600 italic">None fitted</p>
           ) : (
             <div className="space-y-1.5">
-              {attachmentRefs.map((u) => (
-                <div
-                  key={u.id}
-                  className="bg-slate-800/60 rounded border border-slate-700 px-2 py-1.5"
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-medium text-slate-300">{u.name}</span>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <InfoModal
-                        title={u.name}
-                        content={
-                          <div className="space-y-2">
-                            <p className="text-sm text-slate-300 leading-relaxed">
-                              {u.description}
-                            </p>
-                            <p className="text-xs text-slate-500 italic">
-                              {u.applicableTo}
-                            </p>
-                          </div>
-                        }
-                      />
-                      {editable && (
-                        <button
-                          onClick={() => onRemoveAttachment(u.id)}
-                          className="text-slate-500 hover:text-red-400 leading-none text-sm"
-                          title={`Remove ${u.name}`}
-                        >
-                          ×
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {u.weightModifier !== "—" && (
-                      <span className="text-[10px] rounded border border-slate-700 bg-slate-900/40 px-1 py-0.5 text-slate-400">
-                        ⚖ {u.weightModifier}
-                      </span>
-                    )}
-                    <span className="text-[10px] rounded border border-slate-700 bg-slate-900/40 px-1 py-0.5 text-amber-400/80 font-mono">
-                      ₮ {u.value}
-                    </span>
-                    <span
-                      className={`text-[10px] rounded border bg-slate-900/40 px-1 py-0.5 font-mono ${sourceColour(u.source)}`}
-                    >
-                      {u.source}
-                    </span>
-                  </div>
-                </div>
+              {attachmentRefs.map((upgrade) => (
+                <AttachmentCard
+                  key={upgrade.id}
+                  upgrade={upgrade}
+                  editable={editable}
+                  onRemove={onRemoveAttachment}
+                />
               ))}
             </div>
           )}

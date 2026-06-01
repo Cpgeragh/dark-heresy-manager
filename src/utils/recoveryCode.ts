@@ -11,13 +11,13 @@ import {
  * Generate a recovery code in format: DH-XXXX-YYYY
  */
 export function generateRecoveryCode(): string {
-  const seg = () =>
+  const makeSegment = () =>
     Math.random()
       .toString(36)
       .substring(2, 2 + RECOVERY_CODE_SEGMENT_LENGTH)
       .toUpperCase();
 
-  const segments = Array.from({ length: RECOVERY_CODE_SEGMENTS }, () => seg()).join("-");
+  const segments = Array.from({ length: RECOVERY_CODE_SEGMENTS }, () => makeSegment()).join("-");
 
   return `${RECOVERY_CODE_PREFIX}-${segments}`;
 }

@@ -1,8 +1,7 @@
-// src/pages/characterSheet/tabs/skills/SkillsControlBar.tsx
+// src/pages/characterSheet/SkillsTab/SkillsControlBar.tsx
 
 import { useCallback } from "react";
-
-type SortMode = "category" | "characteristic" | "name" | "total";
+import type { SortMode } from "./skillsConstants";
 
 interface SkillsControlBarProps {
   search: string;

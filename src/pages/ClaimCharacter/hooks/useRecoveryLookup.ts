@@ -34,16 +34,9 @@ export function useRecoveryLookup() {
     setLoading(true);
     setData(null);
 
-    // Track if this lookup has been superseded
-    const lookupId = Date.now();
-    let currentLookupId = lookupId;
-
     try {
       const indexRef = doc(db, "recoveryIndex", code);
       const indexSnap = await getDoc(indexRef);
-
-      // Check if a new lookup started
-      if (currentLookupId !== lookupId) return;
 
       if (!indexSnap.exists()) {
         setError("No character found with this recovery code.");
@@ -56,9 +49,6 @@ export function useRecoveryLookup() {
 
       const campSnap = await getDoc(doc(db, "campaigns", campaignId));
       const charSnap = await getDoc(characterDocRef(campaignId, characterId));
-
-      // Check if a new lookup started
-      if (currentLookupId !== lookupId) return;
 
       if (!campSnap.exists() || !charSnap.exists()) {
         setError("Recovery code points to missing data.");
@@ -73,7 +63,6 @@ export function useRecoveryLookup() {
       const currentUser = auth.currentUser;
       const uid = currentUser?.uid ?? null;
 
-      // Ownership derivation
       let ownership: OwnershipState;
 
       if (!characterData.userId) {
@@ -86,9 +75,6 @@ export function useRecoveryLookup() {
         ownership = "claimed-by-other";
       }
 
-      // Final check before setting state
-      if (currentLookupId !== lookupId) return;
-
       setData({
         campaignId,
         characterId,
@@ -97,16 +83,10 @@ export function useRecoveryLookup() {
         ownership,
       });
     } catch (err) {
-      // Only set error if this is still the current lookup
-      if (currentLookupId === lookupId) {
-        console.error(err);
-        setError("Unexpected error during lookup.");
-      }
+      console.error(err);
+      setError("Unexpected error during lookup.");
     } finally {
-      // Only update loading if this is still the current lookup
-      if (currentLookupId === lookupId) {
-        setLoading(false);
-      }
+      setLoading(false);
     }
   }, []);
 

@@ -2,13 +2,10 @@
 
 import { useMemo } from "react";
 import type { SkillWithComputed } from "./useSkillComputation";
-import type { Characteristics } from "../types/Character";
-
-type SortMode = "category" | "characteristic" | "name" | "total";
-
-const GROUP_ORDER: (keyof Characteristics)[] = [
-  "ws", "bs", "s", "t", "ag", "int", "per", "wp", "fel",
-];
+import {
+  GROUP_ORDER,
+  type SortMode,
+} from "../pages/characterSheet/SkillsTab/skillsConstants";
 
 interface UseSkillSortingArgs {
   skills: SkillWithComputed[];

@@ -1,21 +1,16 @@
-// src/pages/characterSheet/Skills/SkillCard.tsx
+// src/pages/characterSheet/SkillsTab/SkillCard.tsx
 
 import { useCallback } from "react";
-import type { SkillEntry, SkillAdvanceLevel } from "../../../../types/Character";
-import { InfoModal } from "../../../../components/InfoModal";
-import { SKILL_DESCRIPTIONS } from "../../../../data/skillDescriptions";
-import type { SkillWithComputed } from "./constants";
-import {
-  SKILL_EXPERT_THRESHOLD,
-  SKILL_TRAINED_THRESHOLD,
-  SKILL_BASIC_THRESHOLD,
-} from "../../../../constants/gameRules";
+import type { SkillAdvanceLevel } from "../../../types/Character";
+import { InfoModal } from "../../../components/InfoModal";
+import { SKILL_DESCRIPTIONS } from "../../../data/skillDescriptions";
+import { CHAR_LABEL, getTotalColor, type SkillWithComputed } from "./skillsConstants";
 
-import { sourceColour, charColour } from "../../../../ui/sourceStyles";
+import { sourceColour, charColour } from "../../../ui/sourceStyles";
 import {
   editableInputClass,
   editableTextareaClass,
-} from "../../../../ui/editableStyles";
+} from "../../../ui/editableStyles";
 
 interface SkillCardProps {
   skill: SkillWithComputed;
@@ -26,25 +21,6 @@ interface SkillCardProps {
   updateNotes: (id: string, notes: string) => void;
 }
 
-const CHAR_LABEL: Record<SkillEntry["characteristic"], string> = {
-  ws: "WS",
-  bs: "BS",
-  s: "S",
-  t: "T",
-  ag: "Ag",
-  int: "Int",
-  per: "Per",
-  wp: "WP",
-  fel: "Fel",
-};
-
-function getTotalColor(total: number | null): string {
-  if (total === null) return "text-slate-400";
-  if (total >= SKILL_EXPERT_THRESHOLD) return "text-green-400";
-  if (total >= SKILL_TRAINED_THRESHOLD) return "text-amber-300";
-  if (total >= SKILL_BASIC_THRESHOLD) return "text-slate-200";
-  return "text-red-400";
-}
 
 export function SkillCard({
   skill,

@@ -14,18 +14,6 @@ interface UseCharacterSheetProps {
   characterIdParam: string | undefined;
 }
 
-/**
- * Domain hook that orchestrates all character sheet functionality.
- * 
- * Composes multiple focused hooks to provide:
- * - Character data (live subscriptions)
- * - Permission checking (DM/player, editable state)
- * - Mutation operations (updates, releases, DM overrides)
- * - Helper functions (characteristic calculations)
- * 
- * @param campaignIdParam - Campaign ID from route params
- * @param characterIdParam - Character ID from route params
- */
 export function useCharacterSheet({
   campaignIdParam,
   characterIdParam,
@@ -57,7 +45,7 @@ export function useCharacterSheet({
   // ================================================================
   // PERMISSIONS
   // ================================================================
-  const { allowedToEdit } = useCharacterPermissions({
+  const { allowedToEdit, isOwner, canPlayerRelease } = useCharacterPermissions({
     character,
     userId,
     isDM,
@@ -94,6 +82,8 @@ export function useCharacterSheet({
     dmReadOnly,
     toggleDmReadOnly,
     allowedToEdit,
+    isOwner,
+    canPlayerRelease,
 
     // Helpers
     getCharField,

@@ -3,7 +3,8 @@
 // AttachmentPicker, and related pure helpers.
 
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
-import { rarityColour } from "../../../ui/sourceStyles";
+import { rarityColour, sourceColour } from "../../../ui/sourceStyles";
+import { InfoModal } from "../../../components/InfoModal";
 import type { WeaponUpgradeRef } from "../../../data/reference/weaponUpgradeReference";
 
 // ─── Stat Chip ────────────────────────────────────────────────────────────────
@@ -33,12 +34,12 @@ export function parseDamageType(
 }
 
 export function DamageTypeChip({ damage }: { damage: string }) {
-  const dt = parseDamageType(damage);
-  if (!dt) return null;
+  const damageType = parseDamageType(damage);
+  if (!damageType) return null;
   return (
     <div className="flex flex-col items-center bg-slate-800/60 rounded px-2 py-1 min-w-[52px]">
       <span className="text-[10px] text-slate-500 uppercase tracking-wide">Type</span>
-      <span className={`text-sm font-semibold mt-0.5 ${dt.colour}`}>{dt.label}</span>
+      <span className={`text-sm font-semibold mt-0.5 ${damageType.colour}`}>{damageType.label}</span>
     </div>
   );
 }
@@ -106,6 +107,65 @@ export function SpecialRulesModal({
             Close
           </button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Attachment Card ──────────────────────────────────────────────────────────
+
+export function AttachmentCard({
+  upgrade,
+  editable,
+  onRemove,
+}: {
+  upgrade: WeaponUpgradeRef;
+  editable: boolean;
+  onRemove: (upgradeId: string) => void;
+}) {
+  return (
+    <div className="bg-slate-800/60 rounded border border-slate-700 px-2 py-1.5">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-xs font-medium text-slate-300">{upgrade.name}</span>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <InfoModal
+            title={upgrade.name}
+            content={
+              <div className="space-y-2">
+                <p className="text-sm text-slate-300 leading-relaxed">
+                  {upgrade.description}
+                </p>
+                <p className="text-xs text-slate-500 italic">
+                  {upgrade.applicableTo}
+                </p>
+              </div>
+            }
+          />
+          {editable && (
+            <button
+              onClick={() => onRemove(upgrade.id)}
+              className="text-slate-500 hover:text-red-400 leading-none text-sm"
+              title={`Remove ${upgrade.name}`}
+            >
+              ×
+            </button>
+          )}
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-1 mt-1">
+        {upgrade.weightModifier !== "—" && (
+          <span className="text-[10px] rounded border border-slate-700 bg-slate-900/40 px-1 py-0.5 text-slate-400">
+            ⚖ {upgrade.weightModifier}
+          </span>
+        )}
+        <span className="text-[10px] rounded border border-slate-700 bg-slate-900/40 px-1 py-0.5 text-amber-400/80 font-mono">
+          ₮ {upgrade.value}
+        </span>
+        <span
+          className={`text-[10px] rounded border bg-slate-900/40 px-1 py-0.5 font-mono ${sourceColour(upgrade.source)}`}
+        >
+          {upgrade.source}
+        </span>
       </div>
     </div>
   );

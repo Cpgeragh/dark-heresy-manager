@@ -1,3 +1,5 @@
+// src/pages/characterSheet/ExperienceTab.tsx
+
 import { useState, useCallback, useMemo } from "react";
 import type { ExperienceBlock } from "../../types/Character";
 import {
@@ -21,7 +23,7 @@ export function ExperienceTab({
   characterId,
   isOwnedByCurrentPlayer,
 }: ExperienceTabProps) {
-  const { error: toastError, success: toastSuccess } = useToast();
+  const toast = useToast();
   const remaining = experience.total - experience.spent;
   const { proposals } = useXpProposals(campaignId, characterId);
   const [description, setDescription] = useState("");
@@ -40,14 +42,14 @@ export function ExperienceTab({
       await proposeXpSpend(campaignId, characterId, description.trim(), xpCost);
       setDescription("");
       setXpCost(0);
-      toastSuccess("Proposal submitted.");
+      toast.success("Proposal submitted.");
     } catch (err) {
       console.error("XP proposal error:", err);
-      toastError("Failed to submit proposal. Please try again.");
+      toast.error("Failed to submit proposal. Please try again.");
     } finally {
       setSubmitting(false);
     }
-  }, [campaignId, characterId, description, xpCost, toastError, toastSuccess]);
+  }, [campaignId, characterId, description, xpCost, toast]);
 
   return (
     <div className="space-y-6 text-slate-300">

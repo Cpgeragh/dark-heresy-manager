@@ -28,7 +28,7 @@ export function useCampaigns(dmUid: string) {
       if (!ignore) setCampaigns(list);
     }
 
-    load();
+    load().catch((err) => console.error("Failed to load campaigns:", err));
     return () => { ignore = true; };
   }, [dmUid]);
 

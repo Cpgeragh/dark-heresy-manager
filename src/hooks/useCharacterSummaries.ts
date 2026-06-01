@@ -34,7 +34,7 @@ export function useCharacterSummaries(campaignId: string | undefined) {
       }
     }
 
-    load();
+    load().catch((err) => console.error("Failed to load character summaries:", err));
     return () => { ignore = true; };
   }, [campaignId]);
 

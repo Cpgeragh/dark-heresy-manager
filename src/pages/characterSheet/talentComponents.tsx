@@ -39,37 +39,37 @@ export function TalentPickerModal({
 }) {
   const [query, setQuery]         = useState("");
   const [picked, setPicked]       = useState<AnyListItem | null>(null);
-  const [specialisation, setSpec] = useState("");
+  const [specialisation, setSpecialisation] = useState("");
 
   const filtered = useMemo(() => {
     const seen = new Set<string>();
     const normalizedQuery = query.trim().toLowerCase();
     return [...listData]
-      .filter((t) => {
-        if (seen.has(t.id)) return false;
-        seen.add(t.id);
-        const repeatable = "repeatable" in t ? (t as TalentData).repeatable : false;
-        if (!repeatable && selectedIds.has(t.id)) return false;
-        return !normalizedQuery || t.name.toLowerCase().includes(normalizedQuery);
+      .filter((item) => {
+        if (seen.has(item.id)) return false;
+        seen.add(item.id);
+        const repeatable = "repeatable" in item ? (item as TalentData).repeatable : false;
+        if (!repeatable && selectedIds.has(item.id)) return false;
+        return !normalizedQuery || item.name.toLowerCase().includes(normalizedQuery);
       })
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [listData, selectedIds, query]);
 
-  const td = picked as TalentData | null;
+  const talentData = picked && "hasSpecialisation" in picked ? picked as TalentData : null;
 
-  const isNumeric = td?.specialisationMin !== undefined;
+  const isNumeric = talentData?.specialisationMin !== undefined;
 
   const numericValid = (): boolean => {
     const raw = specialisation.trim();
     if (!raw) return false;
     const numericValue = Number(raw);
     if (!Number.isInteger(numericValue)) return false;
-    if (td!.specialisationMin !== undefined && numericValue < td!.specialisationMin) return false;
-    if (td!.specialisationMax !== undefined && numericValue > td!.specialisationMax) return false;
+    if (talentData!.specialisationMin !== undefined && numericValue < talentData!.specialisationMin) return false;
+    if (talentData!.specialisationMax !== undefined && numericValue > talentData!.specialisationMax) return false;
     return true;
   };
 
-  const canAdd = !!picked && td?.hasSpecialisation
+  const canAdd = !!picked && talentData?.hasSpecialisation
     ? (isNumeric ? numericValid() : specialisation.trim().length > 0)
     : false;
 
@@ -87,7 +87,7 @@ export function TalentPickerModal({
     };
     onAdd(entry);
     setPicked(null);
-    setSpec("");
+    setSpecialisation("");
   };
 
   return (
@@ -107,7 +107,7 @@ export function TalentPickerModal({
             autoFocus
             placeholder="Search…"
             value={query}
-            onChange={(e) => { setQuery(e.target.value); setPicked(null); setSpec(""); }}
+            onChange={(e) => { setQuery(e.target.value); setPicked(null); setSpecialisation(""); }}
             className={editableInputClass(true)}
           />
         </div>
@@ -117,19 +117,19 @@ export function TalentPickerModal({
           {filtered.length === 0 && (
             <p className="p-4 text-sm text-slate-500 text-center">No matches.</p>
           )}
-          {filtered.map((t) => {
-            const row = t as TalentData;
-            const sources = normaliseSources(t.source as SkillSource | SkillSource[]);
-            const isSelected = picked?.id === t.id;
+          {filtered.map((item) => {
+            const row = item as TalentData;
+            const sources = normaliseSources(item.source as SkillSource | SkillSource[]);
+            const isSelected = picked?.id === item.id;
             return (
               <button
-                key={t.id}
+                key={item.id}
                 onClick={() => {
-                  if ((t as TalentData).hasSpecialisation) {
-                    setPicked(t);
-                    setSpec("");
+                  if ((item as TalentData).hasSpecialisation) {
+                    setPicked(item);
+                    setSpecialisation("");
                   } else {
-                    addImmediate(t);
+                    addImmediate(item);
                   }
                 }}
                 className={`w-full text-left px-4 py-3 hover:bg-slate-800 transition group ${
@@ -138,7 +138,7 @@ export function TalentPickerModal({
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-sm font-medium text-slate-200 group-hover:text-white">
-                    {t.name}
+                    {item.name}
                   </span>
                   <div className="flex gap-1 shrink-0">
                     {sources.map((src) => (
@@ -159,7 +159,7 @@ export function TalentPickerModal({
         </div>
 
         {/* Footer — specialisation confirm */}
-        {picked && td?.hasSpecialisation && (
+        {picked && talentData?.hasSpecialisation && (
           <div className="px-4 py-3 border-t border-slate-700 space-y-2">
             <p className="text-xs text-slate-400">
               Adding: <span className="text-slate-200 font-medium">{picked.name}</span>
@@ -170,28 +170,28 @@ export function TalentPickerModal({
                 <input
                   type="number"
                   value={specialisation}
-                  onChange={(e) => setSpec(e.target.value)}
+                  onChange={(e) => setSpecialisation(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter" && canAdd) handleSpecAdd(); }}
-                  min={td.specialisationMin}
-                  max={td.specialisationMax}
+                  min={talentData.specialisationMin}
+                  max={talentData.specialisationMax}
                   step={1}
-                  placeholder={td.specialisationLabel ?? "Value…"}
+                  placeholder={talentData.specialisationLabel ?? "Value…"}
                   className={editableInputClass(true)}
                   autoFocus
                 />
                 <p className="text-xs text-slate-500">
-                  {td.specialisationMax !== undefined
-                    ? `Whole number ${td.specialisationMin}–${td.specialisationMax}.`
-                    : `Whole number, ${td.specialisationMin} or higher.`}
+                  {talentData.specialisationMax !== undefined
+                    ? `Whole number ${talentData.specialisationMin}–${talentData.specialisationMax}.`
+                    : `Whole number, ${talentData.specialisationMin} or higher.`}
                 </p>
               </>
             ) : (
               <input
                 type="text"
                 value={specialisation}
-                onChange={(e) => setSpec(e.target.value)}
+                onChange={(e) => setSpecialisation(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter" && canAdd) handleSpecAdd(); }}
-                placeholder={td.specialisationLabel ?? "Specialisation…"}
+                placeholder={talentData.specialisationLabel ?? "Specialisation…"}
                 className={editableInputClass(true)}
                 autoFocus
               />

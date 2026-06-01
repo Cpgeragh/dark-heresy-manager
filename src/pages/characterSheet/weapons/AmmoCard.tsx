@@ -192,6 +192,24 @@ export function CustomAmmoForm({
 
 // ─── Ammo Card ────────────────────────────────────────────────────────────────
 
+function formatAmmoValue(value: string) {
+  const parts = value.split(" / ");
+  if (parts.length === 2) {
+    return (
+      <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5">
+        <span className="text-amber-400/80 font-mono">₮ {parts[0]}</span>
+        <span className="text-slate-500"> × </span>
+        <span className="text-slate-200 font-mono">{parts[1]}</span>
+      </span>
+    );
+  }
+  return (
+    <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">
+      ₮ {value}
+    </span>
+  );
+}
+
 export function AmmoCard({
   item,
   editable,
@@ -266,23 +284,7 @@ export function AmmoCard({
               ⚖ {item.weight}
             </span>
           )}
-          {item.value && (() => {
-            const parts = item.value!.split(" / ");
-            if (parts.length === 2) {
-              return (
-                <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5">
-                  <span className="text-amber-400/80 font-mono">₮ {parts[0]}</span>
-                  <span className="text-slate-500"> × </span>
-                  <span className="text-slate-200 font-mono">{parts[1]}</span>
-                </span>
-              );
-            }
-            return (
-              <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">
-                ₮ {item.value}
-              </span>
-            );
-          })()}
+          {item.value && formatAmmoValue(item.value)}
           {item.rarity && (
             <span
               className={`text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 ${rarityColour(item.rarity)}`}

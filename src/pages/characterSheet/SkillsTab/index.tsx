@@ -1,28 +1,27 @@
-// src/pages/characterSheet/tabs/skills/SkillsTab.tsx
+// src/pages/characterSheet/SkillsTab/index.tsx
 
 import { useMemo, useState, useCallback } from "react";
-import type { Characteristics, SkillEntry } from "../../../../types/Character";
-import type { CharField } from "../../../../utils/characterFactory";
-import { CHARACTERISTIC_ADVANCE_INCREMENT } from "../../../../constants/gameRules";
+import type { Characteristics, SkillEntry } from "../../../types/Character";
+import type { CharField } from "../../../utils/characterFactory";
+import { CHARACTERISTIC_ADVANCE_INCREMENT } from "../../../constants/gameRules";
 
 // Import our new hooks
-import { useSkillComputation } from "../../../../hooks/useSkillComputation";
-import { useSkillFiltering } from "../../../../hooks/useSkillFiltering";
-import { useSkillSorting } from "../../../../hooks/useSkillSorting";
-import { useSkillGroupCollapse } from "../../../../hooks/useSkillGroupCollapse";
+import { useSkillComputation } from "../../../hooks/useSkillComputation";
+import { useSkillFiltering } from "../../../hooks/useSkillFiltering";
+import { useSkillSorting } from "../../../hooks/useSkillSorting";
+import { useSkillGroupCollapse } from "../../../hooks/useSkillGroupCollapse";
 
 import {
   GROUP_ORDER,
   CHAR_LABEL,
   CHAR_FULL_LABEL,
-} from "./constants";
+  type SortMode,
+} from "./skillsConstants";
 
 import { SkillCard } from "./SkillCard";
 import { SkillsControlBar } from "./SkillsControlBar";
 import { CategoryGroup } from "./CategoryGroup";
 import { CharacteristicGroup } from "./CharacteristicGroup";
-
-type SortMode = "category" | "characteristic" | "name" | "total";
 
 interface SkillsTabProps {
   skills: SkillEntry[];
