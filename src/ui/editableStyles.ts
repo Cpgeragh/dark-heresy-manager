@@ -61,6 +61,26 @@ export function sectionContainerClass(isEditable: boolean) {
   ].join(" ");
 }
 
+// ─── Shared UI tokens ─────────────────────────────────────────────────────────
+// Use these instead of hardcoding the same Tailwind strings across components.
+
+/** Standard section card — bright border, semi-transparent background. */
+export const uiSection = "rounded-lg border border-slate-500 bg-slate-800/60 p-3";
+
+/** Inner cell within a section (no padding — add your own). */
+export const uiCell = "rounded border border-slate-500 bg-slate-800/60";
+
+/** Label inside a compact stat cell (tight column grids: Quick View, bonuses, movement). */
+export const uiCellLabel = "text-[10px] text-slate-300 leading-tight";
+
+/** Value inside a compact stat cell (tight column grids — keeps text-base to fit). */
+export const uiCellValueSm = "text-base font-semibold font-mono text-slate-100 leading-tight";
+
+/** Value inside a standard-width display cell — matches the Stepper value size. */
+export const uiCellValue = "text-xl font-semibold font-mono text-slate-100";
+
+// ──────────────────────────────────────────────────────────────────────────────
+
 export function readOnlyBadgeClass() {
   return [
     "inline-block",

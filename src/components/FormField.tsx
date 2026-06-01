@@ -54,7 +54,7 @@ export function FormField({
   return (
     <label
       htmlFor={inputId}
-      className={`flex flex-col gap-0.5 text-xs text-slate-400 ${className}`}
+      className={`flex flex-col gap-0.5 text-xs text-slate-300 ${className}`}
     >
       {label}
 

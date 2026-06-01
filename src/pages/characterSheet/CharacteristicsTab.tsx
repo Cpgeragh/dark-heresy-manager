@@ -4,7 +4,6 @@ import { useCallback } from "react";
 import type { CharField } from "../../utils/characterFactory";
 import type { Characteristics } from "../../types/Character";
 import CharacteristicField from "../../components/CharacteristicField";
-import { sectionContainerClass } from "../../ui/editableStyles";
 import {
   CHARACTERISTIC_BONUS_DIVISOR,
   MOVEMENT_FULL_MULTIPLIER,
@@ -12,6 +11,7 @@ import {
   MOVEMENT_RUN_MULTIPLIER,
 } from "../../constants/gameRules";
 import { calculateCharacteristicTotal } from "../../utils/stats";
+import { uiSection, uiCell, uiCellLabel, uiCellValueSm } from "../../ui/editableStyles";
 
 // ─── StatBlock ────────────────────────────────────────────────────────────────
 // Extracted to module level to avoid re-creating the component on every render.
@@ -39,10 +39,10 @@ function StatBlock({
   }, [statKey, updateCharacteristic]);
 
   return (
-    <div className={sectionContainerClass(editable) + " space-y-2"}>
+    <div className={uiSection + " space-y-2"}>
       {/* Header */}
       <div className="flex items-baseline justify-between">
-        <span className="text-sm text-slate-400">{label}</span>
+        <span className="text-sm text-slate-300">{label}</span>
         <span className="text-2xl font-semibold font-mono text-slate-100">
           {statTotal}
         </span>
@@ -89,34 +89,70 @@ export function CharacteristicsTab({
     <div className="space-y-6 text-slate-300">
       <h2 className="text-xl font-semibold">Characteristics</h2>
 
-      {/* QUICK VIEW */}
-      <section className={sectionContainerClass(false)}>
-        <p className="text-xs text-slate-500 uppercase tracking-wide mb-3">Quick View</p>
-        <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-2">
-          {(
-            [
-              { label: "WS",  key: "ws"  },
-              { label: "BS",  key: "bs"  },
-              { label: "S",   key: "s"   },
-              { label: "T",   key: "t"   },
-              { label: "Ag",  key: "ag"  },
-              { label: "Int", key: "int" },
-              { label: "Per", key: "per" },
-              { label: "WP",  key: "wp"  },
-              { label: "Fel", key: "fel" },
-            ] as { label: string; key: keyof Characteristics }[]
-          ).map(({ label, key }) => (
-            <div key={key} className={sectionContainerClass(false) + " text-center"}>
-              <div className="text-xs text-slate-400 mb-1">{label}</div>
-              <div className="text-2xl font-semibold font-mono text-slate-100">
-                {getCharTotal(key)}
-              </div>
+      {/* Quick View */}
+      <div className="grid grid-cols-9 gap-1">
+        {(
+          [
+            { label: "WS",  key: "ws"  },
+            { label: "BS",  key: "bs"  },
+            { label: "S",   key: "s"   },
+            { label: "T",   key: "t"   },
+            { label: "Ag",  key: "ag"  },
+            { label: "Int", key: "int" },
+            { label: "Per", key: "per" },
+            { label: "WP",  key: "wp"  },
+            { label: "Fel", key: "fel" },
+          ] as { label: string; key: keyof Characteristics }[]
+        ).map(({ label, key }) => (
+          <div key={key} className={`${uiCell} text-center py-1 px-0.5`}>
+            <div className={uiCellLabel}>{label}</div>
+            <div className={uiCellValueSm}>
+              {getCharTotal(key)}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Characteristic Bonuses */}
+      <div>
+        <p className="text-xs text-slate-300 uppercase tracking-wide mb-1">Characteristic Bonuses</p>
+        <div className="grid grid-cols-7 gap-1">
+          {[
+            { label: "SB",  value: SB },
+            { label: "TB",  value: TB },
+            { label: "AB",  value: AB },
+            { label: "IB",  value: IB },
+            { label: "PB",  value: PB },
+            { label: "WPB", value: WPB },
+            { label: "FB",  value: FB },
+          ].map(({ label, value }) => (
+            <div key={label} className={`${uiCell} text-center py-1 px-0.5`}>
+              <div className={uiCellLabel}>{label}</div>
+              <div className={uiCellValueSm}>{value}</div>
             </div>
           ))}
         </div>
-      </section>
+      </div>
 
-      {/* Main stats */}
+      {/* Movement */}
+      <div>
+        <p className="text-xs text-slate-300 uppercase tracking-wide mb-1">Movement</p>
+        <div className="grid grid-cols-4 gap-1">
+          {[
+            { label: "Half",   value: AB },
+            { label: "Full",   value: AB * MOVEMENT_FULL_MULTIPLIER },
+            { label: "Charge", value: AB * MOVEMENT_CHARGE_MULTIPLIER },
+            { label: "Run",    value: AB * MOVEMENT_RUN_MULTIPLIER },
+          ].map(({ label, value }) => (
+            <div key={label} className={`${uiCell} text-center py-1 px-0.5`}>
+              <div className={uiCellLabel}>{label}</div>
+              <div className={uiCellValueSm}>{value}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Main stats — stat entry blocks */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <StatBlock label="Weapon Skill (WS)"   statKey="ws"  editable={editable} getCharField={getCharField} updateCharacteristic={updateCharacteristic} />
         <StatBlock label="Ballistic Skill (BS)" statKey="bs"  editable={editable} getCharField={getCharField} updateCharacteristic={updateCharacteristic} />
@@ -128,50 +164,6 @@ export function CharacteristicsTab({
         <StatBlock label="Willpower (WP)"       statKey="wp"  editable={editable} getCharField={getCharField} updateCharacteristic={updateCharacteristic} />
         <StatBlock label="Fellowship (Fel)"     statKey="fel" editable={editable} getCharField={getCharField} updateCharacteristic={updateCharacteristic} />
       </div>
-
-      {/* Derived stats */}
-      <section className={sectionContainerClass(false) + " space-y-4"}>
-        <h3 className="text-lg font-semibold">Derived Stats</h3>
-
-        {/* Characteristic Bonuses */}
-        <div>
-          <p className="text-xs text-slate-500 uppercase tracking-wide mb-2">Characteristic Bonuses</p>
-          <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
-            {[
-              { label: "SB",  value: SB },
-              { label: "TB",  value: TB },
-              { label: "AB",  value: AB },
-              { label: "IB",  value: IB },
-              { label: "PB",  value: PB },
-              { label: "WPB", value: WPB },
-              { label: "FB",  value: FB },
-            ].map(({ label, value }) => (
-              <div key={label} className={sectionContainerClass(false) + " text-center"}>
-                <div className="text-xs text-slate-400 mb-1">{label}</div>
-                <div className="text-2xl font-semibold font-mono text-slate-100">{value}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Movement */}
-        <div>
-          <p className="text-xs text-slate-500 uppercase tracking-wide mb-2">Movement</p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {[
-              { label: "Half",   value: AB },
-              { label: "Full",   value: AB * MOVEMENT_FULL_MULTIPLIER },
-              { label: "Charge", value: AB * MOVEMENT_CHARGE_MULTIPLIER },
-              { label: "Run",    value: AB * MOVEMENT_RUN_MULTIPLIER },
-            ].map(({ label, value }) => (
-              <div key={label} className={sectionContainerClass(false) + " text-center"}>
-                <div className="text-xs text-slate-400 mb-1">{label}</div>
-                <div className="text-2xl font-semibold font-mono text-slate-100">{value}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
     </div>
   );
 }

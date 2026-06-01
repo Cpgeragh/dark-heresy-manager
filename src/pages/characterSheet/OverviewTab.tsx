@@ -2,20 +2,15 @@
 
 import { useState, useCallback } from "react";
 import { InfoModal } from "../../components/InfoModal";
+import { Stepper } from "../../components/Stepper";
 import type {
   Character,
-  CharacterHeader,
   WoundsBlock,
   FateBlock,
   InsanityBlock,
   CorruptionBlock,
-  TalentsAndTraitsBlock,
 } from "../../types/Character";
-import {
-  editableInputClass,
-  sectionContainerClass,
-} from "../../ui/editableStyles";
-import { HOMEWORLD_LIST } from "../../data/homeworldData";
+import { editableInputClass, uiSection, uiCell, uiCellLabel, uiCellValueSm, uiCellValue } from "../../ui/editableStyles";
 import { FormField } from "../../components/FormField";
 import {
   CHARACTERISTIC_BONUS_DIVISOR,
@@ -33,14 +28,11 @@ interface OverviewTabProps {
   editable: boolean;
   canPlayerRelease: boolean;
   onPlayerRelease: () => void;
-  onUpdateHeader: (next: CharacterHeader) => void;
   onUpdateWounds: (next: WoundsBlock) => void;
   onUpdateFate: (next: FateBlock) => void;
   onUpdateInsanity: (next: InsanityBlock) => void;
   onUpdateCorruption: (next: CorruptionBlock) => void;
-  onUpdateTalents: (next: TalentsAndTraitsBlock) => void;
   getCharTotal: (statKey: keyof Character["characteristics"]) => number;
-  talents: TalentsAndTraitsBlock;
   isReleasing?: boolean;
 }
 
@@ -49,132 +41,64 @@ export function OverviewTab({
   editable,
   canPlayerRelease,
   onPlayerRelease,
-  onUpdateHeader,
   onUpdateWounds,
   onUpdateFate,
   onUpdateInsanity,
   onUpdateCorruption,
-  onUpdateTalents,
   getCharTotal,
-  talents,
   isReleasing = false,
 }: OverviewTabProps) {
   const [copied, setCopied] = useState(false);
 
-  const { header, wounds, fate, recoveryCode } = character;
+  const { wounds, fate, recoveryCode } = character;
   const insanity   = character.insanity   ?? { points: 0, disorders: "" };
   const corruption = character.corruption ?? { points: 0, malignancies: "" };
 
-  const selectedHomeworld = HOMEWORLD_LIST.find((hw) => hw.id === talents.homeworld);
-
-  const handleHomeworldChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      if (!editable) return;
-      onUpdateTalents({ ...talents, homeworld: e.target.value });
-    },
-    [editable, talents, onUpdateTalents]
+  const handleCurrentWoundsChange = useCallback(
+    (v: number) => onUpdateWounds({ ...wounds, current: v }),
+    [wounds, onUpdateWounds]
+  );
+  const handleCriticalDamageChange = useCallback(
+    (v: number) => onUpdateWounds({ ...wounds, criticalDamage: v }),
+    [wounds, onUpdateWounds]
+  );
+  const handleFatigueChange = useCallback(
+    (v: number) => onUpdateWounds({ ...wounds, fatigue: v }),
+    [wounds, onUpdateWounds]
+  );
+  const handleWoundsTotalChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      onUpdateWounds({ ...wounds, total: Math.max(0, Number(e.target.value)) }),
+    [wounds, onUpdateWounds]
   );
 
-  const handleHomeworldNotesChange = useCallback(
-    (value: string) => {
-      if (!editable) return;
-      onUpdateTalents({ ...talents, homeworldNotes: value });
-    },
-    [editable, talents, onUpdateTalents]
+  const handleCurrentFateChange = useCallback(
+    (v: number) => onUpdateFate({ ...fate, current: v }),
+    [fate, onUpdateFate]
+  );
+  const handleFateTotalChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      onUpdateFate({ ...fate, total: Math.max(0, Number(e.target.value)) }),
+    [fate, onUpdateFate]
   );
 
-  // ------------------------------
-  // Update helpers
-  // ------------------------------
-  const updateHeaderField = useCallback(<K extends keyof CharacterHeader>(
-    key: K,
-    value: CharacterHeader[K]
-  ) => {
-    onUpdateHeader({ ...header, [key]: value });
-  }, [header, onUpdateHeader]);
+  const handleInsanityPointsChange = useCallback(
+    (v: number) => onUpdateInsanity({ ...insanity, points: v }),
+    [insanity, onUpdateInsanity]
+  );
+  const handleInsanityDisordersChange = useCallback(
+    (v: string) => onUpdateInsanity({ ...insanity, disorders: v }),
+    [insanity, onUpdateInsanity]
+  );
 
-  const handleCharacterNameChange = useCallback((v: string) => updateHeaderField("characterName", v), [updateHeaderField]);
-
-  const handlePlayerNameChange  = useCallback((v: string) => updateHeaderField("playerName",  v), [updateHeaderField]);
-  const handleCareerChange      = useCallback((v: string) => updateHeaderField("career",      v), [updateHeaderField]);
-  const handleRankChange        = useCallback((v: string) => updateHeaderField("rank",        v), [updateHeaderField]);
-  const handleDivinationChange  = useCallback((v: string) => updateHeaderField("divination",  v), [updateHeaderField]);
-  const handleDescriptionChange = useCallback((v: string) => updateHeaderField("description", v), [updateHeaderField]);
-
-  const adjustWounds = useCallback((delta: number) => {
-    if (!editable) return;
-    onUpdateWounds({ ...wounds, current: wounds.current + delta });
-  }, [editable, wounds, onUpdateWounds]);
-
-  const handleWoundsMinus = useCallback(() => {
-    adjustWounds(-1);
-  }, [adjustWounds]);
-
-  const handleWoundsPlus = useCallback(() => {
-    adjustWounds(1);
-  }, [adjustWounds]);
-
-  const handleCriticalDamageChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    onUpdateWounds({
-      ...wounds,
-      criticalDamage: Number(e.target.value),
-    });
-  }, [wounds, onUpdateWounds]);
-
-  const handleFatigueChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    onUpdateWounds({
-      ...wounds,
-      fatigue: Number(e.target.value),
-    });
-  }, [wounds, onUpdateWounds]);
-
-  const adjustFate = useCallback((delta: number) => {
-    if (!editable) return;
-    onUpdateFate({
-      ...fate,
-      current: Math.max(0, fate.current + delta),
-    });
-  }, [editable, fate, onUpdateFate]);
-
-  const handleFateMinus = useCallback(() => {
-    adjustFate(-1);
-  }, [adjustFate]);
-
-  const handleFatePlus = useCallback(() => {
-    adjustFate(1);
-  }, [adjustFate]);
-
-  const handleWoundsTotalChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    onUpdateWounds({ ...wounds, total: Math.max(0, Number(e.target.value)) });
-  }, [wounds, onUpdateWounds]);
-
-  const handleFateTotalChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    onUpdateFate({ ...fate, total: Math.max(0, Number(e.target.value)) });
-  }, [fate, onUpdateFate]);
-
-  const adjustInsanity = useCallback((delta: number) => {
-    if (!editable) return;
-    onUpdateInsanity({ ...insanity, points: Math.max(0, insanity.points + delta) });
-  }, [editable, insanity, onUpdateInsanity]);
-
-  const handleInsanityMinus = useCallback(() => adjustInsanity(-1), [adjustInsanity]);
-  const handleInsanityPlus  = useCallback(() => adjustInsanity(1),  [adjustInsanity]);
-
-  const handleInsanityDisordersChange = useCallback((v: string) => {
-    onUpdateInsanity({ ...insanity, disorders: v });
-  }, [insanity, onUpdateInsanity]);
-
-  const adjustCorruption = useCallback((delta: number) => {
-    if (!editable) return;
-    onUpdateCorruption({ ...corruption, points: Math.max(0, corruption.points + delta) });
-  }, [editable, corruption, onUpdateCorruption]);
-
-  const handleCorruptionMinus = useCallback(() => adjustCorruption(-1), [adjustCorruption]);
-  const handleCorruptionPlus  = useCallback(() => adjustCorruption(1),  [adjustCorruption]);
-
-  const handleMalignanciesChange = useCallback((v: string) => {
-    onUpdateCorruption({ ...corruption, malignancies: v });
-  }, [corruption, onUpdateCorruption]);
+  const handleCorruptionPointsChange = useCallback(
+    (v: number) => onUpdateCorruption({ ...corruption, points: v }),
+    [corruption, onUpdateCorruption]
+  );
+  const handleMalignanciesChange = useCallback(
+    (v: string) => onUpdateCorruption({ ...corruption, malignancies: v }),
+    [corruption, onUpdateCorruption]
+  );
 
   // ------------------------------
   // Danger state helpers
@@ -212,248 +136,96 @@ export function OverviewTab({
 
   return (
     <div className="space-y-6 text-slate-300">
-      {/* CHARACTER DETAILS */}
-      <section className={sectionContainerClass(editable) + " space-y-3"}>
-        <h2 className="text-lg font-semibold">Character Details</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <FormField
-            label="Character Name"
-            value={header.characterName ?? ""}
-            onChange={handleCharacterNameChange}
-            editable={editable}
-            placeholder="e.g. Brother Corvus"
-            className="sm:col-span-2"
-          />
-          <FormField
-            label="Player Name"
-            value={header.playerName ?? ""}
-            onChange={handlePlayerNameChange}
-            editable={editable}
-            placeholder="Your name"
-          />
-          <FormField
-            label="Career"
-            value={header.career ?? ""}
-            onChange={handleCareerChange}
-            editable={editable}
-            placeholder="e.g. Guardsman"
-          />
-          <FormField
-            label="Rank"
-            value={header.rank ?? ""}
-            onChange={handleRankChange}
-            editable={editable}
-            placeholder="e.g. Trooper"
-          />
-          <FormField
-            label="Divination"
-            value={header.divination ?? ""}
-            onChange={handleDivinationChange}
-            editable={editable}
-            placeholder="e.g. Trust in your fear."
-          />
+      {/* COMBAT STATUS */}
+      <section className={uiSection}>
+        <h2 className="text-lg font-semibold mb-3">Combat Status</h2>
 
-          {/* Description — full width, above homeworld */}
-          <FormField
-            label="Description"
-            value={header.description ?? ""}
-            onChange={handleDescriptionChange}
-            editable={editable}
-            type="textarea"
-            rows={2}
-            placeholder="Physical appearance, mannerisms…"
-            className="sm:col-span-2"
-          />
-
-          {/* Homeworld — full width, dropdown + inline description */}
-          <div className="sm:col-span-2 flex flex-col gap-1">
-            <label className="text-xs text-slate-400">Homeworld</label>
-            <select
-              disabled={!editable}
-              value={talents.homeworld}
-              onChange={handleHomeworldChange}
-              className={editableInputClass(editable) + " appearance-none"}
-            >
-              <option value="">— Select homeworld —</option>
-              {[...HOMEWORLD_LIST].sort((a, b) => a.name.localeCompare(b.name)).map((hw) => (
-                <option key={hw.id} value={hw.id}>
-                  {hw.name} ({hw.source})
-                </option>
-              ))}
-            </select>
-            {selectedHomeworld && (
-              <p className="text-xs text-slate-400 italic px-1">
-                {selectedHomeworld.description}
-              </p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {/* Total Wounds */}
+          <div className={uiCell + " text-center p-2"}>
+            <div className="text-xs text-slate-300 mb-1">Total Wounds</div>
+            {editable ? (
+              <input
+                type="number"
+                min={0}
+                className={editableInputClass(true) + " mt-1 text-center"}
+                value={wounds.total}
+                onChange={handleWoundsTotalChange}
+                aria-label="Total wounds"
+              />
+            ) : (
+              <div className={uiCellValue}>
+                {wounds.total}
+              </div>
             )}
           </div>
-        </div>
 
-        <FormField
-          label="Background Notes"
-          value={talents.homeworldNotes ?? ""}
-          onChange={handleHomeworldNotesChange}
-          editable={editable}
-          type="textarea"
-          rows={2}
-          placeholder="Additional background notes…"
-        />
-      </section>
-
-      {/* WOUNDS */}
-      <section className={sectionContainerClass(editable)}>
-        <h2 className="text-lg font-semibold mb-3">Wounds</h2>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {/* Total */}
-          <div className={sectionContainerClass(false) + " text-center"}>
-            <label className="text-xs text-slate-400">
-              Total
-              {editable ? (
-                <input
-                  type="number"
-                  min={0}
-                  className={editableInputClass(true) + " mt-2 text-center"}
-                  value={wounds.total}
-                  onChange={handleWoundsTotalChange}
-                  aria-label="Total wounds"
-                />
-              ) : (
-                <div className="text-2xl font-semibold font-mono text-slate-100 mt-1">
-                  {wounds.total}
-                </div>
-              )}
-            </label>
-          </div>
-
-          {/* Current */}
-          <div className={sectionContainerClass(false) + " text-center"}>
-            <div className="text-xs text-slate-400 mb-2">Current</div>
-            <div className="flex items-center justify-center gap-1">
-              <button
-                disabled={!editable}
-                onClick={handleWoundsMinus}
-                aria-label="Decrease current wounds"
-                className={`px-2 py-0.5 border rounded text-xs transition
-                  ${editable
-                    ? "border-slate-600 hover:bg-slate-800"
-                    : "border-slate-700 opacity-50 cursor-not-allowed"
-                  }`}
-              >
-                −
-              </button>
-              <span
-                className={`min-w-[2ch] text-center text-xl font-semibold font-mono ${dangerClass(wounds.current, WOUNDS_CRITICAL_THRESHOLD)}`}
-              >
-                {wounds.current}
-              </span>
-              <button
-                disabled={!editable}
-                onClick={handleWoundsPlus}
-                aria-label="Increase current wounds"
-                className={`px-2 py-0.5 border rounded text-xs transition
-                  ${editable
-                    ? "border-slate-600 hover:bg-slate-800"
-                    : "border-slate-700 opacity-50 cursor-not-allowed"
-                  }`}
-              >
-                +
-              </button>
-            </div>
+          {/* Current Wounds */}
+          <div className={uiCell + " text-center p-2"}>
+            <div className="text-xs text-slate-300 mb-2">Current Wounds</div>
+            <Stepper
+              value={wounds.current}
+              editable={editable}
+              onChange={handleCurrentWoundsChange}
+              dangerClassName={dangerClass(wounds.current, WOUNDS_CRITICAL_THRESHOLD)}
+            />
           </div>
 
           {/* Critical Damage */}
-          <div className={sectionContainerClass(false) + " text-center"}>
-            <label className="text-xs text-slate-400">
-              Critical Damage
-              <input
-                type="number"
-                disabled={!editable}
-                className={editableInputClass(editable) + " mt-2 text-center"}
-                value={wounds.criticalDamage}
-                onChange={handleCriticalDamageChange}
-                aria-label="Critical damage points"
-              />
-            </label>
+          <div className={uiCell + " text-center p-2"}>
+            <div className="text-xs text-slate-300 mb-2">Critical Damage</div>
+            <Stepper
+              value={wounds.criticalDamage}
+              editable={editable}
+              onChange={handleCriticalDamageChange}
+            />
           </div>
 
           {/* Fatigue */}
-          <div className={sectionContainerClass(false) + " text-center"}>
-            <label className="text-xs text-slate-400">
-              Fatigue
-              <input
-                type="number"
-                disabled={!editable}
-                className={editableInputClass(editable) + " mt-2 text-center"}
-                value={wounds.fatigue}
-                onChange={handleFatigueChange}
-                aria-label="Fatigue points"
-              />
-            </label>
+          <div className={uiCell + " text-center p-2"}>
+            <div className="text-xs text-slate-300 mb-2">Fatigue</div>
+            <Stepper
+              value={wounds.fatigue}
+              editable={editable}
+              onChange={handleFatigueChange}
+            />
           </div>
         </div>
       </section>
 
       {/* FATE */}
-      <section className={sectionContainerClass(editable)}>
+      <section className={uiSection}>
         <h2 className="text-lg font-semibold mb-3">Fate Points</h2>
 
         <div className="grid grid-cols-2 gap-3">
           {/* Total */}
-          <div className={sectionContainerClass(false) + " text-center"}>
-            <label className="text-xs text-slate-400">
-              Total
-              {editable ? (
-                <input
-                  type="number"
-                  min={0}
-                  className={editableInputClass(true) + " mt-2 text-center"}
-                  value={fate.total}
-                  onChange={handleFateTotalChange}
-                  aria-label="Total fate points"
-                />
-              ) : (
-                <div className="text-2xl font-semibold font-mono text-slate-100 mt-1">
-                  {fate.total}
-                </div>
-              )}
-            </label>
+          <div className={uiCell + " text-center p-2"}>
+            <div className="text-xs text-slate-300 mb-1">Total</div>
+            {editable ? (
+              <input
+                type="number"
+                min={0}
+                className={editableInputClass(true) + " mt-1 text-center"}
+                value={fate.total}
+                onChange={handleFateTotalChange}
+                aria-label="Total fate points"
+              />
+            ) : (
+              <div className={uiCellValue}>
+                {fate.total}
+              </div>
+            )}
           </div>
 
           {/* Current */}
-          <div className={sectionContainerClass(false) + " text-center"}>
-            <div className="text-xs text-slate-400 mb-2">Current</div>
-            <div className="flex items-center justify-center gap-1">
-              <button
-                disabled={!editable}
-                onClick={handleFateMinus}
-                aria-label="Decrease current fate points"
-                className={`px-2 py-0.5 border rounded text-xs transition
-                  ${editable
-                    ? "border-slate-600 hover:bg-slate-800"
-                    : "border-slate-700 opacity-50 cursor-not-allowed"
-                  }`}
-              >
-                −
-              </button>
-              <span
-                className={`min-w-[2ch] text-center text-xl font-semibold font-mono ${dangerClass(fate.current, FATE_CRITICAL_THRESHOLD)}`}
-              >
-                {fate.current}
-              </span>
-              <button
-                disabled={!editable}
-                onClick={handleFatePlus}
-                aria-label="Increase current fate points"
-                className={`px-2 py-0.5 border rounded text-xs transition
-                  ${editable
-                    ? "border-slate-600 hover:bg-slate-800"
-                    : "border-slate-700 opacity-50 cursor-not-allowed"
-                  }`}
-              >
-                +
-              </button>
-            </div>
+          <div className={uiCell + " text-center p-2"}>
+            <div className="text-xs text-slate-300 mb-2">Current</div>
+            <Stepper
+              value={fate.current}
+              editable={editable}
+              onChange={handleCurrentFateChange}
+              dangerClassName={dangerClass(fate.current, FATE_CRITICAL_THRESHOLD)}
+            />
           </div>
         </div>
       </section>
@@ -462,39 +234,15 @@ export function OverviewTab({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
         {/* INSANITY */}
-        <section className={sectionContainerClass(editable) + " space-y-3"}>
+        <section className={uiSection + " space-y-3"}>
           <h2 className="text-lg font-semibold">Insanity</h2>
           <div className="flex items-center gap-3">
-            <span className="text-xs text-slate-400 uppercase tracking-wide">Points</span>
-            <div className="flex items-center gap-1">
-              <button
-                disabled={!editable}
-                onClick={handleInsanityMinus}
-                aria-label="Decrease insanity points"
-                className={`px-2 py-0.5 border rounded text-xs transition
-                  ${editable
-                    ? "border-slate-600 hover:bg-slate-800"
-                    : "border-slate-700 opacity-50 cursor-not-allowed"
-                  }`}
-              >
-                −
-              </button>
-              <span className="min-w-[2ch] text-center text-xl font-semibold font-mono text-slate-100">
-                {insanity.points}
-              </span>
-              <button
-                disabled={!editable}
-                onClick={handleInsanityPlus}
-                aria-label="Increase insanity points"
-                className={`px-2 py-0.5 border rounded text-xs transition
-                  ${editable
-                    ? "border-slate-600 hover:bg-slate-800"
-                    : "border-slate-700 opacity-50 cursor-not-allowed"
-                  }`}
-              >
-                +
-              </button>
-            </div>
+            <span className="text-xs text-slate-300 uppercase tracking-wide">Points</span>
+            <Stepper
+              value={insanity.points}
+              editable={editable}
+              onChange={handleInsanityPointsChange}
+            />
           </div>
           <FormField
             label="Disorders"
@@ -508,39 +256,15 @@ export function OverviewTab({
         </section>
 
         {/* CORRUPTION */}
-        <section className={sectionContainerClass(editable) + " space-y-3"}>
+        <section className={uiSection + " space-y-3"}>
           <h2 className="text-lg font-semibold">Corruption</h2>
           <div className="flex items-center gap-3">
-            <span className="text-xs text-slate-400 uppercase tracking-wide">Points</span>
-            <div className="flex items-center gap-1">
-              <button
-                disabled={!editable}
-                onClick={handleCorruptionMinus}
-                aria-label="Decrease corruption points"
-                className={`px-2 py-0.5 border rounded text-xs transition
-                  ${editable
-                    ? "border-slate-600 hover:bg-slate-800"
-                    : "border-slate-700 opacity-50 cursor-not-allowed"
-                  }`}
-              >
-                −
-              </button>
-              <span className="min-w-[2ch] text-center text-xl font-semibold font-mono text-slate-100">
-                {corruption.points}
-              </span>
-              <button
-                disabled={!editable}
-                onClick={handleCorruptionPlus}
-                aria-label="Increase corruption points"
-                className={`px-2 py-0.5 border rounded text-xs transition
-                  ${editable
-                    ? "border-slate-600 hover:bg-slate-800"
-                    : "border-slate-700 opacity-50 cursor-not-allowed"
-                  }`}
-              >
-                +
-              </button>
-            </div>
+            <span className="text-xs text-slate-300 uppercase tracking-wide">Points</span>
+            <Stepper
+              value={corruption.points}
+              editable={editable}
+              onChange={handleCorruptionPointsChange}
+            />
           </div>
           <FormField
             label="Malignancies"
@@ -556,8 +280,8 @@ export function OverviewTab({
       </div>
 
       {/* MOVEMENT */}
-      <section className={sectionContainerClass(false)}>
-        <div className="flex items-center gap-2 mb-3">
+      <section className={uiSection}>
+        <div className="flex items-center gap-2 mb-2">
           <h2 className="text-lg font-semibold">Movement</h2>
           <InfoModal
             title="Movement"
@@ -572,37 +296,29 @@ export function OverviewTab({
             }
           />
         </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className={sectionContainerClass(false) + " text-center"}>
-            <div className="text-xs text-slate-400 mb-1">Half</div>
-            <div className="text-2xl font-semibold font-mono text-slate-100">{move.half}</div>
-          </div>
-          <div className={sectionContainerClass(false) + " text-center"}>
-            <div className="text-xs text-slate-400 mb-1">Full</div>
-            <div className="text-2xl font-semibold font-mono text-slate-100">{move.full}</div>
-          </div>
-          <div className={sectionContainerClass(false) + " text-center"}>
-            <div className="text-xs text-slate-400 mb-1">Charge</div>
-            <div className="text-2xl font-semibold font-mono text-slate-100">{move.charge}</div>
-          </div>
-          <div className={sectionContainerClass(false) + " text-center"}>
-            <div className="text-xs text-slate-400 mb-1">Run</div>
-            <div className="text-2xl font-semibold font-mono text-slate-100">{move.run}</div>
-          </div>
+        <div className="grid grid-cols-4 gap-1">
+          {[
+            { label: "Half",   value: move.half },
+            { label: "Full",   value: move.full },
+            { label: "Charge", value: move.charge },
+            { label: "Run",    value: move.run },
+          ].map(({ label, value }) => (
+            <div key={label} className={uiCell + " text-center py-1 px-0.5"}>
+              <div className={uiCellLabel}>{label}</div>
+              <div className={uiCellValueSm}>{value}</div>
+            </div>
+          ))}
         </div>
       </section>
 
       {/* RECOVERY CODE */}
       {recoveryCode && (
-        <section className={sectionContainerClass(false)}>
-          <div className="text-xs text-slate-400">Recovery Code</div>
-
+        <section className={uiSection}>
+          <div className="text-xs text-slate-300">Recovery Code</div>
           <div className="flex items-center gap-2 mt-1">
-            <code className="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-amber-300">
+            <code className="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-amber-300">
               {recoveryCode}
             </code>
-
             <button
               onClick={copyCode}
               aria-label="Copy recovery code to clipboard"
