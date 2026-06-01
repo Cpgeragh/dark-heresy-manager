@@ -17,24 +17,15 @@ service cloud.firestore {
     // ============================
     match /campaigns/{campaignId} {
 
-      function isCampaignDM() {
-        return request.auth != null &&
-               resource.data.dmId == request.auth.uid;
-      }
-
-      function isCampaignMember() {
-        return request.auth != null &&
-               ('memberIds' in resource.data) &&
-               request.auth.uid in resource.data.memberIds;
-      }
-
-      // DM sees their campaigns; members see campaigns they belong to.
-      allow read: if isCampaignDM() || isCampaignMember();
+      // Any authenticated user can read campaign metadata (name, dmId, memberIds).
+      // Sensitive data lives in characters and sessions, which are separately restricted.
+      allow read: if request.auth != null;
 
       allow create:
         if request.auth != null &&
            request.resource.data.dmId == request.auth.uid;
 
+      // DM can update any campaign field (except transferring ownership).
       allow update:
         if request.auth != null &&
            resource.data.dmId == request.auth.uid &&
@@ -42,6 +33,15 @@ service cloud.firestore {
              !("dmId" in request.resource.data) ||
              request.resource.data.dmId == resource.data.dmId
            );
+
+      // Any authenticated user can add themselves to memberIds (claim flow).
+      // Guards: only memberIds may change, they must be in the result, and no
+      // existing members may be removed.
+      allow update:
+        if request.auth != null &&
+           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberIds']) &&
+           request.auth.uid in request.resource.data.get('memberIds', []) &&
+           request.resource.data.get('memberIds', []).hasAll(resource.data.get('memberIds', []));
 
       // DM can delete their own campaign.
       allow delete:
@@ -72,8 +72,11 @@ service cloud.firestore {
 
         // DM sees all characters in their campaign; members see all characters
         // in campaigns they belong to; owners can always read their own character.
+        // Unclaimed characters are readable by any authenticated user (needed for
+        // the recovery code claim preview before membership is established).
         allow read, list:
-          if dmOwnsCampaign() || isCharacterOwner() || isMemberOfCampaign();
+          if dmOwnsCampaign() || isCharacterOwner() || isMemberOfCampaign() ||
+             (request.auth != null && resource.data.userId == null);
 
         allow create:
           if dmOwnsCampaign() &&
@@ -104,6 +107,13 @@ service cloud.firestore {
               request.resource.data.recoveryCode == resource.data.recoveryCode
             )
           );
+
+        // Players can claim an unclaimed character (set userId to own UID, nothing else).
+        allow update:
+          if request.auth != null &&
+             resource.data.userId == null &&
+             request.resource.data.diff(resource.data).affectedKeys().hasOnly(['userId']) &&
+             request.resource.data.userId == request.auth.uid;
 
         allow delete: if dmOwnsCampaign();
 
