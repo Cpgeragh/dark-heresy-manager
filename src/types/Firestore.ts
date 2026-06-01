@@ -53,6 +53,16 @@ export interface CharacterListItem {
   recoveryCode: string;
   header?: {
     characterName?: string;
+    career?: string;
+    rank?: string;
+  };
+  wounds?: {
+    current: number;
+    total: number;
+  };
+  experience?: {
+    total: number;
+    spent: number;
   };
 }
 
