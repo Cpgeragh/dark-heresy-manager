@@ -22,7 +22,7 @@ export function useCharacterSummaries(campaignId: string | undefined) {
 
     async function load() {
       setLoading(true);
-      const snap = await getDocs(charactersCollectionRef(campaignId));
+      const snap = await getDocs(charactersCollectionRef(campaignId!));
       const list: CharacterSummary[] = snap.docs.map((d) => ({
         id: d.id,
         characterName: d.data().header?.characterName ?? "Unnamed Character",

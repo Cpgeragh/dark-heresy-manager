@@ -123,7 +123,7 @@ export function createEmptyCharacterData(params: {
 
     psychic: {
       psyRating: 0,
-      discipline: "",
+      disciplines: [],
       minorPowers: [],
       majorPowers: [],
     },

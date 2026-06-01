@@ -5,7 +5,7 @@ import { useParams } from "react-router-dom";
 
 import { useIsDM } from "../hooks/useIsDM";
 import { useSessions } from "../hooks/useSessions";
-import { useCharacterSummaries, type CharacterSummary } from "../hooks/useCharacterSummaries";
+import { useCharacterSummaries } from "../hooks/useCharacterSummaries";
 import { SessionForm } from "./CampaignOverview/SessionForm";
 import { SessionCard } from "./CampaignOverview/SessionCard";
 import { CharacterRow } from "./CampaignOverview/CharacterRow";

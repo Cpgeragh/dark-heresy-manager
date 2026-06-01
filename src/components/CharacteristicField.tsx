@@ -5,8 +5,6 @@ import type { CharField } from "../utils/characterFactory";
 import {
   MAX_CHARACTERISTIC_ADVANCES,
   CHARACTERISTIC_ADVANCE_INCREMENT,
-  MAX_CHARACTERISTIC_VALUE,
-  MIN_CHARACTERISTIC_VALUE,
 } from "../constants/gameRules";
 import {
   validateCharacteristicBase,

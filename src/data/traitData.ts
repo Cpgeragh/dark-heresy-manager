@@ -13,6 +13,7 @@ export interface TraitData {
   /** Present on numeric specialisations with a defined upper bound. */
   specialisationMax?: number;
   description?: string;
+  repeatable?: boolean;
 }
 
 export const TRAIT_LIST: readonly TraitData[] = [
