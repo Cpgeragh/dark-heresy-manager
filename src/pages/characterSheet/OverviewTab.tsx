@@ -7,6 +7,8 @@ import type {
   CharacterHeader,
   WoundsBlock,
   FateBlock,
+  InsanityBlock,
+  CorruptionBlock,
   TalentsAndTraitsBlock,
 } from "../../types/Character";
 import {
@@ -34,6 +36,8 @@ interface OverviewTabProps {
   onUpdateHeader: (next: CharacterHeader) => void;
   onUpdateWounds: (next: WoundsBlock) => void;
   onUpdateFate: (next: FateBlock) => void;
+  onUpdateInsanity: (next: InsanityBlock) => void;
+  onUpdateCorruption: (next: CorruptionBlock) => void;
   onUpdateTalents: (next: TalentsAndTraitsBlock) => void;
   getCharTotal: (statKey: keyof Character["characteristics"]) => number;
   talents: TalentsAndTraitsBlock;
@@ -48,6 +52,8 @@ export function OverviewTab({
   onUpdateHeader,
   onUpdateWounds,
   onUpdateFate,
+  onUpdateInsanity,
+  onUpdateCorruption,
   onUpdateTalents,
   getCharTotal,
   talents,
@@ -56,6 +62,8 @@ export function OverviewTab({
   const [copied, setCopied] = useState(false);
 
   const { header, wounds, fate, recoveryCode } = character;
+  const insanity   = character.insanity   ?? { points: 0, disorders: "" };
+  const corruption = character.corruption ?? { points: 0, malignancies: "" };
 
   const selectedHomeworld = HOMEWORLD_LIST.find((hw) => hw.id === talents.homeworld);
 
@@ -136,6 +144,30 @@ export function OverviewTab({
     adjustFate(1);
   }, [adjustFate]);
 
+  const adjustInsanity = useCallback((delta: number) => {
+    if (!editable) return;
+    onUpdateInsanity({ ...insanity, points: Math.max(0, insanity.points + delta) });
+  }, [editable, insanity, onUpdateInsanity]);
+
+  const handleInsanityMinus = useCallback(() => adjustInsanity(-1), [adjustInsanity]);
+  const handleInsanityPlus  = useCallback(() => adjustInsanity(1),  [adjustInsanity]);
+
+  const handleInsanityDisordersChange = useCallback((v: string) => {
+    onUpdateInsanity({ ...insanity, disorders: v });
+  }, [insanity, onUpdateInsanity]);
+
+  const adjustCorruption = useCallback((delta: number) => {
+    if (!editable) return;
+    onUpdateCorruption({ ...corruption, points: Math.max(0, corruption.points + delta) });
+  }, [editable, corruption, onUpdateCorruption]);
+
+  const handleCorruptionMinus = useCallback(() => adjustCorruption(-1), [adjustCorruption]);
+  const handleCorruptionPlus  = useCallback(() => adjustCorruption(1),  [adjustCorruption]);
+
+  const handleMalignanciesChange = useCallback((v: string) => {
+    onUpdateCorruption({ ...corruption, malignancies: v });
+  }, [corruption, onUpdateCorruption]);
+
   // ------------------------------
   // Danger state helpers
   // ------------------------------
@@ -212,44 +244,42 @@ export function OverviewTab({
             editable={editable}
             placeholder="e.g. Trust in your fear."
           />
+
+          {/* Description — full width, above homeworld */}
+          <FormField
+            label="Description"
+            value={header.description ?? ""}
+            onChange={handleDescriptionChange}
+            editable={editable}
+            type="textarea"
+            rows={2}
+            placeholder="Physical appearance, mannerisms…"
+            className="sm:col-span-2"
+          />
+
+          {/* Homeworld — full width, dropdown + inline description */}
+          <div className="sm:col-span-2 flex flex-col gap-1">
+            <label className="text-xs text-slate-400">Homeworld</label>
+            <select
+              disabled={!editable}
+              value={talents.homeworld}
+              onChange={handleHomeworldChange}
+              className={editableInputClass(editable) + " appearance-none"}
+            >
+              <option value="">— Select homeworld —</option>
+              {[...HOMEWORLD_LIST].sort((a, b) => a.name.localeCompare(b.name)).map((hw) => (
+                <option key={hw.id} value={hw.id}>
+                  {hw.name} ({hw.source})
+                </option>
+              ))}
+            </select>
+            {selectedHomeworld && (
+              <p className="text-xs text-slate-400 italic px-1">
+                {selectedHomeworld.description}
+              </p>
+            )}
+          </div>
         </div>
-        <FormField
-          label="Description"
-          value={header.description ?? ""}
-          onChange={handleDescriptionChange}
-          editable={editable}
-          type="textarea"
-          rows={2}
-          placeholder="Physical appearance, mannerisms…"
-        />
-      </section>
-
-      {/* HOMEWORLD */}
-      <section className={sectionContainerClass(editable) + " space-y-3"}>
-        <h2 className="text-lg font-semibold">Homeworld</h2>
-
-        <div>
-          <label className="block text-xs text-slate-400 mb-1">Homeworld</label>
-          <select
-            disabled={!editable}
-            value={talents.homeworld}
-            onChange={handleHomeworldChange}
-            className={editableInputClass(editable) + " appearance-none"}
-          >
-            <option value="">— Select homeworld —</option>
-            {[...HOMEWORLD_LIST].sort((a, b) => a.name.localeCompare(b.name)).map((hw) => (
-              <option key={hw.id} value={hw.id}>
-                {hw.name} ({hw.source})
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {selectedHomeworld && (
-          <p className="text-xs text-slate-400 italic px-1">
-            {selectedHomeworld.description}
-          </p>
-        )}
 
         <FormField
           label="Background Notes"
@@ -393,6 +423,103 @@ export function OverviewTab({
           </div>
         </div>
       </section>
+
+      {/* INSANITY & CORRUPTION */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+        {/* INSANITY */}
+        <section className={sectionContainerClass(editable) + " space-y-3"}>
+          <h2 className="text-lg font-semibold">Insanity</h2>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-slate-400 uppercase tracking-wide">Points</span>
+            <div className="flex items-center gap-1">
+              <button
+                disabled={!editable}
+                onClick={handleInsanityMinus}
+                aria-label="Decrease insanity points"
+                className={`px-2 py-0.5 border rounded text-xs transition
+                  ${editable
+                    ? "border-slate-600 hover:bg-slate-800"
+                    : "border-slate-700 opacity-50 cursor-not-allowed"
+                  }`}
+              >
+                −
+              </button>
+              <span className="min-w-[2ch] text-center text-xl font-semibold font-mono text-slate-100">
+                {insanity.points}
+              </span>
+              <button
+                disabled={!editable}
+                onClick={handleInsanityPlus}
+                aria-label="Increase insanity points"
+                className={`px-2 py-0.5 border rounded text-xs transition
+                  ${editable
+                    ? "border-slate-600 hover:bg-slate-800"
+                    : "border-slate-700 opacity-50 cursor-not-allowed"
+                  }`}
+              >
+                +
+              </button>
+            </div>
+          </div>
+          <FormField
+            label="Disorders"
+            value={insanity.disorders}
+            onChange={handleInsanityDisordersChange}
+            editable={editable}
+            type="textarea"
+            rows={2}
+            placeholder="List any disorders…"
+          />
+        </section>
+
+        {/* CORRUPTION */}
+        <section className={sectionContainerClass(editable) + " space-y-3"}>
+          <h2 className="text-lg font-semibold">Corruption</h2>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-slate-400 uppercase tracking-wide">Points</span>
+            <div className="flex items-center gap-1">
+              <button
+                disabled={!editable}
+                onClick={handleCorruptionMinus}
+                aria-label="Decrease corruption points"
+                className={`px-2 py-0.5 border rounded text-xs transition
+                  ${editable
+                    ? "border-slate-600 hover:bg-slate-800"
+                    : "border-slate-700 opacity-50 cursor-not-allowed"
+                  }`}
+              >
+                −
+              </button>
+              <span className="min-w-[2ch] text-center text-xl font-semibold font-mono text-slate-100">
+                {corruption.points}
+              </span>
+              <button
+                disabled={!editable}
+                onClick={handleCorruptionPlus}
+                aria-label="Increase corruption points"
+                className={`px-2 py-0.5 border rounded text-xs transition
+                  ${editable
+                    ? "border-slate-600 hover:bg-slate-800"
+                    : "border-slate-700 opacity-50 cursor-not-allowed"
+                  }`}
+              >
+                +
+              </button>
+            </div>
+          </div>
+          <FormField
+            label="Malignancies"
+            value={corruption.malignancies}
+            onChange={handleMalignanciesChange}
+            editable={editable}
+            type="textarea"
+            rows={2}
+            placeholder="List any malignancies…"
+          />
+        </section>
+
+      </div>
 
       {/* MOVEMENT */}
       <section className={sectionContainerClass(false)}>

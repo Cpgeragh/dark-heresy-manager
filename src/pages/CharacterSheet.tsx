@@ -31,6 +31,8 @@ import type {
   CharacterHeader,
   WoundsBlock,
   FateBlock,
+  InsanityBlock,
+  CorruptionBlock,
   SkillEntry,
   TalentsAndTraitsBlock,
   WeaponTrainingBlock,
@@ -136,6 +138,16 @@ export default function CharacterSheet() {
 
   const handleUpdateFate = useCallback(
     (next: FateBlock) => updateField("fate", next),
+    [updateField]
+  );
+
+  const handleUpdateInsanity = useCallback(
+    (next: InsanityBlock) => updateField("insanity", next),
+    [updateField]
+  );
+
+  const handleUpdateCorruption = useCallback(
+    (next: CorruptionBlock) => updateField("corruption", next),
     [updateField]
   );
 
@@ -364,6 +376,8 @@ export default function CharacterSheet() {
               onUpdateHeader={handleUpdateHeader}
               onUpdateWounds={handleUpdateWounds}
               onUpdateFate={handleUpdateFate}
+              onUpdateInsanity={handleUpdateInsanity}
+              onUpdateCorruption={handleUpdateCorruption}
               onUpdateTalents={handleUpdateTalents}
               getCharTotal={getCharTotal}
               talents={character.talentsAndTraits}
