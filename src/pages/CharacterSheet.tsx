@@ -33,6 +33,7 @@ import type {
   FateBlock,
   InsanityBlock,
   CorruptionBlock,
+  ExperienceBlock,
   SkillEntry,
   TalentsAndTraitsBlock,
   WeaponTrainingBlock,
@@ -223,6 +224,11 @@ export default function CharacterSheet() {
 
   const handleUpdateNotes = useCallback(
     (value: string) => updateField("notes", value),
+    [updateField]
+  );
+
+  const handleUpdateExperience = useCallback(
+    (next: ExperienceBlock) => updateField("experience", next),
     [updateField]
   );
 
@@ -489,6 +495,8 @@ export default function CharacterSheet() {
               campaignId={path.campaignId}
               characterId={character.id}
               isOwnedByCurrentPlayer={isOwner && !isDM}
+              isDM={isDM}
+              onUpdate={handleUpdateExperience}
             />
           )}
 

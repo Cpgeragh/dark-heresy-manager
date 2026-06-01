@@ -1,7 +1,7 @@
 // src/pages/characterSheet/ExperienceTab.tsx
 
 import { useState, useCallback, useMemo } from "react";
-import type { ExperienceBlock } from "../../types/Character";
+import type { ExperienceBlock, RankAdvances } from "../../types/Character";
 import {
   sectionContainerClass,
   readOnlyBadgeClass,
@@ -10,11 +10,24 @@ import { useXpProposals } from "../../hooks/useXpProposals";
 import { proposeXpSpend } from "../../services/xpService";
 import { useToast } from "../../components/Toast/ToastContext";
 
+// All valid rank values in display order.
+const RANK_OPTIONS: RankAdvances["rank"][] = [1, 2, 3, 4, 5, 6, 7, 8, "elite"];
+
+// Recalculate spent as the sum of every advance cost across all ranks.
+function calcSpent(ranks: RankAdvances[]): number {
+  return ranks.reduce(
+    (total, r) => total + r.advances.reduce((s, a) => s + a.cost, 0),
+    0
+  );
+}
+
 interface ExperienceTabProps {
   experience: ExperienceBlock;
   campaignId: string;
   characterId: string;
   isOwnedByCurrentPlayer: boolean;
+  isDM: boolean;
+  onUpdate: (next: ExperienceBlock) => void;
 }
 
 export function ExperienceTab({
@@ -22,21 +35,31 @@ export function ExperienceTab({
   campaignId,
   characterId,
   isOwnedByCurrentPlayer,
+  isDM,
+  onUpdate,
 }: ExperienceTabProps) {
   const toast = useToast();
   const remaining = experience.total - experience.spent;
   const { proposals } = useXpProposals(campaignId, characterId);
+
+  // ── Player proposal state ──────────────────────────────────────────────────
   const [description, setDescription] = useState("");
   const [xpCost, setXpCost] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
 
-  const pendingProposals = useMemo(() => proposals.filter((p) => p.status === "pending"), [proposals]);
+  // ── DM add-advance form state ──────────────────────────────────────────────
+  const [newRank, setNewRank] = useState<RankAdvances["rank"]>(1);
+  const [newName, setNewName] = useState("");
+  const [newCost, setNewCost] = useState(0);
+  const [newNotes, setNewNotes] = useState("");
+
+  const pendingProposals  = useMemo(() => proposals.filter((p) => p.status === "pending"),  [proposals]);
   const resolvedProposals = useMemo(() => proposals.filter((p) => p.status !== "pending"), [proposals]);
 
+  // ── Player handlers ────────────────────────────────────────────────────────
   const handlePropose = useCallback(async () => {
     if (!description.trim() || xpCost <= 0) return;
-
     setSubmitting(true);
     try {
       await proposeXpSpend(campaignId, characterId, description.trim(), xpCost);
@@ -51,96 +74,206 @@ export function ExperienceTab({
     }
   }, [campaignId, characterId, description, xpCost, toast]);
 
+  // ── DM handlers ───────────────────────────────────────────────────────────
+  const handleTotalChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    onUpdate({ ...experience, total: Math.max(0, Number(e.target.value)) });
+  }, [experience, onUpdate]);
+
+  const handleAddAdvance = useCallback(() => {
+    if (!newName.trim() || newCost <= 0) return;
+
+    const entry = {
+      id: crypto.randomUUID(),
+      name: newName.trim(),
+      cost: newCost,
+      notes: newNotes.trim() || undefined,
+    };
+
+    const existing = experience.ranks.find((r) => r.rank === newRank);
+    const updatedRanks: RankAdvances[] = existing
+      ? experience.ranks.map((r) =>
+          r.rank === newRank ? { ...r, advances: [...r.advances, entry] } : r
+        )
+      : [
+          ...experience.ranks,
+          { rank: newRank, advances: [entry] },
+        ].sort((a, b) => RANK_OPTIONS.indexOf(a.rank) - RANK_OPTIONS.indexOf(b.rank));
+
+    onUpdate({ ...experience, ranks: updatedRanks, spent: calcSpent(updatedRanks) });
+    setNewName("");
+    setNewCost(0);
+    setNewNotes("");
+  }, [experience, newRank, newName, newCost, newNotes, onUpdate]);
+
+  const handleRemoveAdvance = useCallback((rank: RankAdvances["rank"], advanceId: string) => {
+    const updatedRanks = experience.ranks
+      .map((r) =>
+        r.rank === rank ? { ...r, advances: r.advances.filter((a) => a.id !== advanceId) } : r
+      )
+      .filter((r) => r.advances.length > 0);
+
+    onUpdate({ ...experience, ranks: updatedRanks, spent: calcSpent(updatedRanks) });
+  }, [experience, onUpdate]);
+
+  // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className="space-y-6 text-slate-300">
+
       {/* HEADER */}
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Experience</h2>
-        <span className={readOnlyBadgeClass()}>Read-only</span>
+        {!isDM && <span className={readOnlyBadgeClass()}>Read-only</span>}
       </div>
 
       {/* SUMMARY */}
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className={sectionContainerClass(false) + " text-center"}>
-          <div className="text-xs text-slate-400 mb-1">Total XP</div>
-          <div className="text-2xl font-semibold font-mono text-slate-100">
-            {experience.total}
-          </div>
+
+        {/* Total XP — editable by DM */}
+        <div className={sectionContainerClass(isDM) + " text-center"}>
+          {isDM ? (
+            <label className="text-xs text-slate-400">
+              Total XP
+              <input
+                type="number"
+                min={0}
+                value={experience.total}
+                onChange={handleTotalChange}
+                className="mt-2 w-full px-2 py-1 bg-slate-800 border border-slate-600 rounded text-center text-xl font-semibold font-mono text-slate-100 focus:border-amber-400 focus:outline-none"
+                aria-label="Total XP"
+              />
+            </label>
+          ) : (
+            <>
+              <div className="text-xs text-slate-400 mb-1">Total XP</div>
+              <div className="text-2xl font-semibold font-mono text-slate-100">{experience.total}</div>
+            </>
+          )}
         </div>
 
         <div className={sectionContainerClass(false) + " text-center"}>
           <div className="text-xs text-slate-400 mb-1">Spent XP</div>
-          <div className="text-2xl font-semibold font-mono text-slate-100">
-            {experience.spent}
-          </div>
+          <div className="text-2xl font-semibold font-mono text-slate-100">{experience.spent}</div>
         </div>
 
         <div className={sectionContainerClass(false) + " text-center"}>
           <div className="text-xs text-slate-400 mb-1">Remaining XP</div>
-          <div
-            className={`text-2xl font-semibold font-mono ${
-              remaining < 0 ? "text-red-400" : "text-slate-100"
-            }`}
-          >
+          <div className={`text-2xl font-semibold font-mono ${remaining < 0 ? "text-red-400" : "text-slate-100"}`}>
             {remaining}
           </div>
         </div>
+
       </section>
 
       {/* PURCHASED ADVANCES */}
       <section className="space-y-3">
-        <h3 className="text-lg font-semibold text-slate-200">
-          Purchased Advances
-        </h3>
+        <h3 className="text-lg font-semibold text-slate-200">Purchased Advances</h3>
 
         {experience.ranks.length === 0 && (
-          <p className="text-sm text-slate-400">
-            No advances purchased yet.
-          </p>
+          <p className="text-sm text-slate-400">No advances purchased yet.</p>
         )}
 
         <div className="space-y-4">
           {experience.ranks.map((rankBlock) => (
-            <div
-              key={rankBlock.rank}
-              className={sectionContainerClass(false)}
-            >
+            <div key={rankBlock.rank} className={sectionContainerClass(false)}>
               <h4 className="text-sm font-semibold text-slate-300 mb-2">
                 Rank {rankBlock.rank}
               </h4>
-
-              {rankBlock.advances.length === 0 ? (
-                <p className="text-xs text-slate-500">
-                  No advances at this rank.
-                </p>
-              ) : (
-                <ul className="space-y-2">
-                  {rankBlock.advances.map((adv) => (
-                    <li
-                      key={adv.id}
-                      className="rounded border border-slate-700 bg-slate-900/60 p-3"
-                    >
-                      <div className="flex items-baseline justify-between gap-4">
-                        <div className="font-mono text-sm text-slate-100">
-                          {adv.name}
-                        </div>
-                        <div className="text-xs text-slate-400">
-                          {adv.cost} XP
-                        </div>
+              <ul className="space-y-2">
+                {rankBlock.advances.map((adv) => (
+                  <li
+                    key={adv.id}
+                    className="rounded border border-slate-700 bg-slate-900/60 p-3"
+                  >
+                    <div className="flex items-baseline justify-between gap-4">
+                      <div className="font-mono text-sm text-slate-100">{adv.name}</div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-xs text-slate-400">{adv.cost} XP</span>
+                        {isDM && (
+                          <button
+                            onClick={() => handleRemoveAdvance(rankBlock.rank, adv.id)}
+                            className="text-xs text-red-400 hover:text-red-300"
+                          >
+                            Remove
+                          </button>
+                        )}
                       </div>
-
-                      {adv.notes && (
-                        <div className="mt-1 text-xs text-slate-400">
-                          {adv.notes}
-                        </div>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              )}
+                    </div>
+                    {adv.notes && (
+                      <div className="mt-1 text-xs text-slate-400">{adv.notes}</div>
+                    )}
+                  </li>
+                ))}
+              </ul>
             </div>
           ))}
         </div>
+
+        {/* ADD ADVANCE FORM — DM only */}
+        {isDM && (
+          <div className="border border-slate-700 rounded-lg p-4 space-y-3 bg-slate-900/40">
+            <p className="text-xs font-semibold text-amber-400 uppercase tracking-wide">Add Advance</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <div>
+                <label className="text-xs text-slate-400">Rank</label>
+                <select
+                  value={String(newRank)}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setNewRank(v === "elite" ? "elite" : Number(v) as RankAdvances["rank"]);
+                  }}
+                  className="mt-0.5 w-full px-2 py-1 bg-slate-800 border border-slate-600 rounded text-sm text-slate-100 focus:border-amber-400 focus:outline-none"
+                >
+                  {RANK_OPTIONS.map((r) => (
+                    <option key={String(r)} value={String(r)}>
+                      {r === "elite" ? "Elite" : `Rank ${r}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="col-span-2 sm:col-span-2">
+                <label className="text-xs text-slate-400">Advance Name</label>
+                <input
+                  type="text"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  placeholder="e.g. +10 Weapon Skill"
+                  className="mt-0.5 w-full px-2 py-1 bg-slate-800 border border-slate-600 rounded text-sm text-slate-100 focus:border-amber-400 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs text-slate-400">XP Cost</label>
+                <input
+                  type="number"
+                  min={0}
+                  value={newCost}
+                  onChange={(e) => setNewCost(Math.max(0, Number(e.target.value)))}
+                  className="mt-0.5 w-full px-2 py-1 bg-slate-800 border border-slate-600 rounded text-sm text-slate-100 focus:border-amber-400 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs text-slate-400">Notes (optional)</label>
+              <input
+                type="text"
+                value={newNotes}
+                onChange={(e) => setNewNotes(e.target.value)}
+                placeholder="e.g. Approved session 3"
+                className="mt-0.5 w-full px-2 py-1 bg-slate-800 border border-slate-600 rounded text-sm text-slate-100 focus:border-amber-400 focus:outline-none"
+              />
+            </div>
+
+            <button
+              onClick={handleAddAdvance}
+              disabled={!newName.trim() || newCost <= 0}
+              className="px-4 py-1.5 bg-amber-500 text-slate-900 font-semibold rounded text-sm disabled:opacity-40 hover:bg-amber-400 transition"
+            >
+              Add
+            </button>
+          </div>
+        )}
       </section>
 
       {/* XP PROPOSALS — player only */}

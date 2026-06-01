@@ -30,6 +30,7 @@ export async function createSession(
     xpAwarded: session.xpAwarded,
     attendees: session.attendees,
     createdAt: serverTimestamp(),
+    xpApplied: session.xpAwarded > 0,
   });
 
   if (session.xpAwarded > 0) {
@@ -39,6 +40,35 @@ export async function createSession(
         { "experience.total": increment(session.xpAwarded) }
       );
     }
+  }
+
+  await batch.commit();
+}
+
+/**
+ * Manually applies XP from a session to all attendee characters.
+ * Marks the session xpApplied: true to prevent double-application.
+ * Use for sessions created before automatic XP distribution was added.
+ */
+export async function applySessionXp(
+  campaignId: string,
+  sessionId: string,
+  attendeeIds: string[],
+  xpAmount: number
+): Promise<void> {
+  if (xpAmount <= 0 || attendeeIds.length === 0) return;
+
+  const batch = writeBatch(db);
+
+  batch.update(doc(db, "campaigns", campaignId, "sessions", sessionId), {
+    xpApplied: true,
+  });
+
+  for (const characterId of attendeeIds) {
+    batch.update(
+      doc(db, "campaigns", campaignId, "characters", characterId),
+      { "experience.total": increment(xpAmount) }
+    );
   }
 
   await batch.commit();

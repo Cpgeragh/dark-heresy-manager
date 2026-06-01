@@ -9,6 +9,7 @@ import { useCharacterSummaries, type CharacterSummary } from "../hooks/useCharac
 import { SessionForm } from "./CampaignOverview/SessionForm";
 import { SessionCard } from "./CampaignOverview/SessionCard";
 import { CharacterRow } from "./CampaignOverview/CharacterRow";
+import { applySessionXp } from "../services/sessionService";
 
 export default function CampaignOverview() {
   const params = useParams<{ campaignId: string }>();
@@ -109,6 +110,7 @@ export default function CampaignOverview() {
                 isDM={isDM}
                 onDelete={isDM ? () => deleteSession(session.id) : undefined}
                 onSave={isDM ? (data) => updateSession(session.id, data) : undefined}
+                onApplyXp={isDM ? () => applySessionXp(campaignId, session.id, session.attendees, session.xpAwarded) : undefined}
               />
             ))}
           </div>
