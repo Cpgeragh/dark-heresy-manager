@@ -7,7 +7,6 @@ import { CHARACTERISTIC_BONUS_DIVISOR } from "../constants/gameRules";
 
 import { useCharacterSheet } from "./characterSheet/useCharacterSheet";
 import { ErrorBoundary } from "../components/ErrorBoundary";
-import { TabButton } from "../components/TabButton";
 
 import { OverviewTab } from "./characterSheet/OverviewTab";
 import { CharacteristicsTab } from "./characterSheet/CharacteristicsTab";
@@ -54,34 +53,6 @@ import type {
 import { exportCharacterJson } from "../utils/exportCharacter";
 import { normaliseArmour, normaliseGear } from "../utils/characterMigration";
 
-// ================================================================
-// TAB CONFIGURATION
-// ================================================================
-
-interface TabConfig {
-  id: TabId;
-  label: string;
-  dmOnly?: boolean;
-}
-
-const TABS: TabConfig[] = [
-  { id: "overview", label: "Vitals" },
-  { id: "stats", label: "Characteristics" },
-  { id: "skills", label: "Skills" },
-  { id: "talents", label: "Talents" },
-  { id: "traits", label: "Traits" },
-  { id: "weapons", label: "Weapons" },
-  { id: "armour", label: "Armour" },
-  { id: "cybernetics", label: "Cybernetics" },
-  { id: "psychic", label: "Psychic" },
-  { id: "gear", label: "Gear" },
-  { id: "drugs", label: "Drugs" },
-  { id: "xp", label: "XP" },
-  { id: "notes", label: "Notes" },
-  { id: "archeotech", label: "Archeotech" },
-  { id: "background", label: "Background" },
-  { id: "admin", label: "Admin", dmOnly: true },
-];
 
 // ================================================================
 // COMPONENT
@@ -332,26 +303,46 @@ export default function CharacterSheet() {
         </div>
       )}
 
-      {/* TABS - NOW USING CONFIGURATION */}
-      <div
-        className="flex gap-2 mb-6 overflow-x-auto pb-1"
-        role="tablist"
-        aria-label="Character sheet sections"
-      >
-        {TABS.map((tab) => {
-          // Skip DM-only tabs if not DM
-          if (tab.dmOnly && !isDM) return null;
-
-          return (
-            <TabButton
-              key={tab.id}
-              label={tab.label}
-              tabId={tab.id}
-              active={activeTab === tab.id}
-              onTabChange={setActiveTab}
-            />
-          );
-        })}
+      {/* SECTION SELECTOR */}
+      <div className="relative mb-6">
+        <select
+          value={activeTab}
+          onChange={(e) => setActiveTab(e.target.value as TabId)}
+          className="w-full px-3 py-2 rounded-lg border border-slate-500 bg-slate-800 text-slate-100 text-sm appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-amber-500"
+          aria-label="Character sheet section"
+        >
+          <optgroup label="Combat">
+            <option value="overview">Vitals</option>
+            <option value="stats">Characteristics</option>
+            <option value="weapons">Weapons</option>
+            <option value="armour">Armour</option>
+          </optgroup>
+          <optgroup label="Abilities">
+            <option value="skills">Skills</option>
+            <option value="talents">Talents</option>
+            <option value="traits">Traits</option>
+            <option value="psychic">Psychic</option>
+          </optgroup>
+          <optgroup label="Equipment">
+            <option value="gear">Gear</option>
+            <option value="drugs">Drugs</option>
+            <option value="cybernetics">Cybernetics</option>
+            <option value="archeotech">Archeotech</option>
+          </optgroup>
+          <optgroup label="Character">
+            <option value="background">Background</option>
+            <option value="xp">XP</option>
+            <option value="notes">Notes</option>
+          </optgroup>
+          {isDM && (
+            <optgroup label="Admin">
+              <option value="admin">Admin</option>
+            </optgroup>
+          )}
+        </select>
+        <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-400">
+          ▾
+        </div>
       </div>
 
       {/* CONTENT CONTAINER */}
