@@ -46,18 +46,25 @@ export function useCharacterData({
     // Use converter for type safety and consistent data transformation
     const ref = characterDocRef(campaignId, characterId);
 
-    const unsub = onSnapshot(ref, (snap) => {
-      if (!snap.exists()) {
-        setCharacter(null);
-        setLoading(false);
-        return;
-      }
+    const unsub = onSnapshot(
+      ref,
+      (snap) => {
+        if (!snap.exists()) {
+          setCharacter(null);
+          setLoading(false);
+          return;
+        }
 
-      // Converter handles data transformation (adds id, handles types)
-      const data = snap.data();
-      setCharacter(data);
-      setLoading(false);
-    });
+        // Converter handles data transformation (adds id, handles types)
+        const data = snap.data();
+        setCharacter(data);
+        setLoading(false);
+      },
+      (err) => {
+        console.error("Character snapshot error:", err);
+        setLoading(false);
+      }
+    );
 
     return () => unsub();
   }, [campaignId, characterId]);
@@ -82,14 +89,19 @@ export function useCharacterData({
 
     const logsQuery = query(logsRef, orderBy("timestamp", "desc"));
 
-    const unsub = onSnapshot(logsQuery, (snap) => {
-      const list: ClaimLog[] = snap.docs.map((d) => {
-        const data = d.data() as Omit<ClaimLog, "id">;
-        return { id: d.id, ...data };
-      });
-
-      setClaimLog(list);
-    });
+    const unsub = onSnapshot(
+      logsQuery,
+      (snap) => {
+        const list: ClaimLog[] = snap.docs.map((d) => {
+          const data = d.data() as Omit<ClaimLog, "id">;
+          return { id: d.id, ...data };
+        });
+        setClaimLog(list);
+      },
+      (err) => {
+        console.error("Claim log snapshot error:", err);
+      }
+    );
 
     return () => unsub();
   }, [campaignId, characterId, isDM]);

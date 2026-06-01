@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import type { Timestamp } from "firebase/firestore";
 import type { SessionDocument } from "../../types/Firestore";
+import { useToast } from "../../components/Toast";
 
 interface Character {
   id: string;
@@ -32,6 +33,7 @@ function toInputDate(value: SessionDocument["date"]): string {
 }
 
 export function SessionCard({ session, characters, isDM, onDelete, onSave }: Props) {
+  const toast = useToast();
   const [mode, setMode] = useState<"view" | "edit" | "confirmDelete">("view");
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -70,10 +72,13 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave }: Pro
         attendees: [...attendees],
       });
       setMode("view");
+    } catch (err) {
+      console.error("Failed to save session:", err);
+      toast.error("Failed to save session. Please try again.");
     } finally {
       setSaving(false);
     }
-  }, [onSave, date, summary, dmNotes, xpAwarded, attendees]);
+  }, [onSave, date, summary, dmNotes, xpAwarded, attendees, toast]);
 
   const handleCancelEdit = useCallback(() => {
     setDate(toInputDate(session.date));
@@ -89,10 +94,14 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave }: Pro
     setDeleting(true);
     try {
       await onDelete();
+    } catch (err) {
+      console.error("Failed to delete session:", err);
+      toast.error("Failed to delete session. Please try again.");
+      setMode("view");
     } finally {
       setDeleting(false);
     }
-  }, [onDelete]);
+  }, [onDelete, toast]);
 
   if (mode === "edit") {
     return (

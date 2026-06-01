@@ -5,13 +5,65 @@ import type { CharField } from "../../utils/characterFactory";
 import type { Characteristics } from "../../types/Character";
 import CharacteristicField from "../../components/CharacteristicField";
 import { sectionContainerClass } from "../../ui/editableStyles";
-import { 
+import {
   CHARACTERISTIC_BONUS_DIVISOR,
-  CHARACTERISTIC_ADVANCE_INCREMENT
+  CHARACTERISTIC_ADVANCE_INCREMENT,
+  MOVEMENT_FULL_MULTIPLIER,
+  MOVEMENT_CHARGE_MULTIPLIER,
+  MOVEMENT_RUN_MULTIPLIER,
 } from "../../constants/gameRules";
+
+// ─── StatBlock ────────────────────────────────────────────────────────────────
+// Extracted to module level to avoid re-creating the component on every render.
+
+interface StatBlockProps {
+  label: string;
+  statKey: keyof Characteristics;
+  editable: boolean;
+  getCharField: (statKey: keyof Characteristics) => CharField;
+  updateCharacteristic: (statKey: keyof Characteristics, value: CharField) => void;
+}
+
+function StatBlock({
+  label,
+  statKey,
+  editable,
+  getCharField,
+  updateCharacteristic,
+}: StatBlockProps) {
+  const value = getCharField(statKey);
+  const statTotal = value.base + value.advances * CHARACTERISTIC_ADVANCE_INCREMENT;
+
+  const handleChange = useCallback((v: CharField) => {
+    updateCharacteristic(statKey, v);
+  }, [statKey, updateCharacteristic]);
+
+  return (
+    <div className={sectionContainerClass(editable) + " space-y-2"}>
+      {/* Header */}
+      <div className="flex items-baseline justify-between">
+        <span className="text-sm text-slate-400">{label}</span>
+        <span className="text-2xl font-semibold font-mono text-slate-100">
+          {statTotal}
+        </span>
+      </div>
+
+      {/* Base / Advances */}
+      <CharacteristicField
+        label=""
+        value={value}
+        editable={editable}
+        onChange={handleChange}
+      />
+    </div>
+  );
+}
+
+// ─── CharacteristicsTab ───────────────────────────────────────────────────────
 
 interface CharacteristicsTabProps {
   getCharField: (statKey: keyof Characteristics) => CharField;
+  getCharTotal: (statKey: keyof Characteristics) => number;
   editable: boolean;
   updateCharacteristic: (
     statKey: keyof Characteristics,
@@ -21,58 +73,17 @@ interface CharacteristicsTabProps {
 
 export function CharacteristicsTab({
   getCharField,
+  getCharTotal,
   editable,
   updateCharacteristic,
 }: CharacteristicsTabProps) {
-  // Authoritative total
-  function total(stat: keyof Characteristics) {
-    const field = getCharField(stat);
-    return field.base + field.advances * CHARACTERISTIC_ADVANCE_INCREMENT;
-  }
-
-  // Derived bonuses
-  const SB = Math.floor(total("s") / CHARACTERISTIC_BONUS_DIVISOR);
-  const TB = Math.floor(total("t") / CHARACTERISTIC_BONUS_DIVISOR);
-  const AB = Math.floor(total("ag") / CHARACTERISTIC_BONUS_DIVISOR);
-  const IB = Math.floor(total("int") / CHARACTERISTIC_BONUS_DIVISOR);
-  const PB = Math.floor(total("per") / CHARACTERISTIC_BONUS_DIVISOR);
-  const WPB = Math.floor(total("wp") / CHARACTERISTIC_BONUS_DIVISOR);
-  const FB = Math.floor(total("fel") / CHARACTERISTIC_BONUS_DIVISOR);
-
-  function StatBlock({
-    label,
-    statKey,
-  }: {
-    label: string;
-    statKey: keyof Characteristics;
-  }) {
-    const value = getCharField(statKey);
-    const statTotal = value.base + value.advances * CHARACTERISTIC_ADVANCE_INCREMENT;
-
-    const handleChange = useCallback((v: CharField) => {
-      updateCharacteristic(statKey, v);
-    }, [statKey]);
-
-    return (
-      <div className={sectionContainerClass(editable) + " space-y-2"}>
-        {/* Header */}
-        <div className="flex items-baseline justify-between">
-          <span className="text-sm text-slate-400">{label}</span>
-          <span className="text-2xl font-semibold font-mono text-slate-100">
-            {statTotal}
-          </span>
-        </div>
-
-        {/* Base / Advances */}
-        <CharacteristicField
-          label=""
-          value={value}
-          editable={editable}
-          onChange={handleChange}
-        />
-      </div>
-    );
-  }
+  const SB  = Math.floor(getCharTotal("s")   / CHARACTERISTIC_BONUS_DIVISOR);
+  const TB  = Math.floor(getCharTotal("t")   / CHARACTERISTIC_BONUS_DIVISOR);
+  const AB  = Math.floor(getCharTotal("ag")  / CHARACTERISTIC_BONUS_DIVISOR);
+  const IB  = Math.floor(getCharTotal("int") / CHARACTERISTIC_BONUS_DIVISOR);
+  const PB  = Math.floor(getCharTotal("per") / CHARACTERISTIC_BONUS_DIVISOR);
+  const WPB = Math.floor(getCharTotal("wp")  / CHARACTERISTIC_BONUS_DIVISOR);
+  const FB  = Math.floor(getCharTotal("fel") / CHARACTERISTIC_BONUS_DIVISOR);
 
   return (
     <div className="space-y-6 text-slate-300">
@@ -98,7 +109,7 @@ export function CharacteristicsTab({
             <div key={key} className={sectionContainerClass(false) + " text-center"}>
               <div className="text-xs text-slate-400 mb-1">{label}</div>
               <div className="text-2xl font-semibold font-mono text-slate-100">
-                {total(key)}
+                {getCharTotal(key)}
               </div>
             </div>
           ))}
@@ -107,15 +118,15 @@ export function CharacteristicsTab({
 
       {/* Main stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <StatBlock label="Weapon Skill (WS)" statKey="ws" />
-        <StatBlock label="Ballistic Skill (BS)" statKey="bs" />
-        <StatBlock label="Strength (S)" statKey="s" />
-        <StatBlock label="Toughness (T)" statKey="t" />
-        <StatBlock label="Agility (Ag)" statKey="ag" />
-        <StatBlock label="Intelligence (Int)" statKey="int" />
-        <StatBlock label="Perception (Per)" statKey="per" />
-        <StatBlock label="Willpower (WP)" statKey="wp" />
-        <StatBlock label="Fellowship (Fel)" statKey="fel" />
+        <StatBlock label="Weapon Skill (WS)"   statKey="ws"  editable={editable} getCharField={getCharField} updateCharacteristic={updateCharacteristic} />
+        <StatBlock label="Ballistic Skill (BS)" statKey="bs"  editable={editable} getCharField={getCharField} updateCharacteristic={updateCharacteristic} />
+        <StatBlock label="Strength (S)"         statKey="s"   editable={editable} getCharField={getCharField} updateCharacteristic={updateCharacteristic} />
+        <StatBlock label="Toughness (T)"        statKey="t"   editable={editable} getCharField={getCharField} updateCharacteristic={updateCharacteristic} />
+        <StatBlock label="Agility (Ag)"         statKey="ag"  editable={editable} getCharField={getCharField} updateCharacteristic={updateCharacteristic} />
+        <StatBlock label="Intelligence (Int)"   statKey="int" editable={editable} getCharField={getCharField} updateCharacteristic={updateCharacteristic} />
+        <StatBlock label="Perception (Per)"     statKey="per" editable={editable} getCharField={getCharField} updateCharacteristic={updateCharacteristic} />
+        <StatBlock label="Willpower (WP)"       statKey="wp"  editable={editable} getCharField={getCharField} updateCharacteristic={updateCharacteristic} />
+        <StatBlock label="Fellowship (Fel)"     statKey="fel" editable={editable} getCharField={getCharField} updateCharacteristic={updateCharacteristic} />
       </div>
 
       {/* Derived stats */}
@@ -149,9 +160,9 @@ export function CharacteristicsTab({
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
               { label: "Half",   value: AB },
-              { label: "Full",   value: AB * 2 },
-              { label: "Charge", value: AB * 3 },
-              { label: "Run",    value: AB * 6 },
+              { label: "Full",   value: AB * MOVEMENT_FULL_MULTIPLIER },
+              { label: "Charge", value: AB * MOVEMENT_CHARGE_MULTIPLIER },
+              { label: "Run",    value: AB * MOVEMENT_RUN_MULTIPLIER },
             ].map(({ label, value }) => (
               <div key={label} className={sectionContainerClass(false) + " text-center"}>
                 <div className="text-xs text-slate-400 mb-1">{label}</div>

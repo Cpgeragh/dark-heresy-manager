@@ -1,12 +1,8 @@
 // src/pages/SelectCampaign.tsx
 
-import { useEffect, useState, useCallback } from "react";
-import { collection, collectionGroup, doc, getDocs, getDoc, query, where } from "firebase/firestore";
+import { useCallback } from "react";
 import type { User } from "firebase/auth";
-import { db } from "../firebase";
-import type { CampaignDocument } from "../types/Firestore";
-
-type CampaignWithId = CampaignDocument & { id: string };
+import { useCampaignsForUser } from "../hooks/useCampaignsForUser";
 
 type Props = {
   user: User;
@@ -21,50 +17,11 @@ export default function SelectCampaign({
   activeCampaignId,
   onActiveCampaignChange,
 }: Props) {
-  const [campaigns, setCampaigns] = useState<CampaignWithId[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const { campaigns, error } = useCampaignsForUser(user.uid, role);
 
   const handleCampaignSelect = useCallback((campaignId: string) => {
     onActiveCampaignChange(campaignId);
   }, [onActiveCampaignChange]);
-
-  useEffect(() => {
-    let ignore = false;
-
-    async function load() {
-      if (role === "dm") {
-        const snap = await getDocs(
-          query(collection(db, "campaigns"), where("dmId", "==", user.uid))
-        );
-        const list: CampaignWithId[] = snap.docs.map((d) => ({
-          id: d.id,
-          ...(d.data() as Omit<CampaignDocument, "id">),
-        }));
-        if (!ignore) setCampaigns(list);
-      } else {
-        const charSnap = await getDocs(
-          query(collectionGroup(db, "characters"), where("userId", "==", user.uid))
-        );
-        const campaignIds = [
-          ...new Set(charSnap.docs.map((d) => d.ref.parent.parent!.id)),
-        ];
-        const campaignDocs = await Promise.all(
-          campaignIds.map((id) => getDoc(doc(db, "campaigns", id)))
-        );
-        const list: CampaignWithId[] = campaignDocs
-          .filter((d) => d.exists())
-          .map((d) => ({ id: d.id, ...(d.data() as Omit<CampaignDocument, "id">) }));
-        if (!ignore) setCampaigns(list);
-      }
-    }
-
-    load().catch((err) => {
-      console.error("SelectCampaign load error:", err);
-      if (!ignore) setError("Failed to load campaigns. A Firestore index may be missing — check the console.");
-    });
-
-    return () => { ignore = true; };
-  }, [user.uid, role]);
 
   return (
     <div className="space-y-6">

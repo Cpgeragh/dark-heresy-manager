@@ -1,14 +1,14 @@
 // src/pages/CampaignOverview.tsx
 
 import { useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
-import { useClaimLogs } from "../hooks/useClaimLogs";
 import { useIsDM } from "../hooks/useIsDM";
 import { useSessions } from "../hooks/useSessions";
 import { useCharacterSummaries, type CharacterSummary } from "../hooks/useCharacterSummaries";
 import { SessionForm } from "./CampaignOverview/SessionForm";
 import { SessionCard } from "./CampaignOverview/SessionCard";
+import { CharacterRow } from "./CampaignOverview/CharacterRow";
 
 export default function CampaignOverview() {
   const params = useParams<{ campaignId: string }>();
@@ -35,6 +35,12 @@ export default function CampaignOverview() {
       </div>
     );
   }
+
+  const filteredCharacters = search.trim()
+    ? characters.filter((c) =>
+        c.characterName.toLowerCase().includes(search.trim().toLowerCase())
+      )
+    : characters;
 
   return (
     <div className="space-y-8">
@@ -69,28 +75,21 @@ export default function CampaignOverview() {
           />
         </div>
         <div className="space-y-4">
-          {(() => {
-            const filtered = search.trim()
-              ? characters.filter((c) =>
-                  c.characterName.toLowerCase().includes(search.trim().toLowerCase())
-                )
-              : characters;
-            return filtered.length === 0 ? (
-              <p className="text-slate-400 text-sm">
-                {search.trim() ? `No characters match "${search}".` : "No characters yet."}
-              </p>
-            ) : (
-              filtered.map((char) => (
-                <CampaignOverviewCharacterRow
-                  key={char.id}
-                  campaignId={campaignId}
-                  characterId={char.id}
-                  characterName={char.characterName}
-                  userId={char.userId}
-                />
-              ))
-            );
-          })()}
+          {filteredCharacters.length === 0 ? (
+            <p className="text-slate-400 text-sm">
+              {search.trim() ? `No characters match "${search}".` : "No characters yet."}
+            </p>
+          ) : (
+            filteredCharacters.map((char) => (
+              <CharacterRow
+                key={char.id}
+                campaignId={campaignId}
+                characterId={char.id}
+                characterName={char.characterName}
+                userId={char.userId}
+              />
+            ))
+          )}
         </div>
       </div>
 
@@ -114,51 +113,6 @@ export default function CampaignOverview() {
             ))}
           </div>
         )}
-      </div>
-    </div>
-  );
-}
-
-function CampaignOverviewCharacterRow({
-  campaignId,
-  characterId,
-  characterName,
-  userId,
-}: {
-  campaignId: string;
-  characterId: string;
-  characterName: string;
-  userId: string | null;
-}) {
-  const { logs } = useClaimLogs(campaignId, characterId);
-
-  const latest = logs.length > 0 ? logs[0] : null;
-
-  return (
-    <div className="border border-slate-700 p-4 rounded bg-slate-900/40">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-xl font-semibold">{characterName}</h2>
-          <p className="text-xs text-slate-400">
-            Character ID: <code>{characterId}</code>
-          </p>
-          <p className="text-xs text-slate-400">
-            Owner UID: <code>{userId ?? "Unclaimed"}</code> {/* FIXED: Changed from || to ?? */}
-          </p>
-
-          {latest && (
-            <p className="text-xs text-slate-300 mt-1">
-              Last event: {latest.action} by {latest.actorUid}
-            </p>
-          )}
-        </div>
-
-        <Link
-          to={`/campaign/${campaignId}/character/${characterId}`}
-          className="px-3 py-1 rounded bg-amber-500 text-black text-sm border border-amber-400 hover:bg-amber-400"
-        >
-          Open Sheet
-        </Link>
       </div>
     </div>
   );

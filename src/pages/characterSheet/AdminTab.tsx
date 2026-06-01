@@ -10,6 +10,7 @@ import {
 } from "../../ui/editableStyles";
 import { useXpProposals } from "../../hooks/useXpProposals";
 import { approveXpProposal, rejectXpProposal } from "../../services/xpService";
+import { useToast } from "../../components/Toast";
 
 interface AdminTabProps {
   character: Character;
@@ -37,16 +38,29 @@ export function AdminTab({
   characterId,
 }: AdminTabProps) {
   const [assignUID, setAssignUID] = useState("");
+  const toast = useToast();
   const { proposals } = useXpProposals(campaignId, characterId);
   const pendingProposals = proposals.filter((p) => p.status === "pending");
 
   const handleApprove = useCallback(async (proposalId: string, xpCost: number) => {
-    await approveXpProposal(campaignId, characterId, proposalId, xpCost);
-  }, [campaignId, characterId]);
+    try {
+      await approveXpProposal(campaignId, characterId, proposalId, xpCost);
+      toast.success("Proposal approved.");
+    } catch (err) {
+      console.error("Failed to approve XP proposal:", err);
+      toast.error("Failed to approve proposal. Please try again.");
+    }
+  }, [campaignId, characterId, toast]);
 
   const handleReject = useCallback(async (proposalId: string) => {
-    await rejectXpProposal(campaignId, characterId, proposalId);
-  }, [campaignId, characterId]);
+    try {
+      await rejectXpProposal(campaignId, characterId, proposalId);
+      toast.success("Proposal rejected.");
+    } catch (err) {
+      console.error("Failed to reject XP proposal:", err);
+      toast.error("Failed to reject proposal. Please try again.");
+    }
+  }, [campaignId, characterId, toast]);
 
   const handleAssignUIDChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setAssignUID(e.target.value);
@@ -209,7 +223,7 @@ export function AdminTab({
         )}
 
         <ul className="space-y-2 max-h-64 overflow-y-auto pr-1">
-          {claimLog.map((entry) => {
+          {claimLog.map((entry, i) => {
             const when =
               typeof entry.timestamp === "number"
                 ? new Date(entry.timestamp).toLocaleString()
@@ -217,7 +231,7 @@ export function AdminTab({
 
             return (
               <li
-                key={entry.id ?? crypto.randomUUID()}
+                key={entry.id ?? i}
                 className="rounded border border-slate-700
                            bg-slate-900/60 p-2 text-xs"
               >

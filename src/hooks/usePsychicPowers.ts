@@ -11,22 +11,11 @@ interface UsePsychicPowersProps {
   onUpdate: (next: PsychicBlock) => void;
 }
 
-/**
- * Hook to manage psychic power arrays (minor and major).
- * Provides generic add, remove, and update operations.
- * 
- * @param psychic - The psychic block
- * @param editable - Whether powers can be edited
- * @param onUpdate - Callback to update the entire psychic block
- */
 export function usePsychicPowers({
   psychic,
   editable,
   onUpdate,
 }: UsePsychicPowersProps) {
-  /**
-   * Generic function to add a new power to a power array
-   */
   const addPower = useCallback(
     (type: PowerType) => {
       if (!editable) return;
@@ -47,9 +36,6 @@ export function usePsychicPowers({
     [editable, psychic, onUpdate]
   );
 
-  /**
-   * Generic function to remove a power from a power array
-   */
   const removePower = useCallback(
     (type: PowerType, index: number) => {
       if (!editable) return;
@@ -65,9 +51,6 @@ export function usePsychicPowers({
     [editable, psychic, onUpdate]
   );
 
-  /**
-   * Generic function to update a specific field of a power
-   */
   const updatePower = useCallback(
     <K extends keyof PsychicPower>(type: PowerType, index: number, key: K, value: PsychicPower[K]) => {
       if (!editable) return;

@@ -35,7 +35,6 @@ function CampaignSection({
   const handleCreate = useCallback(async () => {
     const name = newCampaignName.trim();
 
-    // Validate campaign name
     const validation = validateCampaignName(name);
     if (!validation.isValid) {
       toast.warning(validation.error ?? "Invalid campaign name");

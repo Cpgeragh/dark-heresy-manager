@@ -9,16 +9,7 @@ interface UseCharacterHelpersProps {
   character: Character | null;
 }
 
-/**
- * Hook providing helper functions for working with character characteristics.
- * 
- * @param character - The character object
- * @returns Helper functions for accessing characteristic data
- */
 export function useCharacterHelpers({ character }: UseCharacterHelpersProps) {
-  /**
-   * Get a characteristic field (base + advances)
-   */
   const getCharField = useCallback(
     (statKey: keyof Characteristics): CharField => {
       if (!character) return { base: 0, advances: 0 };
@@ -27,9 +18,6 @@ export function useCharacterHelpers({ character }: UseCharacterHelpersProps) {
     [character]
   );
 
-  /**
-   * Get computed total for a characteristic
-   */
   const getCharTotal = useCallback(
     (statKey: keyof Characteristics): number => {
       const field = getCharField(statKey);

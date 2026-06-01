@@ -215,7 +215,8 @@ export async function importCharacter(
   batch.set(doc(db, "recoveryIndex", recoveryCode), { campaignId, characterId: charRef.id });
   await batch.commit();
 
-  return (data.header as Record<string, unknown>)?.characterName as string ?? "character";
+  const name = (data.header as Record<string, unknown>)?.characterName;
+  return typeof name === "string" ? name : "character";
 }
 
 /**

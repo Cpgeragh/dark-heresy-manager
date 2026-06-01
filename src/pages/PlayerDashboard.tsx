@@ -38,19 +38,21 @@ export default function PlayerDashboard({ user, activeCampaignId }: Props) {
       "characters"
     );
 
-    const unsubscribe = onSnapshot(charsRef, (snapshot) => {
-      const list: CharacterListItem[] = snapshot.docs
-        .map((docSnap) => {
-          const data = docSnap.data() as Omit<CharacterListItem, "id">;
-          return {
-            id: docSnap.id,
-            ...data,
-          };
-        })
-        .filter((c) => c.userId === user.uid);
-
-      setCharacters(list);
-    });
+    const unsubscribe = onSnapshot(
+      charsRef,
+      (snapshot) => {
+        const list: CharacterListItem[] = snapshot.docs
+          .map((docSnap) => {
+            const data = docSnap.data() as Omit<CharacterListItem, "id">;
+            return { id: docSnap.id, ...data };
+          })
+          .filter((c) => c.userId === user.uid);
+        setCharacters(list);
+      },
+      (err) => {
+        console.error("Player characters snapshot error:", err);
+      }
+    );
 
     return () => unsubscribe();
   }, [activeCampaignId, user.uid]);

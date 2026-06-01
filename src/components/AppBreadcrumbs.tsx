@@ -15,14 +15,12 @@ export function AppBreadcrumbs({ isDM, pathname }: AppBreadcrumbsProps) {
 
   const crumbs: { label: string; to?: string }[] = [];
 
-  // Root
   if (isDM) {
     crumbs.push({ label: "DM Dashboard", to: "/dm" });
   } else {
     crumbs.push({ label: "My Characters", to: "/player" });
   }
 
-  // Campaign context
   if (segments.includes("campaign")) {
     crumbs.push({
       label: "Campaign",
@@ -30,7 +28,6 @@ export function AppBreadcrumbs({ isDM, pathname }: AppBreadcrumbsProps) {
     });
   }
 
-  // Character context
   if (segments.includes("character")) {
     crumbs.push({ label: "Character" });
   }

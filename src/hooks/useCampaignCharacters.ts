@@ -17,13 +17,19 @@ export function useCampaignCharacters(campaignId: string | null) {
 
     const ref = collection(db, "campaigns", campaignId, "characters");
 
-    const unsub = onSnapshot(ref, (snap) => {
-      const list: CharacterListItem[] = snap.docs.map((c) => {
-        const data = c.data() as Omit<CharacterListItem, "id">;
-        return { id: c.id, ...data };
-      });
-      setCharacters(list);
-    });
+    const unsub = onSnapshot(
+      ref,
+      (snap) => {
+        const list: CharacterListItem[] = snap.docs.map((c) => {
+          const data = c.data() as Omit<CharacterListItem, "id">;
+          return { id: c.id, ...data };
+        });
+        setCharacters(list);
+      },
+      (err) => {
+        console.error("Campaign characters snapshot error:", err);
+      }
+    );
 
     return () => unsub();
   }, [campaignId]);

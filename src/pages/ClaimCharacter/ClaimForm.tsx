@@ -10,7 +10,7 @@ function normalizeRecoveryCode(input: string) {
 
 interface ClaimFormProps {
   code: string;
-  onCodeChange: (v: string) => void;
+  onCodeChange: (value: string) => void;
   onSubmit: () => void;
   loading: boolean;
 }

@@ -31,26 +31,43 @@ export function useSessions(campaignId: string | undefined): {
       orderBy("date", "desc")
     );
 
-    const unsub = onSnapshot(sessionsQuery, (snap) => {
-      const list: SessionWithId[] = snap.docs.map((d) => ({
-        id: d.id,
-        ...(d.data() as Omit<SessionDocument, "id">),
-      }));
-      setSessions(list);
-      setLoading(false);
-    });
+    const unsub = onSnapshot(
+      sessionsQuery,
+      (snap) => {
+        const list: SessionWithId[] = snap.docs.map((d) => ({
+          id: d.id,
+          ...(d.data() as Omit<SessionDocument, "id">),
+        }));
+        setSessions(list);
+        setLoading(false);
+      },
+      (err) => {
+        console.error("Sessions snapshot error:", err);
+        setLoading(false);
+      }
+    );
 
     return () => unsub();
   }, [campaignId]);
 
   const deleteSession = useCallback(async (sessionId: string) => {
     if (!campaignId) return;
-    await deleteDoc(doc(db, "campaigns", campaignId, "sessions", sessionId));
+    try {
+      await deleteDoc(doc(db, "campaigns", campaignId, "sessions", sessionId));
+    } catch (err) {
+      console.error("Failed to delete session:", err);
+      throw err;
+    }
   }, [campaignId]);
 
   const updateSession = useCallback(async (sessionId: string, data: SessionUpdateData) => {
     if (!campaignId) return;
-    await updateDoc(doc(db, "campaigns", campaignId, "sessions", sessionId), data as Record<string, unknown>);
+    try {
+      await updateDoc(doc(db, "campaigns", campaignId, "sessions", sessionId), data as Record<string, unknown>);
+    } catch (err) {
+      console.error("Failed to update session:", err);
+      throw err;
+    }
   }, [campaignId]);
 
   return { sessions, loading, deleteSession, updateSession };

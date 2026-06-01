@@ -32,12 +32,8 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    // Log error details for debugging
     console.error("ErrorBoundary caught an error:", error);
     console.error("Error info:", errorInfo);
-
-    // You can also log to an error reporting service here
-    // Example: logErrorToService(error, errorInfo);
 
     this.setState({
       error,
@@ -55,12 +51,10 @@ export class ErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
-      // Use custom fallback if provided
       if (this.props.fallback) {
         return this.props.fallback;
       }
 
-      // Default fallback UI
       return <ErrorFallback error={this.state.error} onReset={this.handleReset} />;
     }
 
@@ -68,7 +62,6 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 }
 
-// Default fallback component
 interface ErrorFallbackProps {
   error: Error | null;
   onReset: () => void;

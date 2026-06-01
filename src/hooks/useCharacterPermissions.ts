@@ -22,13 +22,11 @@ export function useCharacterPermissions({
   isDM,
   dmReadOnly,
 }: UseCharacterPermissionsArgs): UseCharacterPermissionsResult {
-  
-  // Compute ownership
+
   const isOwner = useMemo(() => {
     return !!(userId && character && character.userId === userId);
   }, [userId, character]);
 
-  // Compute edit permission
   const allowedToEdit = useMemo(() => {
     if (!character) return false;
 

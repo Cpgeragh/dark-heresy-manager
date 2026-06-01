@@ -79,7 +79,6 @@ function CharacterSection({ campaignId, characters }: CharacterSectionProps) {
   const handleCreate = useCallback(async () => {
     const trimmedName = characterName.trim();
 
-    // Validate character name
     const validation = validateCharacterName(trimmedName);
     if (!validation.isValid) {
       toast.warning(validation.error ?? "Invalid character name");

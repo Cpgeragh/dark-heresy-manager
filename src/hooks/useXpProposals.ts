@@ -31,14 +31,21 @@ export function useXpProposals(
       orderBy("proposedAt", "desc")
     );
 
-    const unsub = onSnapshot(proposalsQuery, (snap) => {
-      const list: XpProposalWithId[] = snap.docs.map((d) => ({
-        id: d.id,
-        ...(d.data() as Omit<XpProposalDocument, "id">),
-      }));
-      setProposals(list);
-      setLoading(false);
-    });
+    const unsub = onSnapshot(
+      proposalsQuery,
+      (snap) => {
+        const list: XpProposalWithId[] = snap.docs.map((d) => ({
+          id: d.id,
+          ...(d.data() as Omit<XpProposalDocument, "id">),
+        }));
+        setProposals(list);
+        setLoading(false);
+      },
+      (err) => {
+        console.error("XP proposals snapshot error:", err);
+        setLoading(false);
+      }
+    );
 
     return () => unsub();
   }, [campaignId, characterId]);

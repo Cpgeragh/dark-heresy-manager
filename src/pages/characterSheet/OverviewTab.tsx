@@ -68,9 +68,9 @@ export function OverviewTab({
   );
 
   const handleHomeworldNotesChange = useCallback(
-    (v: string) => {
+    (value: string) => {
       if (!editable) return;
-      onUpdateTalents({ ...talents, homeworldNotes: v });
+      onUpdateTalents({ ...talents, homeworldNotes: value });
     },
     [editable, talents, onUpdateTalents]
   );
@@ -135,12 +135,8 @@ export function OverviewTab({
   // ------------------------------
   // Danger state helpers
   // ------------------------------
-  function woundsDangerClass(value: number) {
-    return value <= WOUNDS_CRITICAL_THRESHOLD ? "text-red-400 font-semibold" : "";
-  }
-
-  function fateDangerClass(value: number) {
-    return value === FATE_CRITICAL_THRESHOLD ? "text-red-400 font-semibold" : "";
+  function dangerClass(value: number, criticalThreshold: number): string {
+    return value <= criticalThreshold ? "text-red-400 font-semibold" : "";
   }
 
   // ------------------------------
@@ -148,9 +144,13 @@ export function OverviewTab({
   // ------------------------------
   async function copyCode() {
     if (!recoveryCode) return;
-    await navigator.clipboard.writeText(recoveryCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), COPY_FEEDBACK_DURATION);
+    try {
+      await navigator.clipboard.writeText(recoveryCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), COPY_FEEDBACK_DURATION);
+    } catch (err) {
+      console.error("Failed to copy recovery code:", err);
+    }
   }
 
   // ------------------------------
@@ -249,7 +249,7 @@ export function OverviewTab({
                 −
               </button>
               <span
-                className={`min-w-[2ch] text-center text-xl font-semibold font-mono ${woundsDangerClass(wounds.current)}`}
+                className={`min-w-[2ch] text-center text-xl font-semibold font-mono ${dangerClass(wounds.current, WOUNDS_CRITICAL_THRESHOLD)}`}
               >
                 {wounds.current}
               </span>
@@ -330,7 +330,7 @@ export function OverviewTab({
                 −
               </button>
               <span
-                className={`min-w-[2ch] text-center text-xl font-semibold font-mono ${fateDangerClass(fate.current)}`}
+                className={`min-w-[2ch] text-center text-xl font-semibold font-mono ${dangerClass(fate.current, FATE_CRITICAL_THRESHOLD)}`}
               >
                 {fate.current}
               </span>

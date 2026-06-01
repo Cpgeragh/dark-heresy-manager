@@ -52,7 +52,7 @@ export default function App() {
     (id: string | null) => {
       setActiveCampaignId(id);
       if (!currentUser) return;
-      updateActiveCampaign(currentUser.uid, id);
+      void updateActiveCampaign(currentUser.uid, id); // intentional fire-and-forget
     },
     [currentUser, setActiveCampaignId]
   );

@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
-import { auth } from "../firebase";
+import { CHARACTERISTIC_BONUS_DIVISOR } from "../constants/gameRules";
 
 import { useCharacterSheet } from "./characterSheet/useCharacterSheet";
 import { ErrorBoundary } from "../components/ErrorBoundary";
@@ -11,7 +11,7 @@ import { CharacterBreadcrumb } from "../components/CharacterBreadcrumb";
 
 import { OverviewTab } from "./characterSheet/OverviewTab";
 import { CharacteristicsTab } from "./characterSheet/CharacteristicsTab";
-import { SkillsTab } from "./characterSheet/tabs/skills/SkillsTab";
+import { SkillsTab } from "./characterSheet/SkillsTab";
 import { TalentsTab } from "./characterSheet/TalentsTab";
 import { TraitsTab } from "./characterSheet/TraitsTab";
 import { WeaponsTab } from "./characterSheet/WeaponsTab";
@@ -91,6 +91,8 @@ export default function CharacterSheet() {
     character,
     characterLoading,
     allowedToEdit,
+    isOwner,
+    canPlayerRelease,
     claimLog,
     isDM,
 
@@ -248,12 +250,6 @@ export default function CharacterSheet() {
     );
   }
 
-  const currentUser = auth.currentUser;
-  const isOwner =
-    !!(currentUser && character.userId === currentUser.uid);
-
-  const canPlayerRelease = isOwner && !isDM;
-
   // Visual cue for DM override mode
   const dmOverrideActive = isDM && !dmReadOnly;
 
@@ -378,6 +374,7 @@ export default function CharacterSheet() {
           {activeTab === "stats" && (
             <CharacteristicsTab
               getCharField={getCharField}
+              getCharTotal={getCharTotal}
               editable={allowedToEdit}
               updateCharacteristic={updateCharacteristic}
             />
@@ -417,7 +414,7 @@ export default function CharacterSheet() {
               ammo={character.ammo ?? []}
               grenades={character.grenades ?? []}
               editable={allowedToEdit}
-              strengthBonus={Math.floor(getCharTotal("s") / 10)}
+              strengthBonus={Math.floor(getCharTotal("s") / CHARACTERISTIC_BONUS_DIVISOR)}
               onUpdateRanged={handleUpdateRangedWeapons}
               onUpdateMelee={handleUpdateMeleeWeapons}
               onUpdateAmmo={handleUpdateAmmo}
@@ -431,7 +428,7 @@ export default function CharacterSheet() {
           {activeTab === "armour" && (
             <ArmourTab
               armour={normaliseArmour(character.armour)}
-              toughnessBonus={Math.floor(getCharTotal("t") / 10)}
+              toughnessBonus={Math.floor(getCharTotal("t") / CHARACTERISTIC_BONUS_DIVISOR)}
               editable={allowedToEdit}
               onUpdate={handleUpdateArmour}
               cybernetics={character.cybernetics ?? []}

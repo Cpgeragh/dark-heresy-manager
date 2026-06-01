@@ -1,14 +1,16 @@
-// src/pages/characterSheet/tabs/skills/constants.ts
+// src/pages/characterSheet/SkillsTab/skillsConstants.ts
 
-import type { Characteristics } from "../../../../types/Character";
+import type { Characteristics } from "../../../types/Character";
+
+export type SortMode = "category" | "characteristic" | "name" | "total";
 import {
   SKILL_EXPERT_THRESHOLD,
   SKILL_TRAINED_THRESHOLD,
   SKILL_BASIC_THRESHOLD,
-} from "../../../../constants/gameRules";
+} from "../../../constants/gameRules";
 
 // Re-export type from hook (so existing imports don't break)
-export type { SkillWithComputed } from "../../../../hooks/useSkillComputation";
+export type { SkillWithComputed } from "../../../hooks/useSkillComputation";
 
 // Characteristic display order
 export const GROUP_ORDER: (keyof Characteristics)[] = [

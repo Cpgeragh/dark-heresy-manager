@@ -31,13 +31,23 @@ export default function ClaimCharacterPage() {
 
   const handleForceAssign = useCallback(async (uid: string) => {
     if (!data) return;
-    await forceAssign(data.campaignId, data.character, uid);
-  }, [data, forceAssign]);
+    try {
+      await forceAssign(data.campaignId, data.character, uid);
+    } catch (err) {
+      console.error("Force assign failed:", err);
+      toast.error("Failed to assign character. Please try again.");
+    }
+  }, [data, forceAssign, toast]);
 
   const handleForceRelease = useCallback(async () => {
     if (!data) return;
-    await forceRelease(data.campaignId, data.character);
-  }, [data, forceRelease]);
+    try {
+      await forceRelease(data.campaignId, data.character);
+    } catch (err) {
+      console.error("Force release failed:", err);
+      toast.error("Failed to release character. Please try again.");
+    }
+  }, [data, forceRelease, toast]);
 
   async function handleClaim() {
     if (!data || claiming) return;

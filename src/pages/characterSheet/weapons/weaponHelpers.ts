@@ -99,9 +99,9 @@ export function getCompatibleUpgrades(
   const hasSight = currentIds.some(
     (id) => id === "cr-red-dot-laser-sight" || id === "cr-telescopic-sight"
   );
-  return WEAPON_UPGRADE_REFERENCE.filter((u) => {
-    if (currentIds.includes(u.id)) return false;
-    switch (u.id) {
+  return WEAPON_UPGRADE_REFERENCE.filter((upgrade) => {
+    if (currentIds.includes(upgrade.id)) return false;
+    switch (upgrade.id) {
       case "cr-compact":
         return !isMelee && (cls === "pistol" || cls === "basic");
       case "cr-exterminator":

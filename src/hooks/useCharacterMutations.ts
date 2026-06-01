@@ -24,14 +24,12 @@ export function useCharacterMutations({
   character,
   allowedToEdit,
 }: UseCharacterMutationsProps) {
-  // Loading states
   const [isUpdating, setIsUpdating] = useState(false);
   const [isReleasing, setIsReleasing] = useState(false);
   const [isDmForceReleasing, setIsDmForceReleasing] = useState(false);
   const [isDmForceAssigning, setIsDmForceAssigning] = useState(false);
   const [isDmTogglingEdit, setIsDmTogglingEdit] = useState(false);
 
-  // Toast notifications
   const toast = useToast();
 
   // Use converter for type safety
