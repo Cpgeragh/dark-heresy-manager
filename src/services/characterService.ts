@@ -1,6 +1,7 @@
 // src/services/characterService.ts
 
 import {
+  arrayUnion,
   getDoc,
   setDoc,
   updateDoc,
@@ -121,10 +122,12 @@ export async function forceAssignCharacter(
   if (!user) throw new Error("Not signed in.");
 
   const charRef = characterDocRef(campaignId, characterId);
+  const campaignRef = doc(db, "campaigns", campaignId);
   const logsRef = collection(db, "campaigns", campaignId, "characters", characterId, "claimLog");
 
   const batch = writeBatch(db);
   batch.update(charRef, { userId: targetUid, isEditableByPlayer: true });
+  batch.update(campaignRef, { memberIds: arrayUnion(targetUid) });
   batch.set(doc(logsRef), buildClaimLogPayload("force-assign", user.uid, previousOwner, targetUid));
   await batch.commit();
 }

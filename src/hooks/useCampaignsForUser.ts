@@ -1,7 +1,7 @@
 // src/hooks/useCampaignsForUser.ts
 
 import { useEffect, useState } from "react";
-import { collection, collectionGroup, doc, getDocs, getDoc, query, where } from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../firebase";
 import type { CampaignDocument } from "../types/Firestore";
 
@@ -18,30 +18,19 @@ export function useCampaignsForUser(
     let ignore = false;
 
     async function load() {
-      if (role === "dm") {
-        const snap = await getDocs(
-          query(collection(db, "campaigns"), where("dmId", "==", uid))
-        );
-        const list: CampaignWithId[] = snap.docs.map((d) => ({
-          id: d.id,
-          ...(d.data() as Omit<CampaignDocument, "id">),
-        }));
-        if (!ignore) setCampaigns(list);
-      } else {
-        const charSnap = await getDocs(
-          query(collectionGroup(db, "characters"), where("userId", "==", uid))
-        );
-        const campaignIds = [
-          ...new Set(charSnap.docs.map((d) => d.ref.parent.parent!.id)),
-        ];
-        const campaignDocs = await Promise.all(
-          campaignIds.map((id) => getDoc(doc(db, "campaigns", id)))
-        );
-        const list: CampaignWithId[] = campaignDocs
-          .filter((d) => d.exists())
-          .map((d) => ({ id: d.id, ...(d.data() as Omit<CampaignDocument, "id">) }));
-        if (!ignore) setCampaigns(list);
-      }
+      const field = role === "dm" ? "dmId" : "memberIds";
+      const op    = role === "dm" ? "==" : "array-contains";
+
+      const snap = await getDocs(
+        query(collection(db, "campaigns"), where(field, op, uid))
+      );
+
+      const list: CampaignWithId[] = snap.docs.map((d) => ({
+        id: d.id,
+        ...(d.data() as Omit<CampaignDocument, "id">),
+      }));
+
+      if (!ignore) setCampaigns(list);
     }
 
     load().catch((err) => {

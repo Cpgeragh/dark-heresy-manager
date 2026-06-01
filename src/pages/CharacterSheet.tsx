@@ -26,7 +26,6 @@ import { AdminTab } from "./characterSheet/AdminTab";
 import { ArcheotechTab } from "./characterSheet/ArcheotechTab";
 
 import type { TabId } from "./characterSheet/types";
-import type { CharacterDocument } from "../types/Firestore";
 import type {
   CharacterHeader,
   WoundsBlock,

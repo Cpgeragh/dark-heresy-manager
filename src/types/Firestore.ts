@@ -10,6 +10,7 @@ import type { ClaimLog } from "./ClaimLog";
 export interface CampaignDocument {
   name: string;
   dmId: string;
+  memberIds: string[];
   createdAt: Timestamp | Date | FieldValue;
 }
 

@@ -22,6 +22,7 @@ export async function createCampaign(name: string, dmId: string): Promise<string
   const campaignData: CampaignDocument = {
     name,
     dmId,
+    memberIds: [],
     createdAt: new Date(),
   };
 
