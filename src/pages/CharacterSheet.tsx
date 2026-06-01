@@ -24,6 +24,7 @@ import { ExperienceTab } from "./characterSheet/ExperienceTab";
 import { NotesTab } from "./characterSheet/NotesTab";
 import { AdminTab } from "./characterSheet/AdminTab";
 import { ArcheotechTab } from "./characterSheet/ArcheotechTab";
+import { BackgroundTab } from "./characterSheet/BackgroundTab";
 
 import type { TabId } from "./characterSheet/types";
 import type {
@@ -78,6 +79,7 @@ const TABS: TabConfig[] = [
   { id: "xp", label: "XP" },
   { id: "notes", label: "Notes" },
   { id: "archeotech", label: "Archeotech" },
+  { id: "background", label: "Background" },
   { id: "admin", label: "Admin", dmOnly: true },
 ];
 
@@ -378,14 +380,11 @@ export default function CharacterSheet() {
               editable={allowedToEdit}
               canPlayerRelease={canPlayerRelease}
               onPlayerRelease={releaseCharacter}
-              onUpdateHeader={handleUpdateHeader}
               onUpdateWounds={handleUpdateWounds}
               onUpdateFate={handleUpdateFate}
               onUpdateInsanity={handleUpdateInsanity}
               onUpdateCorruption={handleUpdateCorruption}
-              onUpdateTalents={handleUpdateTalents}
               getCharTotal={getCharTotal}
-              talents={character.talentsAndTraits}
               isReleasing={isReleasing}
             />
           )}
@@ -504,6 +503,16 @@ export default function CharacterSheet() {
               notes={character.notes ?? ""}
               editable={allowedToEdit}
               onSave={handleUpdateNotes}
+            />
+          )}
+
+          {activeTab === "background" && (
+            <BackgroundTab
+              header={character.header}
+              talents={character.talentsAndTraits}
+              editable={allowedToEdit}
+              onUpdateHeader={handleUpdateHeader}
+              onUpdateTalents={handleUpdateTalents}
             />
           )}
 
