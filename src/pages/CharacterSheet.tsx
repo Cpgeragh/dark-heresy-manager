@@ -1,13 +1,12 @@
 // src/pages/CharacterSheet.tsx
 
 import { useState, useCallback } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { CHARACTERISTIC_BONUS_DIVISOR } from "../constants/gameRules";
 
 import { useCharacterSheet } from "./characterSheet/useCharacterSheet";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import { TabButton } from "../components/TabButton";
-import { CharacterBreadcrumb } from "../components/CharacterBreadcrumb";
 
 import { OverviewTab } from "./characterSheet/OverviewTab";
 import { CharacteristicsTab } from "./characterSheet/CharacteristicsTab";
@@ -281,23 +280,18 @@ export default function CharacterSheet() {
 
   return (
     <div>
-      {/* SHARED BREADCRUMB */}
-      <CharacterBreadcrumb isDM={isDM} />
-
       {/* HEADER */}
       <div className="mb-4">
+        <Link
+          to={isDM ? "/dm" : "/player"}
+          className="inline-block mb-2 text-xs px-2 py-1 rounded border bg-slate-900 text-amber-400 border-slate-600 hover:bg-slate-800 shadow-[0_0_8px_rgba(251,191,36,0.35)]"
+        >
+          Campaign Hub
+        </Link>
         <div className="flex items-start justify-between gap-3">
           <h1 className="text-2xl sm:text-3xl font-bold leading-tight min-w-0">
             {character.header?.characterName ?? "Unnamed Character"}
           </h1>
-          {(isDM || isOwner) && (
-            <button
-              onClick={() => exportCharacterJson(character)}
-              className="text-xs px-2 py-1 bg-slate-700 text-slate-300 rounded hover:bg-slate-600 shrink-0 mt-1"
-            >
-              Export JSON
-            </button>
-          )}
         </div>
 
         <p className="hidden sm:block text-xs text-slate-400 mt-1">
@@ -386,6 +380,8 @@ export default function CharacterSheet() {
               onUpdateCorruption={handleUpdateCorruption}
               getCharTotal={getCharTotal}
               isReleasing={isReleasing}
+              canExport={isDM || isOwner}
+              onExport={() => exportCharacterJson(character)}
             />
           )}
 

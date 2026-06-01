@@ -64,16 +64,16 @@ export function Stepper({
     [editable, min, value, onChange]
   );
 
-  const btnClass = `px-2 py-0.5 border rounded text-xs transition ${
+  const btnClass = `px-2 py-0.5 border rounded text-xs text-slate-100 transition ${
     editable
-      ? "border-slate-600 hover:bg-slate-700"
-      : "border-slate-700 opacity-50 cursor-not-allowed"
+      ? "bg-slate-800 border-slate-500 hover:bg-slate-700"
+      : "bg-slate-800 border-slate-500 opacity-50 cursor-not-allowed"
   }`;
 
   return (
     <div className="flex items-center justify-center gap-1">
       <button
-        disabled={!editable}
+        aria-disabled={!editable}
         onClick={() => adjust(-1)}
         aria-label="Decrease"
         className={btnClass}
@@ -106,7 +106,7 @@ export function Stepper({
       )}
 
       <button
-        disabled={!editable}
+        aria-disabled={!editable}
         onClick={() => adjust(1)}
         aria-label="Increase"
         className={btnClass}

@@ -26,9 +26,7 @@ export function AppHeader({
       >
         {/* Logo */}
         <div className="flex items-center gap-2 flex-shrink-0">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500 text-slate-900 font-bold">
-            DH
-          </span>
+          <img src="/icon-192.png" alt="Dark Heresy Manager" className="h-8 w-8 rounded-lg object-cover" />
           <div>
             <div className="font-semibold">Dark Heresy Manager</div>
             <div className="text-xs text-slate-400">
@@ -39,24 +37,11 @@ export function AppHeader({
 
         {/* Navigation */}
         <div className="flex flex-wrap items-center gap-2">
-          {isDM ? (
-            <>
-              <NavLinkButton
-                to="/dm"
-                label="DM Dashboard"
-                current={currentPath === "/dm"}
-              />
-              <NavLinkButton
-                to="/select"
-                label="Select Campaign"
-                current={currentPath === "/select"}
-              />
-            </>
-          ) : (
+          {isDM && (
             <NavLinkButton
-              to="/player"
-              label="Dashboard"
-              current={currentPath === "/player"}
+              to="/select"
+              label="Select Campaign"
+              current={currentPath === "/select"}
             />
           )}
 
