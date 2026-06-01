@@ -53,23 +53,11 @@ export function AppHeader({
               />
             </>
           ) : (
-            <>
-              <NavLinkButton
-                to="/player"
-                label="My Characters"
-                current={currentPath === "/player"}
-              />
-              <NavLinkButton
-                to="/claim"
-                label="Claim"
-                current={currentPath === "/claim"}
-              />
-              <NavLinkButton
-                to="/select"
-                label="Select Campaign"
-                current={currentPath === "/select"}
-              />
-            </>
+            <NavLinkButton
+              to="/player"
+              label="Dashboard"
+              current={currentPath === "/player"}
+            />
           )}
 
           {import.meta.env.DEV && onSwitchToPlayer && onSwitchToDM && (

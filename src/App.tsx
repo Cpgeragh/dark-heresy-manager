@@ -129,25 +129,9 @@ export default function App() {
                 <>
                   <Route
                     path={ROUTES.PLAYER_DASHBOARD}
-                    element={
-                      <PlayerDashboard
-                        user={currentUser}
-                        activeCampaignId={activeCampaignId}
-                      />
-                    }
+                    element={<PlayerDashboard user={currentUser} />}
                   />
                   <Route path={ROUTES.CLAIM_CHARACTER} element={<ClaimCharacterPage />} />
-                  <Route
-                    path={ROUTES.SELECT_CAMPAIGN}
-                    element={
-                      <SelectCampaign
-                        user={currentUser}
-                        role="player"
-                        activeCampaignId={activeCampaignId}
-                        onActiveCampaignChange={handleActiveCampaignChange}
-                      />
-                    }
-                  />
                 </>
               )}
 

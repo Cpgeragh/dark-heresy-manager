@@ -1,101 +1,166 @@
 // src/pages/PlayerDashboard.tsx
 
-import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { db } from "../firebase";
-import { collection, onSnapshot } from "firebase/firestore";
 import type { User } from "firebase/auth";
+import { useCampaignsForUser } from "../hooks/useCampaignsForUser";
+import { usePlayerCharacters } from "../hooks/usePlayerCharacters";
+import { buildRoute, ROUTES } from "../constants/routes";
 import type { CharacterListItem } from "../types/Firestore";
-import { buildRoute } from "../constants/routes";
 
 type Props = {
   user: User;
-  activeCampaignId: string | null;
 };
 
-export default function PlayerDashboard({ user, activeCampaignId }: Props) {
+// ─── Character Card ───────────────────────────────────────────────────────────
+
+function CharacterCard({
+  character,
+  campaignId,
+}: {
+  character: CharacterListItem;
+  campaignId: string;
+}) {
   const navigate = useNavigate();
-  const [characters, setCharacters] = useState<CharacterListItem[]>([]);
-
-  const handleCharacterView = useCallback(
-    (characterId: string) => {
-      if (!activeCampaignId) return;
-      navigate(buildRoute.characterSheet(activeCampaignId, characterId));
-    },
-    [navigate, activeCampaignId]
-  );
-
-  useEffect(() => {
-    if (!activeCampaignId) {
-      setCharacters([]);
-      return;
-    }
-
-    const charsRef = collection(
-      db,
-      "campaigns",
-      activeCampaignId,
-      "characters"
-    );
-
-    const unsubscribe = onSnapshot(
-      charsRef,
-      (snapshot) => {
-        const list: CharacterListItem[] = snapshot.docs
-          .map((docSnap) => {
-            const data = docSnap.data() as Omit<CharacterListItem, "id">;
-            return { id: docSnap.id, ...data };
-          })
-          .filter((c) => c.userId === user.uid);
-        setCharacters(list);
-      },
-      (err) => {
-        console.error("Player characters snapshot error:", err);
-      }
-    );
-
-    return () => unsubscribe();
-  }, [activeCampaignId, user.uid]);
+  const name   = character.header?.characterName ?? "Unnamed Character";
+  const career = character.header?.career;
+  const rank   = character.header?.rank;
+  const xpLeft = character.experience
+    ? character.experience.total - character.experience.spent
+    : null;
 
   return (
-    <div className="space-y-4 text-slate-100">
-      <h1 className="text-2xl font-bold">My Characters</h1>
-
-      {!activeCampaignId && (
-        <p className="text-slate-400">
-          No campaign selected. Use "Select Campaign" in the top navigation.
-        </p>
-      )}
-
-      {activeCampaignId && characters.length === 0 && (
-        <p className="text-slate-400">
-          You have no claimed characters in this campaign.
-        </p>
-      )}
-
-      <div className="space-y-3">
-        {characters.map((c) => (
-          <div
-            key={c.id}
-            className="flex items-center justify-between border border-slate-700 rounded-lg p-4 bg-slate-900/60"
-          >
-            <div>
-              <div className="font-semibold">
-                {c.header?.characterName ?? "Unnamed Character"}
-              </div>
-
-              <div className="text-xs text-slate-500 font-mono mt-1">
-                Recovery: {c.recoveryCode}
-              </div>
+    <div className="border border-slate-700 rounded-lg p-4 bg-slate-900/60 space-y-3">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="font-semibold text-slate-100 leading-tight">{name}</div>
+          {(career || rank) && (
+            <div className="text-sm text-slate-400 mt-0.5">
+              {[career, rank].filter(Boolean).join(" · ")}
             </div>
+          )}
+        </div>
+        <button
+          onClick={() => navigate(buildRoute.characterSheet(campaignId, character.id))}
+          className="shrink-0 px-3 py-1.5 text-sm rounded bg-blue-600 text-white hover:bg-blue-500 transition"
+        >
+          View Sheet
+        </button>
+      </div>
 
-            <button
-              onClick={() => handleCharacterView(c.id)}
-              className="px-3 py-1 text-xs rounded bg-blue-600 text-white hover:bg-blue-500"
-            >
-              View
-            </button>
-          </div>
+      {(character.wounds || xpLeft !== null) && (
+        <div className="flex flex-wrap gap-3 text-xs text-slate-400">
+          {character.wounds && (
+            <span>
+              ❤{" "}
+              <span className={character.wounds.current <= 2 ? "text-red-400 font-semibold" : "text-slate-200"}>
+                {character.wounds.current}
+              </span>
+              <span className="text-slate-600"> / </span>
+              <span className="text-slate-200">{character.wounds.total}</span>
+              {" "}Wounds
+            </span>
+          )}
+          {xpLeft !== null && (
+            <span>
+              ✦{" "}
+              <span className={xpLeft < 0 ? "text-red-400 font-semibold" : "text-slate-200"}>
+                {xpLeft}
+              </span>
+              {" "}XP remaining
+            </span>
+          )}
+        </div>
+      )}
+
+      <div className="text-xs text-slate-600 font-mono">
+        Recovery: {character.recoveryCode}
+      </div>
+    </div>
+  );
+}
+
+// ─── Campaign Section ─────────────────────────────────────────────────────────
+
+function CampaignSection({
+  campaignId,
+  campaignName,
+  userId,
+}: {
+  campaignId: string;
+  campaignName: string;
+  userId: string;
+}) {
+  const { characters, loading } = usePlayerCharacters(campaignId, userId);
+
+  return (
+    <div className="border border-slate-700 rounded-lg p-4 space-y-4 bg-slate-900/40">
+      <h2 className="font-semibold text-lg text-slate-100">{campaignName}</h2>
+
+      {loading && (
+        <p className="text-sm text-slate-500">Loading characters…</p>
+      )}
+
+      {!loading && characters.length === 0 && (
+        <p className="text-sm text-slate-500">No characters claimed in this campaign.</p>
+      )}
+
+      {!loading && characters.length > 0 && (
+        <div className="space-y-3">
+          {characters.map((c) => (
+            <CharacterCard key={c.id} character={c} campaignId={campaignId} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Player Dashboard ─────────────────────────────────────────────────────────
+
+export default function PlayerDashboard({ user }: Props) {
+  const navigate = useNavigate();
+  const { campaigns, error } = useCampaignsForUser(user.uid, "player");
+
+  return (
+    <div className="space-y-6 text-slate-100">
+      <div className="flex items-center justify-between gap-4">
+        <h1 className="text-2xl font-bold">My Dashboard</h1>
+        <button
+          onClick={() => navigate(ROUTES.CLAIM_CHARACTER)}
+          className="px-3 py-1.5 text-sm bg-amber-500 text-slate-900 font-semibold rounded hover:bg-amber-400 transition"
+        >
+          + Claim a Character
+        </button>
+      </div>
+
+      {error && (
+        <p className="text-sm text-red-400 border border-red-700 bg-red-900/20 rounded p-2">
+          {error}
+        </p>
+      )}
+
+      {!error && campaigns.length === 0 && (
+        <div className="space-y-3">
+          <p className="text-slate-400">
+            You are not part of any campaigns yet. Ask your DM for a recovery code to claim your character.
+          </p>
+          <button
+            onClick={() => navigate(ROUTES.CLAIM_CHARACTER)}
+            className="px-4 py-2 bg-amber-500 text-slate-900 font-semibold rounded text-sm hover:bg-amber-400 transition"
+          >
+            Claim a Character
+          </button>
+        </div>
+      )}
+
+      <div className="space-y-4">
+        {campaigns.map((campaign) => (
+          <CampaignSection
+            key={campaign.id}
+            campaignId={campaign.id}
+            campaignName={campaign.name}
+            userId={user.uid}
+          />
         ))}
       </div>
     </div>
