@@ -37,8 +37,8 @@ export function FormField({
       editable
         ? hasError
           ? "bg-slate-800 border-red-500 text-slate-100 focus:border-red-400 focus:outline-none"
-          : "bg-slate-800 border-slate-600 text-slate-100 focus:border-amber-400 focus:outline-none"
-        : "bg-slate-900 border-slate-700 text-slate-400 cursor-not-allowed"
+          : "bg-slate-800 border-slate-500 text-slate-100 focus:border-amber-400 focus:outline-none"
+        : "bg-slate-900 border-slate-500 text-slate-100 cursor-not-allowed"
     }
   `.trim();
 
@@ -54,7 +54,7 @@ export function FormField({
   return (
     <label
       htmlFor={inputId}
-      className={`flex flex-col gap-0.5 text-xs text-slate-300 ${className}`}
+      className={`flex flex-col gap-0.5 text-sm text-slate-100 ${className}`}
     >
       {label}
 

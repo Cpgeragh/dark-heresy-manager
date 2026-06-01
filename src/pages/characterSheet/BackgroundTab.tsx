@@ -3,7 +3,7 @@
 import { useCallback } from "react";
 import type { CharacterHeader, TalentsAndTraitsBlock } from "../../types/Character";
 import { FormField } from "../../components/FormField";
-import { editableInputClass, uiSection } from "../../ui/editableStyles";
+import { editableInputClass, uiSection, uiSectionHeader } from "../../ui/editableStyles";
 import { HOMEWORLD_LIST } from "../../data/homeworldData";
 
 interface BackgroundTabProps {
@@ -59,21 +59,19 @@ export function BackgroundTab({
   );
 
   return (
-    <div className="space-y-6 text-slate-300">
+    <div className="space-y-6 text-slate-100">
 
-      {/* CHARACTER */}
+      {/* IDENTITY */}
       <div>
-        <p className="text-xs text-slate-300 uppercase tracking-wide mb-2">Character</p>
+        <p className={`${uiSectionHeader} mb-2`}>Identity</p>
         <section className={uiSection + " space-y-3"}>
-        <FormField
-          label="Character Name"
-          value={header.characterName ?? ""}
-          onChange={handleCharacterName}
-          editable={editable}
-          placeholder="e.g. Brother Corvus"
-        />
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <FormField
+            label="Character Name"
+            value={header.characterName ?? ""}
+            onChange={handleCharacterName}
+            editable={editable}
+            placeholder="e.g. Brother Corvus"
+          />
           <FormField
             label="Player Name"
             value={header.playerName ?? ""}
@@ -81,35 +79,49 @@ export function BackgroundTab({
             editable={editable}
             placeholder="Your name"
           />
-          <FormField
-            label="Career"
-            value={header.career ?? ""}
-            onChange={handleCareer}
-            editable={editable}
-            placeholder="e.g. Guardsman"
-          />
-          <FormField
-            label="Rank"
-            value={header.rank ?? ""}
-            onChange={handleRank}
-            editable={editable}
-            placeholder="e.g. Trooper"
-          />
-        </div>
+        </section>
+      </div>
 
-        <FormField
-          label="Divination"
-          value={header.divination ?? ""}
-          onChange={handleDivination}
-          editable={editable}
-          placeholder="e.g. Trust in your fear."
-        />
+      {/* CAREER */}
+      <div>
+        <p className={`${uiSectionHeader} mb-2`}>Career</p>
+        <section className={uiSection}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <FormField
+              label="Career"
+              value={header.career ?? ""}
+              onChange={handleCareer}
+              editable={editable}
+              placeholder="e.g. Guardsman"
+            />
+            <FormField
+              label="Rank"
+              value={header.rank ?? ""}
+              onChange={handleRank}
+              editable={editable}
+              placeholder="e.g. Trooper"
+            />
+          </div>
+        </section>
+      </div>
+
+      {/* DIVINATION */}
+      <div>
+        <p className={`${uiSectionHeader} mb-2`}>Divination</p>
+        <section className={uiSection}>
+          <FormField
+            label="Divination"
+            value={header.divination ?? ""}
+            onChange={handleDivination}
+            editable={editable}
+            placeholder="e.g. Trust in your fear."
+          />
         </section>
       </div>
 
       {/* APPEARANCE */}
       <div>
-        <p className="text-xs text-slate-300 uppercase tracking-wide mb-2">Appearance</p>
+        <p className={`${uiSectionHeader} mb-2`}>Appearance</p>
         <section className={uiSection}>
           <FormField
             label="Description"
@@ -125,7 +137,7 @@ export function BackgroundTab({
 
       {/* HOMEWORLD */}
       <div>
-        <p className="text-xs text-slate-300 uppercase tracking-wide mb-2">Homeworld</p>
+        <p className={`${uiSectionHeader} mb-2`}>Homeworld</p>
         <section className={uiSection + " space-y-3"}>
 
         <div className="flex flex-col gap-1">
@@ -145,7 +157,7 @@ export function BackgroundTab({
               ))}
           </select>
           {selectedHomeworld && (
-            <p className="text-xs text-slate-300 italic px-1 mt-1">
+            <p className="text-xs text-slate-100 italic px-1 mt-1">
               {selectedHomeworld.description}
             </p>
           )}

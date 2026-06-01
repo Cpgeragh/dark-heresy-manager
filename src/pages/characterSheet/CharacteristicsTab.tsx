@@ -11,7 +11,7 @@ import {
   MOVEMENT_RUN_MULTIPLIER,
 } from "../../constants/gameRules";
 import { calculateCharacteristicTotal } from "../../utils/stats";
-import { uiSection, uiCell, uiCellLabel, uiCellValueSm } from "../../ui/editableStyles";
+import { uiSection, uiSectionHeader, uiCell, uiCellLabel, uiCellValueSm } from "../../ui/editableStyles";
 
 // ─── StatBlock ────────────────────────────────────────────────────────────────
 // Extracted to module level to avoid re-creating the component on every render.
@@ -42,8 +42,8 @@ function StatBlock({
     <div className={uiSection + " space-y-2"}>
       {/* Header */}
       <div className="flex items-baseline justify-between">
-        <span className="text-sm text-slate-300">{label}</span>
-        <span className="text-2xl font-semibold font-mono text-slate-100">
+        <span className="text-sm text-slate-100">{label}</span>
+        <span className="text-xl font-semibold font-mono text-slate-100">
           {statTotal}
         </span>
       </div>
@@ -86,9 +86,7 @@ export function CharacteristicsTab({
   const FB  = Math.floor(getCharTotal("fel") / CHARACTERISTIC_BONUS_DIVISOR);
 
   return (
-    <div className="space-y-6 text-slate-300">
-      <h2 className="text-xl font-semibold">Characteristics</h2>
-
+    <div className="space-y-6 text-slate-100">
       {/* Quick View */}
       <div className="grid grid-cols-9 gap-1">
         {(
@@ -115,7 +113,7 @@ export function CharacteristicsTab({
 
       {/* Characteristic Bonuses */}
       <div>
-        <p className="text-xs text-slate-300 uppercase tracking-wide mb-1">Characteristic Bonuses</p>
+        <p className={`${uiSectionHeader} mb-2`}>Characteristic Bonuses</p>
         <div className="grid grid-cols-7 gap-1">
           {[
             { label: "SB",  value: SB },
@@ -136,7 +134,7 @@ export function CharacteristicsTab({
 
       {/* Movement */}
       <div>
-        <p className="text-xs text-slate-300 uppercase tracking-wide mb-1">Movement</p>
+        <p className={`${uiSectionHeader} mb-2`}>Movement</p>
         <div className="grid grid-cols-4 gap-1">
           {[
             { label: "Half",   value: AB },

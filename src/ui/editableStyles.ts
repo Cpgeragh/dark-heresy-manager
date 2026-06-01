@@ -14,7 +14,7 @@ export function editableInputClass(isEditable: boolean) {
     isEditable
       ? [
           "bg-slate-900",
-          "border-slate-600",
+          "border-slate-500",
           "text-slate-100",
           "focus:outline-none",
           "focus:ring-2",
@@ -22,7 +22,7 @@ export function editableInputClass(isEditable: boolean) {
         ].join(" ")
       : [
           "bg-slate-800",
-          "border-slate-700",
+          "border-slate-500",
           "text-slate-400",
           "opacity-70",
           "cursor-not-allowed",
@@ -36,7 +36,7 @@ export function editableTextareaClass(isEditable: boolean) {
     isEditable
       ? [
           "bg-slate-900",
-          "border-slate-600",
+          "border-slate-500",
           "text-slate-100",
           "focus:outline-none",
           "focus:ring-2",
@@ -44,7 +44,7 @@ export function editableTextareaClass(isEditable: boolean) {
         ].join(" ")
       : [
           "bg-slate-800",
-          "border-slate-700",
+          "border-slate-500",
           "text-slate-400",
           "opacity-70",
           "cursor-not-allowed",
@@ -56,13 +56,16 @@ export function sectionContainerClass(isEditable: boolean) {
   return [
     "rounded-lg border p-3",
     isEditable
-      ? "border-slate-700 bg-slate-900/40"
+      ? "border-slate-500 bg-slate-900/40"
       : "border-slate-800 bg-slate-900/20",
   ].join(" ");
 }
 
 // ─── Shared UI tokens ─────────────────────────────────────────────────────────
 // Use these instead of hardcoding the same Tailwind strings across components.
+
+/** Section header label — sits outside its box, clearly readable. */
+export const uiSectionHeader = "text-sm font-semibold text-slate-100 uppercase tracking-wide";
 
 /** Standard section card — bright border, semi-transparent background. */
 export const uiSection = "rounded-lg border border-slate-500 bg-slate-800/60 p-3";
@@ -71,7 +74,7 @@ export const uiSection = "rounded-lg border border-slate-500 bg-slate-800/60 p-3
 export const uiCell = "rounded border border-slate-500 bg-slate-800/60";
 
 /** Label inside a compact stat cell (tight column grids: Quick View, bonuses, movement). */
-export const uiCellLabel = "text-[10px] text-slate-300 leading-tight";
+export const uiCellLabel = "text-[10px] text-slate-100 leading-tight";
 
 /** Value inside a compact stat cell (tight column grids — keeps text-base to fit). */
 export const uiCellValueSm = "text-base font-semibold font-mono text-slate-100 leading-tight";
@@ -90,6 +93,6 @@ export function readOnlyBadgeClass() {
     "bg-slate-800",
     "text-slate-400",
     "border",
-    "border-slate-700",
+    "border-slate-500",
   ].join(" ");
 }
