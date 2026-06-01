@@ -4,8 +4,10 @@ import { useCallback } from "react";
 import type { CharField } from "../../utils/characterFactory";
 import type { Characteristics } from "../../types/Character";
 import CharacteristicField from "../../components/CharacteristicField";
+import { InfoModal } from "../../components/InfoModal";
 import {
   CHARACTERISTIC_BONUS_DIVISOR,
+  MOVEMENT_HALF_MULTIPLIER,
   MOVEMENT_FULL_MULTIPLIER,
   MOVEMENT_CHARGE_MULTIPLIER,
   MOVEMENT_RUN_MULTIPLIER,
@@ -87,7 +89,9 @@ export function CharacteristicsTab({
 
   return (
     <div className="space-y-6 text-slate-100">
-      {/* Quick View */}
+      {/* Stats */}
+      <div>
+      <p className={`${uiSectionHeader} mb-2`}>Stats</p>
       <div className="grid grid-cols-9 gap-1">
         {(
           [
@@ -109,6 +113,7 @@ export function CharacteristicsTab({
             </div>
           </div>
         ))}
+      </div>
       </div>
 
       {/* Characteristic Bonuses */}
@@ -134,7 +139,21 @@ export function CharacteristicsTab({
 
       {/* Movement */}
       <div>
-        <p className={`${uiSectionHeader} mb-2`}>Movement</p>
+        <div className="flex items-center gap-2 mb-2">
+          <p className={uiSectionHeader}>Movement</p>
+          <InfoModal
+            title="Movement"
+            content={
+              <>
+                <div>AB = Agility ÷ {CHARACTERISTIC_BONUS_DIVISOR}</div>
+                <div>Half: AB × {MOVEMENT_HALF_MULTIPLIER}</div>
+                <div>Full: AB × {MOVEMENT_FULL_MULTIPLIER}</div>
+                <div>Charge: AB × {MOVEMENT_CHARGE_MULTIPLIER}</div>
+                <div>Run: AB × {MOVEMENT_RUN_MULTIPLIER}</div>
+              </>
+            }
+          />
+        </div>
         <div className="grid grid-cols-4 gap-1">
           {[
             { label: "Half",   value: AB },

@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
+import { ManageModal } from "../components/ManageModal";
 import { CHARACTERISTIC_BONUS_DIVISOR } from "../constants/gameRules";
 
 import { useCharacterSheet } from "./characterSheet/useCharacterSheet";
@@ -64,7 +65,7 @@ interface TabConfig {
 }
 
 const TABS: TabConfig[] = [
-  { id: "overview", label: "Overview" },
+  { id: "overview", label: "Vitals" },
   { id: "stats", label: "Characteristics" },
   { id: "skills", label: "Skills" },
   { id: "talents", label: "Talents" },
@@ -122,6 +123,7 @@ export default function CharacterSheet() {
   });
 
   const [activeTab, setActiveTab] = useState<TabId>("overview");
+  const [isManageOpen, setIsManageOpen] = useState(false);
 
   // ================================================================
   // STABLE UPDATE CALLBACKS (eliminate inline functions)
@@ -282,12 +284,20 @@ export default function CharacterSheet() {
     <div>
       {/* HEADER */}
       <div className="mb-4">
-        <Link
-          to={isDM ? "/dm" : "/player"}
-          className="inline-block mb-2 text-xs px-2 py-1 rounded border bg-slate-900 text-amber-400 border-slate-600 hover:bg-slate-800 shadow-[0_0_8px_rgba(251,191,36,0.35)]"
-        >
-          Campaign Hub
-        </Link>
+        <div className="flex items-center gap-2 mb-2">
+          <Link
+            to={isDM ? "/dm" : "/player"}
+            className="text-xs px-2 py-1 rounded border bg-slate-900 text-amber-400 border-slate-600 hover:bg-slate-800 shadow-[0_0_8px_rgba(251,191,36,0.35)]"
+          >
+            Campaign Hub
+          </Link>
+          <button
+            onClick={() => setIsManageOpen(true)}
+            className="text-xs px-2 py-1 rounded border bg-slate-900 text-slate-100 border-slate-500 hover:bg-slate-800"
+          >
+            Manage
+          </button>
+        </div>
         <div className="flex items-start justify-between gap-3">
           <h1 className="text-2xl sm:text-3xl font-bold leading-tight min-w-0">
             {character.header?.characterName ?? "Unnamed Character"}
@@ -372,16 +382,10 @@ export default function CharacterSheet() {
             <OverviewTab
               character={character}
               editable={allowedToEdit}
-              canPlayerRelease={canPlayerRelease}
-              onPlayerRelease={releaseCharacter}
               onUpdateWounds={handleUpdateWounds}
               onUpdateFate={handleUpdateFate}
               onUpdateInsanity={handleUpdateInsanity}
               onUpdateCorruption={handleUpdateCorruption}
-              getCharTotal={getCharTotal}
-              isReleasing={isReleasing}
-              canExport={isDM || isOwner}
-              onExport={() => exportCharacterJson(character)}
             />
           )}
 
@@ -536,6 +540,17 @@ export default function CharacterSheet() {
           )}
         </ErrorBoundary>
       </div>
+
+      <ManageModal
+        isOpen={isManageOpen}
+        onClose={() => setIsManageOpen(false)}
+        recoveryCode={character.recoveryCode}
+        canExport={isDM || isOwner}
+        onExport={() => exportCharacterJson(character)}
+        canPlayerRelease={canPlayerRelease}
+        onPlayerRelease={releaseCharacter}
+        isReleasing={isReleasing}
+      />
     </div>
   );
 }
