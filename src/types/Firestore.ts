@@ -66,6 +66,7 @@ export interface SessionDocument {
   xpAwarded: number;
   attendees: string[];
   createdAt: Timestamp | Date | FieldValue;
+  xpApplied?: boolean;
 }
 
 /**

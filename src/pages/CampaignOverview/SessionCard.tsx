@@ -19,6 +19,7 @@ interface Props {
   isDM: boolean;
   onDelete?: () => Promise<void>;
   onSave?: (data: SessionUpdateData) => Promise<void>;
+  onApplyXp?: () => Promise<void>;
 }
 
 function toDate(value: SessionDocument["date"]): Date {
@@ -32,11 +33,12 @@ function toInputDate(value: SessionDocument["date"]): string {
   return toDate(value).toISOString().split("T")[0];
 }
 
-export function SessionCard({ session, characters, isDM, onDelete, onSave }: Props) {
+export function SessionCard({ session, characters, isDM, onDelete, onSave, onApplyXp }: Props) {
   const toast = useToast();
   const [mode, setMode] = useState<"view" | "edit" | "confirmDelete">("view");
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [applyingXp, setApplyingXp] = useState(false);
 
   const [date, setDate] = useState(toInputDate(session.date));
   const [summary, setSummary] = useState(session.summary);
@@ -102,6 +104,20 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave }: Pro
       setDeleting(false);
     }
   }, [onDelete, toast]);
+
+  const handleApplyXp = useCallback(async () => {
+    if (!onApplyXp) return;
+    setApplyingXp(true);
+    try {
+      await onApplyXp();
+      toast.success(`+${session.xpAwarded} XP applied to ${session.attendees.length} character(s).`);
+    } catch (err) {
+      console.error("Failed to apply XP:", err);
+      toast.error("Failed to apply XP. Please try again.");
+    } finally {
+      setApplyingXp(false);
+    }
+  }, [onApplyXp, session.xpAwarded, session.attendees.length, toast]);
 
   if (mode === "edit") {
     return (
@@ -199,6 +215,22 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave }: Pro
             <span className="text-xs px-2 py-1 bg-amber-500/20 text-amber-400 rounded">
               +{session.xpAwarded} XP
             </span>
+          )}
+          {isDM && session.xpAwarded > 0 && session.attendees.length > 0 && (
+            session.xpApplied
+              ? (
+                <span className="text-xs px-2 py-1 bg-green-500/20 text-green-400 rounded">
+                  XP Applied ✓
+                </span>
+              ) : (
+                <button
+                  onClick={handleApplyXp}
+                  disabled={applyingXp}
+                  className="text-xs px-2 py-1 bg-amber-600 text-slate-900 font-semibold rounded hover:bg-amber-500 disabled:opacity-50 transition"
+                >
+                  {applyingXp ? "Applying…" : "Apply XP"}
+                </button>
+              )
           )}
           {isDM && onSave && (
             <button
