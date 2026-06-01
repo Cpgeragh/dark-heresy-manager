@@ -25,7 +25,8 @@ vi.mock("firebase/firestore", async () => {
   const actual = await vi.importActual<any>("firebase/firestore");
   return {
     ...actual,
-    doc: vi.fn(),
+    // doc() must return an object with withConverter() so characterDocRef doesn't throw
+    doc: vi.fn(() => ({ withConverter: vi.fn().mockReturnThis() })),
     getDoc: vi.fn(),
   };
 });

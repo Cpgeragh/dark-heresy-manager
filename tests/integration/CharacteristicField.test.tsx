@@ -20,11 +20,13 @@ describe("CharacteristicField", () => {
 
     expect(screen.getByText("Weapon Skill")).toBeInTheDocument();
 
-    const baseInput = screen.getByRole("spinbutton");
-    expect(baseInput).toHaveValue(30);
+    // Component uses type="text" + inputMode="numeric" — role is textbox, not spinbutton
+    const baseInput = screen.getByRole("textbox", { name: /weapon skill base value/i });
+    expect(baseInput).toHaveValue("30");
 
-    const advanceButtons = screen.getAllByRole("button");
-    const pressed = advanceButtons.filter(btn => btn.getAttribute("aria-pressed") === "true");
+    const pressed = screen.getAllByRole("button").filter(
+      (btn) => btn.getAttribute("aria-pressed") === "true"
+    );
     expect(pressed).toHaveLength(3);
 
     // total = 30 + 3 * 5 = 45
@@ -32,7 +34,7 @@ describe("CharacteristicField", () => {
   });
 
   it("calls onChange when values change", () => {
-    const value = { base: 30, advances: 5 };
+    const value = { base: 30, advances: 3 };
     const onChange = vi.fn();
 
     render(
@@ -44,10 +46,11 @@ describe("CharacteristicField", () => {
       />
     );
 
-    const inputs = screen.getAllByRole("spinbutton");
-    const baseInput = inputs[0];
+    const baseInput = screen.getByRole("textbox", { name: /ws base value/i });
 
+    // Component commits on blur, not on every keystroke
     fireEvent.change(baseInput, { target: { value: "40" } });
+    fireEvent.blur(baseInput);
 
     expect(onChange).toHaveBeenCalled();
   });
