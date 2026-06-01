@@ -144,6 +144,14 @@ export function OverviewTab({
     adjustFate(1);
   }, [adjustFate]);
 
+  const handleWoundsTotalChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    onUpdateWounds({ ...wounds, total: Math.max(0, Number(e.target.value)) });
+  }, [wounds, onUpdateWounds]);
+
+  const handleFateTotalChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    onUpdateFate({ ...fate, total: Math.max(0, Number(e.target.value)) });
+  }, [fate, onUpdateFate]);
+
   const adjustInsanity = useCallback((delta: number) => {
     if (!editable) return;
     onUpdateInsanity({ ...insanity, points: Math.max(0, insanity.points + delta) });
@@ -299,10 +307,23 @@ export function OverviewTab({
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {/* Total */}
           <div className={sectionContainerClass(false) + " text-center"}>
-            <div className="text-xs text-slate-400 mb-1">Total</div>
-            <div className="text-2xl font-semibold font-mono text-slate-100">
-              {wounds.total}
-            </div>
+            <label className="text-xs text-slate-400">
+              Total
+              {editable ? (
+                <input
+                  type="number"
+                  min={0}
+                  className={editableInputClass(true) + " mt-2 text-center"}
+                  value={wounds.total}
+                  onChange={handleWoundsTotalChange}
+                  aria-label="Total wounds"
+                />
+              ) : (
+                <div className="text-2xl font-semibold font-mono text-slate-100 mt-1">
+                  {wounds.total}
+                </div>
+              )}
+            </label>
           </div>
 
           {/* Current */}
@@ -380,10 +401,23 @@ export function OverviewTab({
         <div className="grid grid-cols-2 gap-3">
           {/* Total */}
           <div className={sectionContainerClass(false) + " text-center"}>
-            <div className="text-xs text-slate-400 mb-1">Total</div>
-            <div className="text-2xl font-semibold font-mono text-slate-100">
-              {fate.total}
-            </div>
+            <label className="text-xs text-slate-400">
+              Total
+              {editable ? (
+                <input
+                  type="number"
+                  min={0}
+                  className={editableInputClass(true) + " mt-2 text-center"}
+                  value={fate.total}
+                  onChange={handleFateTotalChange}
+                  aria-label="Total fate points"
+                />
+              ) : (
+                <div className="text-2xl font-semibold font-mono text-slate-100 mt-1">
+                  {fate.total}
+                </div>
+              )}
+            </label>
           </div>
 
           {/* Current */}
