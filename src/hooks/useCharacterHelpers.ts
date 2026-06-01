@@ -3,7 +3,7 @@
 import { useCallback } from "react";
 import type { Character, Characteristics } from "../types/Character";
 import type { CharField } from "../utils/characterFactory";
-import { CHARACTERISTIC_ADVANCE_INCREMENT } from "../constants/gameRules";
+import { calculateCharacteristicTotal } from "../utils/stats";
 
 interface UseCharacterHelpersProps {
   character: Character | null;
@@ -21,7 +21,7 @@ export function useCharacterHelpers({ character }: UseCharacterHelpersProps) {
   const getCharTotal = useCallback(
     (statKey: keyof Characteristics): number => {
       const field = getCharField(statKey);
-      return field.base + field.advances * CHARACTERISTIC_ADVANCE_INCREMENT;
+      return calculateCharacteristicTotal(field.base, field.advances);
     },
     [getCharField]
   );

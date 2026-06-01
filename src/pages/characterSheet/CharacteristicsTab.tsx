@@ -7,11 +7,11 @@ import CharacteristicField from "../../components/CharacteristicField";
 import { sectionContainerClass } from "../../ui/editableStyles";
 import {
   CHARACTERISTIC_BONUS_DIVISOR,
-  CHARACTERISTIC_ADVANCE_INCREMENT,
   MOVEMENT_FULL_MULTIPLIER,
   MOVEMENT_CHARGE_MULTIPLIER,
   MOVEMENT_RUN_MULTIPLIER,
 } from "../../constants/gameRules";
+import { calculateCharacteristicTotal } from "../../utils/stats";
 
 // ─── StatBlock ────────────────────────────────────────────────────────────────
 // Extracted to module level to avoid re-creating the component on every render.
@@ -32,7 +32,7 @@ function StatBlock({
   updateCharacteristic,
 }: StatBlockProps) {
   const value = getCharField(statKey);
-  const statTotal = value.base + value.advances * CHARACTERISTIC_ADVANCE_INCREMENT;
+  const statTotal = calculateCharacteristicTotal(value.base, value.advances);
 
   const handleChange = useCallback((v: CharField) => {
     updateCharacteristic(statKey, v);
