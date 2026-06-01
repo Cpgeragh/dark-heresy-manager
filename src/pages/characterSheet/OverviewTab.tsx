@@ -85,9 +85,13 @@ export function OverviewTab({
     onUpdateHeader({ ...header, [key]: value });
   }, [header, onUpdateHeader]);
 
-  const handleCharacterNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    updateHeaderField("characterName", e.target.value);
-  }, [updateHeaderField]);
+  const handleCharacterNameChange = useCallback((v: string) => updateHeaderField("characterName", v), [updateHeaderField]);
+
+  const handlePlayerNameChange  = useCallback((v: string) => updateHeaderField("playerName",  v), [updateHeaderField]);
+  const handleCareerChange      = useCallback((v: string) => updateHeaderField("career",      v), [updateHeaderField]);
+  const handleRankChange        = useCallback((v: string) => updateHeaderField("rank",        v), [updateHeaderField]);
+  const handleDivinationChange  = useCallback((v: string) => updateHeaderField("divination",  v), [updateHeaderField]);
+  const handleDescriptionChange = useCallback((v: string) => updateHeaderField("description", v), [updateHeaderField]);
 
   const adjustWounds = useCallback((delta: number) => {
     if (!editable) return;
@@ -168,17 +172,56 @@ export function OverviewTab({
 
   return (
     <div className="space-y-6 text-slate-300">
-      {/* CHARACTER NAME */}
-      <section className={sectionContainerClass(editable)}>
-        <label className="block text-xs text-slate-400">
-          Character Name
-          <input
-            disabled={!editable}
-            className={editableInputClass(editable) + " mt-1"}
+      {/* CHARACTER DETAILS */}
+      <section className={sectionContainerClass(editable) + " space-y-3"}>
+        <h2 className="text-lg font-semibold">Character Details</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <FormField
+            label="Character Name"
             value={header.characterName ?? ""}
             onChange={handleCharacterNameChange}
+            editable={editable}
+            placeholder="e.g. Brother Corvus"
+            className="sm:col-span-2"
           />
-        </label>
+          <FormField
+            label="Player Name"
+            value={header.playerName ?? ""}
+            onChange={handlePlayerNameChange}
+            editable={editable}
+            placeholder="Your name"
+          />
+          <FormField
+            label="Career"
+            value={header.career ?? ""}
+            onChange={handleCareerChange}
+            editable={editable}
+            placeholder="e.g. Guardsman"
+          />
+          <FormField
+            label="Rank"
+            value={header.rank ?? ""}
+            onChange={handleRankChange}
+            editable={editable}
+            placeholder="e.g. Trooper"
+          />
+          <FormField
+            label="Divination"
+            value={header.divination ?? ""}
+            onChange={handleDivinationChange}
+            editable={editable}
+            placeholder="e.g. Trust in your fear."
+          />
+        </div>
+        <FormField
+          label="Description"
+          value={header.description ?? ""}
+          onChange={handleDescriptionChange}
+          editable={editable}
+          type="textarea"
+          rows={2}
+          placeholder="Physical appearance, mannerisms…"
+        />
       </section>
 
       {/* HOMEWORLD */}
