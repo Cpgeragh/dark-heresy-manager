@@ -216,8 +216,8 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
               +{session.xpAwarded} XP
             </span>
           )}
-          {isDM && session.xpAwarded > 0 && session.attendees.length > 0 && (
-            session.xpApplied
+          {isDM && session.xpAwarded > 0 && session.attendees.length > 0 && session.xpApplied !== undefined && (
+            session.xpApplied === true
               ? (
                 <span className="text-xs px-2 py-1 bg-green-500/20 text-green-400 rounded">
                   XP Applied ✓

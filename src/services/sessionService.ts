@@ -30,17 +30,11 @@ export async function createSession(
     xpAwarded: session.xpAwarded,
     attendees: session.attendees,
     createdAt: serverTimestamp(),
-    xpApplied: session.xpAwarded > 0,
+    // XP is not auto-applied at creation — the DM uses the Apply XP button.
+    // xpApplied: false means "ready to apply"; undefined means "created before
+    // this tracking existed and XP state is unknown — don't show the button."
+    xpApplied: session.xpAwarded > 0 ? false : undefined,
   });
-
-  if (session.xpAwarded > 0) {
-    for (const charId of session.attendees) {
-      batch.update(
-        doc(db, "campaigns", campaignId, "characters", charId),
-        { "experience.total": increment(session.xpAwarded) }
-      );
-    }
-  }
 
   await batch.commit();
 }
