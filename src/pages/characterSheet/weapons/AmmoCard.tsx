@@ -192,7 +192,7 @@ export function CustomAmmoForm({
 
 // ─── Ammo Card ────────────────────────────────────────────────────────────────
 
-function formatAmmoValue(value: string) {
+export function formatAmmoValue(value: string) {
   const parts = value.split(" / ");
   if (parts.length === 2) {
     return (
