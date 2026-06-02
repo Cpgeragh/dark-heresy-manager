@@ -10,12 +10,14 @@ type CampaignWithId = CampaignDocument & { id: string };
 export function useCampaignsForUser(
   uid: string,
   role: "player" | "dm"
-): { campaigns: CampaignWithId[]; error: string | null } {
+): { campaigns: CampaignWithId[]; loading: boolean; error: string | null } {
   const [campaigns, setCampaigns] = useState<CampaignWithId[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let ignore = false;
+    setLoading(true);
 
     async function load() {
       const field = role === "dm" ? "dmId" : "memberIds";
@@ -30,13 +32,18 @@ export function useCampaignsForUser(
         ...(d.data() as Omit<CampaignDocument, "id">),
       }));
 
-      if (!ignore) setCampaigns(list);
+      if (!ignore) {
+        setCampaigns(list);
+        setLoading(false);
+      }
     }
 
     load().catch((err) => {
       console.error("useCampaignsForUser load error:", err);
-      if (!ignore)
+      if (!ignore) {
         setError("Failed to load campaigns. A Firestore index may be missing — check the console.");
+        setLoading(false);
+      }
     });
 
     return () => {
@@ -44,5 +51,5 @@ export function useCampaignsForUser(
     };
   }, [uid, role]);
 
-  return { campaigns, error };
+  return { campaigns, loading, error };
 }

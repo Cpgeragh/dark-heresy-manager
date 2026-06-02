@@ -1,27 +1,12 @@
 // src/pages/characterSheet/SkillsTab/index.tsx
 
-import { useMemo, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import type { Characteristics, SkillEntry } from "../../../types/Character";
 import type { CharField } from "../../../utils/characterFactory";
-import { calculateCharacteristicTotal } from "../../../utils/stats";
-
-// Import our new hooks
 import { useSkillComputation } from "../../../hooks/useSkillComputation";
-import { useSkillFiltering } from "../../../hooks/useSkillFiltering";
-import { useSkillSorting } from "../../../hooks/useSkillSorting";
-import { useSkillGroupCollapse } from "../../../hooks/useSkillGroupCollapse";
-
-import {
-  GROUP_ORDER,
-  CHAR_LABEL,
-  CHAR_FULL_LABEL,
-  type SortMode,
-} from "./skillsConstants";
-
-import { SkillCard } from "./SkillCard";
-import { SkillsControlBar } from "./SkillsControlBar";
-import { CategoryGroup } from "./CategoryGroup";
-import { CharacteristicGroup } from "./CharacteristicGroup";
+import { uiSectionHeader } from "../../../ui/editableStyles";
+import { SkillRow } from "./SkillRow";
+import { AddSkillModal } from "./AddSkillModal";
 
 interface SkillsTabProps {
   skills: SkillEntry[];
@@ -30,202 +15,82 @@ interface SkillsTabProps {
   getCharField: (statKey: keyof Characteristics) => CharField;
 }
 
-export function SkillsTab({
-  skills,
-  editable,
-  onUpdate,
-  getCharField,
-}: SkillsTabProps) {
-  const [search, setSearch] = useState("");
-  const [sortMode, setSortMode] = useState<SortMode>("characteristic");
-  const [showOnlyTrained, setShowOnlyTrained] = useState(false);
-  const [compact, setCompact] = useState(false);
+export function SkillsTab({ skills, editable, onUpdate, getCharField }: SkillsTabProps) {
+  const [isAddOpen, setIsAddOpen] = useState(false);
 
-  // ------------------------------
-  // COMPUTE, FILTER, SORT using hooks
-  // ------------------------------
   const computedSkills = useSkillComputation({ skills, getCharField });
-  const filteredSkills = useSkillFiltering({
-    skills: computedSkills,
-    searchQuery: search,
-    showOnlyTrained,
-  });
-  const sortedSkills = useSkillSorting({
-    skills: filteredSkills,
-    sortMode,
-  });
 
-  // ------------------------------
-  // CATEGORY LIST
-  // ------------------------------
-  const ALL_CATEGORIES = useMemo(() => {
-    const seen = new Set<string>();
-    computedSkills.forEach((s) => seen.add(s.category ?? "Other"));
-    return Array.from(seen).sort();
-  }, [computedSkills]);
+  const trainedSkills = computedSkills
+    .filter((s) => s.level !== "untrained")
+    .sort((a, b) => a.name.localeCompare(b.name));
 
-  const categoryCollapse = useSkillGroupCollapse(ALL_CATEGORIES);
-  const charCollapse = useSkillGroupCollapse(GROUP_ORDER);
+  const untrainedSkills = computedSkills
+    .filter((s) => s.level === "untrained")
+    .sort((a, b) => a.name.localeCompare(b.name));
 
-  // ------------------------------
-  // MEMOIZED COLLAPSE HANDLERS
-  // ------------------------------
-  const handleCategoryCollapse = useCallback(
-    (category: string) => (value: boolean) => {
-      categoryCollapse.setGroupCollapsed(category, value);
-    },
-    [categoryCollapse]
+  const updateLevel = useCallback(
+    (id: string, level: SkillEntry["level"]) =>
+      onUpdate(skills.map((s) => (s.id === id ? { ...s, level } : s))),
+    [skills, onUpdate]
   );
 
-  const handleCharCollapse = useCallback(
-    (charKey: string) => (value: boolean) => {
-      charCollapse.setGroupCollapsed(charKey, value);
-    },
-    [charCollapse]
+  const updateMisc = useCallback(
+    (id: string, value: number) =>
+      onUpdate(skills.map((s) => (s.id === id ? { ...s, miscModifier: value } : s))),
+    [skills, onUpdate]
   );
 
-  // ------------------------------
-  // UPDATE HELPERS
-  // ------------------------------
-  function updateLevel(id: string, level: SkillEntry["level"]) {
-    onUpdate(skills.map((s) => (s.id === id ? { ...s, level } : s)));
-  }
+  const handleAdd = useCallback(
+    (id: string) =>
+      onUpdate(skills.map((s) => (s.id === id ? { ...s, level: "trained" } : s))),
+    [skills, onUpdate]
+  );
 
-  function updateMisc(id: string, value: number) {
-    onUpdate(
-      skills.map((s) =>
-        s.id === id ? { ...s, miscModifier: value } : s
-      )
-    );
-  }
-
-  function updateNotes(id: string, notes: string) {
-    onUpdate(skills.map((s) => (s.id === id ? { ...s, notes } : s)));
-  }
-
-  // ------------------------------
-  // RENDER
-  // ------------------------------
   return (
-    <div className="space-y-6 text-slate-300">
-      <h2 className="text-xl font-semibold">Skills</h2>
+    <div className="space-y-4 text-slate-100">
 
-      <SkillsControlBar
-        search={search}
-        setSearch={setSearch}
-        sortMode={sortMode}
-        setSortMode={setSortMode}
-        showOnlyTrained={showOnlyTrained}
-        setShowOnlyTrained={setShowOnlyTrained}
-        compact={compact}
-        setCompact={setCompact}
-      />
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <p className={uiSectionHeader}>Trained Skills</p>
+        {editable && (
+          <button
+            onClick={() => setIsAddOpen(true)}
+            className="text-xs px-3 py-1.5 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
+          >
+            + Add Skill
+          </button>
+        )}
+      </div>
 
-      {sortMode === "category" ? (
-        <>
-          <div className="flex gap-2 text-xs">
-            <button
-              onClick={categoryCollapse.expandAll}
-              className="px-3 py-1 rounded border border-slate-600 bg-slate-800"
-              aria-label="Expand all skill categories"
-            >
-              Expand all
-            </button>
-            <button
-              onClick={categoryCollapse.collapseAll}
-              className="px-3 py-1 rounded border border-slate-600 bg-slate-800"
-              aria-label="Collapse all skill categories"
-            >
-              Collapse all
-            </button>
-          </div>
-
-          <div className="space-y-4">
-            {ALL_CATEGORIES.map((cat) => {
-              const groupSkills = sortedSkills.filter(
-                (s) => (s.category ?? "Other") === cat
-              );
-              if (!groupSkills.length) return null;
-
-              return (
-                <CategoryGroup
-                  key={cat}
-                  category={cat}
-                  skills={groupSkills}
-                  editable={editable}
-                  compact={compact}
-                  collapsed={categoryCollapse.collapsed[cat] ?? false}
-                  setCollapsed={handleCategoryCollapse(cat)}
-                  updateLevel={updateLevel}
-                  updateMisc={updateMisc}
-                  updateNotes={updateNotes}
-                />
-              );
-            })}
-          </div>
-        </>
-      ) : sortMode === "characteristic" ? (
-        <>
-          <div className="flex gap-2 text-xs">
-            <button
-              onClick={charCollapse.expandAll}
-              className="px-3 py-1 rounded border border-slate-600 bg-slate-800"
-            >
-              Expand all
-            </button>
-            <button
-              onClick={charCollapse.collapseAll}
-              className="px-3 py-1 rounded border border-slate-600 bg-slate-800"
-            >
-              Collapse all
-            </button>
-          </div>
-
-          <div className="space-y-4">
-            {GROUP_ORDER.map((charKey) => {
-              const groupSkills = sortedSkills.filter(
-                (s) => s.characteristic === charKey
-              );
-              if (!groupSkills.length) return null;
-
-              const charField = getCharField(charKey);
-              const charTotal = calculateCharacteristicTotal(charField.base, charField.advances);
-
-              return (
-                <CharacteristicGroup
-                  key={charKey}
-                  charKey={charKey}
-                  charLabel={CHAR_LABEL[charKey]}
-                  charFullLabel={CHAR_FULL_LABEL[charKey]}
-                  charTotal={charTotal}
-                  skills={groupSkills}
-                  editable={editable}
-                  compact={compact}
-                  collapsed={charCollapse.collapsed[charKey] ?? false}
-                  setCollapsed={handleCharCollapse(charKey)}
-                  updateLevel={updateLevel}
-                  updateMisc={updateMisc}
-                  updateNotes={updateNotes}
-                />
-              );
-            })}
-          </div>
-        </>
+      {/* Skill list */}
+      {trainedSkills.length === 0 ? (
+        <p className="text-sm text-slate-400 text-center py-8">
+          {editable
+            ? 'No trained skills yet. Tap "+ Add Skill" to get started.'
+            : "No trained skills yet."}
+        </p>
       ) : (
-        <div className="space-y-3">
-          {sortedSkills.map((skill) => (
-            <SkillCard
+        <div className="space-y-2">
+          {trainedSkills.map((skill) => (
+            <SkillRow
               key={skill.id}
               skill={skill}
               editable={editable}
-              compact={compact}
               updateLevel={updateLevel}
               updateMisc={updateMisc}
-              updateNotes={updateNotes}
             />
           ))}
         </div>
       )}
+
+      {/* Add skill modal */}
+      <AddSkillModal
+        isOpen={isAddOpen}
+        onClose={() => setIsAddOpen(false)}
+        untrainedSkills={untrainedSkills}
+        onAdd={handleAdd}
+      />
+
     </div>
   );
 }

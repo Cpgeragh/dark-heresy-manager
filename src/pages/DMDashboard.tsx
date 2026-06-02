@@ -21,7 +21,7 @@ export default function DMDashboard({
   activeCampaignId,
   onActiveCampaignChange,
 }: Props) {
-  const { campaigns } = useCampaigns(user.uid);
+  const { campaigns, loading } = useCampaigns(user.uid);
   const { characters } = useCampaignCharacters(activeCampaignId);
   const [showQR, setShowQR] = useState(false);
 
@@ -52,6 +52,7 @@ export default function DMDashboard({
       <CampaignSection
         userUid={user.uid}
         campaigns={campaigns}
+        loading={loading}
         activeCampaignId={activeCampaignId}
         onCampaignSelect={onActiveCampaignChange}
       />
