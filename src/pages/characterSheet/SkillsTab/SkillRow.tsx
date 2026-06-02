@@ -59,7 +59,9 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc }: SkillRowP
             {skill.name}
           </span>
           {SKILL_DESCRIPTIONS[skill.name] && (
-            <InfoModal title={skill.name} content={SKILL_DESCRIPTIONS[skill.name]} />
+            <span onClick={(e) => e.stopPropagation()}>
+              <InfoModal title={skill.name} content={SKILL_DESCRIPTIONS[skill.name]} />
+            </span>
           )}
         </div>
 
@@ -76,7 +78,7 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc }: SkillRowP
         </span>
 
         <span className="text-slate-400 text-xs shrink-0">
-          {expanded ? "▲" : "▼"}
+          {expanded ? "▼" : "▲"}
         </span>
       </button>
 
