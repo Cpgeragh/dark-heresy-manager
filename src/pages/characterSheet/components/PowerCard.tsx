@@ -33,7 +33,7 @@ function PowerStats({ power }: { power: PsychicPower }) {
         </span>
       )}
       {power.focusTime && (
-        <span className="text-slate-300">{power.focusTime}</span>
+        <span className="text-slate-100">{power.focusTime}</span>
       )}
       {power.range && (
         <span>
@@ -63,7 +63,7 @@ export function PowerCard({
         <PowerStats power={power} />
       </div>
       {power.description ? (
-        <p className="text-sm text-slate-300 leading-relaxed">
+        <p className="text-sm text-slate-100 leading-relaxed">
           {power.description}
         </p>
       ) : (
@@ -73,9 +73,9 @@ export function PowerCard({
   );
 
   return (
-    <div className="flex items-start justify-between gap-2 rounded border border-slate-700 bg-slate-900/30 px-3 py-2 text-sm">
+    <div className="flex items-start justify-between gap-2 rounded border border-slate-500 bg-slate-900/60 px-3 py-2 text-sm">
       <div className="space-y-1 min-w-0 flex-1">
-        <p className="font-medium text-slate-200">
+        <p className="font-medium text-slate-100">
           {power.name || (
             <span className="italic text-slate-500">Unnamed power</span>
           )}

@@ -117,13 +117,8 @@ export function ExperienceTab({
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="space-y-6 text-slate-300">
-
-      {/* HEADER */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Experience</h2>
-        {!isDM && <span className={readOnlyBadgeClass()}>Read-only</span>}
-      </div>
+    <div className="space-y-6">
+      {!isDM && <div><span className={readOnlyBadgeClass()}>Read-only</span></div>}
 
       {/* SUMMARY */}
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -138,7 +133,7 @@ export function ExperienceTab({
                 min={0}
                 value={experience.total}
                 onChange={handleTotalChange}
-                className="mt-2 w-full px-2 py-1 bg-slate-800 border border-slate-600 rounded text-center text-xl font-semibold font-mono text-slate-100 focus:border-amber-400 focus:outline-none"
+                className="mt-2 w-full px-2 py-1 bg-slate-800 border border-slate-500 rounded text-center text-xl font-semibold font-mono text-slate-100 focus:border-amber-400 focus:outline-none"
                 aria-label="Total XP"
               />
             </label>
@@ -175,14 +170,14 @@ export function ExperienceTab({
         <div className="space-y-4">
           {experience.ranks.map((rankBlock) => (
             <div key={rankBlock.rank} className={sectionContainerClass(false)}>
-              <h4 className="text-sm font-semibold text-slate-300 mb-2">
+              <h4 className="text-sm font-semibold text-slate-100 mb-2">
                 Rank {rankBlock.rank}
               </h4>
               <ul className="space-y-2">
                 {rankBlock.advances.map((adv) => (
                   <li
                     key={adv.id}
-                    className="rounded border border-slate-700 bg-slate-900/60 p-3"
+                    className="rounded border border-slate-500 bg-slate-900/60 p-3"
                   >
                     <div className="flex items-baseline justify-between gap-4">
                       <div className="font-mono text-sm text-slate-100">{adv.name}</div>
@@ -210,7 +205,7 @@ export function ExperienceTab({
 
         {/* ADD ADVANCE FORM — DM only */}
         {isDM && (
-          <div className="border border-slate-700 rounded-lg p-4 space-y-3 bg-slate-900/40">
+          <div className="border border-slate-500 rounded-lg p-4 space-y-3 bg-slate-800/60">
             <p className="text-xs font-semibold text-amber-400 uppercase tracking-wide">Add Advance</p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <div>
@@ -221,7 +216,7 @@ export function ExperienceTab({
                     const v = e.target.value;
                     setNewRank(v === "elite" ? "elite" : Number(v) as RankAdvances["rank"]);
                   }}
-                  className="mt-0.5 w-full px-2 py-1 bg-slate-800 border border-slate-600 rounded text-sm text-slate-100 focus:border-amber-400 focus:outline-none"
+                  className="mt-0.5 w-full px-2 py-1 bg-slate-800 border border-slate-500 rounded text-sm text-slate-100 focus:border-amber-400 focus:outline-none"
                 >
                   {RANK_OPTIONS.map((r) => (
                     <option key={String(r)} value={String(r)}>
@@ -238,7 +233,7 @@ export function ExperienceTab({
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
                   placeholder="e.g. +10 Weapon Skill"
-                  className="mt-0.5 w-full px-2 py-1 bg-slate-800 border border-slate-600 rounded text-sm text-slate-100 focus:border-amber-400 focus:outline-none"
+                  className="mt-0.5 w-full px-2 py-1 bg-slate-800 border border-slate-500 rounded text-sm text-slate-100 focus:border-amber-400 focus:outline-none"
                 />
               </div>
 
@@ -249,7 +244,7 @@ export function ExperienceTab({
                   min={0}
                   value={newCost}
                   onChange={(e) => setNewCost(Math.max(0, Number(e.target.value)))}
-                  className="mt-0.5 w-full px-2 py-1 bg-slate-800 border border-slate-600 rounded text-sm text-slate-100 focus:border-amber-400 focus:outline-none"
+                  className="mt-0.5 w-full px-2 py-1 bg-slate-800 border border-slate-500 rounded text-sm text-slate-100 focus:border-amber-400 focus:outline-none"
                 />
               </div>
             </div>
@@ -261,7 +256,7 @@ export function ExperienceTab({
                 value={newNotes}
                 onChange={(e) => setNewNotes(e.target.value)}
                 placeholder="e.g. Approved session 3"
-                className="mt-0.5 w-full px-2 py-1 bg-slate-800 border border-slate-600 rounded text-sm text-slate-100 focus:border-amber-400 focus:outline-none"
+                className="mt-0.5 w-full px-2 py-1 bg-slate-800 border border-slate-500 rounded text-sm text-slate-100 focus:border-amber-400 focus:outline-none"
               />
             </div>
 
@@ -286,7 +281,7 @@ export function ExperienceTab({
               placeholder="What are you buying?"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="flex-1 min-w-0 px-2 py-1 bg-slate-800 border border-slate-600 rounded text-sm"
+              className="flex-1 min-w-0 px-2 py-1 bg-slate-800 border border-slate-500 rounded text-sm"
             />
             <div className="flex gap-2">
               <input
@@ -295,7 +290,7 @@ export function ExperienceTab({
                 placeholder="Cost"
                 value={xpCost}
                 onChange={(e) => setXpCost(Math.max(0, Number(e.target.value)))}
-                className="w-24 px-2 py-1 bg-slate-800 border border-slate-600 rounded text-sm"
+                className="w-24 px-2 py-1 bg-slate-800 border border-slate-500 rounded text-sm"
               />
               <button
                 onClick={handlePropose}
@@ -316,7 +311,7 @@ export function ExperienceTab({
               {pendingProposals.map((p) => (
                 <div
                   key={p.id}
-                  className="flex items-center justify-between border border-slate-700 rounded px-3 py-2 text-sm"
+                  className="flex items-center justify-between border border-slate-500 rounded px-3 py-2 text-sm"
                 >
                   <span>{p.description} — {p.xpCost} XP</span>
                   <span className="text-slate-400">pending</span>
@@ -339,7 +334,7 @@ export function ExperienceTab({
                   {resolvedProposals.map((p) => (
                     <div
                       key={p.id}
-                      className="flex items-center justify-between border border-slate-700/50 rounded px-3 py-2 text-sm opacity-60"
+                      className="flex items-center justify-between border border-slate-500/50 rounded px-3 py-2 text-sm opacity-60"
                     >
                       <span>{p.description} — {p.xpCost} XP</span>
                       <span className={p.status === "approved" ? "text-green-400" : "text-red-400"}>

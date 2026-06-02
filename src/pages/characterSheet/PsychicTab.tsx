@@ -194,9 +194,7 @@ export function PsychicTab({ psychic, editable, onUpdate }: PsychicTabProps) {
     pickerTarget === "minor" ? "Minor" : "All";
 
   return (
-    <div className="space-y-6 text-slate-300">
-      <h2 className="text-xl font-semibold">Psychic Powers</h2>
-
+    <div className="space-y-6">
       {/* PSY RATING & DISCIPLINES ────────────────────────────────────────── */}
       <div className={sectionContainerClass(editable) + " space-y-3"}>
 
@@ -232,7 +230,7 @@ export function PsychicTab({ psychic, editable, onUpdate }: PsychicTabProps) {
                     active
                       ? "bg-indigo-600 border-indigo-500 text-white font-semibold"
                       : editable
-                      ? "border-slate-600 text-slate-300 hover:bg-slate-800"
+                      ? "border-slate-500 text-slate-100 hover:bg-slate-800"
                       : "border-slate-700 text-slate-500 opacity-60 cursor-not-allowed",
                   ].join(" ")}
                 >
@@ -252,7 +250,7 @@ export function PsychicTab({ psychic, editable, onUpdate }: PsychicTabProps) {
           {editable && (
             <button
               onClick={openPickerForMinor}
-              className="text-xs px-3 py-1 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 transition"
+              className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
               aria-label="Add Minor Power"
             >
               + Add Minor Power
@@ -284,7 +282,7 @@ export function PsychicTab({ psychic, editable, onUpdate }: PsychicTabProps) {
           {editable && (
             <button
               onClick={openPickerForMajor}
-              className="text-xs px-3 py-1 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 transition"
+              className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
               aria-label="Add Major Power"
             >
               + Add Major Power

@@ -64,9 +64,7 @@ export function CyberneticsTab({ cybernetics, editable, onUpdate }: CyberneticsT
   );
 
   return (
-    <div className="space-y-6 text-slate-300">
-      <h2 className="text-xl font-semibold">Cybernetics</h2>
-
+    <div className="space-y-6">
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
@@ -75,7 +73,7 @@ export function CyberneticsTab({ cybernetics, editable, onUpdate }: CyberneticsT
           {editable && (
             <button
               onClick={() => setShowPicker(true)}
-              className="text-xs px-3 py-1 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 transition"
+              className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
             >
               + Install
             </button>

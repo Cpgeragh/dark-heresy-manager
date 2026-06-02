@@ -357,19 +357,17 @@ export function WeaponsTab({
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="space-y-8 text-slate-300">
-      <h2 className="text-xl font-semibold">Weapons</h2>
-
+    <div className="space-y-8">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
         {/* ── RANGED ─────────────────────────────────────────────────────── */}
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-base font-semibold text-slate-200">Ranged</h3>
+            <h3 className="text-base font-semibold text-slate-100">Ranged</h3>
             {editable && !showCustomRanged && (
               <button
                 onClick={() => setPicker("ranged")}
-                className="text-xs px-3 py-1 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700"
+                className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
               >
                 + Add
               </button>
@@ -402,11 +400,11 @@ export function WeaponsTab({
         {/* ── MELEE ──────────────────────────────────────────────────────── */}
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-base font-semibold text-slate-200">Melee</h3>
+            <h3 className="text-base font-semibold text-slate-100">Melee</h3>
             {editable && !showCustomMelee && (
               <button
                 onClick={() => setPicker("melee")}
-                className="text-xs px-3 py-1 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700"
+                className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
               >
                 + Add
               </button>
@@ -443,11 +441,11 @@ export function WeaponsTab({
       {((shields ?? []).length > 0 || editable) && (
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-base font-semibold text-slate-200">Shields</h3>
+            <h3 className="text-base font-semibold text-slate-100">Shields</h3>
             {editable && (
               <button
                 onClick={() => setPicker("shields")}
-                className="text-xs px-3 py-1 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700"
+                className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
               >
                 + Add
               </button>
@@ -474,13 +472,13 @@ export function WeaponsTab({
       {/* ── AMMUNITION ───────────────────────────────────────────────────── */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-base font-semibold text-slate-200">
+          <h3 className="text-base font-semibold text-slate-100">
             Ammunition ({ammo.length})
           </h3>
           {editable && !showCustomAmmo && (
             <button
               onClick={() => setPicker("ammo")}
-              className="text-xs px-3 py-1 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700"
+              className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
             >
               + Add
             </button>
@@ -514,13 +512,13 @@ export function WeaponsTab({
       {/* ── GRENADES ─────────────────────────────────────────────────────── */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-base font-semibold text-slate-200">
+          <h3 className="text-base font-semibold text-slate-100">
             Grenades ({grenades.length})
           </h3>
           {editable && (
             <button
               onClick={() => setPicker("grenades")}
-              className="text-xs px-3 py-1 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700"
+              className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
             >
               + Add
             </button>
@@ -548,7 +546,7 @@ export function WeaponsTab({
       {cyberneticWeaponItems.length > 0 && (
         <section className="space-y-3">
           <div>
-            <h3 className="text-base font-semibold text-slate-200">
+            <h3 className="text-base font-semibold text-slate-100">
               Cybernetic Weapons
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">

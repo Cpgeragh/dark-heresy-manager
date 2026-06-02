@@ -19,15 +19,8 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
   }, [onSave]);
 
   return (
-    <div className="space-y-3 text-slate-300">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Notes</h2>
-        {!editable && (
-          <span className={readOnlyBadgeClass()}>
-            Read-only
-          </span>
-        )}
-      </div>
+    <div className="space-y-3">
+      {!editable && <span className={readOnlyBadgeClass()}>Read-only</span>}
 
       {!editable ? (
         <div className={sectionContainerClass(false)}>

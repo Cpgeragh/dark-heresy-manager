@@ -71,7 +71,7 @@ export function SpecialRulesModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-md bg-slate-900 border border-slate-700 rounded-xl shadow-2xl">
+      <div className="w-full max-w-md bg-slate-900 border border-slate-500 rounded-xl shadow-2xl">
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
           <h3 className="text-sm font-semibold text-slate-200">Special Rules</h3>
           <button
@@ -124,7 +124,7 @@ export function AttachmentCard({
   onRemove: (upgradeId: string) => void;
 }) {
   return (
-    <div className="bg-slate-800/60 rounded border border-slate-700 px-2 py-1.5">
+    <div className="bg-slate-800/60 rounded border border-slate-500 px-2 py-1.5">
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs font-medium text-slate-300">{upgrade.name}</span>
         <div className="flex items-center gap-1.5 shrink-0">
@@ -184,7 +184,7 @@ export function AttachmentPicker({
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-md bg-slate-900 border border-slate-700 rounded-xl shadow-2xl flex flex-col max-h-[80vh]">
+      <div className="w-full max-w-md bg-slate-900 border border-slate-500 rounded-xl shadow-2xl flex flex-col max-h-[80vh]">
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
           <h3 className="text-sm font-semibold text-slate-200">Add Attachment</h3>
           <button
@@ -226,7 +226,7 @@ export function AttachmentPicker({
         <div className="px-4 py-3 border-t border-slate-700">
           <button
             onClick={onClose}
-            className="w-full py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-sm text-slate-300"
+            className="w-full py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-sm text-slate-100"
           >
             Cancel
           </button>

@@ -52,13 +52,9 @@ export function editableTextareaClass(isEditable: boolean) {
   ].join(" ");
 }
 
-export function sectionContainerClass(isEditable: boolean) {
-  return [
-    "rounded-lg border p-3",
-    isEditable
-      ? "border-slate-500 bg-slate-900/40"
-      : "border-slate-800 bg-slate-900/20",
-  ].join(" ");
+/** @deprecated Use uiSection directly */
+export function sectionContainerClass(_isEditable: boolean) {
+  return uiSection;
 }
 
 // ─── Shared UI tokens ─────────────────────────────────────────────────────────
@@ -68,10 +64,10 @@ export function sectionContainerClass(isEditable: boolean) {
 export const uiSectionHeader = "text-sm font-semibold text-slate-100 uppercase tracking-wide";
 
 /** Standard section card — bright border, semi-transparent background. */
-export const uiSection = "rounded-lg border border-slate-500 bg-slate-800/60 p-3";
+export const uiSection = "rounded-lg border border-slate-500 bg-slate-900/60 p-3";
 
 /** Inner cell within a section (no padding — add your own). */
-export const uiCell = "rounded border border-slate-500 bg-slate-800/60";
+export const uiCell = "rounded border border-slate-500 bg-slate-950/60";
 
 /** Label inside a compact stat cell (tight column grids: Quick View, bonuses, movement). */
 export const uiCellLabel = "text-[10px] text-slate-100 leading-tight";

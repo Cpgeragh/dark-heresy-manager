@@ -34,9 +34,7 @@ export function TraitsTab({ talents, editable, onUpdateTalents }: TraitsTabProps
   );
 
   return (
-    <div className="space-y-8 text-slate-300">
-      <h2 className="text-xl font-semibold">Traits</h2>
-
+    <div className="space-y-8">
       <EntrySection
         title="Traits"
         singular="Trait"

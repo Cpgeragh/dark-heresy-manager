@@ -54,7 +54,7 @@ export function ArcheotechPickerModal({ onSelect, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-xl shadow-2xl flex flex-col max-h-[80vh]">
+      <div className="w-full max-w-lg bg-slate-900 border border-slate-500 rounded-xl shadow-2xl flex flex-col max-h-[80vh]">
 
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
@@ -118,7 +118,7 @@ export function ArcheotechPickerModal({ onSelect, onClose }: Props) {
             <div className="flex gap-2 pt-1">
               <button
                 onClick={() => setPending(null)}
-                className="px-4 py-1.5 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 text-sm text-slate-300 transition"
+                className="px-4 py-1.5 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm text-slate-100 transition"
               >
                 Back
               </button>
