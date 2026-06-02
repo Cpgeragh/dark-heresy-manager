@@ -32,7 +32,7 @@ export interface RangedWeaponRef {
   range: string;
   rof: string;
   damage: string;
-  pen: number;
+  pen: number | string;
   clip: number;
   reload: string;
   specialRules: string;
@@ -47,7 +47,7 @@ export interface MeleeWeaponRef {
   source: SkillSource;
   class: string;
   damage: string;
-  pen: number;
+  pen: number | string;
   specialRules: string;
   twoHanded?: boolean;
   weight: string;
@@ -690,7 +690,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
   // ── Book of Judgement ─────────────────────────────────────────────────────
   {
     id: "ius-automatic-pistol",
-    name: "Ius Automatic Pistol",
+    name: "Ius Automatic",
     source: SkillSource.BoJ,
     class: "Pistol",
     range: "30m",
@@ -828,7 +828,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     range: "100m",
     rof: "S/2/–",
     damage: "2d10 I or E",
-    pen: 0,
+    pen: "1d10",
     clip: 20,
     reload: "2 Full",
     specialRules: "Inaccurate, Overheats, Unreliable (not for Orks). Pen 1d10 (rolled separately each shot).",
@@ -1102,7 +1102,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
   },
   {
     id: "dh-tyranicus-heavy-webber",
-    name: "Tyranicus Pattern Heavy Webber",
+    name: "Tyranicus Heavy Webber",
     source: SkillSource.DH,
     class: "Heavy",
     range: "75m",
@@ -1116,61 +1116,6 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
       "at –30, target takes 1d5+1 damage per failed Test. Webbing dissolves after 2d5 hours.",
     weight: "12 kg",
     value: "2,500 Thrones",
-    rarity: "Rare",
-  },
-
-  // Grenades
-  {
-    id: "dh-psyk-out-grenade",
-    name: "Psyk-Out Grenade",
-    source: SkillSource.DH,
-    class: "Thrown",
-    range: "SBx3m",
-    rof: "S/–/–",
-    damage: "1d10 X (psykers only)",
-    pen: 0,
-    clip: 1,
-    reload: "—",
-    specialRules:
-      "Blast (3). Psykers in blast must pass Very Hard (–30) WP Test or lose 1 Psy Rating per DoF " +
-      "(recovers at 1/6 hrs). Losing 2+ Psy Rating triggers auto-Psychic Phenomena for 10–WP Bonus rounds. " +
-      "Dust lingers 5 rounds; psykers within auto-fail to manifest powers.",
-    weight: "1 kg",
-    value: "5,000 Thrones",
-    rarity: "Very Rare",
-  },
-  {
-    id: "dh-psykotroke-grenades",
-    name: "Psykotroke Grenades",
-    source: SkillSource.DH,
-    class: "Thrown",
-    range: "SBx3m",
-    rof: "S/–/–",
-    damage: "Special",
-    pen: 0,
-    clip: 1,
-    reload: "—",
-    specialRules:
-      "Blast (3). All in blast must pass Hard (–20) WP Test or roll on Hallucinogen Effects Table " +
-      "(+5 per DoF to the roll). Sealed suits provide no protection.",
-    weight: "1 kg",
-    value: "500 Thrones",
-    rarity: "Rare",
-  },
-  {
-    id: "dh-rad-grenades",
-    name: "Rad Grenades",
-    source: SkillSource.DH,
-    class: "Thrown",
-    range: "SBx3m",
-    rof: "S/–/–",
-    damage: "1d10 E",
-    pen: 0,
-    clip: 1,
-    reload: "—",
-    specialRules: "Blast (2). Victims must pass Hard (–20) Toughness Test or suffer 2d10 Toughness damage.",
-    weight: "1 kg",
-    value: "500 Thrones",
     rarity: "Rare",
   },
 
@@ -1575,9 +1520,9 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     name: "Agni-pattern Power Maul",
     source: SkillSource.BoJ,
     class: "Melee",
-    damage: "1d10+4 E",
-    pen: 4,
-    specialRules: "Power Field (High) or Shocking (Low, 1d10 I, Pen 0). Switch as Free Action.",
+    damage: "Low: 1d10 I; High: 1d10+4 E",
+    pen: "Low: 0; High: 4",
+    specialRules: "Low power: Shocking. High power: Power Field. User may switch settings once per turn as a Free Action.",
     weight: "0.75 kg",
     value: "1,500 Thrones",
     rarity: "Rare",
@@ -1613,9 +1558,9 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     name: "Lathe-pattern Power Maul",
     source: SkillSource.BoJ,
     class: "Melee",
-    damage: "1d10+5 I",
-    pen: 5,
-    specialRules: "Power Field (High) or Shocking (Low, 1d10-1 I, Pen 0). Switch as Free Action. +5 WS when Parrying.",
+    damage: "Low: 1d10-1 I; High: 1d10+5 I",
+    pen: "Low: 0; High: 5",
+    specialRules: "Low power: Shocking. High power: Power Field. User may switch settings once per turn as a Free Action. +5 WS when attempting to Parry.",
     weight: "0.5 kg",
     value: "2,100 Thrones",
     rarity: "Very Rare",
@@ -1672,31 +1617,6 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
   },
 
   // Shields
-  {
-    id: "synford-pattern-lockshield",
-    name: "Synford-Pattern 'Lockshield'",
-    source: SkillSource.BoJ,
-    class: "Melee",
-    damage: "1d10 I",
-    pen: 0,
-    specialRules: "Defensive",
-    weight: "4 kg",
-    value: "90 Thrones",
-    rarity: "Rare",
-  },
-  {
-    id: "enforcer-riot-shield",
-    name: "Enforcer Riot Shield",
-    source: SkillSource.BoJ,
-    class: "Melee",
-    damage: "1d10 I",
-    pen: 0,
-    specialRules: "Defensive, Primitive",
-    weight: "1.5 kg",
-    value: "40 Thrones",
-    rarity: "Scarce",
-  },
-
   // ── Creatures Anathema ───────────────────────────────────────────────────
   {
     id: "ca-choppa",
@@ -1843,7 +1763,7 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
   },
   {
     id: "dh-daggered-vambraces",
-    name: "Daggered Vambraces",
+    name: "Daggered Vambracers",
     source: SkillSource.DH,
     class: "Melee",
     damage: "1d10 R",
@@ -1867,7 +1787,7 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
   },
   {
     id: "dh-reliquary-sword",
-    name: "Reliquary Sword",
+    name: "Reliquary Blade",
     source: SkillSource.DH,
     class: "Melee",
     damage: "1d10+2 R",
@@ -1879,7 +1799,7 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
   },
   {
     id: "dh-sacred-incense",
-    name: "Sacred Incense Burner",
+    name: "Sacred Incense",
     source: SkillSource.DH,
     class: "Melee",
     damage: "1d10+2 I",
@@ -2207,6 +2127,56 @@ export const GRENADE_REFERENCE: GrenadeRef[] = [
       "A breakable canister of flammable liquid with a cloth fuse. " +
       "The canister breaks open on impact and the burning liquid spreads. " +
       "A target struck must make an Agility Test or catch on fire.",
+  },
+
+  // ── Daemon Hunter ─────────────────────────────────────────────────────────
+  {
+    id: "dh-psyk-out-grenade",
+    name: "Psyk-Out Grenade",
+    source: SkillSource.DH,
+    class: "Thrown",
+    damage: "1d10 X",
+    pen: "0",
+    specialRules: "Blast (3)",
+    weight: "1 kg",
+    value: "5,000 Thrones",
+    rarity: "Very Rare",
+    description:
+      "Psykers in the blast radius must pass a Very Hard (-30) Willpower Test " +
+      "or lose 1 Psy Rating per degree of failure, recovered at 1 point every 6 hours. " +
+      "Losing 2 or more Psy Rating also causes Psychic Phenomena for 10 minus WP Bonus rounds. " +
+      "Psykers in the lingering dust cloud for the next 5 rounds automatically fail to manifest psychic powers.",
+  },
+  {
+    id: "dh-psykotroke-grenades",
+    name: "Psykotroke Grenades",
+    source: SkillSource.DH,
+    class: "Thrown",
+    damage: "Special",
+    pen: "Special",
+    specialRules: "Blast (3)",
+    weight: "1 kg",
+    value: "500 Thrones",
+    rarity: "Rare",
+    description:
+      "The psycho-reactive nerve agent does not need to be breathed in, so sealed suits offer no protection. " +
+      "Anyone in the blast radius must pass a Hard (-20) Willpower Test or roll on the Hallucinogen Effects Table, " +
+      "adding +5 to the roll for each degree of failure.",
+  },
+  {
+    id: "dh-rad-grenades",
+    name: "Rad Grenades",
+    source: SkillSource.DH,
+    class: "Thrown",
+    damage: "1d10 E",
+    pen: "0",
+    specialRules: "Blast (2)",
+    weight: "1 kg",
+    value: "500 Thrones",
+    rarity: "Rare",
+    description:
+      "Victims caught in the blast must pass a Hard (-20) Toughness Test " +
+      "or suffer 2d10 Toughness damage from the burst of intense radiation.",
   },
 
   // ── Lathe Worlds ─────────────────────────────────────────────────────────
