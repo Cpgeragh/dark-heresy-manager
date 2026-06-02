@@ -454,6 +454,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.BoJ,
     locations: ["head"],
     ap: 4,
+    notes: "Includes both infra-red goggles and a photo-visor. Adds +10 to Search and Tracking Tests.",
     weight: "2.5 kg",
     value: "750 Thrones",
     rarity: "Very Rare",
@@ -480,7 +481,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     id: "ecclesiarchy-overlay",
     name: "Ecclesiarchy Overlay",
     source: SkillSource.BoM,
-    locations: ALL,
+    locations: [],
     ap: 0,
     notes:
       "Applied over any normal suit of armour; adds no AP of its own. " +
@@ -515,7 +516,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
       "Defensive quality. Requires Sororitas Power Armour to use. " +
       "Spend a Reaction to Parry attacks (including Ranged Weapon attacks) using Weapon Skill. " +
       "A successful Parry grants the wearer the Praesidium's AP as additional protection. " +
-      "The wearer may also bash with a one-handed weapon for 1d10+2 I (plus Strength Bonus). " +
+      "The wearer may also bash with a one-handed weapon for 1d5+2 I (plus Strength Bonus). " +
       "Can be worn on either arm — adjust the covered location accordingly.",
     weight: "14 kg",
     value: "7,500 Thrones",
@@ -565,7 +566,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
   },
   {
     id: "sororitas-power-armour",
-    name: "Sororitas Power Armour",
+    name: "Sororitas Powered Armour",
     source: SkillSource.BoM,
     locations: ALL,
     ap: 7,
@@ -704,11 +705,11 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     ap: 10,
     apOverrides: { head: 6, body: 14 },
     notes:
-      "AP 14 Body, AP 10 Arms and Legs, AP 6 Head. " +
-      "Completely unavailable — Ork-only wargear that cannot be acquired through normal means.",
+      "AP 6 Head, AP 10 Arms and Legs, AP 14 Body. Adds +30 Strength and increases size by one step. " +
+      "Requires a constant power supply from onboard generators and engines, usually solid fuel, and must be refuelled every 1d5 hours. " +
+      "Without power, the armour cannot move. Far too bulky to be worn by a human.",
     weight: "60 kg",
     value: "—",
     rarity: "Unavailable",
   },
-
 ];

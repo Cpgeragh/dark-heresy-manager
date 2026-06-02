@@ -21,6 +21,16 @@ import {
 } from "./weaponShared";
 import { effectiveMeleeStats, getCompatibleUpgrades } from "./weaponHelpers";
 
+function hasMultipleMeleeProfiles(damage?: string): boolean {
+  return !!damage && /\bLow:\s|\bHigh:\s|;/.test(damage);
+}
+
+function displayMeleeDamage(damage: string): string {
+  return hasMultipleMeleeProfiles(damage)
+    ? damage
+    : damage.replace(/\s*[IREX]$/i, "").trim();
+}
+
 // ─── Melee Picker ─────────────────────────────────────────────────────────────
 
 export function MeleePicker({
@@ -156,6 +166,7 @@ export function MeleeCard({
     attachmentIds.includes(upgrade.id)
   );
   const effective = effectiveMeleeStats(weapon, attachmentRefs);
+  const hasMultipleProfiles = hasMultipleMeleeProfiles(weapon.damage);
   const compatible = getCompatibleUpgrades(
     weapon.class ?? "",
     weapon.name,
@@ -187,13 +198,13 @@ export function MeleeCard({
         {weapon.damage && (
           <StatChip
             label="Damage"
-            value={weapon.damage.replace(/\s*[IREX]$/i, "").trim()}
+            value={displayMeleeDamage(weapon.damage)}
           />
         )}
-        {weapon.damage && <DamageTypeChip damage={weapon.damage} />}
+        {weapon.damage && !hasMultipleProfiles && <DamageTypeChip damage={weapon.damage} />}
         {effective.pen && <StatChip label="Pen" value={effective.pen} />}
         <StatChip label="SB" value={`+${strengthBonus}`} />
-        {weapon.damage && (
+        {weapon.damage && !hasMultipleProfiles && (
           <StatChip
             label="Total"
             value={computeMeleeTotalDamage(weapon.damage, strengthBonus)}
