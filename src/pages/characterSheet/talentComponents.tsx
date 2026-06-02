@@ -137,9 +137,19 @@ export function TalentPickerModal({
                 }`}
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm font-medium text-slate-200 group-hover:text-white">
-                    {item.name}
-                  </span>
+                  <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                    <span className="text-sm font-medium text-slate-200 group-hover:text-white truncate">
+                      {item.name}
+                    </span>
+                    {(TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]) && (
+                      <span onClick={(e) => e.stopPropagation()}>
+                        <InfoModal
+                          title={item.name}
+                          content={TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]}
+                        />
+                      </span>
+                    )}
+                  </div>
                   <div className="flex gap-1 shrink-0">
                     {sources.map((src) => (
                       <span key={src} className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(src)}`}>
