@@ -8,10 +8,12 @@ export interface TraitData {
   source: SkillSource;
   hasSpecialisation: boolean;
   specialisationLabel?: string;
+  specialisationOptions?: readonly string[];
   /** Present on numeric specialisations — signals integer-only input and sets the lower bound. */
   specialisationMin?: number;
   /** Present on numeric specialisations with a defined upper bound. */
   specialisationMax?: number;
+  prerequisites?: string;
   description?: string;
   repeatable?: boolean;
 }
@@ -50,85 +52,17 @@ export const TRAIT_LIST: readonly TraitData[] = [
   { id: "stuff-of-nightmares",      name: "Stuff of Nightmares",      source: SkillSource.CR, hasSpecialisation: false },
   { id: "sturdy",                   name: "Sturdy",                   source: SkillSource.CR, hasSpecialisation: false },
   { id: "toxic",                    name: "Toxic",                    source: SkillSource.CR, hasSpecialisation: false },
-  { id: "unnatural-characteristic", name: "Unnatural Characteristic", source: SkillSource.CR, hasSpecialisation: true,  specialisationLabel: "Characteristic", repeatable: true },
+  { id: "unnatural-characteristic", name: "Unnatural Characteristic", source: SkillSource.CR, hasSpecialisation: true,  specialisationLabel: "Characteristic", specialisationOptions: ["Weapon Skill", "Ballistic Skill", "Strength", "Toughness", "Agility", "Intelligence", "Perception", "Willpower", "Fellowship"], repeatable: true },
   { id: "unnatural-senses",         name: "Unnatural Senses",         source: SkillSource.CR, hasSpecialisation: false },
   { id: "unnatural-speed",          name: "Unnatural Speed",          source: SkillSource.CR, hasSpecialisation: false },
   { id: "warp-instability",         name: "Warp Instability",         source: SkillSource.CR, hasSpecialisation: false },
   { id: "warp-weapon",              name: "Warp Weapon",              source: SkillSource.CR, hasSpecialisation: false },
-
-  // ─── Radical's Handbook ─────────────────────────────────────────────────────
-
   // ─── Creatures Anathema ──────────────────────────────────────────────────────
   { id: "improved-natural-weapons", name: "Improved Natural Weapons", source: SkillSource.CA, hasSpecialisation: false },
 
   // ─── Career Traits (purchasable) ────────────────────────────────────────────
-  { id: "encarta-maleficarum",      name: "Encarta Maleficarum",      source: SkillSource.IH, hasSpecialisation: false },
-  { id: "feared-and-loathed",       name: "Feared and Loathed",       source: SkillSource.IH, hasSpecialisation: false },
-  { id: "knave-of-pistols",         name: "Knave of Pistols",         source: SkillSource.IH, hasSpecialisation: false },
-  { id: "mechanus-implants",        name: "Mechanus Implants",        source: SkillSource.CR, hasSpecialisation: false },
-  { id: "power-of-the-daemon",      name: "Power of the Daemon",      source: SkillSource.IH, hasSpecialisation: false },
-  { id: "sanctioned-psyker",        name: "Sanctioned Psyker",        source: SkillSource.IH, hasSpecialisation: false },
-  { id: "sin-scarred",              name: "Sin Scarred",              source: SkillSource.IH, hasSpecialisation: false },
-  { id: "the-bloody-edge",          name: "The Bloody Edge",          source: SkillSource.IH, hasSpecialisation: false },
-  { id: "unnatural-intelligence",   name: "Unnatural Intelligence",   source: SkillSource.IH, hasSpecialisation: false },
-  { id: "unreadable-mind",          name: "Unreadable Mind",          source: SkillSource.IH, hasSpecialisation: false },
-  { id: "witch-sight",              name: "Witch Sight",              source: SkillSource.BoM, hasSpecialisation: false },
-
-  // ─── Starting / Background Traits ───────────────────────────────────────────
-  { id: "accustomed-to-crowds",     name: "Accustomed to Crowds",     source: SkillSource.IH, hasSpecialisation: false },
-  { id: "bad-blood",                name: "Bad Blood",                source: SkillSource.IH, hasSpecialisation: false },
-  { id: "barren-world",             name: "Barren World",             source: SkillSource.IH, hasSpecialisation: false },
-  { id: "beloved-of-the-god-emperor", name: "Beloved of the God-Emperor", source: SkillSource.IH, hasSpecialisation: false },
-  { id: "blessed-ignorance",        name: "Blessed Ignorance",        source: SkillSource.IH, hasSpecialisation: false },
-  { id: "blighted-origins",         name: "Blighted Origins",         source: SkillSource.IH, hasSpecialisation: false },
-  { id: "born-survivor",            name: "Born Survivor",            source: SkillSource.IH, hasSpecialisation: false },
-  { id: "caves-of-steel",           name: "Caves of Steel",           source: SkillSource.IH, hasSpecialisation: false },
-  { id: "charmed",                  name: "Charmed",                  source: SkillSource.IH, hasSpecialisation: false },
-  { id: "close-quarter-fighter",    name: "Close-Quarter Fighter",    source: SkillSource.IH, hasSpecialisation: false },
-  { id: "cold-souled-and-hungry",   name: "Cold-Souled and Hungry",   source: SkillSource.IH, hasSpecialisation: false },
-  { id: "conditioned-mind",         name: "Conditioned Mind",         source: SkillSource.IH, hasSpecialisation: false },
-  { id: "credo-omnissiah",          name: "Credo Omnissiah",          source: SkillSource.IH, hasSpecialisation: false },
-  { id: "dark-tales",               name: "Dark Tales",               source: SkillSource.IH, hasSpecialisation: false },
-  { id: "darkholder-skills",        name: "Darkholder Skills",        source: SkillSource.IH, hasSpecialisation: false },
-  { id: "decayed-society",          name: "Decayed Society",          source: SkillSource.IH, hasSpecialisation: false },
-  { id: "engram-implant",           name: "Engram Implant",           source: SkillSource.IH, hasSpecialisation: false },
-  { id: "etiquette",                name: "Etiquette",                source: SkillSource.IH, hasSpecialisation: false },
-  { id: "failsafe-control",         name: "Failsafe Control",         source: SkillSource.IH, hasSpecialisation: false },
-  { id: "fiendish-mind",            name: "Fiendish Mind",            source: SkillSource.IH, hasSpecialisation: false },
-  { id: "fit-for-purpose",          name: "Fit For Purpose",          source: SkillSource.IH, hasSpecialisation: false },
-  { id: "ghillam-blood",            name: "Ghillam Blood",            source: SkillSource.IH, hasSpecialisation: false },
-  { id: "grim",                     name: "Grim",                     source: SkillSource.IH, hasSpecialisation: false },
-  { id: "hagiography",              name: "Hagiography",              source: SkillSource.IH, hasSpecialisation: false },
-  { id: "hivebound",                name: "Hivebound",                source: SkillSource.IH, hasSpecialisation: false },
-  { id: "ill-omened",               name: "Ill-Omened",               source: SkillSource.IH, hasSpecialisation: false },
-  { id: "imperial-conditioning",    name: "Imperial Conditioning",    source: SkillSource.IH, hasSpecialisation: false },
-  { id: "iron-stomach",             name: "Iron Stomach",             source: SkillSource.IH, hasSpecialisation: false },
-  { id: "little-left-to-fear",      name: "Little Left to Fear",      source: SkillSource.IH, hasSpecialisation: false },
-  { id: "liturgical-familiarity",   name: "Liturgical Familiarity",   source: SkillSource.IH, hasSpecialisation: false },
-  { id: "monstrous-lineage",        name: "Monstrous Lineage",        source: SkillSource.IH, hasSpecialisation: false },
-  { id: "naval-lineage-skills",     name: "Naval Lineage Skills",     source: SkillSource.IH, hasSpecialisation: false },
-  { id: "officer-on-deck",          name: "Officer on Deck",          source: SkillSource.IH, hasSpecialisation: false },
-  { id: "packing-iron",             name: "Packing Iron",             source: SkillSource.IH, hasSpecialisation: false },
-  { id: "primitive",                name: "Primitive",                source: SkillSource.IH, hasSpecialisation: false },
-  { id: "rite-of-passage",          name: "Rite of Passage",          source: SkillSource.IH, hasSpecialisation: false },
-  { id: "schola-education",         name: "Schola Education",         source: SkillSource.IH, hasSpecialisation: false },
-  { id: "sheltered-upbringing",     name: "Sheltered Upbringing",     source: SkillSource.IH, hasSpecialisation: false },
-  { id: "shipwise",                 name: "Shipwise",                 source: SkillSource.IH, hasSpecialisation: false },
-  { id: "skill-at-arms",            name: "Skill at Arms",            source: SkillSource.IH, hasSpecialisation: false },
-  { id: "stranger-to-the-cult",     name: "Stranger to the Cult",     source: SkillSource.IH, hasSpecialisation: false },
-  { id: "strength-through-adversity", name: "Strength through Adversity", source: SkillSource.IH, hasSpecialisation: false },
-  { id: "superior-origins",         name: "Superior Origins",         source: SkillSource.IH, hasSpecialisation: false },
-  { id: "supremely-connected",      name: "Supremely Connected",      source: SkillSource.IH, hasSpecialisation: false },
-  { id: "tempered-will",            name: "Tempered Will",            source: SkillSource.IH, hasSpecialisation: false },
-  { id: "through-a-mirror-darkly",  name: "Through a Mirror Darkly",  source: SkillSource.IH, hasSpecialisation: false },
-  { id: "tutored-in-the-profane",   name: "Tutored in the Profane",   source: SkillSource.IH, hasSpecialisation: false },
-  { id: "twist",                    name: "Twist",                    source: SkillSource.IH, hasSpecialisation: false },
-  { id: "vendetta",                 name: "Vendetta",                 source: SkillSource.IH, hasSpecialisation: false },
-  { id: "void-accustomed",          name: "Void Accustomed",          source: SkillSource.IH, hasSpecialisation: false },
-  { id: "wary",                     name: "Wary",                     source: SkillSource.IH, hasSpecialisation: false },
-  { id: "way-of-the-gun",           name: "Way of the Gun",           source: SkillSource.IH, hasSpecialisation: false },
-  { id: "wealth",                   name: "Wealth",                   source: SkillSource.IH, hasSpecialisation: false },
-  { id: "wilderness-savvy",         name: "Wilderness Savvy",         source: SkillSource.IH, hasSpecialisation: false },
+  { id: "mechanicus-implants",      name: "Mechanicus Implants",      source: SkillSource.CR, hasSpecialisation: false },
+  { id: "sanctioned-psyker",        name: "Sanctioned Psyker",        source: SkillSource.CR, hasSpecialisation: false },
 
   // ─── Disciples of the Dark Gods ─────────────────────────────────────────────
   { id: "dotdg-untouchable",         name: "Untouchable",              source: SkillSource.DotDG, hasSpecialisation: false },
@@ -143,7 +77,7 @@ export const TRAIT_LIST: readonly TraitData[] = [
   { id: "heart-of-steel",           name: "Heart of Steel",           source: SkillSource.LW, hasSpecialisation: false },
   { id: "skin-of-iron",             name: "Skin of Iron",             source: SkillSource.LW, hasSpecialisation: false },
   { id: "excommunicate-mechanicum", name: "Excommunicate Mechanicum", source: SkillSource.LW, hasSpecialisation: false },
-  { id: "fabricated-flesh",         name: "Fabricated Flesh",         source: SkillSource.LW, hasSpecialisation: false },
+  { id: "fabricated-flesh",         name: "Fabricated Flesh",         source: SkillSource.LW, hasSpecialisation: false, prerequisites: "Tech-Priest" },
   { id: "genetic-pantropy",         name: "Genetic Pantropy",         source: SkillSource.LW, hasSpecialisation: false },
   { id: "labourer-build",           name: "Labourer Build",           source: SkillSource.LW, hasSpecialisation: false },
 

@@ -58,6 +58,7 @@ export function TalentPickerModal({
   const talentData = picked && "hasSpecialisation" in picked ? picked as TalentData : null;
 
   const isNumeric = talentData?.specialisationMin !== undefined;
+  const specialisationOptions = talentData?.specialisationOptions;
 
   const numericValid = (): boolean => {
     const raw = specialisation.trim();
@@ -175,7 +176,21 @@ export function TalentPickerModal({
               Adding: <span className="text-slate-200 font-medium">{picked.name}</span>
             </p>
 
-            {isNumeric ? (
+            {specialisationOptions ? (
+              <select
+                value={specialisation}
+                onChange={(e) => setSpecialisation(e.target.value)}
+                className={editableInputClass(true)}
+                autoFocus
+              >
+                <option value="">{talentData.specialisationLabel ?? "Specialisation"}...</option>
+                {specialisationOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            ) : isNumeric ? (
               <>
                 <input
                   type="number"

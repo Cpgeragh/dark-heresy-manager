@@ -8,6 +8,7 @@ export interface TalentData {
   source: SkillSource | SkillSource[];
   hasSpecialisation: boolean;
   specialisationLabel?: string; // e.g. "Group", "Sense", "Skill"
+  specialisationOptions?: readonly string[];
   /** Present on numeric specialisations — signals integer-only input and sets the lower bound. */
   specialisationMin?: number;
   /** Present on numeric specialisations with a defined upper bound. */

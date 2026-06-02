@@ -12,7 +12,7 @@ export const TRAIT_DESCRIPTIONS: Record<string, string> = {
   "brutal-charge":           "Deals an extra 3 points of Damage when charging.",
   "burrower":                "Can burrow through soil, rock, and sand; some can burrow through metal. Leaves a tunnel behind — creatures one size smaller may traverse it freely. 50% chance per Round the tunnel collapses.",
   "crawler":                 "Movement equals half Agility Bonus. Takes no penalties for moving over Difficult Terrain.",
-  "daemonic":                "Doubles Toughness Bonus against all Damage. Immune to poison and disease. The doubling does not apply against force weapons, Psychic Powers, holy attacks, or other Daemonic creatures.",
+  "daemonic":                "Doubles Toughness Bonus against all Damage. Immune to poison and disease. The doubling does not apply against force weapons, Psychic Powers, holy attacks, or other Daemonic creatures. If combined with Unnatural Toughness, do not multiply Toughness Bonus twice; add 1 to the Unnatural Toughness multiplier instead.",
   "dark-sight":              "Sees normally in all levels of darkness. Never takes penalties for dim or absent lighting.",
   "fear":                    "Characters who encounter this creature must pass a Willpower Test, modified by the Fear Rating. On failure, roll on the Shock Table, adding +10 per degree of failure. Fear Rating: 1 Disturbing (0), 2 Frightening (–10), 3 Horrifying (–20), 4 Terrifying (–30).",
   "flyer":                   "Can fly at a speed listed in the creature entry.",
@@ -35,14 +35,15 @@ export const TRAIT_DESCRIPTIONS: Record<string, string> = {
   "stuff-of-nightmares":     "Completely immune to poison, disease, the need to breathe, most environmental hazards, Blood Loss, Stunning, and any Critical result — unless caused by a Psychic Power, force weapon, or holy attack.",
   "sturdy":                  "+20 to Tests made to resist Grappling and the Takedown talent.",
   "toxic":                   "Delivers poison via natural attacks, contact, or stench. Targets must pass a Toughness Test or suffer 1d10 Damage ignoring Armour. Variations are listed in the creature entry.",
-  "unnatural-characteristic":"Double the Bonus of one Characteristic. May be taken multiple times; each additional application to the same Characteristic increases the multiplier by 1 (×2, ×3, ×4 etc.). Does not increase movement even if applied to Agility.",
+  "unnatural-characteristic":"Double the Bonus of one Characteristic. May be taken multiple times; each additional application to the same Characteristic increases the multiplier by 1 (×2, ×3, ×4 etc.). Does not increase movement even if applied to Agility. If Daemonic and Unnatural Toughness both apply, do not multiply Toughness Bonus twice; add 1 to the Unnatural Toughness multiplier instead.",
   "unnatural-senses":        "Perceives surroundings by means other than sight or hearing. Range is listed in the creature entry, typically 15 metres.",
   "unnatural-speed":         "Doubles Agility Bonus for movement, applied after other modifiers from size and Traits.",
   "warp-instability":        "If the creature takes Damage and does not deal Damage or Insanity Points to another creature by the end of its next Turn, it must test Willpower. On failure, it takes 1 Damage plus 1 per degree of failure. If this equals or exceeds its Wounds, the creature is cast back into the warp.",
   "warp-weapon":             "Attacks ignore physical armour unless made from psychoreactive materials or carrying the holy quality. Force fields still work normally.",
 
   // ─── Core Rulebook — Career Traits ──────────────────────────────────────────
-  "mechanus-implants":       "You bear the sacred implants of the Adeptus Mechanicus: an Electro-Graft (data port interface), Electoo Inductors (bio-electrical power siphon), a Respirator Unit (+20 to resist airborne toxins and gas weapons; includes a vox-synthesiser), a Cyber-Mantle (implant anchorage framework), a Potentia Coil (power storage), and Cranial Circuitry (cognitive augmentation).",
+  "mechanicus-implants":     "You bear the sacred implants of the Adeptus Mechanicus: an Electro-Graft (data port interface), Electoo Inductors (bio-electrical power siphon), a Respirator Unit (+20 to resist airborne toxins and gas weapons; includes a vox-synthesiser), a Cyber-Mantle (implant anchorage framework), a Potentia Coil (power storage), and Cranial Circuitry (cognitive augmentation).",
+  "sanctioned-psyker":       "You were trained under the Scholastia Psykana and sanctioned by Imperial authority. You gain a Psy Rating, begin with sanctioned psychic disciplines as appropriate, and are permitted to use psychic powers without being treated as an unsanctioned witch.",
 
   // ─── Creatures Anathema ──────────────────────────────────────────────────────
   "improved-natural-weapons": "This creature's attacks are powerful enough to crush plasteel or punch through armour. The creature's natural weapons no longer count as Primitive.",
