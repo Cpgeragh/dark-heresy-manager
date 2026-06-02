@@ -8,7 +8,7 @@ import { CHARACTERISTIC_BONUS_DIVISOR } from "../constants/gameRules";
 import { useCharacterSheet } from "./characterSheet/useCharacterSheet";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 
-import { OverviewTab } from "./characterSheet/OverviewTab";
+import { VitalsTab } from "./characterSheet/VitalsTab";
 import { CharacteristicsTab } from "./characterSheet/CharacteristicsTab";
 import { SkillsTab } from "./characterSheet/SkillsTab";
 import { TalentsTab } from "./characterSheet/TalentsTab";
@@ -94,7 +94,7 @@ export default function CharacterSheet() {
     characterIdParam: params.characterId,
   });
 
-  const [activeTab, setActiveTab] = useState<TabId>("overview");
+  const [activeTab, setActiveTab] = useState<TabId>("vitals");
   const [isManageOpen, setIsManageOpen] = useState(false);
 
   // ================================================================
@@ -327,7 +327,7 @@ export default function CharacterSheet() {
                 </p>
               </div>
               <button
-                onClick={() => setActiveTab("overview")}
+                onClick={() => setActiveTab("vitals")}
                 className="px-4 py-2 bg-slate-800 text-slate-200 rounded border border-slate-700 hover:bg-slate-700 transition"
               >
                 Back to Overview
@@ -335,8 +335,8 @@ export default function CharacterSheet() {
             </div>
           }
         >
-          {activeTab === "overview" && (
-            <OverviewTab
+          {activeTab === "vitals" && (
+            <VitalsTab
               character={character}
               editable={allowedToEdit}
               onUpdateWounds={handleUpdateWounds}

@@ -1,4 +1,4 @@
-// src/pages/characterSheet/OverviewTab.tsx
+// src/pages/characterSheet/VitalsTab.tsx
 
 import { useCallback } from "react";
 import { Stepper } from "../../components/Stepper";
@@ -16,7 +16,7 @@ import {
   FATE_CRITICAL_THRESHOLD,
 } from "../../constants/gameRules";
 
-interface OverviewTabProps {
+interface VitalsTabProps {
   character: Character;
   editable: boolean;
   onUpdateWounds: (next: WoundsBlock) => void;
@@ -25,14 +25,14 @@ interface OverviewTabProps {
   onUpdateCorruption: (next: CorruptionBlock) => void;
 }
 
-export function OverviewTab({
+export function VitalsTab({
   character,
   editable,
   onUpdateWounds,
   onUpdateFate,
   onUpdateInsanity,
   onUpdateCorruption,
-}: OverviewTabProps) {
+}: VitalsTabProps) {
   const { wounds, fate } = character;
   const insanity   = character.insanity   ?? { points: 0, disorders: "" };
   const corruption = character.corruption ?? { points: 0, malignancies: "" };
