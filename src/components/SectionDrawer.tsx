@@ -13,44 +13,44 @@ const CATEGORIES: {
   tabs: { id: TabId; label: string }[];
 }[] = [
   {
-    label: "Combat",
-    tabs: [
-      { id: "vitals",    label: "Vitals" },
-      { id: "stats",     label: "Characteristics" },
-      { id: "weapons",   label: "Weapons" },
-      { id: "armour",    label: "Armour" },
-    ],
-  },
-  {
     label: "Abilities",
     tabs: [
+      { id: "psychic",  label: "Psychic" },
       { id: "skills",   label: "Skills" },
       { id: "talents",  label: "Talents" },
       { id: "traits",   label: "Traits" },
-      { id: "psychic",  label: "Psychic" },
-    ],
-  },
-  {
-    label: "Equipment",
-    tabs: [
-      { id: "gear",        label: "Gear" },
-      { id: "drugs",       label: "Drugs" },
-      { id: "cybernetics", label: "Cybernetics" },
-      { id: "archeotech",  label: "Archeotech" },
-    ],
-  },
-  {
-    label: "Character",
-    tabs: [
-      { id: "background", label: "Background" },
-      { id: "xp",         label: "XP" },
-      { id: "notes",      label: "Notes" },
     ],
   },
   {
     label: "Admin",
     dmOnly: true,
     tabs: [{ id: "admin", label: "Admin" }],
+  },
+  {
+    label: "Character",
+    tabs: [
+      { id: "background", label: "Background" },
+      { id: "notes",      label: "Notes" },
+      { id: "xp",         label: "XP" },
+    ],
+  },
+  {
+    label: "Combat",
+    tabs: [
+      { id: "armour",    label: "Armour" },
+      { id: "stats",     label: "Characteristics" },
+      { id: "vitals",    label: "Vitals" },
+      { id: "weapons",   label: "Weapons" },
+    ],
+  },
+  {
+    label: "Equipment",
+    tabs: [
+      { id: "archeotech",  label: "Archeotech" },
+      { id: "cybernetics", label: "Cybernetics" },
+      { id: "drugs",       label: "Drugs" },
+      { id: "gear",        label: "Gear" },
+    ],
   },
 ];
 
