@@ -13,6 +13,7 @@ type CampaignWithId = CampaignDocument & { id: string };
 interface CampaignSectionProps {
   userUid: string;
   campaigns: CampaignWithId[];
+  loading: boolean;
   activeCampaignId: string | null;
   onCampaignSelect: (campaignId: string | null) => void;
 }
@@ -20,6 +21,7 @@ interface CampaignSectionProps {
 function CampaignSection({
   userUid,
   campaigns,
+  loading,
   activeCampaignId,
   onCampaignSelect,
 }: CampaignSectionProps) {
@@ -129,7 +131,9 @@ function CampaignSection({
       <div>
         <h2 className="text-2xl font-semibold mb-2">Your Campaigns</h2>
 
-        {campaigns.length === 0 ? (
+        {loading ? (
+          <p className="text-slate-400 text-sm">Loading campaigns…</p>
+        ) : campaigns.length === 0 ? (
           <p className="text-slate-400">No campaigns created yet.</p>
         ) : (
           <div className="flex flex-col gap-3">

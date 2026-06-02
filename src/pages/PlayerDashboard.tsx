@@ -119,18 +119,22 @@ function CampaignSection({
 
 export default function PlayerDashboard({ user }: Props) {
   const navigate = useNavigate();
-  const { campaigns, error } = useCampaignsForUser(user.uid, "player");
+  const { campaigns, loading, error } = useCampaignsForUser(user.uid, "player");
+
+  const isEmpty = !loading && !error && campaigns.length === 0;
 
   return (
     <div className="space-y-6 text-slate-100">
       <div className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold">My Dashboard</h1>
-        <button
-          onClick={() => navigate(ROUTES.CLAIM_CHARACTER)}
-          className="px-3 py-1.5 text-sm bg-amber-500 text-slate-900 font-semibold rounded hover:bg-amber-400 transition"
-        >
-          + Claim a Character
-        </button>
+        <h1 className="text-2xl font-bold">Campaign Hub</h1>
+        {!isEmpty && (
+          <button
+            onClick={() => navigate(ROUTES.CLAIM_CHARACTER)}
+            className="px-3 py-1.5 text-sm bg-amber-500 text-slate-900 font-semibold rounded hover:bg-amber-400 transition"
+          >
+            + Claim a Character
+          </button>
+        )}
       </div>
 
       {error && (
@@ -139,8 +143,12 @@ export default function PlayerDashboard({ user }: Props) {
         </p>
       )}
 
-      {!error && campaigns.length === 0 && (
-        <div className="space-y-3">
+      {loading && (
+        <p className="text-slate-400 text-sm">Loading campaigns…</p>
+      )}
+
+      {isEmpty && (
+        <div className="space-y-4 text-center py-8">
           <p className="text-slate-400">
             You are not part of any campaigns yet. Ask your DM for a recovery code to claim your character.
           </p>
@@ -153,16 +161,18 @@ export default function PlayerDashboard({ user }: Props) {
         </div>
       )}
 
-      <div className="space-y-4">
-        {campaigns.map((campaign) => (
-          <CampaignSection
-            key={campaign.id}
-            campaignId={campaign.id}
-            campaignName={campaign.name}
-            userId={user.uid}
-          />
-        ))}
-      </div>
+      {!loading && campaigns.length > 0 && (
+        <div className="space-y-4">
+          {campaigns.map((campaign) => (
+            <CampaignSection
+              key={campaign.id}
+              campaignId={campaign.id}
+              campaignName={campaign.name}
+              userId={user.uid}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

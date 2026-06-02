@@ -10,9 +10,11 @@ type CampaignWithId = CampaignDocument & { id: string };
 
 export function useCampaigns(dmUid: string) {
   const [campaigns, setCampaigns] = useState<CampaignWithId[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let ignore = false;
+    setLoading(true);
 
     async function load() {
       const snap = await getDocs(collection(db, "campaigns"));
@@ -25,12 +27,19 @@ export function useCampaigns(dmUid: string) {
         }
       });
 
-      if (!ignore) setCampaigns(list);
+      if (!ignore) {
+        setCampaigns(list);
+        setLoading(false);
+      }
     }
 
-    load().catch((err) => console.error("Failed to load campaigns:", err));
+    load().catch((err) => {
+      console.error("Failed to load campaigns:", err);
+      if (!ignore) setLoading(false);
+    });
+
     return () => { ignore = true; };
   }, [dmUid]);
 
-  return { campaigns };
+  return { campaigns, loading };
 }
