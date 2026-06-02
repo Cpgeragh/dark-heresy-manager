@@ -17,7 +17,7 @@ export function PieceNotesModal({ piece, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-md bg-slate-900 border border-slate-700 rounded-xl shadow-2xl">
+      <div className="w-full max-w-md bg-slate-900 border border-slate-500 rounded-xl shadow-2xl">
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
           <h3 className="text-sm font-semibold text-slate-200">{piece.name}</h3>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-200 text-lg leading-none">×</button>

@@ -92,7 +92,7 @@ export function TalentPickerModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-xl shadow-2xl flex flex-col max-h-[80vh]">
+      <div className="w-full max-w-lg bg-slate-900 border border-slate-500 rounded-xl shadow-2xl flex flex-col max-h-[80vh]">
 
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
@@ -227,10 +227,10 @@ export function EntryCard({ entry, editable, onRemove }: EntryCardProps) {
   const refSources = refData ? normaliseSources(refData.source) : [];
 
   return (
-    <div className="flex items-start justify-between gap-2 rounded border border-slate-700 bg-slate-900/30 px-3 py-2 text-sm">
+    <div className="flex items-start justify-between gap-2 rounded border border-slate-500 bg-slate-900/60 px-3 py-2 text-sm">
       <div className="space-y-0.5 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="font-medium text-slate-200 break-words">{entry.name}</span>
+          <span className="font-medium text-slate-100 break-words">{entry.name}</span>
           {refSources.map((src) => (
             <span key={src} className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(src)}`}>
               {src}
@@ -309,7 +309,7 @@ export function EntrySection({
       {editable && (
         <button
           onClick={() => setShowPicker(true)}
-          className="mt-1 px-3 py-1 text-xs rounded border border-slate-600 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition"
+          className="mt-1 px-3 py-1 text-xs rounded border border-slate-500 text-slate-100 hover:bg-slate-800 transition"
         >
           + Add {singular}
         </button>

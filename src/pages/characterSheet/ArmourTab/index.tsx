@@ -86,9 +86,7 @@ export function ArmourTab({
   const stowed        = regularArmour.filter((p) => !p.worn);
 
   return (
-    <div className="space-y-6 text-slate-300">
-      <h2 className="text-xl font-semibold">Armour</h2>
-
+    <div className="space-y-6">
       {/* LOCATION SUMMARY */}
       <section>
         <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400 mb-2">
@@ -112,7 +110,7 @@ export function ArmourTab({
                 const total  = ap + toughnessBonus + bionic;
                 return (
                   <tr key={loc} className="hover:bg-slate-800/40 transition">
-                    <td className="py-2 pr-4 text-slate-300">{LOCATION_LABELS[loc]}</td>
+                    <td className="py-2 pr-4 text-slate-100">{LOCATION_LABELS[loc]}</td>
                     <td className="py-2 px-3 text-center font-mono text-slate-200">{ap}</td>
                     <td className="py-2 px-3 text-center font-mono text-slate-400">{toughnessBonus}</td>
                     <td className={`py-2 px-3 text-center font-mono ${bionic > 0 ? "text-cyan-400" : "text-slate-700"}`}>
@@ -139,7 +137,7 @@ export function ArmourTab({
           {editable && !showCustomForm && (
             <button
               onClick={() => { setPickerMode("worn"); setShowPicker(true); }}
-              className="text-xs px-3 py-1 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 transition"
+              className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
             >
               + Equip
             </button>
@@ -160,7 +158,7 @@ export function ArmourTab({
           {editable && !showCustomForm && (
             <button
               onClick={() => { setPickerMode("stowed"); setShowPicker(true); }}
-              className="text-xs px-3 py-1 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 transition"
+              className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
             >
               + Stow
             </button>
@@ -181,7 +179,7 @@ export function ArmourTab({
           {editable && (
             <button
               onClick={() => setShowFieldPicker(true)}
-              className="text-xs px-3 py-1 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 transition"
+              className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
             >
               + Add
             </button>

@@ -123,7 +123,7 @@ export function CustomRangedForm({
         </button>
         <button
           onClick={onCancel}
-          className="px-4 py-1.5 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 text-sm text-slate-300"
+          className="px-4 py-1.5 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm text-slate-100"
         >
           Cancel
         </button>

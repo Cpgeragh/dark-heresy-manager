@@ -42,7 +42,7 @@ export function ImplantPicker({ onSelect, onClose }: Props) {
 
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-        <div className="w-full max-w-md bg-slate-900 border border-slate-700 rounded-xl shadow-2xl">
+        <div className="w-full max-w-md bg-slate-900 border border-slate-500 rounded-xl shadow-2xl">
           <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
             <h3 className="text-sm font-semibold text-slate-200">{selected.name}</h3>
             <button onClick={resetPicker} className="text-slate-400 hover:text-slate-200 text-lg leading-none">×</button>
@@ -66,7 +66,7 @@ export function ImplantPicker({ onSelect, onClose }: Props) {
           <div className="px-4 py-3 border-t border-slate-700">
             <button
               onClick={resetPicker}
-              className="px-4 py-1.5 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 text-sm text-slate-300"
+              className="px-4 py-1.5 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm text-slate-100"
             >
               Back
             </button>
@@ -80,7 +80,7 @@ export function ImplantPicker({ onSelect, onClose }: Props) {
   if (selected) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-        <div className="w-full max-w-md bg-slate-900 border border-slate-700 rounded-xl shadow-2xl">
+        <div className="w-full max-w-md bg-slate-900 border border-slate-500 rounded-xl shadow-2xl">
           <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
             <h3 className="text-sm font-semibold text-slate-200">{selected.name}</h3>
             <button onClick={resetPicker} className="text-slate-400 hover:text-slate-200 text-lg leading-none">×</button>
@@ -125,7 +125,7 @@ export function ImplantPicker({ onSelect, onClose }: Props) {
           <div className="px-4 py-3 border-t border-slate-700 flex gap-2">
             <button
               onClick={resetPicker}
-              className="px-4 py-1.5 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 text-sm text-slate-300"
+              className="px-4 py-1.5 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm text-slate-100"
             >
               Back
             </button>

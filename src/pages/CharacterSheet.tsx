@@ -245,6 +245,25 @@ export default function CharacterSheet() {
   // Visual cue for DM override mode
   const dmOverrideActive = isDM && !dmReadOnly;
 
+  const TAB_TITLES: Record<TabId, string> = {
+    vitals:      "Vitals",
+    stats:       "Characteristics",
+    skills:      "Skills",
+    talents:     "Talents",
+    traits:      "Traits",
+    weapons:     "Weapons",
+    armour:      "Armour",
+    cybernetics: "Cybernetics",
+    psychic:     "Psychic Powers",
+    gear:        "Gear & Equipment",
+    drugs:       "Drugs",
+    xp:          "Experience",
+    notes:       "Notes",
+    background:  "Background",
+    archeotech:  "Archeotech",
+    admin:       "Admin",
+  };
+
   const containerClass = [
     "border p-4 rounded-lg transition-colors",
     dmOverrideActive
@@ -311,8 +330,11 @@ export default function CharacterSheet() {
         isDM={isDM}
       />
 
+      {/* PAGE TITLE */}
+      <h2 className="text-xl font-semibold text-slate-100 mb-3">{TAB_TITLES[activeTab]}</h2>
+
       {/* CONTENT CONTAINER */}
-      <div 
+      <div
         className={containerClass}
         role="tabpanel"
         aria-label={`${activeTab} content`}

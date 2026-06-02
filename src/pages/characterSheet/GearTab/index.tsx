@@ -110,9 +110,7 @@ export function GearTab({ gear, consumables, editable, onUpdate, onUpdateConsuma
   );
 
   return (
-    <div className="space-y-6 text-slate-300">
-      <h2 className="text-xl font-semibold">Gear &amp; Equipment</h2>
-
+    <div className="space-y-6">
       {/* CONSUMABLES ──────────────────────────────────────────────────────── */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
@@ -122,7 +120,7 @@ export function GearTab({ gear, consumables, editable, onUpdate, onUpdateConsuma
           {editable && (
             <button
               onClick={() => setShowConsumablePicker(true)}
-              className="text-xs px-3 py-1 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700"
+              className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
             >
               + Add
             </button>
@@ -153,7 +151,7 @@ export function GearTab({ gear, consumables, editable, onUpdate, onUpdateConsuma
           {editable && !showCustomForm && (
             <button
               onClick={() => setShowGearPicker(true)}
-              className="text-xs px-3 py-1 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700"
+              className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
             >
               + Add Item
             </button>

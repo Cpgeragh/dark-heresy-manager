@@ -54,9 +54,7 @@ export function DrugsTab({ drugs, editable, onUpdate }: DrugsTabProps) {
   );
 
   return (
-    <div className="space-y-6 text-slate-300">
-      <h2 className="text-xl font-semibold">Drugs</h2>
-
+    <div className="space-y-6">
       {/* Excessive Drug Use rule */}
       <div className="rounded-lg border border-violet-700/40 bg-violet-900/10 px-4 py-3 text-xs text-slate-400 leading-relaxed">
         <span className="font-semibold text-violet-400 uppercase tracking-wide mr-1">
@@ -76,7 +74,7 @@ export function DrugsTab({ drugs, editable, onUpdate }: DrugsTabProps) {
           {editable && (
             <button
               onClick={() => setShowPicker(true)}
-              className="text-xs px-3 py-1 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 transition"
+              className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
             >
               + Add
             </button>

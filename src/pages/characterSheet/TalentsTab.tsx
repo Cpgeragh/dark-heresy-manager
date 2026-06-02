@@ -174,9 +174,7 @@ export function TalentsTab({
   }, [weaponTraining, onUpdateTraining]);
 
   return (
-    <div className="space-y-8 text-slate-300">
-      <h2 className="text-xl font-semibold">Talents</h2>
-
+    <div className="space-y-8">
       {/* TALENTS */}
       <EntrySection
         title="Talents"
@@ -220,7 +218,7 @@ export function TalentsTab({
                       active
                         ? "bg-amber-500 border-amber-400 text-slate-900 font-semibold"
                         : editable
-                        ? "border-slate-600 text-slate-300 hover:bg-slate-800"
+                        ? "border-slate-500 text-slate-100 hover:bg-slate-800"
                         : "border-slate-700 text-slate-500 opacity-60 cursor-not-allowed"
                     }`}
                   >
@@ -246,7 +244,7 @@ export function TalentsTab({
             {weaponTraining.exoticWeapons.map((weapon, index) => (
               <div
                 key={index}
-                className="flex items-center justify-between rounded border border-slate-700 bg-slate-900/30 px-3 py-1.5 text-sm"
+                className="flex items-center justify-between rounded border border-slate-500 bg-slate-900/60 px-3 py-1.5 text-sm"
               >
                 <span className="text-slate-200">{weapon}</span>
                 {editable && (

@@ -60,16 +60,11 @@ export function ArcheotechTab({ archeotech, editable, onUpdate }: ArcheotechTabP
   );
 
   return (
-    <div className="space-y-8 text-slate-300">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-semibold">Archeotech</h2>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Ancient technology of the Dark Age. Most items have no standard cost or availability —
-            acquisition is left entirely to the GM.
-          </p>
-        </div>
-      </div>
+    <div className="space-y-8">
+      <p className="text-xs text-slate-400">
+        Ancient technology of the Dark Age. Most items have no standard cost or availability —
+        acquisition is left entirely to the GM.
+      </p>
 
       {/* ── INVENTORY ─────────────────────────────────────────────────────── */}
       <section className="space-y-3">
@@ -81,7 +76,7 @@ export function ArcheotechTab({ archeotech, editable, onUpdate }: ArcheotechTabP
             <div className="flex gap-2">
               <button
                 onClick={() => setShowPicker(true)}
-                className="text-xs px-3 py-1 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 transition"
+                className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
               >
                 + From Reference
               </button>

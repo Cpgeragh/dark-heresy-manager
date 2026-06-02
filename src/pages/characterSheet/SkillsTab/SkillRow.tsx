@@ -84,7 +84,7 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc }: SkillRowP
 
       {/* EXPANDED BODY */}
       {expanded && (
-        <div className="px-3 pb-3 pt-2 border-t border-slate-700 space-y-3">
+        <div className="px-3 pb-3 pt-2 border-t border-slate-600 space-y-3">
 
           {/* Level buttons */}
           {editable && (

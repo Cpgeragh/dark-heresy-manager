@@ -76,9 +76,7 @@ export function AdminTab({
   const latest = claimLog.length > 0 ? claimLog[0] : null;
 
   return (
-    <div className="space-y-6 text-slate-300">
-      <h2 className="text-xl font-semibold">Admin</h2>
-
+    <div className="space-y-6">
       {/* CONTEXT NOTE */}
       <p className="text-xs text-slate-400">
         DM-only controls. Changes here immediately affect player access.
@@ -181,7 +179,7 @@ export function AdminTab({
             {pendingProposals.map((p) => (
               <li
                 key={p.id}
-                className="flex flex-col sm:flex-row sm:items-center gap-2 border border-slate-700 rounded px-3 py-2 text-sm"
+                className="flex flex-col sm:flex-row sm:items-center gap-2 border border-slate-500 rounded px-3 py-2 text-sm"
               >
                 <div>
                   <span className="text-slate-200">{p.description}</span>
@@ -232,8 +230,7 @@ export function AdminTab({
             return (
               <li
                 key={entry.id ?? i}
-                className="rounded border border-slate-700
-                           bg-slate-900/60 p-2 text-xs"
+                className="rounded border border-slate-500 bg-slate-900/60 p-2 text-xs"
               >
                 <div className="font-mono text-slate-200">
                   {entry.action} @ {when}

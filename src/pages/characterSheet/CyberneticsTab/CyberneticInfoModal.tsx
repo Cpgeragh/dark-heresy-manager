@@ -16,7 +16,7 @@ export function CyberneticInfoModal({ item, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-xl shadow-2xl flex flex-col max-h-[80vh]">
+      <div className="w-full max-w-lg bg-slate-900 border border-slate-500 rounded-xl shadow-2xl flex flex-col max-h-[80vh]">
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
           <div className="flex items-center gap-2">
             <h3 className="text-sm font-semibold text-slate-200">{item.name}</h3>

@@ -30,6 +30,7 @@ const CATEGORIES: {
     label: "Character",
     tabs: [
       { id: "background", label: "Background" },
+      { id: "stats",      label: "Characteristics" },
       { id: "notes",      label: "Notes" },
       { id: "xp",         label: "XP" },
     ],
@@ -37,10 +38,9 @@ const CATEGORIES: {
   {
     label: "Combat",
     tabs: [
-      { id: "armour",    label: "Armour" },
-      { id: "stats",     label: "Characteristics" },
-      { id: "vitals",    label: "Vitals" },
-      { id: "weapons",   label: "Weapons" },
+      { id: "armour",  label: "Armour" },
+      { id: "vitals",  label: "Vitals" },
+      { id: "weapons", label: "Weapons" },
     ],
   },
   {
