@@ -15,7 +15,7 @@ const CATEGORIES: {
   {
     label: "Combat",
     tabs: [
-      { id: "overview",  label: "Vitals" },
+      { id: "vitals",    label: "Vitals" },
       { id: "stats",     label: "Characteristics" },
       { id: "weapons",   label: "Weapons" },
       { id: "armour",    label: "Armour" },

@@ -1,5 +1,5 @@
 export type TabId =
-  | "overview"
+  | "vitals"
   | "stats"
   | "skills"
   | "talents"
