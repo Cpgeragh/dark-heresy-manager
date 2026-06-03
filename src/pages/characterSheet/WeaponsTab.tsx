@@ -13,6 +13,8 @@ import type {
 } from "../../types/Character";
 import { CYBERNETICS_REFERENCE } from "../../data/reference/cyberneticsReference";
 import {
+  RANGED_WEAPON_REFERENCE,
+  MELEE_WEAPON_REFERENCE,
   type RangedWeaponRef,
   type MeleeWeaponRef,
   type GrenadeRef,
@@ -23,6 +25,7 @@ import { MeleeCard, MeleePicker, CustomMeleeForm } from "./weapons/MeleeCard";
 import { GrenadeCard, GrenadePicker } from "./weapons/GrenadeCard";
 import { ShieldCard, ShieldPicker } from "./weapons/ShieldCard";
 import { CyberneticWeaponCard } from "./weapons/CyberneticWeaponCard";
+import { PickerModal } from "../../ui/PickerModal";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -40,7 +43,133 @@ interface WeaponsTabProps {
   onUpdateShields?: (next: ShieldItem[]) => void;
 }
 
-type PickerTarget = "ranged" | "melee" | "grenades" | "shields" | null;
+type PickerTarget = "ranged" | "melee" | "integrated" | "grenades" | "shields" | null;
+
+const INTEGRATED_RANGED_IDS = new Set([
+  "lw-lathe-laspistol",
+  "lw-lathe-lasrifle",
+  "lw-lathe-lasblaster",
+  "lw-phased-plasma-rifle",
+  "lw-catalytic-mass-driver",
+  "lw-heavy-catalytic-mass-driver",
+]);
+
+const INTEGRATED_MELEE_IDS = new Set([
+  "lw-coil-whip",
+  "lw-lathes-arc-welder",
+]);
+
+const INTEGRATED_RANGED_NAMES = new Set([
+  "lathe laspistol",
+  "lathe-laspistol",
+  "lathe lasrifle",
+  "lathe-lasrifle",
+  "lathe lasblaster",
+  "lathe-lasblaster",
+  "phased plasma rifle",
+  "catalytic mass driver",
+  "heavy catalytic mass driver",
+]);
+
+const INTEGRATED_MELEE_NAMES = new Set([
+  "coil whip",
+  "coil-whip",
+  "lathes arc welder",
+  "lathes arc-welder",
+]);
+
+function normaliseName(name: string): string {
+  return name.toLowerCase().replace(/\s+/g, " ").trim();
+}
+
+function isIntegratedRangedRef(ref: RangedWeaponRef): boolean {
+  return INTEGRATED_RANGED_IDS.has(ref.id);
+}
+
+function isIntegratedMeleeRef(ref: MeleeWeaponRef): boolean {
+  return INTEGRATED_MELEE_IDS.has(ref.id);
+}
+
+function isIntegratedRangedWeapon(weapon: RangedWeapon): boolean {
+  return (
+    (weapon.referenceId ? INTEGRATED_RANGED_IDS.has(weapon.referenceId) : false) ||
+    INTEGRATED_RANGED_NAMES.has(normaliseName(weapon.name))
+  );
+}
+
+function isIntegratedMeleeWeapon(weapon: MeleeWeapon): boolean {
+  return (
+    (weapon.referenceId ? INTEGRATED_MELEE_IDS.has(weapon.referenceId) : false) ||
+    INTEGRATED_MELEE_NAMES.has(normaliseName(weapon.name))
+  );
+}
+
+const NORMAL_RANGED_REFS = RANGED_WEAPON_REFERENCE.filter((ref) => !isIntegratedRangedRef(ref));
+const NORMAL_MELEE_REFS = MELEE_WEAPON_REFERENCE.filter((ref) => !isIntegratedMeleeRef(ref));
+const INTEGRATED_RANGED_REFS = RANGED_WEAPON_REFERENCE.filter(isIntegratedRangedRef);
+const INTEGRATED_MELEE_REFS = MELEE_WEAPON_REFERENCE.filter(isIntegratedMeleeRef);
+
+function IntegratedWeaponPicker({
+  onSelectRanged,
+  onSelectMelee,
+  onClose,
+}: {
+  onSelectRanged: (ref: RangedWeaponRef) => void;
+  onSelectMelee: (ref: MeleeWeaponRef) => void;
+  onClose: () => void;
+}) {
+  const [query, setQuery] = useState("");
+  const q = query.toLowerCase();
+  const ranged = INTEGRATED_RANGED_REFS.filter((ref) => ref.name.toLowerCase().includes(q));
+  const melee = INTEGRATED_MELEE_REFS.filter((ref) => ref.name.toLowerCase().includes(q));
+  const isEmpty = ranged.length === 0 && melee.length === 0;
+
+  return (
+    <PickerModal
+      title="Add Integrated Weapon"
+      placeholder="Search integrated weapons..."
+      query={query}
+      onQueryChange={setQuery}
+      onClose={onClose}
+      isEmpty={isEmpty}
+    >
+      {ranged.map((ref) => (
+        <button
+          key={ref.id}
+          onClick={() => onSelectRanged(ref)}
+          className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm font-medium text-slate-200 group-hover:text-white">
+              {ref.name}
+            </span>
+            <span className="text-xs text-slate-500 shrink-0">{ref.class}</span>
+          </div>
+          <div className="text-xs text-slate-500 mt-0.5 font-mono">
+            {ref.range} · {ref.rof} · {ref.damage} · Pen {ref.pen}
+          </div>
+        </button>
+      ))}
+      {melee.map((ref) => (
+        <button
+          key={ref.id}
+          onClick={() => onSelectMelee(ref)}
+          className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm font-medium text-slate-200 group-hover:text-white">
+              {ref.name}
+            </span>
+            <span className="text-xs text-slate-500 shrink-0">{ref.class}</span>
+          </div>
+          <div className="text-xs text-slate-500 mt-0.5 font-mono">
+            {ref.damage} · Pen {ref.pen}
+          </div>
+        </button>
+      ))}
+    </PickerModal>
+  );
+}
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
@@ -67,6 +196,20 @@ export function WeaponsTab({
     if (!ref?.weapon) return [];
     return [{ cybernetic: c, weapon: ref.weapon }];
   });
+
+  const normalRangedWeapons = rangedWeapons
+    .map((weapon, index) => ({ weapon, index }))
+    .filter(({ weapon }) => !isIntegratedRangedWeapon(weapon));
+  const integratedRangedWeapons = rangedWeapons
+    .map((weapon, index) => ({ weapon, index }))
+    .filter(({ weapon }) => isIntegratedRangedWeapon(weapon));
+  const normalMeleeWeapons = meleeWeapons
+    .map((weapon, index) => ({ weapon, index }))
+    .filter(({ weapon }) => !isIntegratedMeleeWeapon(weapon));
+  const integratedMeleeWeapons = meleeWeapons
+    .map((weapon, index) => ({ weapon, index }))
+    .filter(({ weapon }) => isIntegratedMeleeWeapon(weapon));
+  const integratedWeaponCount = integratedRangedWeapons.length + integratedMeleeWeapons.length;
 
   // ── Grenade handlers ───────────────────────────────────────────────────────
 
@@ -351,16 +494,16 @@ export function WeaponsTab({
             )}
           </div>
 
-          {rangedWeapons.length === 0 && !showCustomRanged && (
+          {normalRangedWeapons.length === 0 && !showCustomRanged && (
             <p className="text-sm text-slate-500 italic">No ranged weapons.</p>
           )}
 
-          {rangedWeapons.map((weapon, i) => (
+          {normalRangedWeapons.map(({ weapon, index }) => (
             <RangedCard
               key={weapon.id}
               weapon={weapon}
               editable={editable}
-              onRemove={() => removeRanged(i)}
+              onRemove={() => removeRanged(index)}
               onAddAttachment={(upgradeId) => addAttachmentToRanged(weapon.id, upgradeId)}
               onRemoveAttachment={(upgradeId) => removeAttachmentFromRanged(weapon.id, upgradeId)}
               onUpdateAmmoEntries={(entries) => updateRangedAmmoEntries(weapon.id, entries)}
@@ -392,17 +535,17 @@ export function WeaponsTab({
             )}
           </div>
 
-          {meleeWeapons.length === 0 && !showCustomMelee && (
+          {normalMeleeWeapons.length === 0 && !showCustomMelee && (
             <p className="text-sm text-slate-500 italic">No melee weapons.</p>
           )}
 
-          {meleeWeapons.map((weapon, i) => (
+          {normalMeleeWeapons.map(({ weapon, index }) => (
             <MeleeCard
               key={weapon.id}
               weapon={weapon}
               editable={editable}
               strengthBonus={strengthBonus}
-              onRemove={() => removeMelee(i)}
+              onRemove={() => removeMelee(index)}
               onAddAttachment={(upgradeId) => addAttachmentToMelee(weapon.id, upgradeId)}
               onRemoveAttachment={(upgradeId) => removeAttachmentFromMelee(weapon.id, upgradeId)}
               onUpdateQuantity={(qty) => updateMeleeQuantity(weapon.id, qty)}
@@ -418,6 +561,60 @@ export function WeaponsTab({
         </section>
 
       </div>
+
+      {/* INTEGRATED WEAPONS */}
+      {(integratedWeaponCount > 0 || editable) && (
+        <section className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-base font-semibold text-slate-100">
+              Integrated Weapons ({integratedWeaponCount})
+            </h3>
+            {editable && (
+              <button
+                onClick={() => setPicker("integrated")}
+                className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
+              >
+                + Add
+              </button>
+            )}
+          </div>
+
+          {integratedWeaponCount === 0 && (
+            <p className="text-sm text-slate-500 italic">No integrated weapons installed.</p>
+          )}
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            {integratedRangedWeapons.map(({ weapon, index }) => (
+              <RangedCard
+                key={weapon.id}
+                weapon={weapon}
+                editable={editable}
+                onRemove={() => removeRanged(index)}
+                onAddAttachment={(upgradeId) => addAttachmentToRanged(weapon.id, upgradeId)}
+                onRemoveAttachment={(upgradeId) => removeAttachmentFromRanged(weapon.id, upgradeId)}
+                onUpdateAmmoEntries={(entries) => updateRangedAmmoEntries(weapon.id, entries)}
+                onUpdateQuantity={(qty) => updateRangedQuantity(weapon.id, qty)}
+                grenades={grenades}
+                onUpdateGrenades={onUpdateGrenades}
+                allowAttachments={false}
+              />
+            ))}
+            {integratedMeleeWeapons.map(({ weapon, index }) => (
+              <MeleeCard
+                key={weapon.id}
+                weapon={weapon}
+                editable={editable}
+                strengthBonus={strengthBonus}
+                onRemove={() => removeMelee(index)}
+                onAddAttachment={(upgradeId) => addAttachmentToMelee(weapon.id, upgradeId)}
+                onRemoveAttachment={(upgradeId) => removeAttachmentFromMelee(weapon.id, upgradeId)}
+                onUpdateQuantity={(qty) => updateMeleeQuantity(weapon.id, qty)}
+                allowAttachments={false}
+              />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* ── SHIELDS ──────────────────────────────────────────────────────── */}
       {((shields ?? []).length > 0 || editable) && (
@@ -452,6 +649,30 @@ export function WeaponsTab({
       )}
 
       {/* ── GRENADES ─────────────────────────────────────────────────────── */}
+      {/* CYBERNETIC WEAPONS */}
+      {cyberneticWeaponItems.length > 0 && (
+        <section className="space-y-3">
+          <div>
+            <h3 className="text-base font-semibold text-slate-100">
+              Cybernetic Weapons
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Granted by installed implants — managed in the Cybernetics tab.
+              Melee damage shown before Strength Bonus.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            {cyberneticWeaponItems.map(({ cybernetic, weapon }) => (
+              <CyberneticWeaponCard
+                key={cybernetic.id}
+                cyberneticName={cybernetic.name}
+                weapon={weapon}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-base font-semibold text-slate-100">
@@ -484,34 +705,11 @@ export function WeaponsTab({
         </div>
       </section>
 
-      {/* ── CYBERNETIC WEAPONS ────────────────────────────────────────────── */}
-      {cyberneticWeaponItems.length > 0 && (
-        <section className="space-y-3">
-          <div>
-            <h3 className="text-base font-semibold text-slate-100">
-              Cybernetic Weapons
-            </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Granted by installed implants — managed in the Cybernetics tab.
-              Melee damage shown before Strength Bonus.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-            {cyberneticWeaponItems.map(({ cybernetic, weapon }) => (
-              <CyberneticWeaponCard
-                key={cybernetic.id}
-                cyberneticName={cybernetic.name}
-                weapon={weapon}
-              />
-            ))}
-          </div>
-        </section>
-      )}
-
       {/* ── Pickers ───────────────────────────────────────────────────────── */}
       {picker === "ranged" && (
         <RangedPicker
           onSelect={addFromRangedRef}
+          references={NORMAL_RANGED_REFS}
           onCustom={() => {
             setPicker(null);
             setShowCustomRanged(true);
@@ -522,10 +720,18 @@ export function WeaponsTab({
       {picker === "melee" && (
         <MeleePicker
           onSelect={addFromMeleeRef}
+          references={NORMAL_MELEE_REFS}
           onCustom={() => {
             setPicker(null);
             setShowCustomMelee(true);
           }}
+          onClose={() => setPicker(null)}
+        />
+      )}
+      {picker === "integrated" && (
+        <IntegratedWeaponPicker
+          onSelectRanged={addFromRangedRef}
+          onSelectMelee={addFromMeleeRef}
           onClose={() => setPicker(null)}
         />
       )}

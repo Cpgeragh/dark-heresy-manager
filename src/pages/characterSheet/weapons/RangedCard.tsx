@@ -31,32 +31,40 @@ export function RangedPicker({
   onSelect,
   onCustom,
   onClose,
+  references = RANGED_WEAPON_REFERENCE,
+  title = "Add Ranged Weapon",
+  placeholder = "Search weapons…",
+  showCustom = true,
 }: {
   onSelect: (ref: RangedWeaponRef) => void;
   onCustom: () => void;
   onClose: () => void;
+  references?: RangedWeaponRef[];
+  title?: string;
+  placeholder?: string;
+  showCustom?: boolean;
 }) {
   const [query, setQuery] = useState("");
-  const filtered = RANGED_WEAPON_REFERENCE.filter((r) =>
+  const filtered = references.filter((r) =>
     r.name.toLowerCase().includes(query.toLowerCase())
   ).sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <PickerModal
-      title="Add Ranged Weapon"
-      placeholder="Search weapons…"
+      title={title}
+      placeholder={placeholder}
       query={query}
       onQueryChange={setQuery}
       onClose={onClose}
       isEmpty={filtered.length === 0}
-      footer={
+      footer={showCustom ? (
         <button
           onClick={onCustom}
           className="w-full text-sm text-amber-400 hover:text-amber-300 text-center py-1"
         >
           + Add custom weapon
         </button>
-      }
+      ) : undefined}
     >
       {filtered.map((ref) => (
         <button
@@ -364,6 +372,7 @@ export function RangedCard({
   onUpdateQuantity,
   grenades,
   onUpdateGrenades,
+  allowAttachments = true,
 }: {
   weapon: RangedWeapon;
   editable: boolean;
@@ -374,6 +383,7 @@ export function RangedCard({
   onUpdateQuantity: (qty: number) => void;
   grenades?: GrenadeItem[];
   onUpdateGrenades?: (next: GrenadeItem[]) => void;
+  allowAttachments?: boolean;
 }) {
   const [showQualities, setShowQualities] = useState(false);
   const [showItemRules, setShowItemRules] = useState(false);
@@ -398,6 +408,7 @@ export function RangedCard({
     false,
     attachmentIds
   );
+  const visibleCompatible = allowAttachments ? compatible : [];
 
   const rulesText = effective.specialRules?.trim() ?? "";
   const hasRules = Boolean(rulesText && rulesText !== "—" && rulesText !== "-");
@@ -633,13 +644,13 @@ export function RangedCard({
       )}
 
       {/* Attachments */}
-      {(attachmentRefs.length > 0 || (editable && compatible.length > 0)) && (
+      {(attachmentRefs.length > 0 || (editable && visibleCompatible.length > 0)) && (
         <div className="border-t border-slate-800 pt-2 space-y-1.5">
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-slate-500 uppercase tracking-wide">
               Attachments
             </span>
-            {editable && compatible.length > 0 && (
+            {editable && visibleCompatible.length > 0 && (
               <button
                 onClick={() => setShowAttachPicker(true)}
                 className="text-xs text-amber-400 hover:text-amber-300"
@@ -685,7 +696,7 @@ export function RangedCard({
 
       {showAttachPicker && (
         <AttachmentPicker
-          compatibleUpgrades={compatible}
+          compatibleUpgrades={visibleCompatible}
           onSelect={(id) => {
             onAddAttachment(id);
             setShowAttachPicker(false);
