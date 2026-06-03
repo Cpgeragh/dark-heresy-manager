@@ -1,8 +1,8 @@
 // src/pages/CharacterSheet.tsx
 
 import { useState, useCallback, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
-import { useHeaderExtension } from "../context/HeaderExtensionContext";
+import { useParams } from "react-router-dom";
+import { useHeaderExtensionSetters } from "../context/HeaderExtensionContext";
 import { CharacterKebabContent } from "./characterSheet/CharacterKebabContent";
 import { CHARACTERISTIC_BONUS_DIVISOR } from "../constants/gameRules";
 
@@ -96,16 +96,12 @@ export default function CharacterSheet() {
 
   const [activeTab, setActiveTab] = useState<TabId>("stats");
 
-  const { setSecondRow, clearSecondRow, setKebabContent, clearKebabContent } = useHeaderExtension();
+  const { setBackHref, clearBackHref, setKebabContent, clearKebabContent } = useHeaderExtensionSetters();
 
   useEffect(() => {
     if (!character) return;
 
-    setSecondRow(
-      <span className="text-sm font-bold text-slate-100 truncate">
-        {character.header?.characterName ?? "Unnamed"}
-      </span>
-    );
+    setBackHref(isDM ? "/dm" : "/player");
 
     setKebabContent(
       <CharacterKebabContent
@@ -119,10 +115,10 @@ export default function CharacterSheet() {
     );
 
     return () => {
-      clearSecondRow();
+      clearBackHref();
       clearKebabContent();
     };
-  }, [character, isDM, isOwner, canPlayerRelease, releaseCharacter, isReleasing, setSecondRow, clearSecondRow, setKebabContent, clearKebabContent]);
+  }, [character, isDM, isOwner, canPlayerRelease, releaseCharacter, isReleasing, setBackHref, clearBackHref, setKebabContent, clearKebabContent]);
 
   // ================================================================
   // STABLE UPDATE CALLBACKS (eliminate inline functions)
@@ -295,16 +291,6 @@ export default function CharacterSheet() {
 
   return (
     <div>
-
-      {/* BACK TO CAMPAIGN HUB */}
-      <div className="mb-3">
-        <Link
-          to={isDM ? "/dm" : "/player"}
-          className="text-xs px-2 py-1 rounded border bg-slate-900 text-amber-400 border-slate-600 hover:bg-slate-800 shadow-[0_0_8px_rgba(251,191,36,0.35)]"
-        >
-          ← Campaign Hub
-        </Link>
-      </div>
 
       {/* DM NAV / OVERRIDE BAR */}
       {isDM && (
