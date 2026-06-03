@@ -39,6 +39,12 @@ export interface RangedWeaponRef {
   weight: string;
   value: string;
   rarity: string;
+  /** Default ammo type label shown on the weapon card. Omit for integrated/no-ammo weapons. */
+  ammoType?: string;
+  /** AmmoRef IDs compatible with this weapon — drives the ammo picker dropdown. */
+  compatibleAmmoIds?: string[];
+  /** True for thrown weapons where the item itself is the projectile (bolas, throwing stars). Shows a quantity counter instead of ammo entries. */
+  isThrown?: boolean;
 }
 
 export interface MeleeWeaponRef {
@@ -77,6 +83,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "1.5 kg",
     value: "50 Thrones",
     rarity: "Common",
+    ammoType: "Charge Pack (pistol)",
+    compatibleAmmoIds: ["cr-charge-pack-pistol", "cr-charge-pack-basic", "cr-charge-pack-heavy", "cr-hot-shot-charge"],
   },
   {
     id: "cr-las-carbine",
@@ -93,6 +101,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "3 kg",
     value: "75 Thrones",
     rarity: "Common",
+    ammoType: "Charge Pack (basic)",
+    compatibleAmmoIds: ["cr-charge-pack-pistol", "cr-charge-pack-basic", "cr-charge-pack-heavy", "cr-hot-shot-charge"],
   },
   {
     id: "cr-lasgun",
@@ -109,6 +119,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "4 kg",
     value: "75 Thrones",
     rarity: "Common",
+    ammoType: "Charge Pack (basic)",
+    compatibleAmmoIds: ["cr-charge-pack-pistol", "cr-charge-pack-basic", "cr-charge-pack-heavy", "cr-hot-shot-charge"],
   },
   {
     id: "cr-long-las",
@@ -125,6 +137,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "4.5 kg",
     value: "100 Thrones",
     rarity: "Scarce",
+    ammoType: "Charge Pack (basic)",
+    compatibleAmmoIds: ["cr-charge-pack-pistol", "cr-charge-pack-basic", "cr-charge-pack-heavy", "cr-hot-shot-charge"],
   },
   {
     id: "cr-mp-lascannon",
@@ -141,6 +155,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "55 kg",
     value: "5,000 Thrones",
     rarity: "Very Rare",
+    ammoType: "Charge Pack (heavy)",
+    compatibleAmmoIds: ["cr-charge-pack-pistol", "cr-charge-pack-basic", "cr-charge-pack-heavy"],
   },
 
   // Solid Projectile
@@ -159,6 +175,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "2.5 kg",
     value: "75 Thrones",
     rarity: "Common",
+    ammoType: "Bullets",
+    compatibleAmmoIds: ["cr-bullets", "cr-man-stopper-bullets"],
   },
   {
     id: "cr-stub-revolver",
@@ -175,6 +193,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "1 kg",
     value: "40 Thrones",
     rarity: "Plentiful",
+    ammoType: "Bullets",
+    compatibleAmmoIds: ["cr-bullets", "cr-dumdum-bullets", "cr-man-stopper-bullets"],
   },
   {
     id: "cr-stub-automatic",
@@ -191,6 +211,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "1.5 kg",
     value: "50 Thrones",
     rarity: "Plentiful",
+    ammoType: "Bullets",
+    compatibleAmmoIds: ["cr-bullets", "cr-dumdum-bullets", "cr-man-stopper-bullets"],
   },
   {
     id: "cr-hand-cannon",
@@ -207,6 +229,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "3 kg",
     value: "65 Thrones",
     rarity: "Average",
+    ammoType: "Bullets",
+    compatibleAmmoIds: ["cr-bullets", "cr-dumdum-bullets", "cr-man-stopper-bullets"],
   },
   {
     id: "cr-autogun",
@@ -223,6 +247,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "3.5 kg",
     value: "100 Thrones",
     rarity: "Average",
+    ammoType: "Bullets",
+    compatibleAmmoIds: ["cr-bullets", "cr-man-stopper-bullets"],
   },
   {
     id: "cr-hunting-rifle",
@@ -239,6 +265,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "5 kg",
     value: "100 Thrones",
     rarity: "Scarce",
+    ammoType: "Bullets",
+    compatibleAmmoIds: ["cr-bullets"],
   },
   {
     id: "cr-shotgun",
@@ -255,6 +283,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "5 kg",
     value: "60 Thrones",
     rarity: "Common",
+    ammoType: "Shells",
+    compatibleAmmoIds: ["cr-shells", "cr-inferno-shells", "dh-cryptus-shotgun-shells"],
   },
   {
     id: "cr-pump-action-shotgun",
@@ -271,6 +301,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "5 kg",
     value: "75 Thrones",
     rarity: "Average",
+    ammoType: "Shells",
+    compatibleAmmoIds: ["cr-shells", "cr-inferno-shells", "dh-cryptus-shotgun-shells"],
   },
   {
     id: "cr-combat-shotgun",
@@ -287,6 +319,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "6.5 kg",
     value: "150 Thrones",
     rarity: "Scarce",
+    ammoType: "Shells",
+    compatibleAmmoIds: ["cr-shells", "cr-inferno-shells", "dh-cryptus-shotgun-shells"],
   },
   {
     id: "cr-heavy-stubber",
@@ -303,6 +337,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "35 kg",
     value: "750 Thrones",
     rarity: "Scarce",
+    ammoType: "Bullets",
+    compatibleAmmoIds: ["cr-bullets"],
   },
 
   // Bolt
@@ -321,6 +357,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "3.5 kg",
     value: "250 Thrones",
     rarity: "Rare",
+    ammoType: "Bolt Shells",
+    compatibleAmmoIds: ["cr-bolt-shells", "cr-inferno-shells", "dh-psybolt-ammunition"],
   },
   {
     id: "cr-boltgun",
@@ -337,6 +375,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "7 kg",
     value: "500 Thrones",
     rarity: "Very Rare",
+    ammoType: "Bolt Shells",
+    compatibleAmmoIds: ["cr-bolt-shells", "cr-inferno-shells", "dh-psybolt-ammunition"],
   },
   {
     id: "cr-heavy-bolter",
@@ -353,6 +393,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "40 kg",
     value: "2,000 Thrones",
     rarity: "Very Rare",
+    ammoType: "Bolt Shells",
+    compatibleAmmoIds: ["cr-bolt-shells", "cr-inferno-shells", "dh-psybolt-ammunition"],
   },
 
   // Melta
@@ -371,6 +413,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "2.5 kg",
     value: "7,500 Thrones",
     rarity: "Very Rare",
+    ammoType: "Melta Canister (pistol)",
+    compatibleAmmoIds: ["cr-melta-canister-pistol", "cr-melta-canister-basic"],
   },
   {
     id: "cr-meltagun",
@@ -387,6 +431,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "8 kg",
     value: "4,000 Thrones",
     rarity: "Rare",
+    ammoType: "Melta Canister (basic)",
+    compatibleAmmoIds: ["cr-melta-canister-pistol", "cr-melta-canister-basic"],
   },
 
   // Plasma
@@ -405,6 +451,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "4 kg",
     value: "4,000 Thrones",
     rarity: "Very Rare",
+    ammoType: "Plasma Flask (pistol)",
+    compatibleAmmoIds: ["cr-plasma-flask-pistol", "cr-plasma-flask-basic"],
   },
   {
     id: "cr-plasma-gun",
@@ -421,6 +469,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "11 kg",
     value: "3,000 Thrones",
     rarity: "Very Rare",
+    ammoType: "Plasma Flask (basic)",
+    compatibleAmmoIds: ["cr-plasma-flask-pistol", "cr-plasma-flask-basic"],
   },
 
   // Flame
@@ -439,6 +489,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "3.5 kg",
     value: "200 Thrones",
     rarity: "Rare",
+    ammoType: "Fuel (pistol)",
+    compatibleAmmoIds: ["cr-fuel-pistol", "cr-fuel-basic", "dh-psyflame-ammunition"],
   },
   {
     id: "cr-flamer",
@@ -455,6 +507,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "6 kg",
     value: "300 Thrones",
     rarity: "Scarce",
+    ammoType: "Fuel (basic)",
+    compatibleAmmoIds: ["cr-fuel-pistol", "cr-fuel-basic", "dh-psyflame-ammunition"],
   },
 
   // Primitive
@@ -473,6 +527,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "1.5 kg",
     value: "10 Thrones",
     rarity: "Average",
+    isThrown: true,
   },
   {
     id: "cr-hand-bow",
@@ -489,6 +544,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "1 kg",
     value: "200 Thrones",
     rarity: "Rare",
+    ammoType: "Arrows/Quarrels",
+    compatibleAmmoIds: ["cr-arrows-quarrels", "lw-purity-round"],
   },
   {
     id: "cr-flintlock-pistol",
@@ -505,6 +562,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "4 kg",
     value: "10 Thrones",
     rarity: "Common",
+    ammoType: "Shot",
+    compatibleAmmoIds: ["cr-shot"],
   },
   {
     id: "cr-musket",
@@ -521,6 +580,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "7 kg",
     value: "30 Thrones",
     rarity: "Common",
+    ammoType: "Shot",
+    compatibleAmmoIds: ["cr-shot"],
   },
   {
     id: "cr-bow",
@@ -537,6 +598,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "2 kg",
     value: "10 Thrones",
     rarity: "Common",
+    ammoType: "Arrows/Quarrels",
+    compatibleAmmoIds: ["cr-arrows-quarrels"],
   },
   {
     id: "cr-sling",
@@ -553,6 +616,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "0.5 kg",
     value: "10 Thrones",
     rarity: "Plentiful",
+    ammoType: "Sling Stones",
   },
   {
     id: "cr-crossbow",
@@ -569,6 +633,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "3 kg",
     value: "10 Thrones",
     rarity: "Common",
+    ammoType: "Arrows/Quarrels",
+    compatibleAmmoIds: ["cr-arrows-quarrels", "lw-purity-round"],
   },
   {
     id: "cr-throwing-star-knife",
@@ -585,6 +651,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "0.5 kg",
     value: "5 Thrones",
     rarity: "Plentiful",
+    isThrown: true,
   },
 
   // Launchers
@@ -603,6 +670,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "9 kg",
     value: "500 Thrones",
     rarity: "Scarce",
+    ammoType: "Grenades",
   },
   {
     id: "cr-rpg-launcher",
@@ -619,6 +687,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "15 kg",
     value: "1,200 Thrones",
     rarity: "Rare",
+    ammoType: "Rockets",
   },
 
   // Exotic
@@ -637,6 +706,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "1.5 kg",
     value: "1,250 Thrones",
     rarity: "Very Rare",
+    ammoType: "Exotic",
+    compatibleAmmoIds: ["cr-exotic"],
   },
   {
     id: "cr-web-pistol",
@@ -653,6 +724,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "3.5 kg",
     value: "1,200 Thrones",
     rarity: "Rare",
+    ammoType: "Exotic",
+    compatibleAmmoIds: ["cr-exotic"],
   },
   {
     id: "cr-needle-rifle",
@@ -669,6 +742,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "2 kg",
     value: "1,000 Thrones",
     rarity: "Very Rare",
+    ammoType: "Exotic",
+    compatibleAmmoIds: ["cr-exotic"],
   },
   {
     id: "cr-webber",
@@ -685,6 +760,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "8 kg",
     value: "750 Thrones",
     rarity: "Rare",
+    ammoType: "Exotic",
+    compatibleAmmoIds: ["cr-exotic"],
   },
 
   // ── Book of Judgement ─────────────────────────────────────────────────────
@@ -703,6 +780,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "1.7 kg",
     value: "95 Thrones",
     rarity: "Average",
+    ammoType: "Bullets",
+    compatibleAmmoIds: ["cr-bullets", "cr-man-stopper-bullets"],
   },
   {
     id: "judgeslayer-handcannon",
@@ -719,6 +798,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "3.5 kg",
     value: "100 Thrones",
     rarity: "Average",
+    ammoType: "Bullets",
+    compatibleAmmoIds: ["cr-bullets", "cr-dumdum-bullets", "cr-man-stopper-bullets"],
   },
   {
     id: "raffir-ringleader-pistol",
@@ -735,6 +816,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "0.25 kg",
     value: "500 Thrones",
     rarity: "Rare",
+    ammoType: "Bullets",
+    compatibleAmmoIds: ["cr-bullets"],
   },
   {
     id: "raffir-pax-factorem-rifle",
@@ -751,6 +834,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "6.5 kg",
     value: "750 Thrones",
     rarity: "Rare",
+    ammoType: "Bullets",
+    compatibleAmmoIds: ["cr-bullets"],
   },
   {
     id: "vox-legi-combat-shotgun",
@@ -767,6 +852,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "7 kg",
     value: "400 Thrones",
     rarity: "Very Rare",
+    ammoType: "Shells",
+    compatibleAmmoIds: ["cr-shells", "cr-inferno-shells", "dh-cryptus-shotgun-shells"],
   },
   {
     id: "bulldog-heavy-stubber",
@@ -783,6 +870,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "30 kg",
     value: "800 Thrones",
     rarity: "Rare",
+    ammoType: "Bullets",
+    compatibleAmmoIds: ["cr-bullets"],
   },
 
   // ── Creatures Anathema ───────────────────────────────────────────────────
@@ -803,6 +892,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "2 kg",
     value: "100 Thrones",
     rarity: "Scarce (Common for Orks)",
+    ammoType: "Bullets",
+    compatibleAmmoIds: ["cr-bullets"],
   },
   {
     id: "ca-shoota",
@@ -819,6 +910,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "4 kg",
     value: "200 Thrones",
     rarity: "Scarce (Common for Orks)",
+    ammoType: "Bullets",
+    compatibleAmmoIds: ["cr-bullets"],
   },
   {
     id: "ca-snazzgun",
@@ -835,6 +928,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "7 kg",
     value: "1,500 Thrones",
     rarity: "Rare (Scarce for Orks)",
+    ammoType: "Bullets",
+    compatibleAmmoIds: ["cr-bullets"],
   },
 
   // Eldar Weaponry
@@ -853,6 +948,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "1.2 kg",
     value: "5,000 Thrones",
     rarity: "Very Rare",
+    ammoType: "Shuriken Clip",
+    compatibleAmmoIds: ["ca-shuriken-clip"],
   },
   {
     id: "ca-avenger-shuriken-catapult",
@@ -869,6 +966,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "2.5 kg",
     value: "9,500 Thrones",
     rarity: "Very Rare",
+    ammoType: "Shuriken Clip",
+    compatibleAmmoIds: ["ca-shuriken-clip"],
   },
   {
     id: "ca-ranger-long-rifle",
@@ -885,6 +984,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "2 kg",
     value: "8,500 Thrones",
     rarity: "Very Rare",
+    ammoType: "Shuriken Clip",
+    compatibleAmmoIds: ["ca-shuriken-clip"],
   },
 
   // ── Blood of Martyrs ──────────────────────────────────────────────────────
@@ -903,6 +1004,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "9 kg",
     value: "3,000 Thrones",
     rarity: "Very Rare",
+    ammoType: "Bolt Shells",
+    compatibleAmmoIds: ["cr-bolt-shells", "cr-inferno-shells", "dh-psybolt-ammunition"],
   },
   {
     id: "godwyn-deaz-storm-bolter",
@@ -919,6 +1022,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "12 kg",
     value: "9,000 Thrones",
     rarity: "Extremely Rare",
+    ammoType: "Bolt Shells",
+    compatibleAmmoIds: ["cr-bolt-shells", "cr-inferno-shells", "dh-psybolt-ammunition"],
   },
   {
     id: "seraphim-inferno-pistol",
@@ -935,6 +1040,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "2 kg",
     value: "9,000 Thrones",
     rarity: "Extremely Rare",
+    ammoType: "Melta Canister (pistol)",
+    compatibleAmmoIds: ["cr-melta-canister-pistol", "cr-melta-canister-basic"],
   },
   {
     id: "seraphim-hand-flamer",
@@ -951,6 +1058,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "2 kg",
     value: "1,000 Thrones",
     rarity: "Extremely Rare",
+    ammoType: "Fuel (pistol)",
+    compatibleAmmoIds: ["cr-fuel-pistol", "cr-fuel-basic", "dh-psyflame-ammunition"],
   },
   {
     id: "heavy-flamer",
@@ -967,6 +1076,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "45 kg",
     value: "1,000 Thrones",
     rarity: "Rare",
+    ammoType: "Fuel (basic)",
+    compatibleAmmoIds: ["cr-fuel-pistol", "cr-fuel-basic", "dh-psyflame-ammunition"],
   },
 
   // ── Daemon Hunter ─────────────────────────────────────────────────────────
@@ -1008,6 +1119,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "5 kg",
     value: "3,500 Thrones",
     rarity: "Very Rare",
+    ammoType: "Special Power Cell",
   },
 
   // Solid Projectile
@@ -1028,6 +1140,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "0.5 kg",
     value: "150 Thrones",
     rarity: "Rare",
+    ammoType: "Bullets",
+    compatibleAmmoIds: ["cr-bullets"],
   },
   {
     id: "dh-hell-rifle",
@@ -1060,6 +1174,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "1.5 kg",
     value: "350 Thrones",
     rarity: "Common",
+    ammoType: "Exotic",
+    compatibleAmmoIds: ["cr-exotic"],
   },
 
   // Exotic
@@ -1080,6 +1196,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "85 kg",
     value: "—",
     rarity: "Unique",
+    ammoType: "Exotic",
+    compatibleAmmoIds: ["cr-exotic"],
   },
   {
     id: "dh-empyrian-brain-mines",
@@ -1117,6 +1235,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "12 kg",
     value: "2,500 Thrones",
     rarity: "Rare",
+    ammoType: "Exotic",
+    compatibleAmmoIds: ["cr-exotic"],
   },
 
   // ── Lathe Worlds ─────────────────────────────────────────────────────────

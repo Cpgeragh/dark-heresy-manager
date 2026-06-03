@@ -38,7 +38,6 @@ import type {
   WeaponTrainingBlock,
   RangedWeapon,
   MeleeWeapon,
-  AmmoItem,
   GrenadeItem,
   ShieldItem,
   WornArmourPiece,
@@ -148,11 +147,6 @@ export default function CharacterSheet() {
 
   const handleUpdateMeleeWeapons = useCallback(
     (next: MeleeWeapon[]) => updateField("meleeWeapons", next),
-    [updateField]
-  );
-
-  const handleUpdateAmmo = useCallback(
-    (next: AmmoItem[]) => updateField("ammo", next),
     [updateField]
   );
 
@@ -408,13 +402,11 @@ export default function CharacterSheet() {
             <WeaponsTab
               rangedWeapons={character.rangedWeapons}
               meleeWeapons={character.meleeWeapons}
-              ammo={character.ammo ?? []}
               grenades={character.grenades ?? []}
               editable={allowedToEdit}
               strengthBonus={Math.floor(getCharTotal("s") / CHARACTERISTIC_BONUS_DIVISOR)}
               onUpdateRanged={handleUpdateRangedWeapons}
               onUpdateMelee={handleUpdateMeleeWeapons}
-              onUpdateAmmo={handleUpdateAmmo}
               onUpdateGrenades={handleUpdateGrenades}
               shields={character.shields ?? []}
               onUpdateShields={handleUpdateShields}
