@@ -6,7 +6,7 @@ import { useState, useCallback } from "react";
 import type {
   RangedWeapon,
   MeleeWeapon,
-  AmmoItem,
+  WeaponAmmoEntry,
   GrenadeItem,
   CyberneticItem,
   ShieldItem,
@@ -18,10 +18,8 @@ import {
   type GrenadeRef,
   type ShieldRef,
 } from "../../data/reference/weaponReference";
-import type { AmmoRef } from "../../data/reference/ammoReference";
 import { RangedCard, RangedPicker, CustomRangedForm } from "./weapons/RangedCard";
 import { MeleeCard, MeleePicker, CustomMeleeForm } from "./weapons/MeleeCard";
-import { AmmoCard, AmmoPicker, CustomAmmoForm } from "./weapons/AmmoCard";
 import { GrenadeCard, GrenadePicker } from "./weapons/GrenadeCard";
 import { ShieldCard, ShieldPicker } from "./weapons/ShieldCard";
 import { CyberneticWeaponCard } from "./weapons/CyberneticWeaponCard";
@@ -31,33 +29,29 @@ import { CyberneticWeaponCard } from "./weapons/CyberneticWeaponCard";
 interface WeaponsTabProps {
   rangedWeapons: RangedWeapon[];
   meleeWeapons: MeleeWeapon[];
-  ammo: AmmoItem[];
   grenades: GrenadeItem[];
   editable: boolean;
   strengthBonus: number;
   onUpdateRanged: (next: RangedWeapon[]) => void;
   onUpdateMelee: (next: MeleeWeapon[]) => void;
-  onUpdateAmmo: (next: AmmoItem[]) => void;
   onUpdateGrenades: (next: GrenadeItem[]) => void;
   cybernetics?: CyberneticItem[];
   shields?: ShieldItem[];
   onUpdateShields?: (next: ShieldItem[]) => void;
 }
 
-type PickerTarget = "ranged" | "melee" | "ammo" | "grenades" | "shields" | null;
+type PickerTarget = "ranged" | "melee" | "grenades" | "shields" | null;
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export function WeaponsTab({
   rangedWeapons,
   meleeWeapons,
-  ammo,
   grenades,
   editable,
   strengthBonus,
   onUpdateRanged,
   onUpdateMelee,
-  onUpdateAmmo,
   onUpdateGrenades,
   cybernetics,
   shields,
@@ -66,7 +60,6 @@ export function WeaponsTab({
   const [picker, setPicker] = useState<PickerTarget>(null);
   const [showCustomRanged, setShowCustomRanged] = useState(false);
   const [showCustomMelee, setShowCustomMelee] = useState(false);
-  const [showCustomAmmo, setShowCustomAmmo] = useState(false);
 
   // ── Cybernetic weapons ─────────────────────────────────────────────────────
   const cyberneticWeaponItems = (cybernetics ?? []).flatMap((c) => {
@@ -195,6 +188,26 @@ export function WeaponsTab({
     [editable, rangedWeapons, onUpdateRanged]
   );
 
+  const updateRangedAmmoEntries = useCallback(
+    (weaponId: string, entries: WeaponAmmoEntry[]) => {
+      if (!editable) return;
+      onUpdateRanged(
+        rangedWeapons.map((w) => (w.id === weaponId ? { ...w, ammoEntries: entries } : w))
+      );
+    },
+    [editable, rangedWeapons, onUpdateRanged]
+  );
+
+  const updateRangedQuantity = useCallback(
+    (weaponId: string, quantity: number) => {
+      if (!editable) return;
+      onUpdateRanged(
+        rangedWeapons.map((w) => (w.id === weaponId ? { ...w, quantity } : w))
+      );
+    },
+    [editable, rangedWeapons, onUpdateRanged]
+  );
+
   // ── Melee handlers ─────────────────────────────────────────────────────────
 
   const addFromMeleeRef = useCallback(
@@ -268,56 +281,6 @@ export function WeaponsTab({
     [editable, meleeWeapons, onUpdateMelee]
   );
 
-  // ── Ammo handlers ──────────────────────────────────────────────────────────
-
-  const addFromAmmoRef = useCallback(
-    (ref: AmmoRef) => {
-      if (!editable) return;
-      const numericAmount = Number(ref.purchaseAmount);
-      onUpdateAmmo([
-        ...ammo,
-        {
-          id: crypto.randomUUID(),
-          referenceId: ref.id,
-          name: ref.name,
-          compatibleWith: ref.compatibleWith,
-          amount: Number.isFinite(numericAmount) && numericAmount > 0 ? numericAmount : 1,
-          value: `${ref.cost} / ${ref.purchaseAmount}`,
-          rarity: ref.rarity,
-          source: ref.source,
-          description: ref.description,
-        },
-      ]);
-      setPicker(null);
-    },
-    [editable, ammo, onUpdateAmmo]
-  );
-
-  const addCustomAmmo = useCallback(
-    (item: AmmoItem) => {
-      if (!editable) return;
-      onUpdateAmmo([...ammo, item]);
-      setShowCustomAmmo(false);
-    },
-    [editable, ammo, onUpdateAmmo]
-  );
-
-  const removeAmmo = useCallback(
-    (id: string) => {
-      if (!editable) return;
-      onUpdateAmmo(ammo.filter((a) => a.id !== id));
-    },
-    [editable, ammo, onUpdateAmmo]
-  );
-
-  const updateAmmoAmount = useCallback(
-    (id: string, amount: number) => {
-      if (!editable) return;
-      onUpdateAmmo(ammo.map((a) => (a.id === id ? { ...a, amount } : a)));
-    },
-    [editable, ammo, onUpdateAmmo]
-  );
-
   // ── Shield handlers ────────────────────────────────────────────────────────
 
   const addFromShieldRef = useCallback(
@@ -386,6 +349,8 @@ export function WeaponsTab({
               onRemove={() => removeRanged(i)}
               onAddAttachment={(upgradeId) => addAttachmentToRanged(weapon.id, upgradeId)}
               onRemoveAttachment={(upgradeId) => removeAttachmentFromRanged(weapon.id, upgradeId)}
+              onUpdateAmmoEntries={(entries) => updateRangedAmmoEntries(weapon.id, entries)}
+              onUpdateQuantity={(qty) => updateRangedQuantity(weapon.id, qty)}
             />
           ))}
 
@@ -469,46 +434,6 @@ export function WeaponsTab({
         </section>
       )}
 
-      {/* ── AMMUNITION ───────────────────────────────────────────────────── */}
-      <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="text-base font-semibold text-slate-100">
-            Ammunition ({ammo.length})
-          </h3>
-          {editable && !showCustomAmmo && (
-            <button
-              onClick={() => setPicker("ammo")}
-              className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
-            >
-              + Add
-            </button>
-          )}
-        </div>
-
-        {ammo.length === 0 && !showCustomAmmo && (
-          <p className="text-sm text-slate-500 italic">No ammunition tracked.</p>
-        )}
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {ammo.map((item) => (
-            <AmmoCard
-              key={item.id}
-              item={item}
-              editable={editable}
-              onRemove={() => removeAmmo(item.id)}
-              onUpdateAmount={(amount) => updateAmmoAmount(item.id, amount)}
-            />
-          ))}
-        </div>
-
-        {showCustomAmmo && (
-          <CustomAmmoForm
-            onAdd={addCustomAmmo}
-            onCancel={() => setShowCustomAmmo(false)}
-          />
-        )}
-      </section>
-
       {/* ── GRENADES ─────────────────────────────────────────────────────── */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
@@ -583,16 +508,6 @@ export function WeaponsTab({
           onCustom={() => {
             setPicker(null);
             setShowCustomMelee(true);
-          }}
-          onClose={() => setPicker(null)}
-        />
-      )}
-      {picker === "ammo" && (
-        <AmmoPicker
-          onSelect={addFromAmmoRef}
-          onCustom={() => {
-            setPicker(null);
-            setShowCustomAmmo(true);
           }}
           onClose={() => setPicker(null)}
         />

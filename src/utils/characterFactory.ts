@@ -97,7 +97,6 @@ export function createEmptyCharacterData(params: {
 
     rangedWeapons: [],
     meleeWeapons: [],
-    ammo: [],
 
     armour: [],
 

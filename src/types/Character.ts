@@ -85,6 +85,21 @@ export interface MovementBlock {
 /**
  * WEAPONS + ARMOUR
  */
+
+/**
+ * A single ammo type carried for a ranged weapon.
+ * A weapon can carry multiple types simultaneously (e.g. standard + specialist).
+ * One entry is marked `loaded` — the currently chambered type.
+ */
+export interface WeaponAmmoEntry {
+  id: string;           // unique per entry (crypto.randomUUID())
+  referenceId?: string; // AmmoRef.id if created from reference data
+  name: string;         // e.g. "Bolt Shells", "Psybolt Ammunition"
+  clips: number;        // spare full clips/magazines carried
+  rounds: number;       // loose individual rounds carried
+  loaded: boolean;      // true = currently chambered
+}
+
 export interface RangedWeapon {
   id: string;
   referenceId?: string;   // set when created from RANGED_WEAPON_REFERENCE
@@ -103,6 +118,8 @@ export interface RangedWeapon {
   source?: string;        // e.g. "CR", "BoJ" — which book to look this up in
   custom?: boolean;       // true when created via "Add Custom"
   attachments?: string[]; // WeaponUpgradeRef.id values for fitted upgrades
+  ammoEntries?: WeaponAmmoEntry[]; // ammo types carried; one marked loaded
+  quantity?: number;      // for thrown weapons (bolas, throwing stars) — how many carried
 }
 
 export interface MeleeWeapon {
@@ -411,7 +428,8 @@ export interface Character {
 
   rangedWeapons: RangedWeapon[];
   meleeWeapons: MeleeWeapon[];
-  ammo: AmmoItem[];
+  /** @deprecated Ammo is now tracked per-weapon on RangedWeapon.ammoAmount. Kept optional for Firestore backwards compat. */
+  ammo?: AmmoItem[];
   armour: WornArmourPiece[];
 
   talentsAndTraits: TalentsAndTraitsBlock;
