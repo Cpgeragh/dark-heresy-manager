@@ -1,45 +1,8 @@
 // src/hooks/useCampaigns.ts
-// Fetches all campaigns owned by the given DM uid.
+// Reads DM campaigns from the shared CampaignsContext (started at app load).
 
-import { useEffect, useState } from "react";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../firebase";
-import type { CampaignDocument } from "../types/Firestore";
+import { useCampaignsContext } from "../context/CampaignsContext";
 
-type CampaignWithId = CampaignDocument & { id: string };
-
-export function useCampaigns(dmUid: string) {
-  const [campaigns, setCampaigns] = useState<CampaignWithId[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let ignore = false;
-    setLoading(true);
-
-    async function load() {
-      const snap = await getDocs(collection(db, "campaigns"));
-      const list: CampaignWithId[] = [];
-
-      snap.forEach((docSnap) => {
-        const data = docSnap.data() as Omit<CampaignDocument, "id">;
-        if (data.dmId === dmUid) {
-          list.push({ id: docSnap.id, ...data });
-        }
-      });
-
-      if (!ignore) {
-        setCampaigns(list);
-        setLoading(false);
-      }
-    }
-
-    load().catch((err) => {
-      console.error("Failed to load campaigns:", err);
-      if (!ignore) setLoading(false);
-    });
-
-    return () => { ignore = true; };
-  }, [dmUid]);
-
-  return { campaigns, loading };
+export function useCampaigns(_dmUid: string) {
+  return useCampaignsContext();
 }
