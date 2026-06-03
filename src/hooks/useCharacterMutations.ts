@@ -1,6 +1,6 @@
 // src/hooks/useCharacterMutations.ts
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { updateDoc, writeBatch, collection, doc } from "firebase/firestore";
 import { db, auth } from "../firebase";
 import { characterDocRef } from "../firebase/converters";
@@ -33,7 +33,10 @@ export function useCharacterMutations({
   const toast = useToast();
 
   // Use converter for type safety
-  const charRef = characterDocRef(campaignId, characterId);
+  const charRef = useMemo(
+    () => characterDocRef(campaignId, characterId),
+    [campaignId, characterId]
+  );
 
   // ================================================================
   // UPDATE FIELD (GENERIC)
