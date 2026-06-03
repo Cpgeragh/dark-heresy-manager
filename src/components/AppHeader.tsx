@@ -18,11 +18,7 @@ export function AppHeader({
   return (
     <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur">
       <nav
-        className="
-          max-w-5xl mx-auto px-4 py-3
-          flex flex-col gap-3
-          sm:flex-row sm:items-center sm:justify-between
-        "
+        className="max-w-5xl mx-auto px-4 py-2 flex flex-row items-center justify-between gap-2"
       >
         {/* Logo */}
         <div className="flex items-center gap-2 flex-shrink-0">

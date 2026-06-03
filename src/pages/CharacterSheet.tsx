@@ -93,7 +93,7 @@ export default function CharacterSheet() {
     characterIdParam: params.characterId,
   });
 
-  const [activeTab, setActiveTab] = useState<TabId>("vitals");
+  const [activeTab, setActiveTab] = useState<TabId>("stats");
   const [isManageOpen, setIsManageOpen] = useState(false);
 
   // ================================================================
@@ -278,7 +278,7 @@ export default function CharacterSheet() {
           </Link>
           <button
             onClick={() => setIsManageOpen(true)}
-            className="text-xs px-2 py-1 rounded border bg-slate-900 text-slate-100 border-slate-500 hover:bg-slate-800"
+            className="text-xs px-2 py-1 rounded border bg-slate-900 text-amber-400 border-slate-600 hover:bg-slate-800 shadow-[0_0_8px_rgba(251,191,36,0.35)]"
           >
             Manage
           </button>
