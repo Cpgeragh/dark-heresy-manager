@@ -28,9 +28,9 @@ export function InfoModal({ title, content }: InfoModalProps) {
       <button
         onClick={(e) => { e.stopPropagation(); setOpen(true); }}
         aria-label={`Show information about ${title}`}
-        className="text-slate-300 px-2 py-0.5 rounded bg-slate-700 border border-slate-600 hover:bg-slate-600 text-xs shrink-0"
+        className="inline-flex h-6 w-9 shrink-0 items-center justify-center rounded bg-slate-700 border border-slate-600 text-slate-300 text-sm leading-none hover:bg-slate-600"
       >
-        ⓘ
+        <span className="relative -top-px">{"\u24D8"}</span>
       </button>
 
       <dialog
@@ -46,7 +46,7 @@ export function InfoModal({ title, content }: InfoModalProps) {
             aria-label="Close"
             className="text-slate-400 hover:text-slate-200 text-base leading-none ml-4"
           >
-            ✕
+            {"\u00D7"}
           </button>
         </div>
         <div className="px-4 py-3 text-sm text-slate-300 space-y-1.5">

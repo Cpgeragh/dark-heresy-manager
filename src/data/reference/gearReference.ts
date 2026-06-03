@@ -443,7 +443,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Availability is Rare; base cost at least 100 Thrones. " +
       "Once the terms are met, redeem for ten times the original value.",
     weight: "0.1 kg",
-    value: "100+ Thrones",
+    value: "100 Thrones",
     rarity: "Rare",
   },
   {
@@ -453,7 +453,9 @@ export const GEAR_REFERENCE: GearRef[] = [
     description:
       "Two-handed cylinder with a salvaged grav-plate generator. Press against a lock and trigger " +
       "to destroy it (Challenging +0 Tech-Use Test). Works on doors AP 16 or less. " +
-      "On 4+ Degrees of Failure, the device misfires and throws the user 2d10 metres (falling damage applies).",
+      "On 4+ Degrees of Failure, the device misfires and throws the user 2d10 metres (falling damage applies). " +
+      "Good/Best Craftsmanship versions misfire on 5/6 Degrees of Failure respectively. " +
+      "Poor Craftsmanship imposes -10 to Tech-Use Tests.",
     weight: "0.2 kg",
     value: "300 Thrones",
     rarity: "Scarce",
@@ -693,8 +695,8 @@ export const GEAR_REFERENCE: GearRef[] = [
     source: SkillSource.BoM,
     description:
       "Treated as a charm.",
-    weight: "—",
-    value: "100 Thrones",
+    weight: "0 kg",
+    value: "10 Thrones",
     rarity: "Rare",
   },
   {
@@ -734,8 +736,8 @@ export const GEAR_REFERENCE: GearRef[] = [
     source: SkillSource.BoM,
     description:
       "Requires Pilot (Jump Pack) skill and Sororitas Power Armour. " +
-      "Allows a safe, guided fall from any height and any number of short jumps (Move Action; " +
-      "must end by end of Turn). At maximal thrust, duplicates the Flyer (12) trait for up to " +
+      "Allows a safe, guided fall from any height. Short jumps double the character's Base Movement action " +
+      "and must end by the end of her Turn. At maximal thrust, duplicates the Flyer (12) trait for up to " +
       "one minute before the turbines require one minute to cool.",
     weight: "15 kg",
     value: "5,000 Thrones",
@@ -772,6 +774,7 @@ export const GEAR_REFERENCE: GearRef[] = [
     source: SkillSource.DH,
     description:
       "Inscribe onto armour (10 min/location, Hard –20 Scholastic Lore Occult or Imperial Creed Test per location). " +
+      "A single pot is enough to ward one armour location. " +
       "+20 to Fear Tests vs daemonic entities; +10 to WP Tests to resist psychic powers. " +
       "Wards last one month (GM may remove earlier if armour is soaked, burned, etc.).",
     weight: "—",
@@ -823,8 +826,9 @@ export const GEAR_REFERENCE: GearRef[] = [
     source: SkillSource.DH,
     description:
       "Metal gauntlet with burrowing wires. Requires Difficult (–10) Tech-Use or Challenging (+0) Medicae Test to use. " +
-      "Target must be restrained or controlled. Grants +20 to Interrogation Tests against the subject. " +
-      "If the subject wins the opposed Test, they take 1d5 Wounds ignoring Toughness Bonus.",
+      "Target must be restrained or controlled. Failure on the use Test deals 1d5 Wounds ignoring Toughness Bonus. " +
+      "Once activated, grants +20 to opposed Interrogation Tests against the subject. " +
+      "If the subject wins the opposed Test, they take 1d5 Damage ignoring Toughness Bonus.",
     weight: "2 kg",
     value: "1,700 Thrones",
     rarity: "Rare",
@@ -835,7 +839,7 @@ export const GEAR_REFERENCE: GearRef[] = [
     source: SkillSource.DH,
     description:
       "Challenging (+10) Awareness Test reveals psykers and Warp-creatures in a corona of white light. " +
-      "Grants Dark Sight for perceiving revealed psykers; +10 BS on single shots at revealed targets. " +
+      "Grants Dark Sight for perceiving revealed psykers/Warp-creatures; +10 BS on single shots at revealed targets. " +
       "–20 to all other sight-based Awareness Tests while worn. " +
       "Using for more than one minute causes 1 Fatigue; cannot remove this fatigue while worn.",
     weight: "1.5 kg",

@@ -7,15 +7,19 @@ import {
   MELEE_WEAPON_REFERENCE,
   type MeleeWeaponRef,
 } from "../../../data/reference/weaponReference";
+import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
 import { WEAPON_UPGRADE_REFERENCE } from "../../../data/reference/weaponUpgradeReference";
 import { editableInputClass, sectionContainerClass } from "../../../ui/editableStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
+import { QuantityControl } from "../../../ui/QuantityControl";
+import { InfoModal } from "../../../components/InfoModal";
 import {
   StatChip,
   DamageTypeChip,
   computeMeleeTotalDamage,
   SpecialRulesModal,
+  SpecialRulesContent,
   AttachmentPicker,
   AttachmentCard,
 } from "./weaponShared";
@@ -124,7 +128,14 @@ export function CustomMeleeForm({
       </div>
       <div className="flex gap-2 pt-1">
         <button
-          onClick={() => onAdd({ id: crypto.randomUUID(), custom: true, ...fields })}
+          onClick={() =>
+            onAdd({
+              id: crypto.randomUUID(),
+              custom: true,
+              ...fields,
+              quantity: fields.class?.toLowerCase().includes("thrown") ? 1 : undefined,
+            })
+          }
           disabled={!fields.name?.trim()}
           className="flex-1 py-1.5 rounded bg-amber-600 hover:bg-amber-500 disabled:opacity-40 text-sm text-slate-900 font-semibold"
         >
@@ -150,6 +161,7 @@ export function MeleeCard({
   onRemove,
   onAddAttachment,
   onRemoveAttachment,
+  onUpdateQuantity,
 }: {
   weapon: MeleeWeapon;
   editable: boolean;
@@ -157,15 +169,22 @@ export function MeleeCard({
   onRemove: () => void;
   onAddAttachment: (upgradeId: string) => void;
   onRemoveAttachment: (upgradeId: string) => void;
+  onUpdateQuantity: (qty: number) => void;
 }) {
-  const [showRules, setShowRules] = useState(false);
+  const [showQualities, setShowQualities] = useState(false);
+  const [showItemRules, setShowItemRules] = useState(false);
   const [showAttachPicker, setShowAttachPicker] = useState(false);
 
   const attachmentIds = weapon.attachments ?? [];
   const attachmentRefs = WEAPON_UPGRADE_REFERENCE.filter((upgrade) =>
     attachmentIds.includes(upgrade.id)
   );
-  const effective = effectiveMeleeStats(weapon, attachmentRefs);
+  const weaponRef = weapon.referenceId
+    ? MELEE_WEAPON_REFERENCE.find((r) => r.id === weapon.referenceId)
+    : undefined;
+  // Prefer reference specialRules as source of truth; avoids stale stored character data
+  const baseWeapon = weaponRef ? { ...weapon, specialRules: weaponRef.specialRules } : weapon;
+  const effective = effectiveMeleeStats(baseWeapon, attachmentRefs);
   const hasMultipleProfiles = hasMultipleMeleeProfiles(weapon.damage);
   const compatible = getCompatibleUpgrades(
     weapon.class ?? "",
@@ -173,7 +192,23 @@ export function MeleeCard({
     true,
     attachmentIds
   );
-  const hasRules = !!(effective.specialRules?.trim());
+  const rulesText = effective.specialRules?.trim() ?? "";
+  const hasRules = Boolean(rulesText && rulesText !== "—" && rulesText !== "-");
+  const ruleNamesInLookup = (effective.specialRules ?? "")
+    .split(",")
+    .map((r) => r.trim().replace(/\s*\(.*?\)/, ""))
+    .filter((name) => Boolean(name) && Boolean(WEAPON_SPECIAL_RULES[name]));
+  const hasModal = !!(weaponRef?.description) || ruleNamesInLookup.length > 0;
+  const rulesDisplayText = hasRules ? rulesText : hasModal ? "Special rules" : "";
+  const hasQualities = Boolean(
+    rulesText && rulesText !== "—" && rulesText !== "-" && rulesText !== "â€”"
+  );
+  const rulesDescription = weaponRef?.description;
+  const hasQualityModal = ruleNamesInLookup.length > 0;
+  const hasItemRules = !!rulesDescription;
+  const isThrown =
+    weapon.class?.toLowerCase().includes("thrown") ||
+    weaponRef?.class.toLowerCase().includes("thrown");
 
   return (
     <div className={sectionContainerClass(editable) + " space-y-3"}>
@@ -212,20 +247,48 @@ export function MeleeCard({
         )}
       </div>
 
-      {hasRules && (
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-400 italic flex-1">
-            {effective.specialRules}
+      {false && (
+        <div className="flex items-center gap-1.5">
+          <span className="text-xs text-slate-400 italic">
+            {rulesDisplayText}
           </span>
-          <button
-            onClick={() => setShowRules(true)}
-            title="Explain special rules"
-            className="text-slate-500 hover:text-amber-400 text-sm transition"
-          >
-            ⓘ
-          </button>
+          {hasModal && (
+            <button
+              onClick={() => setShowQualities(true)}
+              title="Explain special rules"
+              className="text-slate-500 hover:text-amber-400 text-sm transition"
+            >
+              ⓘ
+            </button>
+          )}
         </div>
       )}
+
+      <div className="space-y-1">
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Qualities</span>
+          <span className="text-xs text-slate-400 italic">
+            {hasQualities ? rulesText : "-"}
+          </span>
+          {hasQualityModal && (
+            <InfoModal
+              title={`${weapon.name} Qualities`}
+              content={<SpecialRulesContent rules={effective.specialRules ?? ""} />}
+            />
+          )}
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Rules</span>
+          {hasItemRules ? (
+            <InfoModal
+              title={`${weapon.name} Rules`}
+              content={<SpecialRulesContent rules="" description={rulesDescription} />}
+            />
+          ) : (
+            <span className="text-xs text-slate-600 italic">-</span>
+          )}
+        </div>
+      </div>
 
       {/* Weight / Value / Rarity / Source */}
       <ItemMetaChips
@@ -235,6 +298,18 @@ export function MeleeCard({
         source={weapon.source}
         className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1"
       />
+
+      {isThrown && (
+        <div className="border-t border-slate-800 pt-2 flex items-center justify-between gap-2">
+          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Quantity</span>
+          <QuantityControl
+            quantity={weapon.quantity ?? 1}
+            editable={editable}
+            size="sm"
+            onUpdate={onUpdateQuantity}
+          />
+        </div>
+      )}
 
       {/* Attachments */}
       {(attachmentRefs.length > 0 || (editable && compatible.length > 0)) && (
@@ -269,10 +344,20 @@ export function MeleeCard({
         </div>
       )}
 
-      {showRules && effective.specialRules && (
+      {showQualities && (
         <SpecialRulesModal
-          rules={effective.specialRules}
-          onClose={() => setShowRules(false)}
+          rules={effective.specialRules ?? ""}
+          title="Qualities"
+          onClose={() => setShowQualities(false)}
+        />
+      )}
+
+      {showItemRules && rulesDescription && (
+        <SpecialRulesModal
+          rules=""
+          description={rulesDescription}
+          title="Rules"
+          onClose={() => setShowItemRules(false)}
         />
       )}
 

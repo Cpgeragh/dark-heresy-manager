@@ -95,7 +95,7 @@ export interface WeaponAmmoEntry {
   id: string;           // unique per entry (crypto.randomUUID())
   referenceId?: string; // AmmoRef.id if created from reference data
   name: string;         // e.g. "Bolt Shells", "Psybolt Ammunition"
-  clips: number;        // spare full clips/magazines carried
+  clips: number;        // full clips/magazines carried, including the loaded clip
   rounds: number;       // loose individual rounds carried
   loaded: boolean;      // true = currently chambered
 }
@@ -120,6 +120,7 @@ export interface RangedWeapon {
   attachments?: string[]; // WeaponUpgradeRef.id values for fitted upgrades
   ammoEntries?: WeaponAmmoEntry[]; // ammo types carried; one marked loaded
   quantity?: number;      // for thrown weapons (bolas, throwing stars) — how many carried
+  description?: string;   // rules text copied from reference data when needed
 }
 
 export interface MeleeWeapon {
@@ -136,6 +137,7 @@ export interface MeleeWeapon {
   source?: string;
   custom?: boolean;
   attachments?: string[]; // WeaponUpgradeRef.id values for fitted upgrades
+  quantity?: number;      // for thrown melee weapons (knives, spears) — how many carried
 }
 
 export interface ShieldItem {

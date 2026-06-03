@@ -116,6 +116,7 @@ export function WeaponsTab({
   const addFromRangedRef = useCallback(
     (ref: RangedWeaponRef) => {
       if (!editable) return;
+      const isThrown = ref.class.toLowerCase().includes("thrown");
       onUpdateRanged([
         ...rangedWeapons,
         {
@@ -134,6 +135,7 @@ export function WeaponsTab({
           value: ref.value,
           rarity: ref.rarity,
           source: ref.source,
+          quantity: isThrown ? 1 : undefined,
         },
       ]);
       setPicker(null);
@@ -213,13 +215,14 @@ export function WeaponsTab({
   const addFromMeleeRef = useCallback(
     (ref: MeleeWeaponRef) => {
       if (!editable) return;
+      const isThrown = ref.class.toLowerCase().includes("thrown");
       onUpdateMelee([
         ...meleeWeapons,
         {
           id: crypto.randomUUID(),
           referenceId: ref.id,
           name: ref.name,
-          class: ref.twoHanded ? "Melee (Two-Handed)" : ref.class,
+          class: ref.twoHanded ? `${ref.class} (Two-Handed)` : ref.class,
           damage: ref.damage,
           pen: String(ref.pen),
           specialRules: ref.specialRules,
@@ -227,6 +230,7 @@ export function WeaponsTab({
           value: ref.value,
           rarity: ref.rarity,
           source: ref.source,
+          quantity: isThrown ? 1 : undefined,
         },
       ]);
       setPicker(null);
@@ -276,6 +280,16 @@ export function WeaponsTab({
             ? { ...weapon, attachments: (weapon.attachments ?? []).filter((id) => id !== upgradeId) }
             : weapon
         )
+      );
+    },
+    [editable, meleeWeapons, onUpdateMelee]
+  );
+
+  const updateMeleeQuantity = useCallback(
+    (weaponId: string, quantity: number) => {
+      if (!editable) return;
+      onUpdateMelee(
+        meleeWeapons.map((w) => (w.id === weaponId ? { ...w, quantity } : w))
       );
     },
     [editable, meleeWeapons, onUpdateMelee]
@@ -351,6 +365,8 @@ export function WeaponsTab({
               onRemoveAttachment={(upgradeId) => removeAttachmentFromRanged(weapon.id, upgradeId)}
               onUpdateAmmoEntries={(entries) => updateRangedAmmoEntries(weapon.id, entries)}
               onUpdateQuantity={(qty) => updateRangedQuantity(weapon.id, qty)}
+              grenades={grenades}
+              onUpdateGrenades={onUpdateGrenades}
             />
           ))}
 
@@ -389,6 +405,7 @@ export function WeaponsTab({
               onRemove={() => removeMelee(i)}
               onAddAttachment={(upgradeId) => addAttachmentToMelee(weapon.id, upgradeId)}
               onRemoveAttachment={(upgradeId) => removeAttachmentFromMelee(weapon.id, upgradeId)}
+              onUpdateQuantity={(qty) => updateMeleeQuantity(weapon.id, qty)}
             />
           ))}
 

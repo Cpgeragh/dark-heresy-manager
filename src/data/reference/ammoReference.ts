@@ -299,6 +299,31 @@ export const AMMO_REFERENCE: AmmoRef[] = [
       "Counts as Sanctified. Targets in the area of effect suffer –5 to their Agility Test per point of the user's Psy Rating.",
   },
 
+  {
+    id: "dh-synapse-power-cell",
+    name: "Synapse Disruptor Power Cell",
+    source: SkillSource.DH,
+    compatibleWith: "Synapse Disruptor",
+    cost: "200 Thrones",
+    purchaseAmount: "1",
+    rarity: "Very Rare",
+    description:
+      "Specially crafted power cell for the Synapse Disruptor. " +
+      "Cannot be substituted with standard charge packs.",
+  },
+  {
+    id: "dh-sting-blunt-magazine",
+    name: "Sting-Blunt Magazine",
+    source: SkillSource.DH,
+    compatibleWith: "Sting-Blunt",
+    cost: "50 Thrones",
+    purchaseAmount: "full clip",
+    rarity: "Scarce",
+    description:
+      "Proprietary circuitry-traced bullets specially created for the Sting-Blunt. " +
+      "Imperial standard ammunition cannot be adapted for this weapon.",
+  },
+
   // ── Lathe Worlds ─────────────────────────────────────────────────────────
   {
     id: "lw-purity-round",
