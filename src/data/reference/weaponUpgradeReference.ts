@@ -63,7 +63,7 @@ export const WEAPON_UPGRADE_REFERENCE: WeaponUpgradeRef[] = [
     description:
       "Also known as a pistol grip. Allows the weapon to be wielded in one hand without the " +
       "usual –20 penalty for firing a basic weapon one-handed. Range is halved.",
-    applicableTo: "Any Basic ranged weapon.",
+    applicableTo: "Any Basic ranged weapon can have melee attachments.",
   },
 
   {
@@ -96,7 +96,7 @@ export const WEAPON_UPGRADE_REFERENCE: WeaponUpgradeRef[] = [
     id: "cr-mono",
     name: "Mono",
     source: SkillSource.CR,
-    weightModifier: "—",
+    weightModifier: "0",
     value: "40 Thrones",
     rarity: "Scarce",
     description:
@@ -159,21 +159,4 @@ export const WEAPON_UPGRADE_REFERENCE: WeaponUpgradeRef[] = [
     applicableTo: "Any Basic Las, Solid Projectile, Bolt, Primitive or Plasma weapon.",
   },
 
-  // ── Lathe Worlds ─────────────────────────────────────────────────────────
-
-  {
-    id: "lw-integrated-weapon-components",
-    name: "Integrated Weapon Components",
-    source: SkillSource.LW,
-    weightModifier: "+0.5 kg",
-    value: "200 Thrones",
-    rarity: "Extremely Rare",
-    description:
-      "The weapon is surgically integrated into the bearer's body, typically replacing a forearm or hand. " +
-      "An integrated weapon cannot be dropped, disarmed, or taken away without surgery. " +
-      "Drawing or holstering an integrated weapon is a Free Action. " +
-      "The weapon uses the bearer's own power reserves (electoo inductors, potentia coil, etc.) and requires no separate ammunition or reload. " +
-      "Integration requires a Medicae or Tech-Use (Hard –20) Test and takes 1d5 hours.",
-    applicableTo: "Any Pistol, Basic, or Melee weapon of appropriate size.",
-  },
 ];

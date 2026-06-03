@@ -136,7 +136,7 @@ export const ARCHEOTECH_REFERENCE: ArcheotechRef[] = [
     name: "Psybernetics",
     source: SkillSource.LW,
     type: "Implant",
-    weight: "—",
+    weight: "0 kg",
     value: "—",
     rarity: "—",
     description:

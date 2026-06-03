@@ -9,6 +9,7 @@ import { useUserRole } from "./hooks/useUserRole";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { AppHeader } from "./components/AppHeader";
 import { CampaignsProvider } from "./context/CampaignsContext";
+import { HeaderExtensionProvider } from "./context/HeaderExtensionContext";
 import { ToastProvider, ToastContainer } from "./components/Toast";
 import { OfflineIndicator } from "./components/OfflineIndicator";
 import { ToastTester } from "./components/ToastTester";
@@ -82,6 +83,7 @@ export default function App() {
   // MAIN APP UI
   // -------------------------------------------------
   return (
+    <HeaderExtensionProvider>
     <ToastProvider>
       <div className="min-h-screen bg-slate-950 text-slate-100">
         {/* HEADER */}
@@ -162,5 +164,6 @@ export default function App() {
       {import.meta.env.DEV && <ToastTester />}
     </div>
     </ToastProvider>
+    </HeaderExtensionProvider>
   );
 }
