@@ -8,6 +8,7 @@ import { updateActiveCampaign } from "./services/userService";
 import { useUserRole } from "./hooks/useUserRole";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { AppHeader } from "./components/AppHeader";
+import { CampaignsProvider } from "./context/CampaignsContext";
 import { ToastProvider, ToastContainer } from "./components/Toast";
 import { OfflineIndicator } from "./components/OfflineIndicator";
 import { ToastTester } from "./components/ToastTester";
@@ -92,6 +93,7 @@ export default function App() {
         />
 
         {/* ROUTES */}
+        <CampaignsProvider uid={currentUser.uid} role={isDM ? "dm" : "player"}>
         <main className="max-w-5xl mx-auto px-4 py-6">
           <ErrorBoundary>
             <Routes>
@@ -153,6 +155,7 @@ export default function App() {
             </Routes>
           </ErrorBoundary>
         </main>
+        </CampaignsProvider>
 
         <ToastContainer />
         <OfflineIndicator />
