@@ -641,7 +641,11 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     ap: 0,
     notes:
       "Protection Rating 30. Protects body and arms only — head and legs are unprotected. " +
-      "Does not function against area attacks.",
+      "Does not function against area attacks, although it may help against some Flame weapons if the GM wishes. " +
+      "A character may only benefit from one field at a time. When attacked, roll d100; if the result is less than " +
+      "or equal to the field's Protection Rating, the attack is nullified. Fields may overload: Poor overloads on " +
+      "01-15, Common on 01-10, Good on 01-05, and Best on 1. An overloaded field ceases to function until recharged " +
+      "or repaired with the Luminen Charge Talent or a Very Hard (-30) Tech-Use Test.",
     weight: "0.3 kg",
     value: "5,000 Thrones",
     rarity: "Rare",
@@ -655,8 +659,12 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     locations: [],
     ap: 0,
     notes:
-      "Protection Rating 30. Standard refraction field. " +
-      "Ordo Malleus agents treat availability as Rare (instead of Very Rare) and reduce cost by 25%.",
+      "Protection Rating 30. Common refractor field often found among Officers of the Brontian Longknives. " +
+      "Acolytes and Throne Agents in service of the Calixis Ordo Malleus treat availability as Rare instead of Very Rare " +
+      "and reduce the purchase cost by 25%. A character may only benefit from one field at a time. When attacked, roll d100; " +
+      "if the result is less than or equal to the field's Protection Rating, the attack is nullified. Fields may overload: " +
+      "Poor overloads on 01-15, Common on 01-10, Good on 01-05, and Best on 1. An overloaded field ceases to function until " +
+      "recharged or repaired with the Luminen Charge Talent or a Very Hard (-30) Tech-Use Test.",
     weight: "0.4 kg",
     value: "15,000 Thrones",
     rarity: "Very Rare",
@@ -670,10 +678,11 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     locations: [],
     ap: 0,
     notes:
-      "Protection Rating 70 — functions only against psychic attacks (including friendly ones " +
-      "originating more than 5m away). Deals 1d10 damage ignoring Armour and Toughness Bonus " +
-      "to any creature with the Daemonic trait that passes or remains within 5m. " +
-      "Jokaero-modified Imperial technology.",
+      "Protection Rating 70. Functions only against psychic attacks, including friendly psychic powers originating more than 5m away. " +
+      "Any creature with the Daemonic trait that passes or remains within 5m suffers 1d10 damage ignoring Armour and Toughness Bonus. " +
+      "A character may only benefit from one field at a time. When attacked, roll d100; if the result is less than or equal to the field's " +
+      "Protection Rating, the attack is nullified. Fields may overload: Poor overloads on 01-15, Common on 01-10, Good on 01-05, and Best on 1. " +
+      "An overloaded field ceases to function until recharged or repaired with the Luminen Charge Talent or a Very Hard (-30) Tech-Use Test.",
     weight: "0.5 kg",
     value: "50,000 Thrones",
     rarity: "Near Unique",

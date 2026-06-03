@@ -34,9 +34,9 @@ export function AppHeader({
             <img
               src="/icon-192.png"
               alt=""
-              className="h-8 w-8 rounded-lg object-cover"
+              className="h-8 w-8 rounded-lg object-cover shadow-[0_0_8px_rgba(251,191,36,0.35)]"
             />
-            <span className="text-xs text-amber-400 leading-none">Hub</span>
+            <span className="text-xs text-slate-100 leading-none">Hub</span>
           </Link>
         ) : (
           <img
