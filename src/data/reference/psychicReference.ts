@@ -666,7 +666,7 @@ export const PSYCHIC_POWER_REFERENCE: PsychicPowerRef[] = [
     threshold: 11,
     focusTime: "Half Action",
     sustained: false,
-    range: "Touch",
+    range: "Touch (You)",
     description:
       "You draw poisons from the flesh. " +
       "This has the same effect as taking a dose of de-tox, except the target must lose a Full Action " +
@@ -1506,7 +1506,7 @@ export const PSYCHIC_POWER_REFERENCE: PsychicPowerRef[] = [
     threshold: 12,
     focusTime: "Half Action",
     sustained: true,
-    range: "10m radius",
+    range: "10 Metre Radius from the Psyker",
     description:
       "You manifest an uncontrolled storm of unleashed psychokinetic potential around yourself, " +
       "raising squalling winds, causing small objects to jump and topple, glass to shatter, electrical contacts to short out and spark, " +
@@ -1542,7 +1542,7 @@ export const PSYCHIC_POWER_REFERENCE: PsychicPowerRef[] = [
     threshold: 25,
     focusTime: "Full Action",
     sustained: false,
-    range: "5m × Willpower Bonus",
+    range: "5 Metres x Willpower Bonus",
     description:
       "You slay your enemy with an invisible splinter of annihilating psychic force. " +
       "The attack inflicts 1d10 X Damage plus double the psyker's Willpower Bonus, ignoring armour unless it is warded. " +
@@ -1558,7 +1558,7 @@ export const PSYCHIC_POWER_REFERENCE: PsychicPowerRef[] = [
     threshold: 19,
     focusTime: "Half Action",
     sustained: false,
-    range: "(5 + Willpower Bonus)m radius",
+    range: "(5 + Willpower Bonus) radius in Metres",
     description:
       "You send out a wave of telepathic force carrying a single command. " +
       "Every person (friend and foe alike) within range must make an Opposed Willpower Test against you — you roll only once to oppose all. " +
