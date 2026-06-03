@@ -226,8 +226,8 @@ export const DRUGS_REFERENCE: DrugRef[] = [
     value: "155 Thrones",
     rarity: "Rare",
     effect:
-      "–30 to any tracking attempts by scent against the user. Grants Concealment and Shadowing " +
-      "bonuses when hiding from or tracking animals.",
+      "-30 to any tracking attempts by scent against the user. Gain the Concealment and Shadowing " +
+      "skills when attempting to hide from or track animals.",
     duration: "1d10 hours",
     notes: "Injected chemical that eliminates all scent and pheromone output.",
   },
@@ -311,5 +311,7 @@ export const DRUGS_REFERENCE: DrugRef[] = [
     sideEffect:
       "Memories of events during the effect become hazy — Hard (–20) Intelligence Test to recall; " +
       "Very Hard after one month.",
+    notes:
+      "Users are prone to acts of insane courage and have little instinct for self-preservation.",
   },
 ];

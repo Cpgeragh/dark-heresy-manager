@@ -2,7 +2,7 @@
 // RangedPicker, CustomRangedForm, RangedCard — co-located for navigability.
 
 import { useState } from "react";
-import type { RangedWeapon, WeaponAmmoEntry } from "../../../types/Character";
+import type { RangedWeapon, WeaponAmmoEntry, GrenadeItem } from "../../../types/Character";
 import {
   RANGED_WEAPON_REFERENCE,
   type RangedWeaponRef,
@@ -13,13 +13,16 @@ import { editableInputClass, sectionContainerClass } from "../../../ui/editableS
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
 import { QuantityControl } from "../../../ui/QuantityControl";
+import { InfoModal } from "../../../components/InfoModal";
 import {
   StatChip,
   DamageTypeChip,
   SpecialRulesModal,
+  SpecialRulesContent,
   AttachmentPicker,
   AttachmentCard,
 } from "./weaponShared";
+import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
 import { effectiveRangedStats, getCompatibleUpgrades } from "./weaponHelpers";
 
 // ─── Ranged Picker ────────────────────────────────────────────────────────────
@@ -86,7 +89,7 @@ export function CustomRangedForm({
   onCancel: () => void;
 }) {
   const [fields, setFields] = useState<Omit<RangedWeapon, "id" | "custom">>({
-    name: "", class: "", damage: "", pen: "", range: "", rof: "", clip: "", rld: "", specialRules: "",
+    name: "", class: "", damage: "", pen: "", range: "", rof: "", clip: "", rld: "", weight: "", specialRules: "",
   });
 
   const makeFieldSetter =
@@ -100,7 +103,7 @@ export function CustomRangedForm({
       </p>
       <div className="grid grid-cols-2 gap-2">
         {(
-          ["name", "class", "range", "rof", "damage", "pen", "clip", "rld", "specialRules"] as const
+          ["name", "class", "range", "rof", "damage", "pen", "clip", "rld", "weight", "specialRules"] as const
         ).map((k) => (
           <div key={k} className={k === "name" || k === "specialRules" ? "col-span-2" : ""}>
             <label className="text-xs text-slate-400 capitalize">
@@ -139,6 +142,8 @@ export function CustomRangedForm({
 function AmmoEntryRow({
   entry,
   editable,
+  clipSize,
+  weightKg,
   onSetLoaded,
   onRemove,
   onUpdateClips,
@@ -146,11 +151,21 @@ function AmmoEntryRow({
 }: {
   entry: WeaponAmmoEntry;
   editable: boolean;
+  clipSize?: string;
+  weightKg?: number;
   onSetLoaded: () => void;
   onRemove: () => void;
   onUpdateClips: (qty: number) => void;
   onUpdateRounds: (qty: number) => void;
 }) {
+  const ammoRef = entry.referenceId
+    ? AMMO_REFERENCE.find((ammo) => ammo.id === entry.referenceId)
+    : undefined;
+  const clipSizeLabel =
+    clipSize && clipSize !== "0" && clipSize !== "—" && clipSize !== "N/A"
+      ? `${clipSize}/clip`
+      : undefined;
+
   return (
     <div className="rounded bg-slate-800/60 px-2.5 py-2 space-y-1.5">
       {/* Name row */}
@@ -184,7 +199,27 @@ function AmmoEntryRow({
         )}
       </div>
 
-      {/* Clips + Rounds */}
+      {(ammoRef || clipSizeLabel) && (
+        <div className="flex flex-wrap items-center gap-1.5 text-[10px]">
+          {clipSizeLabel && (
+            <span className="rounded border border-slate-700 bg-slate-900/40 px-1.5 py-0.5 text-slate-400">
+              {clipSizeLabel}
+            </span>
+          )}
+          {ammoRef && (
+            <>
+              <span className="rounded border border-slate-700 bg-slate-900/40 px-1.5 py-0.5 text-amber-400/80 font-mono">
+                ₮ {ammoRef.cost}
+              </span>
+              <span className="rounded border border-slate-700 bg-slate-900/40 px-1.5 py-0.5 text-slate-400">
+                per {ammoRef.purchaseAmount}
+              </span>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Clips + Rounds + Weight */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-1.5">
           <span className="text-[10px] text-slate-500 uppercase tracking-wide">Clips</span>
@@ -204,6 +239,9 @@ function AmmoEntryRow({
             onUpdate={onUpdateRounds}
           />
         </div>
+        {(weightKg ?? 0) > 0 && (
+          <span className="text-[10px] text-slate-500 ml-auto">{formatWeight(weightKg!)} kg</span>
+        )}
       </div>
     </div>
   );
@@ -256,7 +294,12 @@ function AmmoPicker({
             <span className="text-sm font-medium text-slate-200 group-hover:text-white">
               {ammo.name}
             </span>
-            <span className="text-xs text-slate-500 shrink-0">{ammo.rarity}</span>
+            <div className="flex items-center gap-1.5 text-xs shrink-0">
+              <span className="text-slate-500">{ammo.rarity}</span>
+              <span className="text-slate-600">·</span>
+              <span className="text-amber-400/80 font-mono">₮ {ammo.cost}</span>
+              <span className="text-slate-500">/ {ammo.purchaseAmount}</span>
+            </div>
           </div>
           {ammo.description && (
             <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{ammo.description}</p>
@@ -293,6 +336,22 @@ function AmmoPicker({
   );
 }
 
+// ─── Ammo Weight ─────────────────────────────────────────────────────────────
+// CR rule: a full clip weighs 10% of the weapon's weight.
+
+function calcEntryWeight(weapon: RangedWeapon, entry: WeaponAmmoEntry): number {
+  const weaponKg = parseFloat(weapon.weight ?? "0");
+  if (!weaponKg) return 0;
+  const clipSize = parseFloat(weapon.clip ?? "1") || 1;
+  const clipWeight = weaponKg * 0.1;
+  return entry.clips * clipWeight + (entry.rounds / clipSize) * clipWeight;
+}
+
+function formatWeight(kg: number): string {
+  // Drop trailing zeros: 0.700 → "0.7", 0.500 → "0.5", 1.000 → "1"
+  return parseFloat(kg.toFixed(2)).toString();
+}
+
 // ─── Ranged Card ──────────────────────────────────────────────────────────────
 
 export function RangedCard({
@@ -303,6 +362,8 @@ export function RangedCard({
   onRemoveAttachment,
   onUpdateAmmoEntries,
   onUpdateQuantity,
+  grenades,
+  onUpdateGrenades,
 }: {
   weapon: RangedWeapon;
   editable: boolean;
@@ -311,8 +372,11 @@ export function RangedCard({
   onRemoveAttachment: (upgradeId: string) => void;
   onUpdateAmmoEntries: (entries: WeaponAmmoEntry[]) => void;
   onUpdateQuantity: (qty: number) => void;
+  grenades?: GrenadeItem[];
+  onUpdateGrenades?: (next: GrenadeItem[]) => void;
 }) {
-  const [showRules, setShowRules] = useState(false);
+  const [showQualities, setShowQualities] = useState(false);
+  const [showItemRules, setShowItemRules] = useState(false);
   const [showAttachPicker, setShowAttachPicker] = useState(false);
   const [showAmmoPicker, setShowAmmoPicker] = useState(false);
 
@@ -320,22 +384,43 @@ export function RangedCard({
   const attachmentRefs = WEAPON_UPGRADE_REFERENCE.filter((upgrade) =>
     attachmentIds.includes(upgrade.id)
   );
-  const effective = effectiveRangedStats(weapon, attachmentRefs);
+  // Resolve reference data first — source of truth for stats, avoids stale stored character data
+  const weaponRef = weapon.referenceId
+    ? RANGED_WEAPON_REFERENCE.find((r) => r.id === weapon.referenceId)
+    : RANGED_WEAPON_REFERENCE.find(
+        (r) => r.name === weapon.name && (!weapon.source || r.source === weapon.source)
+      );
+  const baseWeapon = weaponRef ? { ...weapon, specialRules: weaponRef.specialRules } : weapon;
+  const effective = effectiveRangedStats(baseWeapon, attachmentRefs);
   const compatible = getCompatibleUpgrades(
     weapon.class ?? "",
     weapon.name,
     false,
     attachmentIds
   );
-  const hasRules = !!(effective.specialRules?.trim());
 
-  // Resolve reference data for ammo compatibility
-  const weaponRef = weapon.referenceId
-    ? RANGED_WEAPON_REFERENCE.find((r) => r.id === weapon.referenceId)
-    : undefined;
+  const rulesText = effective.specialRules?.trim() ?? "";
+  const hasRules = Boolean(rulesText && rulesText !== "—" && rulesText !== "-");
+  const ruleNamesInLookup = (effective.specialRules ?? "")
+    .split(",")
+    .map((r) => r.trim().replace(/\s*\(.*?\)/, ""))
+    .filter((name) => Boolean(name) && Boolean(WEAPON_SPECIAL_RULES[name]));
+  const rulesDescription = weaponRef?.description ?? weapon.description;
+  const hasModal = !!rulesDescription || ruleNamesInLookup.length > 0;
+  const rulesDisplayText = hasRules ? rulesText : hasModal ? "Special rules" : "";
+  const hasQualities = Boolean(
+    rulesText && rulesText !== "—" && rulesText !== "-" && rulesText !== "â€”"
+  );
+  const hasQualityModal = ruleNamesInLookup.length > 0;
+  const hasItemRules = !!rulesDescription;
 
-  const isThrown = weapon.class === "Thrown";
-  const hasAmmo = !isThrown && !!(weaponRef?.ammoType || weapon.custom);
+  const isThrown =
+    weapon.class?.toLowerCase().includes("thrown") ||
+    weaponRef?.class.toLowerCase().includes("thrown");
+  const isGrenadeLauncher =
+    weapon.referenceId === "cr-grenade-launcher" ||
+    weapon.referenceId === "cr-rpg-launcher";
+  const hasAmmo = !isThrown && !isGrenadeLauncher && !!(weaponRef?.ammoType || weapon.custom);
 
   const ammoEntries = weapon.ammoEntries ?? [];
   const existingAmmoNames = new Set(ammoEntries.map((e) => e.name));
@@ -412,20 +497,48 @@ export function RangedCard({
       </div>
 
       {/* Special rules */}
-      {hasRules && (
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-400 italic flex-1">
-            {effective.specialRules}
+      {false && (
+        <div className="flex items-center gap-1.5">
+          <span className="text-xs text-slate-400 italic">
+            {rulesDisplayText}
           </span>
-          <button
-            onClick={() => setShowRules(true)}
-            title="Explain special rules"
-            className="text-slate-500 hover:text-amber-400 text-sm transition"
-          >
-            ⓘ
-          </button>
+          {hasModal && (
+            <button
+              onClick={() => setShowQualities(true)}
+              title="Explain special rules"
+              className="text-slate-500 hover:text-amber-400 text-sm transition"
+            >
+              ⓘ
+            </button>
+          )}
         </div>
       )}
+
+      <div className="space-y-1">
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Qualities</span>
+          <span className="text-xs text-slate-400 italic">
+            {hasQualities ? rulesText : "-"}
+          </span>
+          {hasQualityModal && (
+            <InfoModal
+              title={`${weapon.name} Qualities`}
+              content={<SpecialRulesContent rules={effective.specialRules ?? ""} />}
+            />
+          )}
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Rules</span>
+          {hasItemRules ? (
+            <InfoModal
+              title={`${weapon.name} Rules`}
+              content={<SpecialRulesContent rules="" description={rulesDescription} />}
+            />
+          ) : (
+            <span className="text-xs text-slate-600 italic">-</span>
+          )}
+        </div>
+      </div>
 
       {/* Weight / Value / Rarity / Source */}
       <ItemMetaChips
@@ -435,6 +548,89 @@ export function RangedCard({
         source={weapon.source}
         className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1"
       />
+
+      {/* Thrown weapon: quantity counter */}
+      {isThrown && (
+        <div className="border-t border-slate-800 pt-2 flex items-center justify-between gap-2">
+          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Quantity</span>
+          <QuantityControl
+            quantity={weapon.quantity ?? 0}
+            editable={editable}
+            size="sm"
+            onUpdate={onUpdateQuantity}
+          />
+        </div>
+      )}
+
+      {/* Grenade launcher: ammo drawn from grenade inventory */}
+      {isGrenadeLauncher && (
+        <div className="border-t border-slate-800 pt-2 space-y-2">
+          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Grenades</span>
+          {(grenades ?? []).length === 0 ? (
+            <p className="text-xs text-slate-600 italic">
+              No grenades — add via the Grenades section below.
+            </p>
+          ) : (
+            <div className="space-y-1.5">
+              {(grenades ?? []).map((g) => (
+                <div
+                  key={g.id}
+                  className="rounded bg-slate-800/60 px-2.5 py-2 flex items-center justify-between gap-2"
+                >
+                  <span className="text-xs text-slate-200 truncate">{g.name}</span>
+                  <QuantityControl
+                    quantity={g.quantity}
+                    editable={editable}
+                    size="sm"
+                    onUpdate={(qty) =>
+                      onUpdateGrenades?.(
+                        (grenades ?? []).map((x) => (x.id === g.id ? { ...x, quantity: qty } : x))
+                      )
+                    }
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Regular weapon: ammo entries */}
+      {hasAmmo && (
+        <div className="border-t border-slate-800 pt-2 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-slate-500 uppercase tracking-wide">Ammo</span>
+            {editable && (
+              <button
+                onClick={() => setShowAmmoPicker(true)}
+                className="text-xs text-amber-400 hover:text-amber-300"
+              >
+                + Add
+              </button>
+            )}
+          </div>
+
+          {ammoEntries.length === 0 ? (
+            <p className="text-xs text-slate-600 italic">No ammo tracked</p>
+          ) : (
+            <div className="space-y-1.5">
+              {ammoEntries.map((entry) => (
+                <AmmoEntryRow
+                  key={entry.id}
+                  entry={entry}
+                  editable={editable}
+                  clipSize={weapon.clip}
+                  weightKg={calcEntryWeight(weapon, entry)}
+                  onSetLoaded={() => handleSetLoaded(entry.id)}
+                  onRemove={() => handleRemoveAmmo(entry.id)}
+                  onUpdateClips={(qty) => handleUpdateEntry(entry.id, { clips: qty })}
+                  onUpdateRounds={(qty) => handleUpdateEntry(entry.id, { rounds: qty })}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Attachments */}
       {(attachmentRefs.length > 0 || (editable && compatible.length > 0)) && (
@@ -469,59 +665,21 @@ export function RangedCard({
         </div>
       )}
 
-      {/* Thrown weapon: quantity counter */}
-      {isThrown && (
-        <div className="border-t border-slate-800 pt-2 flex items-center justify-between gap-2">
-          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Quantity</span>
-          <QuantityControl
-            quantity={weapon.quantity ?? 0}
-            editable={editable}
-            size="sm"
-            onUpdate={onUpdateQuantity}
-          />
-        </div>
-      )}
-
-      {/* Regular weapon: ammo entries */}
-      {hasAmmo && (
-        <div className="border-t border-slate-800 pt-2 space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] text-slate-500 uppercase tracking-wide">Ammo</span>
-            {editable && (
-              <button
-                onClick={() => setShowAmmoPicker(true)}
-                className="text-xs text-amber-400 hover:text-amber-300"
-              >
-                + Add
-              </button>
-            )}
-          </div>
-
-          {ammoEntries.length === 0 ? (
-            <p className="text-xs text-slate-600 italic">No ammo tracked</p>
-          ) : (
-            <div className="space-y-1.5">
-              {ammoEntries.map((entry) => (
-                <AmmoEntryRow
-                  key={entry.id}
-                  entry={entry}
-                  editable={editable}
-                  onSetLoaded={() => handleSetLoaded(entry.id)}
-                  onRemove={() => handleRemoveAmmo(entry.id)}
-                  onUpdateClips={(qty) => handleUpdateEntry(entry.id, { clips: qty })}
-                  onUpdateRounds={(qty) => handleUpdateEntry(entry.id, { rounds: qty })}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
       {/* Modals */}
-      {showRules && effective.specialRules && (
+      {showQualities && (
         <SpecialRulesModal
-          rules={effective.specialRules}
-          onClose={() => setShowRules(false)}
+          rules={effective.specialRules ?? ""}
+          title="Qualities"
+          onClose={() => setShowQualities(false)}
+        />
+      )}
+
+      {showItemRules && rulesDescription && (
+        <SpecialRulesModal
+          rules=""
+          description={rulesDescription}
+          title="Rules"
+          onClose={() => setShowItemRules(false)}
         />
       )}
 

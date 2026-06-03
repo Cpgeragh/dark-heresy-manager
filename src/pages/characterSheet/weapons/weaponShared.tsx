@@ -57,23 +57,52 @@ export function computeMeleeTotalDamage(damage: string, sb: number): string {
 
 // ─── Special Rules Modal ──────────────────────────────────────────────────────
 
-export function SpecialRulesModal({
+export function SpecialRulesContent({
   rules,
-  onClose,
+  description,
 }: {
   rules: string;
-  onClose: () => void;
+  description?: string;
 }) {
   const ruleNames = rules
     .split(",")
     .map((r) => r.trim().replace(/\s*\(.*?\)/, ""))
-    .filter(Boolean);
+    .filter((name) => Boolean(name) && Boolean(WEAPON_SPECIAL_RULES[name]));
 
+  return (
+    <div className="space-y-4">
+      {description && (
+        <p className="text-sm text-slate-300 leading-relaxed">{description}</p>
+      )}
+      {ruleNames.map((name) => {
+        const desc = WEAPON_SPECIAL_RULES[name];
+        return (
+          <div key={name}>
+            <p className="text-sm font-semibold text-amber-300">{name}</p>
+            <p className="text-sm text-slate-300 mt-1 leading-relaxed">{desc}</p>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+export function SpecialRulesModal({
+  rules,
+  description,
+  title = "Special Rules",
+  onClose,
+}: {
+  rules: string;
+  description?: string;
+  title?: string;
+  onClose: () => void;
+}) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
       <div className="w-full max-w-md bg-slate-900 border border-slate-500 rounded-xl shadow-2xl">
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
-          <h3 className="text-sm font-semibold text-slate-200">Special Rules</h3>
+          <h3 className="text-sm font-semibold text-slate-200">{title}</h3>
           <button
             onClick={onClose}
             className="text-slate-400 hover:text-slate-200 text-lg leading-none"
@@ -82,22 +111,7 @@ export function SpecialRulesModal({
           </button>
         </div>
         <div className="px-4 py-3 space-y-4 max-h-[60vh] overflow-y-auto">
-          <p className="text-xs text-slate-500 font-mono">{rules}</p>
-          {ruleNames.map((name) => {
-            const desc = WEAPON_SPECIAL_RULES[name];
-            return (
-              <div key={name}>
-                <p className="text-sm font-semibold text-amber-300">{name}</p>
-                {desc ? (
-                  <p className="text-sm text-slate-300 mt-1 leading-relaxed">{desc}</p>
-                ) : (
-                  <p className="text-sm text-slate-500 italic mt-1">
-                    No description available — consult the source book.
-                  </p>
-                )}
-              </div>
-            );
-          })}
+          <SpecialRulesContent rules={rules} description={description} />
         </div>
         <div className="px-4 py-3 border-t border-slate-700">
           <button

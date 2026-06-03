@@ -109,6 +109,14 @@ export function GearTab({ gear, consumables, editable, onUpdate, onUpdateConsuma
     [editable, gear, onUpdate]
   );
 
+  const updateItemValue = useCallback(
+    (id: string, value: string) => {
+      if (!editable) return;
+      onUpdate(gear.map((g) => (g.id === id ? { ...g, value } : g)));
+    },
+    [editable, gear, onUpdate]
+  );
+
   return (
     <div className="space-y-6">
       {/* CONSUMABLES ──────────────────────────────────────────────────────── */}
@@ -167,6 +175,7 @@ export function GearTab({ gear, consumables, editable, onUpdate, onUpdateConsuma
             key={item.id}
             item={item}
             editable={editable}
+            onUpdateValue={(value) => updateItemValue(item.id, value)}
             onRemove={() => removeItem(item.id)}
           />
         ))}

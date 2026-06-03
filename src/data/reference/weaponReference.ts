@@ -45,6 +45,8 @@ export interface RangedWeaponRef {
   compatibleAmmoIds?: string[];
   /** True for thrown weapons where the item itself is the projectile (bolas, throwing stars). Shows a quantity counter instead of ammo entries. */
   isThrown?: boolean;
+  /** Prose description / special rules note shown in the info modal. */
+  description?: string;
 }
 
 export interface MeleeWeaponRef {
@@ -59,6 +61,8 @@ export interface MeleeWeaponRef {
   weight: string;
   value: string;
   rarity: string;
+  /** Prose description / special rules note shown in the info modal. */
+  description?: string;
 }
 
 // ─── Ranged Weapons ──────────────────────────────────────────────────────────
@@ -194,7 +198,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     value: "40 Thrones",
     rarity: "Plentiful",
     ammoType: "Bullets",
-    compatibleAmmoIds: ["cr-bullets", "cr-dumdum-bullets", "cr-man-stopper-bullets"],
+    compatibleAmmoIds: ["cr-bullets", "cr-dumdum-bullets", "cr-man-stopper-bullets", "lw-purity-round"],
   },
   {
     id: "cr-stub-automatic",
@@ -212,7 +216,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     value: "50 Thrones",
     rarity: "Plentiful",
     ammoType: "Bullets",
-    compatibleAmmoIds: ["cr-bullets", "cr-dumdum-bullets", "cr-man-stopper-bullets"],
+    compatibleAmmoIds: ["cr-bullets", "cr-dumdum-bullets", "cr-man-stopper-bullets", "lw-purity-round"],
   },
   {
     id: "cr-hand-cannon",
@@ -616,7 +620,6 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "0.5 kg",
     value: "10 Thrones",
     rarity: "Plentiful",
-    ammoType: "Sling Stones",
   },
   {
     id: "cr-crossbow",
@@ -666,7 +669,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     pen: 0,
     clip: 6,
     reload: "Full",
-    specialRules: "Damage, Pen and Special determined by grenade type",
+    specialRules: "—",
     weight: "9 kg",
     value: "500 Thrones",
     rarity: "Scarce",
@@ -679,15 +682,15 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     class: "Heavy",
     range: "120m",
     rof: "S/–/–",
-    damage: "By rocket",
+    damage: "By grenade",
     pen: 0,
     clip: 1,
     reload: "Full",
-    specialRules: "Damage, Pen and Special determined by rocket type",
+    specialRules: "—",
     weight: "15 kg",
     value: "1,200 Thrones",
     rarity: "Rare",
-    ammoType: "Rockets",
+    ammoType: "Grenades",
   },
 
   // Exotic
@@ -924,7 +927,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     pen: "1d10",
     clip: 20,
     reload: "2 Full",
-    specialRules: "Inaccurate, Overheats, Unreliable (not for Orks). Pen 1d10 (rolled separately each shot).",
+    specialRules: "Inaccurate, Overheats, Unreliable",
+    description: "Pen 1d10, rolled separately each shot. Not Unreliable for Orks.",
     weight: "7 kg",
     value: "1,500 Thrones",
     rarity: "Rare (Scarce for Orks)",
@@ -980,7 +984,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     pen: 2,
     clip: 40,
     reload: "Full",
-    specialRules: "Accurate, Reliable. Pen doubles to 4 with Aim, triples to 6 with Full Aim.",
+    specialRules: "Accurate, Reliable",
+    description: "Pen doubles to 4 with Aim, triples to 6 with Full Aim.",
     weight: "2 kg",
     value: "8,500 Thrones",
     rarity: "Very Rare",
@@ -1072,12 +1077,13 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     pen: 4,
     clip: 10,
     reload: "2 Full",
-    specialRules: "Flame. With Sanctified Ammo, automatically confirms Righteous Fury against Daemons and Psykers.",
+    specialRules: "Flame",
+    description: "With Sanctified Ammo, automatically confirms Righteous Fury against Daemons and Psykers.",
     weight: "45 kg",
     value: "1,000 Thrones",
     rarity: "Rare",
     ammoType: "Fuel (basic)",
-    compatibleAmmoIds: ["cr-fuel-pistol", "cr-fuel-basic", "dh-psyflame-ammunition"],
+    compatibleAmmoIds: ["cr-fuel-basic", "dh-psyflame-ammunition"],
   },
 
   // ── Daemon Hunter ─────────────────────────────────────────────────────────
@@ -1094,9 +1100,11 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     pen: 7,
     clip: 1,
     reload: "Special",
-    specialRules:
-      "Reliable. Single-shot; can only be fired once without specialist reloading. " +
-      "Can be fired even when hands are occupied. –20 to detect/recognise as a weapon. May be used in melee.",
+    specialRules: "Reliable",
+    description:
+      "Each digi-weapon can only be fired once, and reloading one is exceptionally difficult. " +
+      "Can be fired even when the character is holding something else. May be used in melee like a pistol. " +
+      "–20 to detect or recognise as a weapon.",
     weight: "0.1 kg",
     value: "9,000 Thrones",
     rarity: "Unique",
@@ -1112,14 +1120,16 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     pen: 0,
     clip: 10,
     reload: "2 Full",
-    specialRules:
-      "No physical damage. Beam maintained 3+ rounds (BS Test each round if target moves >5m): " +
+    specialRules: "—",
+    description:
+      "Fires a near-invisible beam. If maintained for 3+ rounds (BS Test each round if target moves >5m): " +
       "first failed WP Test = roll on Hallucinogen Effects Table; second failure = –20 to concentration " +
-      "Tests for 1d5 minutes. Disguised as a lasgun. Special power cells cost 200 Thrones each.",
+      "Tests for 1d5 minutes. Disguised as a lasgun.",
     weight: "5 kg",
     value: "3,500 Thrones",
     rarity: "Very Rare",
     ammoType: "Special Power Cell",
+    compatibleAmmoIds: ["dh-synapse-power-cell"],
   },
 
   // Solid Projectile
@@ -1134,9 +1144,10 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     pen: 0,
     clip: 2,
     reload: "Full",
-    specialRules:
+    specialRules: "—",
+    description:
       "–20 to detect/recognise when disassembled (Ordinary +10 Tech-Use to assemble/disassemble). " +
-      "A roll of 94–00 on the BS Test hits the user's own arm (1 degree of success).",
+      "On a BS roll of 94–00, the user shoots their own arm (1 degree of success hit).",
     weight: "0.5 kg",
     value: "150 Thrones",
     rarity: "Rare",
@@ -1154,7 +1165,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     pen: 7,
     clip: 0,
     reload: "—",
-    specialRules: "Felling (2). Archaeotech of unknown function; no standard clip or reload mechanism.",
+    specialRules: "Felling (2)",
+    description: "Archaeotech of unknown function; no standard clip or reload mechanism.",
     weight: "10 kg",
     value: "—",
     rarity: "Unique",
@@ -1170,12 +1182,12 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     pen: 0,
     clip: 5,
     reload: "Full",
-    specialRules: "Shocking. Ammo costs 50 Thrones per magazine.",
+    specialRules: "Shocking",
     weight: "1.5 kg",
     value: "350 Thrones",
     rarity: "Common",
-    ammoType: "Exotic",
-    compatibleAmmoIds: ["cr-exotic"],
+    ammoType: "Sting-Blunt Magazine",
+    compatibleAmmoIds: ["dh-sting-blunt-magazine"],
   },
 
   // Exotic
@@ -1190,7 +1202,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     pen: 0,
     clip: 4,
     reload: "2 Full",
-    specialRules:
+    specialRules: "—",
+    description:
       "Damage varies by range — ≤15m: 1d10+9 Pen 2; up to Short Range: 3d10+9 Pen 8 Felling (1); " +
       "beyond Short Range: 6d10+12 Pen 14 Felling (2) Blast (2).",
     weight: "85 kg",
@@ -1210,7 +1223,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     pen: 0,
     clip: 1,
     reload: "N/A",
-    specialRules:
+    specialRules: "—",
+    description:
       "Must be attached via melee attack. Target makes Hard Agility Test each round or loses all actions " +
       "(success = one Half Action only). Removing deals 1d10+5 R damage ignoring armour. " +
       "Burns out and detaches after 3 rounds. Not reusable.",
@@ -1229,8 +1243,9 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     pen: 0,
     clip: 1,
     reload: "2 Full",
-    specialRules:
-      "Blast (4), Snare. Each failed escape Test adds cumulative –10 to future escape Tests; " +
+    specialRules: "Blast (4), Snare",
+    description:
+      "Each failed escape Test adds cumulative –10 to future escape Tests; " +
       "at –30, target takes 1d5+1 damage per failed Test. Webbing dissolves after 2d5 hours.",
     weight: "12 kg",
     value: "2,500 Thrones",
@@ -1252,7 +1267,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     pen: 2,
     clip: 0,
     reload: "—",
-    specialRules: "Integrated, Tearing",
+    specialRules: "Tearing",
     weight: "2 kg",
     value: "150 Thrones",
     rarity: "Very Rare",
@@ -1268,7 +1283,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     pen: 2,
     clip: 0,
     reload: "—",
-    specialRules: "Integrated, Tearing",
+    specialRules: "Tearing",
     weight: "4.5 kg",
     value: "200 Thrones",
     rarity: "Very Rare",
@@ -1284,7 +1299,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     pen: 8,
     clip: 0,
     reload: "—",
-    specialRules: "Integrated (replaces forearm), Tearing",
+    specialRules: "Tearing",
     weight: "6 kg",
     value: "950 Thrones",
     rarity: "Extremely Rare",
@@ -1300,7 +1315,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     pen: 6,
     clip: 0,
     reload: "—",
-    specialRules: "Integrated",
+    specialRules: "—",
     weight: "12 kg",
     value: "1,200 Thrones",
     rarity: "Very Rare",
@@ -1316,7 +1331,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     pen: 12,
     clip: 0,
     reload: "—",
-    specialRules: "Integrated",
+    specialRules: "—",
     weight: "7 kg",
     value: "600 Thrones",
     rarity: "Very Rare",
@@ -1332,7 +1347,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     pen: 12,
     clip: 0,
     reload: "—",
-    specialRules: "Integrated",
+    specialRules: "—",
     weight: "16 kg",
     value: "2,800 Thrones",
     rarity: "Very Rare",
@@ -1348,9 +1363,10 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     pen: 0,
     clip: 0,
     reload: "—",
-    specialRules:
-      "Blast (6), Inaccurate, Integrated. All caught in the blast must pass a Toughness Test or be knocked down. " +
-      "Those wearing Power Armour or heavier armour are immune. " +
+    specialRules: "Blast (6), Inaccurate",
+    description:
+      "All caught in the blast must pass a Toughness Test or be knocked down. " +
+      "Those wearing Power Armour or heavier are immune. " +
       "Damage = 1d10 + half the target's Armour Points (rounded up) on the affected location.",
     weight: "24 kg",
     value: "4,700 Thrones",
@@ -1459,7 +1475,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     class: "Melee, Thrown",
     damage: "1d5 R",
     pen: 0,
-    specialRules: "Primitive. Can be thrown (3m).",
+    specialRules: "Primitive",
+    description: "Can be thrown up to 3 metres.",
     weight: "0.5 kg",
     value: "5 Thrones",
     rarity: "Abundant",
@@ -1483,7 +1500,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     class: "Melee, Thrown",
     damage: "1d10 R",
     pen: 0,
-    specialRules: "Primitive. Can be thrown (10m).",
+    specialRules: "Primitive",
+    description: "Can be thrown up to 10 metres.",
     twoHanded: true,
     weight: "3 kg",
     value: "15 Thrones",
@@ -1604,7 +1622,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     class: "Melee",
     damage: "1d10-1 I",
     pen: 0,
-    specialRules: "Primitive. Deals Fatigue instead of Wounds against Surprised targets (still reduced by Armour and Toughness).",
+    specialRules: "Primitive",
+    description: "Deals Fatigue instead of Wounds against Surprised targets (still reduced by Armour and Toughness).",
     weight: "1 kg",
     value: "15 Thrones",
     rarity: "Common",
@@ -1628,7 +1647,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     class: "Melee",
     damage: "1d10 I",
     pen: 0,
-    specialRules: "+5 WS on Parry attempts.",
+    specialRules: "—",
+    description: "+5 WS on Parry attempts.",
     weight: "2.5 kg",
     value: "30 Thrones",
     rarity: "Average",
@@ -1642,7 +1662,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     class: "Melee",
     damage: "Low: 1d10 I; High: 1d10+4 E",
     pen: "Low: 0; High: 4",
-    specialRules: "Low power: Shocking. High power: Power Field. User may switch settings once per turn as a Free Action.",
+    specialRules: "Shocking, Power Field",
+    description: "Low setting has Shocking; high setting has Power Field. User may switch settings once per turn as a Free Action.",
     weight: "0.75 kg",
     value: "1,500 Thrones",
     rarity: "Rare",
@@ -1654,7 +1675,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     class: "Melee",
     damage: "2d10 I",
     pen: 6,
-    specialRules: "Power Field, Unwieldy. Double damage vs inanimate structures. –20 WS in melee.",
+    specialRules: "Power Field, Unwieldy",
+    description: "–20 WS in melee. Doubles damage against inanimate structures such as doors and walls.",
     twoHanded: true,
     weight: "25 kg",
     value: "1,250 Thrones",
@@ -1667,7 +1689,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     class: "Melee",
     damage: "2d10 I",
     pen: 5,
-    specialRules: "Power Field, Unwieldy, Shocking. On hit, grants Fear (1) vs target's allies for the encounter.",
+    specialRules: "Power Field, Unwieldy, Shocking",
+    description: "On hit, grants Fear (1) against that target's allies for the remainder of the encounter.",
     twoHanded: true,
     weight: "8.5 kg",
     value: "4,000 Thrones",
@@ -1680,7 +1703,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     class: "Melee",
     damage: "Low: 1d10-1 I; High: 1d10+5 I",
     pen: "Low: 0; High: 5",
-    specialRules: "Low power: Shocking. High power: Power Field. User may switch settings once per turn as a Free Action. +5 WS when attempting to Parry.",
+    specialRules: "Shocking, Power Field",
+    description: "Low setting has Shocking; high setting has Power Field. User may switch settings once per turn as a Free Action. +5 WS when attempting to Parry.",
     weight: "0.5 kg",
     value: "2,100 Thrones",
     rarity: "Very Rare",
@@ -1796,7 +1820,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     class: "Melee",
     damage: "1d10+10 R",
     pen: 5,
-    specialRules: "Tearing, Unwieldy, Special",
+    specialRules: "Tearing, Unwieldy",
+    description: "On an attack roll of 96–00, the wielder must succeed on an Agility Test or take damage from the weapon (including SB).",
     twoHanded: true,
     weight: "12 kg",
     value: "750 Thrones",
@@ -1809,7 +1834,7 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     class: "Melee",
     damage: "1d10 R",
     pen: 0,
-    specialRules: "Special",
+    specialRules: "—",
     weight: "4 kg",
     value: "550 Thrones",
     rarity: "Rare",
@@ -1821,7 +1846,7 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     class: "Melee",
     damage: "2d10 I",
     pen: 2,
-    specialRules: "Unwieldy, Special",
+    specialRules: "Unwieldy",
     twoHanded: true,
     weight: "8 kg",
     value: "800 Thrones",
@@ -1834,7 +1859,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     class: "Melee",
     damage: "1d10 I",
     pen: 0,
-    specialRules: "Unwieldy, Special",
+    specialRules: "Unwieldy",
+    description: "On a successful hit (–20 WS penalty), target is restrained and cannot move unless they win an opposed Strength vs WS Test or a Contortionist Test.",
     twoHanded: true,
     weight: "4 kg",
     value: "200 Thrones",
@@ -1875,7 +1901,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     class: "Melee",
     damage: "1d10+4 R",
     pen: 2,
-    specialRules: "Unwieldy. +10 to Weapon Skill Tests to Stun opponents.",
+    specialRules: "Unwieldy",
+    description: "+10 to Weapon Skill Tests to Stun opponents.",
     twoHanded: true,
     weight: "8 kg",
     value: "70 Thrones",
@@ -1888,7 +1915,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     class: "Melee",
     damage: "1d10 R",
     pen: 0,
-    specialRules: "Unwieldy. May make melee attacks even when both hands are otherwise occupied.",
+    specialRules: "Unwieldy",
+    description: "May make melee attacks even when both hands are otherwise occupied.",
     weight: "1 kg",
     value: "100 Thrones",
     rarity: "Common",
@@ -1900,7 +1928,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     class: "Melee",
     damage: "1d10+2 R",
     pen: 0,
-    specialRules: "Balanced. Opponents attempting to parry (not dodge) suffer –10 to their WS Test.",
+    specialRules: "Balanced",
+    description: "Opponents attempting to parry (not dodge) suffer –10 to their WS Test.",
     weight: "2 kg",
     value: "1,000 Thrones",
     rarity: "Rare",
@@ -1912,7 +1941,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     class: "Melee",
     damage: "1d10+2 R",
     pen: 3,
-    specialRules: "Balanced, Sanctified. Always Best Craftsmanship.",
+    specialRules: "Balanced, Sanctified",
+    description: "Always Best Craftsmanship.",
     weight: "3 kg",
     value: "3,000 Thrones",
     rarity: "Very Rare",
@@ -1924,9 +1954,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     class: "Melee",
     damage: "1d10+2 I",
     pen: 0,
-    specialRules:
-      "Flexible, Sanctified. " +
-      "Daemons within 10m of the bearer suffer –10 WS and –10 to all Warp Instability Tests.",
+    specialRules: "Flexible, Sanctified",
+    description: "Daemons within 10m of the bearer suffer –10 WS and –10 to all Warp Instability Tests.",
     weight: "5 kg",
     value: "3,000 Thrones",
     rarity: "Very Rare",
@@ -1938,9 +1967,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     class: "Melee",
     damage: "1d10 I",
     pen: 0,
-    specialRules:
-      "Balanced, Sanctified. Always Best Craftsmanship. " +
-      "Etched with the True Names of nine and ninety daemons.",
+    specialRules: "Balanced, Sanctified",
+    description: "Always Best Craftsmanship. Etched with the True Names of nine and ninety daemons.",
     weight: "4 kg",
     value: "2,000 Thrones",
     rarity: "Very Rare",
@@ -1954,8 +1982,9 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     class: "Melee",
     damage: "1d10+4 I",
     pen: 6,
-    specialRules:
-      "Power Field. Psychic powers within or entering the field have a 70% chance of failure. " +
+    specialRules: "Power Field",
+    description:
+      "Psychic powers within or entering the field have a 70% chance of failure. " +
       "Psykers gain 1 Insanity Point per 10 continuous rounds spent within the field.",
     weight: "3 kg",
     value: "9,000 Thrones",
@@ -1968,8 +1997,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     class: "Melee",
     damage: "2d10+4 E",
     pen: 10,
-    specialRules:
-      "Power Field, Unwieldy. Doubles Strength Bonus for damage (or increases Unnatural Strength multiplier by 1).",
+    specialRules: "Power Field, Unwieldy",
+    description: "Doubles Strength Bonus for damage (or increases Unnatural Strength multiplier by 1).",
     twoHanded: true,
     weight: "18 kg",
     value: "5,000 Thrones",
@@ -1984,8 +2013,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     class: "Melee",
     damage: "1d10+3 I",
     pen: 4,
-    specialRules:
-      "Unwieldy, Volatile, Blast (1). On a WS roll of 94–00, the wielder is within the blast and takes damage equal to the weapon's normal damage.",
+    specialRules: "Unwieldy, Blast (1)",
+    description: "On a WS roll of 94–00, the wielder is within the blast and takes damage equal to the weapon's normal damage.",
     weight: "15 kg",
     value: "200 Thrones",
     rarity: "Scarce",
@@ -1997,7 +2026,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     class: "Melee",
     damage: "1d10 I",
     pen: 0,
-    specialRules: "Shocking. When deactivated, –20 to identify it as a weapon.",
+    specialRules: "Shocking",
+    description: "When deactivated, –20 to identify it as a weapon.",
     weight: "4 kg",
     value: "250 Thrones",
     rarity: "Scarce",
@@ -2011,8 +2041,9 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     class: "Melee",
     damage: "1d10 I",
     pen: 2,
-    specialRules:
-      "Snaring, Excruciating. Each round the target is snared, it must pass a Difficult (–10) WP or Toughness Test (target's choice) or be Stunned for 1 round. Daemonic weapon (Slaanesh/Khorne).",
+    specialRules: "Snare, Excruciating",
+    description:
+      "Each round the target is snared, it must pass a Difficult (–10) WP or Toughness Test (target's choice) or be Stunned for 1 round. Daemonic weapon (Slaanesh/Khorne).",
     weight: "5 kg",
     value: "—",
     rarity: "Very Rare",
@@ -2024,7 +2055,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     class: "Melee",
     damage: "1d10+2 R",
     pen: 0,
-    specialRules: "Balanced. Wielder adds Strength Bonus to Penetration. Daemonic weapon (Khorne).",
+    specialRules: "Balanced",
+    description: "Wielder adds Strength Bonus to Penetration. Daemonic weapon (Khorne).",
     weight: "4 kg",
     value: "—",
     rarity: "Very Rare",
@@ -2036,7 +2068,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     class: "Melee",
     damage: "2d10+4 R",
     pen: 0,
-    specialRules: "Unwieldy. Wielder adds Strength Bonus to Penetration. Daemonic weapon (Khorne).",
+    specialRules: "Unwieldy",
+    description: "Wielder adds Strength Bonus to Penetration. Daemonic weapon (Khorne).",
     twoHanded: true,
     weight: "9 kg",
     value: "—",
@@ -2049,8 +2082,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     class: "Melee",
     damage: "1d10+1 R",
     pen: 2,
-    specialRules:
-      "Balanced, Toxic. GM may substitute a specific disease for the Toxic quality. Daemonic weapon (Nurgle).",
+    specialRules: "Balanced, Toxic",
+    description: "GM may substitute a specific disease for the Toxic quality. Daemonic weapon (Nurgle).",
     weight: "4 kg",
     value: "—",
     rarity: "Very Rare",
@@ -2062,8 +2095,9 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     class: "Melee",
     damage: "1d10 I",
     pen: 0,
-    specialRules:
-      "Balanced. Wielder does not suffer Psychic Phenomena — instead, each time Phenomena would trigger, " +
+    specialRules: "Balanced",
+    description:
+      "Wielder does not suffer Psychic Phenomena — instead, each time Phenomena would trigger, " +
       "add Psy Rating to the next psychic power's damage. If the next power deals no damage, the bonus is lost. Daemonic weapon (Tzeentch).",
     weight: "3 kg",
     value: "—",
@@ -2079,7 +2113,7 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     class: "Melee",
     damage: "1d10+5 E",
     pen: 4,
-    specialRules: "Flexible, Integrated, Shocking",
+    specialRules: "Flexible, Shocking",
     weight: "3 kg",
     value: "600 Thrones",
     rarity: "Very Rare",
@@ -2091,8 +2125,9 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     class: "Melee",
     damage: "1d10+5 E",
     pen: 10,
-    specialRules:
-      "Integrated, Unwieldy. Does not add Strength Bonus to Damage. " +
+    specialRules: "Unwieldy",
+    description:
+      "Does not add Strength Bonus to Damage. " +
       "Enemies attempting to Parry this weapon suffer a –20 penalty to their WS Test.",
     weight: "2 kg",
     value: "1,700 Thrones",
@@ -2105,8 +2140,9 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     class: "Melee / Thrown",
     damage: "1d10+2 E",
     pen: 5,
-    specialRules:
-      "Unwieldy. Doubles the wielder's Strength Bonus for Damage. " +
+    specialRules: "Unwieldy",
+    description:
+      "Doubles the wielder's Strength Bonus for Damage. " +
       "Characters with the Unnatural Strength trait add 1 to their multiplier instead.",
     weight: "4 kg",
     value: "3,000 Thrones",
@@ -2119,9 +2155,9 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     class: "Melee",
     damage: "1d10+10 E",
     pen: 7,
-    specialRules:
-      "Balanced, Flexible, Power Field. Adeptus Mechanicus only. " +
-      "When used against a Machine, the wielder may re-roll any failed WS Test. " +
+    specialRules: "Balanced, Flexible, Power Field",
+    description:
+      "Adeptus Mechanicus only. When used against a Machine, the wielder may re-roll any failed WS Test. " +
       "When used against a character with cybernetics, counts as a force weapon for those implants only. " +
       "Grants +10 to Tech-Use and Medicae Tests made to repair or treat mechanical components.",
     weight: "9 kg",
@@ -2135,9 +2171,10 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     class: "Melee / Thrown",
     damage: "1d5+3 R",
     pen: 4,
-    specialRules:
-      "Best Craftsmanship (+15 WS, +1 Damage already included), Razor Sharp. " +
-      "Counts as AP 35 armour when used to Parry.",
+    specialRules: "Razor Sharp",
+    description:
+      "Always Best Craftsmanship (+15 WS, +1 Damage already included in profile). " +
+      "Counts as AP 35 when used to Parry.",
     weight: "0.5 kg",
     value: "2,500 Thrones",
     rarity: "Very Rare",
@@ -2315,44 +2352,6 @@ export const GRENADE_REFERENCE: GrenadeRef[] = [
       "On detonation this grenade floods the area with disruptive electromagnetic pulses. " +
       "All electronic and mechanical devices within the blast radius are affected by the Haywire quality.",
   },
-
-  // ── Lost Dataslate ────────────────────────────────────────────────────────
-  {
-    id: "ld-stasis-grenade",
-    name: "Belecane-Pattern Stasis Grenade",
-    source: SkillSource.LD,
-    class: "Thrown",
-    damage: "—",
-    pen: "—",
-    specialRules: "Exotic, Indirect, Stasis (2 m radius, 1d5 Rounds)",
-    weight: "0.5 kg",
-    value: "8,000 Thrones",
-    rarity: "Very Rare",
-    description:
-      "Produced in small quantities on the Calixian forge world of Belecane. Traps everything within 2 metres " +
-      "in a bubble of slowed time for 1d5 Rounds. Targets cannot take any Actions; those outside cannot attack " +
-      "or interact with anyone inside the field. " +
-      "Requires the appropriate Exotic Weapon Training Talent.",
-  },
-  {
-    id: "ld-stasis-mine",
-    name: "Belecane-Pattern Stasis Mine",
-    source: SkillSource.LD,
-    class: "Placed",
-    damage: "—",
-    pen: "—",
-    specialRules: "Exotic, Blast (6), Stasis (6 m radius, 3d10 minutes)",
-    weight: "20 kg",
-    value: "19,000 Thrones",
-    rarity: "Very Rare",
-    description:
-      "A large rechargeable stasis device. Detects creatures of a specified Size within 5 metres and activates " +
-      "when triggered. Everything within 6 metres is trapped in stasis for 3d10 minutes. " +
-      "Good-Craftsmanship versions include a remote detonator. Once used, recharge with a Difficult (–10) " +
-      "Tech-Use Test; 3+ DoF permanently burns out the generator. " +
-      "Requires the appropriate Exotic Weapon Training Talent.",
-  },
-
 ];
 
 // ─── Shields ─────────────────────────────────────────────────────────────────

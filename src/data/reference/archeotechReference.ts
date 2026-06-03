@@ -41,6 +41,42 @@ export const ARCHEOTECH_REFERENCE: ArcheotechRef[] = [
       "The grid itself provides no cover and individual panels (usually ~2m across) cannot be repaired if damaged.",
   },
 
+  {
+    id: "ld-stasis-grenade",
+    name: "Belecane-Pattern Stasis Grenade",
+    source: SkillSource.LD,
+    type: "Grenade",
+    specialRules: "Indirect",
+    weight: "0.5 kg",
+    value: "8,000 Thrones",
+    rarity: "Very Rare",
+    description:
+      "Produced in very small quantities on the Calixian forge world of Belecane. Stasis grenades trap " +
+      "or preserve those caught in the blast within a bubble of slowed time. They have a radius of 2 metres, " +
+      "and anything within this radius is held in time, unable to take any Actions for 1d5 Rounds. Those " +
+      "outside cannot attack or interact with anyone within the stasis field's radius. Stasis grenades are " +
+      "considered Exotic Weapons, and a character must have the appropriate Talent before using them effectively.",
+  },
+
+  {
+    id: "ld-stasis-mine",
+    name: "Belecane-Pattern Stasis Mine",
+    source: SkillSource.LD,
+    type: "Mine",
+    specialRules: "Blast (6)",
+    weight: "20 kg",
+    value: "19,000 Thrones",
+    rarity: "Very Rare",
+    description:
+      "A larger Belecane stasis device with a variable detection radius of up to 5 metres, which can be " +
+      "set to detect creatures of a specific Size. Once triggered, everything within its 6 metre radius is " +
+      "trapped and unable to take any Actions for 3d10 minutes. Those outside cannot attack or interact with " +
+      "anyone within the field. Good-Craftsmanship versions include a remote detonator. Once used, it can be " +
+      "recharged with a Difficult (-10) Tech-Use Test; three or more Degrees of Failure burns out the field " +
+      "generator and renders the mine useless. Stasis mines are considered Exotic Weapons and require the " +
+      "appropriate Talent to use effectively.",
+  },
+
   // ── Lathe Worlds ─────────────────────────────────────────────────────────
 
   {
