@@ -414,6 +414,7 @@ export default function CharacterSheet() {
               onUpdateShields={handleUpdateShields}
               cybernetics={character.cybernetics ?? []}
               archeotech={character.archeotech ?? []}
+              onUpdateArcheotech={handleUpdateArcheotech}
             />
           )}
 

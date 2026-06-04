@@ -1,7 +1,7 @@
 // src/pages/characterSheet/weapons/RangedCard.tsx
 // RangedPicker, CustomRangedForm, RangedCard — co-located for navigability.
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { RangedWeapon, WeaponAmmoEntry, GrenadeItem, ArcheotechItem } from "../../../types/Character";
 import {
   RANGED_WEAPON_REFERENCE,
@@ -21,6 +21,7 @@ import {
   SpecialRulesContent,
   AttachmentPicker,
   AttachmentCard,
+  EquipToggle,
 } from "./weaponShared";
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
 import { effectiveRangedStats, getCompatibleUpgrades } from "./weaponHelpers";
@@ -374,6 +375,10 @@ export function RangedCard({
   onUpdateGrenades,
   archeotechGrenades,
   allowAttachments = true,
+  isEquipped = false,
+  onToggleEquip,
+  slotsDisabled = false,
+  forceExpanded = false,
 }: {
   weapon: RangedWeapon;
   editable: boolean;
@@ -386,7 +391,14 @@ export function RangedCard({
   onUpdateGrenades?: (next: GrenadeItem[]) => void;
   archeotechGrenades?: ArcheotechItem[];
   allowAttachments?: boolean;
+  isEquipped?: boolean;
+  onToggleEquip?: () => void;
+  slotsDisabled?: boolean;
+  forceExpanded?: boolean;
 }) {
+  const [expanded, setExpanded] = useState(isEquipped);
+  useEffect(() => { setExpanded(isEquipped); }, [isEquipped]);
+
   const [showQualities, setShowQualities] = useState(false);
   const [showItemRules, setShowItemRules] = useState(false);
   const [showAttachPicker, setShowAttachPicker] = useState(false);
@@ -475,24 +487,50 @@ export function RangedCard({
 
   return (
     <div className={sectionContainerClass(editable) + " space-y-3"}>
-      {/* Header */}
+      {/* Header — always visible */}
       <div className="flex items-start justify-between gap-2">
-        <div>
+        <button
+          className="flex-1 min-w-0 text-left"
+          onClick={() => !forceExpanded && setExpanded((e) => !e)}
+          disabled={forceExpanded}
+        >
           <p className="text-sm font-semibold text-slate-200">{weapon.name}</p>
           {weapon.class && (
             <p className="text-xs text-slate-500">{weapon.class}</p>
           )}
+        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          {onToggleEquip && (
+            <EquipToggle
+              equipped={isEquipped}
+              disabled={slotsDisabled}
+              editable={editable}
+              onChange={onToggleEquip}
+            />
+          )}
+          {!forceExpanded && (
+            <button
+              onClick={() => setExpanded((e) => !e)}
+              className="text-slate-400 hover:text-slate-200 transition"
+              aria-label={expanded ? "Collapse" : "Expand"}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={`w-4 h-4 transition-transform ${expanded ? "" : "-rotate-90"}`}>
+                <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd"/>
+              </svg>
+            </button>
+          )}
+          {editable && (expanded || forceExpanded) && (
+            <button
+              onClick={onRemove}
+              className="text-xs text-red-400 hover:text-red-300 shrink-0"
+            >
+              Remove
+            </button>
+          )}
         </div>
-        {editable && (
-          <button
-            onClick={onRemove}
-            className="text-xs text-red-400 hover:text-red-300 shrink-0"
-          >
-            Remove
-          </button>
-        )}
       </div>
 
+      {(expanded || forceExpanded) && (<>
       {/* Stats grid */}
       <div className="flex flex-wrap gap-1.5">
         {effective.range && <StatChip label="Range" value={effective.range} />}
@@ -726,6 +764,7 @@ export function RangedCard({
           onClose={() => setShowAmmoPicker(false)}
         />
       )}
+      </>)}
     </div>
   );
 }

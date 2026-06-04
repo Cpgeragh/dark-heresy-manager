@@ -55,6 +55,74 @@ export function computeMeleeTotalDamage(damage: string, sb: number): string {
   return `${dice}${total > 0 ? "+" : ""}${total}`;
 }
 
+// ─── Equip Toggle ─────────────────────────────────────────────────────────────
+
+export function EquipToggle({
+  equipped,
+  disabled,
+  editable,
+  onChange,
+  labels = { equipped: "Equipped", unequipped: "Equip" },
+}: {
+  equipped: boolean;
+  disabled: boolean;
+  editable: boolean;
+  onChange: () => void;
+  labels?: { equipped: string; unequipped: string };
+}) {
+  if (!editable) {
+    return equipped ? (
+      <span className="text-[10px] text-green-400 border border-green-700/50 rounded px-1.5 py-0.5 font-medium uppercase tracking-wide shrink-0">
+        {labels.equipped}
+      </span>
+    ) : null;
+  }
+  return (
+    <button
+      onClick={!disabled || equipped ? onChange : undefined}
+      disabled={disabled && !equipped}
+      title={equipped ? "Click to stow" : disabled ? "Slots full" : "Click to equip"}
+      className={`flex items-center gap-1 shrink-0 group transition ${
+        disabled && !equipped ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
+      }`}
+    >
+      <div
+        className={`w-3.5 h-3.5 rounded border flex items-center justify-center transition ${
+          equipped
+            ? "border-green-600 bg-green-500/20"
+            : "border-slate-600 group-hover:border-slate-400"
+        }`}
+      >
+        {equipped && (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 10 10"
+            fill="none"
+            className="w-2 h-2"
+          >
+            <path
+              stroke="#4ade80"
+              strokeWidth={1.8}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M1.5 5l2.5 2.5 4.5-4.5"
+            />
+          </svg>
+        )}
+      </div>
+      <span
+        className={`text-[10px] uppercase tracking-wide ${
+          equipped
+            ? "text-green-400"
+            : "text-slate-500 group-hover:text-slate-300"
+        }`}
+      >
+        {equipped ? labels.equipped : labels.unequipped}
+      </span>
+    </button>
+  );
+}
+
 // ─── Special Rules Modal ──────────────────────────────────────────────────────
 
 export function SpecialRulesContent({

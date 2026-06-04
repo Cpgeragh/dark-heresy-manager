@@ -100,6 +100,7 @@ export function getCompatibleUpgrades(
     (id) => id === "cr-red-dot-laser-sight" || id === "cr-telescopic-sight"
   );
   return WEAPON_UPGRADE_REFERENCE.filter((upgrade) => {
+    if (upgrade.isCreationComponent) return false;
     if (currentIds.includes(upgrade.id)) return false;
     switch (upgrade.id) {
       case "cr-compact":
