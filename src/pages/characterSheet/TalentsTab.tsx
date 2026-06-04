@@ -74,7 +74,7 @@ function FaithTalentSection({
         const groupEntries = entries.filter((e) => getFaithGroup(e.talentId) === group);
         return (
           <div key={group}>
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-100 mb-1.5">
               {FAITH_GROUP_LABELS[group]}
             </p>
             {groupEntries.length === 0 && (
@@ -203,7 +203,7 @@ export function TalentsTab({
 
         {WEAPON_TRAINING_GROUPS.map((group) => (
           <div key={group.label}>
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-100 mb-1.5">
               {group.label}
             </p>
             <div className="flex flex-wrap gap-1.5">
@@ -235,7 +235,7 @@ export function TalentsTab({
 
         {/* Exotic Weapon Training */}
         <div>
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-100 mb-1.5">
             Exotic Weapon Training
           </p>
 

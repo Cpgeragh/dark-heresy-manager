@@ -10,6 +10,10 @@ export const WEAPON_SPECIAL_RULES: Record<string, string> = {
   "Balanced":
     "Balanced weapons grant a +10 bonus to Weapon Skill Tests when used to Parry.",
 
+  "Compact":
+    "A smaller version of a pistol or basic weapon favoured for concealment over stopping power. " +
+    "Halves the weapon's weight, clip size, and range, and reduces its Damage by 1.",
+
   "Blast":
     "On a hit, all targets within the weapon's Blast radius suffer the weapon's damage. " +
     "The number in parentheses is the radius in metres. Targets in the blast make an " +
@@ -61,6 +65,10 @@ export const WEAPON_SPECIAL_RULES: Record<string, string> = {
     "or on Maximal. Maximal adds 10 to range, +1d10 to damage, and +2 to Penetration; if the weapon " +
     "has the Blast quality, its radius increases by 2. Maximal fire uses three times the normal " +
     "ammunition per shot and adds the Recharge quality.",
+
+  "Mono":
+    "Mono weapons have specially fashioned blades with superfine edges that cut through " +
+    "armour and never lose their edge. The weapon no longer counts as Primitive and gains +2 Penetration.",
 
   "Overheats":
     "Roll a 91-00 when firing and the weapon overheats. The wielder takes Energy damage " +

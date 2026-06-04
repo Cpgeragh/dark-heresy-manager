@@ -17,6 +17,14 @@ export interface ArcheotechRef {
   weight?: string;
   value?: string;
   rarity?: string;
+  /** Structured weapon stats — only present on type "Weapon" items */
+  weaponClass?: string;
+  damage?: string;
+  pen?: string;
+  range?: string;
+  rof?: string;
+  clip?: string;
+  rld?: string;
 }
 
 // ─── Reference Data ───────────────────────────────────────────────────────────
@@ -46,7 +54,7 @@ export const ARCHEOTECH_REFERENCE: ArcheotechRef[] = [
     name: "Belecane-Pattern Stasis Grenade",
     source: SkillSource.LD,
     type: "Grenade",
-    specialRules: "Indirect",
+    specialRules: "Blast (2)",
     weight: "0.5 kg",
     value: "8,000 Thrones",
     rarity: "Very Rare",
@@ -122,6 +130,9 @@ export const ARCHEOTECH_REFERENCE: ArcheotechRef[] = [
     value: "—",
     rarity: "—",
     specialRules: "Special, Power Field",
+    weaponClass: "Melee",
+    damage: "2d10 E",
+    pen: "7",
     description:
       "Melee — 2d10 E, Pen 7, Power Field. A single sheath of unknown golden material extending " +
       "to the shoulder. Functions like a low-powered power fist and can parry effectively due to " +
@@ -157,6 +168,12 @@ export const ARCHEOTECH_REFERENCE: ArcheotechRef[] = [
     value: "—",
     rarity: "—",
     specialRules: "Special, Shocking, Toxic",
+    weaponClass: "Basic",
+    damage: "3d10 R",
+    pen: "—",
+    range: "35m",
+    rof: "S/–/–",
+    clip: "18",
     description:
       "Basic — 35m, S/–/–, 3d10 R, Pen —, Clip 18. Completely ignores Armour and has no effect " +
       "on technological items. Targets killed by this weapon leave all non-living items (weapons, " +

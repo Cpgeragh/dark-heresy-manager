@@ -301,6 +301,8 @@ export interface GrenadeItem {
   referenceId?: string;  // links back to GrenadeRef.id
   name: string;
   quantity: number;
+  /** "Grenade" or "Mine" — used to exclude mines from launcher panels */
+  type?: string;
   class?: string;
   damage?: string;
   pen?: string;

@@ -10,8 +10,10 @@ import type {
   GrenadeItem,
   CyberneticItem,
   ShieldItem,
+  ArcheotechItem,
 } from "../../types/Character";
 import { CYBERNETICS_REFERENCE } from "../../data/reference/cyberneticsReference";
+import { ARCHEOTECH_REFERENCE } from "../../data/reference/archeotechReference";
 import {
   RANGED_WEAPON_REFERENCE,
   MELEE_WEAPON_REFERENCE,
@@ -25,6 +27,7 @@ import { MeleeCard, MeleePicker, CustomMeleeForm } from "./weapons/MeleeCard";
 import { GrenadeCard, GrenadePicker } from "./weapons/GrenadeCard";
 import { ShieldCard, ShieldPicker } from "./weapons/ShieldCard";
 import { CyberneticWeaponCard } from "./weapons/CyberneticWeaponCard";
+import { ArcheotechWeaponCard } from "./weapons/ArcheotechWeaponCard";
 import { PickerModal } from "../../ui/PickerModal";
 import { uiSectionHeader } from "../../ui/editableStyles";
 
@@ -42,6 +45,7 @@ interface WeaponsTabProps {
   cybernetics?: CyberneticItem[];
   shields?: ShieldItem[];
   onUpdateShields?: (next: ShieldItem[]) => void;
+  archeotech?: ArcheotechItem[];
 }
 
 type PickerTarget = "ranged" | "melee" | "integrated" | "grenades" | "shields" | null;
@@ -186,10 +190,30 @@ export function WeaponsTab({
   cybernetics,
   shields,
   onUpdateShields,
+  archeotech,
 }: WeaponsTabProps) {
   const [picker, setPicker] = useState<PickerTarget>(null);
   const [showCustomRanged, setShowCustomRanged] = useState(false);
   const [showCustomMelee, setShowCustomMelee] = useState(false);
+
+  // ── Archeotech weapons ─────────────────────────────────────────────────────
+  const archeotechGrenadeItems = (archeotech ?? []).filter(
+    (a) => a.type === "Grenade"
+  );
+  const archeotechMineItems = (archeotech ?? []).filter(
+    (a) => a.type === "Mine"
+  );
+  const archeotechWeaponItems = (archeotech ?? []).filter(
+    (a) => a.type === "Weapon"
+  );
+  const archeotechRangedItems = archeotechWeaponItems.filter((a) => {
+    const ref = ARCHEOTECH_REFERENCE.find((r) => r.id === a.referenceId);
+    return ref?.weaponClass !== "Melee";
+  });
+  const archeotechMeleeWeaponItems = archeotechWeaponItems.filter((a) => {
+    const ref = ARCHEOTECH_REFERENCE.find((r) => r.id === a.referenceId);
+    return ref?.weaponClass === "Melee";
+  });
 
   // ── Cybernetic weapons ─────────────────────────────────────────────────────
   const cyberneticWeaponItems = (cybernetics ?? []).flatMap((c) => {
@@ -197,6 +221,8 @@ export function WeaponsTab({
     if (!ref?.weapon) return [];
     return [{ cybernetic: c, weapon: ref.weapon }];
   });
+  const cyberneticRangedItems = cyberneticWeaponItems.filter(({ weapon }) => weapon.type === "ranged");
+  const cyberneticMeleeItems  = cyberneticWeaponItems.filter(({ weapon }) => weapon.type === "melee");
 
   const normalRangedWeapons = rangedWeapons
     .map((weapon, index) => ({ weapon, index }))
@@ -212,6 +238,25 @@ export function WeaponsTab({
     .filter(({ weapon }) => isIntegratedMeleeWeapon(weapon));
   const integratedWeaponCount = integratedRangedWeapons.length + integratedMeleeWeapons.length;
 
+  // ── Unified sorted lists ───────────────────────────────────────────────────
+  const allRangedEntries = [
+    ...normalRangedWeapons.map(({ weapon, index }) => ({ kind: "regular" as const, weapon, index, name: weapon.name })),
+    ...cyberneticRangedItems.map(({ cybernetic, weapon }) => ({ kind: "cybernetic" as const, cybernetic, weapon, name: weapon.name })),
+    ...archeotechRangedItems.map((item) => ({ kind: "archeotech" as const, item, name: item.name })),
+  ].sort((a, b) => a.name.localeCompare(b.name));
+
+  const allMeleeEntries = [
+    ...normalMeleeWeapons.map(({ weapon, index }) => ({ kind: "regular" as const, weapon, index, name: weapon.name })),
+    ...cyberneticMeleeItems.map(({ cybernetic, weapon }) => ({ kind: "cybernetic" as const, cybernetic, weapon, name: weapon.name })),
+    ...archeotechMeleeWeaponItems.map((item) => ({ kind: "archeotech" as const, item, name: item.name })),
+  ].sort((a, b) => a.name.localeCompare(b.name));
+
+  const allGrenadeEntries = [
+    ...grenades.map((item) => ({ kind: "regular" as const, item, name: item.name })),
+    ...archeotechGrenadeItems.map((item) => ({ kind: "archeotech" as const, item, name: item.name })),
+    ...archeotechMineItems.map((item) => ({ kind: "archeotech" as const, item, name: item.name })),
+  ].sort((a, b) => a.name.localeCompare(b.name));
+
   // ── Grenade handlers ───────────────────────────────────────────────────────
 
   const addFromGrenadeRef = useCallback(
@@ -224,6 +269,7 @@ export function WeaponsTab({
           referenceId: ref.id,
           name: ref.name,
           quantity: 1,
+          type: ref.type,
           class: ref.class,
           damage: ref.damage,
           pen: ref.pen,
@@ -495,24 +541,42 @@ export function WeaponsTab({
             )}
           </div>
 
-          {normalRangedWeapons.length === 0 && !showCustomRanged && (
+          {allRangedEntries.length === 0 && !showCustomRanged && (
             <p className="text-sm text-slate-500 italic">No ranged weapons.</p>
           )}
 
-          {normalRangedWeapons.map(({ weapon, index }) => (
-            <RangedCard
-              key={weapon.id}
-              weapon={weapon}
-              editable={editable}
-              onRemove={() => removeRanged(index)}
-              onAddAttachment={(upgradeId) => addAttachmentToRanged(weapon.id, upgradeId)}
-              onRemoveAttachment={(upgradeId) => removeAttachmentFromRanged(weapon.id, upgradeId)}
-              onUpdateAmmoEntries={(entries) => updateRangedAmmoEntries(weapon.id, entries)}
-              onUpdateQuantity={(qty) => updateRangedQuantity(weapon.id, qty)}
-              grenades={grenades}
-              onUpdateGrenades={onUpdateGrenades}
-            />
-          ))}
+          {allRangedEntries.map((entry) => {
+            if (entry.kind === "cybernetic") return (
+              <CyberneticWeaponCard
+                key={entry.cybernetic.id}
+                cyberneticName={entry.cybernetic.name}
+                weapon={entry.weapon}
+                strengthBonus={strengthBonus}
+              />
+            );
+            if (entry.kind === "archeotech") return (
+              <ArcheotechWeaponCard
+                key={entry.item.id}
+                item={entry.item}
+                strengthBonus={strengthBonus}
+              />
+            );
+            return (
+              <RangedCard
+                key={entry.weapon.id}
+                weapon={entry.weapon}
+                editable={editable}
+                onRemove={() => removeRanged(entry.index)}
+                onAddAttachment={(upgradeId) => addAttachmentToRanged(entry.weapon.id, upgradeId)}
+                onRemoveAttachment={(upgradeId) => removeAttachmentFromRanged(entry.weapon.id, upgradeId)}
+                onUpdateAmmoEntries={(entries) => updateRangedAmmoEntries(entry.weapon.id, entries)}
+                onUpdateQuantity={(qty) => updateRangedQuantity(entry.weapon.id, qty)}
+                grenades={grenades}
+                onUpdateGrenades={onUpdateGrenades}
+                archeotechGrenades={archeotechGrenadeItems}
+              />
+            );
+          })}
 
           {showCustomRanged && (
             <CustomRangedForm
@@ -536,22 +600,39 @@ export function WeaponsTab({
             )}
           </div>
 
-          {normalMeleeWeapons.length === 0 && !showCustomMelee && (
+          {allMeleeEntries.length === 0 && !showCustomMelee && (
             <p className="text-sm text-slate-500 italic">No melee weapons.</p>
           )}
 
-          {normalMeleeWeapons.map(({ weapon, index }) => (
-            <MeleeCard
-              key={weapon.id}
-              weapon={weapon}
-              editable={editable}
-              strengthBonus={strengthBonus}
-              onRemove={() => removeMelee(index)}
-              onAddAttachment={(upgradeId) => addAttachmentToMelee(weapon.id, upgradeId)}
-              onRemoveAttachment={(upgradeId) => removeAttachmentFromMelee(weapon.id, upgradeId)}
-              onUpdateQuantity={(qty) => updateMeleeQuantity(weapon.id, qty)}
-            />
-          ))}
+          {allMeleeEntries.map((entry) => {
+            if (entry.kind === "cybernetic") return (
+              <CyberneticWeaponCard
+                key={entry.cybernetic.id}
+                cyberneticName={entry.cybernetic.name}
+                weapon={entry.weapon}
+                strengthBonus={strengthBonus}
+              />
+            );
+            if (entry.kind === "archeotech") return (
+              <ArcheotechWeaponCard
+                key={entry.item.id}
+                item={entry.item}
+                strengthBonus={strengthBonus}
+              />
+            );
+            return (
+              <MeleeCard
+                key={entry.weapon.id}
+                weapon={entry.weapon}
+                editable={editable}
+                strengthBonus={strengthBonus}
+                onRemove={() => removeMelee(entry.index)}
+                onAddAttachment={(upgradeId) => addAttachmentToMelee(entry.weapon.id, upgradeId)}
+                onRemoveAttachment={(upgradeId) => removeAttachmentFromMelee(entry.weapon.id, upgradeId)}
+                onUpdateQuantity={(qty) => updateMeleeQuantity(entry.weapon.id, qty)}
+              />
+            );
+          })}
 
           {showCustomMelee && (
             <CustomMeleeForm
@@ -563,11 +644,11 @@ export function WeaponsTab({
 
       </div>
 
-      {/* ── GRENADES ─────────────────────────────────────────────────────── */}
+      {/* ── GRENADES & MINES ─────────────────────────────────────────────── */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className={uiSectionHeader}>
-            Grenades ({grenades.length})
+            Grenades & Mines ({allGrenadeEntries.length})
           </h3>
           {editable && (
             <button
@@ -579,20 +660,25 @@ export function WeaponsTab({
           )}
         </div>
 
-        {grenades.length === 0 && (
-          <p className="text-sm text-slate-500 italic">No grenades carried.</p>
+        {allGrenadeEntries.length === 0 && (
+          <p className="text-sm text-slate-500 italic">No grenades or mines carried.</p>
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {grenades.map((item) => (
-            <GrenadeCard
-              key={item.id}
-              item={item}
-              editable={editable}
-              onRemove={() => removeGrenade(item.id)}
-              onUpdateQty={(qty) => updateGrenadeQty(item.id, qty)}
-            />
-          ))}
+          {allGrenadeEntries.map((entry) => {
+            if (entry.kind === "archeotech") return (
+              <ArcheotechWeaponCard key={entry.item.id} item={entry.item} />
+            );
+            return (
+              <GrenadeCard
+                key={entry.item.id}
+                item={entry.item}
+                editable={editable}
+                onRemove={() => removeGrenade(entry.item.id)}
+                onUpdateQty={(qty) => updateGrenadeQty(entry.item.id, qty)}
+              />
+            );
+          })}
         </div>
       </section>
 
@@ -629,6 +715,7 @@ export function WeaponsTab({
               onUpdateQuantity={(qty) => updateRangedQuantity(weapon.id, qty)}
               grenades={grenades}
               onUpdateGrenades={onUpdateGrenades}
+              archeotechGrenades={archeotechGrenadeItems}
               allowAttachments={false}
             />
           ))}
@@ -677,30 +764,6 @@ export function WeaponsTab({
           ))}
         </div>
       </section>
-
-      {/* ── CYBERNETIC WEAPONS ───────────────────────────────────────────── */}
-      {cyberneticWeaponItems.length > 0 && (
-        <section className="space-y-3">
-          <div>
-            <h3 className={uiSectionHeader}>
-              Cybernetic Weapons
-            </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Granted by installed implants — managed in the Cybernetics tab.
-              Melee damage shown before Strength Bonus.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-            {cyberneticWeaponItems.map(({ cybernetic, weapon }) => (
-              <CyberneticWeaponCard
-                key={cybernetic.id}
-                cyberneticName={cybernetic.name}
-                weapon={weapon}
-              />
-            ))}
-          </div>
-        </section>
-      )}
 
       {/* ── Pickers ───────────────────────────────────────────────────────── */}
       {picker === "ranged" && (

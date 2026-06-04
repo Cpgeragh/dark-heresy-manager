@@ -12,7 +12,8 @@ import { sectionContainerClass } from "../../../ui/editableStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
 import { InfoModal } from "../../../components/InfoModal";
-import { StatChip, DamageTypeChip, SpecialRulesModal } from "./weaponShared";
+import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
+import { StatChip, DamageTypeChip, SpecialRulesContent } from "./weaponShared";
 
 // ─── Shield Picker ────────────────────────────────────────────────────────────
 
@@ -69,8 +70,11 @@ export function ShieldCard({
   editable: boolean;
   onRemove: () => void;
 }) {
-  const [showRules, setShowRules] = useState(false);
   const hasRules = !!(item.specialRules?.trim() && item.specialRules !== "—");
+  const ruleNamesInLookup = (item.specialRules ?? "")
+    .split(",")
+    .map((r) => r.trim().replace(/\s*\(.*?\)/, ""))
+    .filter((name) => Boolean(name) && Boolean(WEAPON_SPECIAL_RULES[name]));
 
   return (
     <div className={sectionContainerClass(editable) + " space-y-3"}>
@@ -82,21 +86,11 @@ export function ShieldCard({
             Shield{item.locations ? ` · ${item.locations}` : ""}
           </p>
         </div>
-        <div className="flex items-center gap-1.5 shrink-0">
-          {item.notes && (
-            <InfoModal
-              title={item.name}
-              content={
-                <p className="text-sm text-slate-300 leading-relaxed">{item.notes}</p>
-              }
-            />
-          )}
-          {editable && (
-            <button onClick={onRemove} className="text-xs text-red-400 hover:text-red-300">
-              Remove
-            </button>
-          )}
-        </div>
+        {editable && (
+          <button onClick={onRemove} className="text-xs text-red-400 hover:text-red-300 shrink-0">
+            Remove
+          </button>
+        )}
       </div>
 
       {/* Stats — AP chip in cyan to distinguish from weapon damage */}
@@ -115,19 +109,30 @@ export function ShieldCard({
         {item.pen && <StatChip label="Pen" value={item.pen} />}
       </div>
 
-      {/* Special rules */}
-      {hasRules && (
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-400 italic flex-1">{item.specialRules}</span>
-          <button
-            onClick={() => setShowRules(true)}
-            title="Explain special rules"
-            className="text-slate-500 hover:text-amber-400 text-sm transition"
-          >
-            ⓘ
-          </button>
+      {/* Qualities / Rules */}
+      <div className="space-y-1">
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Qualities</span>
+          <span className="text-xs text-slate-400 italic">{hasRules ? item.specialRules : "-"}</span>
+          {ruleNamesInLookup.length > 0 && (
+            <InfoModal
+              title={`${item.name} Qualities`}
+              content={<SpecialRulesContent rules={item.specialRules ?? ""} />}
+            />
+          )}
         </div>
-      )}
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Rules</span>
+          {item.notes ? (
+            <InfoModal
+              title={`${item.name} Rules`}
+              content={<p className="text-sm text-slate-300 leading-relaxed">{item.notes}</p>}
+            />
+          ) : (
+            <span className="text-xs text-slate-600 italic">-</span>
+          )}
+        </div>
+      </div>
 
       {/* Weight / Value / Rarity / Source */}
       <ItemMetaChips
@@ -139,12 +144,6 @@ export function ShieldCard({
         className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1"
       />
 
-      {showRules && item.specialRules && (
-        <SpecialRulesModal
-          rules={item.specialRules}
-          onClose={() => setShowRules(false)}
-        />
-      )}
     </div>
   );
 }
