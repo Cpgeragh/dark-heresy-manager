@@ -93,7 +93,7 @@ export function CustomAmmoForm({
       </p>
       <div className="grid grid-cols-2 gap-2">
         <div className="col-span-2">
-          <label className="text-xs text-slate-400">Name</label>
+          <label className="text-xs font-medium uppercase tracking-wide text-slate-100">Name</label>
           <input
             type="text"
             value={name}
@@ -103,7 +103,7 @@ export function CustomAmmoForm({
           />
         </div>
         <div className="col-span-2">
-          <label className="text-xs text-slate-400">
+          <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
             Compatible With <span className="text-slate-600">(optional)</span>
           </label>
           <input
@@ -115,7 +115,7 @@ export function CustomAmmoForm({
           />
         </div>
         <div className="col-span-2">
-          <label className="text-xs text-slate-400">Starting Amount</label>
+          <label className="text-xs font-medium uppercase tracking-wide text-slate-100">Starting Amount</label>
           <input
             type="number"
             min={0}
@@ -125,7 +125,7 @@ export function CustomAmmoForm({
           />
         </div>
         <div>
-          <label className="text-xs text-slate-400">
+          <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
             Weight <span className="text-slate-600">(optional)</span>
           </label>
           <input
@@ -137,7 +137,7 @@ export function CustomAmmoForm({
           />
         </div>
         <div>
-          <label className="text-xs text-slate-400">
+          <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
             Value <span className="text-slate-600">(optional)</span>
           </label>
           <input
@@ -149,7 +149,7 @@ export function CustomAmmoForm({
           />
         </div>
         <div className="col-span-2">
-          <label className="text-xs text-slate-400">
+          <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
             Rarity <span className="text-slate-600">(optional)</span>
           </label>
           <input

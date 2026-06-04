@@ -7,6 +7,7 @@ import { CyberneticInfoModal } from "./CyberneticInfoModal";
 import { ImplantPicker } from "./ImplantPicker";
 import { ImplantRow } from "./ImplantRow";
 import { nextCraftsmanship } from "./cyberneticsHelpers";
+import { uiSectionHeader } from "../../../ui/editableStyles";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -67,7 +68,7 @@ export function CyberneticsTab({ cybernetics, editable, onUpdate }: CyberneticsT
     <div className="space-y-6">
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+          <h3 className={uiSectionHeader}>
             Installed Implants ({cybernetics.length})
           </h3>
           {editable && (

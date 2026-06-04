@@ -1,10 +1,10 @@
 // src/pages/characterSheet/GearTab/ConsumableRow.tsx
 
-import { useState } from "react";
 import type { ConsumableItem } from "../../../types/Character";
 import { sectionContainerClass } from "../../../ui/editableStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
+import { InfoModal } from "../../../components/InfoModal";
 
 interface Props {
   item: ConsumableItem;
@@ -14,7 +14,6 @@ interface Props {
 }
 
 export function ConsumableRow({ item, editable, onUpdateQty, onRemove }: Props) {
-  const [expanded, setExpanded] = useState(false);
   const hasDesc = !!(item.description?.trim());
 
   return (
@@ -34,20 +33,12 @@ export function ConsumableRow({ item, editable, onUpdateQty, onRemove }: Props) 
           <div className="flex items-center gap-2">
             <p className="text-sm font-medium text-slate-200">{item.name}</p>
             {hasDesc && (
-              <button
-                onClick={() => setExpanded((v) => !v)}
-                className="text-slate-500 hover:text-slate-300 text-xs transition"
-              >
-                {expanded ? "▲" : "▼"}
-              </button>
+              <InfoModal
+                title={item.name}
+                content={<p className="text-sm text-slate-300 leading-relaxed">{item.description}</p>}
+              />
             )}
           </div>
-          {hasDesc && expanded && (
-            <p className="text-xs text-slate-400 mt-1 leading-relaxed">{item.description}</p>
-          )}
-          {hasDesc && !expanded && (
-            <p className="text-xs text-slate-500 mt-0.5 truncate">{item.description}</p>
-          )}
           <ItemMetaChips
             weight={item.weight ?? "—"}
             value={item.value}

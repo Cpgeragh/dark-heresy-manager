@@ -9,6 +9,7 @@ import { ConsumablePicker } from "./ConsumablePicker";
 import { ItemRow } from "./ItemRow";
 import { GearPicker } from "./GearPicker";
 import { CustomItemForm } from "./CustomItemForm";
+import { uiSectionHeader } from "../../../ui/editableStyles";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -122,7 +123,7 @@ export function GearTab({ gear, consumables, editable, onUpdate, onUpdateConsuma
       {/* CONSUMABLES ──────────────────────────────────────────────────────── */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+          <h3 className={uiSectionHeader}>
             Consumables ({consumables.length})
           </h3>
           {editable && (
@@ -153,7 +154,7 @@ export function GearTab({ gear, consumables, editable, onUpdate, onUpdateConsuma
       {/* GEAR ─────────────────────────────────────────────────────────────── */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+          <h3 className={uiSectionHeader}>
             Carried Items ({gear.length})
           </h3>
           {editable && !showCustomForm && (

@@ -63,7 +63,7 @@ export function BackgroundTab({
 
       {/* IDENTITY */}
       <div>
-        <p className={`${uiSectionHeader} mb-2`}>Identity</p>
+        <p className={`${uiSectionHeader} mb-3`}>Identity</p>
         <section className={uiSection + " space-y-3"}>
           <FormField
             label="Character Name"
@@ -84,7 +84,7 @@ export function BackgroundTab({
 
       {/* CAREER */}
       <div>
-        <p className={`${uiSectionHeader} mb-2`}>Career</p>
+        <p className={`${uiSectionHeader} mb-3`}>Career</p>
         <section className={uiSection}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <FormField
@@ -107,7 +107,7 @@ export function BackgroundTab({
 
       {/* DIVINATION */}
       <div>
-        <p className={`${uiSectionHeader} mb-2`}>Divination</p>
+        <p className={`${uiSectionHeader} mb-3`}>Divination</p>
         <section className={uiSection}>
           <FormField
             label="Divination"
@@ -121,7 +121,7 @@ export function BackgroundTab({
 
       {/* APPEARANCE */}
       <div>
-        <p className={`${uiSectionHeader} mb-2`}>Appearance</p>
+        <p className={`${uiSectionHeader} mb-3`}>Appearance</p>
         <section className={uiSection}>
           <FormField
             label="Description"
@@ -137,7 +137,7 @@ export function BackgroundTab({
 
       {/* HOMEWORLD */}
       <div>
-        <p className={`${uiSectionHeader} mb-2`}>Homeworld</p>
+        <p className={`${uiSectionHeader} mb-3`}>Homeworld</p>
         <section className={uiSection + " space-y-3"}>
 
         <div className="flex flex-col gap-1">

@@ -6,6 +6,7 @@ import type { DrugRef } from "../../../data/reference/drugsReference";
 import { DrugInfoModal } from "./DrugInfoModal";
 import { DrugPicker } from "./DrugPicker";
 import { DrugRow } from "./DrugRow";
+import { uiSectionHeader } from "../../../ui/editableStyles";
 
 interface DrugsTabProps {
   drugs: DrugItem[];
@@ -68,7 +69,7 @@ export function DrugsTab({ drugs, editable, onUpdate }: DrugsTabProps) {
       {/* Carried drugs */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+          <h3 className={uiSectionHeader}>
             Carried ({drugs.length})
           </h3>
           {editable && (

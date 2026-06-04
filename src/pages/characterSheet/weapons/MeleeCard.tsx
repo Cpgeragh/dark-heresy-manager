@@ -124,7 +124,7 @@ export function CustomMeleeForm({
       <div className="grid grid-cols-2 gap-2">
         {(["name", "class", "damage", "pen", "specialRules"] as const).map((k) => (
           <div key={k} className={k === "name" || k === "specialRules" ? "col-span-2" : ""}>
-            <label className="text-xs text-slate-400 capitalize">{k}</label>
+            <label className="text-xs font-medium uppercase tracking-wide text-slate-100">{k}</label>
             <input
               type="text"
               value={fields[k] ?? ""}

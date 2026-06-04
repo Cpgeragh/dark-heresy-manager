@@ -11,6 +11,7 @@ import {
 import {
   editableInputClass,
   sectionContainerClass,
+  uiSectionHeader,
 } from "../../ui/editableStyles";
 import { PowerCard } from "./components/PowerCard";
 import { PickerModal } from "../../ui/PickerModal";
@@ -199,8 +200,8 @@ export function PsychicTab({ psychic, editable, onUpdate }: PsychicTabProps) {
       <div className={sectionContainerClass(editable) + " space-y-3"}>
 
         {/* Psy Rating */}
-        <label className="flex flex-col gap-0.5 text-xs text-slate-400">
-          Psy Rating
+        <label className="flex flex-col gap-0.5">
+          <span className="text-xs font-medium uppercase tracking-wide text-slate-100">Psy Rating</span>
           <input
             disabled={!editable}
             type="number"
@@ -215,7 +216,7 @@ export function PsychicTab({ psychic, editable, onUpdate }: PsychicTabProps) {
 
         {/* Disciplines — toggle chips, one per major discipline */}
         <div>
-          <p className="text-xs text-slate-400 mb-1.5">Disciplines</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-100 mb-1.5">Disciplines</p>
           <div className="flex flex-wrap gap-1.5">
             {PSYCHIC_DISCIPLINES.filter((d) => d !== "Minor").map((d) => {
               const active = (psychic.disciplines ?? []).includes(d);
@@ -246,7 +247,7 @@ export function PsychicTab({ psychic, editable, onUpdate }: PsychicTabProps) {
       {/* MINOR POWERS ────────────────────────────────────────────────────── */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Minor Powers</h3>
+          <h3 className={uiSectionHeader}>Minor Powers</h3>
           {editable && (
             <button
               onClick={openPickerForMinor}
@@ -278,7 +279,7 @@ export function PsychicTab({ psychic, editable, onUpdate }: PsychicTabProps) {
       {/* MAJOR POWERS ────────────────────────────────────────────────────── */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Major Powers</h3>
+          <h3 className={uiSectionHeader}>Major Powers</h3>
           {editable && (
             <button
               onClick={openPickerForMajor}

@@ -60,8 +60,8 @@ export function sectionContainerClass(_isEditable: boolean) {
 // ─── Shared UI tokens ─────────────────────────────────────────────────────────
 // Use these instead of hardcoding the same Tailwind strings across components.
 
-/** Section header label — sits outside its box, clearly readable. */
-export const uiSectionHeader = "text-sm font-semibold text-slate-100 uppercase tracking-wide";
+/** Section header label — amber left-border accent, sits outside or at the top of its box. */
+export const uiSectionHeader = "border-l-2 border-amber-500 pl-2 text-xs font-semibold uppercase tracking-widest text-amber-400";
 
 /** Standard section card — bright border, semi-transparent background. */
 export const uiSection = "rounded-lg border border-slate-500 bg-slate-900/60 p-3";

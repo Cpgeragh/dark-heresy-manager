@@ -54,9 +54,9 @@ export function FormField({
   return (
     <label
       htmlFor={inputId}
-      className={`flex flex-col gap-0.5 text-sm text-slate-100 ${className}`}
+      className={`flex flex-col gap-0.5 ${className}`}
     >
-      {label}
+      <span className="text-xs font-medium uppercase tracking-wide text-slate-100">{label}</span>
 
       {type === "textarea" ? (
         <textarea

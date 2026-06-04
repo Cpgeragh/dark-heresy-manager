@@ -6,6 +6,7 @@ import type { ArcheotechRef } from "../../../data/reference/archeotechReference"
 import { ArcheotechPickerModal } from "./ArcheotechPickerModal";
 import { ItemCard } from "./ItemCard";
 import { CustomItemForm } from "./CustomItemForm";
+import { uiSectionHeader } from "../../../ui/editableStyles";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -69,7 +70,7 @@ export function ArcheotechTab({ archeotech, editable, onUpdate }: ArcheotechTabP
       {/* ── INVENTORY ─────────────────────────────────────────────────────── */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+          <h3 className={uiSectionHeader}>
             Inventory ({archeotech.length})
           </h3>
           {editable && !showCustomForm && (

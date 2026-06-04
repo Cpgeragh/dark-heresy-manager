@@ -11,6 +11,7 @@ import { PieceNotesModal } from "./PieceNotesModal";
 import { CustomPieceForm } from "./CustomPieceForm";
 import { ForceFieldRow } from "./ForceFieldRow";
 import { PieceRow } from "./PieceRow";
+import { uiSectionHeader, uiSection } from "../../../ui/editableStyles";
 
 interface ArmourTabProps {
   armour: WornArmourPiece[];
@@ -89,49 +90,51 @@ export function ArmourTab({
     <div className="space-y-6">
       {/* LOCATION SUMMARY */}
       <section>
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400 mb-2">
+        <h3 className={`${uiSectionHeader} mb-2`}>
           Location Summary
         </h3>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm border-collapse">
-            <thead>
-              <tr className="text-xs text-slate-500 uppercase">
-                <th className="text-left py-1.5 pr-4 font-medium">Location</th>
-                <th className="text-center py-1.5 px-3 font-medium">AP</th>
-                <th className="text-center py-1.5 px-3 font-medium">TB</th>
-                <th className="text-center py-1.5 px-3 font-medium">Bionic</th>
-                <th className="text-center py-1.5 px-3 font-medium">Total</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800">
-              {LOCATION_ORDER.map((loc) => {
-                const ap     = wornApAt(regularArmour, loc);
-                const bionic = bionicBonusAt(loc, cybernetics);
-                const total  = ap + toughnessBonus + bionic;
-                return (
-                  <tr key={loc} className="hover:bg-slate-800/40 transition">
-                    <td className="py-2 pr-4 text-slate-100">{LOCATION_LABELS[loc]}</td>
-                    <td className="py-2 px-3 text-center font-mono text-slate-200">{ap}</td>
-                    <td className="py-2 px-3 text-center font-mono text-slate-400">{toughnessBonus}</td>
-                    <td className={`py-2 px-3 text-center font-mono ${bionic > 0 ? "text-cyan-400" : "text-slate-700"}`}>
-                      {bionic > 0 ? `+${bionic}` : "—"}
-                    </td>
-                    <td className="py-2 px-3 text-center font-mono font-semibold text-amber-300">{total}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <div className={uiSection}>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="text-xs text-slate-500 uppercase">
+                  <th className="text-left py-1.5 pr-4 font-medium">Location</th>
+                  <th className="text-center py-1.5 px-3 font-medium">AP</th>
+                  <th className="text-center py-1.5 px-3 font-medium">TB</th>
+                  <th className="text-center py-1.5 px-3 font-medium">Bionic</th>
+                  <th className="text-center py-1.5 px-3 font-medium">Total</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800">
+                {LOCATION_ORDER.map((loc) => {
+                  const ap     = wornApAt(regularArmour, loc);
+                  const bionic = bionicBonusAt(loc, cybernetics);
+                  const total  = ap + toughnessBonus + bionic;
+                  return (
+                    <tr key={loc} className="hover:bg-slate-800/40 transition">
+                      <td className="py-2 pr-4 text-slate-100">{LOCATION_LABELS[loc]}</td>
+                      <td className="py-2 px-3 text-center font-mono text-slate-200">{ap}</td>
+                      <td className="py-2 px-3 text-center font-mono text-slate-400">{toughnessBonus}</td>
+                      <td className={`py-2 px-3 text-center font-mono ${bionic > 0 ? "text-cyan-400" : "text-slate-700"}`}>
+                        {bionic > 0 ? `+${bionic}` : "—"}
+                      </td>
+                      <td className="py-2 px-3 text-center font-mono font-semibold text-amber-300">{total}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs text-slate-600 mt-2">
+            Total = Armour Points (worn only) + Toughness Bonus + Bionic (+2 per installed bionic limb)
+          </p>
         </div>
-        <p className="text-xs text-slate-600 mt-1">
-          Total = Armour Points (worn only) + Toughness Bonus + Bionic (+2 per installed bionic limb)
-        </p>
       </section>
 
       {/* WORN PIECES */}
       <section className="space-y-2">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+          <h3 className={uiSectionHeader}>
             Worn ({worn.length})
           </h3>
           {editable && !showCustomForm && (
@@ -152,7 +155,7 @@ export function ArmourTab({
       {/* STOWED PIECES */}
       <section className="space-y-2">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+          <h3 className={uiSectionHeader}>
             Stowed ({stowed.length})
           </h3>
           {editable && !showCustomForm && (
@@ -173,7 +176,7 @@ export function ArmourTab({
       {/* FORCE FIELDS */}
       <section className="space-y-2">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+          <h3 className={uiSectionHeader}>
             Force Fields ({forceFields.length})
           </h3>
           {editable && (

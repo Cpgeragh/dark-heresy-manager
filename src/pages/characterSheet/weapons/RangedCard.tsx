@@ -114,7 +114,7 @@ export function CustomRangedForm({
           ["name", "class", "range", "rof", "damage", "pen", "clip", "rld", "weight", "specialRules"] as const
         ).map((k) => (
           <div key={k} className={k === "name" || k === "specialRules" ? "col-span-2" : ""}>
-            <label className="text-xs text-slate-400 capitalize">
+            <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
               {k === "rld" ? "Reload" : k}
             </label>
             <input

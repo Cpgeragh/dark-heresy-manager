@@ -79,7 +79,7 @@ export function ArcheotechPickerModal({ onSelect, onClose }: Props) {
 
             {/* Cost */}
             <div className="space-y-1">
-              <label className="text-xs text-slate-400">
+              <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
                 Cost (Thrones) <span className="text-red-400">*</span>
               </label>
               <input
@@ -99,7 +99,7 @@ export function ArcheotechPickerModal({ onSelect, onClose }: Props) {
 
             {/* Rarity */}
             <div className="space-y-1">
-              <label className="text-xs text-slate-400">
+              <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
                 Rarity <span className="text-red-400">*</span>
               </label>
               <select
