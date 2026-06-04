@@ -143,7 +143,7 @@ export function TalentPickerModal({
                       {item.name}
                     </span>
                     {(TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]) && (
-                      <span onClick={(e) => e.stopPropagation()}>
+                      <span className="inline-flex items-center leading-[0]" onClick={(e) => e.stopPropagation()}>
                         <InfoModal
                           title={item.name}
                           content={TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]}

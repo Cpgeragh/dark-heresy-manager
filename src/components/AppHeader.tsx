@@ -21,22 +21,19 @@ export function AppHeader({
   const [kebabOpen, setKebabOpen] = useState(false);
 
   return (
-    <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur">
-      <div className="max-w-5xl mx-auto px-4 py-2 flex items-center gap-3">
+    <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-900/80 backdrop-blur">
+      <div className="max-w-5xl mx-auto px-4 py-2 flex items-center relative">
 
         {/* Icon column — Hub link on character sheet, plain icon elsewhere */}
         {backHref ? (
           <Link
             to={backHref}
-            className="flex flex-col items-center shrink-0 gap-0.5"
+            className="shrink-0 h-8 w-8 rounded-lg bg-slate-800 border border-slate-600 flex items-center justify-center hover:bg-slate-700 transition"
             aria-label="Campaign Hub"
           >
-            <img
-              src="/icon-192.png"
-              alt=""
-              className="h-8 w-8 rounded-lg object-cover shadow-[0_0_8px_rgba(251,191,36,0.35)]"
-            />
-            <span className="text-xs text-slate-100 leading-none">Hub</span>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-slate-300">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+            </svg>
           </Link>
         ) : (
           <img
@@ -46,13 +43,16 @@ export function AppHeader({
           />
         )}
 
-        {/* Text + actions */}
-        <div className="flex items-center justify-between flex-1 min-w-0 gap-2">
-          <span className={`font-semibold text-slate-100 truncate ${backHref ? "text-base" : "text-sm"}`}>
+        {/* App name — centred */}
+        <div className="absolute inset-x-0 flex items-center justify-center gap-2 pointer-events-none">
+          <img src="/icon-192.png" alt="" className="h-6 w-6 rounded-lg object-cover" />
+          <span className={`font-semibold text-slate-100 ${backHref ? "text-base" : "text-sm"}`}>
             Dark Heresy Manager
           </span>
+        </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+        {/* Nav + kebab */}
+        <div className="ml-auto flex items-center gap-2 shrink-0">
             {isDM && (
               <NavLinkButton
                 to="/select"
@@ -103,7 +103,6 @@ export function AppHeader({
               </div>
             )}
           </div>
-        </div>
 
       </div>
     </header>

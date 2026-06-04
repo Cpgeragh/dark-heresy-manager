@@ -95,6 +95,13 @@ export default function CharacterSheet() {
   });
 
   const [activeTab, setActiveTab] = useState<TabId>("stats");
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setShowScrollTop(window.scrollY > 200);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const { setBackHref, clearBackHref, setKebabContent, clearKebabContent } = useHeaderExtensionSetters();
 
@@ -314,15 +321,13 @@ export default function CharacterSheet() {
         </div>
       )}
 
-      {/* SECTION DRAWER */}
-      <SectionDrawer
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        isDM={isDM}
-      />
-
-      {/* PAGE TITLE */}
-      <h2 className="text-xl font-semibold text-slate-100 mb-3">{TAB_TITLES[activeTab]}</h2>
+      {/* NAV BAR */}
+      <div className="relative flex items-center mb-4 py-1">
+        <SectionDrawer activeTab={activeTab} onTabChange={setActiveTab} isDM={isDM} />
+        <span className="absolute inset-x-0 text-center font-semibold text-slate-100 text-lg pointer-events-none">
+          {TAB_TITLES[activeTab]}
+        </span>
+      </div>
 
       {/* CONTENT CONTAINER */}
       <div
@@ -508,6 +513,18 @@ export default function CharacterSheet() {
           )}
         </ErrorBoundary>
       </div>
+
+      {showScrollTop && (
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          aria-label="Scroll to top"
+          className="fixed bottom-6 right-4 z-50 w-9 h-9 rounded bg-slate-800/85 border border-slate-600 flex items-center justify-center text-slate-300 hover:bg-slate-700/90 transition shadow-lg"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+          </svg>
+        </button>
+      )}
 
     </div>
   );
