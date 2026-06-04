@@ -121,6 +121,7 @@ export interface RangedWeapon {
   ammoEntries?: WeaponAmmoEntry[]; // ammo types carried; one marked loaded
   quantity?: number;      // for thrown weapons (bolas, throwing stars) — how many carried
   description?: string;   // rules text copied from reference data when needed
+  equipped?: boolean;     // true = carried on body, shown expanded and pinned to top
 }
 
 export interface MeleeWeapon {
@@ -138,6 +139,7 @@ export interface MeleeWeapon {
   custom?: boolean;
   attachments?: string[]; // WeaponUpgradeRef.id values for fitted upgrades
   quantity?: number;      // for thrown melee weapons (knives, spears) — how many carried
+  equipped?: boolean;     // true = carried on body, shown expanded and pinned to top
 }
 
 export interface ShieldItem {
@@ -157,6 +159,7 @@ export interface ShieldItem {
   rarity?: string;
   source?: string;
   custom?: boolean;
+  equipped?: boolean;   // true = currently active shield
 }
 
 /**
@@ -246,6 +249,7 @@ export interface ArcheotechItem {
   value?: string;
   rarity?: string;
   source?: string;
+  equipped?: boolean;     // true = counts toward slot budget, shown expanded and pinned to top
 }
 
 /**
@@ -303,6 +307,7 @@ export interface GrenadeItem {
   quantity: number;
   /** "Grenade" or "Mine" — used to exclude mines from launcher panels */
   type?: string;
+  equipped?: boolean;     // true = up to 3 shown in expanded card, remainder in stowed card
   class?: string;
   damage?: string;
   pen?: string;

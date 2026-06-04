@@ -18,6 +18,8 @@ export interface WeaponUpgradeRef {
   description: string;
   /** What weapon types this upgrade can be applied to */
   applicableTo: string;
+  /** Creation components are reference data only and are not fitted as normal attachments. */
+  isCreationComponent?: boolean;
 }
 
 // ─── Reference Data ──────────────────────────────────────────────────────────
@@ -157,6 +159,24 @@ export const WEAPON_UPGRADE_REFERENCE: WeaponUpgradeRef[] = [
       "long and extreme range, provided the shooter takes a Full Action to aim. " +
       "Counts as a sight — a weapon may only have one sight fitted.",
     applicableTo: "Any Basic Las, Solid Projectile, Bolt, Primitive or Plasma weapon.",
+  },
+
+  {
+    id: "lw-integrated-weapon-components",
+    name: "Integrated Weapon Components",
+    source: SkillSource.LW,
+    weightModifier: "+0.5 kg",
+    value: "200 Thrones",
+    rarity: "Extremely Rare",
+    description:
+      "Used to create new Integrated Weapons; this is creation component data, not a normal fitted attachment. " +
+      "Integrated weapons are linked to a Potentia Coil, have unlimited ammunition, do not need to reload unless otherwise noted, and do not Jam; a Jam instead gives the user 1 Fatigue. " +
+      "Las weapons gain the normal integrated benefits. Integrated Plasma and Melta weapons double Clip Size while connected; Plasma weapons can still Overheat but lose Recharge while connected. " +
+      "Integrated Solid Projectile and Launcher weapons instead gain Reliable and Storm. " +
+      "Only Chain, Shock, or Power melee weapons can be integrated: Chain gains Razor Sharp, Shock imposes an additional -30 penalty on Toughness Tests to resist Stunning, and Power gains +2 Damage and +2 Penetration. Primitive weapons cannot be integrated. " +
+      "Creating one follows normal weapon upgrade rules, but requires trained Forbidden Lore (Adeptus Mechanicus); components are only available on Forge Worlds.",
+    applicableTo: "Creation of Integrated Weapons only; not selectable as a normal weapon attachment.",
+    isCreationComponent: true,
   },
 
 ];

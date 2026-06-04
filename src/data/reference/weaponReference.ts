@@ -86,6 +86,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 30,
     reload: "Full",
     specialRules: "Reliable",
+    description:
+      "Light, compact, and reliable las weapon common throughout the Imperium. Designs range from ornate heirlooms to brutally simple underhive weapons.",
     weight: "1.5 kg",
     value: "50 Thrones",
     rarity: "Common",
@@ -104,6 +106,9 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 40,
     reload: "Full",
     specialRules: "Reliable",
+    description:
+      "Cut-down lasgun with fewer shots and shorter range, but easier to carry and aim. " +
+      "Can be fired one-handed at only a -10 penalty instead of the normal -20 for Basic weapons.",
     weight: "3 kg",
     value: "75 Thrones",
     rarity: "Common",
@@ -122,6 +127,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 60,
     reload: "Full",
     specialRules: "Reliable",
+    description:
+      "Robust and dependable standard las weapon found on almost every Imperial world, favoured by the Emperor's forces and many enemies alike.",
     weight: "4 kg",
     value: "75 Thrones",
     rarity: "Common",
@@ -140,6 +147,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 40,
     reload: "Full",
     specialRules: "Accurate, Reliable",
+    description:
+      "Specially modified lasgun built for snipers, with extra range and accuracy. Its long barrel can make it unwieldy in close quarters.",
     weight: "4.5 kg",
     value: "100 Thrones",
     rarity: "Scarce",
@@ -158,6 +167,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 5,
     reload: "2 Full",
     specialRules: "—",
+    description:
+      "Heavy battlefield lascannon with separate power packs, normally crewed by two or more people and capable of punching through very thick armour at long range.",
     weight: "55 kg",
     value: "5,000 Thrones",
     rarity: "Very Rare",
@@ -178,6 +189,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 18,
     reload: "Full",
     specialRules: "—",
+    description: "Compact rapid-firing solid projectile pistol, popular with gangers, outlaws, and other close-range fighters.",
     weight: "2.5 kg",
     value: "75 Thrones",
     rarity: "Common",
@@ -196,6 +208,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 6,
     reload: "2 Full",
     specialRules: "Reliable",
+    description: "Ancient, reliable revolver design often carried as a dependable backup weapon.",
     weight: "1 kg",
     value: "40 Thrones",
     rarity: "Plentiful",
@@ -214,6 +227,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 9,
     reload: "Full",
     specialRules: "—",
+    description:
+      "Common automatic variant of the stub revolver with better rate of fire and clip capacity, but less reliability.",
     weight: "1.5 kg",
     value: "50 Thrones",
     rarity: "Plentiful",
@@ -232,6 +247,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 5,
     reload: "2 Full",
     specialRules: "—",
+    description:
+      "Oversized stub revolver variant firing huge rounds with ferocious recoil. If not fired two-handed, attacks suffer a -10 Ballistic Skill penalty.",
     weight: "3 kg",
     value: "65 Thrones",
     rarity: "Average",
@@ -250,6 +267,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 30,
     reload: "Full",
     specialRules: "—",
+    description:
+      "Cheap, rugged, easily manufactured solid projectile weapon common across the Imperium, especially in rougher regions.",
     weight: "3.5 kg",
     value: "100 Thrones",
     rarity: "Average",
@@ -268,6 +287,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 5,
     reload: "Full",
     specialRules: "Accurate",
+    description:
+      "Accurate long gun used by frontier hunters and wealthy sportsmen; in trained hands it can bring down prey at extreme range.",
     weight: "5 kg",
     value: "100 Thrones",
     rarity: "Scarce",
@@ -286,6 +307,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 2,
     reload: "2 Full",
     specialRules: "Scatter, Reliable",
+    description:
+      "Common short-ranged weapon favoured for urban and shipboard fighting, where its stopping power is most effective.",
     weight: "5 kg",
     value: "60 Thrones",
     rarity: "Common",
@@ -304,6 +327,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 8,
     reload: "2 Full",
     specialRules: "Scatter",
+    description:
+      "Enforcer-favoured shotgun with the strengths of a double-barrelled shotgun and greater clip capacity; its chambering sound is famously intimidating.",
     weight: "5 kg",
     value: "75 Thrones",
     rarity: "Average",
@@ -322,6 +347,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 18,
     reload: "Full",
     specialRules: "Scatter",
+    description:
+      "Automatic drum-fed shotgun built for warfare, combining short-range destructive power with a loud intimidating rate of fire.",
     weight: "6.5 kg",
     value: "150 Thrones",
     rarity: "Scarce",
@@ -340,6 +367,9 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 200,
     reload: "2 Full",
     specialRules: "—",
+    description:
+      "Support weapon popular on lower-tech worlds, with outlaws, and with hive gangers. " +
+      "May use an ammunition drum instead of belt feed: Clip 40, cost +100 Thrones, reload reduced to 1 Full Action.",
     weight: "35 kg",
     value: "750 Thrones",
     rarity: "Scarce",
@@ -360,6 +390,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 8,
     reload: "Full",
     specialRules: "—",
+    description:
+      "High-status Imperial sidearm firing destructive bolt shells. Expensive to maintain and feed, but feared for its battlefield power.",
     weight: "3.5 kg",
     value: "250 Thrones",
     rarity: "Rare",
@@ -378,6 +410,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 24,
     reload: "Full",
     specialRules: "—",
+    description:
+      "Fires distinctive self-propelled explosive bolt rounds, known for their roar on discharge and violent detonation on impact.",
     weight: "7 kg",
     value: "500 Thrones",
     rarity: "Very Rare",
@@ -396,6 +430,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 60,
     reload: "2 Full",
     specialRules: "—",
+    description:
+      "Heavy support version of the boltgun using larger bolt shells with more propellant, giving greater distance and stopping power against infantry and light vehicles.",
     weight: "40 kg",
     value: "2,000 Thrones",
     rarity: "Very Rare",
@@ -416,6 +452,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 3,
     reload: "Full",
     specialRules: "—",
+    description:
+      "Exceptionally rare and expensive melta pistol; possession is a mark of status among powerful and influential Imperial servants.",
     weight: "2.5 kg",
     value: "7,500 Thrones",
     rarity: "Very Rare",
@@ -434,6 +472,9 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 5,
     reload: "2 Full",
     specialRules: "—",
+    description:
+      "Common melta weapon prized for close-range armour destruction and breaching. " +
+      "May use a backpack and feed line instead of attached canisters, doubling Clip Size, adding 6 kg, and increasing cost by 100 Thrones.",
     weight: "8 kg",
     value: "4,000 Thrones",
     rarity: "Rare",
@@ -454,6 +495,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 10,
     reload: "4 Full",
     specialRules: "Recharge, Overheats",
+    description:
+      "Extremely dangerous pistol firing superheated plasma; capable of dropping almost any foe at close range but prone to overheating.",
     weight: "4 kg",
     value: "4,000 Thrones",
     rarity: "Very Rare",
@@ -472,6 +515,9 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 20,
     reload: "8 Full",
     specialRules: "Recharge, Overheats",
+    description:
+      "Rare and ancient Imperial plasma weapon, still deadly after centuries of service. " +
+      "May use a backpack and feed line instead of plasma flasks, doubling Clip Size, adding 6 kg, and increasing cost by 100 Thrones.",
     weight: "11 kg",
     value: "3,000 Thrones",
     rarity: "Very Rare",
@@ -492,6 +538,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 2,
     reload: "2 Full",
     specialRules: "Flame",
+    description:
+      "Pistol-sized flame weapon for personal close combat, where its short range and poor precision are less of a drawback.",
     weight: "3.5 kg",
     value: "200 Thrones",
     rarity: "Rare",
@@ -510,6 +558,9 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 3,
     reload: "2 Full",
     specialRules: "Flame",
+    description:
+      "Projects burning promethium in a cone, ideal for enemies in cover or confined spaces. " +
+      "May use a backpack fuel hose instead of an underslung canister, doubling Clip Size, adding 6 kg, and increasing cost by 100 Thrones.",
     weight: "6 kg",
     value: "300 Thrones",
     rarity: "Scarce",
@@ -530,6 +581,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 1,
     reload: "—",
     specialRules: "Primitive, Snare, Inaccurate",
+    description:
+      "Usually non-lethal thrown entangling weapon used by bounty hunters and law enforcement to wrap targets in weighted cords or wire.",
     weight: "1.5 kg",
     value: "10 Thrones",
     rarity: "Average",
@@ -547,6 +600,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 1,
     reload: "Full",
     specialRules: "Primitive",
+    description:
+      "Compact pistol-grip crossbow with short range, silent operation, and easy concealment, favoured by assassins.",
     weight: "1 kg",
     value: "200 Thrones",
     rarity: "Rare",
@@ -565,6 +620,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 1,
     reload: "3 Full",
     specialRules: "Primitive, Unreliable, Inaccurate",
+    description:
+      "Primitive blackpowder pistol, ranging from noble-crafted duelling pieces to crude underhive pipe-and-powder weapons.",
     weight: "4 kg",
     value: "10 Thrones",
     rarity: "Common",
@@ -583,6 +640,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 1,
     reload: "5 Full",
     specialRules: "Primitive, Unreliable, Inaccurate",
+    description:
+      "Crude blackpowder longarm that fires once before reloading, is prone to failure, and is deadly mainly against unarmoured foes.",
     weight: "7 kg",
     value: "30 Thrones",
     rarity: "Common",
@@ -601,6 +660,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 1,
     reload: "Half",
     specialRules: "Primitive, Reliable",
+    description:
+      "Ancient silent weapon still used across the galaxy, especially by assassins and gangers even on high-tech worlds.",
     weight: "2 kg",
     value: "10 Thrones",
     rarity: "Common",
@@ -619,6 +680,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 1,
     reload: "Full",
     specialRules: "Primitive",
+    description:
+      "Simple but difficult-to-master projectile sling. When used to throw grenades, use the grenade's effects for Damage but keep the sling's Range.",
     weight: "0.5 kg",
     value: "10 Thrones",
     rarity: "Plentiful",
@@ -635,6 +698,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 1,
     reload: "2 Full",
     specialRules: "Primitive",
+    description:
+      "Mechanical bow weapon, less common than bows but equally deadly.",
     weight: "3 kg",
     value: "10 Thrones",
     rarity: "Common",
@@ -653,6 +718,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 1,
     reload: "—",
     specialRules: "Primitive",
+    description:
+      "Carefully crafted small thrown blade or star designed purely for throwing and capable of inflicting serious wounds.",
     weight: "0.5 kg",
     value: "5 Thrones",
     rarity: "Plentiful",
@@ -672,6 +739,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 6,
     reload: "Full",
     specialRules: "—",
+    description:
+      "Uses compressed gas to launch grenades in high arcs for indirect fire or directly against visible foes. Damage, Penetration, and qualities are determined by the grenade fired.",
     weight: "9 kg",
     value: "500 Thrones",
     rarity: "Scarce",
@@ -689,6 +758,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 1,
     reload: "Full",
     specialRules: "—",
+    description:
+      "More powerful launcher than a standard grenade launcher, capable of accurately striking targets hundreds of metres away. Damage, Penetration, and qualities are determined by the ammunition fired.",
     weight: "15 kg",
     value: "1,200 Thrones",
     rarity: "Rare",
@@ -708,6 +779,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 6,
     reload: "Full",
     specialRules: "Accurate, Toxic",
+    description:
+      "Silent assassin weapon using a low-power laser to fire toxin-coated crystalline needles. Wounded enemies are quickly paralysed or killed.",
     weight: "1.5 kg",
     value: "1,250 Thrones",
     rarity: "Very Rare",
@@ -726,6 +799,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 1,
     reload: "Full",
     specialRules: "Snare",
+    description:
+      "Fires expanding sticky filaments. In addition to Snare, each failed escape Test adds cumulative -10 to future escape Tests; beyond -30, each further failed Test deals 1d5+1 Damage. Webbing breaks down after 1d10 rounds.",
     weight: "3.5 kg",
     value: "1,200 Thrones",
     rarity: "Rare",
@@ -744,6 +819,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 6,
     reload: "2 Full",
     specialRules: "Accurate, Toxic",
+    description:
+      "Sniper needle weapon combining range, stealth, and toxins, but with poor effectiveness against heavily armoured targets.",
     weight: "2 kg",
     value: "1,000 Thrones",
     rarity: "Very Rare",
@@ -762,6 +839,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 1,
     reload: "Full",
     specialRules: "Snare",
+    description:
+      "Larger web weapon used to subdue crowds and lawbreakers. Its webbing breaks down and flakes away after 1d5 hours.",
     weight: "8 kg",
     value: "750 Thrones",
     rarity: "Rare",
@@ -782,6 +861,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 11,
     reload: "Full",
     specialRules: "Reliable",
+    description:
+      "Ubiquitous Arbites and Scintillan enforcer backup pistol. Sturdy, reliable, foolproof, and built to survive punishment that would damage lesser firearms.",
     weight: "1.7 kg",
     value: "95 Thrones",
     rarity: "Average",
@@ -800,6 +881,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 4,
     reload: "2 Full",
     specialRules: "Unreliable, Unstable",
+    description:
+      "Backstreet anti-Arbites handcannon built to stop carapace-armoured law officers, with dangerous disregard for the user's safety.",
     weight: "3.5 kg",
     value: "100 Thrones",
     rarity: "Average",
@@ -818,6 +901,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 5,
     reload: "2 Full",
     specialRules: "—",
+    description:
+      "Huge Raffir clan shock-and-terror pistol issued to senior Arbites officers for executing high-profile targets and breaking follower morale.",
     weight: "0.25 kg",
     value: "500 Thrones",
     rarity: "Rare",
@@ -836,6 +921,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 5,
     reload: "Full",
     specialRules: "Accurate",
+    description:
+      "Large calibre semi-automatic Gunmetal City sniper rifle used by assassins and enforcer sharpshooter teams.",
     weight: "6.5 kg",
     value: "750 Thrones",
     rarity: "Rare",
@@ -854,6 +941,9 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 14,
     reload: "2 Full",
     specialRules: "Reliable, Scatter",
+    description:
+      "Large-bore Arbites combat shotgun with heavy psychological impact. Counts as a club in melee. " +
+      "The user may hand-load one shotgun shell as a single Full Action; it may be a different shell type and must be the next shell fired.",
     weight: "7 kg",
     value: "400 Thrones",
     rarity: "Very Rare",
@@ -872,6 +962,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 50,
     reload: "Full",
     specialRules: "Reliable",
+    description:
+      "Reliable Arbites heavy stubber that can switch between belt and magazine feed, accepts exotic ammunition well, and can be hip-fired in a gyro-mount or Rhino-mounted.",
     weight: "30 kg",
     value: "800 Thrones",
     rarity: "Rare",
@@ -894,6 +986,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 18,
     reload: "Full",
     specialRules: "Inaccurate, Unreliable (not for Orks)",
+    description:
+      "Basic Ork solid-shot pistol. Devastating up close, though Ork inaccuracy means many sluggas cause more harm as crude clubs than as firearms.",
     weight: "2 kg",
     value: "100 Thrones",
     rarity: "Scarce (Common for Orks)",
@@ -912,6 +1006,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 30,
     reload: "Full",
     specialRules: "Inaccurate, Unreliable (not for Orks)",
+    description:
+      "Catch-all Ork firearm for loud short- to mid-range guns, cobbled together to throw out hails of bullets with little concern for accuracy or recoil.",
     weight: "4 kg",
     value: "200 Thrones",
     rarity: "Scarce (Common for Orks)",
@@ -930,7 +1026,9 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 20,
     reload: "2 Full",
     specialRules: "Inaccurate, Overheats, Unreliable",
-    description: "Pen 1d10, rolled separately each shot. Not Unreliable for Orks.",
+    description:
+      "Flash Git shoota variant that fires either energy bolts or shells, chosen per weapon. Penetration is 1d10, rolled separately each shot. " +
+      "Not Unreliable for Orks. Targeting equipment or bionics remove Inaccurate instead of granting bonuses to hit.",
     weight: "7 kg",
     value: "1,500 Thrones",
     rarity: "Rare (Scarce for Orks)",
@@ -951,6 +1049,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 40,
     reload: "2 Full",
     specialRules: "Reliable",
+    description:
+      "Eldar shuriken weapon grown from wraithbone, firing monomolecular discs. Shuriken ammunition is Very Rare and has a base price of 500 Thrones per clip.",
     weight: "1.2 kg",
     value: "5,000 Thrones",
     rarity: "Very Rare",
@@ -969,6 +1069,9 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 100,
     reload: "2 Full",
     specialRules: "Reliable, Tearing",
+    description:
+      "Dire Avenger variant of the shuriken catapult, grown from wraithbone with a longer barrel and built-in range-finders for greater danger at extended range. " +
+      "Shuriken ammunition is Very Rare and has a base price of 500 Thrones per clip.",
     weight: "2.5 kg",
     value: "9,500 Thrones",
     rarity: "Very Rare",
@@ -987,7 +1090,9 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 40,
     reload: "Full",
     specialRules: "Accurate, Reliable",
-    description: "Pen doubles to 4 with Aim, triples to 6 with Full Aim.",
+    description:
+      "Eldar Ranger sniper rifle grown for its user, with crystals able to focus a tight beam over great distance. " +
+      "Pen doubles to 4 with Aim, or triples to 6 with a Full Action Aim.",
     weight: "2 kg",
     value: "8,500 Thrones",
     rarity: "Very Rare",
@@ -1008,6 +1113,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 30,
     reload: "Full",
     specialRules: "Reliable, Tearing",
+    description:
+      "Adepta Sororitas bolter blessed and presented to a Battle Sister, maintained as a venerated heirloom and symbol of faith and judgement.",
     weight: "9 kg",
     value: "3,000 Thrones",
     rarity: "Very Rare",
@@ -1026,6 +1133,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 60,
     reload: "Full",
     specialRules: "Reliable, Tearing, Storm",
+    description:
+      "Ecclesiarchy storm bolter, effectively two synchronised bolters with a high rate of fire and high ammunition consumption.",
     weight: "12 kg",
     value: "9,000 Thrones",
     rarity: "Extremely Rare",
@@ -1044,6 +1153,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 6,
     reload: "Full",
     specialRules: "Reliable",
+    description:
+      "Designed for Seraphim to use as a pair, including in melee. With Dual Shot, a character may fire both at once, increasing Damage by 1d10 and doubling Penetration.",
     weight: "2 kg",
     value: "9,000 Thrones",
     rarity: "Extremely Rare",
@@ -1062,6 +1173,10 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 6,
     reload: "Full",
     specialRules: "Flame",
+    description:
+      "Paired Seraphim hand flamers designed for ranged or melee use by properly trained wielders. " +
+      "With Dual Shot, both flamers make a combined attack dealing 1d10+10 Damage and imposing -20 on targets' Agility Tests to avoid the flames. " +
+      "May attack a single melee target without expending ammunition, unless the GM rules otherwise over a long battle.",
     weight: "2 kg",
     value: "1,000 Thrones",
     rarity: "Extremely Rare",
@@ -1080,7 +1195,9 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 10,
     reload: "2 Full",
     specialRules: "Flame",
-    description: "With Sanctified Ammo, automatically confirms Righteous Fury against Daemons and Psykers.",
+    description:
+      "Large crew-served flamer; characters in power armour or with Strength 40+ can carry the promethium and operate it. " +
+      "With Sanctified Ammo, automatically confirms Righteous Fury against Daemons and Psykers.",
     weight: "45 kg",
     value: "1,000 Thrones",
     rarity: "Rare",
@@ -1168,7 +1285,9 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 0,
     reload: "—",
     specialRules: "Felling (2)",
-    description: "Archaeotech of unknown function; no standard clip or reload mechanism.",
+    description:
+      "Radical Ordo Malleus weapon that fires impossibly sharp shards of matter, possibly Daemonic in origin. " +
+      "No specimen has been surrendered to the Adeptus Mechanicus, so its true function is unknown.",
     weight: "10 kg",
     value: "—",
     rarity: "Unique",
@@ -1185,6 +1304,9 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 5,
     reload: "Full",
     specialRules: "Shocking",
+    description:
+      "Low-calibre Malfian pistol using a power pack and charged circuitry-traced bullets to deliver impact plus electric shock. " +
+      "Sting-Blunt ammunition costs 50 Thrones per magazine.",
     weight: "1.5 kg",
     value: "350 Thrones",
     rarity: "Common",
@@ -1250,6 +1372,11 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 0,
     reload: "—",
     specialRules: "Tearing",
+    description:
+      "Integrated Weapon: unlimited ammunition and no reload while connected to a Potentia Coil. " +
+      "Does not Jam; if it would Jam, the user gains 1 Fatigue instead. " +
+      "Physically linked to the user and requires an Ordinary (+10) Tech-Use Test and a Half Action to disconnect or reconnect. " +
+      "Smallest integrated weapon in standard Crimson Guard use; deadly, with good rate of fire and penetration, but shorter range than the rifle.",
     weight: "2 kg",
     value: "150 Thrones",
     rarity: "Very Rare",
@@ -1266,6 +1393,11 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 0,
     reload: "—",
     specialRules: "Tearing",
+    description:
+      "Integrated Weapon: unlimited ammunition and no reload while connected to a Potentia Coil. " +
+      "Does not Jam; if it would Jam, the user gains 1 Fatigue instead. " +
+      "Physically linked to the user and requires an Ordinary (+10) Tech-Use Test and a Half Action to disconnect or reconnect. " +
+      "Ancient archeotech-derived las weapon and standard weapon of the Crimson Guard, packing more punch than regular lasguns.",
     weight: "4.5 kg",
     value: "200 Thrones",
     rarity: "Very Rare",
@@ -1282,6 +1414,12 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 0,
     reload: "—",
     specialRules: "Tearing",
+    description:
+      "Integrated Weapon: unlimited ammunition and no reload while connected to a Potentia Coil. " +
+      "Does not Jam; if it would Jam, the user gains 1 Fatigue instead. " +
+      "Replaces the user's hand and forearm at the elbow; the arm cannot be used for anything else once installed. " +
+      "Installed using bionics and implants rules but does not add to Toughness Bonus. " +
+      "Tests to adapt external power supplies or recharge depleted Lathe-Lasblasters suffer an additional -20 penalty.",
     weight: "6 kg",
     value: "950 Thrones",
     rarity: "Extremely Rare",
@@ -1298,6 +1436,10 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 0,
     reload: "—",
     specialRules: "—",
+    description:
+      "Integrated Weapon: unlimited ammunition and no reload while connected to a Potentia Coil. " +
+      "Does not Jam; if it would Jam, the user gains 1 Fatigue instead. " +
+      "A Crimson Guard special issue plasma weapon that largely removes normal plasma drawbacks, almost eliminating the need for recharging and greatly reducing excess heat.",
     weight: "12 kg",
     value: "1,200 Thrones",
     rarity: "Very Rare",
@@ -1314,6 +1456,9 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 0,
     reload: "—",
     specialRules: "—",
+    description:
+      "Integrated Weapon: uses energy from a Potentia Coil to propel tiny metal shards at very high velocity. " +
+      "One of the few integrated weapons known to run out of ammunition, though its drum-sized magazines can last for many hours of constant use.",
     weight: "7 kg",
     value: "600 Thrones",
     rarity: "Very Rare",
@@ -1330,6 +1475,9 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 0,
     reload: "—",
     specialRules: "—",
+    description:
+      "Integrated Weapon: larger version of the standard Catalytic Mass Driver. " +
+      "Uses Potentia Coil energy to propel tiny metal shards at very high velocity; its drum-sized magazines can last for many hours of constant use.",
     weight: "16 kg",
     value: "2,800 Thrones",
     rarity: "Very Rare",
@@ -1347,9 +1495,10 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     reload: "—",
     specialRules: "Blast (6), Inaccurate",
     description:
-      "All caught in the blast must pass a Toughness Test or be knocked down. " +
-      "Those wearing Power Armour or heavier are immune. " +
-      "Damage = 1d10 + half the target's Armour Points (rounded up) on the affected location.",
+      "Integrated Weapon: projects a barely contained gravitic orb with limited range. " +
+      "Everything caught in the blast must take a Hard (-20) Strength Test or be knocked down. " +
+      "Being thrown to a solid surface from standing inflicts 1d5 Impact Damage with the Primitive quality to the Body, with worse effects possible at the GM's discretion. " +
+      "For 1d5 rounds, moving or performing physical actions within the blast radius requires an Arduous (-40) Strength Test.",
     weight: "24 kg",
     value: "4,700 Thrones",
     rarity: "Extremely Rare",
@@ -1372,6 +1521,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10+1 R",
     pen: 0,
     specialRules: "Primitive, Unbalanced",
+    description:
+      "Brutal tool and weapon; lacks a sword's reach and parrying ability, but creates lethal wounds when it lands.",
     weight: "4 kg",
     value: "20 Thrones",
     rarity: "Average",
@@ -1384,6 +1535,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d5-1 I",
     pen: 0,
     specialRules: "Primitive",
+    description:
+      "Simple knuckle dusters worn over the fingers, turning a punch into a bone-breaking blow.",
     weight: "0.5 kg",
     value: "5 Thrones",
     rarity: "Plentiful",
@@ -1396,6 +1549,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10 I",
     pen: 0,
     specialRules: "Primitive",
+    description:
+      "Primitive bludgeon, maul, or club relying on weight and strength to cave in a foe's skull.",
     weight: "2 kg",
     value: "5 Thrones",
     rarity: "Abundant",
@@ -1408,6 +1563,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10+2 I",
     pen: 0,
     specialRules: "Flexible, Primitive",
+    description:
+      "Difficult-to-wield pole or handle with spiked balls on chains or rods, capable of inflicting terrible wounds.",
     twoHanded: true,
     weight: "4 kg",
     value: "20 Thrones",
@@ -1421,6 +1578,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "2d10 R",
     pen: 2,
     specialRules: "Primitive, Unwieldy",
+    description:
+      "Oversized two-handed version of a melee weapon, such as a huge axe, hammer, sword, or club, built to inflict serious damage with each blow.",
     twoHanded: true,
     weight: "7 kg",
     value: "70 Thrones",
@@ -1434,6 +1593,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10+1 I",
     pen: 0,
     specialRules: "Primitive, Unbalanced",
+    description:
+      "Heavy striking tool turned weapon, favoured by many Imperial servants as a symbol of righteous justice.",
     weight: "4 kg",
     value: "10 Thrones",
     rarity: "Common",
@@ -1446,6 +1607,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10-2 I",
     pen: 0,
     specialRules: "Primitive, Unbalanced",
+    description:
+      "Any handy weighted object used as a weapon. Striking with the butt of a Basic ranged weapon counts as an improvised weapon.",
     weight: "—",
     value: "—",
     rarity: "—",
@@ -1458,7 +1621,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d5 R",
     pen: 0,
     specialRules: "Primitive",
-    description: "Can be thrown up to 3 metres.",
+    description:
+      "Ubiquitous backup weapon across the Imperium. Can be thrown up to 3 metres.",
     weight: "0.5 kg",
     value: "5 Thrones",
     rarity: "Abundant",
@@ -1471,6 +1635,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d5 I",
     pen: 0,
     specialRules: "Defensive, Primitive",
+    description:
+      "Protective defensive weapon made from anything from improvised sheets to armourplas. Attacking with a shield imposes a -20 penalty.",
     weight: "3 kg",
     value: "25 Thrones",
     rarity: "Average",
@@ -1483,7 +1649,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10 R",
     pen: 0,
     specialRules: "Primitive",
-    description: "Can be thrown up to 10 metres.",
+    description:
+      "Common hunting and warrior weapon on feral and medieval worlds. Can be thrown up to 10 metres.",
     twoHanded: true,
     weight: "3 kg",
     value: "15 Thrones",
@@ -1497,6 +1664,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10 R",
     pen: 0,
     specialRules: "Balanced, Primitive",
+    description:
+      "Blade weapon ranging from short daggers to elaborate duelling swords, with exact shape and edge depending on purpose and user taste.",
     weight: "3 kg",
     value: "15 Thrones",
     rarity: "Common",
@@ -1509,6 +1678,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10 I",
     pen: 0,
     specialRules: "Balanced, Primitive",
+    description:
+      "Long simple weapon useful for striking before an enemy can close; common among pilgrims and travellers.",
     twoHanded: true,
     weight: "3 kg",
     value: "10 Thrones",
@@ -1524,6 +1695,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10+2 R",
     pen: 2,
     specialRules: "Balanced, Tearing",
+    description:
+      "Sword-shaped chain weapon with exposed spinning teeth that bite into flesh and bone.",
     weight: "6 kg",
     value: "275 Thrones",
     rarity: "Rare",
@@ -1536,6 +1709,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10+4 R",
     pen: 2,
     specialRules: "Tearing",
+    description:
+      "Heavy brutal chain weapon that delivers hideous damage; double-sided versions can continue operating if one side is fouled.",
     weight: "13 kg",
     value: "450 Thrones",
     rarity: "Very Rare",
@@ -1550,6 +1725,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10+3 E",
     pen: 6,
     specialRules: "Power Field",
+    description:
+      "Dagger-sized power weapon made far deadlier by its field and easily concealed by those who prefer to appear unarmed.",
     weight: "1.5 kg",
     value: "1,750 Thrones",
     rarity: "Very Rare",
@@ -1562,6 +1739,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10+5 E",
     pen: 6,
     specialRules: "Balanced, Power Field",
+    description:
+      "Rare and valuable power sword, often a treasured heirloom and deadly status symbol in skilled hands.",
     weight: "3.5 kg",
     value: "2,500 Thrones",
     rarity: "Very Rare",
@@ -1576,6 +1755,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10 I",
     pen: 0,
     specialRules: "Shocking",
+    description:
+      "Crowd-control shock weapon common among Arbites and enforcers, capable of being deadly in enthusiastic hands.",
     weight: "2.5 kg",
     value: "150 Thrones",
     rarity: "Scarce",
@@ -1588,6 +1769,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10+2 I",
     pen: 0,
     specialRules: "Flexible, Shocking",
+    description:
+      "Short-reach shock flail with multiple tendril lashes, striking in masses of blows to incapacitate foes.",
     twoHanded: true,
     weight: "4.5 kg",
     value: "375 Thrones",
@@ -1605,7 +1788,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10-1 I",
     pen: 0,
     specialRules: "Primitive",
-    description: "Deals Fatigue instead of Wounds against Surprised targets (still reduced by Armour and Toughness).",
+    description:
+      "Weighted flexible cosh used to knock out targets. Against a Surprised opponent, deals Fatigue instead of Wounds, still reduced by Armour and Toughness.",
     weight: "1 kg",
     value: "15 Thrones",
     rarity: "Common",
@@ -1618,6 +1802,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d5-1 R",
     pen: 0,
     specialRules: "Primitive, Unbalanced",
+    description:
+      "Improvised stabbing weapon made from whatever materials are available; crude, fragile, and deadly in desperate hands.",
     weight: "0.5 kg",
     value: "—",
     rarity: "Plentiful",
@@ -1630,7 +1816,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10 I",
     pen: 0,
     specialRules: "—",
-    description: "+5 WS on Parry attempts.",
+    description:
+      "Club with a side handle for defensive forearm use. Grants +5 to Weapon Skill Tests made to Parry.",
     weight: "2.5 kg",
     value: "30 Thrones",
     rarity: "Average",
@@ -1645,7 +1832,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "Low: 1d10 I; High: 1d10+4 E",
     pen: "Low: 0; High: 4",
     specialRules: "Shocking, Power Field",
-    description: "Low setting has Shocking; high setting has Power Field. User may switch settings once per turn as a Free Action.",
+    description:
+      "Small inexpensive power maul with adjustable energy settings. Low setting has Shocking; high setting has Power Field. User may switch settings once per turn as a Free Action.",
     weight: "0.75 kg",
     value: "1,500 Thrones",
     rarity: "Rare",
@@ -1658,7 +1846,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "2d10 I",
     pen: 6,
     specialRules: "Power Field, Unwieldy",
-    description: "–20 WS in melee. Doubles damage against inanimate structures such as doors and walls.",
+    description:
+      "Heavy entry ram designed to breach doors and walls. Weapon Skill Tests in melee suffer -20. Doubles damage against inanimate structures such as doors and walls.",
     twoHanded: true,
     weight: "25 kg",
     value: "1,250 Thrones",
@@ -1672,7 +1861,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "2d10 I",
     pen: 5,
     specialRules: "Power Field, Unwieldy, Shocking",
-    description: "On hit, grants Fear (1) against that target's allies for the remainder of the encounter.",
+    description:
+      "Huge two-handed riot maul with an overcharged disruption field. On hit, grants Fear (1) against that target's allies for the remainder of the encounter.",
     twoHanded: true,
     weight: "8.5 kg",
     value: "4,000 Thrones",
@@ -1686,7 +1876,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "Low: 1d10-1 I; High: 1d10+5 I",
     pen: "Low: 0; High: 5",
     specialRules: "Shocking, Power Field",
-    description: "Low setting has Shocking; high setting has Power Field. User may switch settings once per turn as a Free Action. +5 WS when attempting to Parry.",
+    description:
+      "Elegant Lathe-crafted power maul handled more like a sword than a club. Low setting has Shocking; high setting has Power Field. User may switch settings once per turn as a Free Action. +5 WS when attempting to Parry.",
     weight: "0.5 kg",
     value: "2,100 Thrones",
     rarity: "Very Rare",
@@ -1701,6 +1892,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10+4 E",
     pen: 6,
     specialRules: "Power Field, Unwieldy, Unstable, Overheats",
+    description:
+      "Modified mining-tool disruptor weapon used by criminals against heavily armoured Arbitrators and enforcers; rare surviving examples are prized on the black market.",
     weight: "3 kg",
     value: "800 Thrones",
     rarity: "Very Rare",
@@ -1713,6 +1906,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10 I",
     pen: 0,
     specialRules: "Balanced, Shocking",
+    description:
+      "Double-ended shock staff used by the Hallmarshals of Hredrin to keep knife-wielding foes at reach before stunning them.",
     weight: "4 kg",
     value: "325 Thrones",
     rarity: "Rare",
@@ -1725,6 +1920,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10-1 I",
     pen: 0,
     specialRules: "Shocking",
+    description:
+      "Concealable baton that expands from a palm-width rod to an eighteen-inch club. Its tiny shock generator has five Shock discharges before recharging.",
     weight: "1.5 kg",
     value: "200 Thrones",
     rarity: "Scarce",
@@ -1737,6 +1934,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d5-2 E",
     pen: 0,
     specialRules: "Shocking",
+    description:
+      "Small box-shaped shock device with two spikes; pressed against exposed skin to deliver a stunning electrical discharge.",
     weight: "0.75 kg",
     value: "90 Thrones",
     rarity: "Scarce",
@@ -1752,6 +1951,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10+1 R",
     pen: 2,
     specialRules: "Tearing, Unbalanced",
+    description:
+      "Catch-all Ork melee weapon, covering crude cleavers, machetes, smoky chainblades, and simple powered blades.",
     weight: "5 kg",
     value: "600 Thrones",
     rarity: "Scarce (Common for Orks)",
@@ -1766,6 +1967,9 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10+1 I",
     pen: 0,
     specialRules: "Toxic, Unbalanced",
+    description:
+      "Ecclesiarchy hammer or mace with an integral tank of caustic fluid. Has Toxic. " +
+      "Alternatively the tank can be filled with promethium and an igniter, forcing struck targets to make an Agility Test to avoid catching fire.",
     weight: "4.5 kg",
     value: "500 Thrones",
     rarity: "Scarce",
@@ -1778,6 +1982,9 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10 R",
     pen: 2,
     specialRules: "Holy",
+    description:
+      "Three- to four-metre adamantine-silver and diamantine polearm for breaking charges by daemons, mutants, and warp creatures. " +
+      "Prayers, blessed oils, and sacred waters make it a Holy weapon.",
     weight: "4 kg",
     value: "1,000 Thrones",
     rarity: "Rare",
@@ -1790,6 +1997,9 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10 R",
     pen: 2,
     specialRules: "Unbalanced, Holy",
+    description:
+      "Ecclesiarchy symbol forged into a sharp blessed weapon, made only for suitably ranked individuals rather than normal purchase. " +
+      "Counts as a Holy weapon.",
     twoHanded: true,
     weight: "6 kg",
     value: "—",
@@ -1803,7 +2013,9 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10+10 R",
     pen: 5,
     specialRules: "Tearing, Unwieldy",
-    description: "On an attack roll of 96–00, the wielder must succeed on an Agility Test or take damage from the weapon (including SB).",
+    description:
+      "Massive two-handed chain weapon fitted with a crude disruption field. " +
+      "On an attack roll of 96-00, the wielder must succeed on an Agility Test or take damage from the weapon, including Strength Bonus.",
     twoHanded: true,
     weight: "12 kg",
     value: "750 Thrones",
@@ -1842,7 +2054,9 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10 I",
     pen: 0,
     specialRules: "Unwieldy",
-    description: "On a successful hit (–20 WS penalty), target is restrained and cannot move unless they win an opposed Strength vs WS Test or a Contortionist Test.",
+    description:
+      "Pole-arm restraint weapon used to capture targets alive. On a successful hit with a -20 WS penalty, a humanoid target is restrained. " +
+      "To move, the target must win an opposed Strength vs Weapon Skill Test or pass a Contortionist Test.",
     twoHanded: true,
     weight: "4 kg",
     value: "200 Thrones",
@@ -1856,6 +2070,9 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "0 I",
     pen: 0,
     specialRules: "Primitive, Flexible",
+    description:
+      "Whip of knotted cloth or soft leather used for corporal mortification. As a weapon, deals only the wielder's Strength Bonus as Damage. " +
+      "With the Flagellant talent, daily mortification can be endured without suffering a wound on a Hard (-10) Toughness Test.",
     weight: "1 kg",
     value: "5 Thrones",
     rarity: "Scarce",
@@ -1872,6 +2089,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10+3 R",
     pen: 4,
     specialRules: "Balanced",
+    description:
+      "Elegant halberd made from razor-sharp black stone stronger than steel, perfectly balanced for both offence and defence.",
     weight: "5 kg",
     value: "500 Thrones",
     rarity: "Rare",
@@ -1884,7 +2103,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10+4 R",
     pen: 2,
     specialRules: "Unwieldy",
-    description: "+10 to Weapon Skill Tests to Stun opponents.",
+    description:
+      "Slow, crushing two-handed hammer. Grants +10 to Weapon Skill Tests to Stun opponents.",
     twoHanded: true,
     weight: "8 kg",
     value: "70 Thrones",
@@ -1898,7 +2118,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10 R",
     pen: 0,
     specialRules: "Unwieldy",
-    description: "May make melee attacks even when both hands are otherwise occupied.",
+    description:
+      "Curved blades fixed to stiff metal bracers. May make melee attacks even when both hands are otherwise occupied.",
     weight: "1 kg",
     value: "100 Thrones",
     rarity: "Common",
@@ -1911,7 +2132,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10+2 R",
     pen: 0,
     specialRules: "Balanced",
-    description: "Opponents attempting to parry (not dodge) suffer –10 to their WS Test.",
+    description:
+      "Xenos duelling blade with fluid, hard-to-track motion. Opponents attempting to parry, but not dodge, suffer -10 to their Weapon Skill Test.",
     weight: "2 kg",
     value: "1,000 Thrones",
     rarity: "Rare",
@@ -1924,7 +2146,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10+2 R",
     pen: 3,
     specialRules: "Balanced, Sanctified",
-    description: "Always Best Craftsmanship.",
+    description:
+      "Sword recovered from the crypts of saints and seers in times of dire need. Always Best Craftsmanship and Sanctified.",
     weight: "3 kg",
     value: "3,000 Thrones",
     rarity: "Very Rare",
@@ -1937,7 +2160,9 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10+2 I",
     pen: 0,
     specialRules: "Flexible, Sanctified",
-    description: "Daemons within 10m of the bearer suffer –10 WS and –10 to all Warp Instability Tests.",
+    description:
+      "Holy incense burned from braziers or censers, weakening daemonkind for about one hour. " +
+      "Daemons within 10m of the bearer suffer -10 WS and -10 to all Warp Instability Tests.",
     weight: "5 kg",
     value: "3,000 Thrones",
     rarity: "Very Rare",
@@ -1950,7 +2175,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10 I",
     pen: 0,
     specialRules: "Balanced, Sanctified",
-    description: "Always Best Craftsmanship. Etched with the True Names of nine and ninety daemons.",
+    description:
+      "Ordo Malleus staff etched with the True Names of nine and ninety daemons. Always Best Craftsmanship and Sanctified.",
     weight: "4 kg",
     value: "2,000 Thrones",
     rarity: "Very Rare",
@@ -1966,8 +2192,9 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     pen: 6,
     specialRules: "Power Field",
     description:
-      "Psychic powers within or entering the field have a 70% chance of failure. " +
-      "Psykers gain 1 Insanity Point per 10 continuous rounds spent within the field.",
+      "Warp-disrupting rod with a power field and special effects against daemons and psykers. " +
+      "Psychic powers used within or entering the field have a 70% chance of failure, checked before Psychic Phenomena. " +
+      "For every 10 continuous rounds a psyker spends within the field, they must pass a Challenging (+0) Willpower Test or gain 1 Insanity Point.",
     weight: "3 kg",
     value: "9,000 Thrones",
     rarity: "Very Rare",
@@ -1980,7 +2207,9 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "2d10+4 E",
     pen: 10,
     specialRules: "Power Field, Unwieldy",
-    description: "Doubles Strength Bonus for damage (or increases Unnatural Strength multiplier by 1).",
+    description:
+      "Two-handed hammer designed to incapacitate foes with stunning force. " +
+      "Doubles Strength Bonus for damage, or increases Unnatural Strength multiplier by 1.",
     twoHanded: true,
     weight: "18 kg",
     value: "5,000 Thrones",
@@ -1996,7 +2225,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10+3 I",
     pen: 4,
     specialRules: "Unwieldy, Blast (1)",
-    description: "On a WS roll of 94–00, the wielder is within the blast and takes damage equal to the weapon's normal damage.",
+    description:
+      "Gravity-plate mace that creates a small crushing field. On a WS roll of 94-00, the wielder is within the blast radius and takes damage equal to the weapon's normal damage.",
     weight: "15 kg",
     value: "200 Thrones",
     rarity: "Scarce",
@@ -2009,7 +2239,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10 I",
     pen: 0,
     specialRules: "Shocking",
-    description: "When deactivated, –20 to identify it as a weapon.",
+    description:
+      "Walking-staff-like shock weapon with a crackling electrical tip. When deactivated, attempts to identify it as a weapon suffer -20.",
     weight: "4 kg",
     value: "250 Thrones",
     rarity: "Scarce",
@@ -2025,7 +2256,7 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     pen: 2,
     specialRules: "Snare, Excruciating",
     description:
-      "Each round the target is snared, it must pass a Difficult (–10) WP or Toughness Test (target's choice) or be Stunned for 1 round. Daemonic weapon (Slaanesh/Khorne).",
+      "Painful whip of flesh, bone, or chain. Each round the target is snared, it must pass a Difficult (-10) Willpower or Toughness Test, target's choice, or be Stunned for 1 round. Daemonic weapon.",
     weight: "5 kg",
     value: "—",
     rarity: "Very Rare",
@@ -2038,7 +2269,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10+2 R",
     pen: 0,
     specialRules: "Balanced",
-    description: "Wielder adds Strength Bonus to Penetration. Daemonic weapon (Khorne).",
+    description:
+      "Brass Khornate blade covered in chains, skulls, and flayed leather. Wielder adds Strength Bonus to Penetration. Daemonic weapon.",
     weight: "4 kg",
     value: "—",
     rarity: "Very Rare",
@@ -2051,7 +2283,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "2d10+4 R",
     pen: 0,
     specialRules: "Unwieldy",
-    description: "Wielder adds Strength Bonus to Penetration. Daemonic weapon (Khorne).",
+    description:
+      "Brass Khornate axe covered in chains, skulls, and flayed leather. Wielder adds Strength Bonus to Penetration. Daemonic weapon.",
     twoHanded: true,
     weight: "9 kg",
     value: "—",
@@ -2065,7 +2298,9 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10+1 R",
     pen: 2,
     specialRules: "Balanced, Toxic",
-    description: "GM may substitute a specific disease for the Toxic quality. Daemonic weapon (Nurgle).",
+    description:
+      "Nurgle daemon weapon dripping with disease and poison, often a rusting glaive, mace, or short spear. " +
+      "GM may substitute a specific disease for the Toxic quality.",
     weight: "4 kg",
     value: "—",
     rarity: "Very Rare",
@@ -2079,8 +2314,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     pen: 0,
     specialRules: "Balanced",
     description:
-      "Wielder does not suffer Psychic Phenomena — instead, each time Phenomena would trigger, " +
-      "add Psy Rating to the next psychic power's damage. If the next power deals no damage, the bonus is lost. Daemonic weapon (Tzeentch).",
+      "Tzeentchian sorcerous staff engraved with impossible runes. Wielder does not suffer Psychic Phenomena; instead, each time Phenomena would trigger, " +
+      "add Psy Rating to the next psychic power's damage. If the next power deals no damage, the bonus is lost.",
     weight: "3 kg",
     value: "—",
     rarity: "Very Rare",
@@ -2096,6 +2331,9 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10+5 E",
     pen: 4,
     specialRules: "Flexible, Shocking",
+    description:
+      "Integrated melee weapon: a long segmented chain glowing with electrical energy. " +
+      "Often used by Venatorii Decani and Electro-Priests; can knock even a man in full power armour off his feet.",
     weight: "3 kg",
     value: "600 Thrones",
     rarity: "Very Rare",
@@ -2110,6 +2348,8 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     specialRules: "Unwieldy",
     description:
       "Does not add Strength Bonus to Damage. " +
+      "Can cut through metres of adamantine plating up to 40 centimetres thick each minute, with thinner material cut faster. " +
+      "Usually wrist-mounted and rapidly extendable, making it easily concealable. " +
       "Enemies attempting to Parry this weapon suffer a –20 penalty to their WS Test.",
     weight: "2 kg",
     value: "1,700 Thrones",
@@ -2125,7 +2365,7 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     specialRules: "Unwieldy",
     description:
       "Doubles the wielder's Strength Bonus for Damage. " +
-      "Characters with the Unnatural Strength trait add 1 to their multiplier instead.",
+      "Characters with the Unnatural Strength trait add 1 to their multiplier instead. Can be used as a Thrown weapon.",
     weight: "4 kg",
     value: "3,000 Thrones",
     rarity: "Rare",
@@ -2139,9 +2379,9 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     pen: 7,
     specialRules: "Balanced, Flexible, Power Field",
     description:
-      "Adeptus Mechanicus only. When used against a Machine, the wielder may re-roll any failed WS Test. " +
-      "When used against a character with cybernetics, counts as a force weapon for those implants only. " +
-      "Grants +10 to Tech-Use and Medicae Tests made to repair or treat mechanical components.",
+      "Exceptionally rare symbol and weapon gifted only to high-ranking members of the Cult Mechanicus. " +
+      "Bearer receives +20 to Interaction Tests involving followers of the Machine God. " +
+      "Its prominent Imperial Aquila improves the Disposition of those loyal to the Imperium by one step.",
     weight: "9 kg",
     value: "—",
     rarity: "Adeptus Mechanicus Only",
