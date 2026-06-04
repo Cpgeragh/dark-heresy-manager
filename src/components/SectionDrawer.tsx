@@ -112,7 +112,7 @@ export function SectionDrawer({ activeTab, onTabChange, isDM }: SectionDrawerPro
       <button
         onClick={() => setIsOpen(true)}
         aria-label="Open section navigation"
-        className="mb-6 px-3 py-2 rounded-lg border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition text-base leading-none"
+        className="px-3 py-2 rounded-lg border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition text-base leading-none"
       >
         ☰
       </button>

@@ -91,7 +91,7 @@ export function AddSkillModal({
                         {skill.name}
                       </span>
                       {SKILL_DESCRIPTIONS[skill.name] && (
-                        <span onClick={(e) => e.stopPropagation()}>
+                        <span className="inline-flex items-center leading-[0]" onClick={(e) => e.stopPropagation()}>
                           <InfoModal title={skill.name} content={SKILL_DESCRIPTIONS[skill.name]} />
                         </span>
                       )}
