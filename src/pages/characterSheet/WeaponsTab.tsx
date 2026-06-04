@@ -26,6 +26,7 @@ import { GrenadeCard, GrenadePicker } from "./weapons/GrenadeCard";
 import { ShieldCard, ShieldPicker } from "./weapons/ShieldCard";
 import { CyberneticWeaponCard } from "./weapons/CyberneticWeaponCard";
 import { PickerModal } from "../../ui/PickerModal";
+import { uiSectionHeader } from "../../ui/editableStyles";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -483,7 +484,7 @@ export function WeaponsTab({
         {/* ── RANGED ─────────────────────────────────────────────────────── */}
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-base font-semibold text-slate-100">Ranged</h3>
+            <h3 className={uiSectionHeader}>Ranged</h3>
             {editable && !showCustomRanged && (
               <button
                 onClick={() => setPicker("ranged")}
@@ -524,7 +525,7 @@ export function WeaponsTab({
         {/* ── MELEE ──────────────────────────────────────────────────────── */}
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-base font-semibold text-slate-100">Melee</h3>
+            <h3 className={uiSectionHeader}>Melee</h3>
             {editable && !showCustomMelee && (
               <button
                 onClick={() => setPicker("melee")}
@@ -562,120 +563,10 @@ export function WeaponsTab({
 
       </div>
 
-      {/* INTEGRATED WEAPONS */}
-      {(integratedWeaponCount > 0 || editable) && (
-        <section className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-base font-semibold text-slate-100">
-              Integrated Weapons ({integratedWeaponCount})
-            </h3>
-            {editable && (
-              <button
-                onClick={() => setPicker("integrated")}
-                className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
-              >
-                + Add
-              </button>
-            )}
-          </div>
-
-          {integratedWeaponCount === 0 && (
-            <p className="text-sm text-slate-500 italic">No integrated weapons installed.</p>
-          )}
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-            {integratedRangedWeapons.map(({ weapon, index }) => (
-              <RangedCard
-                key={weapon.id}
-                weapon={weapon}
-                editable={editable}
-                onRemove={() => removeRanged(index)}
-                onAddAttachment={(upgradeId) => addAttachmentToRanged(weapon.id, upgradeId)}
-                onRemoveAttachment={(upgradeId) => removeAttachmentFromRanged(weapon.id, upgradeId)}
-                onUpdateAmmoEntries={(entries) => updateRangedAmmoEntries(weapon.id, entries)}
-                onUpdateQuantity={(qty) => updateRangedQuantity(weapon.id, qty)}
-                grenades={grenades}
-                onUpdateGrenades={onUpdateGrenades}
-                allowAttachments={false}
-              />
-            ))}
-            {integratedMeleeWeapons.map(({ weapon, index }) => (
-              <MeleeCard
-                key={weapon.id}
-                weapon={weapon}
-                editable={editable}
-                strengthBonus={strengthBonus}
-                onRemove={() => removeMelee(index)}
-                onAddAttachment={(upgradeId) => addAttachmentToMelee(weapon.id, upgradeId)}
-                onRemoveAttachment={(upgradeId) => removeAttachmentFromMelee(weapon.id, upgradeId)}
-                onUpdateQuantity={(qty) => updateMeleeQuantity(weapon.id, qty)}
-                allowAttachments={false}
-              />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* ── SHIELDS ──────────────────────────────────────────────────────── */}
-      {((shields ?? []).length > 0 || editable) && (
-        <section className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-base font-semibold text-slate-100">Shields</h3>
-            {editable && (
-              <button
-                onClick={() => setPicker("shields")}
-                className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
-              >
-                + Add
-              </button>
-            )}
-          </div>
-
-          {(shields ?? []).length === 0 && (
-            <p className="text-sm text-slate-500 italic">No shields carried.</p>
-          )}
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {(shields ?? []).map((item) => (
-              <ShieldCard
-                key={item.id}
-                item={item}
-                editable={editable}
-                onRemove={() => removeShield(item.id)}
-              />
-            ))}
-          </div>
-        </section>
-      )}
-
       {/* ── GRENADES ─────────────────────────────────────────────────────── */}
-      {/* CYBERNETIC WEAPONS */}
-      {cyberneticWeaponItems.length > 0 && (
-        <section className="space-y-3">
-          <div>
-            <h3 className="text-base font-semibold text-slate-100">
-              Cybernetic Weapons
-            </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Granted by installed implants — managed in the Cybernetics tab.
-              Melee damage shown before Strength Bonus.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-            {cyberneticWeaponItems.map(({ cybernetic, weapon }) => (
-              <CyberneticWeaponCard
-                key={cybernetic.id}
-                cyberneticName={cybernetic.name}
-                weapon={weapon}
-              />
-            ))}
-          </div>
-        </section>
-      )}
-
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-base font-semibold text-slate-100">
+          <h3 className={uiSectionHeader}>
             Grenades ({grenades.length})
           </h3>
           {editable && (
@@ -704,6 +595,112 @@ export function WeaponsTab({
           ))}
         </div>
       </section>
+
+      {/* ── INTEGRATED WEAPONS ───────────────────────────────────────────── */}
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className={uiSectionHeader}>
+            Integrated Weapons ({integratedWeaponCount})
+          </h3>
+          {editable && (
+            <button
+              onClick={() => setPicker("integrated")}
+              className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
+            >
+              + Add
+            </button>
+          )}
+        </div>
+
+        {integratedWeaponCount === 0 && (
+          <p className="text-sm text-slate-500 italic">No integrated weapons installed.</p>
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          {integratedRangedWeapons.map(({ weapon, index }) => (
+            <RangedCard
+              key={weapon.id}
+              weapon={weapon}
+              editable={editable}
+              onRemove={() => removeRanged(index)}
+              onAddAttachment={(upgradeId) => addAttachmentToRanged(weapon.id, upgradeId)}
+              onRemoveAttachment={(upgradeId) => removeAttachmentFromRanged(weapon.id, upgradeId)}
+              onUpdateAmmoEntries={(entries) => updateRangedAmmoEntries(weapon.id, entries)}
+              onUpdateQuantity={(qty) => updateRangedQuantity(weapon.id, qty)}
+              grenades={grenades}
+              onUpdateGrenades={onUpdateGrenades}
+              allowAttachments={false}
+            />
+          ))}
+          {integratedMeleeWeapons.map(({ weapon, index }) => (
+            <MeleeCard
+              key={weapon.id}
+              weapon={weapon}
+              editable={editable}
+              strengthBonus={strengthBonus}
+              onRemove={() => removeMelee(index)}
+              onAddAttachment={(upgradeId) => addAttachmentToMelee(weapon.id, upgradeId)}
+              onRemoveAttachment={(upgradeId) => removeAttachmentFromMelee(weapon.id, upgradeId)}
+              onUpdateQuantity={(qty) => updateMeleeQuantity(weapon.id, qty)}
+              allowAttachments={false}
+            />
+          ))}
+        </div>
+      </section>
+
+      {/* ── SHIELDS ──────────────────────────────────────────────────────── */}
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className={uiSectionHeader}>Shields</h3>
+          {editable && (
+            <button
+              onClick={() => setPicker("shields")}
+              className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
+            >
+              + Add
+            </button>
+          )}
+        </div>
+
+        {(shields ?? []).length === 0 && (
+          <p className="text-sm text-slate-500 italic">No shields carried.</p>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {(shields ?? []).map((item) => (
+            <ShieldCard
+              key={item.id}
+              item={item}
+              editable={editable}
+              onRemove={() => removeShield(item.id)}
+            />
+          ))}
+        </div>
+      </section>
+
+      {/* ── CYBERNETIC WEAPONS ───────────────────────────────────────────── */}
+      {cyberneticWeaponItems.length > 0 && (
+        <section className="space-y-3">
+          <div>
+            <h3 className={uiSectionHeader}>
+              Cybernetic Weapons
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Granted by installed implants — managed in the Cybernetics tab.
+              Melee damage shown before Strength Bonus.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            {cyberneticWeaponItems.map(({ cybernetic, weapon }) => (
+              <CyberneticWeaponCard
+                key={cybernetic.id}
+                cyberneticName={cybernetic.name}
+                weapon={weapon}
+              />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* ── Pickers ───────────────────────────────────────────────────────── */}
       {picker === "ranged" && (

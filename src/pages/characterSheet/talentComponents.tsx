@@ -8,7 +8,7 @@ import type { TraitData } from "../../data/traitData";
 import { TALENT_LIST } from "../../data/talentData";
 import { TRAIT_LIST } from "../../data/traitData";
 import type { SkillSource } from "../../types/SkillSource";
-import { editableInputClass, sectionContainerClass } from "../../ui/editableStyles";
+import { editableInputClass, sectionContainerClass, uiSectionHeader } from "../../ui/editableStyles";
 import { InfoModal } from "../../components/InfoModal";
 import { TALENT_DESCRIPTIONS } from "../../data/talentDescriptions";
 import { TRAIT_DESCRIPTIONS } from "../../data/traitDescriptions";
@@ -308,47 +308,49 @@ export function EntrySection({
   );
 
   return (
-    <section className={sectionContainerClass(editable) + " space-y-2"}>
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">{title}</h3>
+    <div>
+      <div className="flex items-center justify-between mb-3">
+        <h3 className={uiSectionHeader}>{title}</h3>
         <span className="text-xs text-slate-500">
           {entries.length} {entries.length === 1 ? singular.toLowerCase() : title.toLowerCase()}
         </span>
       </div>
 
-      {entries.length === 0 && (
-        <p className="text-sm text-slate-500 italic">None added yet.</p>
-      )}
+      <section className={sectionContainerClass(editable) + " space-y-2"}>
+        {entries.length === 0 && (
+          <p className="text-sm text-slate-500 italic">None added yet.</p>
+        )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        {entries.map((entry) => (
-          <EntryCard
-            key={entry.uid}
-            entry={entry}
-            editable={editable}
-            onRemove={onRemove}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {entries.map((entry) => (
+            <EntryCard
+              key={entry.uid}
+              entry={entry}
+              editable={editable}
+              onRemove={onRemove}
+            />
+          ))}
+        </div>
+
+        {editable && (
+          <button
+            onClick={() => setShowPicker(true)}
+            className="mt-1 px-3 py-1 text-xs rounded border border-slate-500 text-slate-100 hover:bg-slate-800 transition"
+          >
+            + Add {singular}
+          </button>
+        )}
+
+        {showPicker && (
+          <TalentPickerModal
+            title={`Add ${singular}`}
+            listData={listData}
+            selectedIds={selectedIds}
+            onAdd={onAdd}
+            onClose={() => setShowPicker(false)}
           />
-        ))}
-      </div>
-
-      {editable && (
-        <button
-          onClick={() => setShowPicker(true)}
-          className="mt-1 px-3 py-1 text-xs rounded border border-slate-500 text-slate-100 hover:bg-slate-800 transition"
-        >
-          + Add {singular}
-        </button>
-      )}
-
-      {showPicker && (
-        <TalentPickerModal
-          title={`Add ${singular}`}
-          listData={listData}
-          selectedIds={selectedIds}
-          onAdd={onAdd}
-          onClose={() => setShowPicker(false)}
-        />
-      )}
-    </section>
+        )}
+      </section>
+    </div>
   );
 }

@@ -43,7 +43,7 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
 
       {/* Name */}
       <div className="space-y-1">
-        <label className="text-xs text-slate-400">Name <span className="text-red-400">*</span></label>
+        <label className="text-xs font-medium uppercase tracking-wide text-slate-100">Name <span className="text-red-400">*</span></label>
         <input
           type="text"
           value={name}
@@ -56,7 +56,7 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
 
       {/* Type */}
       <div className="space-y-1">
-        <label className="text-xs text-slate-400">Type <span className="text-slate-600">(optional)</span></label>
+        <label className="text-xs font-medium uppercase tracking-wide text-slate-100">Type <span className="text-slate-600">(optional)</span></label>
         <select
           value={type}
           onChange={(e) => setType(e.target.value as ItemType | "")}
@@ -72,7 +72,7 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
       {/* Weight + Value on one row */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
-          <label className="text-xs text-slate-400">Weight <span className="text-slate-600">(optional)</span></label>
+          <label className="text-xs font-medium uppercase tracking-wide text-slate-100">Weight <span className="text-slate-600">(optional)</span></label>
           <input
             type="text"
             value={weight}
@@ -82,7 +82,7 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
           />
         </div>
         <div className="space-y-1">
-          <label className="text-xs text-slate-400">Value <span className="text-slate-600">(optional)</span></label>
+          <label className="text-xs font-medium uppercase tracking-wide text-slate-100">Value <span className="text-slate-600">(optional)</span></label>
           <input
             type="text"
             value={value}
@@ -95,7 +95,7 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
 
       {/* Rarity */}
       <div className="space-y-1">
-        <label className="text-xs text-slate-400">Rarity <span className="text-slate-600">(optional)</span></label>
+        <label className="text-xs font-medium uppercase tracking-wide text-slate-100">Rarity <span className="text-slate-600">(optional)</span></label>
         <select
           value={rarity}
           onChange={(e) => setRarity(e.target.value)}
@@ -110,7 +110,7 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
 
       {/* Description */}
       <div className="space-y-1">
-        <label className="text-xs text-slate-400">
+        <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
           Description / Rules <span className="text-slate-600">(optional)</span>
         </label>
         <textarea
@@ -124,7 +124,7 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
 
       {/* Notes */}
       <div className="space-y-1">
-        <label className="text-xs text-slate-400">
+        <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
           Notes <span className="text-slate-600">(optional)</span>
         </label>
         <textarea

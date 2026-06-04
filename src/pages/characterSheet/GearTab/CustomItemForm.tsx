@@ -17,7 +17,7 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
     <div className="border border-amber-500/30 bg-slate-900/60 rounded-lg p-4 space-y-3">
       <p className="text-xs font-semibold text-amber-400 uppercase tracking-wide">Custom Item</p>
       <div className="space-y-1">
-        <label className="text-xs text-slate-400">Name</label>
+        <label className="text-xs font-medium uppercase tracking-wide text-slate-100">Name</label>
         <input
           type="text"
           value={name}
@@ -27,7 +27,7 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
         />
       </div>
       <div className="space-y-1">
-        <label className="text-xs text-slate-400">
+        <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
           Description <span className="text-slate-600">(optional)</span>
         </label>
         <textarea

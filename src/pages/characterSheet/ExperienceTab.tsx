@@ -5,6 +5,7 @@ import type { ExperienceBlock, RankAdvances } from "../../types/Character";
 import {
   sectionContainerClass,
   readOnlyBadgeClass,
+  uiSectionHeader,
 } from "../../ui/editableStyles";
 import { useXpProposals } from "../../hooks/useXpProposals";
 import { proposeXpSpend } from "../../services/xpService";
@@ -126,8 +127,8 @@ export function ExperienceTab({
         {/* Total XP — editable by DM */}
         <div className={sectionContainerClass(isDM) + " text-center"}>
           {isDM ? (
-            <label className="text-xs text-slate-400">
-              Total XP
+            <label className="flex flex-col gap-0.5">
+              <span className="text-xs font-medium uppercase tracking-wide text-slate-100">Total XP</span>
               <input
                 type="number"
                 min={0}
@@ -161,7 +162,7 @@ export function ExperienceTab({
 
       {/* PURCHASED ADVANCES */}
       <section className="space-y-3">
-        <h3 className="text-lg font-semibold text-slate-200">Purchased Advances</h3>
+        <h3 className={uiSectionHeader}>Purchased Advances</h3>
 
         {experience.ranks.length === 0 && (
           <p className="text-sm text-slate-400">No advances purchased yet.</p>
@@ -209,7 +210,7 @@ export function ExperienceTab({
             <p className="text-xs font-semibold text-amber-400 uppercase tracking-wide">Add Advance</p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <div>
-                <label className="text-xs text-slate-400">Rank</label>
+                <label className="text-xs font-medium uppercase tracking-wide text-slate-100">Rank</label>
                 <select
                   value={String(newRank)}
                   onChange={(e) => {
@@ -227,7 +228,7 @@ export function ExperienceTab({
               </div>
 
               <div className="col-span-2 sm:col-span-2">
-                <label className="text-xs text-slate-400">Advance Name</label>
+                <label className="text-xs font-medium uppercase tracking-wide text-slate-100">Advance Name</label>
                 <input
                   type="text"
                   value={newName}
@@ -238,7 +239,7 @@ export function ExperienceTab({
               </div>
 
               <div>
-                <label className="text-xs text-slate-400">XP Cost</label>
+                <label className="text-xs font-medium uppercase tracking-wide text-slate-100">XP Cost</label>
                 <input
                   type="number"
                   min={0}
@@ -250,7 +251,7 @@ export function ExperienceTab({
             </div>
 
             <div>
-              <label className="text-xs text-slate-400">Notes (optional)</label>
+              <label className="text-xs font-medium uppercase tracking-wide text-slate-100">Notes (optional)</label>
               <input
                 type="text"
                 value={newNotes}
@@ -274,7 +275,7 @@ export function ExperienceTab({
       {/* XP PROPOSALS — player only */}
       {isOwnedByCurrentPlayer && (
         <section className="space-y-3">
-          <h3 className="text-lg font-semibold text-slate-200">Propose XP Spend</h3>
+          <h3 className={uiSectionHeader}>Propose XP Spend</h3>
 
           <div className="flex flex-col sm:flex-row gap-2">
             <input

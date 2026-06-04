@@ -41,7 +41,7 @@ export function CustomPieceForm({ onAdd, onCancel }: Props) {
       <p className="text-xs font-semibold text-amber-400 uppercase tracking-wide">Custom Piece</p>
 
       <div className="space-y-1">
-        <label className="text-xs text-slate-400">Name</label>
+        <label className="text-xs font-medium uppercase tracking-wide text-slate-100">Name</label>
         <input
           type="text"
           value={name}
@@ -52,7 +52,7 @@ export function CustomPieceForm({ onAdd, onCancel }: Props) {
       </div>
 
       <div className="space-y-1">
-        <label className="text-xs text-slate-400">Locations covered</label>
+        <label className="text-xs font-medium uppercase tracking-wide text-slate-100">Locations covered</label>
         <div className="flex flex-wrap gap-2">
           {LOCATION_ORDER.map((loc) => (
             <button
@@ -72,7 +72,7 @@ export function CustomPieceForm({ onAdd, onCancel }: Props) {
       </div>
 
       <div className="flex items-center gap-3">
-        <label className="text-xs text-slate-400 w-6 shrink-0">AP</label>
+        <label className="text-xs font-medium uppercase tracking-wide text-slate-100 w-6 shrink-0">AP</label>
         <input
           type="number"
           min={0}

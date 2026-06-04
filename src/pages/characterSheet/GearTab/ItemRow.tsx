@@ -1,10 +1,10 @@
 // src/pages/characterSheet/GearTab/ItemRow.tsx
 
-import { useState } from "react";
 import type { GearItem } from "../../../types/Character";
 import { GEAR_REFERENCE } from "../../../data/reference/gearReference";
 import { editableInputClass, sectionContainerClass } from "../../../ui/editableStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
+import { InfoModal } from "../../../components/InfoModal";
 
 interface Props {
   item: GearItem;
@@ -14,7 +14,6 @@ interface Props {
 }
 
 export function ItemRow({ item, editable, onUpdateValue, onRemove }: Props) {
-  const [expanded, setExpanded] = useState(false);
   const hasDesc = !!(item.description?.trim());
 
   // Fall back to reference data for items saved before weight/value/rarity were stored
@@ -47,21 +46,12 @@ export function ItemRow({ item, editable, onUpdateValue, onRemove }: Props) {
           <div className="flex items-center gap-2">
             <p className="text-sm font-medium text-slate-200">{item.name}</p>
             {hasDesc && (
-              <button
-                onClick={() => setExpanded((v) => !v)}
-                className="text-slate-500 hover:text-slate-300 text-xs transition"
-              >
-                {expanded ? "▲" : "▼"}
-              </button>
+              <InfoModal
+                title={item.name}
+                content={<p className="text-sm text-slate-300 leading-relaxed">{item.description}</p>}
+              />
             )}
           </div>
-          {!hasDesc && <p className="text-xs text-slate-600 italic">No description.</p>}
-          {hasDesc && expanded && (
-            <p className="text-xs text-slate-400 mt-1 leading-relaxed">{item.description}</p>
-          )}
-          {hasDesc && !expanded && (
-            <p className="text-xs text-slate-500 mt-0.5 truncate">{item.description}</p>
-          )}
           <ItemMetaChips
             weight={weight} value={value} rarity={rarity} source={item.source}
             className="flex flex-wrap gap-1.5 mt-1"
