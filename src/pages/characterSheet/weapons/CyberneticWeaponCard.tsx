@@ -1,19 +1,25 @@
 // src/pages/characterSheet/weapons/CyberneticWeaponCard.tsx
 // Read-only card for weapons granted by cybernetic implants.
 
-import { useState } from "react";
 import type { CyberneticWeapon } from "../../../data/reference/cyberneticsReference";
-import { StatChip, DamageTypeChip, SpecialRulesModal } from "./weaponShared";
+import { InfoModal } from "../../../components/InfoModal";
+import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
+import { StatChip, DamageTypeChip, SpecialRulesContent, computeMeleeTotalDamage } from "./weaponShared";
 
 export function CyberneticWeaponCard({
   cyberneticName,
   weapon,
+  strengthBonus,
 }: {
   cyberneticName: string;
   weapon: CyberneticWeapon;
+  strengthBonus: number;
 }) {
-  const [showRules, setShowRules] = useState(false);
   const hasRules = !!(weapon.specialRules?.trim());
+  const ruleNamesInLookup = (weapon.specialRules ?? "")
+    .split(",")
+    .map((r) => r.trim().replace(/\s*\(.*?\)/, ""))
+    .filter((name) => Boolean(name) && Boolean(WEAPON_SPECIAL_RULES[name]));
 
   return (
     <div className="border border-cyan-700/40 bg-cyan-900/10 rounded-lg p-3 space-y-3">
@@ -51,29 +57,32 @@ export function CyberneticWeaponCard({
         {weapon.type === "ranged" && weapon.rld && (
           <StatChip label="Reload" value={weapon.rld} />
         )}
+        {weapon.type === "melee" && (
+          <>
+            <StatChip label="SB" value={`+${strengthBonus}`} />
+            {weapon.damage && (
+              <StatChip label="Total" value={computeMeleeTotalDamage(weapon.damage, strengthBonus)} />
+            )}
+          </>
+        )}
       </div>
 
-      {hasRules && (
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-400 italic flex-1">
-            {weapon.specialRules}
-          </span>
-          <button
-            onClick={() => setShowRules(true)}
-            title="Explain special rules"
-            className="text-slate-500 hover:text-amber-400 text-sm transition"
-          >
-            ⓘ
-          </button>
+      <div className="space-y-1">
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Qualities</span>
+          <span className="text-xs text-slate-400 italic">{hasRules ? weapon.specialRules : "-"}</span>
+          {ruleNamesInLookup.length > 0 && (
+            <InfoModal
+              title={`${weapon.name} Qualities`}
+              content={<SpecialRulesContent rules={weapon.specialRules ?? ""} />}
+            />
+          )}
         </div>
-      )}
-
-      {showRules && weapon.specialRules && (
-        <SpecialRulesModal
-          rules={weapon.specialRules}
-          onClose={() => setShowRules(false)}
-        />
-      )}
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Rules</span>
+          <span className="text-xs text-slate-600 italic">-</span>
+        </div>
+      </div>
     </div>
   );
 }

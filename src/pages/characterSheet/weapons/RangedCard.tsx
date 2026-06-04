@@ -2,7 +2,7 @@
 // RangedPicker, CustomRangedForm, RangedCard — co-located for navigability.
 
 import { useState } from "react";
-import type { RangedWeapon, WeaponAmmoEntry, GrenadeItem } from "../../../types/Character";
+import type { RangedWeapon, WeaponAmmoEntry, GrenadeItem, ArcheotechItem } from "../../../types/Character";
 import {
   RANGED_WEAPON_REFERENCE,
   type RangedWeaponRef,
@@ -372,6 +372,7 @@ export function RangedCard({
   onUpdateQuantity,
   grenades,
   onUpdateGrenades,
+  archeotechGrenades,
   allowAttachments = true,
 }: {
   weapon: RangedWeapon;
@@ -383,6 +384,7 @@ export function RangedCard({
   onUpdateQuantity: (qty: number) => void;
   grenades?: GrenadeItem[];
   onUpdateGrenades?: (next: GrenadeItem[]) => void;
+  archeotechGrenades?: ArcheotechItem[];
   allowAttachments?: boolean;
 }) {
   const [showQualities, setShowQualities] = useState(false);
@@ -577,13 +579,13 @@ export function RangedCard({
       {isGrenadeLauncher && (
         <div className="border-t border-slate-800 pt-2 space-y-2">
           <span className="text-[10px] text-slate-500 uppercase tracking-wide">Grenades</span>
-          {(grenades ?? []).length === 0 ? (
+          {(grenades ?? []).filter((g) => g.type !== "Mine").length === 0 && (archeotechGrenades ?? []).length === 0 ? (
             <p className="text-xs text-slate-600 italic">
-              No grenades — add via the Grenades section below.
+              No grenades — add via the Grenades & Mines section below.
             </p>
           ) : (
             <div className="space-y-1.5">
-              {(grenades ?? []).map((g) => (
+              {(grenades ?? []).filter((g) => g.type !== "Mine").map((g) => (
                 <div
                   key={g.id}
                   className="rounded bg-slate-800/60 px-2.5 py-2 flex items-center justify-between gap-2"
@@ -599,6 +601,17 @@ export function RangedCard({
                       )
                     }
                   />
+                </div>
+              ))}
+              {(archeotechGrenades ?? []).map((g) => (
+                <div
+                  key={g.id}
+                  className="rounded bg-amber-900/20 border border-amber-700/30 px-2.5 py-2 flex items-center justify-between gap-2"
+                >
+                  <span className="text-xs text-slate-200 truncate">{g.name}</span>
+                  <span className="text-[10px] text-amber-400 border border-amber-700/50 rounded px-1.5 py-0.5">
+                    Archeotech
+                  </span>
                 </div>
               ))}
             </div>

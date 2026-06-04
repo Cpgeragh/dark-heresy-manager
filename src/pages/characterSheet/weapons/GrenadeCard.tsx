@@ -12,7 +12,9 @@ import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import { PickerModal } from "../../../ui/PickerModal";
 import { rarityColour } from "../../../ui/sourceStyles";
-import { StatChip, DamageTypeChip, SpecialRulesModal } from "./weaponShared";
+import { InfoModal } from "../../../components/InfoModal";
+import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
+import { StatChip, DamageTypeChip, SpecialRulesContent } from "./weaponShared";
 
 // ─── Grenade Picker ───────────────────────────────────────────────────────────
 
@@ -81,12 +83,13 @@ export function GrenadeCard({
   onRemove: () => void;
   onUpdateQty: (qty: number) => void;
 }) {
-  const [showRules, setShowRules] = useState(false);
-  const [showInfo, setShowInfo] = useState(false);
-
   const ref = GRENADE_REFERENCE.find((r) => r.id === item.referenceId);
   const hasRules = !!(item.specialRules?.trim() && item.specialRules !== "—");
   const hasInfo = !!(ref?.description);
+  const ruleNamesInLookup = (item.specialRules ?? "")
+    .split(",")
+    .map((r) => r.trim().replace(/\s*\(.*?\)/, ""))
+    .filter((name) => Boolean(name) && Boolean(WEAPON_SPECIAL_RULES[name]));
 
   return (
     <div className={sectionContainerClass(editable) + " space-y-2"}>
@@ -96,22 +99,11 @@ export function GrenadeCard({
           <p className="text-sm font-semibold text-slate-200">{item.name}</p>
           <p className="text-xs text-slate-500">Thrown · Range SBx3</p>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          {hasInfo && (
-            <button
-              onClick={() => setShowInfo(true)}
-              title="View rules"
-              className="text-slate-500 hover:text-slate-300 text-sm transition"
-            >
-              ⓘ
-            </button>
-          )}
-          {editable && (
-            <button onClick={onRemove} className="text-xs text-red-400 hover:text-red-300">
-              Remove
-            </button>
-          )}
-        </div>
+        {editable && (
+          <button onClick={onRemove} className="text-xs text-red-400 hover:text-red-300 shrink-0">
+            Remove
+          </button>
+        )}
       </div>
 
       {/* Stat chips */}
@@ -140,19 +132,30 @@ export function GrenadeCard({
         </div>
       )}
 
-      {/* Special rules */}
-      {hasRules && (
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-400 italic flex-1">{item.specialRules}</span>
-          <button
-            onClick={() => setShowRules(true)}
-            title="Explain special rules"
-            className="text-slate-500 hover:text-amber-400 text-sm transition"
-          >
-            ⓘ
-          </button>
+      {/* Qualities / Rules */}
+      <div className="space-y-1">
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Qualities</span>
+          <span className="text-xs text-slate-400 italic">{hasRules ? item.specialRules : "-"}</span>
+          {ruleNamesInLookup.length > 0 && (
+            <InfoModal
+              title={`${item.name} Qualities`}
+              content={<SpecialRulesContent rules={item.specialRules ?? ""} />}
+            />
+          )}
         </div>
-      )}
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Rules</span>
+          {hasInfo ? (
+            <InfoModal
+              title={`${item.name} Rules`}
+              content={<p className="text-sm text-slate-300 leading-relaxed">{ref!.description}</p>}
+            />
+          ) : (
+            <span className="text-xs text-slate-600 italic">-</span>
+          )}
+        </div>
+      </div>
 
       {/* Quantity row */}
       <div className="flex items-center gap-3 pt-1">
@@ -175,39 +178,6 @@ export function GrenadeCard({
         className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1"
       />
 
-      {showRules && item.specialRules && (
-        <SpecialRulesModal
-          rules={item.specialRules}
-          onClose={() => setShowRules(false)}
-        />
-      )}
-
-      {showInfo && ref?.description && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-          <div className="w-full max-w-md bg-slate-900 border border-slate-500 rounded-xl shadow-2xl">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
-              <h3 className="text-sm font-semibold text-slate-200">{item.name}</h3>
-              <button
-                onClick={() => setShowInfo(false)}
-                className="text-slate-400 hover:text-slate-200 text-lg leading-none"
-              >
-                ×
-              </button>
-            </div>
-            <div className="px-4 py-3">
-              <p className="text-sm text-slate-300 leading-relaxed">{ref.description}</p>
-            </div>
-            <div className="px-4 py-3 border-t border-slate-700">
-              <button
-                onClick={() => setShowInfo(false)}
-                className="w-full py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-sm text-slate-200"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

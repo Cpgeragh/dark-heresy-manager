@@ -413,6 +413,7 @@ export default function CharacterSheet() {
               shields={character.shields ?? []}
               onUpdateShields={handleUpdateShields}
               cybernetics={character.cybernetics ?? []}
+              archeotech={character.archeotech ?? []}
             />
           )}
 

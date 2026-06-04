@@ -10,6 +10,8 @@ export interface GrenadeRef {
   id: string;
   name: string;
   source: string;
+  /** Distinguishes grenades from mines; defaults to "Grenade" if omitted */
+  type?: "Grenade" | "Mine";
   class: string;
   /** Damage string, "—" if no damage, or "Special" */
   damage: string;
@@ -1213,26 +1215,6 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     compatibleAmmoIds: ["cr-exotic"],
   },
   {
-    id: "dh-empyrian-brain-mines",
-    name: "Empyrian Brain Mines",
-    source: SkillSource.DH,
-    class: "Exotic",
-    range: "SBx3m",
-    rof: "S/–/–",
-    damage: "Special",
-    pen: 0,
-    clip: 1,
-    reload: "N/A",
-    specialRules: "—",
-    description:
-      "Must be attached via melee attack. Target makes Hard Agility Test each round or loses all actions " +
-      "(success = one Half Action only). Removing deals 1d10+5 R damage ignoring armour. " +
-      "Burns out and detaches after 3 rounds. Not reusable.",
-    weight: "1 kg",
-    value: "500 Thrones",
-    rarity: "Very Rare",
-  },
-  {
     id: "dh-tyranicus-heavy-webber",
     name: "Tyranicus Heavy Webber",
     source: SkillSource.DH,
@@ -2334,6 +2316,24 @@ export const GRENADE_REFERENCE: GrenadeRef[] = [
     description:
       "Victims caught in the blast must pass a Hard (-20) Toughness Test " +
       "or suffer 2d10 Toughness damage from the burst of intense radiation.",
+  },
+
+  {
+    id: "dh-empyrian-brain-mines",
+    name: "Empyrian Brain Mines",
+    source: SkillSource.DH,
+    type: "Mine",
+    class: "Exotic",
+    damage: "Special",
+    pen: "0",
+    specialRules: "—",
+    description:
+      "Must be attached via melee attack. Target makes Hard Agility Test each round or loses all actions " +
+      "(success = one Half Action only). Removing deals 1d10+5 R damage ignoring armour. " +
+      "Burns out and detaches after 3 rounds. Not reusable.",
+    weight: "1 kg",
+    value: "500 Thrones",
+    rarity: "Very Rare",
   },
 
   // ── Lathe Worlds ─────────────────────────────────────────────────────────
