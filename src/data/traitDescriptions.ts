@@ -43,7 +43,7 @@ export const TRAIT_DESCRIPTIONS: Record<string, string> = {
 
   // ─── Core Rulebook — Career Traits ──────────────────────────────────────────
   "mechanicus-implants":     "You bear the sacred implants of the Adeptus Mechanicus: an Electro-Graft (data port interface), Electoo Inductors (bio-electrical power siphon), a Respirator Unit (+20 to resist airborne toxins and gas weapons; includes a vox-synthesiser), a Cyber-Mantle (implant anchorage framework), a Potentia Coil (power storage), and Cranial Circuitry (cognitive augmentation).",
-  "sanctioned-psyker":       "You were trained under the Scholastia Psykana and sanctioned by Imperial authority. You gain a Psy Rating, begin with sanctioned psychic disciplines as appropriate, and are permitted to use psychic powers without being treated as an unsanctioned witch.",
+  "sanctioned-psyker":       "Taken aboard the Black Ships to Holy Terra and sanctioned by agents of the Golden Throne through painful rituals that test the soul against the psychic predators of the warp. Roll on Table 1-5: Sanctioning Side Effects to determine the mark left by the sanctioning. Starting age is increased by 3d10 years.",
 
   // ─── Creatures Anathema ──────────────────────────────────────────────────────
   "improved-natural-weapons": "This creature's attacks are powerful enough to crush plasteel or punch through armour. The creature's natural weapons no longer count as Primitive.",
