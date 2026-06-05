@@ -9,12 +9,13 @@ import { PickerModal } from "../../../ui/PickerModal";
 
 interface AddSkillModalProps {
   isOpen: boolean;
+  editable?: boolean;
   onClose: () => void;
   untrainedSkills: SkillWithComputed[];
   onAdd: (id: string) => void;
 }
 
-export function AddSkillModal({ isOpen, onClose, untrainedSkills, onAdd }: AddSkillModalProps) {
+export function AddSkillModal({ isOpen, editable = true, onClose, untrainedSkills, onAdd }: AddSkillModalProps) {
   const [search, setSearch] = useState("");
 
   const filtered = untrainedSkills
@@ -36,8 +37,8 @@ export function AddSkillModal({ isOpen, onClose, untrainedSkills, onAdd }: AddSk
       {filtered.map((skill) => (
         <button
           key={skill.id}
-          onClick={() => onAdd(skill.id)}
-          className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-800 transition"
+          onClick={editable ? () => onAdd(skill.id) : undefined}
+          className={`w-full flex items-center gap-3 px-4 py-3 text-left transition ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
           <div className="flex items-center gap-1.5 flex-1 min-w-0">
             <span className="text-sm text-slate-100 truncate">{skill.name}</span>

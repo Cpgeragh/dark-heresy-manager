@@ -94,20 +94,19 @@ function FaithTalentSection({
         );
       })}
 
-      {editable && (
-        <button
-          onClick={() => setShowPicker(true)}
-          className="mt-1 px-3 py-1 text-xs rounded border border-slate-600 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition"
-        >
-          + Add Faith Talent
-        </button>
-      )}
+      <button
+        onClick={() => setShowPicker(true)}
+        className="mt-1 px-3 py-1 text-xs rounded border border-slate-600 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition"
+      >
+        {editable ? "+ Add Faith Talent" : "View Faith Talents"}
+      </button>
 
       {showPicker && (
         <TalentPickerModal
           title="Add Faith Talent"
           listData={FAITH_TALENT_LIST}
           selectedIds={selectedIds}
+          editable={editable}
           onAdd={onAdd}
           onClose={() => setShowPicker(false)}
         />

@@ -6,11 +6,12 @@ import { rarityColour } from "../../../ui/sourceStyles";
 import { PickerModal } from "../../../ui/PickerModal";
 
 interface Props {
+  editable?: boolean;
   onSelect: (ref: ConsumableRef) => void;
   onClose: () => void;
 }
 
-export function ConsumablePicker({ onSelect, onClose }: Props) {
+export function ConsumablePicker({ editable = true, onSelect, onClose }: Props) {
   const [query, setQuery] = useState("");
   const filtered = CONSUMABLES_REFERENCE.filter((r) =>
     r.name.toLowerCase().includes(query.toLowerCase())
@@ -28,11 +29,11 @@ export function ConsumablePicker({ onSelect, onClose }: Props) {
       {filtered.map((ref) => (
         <button
           key={ref.id}
-          onClick={() => onSelect(ref)}
-          className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group"
+          onClick={editable ? () => onSelect(ref) : undefined}
+          className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
           <div className="flex items-center justify-between gap-2">
-            <p className="text-sm font-medium text-slate-200 group-hover:text-white">
+            <p className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}>
               {ref.name}
             </p>
             <span className="text-xs shrink-0">

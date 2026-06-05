@@ -118,10 +118,12 @@ const INTEGRATED_RANGED_REFS = RANGED_WEAPON_REFERENCE.filter(isIntegratedRanged
 const INTEGRATED_MELEE_REFS = MELEE_WEAPON_REFERENCE.filter(isIntegratedMeleeRef);
 
 function IntegratedWeaponPicker({
+  editable = true,
   onSelectRanged,
   onSelectMelee,
   onClose,
 }: {
+  editable?: boolean;
   onSelectRanged: (ref: RangedWeaponRef) => void;
   onSelectMelee: (ref: MeleeWeaponRef) => void;
   onClose: () => void;
@@ -144,11 +146,11 @@ function IntegratedWeaponPicker({
       {ranged.map((ref) => (
         <button
           key={ref.id}
-          onClick={() => onSelectRanged(ref)}
-          className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group"
+          onClick={editable ? () => onSelectRanged(ref) : undefined}
+          className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
           <div className="flex items-center justify-between gap-2">
-            <span className="text-sm font-medium text-slate-200 group-hover:text-white">
+            <span className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}>
               {ref.name}
             </span>
             <span className="text-xs text-slate-500 shrink-0">{ref.class}</span>
@@ -161,11 +163,11 @@ function IntegratedWeaponPicker({
       {melee.map((ref) => (
         <button
           key={ref.id}
-          onClick={() => onSelectMelee(ref)}
-          className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group"
+          onClick={editable ? () => onSelectMelee(ref) : undefined}
+          className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
           <div className="flex items-center justify-between gap-2">
-            <span className="text-sm font-medium text-slate-200 group-hover:text-white">
+            <span className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}>
               {ref.name}
             </span>
             <span className="text-xs text-slate-500 shrink-0">{ref.class}</span>
@@ -620,12 +622,12 @@ export function WeaponsTab({
         <section className="space-y-3">
           <div className="flex items-center justify-between">
             <h3 className={uiSectionHeader}>Ranged</h3>
-            {editable && !showCustomRanged && (
+            {!showCustomRanged && (
               <button
                 onClick={() => setPicker("ranged")}
                 className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
               >
-                + Add
+                {editable ? "+ Add" : "View"}
               </button>
             )}
           </div>
@@ -686,12 +688,12 @@ export function WeaponsTab({
         <section className="space-y-3">
           <div className="flex items-center justify-between">
             <h3 className={uiSectionHeader}>Melee</h3>
-            {editable && !showCustomMelee && (
+            {!showCustomMelee && (
               <button
                 onClick={() => setPicker("melee")}
                 className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
               >
-                + Add
+                {editable ? "+ Add" : "View"}
               </button>
             )}
           </div>
@@ -753,14 +755,12 @@ export function WeaponsTab({
           <h3 className={uiSectionHeader}>
             Grenades & Mines ({allGrenadeEntries.length})
           </h3>
-          {editable && (
-            <button
-              onClick={() => setPicker("grenades")}
-              className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
-            >
-              + Add
-            </button>
-          )}
+          <button
+            onClick={() => setPicker("grenades")}
+            className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
+          >
+            {editable ? "+ Add" : "View"}
+          </button>
         </div>
 
         {allGrenadeEntries.length === 0 && (
@@ -814,14 +814,12 @@ export function WeaponsTab({
           <h3 className={uiSectionHeader}>
             Integrated Weapons ({integratedWeaponCount})
           </h3>
-          {editable && (
-            <button
-              onClick={() => setPicker("integrated")}
-              className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
-            >
-              + Add
-            </button>
-          )}
+          <button
+            onClick={() => setPicker("integrated")}
+            className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
+          >
+            {editable ? "+ Add" : "View"}
+          </button>
         </div>
 
         {integratedWeaponCount === 0 && (
@@ -867,14 +865,12 @@ export function WeaponsTab({
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className={uiSectionHeader}>Shields</h3>
-          {editable && (
-            <button
-              onClick={() => setPicker("shields")}
-              className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
-            >
-              + Add
-            </button>
-          )}
+          <button
+            onClick={() => setPicker("shields")}
+            className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
+          >
+            {editable ? "+ Add" : "View"}
+          </button>
         </div>
 
         {(shields ?? []).length === 0 && (
@@ -903,6 +899,7 @@ export function WeaponsTab({
       {/* ── Pickers ───────────────────────────────────────────────────────── */}
       {picker === "ranged" && (
         <RangedPicker
+          editable={editable}
           onSelect={addFromRangedRef}
           references={NORMAL_RANGED_REFS}
           onCustom={() => {
@@ -914,6 +911,7 @@ export function WeaponsTab({
       )}
       {picker === "melee" && (
         <MeleePicker
+          editable={editable}
           onSelect={addFromMeleeRef}
           references={NORMAL_MELEE_REFS}
           onCustom={() => {
@@ -925,6 +923,7 @@ export function WeaponsTab({
       )}
       {picker === "integrated" && (
         <IntegratedWeaponPicker
+          editable={editable}
           onSelectRanged={addFromRangedRef}
           onSelectMelee={addFromMeleeRef}
           onClose={() => setPicker(null)}
@@ -932,12 +931,14 @@ export function WeaponsTab({
       )}
       {picker === "grenades" && (
         <GrenadePicker
+          editable={editable}
           onSelect={addFromGrenadeRef}
           onClose={() => setPicker(null)}
         />
       )}
       {picker === "shields" && (
         <ShieldPicker
+          editable={editable}
           onSelect={addFromShieldRef}
           onClose={() => setPicker(null)}
         />

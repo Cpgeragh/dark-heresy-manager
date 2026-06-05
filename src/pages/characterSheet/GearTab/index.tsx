@@ -126,14 +126,12 @@ export function GearTab({ gear, consumables, editable, onUpdate, onUpdateConsuma
           <h3 className={uiSectionHeader}>
             Consumables ({consumables.length})
           </h3>
-          {editable && (
-            <button
-              onClick={() => setShowConsumablePicker(true)}
-              className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
-            >
-              + Add
-            </button>
-          )}
+          <button
+            onClick={() => setShowConsumablePicker(true)}
+            className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
+          >
+            {editable ? "+ Add" : "View"}
+          </button>
         </div>
 
         {consumables.length === 0 && (
@@ -157,12 +155,12 @@ export function GearTab({ gear, consumables, editable, onUpdate, onUpdateConsuma
           <h3 className={uiSectionHeader}>
             Carried Items ({gear.length})
           </h3>
-          {editable && !showCustomForm && (
+          {!showCustomForm && (
             <button
               onClick={() => setShowGearPicker(true)}
               className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
             >
-              + Add Item
+              {editable ? "+ Add Item" : "View"}
             </button>
           )}
         </div>
@@ -192,6 +190,7 @@ export function GearTab({ gear, consumables, editable, onUpdate, onUpdateConsuma
       {/* MODALS ───────────────────────────────────────────────────────────── */}
       {showConsumablePicker && (
         <ConsumablePicker
+          editable={editable}
           onSelect={addConsumableFromRef}
           onClose={() => setShowConsumablePicker(false)}
         />
@@ -199,6 +198,7 @@ export function GearTab({ gear, consumables, editable, onUpdate, onUpdateConsuma
 
       {showGearPicker && (
         <GearPicker
+          editable={editable}
           onSelect={addFromRef}
           onCustom={() => {
             setShowGearPicker(false);

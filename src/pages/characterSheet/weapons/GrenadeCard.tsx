@@ -19,9 +19,11 @@ import { StatChip, DamageTypeChip, SpecialRulesContent, EquipToggle } from "./we
 // ─── Grenade Picker ───────────────────────────────────────────────────────────
 
 export function GrenadePicker({
+  editable = true,
   onSelect,
   onClose,
 }: {
+  editable?: boolean;
   onSelect: (ref: GrenadeRef) => void;
   onClose: () => void;
 }) {
@@ -47,11 +49,11 @@ export function GrenadePicker({
       {filtered.map((ref) => (
         <button
           key={ref.id}
-          onClick={() => onSelect(ref)}
-          className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group"
+          onClick={editable ? () => onSelect(ref) : undefined}
+          className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
           <div className="flex items-center justify-between gap-2">
-            <span className="text-sm font-medium text-slate-200 group-hover:text-white">
+            <span className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}>
               {ref.name}
             </span>
             <div className="flex items-center gap-1.5 text-xs shrink-0">

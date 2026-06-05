@@ -11,11 +11,12 @@ import { RARITY_OPTIONS } from "./archeotechConstants";
 import { PickerModal } from "../../../ui/PickerModal";
 
 interface Props {
+  editable?: boolean;
   onSelect: (ref: ArcheotechRef, gmValue?: string, gmRarity?: string) => void;
   onClose: () => void;
 }
 
-export function ArcheotechPickerModal({ onSelect, onClose }: Props) {
+export function ArcheotechPickerModal({ editable = true, onSelect, onClose }: Props) {
   const [query,    setQuery]    = useState("");
   const [pending,  setPending]  = useState<ArcheotechRef | null>(null);
   const [gmCost,   setGmCost]   = useState("");
@@ -35,6 +36,7 @@ export function ArcheotechPickerModal({ onSelect, onClose }: Props) {
   const needsGmInput = (ref: ArcheotechRef) => ref.value === "—" || ref.rarity === "—";
 
   function handleRowClick(ref: ArcheotechRef) {
+    if (!editable) return;
     if (needsGmInput(ref)) {
       setPending(ref);
       setGmCost("");
@@ -127,11 +129,11 @@ export function ArcheotechPickerModal({ onSelect, onClose }: Props) {
         filtered.map((ref) => (
           <button
             key={ref.id}
-            onClick={() => handleRowClick(ref)}
-            className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group"
+            onClick={editable ? () => handleRowClick(ref) : undefined}
+            className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
           >
             <div className="flex items-center justify-between gap-2">
-              <span className="text-sm font-medium text-slate-200 group-hover:text-white">
+              <span className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}>
                 {ref.name}
               </span>
               <div className="flex items-center gap-2 shrink-0">

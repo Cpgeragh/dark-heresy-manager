@@ -16,6 +16,7 @@ import { PowerCard } from "./components/PowerCard";
 import { PickerModal } from "../../ui/PickerModal";
 import { InfoModal } from "../../components/InfoModal";
 import { usePsychicPowers } from "../../hooks/usePsychicPowers";
+import { TALENT_DESCRIPTIONS } from "../../data/talentDescriptions";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -35,6 +36,7 @@ function PowerPicker({
   initialDiscipline,
   excludeMinor = false,
   minorOnly = false,
+  editable = true,
   existingNames,
   onSelect,
   onCustomMinor,
@@ -44,6 +46,7 @@ function PowerPicker({
   initialDiscipline: DisciplineFilter;
   excludeMinor?: boolean;
   minorOnly?: boolean;
+  editable?: boolean;
   existingNames: Set<string>;
   onSelect: (ref: PsychicPowerRef) => void;
   onCustomMinor: () => void;
@@ -94,7 +97,7 @@ function PowerPicker({
           {d}
         </button>
       ))}
-      footer={
+      footer={editable ? (
         <div className="flex gap-2">
           <button
             onClick={onCustomMinor}
@@ -110,13 +113,13 @@ function PowerPicker({
             + Custom major power
           </button>
         </div>
-      }
+      ) : undefined}
     >
       {filtered.map((ref) => (
         <button
           key={ref.id}
-          onClick={() => onSelect(ref)}
-          className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group"
+          onClick={editable ? () => onSelect(ref) : undefined}
+          className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <div className="flex items-center gap-1.5 flex-1 min-w-0">
@@ -218,8 +221,18 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
         {/* Psy Rating — derived from highest Psy Rating talent */}
         <div className="inline-flex flex-col items-center gap-1">
           <span className="text-xs font-medium uppercase tracking-wide text-slate-100">Psy Rating</span>
-          <div className="w-[26px] h-[26px] flex items-center justify-center rounded border border-indigo-500/50 bg-indigo-950/40">
-            <span className="text-sm font-bold font-mono text-indigo-300">{psyRating}</span>
+          <div className="relative inline-flex">
+            <div className="w-[26px] h-[26px] flex items-center justify-center rounded border border-indigo-500/50 bg-indigo-950/40">
+              <span className="text-sm font-bold font-mono text-indigo-300">{psyRating}</span>
+            </div>
+            {psyRating > 0 && (
+              <div className="absolute left-full ml-1 top-1/2 -translate-y-1/2">
+                <InfoModal
+                  title={`Psy Rating ${psyRating}`}
+                  content={<p className="text-sm text-slate-300 leading-relaxed">{TALENT_DESCRIPTIONS[`psy-rating-${psyRating}`]}</p>}
+                />
+              </div>
+            )}
           </div>
         </div>
 
@@ -257,15 +270,13 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <h3 className={uiSectionHeader}>Minor Powers</h3>
-          {editable && (
-            <button
-              onClick={openPickerForMinor}
-              className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
-              aria-label="Add Minor Power"
-            >
-              + Add Minor Power
-            </button>
-          )}
+          <button
+            onClick={openPickerForMinor}
+            className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
+            aria-label={editable ? "Add Minor Power" : "View Minor Powers"}
+          >
+            {editable ? "+ Add Minor Power" : "View"}
+          </button>
         </div>
 
         {psychic.minorPowers.length === 0 ? (
@@ -288,15 +299,13 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <h3 className={uiSectionHeader}>Major Powers</h3>
-          {editable && (
-            <button
-              onClick={openPickerForMajor}
-              className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
-              aria-label="Add Major Power"
-            >
-              + Add Major Power
-            </button>
-          )}
+          <button
+            onClick={openPickerForMajor}
+            className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
+            aria-label={editable ? "Add Major Power" : "View Major Powers"}
+          >
+            {editable ? "+ Add Major Power" : "View"}
+          </button>
         </div>
 
         {psychic.majorPowers.length === 0 ? (
@@ -321,6 +330,7 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
           initialDiscipline={pickerInitialDiscipline}
           excludeMinor={pickerTarget === "major"}
           minorOnly={pickerTarget === "minor"}
+          editable={editable}
           existingNames={new Set([
             ...psychic.minorPowers.map((p) => p.name),
             ...psychic.majorPowers.map((p) => p.name),

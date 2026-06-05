@@ -5,11 +5,12 @@ import { ARMOUR_REFERENCE, type ArmourRef } from "../../../data/reference/armour
 import { PickerModal } from "../../../ui/PickerModal";
 
 interface Props {
+  editable?: boolean;
   onSelect: (ref: ArmourRef) => void;
   onClose: () => void;
 }
 
-export function ForceFieldPicker({ onSelect, onClose }: Props) {
+export function ForceFieldPicker({ editable = true, onSelect, onClose }: Props) {
   const [query, setQuery] = useState("");
   const filtered = ARMOUR_REFERENCE.filter((r) =>
     r.isForceField && r.name.toLowerCase().includes(query.toLowerCase())
@@ -27,11 +28,11 @@ export function ForceFieldPicker({ onSelect, onClose }: Props) {
       {filtered.map((ref) => (
         <button
           key={ref.id}
-          onClick={() => onSelect(ref)}
-          className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group"
+          onClick={editable ? () => onSelect(ref) : undefined}
+          className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
           <div className="flex items-center justify-between gap-2">
-            <span className="text-sm font-medium text-slate-200 group-hover:text-white">
+            <span className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}>
               {ref.name}
             </span>
             <span className="text-xs text-slate-500 shrink-0">

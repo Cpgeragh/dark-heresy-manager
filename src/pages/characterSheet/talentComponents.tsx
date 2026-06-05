@@ -29,12 +29,14 @@ export function TalentPickerModal({
   title,
   listData,
   selectedIds,
+  editable = true,
   onAdd,
   onClose,
 }: {
   title: string;
   listData: readonly AnyListItem[];
   selectedIds: ReadonlySet<string>;
+  editable?: boolean;
   onAdd: (entry: TalentEntry) => void;
   onClose: () => void;
 }) {
@@ -92,7 +94,7 @@ export function TalentPickerModal({
     setSpecialisation("");
   };
 
-  const specialisationFooter = picked && talentData?.hasSpecialisation ? (
+  const specialisationFooter = editable && picked && talentData?.hasSpecialisation ? (
     <div className="space-y-2">
       <p className="text-xs text-slate-400">
         Adding: <span className="text-slate-200 font-medium">{picked.name}</span>
@@ -166,21 +168,21 @@ export function TalentPickerModal({
         return (
           <button
             key={item.id}
-            onClick={() => {
+            onClick={editable ? () => {
               if ((item as TalentData).hasSpecialisation) {
                 setPicked(item);
                 setSpecialisation("");
               } else {
                 addImmediate(item);
               }
-            }}
-            className={`w-full text-left px-4 py-3 hover:bg-slate-800 transition group ${
+            } : undefined}
+            className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"} ${
               isSelected ? "bg-slate-800 ring-1 ring-inset ring-amber-500/40" : ""
             }`}
           >
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                <span className="text-sm font-medium text-slate-200 group-hover:text-white truncate">
+                <span className={`text-sm font-medium text-slate-200 truncate ${editable ? "group-hover:text-white" : ""}`}>
                   {item.name}
                 </span>
                 {(TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]) && (
@@ -307,20 +309,19 @@ export function EntrySection({
           ))}
         </div>
 
-        {editable && (
-          <button
-            onClick={() => setShowPicker(true)}
-            className="mt-1 px-3 py-1 text-xs rounded border border-slate-500 text-slate-100 hover:bg-slate-800 transition"
-          >
-            + Add {singular}
-          </button>
-        )}
+        <button
+          onClick={() => setShowPicker(true)}
+          className="mt-1 px-3 py-1 text-xs rounded border border-slate-500 text-slate-100 hover:bg-slate-800 transition"
+        >
+          {editable ? `+ Add ${singular}` : `View ${singular}s`}
+        </button>
 
         {showPicker && (
           <TalentPickerModal
             title={`Add ${singular}`}
             listData={listData}
             selectedIds={selectedIds}
+            editable={editable}
             onAdd={onAdd}
             onClose={() => setShowPicker(false)}
           />

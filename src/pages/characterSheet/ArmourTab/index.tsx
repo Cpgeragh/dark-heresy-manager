@@ -152,12 +152,12 @@ export function ArmourTab({
           <h3 className={uiSectionHeader}>
             Worn ({worn.length})
           </h3>
-          {editable && !showCustomForm && (
+          {!showCustomForm && (
             <button
               onClick={() => { setPickerMode("worn"); setShowPicker(true); }}
               className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
             >
-              + Equip
+              {editable ? "+ Equip" : "View"}
             </button>
           )}
         </div>
@@ -173,12 +173,12 @@ export function ArmourTab({
           <h3 className={uiSectionHeader}>
             Stowed ({stowed.length})
           </h3>
-          {editable && !showCustomForm && (
+          {!showCustomForm && (
             <button
               onClick={() => { setPickerMode("stowed"); setShowPicker(true); }}
               className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
             >
-              + Stow
+              {editable ? "+ Stow" : "View"}
             </button>
           )}
         </div>
@@ -194,14 +194,12 @@ export function ArmourTab({
           <h3 className={uiSectionHeader}>
             Force Fields ({forceFields.length})
           </h3>
-          {editable && (
-            <button
-              onClick={() => setShowFieldPicker(true)}
-              className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
-            >
-              + Add
-            </button>
-          )}
+          <button
+            onClick={() => setShowFieldPicker(true)}
+            className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
+          >
+            {editable ? "+ Add" : "View"}
+          </button>
         </div>
         {forceFields.length === 0 && <p className="text-sm text-slate-500 italic">No force field equipped.</p>}
         {forceFields.map((piece) => (
@@ -219,6 +217,7 @@ export function ArmourTab({
       {/* MODALS */}
       {showPicker && (
         <ArmourPicker
+          editable={editable}
           onSelect={fromReference}
           onCustom={() => { setShowPicker(false); setShowCustomForm(true); }}
           onClose={() => setShowPicker(false)}
@@ -226,6 +225,7 @@ export function ArmourTab({
       )}
       {showFieldPicker && (
         <ForceFieldPicker
+          editable={editable}
           onSelect={(ref) => { fromReference(ref); setShowFieldPicker(false); }}
           onClose={() => setShowFieldPicker(false)}
         />
