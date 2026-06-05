@@ -73,20 +73,22 @@ export function ArcheotechTab({ archeotech, editable, onUpdate }: ArcheotechTabP
           <h3 className={uiSectionHeader}>
             Inventory ({archeotech.length})
           </h3>
-          {editable && !showCustomForm && (
+          {!showCustomForm && (
             <div className="flex gap-2">
               <button
                 onClick={() => setShowPicker(true)}
                 className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
               >
-                + From Reference
+                {editable ? "+ From Reference" : "View Reference"}
               </button>
-              <button
-                onClick={() => setShowCustomForm(true)}
-                className="text-xs px-3 py-1 rounded border border-amber-600/50 bg-amber-600/10 text-amber-400 hover:bg-amber-600/20 transition"
-              >
-                + Custom Item
-              </button>
+              {editable && (
+                <button
+                  onClick={() => setShowCustomForm(true)}
+                  className="text-xs px-3 py-1 rounded border border-amber-600/50 bg-amber-600/10 text-amber-400 hover:bg-amber-600/20 transition"
+                >
+                  + Custom Item
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -115,6 +117,7 @@ export function ArcheotechTab({ archeotech, editable, onUpdate }: ArcheotechTabP
       {/* ── MODAL ─────────────────────────────────────────────────────────── */}
       {showPicker && (
         <ArcheotechPickerModal
+          editable={editable}
           onSelect={addFromRef}
           onClose={() => setShowPicker(false)}
         />

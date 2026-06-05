@@ -29,6 +29,7 @@ import { effectiveRangedStats, getCompatibleUpgrades } from "./weaponHelpers";
 // ─── Ranged Picker ────────────────────────────────────────────────────────────
 
 export function RangedPicker({
+  editable = true,
   onSelect,
   onCustom,
   onClose,
@@ -37,6 +38,7 @@ export function RangedPicker({
   placeholder = "Search weapons…",
   showCustom = true,
 }: {
+  editable?: boolean;
   onSelect: (ref: RangedWeaponRef) => void;
   onCustom: () => void;
   onClose: () => void;
@@ -58,7 +60,7 @@ export function RangedPicker({
       onQueryChange={setQuery}
       onClose={onClose}
       isEmpty={filtered.length === 0}
-      footer={showCustom ? (
+      footer={editable && showCustom ? (
         <button
           onClick={onCustom}
           className="w-full text-sm text-amber-400 hover:text-amber-300 text-center py-1"
@@ -70,11 +72,11 @@ export function RangedPicker({
       {filtered.map((ref) => (
         <button
           key={ref.id}
-          onClick={() => onSelect(ref)}
-          className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group"
+          onClick={editable ? () => onSelect(ref) : undefined}
+          className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
           <div className="flex items-center justify-between gap-2">
-            <span className="text-sm font-medium text-slate-200 group-hover:text-white">
+            <span className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}>
               {ref.name}
             </span>
             <span className="text-xs text-slate-500 shrink-0">{ref.class}</span>

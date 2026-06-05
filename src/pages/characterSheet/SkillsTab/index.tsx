@@ -52,14 +52,12 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField }: SkillsTa
       {/* Header */}
       <div className="flex items-center justify-between">
         <p className={uiSectionHeader}>Trained Skills</p>
-        {editable && (
-          <button
-            onClick={() => setIsAddOpen(true)}
-            className="text-xs px-3 py-1.5 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
-          >
-            + Add Skill
-          </button>
-        )}
+        <button
+          onClick={() => setIsAddOpen(true)}
+          className="text-xs px-3 py-1.5 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
+        >
+          {editable ? "+ Add Skill" : "View Skills"}
+        </button>
       </div>
 
       {/* Skill list */}
@@ -86,6 +84,7 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField }: SkillsTa
       {/* Add skill modal */}
       <AddSkillModal
         isOpen={isAddOpen}
+        editable={editable}
         onClose={() => setIsAddOpen(false)}
         untrainedSkills={untrainedSkills}
         onAdd={handleAdd}
