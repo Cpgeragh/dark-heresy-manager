@@ -103,6 +103,28 @@ export default function CharacterSheet() {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [navigate]);
 
+  const basePath = `/campaign/${params.campaignId}/character/${params.characterId}`;
+  useEffect(() => {
+    window.history.pushState(null, '', window.location.href);
+
+    const handlePopState = () => {
+      const onCharSheet = window.location.pathname.startsWith(basePath);
+      const atFloor = onCharSheet && !window.location.search.includes('tab=');
+
+      if (!onCharSheet) {
+        // Safety net — redirect back if somehow the sentinel was exhausted
+        navigate(`${basePath}?tab=stats`, { replace: true });
+      } else if (atFloor) {
+        // Hit the floor (stats, no tab param) — replenish the sentinel
+        window.history.pushState(null, '', window.location.href);
+      }
+      // Tab-to-tab back navigation — do nothing, works normally
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [basePath, navigate]);
+
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {
