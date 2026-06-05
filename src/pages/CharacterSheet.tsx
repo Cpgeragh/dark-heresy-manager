@@ -1,7 +1,7 @@
 // src/pages/CharacterSheet.tsx
 
 import { useState, useCallback, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useHeaderExtensionSetters } from "../context/HeaderExtensionContext";
 import { CharacterKebabContent } from "./characterSheet/CharacterKebabContent";
 import { CHARACTERISTIC_BONUS_DIVISOR } from "../constants/gameRules";
@@ -94,7 +94,15 @@ export default function CharacterSheet() {
     characterIdParam: params.characterId,
   });
 
-  const [activeTab, setActiveTab] = useState<TabId>("stats");
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const activeTab = (searchParams.get("tab") as TabId) ?? "stats";
+
+  const handleTabChange = useCallback((tab: TabId) => {
+    navigate(`?tab=${tab}`);
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [navigate]);
+
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {
@@ -323,7 +331,7 @@ export default function CharacterSheet() {
 
       {/* NAV BAR */}
       <div className="relative flex items-center mb-4 py-1">
-        <SectionDrawer activeTab={activeTab} onTabChange={setActiveTab} isDM={isDM} />
+        <SectionDrawer activeTab={activeTab} onTabChange={handleTabChange} isDM={isDM} />
         <span className="absolute inset-x-0 text-center font-semibold text-slate-100 text-lg pointer-events-none">
           {TAB_TITLES[activeTab]}
         </span>
@@ -345,7 +353,7 @@ export default function CharacterSheet() {
                 </p>
               </div>
               <button
-                onClick={() => setActiveTab("vitals")}
+                onClick={() => handleTabChange("vitals")}
                 className="px-4 py-2 bg-slate-800 text-slate-200 rounded border border-slate-700 hover:bg-slate-700 transition"
               >
                 Back to Overview

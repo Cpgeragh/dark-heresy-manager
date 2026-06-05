@@ -81,6 +81,21 @@ export function ArmourTab({
     [editable, armour, onUpdate]
   );
 
+  const toggleForceField = useCallback(
+    (id: string) => {
+      if (!editable) return;
+      const field = armour.find((p) => p.id === id);
+      if (!field) return;
+      const activating = !field.worn;
+      onUpdate(armour.map((p) => {
+        if (!p.isForceField) return p;
+        if (activating) return { ...p, worn: p.id === id };
+        return p.id === id ? { ...p, worn: false } : p;
+      }));
+    },
+    [editable, armour, onUpdate]
+  );
+
   const regularArmour = armour.filter((p) => !p.isForceField);
   const forceFields   = armour.filter((p) => p.isForceField);
   const worn          = regularArmour.filter((p) => p.worn);
@@ -190,7 +205,7 @@ export function ArmourTab({
         </div>
         {forceFields.length === 0 && <p className="text-sm text-slate-500 italic">No force field equipped.</p>}
         {forceFields.map((piece) => (
-          <ForceFieldRow key={piece.id} piece={piece} editable={editable} onToggle={toggleWorn} onRemove={removePiece} onInfo={setInfoTarget} />
+          <ForceFieldRow key={piece.id} piece={piece} editable={editable} onToggle={toggleForceField} onRemove={removePiece} onInfo={setInfoTarget} />
         ))}
       </section>
 

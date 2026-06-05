@@ -2029,6 +2029,10 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d10 R",
     pen: 0,
     specialRules: "—",
+    description:
+      "Fire Lance / Flame Hammer: ignores 3 points of the target's Toughness Bonus after modifiers such as Unnatural Toughness. " +
+      "Cauterizes wounds it inflicts, so ongoing bleeding effects caused by the weapon are ignored. " +
+      "May fire once as a Flamer; after doing so it needs refuelling and no longer ignores Toughness or cauterizes wounds until recharged.",
     weight: "4 kg",
     value: "550 Thrones",
     rarity: "Rare",
@@ -2041,6 +2045,10 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "2d10 I",
     pen: 2,
     specialRules: "Unwieldy",
+    description:
+      "Fire Lance / Flame Hammer: ignores 3 points of the target's Toughness Bonus after modifiers such as Unnatural Toughness. " +
+      "Cauterizes wounds it inflicts, so ongoing bleeding effects caused by the weapon are ignored. " +
+      "May fire once as a Flamer; after doing so it needs refuelling and no longer ignores Toughness or cauterizes wounds until recharged.",
     twoHanded: true,
     weight: "8 kg",
     value: "800 Thrones",

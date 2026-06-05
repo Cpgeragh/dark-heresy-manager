@@ -8,6 +8,7 @@ import {
 import { editableInputClass } from "../../../ui/editableStyles";
 import { rarityColour, sourceColour } from "../../../ui/sourceStyles";
 import { RARITY_OPTIONS } from "./archeotechConstants";
+import { PickerModal } from "../../../ui/PickerModal";
 
 interface Props {
   onSelect: (ref: ArcheotechRef, gmValue?: string, gmRarity?: string) => void;
@@ -53,135 +54,105 @@ export function ArcheotechPickerModal({ onSelect, onClose }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-lg bg-slate-900 border border-slate-500 rounded-xl shadow-2xl flex flex-col max-h-[80vh]">
+    <PickerModal
+      title={pending ? "GM-Assigned Values" : "Add Known Archeotech"}
+      placeholder="Search archeotech…"
+      query={query}
+      onQueryChange={setQuery}
+      onClose={pending ? () => setPending(null) : onClose}
+      closeLabel={pending ? "←" : "×"}
+      isEmpty={!pending && filtered.length === 0}
+      hideSearch={!!pending}
+    >
+      {pending ? (
+        // ── Step 2: GM form ──────────────────────────────────────────────────
+        <div className="p-4 space-y-4">
+          <p className="text-sm text-slate-400">
+            <span className="font-medium text-slate-200">{pending.name}</span> has no
+            standard cost or availability. Enter the values the GM has assigned.
+          </p>
 
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
-          <h3 className="text-sm font-semibold text-slate-200">
-            {pending ? "GM-Assigned Values" : "Add Known Archeotech"}
-          </h3>
-          <button
-            onClick={pending ? () => setPending(null) : onClose}
-            className="text-slate-400 hover:text-slate-200 text-lg leading-none"
-          >
-            {pending ? "←" : "×"}
-          </button>
-        </div>
-
-        {/* Step 2 — GM values */}
-        {pending ? (
-          <div className="p-4 space-y-4 overflow-y-auto">
-            <p className="text-sm text-slate-400">
-              <span className="font-medium text-slate-200">{pending.name}</span> has no
-              standard cost or availability. Enter the values the GM has assigned.
-            </p>
-
-            {/* Cost */}
-            <div className="space-y-1">
-              <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
-                Cost (Thrones) <span className="text-red-400">*</span>
-              </label>
-              <input
-                type="number"
-                min={1}
-                step={1}
-                autoFocus
-                value={gmCost}
-                onChange={(e) => setGmCost(e.target.value)}
-                placeholder="e.g. 5000"
-                className={editableInputClass(true)}
-              />
-              {gmCost.trim() !== "" && !costValid && (
-                <p className="text-xs text-red-400">Must be a whole number of 1 or more.</p>
-              )}
-            </div>
-
-            {/* Rarity */}
-            <div className="space-y-1">
-              <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
-                Rarity <span className="text-red-400">*</span>
-              </label>
-              <select
-                value={gmRarity}
-                onChange={(e) => setGmRarity(e.target.value)}
-                className={editableInputClass(true) + " appearance-none"}
-              >
-                <option value="">— Select rarity —</option>
-                {RARITY_OPTIONS.map((r) => (
-                  <option key={r} value={r}>{r}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Buttons */}
-            <div className="flex gap-2 pt-1">
-              <button
-                onClick={() => setPending(null)}
-                className="px-4 py-1.5 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm text-slate-100 transition"
-              >
-                Back
-              </button>
-              <button
-                onClick={handleConfirm}
-                disabled={!canConfirm}
-                className="flex-1 py-1.5 rounded bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed text-sm text-slate-900 font-semibold transition"
-              >
-                Add to Inventory
-              </button>
-            </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+              Cost (Thrones) <span className="text-red-400">*</span>
+            </label>
+            <input
+              type="number"
+              min={1}
+              step={1}
+              value={gmCost}
+              onChange={(e) => setGmCost(e.target.value)}
+              placeholder="e.g. 5000"
+              className={editableInputClass(true)}
+            />
+            {gmCost.trim() !== "" && !costValid && (
+              <p className="text-xs text-red-400">Must be a whole number of 1 or more.</p>
+            )}
           </div>
-        ) : (
-          <>
-            {/* Search */}
-            <div className="px-4 py-2 border-b border-slate-800">
-              <input
-                type="text"
-                autoFocus
-                placeholder="Search archeotech…"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                className={editableInputClass(true)}
-              />
-            </div>
 
-            {/* List */}
-            <div className="overflow-y-auto flex-1 divide-y divide-slate-800">
-              {filtered.length === 0 && (
-                <p className="p-4 text-sm text-slate-500 text-center">No matches.</p>
-              )}
-              {filtered.map((ref) => (
-                <button
-                  key={ref.id}
-                  onClick={() => handleRowClick(ref)}
-                  className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group"
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-medium text-slate-200 group-hover:text-white">
-                      {ref.name}
-                    </span>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-xs text-slate-500">{ref.type}</span>
-                      <span className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(ref.source)}`}>
-                        {ref.source}
-                      </span>
-                    </div>
-                  </div>
-                  {ref.rarity && ref.rarity !== "—" && (
-                    <p className={`text-xs mt-0.5 ${rarityColour(ref.rarity)}`}>{ref.rarity}</p>
-                  )}
-                  {ref.rarity === "—" && (
-                    <p className="text-xs mt-0.5 text-amber-400/70 italic">GM determines cost &amp; rarity</p>
-                  )}
-                  {ref.description && (
-                    <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{ref.description}</p>
-                  )}
-                </button>
+          <div className="space-y-1">
+            <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+              Rarity <span className="text-red-400">*</span>
+            </label>
+            <select
+              value={gmRarity}
+              onChange={(e) => setGmRarity(e.target.value)}
+              className={editableInputClass(true) + " appearance-none"}
+            >
+              <option value="">— Select rarity —</option>
+              {RARITY_OPTIONS.map((r) => (
+                <option key={r} value={r}>{r}</option>
               ))}
+            </select>
+          </div>
+
+          <div className="flex gap-2 pt-1">
+            <button
+              onClick={() => setPending(null)}
+              className="px-4 py-1.5 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm text-slate-100 transition"
+            >
+              Back
+            </button>
+            <button
+              onClick={handleConfirm}
+              disabled={!canConfirm}
+              className="flex-1 py-1.5 rounded bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed text-sm text-slate-900 font-semibold transition"
+            >
+              Add to Inventory
+            </button>
+          </div>
+        </div>
+      ) : (
+        // ── Step 1: Search list ──────────────────────────────────────────────
+        filtered.map((ref) => (
+          <button
+            key={ref.id}
+            onClick={() => handleRowClick(ref)}
+            className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group"
+          >
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-sm font-medium text-slate-200 group-hover:text-white">
+                {ref.name}
+              </span>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-xs text-slate-500">{ref.type}</span>
+                <span className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(ref.source)}`}>
+                  {ref.source}
+                </span>
+              </div>
             </div>
-          </>
-        )}
-      </div>
-    </div>
+            {ref.rarity && ref.rarity !== "—" && (
+              <p className={`text-xs mt-0.5 ${rarityColour(ref.rarity)}`}>{ref.rarity}</p>
+            )}
+            {ref.rarity === "—" && (
+              <p className="text-xs mt-0.5 text-amber-400/70 italic">GM determines cost &amp; rarity</p>
+            )}
+            {ref.description && (
+              <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{ref.description}</p>
+            )}
+          </button>
+        ))
+      )}
+    </PickerModal>
   );
 }
