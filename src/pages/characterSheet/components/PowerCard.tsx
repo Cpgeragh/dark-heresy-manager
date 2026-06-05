@@ -5,9 +5,8 @@ import type { PsychicPower } from "../../../types/Character";
 
 interface PowerCardProps {
   power: PsychicPower;
-  index: number;
   editable: boolean;
-  onRemove: (index: number) => void;
+  onRemove: (id: string) => void;
 }
 
 /** Shared stat row — used in both the card and the InfoModal header. */
@@ -53,7 +52,6 @@ function PowerStats({ power }: { power: PsychicPower }) {
 
 export function PowerCard({
   power,
-  index,
   editable,
   onRemove,
 }: PowerCardProps) {
@@ -75,22 +73,24 @@ export function PowerCard({
   return (
     <div className="flex items-start justify-between gap-2 rounded border border-slate-500 bg-slate-900/60 px-3 py-2 text-sm">
       <div className="space-y-1 min-w-0 flex-1">
-        <p className="font-medium text-slate-100">
-          {power.name || (
-            <span className="italic text-slate-500">Unnamed power</span>
-          )}
-        </p>
+        <div className="flex items-center gap-1.5">
+          <p className="font-medium text-slate-100">
+            {power.name || (
+              <span className="italic text-slate-500">Unnamed power</span>
+            )}
+          </p>
+          <InfoModal
+            title={power.name || "Psychic Power"}
+            content={modalContent}
+          />
+        </div>
         <PowerStats power={power} />
       </div>
 
       <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
-        <InfoModal
-          title={power.name || "Psychic Power"}
-          content={modalContent}
-        />
         {editable && (
           <button
-            onClick={() => onRemove(index)}
+            onClick={() => onRemove(power.id)}
             aria-label={`Remove ${power.name || "power"}`}
             className="text-slate-500 hover:text-red-400 transition text-xs"
           >
