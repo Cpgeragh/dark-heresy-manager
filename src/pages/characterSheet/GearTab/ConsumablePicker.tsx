@@ -32,18 +32,14 @@ export function ConsumablePicker({ editable = true, onSelect, onClose }: Props) 
           onClick={editable ? () => onSelect(ref) : undefined}
           className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
-          <div className="flex items-center justify-between gap-2">
-            <p className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}>
-              {ref.name}
-            </p>
-            <span className="text-xs shrink-0">
-              <span className="text-amber-400/80 font-mono">₮ {ref.value}</span>
-              <span className={`ml-2 ${rarityColour(ref.rarity)}`}>{ref.rarity}</span>
-            </span>
+          <p className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}>
+            {ref.name}
+          </p>
+          <div className="flex items-center gap-2 text-xs mt-0.5 flex-wrap">
+            <span className="text-amber-400/80 font-mono">₮ {ref.value}</span>
+            <span className={rarityColour(ref.rarity)}>{ref.rarity}</span>
+            {ref.description && <span className="text-slate-500">{ref.description}</span>}
           </div>
-          {ref.description && (
-            <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{ref.description}</p>
-          )}
         </button>
       ))}
     </PickerModal>

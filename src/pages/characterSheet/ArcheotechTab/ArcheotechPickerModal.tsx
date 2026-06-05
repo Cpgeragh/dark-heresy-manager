@@ -132,26 +132,24 @@ export function ArcheotechPickerModal({ editable = true, onSelect, onClose }: Pr
             onClick={editable ? () => handleRowClick(ref) : undefined}
             className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
           >
-            <div className="flex items-center justify-between gap-2">
-              <span className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}>
-                {ref.name}
+            <span className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}>
+              {ref.name}
+            </span>
+            <div className="flex items-center gap-2 text-xs mt-0.5 flex-wrap">
+              <span className="text-slate-500">{ref.type}</span>
+              <span className={`rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(ref.source)}`}>
+                {ref.source}
               </span>
-              <div className="flex items-center gap-2 shrink-0">
-                <span className="text-xs text-slate-500">{ref.type}</span>
-                <span className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(ref.source)}`}>
-                  {ref.source}
-                </span>
-              </div>
+              {ref.rarity && ref.rarity !== "—" && (
+                <span className={rarityColour(ref.rarity)}>{ref.rarity}</span>
+              )}
+              {ref.rarity === "—" && (
+                <span className="text-amber-400/70 italic">GM determines cost &amp; rarity</span>
+              )}
+              {ref.description && (
+                <span className="text-slate-500">{ref.description}</span>
+              )}
             </div>
-            {ref.rarity && ref.rarity !== "—" && (
-              <p className={`text-xs mt-0.5 ${rarityColour(ref.rarity)}`}>{ref.rarity}</p>
-            )}
-            {ref.rarity === "—" && (
-              <p className="text-xs mt-0.5 text-amber-400/70 italic">GM determines cost &amp; rarity</p>
-            )}
-            {ref.description && (
-              <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{ref.description}</p>
-            )}
           </button>
         ))
       )}
