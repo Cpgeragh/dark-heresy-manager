@@ -31,17 +31,13 @@ export function ForceFieldPicker({ editable = true, onSelect, onClose }: Props) 
           onClick={editable ? () => onSelect(ref) : undefined}
           className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
-          <div className="flex items-center justify-between gap-2">
-            <span className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}>
-              {ref.name}
-            </span>
-            <span className="text-xs text-slate-500 shrink-0">
-              PR {ref.protectionRating}
-            </span>
+          <span className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}>
+            {ref.name}
+          </span>
+          <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5 flex-wrap font-mono">
+            <span>PR {ref.protectionRating}</span>
+            {ref.notes && <span className="font-sans">{ref.notes}</span>}
           </div>
-          {ref.notes && (
-            <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{ref.notes}</p>
-          )}
         </button>
       ))}
     </PickerModal>

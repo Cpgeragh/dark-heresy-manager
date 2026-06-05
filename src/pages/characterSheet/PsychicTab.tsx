@@ -121,29 +121,27 @@ function PowerPicker({
           onClick={editable ? () => onSelect(ref) : undefined}
           className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
-          <div className="flex items-center justify-between gap-2 flex-wrap">
-            <div className="flex items-center gap-1.5 flex-1 min-w-0">
-              <span className="text-sm font-medium text-slate-200 group-hover:text-white">
-                {ref.name}
+          <div className="flex items-center gap-1.5">
+            <span className="text-sm font-medium text-slate-200 group-hover:text-white">
+              {ref.name}
+            </span>
+            {ref.description && (
+              <span className="inline-flex items-center leading-[0] shrink-0" onClick={(e) => e.stopPropagation()}>
+                <InfoModal
+                  title={ref.name}
+                  content={<p className="text-sm text-slate-300 leading-relaxed">{ref.description}</p>}
+                />
               </span>
-              {ref.description && (
-                <span className="inline-flex items-center leading-[0]" onClick={(e) => e.stopPropagation()}>
-                  <InfoModal
-                    title={ref.name}
-                    content={<p className="text-sm text-slate-300 leading-relaxed">{ref.description}</p>}
-                  />
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-2 text-xs text-slate-500 shrink-0 flex-wrap justify-end">
-              <span className="text-indigo-400/80">{ref.discipline}</span>
-              <span className="font-mono">PT {ref.threshold}</span>
-              <span>{ref.focusTime}</span>
-              <span>{ref.range}</span>
-              {ref.sustained && (
-                <span className="text-amber-500/80">Sustained</span>
-              )}
-            </div>
+            )}
+          </div>
+          <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5 flex-wrap">
+            <span className="text-indigo-400/80">{ref.discipline}</span>
+            <span className="font-mono">PT {ref.threshold}</span>
+            <span>{ref.focusTime}</span>
+            <span>{ref.range}</span>
+            {ref.sustained && (
+              <span className="text-amber-500/80">Sustained</span>
+            )}
           </div>
         </button>
       ))}

@@ -149,14 +149,15 @@ function IntegratedWeaponPicker({
           onClick={editable ? () => onSelectRanged(ref) : undefined}
           className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
-          <div className="flex items-center justify-between gap-2">
-            <span className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}>
-              {ref.name}
-            </span>
-            <span className="text-xs text-slate-500 shrink-0">{ref.class}</span>
-          </div>
-          <div className="text-xs text-slate-500 mt-0.5 font-mono">
-            {ref.range} · {ref.rof} · {ref.damage} · Pen {ref.pen}
+          <span className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}>
+            {ref.name}
+          </span>
+          <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5 flex-wrap font-mono">
+            <span>{ref.class}</span>
+            <span>{ref.range}</span>
+            <span>{ref.rof}</span>
+            <span>{ref.damage}</span>
+            <span>Pen {ref.pen}</span>
           </div>
         </button>
       ))}
@@ -166,14 +167,13 @@ function IntegratedWeaponPicker({
           onClick={editable ? () => onSelectMelee(ref) : undefined}
           className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
-          <div className="flex items-center justify-between gap-2">
-            <span className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}>
-              {ref.name}
-            </span>
-            <span className="text-xs text-slate-500 shrink-0">{ref.class}</span>
-          </div>
-          <div className="text-xs text-slate-500 mt-0.5 font-mono">
-            {ref.damage} · Pen {ref.pen}
+          <span className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}>
+            {ref.name}
+          </span>
+          <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5 flex-wrap font-mono">
+            <span>{ref.class}</span>
+            <span>{ref.damage}</span>
+            <span>Pen {ref.pen}</span>
           </div>
         </button>
       ))}

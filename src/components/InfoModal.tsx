@@ -39,7 +39,7 @@ export function InfoModal({ title, content }: InfoModalProps) {
         ref={dialogRef}
         onClick={handleBackdropClick}
         onClose={() => setOpen(false)}
-        className="w-[90vw] max-w-sm max-h-[70vh] overflow-y-auto rounded-lg bg-slate-800 border border-slate-600 shadow-xl p-0 text-slate-200 backdrop:bg-black/60"
+        className="w-[90vw] max-w-sm max-h-[70vh] overflow-y-auto rounded-lg bg-slate-800 border border-slate-600 shadow-xl p-0 text-slate-200 backdrop:bg-black/60 whitespace-normal"
       >
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700 sticky top-0 bg-slate-800">
           <h3 className="text-sm font-semibold">{title}</h3>

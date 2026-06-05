@@ -52,19 +52,15 @@ export function GrenadePicker({
           onClick={editable ? () => onSelect(ref) : undefined}
           className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
-          <div className="flex items-center justify-between gap-2">
-            <span className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}>
-              {ref.name}
-            </span>
-            <div className="flex items-center gap-1.5 text-xs shrink-0">
-              <span className={rarityColour(ref.rarity)}>{ref.rarity}</span>
-              <span className="text-slate-600">·</span>
-              <span className="text-amber-400/80 font-mono">₮ {ref.value}</span>
-            </div>
-          </div>
-          <div className="text-xs text-slate-500 mt-0.5 font-mono">
-            {ref.damage !== "—" ? ref.damage : "No damage"} · Pen {ref.pen} ·{" "}
-            {ref.specialRules}
+          <span className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}>
+            {ref.name}
+          </span>
+          <div className="flex items-center gap-2 text-xs mt-0.5 flex-wrap font-mono">
+            <span className={rarityColour(ref.rarity)}>{ref.rarity}</span>
+            <span className="text-amber-400/80">₮ {ref.value}</span>
+            <span className="text-slate-500">{ref.damage !== "—" ? ref.damage : "No damage"}</span>
+            <span className="text-slate-500">Pen {ref.pen}</span>
+            <span className="text-slate-500">{ref.specialRules}</span>
           </div>
         </button>
       ))}

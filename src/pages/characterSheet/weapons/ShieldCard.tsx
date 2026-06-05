@@ -45,14 +45,15 @@ export function ShieldPicker({
           onClick={editable ? () => onSelect(ref) : undefined}
           className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
-          <div className="flex items-center justify-between gap-2">
-            <span className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}>
-              {ref.name}
-            </span>
-            <span className="text-xs text-cyan-400 shrink-0 font-mono">AP {ref.ap}</span>
-          </div>
-          <div className="text-xs text-slate-500 mt-0.5 font-mono">
-            {ref.locations} · {ref.damage} · Pen {ref.pen} · {ref.specialRules}
+          <span className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}>
+            {ref.name}
+          </span>
+          <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5 flex-wrap font-mono">
+            <span className="text-cyan-400">AP {ref.ap}</span>
+            <span>{ref.locations}</span>
+            <span>{ref.damage}</span>
+            <span>Pen {ref.pen}</span>
+            <span>{ref.specialRules}</span>
           </div>
         </button>
       ))}
