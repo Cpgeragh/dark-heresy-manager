@@ -9,18 +9,19 @@ import {
   type PsychicDiscipline,
 } from "../../data/reference/psychicReference";
 import {
-  editableInputClass,
   sectionContainerClass,
   uiSectionHeader,
 } from "../../ui/editableStyles";
 import { PowerCard } from "./components/PowerCard";
 import { PickerModal } from "../../ui/PickerModal";
+import { InfoModal } from "../../components/InfoModal";
 import { usePsychicPowers } from "../../hooks/usePsychicPowers";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface PsychicTabProps {
   psychic: PsychicBlock;
+  psyRating: number;
   editable: boolean;
   onUpdate: (next: PsychicBlock) => void;
 }
@@ -32,12 +33,18 @@ type DisciplineFilter = PsychicDiscipline | "All";
 
 function PowerPicker({
   initialDiscipline,
+  excludeMinor = false,
+  minorOnly = false,
+  existingNames,
   onSelect,
   onCustomMinor,
   onCustomMajor,
   onClose,
 }: {
   initialDiscipline: DisciplineFilter;
+  excludeMinor?: boolean;
+  minorOnly?: boolean;
+  existingNames: Set<string>;
   onSelect: (ref: PsychicPowerRef) => void;
   onCustomMinor: () => void;
   onCustomMajor: () => void;
@@ -49,10 +56,20 @@ function PowerPicker({
   const filtered = PSYCHIC_POWER_REFERENCE.filter((r) => {
     const matchesQuery = r.name.toLowerCase().includes(query.toLowerCase());
     const matchesDiscipline = discipline === "All" || r.discipline === discipline;
-    return matchesQuery && matchesDiscipline;
+    const notMinor = !excludeMinor || r.discipline !== "Minor";
+    const onlyMinor = !minorOnly || r.discipline === "Minor";
+    const notAlreadyPicked = !existingNames.has(r.name);
+    return matchesQuery && matchesDiscipline && notMinor && onlyMinor && notAlreadyPicked;
   }).sort((a, b) => a.name.localeCompare(b.name));
 
-  const allFilters: DisciplineFilter[] = ["All", ...PSYCHIC_DISCIPLINES];
+  const allFilters: DisciplineFilter[] = [
+    ...(!minorOnly ? (["All"] as DisciplineFilter[]) : []),
+    ...PSYCHIC_DISCIPLINES.filter((d) => {
+      if (excludeMinor && d === "Minor") return false;
+      if (minorOnly && d !== "Minor") return false;
+      return true;
+    }),
+  ];
 
   return (
     <PickerModal
@@ -102,9 +119,19 @@ function PowerPicker({
           className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group"
         >
           <div className="flex items-center justify-between gap-2 flex-wrap">
-            <span className="text-sm font-medium text-slate-200 group-hover:text-white">
-              {ref.name}
-            </span>
+            <div className="flex items-center gap-1.5 flex-1 min-w-0">
+              <span className="text-sm font-medium text-slate-200 group-hover:text-white">
+                {ref.name}
+              </span>
+              {ref.description && (
+                <span className="inline-flex items-center leading-[0]" onClick={(e) => e.stopPropagation()}>
+                  <InfoModal
+                    title={ref.name}
+                    content={<p className="text-sm text-slate-300 leading-relaxed">{ref.description}</p>}
+                  />
+                </span>
+              )}
+            </div>
             <div className="flex items-center gap-2 text-xs text-slate-500 shrink-0 flex-wrap justify-end">
               <span className="text-indigo-400/80">{ref.discipline}</span>
               <span className="font-mono">PT {ref.threshold}</span>
@@ -115,9 +142,6 @@ function PowerPicker({
               )}
             </div>
           </div>
-          <p className="text-xs text-slate-500 mt-0.5 line-clamp-2 text-left">
-            {ref.description}
-          </p>
         </button>
       ))}
     </PickerModal>
@@ -126,18 +150,10 @@ function PowerPicker({
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export function PsychicTab({ psychic, editable, onUpdate }: PsychicTabProps) {
+export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTabProps) {
   const [pickerTarget, setPickerTarget] = useState<PickerTarget>(null);
 
   // ── Field updates ────────────────────────────────────────────────────────
-
-  const handlePsyRatingChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (!editable) return;
-      onUpdate({ ...psychic, psyRating: Number(e.target.value) });
-    },
-    [editable, psychic, onUpdate]
-  );
 
   const handleToggleDiscipline = useCallback(
     (d: string) => {
@@ -197,27 +213,20 @@ export function PsychicTab({ psychic, editable, onUpdate }: PsychicTabProps) {
   return (
     <div className="space-y-6">
       {/* PSY RATING & DISCIPLINES ────────────────────────────────────────── */}
-      <div className={sectionContainerClass(editable) + " space-y-3"}>
+      <div className={sectionContainerClass(editable) + " flex flex-col items-center space-y-3"}>
 
-        {/* Psy Rating */}
-        <label className="flex flex-col gap-0.5">
+        {/* Psy Rating — derived from highest Psy Rating talent */}
+        <div className="inline-flex flex-col items-center gap-1">
           <span className="text-xs font-medium uppercase tracking-wide text-slate-100">Psy Rating</span>
-          <input
-            disabled={!editable}
-            type="number"
-            min={0}
-            max={10}
-            value={psychic.psyRating ?? 0}
-            onChange={handlePsyRatingChange}
-            className={editableInputClass(editable) + " w-24"}
-            aria-label="Psy Rating"
-          />
-        </label>
+          <div className="w-[26px] h-[26px] flex items-center justify-center rounded border border-indigo-500/50 bg-indigo-950/40">
+            <span className="text-sm font-bold font-mono text-indigo-300">{psyRating}</span>
+          </div>
+        </div>
 
         {/* Disciplines — toggle chips, one per major discipline */}
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-100 mb-1.5">Disciplines</p>
-          <div className="flex flex-wrap gap-1.5">
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-100 mb-1.5 text-center">Disciplines</p>
+          <div className="flex flex-wrap gap-1.5 justify-center">
             {PSYCHIC_DISCIPLINES.filter((d) => d !== "Minor").map((d) => {
               const active = (psychic.disciplines ?? []).includes(d);
               return (
@@ -263,11 +272,10 @@ export function PsychicTab({ psychic, editable, onUpdate }: PsychicTabProps) {
           <p className="text-sm text-slate-400">No minor powers recorded.</p>
         ) : (
           <div className="space-y-3">
-            {psychic.minorPowers.map((power, index) => (
+            {[...psychic.minorPowers].sort((a, b) => a.name.localeCompare(b.name)).map((power) => (
               <PowerCard
                 key={power.id}
                 power={power}
-                index={index}
                 editable={editable}
                 onRemove={removeMinorPower}
               />
@@ -295,11 +303,10 @@ export function PsychicTab({ psychic, editable, onUpdate }: PsychicTabProps) {
           <p className="text-sm text-slate-400">No major powers recorded.</p>
         ) : (
           <div className="space-y-3">
-            {psychic.majorPowers.map((power, index) => (
+            {[...psychic.majorPowers].sort((a, b) => a.name.localeCompare(b.name)).map((power) => (
               <PowerCard
                 key={power.id}
                 power={power}
-                index={index}
                 editable={editable}
                 onRemove={removeMajorPower}
               />
@@ -312,6 +319,12 @@ export function PsychicTab({ psychic, editable, onUpdate }: PsychicTabProps) {
       {pickerTarget !== null && (
         <PowerPicker
           initialDiscipline={pickerInitialDiscipline}
+          excludeMinor={pickerTarget === "major"}
+          minorOnly={pickerTarget === "minor"}
+          existingNames={new Set([
+            ...psychic.minorPowers.map((p) => p.name),
+            ...psychic.majorPowers.map((p) => p.name),
+          ])}
           onSelect={fromReference}
           onCustomMinor={() => {
             setPickerTarget(null);

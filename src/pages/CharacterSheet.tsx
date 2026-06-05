@@ -469,6 +469,10 @@ export default function CharacterSheet() {
           {activeTab === "psychic" && (
             <PsychicTab
               psychic={character.psychic}
+              psyRating={(character.talentsAndTraits.talents ?? []).reduce((max, entry) => {
+                const match = entry.talentId.match(/^psy-rating-(\d+)$/);
+                return match ? Math.max(max, parseInt(match[1], 10)) : max;
+              }, 0)}
               editable={allowedToEdit}
               onUpdate={handleUpdatePsychic}
             />

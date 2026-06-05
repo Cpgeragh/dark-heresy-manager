@@ -37,15 +37,11 @@ export function usePsychicPowers({
   );
 
   const removePower = useCallback(
-    (type: PowerType, index: number) => {
+    (type: PowerType, id: string) => {
       if (!editable) return;
-
-      const powers = [...psychic[type]];
-      powers.splice(index, 1);
-
       onUpdate({
         ...psychic,
-        [type]: powers,
+        [type]: psychic[type].filter((p) => p.id !== id),
       });
     },
     [editable, psychic, onUpdate]
@@ -74,11 +70,11 @@ export function usePsychicPowers({
   const addMajorPower = useCallback(() => addPower("majorPowers"), [addPower]);
 
   const removeMinorPower = useCallback(
-    (index: number) => removePower("minorPowers", index),
+    (id: string) => removePower("minorPowers", id),
     [removePower]
   );
   const removeMajorPower = useCallback(
-    (index: number) => removePower("majorPowers", index),
+    (id: string) => removePower("majorPowers", id),
     [removePower]
   );
 
