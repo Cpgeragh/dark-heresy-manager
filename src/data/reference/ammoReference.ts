@@ -25,6 +25,31 @@ export interface AmmoRef {
   description?: string;
 }
 
+export const RECHARGING_POWER_PACKS_TEXT =
+  "Las power packs can be charged in the field from most power sources. Characters may make a Tech-Use Test to successfully charge any power pack if there is a suitable power source available. The time the pack takes to charge is determined by the power output of the source and is ultimately up to the GM, but typically takes several hours. Alternatively, power packs may be charged by placing them in an open flame. This takes at least a day and permanently reduces the clip size by half the first time it is charged in this way. It also removes a las weapon's Reliable special quality, or gives it the Unreliable special quality if it was not Reliable to start with. Each time a pack is recharged in this way there is a 30% chance it is permanently rendered useless.";
+
+export function isChargePackAmmoName(name: string): boolean {
+  return /^Charge Pack \(/i.test(name);
+}
+
+export function formatAmmoName(name: string): string {
+  return name.replace(/\(([^)]+)\)/, (_, type: string) => `(${type.charAt(0).toUpperCase()}${type.slice(1)})`);
+}
+
+export function usesUnitAmmoTracking(ammo?: Pick<AmmoRef, "id">): boolean {
+  if (!ammo) return false;
+  return new Set([
+    "cr-dumdum-bullets",
+    "cr-hot-shot-charge",
+    "cr-inferno-shells",
+    "cr-man-stopper-bullets",
+    "dh-cryptus-shotgun-shells",
+    "dh-psybolt-ammunition",
+    "dh-psyflame-ammunition",
+    "lw-purity-round",
+  ]).has(ammo.id);
+}
+
 // ─── Reference Data ───────────────────────────────────────────────────────────
 
 export const AMMO_REFERENCE: AmmoRef[] = [
@@ -80,7 +105,7 @@ export const AMMO_REFERENCE: AmmoRef[] = [
 
   {
     id: "cr-charge-pack-pistol",
-    name: "Charge Pack (pistol)",
+    name: "Charge Pack (Pistol)",
     source: SkillSource.CR,
     compatibleWith: "Laspistol, las carbine, lasgun, long las, MP lascannon",
     cost: "10 Thrones",
@@ -91,7 +116,7 @@ export const AMMO_REFERENCE: AmmoRef[] = [
   },
   {
     id: "cr-charge-pack-basic",
-    name: "Charge Pack (basic)",
+    name: "Charge Pack (Basic)",
     source: SkillSource.CR,
     compatibleWith: "Laspistol, las carbine, lasgun, long las, MP lascannon",
     cost: "15 Thrones",
@@ -102,7 +127,7 @@ export const AMMO_REFERENCE: AmmoRef[] = [
   },
   {
     id: "cr-charge-pack-heavy",
-    name: "Charge Pack (heavy)",
+    name: "Charge Pack (Heavy)",
     source: SkillSource.CR,
     compatibleWith: "Laspistol, las carbine, lasgun, long las, MP lascannon",
     cost: "30 Thrones",

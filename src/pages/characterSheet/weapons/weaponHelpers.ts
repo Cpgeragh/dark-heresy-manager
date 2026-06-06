@@ -2,6 +2,7 @@
 // Pure stat-calculation helpers (no React, no JSX).
 
 import type { RangedWeapon, MeleeWeapon } from "../../../types/Character";
+import type { AmmoRef } from "../../../data/reference/ammoReference";
 import {
   WEAPON_UPGRADE_REFERENCE,
   type WeaponUpgradeRef,
@@ -35,6 +36,20 @@ export function modifyPen(pen: string, delta: number): string {
   return isNaN(penVal) ? pen : String(Math.max(0, penVal + delta));
 }
 
+export function addSpecialRule(rules: string, toAdd: string): string {
+  const cleaned = rules.trim();
+  if (!cleaned || cleaned === "-" || cleaned === "—" || cleaned === "â€”") return toAdd;
+  const existing = cleaned.split(",").map((r) => r.trim().toLowerCase());
+  if (existing.includes(toAdd.toLowerCase())) return cleaned;
+  return `${cleaned}, ${toAdd}`;
+}
+
+function setPenAtLeast(pen: string, value: number): string {
+  const penVal = parseInt(pen);
+  if (isNaN(penVal)) return String(value);
+  return String(Math.max(penVal, value));
+}
+
 export function removeSpecialRule(rules: string, toRemove: string): string {
   const result = rules
     .split(",")
@@ -49,7 +64,8 @@ export function removeSpecialRule(rules: string, toRemove: string): string {
 
 export function effectiveRangedStats(
   weapon: RangedWeapon,
-  attachmentRefs: WeaponUpgradeRef[]
+  attachmentRefs: WeaponUpgradeRef[],
+  loadedAmmoRef?: AmmoRef
 ): { damage: string; range: string; clip: string; pen: string; specialRules: string } {
   let damage = weapon.damage ?? "";
   let range = weapon.range ?? "";
@@ -67,6 +83,31 @@ export function effectiveRangedStats(
       damage = modifyDamageBonus(damage, +1);
       clip = halveClip(clip);
     }
+  }
+  switch (loadedAmmoRef?.id) {
+    case "cr-dumdum-bullets":
+      damage = modifyDamageBonus(damage, +2);
+      break;
+    case "cr-hot-shot-charge":
+      damage = modifyDamageBonus(damage, +1);
+      pen = setPenAtLeast(pen, 4);
+      clip = "1";
+      specialRules = removeSpecialRule(specialRules, "Reliable");
+      break;
+    case "cr-man-stopper-bullets":
+      pen = modifyPen(pen, +3);
+      break;
+    case "dh-cryptus-shotgun-shells":
+      specialRules = addSpecialRule(specialRules, "Sanctified");
+      break;
+    case "dh-psybolt-ammunition":
+      specialRules = addSpecialRule(specialRules, "Sanctified");
+      break;
+    case "lw-purity-round":
+      specialRules = addSpecialRule(specialRules, "Haywire (2)");
+      break;
+    default:
+      break;
   }
   return { damage, range, clip, pen, specialRules };
 }

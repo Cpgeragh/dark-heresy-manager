@@ -110,16 +110,70 @@ export function GearTab({ gear, consumables, editable, onUpdate, onUpdateConsuma
     [editable, gear, onUpdate]
   );
 
-  const updateItemValue = useCallback(
-    (id: string, value: string) => {
-      if (!editable) return;
-      onUpdate(gear.map((g) => (g.id === id ? { ...g, value } : g)));
-    },
-    [editable, gear, onUpdate]
-  );
+  const consumableColumns = [
+    consumables.filter((_, index) => index % 2 === 0),
+    consumables.filter((_, index) => index % 2 === 1),
+  ];
+
+  const gearColumns = [
+    gear.filter((_, index) => index % 2 === 0),
+    gear.filter((_, index) => index % 2 === 1),
+  ];
 
   return (
     <div className="space-y-6">
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className={uiSectionHeader}>
+            Items ({gear.length})
+          </h3>
+          {!showCustomForm && (
+            <button
+              onClick={() => setShowGearPicker(true)}
+              className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
+            >
+              {editable ? "+ Add Item" : "View"}
+            </button>
+          )}
+        </div>
+
+        {gear.length === 0 && !showCustomForm && (
+          <p className="text-sm text-slate-500 italic">No items recorded.</p>
+        )}
+
+        <div className="space-y-3 sm:hidden">
+          {gear.map((item) => (
+            <ItemRow
+              key={item.id}
+              item={item}
+              editable={editable}
+              onRemove={() => removeItem(item.id)}
+            />
+          ))}
+        </div>
+
+        <div className="hidden sm:grid sm:grid-cols-2 sm:gap-3 sm:items-start">
+          {gearColumns.map((column, index) => (
+            <div key={index} className="space-y-3">
+              {column.map((item) => (
+                <ItemRow
+                  key={item.id}
+                  item={item}
+                  editable={editable}
+                  onRemove={() => removeItem(item.id)}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+
+        {showCustomForm && (
+          <CustomItemForm
+            onAdd={addCustom}
+            onCancel={() => setShowCustomForm(false)}
+          />
+        )}
+      </section>
       {/* CONSUMABLES ──────────────────────────────────────────────────────── */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
@@ -138,56 +192,35 @@ export function GearTab({ gear, consumables, editable, onUpdate, onUpdateConsuma
           <p className="text-sm text-slate-500 italic">No consumables recorded.</p>
         )}
 
-        {consumables.map((item) => (
-          <ConsumableRow
-            key={item.id}
-            item={item}
-            editable={editable}
-            onUpdateQty={updateConsumableQty}
-            onRemove={removeConsumable}
-          />
-        ))}
-      </section>
-
-      {/* GEAR ─────────────────────────────────────────────────────────────── */}
-      <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className={uiSectionHeader}>
-            Carried Items ({gear.length})
-          </h3>
-          {!showCustomForm && (
-            <button
-              onClick={() => setShowGearPicker(true)}
-              className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
-            >
-              {editable ? "+ Add Item" : "View"}
-            </button>
-          )}
+        <div className="space-y-3 sm:hidden">
+          {consumables.map((item) => (
+            <ConsumableRow
+              key={item.id}
+              item={item}
+              editable={editable}
+              onUpdateQty={updateConsumableQty}
+              onRemove={removeConsumable}
+            />
+          ))}
         </div>
 
-        {gear.length === 0 && !showCustomForm && (
-          <p className="text-sm text-slate-500 italic">No items recorded.</p>
-        )}
-
-        {gear.map((item) => (
-          <ItemRow
-            key={item.id}
-            item={item}
-            editable={editable}
-            onUpdateValue={(value) => updateItemValue(item.id, value)}
-            onRemove={() => removeItem(item.id)}
-          />
-        ))}
-
-        {showCustomForm && (
-          <CustomItemForm
-            onAdd={addCustom}
-            onCancel={() => setShowCustomForm(false)}
-          />
-        )}
+        <div className="hidden sm:grid sm:grid-cols-2 sm:gap-3 sm:items-start">
+          {consumableColumns.map((column, index) => (
+            <div key={index} className="space-y-3">
+              {column.map((item) => (
+                <ConsumableRow
+                  key={item.id}
+                  item={item}
+                  editable={editable}
+                  onUpdateQty={updateConsumableQty}
+                  onRemove={removeConsumable}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
       </section>
 
-      {/* MODALS ───────────────────────────────────────────────────────────── */}
       {showConsumablePicker && (
         <ConsumablePicker
           editable={editable}

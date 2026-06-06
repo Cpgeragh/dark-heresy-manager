@@ -122,7 +122,7 @@ export const DEFAULT_SKILLS: SkillEntry[] = [
   { id: "forbidden-ordos", name: "Forbidden Lore (Ordos)", characteristic: "int", level: "untrained", category: "Forbidden Lore", advanced: true, source: "CR" },
   { id: "forbidden-mechanicus", name: "Forbidden Lore (Adeptus Mechanicus)", characteristic: "int", level: "untrained", category: "Forbidden Lore", advanced: true, source: "CR" },
   { id: "forbidden-psyker", name: "Forbidden Lore (Psykers)", characteristic: "int", level: "untrained", category: "Forbidden Lore", advanced: true, source: "CR" },
-  { id: "forbidden-warp", name: "Forbidden Lore (The Warp)", characteristic: "int", level: "untrained", category: "Forbidden Lore", advanced: true, source: "CR" },
+  { id: "forbidden-warp", name: "Forbidden Lore (Warp)", characteristic: "int", level: "untrained", category: "Forbidden Lore", advanced: true, source: "CR" },
   { id: "forbidden-xenos", name: "Forbidden Lore (Xenos)", characteristic: "int", level: "untrained", category: "Forbidden Lore", advanced: true, source: "CR" },
 
   // ===== PERFORMER SKILLS =====

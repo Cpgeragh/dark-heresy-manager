@@ -4,7 +4,7 @@ import type { CyberneticItem } from "../../../types/Character";
 import { CYBERNETICS_REFERENCE } from "../../../data/reference/cyberneticsReference";
 import { rarityColour } from "../../../ui/sourceStyles";
 import { CRAFTSMANSHIP_STYLE } from "./cyberneticsConstants";
-import { craftsmanshipDescription } from "./cyberneticsHelpers";
+import { availableCraftsmanship, craftsmanshipDescription } from "./cyberneticsHelpers";
 
 interface Props {
   item: CyberneticItem;
@@ -13,6 +13,10 @@ interface Props {
 
 export function CyberneticInfoModal({ item, onClose }: Props) {
   const ref = CYBERNETICS_REFERENCE.find((r) => r.id === item.referenceId);
+  const qualityOptions = availableCraftsmanship(ref);
+  const displayedCraftsmanship = qualityOptions.includes(item.craftsmanship)
+    ? item.craftsmanship
+    : qualityOptions[0];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
@@ -20,8 +24,8 @@ export function CyberneticInfoModal({ item, onClose }: Props) {
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
           <div className="flex items-center gap-2">
             <h3 className="text-sm font-semibold text-slate-200">{item.name}</h3>
-            <span className={`text-xs px-1.5 py-0.5 rounded border font-medium ${CRAFTSMANSHIP_STYLE[item.craftsmanship]}`}>
-              {item.craftsmanship}
+            <span className={`text-xs px-1.5 py-0.5 rounded border font-medium ${CRAFTSMANSHIP_STYLE[displayedCraftsmanship]}`}>
+              {displayedCraftsmanship}
             </span>
           </div>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-200 text-lg leading-none">×</button>
@@ -39,10 +43,10 @@ export function CyberneticInfoModal({ item, onClose }: Props) {
           {/* Craftsmanship rules */}
           <div>
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
-              {item.craftsmanship} Quality
+              {displayedCraftsmanship} Quality
             </p>
             <p className="text-sm text-slate-300 leading-relaxed">
-              {ref ? craftsmanshipDescription(ref, item.craftsmanship) : item.notes ?? "No rules recorded."}
+              {ref ? craftsmanshipDescription(ref, displayedCraftsmanship) : item.notes ?? "No rules recorded."}
             </p>
           </div>
 

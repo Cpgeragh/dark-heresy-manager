@@ -2,7 +2,7 @@
 // MeleePicker, CustomMeleeForm, MeleeCard — co-located for navigability.
 
 import { useState, useEffect } from "react";
-import type { MeleeWeapon } from "../../../types/Character";
+import type { MeleeWeapon, WeaponCraftsmanship } from "../../../types/Character";
 import {
   MELEE_WEAPON_REFERENCE,
   type MeleeWeaponRef,
@@ -25,6 +25,29 @@ import {
   EquipToggle,
 } from "./weaponShared";
 import { effectiveMeleeStats, getCompatibleUpgrades } from "./weaponHelpers";
+
+const WEAPON_CRAFTSMANSHIP_OPTIONS: WeaponCraftsmanship[] = ["Poor", "Common", "Good", "Best"];
+
+const WEAPON_CRAFTSMANSHIP_STYLE: Record<WeaponCraftsmanship, string> = {
+  Poor: "border-red-500/70 bg-red-500/15 text-red-300",
+  Common: "border-slate-500 bg-slate-800 text-slate-200",
+  Good: "border-emerald-500/70 bg-emerald-500/15 text-emerald-300",
+  Best: "border-amber-400 bg-amber-500/20 text-amber-300",
+};
+
+function meleeCraftsmanshipDescription(craftsmanship: WeaponCraftsmanship): string {
+  switch (craftsmanship) {
+    case "Poor":
+      return "Poor melee weapons incur a -10 penalty to Tests made to attack.";
+    case "Good":
+      return "Good melee weapons add a +5 bonus to Tests made to attack.";
+    case "Best":
+      return "Best melee weapons add a +10 bonus to Tests made to attack and add 1 to the Damage they inflict.";
+    case "Common":
+    default:
+      return "Common craftsmanship melee weapons have no additional modifier.";
+  }
+}
 
 function hasMultipleMeleeProfiles(damage?: string): boolean {
   return !!damage && /\bLow:\s|\bHigh:\s|;/.test(damage);
@@ -49,7 +72,7 @@ export function MeleePicker({
   showCustom = true,
 }: {
   editable?: boolean;
-  onSelect: (ref: MeleeWeaponRef) => void;
+  onSelect: (ref: MeleeWeaponRef, craftsmanship: WeaponCraftsmanship) => void;
   onCustom: () => void;
   onClose: () => void;
   references?: MeleeWeaponRef[];
@@ -58,9 +81,72 @@ export function MeleePicker({
   showCustom?: boolean;
 }) {
   const [query, setQuery] = useState("");
+  const [selected, setSelected] = useState<MeleeWeaponRef | null>(null);
+  const [craftsmanship, setCraftsmanship] = useState<WeaponCraftsmanship>("Common");
   const filtered = references.filter((r) =>
     r.name.toLowerCase().includes(query.toLowerCase())
   ).sort((a, b) => a.name.localeCompare(b.name));
+
+  function resetPicker() {
+    setSelected(null);
+    setCraftsmanship("Common");
+  }
+
+  if (selected) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+        <div className="w-full max-w-md bg-slate-900 border border-slate-500 rounded-xl shadow-2xl">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
+            <h3 className="text-sm font-semibold text-slate-200">{selected.name}</h3>
+            <button onClick={resetPicker} className="text-slate-400 hover:text-slate-200 text-lg leading-none">
+              {"\u00D7"}
+            </button>
+          </div>
+
+          <div className="px-4 py-4 space-y-4">
+            <div>
+              <p className="text-xs text-slate-400 mb-2">Select weapon craftsmanship:</p>
+              <div className="flex gap-2">
+                {WEAPON_CRAFTSMANSHIP_OPTIONS.map((q) => (
+                  <button
+                    key={q}
+                    onClick={() => setCraftsmanship(q)}
+                    className={[
+                      "flex-1 py-1.5 rounded border text-sm font-medium transition",
+                      craftsmanship === q
+                        ? WEAPON_CRAFTSMANSHIP_STYLE[q]
+                        : "border-slate-700 bg-slate-800 text-slate-400 hover:border-slate-500",
+                    ].join(" ")}
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="text-xs text-slate-400 bg-slate-800/60 rounded p-3 leading-relaxed">
+              {meleeCraftsmanshipDescription(craftsmanship)}
+            </div>
+          </div>
+
+          <div className="px-4 py-3 border-t border-slate-700 flex gap-2">
+            <button
+              onClick={resetPicker}
+              className="px-4 py-1.5 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm text-slate-100"
+            >
+              Back
+            </button>
+            <button
+              onClick={() => onSelect(selected, craftsmanship)}
+              className="flex-1 py-1.5 rounded bg-amber-600 hover:bg-amber-500 text-sm text-slate-900 font-semibold"
+            >
+              Add Weapon
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <PickerModal
@@ -82,7 +168,7 @@ export function MeleePicker({
       {filtered.map((ref) => (
         <button
           key={ref.id}
-          onClick={editable ? () => onSelect(ref) : undefined}
+          onClick={editable ? () => setSelected(ref) : undefined}
           className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
           <span className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}>
@@ -228,6 +314,7 @@ export function MeleeCard({
   const rulesDescription = weaponRef?.description;
   const hasQualityModal = ruleNamesInLookup.length > 0;
   const hasItemRules = !!rulesDescription;
+  const craftsmanship = weapon.craftsmanship ?? "Common";
   const isThrown =
     weapon.class?.toLowerCase().includes("thrown") ||
     weaponRef?.class.toLowerCase().includes("thrown");
@@ -336,6 +423,14 @@ export function MeleeCard({
           ) : (
             <span className="text-xs text-slate-600 italic">-</span>
           )}
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Craftsmanship</span>
+          <span className="text-xs text-slate-400 italic">{craftsmanship}</span>
+          <InfoModal
+            title={`${craftsmanship} Weapon`}
+            content={meleeCraftsmanshipDescription(craftsmanship)}
+          />
         </div>
       </div>
 

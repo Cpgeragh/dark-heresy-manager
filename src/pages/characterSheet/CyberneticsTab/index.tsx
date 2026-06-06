@@ -3,11 +3,11 @@
 import { useState, useCallback } from "react";
 import type { CyberneticItem, CyberneticCraftsmanship, ArmourLocationKey } from "../../../types/Character";
 import type { CyberneticRef } from "../../../data/reference/cyberneticsReference";
-import { CyberneticInfoModal } from "./CyberneticInfoModal";
 import { ImplantPicker } from "./ImplantPicker";
 import { ImplantRow } from "./ImplantRow";
-import { nextCraftsmanship } from "./cyberneticsHelpers";
+import { nextAvailableCraftsmanship } from "./cyberneticsHelpers";
 import { uiSectionHeader } from "../../../ui/editableStyles";
+import { CYBERNETICS_REFERENCE } from "../../../data/reference/cyberneticsReference";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -21,7 +21,6 @@ interface CyberneticsTabProps {
 
 export function CyberneticsTab({ cybernetics, editable, onUpdate }: CyberneticsTabProps) {
   const [showPicker, setShowPicker] = useState(false);
-  const [infoTarget, setInfoTarget] = useState<CyberneticItem | null>(null);
 
   const install = useCallback(
     (ref: CyberneticRef, craftsmanship: CyberneticCraftsmanship, bodyLocation?: ArmourLocationKey[]) => {
@@ -48,9 +47,11 @@ export function CyberneticsTab({ cybernetics, editable, onUpdate }: CyberneticsT
     (id: string) => {
       if (!editable) return;
       onUpdate(
-        cybernetics.map((c) =>
-          c.id === id ? { ...c, craftsmanship: nextCraftsmanship(c.craftsmanship) } : c
-        )
+        cybernetics.map((c) => {
+          if (c.id !== id) return c;
+          const ref = CYBERNETICS_REFERENCE.find((r) => r.id === c.referenceId);
+          return { ...c, craftsmanship: nextAvailableCraftsmanship(c.craftsmanship, ref) };
+        })
       );
     },
     [editable, cybernetics, onUpdate]
@@ -63,6 +64,11 @@ export function CyberneticsTab({ cybernetics, editable, onUpdate }: CyberneticsT
     },
     [editable, cybernetics, onUpdate]
   );
+
+  const cyberneticColumns = [
+    cybernetics.filter((_, index) => index % 2 === 0),
+    cybernetics.filter((_, index) => index % 2 === 1),
+  ];
 
   return (
     <div className="space-y-6">
@@ -85,20 +91,37 @@ export function CyberneticsTab({ cybernetics, editable, onUpdate }: CyberneticsT
           <p className="text-sm text-slate-500 italic">No cybernetics installed.</p>
         )}
 
-        {cybernetics.map((item) => (
-          <ImplantRow
-            key={item.id}
-            item={item}
-            editable={editable}
-            onCycleQuality={cycleQuality}
-            onRemove={removeImplant}
-            onInfo={setInfoTarget}
-          />
-        ))}
+        <div className="space-y-3 sm:hidden">
+          {cybernetics.map((item) => (
+            <ImplantRow
+              key={item.id}
+              item={item}
+              editable={editable}
+              onCycleQuality={cycleQuality}
+              onRemove={removeImplant}
+            />
+          ))}
+        </div>
+
+        <div className="hidden sm:grid sm:grid-cols-2 sm:gap-3 sm:items-start">
+          {cyberneticColumns.map((column, index) => (
+            <div key={index} className="space-y-3">
+              {column.map((item) => (
+                <ImplantRow
+                  key={item.id}
+                  item={item}
+                  editable={editable}
+                  onCycleQuality={cycleQuality}
+                  onRemove={removeImplant}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
       </section>
 
       <p className="text-xs text-slate-600">
-        Cost shown is for Common craftsmanship. Click the quality badge to cycle between Poor, Common and Good.
+        Cost shown is for Common craftsmanship. Available qualities depend on the implant's rules.
       </p>
 
       {showPicker && (
@@ -108,12 +131,6 @@ export function CyberneticsTab({ cybernetics, editable, onUpdate }: CyberneticsT
         />
       )}
 
-      {infoTarget && (
-        <CyberneticInfoModal
-          item={infoTarget}
-          onClose={() => setInfoTarget(null)}
-        />
-      )}
     </div>
   );
 }

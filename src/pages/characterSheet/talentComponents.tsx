@@ -299,7 +299,7 @@ export function EntrySection({
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {entries.map((entry) => (
+          {[...entries].sort((a, b) => a.name.localeCompare(b.name)).map((entry) => (
             <EntryCard
               key={entry.uid}
               entry={entry}

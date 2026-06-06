@@ -5,8 +5,8 @@ import type { CyberneticCraftsmanship, ArmourLocationKey } from "../../../types/
 import { CYBERNETICS_REFERENCE, type CyberneticRef } from "../../../data/reference/cyberneticsReference";
 import { rarityColour } from "../../../ui/sourceStyles";
 import { PickerModal } from "../../../ui/PickerModal";
-import { CRAFTSMANSHIP_ORDER, CRAFTSMANSHIP_STYLE, LOCATION_DISPLAY } from "./cyberneticsConstants";
-import { craftsmanshipDescription } from "./cyberneticsHelpers";
+import { CRAFTSMANSHIP_STYLE, LOCATION_DISPLAY } from "./cyberneticsConstants";
+import { availableCraftsmanship, craftsmanshipDescription, defaultCraftsmanship } from "./cyberneticsHelpers";
 
 interface Props {
   onSelect: (ref: CyberneticRef, craftsmanship: CyberneticCraftsmanship, bodyLocation?: ArmourLocationKey[]) => void;
@@ -23,7 +23,11 @@ export function ImplantPicker({ onSelect, onClose }: Props) {
     .filter((r) => r.name.toLowerCase().includes(query.toLowerCase()))
     .sort((a, b) => a.name.localeCompare(b.name));
 
-  const resetPicker = () => { setSelected(null); setLocation(null); };
+  const resetPicker = () => { setSelected(null); setLocation(null); setCraftsmanship("Common"); };
+  const selectImplant = (ref: CyberneticRef) => {
+    setSelected(ref);
+    setCraftsmanship(defaultCraftsmanship(ref));
+  };
 
   // ── Step 2: Location picker (arm/leg implants only) ───────────────────────
   if (selected && selected.requiresLocation && !location) {
@@ -78,6 +82,7 @@ export function ImplantPicker({ onSelect, onClose }: Props) {
 
   // ── Step 3: Craftsmanship picker ──────────────────────────────────────────
   if (selected) {
+    const qualities = availableCraftsmanship(selected);
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
         <div className="w-full max-w-md bg-slate-900 border border-slate-500 rounded-xl shadow-2xl">
@@ -100,7 +105,7 @@ export function ImplantPicker({ onSelect, onClose }: Props) {
             <div>
               <p className="text-xs text-slate-400 mb-2">Select craftsmanship quality:</p>
               <div className="flex gap-2">
-                {CRAFTSMANSHIP_ORDER.map((q) => (
+                {qualities.map((q) => (
                   <button
                     key={q}
                     onClick={() => setCraftsmanship(q)}
@@ -154,7 +159,7 @@ export function ImplantPicker({ onSelect, onClose }: Props) {
       {filtered.map((ref) => (
         <button
           key={ref.id}
-          onClick={() => setSelected(ref)}
+          onClick={() => selectImplant(ref)}
           className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group"
         >
           <div className="flex items-center justify-between gap-2">
@@ -174,4 +179,3 @@ export function ImplantPicker({ onSelect, onClose }: Props) {
     </PickerModal>
   );
 }
-

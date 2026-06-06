@@ -117,6 +117,7 @@ export interface RangedWeapon {
   rarity?: string;
   source?: string;        // e.g. "CR", "BoJ" — which book to look this up in
   custom?: boolean;       // true when created via "Add Custom"
+  craftsmanship?: WeaponCraftsmanship;
   attachments?: string[]; // WeaponUpgradeRef.id values for fitted upgrades
   ammoEntries?: WeaponAmmoEntry[]; // ammo types carried; one marked loaded
   quantity?: number;      // for thrown weapons (bolas, throwing stars) — how many carried
@@ -137,10 +138,13 @@ export interface MeleeWeapon {
   rarity?: string;
   source?: string;
   custom?: boolean;
+  craftsmanship?: WeaponCraftsmanship;
   attachments?: string[]; // WeaponUpgradeRef.id values for fitted upgrades
   quantity?: number;      // for thrown melee weapons (knives, spears) — how many carried
   equipped?: boolean;     // true = carried on body, shown expanded and pinned to top
 }
+
+export type WeaponCraftsmanship = "Poor" | "Common" | "Good" | "Best";
 
 export interface ShieldItem {
   id: string;
@@ -177,6 +181,8 @@ export type ArmourLocationKey =
   | "rightLeg"
   | "leftLeg";
 
+export type ArmourCraftsmanship = "Poor" | "Common" | "Good" | "Best";
+
 export interface WornArmourPiece {
   id: string;
   referenceId?: string;   // links back to ArmourRef.id
@@ -194,6 +200,7 @@ export interface WornArmourPiece {
   value?: string;
   rarity?: string;
   source?: string;
+  craftsmanship?: ArmourCraftsmanship;
   custom?: boolean;       // true when created via "Add Custom"
   /** true for force fields — no locations or AP, tracked separately in the Armour tab */
   isForceField?: boolean;
@@ -386,6 +393,7 @@ export interface PsychicPower {
   sustained?: string;
   range?: string;
   description?: string;
+  source?: string;
   isMinor?: boolean;
   known: boolean;
 }

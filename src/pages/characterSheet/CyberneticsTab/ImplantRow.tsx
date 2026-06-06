@@ -1,30 +1,65 @@
 // src/pages/characterSheet/CyberneticsTab/ImplantRow.tsx
 
 import type { CyberneticItem } from "../../../types/Character";
-import { CYBERNETICS_REFERENCE, type CyberneticRef } from "../../../data/reference/cyberneticsReference";
+import { CYBERNETICS_REFERENCE } from "../../../data/reference/cyberneticsReference";
 import { sectionContainerClass } from "../../../ui/editableStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { CRAFTSMANSHIP_STYLE, LOCATION_DISPLAY } from "./cyberneticsConstants";
-import { craftsmanshipDescription } from "./cyberneticsHelpers";
+import { availableCraftsmanship, craftsmanshipDescription } from "./cyberneticsHelpers";
+import { InfoModal } from "../../../components/InfoModal";
 
 interface Props {
   item: CyberneticItem;
   editable: boolean;
   onCycleQuality: (id: string) => void;
   onRemove: (id: string) => void;
-  onInfo: (item: CyberneticItem) => void;
 }
 
-export function ImplantRow({ item, editable, onCycleQuality, onRemove, onInfo }: Props) {
+export function ImplantRow({ item, editable, onCycleQuality, onRemove }: Props) {
   const ref = CYBERNETICS_REFERENCE.find((r) => r.id === item.referenceId);
+  const qualityOptions = availableCraftsmanship(ref);
+  const canChangeQuality = editable && qualityOptions.length > 1;
+  const displayedCraftsmanship = qualityOptions.includes(item.craftsmanship)
+    ? item.craftsmanship
+    : qualityOptions[0];
+  const qualityDescription = ref
+    ? craftsmanshipDescription(ref, displayedCraftsmanship)
+    : item.notes ?? "No rules recorded.";
 
   return (
-    <div className={[sectionContainerClass(editable), "flex items-center gap-3"].join(" ")}>
+    <div className={[sectionContainerClass(editable), "flex items-start gap-3"].join(" ")}>
       {/* Name + craftsmanship description */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-slate-200">{item.name}</p>
+        <div className="flex items-center gap-1.5 min-w-0">
+          <p className="text-sm font-medium text-slate-200 truncate">{item.name}</p>
+          <InfoModal
+            title={item.name}
+            content={
+              <div className="space-y-3">
+                {ref?.notes && (
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Item Rules</p>
+                    <p className="text-sm text-slate-300 leading-relaxed">{ref.notes}</p>
+                  </div>
+                )}
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
+                    {displayedCraftsmanship} Quality
+                  </p>
+                  <p className="text-sm text-slate-300 leading-relaxed">{qualityDescription}</p>
+                </div>
+                {item.notes && (
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Notes</p>
+                    <p className="text-sm text-slate-300 leading-relaxed">{item.notes}</p>
+                  </div>
+                )}
+              </div>
+            }
+          />
+        </div>
         <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">
-          {craftsmanshipDescription(ref ?? {} as CyberneticRef, item.craftsmanship)}
+          {qualityDescription}
         </p>
         <div className="flex flex-wrap gap-1.5 mt-1">
           {item.bodyLocation && item.bodyLocation.length > 0 && (
@@ -40,31 +75,37 @@ export function ImplantRow({ item, editable, onCycleQuality, onRemove, onInfo }:
             source={item.source ?? ref?.source}
           />
         </div>
+        <div className="flex items-center gap-1.5 mt-1">
+          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Quality</span>
+          <button
+            onClick={() => canChangeQuality && onCycleQuality(item.id)}
+            title={canChangeQuality ? `Click to change quality (currently ${displayedCraftsmanship})` : displayedCraftsmanship}
+            disabled={!canChangeQuality}
+            className={[
+              "text-xs px-1.5 py-0.5 rounded border font-medium transition shrink-0",
+              CRAFTSMANSHIP_STYLE[displayedCraftsmanship],
+              canChangeQuality ? "cursor-pointer hover:opacity-80" : "cursor-default",
+            ].join(" ")}
+          >
+            {displayedCraftsmanship}
+          </button>
+          <InfoModal
+            title={`${displayedCraftsmanship} ${item.name}`}
+            content={qualityDescription}
+          />
+        </div>
       </div>
 
       {/* Info button */}
       <button
-        onClick={() => onInfo(item)}
+        onClick={() => undefined}
         title="View rules"
-        className="text-slate-500 hover:text-slate-300 text-sm px-1 transition shrink-0"
+        className="hidden"
       >
         ⓘ
       </button>
 
       {/* Craftsmanship badge — clickable when editable */}
-      <button
-        onClick={() => editable && onCycleQuality(item.id)}
-        title={editable ? `Click to change craftsmanship (currently ${item.craftsmanship})` : item.craftsmanship}
-        disabled={!editable}
-        className={[
-          "text-xs px-2 py-1 rounded border font-medium transition shrink-0",
-          CRAFTSMANSHIP_STYLE[item.craftsmanship],
-          editable ? "cursor-pointer hover:opacity-80" : "cursor-default",
-        ].join(" ")}
-      >
-        {item.craftsmanship}
-      </button>
-
       {/* Remove */}
       {editable && (
         <button

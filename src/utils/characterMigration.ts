@@ -5,7 +5,8 @@
 // gear as string[]. These functions convert both to the current shapes so the
 // rest of the app can work with a single consistent format.
 
-import type { ArmourLocationKey, GearItem, WornArmourPiece } from "../types/Character";
+import { DEFAULT_SKILLS } from "../data/defaultSkills";
+import type { ArmourLocationKey, GearItem, SkillEntry, WornArmourPiece } from "../types/Character";
 
 const LOCATION_KEYS: ArmourLocationKey[] = [
   "head", "body", "rightArm", "leftArm", "rightLeg", "leftLeg",
@@ -34,5 +35,48 @@ export function normaliseGear(raw: unknown): GearItem[] {
       return { id: crypto.randomUUID(), name: item };
     }
     return item as GearItem;
+  });
+}
+
+export function normaliseSkills(raw: unknown): SkillEntry[] {
+  if (!Array.isArray(raw)) return DEFAULT_SKILLS;
+
+  const savedById = new Map(
+    (raw as SkillEntry[]).map((skill) => [skill.id, skill])
+  );
+
+  return DEFAULT_SKILLS.map((skill) => {
+    const saved = savedById.get(skill.id);
+    if (!saved) return skill;
+
+    return {
+      ...skill,
+      level: saved.level ?? skill.level,
+      miscModifier: saved.miscModifier,
+      notes: saved.notes,
+    };
+  });
+}
+
+export function skillsNeedNormalisation(raw: unknown, normalised = normaliseSkills(raw)): boolean {
+  if (!Array.isArray(raw)) return true;
+
+  const current = raw as SkillEntry[];
+  if (current.length !== normalised.length) return true;
+
+  return normalised.some((skill, index) => {
+    const saved = current[index];
+    return (
+      !saved ||
+      saved.id !== skill.id ||
+      saved.name !== skill.name ||
+      saved.characteristic !== skill.characteristic ||
+      saved.level !== skill.level ||
+      saved.category !== skill.category ||
+      saved.advanced !== skill.advanced ||
+      saved.source !== skill.source ||
+      saved.miscModifier !== skill.miscModifier ||
+      saved.notes !== skill.notes
+    );
   });
 }

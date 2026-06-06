@@ -3,7 +3,13 @@
 
 import { useState } from "react";
 import type { AmmoItem } from "../../../types/Character";
-import { AMMO_REFERENCE, type AmmoRef } from "../../../data/reference/ammoReference";
+import {
+  AMMO_REFERENCE,
+  RECHARGING_POWER_PACKS_TEXT,
+  formatAmmoName,
+  isChargePackAmmoName,
+  type AmmoRef,
+} from "../../../data/reference/ammoReference";
 import { editableInputClass, sectionContainerClass } from "../../../ui/editableStyles";
 import { rarityColour, sourceColour } from "../../../ui/sourceStyles";
 import { QuantityControl } from "../../../ui/QuantityControl";
@@ -53,7 +59,7 @@ export function AmmoPicker({
         >
           <div className="flex items-center justify-between gap-2">
             <span className="text-sm font-medium text-slate-200 group-hover:text-white">
-              {ref.name}
+              {formatAmmoName(ref.name)}
             </span>
             <div className="flex items-center gap-1.5 text-xs shrink-0">
               <span className={rarityColour(ref.rarity)}>{ref.rarity}</span>
@@ -221,12 +227,15 @@ export function AmmoCard({
   onRemove: () => void;
   onUpdateAmount: (amount: number) => void;
 }) {
+  const displayName = formatAmmoName(item.name);
+  const isChargePack = isChargePackAmmoName(displayName);
+
   return (
     <div className={sectionContainerClass(editable)}>
       {/* Header */}
       <div className="flex items-start justify-between gap-2 mb-2">
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-slate-200">{item.name}</p>
+          <p className="text-sm font-semibold text-slate-200">{displayName}</p>
           {item.compatibleWith && (
             <span className="inline-block mt-0.5 text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">
               {item.compatibleWith}
@@ -236,7 +245,7 @@ export function AmmoCard({
         <div className="flex items-center gap-1.5 shrink-0">
           {(item.description || item.compatibleWith) && (
             <InfoModal
-              title={item.name}
+              title={displayName}
               content={
                 <div className="space-y-2">
                   {item.compatibleWith && (
@@ -252,6 +261,12 @@ export function AmmoCard({
                   )}
                 </div>
               }
+            />
+          )}
+          {isChargePack && (
+            <InfoModal
+              title="Recharging Power Packs"
+              content={RECHARGING_POWER_PACKS_TEXT}
             />
           )}
           {editable && (

@@ -1,7 +1,7 @@
 // src/pages/characterSheet/ArmourTab/index.tsx
 
 import { useState, useCallback } from "react";
-import type { WornArmourPiece, CyberneticItem } from "../../../types/Character";
+import type { WornArmourPiece, CyberneticItem, ArmourCraftsmanship } from "../../../types/Character";
 import type { ArmourRef } from "../../../data/reference/armourReference";
 
 import { wornApAt, bionicBonusAt, LOCATION_LABELS, LOCATION_ORDER } from "./armourHelpers";
@@ -21,6 +21,146 @@ interface ArmourTabProps {
   cybernetics?: CyberneticItem[];
 }
 
+function formatKg(value: number): string {
+  return `${Number(value.toFixed(2))} kg`;
+}
+
+function halveWeight(weight: string): string {
+  const match = weight.trim().match(/^(\d+(?:\.\d+)?)\s*kg$/i);
+  if (!match) return weight;
+  return formatKg(Number(match[1]) / 2);
+}
+
+function applyCraftsmanshipToRef(ref: ArmourRef, craftsmanship: ArmourCraftsmanship) {
+  if (craftsmanship !== "Best") {
+    return {
+      ap: ref.ap,
+      apOverrides: ref.apOverrides,
+      weight: ref.weight,
+    };
+  }
+
+  const apOverrides = ref.apOverrides
+    ? Object.fromEntries(
+        Object.entries(ref.apOverrides).map(([location, ap]) => [location, (ap ?? ref.ap) + 1])
+      ) as typeof ref.apOverrides
+    : undefined;
+
+  return {
+    ap: ref.ap + 1,
+    apOverrides,
+    weight: halveWeight(ref.weight),
+  };
+}
+
+function ArmourPieceGrid({
+  pieces,
+  editable,
+  worn,
+  onToggle,
+  onRemove,
+  onInfo,
+}: {
+  pieces: WornArmourPiece[];
+  editable: boolean;
+  worn: boolean;
+  onToggle: (id: string) => void;
+  onRemove: (id: string) => void;
+  onInfo: (piece: WornArmourPiece) => void;
+}) {
+  const columns = [
+    pieces.filter((_, index) => index % 2 === 0),
+    pieces.filter((_, index) => index % 2 === 1),
+  ];
+
+  return (
+    <>
+      <div className="space-y-2 sm:hidden">
+        {pieces.map((piece) => (
+          <PieceRow
+            key={piece.id}
+            piece={piece}
+            editable={editable}
+            worn={worn}
+            onToggle={onToggle}
+            onRemove={onRemove}
+            onInfo={onInfo}
+          />
+        ))}
+      </div>
+      <div className="hidden sm:grid sm:grid-cols-2 sm:gap-2 sm:items-start">
+        {columns.map((column, index) => (
+          <div key={index} className="space-y-2">
+            {column.map((piece) => (
+              <PieceRow
+                key={piece.id}
+                piece={piece}
+                editable={editable}
+                worn={worn}
+                onToggle={onToggle}
+                onRemove={onRemove}
+                onInfo={onInfo}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+function ForceFieldGrid({
+  pieces,
+  editable,
+  onToggle,
+  onRemove,
+  onInfo,
+}: {
+  pieces: WornArmourPiece[];
+  editable: boolean;
+  onToggle: (id: string) => void;
+  onRemove: (id: string) => void;
+  onInfo: (piece: WornArmourPiece) => void;
+}) {
+  const columns = [
+    pieces.filter((_, index) => index % 2 === 0),
+    pieces.filter((_, index) => index % 2 === 1),
+  ];
+
+  return (
+    <>
+      <div className="space-y-2 sm:hidden">
+        {pieces.map((piece) => (
+          <ForceFieldRow
+            key={piece.id}
+            piece={piece}
+            editable={editable}
+            onToggle={onToggle}
+            onRemove={onRemove}
+            onInfo={onInfo}
+          />
+        ))}
+      </div>
+      <div className="hidden sm:grid sm:grid-cols-2 sm:gap-2 sm:items-start">
+        {columns.map((column, index) => (
+          <div key={index} className="space-y-2">
+            {column.map((piece) => (
+              <ForceFieldRow
+                key={piece.id}
+                piece={piece}
+                editable={editable}
+                onToggle={onToggle}
+                onRemove={onRemove}
+                onInfo={onInfo}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
 export function ArmourTab({
   armour,
   toughnessBonus,
@@ -37,7 +177,10 @@ export function ArmourTab({
   const addPiece = useCallback(
     (piece: WornArmourPiece) => {
       if (!editable) return;
-      onUpdate([...armour, { ...piece, worn: pickerMode === "worn" }]);
+      const nextPiece = piece.isForceField
+        ? piece
+        : { ...piece, craftsmanship: piece.craftsmanship ?? "Common" as const };
+      onUpdate([...armour, { ...nextPiece, worn: pickerMode === "worn" }]);
       setShowPicker(false);
       setShowCustomForm(false);
     },
@@ -45,18 +188,20 @@ export function ArmourTab({
   );
 
   const fromReference = useCallback(
-    (ref: ArmourRef) => {
+    (ref: ArmourRef, craftsmanship: ArmourCraftsmanship = "Common") => {
+      const crafted = applyCraftsmanshipToRef(ref, craftsmanship);
       addPiece({
         id: crypto.randomUUID(),
         referenceId: ref.id,
         name: ref.name,
         locations: ref.locations,
-        ap: ref.ap,
-        ...(ref.apOverrides ? { apOverrides: ref.apOverrides } : {}),
+        ap: crafted.ap,
+        ...(crafted.apOverrides ? { apOverrides: crafted.apOverrides } : {}),
         ...(ref.isForceField ? { isForceField: true } : {}),
         ...(ref.protectionRating !== undefined ? { protectionRating: ref.protectionRating } : {}),
+        ...(!ref.isForceField ? { craftsmanship } : {}),
         worn: true,
-        weight: ref.weight,
+        weight: crafted.weight,
         value: ref.value,
         rarity: ref.rarity,
         source: ref.source,
@@ -162,9 +307,16 @@ export function ArmourTab({
           )}
         </div>
         {worn.length === 0 && <p className="text-sm text-slate-500 italic">No armour worn.</p>}
-        {worn.map((piece) => (
-          <PieceRow key={piece.id} piece={piece} editable={editable} worn onToggle={toggleWorn} onRemove={removePiece} onInfo={setInfoTarget} />
-        ))}
+        {worn.length > 0 && (
+          <ArmourPieceGrid
+            pieces={worn}
+            editable={editable}
+            worn
+            onToggle={toggleWorn}
+            onRemove={removePiece}
+            onInfo={setInfoTarget}
+          />
+        )}
       </section>
 
       {/* STOWED PIECES */}
@@ -183,9 +335,16 @@ export function ArmourTab({
           )}
         </div>
         {stowed.length === 0 && <p className="text-sm text-slate-500 italic">No armour stowed.</p>}
-        {stowed.map((piece) => (
-          <PieceRow key={piece.id} piece={piece} editable={editable} worn={false} onToggle={toggleWorn} onRemove={removePiece} onInfo={setInfoTarget} />
-        ))}
+        {stowed.length > 0 && (
+          <ArmourPieceGrid
+            pieces={stowed}
+            editable={editable}
+            worn={false}
+            onToggle={toggleWorn}
+            onRemove={removePiece}
+            onInfo={setInfoTarget}
+          />
+        )}
       </section>
 
       {/* FORCE FIELDS */}
@@ -202,9 +361,15 @@ export function ArmourTab({
           </button>
         </div>
         {forceFields.length === 0 && <p className="text-sm text-slate-500 italic">No force field equipped.</p>}
-        {forceFields.map((piece) => (
-          <ForceFieldRow key={piece.id} piece={piece} editable={editable} onToggle={toggleForceField} onRemove={removePiece} onInfo={setInfoTarget} />
-        ))}
+        {forceFields.length > 0 && (
+          <ForceFieldGrid
+            pieces={forceFields}
+            editable={editable}
+            onToggle={toggleForceField}
+            onRemove={removePiece}
+            onInfo={setInfoTarget}
+          />
+        )}
       </section>
 
       {/* CUSTOM FORM */}
