@@ -42,12 +42,6 @@ export function ImplantRow({ item, editable, onCycleQuality, onRemove }: Props) 
                     <p className="text-sm text-slate-300 leading-relaxed">{ref.notes}</p>
                   </div>
                 )}
-                <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
-                    {displayedCraftsmanship} Quality
-                  </p>
-                  <p className="text-sm text-slate-300 leading-relaxed">{qualityDescription}</p>
-                </div>
                 {item.notes && (
                   <div>
                     <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Notes</p>
