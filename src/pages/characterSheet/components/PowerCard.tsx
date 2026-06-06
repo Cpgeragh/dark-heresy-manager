@@ -1,6 +1,7 @@
 // src/pages/characterSheet/components/PowerCard.tsx
 
 import { InfoModal } from "../../../components/InfoModal";
+import { sourceColour } from "../../../ui/sourceStyles";
 import type { PsychicPower } from "../../../types/Character";
 
 interface PowerCardProps {
@@ -22,6 +23,11 @@ function PowerStats({ power }: { power: PsychicPower }) {
 
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs">
+      {power.source && (
+        <span className={`rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(power.source)}`}>
+          {power.source}
+        </span>
+      )}
       {power.discipline && (
         <span className="text-indigo-400">{power.discipline}</span>
       )}

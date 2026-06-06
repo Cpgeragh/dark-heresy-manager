@@ -24,6 +24,11 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField }: SkillsTa
     .filter((s) => s.level !== "untrained")
     .sort((a, b) => a.name.localeCompare(b.name));
 
+  const trainedSkillColumns = [
+    trainedSkills.filter((_, index) => index % 2 === 0),
+    trainedSkills.filter((_, index) => index % 2 === 1),
+  ];
+
   const untrainedSkills = computedSkills
     .filter((s) => s.level === "untrained")
     .sort((a, b) => a.name.localeCompare(b.name));
@@ -68,8 +73,22 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField }: SkillsTa
             : "No trained skills yet."}
         </p>
       ) : (
-        <div className="space-y-2">
-          {trainedSkills.map((skill) => (
+        <>
+          <div className="space-y-2 sm:hidden">
+            {trainedSkills.map((skill) => (
+              <SkillRow
+                key={skill.id}
+                skill={skill}
+                editable={editable}
+                updateLevel={updateLevel}
+                updateMisc={updateMisc}
+              />
+            ))}
+          </div>
+          <div className="hidden sm:grid sm:grid-cols-2 sm:gap-2 sm:items-start">
+            {trainedSkillColumns.map((column, index) => (
+              <div key={index} className="space-y-2">
+                {column.map((skill) => (
             <SkillRow
               key={skill.id}
               skill={skill}
@@ -77,8 +96,11 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField }: SkillsTa
               updateLevel={updateLevel}
               updateMisc={updateMisc}
             />
-          ))}
-        </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </>
       )}
 
       {/* Add skill modal */}

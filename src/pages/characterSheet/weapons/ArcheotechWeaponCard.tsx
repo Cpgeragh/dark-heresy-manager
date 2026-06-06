@@ -14,6 +14,7 @@ import {
   computeMeleeTotalDamage,
   EquipToggle,
 } from "./weaponShared";
+import { EXPLOSIVE_MISHAPS_CONTENT } from "./GrenadeCard";
 
 export function ArcheotechWeaponCard({
   item,
@@ -48,6 +49,7 @@ export function ArcheotechWeaponCard({
     .filter((name) => Boolean(name) && Boolean(WEAPON_SPECIAL_RULES[name]));
 
   const hasWeaponStats = !!(ref?.damage || ref?.weaponClass);
+  const showMishaps = item.type === "Grenade";
 
   return (
     <div className="border border-amber-700/40 bg-amber-900/10 rounded-lg p-3 space-y-3">
@@ -138,6 +140,12 @@ export function ArcheotechWeaponCard({
               <span className="text-xs text-slate-600 italic">-</span>
             )}
           </div>
+          {showMishaps && (
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] text-slate-500 uppercase tracking-wide">Mishaps</span>
+              <InfoModal title="Explosive Mishaps" content={EXPLOSIVE_MISHAPS_CONTENT} />
+            </div>
+          )}
         </div>
 
         {/* Weight / Value / Rarity / Source */}

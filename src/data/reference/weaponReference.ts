@@ -91,8 +91,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "1.5 kg",
     value: "50 Thrones",
     rarity: "Common",
-    ammoType: "Charge Pack (pistol)",
-    compatibleAmmoIds: ["cr-charge-pack-pistol", "cr-charge-pack-basic", "cr-charge-pack-heavy", "cr-hot-shot-charge"],
+    ammoType: "Charge Pack (Pistol)",
+    compatibleAmmoIds: ["cr-charge-pack-pistol", "cr-hot-shot-charge"],
   },
   {
     id: "cr-las-carbine",
@@ -112,8 +112,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "3 kg",
     value: "75 Thrones",
     rarity: "Common",
-    ammoType: "Charge Pack (basic)",
-    compatibleAmmoIds: ["cr-charge-pack-pistol", "cr-charge-pack-basic", "cr-charge-pack-heavy", "cr-hot-shot-charge"],
+    ammoType: "Charge Pack (Basic)",
+    compatibleAmmoIds: ["cr-charge-pack-basic", "cr-hot-shot-charge"],
   },
   {
     id: "cr-lasgun",
@@ -132,8 +132,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "4 kg",
     value: "75 Thrones",
     rarity: "Common",
-    ammoType: "Charge Pack (basic)",
-    compatibleAmmoIds: ["cr-charge-pack-pistol", "cr-charge-pack-basic", "cr-charge-pack-heavy", "cr-hot-shot-charge"],
+    ammoType: "Charge Pack (Basic)",
+    compatibleAmmoIds: ["cr-charge-pack-basic", "cr-hot-shot-charge"],
   },
   {
     id: "cr-long-las",
@@ -152,8 +152,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "4.5 kg",
     value: "100 Thrones",
     rarity: "Scarce",
-    ammoType: "Charge Pack (basic)",
-    compatibleAmmoIds: ["cr-charge-pack-pistol", "cr-charge-pack-basic", "cr-charge-pack-heavy", "cr-hot-shot-charge"],
+    ammoType: "Charge Pack (Basic)",
+    compatibleAmmoIds: ["cr-charge-pack-basic", "cr-hot-shot-charge"],
   },
   {
     id: "cr-mp-lascannon",
@@ -172,8 +172,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     weight: "55 kg",
     value: "5,000 Thrones",
     rarity: "Very Rare",
-    ammoType: "Charge Pack (heavy)",
-    compatibleAmmoIds: ["cr-charge-pack-pistol", "cr-charge-pack-basic", "cr-charge-pack-heavy"],
+    ammoType: "Charge Pack (Heavy)",
+    compatibleAmmoIds: ["cr-charge-pack-heavy"],
   },
 
   // Solid Projectile

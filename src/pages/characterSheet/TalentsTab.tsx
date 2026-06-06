@@ -71,7 +71,9 @@ function FaithTalentSection({
 
       <section className={sectionContainerClass(editable) + " space-y-4"}>
       {FAITH_GROUP_ORDER.map((group) => {
-        const groupEntries = entries.filter((e) => getFaithGroup(e.talentId) === group);
+        const groupEntries = entries
+          .filter((e) => getFaithGroup(e.talentId) === group)
+          .sort((a, b) => a.name.localeCompare(b.name));
         return (
           <div key={group}>
             <p className="text-xs font-medium uppercase tracking-wide text-slate-100 mb-1.5">

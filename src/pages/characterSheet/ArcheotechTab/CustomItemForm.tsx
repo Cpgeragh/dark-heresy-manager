@@ -10,6 +10,28 @@ interface Props {
   onCancel: () => void;
 }
 
+const WEIGHT_INPUT_RE = /^$|^\d+(?:\.\d?)?$/;
+const COMPLETE_WEIGHT_RE = /^\d+(?:\.\d)?$/;
+const VALUE_INPUT_RE = /^\d*$/;
+const COMPLETE_VALUE_RE = /^[1-9]\d*$/;
+
+function formatWeight(value: string): string | undefined {
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+  if (!COMPLETE_WEIGHT_RE.test(trimmed)) return undefined;
+
+  const kg = Number(trimmed);
+  const formatted = Number.isInteger(kg) ? String(kg) : kg.toFixed(1);
+  return `${formatted} kg`;
+}
+
+function formatValue(value: string): string | undefined {
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+  if (!COMPLETE_VALUE_RE.test(trimmed)) return undefined;
+  return `${trimmed} Thrones`;
+}
+
 export function CustomItemForm({ onAdd, onCancel }: Props) {
   const [name,        setName]        = useState("");
   const [type,        setType]        = useState<ItemType | "">("");
@@ -19,7 +41,25 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
   const [value,       setValue]       = useState("");
   const [rarity,      setRarity]      = useState("");
 
-  const canAdd = name.trim().length > 0;
+  const formattedWeight = formatWeight(weight);
+  const formattedValue = formatValue(value);
+  const canAdd =
+    name.trim().length > 0 &&
+    !!formattedWeight &&
+    !!formattedValue;
+
+  function handleWeightChange(value: string) {
+    const next = value.replace(",", ".");
+    if (WEIGHT_INPUT_RE.test(next)) {
+      setWeight(next);
+    }
+  }
+
+  function handleValueChange(value: string) {
+    if (VALUE_INPUT_RE.test(value)) {
+      setValue(value);
+    }
+  }
 
   function handleAdd() {
     if (!canAdd) return;
@@ -29,8 +69,8 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
       type:        type || undefined,
       description: description.trim() || undefined,
       notes:       notes.trim() || undefined,
-      weight:      weight.trim() || undefined,
-      value:       value.trim() || undefined,
+      weight:      formattedWeight,
+      value:       formattedValue,
       rarity:      rarity || undefined,
     });
   }
@@ -72,22 +112,24 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
       {/* Weight + Value on one row */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
-          <label className="text-xs font-medium uppercase tracking-wide text-slate-100">Weight <span className="text-slate-600">(optional)</span></label>
+          <label className="text-xs font-medium uppercase tracking-wide text-slate-100">Weight <span className="text-red-400">*</span></label>
           <input
             type="text"
+            inputMode="decimal"
             value={weight}
-            onChange={(e) => setWeight(e.target.value)}
-            placeholder="e.g. 2 kg"
+            onChange={(e) => handleWeightChange(e.target.value)}
+            placeholder="e.g. 2"
             className={editableInputClass(true)}
           />
         </div>
         <div className="space-y-1">
-          <label className="text-xs font-medium uppercase tracking-wide text-slate-100">Value <span className="text-slate-600">(optional)</span></label>
+          <label className="text-xs font-medium uppercase tracking-wide text-slate-100">Value <span className="text-red-400">*</span></label>
           <input
             type="text"
+            inputMode="numeric"
             value={value}
-            onChange={(e) => setValue(e.target.value)}
-            placeholder="e.g. Priceless"
+            onChange={(e) => handleValueChange(e.target.value)}
+            placeholder="e.g. 1000"
             className={editableInputClass(true)}
           />
         </div>

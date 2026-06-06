@@ -3,6 +3,7 @@
 import type { WornArmourPiece } from "../../../types/Character";
 import { sectionContainerClass } from "../../../ui/editableStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
+import { InfoModal } from "../../../components/InfoModal";
 import { locationLabel } from "./armourHelpers";
 
 interface Props {
@@ -14,11 +15,26 @@ interface Props {
   onInfo: (piece: WornArmourPiece) => void;
 }
 
+function armourCraftsmanshipInfo(craftsmanship: NonNullable<WornArmourPiece["craftsmanship"]>) {
+  switch (craftsmanship) {
+    case "Poor":
+      return "Badly fitted, designed or damaged armour. Characters wearing Poor armour take a -10 penalty to all Agility Tests.";
+    case "Good":
+      return "Well constructed and better fitting armour. Against the first attack in any round, the armour increases its AP by 1.";
+    case "Best":
+      return "Finely wrought and perfectly fitted armour. Best armour weighs half the normal amount and increases its AP by 1.";
+    case "Common":
+    default:
+      return "Common craftsmanship armour has no additional modifier.";
+  }
+}
+
 export function PieceRow({ piece, editable, worn, onToggle, onRemove, onInfo }: Props) {
   const apDesc =
     Object.keys(piece.apOverrides ?? {}).length > 0
       ? `AP ${piece.ap}*`
       : `AP ${piece.ap}`;
+  const craftsmanship = piece.craftsmanship ?? "Common";
 
   return (
     <div
@@ -49,6 +65,11 @@ export function PieceRow({ piece, editable, worn, onToggle, onRemove, onInfo }: 
           <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-300">{locationLabel(piece.locations)}</span>
           <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 font-mono text-slate-200">{apDesc}</span>
           <ItemMetaChips bare weight={piece.weight} value={piece.value} rarity={piece.rarity} source={piece.source} />
+        </div>
+        <div className="flex items-center gap-1.5 mt-1">
+          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Craftsmanship</span>
+          <span className="text-xs text-slate-400 italic">{craftsmanship}</span>
+          <InfoModal title={`${craftsmanship} Armour`} content={armourCraftsmanshipInfo(craftsmanship)} />
         </div>
       </div>
 

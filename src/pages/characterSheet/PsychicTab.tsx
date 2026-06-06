@@ -17,6 +17,7 @@ import { PickerModal } from "../../ui/PickerModal";
 import { InfoModal } from "../../components/InfoModal";
 import { usePsychicPowers } from "../../hooks/usePsychicPowers";
 import { TALENT_DESCRIPTIONS } from "../../data/talentDescriptions";
+import { sourceColour } from "../../ui/sourceStyles";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -135,6 +136,9 @@ function PowerPicker({
             )}
           </div>
           <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5 flex-wrap">
+            <span className={`rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(ref.source)}`}>
+              {ref.source}
+            </span>
             <span className="text-indigo-400/80">{ref.discipline}</span>
             <span className="font-mono">PT {ref.threshold}</span>
             <span>{ref.focusTime}</span>
@@ -150,6 +154,51 @@ function PowerPicker({
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
+
+function PowerGrid({
+  powers,
+  editable,
+  onRemove,
+}: {
+  powers: PsychicPower[];
+  editable: boolean;
+  onRemove: (id: string) => void;
+}) {
+  const sortedPowers = [...powers].sort((a, b) => a.name.localeCompare(b.name));
+  const columns = [
+    sortedPowers.filter((_, index) => index % 2 === 0),
+    sortedPowers.filter((_, index) => index % 2 === 1),
+  ];
+
+  return (
+    <>
+      <div className="space-y-3 sm:hidden">
+        {sortedPowers.map((power) => (
+          <PowerCard
+            key={power.id}
+            power={power}
+            editable={editable}
+            onRemove={onRemove}
+          />
+        ))}
+      </div>
+      <div className="hidden sm:grid sm:grid-cols-2 sm:gap-3 sm:items-start">
+        {columns.map((column, index) => (
+          <div key={index} className="space-y-3">
+            {column.map((power) => (
+              <PowerCard
+                key={power.id}
+                power={power}
+                editable={editable}
+                onRemove={onRemove}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
 
 export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTabProps) {
   const [pickerTarget, setPickerTarget] = useState<PickerTarget>(null);
@@ -190,6 +239,7 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
         sustained: ref.sustained ? "Yes" : "No",
         range: ref.range,
         description: ref.description,
+        source: ref.source,
         isMinor: ref.discipline === "Minor",
         known: true,
       };
@@ -280,16 +330,11 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
         {psychic.minorPowers.length === 0 ? (
           <p className="text-sm text-slate-400">No minor powers recorded.</p>
         ) : (
-          <div className="space-y-3">
-            {[...psychic.minorPowers].sort((a, b) => a.name.localeCompare(b.name)).map((power) => (
-              <PowerCard
-                key={power.id}
-                power={power}
-                editable={editable}
-                onRemove={removeMinorPower}
-              />
-            ))}
-          </div>
+          <PowerGrid
+            powers={psychic.minorPowers}
+            editable={editable}
+            onRemove={removeMinorPower}
+          />
         )}
       </section>
 
@@ -309,16 +354,11 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
         {psychic.majorPowers.length === 0 ? (
           <p className="text-sm text-slate-400">No major powers recorded.</p>
         ) : (
-          <div className="space-y-3">
-            {[...psychic.majorPowers].sort((a, b) => a.name.localeCompare(b.name)).map((power) => (
-              <PowerCard
-                key={power.id}
-                power={power}
-                editable={editable}
-                onRemove={removeMajorPower}
-              />
-            ))}
-          </div>
+          <PowerGrid
+            powers={psychic.majorPowers}
+            editable={editable}
+            onRemove={removeMajorPower}
+          />
         )}
       </section>
 

@@ -60,6 +60,11 @@ export function ArcheotechTab({ archeotech, editable, onUpdate }: ArcheotechTabP
     [editable, archeotech, onUpdate]
   );
 
+  const archeotechColumns = [
+    archeotech.filter((_, index) => index % 2 === 0),
+    archeotech.filter((_, index) => index % 2 === 1),
+  ];
+
   return (
     <div className="space-y-8">
       <p className="text-xs text-slate-400">
@@ -97,14 +102,31 @@ export function ArcheotechTab({ archeotech, editable, onUpdate }: ArcheotechTabP
           <p className="text-sm text-slate-500 italic">No archeotech recorded.</p>
         )}
 
-        {archeotech.map((item) => (
-          <ItemCard
-            key={item.id}
-            item={item}
-            editable={editable}
-            onRemove={() => removeItem(item.id)}
-          />
-        ))}
+        <div className="space-y-3 sm:hidden">
+          {archeotech.map((item) => (
+            <ItemCard
+              key={item.id}
+              item={item}
+              editable={editable}
+              onRemove={() => removeItem(item.id)}
+            />
+          ))}
+        </div>
+
+        <div className="hidden sm:grid sm:grid-cols-2 sm:gap-3 sm:items-start">
+          {archeotechColumns.map((column, index) => (
+            <div key={index} className="space-y-3">
+              {column.map((item) => (
+                <ItemCard
+                  key={item.id}
+                  item={item}
+                  editable={editable}
+                  onRemove={() => removeItem(item.id)}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
 
         {showCustomForm && (
           <CustomItemForm

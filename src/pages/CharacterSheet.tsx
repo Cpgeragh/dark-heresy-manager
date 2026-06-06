@@ -1,6 +1,6 @@
 // src/pages/CharacterSheet.tsx
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useHeaderExtensionSetters } from "../context/HeaderExtensionContext";
 import { CharacterKebabContent } from "./characterSheet/CharacterKebabContent";
@@ -51,7 +51,7 @@ import type {
 } from "../types/Character";
 
 import { exportCharacterJson } from "../utils/exportCharacter";
-import { normaliseArmour, normaliseGear } from "../utils/characterMigration";
+import { normaliseArmour, normaliseGear, normaliseSkills, skillsNeedNormalisation } from "../utils/characterMigration";
 import { SectionDrawer } from "../components/SectionDrawer";
 
 
@@ -97,6 +97,17 @@ export default function CharacterSheet() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const activeTab = (searchParams.get("tab") as TabId) ?? "stats";
+  const normalisedSkills = useMemo(
+    () => (character ? normaliseSkills(character.skills) : []),
+    [character?.skills]
+  );
+
+  useEffect(() => {
+    if (!character || !allowedToEdit) return;
+    if (skillsNeedNormalisation(character.skills, normalisedSkills)) {
+      updateField("skills", normalisedSkills);
+    }
+  }, [character, allowedToEdit, normalisedSkills, updateField]);
 
   const handleTabChange = useCallback((tab: TabId) => {
     navigate(`?tab=${tab}`);
@@ -310,7 +321,7 @@ export default function CharacterSheet() {
     armour:      "Armour",
     cybernetics: "Cybernetics",
     psychic:     "Psychic Powers",
-    gear:        "Gear & Equipment",
+    gear:        "Gear",
     drugs:       "Drugs",
     xp:          "Experience",
     notes:       "Notes",
@@ -405,7 +416,7 @@ export default function CharacterSheet() {
 
           {activeTab === "skills" && (
             <SkillsTab
-              skills={character.skills}
+              skills={normalisedSkills}
               editable={allowedToEdit}
               onUpdate={handleUpdateSkills}
               getCharField={getCharField}

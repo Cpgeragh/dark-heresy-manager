@@ -2,7 +2,7 @@
 // Orchestration layer: state management and layout for all weapon categories.
 // Card components, pickers and helpers live in ./weapons/.
 
-import { useState, useCallback, Fragment } from "react";
+import { useState, useCallback, Fragment, type ReactNode } from "react";
 import type {
   RangedWeapon,
   MeleeWeapon,
@@ -11,6 +11,7 @@ import type {
   CyberneticItem,
   ShieldItem,
   ArcheotechItem,
+  WeaponCraftsmanship,
 } from "../../types/Character";
 import { CYBERNETICS_REFERENCE } from "../../data/reference/cyberneticsReference";
 import { ARCHEOTECH_REFERENCE } from "../../data/reference/archeotechReference";
@@ -50,6 +51,37 @@ interface WeaponsTabProps {
 }
 
 type PickerTarget = "ranged" | "melee" | "integrated" | "grenades" | "shields" | null;
+
+function IndependentCardGrid({
+  items,
+  breakpoint = "sm",
+}: {
+  items: ReactNode[];
+  breakpoint?: "sm" | "lg";
+}) {
+  const columns = [
+    items.filter((_, index) => index % 2 === 0),
+    items.filter((_, index) => index % 2 === 1),
+  ];
+
+  const mobileClass = breakpoint === "lg" ? "space-y-3 lg:hidden" : "space-y-3 sm:hidden";
+  const desktopClass = breakpoint === "lg"
+    ? "hidden lg:grid lg:grid-cols-2 lg:gap-3 lg:items-start"
+    : "hidden sm:grid sm:grid-cols-2 sm:gap-3 sm:items-start";
+
+  return (
+    <>
+      <div className={mobileClass}>{items}</div>
+      <div className={desktopClass}>
+        {columns.map((column, index) => (
+          <div key={index} className="space-y-3">
+            {column}
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
 
 const INTEGRATED_RANGED_IDS = new Set([
   "lw-lathe-laspistol",
@@ -191,6 +223,35 @@ function getRangedSlots(weapon: RangedWeapon): number {
 }
 function getMeleeSlots(weapon: MeleeWeapon): number {
   return (weapon.class ?? "").toLowerCase().includes("two-handed") ? 2 : 1;
+}
+
+function addSpecialRule(rules: string, rule: string): string {
+  const cleaned = rules.trim();
+  if (!cleaned || cleaned === "-" || cleaned === "—") return rule;
+  const existing = cleaned.split(",").map((entry) => entry.trim().toLowerCase());
+  if (existing.includes(rule.toLowerCase())) return cleaned;
+  return `${cleaned}, ${rule}`;
+}
+
+function rangedRulesForCraftsmanship(rules: string, craftsmanship: WeaponCraftsmanship): string {
+  if (craftsmanship === "Poor") return addSpecialRule(rules, "Unreliable");
+  if (craftsmanship === "Good") return addSpecialRule(rules, "Reliable");
+  return rules;
+}
+
+function modifyDamageBonus(damage: string, delta: number): string {
+  const match = damage.trim().match(/^(\d*d\d+)([+-]\d+)?\s*([IREX])?$/i);
+  if (!match) return damage;
+  const dice = match[1];
+  const bonus = (match[2] ? parseInt(match[2], 10) : 0) + delta;
+  const type = match[3] ? ` ${match[3].toUpperCase()}` : "";
+  if (bonus === 0) return `${dice}${type}`.trim();
+  return `${dice}${bonus > 0 ? "+" : ""}${bonus}${type}`.trim();
+}
+
+function meleeDamageForCraftsmanship(damage: string, craftsmanship: WeaponCraftsmanship): string {
+  if (craftsmanship !== "Best") return damage;
+  return modifyDamageBonus(damage, 1);
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
@@ -353,9 +414,10 @@ export function WeaponsTab({
   // ── Ranged handlers ────────────────────────────────────────────────────────
 
   const addFromRangedRef = useCallback(
-    (ref: RangedWeaponRef) => {
+    (ref: RangedWeaponRef, craftsmanship: WeaponCraftsmanship = "Common") => {
       if (!editable) return;
       const isThrown = ref.class.toLowerCase().includes("thrown");
+      const specialRules = rangedRulesForCraftsmanship(ref.specialRules, craftsmanship);
       onUpdateRanged([
         ...rangedWeapons,
         {
@@ -369,11 +431,12 @@ export function WeaponsTab({
           pen: String(ref.pen),
           clip: String(ref.clip),
           rld: ref.reload,
-          specialRules: ref.specialRules,
+          specialRules,
           weight: ref.weight,
           value: ref.value,
           rarity: ref.rarity,
           source: ref.source,
+          craftsmanship,
           quantity: isThrown ? 1 : undefined,
         },
       ]);
@@ -385,7 +448,7 @@ export function WeaponsTab({
   const addCustomRanged = useCallback(
     (weapon: RangedWeapon) => {
       if (!editable) return;
-      onUpdateRanged([...rangedWeapons, weapon]);
+      onUpdateRanged([...rangedWeapons, { ...weapon, craftsmanship: weapon.craftsmanship ?? "Common" }]);
       setShowCustomRanged(false);
     },
     [editable, rangedWeapons, onUpdateRanged]
@@ -452,9 +515,10 @@ export function WeaponsTab({
   // ── Melee handlers ─────────────────────────────────────────────────────────
 
   const addFromMeleeRef = useCallback(
-    (ref: MeleeWeaponRef) => {
+    (ref: MeleeWeaponRef, craftsmanship: WeaponCraftsmanship = "Common") => {
       if (!editable) return;
       const isThrown = ref.class.toLowerCase().includes("thrown");
+      const damage = meleeDamageForCraftsmanship(ref.damage, craftsmanship);
       onUpdateMelee([
         ...meleeWeapons,
         {
@@ -462,13 +526,14 @@ export function WeaponsTab({
           referenceId: ref.id,
           name: ref.name,
           class: ref.twoHanded ? `${ref.class} (Two-Handed)` : ref.class,
-          damage: ref.damage,
+          damage,
           pen: String(ref.pen),
           specialRules: ref.specialRules,
           weight: ref.weight,
           value: ref.value,
           rarity: ref.rarity,
           source: ref.source,
+          craftsmanship,
           quantity: isThrown ? 1 : undefined,
         },
       ]);
@@ -480,7 +545,7 @@ export function WeaponsTab({
   const addCustomMelee = useCallback(
     (weapon: MeleeWeapon) => {
       if (!editable) return;
-      onUpdateMelee([...meleeWeapons, weapon]);
+      onUpdateMelee([...meleeWeapons, { ...weapon, craftsmanship: weapon.craftsmanship ?? "Common" }]);
       setShowCustomMelee(false);
     },
     [editable, meleeWeapons, onUpdateMelee]
@@ -767,8 +832,8 @@ export function WeaponsTab({
           <p className="text-sm text-slate-500 italic">No grenades or mines carried.</p>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
-          {allGrenadeEntries.map((entry) => {
+        <IndependentCardGrid
+          items={allGrenadeEntries.map((entry) => {
             if (entry.kind === "archeotech") return (
               <ArcheotechWeaponCard
                 key={entry.item.id}
@@ -805,7 +870,7 @@ export function WeaponsTab({
               </Fragment>
             );
           })}
-        </div>
+        />
       </section>
 
       {/* ── INTEGRATED WEAPONS ───────────────────────────────────────────── */}
@@ -826,8 +891,10 @@ export function WeaponsTab({
           <p className="text-sm text-slate-500 italic">No integrated weapons installed.</p>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-start">
-          {integratedRangedWeapons.map(({ weapon, index }) => (
+        <IndependentCardGrid
+          breakpoint="lg"
+          items={[
+            ...integratedRangedWeapons.map(({ weapon, index }) => (
             <RangedCard
               key={weapon.id}
               weapon={weapon}
@@ -843,8 +910,8 @@ export function WeaponsTab({
               allowAttachments={false}
               forceExpanded
             />
-          ))}
-          {integratedMeleeWeapons.map(({ weapon, index }) => (
+            )),
+            ...integratedMeleeWeapons.map(({ weapon, index }) => (
             <MeleeCard
               key={weapon.id}
               weapon={weapon}
@@ -857,8 +924,9 @@ export function WeaponsTab({
               allowAttachments={false}
               forceExpanded
             />
-          ))}
-        </div>
+            )),
+          ]}
+        />
       </section>
 
       {/* ── SHIELDS ──────────────────────────────────────────────────────── */}
@@ -877,8 +945,8 @@ export function WeaponsTab({
           <p className="text-sm text-slate-500 italic">No shields carried.</p>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
-          {[...(shields ?? [])].sort((a, b) => {
+        <IndependentCardGrid
+          items={[...(shields ?? [])].sort((a, b) => {
             if (a.equipped && !b.equipped) return -1;
             if (!a.equipped && b.equipped) return 1;
             return a.name.localeCompare(b.name);
@@ -893,7 +961,7 @@ export function WeaponsTab({
               slotsDisabled={!(item.equipped) && slotsRemaining < 1}
             />
           ))}
-        </div>
+        />
       </section>
 
       {/* ── Pickers ───────────────────────────────────────────────────────── */}

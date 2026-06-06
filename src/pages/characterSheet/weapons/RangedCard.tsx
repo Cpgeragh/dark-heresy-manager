@@ -2,12 +2,18 @@
 // RangedPicker, CustomRangedForm, RangedCard — co-located for navigability.
 
 import { useState, useEffect } from "react";
-import type { RangedWeapon, WeaponAmmoEntry, GrenadeItem, ArcheotechItem } from "../../../types/Character";
+import type { RangedWeapon, WeaponAmmoEntry, GrenadeItem, ArcheotechItem, WeaponCraftsmanship } from "../../../types/Character";
 import {
   RANGED_WEAPON_REFERENCE,
   type RangedWeaponRef,
 } from "../../../data/reference/weaponReference";
-import { AMMO_REFERENCE } from "../../../data/reference/ammoReference";
+import {
+  AMMO_REFERENCE,
+  RECHARGING_POWER_PACKS_TEXT,
+  formatAmmoName,
+  isChargePackAmmoName,
+  usesUnitAmmoTracking,
+} from "../../../data/reference/ammoReference";
 import { WEAPON_UPGRADE_REFERENCE } from "../../../data/reference/weaponUpgradeReference";
 import { editableInputClass, sectionContainerClass } from "../../../ui/editableStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
@@ -26,6 +32,29 @@ import {
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
 import { effectiveRangedStats, getCompatibleUpgrades } from "./weaponHelpers";
 
+const WEAPON_CRAFTSMANSHIP_OPTIONS: WeaponCraftsmanship[] = ["Poor", "Common", "Good", "Best"];
+
+const WEAPON_CRAFTSMANSHIP_STYLE: Record<WeaponCraftsmanship, string> = {
+  Poor: "border-red-500/70 bg-red-500/15 text-red-300",
+  Common: "border-slate-500 bg-slate-800 text-slate-200",
+  Good: "border-emerald-500/70 bg-emerald-500/15 text-emerald-300",
+  Best: "border-amber-400 bg-amber-500/20 text-amber-300",
+};
+
+function rangedCraftsmanshipDescription(craftsmanship: WeaponCraftsmanship): string {
+  switch (craftsmanship) {
+    case "Poor":
+      return "Poor ranged weapons are more prone to malfunction. A Poor ranged weapon has the Unreliable quality. If it already has this quality, it jams on any failed roll to hit.";
+    case "Good":
+      return "Good ranged weapons are more reliable. A Good ranged weapon has the Reliable quality. If it already has this quality, there is no further effect beyond fine workmanship.";
+    case "Best":
+      return "Best ranged weapons never suffer from jamming or overheating. If a roll would result in either, count it as a miss instead.";
+    case "Common":
+    default:
+      return "Common craftsmanship ranged weapons have no additional modifier.";
+  }
+}
+
 // ─── Ranged Picker ────────────────────────────────────────────────────────────
 
 export function RangedPicker({
@@ -39,7 +68,7 @@ export function RangedPicker({
   showCustom = true,
 }: {
   editable?: boolean;
-  onSelect: (ref: RangedWeaponRef) => void;
+  onSelect: (ref: RangedWeaponRef, craftsmanship: WeaponCraftsmanship) => void;
   onCustom: () => void;
   onClose: () => void;
   references?: RangedWeaponRef[];
@@ -48,9 +77,72 @@ export function RangedPicker({
   showCustom?: boolean;
 }) {
   const [query, setQuery] = useState("");
+  const [selected, setSelected] = useState<RangedWeaponRef | null>(null);
+  const [craftsmanship, setCraftsmanship] = useState<WeaponCraftsmanship>("Common");
   const filtered = references.filter((r) =>
     r.name.toLowerCase().includes(query.toLowerCase())
   ).sort((a, b) => a.name.localeCompare(b.name));
+
+  function resetPicker() {
+    setSelected(null);
+    setCraftsmanship("Common");
+  }
+
+  if (selected) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+        <div className="w-full max-w-md bg-slate-900 border border-slate-500 rounded-xl shadow-2xl">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
+            <h3 className="text-sm font-semibold text-slate-200">{selected.name}</h3>
+            <button onClick={resetPicker} className="text-slate-400 hover:text-slate-200 text-lg leading-none">
+              {"\u00D7"}
+            </button>
+          </div>
+
+          <div className="px-4 py-4 space-y-4">
+            <div>
+              <p className="text-xs text-slate-400 mb-2">Select weapon craftsmanship:</p>
+              <div className="flex gap-2">
+                {WEAPON_CRAFTSMANSHIP_OPTIONS.map((q) => (
+                  <button
+                    key={q}
+                    onClick={() => setCraftsmanship(q)}
+                    className={[
+                      "flex-1 py-1.5 rounded border text-sm font-medium transition",
+                      craftsmanship === q
+                        ? WEAPON_CRAFTSMANSHIP_STYLE[q]
+                        : "border-slate-700 bg-slate-800 text-slate-400 hover:border-slate-500",
+                    ].join(" ")}
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="text-xs text-slate-400 bg-slate-800/60 rounded p-3 leading-relaxed">
+              {rangedCraftsmanshipDescription(craftsmanship)}
+            </div>
+          </div>
+
+          <div className="px-4 py-3 border-t border-slate-700 flex gap-2">
+            <button
+              onClick={resetPicker}
+              className="px-4 py-1.5 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm text-slate-100"
+            >
+              Back
+            </button>
+            <button
+              onClick={() => onSelect(selected, craftsmanship)}
+              className="flex-1 py-1.5 rounded bg-amber-600 hover:bg-amber-500 text-sm text-slate-900 font-semibold"
+            >
+              Add Weapon
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <PickerModal
@@ -72,7 +164,7 @@ export function RangedPicker({
       {filtered.map((ref) => (
         <button
           key={ref.id}
-          onClick={editable ? () => onSelect(ref) : undefined}
+          onClick={editable ? () => setSelected(ref) : undefined}
           className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
           <span className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}>
@@ -174,10 +266,15 @@ function AmmoEntryRow({
   const ammoRef = entry.referenceId
     ? AMMO_REFERENCE.find((ammo) => ammo.id === entry.referenceId)
     : undefined;
+  const displayName = formatAmmoName(ammoRef?.name ?? entry.name);
+  const isChargePack = isChargePackAmmoName(displayName);
+  const hasAmmoInfo = !!ammoRef?.description || isChargePack;
+  const usesUnitTracking = usesUnitAmmoTracking(ammoRef);
   const clipSizeLabel =
     clipSize && clipSize !== "0" && clipSize !== "—" && clipSize !== "N/A"
       ? `${clipSize}/clip`
       : undefined;
+  const visibleClipSizeLabel = usesUnitTracking ? undefined : clipSizeLabel;
 
   return (
     <div className="rounded bg-slate-800/60 px-2.5 py-2 space-y-1.5">
@@ -195,7 +292,25 @@ function AmmoEntryRow({
                 : "bg-slate-600"
             }`}
           />
-          <span className="text-xs text-slate-200 truncate">{entry.name}</span>
+          <span className="text-xs text-slate-200 truncate">{displayName}</span>
+          {hasAmmoInfo && (
+            <InfoModal
+              title={displayName}
+              content={
+                <div className="space-y-2">
+                  {ammoRef?.description && (
+                    <p className="text-sm text-slate-300 leading-relaxed">{ammoRef.description}</p>
+                  )}
+                  {isChargePack && (
+                    <div className="space-y-1">
+                      <p className="text-sm font-semibold text-slate-100">Recharging Power Packs</p>
+                      <p className="text-sm text-slate-300 leading-relaxed">{RECHARGING_POWER_PACKS_TEXT}</p>
+                    </div>
+                  )}
+                </div>
+              }
+            />
+          )}
           {entry.loaded && (
             <span className="text-[10px] text-green-500 uppercase tracking-wide shrink-0">
               Loaded
@@ -212,11 +327,11 @@ function AmmoEntryRow({
         )}
       </div>
 
-      {(ammoRef || clipSizeLabel) && (
+      {(ammoRef || visibleClipSizeLabel) && (
         <div className="flex flex-wrap items-center gap-1.5 text-[10px]">
-          {clipSizeLabel && (
+          {visibleClipSizeLabel && (
             <span className="rounded border border-slate-700 bg-slate-900/40 px-1.5 py-0.5 text-slate-400">
-              {clipSizeLabel}
+              {visibleClipSizeLabel}
             </span>
           )}
           {ammoRef && (
@@ -232,10 +347,12 @@ function AmmoEntryRow({
         </div>
       )}
 
-      {/* Clips + Rounds + Weight */}
+      {/* Count + Weight */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-1.5">
-          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Clips</span>
+          <span className="text-[10px] text-slate-500 uppercase tracking-wide">
+            {usesUnitTracking ? "Qty" : "Clips"}
+          </span>
           <QuantityControl
             quantity={entry.clips}
             editable={editable}
@@ -243,18 +360,20 @@ function AmmoEntryRow({
             onUpdate={onUpdateClips}
           />
         </div>
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Rounds</span>
-          <QuantityControl
-            quantity={entry.rounds}
-            editable={editable}
-            size="sm"
-            onUpdate={onUpdateRounds}
-          />
-        </div>
-        {(weightKg ?? 0) > 0 && (
-          <span className="text-[10px] text-slate-500 ml-auto">{formatWeight(weightKg!)} kg</span>
+        {!usesUnitTracking && (
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] text-slate-500 uppercase tracking-wide">Rounds</span>
+            <QuantityControl
+              quantity={entry.rounds}
+              editable={editable}
+              size="sm"
+              onUpdate={onUpdateRounds}
+            />
+          </div>
         )}
+        <span className="text-[10px] text-slate-500 ml-auto">
+          {formatWeight(weightKg ?? 0)} kg
+        </span>
       </div>
     </div>
   );
@@ -297,15 +416,15 @@ function AmmoPicker({
         <button
           key={ammo.id}
           onClick={() => {
-            onSelect(ammo.name, ammo.id);
+            onSelect(formatAmmoName(ammo.name), ammo.id);
             onClose();
           }}
-          disabled={existingNames.has(ammo.name)}
+          disabled={existingNames.has(formatAmmoName(ammo.name))}
           className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <div className="flex items-center justify-between gap-2">
             <span className="text-sm font-medium text-slate-200 group-hover:text-white">
-              {ammo.name}
+              {formatAmmoName(ammo.name)}
             </span>
             <div className="flex items-center gap-1.5 text-xs shrink-0">
               <span className="text-slate-500">{ammo.rarity}</span>
@@ -357,6 +476,15 @@ function calcEntryWeight(weapon: RangedWeapon, entry: WeaponAmmoEntry): number {
   if (!weaponKg) return 0;
   const clipSize = parseFloat(weapon.clip ?? "1") || 1;
   const clipWeight = weaponKg * 0.1;
+  const ammoRef = entry.referenceId
+    ? AMMO_REFERENCE.find((ammo) => ammo.id === entry.referenceId)
+    : undefined;
+  if (ammoRef?.id === "cr-hot-shot-charge") {
+    return entry.clips * clipWeight;
+  }
+  if (usesUnitAmmoTracking(ammoRef)) {
+    return entry.clips * (clipWeight / clipSize);
+  }
   return entry.clips * clipWeight + (entry.rounds / clipSize) * clipWeight;
 }
 
@@ -418,8 +546,17 @@ export function RangedCard({
     : RANGED_WEAPON_REFERENCE.find(
         (r) => r.name === weapon.name && (!weapon.source || r.source === weapon.source)
       );
-  const baseWeapon = weaponRef ? { ...weapon, specialRules: weaponRef.specialRules } : weapon;
-  const effective = effectiveRangedStats(baseWeapon, attachmentRefs);
+  const craftsmanship = weapon.craftsmanship ?? "Common";
+  const baseSpecialRules = craftsmanship === "Common"
+    ? (weaponRef?.specialRules ?? weapon.specialRules)
+    : (weapon.specialRules ?? weaponRef?.specialRules);
+  const baseWeapon = weaponRef ? { ...weapon, specialRules: baseSpecialRules } : weapon;
+  const ammoEntries = weapon.ammoEntries ?? [];
+  const loadedAmmoEntry = ammoEntries.find((entry) => entry.loaded);
+  const loadedAmmoRef = loadedAmmoEntry?.referenceId
+    ? AMMO_REFERENCE.find((ammo) => ammo.id === loadedAmmoEntry.referenceId)
+    : undefined;
+  const effective = effectiveRangedStats(baseWeapon, attachmentRefs, loadedAmmoRef);
   const compatible = getCompatibleUpgrades(
     weapon.class ?? "",
     weapon.name,
@@ -451,20 +588,23 @@ export function RangedCard({
     weapon.referenceId === "cr-rpg-launcher";
   const hasAmmo = !isThrown && !isGrenadeLauncher && !!(weaponRef?.ammoType || weapon.custom);
 
-  const ammoEntries = weapon.ammoEntries ?? [];
-  const existingAmmoNames = new Set(ammoEntries.map((e) => e.name));
+  const existingAmmoNames = new Set(ammoEntries.map((e) => formatAmmoName(e.name)));
 
   // ── Ammo helpers ────────────────────────────────────────────────────────────
 
   function handleAddAmmo(name: string, referenceId?: string) {
     const isFirst = ammoEntries.length === 0;
+    const ammoRef = referenceId
+      ? AMMO_REFERENCE.find((ammo) => ammo.id === referenceId)
+      : undefined;
+    const usesUnitTracking = usesUnitAmmoTracking(ammoRef);
     onUpdateAmmoEntries([
       ...ammoEntries,
       {
         id: crypto.randomUUID(),
         referenceId,
         name,
-        clips: 0,
+        clips: usesUnitTracking ? 1 : 0,
         rounds: 0,
         loaded: isFirst,
       },
@@ -592,6 +732,14 @@ export function RangedCard({
           ) : (
             <span className="text-xs text-slate-600 italic">-</span>
           )}
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Craftsmanship</span>
+          <span className="text-xs text-slate-400 italic">{craftsmanship}</span>
+          <InfoModal
+            title={`${craftsmanship} Weapon`}
+            content={rangedCraftsmanshipDescription(craftsmanship)}
+          />
         </div>
       </div>
 

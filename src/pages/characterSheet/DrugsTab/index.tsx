@@ -54,6 +54,11 @@ export function DrugsTab({ drugs, editable, onUpdate }: DrugsTabProps) {
     [editable, drugs, onUpdate]
   );
 
+  const drugColumns = [
+    drugs.filter((_, index) => index % 2 === 0),
+    drugs.filter((_, index) => index % 2 === 1),
+  ];
+
   return (
     <div className="space-y-6">
       {/* Excessive Drug Use rule */}
@@ -86,16 +91,35 @@ export function DrugsTab({ drugs, editable, onUpdate }: DrugsTabProps) {
           <p className="text-sm text-slate-500 italic">No drugs carried.</p>
         )}
 
-        {drugs.map((item) => (
-          <DrugRow
-            key={item.id}
-            item={item}
-            editable={editable}
-            onUpdateQty={updateQty}
-            onRemove={removeDrug}
-            onInfo={setInfoTarget}
-          />
-        ))}
+        <div className="space-y-3 sm:hidden">
+          {drugs.map((item) => (
+            <DrugRow
+              key={item.id}
+              item={item}
+              editable={editable}
+              onUpdateQty={updateQty}
+              onRemove={removeDrug}
+              onInfo={setInfoTarget}
+            />
+          ))}
+        </div>
+
+        <div className="hidden sm:grid sm:grid-cols-2 sm:gap-3 sm:items-start">
+          {drugColumns.map((column, index) => (
+            <div key={index} className="space-y-3">
+              {column.map((item) => (
+                <DrugRow
+                  key={item.id}
+                  item={item}
+                  editable={editable}
+                  onUpdateQty={updateQty}
+                  onRemove={removeDrug}
+                  onInfo={setInfoTarget}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
       </section>
 
       <p className="text-xs text-slate-600">
