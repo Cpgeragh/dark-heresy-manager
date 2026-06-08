@@ -6,9 +6,10 @@ import {
   type ArcheotechRef,
 } from "../../../data/reference/archeotechReference";
 import { editableInputClass } from "../../../ui/editableStyles";
-import { rarityColour, sourceColour } from "../../../ui/sourceStyles";
 import { RARITY_OPTIONS } from "./archeotechConstants";
 import { PickerModal } from "../../../ui/PickerModal";
+import { InfoModal } from "../../../components/InfoModal";
+import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 
 interface Props {
   editable?: boolean;
@@ -34,7 +35,8 @@ export function ArcheotechPickerModal({ editable = true, onSelect, onClose }: Pr
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [query]);
 
-  const needsGmInput = (ref: ArcheotechRef) => ref.value === "—" || ref.rarity === "—";
+  const isUnknownMeta = (value?: string) => !value || value.trim() === "—";
+  const needsGmInput = (ref: ArcheotechRef) => isUnknownMeta(ref.value) || isUnknownMeta(ref.rarity);
 
   function handleRowClick(ref: ArcheotechRef) {
     if (!editable) return;
@@ -135,25 +137,34 @@ export function ArcheotechPickerModal({ editable = true, onSelect, onClose }: Pr
             onClick={editable ? () => handleRowClick(ref) : undefined}
             className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
           >
-            <span
-              className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}
-            >
-              {ref.name}
-            </span>
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span
+                className={`text-sm font-medium text-slate-200 truncate ${editable ? "group-hover:text-white" : ""}`}
+              >
+                {ref.name}
+              </span>
+              {ref.description && (
+                <span className="inline-flex items-center leading-[0]" onClick={(e) => e.stopPropagation()}>
+                  <InfoModal
+                    title={ref.name}
+                    content={<p className="text-sm text-slate-300 leading-relaxed">{ref.description}</p>}
+                  />
+                </span>
+              )}
+            </div>
             <div className="flex items-center gap-2 text-xs mt-0.5 flex-wrap">
               <span className="text-slate-500">{ref.type}</span>
-              <span
-                className={`rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(ref.source)}`}
-              >
-                {ref.source}
-              </span>
-              {ref.rarity && ref.rarity !== "—" && (
-                <span className={rarityColour(ref.rarity)}>{ref.rarity}</span>
-              )}
-              {ref.rarity === "—" && (
+              <ItemMetaChips
+                bare
+                weight={ref.weight}
+                value={isUnknownMeta(ref.value) ? undefined : ref.value}
+                rarity={isUnknownMeta(ref.rarity) ? undefined : ref.rarity}
+                source={ref.source}
+                valueAmber
+              />
+              {needsGmInput(ref) && (
                 <span className="text-amber-400/70 italic">GM determines cost &amp; rarity</span>
               )}
-              {ref.description && <span className="text-slate-500">{ref.description}</span>}
             </div>
           </button>
         ))

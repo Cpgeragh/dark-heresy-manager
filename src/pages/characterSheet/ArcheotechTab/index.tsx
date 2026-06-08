@@ -67,11 +67,6 @@ export function ArcheotechTab({ archeotech, editable, onUpdate }: ArcheotechTabP
 
   return (
     <div className="space-y-8">
-      <p className="text-xs text-slate-400">
-        Ancient technology of the Dark Age. Most items have no standard cost or availability —
-        acquisition is left entirely to the GM.
-      </p>
-
       {/* ── INVENTORY ─────────────────────────────────────────────────────── */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
