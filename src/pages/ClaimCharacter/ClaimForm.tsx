@@ -15,18 +15,16 @@ interface ClaimFormProps {
   loading: boolean;
 }
 
-export function ClaimForm({
-  code,
-  onCodeChange,
-  onSubmit,
-  loading,
-}: ClaimFormProps) {
+export function ClaimForm({ code, onCodeChange, onSubmit, loading }: ClaimFormProps) {
   const normalized = normalizeRecoveryCode(code);
   const isValid = RECOVERY_CODE_REGEX.test(normalized);
 
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    onCodeChange(e.target.value);
-  }, [onCodeChange]);
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      onCodeChange(e.target.value);
+    },
+    [onCodeChange]
+  );
 
   const handleSubmit = useCallback(() => {
     if (!isValid || loading) return;
@@ -35,9 +33,7 @@ export function ClaimForm({
 
   return (
     <div className="border border-slate-700 bg-slate-900 p-4 rounded space-y-3">
-      <label className="block text-sm text-slate-300">
-        Enter Recovery Code
-      </label>
+      <label className="block text-sm text-slate-300">Enter Recovery Code</label>
 
       <input
         className="px-3 py-2 bg-slate-800 border border-slate-600 rounded w-full font-mono text-slate-100"
@@ -52,9 +48,7 @@ export function ClaimForm({
       {/* Format helper */}
       <div className="text-xs text-slate-400">
         Format: <span className="font-mono">DH-XXXX-XXXX</span>{" "}
-        <span
-          className={isValid ? "text-green-400" : "text-slate-500"}
-        >
+        <span className={isValid ? "text-green-400" : "text-slate-500"}>
           {isValid ? "Valid" : "Not valid yet"}
         </span>
       </div>
@@ -67,8 +61,8 @@ export function ClaimForm({
             loading
               ? "bg-amber-300 cursor-wait"
               : !isValid
-              ? "bg-slate-700 text-slate-300 cursor-not-allowed"
-              : "bg-amber-500 hover:bg-amber-400"
+                ? "bg-slate-700 text-slate-300 cursor-not-allowed"
+                : "bg-amber-500 hover:bg-amber-400"
           }`}
       >
         {loading ? "Checking..." : "Look Up Character"}

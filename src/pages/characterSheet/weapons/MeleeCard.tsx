@@ -54,9 +54,7 @@ function hasMultipleMeleeProfiles(damage?: string): boolean {
 }
 
 function displayMeleeDamage(damage: string): string {
-  return hasMultipleMeleeProfiles(damage)
-    ? damage
-    : damage.replace(/\s*[IREX]$/i, "").trim();
+  return hasMultipleMeleeProfiles(damage) ? damage : damage.replace(/\s*[IREX]$/i, "").trim();
 }
 
 // ─── Melee Picker ─────────────────────────────────────────────────────────────
@@ -83,9 +81,9 @@ export function MeleePicker({
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<MeleeWeaponRef | null>(null);
   const [craftsmanship, setCraftsmanship] = useState<WeaponCraftsmanship>("Common");
-  const filtered = references.filter((r) =>
-    r.name.toLowerCase().includes(query.toLowerCase())
-  ).sort((a, b) => a.name.localeCompare(b.name));
+  const filtered = references
+    .filter((r) => r.name.toLowerCase().includes(query.toLowerCase()))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   function resetPicker() {
     setSelected(null);
@@ -98,7 +96,10 @@ export function MeleePicker({
         <div className="w-full max-w-md bg-slate-900 border border-slate-500 rounded-xl shadow-2xl">
           <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
             <h3 className="text-sm font-semibold text-slate-200">{selected.name}</h3>
-            <button onClick={resetPicker} className="text-slate-400 hover:text-slate-200 text-lg leading-none">
+            <button
+              onClick={resetPicker}
+              className="text-slate-400 hover:text-slate-200 text-lg leading-none"
+            >
               {"\u00D7"}
             </button>
           </div>
@@ -156,14 +157,16 @@ export function MeleePicker({
       onQueryChange={setQuery}
       onClose={onClose}
       isEmpty={filtered.length === 0}
-      footer={editable && showCustom ? (
-        <button
-          onClick={onCustom}
-          className="w-full text-sm text-amber-400 hover:text-amber-300 text-center py-1"
-        >
-          + Add custom weapon
-        </button>
-      ) : undefined}
+      footer={
+        editable && showCustom ? (
+          <button
+            onClick={onCustom}
+            className="w-full text-sm text-amber-400 hover:text-amber-300 text-center py-1"
+          >
+            + Add custom weapon
+          </button>
+        ) : undefined
+      }
     >
       {filtered.map((ref) => (
         <button
@@ -171,7 +174,9 @@ export function MeleePicker({
           onClick={editable ? () => setSelected(ref) : undefined}
           className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
-          <span className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}>
+          <span
+            className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}
+          >
             {ref.name}
           </span>
           <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5 flex-wrap font-mono">
@@ -195,12 +200,15 @@ export function CustomMeleeForm({
   onCancel: () => void;
 }) {
   const [fields, setFields] = useState<Omit<MeleeWeapon, "id" | "custom">>({
-    name: "", class: "", damage: "", pen: "", specialRules: "",
+    name: "",
+    class: "",
+    damage: "",
+    pen: "",
+    specialRules: "",
   });
 
-  const makeFieldSetter =
-    (k: keyof typeof fields) => (e: React.ChangeEvent<HTMLInputElement>) =>
-      setFields((prev) => ({ ...prev, [k]: e.target.value }));
+  const makeFieldSetter = (k: keyof typeof fields) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    setFields((prev) => ({ ...prev, [k]: e.target.value }));
 
   return (
     <div className="border border-amber-500/30 bg-slate-900/60 rounded-lg p-4 space-y-3">
@@ -210,7 +218,9 @@ export function CustomMeleeForm({
       <div className="grid grid-cols-2 gap-2">
         {(["name", "class", "damage", "pen", "specialRules"] as const).map((k) => (
           <div key={k} className={k === "name" || k === "specialRules" ? "col-span-2" : ""}>
-            <label className="text-xs font-medium uppercase tracking-wide text-slate-100">{k}</label>
+            <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+              {k}
+            </label>
             <input
               type="text"
               value={fields[k] ?? ""}
@@ -276,7 +286,9 @@ export function MeleeCard({
   forceExpanded?: boolean;
 }) {
   const [expanded, setExpanded] = useState(isEquipped);
-  useEffect(() => { setExpanded(isEquipped); }, [isEquipped]);
+  useEffect(() => {
+    setExpanded(isEquipped);
+  }, [isEquipped]);
 
   const [showQualities, setShowQualities] = useState(false);
   const [showItemRules, setShowItemRules] = useState(false);
@@ -293,12 +305,7 @@ export function MeleeCard({
   const baseWeapon = weaponRef ? { ...weapon, specialRules: weaponRef.specialRules } : weapon;
   const effective = effectiveMeleeStats(baseWeapon, attachmentRefs);
   const hasMultipleProfiles = hasMultipleMeleeProfiles(weapon.damage);
-  const compatible = getCompatibleUpgrades(
-    weapon.class ?? "",
-    weapon.name,
-    true,
-    attachmentIds
-  );
+  const compatible = getCompatibleUpgrades(weapon.class ?? "", weapon.name, true, attachmentIds);
   const visibleCompatible = allowAttachments ? compatible : [];
   const rulesText = effective.specialRules?.trim() ?? "";
   const hasRules = Boolean(rulesText && rulesText !== "—" && rulesText !== "-");
@@ -306,7 +313,7 @@ export function MeleeCard({
     .split(",")
     .map((r) => r.trim().replace(/\s*\(.*?\)/, ""))
     .filter((name) => Boolean(name) && Boolean(WEAPON_SPECIAL_RULES[name]));
-  const hasModal = !!(weaponRef?.description) || ruleNamesInLookup.length > 0;
+  const hasModal = !!weaponRef?.description || ruleNamesInLookup.length > 0;
   const rulesDisplayText = hasRules ? rulesText : hasModal ? "Special rules" : "";
   const hasQualities = Boolean(
     rulesText && rulesText !== "—" && rulesText !== "-" && rulesText !== "â€”"
@@ -329,9 +336,7 @@ export function MeleeCard({
           disabled={forceExpanded}
         >
           <p className="text-sm font-semibold text-slate-200">{weapon.name}</p>
-          {weapon.class && (
-            <p className="text-xs text-slate-500">{weapon.class}</p>
-          )}
+          {weapon.class && <p className="text-xs text-slate-500">{weapon.class}</p>}
         </button>
         <div className="flex items-center gap-2 shrink-0">
           {onToggleEquip && (
@@ -348,174 +353,177 @@ export function MeleeCard({
               className="text-slate-400 hover:text-slate-200 transition"
               aria-label={expanded ? "Collapse" : "Expand"}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={`w-4 h-4 transition-transform ${expanded ? "" : "-rotate-90"}`}>
-                <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd"/>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                className={`w-4 h-4 transition-transform ${expanded ? "" : "-rotate-90"}`}
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                  clipRule="evenodd"
+                />
               </svg>
             </button>
           )}
           {editable && (expanded || forceExpanded) && (
-            <button
-              onClick={onRemove}
-              className="text-xs text-red-400 hover:text-red-300 shrink-0"
-            >
+            <button onClick={onRemove} className="text-xs text-red-400 hover:text-red-300 shrink-0">
               Remove
             </button>
           )}
         </div>
       </div>
 
-      {(expanded || forceExpanded) && (<>
-      <div className="flex flex-wrap gap-1.5">
-        {weapon.damage && (
-          <StatChip
-            label="Damage"
-            value={displayMeleeDamage(weapon.damage)}
-          />
-        )}
-        {weapon.damage && !hasMultipleProfiles && <DamageTypeChip damage={weapon.damage} />}
-        {effective.pen && <StatChip label="Pen" value={effective.pen} />}
-        <StatChip label="SB" value={`+${strengthBonus}`} />
-        {weapon.damage && !hasMultipleProfiles && (
-          <StatChip
-            label="Total"
-            value={computeMeleeTotalDamage(weapon.damage, strengthBonus)}
-          />
-        )}
-      </div>
-
-      {false && (
-        <div className="flex items-center gap-1.5">
-          <span className="text-xs text-slate-400 italic">
-            {rulesDisplayText}
-          </span>
-          {hasModal && (
-            <button
-              onClick={() => setShowQualities(true)}
-              title="Explain special rules"
-              className="text-slate-500 hover:text-amber-400 text-sm transition"
-            >
-              ⓘ
-            </button>
-          )}
-        </div>
-      )}
-
-      <div className="space-y-1">
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Qualities</span>
-          <span className="text-xs text-slate-400 italic">
-            {hasQualities ? rulesText : "-"}
-          </span>
-          {hasQualityModal && (
-            <InfoModal
-              title={`${weapon.name} Qualities`}
-              content={<SpecialRulesContent rules={effective.specialRules ?? ""} />}
-            />
-          )}
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Rules</span>
-          {hasItemRules ? (
-            <InfoModal
-              title={`${weapon.name} Rules`}
-              content={<SpecialRulesContent rules="" description={rulesDescription} />}
-            />
-          ) : (
-            <span className="text-xs text-slate-600 italic">-</span>
-          )}
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Craftsmanship</span>
-          <span className="text-xs text-slate-400 italic">{craftsmanship}</span>
-          <InfoModal
-            title={`${craftsmanship} Weapon`}
-            content={meleeCraftsmanshipDescription(craftsmanship)}
-          />
-        </div>
-      </div>
-
-      {/* Weight / Value / Rarity / Source */}
-      <ItemMetaChips
-        weight={weapon.weight}
-        value={weapon.value}
-        rarity={weapon.rarity}
-        source={weapon.source}
-        className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1"
-      />
-
-      {isThrown && (
-        <div className="border-t border-slate-800 pt-2 flex items-center justify-between gap-2">
-          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Quantity</span>
-          <QuantityControl
-            quantity={weapon.quantity ?? 1}
-            editable={editable}
-            size="sm"
-            onUpdate={onUpdateQuantity}
-          />
-        </div>
-      )}
-
-      {/* Attachments */}
-      {(attachmentRefs.length > 0 || (editable && visibleCompatible.length > 0)) && (
-        <div className="border-t border-slate-800 pt-2 space-y-1.5">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] text-slate-500 uppercase tracking-wide">
-              Attachments
-            </span>
-            {editable && visibleCompatible.length > 0 && (
-              <button
-                onClick={() => setShowAttachPicker(true)}
-                className="text-xs text-amber-400 hover:text-amber-300"
-              >
-                + Add
-              </button>
+      {(expanded || forceExpanded) && (
+        <>
+          <div className="flex flex-wrap gap-1.5">
+            {weapon.damage && <StatChip label="Damage" value={displayMeleeDamage(weapon.damage)} />}
+            {weapon.damage && !hasMultipleProfiles && <DamageTypeChip damage={weapon.damage} />}
+            {effective.pen && <StatChip label="Pen" value={effective.pen} />}
+            <StatChip label="SB" value={`+${strengthBonus}`} />
+            {weapon.damage && !hasMultipleProfiles && (
+              <StatChip
+                label="Total"
+                value={computeMeleeTotalDamage(weapon.damage, strengthBonus)}
+              />
             )}
           </div>
-          {attachmentRefs.length === 0 ? (
-            <p className="text-xs text-slate-600 italic">None fitted</p>
-          ) : (
-            <div className="space-y-1.5">
-              {attachmentRefs.map((upgrade) => (
-                <AttachmentCard
-                  key={upgrade.id}
-                  upgrade={upgrade}
-                  editable={editable}
-                  onRemove={onRemoveAttachment}
-                />
-              ))}
+
+          {false && (
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs text-slate-400 italic">{rulesDisplayText}</span>
+              {hasModal && (
+                <button
+                  onClick={() => setShowQualities(true)}
+                  title="Explain special rules"
+                  className="text-slate-500 hover:text-amber-400 text-sm transition"
+                >
+                  ⓘ
+                </button>
+              )}
             </div>
           )}
-        </div>
-      )}
 
-      {showQualities && (
-        <SpecialRulesModal
-          rules={effective.specialRules ?? ""}
-          title="Qualities"
-          onClose={() => setShowQualities(false)}
-        />
-      )}
+          <div className="space-y-1">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] text-slate-500 uppercase tracking-wide">Qualities</span>
+              <span className="text-xs text-slate-400 italic">
+                {hasQualities ? rulesText : "-"}
+              </span>
+              {hasQualityModal && (
+                <InfoModal
+                  title={`${weapon.name} Qualities`}
+                  content={<SpecialRulesContent rules={effective.specialRules ?? ""} />}
+                />
+              )}
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] text-slate-500 uppercase tracking-wide">Rules</span>
+              {hasItemRules ? (
+                <InfoModal
+                  title={`${weapon.name} Rules`}
+                  content={<SpecialRulesContent rules="" description={rulesDescription} />}
+                />
+              ) : (
+                <span className="text-xs text-slate-600 italic">-</span>
+              )}
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] text-slate-500 uppercase tracking-wide">
+                Craftsmanship
+              </span>
+              <span className="text-xs text-slate-400 italic">{craftsmanship}</span>
+              <InfoModal
+                title={`${craftsmanship} Weapon`}
+                content={meleeCraftsmanshipDescription(craftsmanship)}
+              />
+            </div>
+          </div>
 
-      {showItemRules && rulesDescription && (
-        <SpecialRulesModal
-          rules=""
-          description={rulesDescription}
-          title="Rules"
-          onClose={() => setShowItemRules(false)}
-        />
-      )}
+          {/* Weight / Value / Rarity / Source */}
+          <ItemMetaChips
+            weight={weapon.weight}
+            value={weapon.value}
+            rarity={weapon.rarity}
+            source={weapon.source}
+            className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1"
+          />
 
-      {showAttachPicker && (
-        <AttachmentPicker
-          compatibleUpgrades={visibleCompatible}
-          onSelect={(id) => {
-            onAddAttachment(id);
-            setShowAttachPicker(false);
-          }}
-          onClose={() => setShowAttachPicker(false)}
-        />
+          {isThrown && (
+            <div className="border-t border-slate-800 pt-2 flex items-center justify-between gap-2">
+              <span className="text-[10px] text-slate-500 uppercase tracking-wide">Quantity</span>
+              <QuantityControl
+                quantity={weapon.quantity ?? 1}
+                editable={editable}
+                size="sm"
+                onUpdate={onUpdateQuantity}
+              />
+            </div>
+          )}
+
+          {/* Attachments */}
+          {(attachmentRefs.length > 0 || (editable && visibleCompatible.length > 0)) && (
+            <div className="border-t border-slate-800 pt-2 space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] text-slate-500 uppercase tracking-wide">
+                  Attachments
+                </span>
+                {editable && visibleCompatible.length > 0 && (
+                  <button
+                    onClick={() => setShowAttachPicker(true)}
+                    className="text-xs text-amber-400 hover:text-amber-300"
+                  >
+                    + Add
+                  </button>
+                )}
+              </div>
+              {attachmentRefs.length === 0 ? (
+                <p className="text-xs text-slate-600 italic">None fitted</p>
+              ) : (
+                <div className="space-y-1.5">
+                  {attachmentRefs.map((upgrade) => (
+                    <AttachmentCard
+                      key={upgrade.id}
+                      upgrade={upgrade}
+                      editable={editable}
+                      onRemove={onRemoveAttachment}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {showQualities && (
+            <SpecialRulesModal
+              rules={effective.specialRules ?? ""}
+              title="Qualities"
+              onClose={() => setShowQualities(false)}
+            />
+          )}
+
+          {showItemRules && rulesDescription && (
+            <SpecialRulesModal
+              rules=""
+              description={rulesDescription}
+              title="Rules"
+              onClose={() => setShowItemRules(false)}
+            />
+          )}
+
+          {showAttachPicker && (
+            <AttachmentPicker
+              compatibleUpgrades={visibleCompatible}
+              onSelect={(id) => {
+                onAddAttachment(id);
+                setShowAttachPicker(false);
+              }}
+              onClose={() => setShowAttachPicker(false)}
+            />
+          )}
+        </>
       )}
-      </>)}
     </div>
   );
 }

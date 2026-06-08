@@ -33,20 +33,17 @@ function formatValue(value: string): string | undefined {
 }
 
 export function CustomItemForm({ onAdd, onCancel }: Props) {
-  const [name,        setName]        = useState("");
-  const [type,        setType]        = useState<ItemType | "">("");
+  const [name, setName] = useState("");
+  const [type, setType] = useState<ItemType | "">("");
   const [description, setDescription] = useState("");
-  const [notes,       setNotes]       = useState("");
-  const [weight,      setWeight]      = useState("");
-  const [value,       setValue]       = useState("");
-  const [rarity,      setRarity]      = useState("");
+  const [notes, setNotes] = useState("");
+  const [weight, setWeight] = useState("");
+  const [value, setValue] = useState("");
+  const [rarity, setRarity] = useState("");
 
   const formattedWeight = formatWeight(weight);
   const formattedValue = formatValue(value);
-  const canAdd =
-    name.trim().length > 0 &&
-    !!formattedWeight &&
-    !!formattedValue;
+  const canAdd = name.trim().length > 0 && !!formattedWeight && !!formattedValue;
 
   function handleWeightChange(value: string) {
     const next = value.replace(",", ".");
@@ -64,14 +61,14 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
   function handleAdd() {
     if (!canAdd) return;
     onAdd({
-      id:          crypto.randomUUID(),
-      name:        name.trim(),
-      type:        type || undefined,
+      id: crypto.randomUUID(),
+      name: name.trim(),
+      type: type || undefined,
       description: description.trim() || undefined,
-      notes:       notes.trim() || undefined,
-      weight:      formattedWeight,
-      value:       formattedValue,
-      rarity:      rarity || undefined,
+      notes: notes.trim() || undefined,
+      weight: formattedWeight,
+      value: formattedValue,
+      rarity: rarity || undefined,
     });
   }
 
@@ -83,7 +80,9 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
 
       {/* Name */}
       <div className="space-y-1">
-        <label className="text-xs font-medium uppercase tracking-wide text-slate-100">Name <span className="text-red-400">*</span></label>
+        <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+          Name <span className="text-red-400">*</span>
+        </label>
         <input
           type="text"
           value={name}
@@ -96,7 +95,9 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
 
       {/* Type */}
       <div className="space-y-1">
-        <label className="text-xs font-medium uppercase tracking-wide text-slate-100">Type <span className="text-slate-600">(optional)</span></label>
+        <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+          Type <span className="text-slate-600">(optional)</span>
+        </label>
         <select
           value={type}
           onChange={(e) => setType(e.target.value as ItemType | "")}
@@ -104,7 +105,9 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
         >
           <option value="">— Select type —</option>
           {ITEM_TYPES.map((t) => (
-            <option key={t} value={t}>{t}</option>
+            <option key={t} value={t}>
+              {t}
+            </option>
           ))}
         </select>
       </div>
@@ -112,7 +115,9 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
       {/* Weight + Value on one row */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
-          <label className="text-xs font-medium uppercase tracking-wide text-slate-100">Weight <span className="text-red-400">*</span></label>
+          <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+            Weight <span className="text-red-400">*</span>
+          </label>
           <input
             type="text"
             inputMode="decimal"
@@ -123,7 +128,9 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
           />
         </div>
         <div className="space-y-1">
-          <label className="text-xs font-medium uppercase tracking-wide text-slate-100">Value <span className="text-red-400">*</span></label>
+          <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+            Value <span className="text-red-400">*</span>
+          </label>
           <input
             type="text"
             inputMode="numeric"
@@ -137,7 +144,9 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
 
       {/* Rarity */}
       <div className="space-y-1">
-        <label className="text-xs font-medium uppercase tracking-wide text-slate-100">Rarity <span className="text-slate-600">(optional)</span></label>
+        <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+          Rarity <span className="text-slate-600">(optional)</span>
+        </label>
         <select
           value={rarity}
           onChange={(e) => setRarity(e.target.value)}
@@ -145,7 +154,9 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
         >
           <option value="">— Select rarity —</option>
           {RARITY_OPTIONS.map((r) => (
-            <option key={r} value={r}>{r}</option>
+            <option key={r} value={r}>
+              {r}
+            </option>
           ))}
         </select>
       </div>

@@ -16,14 +16,7 @@ import { db, auth } from "../firebase";
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function proposalsRef(campaignId: string, characterId: string) {
-  return collection(
-    db,
-    "campaigns",
-    campaignId,
-    "characters",
-    characterId,
-    "xpProposals"
-  );
+  return collection(db, "campaigns", campaignId, "characters", characterId, "xpProposals");
 }
 
 function proposalDocRef(campaignId: string, characterId: string, proposalId: string) {

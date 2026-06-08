@@ -1,11 +1,9 @@
 // src/context/CampaignsContext.tsx
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { collection, onSnapshot, query, where } from "firebase/firestore";
-import { db } from "../firebase";
-import type { CampaignDocument } from "../types/Firestore";
-
-type CampaignWithId = CampaignDocument & { id: string };
+import { onSnapshot, query, where } from "firebase/firestore";
+import { campaignsCollectionRef } from "../firebase/converters";
+import type { CampaignWithId } from "../types/Firestore";
 
 interface CampaignsContextValue {
   campaigns: CampaignWithId[];
@@ -34,15 +32,12 @@ export function CampaignsProvider({
 
   useEffect(() => {
     const field = role === "dm" ? "dmId" : "memberIds";
-    const op    = role === "dm" ? "==" : "array-contains";
+    const op = role === "dm" ? "==" : "array-contains";
 
     const unsubscribe = onSnapshot(
-      query(collection(db, "campaigns"), where(field, op, uid)),
+      query(campaignsCollectionRef(), where(field, op, uid)),
       (snap) => {
-        setCampaigns(snap.docs.map((d) => ({
-          id: d.id,
-          ...(d.data() as Omit<CampaignDocument, "id">),
-        })));
+        setCampaigns(snap.docs.map((d) => d.data()));
         setLoading(false);
       },
       (err) => {

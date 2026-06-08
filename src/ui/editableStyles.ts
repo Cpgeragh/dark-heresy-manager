@@ -1,11 +1,15 @@
 // src/ui/editableStyles.ts
 
 /**
- * Shared visual language for editable vs read-only UI.
+ * Shared UI styles and tokens.
  *
- * IMPORTANT:
- * - These helpers do NOT decide permissions.
- * - They only reflect a decision already made elsewhere.
+ * - editableInputClass / editableTextareaClass / readOnlyBadgeClass:
+ *   reflect an editable/read-only decision already made elsewhere.
+ * - uiSection / uiCell / uiCellLabel etc.:
+ *   shared layout tokens used across tab components.
+ *
+ * IMPORTANT: These helpers do NOT decide permissions.
+ * They only reflect a decision already made elsewhere.
  */
 
 export function editableInputClass(isEditable: boolean) {
@@ -56,7 +60,8 @@ export function editableTextareaClass(isEditable: boolean) {
 // Use these instead of hardcoding the same Tailwind strings across components.
 
 /** Section header label — amber left-border accent, sits outside or at the top of its box. */
-export const uiSectionHeader = "border-l-2 border-amber-500 pl-2 text-xs font-semibold uppercase tracking-widest text-amber-400";
+export const uiSectionHeader =
+  "border-l-2 border-amber-500 pl-2 text-xs font-semibold uppercase tracking-widest text-amber-400";
 
 /** Standard section card — bright border, semi-transparent background. */
 export const uiSection = "rounded-lg border border-slate-500 bg-slate-900/60 p-3";

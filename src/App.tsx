@@ -28,14 +28,8 @@ export default function App() {
   // -------------------------------------------------
   // AUTH & USER STATE
   // -------------------------------------------------
-  const {
-    currentUser,
-    userRole,
-    activeCampaignId,
-    loading,
-    setUserRole,
-    setActiveCampaignId,
-  } = useAuth();
+  const { currentUser, userRole, activeCampaignId, loading, setUserRole, setActiveCampaignId } =
+    useAuth();
 
   // -------------------------------------------------
   // ROLE SWITCHING (DEV ONLY)
@@ -84,86 +78,77 @@ export default function App() {
   // -------------------------------------------------
   return (
     <HeaderExtensionProvider>
-    <ToastProvider>
-      <div className="min-h-screen bg-slate-950 text-slate-100">
-        {/* HEADER */}
-        <AppHeader
-          isDM={isDM}
-          currentPath={location.pathname}
-          onSwitchToDM={switchToDM}
-          onSwitchToPlayer={switchToPlayer}
-        />
+      <ToastProvider>
+        <div className="min-h-screen bg-slate-950 text-slate-100">
+          {/* HEADER */}
+          <AppHeader
+            isDM={isDM}
+            currentPath={location.pathname}
+            onSwitchToDM={switchToDM}
+            onSwitchToPlayer={switchToPlayer}
+          />
 
-        {/* ROUTES */}
-        <CampaignsProvider uid={currentUser.uid} role={isDM ? "dm" : "player"}>
-        <main className="max-w-5xl mx-auto px-4 py-6">
-          <ErrorBoundary>
-            <Routes>
-              {isDM && (
-                <>
-                  <Route
-                    path={ROUTES.DM_DASHBOARD}
-                    element={
-                      <DMDashboard
-                        user={currentUser}
-                        activeCampaignId={activeCampaignId}
-                        onActiveCampaignChange={handleActiveCampaignChange}
+          {/* ROUTES */}
+          <CampaignsProvider uid={currentUser.uid} role={isDM ? "dm" : "player"}>
+            <main className="max-w-5xl mx-auto px-4 py-6">
+              <ErrorBoundary>
+                <Routes>
+                  {isDM && (
+                    <>
+                      <Route
+                        path={ROUTES.DM_DASHBOARD}
+                        element={
+                          <DMDashboard
+                            user={currentUser}
+                            activeCampaignId={activeCampaignId}
+                            onActiveCampaignChange={handleActiveCampaignChange}
+                          />
+                        }
                       />
+                      <Route
+                        path={ROUTES.SELECT_CAMPAIGN}
+                        element={
+                          <SelectCampaign
+                            user={currentUser}
+                            role="dm"
+                            activeCampaignId={activeCampaignId}
+                            onActiveCampaignChange={handleActiveCampaignChange}
+                          />
+                        }
+                      />
+                    </>
+                  )}
+
+                  {!isDM && (
+                    <>
+                      <Route
+                        path={ROUTES.PLAYER_DASHBOARD}
+                        element={<PlayerDashboard user={currentUser} />}
+                      />
+                      <Route path={ROUTES.CLAIM_CHARACTER} element={<ClaimCharacterPage />} />
+                    </>
+                  )}
+
+                  <Route path={ROUTE_PATTERNS.CHARACTER_SHEET} element={<CharacterSheet />} />
+
+                  <Route path={ROUTE_PATTERNS.CAMPAIGN_OVERVIEW} element={<CampaignOverview />} />
+
+                  <Route
+                    path="*"
+                    element={
+                      <Navigate to={isDM ? ROUTES.DM_DASHBOARD : ROUTES.PLAYER_DASHBOARD} replace />
                     }
                   />
-                  <Route
-                    path={ROUTES.SELECT_CAMPAIGN}
-                    element={
-                      <SelectCampaign
-                        user={currentUser}
-                        role="dm"
-                        activeCampaignId={activeCampaignId}
-                        onActiveCampaignChange={handleActiveCampaignChange}
-                      />
-                    }
-                  />
-                </>
-              )}
+                </Routes>
+              </ErrorBoundary>
+            </main>
+          </CampaignsProvider>
 
-              {!isDM && (
-                <>
-                  <Route
-                    path={ROUTES.PLAYER_DASHBOARD}
-                    element={<PlayerDashboard user={currentUser} />}
-                  />
-                  <Route path={ROUTES.CLAIM_CHARACTER} element={<ClaimCharacterPage />} />
-                </>
-              )}
-
-              <Route
-                path={ROUTE_PATTERNS.CHARACTER_SHEET}
-                element={<CharacterSheet />}
-              />
-
-              <Route
-                path={ROUTE_PATTERNS.CAMPAIGN_OVERVIEW}
-                element={<CampaignOverview />}
-              />
-
-              <Route
-                path="*"
-                element={
-                  <Navigate 
-                    to={isDM ? ROUTES.DM_DASHBOARD : ROUTES.PLAYER_DASHBOARD} 
-                    replace 
-                  />
-                }
-              />
-            </Routes>
-          </ErrorBoundary>
-        </main>
-        </CampaignsProvider>
-
-        <ToastContainer />
-        <OfflineIndicator />
-      {import.meta.env.DEV && <ToastTester />}
-    </div>
-    </ToastProvider>
+          <ToastContainer />
+          <OfflineIndicator />
+          {import.meta.env.DEV && <ToastTester />}
+        </div>
+      </ToastProvider>
     </HeaderExtensionProvider>
   );
 }

@@ -11,7 +11,9 @@ interface Character {
 }
 
 type SessionWithId = SessionDocument & { id: string };
-type SessionUpdateData = Partial<Pick<SessionDocument, "date" | "summary" | "dmNotes" | "xpAwarded" | "attendees">>;
+type SessionUpdateData = Partial<
+  Pick<SessionDocument, "date" | "summary" | "dmNotes" | "xpAwarded" | "attendees">
+>;
 
 interface Props {
   session: SessionWithId;
@@ -110,7 +112,9 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
     setApplyingXp(true);
     try {
       await onApplyXp();
-      toast.success(`+${session.xpAwarded} XP applied to ${session.attendees.length} character(s).`);
+      toast.success(
+        `+${session.xpAwarded} XP applied to ${session.attendees.length} character(s).`
+      );
     } catch (err) {
       console.error("Failed to apply XP:", err);
       toast.error("Failed to apply XP. Please try again.");
@@ -216,22 +220,23 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
               +{session.xpAwarded} XP
             </span>
           )}
-          {isDM && session.xpAwarded > 0 && session.attendees.length > 0 && session.xpApplied !== undefined && (
-            session.xpApplied === true
-              ? (
-                <span className="text-xs px-2 py-1 bg-green-500/20 text-green-400 rounded">
-                  XP Applied ✓
-                </span>
-              ) : (
-                <button
-                  onClick={handleApplyXp}
-                  disabled={applyingXp}
-                  className="text-xs px-2 py-1 bg-amber-600 text-slate-900 font-semibold rounded hover:bg-amber-500 disabled:opacity-50 transition"
-                >
-                  {applyingXp ? "Applying…" : "Apply XP"}
-                </button>
-              )
-          )}
+          {isDM &&
+            session.xpAwarded > 0 &&
+            session.attendees.length > 0 &&
+            session.xpApplied !== undefined &&
+            (session.xpApplied === true ? (
+              <span className="text-xs px-2 py-1 bg-green-500/20 text-green-400 rounded">
+                XP Applied ✓
+              </span>
+            ) : (
+              <button
+                onClick={handleApplyXp}
+                disabled={applyingXp}
+                className="text-xs px-2 py-1 bg-amber-600 text-slate-900 font-semibold rounded hover:bg-amber-500 disabled:opacity-50 transition"
+              >
+                {applyingXp ? "Applying…" : "Apply XP"}
+              </button>
+            ))}
           {isDM && onSave && (
             <button
               onClick={() => setMode("edit")}
@@ -276,9 +281,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
         </p>
       )}
 
-      {session.summary && (
-        <p className="text-sm text-slate-300">{session.summary}</p>
-      )}
+      {session.summary && <p className="text-sm text-slate-300">{session.summary}</p>}
 
       {isDM && session.dmNotes && (
         <p className="text-xs text-slate-500 italic border-t border-slate-700 pt-2">

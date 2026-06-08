@@ -1,7 +1,11 @@
 // src/pages/characterSheet/ArmourTab/index.tsx
 
 import { useState, useCallback } from "react";
-import type { WornArmourPiece, CyberneticItem, ArmourCraftsmanship } from "../../../types/Character";
+import type {
+  WornArmourPiece,
+  CyberneticItem,
+  ArmourCraftsmanship,
+} from "../../../types/Character";
 import type { ArmourRef } from "../../../data/reference/armourReference";
 
 import { wornApAt, bionicBonusAt, LOCATION_LABELS, LOCATION_ORDER } from "./armourHelpers";
@@ -41,9 +45,9 @@ function applyCraftsmanshipToRef(ref: ArmourRef, craftsmanship: ArmourCraftsmans
   }
 
   const apOverrides = ref.apOverrides
-    ? Object.fromEntries(
+    ? (Object.fromEntries(
         Object.entries(ref.apOverrides).map(([location, ap]) => [location, (ap ?? ref.ap) + 1])
-      ) as typeof ref.apOverrides
+      ) as typeof ref.apOverrides)
     : undefined;
 
   return {
@@ -179,7 +183,7 @@ export function ArmourTab({
       if (!editable) return;
       const nextPiece = piece.isForceField
         ? piece
-        : { ...piece, craftsmanship: piece.craftsmanship ?? "Common" as const };
+        : { ...piece, craftsmanship: piece.craftsmanship ?? ("Common" as const) };
       onUpdate([...armour, { ...nextPiece, worn: pickerMode === "worn" }]);
       setShowPicker(false);
       setShowCustomForm(false);
@@ -232,27 +236,27 @@ export function ArmourTab({
       const field = armour.find((p) => p.id === id);
       if (!field) return;
       const activating = !field.worn;
-      onUpdate(armour.map((p) => {
-        if (!p.isForceField) return p;
-        if (activating) return { ...p, worn: p.id === id };
-        return p.id === id ? { ...p, worn: false } : p;
-      }));
+      onUpdate(
+        armour.map((p) => {
+          if (!p.isForceField) return p;
+          if (activating) return { ...p, worn: p.id === id };
+          return p.id === id ? { ...p, worn: false } : p;
+        })
+      );
     },
     [editable, armour, onUpdate]
   );
 
   const regularArmour = armour.filter((p) => !p.isForceField);
-  const forceFields   = armour.filter((p) => p.isForceField);
-  const worn          = regularArmour.filter((p) => p.worn);
-  const stowed        = regularArmour.filter((p) => !p.worn);
+  const forceFields = armour.filter((p) => p.isForceField);
+  const worn = regularArmour.filter((p) => p.worn);
+  const stowed = regularArmour.filter((p) => !p.worn);
 
   return (
     <div className="space-y-6">
       {/* LOCATION SUMMARY */}
       <section>
-        <h3 className={`${uiSectionHeader} mb-2`}>
-          Location Summary
-        </h3>
+        <h3 className={`${uiSectionHeader} mb-2`}>Location Summary</h3>
         <div className={uiSection}>
           <div className="overflow-x-auto">
             <table className="w-full text-sm border-collapse">
@@ -267,18 +271,24 @@ export function ArmourTab({
               </thead>
               <tbody className="divide-y divide-slate-800">
                 {LOCATION_ORDER.map((loc) => {
-                  const ap     = wornApAt(regularArmour, loc);
+                  const ap = wornApAt(regularArmour, loc);
                   const bionic = bionicBonusAt(loc, cybernetics);
-                  const total  = ap + toughnessBonus + bionic;
+                  const total = ap + toughnessBonus + bionic;
                   return (
                     <tr key={loc} className="hover:bg-slate-800/40 transition">
                       <td className="py-2 pr-4 text-slate-100">{LOCATION_LABELS[loc]}</td>
                       <td className="py-2 px-3 text-center font-mono text-slate-200">{ap}</td>
-                      <td className="py-2 px-3 text-center font-mono text-slate-400">{toughnessBonus}</td>
-                      <td className={`py-2 px-3 text-center font-mono ${bionic > 0 ? "text-cyan-400" : "text-slate-700"}`}>
+                      <td className="py-2 px-3 text-center font-mono text-slate-400">
+                        {toughnessBonus}
+                      </td>
+                      <td
+                        className={`py-2 px-3 text-center font-mono ${bionic > 0 ? "text-cyan-400" : "text-slate-700"}`}
+                      >
                         {bionic > 0 ? `+${bionic}` : "—"}
                       </td>
-                      <td className="py-2 px-3 text-center font-mono font-semibold text-amber-300">{total}</td>
+                      <td className="py-2 px-3 text-center font-mono font-semibold text-amber-300">
+                        {total}
+                      </td>
                     </tr>
                   );
                 })}
@@ -286,7 +296,8 @@ export function ArmourTab({
             </table>
           </div>
           <p className="text-xs text-slate-600 mt-2">
-            Total = Armour Points (worn only) + Toughness Bonus + Bionic (+2 per installed bionic limb)
+            Total = Armour Points (worn only) + Toughness Bonus + Bionic (+2 per installed bionic
+            limb)
           </p>
         </div>
       </section>
@@ -294,12 +305,13 @@ export function ArmourTab({
       {/* WORN PIECES */}
       <section className="space-y-2">
         <div className="flex items-center justify-between">
-          <h3 className={uiSectionHeader}>
-            Worn ({worn.length})
-          </h3>
+          <h3 className={uiSectionHeader}>Worn ({worn.length})</h3>
           {!showCustomForm && (
             <button
-              onClick={() => { setPickerMode("worn"); setShowPicker(true); }}
+              onClick={() => {
+                setPickerMode("worn");
+                setShowPicker(true);
+              }}
               className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
             >
               {editable ? "+ Equip" : "View"}
@@ -322,12 +334,13 @@ export function ArmourTab({
       {/* STOWED PIECES */}
       <section className="space-y-2">
         <div className="flex items-center justify-between">
-          <h3 className={uiSectionHeader}>
-            Stowed ({stowed.length})
-          </h3>
+          <h3 className={uiSectionHeader}>Stowed ({stowed.length})</h3>
           {!showCustomForm && (
             <button
-              onClick={() => { setPickerMode("stowed"); setShowPicker(true); }}
+              onClick={() => {
+                setPickerMode("stowed");
+                setShowPicker(true);
+              }}
               className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
             >
               {editable ? "+ Stow" : "View"}
@@ -350,9 +363,7 @@ export function ArmourTab({
       {/* FORCE FIELDS */}
       <section className="space-y-2">
         <div className="flex items-center justify-between">
-          <h3 className={uiSectionHeader}>
-            Force Fields ({forceFields.length})
-          </h3>
+          <h3 className={uiSectionHeader}>Force Fields ({forceFields.length})</h3>
           <button
             onClick={() => setShowFieldPicker(true)}
             className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
@@ -360,7 +371,9 @@ export function ArmourTab({
             {editable ? "+ Add" : "View"}
           </button>
         </div>
-        {forceFields.length === 0 && <p className="text-sm text-slate-500 italic">No force field equipped.</p>}
+        {forceFields.length === 0 && (
+          <p className="text-sm text-slate-500 italic">No force field equipped.</p>
+        )}
         {forceFields.length > 0 && (
           <ForceFieldGrid
             pieces={forceFields}
@@ -384,20 +397,24 @@ export function ArmourTab({
         <ArmourPicker
           editable={editable}
           onSelect={fromReference}
-          onCustom={() => { setShowPicker(false); setShowCustomForm(true); }}
+          onCustom={() => {
+            setShowPicker(false);
+            setShowCustomForm(true);
+          }}
           onClose={() => setShowPicker(false)}
         />
       )}
       {showFieldPicker && (
         <ForceFieldPicker
           editable={editable}
-          onSelect={(ref) => { fromReference(ref); setShowFieldPicker(false); }}
+          onSelect={(ref) => {
+            fromReference(ref);
+            setShowFieldPicker(false);
+          }}
           onClose={() => setShowFieldPicker(false)}
         />
       )}
-      {infoTarget && (
-        <PieceNotesModal piece={infoTarget} onClose={() => setInfoTarget(null)} />
-      )}
+      {infoTarget && <PieceNotesModal piece={infoTarget} onClose={() => setInfoTarget(null)} />}
     </div>
   );
 }

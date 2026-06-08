@@ -2,44 +2,84 @@
 
 import { useState } from "react";
 import type { CyberneticCraftsmanship, ArmourLocationKey } from "../../../types/Character";
-import { CYBERNETICS_REFERENCE, type CyberneticRef } from "../../../data/reference/cyberneticsReference";
+import {
+  CYBERNETICS_REFERENCE,
+  type CyberneticRef,
+} from "../../../data/reference/cyberneticsReference";
 import { rarityColour } from "../../../ui/sourceStyles";
 import { PickerModal } from "../../../ui/PickerModal";
+import { InfoModal } from "../../../components/InfoModal";
 import { CRAFTSMANSHIP_STYLE, LOCATION_DISPLAY } from "./cyberneticsConstants";
-import { availableCraftsmanship, craftsmanshipDescription, defaultCraftsmanship } from "./cyberneticsHelpers";
+import {
+  availableCraftsmanship,
+  craftsmanshipDescription,
+  defaultCraftsmanship,
+} from "./cyberneticsHelpers";
 
 interface Props {
-  onSelect: (ref: CyberneticRef, craftsmanship: CyberneticCraftsmanship, bodyLocation?: ArmourLocationKey[]) => void;
+  editable?: boolean;
+  onSelect: (
+    ref: CyberneticRef,
+    craftsmanship: CyberneticCraftsmanship,
+    bodyLocation?: ArmourLocationKey[]
+  ) => void;
   onClose: () => void;
 }
 
-export function ImplantPicker({ onSelect, onClose }: Props) {
-  const [query,         setQuery]         = useState("");
-  const [selected,      setSelected]      = useState<CyberneticRef | null>(null);
-  const [location,      setLocation]      = useState<ArmourLocationKey[] | null>(null);
+export function ImplantPicker({ editable = true, onSelect, onClose }: Props) {
+  const [query, setQuery] = useState("");
+  const [selected, setSelected] = useState<CyberneticRef | null>(null);
+  const [location, setLocation] = useState<ArmourLocationKey[] | null>(null);
   const [craftsmanship, setCraftsmanship] = useState<CyberneticCraftsmanship>("Common");
 
-  const filtered = CYBERNETICS_REFERENCE
-    .filter((r) => r.name.toLowerCase().includes(query.toLowerCase()))
-    .sort((a, b) => a.name.localeCompare(b.name));
+  const filtered = CYBERNETICS_REFERENCE.filter((r) =>
+    r.name.toLowerCase().includes(query.toLowerCase())
+  ).sort((a, b) => a.name.localeCompare(b.name));
 
-  const resetPicker = () => { setSelected(null); setLocation(null); setCraftsmanship("Common"); };
+  const resetPicker = () => {
+    setSelected(null);
+    setLocation(null);
+    setCraftsmanship("Common");
+  };
   const selectImplant = (ref: CyberneticRef) => {
+    if (!editable) return;
     setSelected(ref);
     setCraftsmanship(defaultCraftsmanship(ref));
   };
+  const implantInfo = (ref: CyberneticRef) => (
+    <div className="space-y-3">
+      {ref.notes && (
+        <div>
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
+            Item Rules
+          </p>
+          <p className="text-sm text-slate-300 leading-relaxed">{ref.notes}</p>
+        </div>
+      )}
+      {availableCraftsmanship(ref).map((quality) => (
+        <div key={quality}>
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
+            {quality}
+          </p>
+          <p className="text-sm text-slate-300 leading-relaxed">
+            {craftsmanshipDescription(ref, quality)}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
 
   // ── Step 2: Location picker (arm/leg implants only) ───────────────────────
   if (selected && selected.requiresLocation && !location) {
     const isArm = selected.requiresLocation === "arm";
     const options: { label: string; value: ArmourLocationKey[] }[] = isArm
       ? [
-          { label: "Left Arm",  value: ["leftArm"] },
+          { label: "Left Arm", value: ["leftArm"] },
           { label: "Right Arm", value: ["rightArm"] },
           { label: "Both Arms", value: ["leftArm", "rightArm"] },
         ]
       : [
-          { label: "Left Leg",  value: ["leftLeg"] },
+          { label: "Left Leg", value: ["leftLeg"] },
           { label: "Right Leg", value: ["rightLeg"] },
           { label: "Both Legs", value: ["leftLeg", "rightLeg"] },
         ];
@@ -49,7 +89,12 @@ export function ImplantPicker({ onSelect, onClose }: Props) {
         <div className="w-full max-w-md bg-slate-900 border border-slate-500 rounded-xl shadow-2xl">
           <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
             <h3 className="text-sm font-semibold text-slate-200">{selected.name}</h3>
-            <button onClick={resetPicker} className="text-slate-400 hover:text-slate-200 text-lg leading-none">×</button>
+            <button
+              onClick={resetPicker}
+              className="text-slate-400 hover:text-slate-200 text-lg leading-none"
+            >
+              ×
+            </button>
           </div>
 
           <div className="px-4 py-4 space-y-3">
@@ -88,7 +133,12 @@ export function ImplantPicker({ onSelect, onClose }: Props) {
         <div className="w-full max-w-md bg-slate-900 border border-slate-500 rounded-xl shadow-2xl">
           <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
             <h3 className="text-sm font-semibold text-slate-200">{selected.name}</h3>
-            <button onClick={resetPicker} className="text-slate-400 hover:text-slate-200 text-lg leading-none">×</button>
+            <button
+              onClick={resetPicker}
+              className="text-slate-400 hover:text-slate-200 text-lg leading-none"
+            >
+              ×
+            </button>
           </div>
 
           <div className="px-4 py-4 space-y-4">
@@ -136,6 +186,7 @@ export function ImplantPicker({ onSelect, onClose }: Props) {
             </button>
             <button
               onClick={() => onSelect(selected, craftsmanship, location ?? undefined)}
+              disabled={!editable}
               className="flex-1 py-1.5 rounded bg-amber-600 hover:bg-amber-500 text-sm text-slate-900 font-semibold"
             >
               Install
@@ -159,21 +210,27 @@ export function ImplantPicker({ onSelect, onClose }: Props) {
       {filtered.map((ref) => (
         <button
           key={ref.id}
-          onClick={() => selectImplant(ref)}
-          className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group"
+          onClick={editable ? () => selectImplant(ref) : undefined}
+          className={`w-full text-left px-4 py-3 transition group ${
+            editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"
+          }`}
         >
           <div className="flex items-center justify-between gap-2">
-            <span className="text-sm font-medium text-slate-200 group-hover:text-white">
-              {ref.name}
-            </span>
+            <div className="flex items-center gap-1.5 flex-1 min-w-0">
+              <span className={`text-sm font-medium text-slate-200 truncate ${editable ? "group-hover:text-white" : ""}`}>
+                {ref.name}
+              </span>
+              {(ref.notes || ref.poor || ref.common || ref.good) && (
+                <span className="inline-flex items-center leading-[0]" onClick={(e) => e.stopPropagation()}>
+                  <InfoModal title={ref.name} content={implantInfo(ref)} />
+                </span>
+              )}
+            </div>
             <div className="flex items-center gap-2 shrink-0 text-xs">
               <span className="text-amber-400/80 font-mono">₮ {ref.value}</span>
               <span className={rarityColour(ref.rarity)}>{ref.rarity}</span>
             </div>
           </div>
-          {ref.common && (
-            <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">{ref.common}</p>
-          )}
         </button>
       ))}
     </PickerModal>

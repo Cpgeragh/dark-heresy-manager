@@ -33,7 +33,10 @@ export function isChargePackAmmoName(name: string): boolean {
 }
 
 export function formatAmmoName(name: string): string {
-  return name.replace(/\(([^)]+)\)/, (_, type: string) => `(${type.charAt(0).toUpperCase()}${type.slice(1)})`);
+  return name.replace(
+    /\(([^)]+)\)/,
+    (_, type: string) => `(${type.charAt(0).toUpperCase()}${type.slice(1)})`
+  );
 }
 
 export function usesUnitAmmoTracking(ammo?: Pick<AmmoRef, "id">): boolean {
@@ -53,7 +56,6 @@ export function usesUnitAmmoTracking(ammo?: Pick<AmmoRef, "id">): boolean {
 // ─── Reference Data ───────────────────────────────────────────────────────────
 
 export const AMMO_REFERENCE: AmmoRef[] = [
-
   // ── Core Rulebook — Basic ────────────────────────────────────────────────
 
   {
@@ -82,7 +84,8 @@ export const AMMO_REFERENCE: AmmoRef[] = [
     id: "cr-bullets",
     name: "Bullets",
     source: SkillSource.CR,
-    compatibleWith: "Autopistol, stub revolver, stub automatic, hand cannon, autogun, hunting rifle and heavy stubber",
+    compatibleWith:
+      "Autopistol, stub revolver, stub automatic, hand cannon, autogun, hunting rifle and heavy stubber",
     cost: "1 Throne",
     purchaseAmount: "20",
     rarity: "Plentiful",

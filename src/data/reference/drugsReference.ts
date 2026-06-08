@@ -9,6 +9,8 @@ export interface DrugRef {
   id: string;
   name: string;
   source: SkillSource;
+  /** Weight per dose */
+  weight?: string;
   /** Cost per dose */
   value: string;
   rarity: string;
@@ -25,7 +27,6 @@ export interface DrugRef {
 // ─── Reference Data ───────────────────────────────────────────────────────────
 
 export const DRUGS_REFERENCE: DrugRef[] = [
-
   // ── Core Rulebook ─────────────────────────────────────────────────────────
 
   {
@@ -101,8 +102,7 @@ export const DRUGS_REFERENCE: DrugRef[] = [
       "With Psy Rating 1+: Willpower Test — failure = 2 Insanity Points; success = +2 to all Power " +
       "Rolls for 1 hour.",
     duration: "1d5 hours (powers)",
-    sideEffect:
-      "Characters with Psy Rating add +25 to any rolls on the Psychic Phenomena table.",
+    sideEffect: "Characters with Psy Rating add +25 to any rolls on the Psychic Phenomena table.",
     notes: "Random power determined by Table 5–15: Random Psychic Powers in the Core Rulebook.",
   },
 
@@ -184,10 +184,10 @@ export const DRUGS_REFERENCE: DrugRef[] = [
     source: SkillSource.BoJ,
     value: "80 Thrones",
     rarity: "Scarce",
-    effect: "Thickens skin to a rubbery texture. Grants Resistance (Cold, Heat) and inflicts 1 Fatigue.",
+    effect:
+      "Thickens skin to a rubbery texture. Grants Resistance (Cold, Heat) and inflicts 1 Fatigue.",
     duration: "Ongoing — one dose per week required to maintain the effect.",
-    notes:
-      "Must be taken at least a dozen times over as many days before it takes effect.",
+    notes: "Must be taken at least a dozen times over as many days before it takes effect.",
   },
 
   {
@@ -266,7 +266,8 @@ export const DRUGS_REFERENCE: DrugRef[] = [
     source: SkillSource.BoJ,
     value: "135 Thrones",
     rarity: "Rare",
-    effect: "–50 to all Tests made to resist Interrogation or other attempts to extract information.",
+    effect:
+      "–50 to all Tests made to resist Interrogation or other attempts to extract information.",
     duration: "3d5 hours minus Toughness Bonus",
     notes: "Powerful serum that depresses resistance to questioning. Also known as Verity or Veal.",
   },
@@ -277,9 +278,11 @@ export const DRUGS_REFERENCE: DrugRef[] = [
     source: SkillSource.BoJ,
     value: "125 Thrones",
     rarity: "Rare",
-    effect: "Ignore Fatigue for the duration. +40 to all Toughness-based Tests and to resist Interrogation.",
+    effect:
+      "Ignore Fatigue for the duration. +40 to all Toughness-based Tests and to resist Interrogation.",
     duration: "2d5 hours",
-    sideEffect: "Must pass a Very Hard (–30) Toughness Test or gain 2 Fatigue when the effect wears off.",
+    sideEffect:
+      "Must pass a Very Hard (–30) Toughness Test or gain 2 Fatigue when the effect wears off.",
   },
 
   // ── Daemon Hunter ─────────────────────────────────────────────────────────

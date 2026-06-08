@@ -12,15 +12,19 @@ interface Props {
   onRemove: () => void;
 }
 
+function displayWeight(weight?: string | null) {
+  const value = weight?.trim();
+  if (!value || value === "\u2014" || value.includes("\u20ac")) return "0 kg";
+  return value;
+}
+
 export function ItemRow({ item, editable, onRemove }: Props) {
-  const hasDesc = !!(item.description?.trim());
+  const hasDesc = !!item.description?.trim();
 
   // Fall back to reference data for items saved before weight/value/rarity were stored
-  const ref = item.referenceId
-    ? GEAR_REFERENCE.find((r) => r.id === item.referenceId)
-    : undefined;
-  const weight = item.weight ?? ref?.weight;
-  const value  = item.value  ?? ref?.value;
+  const ref = item.referenceId ? GEAR_REFERENCE.find((r) => r.id === item.referenceId) : undefined;
+  const weight = displayWeight(item.weight ?? ref?.weight);
+  const value = item.value ?? ref?.value;
   const rarity = item.rarity ?? ref?.rarity;
 
   return (
@@ -32,12 +36,17 @@ export function ItemRow({ item, editable, onRemove }: Props) {
             {hasDesc && (
               <InfoModal
                 title={item.name}
-                content={<p className="text-sm text-slate-300 leading-relaxed">{item.description}</p>}
+                content={
+                  <p className="text-sm text-slate-300 leading-relaxed">{item.description}</p>
+                }
               />
             )}
           </div>
           <ItemMetaChips
-            weight={weight} value={value} rarity={rarity} source={item.source}
+            weight={weight}
+            value={value}
+            rarity={rarity}
+            source={item.source}
             className="flex flex-wrap gap-1.5 mt-1"
           />
         </div>

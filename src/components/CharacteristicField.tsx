@@ -6,10 +6,7 @@ import {
   MAX_CHARACTERISTIC_ADVANCES,
   CHARACTERISTIC_ADVANCE_INCREMENT,
 } from "../constants/gameRules";
-import {
-  validateCharacteristicBase,
-  validateCharacteristicTotal,
-} from "../utils/validation";
+import { validateCharacteristicBase, validateCharacteristicTotal } from "../utils/validation";
 
 interface Props {
   label: string;
@@ -18,12 +15,7 @@ interface Props {
   onChange: (newValue: CharField) => void;
 }
 
-export default function CharacteristicField({
-  label,
-  value,
-  editable,
-  onChange,
-}: Props) {
+export default function CharacteristicField({ label, value, editable, onChange }: Props) {
   const { base, advances } = value;
   const [error, setError] = useState<string | undefined>();
   const [draft, setDraft] = useState(String(base));
@@ -63,13 +55,10 @@ export default function CharacteristicField({
     setDraft(String(base)); // sync to current committed value on focus
   }, [base]);
 
-  const handleBaseChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      // Strip anything that isn't a digit — no minus, no decimal, no letters
-      setDraft(e.target.value.replace(/\D/g, ""));
-    },
-    []
-  );
+  const handleBaseChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    // Strip anything that isn't a digit — no minus, no decimal, no letters
+    setDraft(e.target.value.replace(/\D/g, ""));
+  }, []);
 
   const handleBaseBlur = useCallback(() => {
     isFocused.current = false;
@@ -95,8 +84,7 @@ export default function CharacteristicField({
       let newAdvances = index < advances ? index : index + 1;
 
       if (newAdvances < 0) newAdvances = 0;
-      if (newAdvances > MAX_CHARACTERISTIC_ADVANCES)
-        newAdvances = MAX_CHARACTERISTIC_ADVANCES;
+      if (newAdvances > MAX_CHARACTERISTIC_ADVANCES) newAdvances = MAX_CHARACTERISTIC_ADVANCES;
 
       // Validate total won't exceed max
       const totalCheck = validateCharacteristicTotal(base, newAdvances);
@@ -110,7 +98,6 @@ export default function CharacteristicField({
     },
     [editable, base, advances, onChange]
   );
-
 
   const total = base + advances * CHARACTERISTIC_ADVANCE_INCREMENT;
 
@@ -156,11 +143,7 @@ export default function CharacteristicField({
               aria-pressed={filled}
               tabIndex={editable ? 0 : -1}
               className={`h-5 w-5 border rounded flex items-center justify-center
-                ${
-                  filled
-                    ? "bg-amber-500 border-amber-400"
-                    : "bg-slate-900 border-slate-600"
-                }
+                ${filled ? "bg-amber-500 border-amber-400" : "bg-slate-900 border-slate-600"}
                 ${
                   editable
                     ? "cursor-pointer hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-500"
@@ -179,11 +162,7 @@ export default function CharacteristicField({
 
       {/* Error message */}
       {error && editable && (
-        <div
-          id={`${label}-error`}
-          className="text-xs text-red-400 mt-2"
-          role="alert"
-        >
+        <div id={`${label}-error`} className="text-xs text-red-400 mt-2" role="alert">
           {error}
         </div>
       )}

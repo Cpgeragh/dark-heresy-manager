@@ -19,7 +19,7 @@ interface ArcheotechTabProps {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function ArcheotechTab({ archeotech, editable, onUpdate }: ArcheotechTabProps) {
-  const [showPicker,     setShowPicker]     = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
   const [showCustomForm, setShowCustomForm] = useState(false);
 
   const addFromRef = useCallback(
@@ -28,14 +28,14 @@ export function ArcheotechTab({ archeotech, editable, onUpdate }: ArcheotechTabP
       onUpdate([
         ...archeotech,
         {
-          id:          crypto.randomUUID(),
+          id: crypto.randomUUID(),
           referenceId: ref.id,
-          name:        ref.name,
-          type:        ref.type,
-          source:      ref.source,
+          name: ref.name,
+          type: ref.type,
+          source: ref.source,
           // Store GM-assigned values directly on the item so they override "—"
-          value:       gmValue  || undefined,
-          rarity:      gmRarity || undefined,
+          value: gmValue || undefined,
+          rarity: gmRarity || undefined,
         },
       ]);
       setShowPicker(false);
@@ -75,9 +75,7 @@ export function ArcheotechTab({ archeotech, editable, onUpdate }: ArcheotechTabP
       {/* ── INVENTORY ─────────────────────────────────────────────────────── */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className={uiSectionHeader}>
-            Inventory ({archeotech.length})
-          </h3>
+          <h3 className={uiSectionHeader}>Inventory ({archeotech.length})</h3>
           {!showCustomForm && (
             <div className="flex gap-2">
               <button
@@ -129,10 +127,7 @@ export function ArcheotechTab({ archeotech, editable, onUpdate }: ArcheotechTabP
         </div>
 
         {showCustomForm && (
-          <CustomItemForm
-            onAdd={addCustom}
-            onCancel={() => setShowCustomForm(false)}
-          />
+          <CustomItemForm onAdd={addCustom} onCancel={() => setShowCustomForm(false)} />
         )}
       </section>
 

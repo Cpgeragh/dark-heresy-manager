@@ -4,7 +4,12 @@
 import type { CyberneticWeapon } from "../../../data/reference/cyberneticsReference";
 import { InfoModal } from "../../../components/InfoModal";
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
-import { StatChip, DamageTypeChip, SpecialRulesContent, computeMeleeTotalDamage } from "./weaponShared";
+import {
+  StatChip,
+  DamageTypeChip,
+  SpecialRulesContent,
+  computeMeleeTotalDamage,
+} from "./weaponShared";
 
 export function CyberneticWeaponCard({
   cyberneticName,
@@ -15,7 +20,7 @@ export function CyberneticWeaponCard({
   weapon: CyberneticWeapon;
   strengthBonus: number;
 }) {
-  const hasRules = !!(weapon.specialRules?.trim());
+  const hasRules = !!weapon.specialRules?.trim();
   const ruleNamesInLookup = (weapon.specialRules ?? "")
     .split(",")
     .map((r) => r.trim().replace(/\s*\(.*?\)/, ""))
@@ -40,28 +45,22 @@ export function CyberneticWeaponCard({
         {weapon.type === "ranged" && weapon.range && (
           <StatChip label="Range" value={weapon.range} />
         )}
-        {weapon.type === "ranged" && weapon.rof && (
-          <StatChip label="RoF" value={weapon.rof} />
-        )}
+        {weapon.type === "ranged" && weapon.rof && <StatChip label="RoF" value={weapon.rof} />}
         {weapon.damage && (
-          <StatChip
-            label="Damage"
-            value={weapon.damage.replace(/\s*[IREX]$/i, "").trim()}
-          />
+          <StatChip label="Damage" value={weapon.damage.replace(/\s*[IREX]$/i, "").trim()} />
         )}
         {weapon.damage && <DamageTypeChip damage={weapon.damage} />}
         {weapon.pen && <StatChip label="Pen" value={weapon.pen} />}
-        {weapon.type === "ranged" && weapon.clip && (
-          <StatChip label="Clip" value={weapon.clip} />
-        )}
-        {weapon.type === "ranged" && weapon.rld && (
-          <StatChip label="Reload" value={weapon.rld} />
-        )}
+        {weapon.type === "ranged" && weapon.clip && <StatChip label="Clip" value={weapon.clip} />}
+        {weapon.type === "ranged" && weapon.rld && <StatChip label="Reload" value={weapon.rld} />}
         {weapon.type === "melee" && (
           <>
             <StatChip label="SB" value={`+${strengthBonus}`} />
             {weapon.damage && (
-              <StatChip label="Total" value={computeMeleeTotalDamage(weapon.damage, strengthBonus)} />
+              <StatChip
+                label="Total"
+                value={computeMeleeTotalDamage(weapon.damage, strengthBonus)}
+              />
             )}
           </>
         )}
@@ -70,7 +69,9 @@ export function CyberneticWeaponCard({
       <div className="space-y-1">
         <div className="flex items-center gap-1.5">
           <span className="text-[10px] text-slate-500 uppercase tracking-wide">Qualities</span>
-          <span className="text-xs text-slate-400 italic">{hasRules ? weapon.specialRules : "-"}</span>
+          <span className="text-xs text-slate-400 italic">
+            {hasRules ? weapon.specialRules : "-"}
+          </span>
           {ruleNamesInLookup.length > 0 && (
             <InfoModal
               title={`${weapon.name} Qualities`}

@@ -9,12 +9,15 @@ import type {
   InsanityBlock,
   CorruptionBlock,
 } from "../../types/Character";
-import { editableInputClass, uiSection, uiSectionHeader, uiCell, uiCellValue } from "../../ui/editableStyles";
-import { FormField } from "../../components/FormField";
 import {
-  WOUNDS_CRITICAL_THRESHOLD,
-  FATE_CRITICAL_THRESHOLD,
-} from "../../constants/gameRules";
+  editableInputClass,
+  uiSection,
+  uiSectionHeader,
+  uiCell,
+  uiCellValue,
+} from "../../ui/editableStyles";
+import { FormField } from "../../components/FormField";
+import { WOUNDS_CRITICAL_THRESHOLD, FATE_CRITICAL_THRESHOLD } from "../../constants/gameRules";
 
 interface VitalsTabProps {
   character: Character;
@@ -34,7 +37,7 @@ export function VitalsTab({
   onUpdateCorruption,
 }: VitalsTabProps) {
   const { wounds, fate } = character;
-  const insanity   = character.insanity   ?? { points: 0, disorders: "" };
+  const insanity = character.insanity ?? { points: 0, disorders: "" };
   const corruption = character.corruption ?? { points: 0, malignancies: "" };
 
   const handleCurrentWoundsChange = useCallback(
@@ -96,63 +99,63 @@ export function VitalsTab({
       <div>
         <p className={`${uiSectionHeader} mb-2`}>Combat Status</p>
         <section className={uiSection}>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          {/* Total Wounds */}
-          <div className={uiCell + " text-center p-2 flex flex-col"}>
-            <div className="text-xs text-slate-100 mb-2">Total Wounds</div>
-            <div className="flex-1 flex items-center justify-center">
-              {editable ? (
-                <input
-                  type="number"
-                  min={0}
-                  className={editableInputClass(true) + " mt-1 text-center"}
-                  value={wounds.total}
-                  onChange={handleWoundsTotalChange}
-                  aria-label="Total wounds"
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {/* Total Wounds */}
+            <div className={uiCell + " text-center p-2 flex flex-col"}>
+              <div className="text-xs text-slate-100 mb-2">Total Wounds</div>
+              <div className="flex-1 flex items-center justify-center">
+                {editable ? (
+                  <input
+                    type="number"
+                    min={0}
+                    className={editableInputClass(true) + " mt-1 text-center"}
+                    value={wounds.total}
+                    onChange={handleWoundsTotalChange}
+                    aria-label="Total wounds"
+                  />
+                ) : (
+                  <div className={uiCellValue}>{wounds.total}</div>
+                )}
+              </div>
+            </div>
+
+            {/* Current Wounds */}
+            <div className={uiCell + " text-center p-2 flex flex-col"}>
+              <div className="text-xs text-slate-100 mb-2">Current Wounds</div>
+              <div className="flex-1 flex items-center justify-center">
+                <Stepper
+                  value={wounds.current}
+                  editable={editable}
+                  onChange={handleCurrentWoundsChange}
+                  dangerClassName={dangerClass(wounds.current, WOUNDS_CRITICAL_THRESHOLD)}
                 />
-              ) : (
-                <div className={uiCellValue}>{wounds.total}</div>
-              )}
+              </div>
             </div>
-          </div>
 
-          {/* Current Wounds */}
-          <div className={uiCell + " text-center p-2 flex flex-col"}>
-            <div className="text-xs text-slate-100 mb-2">Current Wounds</div>
-            <div className="flex-1 flex items-center justify-center">
-              <Stepper
-                value={wounds.current}
-                editable={editable}
-                onChange={handleCurrentWoundsChange}
-                dangerClassName={dangerClass(wounds.current, WOUNDS_CRITICAL_THRESHOLD)}
-              />
+            {/* Critical Damage */}
+            <div className={uiCell + " text-center p-2 flex flex-col"}>
+              <div className="text-xs text-slate-100 mb-2">Critical Damage</div>
+              <div className="flex-1 flex items-center justify-center">
+                <Stepper
+                  value={wounds.criticalDamage}
+                  editable={editable}
+                  onChange={handleCriticalDamageChange}
+                />
+              </div>
             </div>
-          </div>
 
-          {/* Critical Damage */}
-          <div className={uiCell + " text-center p-2 flex flex-col"}>
-            <div className="text-xs text-slate-100 mb-2">Critical Damage</div>
-            <div className="flex-1 flex items-center justify-center">
-              <Stepper
-                value={wounds.criticalDamage}
-                editable={editable}
-                onChange={handleCriticalDamageChange}
-              />
+            {/* Fatigue */}
+            <div className={uiCell + " text-center p-2 flex flex-col"}>
+              <div className="text-xs text-slate-100 mb-2">Fatigue</div>
+              <div className="flex-1 flex items-center justify-center">
+                <Stepper
+                  value={wounds.fatigue}
+                  editable={editable}
+                  onChange={handleFatigueChange}
+                />
+              </div>
             </div>
           </div>
-
-          {/* Fatigue */}
-          <div className={uiCell + " text-center p-2 flex flex-col"}>
-            <div className="text-xs text-slate-100 mb-2">Fatigue</div>
-            <div className="flex-1 flex items-center justify-center">
-              <Stepper
-                value={wounds.fatigue}
-                editable={editable}
-                onChange={handleFatigueChange}
-              />
-            </div>
-          </div>
-        </div>
         </section>
       </div>
 
@@ -160,66 +163,65 @@ export function VitalsTab({
       <div>
         <p className={`${uiSectionHeader} mb-2`}>Fate Points</p>
         <section className={uiSection}>
-        <div className="grid grid-cols-2 gap-3">
-          {/* Total */}
-          <div className={uiCell + " text-center p-2 flex flex-col"}>
-            <div className="text-xs text-slate-100 mb-2">Total</div>
-            <div className="flex-1 flex items-center justify-center">
-              {editable ? (
-                <input
-                  type="number"
-                  min={0}
-                  className={editableInputClass(true) + " mt-1 text-center"}
-                  value={fate.total}
-                  onChange={handleFateTotalChange}
-                  aria-label="Total fate points"
-                />
-              ) : (
-                <div className={uiCellValue}>{fate.total}</div>
-              )}
+          <div className="grid grid-cols-2 gap-3">
+            {/* Total */}
+            <div className={uiCell + " text-center p-2 flex flex-col"}>
+              <div className="text-xs text-slate-100 mb-2">Total</div>
+              <div className="flex-1 flex items-center justify-center">
+                {editable ? (
+                  <input
+                    type="number"
+                    min={0}
+                    className={editableInputClass(true) + " mt-1 text-center"}
+                    value={fate.total}
+                    onChange={handleFateTotalChange}
+                    aria-label="Total fate points"
+                  />
+                ) : (
+                  <div className={uiCellValue}>{fate.total}</div>
+                )}
+              </div>
             </div>
-          </div>
 
-          {/* Current */}
-          <div className={uiCell + " text-center p-2 flex flex-col"}>
-            <div className="text-xs text-slate-100 mb-2">Current</div>
-            <div className="flex-1 flex items-center justify-center">
-              <Stepper
-                value={fate.current}
-                editable={editable}
-                onChange={handleCurrentFateChange}
-                dangerClassName={dangerClass(fate.current, FATE_CRITICAL_THRESHOLD)}
-              />
+            {/* Current */}
+            <div className={uiCell + " text-center p-2 flex flex-col"}>
+              <div className="text-xs text-slate-100 mb-2">Current</div>
+              <div className="flex-1 flex items-center justify-center">
+                <Stepper
+                  value={fate.current}
+                  editable={editable}
+                  onChange={handleCurrentFateChange}
+                  dangerClassName={dangerClass(fate.current, FATE_CRITICAL_THRESHOLD)}
+                />
+              </div>
             </div>
           </div>
-        </div>
         </section>
       </div>
 
       {/* INSANITY & CORRUPTION */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
         {/* INSANITY */}
         <div>
           <p className={`${uiSectionHeader} mb-2`}>Insanity</p>
           <section className={uiSection + " space-y-3"}>
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-slate-100 uppercase tracking-wide">Points</span>
-            <Stepper
-              value={insanity.points}
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-slate-100 uppercase tracking-wide">Points</span>
+              <Stepper
+                value={insanity.points}
+                editable={editable}
+                onChange={handleInsanityPointsChange}
+              />
+            </div>
+            <FormField
+              label="Disorders"
+              value={insanity.disorders}
+              onChange={handleInsanityDisordersChange}
               editable={editable}
-              onChange={handleInsanityPointsChange}
+              type="textarea"
+              rows={2}
+              placeholder="List any disorders…"
             />
-          </div>
-          <FormField
-            label="Disorders"
-            value={insanity.disorders}
-            onChange={handleInsanityDisordersChange}
-            editable={editable}
-            type="textarea"
-            rows={2}
-            placeholder="List any disorders…"
-          />
           </section>
         </div>
 
@@ -227,28 +229,26 @@ export function VitalsTab({
         <div>
           <p className={`${uiSectionHeader} mb-2`}>Corruption</p>
           <section className={uiSection + " space-y-3"}>
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-slate-100 uppercase tracking-wide">Points</span>
-            <Stepper
-              value={corruption.points}
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-slate-100 uppercase tracking-wide">Points</span>
+              <Stepper
+                value={corruption.points}
+                editable={editable}
+                onChange={handleCorruptionPointsChange}
+              />
+            </div>
+            <FormField
+              label="Malignancies"
+              value={corruption.malignancies}
+              onChange={handleMalignanciesChange}
               editable={editable}
-              onChange={handleCorruptionPointsChange}
+              type="textarea"
+              rows={2}
+              placeholder="List any malignancies…"
             />
-          </div>
-          <FormField
-            label="Malignancies"
-            value={corruption.malignancies}
-            onChange={handleMalignanciesChange}
-            editable={editable}
-            type="textarea"
-            rows={2}
-            placeholder="List any malignancies…"
-          />
           </section>
         </div>
-
       </div>
-
     </div>
   );
 }

@@ -56,7 +56,6 @@ function CampaignSection({
     }
   }, [newCampaignName, userUid, onCampaignSelect, toast]);
 
-
   const handleEditStart = useCallback((campaign: CampaignWithId) => {
     setEditingId(campaign.id);
     setEditName(campaign.name);
@@ -67,22 +66,25 @@ function CampaignSection({
     setEditName("");
   }, []);
 
-  const handleDeleteConfirm = useCallback(async (campaignId: string) => {
-    setDeleting(true);
-    try {
-      await deleteCampaign(campaignId);
-      if (activeCampaignId === campaignId) {
-        onCampaignSelect(null);
+  const handleDeleteConfirm = useCallback(
+    async (campaignId: string) => {
+      setDeleting(true);
+      try {
+        await deleteCampaign(campaignId);
+        if (activeCampaignId === campaignId) {
+          onCampaignSelect(null);
+        }
+        setConfirmDeleteId(null);
+        toast.success("Campaign deleted.");
+      } catch (err) {
+        console.error("Failed to delete campaign:", err);
+        toast.error("Failed to delete campaign. Please try again.");
+      } finally {
+        setDeleting(false);
       }
-      setConfirmDeleteId(null);
-      toast.success("Campaign deleted.");
-    } catch (err) {
-      console.error("Failed to delete campaign:", err);
-      toast.error("Failed to delete campaign. Please try again.");
-    } finally {
-      setDeleting(false);
-    }
-  }, [activeCampaignId, onCampaignSelect, toast]);
+    },
+    [activeCampaignId, onCampaignSelect, toast]
+  );
 
   const handleEditSave = useCallback(async () => {
     if (!editingId) return;

@@ -24,7 +24,7 @@ export function ImplantRow({ item, editable, onCycleQuality, onRemove }: Props) 
     : qualityOptions[0];
   const qualityDescription = ref
     ? craftsmanshipDescription(ref, displayedCraftsmanship)
-    : item.notes ?? "No rules recorded.";
+    : (item.notes ?? "No rules recorded.");
 
   return (
     <div className={[uiSection, "flex items-start gap-3"].join(" ")}>
@@ -38,13 +38,17 @@ export function ImplantRow({ item, editable, onCycleQuality, onRemove }: Props) 
               <div className="space-y-3">
                 {ref?.notes && (
                   <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Item Rules</p>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
+                      Item Rules
+                    </p>
                     <p className="text-sm text-slate-300 leading-relaxed">{ref.notes}</p>
                   </div>
                 )}
                 {item.notes && (
                   <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Notes</p>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
+                      Notes
+                    </p>
                     <p className="text-sm text-slate-300 leading-relaxed">{item.notes}</p>
                   </div>
                 )}
@@ -52,9 +56,6 @@ export function ImplantRow({ item, editable, onCycleQuality, onRemove }: Props) 
             }
           />
         </div>
-        <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">
-          {qualityDescription}
-        </p>
         <div className="flex flex-wrap gap-1.5 mt-1">
           {item.bodyLocation && item.bodyLocation.length > 0 && (
             <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">
@@ -73,7 +74,11 @@ export function ImplantRow({ item, editable, onCycleQuality, onRemove }: Props) 
           <span className="text-[10px] text-slate-500 uppercase tracking-wide">Quality</span>
           <button
             onClick={() => canChangeQuality && onCycleQuality(item.id)}
-            title={canChangeQuality ? `Click to change quality (currently ${displayedCraftsmanship})` : displayedCraftsmanship}
+            title={
+              canChangeQuality
+                ? `Click to change quality (currently ${displayedCraftsmanship})`
+                : displayedCraftsmanship
+            }
             disabled={!canChangeQuality}
             className={[
               "text-xs px-1.5 py-0.5 rounded border font-medium transition shrink-0",
@@ -91,11 +96,7 @@ export function ImplantRow({ item, editable, onCycleQuality, onRemove }: Props) 
       </div>
 
       {/* Info button */}
-      <button
-        onClick={() => undefined}
-        title="View rules"
-        className="hidden"
-      >
+      <button onClick={() => undefined} title="View rules" className="hidden">
         ⓘ
       </button>
 

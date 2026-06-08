@@ -15,7 +15,13 @@ interface AddSkillModalProps {
   onAdd: (id: string) => void;
 }
 
-export function AddSkillModal({ isOpen, editable = true, onClose, untrainedSkills, onAdd }: AddSkillModalProps) {
+export function AddSkillModal({
+  isOpen,
+  editable = true,
+  onClose,
+  untrainedSkills,
+  onAdd,
+}: AddSkillModalProps) {
   const [search, setSearch] = useState("");
 
   const filtered = untrainedSkills
@@ -43,19 +49,26 @@ export function AddSkillModal({ isOpen, editable = true, onClose, untrainedSkill
           <div className="flex items-center gap-1.5 flex-1 min-w-0">
             <span className="text-sm text-slate-100 truncate">{skill.name}</span>
             {SKILL_DESCRIPTIONS[skill.name] && (
-              <span className="inline-flex items-center leading-[0]" onClick={(e) => e.stopPropagation()}>
+              <span
+                className="inline-flex items-center leading-[0]"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <InfoModal title={skill.name} content={SKILL_DESCRIPTIONS[skill.name]} />
               </span>
             )}
           </div>
-          <span className={`px-1.5 py-0.5 rounded border bg-slate-800 text-[10px] font-mono shrink-0 ${charColour(skill.characteristic)}`}>
+          <span
+            className={`px-1.5 py-0.5 rounded border bg-slate-800 text-[10px] font-mono shrink-0 ${charColour(skill.characteristic)}`}
+          >
             {CHAR_LABEL[skill.characteristic]}
           </span>
-          <span className={`px-1.5 py-0.5 rounded border text-[10px] shrink-0 ${
-            skill.advanced
-              ? "bg-purple-700/40 border-purple-500 text-purple-300"
-              : "bg-teal-900/40 border-teal-700/50 text-teal-300"
-          }`}>
+          <span
+            className={`px-1.5 py-0.5 rounded border text-[10px] shrink-0 ${
+              skill.advanced
+                ? "bg-purple-700/40 border-purple-500 text-purple-300"
+                : "bg-teal-900/40 border-teal-700/50 text-teal-300"
+            }`}
+          >
             {skill.advanced ? "Advanced" : "Basic"}
           </span>
         </button>

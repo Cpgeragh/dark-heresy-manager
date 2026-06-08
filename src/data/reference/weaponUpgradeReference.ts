@@ -25,7 +25,6 @@ export interface WeaponUpgradeRef {
 // ─── Reference Data ──────────────────────────────────────────────────────────
 
 export const WEAPON_UPGRADE_REFERENCE: WeaponUpgradeRef[] = [
-
   // ── Core Rulebook ─────────────────────────────────────────────────────────
 
   {
@@ -175,8 +174,8 @@ export const WEAPON_UPGRADE_REFERENCE: WeaponUpgradeRef[] = [
       "Integrated Solid Projectile and Launcher weapons instead gain Reliable and Storm. " +
       "Only Chain, Shock, or Power melee weapons can be integrated: Chain gains Razor Sharp, Shock imposes an additional -30 penalty on Toughness Tests to resist Stunning, and Power gains +2 Damage and +2 Penetration. Primitive weapons cannot be integrated. " +
       "Creating one follows normal weapon upgrade rules, but requires trained Forbidden Lore (Adeptus Mechanicus); components are only available on Forge Worlds.",
-    applicableTo: "Creation of Integrated Weapons only; not selectable as a normal weapon attachment.",
+    applicableTo:
+      "Creation of Integrated Weapons only; not selectable as a normal weapon attachment.",
     isCreationComponent: true,
   },
-
 ];

@@ -40,8 +40,8 @@ export function TalentPickerModal({
   onAdd: (entry: TalentEntry) => void;
   onClose: () => void;
 }) {
-  const [query, setQuery]         = useState("");
-  const [picked, setPicked]       = useState<AnyListItem | null>(null);
+  const [query, setQuery] = useState("");
+  const [picked, setPicked] = useState<AnyListItem | null>(null);
   const [specialisation, setSpecialisation] = useState("");
 
   const filtered = useMemo(() => {
@@ -58,7 +58,7 @@ export function TalentPickerModal({
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [listData, selectedIds, query]);
 
-  const talentData = picked && "hasSpecialisation" in picked ? picked as TalentData : null;
+  const talentData = picked && "hasSpecialisation" in picked ? (picked as TalentData) : null;
 
   const isNumeric = talentData?.specialisationMin !== undefined;
   const specialisationOptions = talentData?.specialisationOptions;
@@ -68,14 +68,19 @@ export function TalentPickerModal({
     if (!raw) return false;
     const numericValue = Number(raw);
     if (!Number.isInteger(numericValue)) return false;
-    if (talentData!.specialisationMin !== undefined && numericValue < talentData!.specialisationMin) return false;
-    if (talentData!.specialisationMax !== undefined && numericValue > talentData!.specialisationMax) return false;
+    if (talentData!.specialisationMin !== undefined && numericValue < talentData!.specialisationMin)
+      return false;
+    if (talentData!.specialisationMax !== undefined && numericValue > talentData!.specialisationMax)
+      return false;
     return true;
   };
 
-  const canAdd = !!picked && talentData?.hasSpecialisation
-    ? (isNumeric ? numericValid() : specialisation.trim().length > 0)
-    : false;
+  const canAdd =
+    !!picked && talentData?.hasSpecialisation
+      ? isNumeric
+        ? numericValid()
+        : specialisation.trim().length > 0
+      : false;
 
   const addImmediate = (item: AnyListItem) => {
     onAdd({ uid: crypto.randomUUID(), talentId: item.id, name: item.name });
@@ -94,69 +99,80 @@ export function TalentPickerModal({
     setSpecialisation("");
   };
 
-  const specialisationFooter = editable && picked && talentData?.hasSpecialisation ? (
-    <div className="space-y-2">
-      <p className="text-xs text-slate-400">
-        Adding: <span className="text-slate-200 font-medium">{picked.name}</span>
-      </p>
+  const specialisationFooter =
+    editable && picked && talentData?.hasSpecialisation ? (
+      <div className="space-y-2">
+        <p className="text-xs text-slate-400">
+          Adding: <span className="text-slate-200 font-medium">{picked.name}</span>
+        </p>
 
-      {specialisationOptions ? (
-        <select
-          value={specialisation}
-          onChange={(e) => setSpecialisation(e.target.value)}
-          className={editableInputClass(true)}
-        >
-          <option value="">{talentData.specialisationLabel ?? "Specialisation"}...</option>
-          {specialisationOptions.map((option) => (
-            <option key={option} value={option}>{option}</option>
-          ))}
-        </select>
-      ) : isNumeric ? (
-        <>
-          <input
-            type="number"
+        {specialisationOptions ? (
+          <select
             value={specialisation}
             onChange={(e) => setSpecialisation(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter" && canAdd) handleSpecAdd(); }}
-            min={talentData.specialisationMin}
-            max={talentData.specialisationMax}
-            step={1}
-            placeholder={talentData.specialisationLabel ?? "Value…"}
+            className={editableInputClass(true)}
+          >
+            <option value="">{talentData.specialisationLabel ?? "Specialisation"}...</option>
+            {specialisationOptions.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+        ) : isNumeric ? (
+          <>
+            <input
+              type="number"
+              value={specialisation}
+              onChange={(e) => setSpecialisation(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && canAdd) handleSpecAdd();
+              }}
+              min={talentData.specialisationMin}
+              max={talentData.specialisationMax}
+              step={1}
+              placeholder={talentData.specialisationLabel ?? "Value…"}
+              className={editableInputClass(true)}
+            />
+            <p className="text-xs text-slate-500">
+              {talentData.specialisationMax !== undefined
+                ? `Whole number ${talentData.specialisationMin}–${talentData.specialisationMax}.`
+                : `Whole number, ${talentData.specialisationMin} or higher.`}
+            </p>
+          </>
+        ) : (
+          <input
+            type="text"
+            value={specialisation}
+            onChange={(e) => setSpecialisation(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && canAdd) handleSpecAdd();
+            }}
+            placeholder={talentData.specialisationLabel ?? "Specialisation…"}
             className={editableInputClass(true)}
           />
-          <p className="text-xs text-slate-500">
-            {talentData.specialisationMax !== undefined
-              ? `Whole number ${talentData.specialisationMin}–${talentData.specialisationMax}.`
-              : `Whole number, ${talentData.specialisationMin} or higher.`}
-          </p>
-        </>
-      ) : (
-        <input
-          type="text"
-          value={specialisation}
-          onChange={(e) => setSpecialisation(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter" && canAdd) handleSpecAdd(); }}
-          placeholder={talentData.specialisationLabel ?? "Specialisation…"}
-          className={editableInputClass(true)}
-        />
-      )}
+        )}
 
-      <button
-        onClick={handleSpecAdd}
-        disabled={!canAdd}
-        className="w-full px-3 py-1.5 text-sm rounded border border-amber-500 bg-amber-600 text-white hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed transition"
-      >
-        Add {picked.name}
-      </button>
-    </div>
-  ) : undefined;
+        <button
+          onClick={handleSpecAdd}
+          disabled={!canAdd}
+          className="w-full px-3 py-1.5 text-sm rounded border border-amber-500 bg-amber-600 text-white hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed transition"
+        >
+          Add {picked.name}
+        </button>
+      </div>
+    ) : undefined;
 
   return (
     <PickerModal
       title={title}
       placeholder="Search…"
       query={query}
-      onQueryChange={(q) => { setQuery(q); setPicked(null); setSpecialisation(""); }}
+      onQueryChange={(q) => {
+        setQuery(q);
+        setPicked(null);
+        setSpecialisation("");
+      }}
       onClose={onClose}
       isEmpty={filtered.length === 0}
       footer={specialisationFooter}
@@ -168,25 +184,34 @@ export function TalentPickerModal({
         return (
           <button
             key={item.id}
-            onClick={editable ? () => {
-              if ((item as TalentData).hasSpecialisation) {
-                setPicked(item);
-                setSpecialisation("");
-              } else {
-                addImmediate(item);
-              }
-            } : undefined}
+            onClick={
+              editable
+                ? () => {
+                    if ((item as TalentData).hasSpecialisation) {
+                      setPicked(item);
+                      setSpecialisation("");
+                    } else {
+                      addImmediate(item);
+                    }
+                  }
+                : undefined
+            }
             className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"} ${
               isSelected ? "bg-slate-800 ring-1 ring-inset ring-amber-500/40" : ""
             }`}
           >
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                <span className={`text-sm font-medium text-slate-200 truncate ${editable ? "group-hover:text-white" : ""}`}>
+                <span
+                  className={`text-sm font-medium text-slate-200 truncate ${editable ? "group-hover:text-white" : ""}`}
+                >
                   {item.name}
                 </span>
                 {(TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]) && (
-                  <span className="inline-flex items-center leading-[0]" onClick={(e) => e.stopPropagation()}>
+                  <span
+                    className="inline-flex items-center leading-[0]"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <InfoModal
                       title={item.name}
                       content={TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]}
@@ -196,7 +221,10 @@ export function TalentPickerModal({
               </div>
               <div className="flex gap-1 shrink-0">
                 {sources.map((src) => (
-                  <span key={src} className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(src)}`}>
+                  <span
+                    key={src}
+                    className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(src)}`}
+                  >
                     {src}
                   </span>
                 ))}
@@ -224,8 +252,9 @@ interface EntryCardProps {
 
 export function EntryCard({ entry, editable, onRemove }: EntryCardProps) {
   const description = TALENT_DESCRIPTIONS[entry.talentId] ?? TRAIT_DESCRIPTIONS[entry.talentId];
-  const refData = ([...TALENT_LIST, ...TRAIT_LIST] as Array<{ id: string; source: SkillSource | SkillSource[] }>)
-    .find((r) => r.id === entry.talentId);
+  const refData = (
+    [...TALENT_LIST, ...TRAIT_LIST] as Array<{ id: string; source: SkillSource | SkillSource[] }>
+  ).find((r) => r.id === entry.talentId);
   const refSources = refData ? normaliseSources(refData.source) : [];
 
   return (
@@ -234,13 +263,14 @@ export function EntryCard({ entry, editable, onRemove }: EntryCardProps) {
         <div className="flex items-center gap-2 flex-wrap">
           <span className="font-medium text-slate-100 break-words">{entry.name}</span>
           {refSources.map((src) => (
-            <span key={src} className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(src)}`}>
+            <span
+              key={src}
+              className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(src)}`}
+            >
               {src}
             </span>
           ))}
-          {description && (
-            <InfoModal title={entry.name} content={description} />
-          )}
+          {description && <InfoModal title={entry.name} content={description} />}
         </div>
       </div>
       {editable && (
@@ -279,10 +309,7 @@ export function EntrySection({
 }: EntrySectionProps) {
   const [showPicker, setShowPicker] = useState(false);
 
-  const selectedIds = useMemo(
-    () => new Set(entries.map((e) => e.talentId)),
-    [entries]
-  );
+  const selectedIds = useMemo(() => new Set(entries.map((e) => e.talentId)), [entries]);
 
   return (
     <div>
@@ -294,19 +321,14 @@ export function EntrySection({
       </div>
 
       <section className={uiSection + " space-y-2"}>
-        {entries.length === 0 && (
-          <p className="text-sm text-slate-500 italic">None added yet.</p>
-        )}
+        {entries.length === 0 && <p className="text-sm text-slate-500 italic">None added yet.</p>}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {[...entries].sort((a, b) => a.name.localeCompare(b.name)).map((entry) => (
-            <EntryCard
-              key={entry.uid}
-              entry={entry}
-              editable={editable}
-              onRemove={onRemove}
-            />
-          ))}
+          {[...entries]
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .map((entry) => (
+              <EntryCard key={entry.uid} entry={entry} editable={editable} onRemove={onRemove} />
+            ))}
         </div>
 
         <button

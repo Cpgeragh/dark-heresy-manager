@@ -11,12 +11,12 @@ export const SkillSource = {
   LW: "LW",
   Asc: "Asc",
   DotDG: "DotDG",
-  BSep:  "BSep",
-  CC:    "CC",
-  H3:    "H3",
-  LD:    "LD",
-  SDS:   "SDS",  // Salvation Demands Sacrifice
+  BSep: "BSep",
+  CC: "CC",
+  H3: "H3",
+  LD: "LD",
+  SDS: "SDS", // Salvation Demands Sacrifice
 } as const;
 
 // A type of all source keys (safe, no runtime code)
-export type SkillSource = typeof SkillSource[keyof typeof SkillSource];
+export type SkillSource = (typeof SkillSource)[keyof typeof SkillSource];

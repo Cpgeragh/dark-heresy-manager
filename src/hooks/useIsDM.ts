@@ -42,7 +42,9 @@ export function useIsDM(campaignId: string | undefined): boolean {
     }
 
     checkDM();
-    return () => { ignore = true; };
+    return () => {
+      ignore = true;
+    };
   }, [campaignId]);
 
   return isDM;

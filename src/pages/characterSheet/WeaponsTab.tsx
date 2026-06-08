@@ -65,9 +65,10 @@ function IndependentCardGrid({
   ];
 
   const mobileClass = breakpoint === "lg" ? "space-y-3 lg:hidden" : "space-y-3 sm:hidden";
-  const desktopClass = breakpoint === "lg"
-    ? "hidden lg:grid lg:grid-cols-2 lg:gap-3 lg:items-start"
-    : "hidden sm:grid sm:grid-cols-2 sm:gap-3 sm:items-start";
+  const desktopClass =
+    breakpoint === "lg"
+      ? "hidden lg:grid lg:grid-cols-2 lg:gap-3 lg:items-start"
+      : "hidden sm:grid sm:grid-cols-2 sm:gap-3 sm:items-start";
 
   return (
     <>
@@ -93,10 +94,7 @@ const INTEGRATED_RANGED_IDS = new Set([
   "lw-graviton-pulse-launcher",
 ]);
 
-const INTEGRATED_MELEE_IDS = new Set([
-  "lw-coil-whip",
-  "lw-lathes-arc-welder",
-]);
+const INTEGRATED_MELEE_IDS = new Set(["lw-coil-whip", "lw-lathes-arc-welder"]);
 
 const INTEGRATED_RANGED_NAMES = new Set([
   "lathe laspistol",
@@ -131,6 +129,8 @@ function isIntegratedMeleeRef(ref: MeleeWeaponRef): boolean {
 }
 
 function isIntegratedRangedWeapon(weapon: RangedWeapon): boolean {
+  // referenceId is the primary check. The name fallback handles weapons added
+  // before referenceId existed — legacy data only has a name, not an id.
   return (
     (weapon.referenceId ? INTEGRATED_RANGED_IDS.has(weapon.referenceId) : false) ||
     INTEGRATED_RANGED_NAMES.has(normaliseName(weapon.name))
@@ -138,6 +138,8 @@ function isIntegratedRangedWeapon(weapon: RangedWeapon): boolean {
 }
 
 function isIntegratedMeleeWeapon(weapon: MeleeWeapon): boolean {
+  // referenceId is the primary check. The name fallback handles weapons added
+  // before referenceId existed — legacy data only has a name, not an id.
   return (
     (weapon.referenceId ? INTEGRATED_MELEE_IDS.has(weapon.referenceId) : false) ||
     INTEGRATED_MELEE_NAMES.has(normaliseName(weapon.name))
@@ -161,9 +163,11 @@ function IntegratedWeaponPicker({
   onClose: () => void;
 }) {
   const [query, setQuery] = useState("");
-  const q = query.toLowerCase();
-  const ranged = INTEGRATED_RANGED_REFS.filter((ref) => ref.name.toLowerCase().includes(q));
-  const melee = INTEGRATED_MELEE_REFS.filter((ref) => ref.name.toLowerCase().includes(q));
+  const lowerQuery = query.toLowerCase();
+  const ranged = INTEGRATED_RANGED_REFS.filter((ref) =>
+    ref.name.toLowerCase().includes(lowerQuery)
+  );
+  const melee = INTEGRATED_MELEE_REFS.filter((ref) => ref.name.toLowerCase().includes(lowerQuery));
   const isEmpty = ranged.length === 0 && melee.length === 0;
 
   return (
@@ -181,7 +185,9 @@ function IntegratedWeaponPicker({
           onClick={editable ? () => onSelectRanged(ref) : undefined}
           className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
-          <span className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}>
+          <span
+            className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}
+          >
             {ref.name}
           </span>
           <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5 flex-wrap font-mono">
@@ -199,7 +205,9 @@ function IntegratedWeaponPicker({
           onClick={editable ? () => onSelectMelee(ref) : undefined}
           className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
-          <span className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}>
+          <span
+            className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}
+          >
             {ref.name}
           </span>
           <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5 flex-wrap font-mono">
@@ -276,15 +284,9 @@ export function WeaponsTab({
   const [showCustomMelee, setShowCustomMelee] = useState(false);
 
   // ── Archeotech weapons ─────────────────────────────────────────────────────
-  const archeotechGrenadeItems = (archeotech ?? []).filter(
-    (a) => a.type === "Grenade"
-  );
-  const archeotechMineItems = (archeotech ?? []).filter(
-    (a) => a.type === "Mine"
-  );
-  const archeotechWeaponItems = (archeotech ?? []).filter(
-    (a) => a.type === "Weapon"
-  );
+  const archeotechGrenadeItems = (archeotech ?? []).filter((a) => a.type === "Grenade");
+  const archeotechMineItems = (archeotech ?? []).filter((a) => a.type === "Mine");
+  const archeotechWeaponItems = (archeotech ?? []).filter((a) => a.type === "Weapon");
   const archeotechRangedItems = archeotechWeaponItems.filter((a) => {
     const ref = ARCHEOTECH_REFERENCE.find((r) => r.id === a.referenceId);
     return ref?.weaponClass !== "Melee";
@@ -300,8 +302,12 @@ export function WeaponsTab({
     if (!ref?.weapon) return [];
     return [{ cybernetic: c, weapon: ref.weapon }];
   });
-  const cyberneticRangedItems = cyberneticWeaponItems.filter(({ weapon }) => weapon.type === "ranged");
-  const cyberneticMeleeItems  = cyberneticWeaponItems.filter(({ weapon }) => weapon.type === "melee");
+  const cyberneticRangedItems = cyberneticWeaponItems.filter(
+    ({ weapon }) => weapon.type === "ranged"
+  );
+  const cyberneticMeleeItems = cyberneticWeaponItems.filter(
+    ({ weapon }) => weapon.type === "melee"
+  );
 
   const normalRangedWeapons = rangedWeapons
     .map((weapon, index) => ({ weapon, index }))
@@ -319,34 +325,102 @@ export function WeaponsTab({
 
   // ── Unified sorted lists ───────────────────────────────────────────────────
   const allRangedEntries = [
-    ...normalRangedWeapons.map(({ weapon, index }) => ({ kind: "regular" as const, weapon, index, name: weapon.name })),
-    ...cyberneticRangedItems.map(({ cybernetic, weapon }) => ({ kind: "cybernetic" as const, cybernetic, weapon, name: weapon.name })),
-    ...archeotechRangedItems.map((item) => ({ kind: "archeotech" as const, item, name: item.name })),
+    ...normalRangedWeapons.map(({ weapon, index }) => ({
+      kind: "regular" as const,
+      weapon,
+      index,
+      name: weapon.name,
+    })),
+    ...cyberneticRangedItems.map(({ cybernetic, weapon }) => ({
+      kind: "cybernetic" as const,
+      cybernetic,
+      weapon,
+      name: weapon.name,
+    })),
+    ...archeotechRangedItems.map((item) => ({
+      kind: "archeotech" as const,
+      item,
+      name: item.name,
+    })),
   ].sort((a, b) => {
     if (a.kind === "cybernetic" && b.kind !== "cybernetic") return -1;
     if (b.kind === "cybernetic" && a.kind !== "cybernetic") return 1;
-    const aEq = a.kind === "regular" ? (a.weapon.equipped ? 0 : 1) : a.kind === "archeotech" ? (a.item.equipped ? 0 : 1) : 0;
-    const bEq = b.kind === "regular" ? (b.weapon.equipped ? 0 : 1) : b.kind === "archeotech" ? (b.item.equipped ? 0 : 1) : 0;
+    const aEq =
+      a.kind === "regular"
+        ? a.weapon.equipped
+          ? 0
+          : 1
+        : a.kind === "archeotech"
+          ? a.item.equipped
+            ? 0
+            : 1
+          : 0;
+    const bEq =
+      b.kind === "regular"
+        ? b.weapon.equipped
+          ? 0
+          : 1
+        : b.kind === "archeotech"
+          ? b.item.equipped
+            ? 0
+            : 1
+          : 0;
     if (aEq !== bEq) return aEq - bEq;
     return a.name.localeCompare(b.name);
   });
 
   const allMeleeEntries = [
-    ...normalMeleeWeapons.map(({ weapon, index }) => ({ kind: "regular" as const, weapon, index, name: weapon.name })),
-    ...cyberneticMeleeItems.map(({ cybernetic, weapon }) => ({ kind: "cybernetic" as const, cybernetic, weapon, name: weapon.name })),
-    ...archeotechMeleeWeaponItems.map((item) => ({ kind: "archeotech" as const, item, name: item.name })),
+    ...normalMeleeWeapons.map(({ weapon, index }) => ({
+      kind: "regular" as const,
+      weapon,
+      index,
+      name: weapon.name,
+    })),
+    ...cyberneticMeleeItems.map(({ cybernetic, weapon }) => ({
+      kind: "cybernetic" as const,
+      cybernetic,
+      weapon,
+      name: weapon.name,
+    })),
+    ...archeotechMeleeWeaponItems.map((item) => ({
+      kind: "archeotech" as const,
+      item,
+      name: item.name,
+    })),
   ].sort((a, b) => {
     if (a.kind === "cybernetic" && b.kind !== "cybernetic") return -1;
     if (b.kind === "cybernetic" && a.kind !== "cybernetic") return 1;
-    const aEq = a.kind === "regular" ? (a.weapon.equipped ? 0 : 1) : a.kind === "archeotech" ? (a.item.equipped ? 0 : 1) : 0;
-    const bEq = b.kind === "regular" ? (b.weapon.equipped ? 0 : 1) : b.kind === "archeotech" ? (b.item.equipped ? 0 : 1) : 0;
+    const aEq =
+      a.kind === "regular"
+        ? a.weapon.equipped
+          ? 0
+          : 1
+        : a.kind === "archeotech"
+          ? a.item.equipped
+            ? 0
+            : 1
+          : 0;
+    const bEq =
+      b.kind === "regular"
+        ? b.weapon.equipped
+          ? 0
+          : 1
+        : b.kind === "archeotech"
+          ? b.item.equipped
+            ? 0
+            : 1
+          : 0;
     if (aEq !== bEq) return aEq - bEq;
     return a.name.localeCompare(b.name);
   });
 
   const allGrenadeEntries = [
     ...grenades.map((item) => ({ kind: "regular" as const, item, name: item.name })),
-    ...archeotechGrenadeItems.map((item) => ({ kind: "archeotech" as const, item, name: item.name })),
+    ...archeotechGrenadeItems.map((item) => ({
+      kind: "archeotech" as const,
+      item,
+      name: item.name,
+    })),
     ...archeotechMineItems.map((item) => ({ kind: "archeotech" as const, item, name: item.name })),
   ].sort((a, b) => {
     const aEq = a.item.equipped ? 0 : 1;
@@ -357,8 +431,12 @@ export function WeaponsTab({
 
   // ── Slot counting ──────────────────────────────────────────────────────────
   const equippedWeaponSlots =
-    normalRangedWeapons.filter(({ weapon }) => weapon.equipped).reduce((sum, { weapon }) => sum + getRangedSlots(weapon), 0) +
-    normalMeleeWeapons.filter(({ weapon }) => weapon.equipped).reduce((sum, { weapon }) => sum + getMeleeSlots(weapon), 0) +
+    normalRangedWeapons
+      .filter(({ weapon }) => weapon.equipped)
+      .reduce((sum, { weapon }) => sum + getRangedSlots(weapon), 0) +
+    normalMeleeWeapons
+      .filter(({ weapon }) => weapon.equipped)
+      .reduce((sum, { weapon }) => sum + getMeleeSlots(weapon), 0) +
     archeotechRangedItems.filter((a) => a.equipped).length +
     archeotechMeleeWeaponItems.filter((a) => a.equipped).length +
     (shields ?? []).filter((s) => s.equipped).length;
@@ -448,7 +526,10 @@ export function WeaponsTab({
   const addCustomRanged = useCallback(
     (weapon: RangedWeapon) => {
       if (!editable) return;
-      onUpdateRanged([...rangedWeapons, { ...weapon, craftsmanship: weapon.craftsmanship ?? "Common" }]);
+      onUpdateRanged([
+        ...rangedWeapons,
+        { ...weapon, craftsmanship: weapon.craftsmanship ?? "Common" },
+      ]);
       setShowCustomRanged(false);
     },
     [editable, rangedWeapons, onUpdateRanged]
@@ -484,7 +565,10 @@ export function WeaponsTab({
       onUpdateRanged(
         rangedWeapons.map((weapon) =>
           weapon.id === weaponId
-            ? { ...weapon, attachments: (weapon.attachments ?? []).filter((id) => id !== upgradeId) }
+            ? {
+                ...weapon,
+                attachments: (weapon.attachments ?? []).filter((id) => id !== upgradeId),
+              }
             : weapon
         )
       );
@@ -505,9 +589,7 @@ export function WeaponsTab({
   const updateRangedQuantity = useCallback(
     (weaponId: string, quantity: number) => {
       if (!editable) return;
-      onUpdateRanged(
-        rangedWeapons.map((w) => (w.id === weaponId ? { ...w, quantity } : w))
-      );
+      onUpdateRanged(rangedWeapons.map((w) => (w.id === weaponId ? { ...w, quantity } : w)));
     },
     [editable, rangedWeapons, onUpdateRanged]
   );
@@ -545,7 +627,10 @@ export function WeaponsTab({
   const addCustomMelee = useCallback(
     (weapon: MeleeWeapon) => {
       if (!editable) return;
-      onUpdateMelee([...meleeWeapons, { ...weapon, craftsmanship: weapon.craftsmanship ?? "Common" }]);
+      onUpdateMelee([
+        ...meleeWeapons,
+        { ...weapon, craftsmanship: weapon.craftsmanship ?? "Common" },
+      ]);
       setShowCustomMelee(false);
     },
     [editable, meleeWeapons, onUpdateMelee]
@@ -581,7 +666,10 @@ export function WeaponsTab({
       onUpdateMelee(
         meleeWeapons.map((weapon) =>
           weapon.id === weaponId
-            ? { ...weapon, attachments: (weapon.attachments ?? []).filter((id) => id !== upgradeId) }
+            ? {
+                ...weapon,
+                attachments: (weapon.attachments ?? []).filter((id) => id !== upgradeId),
+              }
             : weapon
         )
       );
@@ -592,9 +680,7 @@ export function WeaponsTab({
   const updateMeleeQuantity = useCallback(
     (weaponId: string, quantity: number) => {
       if (!editable) return;
-      onUpdateMelee(
-        meleeWeapons.map((w) => (w.id === weaponId ? { ...w, quantity } : w))
-      );
+      onUpdateMelee(meleeWeapons.map((w) => (w.id === weaponId ? { ...w, quantity } : w)));
     },
     [editable, meleeWeapons, onUpdateMelee]
   );
@@ -640,7 +726,7 @@ export function WeaponsTab({
   const toggleEquipRanged = useCallback(
     (id: string) => {
       if (!editable) return;
-      onUpdateRanged(rangedWeapons.map((w) => w.id === id ? { ...w, equipped: !w.equipped } : w));
+      onUpdateRanged(rangedWeapons.map((w) => (w.id === id ? { ...w, equipped: !w.equipped } : w)));
     },
     [editable, rangedWeapons, onUpdateRanged]
   );
@@ -648,7 +734,7 @@ export function WeaponsTab({
   const toggleEquipMelee = useCallback(
     (id: string) => {
       if (!editable) return;
-      onUpdateMelee(meleeWeapons.map((w) => w.id === id ? { ...w, equipped: !w.equipped } : w));
+      onUpdateMelee(meleeWeapons.map((w) => (w.id === id ? { ...w, equipped: !w.equipped } : w)));
     },
     [editable, meleeWeapons, onUpdateMelee]
   );
@@ -656,7 +742,9 @@ export function WeaponsTab({
   const toggleEquipArcheotech = useCallback(
     (id: string) => {
       if (!editable || !onUpdateArcheotech) return;
-      onUpdateArcheotech((archeotech ?? []).map((a) => a.id === id ? { ...a, equipped: !a.equipped } : a));
+      onUpdateArcheotech(
+        (archeotech ?? []).map((a) => (a.id === id ? { ...a, equipped: !a.equipped } : a))
+      );
     },
     [editable, archeotech, onUpdateArcheotech]
   );
@@ -664,7 +752,7 @@ export function WeaponsTab({
   const toggleEquipGrenade = useCallback(
     (id: string) => {
       if (!editable) return;
-      onUpdateGrenades(grenades.map((g) => g.id === id ? { ...g, equipped: !g.equipped } : g));
+      onUpdateGrenades(grenades.map((g) => (g.id === id ? { ...g, equipped: !g.equipped } : g)));
     },
     [editable, grenades, onUpdateGrenades]
   );
@@ -672,7 +760,9 @@ export function WeaponsTab({
   const toggleEquipShield = useCallback(
     (id: string) => {
       if (!editable || !onUpdateShields) return;
-      onUpdateShields((shields ?? []).map((s) => s.id === id ? { ...s, equipped: !s.equipped } : s));
+      onUpdateShields(
+        (shields ?? []).map((s) => (s.id === id ? { ...s, equipped: !s.equipped } : s))
+      );
     },
     [editable, shields, onUpdateShields]
   );
@@ -682,7 +772,6 @@ export function WeaponsTab({
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
         {/* ── RANGED ─────────────────────────────────────────────────────── */}
         <section className="space-y-3">
           <div className="flex items-center justify-between">
@@ -702,25 +791,27 @@ export function WeaponsTab({
           )}
 
           {allRangedEntries.map((entry) => {
-            if (entry.kind === "cybernetic") return (
-              <CyberneticWeaponCard
-                key={entry.cybernetic.id}
-                cyberneticName={entry.cybernetic.name}
-                weapon={entry.weapon}
-                strengthBonus={strengthBonus}
-              />
-            );
-            if (entry.kind === "archeotech") return (
-              <ArcheotechWeaponCard
-                key={entry.item.id}
-                item={entry.item}
-                strengthBonus={strengthBonus}
-                editable={editable}
-                isEquipped={entry.item.equipped ?? false}
-                onToggleEquip={() => toggleEquipArcheotech(entry.item.id)}
-                slotsDisabled={!(entry.item.equipped) && slotsRemaining < 1}
-              />
-            );
+            if (entry.kind === "cybernetic")
+              return (
+                <CyberneticWeaponCard
+                  key={entry.cybernetic.id}
+                  cyberneticName={entry.cybernetic.name}
+                  weapon={entry.weapon}
+                  strengthBonus={strengthBonus}
+                />
+              );
+            if (entry.kind === "archeotech")
+              return (
+                <ArcheotechWeaponCard
+                  key={entry.item.id}
+                  item={entry.item}
+                  strengthBonus={strengthBonus}
+                  editable={editable}
+                  isEquipped={entry.item.equipped ?? false}
+                  onToggleEquip={() => toggleEquipArcheotech(entry.item.id)}
+                  slotsDisabled={!entry.item.equipped && slotsRemaining < 1}
+                />
+              );
             return (
               <RangedCard
                 key={entry.weapon.id}
@@ -728,7 +819,9 @@ export function WeaponsTab({
                 editable={editable}
                 onRemove={() => removeRanged(entry.index)}
                 onAddAttachment={(upgradeId) => addAttachmentToRanged(entry.weapon.id, upgradeId)}
-                onRemoveAttachment={(upgradeId) => removeAttachmentFromRanged(entry.weapon.id, upgradeId)}
+                onRemoveAttachment={(upgradeId) =>
+                  removeAttachmentFromRanged(entry.weapon.id, upgradeId)
+                }
                 onUpdateAmmoEntries={(entries) => updateRangedAmmoEntries(entry.weapon.id, entries)}
                 onUpdateQuantity={(qty) => updateRangedQuantity(entry.weapon.id, qty)}
                 grenades={grenades}
@@ -736,16 +829,15 @@ export function WeaponsTab({
                 archeotechGrenades={archeotechGrenadeItems}
                 isEquipped={entry.weapon.equipped ?? false}
                 onToggleEquip={() => toggleEquipRanged(entry.weapon.id)}
-                slotsDisabled={!(entry.weapon.equipped) && slotsRemaining < getRangedSlots(entry.weapon)}
+                slotsDisabled={
+                  !entry.weapon.equipped && slotsRemaining < getRangedSlots(entry.weapon)
+                }
               />
             );
           })}
 
           {showCustomRanged && (
-            <CustomRangedForm
-              onAdd={addCustomRanged}
-              onCancel={() => setShowCustomRanged(false)}
-            />
+            <CustomRangedForm onAdd={addCustomRanged} onCancel={() => setShowCustomRanged(false)} />
           )}
         </section>
 
@@ -768,25 +860,27 @@ export function WeaponsTab({
           )}
 
           {allMeleeEntries.map((entry) => {
-            if (entry.kind === "cybernetic") return (
-              <CyberneticWeaponCard
-                key={entry.cybernetic.id}
-                cyberneticName={entry.cybernetic.name}
-                weapon={entry.weapon}
-                strengthBonus={strengthBonus}
-              />
-            );
-            if (entry.kind === "archeotech") return (
-              <ArcheotechWeaponCard
-                key={entry.item.id}
-                item={entry.item}
-                strengthBonus={strengthBonus}
-                editable={editable}
-                isEquipped={entry.item.equipped ?? false}
-                onToggleEquip={() => toggleEquipArcheotech(entry.item.id)}
-                slotsDisabled={!(entry.item.equipped) && slotsRemaining < 1}
-              />
-            );
+            if (entry.kind === "cybernetic")
+              return (
+                <CyberneticWeaponCard
+                  key={entry.cybernetic.id}
+                  cyberneticName={entry.cybernetic.name}
+                  weapon={entry.weapon}
+                  strengthBonus={strengthBonus}
+                />
+              );
+            if (entry.kind === "archeotech")
+              return (
+                <ArcheotechWeaponCard
+                  key={entry.item.id}
+                  item={entry.item}
+                  strengthBonus={strengthBonus}
+                  editable={editable}
+                  isEquipped={entry.item.equipped ?? false}
+                  onToggleEquip={() => toggleEquipArcheotech(entry.item.id)}
+                  slotsDisabled={!entry.item.equipped && slotsRemaining < 1}
+                />
+              );
             return (
               <MeleeCard
                 key={entry.weapon.id}
@@ -795,31 +889,29 @@ export function WeaponsTab({
                 strengthBonus={strengthBonus}
                 onRemove={() => removeMelee(entry.index)}
                 onAddAttachment={(upgradeId) => addAttachmentToMelee(entry.weapon.id, upgradeId)}
-                onRemoveAttachment={(upgradeId) => removeAttachmentFromMelee(entry.weapon.id, upgradeId)}
+                onRemoveAttachment={(upgradeId) =>
+                  removeAttachmentFromMelee(entry.weapon.id, upgradeId)
+                }
                 onUpdateQuantity={(qty) => updateMeleeQuantity(entry.weapon.id, qty)}
                 isEquipped={entry.weapon.equipped ?? false}
                 onToggleEquip={() => toggleEquipMelee(entry.weapon.id)}
-                slotsDisabled={!(entry.weapon.equipped) && slotsRemaining < getMeleeSlots(entry.weapon)}
+                slotsDisabled={
+                  !entry.weapon.equipped && slotsRemaining < getMeleeSlots(entry.weapon)
+                }
               />
             );
           })}
 
           {showCustomMelee && (
-            <CustomMeleeForm
-              onAdd={addCustomMelee}
-              onCancel={() => setShowCustomMelee(false)}
-            />
+            <CustomMeleeForm onAdd={addCustomMelee} onCancel={() => setShowCustomMelee(false)} />
           )}
         </section>
-
       </div>
 
       {/* ── GRENADES & MINES ─────────────────────────────────────────────── */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className={uiSectionHeader}>
-            Grenades & Mines ({allGrenadeEntries.length})
-          </h3>
+          <h3 className={uiSectionHeader}>Grenades & Mines ({allGrenadeEntries.length})</h3>
           <button
             onClick={() => setPicker("grenades")}
             className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
@@ -834,16 +926,17 @@ export function WeaponsTab({
 
         <IndependentCardGrid
           items={allGrenadeEntries.map((entry) => {
-            if (entry.kind === "archeotech") return (
-              <ArcheotechWeaponCard
-                key={entry.item.id}
-                item={entry.item}
-                editable={editable}
-                isEquipped={entry.item.equipped ?? false}
-                onToggleEquip={() => toggleEquipArcheotech(entry.item.id)}
-                slotsDisabled={!(entry.item.equipped) && equippedGrenadeTypes >= MAX_GRENADE_TYPES}
-              />
-            );
+            if (entry.kind === "archeotech")
+              return (
+                <ArcheotechWeaponCard
+                  key={entry.item.id}
+                  item={entry.item}
+                  editable={editable}
+                  isEquipped={entry.item.equipped ?? false}
+                  onToggleEquip={() => toggleEquipArcheotech(entry.item.id)}
+                  slotsDisabled={!entry.item.equipped && equippedGrenadeTypes >= MAX_GRENADE_TYPES}
+                />
+              );
             const item = entry.item;
             const isEquipped = !!item.equipped;
             const stowedCount = isEquipped ? Math.max(0, item.quantity - 3) : 0;
@@ -876,9 +969,7 @@ export function WeaponsTab({
       {/* ── INTEGRATED WEAPONS ───────────────────────────────────────────── */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className={uiSectionHeader}>
-            Integrated Weapons ({integratedWeaponCount})
-          </h3>
+          <h3 className={uiSectionHeader}>Integrated Weapons ({integratedWeaponCount})</h3>
           <button
             onClick={() => setPicker("integrated")}
             className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
@@ -895,35 +986,35 @@ export function WeaponsTab({
           breakpoint="lg"
           items={[
             ...integratedRangedWeapons.map(({ weapon, index }) => (
-            <RangedCard
-              key={weapon.id}
-              weapon={weapon}
-              editable={editable}
-              onRemove={() => removeRanged(index)}
-              onAddAttachment={(upgradeId) => addAttachmentToRanged(weapon.id, upgradeId)}
-              onRemoveAttachment={(upgradeId) => removeAttachmentFromRanged(weapon.id, upgradeId)}
-              onUpdateAmmoEntries={(entries) => updateRangedAmmoEntries(weapon.id, entries)}
-              onUpdateQuantity={(qty) => updateRangedQuantity(weapon.id, qty)}
-              grenades={grenades}
-              onUpdateGrenades={onUpdateGrenades}
-              archeotechGrenades={archeotechGrenadeItems}
-              allowAttachments={false}
-              forceExpanded
-            />
+              <RangedCard
+                key={weapon.id}
+                weapon={weapon}
+                editable={editable}
+                onRemove={() => removeRanged(index)}
+                onAddAttachment={(upgradeId) => addAttachmentToRanged(weapon.id, upgradeId)}
+                onRemoveAttachment={(upgradeId) => removeAttachmentFromRanged(weapon.id, upgradeId)}
+                onUpdateAmmoEntries={(entries) => updateRangedAmmoEntries(weapon.id, entries)}
+                onUpdateQuantity={(qty) => updateRangedQuantity(weapon.id, qty)}
+                grenades={grenades}
+                onUpdateGrenades={onUpdateGrenades}
+                archeotechGrenades={archeotechGrenadeItems}
+                allowAttachments={false}
+                forceExpanded
+              />
             )),
             ...integratedMeleeWeapons.map(({ weapon, index }) => (
-            <MeleeCard
-              key={weapon.id}
-              weapon={weapon}
-              editable={editable}
-              strengthBonus={strengthBonus}
-              onRemove={() => removeMelee(index)}
-              onAddAttachment={(upgradeId) => addAttachmentToMelee(weapon.id, upgradeId)}
-              onRemoveAttachment={(upgradeId) => removeAttachmentFromMelee(weapon.id, upgradeId)}
-              onUpdateQuantity={(qty) => updateMeleeQuantity(weapon.id, qty)}
-              allowAttachments={false}
-              forceExpanded
-            />
+              <MeleeCard
+                key={weapon.id}
+                weapon={weapon}
+                editable={editable}
+                strengthBonus={strengthBonus}
+                onRemove={() => removeMelee(index)}
+                onAddAttachment={(upgradeId) => addAttachmentToMelee(weapon.id, upgradeId)}
+                onRemoveAttachment={(upgradeId) => removeAttachmentFromMelee(weapon.id, upgradeId)}
+                onUpdateQuantity={(qty) => updateMeleeQuantity(weapon.id, qty)}
+                allowAttachments={false}
+                forceExpanded
+              />
             )),
           ]}
         />
@@ -946,21 +1037,23 @@ export function WeaponsTab({
         )}
 
         <IndependentCardGrid
-          items={[...(shields ?? [])].sort((a, b) => {
-            if (a.equipped && !b.equipped) return -1;
-            if (!a.equipped && b.equipped) return 1;
-            return a.name.localeCompare(b.name);
-          }).map((item) => (
-            <ShieldCard
-              key={item.id}
-              item={item}
-              editable={editable}
-              onRemove={() => removeShield(item.id)}
-              isEquipped={item.equipped ?? false}
-              onToggleEquip={() => toggleEquipShield(item.id)}
-              slotsDisabled={!(item.equipped) && slotsRemaining < 1}
-            />
-          ))}
+          items={[...(shields ?? [])]
+            .sort((a, b) => {
+              if (a.equipped && !b.equipped) return -1;
+              if (!a.equipped && b.equipped) return 1;
+              return a.name.localeCompare(b.name);
+            })
+            .map((item) => (
+              <ShieldCard
+                key={item.id}
+                item={item}
+                editable={editable}
+                onRemove={() => removeShield(item.id)}
+                isEquipped={item.equipped ?? false}
+                onToggleEquip={() => toggleEquipShield(item.id)}
+                slotsDisabled={!item.equipped && slotsRemaining < 1}
+              />
+            ))}
         />
       </section>
 

@@ -70,7 +70,6 @@ export interface MeleeWeaponRef {
 // ─── Ranged Weapons ──────────────────────────────────────────────────────────
 
 export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
-
   // ── Core Rulebook ─────────────────────────────────────────────────────────
 
   // Las
@@ -189,7 +188,8 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 18,
     reload: "Full",
     specialRules: "—",
-    description: "Compact rapid-firing solid projectile pistol, popular with gangers, outlaws, and other close-range fighters.",
+    description:
+      "Compact rapid-firing solid projectile pistol, popular with gangers, outlaws, and other close-range fighters.",
     weight: "2.5 kg",
     value: "75 Thrones",
     rarity: "Common",
@@ -213,7 +213,12 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     value: "40 Thrones",
     rarity: "Plentiful",
     ammoType: "Bullets",
-    compatibleAmmoIds: ["cr-bullets", "cr-dumdum-bullets", "cr-man-stopper-bullets", "lw-purity-round"],
+    compatibleAmmoIds: [
+      "cr-bullets",
+      "cr-dumdum-bullets",
+      "cr-man-stopper-bullets",
+      "lw-purity-round",
+    ],
   },
   {
     id: "cr-stub-automatic",
@@ -233,7 +238,12 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     value: "50 Thrones",
     rarity: "Plentiful",
     ammoType: "Bullets",
-    compatibleAmmoIds: ["cr-bullets", "cr-dumdum-bullets", "cr-man-stopper-bullets", "lw-purity-round"],
+    compatibleAmmoIds: [
+      "cr-bullets",
+      "cr-dumdum-bullets",
+      "cr-man-stopper-bullets",
+      "lw-purity-round",
+    ],
   },
   {
     id: "cr-hand-cannon",
@@ -698,8 +708,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     clip: 1,
     reload: "2 Full",
     specialRules: "Primitive",
-    description:
-      "Mechanical bow weapon, less common than bows but equally deadly.",
+    description: "Mechanical bow weapon, less common than bows but equally deadly.",
     weight: "3 kg",
     value: "10 Thrones",
     rarity: "Common",
@@ -1503,13 +1512,11 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     value: "4,700 Thrones",
     rarity: "Extremely Rare",
   },
-
 ];
 
 // ─── Melee Weapons ───────────────────────────────────────────────────────────
 
 export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
-
   // ── Core Rulebook ─────────────────────────────────────────────────────────
 
   // Primitive
@@ -1621,8 +1628,7 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     damage: "1d5 R",
     pen: 0,
     specialRules: "Primitive",
-    description:
-      "Ubiquitous backup weapon across the Imperium. Can be thrown up to 3 metres.",
+    description: "Ubiquitous backup weapon across the Imperium. Can be thrown up to 3 metres.",
     weight: "0.5 kg",
     value: "5 Thrones",
     rarity: "Abundant",
@@ -2409,14 +2415,12 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     value: "2,500 Thrones",
     rarity: "Very Rare",
   },
-
 ];
 
 // ─── Grenades ────────────────────────────────────────────────────────────────
 // Range for all thrown grenades is SBx3 (Strength Bonus × 3 metres).
 
 export const GRENADE_REFERENCE: GrenadeRef[] = [
-
   // ── Core Rulebook ──────────────────────────────────────────────────────────
   {
     id: "cr-frag-grenade",
@@ -2622,7 +2626,6 @@ export interface ShieldRef {
 }
 
 export const SHIELD_REFERENCE: ShieldRef[] = [
-
   // ── Book of Judgement ─────────────────────────────────────────────────────
   {
     id: "boj-synford-lockshield",
@@ -2661,5 +2664,4 @@ export const SHIELD_REFERENCE: ShieldRef[] = [
     value: "40 Thrones",
     rarity: "Scarce",
   },
-
 ];

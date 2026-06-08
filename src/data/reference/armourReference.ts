@@ -29,10 +29,10 @@ export interface ArmourRef {
 }
 
 // Convenience shorthands for common location sets
-const ALL: ArmourLocationKey[]          = ["head", "body", "rightArm", "leftArm", "rightLeg", "leftLeg"];
+const ALL: ArmourLocationKey[] = ["head", "body", "rightArm", "leftArm", "rightLeg", "leftLeg"];
 const ARMS_BODY_LEGS: ArmourLocationKey[] = ["body", "rightArm", "leftArm", "rightLeg", "leftLeg"];
-const ARMS: ArmourLocationKey[]          = ["rightArm", "leftArm"];
-const LEGS: ArmourLocationKey[]          = ["rightLeg", "leftLeg"];
+const ARMS: ArmourLocationKey[] = ["rightArm", "leftArm"];
+const LEGS: ArmourLocationKey[] = ["rightLeg", "leftLeg"];
 
 // ─── Armour Reference ────────────────────────────────────────────────────────
 
@@ -49,7 +49,6 @@ const MESH_NOTE =
   "Becomes momentarily rigid to spread and dissipate impacts and heat energy.";
 
 export const ARMOUR_REFERENCE: ArmourRef[] = [
-
   // ── Core Rulebook — Primitive Armour ─────────────────────────────────────
   {
     id: "cr-gang-leathers",
@@ -294,7 +293,8 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.CR,
     locations: ARMS,
     ap: 5,
-    notes: "Densely layered plates of armaplas, ceramite, or another highly durable material. Heavy to wear and difficult to fit over flexible areas such as joints.",
+    notes:
+      "Densely layered plates of armaplas, ceramite, or another highly durable material. Heavy to wear and difficult to fit over flexible areas such as joints.",
     weight: "2 kg",
     value: "300 Thrones",
     rarity: "Rare",
@@ -305,7 +305,8 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.CR,
     locations: LEGS,
     ap: 5,
-    notes: "Densely layered plates of armaplas, ceramite, or another highly durable material. Heavy to wear and difficult to fit over flexible areas such as joints.",
+    notes:
+      "Densely layered plates of armaplas, ceramite, or another highly durable material. Heavy to wear and difficult to fit over flexible areas such as joints.",
     weight: "3 kg",
     value: "375 Thrones",
     rarity: "Rare",
@@ -316,7 +317,8 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.CR,
     locations: ARMS_BODY_LEGS,
     ap: 5,
-    notes: "Densely layered plates of armaplas, ceramite, or another highly durable material. Heavy to wear and difficult to fit over flexible areas such as joints.",
+    notes:
+      "Densely layered plates of armaplas, ceramite, or another highly durable material. Heavy to wear and difficult to fit over flexible areas such as joints.",
     weight: "15 kg",
     value: "575 Thrones",
     rarity: "Rare",
@@ -327,7 +329,8 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.CR,
     locations: ["body"],
     ap: 6,
-    notes: "Densely layered plates of armaplas, ceramite, or another highly durable material. Heavy to wear and difficult to fit over flexible areas such as joints.",
+    notes:
+      "Densely layered plates of armaplas, ceramite, or another highly durable material. Heavy to wear and difficult to fit over flexible areas such as joints.",
     weight: "7 kg",
     value: "600 Thrones",
     rarity: "Rare",
@@ -338,7 +341,8 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.CR,
     locations: ALL,
     ap: 6,
-    notes: "Densely layered plates of armaplas, ceramite, or another highly durable material. Heavy to wear and difficult to fit over flexible areas such as joints.",
+    notes:
+      "Densely layered plates of armaplas, ceramite, or another highly durable material. Heavy to wear and difficult to fit over flexible areas such as joints.",
     weight: "17 kg",
     value: "3,750 Thrones",
     rarity: "Very Rare",
@@ -459,7 +463,8 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.BoJ,
     locations: ["head"],
     ap: 4,
-    notes: "Includes both infra-red goggles and a photo-visor. Adds +10 to Search and Tracking Tests.",
+    notes:
+      "Includes both infra-red goggles and a photo-visor. Adds +10 to Search and Tracking Tests.",
     weight: "2.5 kg",
     value: "750 Thrones",
     rarity: "Very Rare",

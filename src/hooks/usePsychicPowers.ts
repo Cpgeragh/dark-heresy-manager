@@ -11,11 +11,7 @@ interface UsePsychicPowersProps {
   onUpdate: (next: PsychicBlock) => void;
 }
 
-export function usePsychicPowers({
-  psychic,
-  editable,
-  onUpdate,
-}: UsePsychicPowersProps) {
+export function usePsychicPowers({ psychic, editable, onUpdate }: UsePsychicPowersProps) {
   const addPower = useCallback(
     (type: PowerType) => {
       if (!editable) return;
@@ -48,7 +44,12 @@ export function usePsychicPowers({
   );
 
   const updatePower = useCallback(
-    <K extends keyof PsychicPower>(type: PowerType, index: number, key: K, value: PsychicPower[K]) => {
+    <K extends keyof PsychicPower>(
+      type: PowerType,
+      index: number,
+      key: K,
+      value: PsychicPower[K]
+    ) => {
       if (!editable) return;
 
       const powers = [...psychic[type]];

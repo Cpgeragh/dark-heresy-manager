@@ -2,11 +2,7 @@
 
 import { serverTimestamp, type FieldValue, type Timestamp } from "firebase/firestore";
 
-export type ClaimLogAction =
-  | "claim"
-  | "release"
-  | "force-assign"
-  | "force-release";
+export type ClaimLogAction = "claim" | "release" | "force-assign" | "force-release";
 
 export type ClaimLogEntry = {
   id?: string;

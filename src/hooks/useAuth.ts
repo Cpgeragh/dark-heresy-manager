@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
-import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
+import { getDoc, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
 import type { User } from "firebase/auth";
-import { auth, db } from "../firebase";
+import { auth } from "../firebase";
+import { userDocRef } from "../firebase/converters";
 import type { UserDocument } from "../types/Firestore";
 
 type Role = "player" | "dm";
@@ -38,7 +39,7 @@ export function useAuth(): UseAuthResult {
 
         setCurrentUser(user);
 
-        const ref = doc(db, "users", user.uid);
+        const ref = userDocRef(user.uid);
         const snap = await getDoc(ref);
 
         if (ignore) return;
@@ -58,7 +59,7 @@ export function useAuth(): UseAuthResult {
           setUserRole("player");
           setActiveCampaignId(null);
         } else {
-          const data = snap.data() as UserDocument;
+          const data = snap.data();
           const role: Role = data.role === "dm" ? "dm" : "player";
 
           if (ignore) return;
@@ -67,7 +68,7 @@ export function useAuth(): UseAuthResult {
           setActiveCampaignId(data.activeCampaignId ?? null);
         }
 
-        await setDoc(ref, { lastSeen: serverTimestamp() }, { merge: true });
+        await updateDoc(ref, { lastSeen: serverTimestamp() });
       } catch (err) {
         console.error("Auth error:", err);
       } finally {

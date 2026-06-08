@@ -1,13 +1,7 @@
 // src/hooks/useClaimLogs.ts
 
 import { useEffect, useState } from "react";
-import {
-  collection,
-  query,
-  orderBy,
-  onSnapshot,
-  type FirestoreError,
-} from "firebase/firestore";
+import { collection, query, orderBy, onSnapshot, type FirestoreError } from "firebase/firestore";
 
 import { db } from "../firebase";
 import type { ClaimLogEntry } from "../utils/claimLog";
@@ -28,14 +22,7 @@ export function useClaimLogs(
       return;
     }
 
-    const ref = collection(
-      db,
-      "campaigns",
-      campaignId,
-      "characters",
-      characterId,
-      "claimLog"
-    );
+    const ref = collection(db, "campaigns", campaignId, "characters", characterId, "claimLog");
 
     const logsQuery = query(ref, orderBy("timestamp", "desc"));
 

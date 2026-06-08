@@ -26,6 +26,7 @@ export function DrugsTab({ drugs, editable, onUpdate }: DrugsTabProps) {
           referenceId: ref.id,
           name: ref.name,
           quantity: 1,
+          weight: ref.weight ?? "0 kg",
           value: ref.value,
           rarity: ref.rarity,
           source: ref.source,
@@ -72,22 +73,16 @@ export function DrugsTab({ drugs, editable, onUpdate }: DrugsTabProps) {
       {/* Carried drugs */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className={uiSectionHeader}>
-            Carried ({drugs.length})
-          </h3>
-          {editable && (
-            <button
-              onClick={() => setShowPicker(true)}
-              className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
-            >
-              + Add
-            </button>
-          )}
+          <h3 className={uiSectionHeader}>Carried ({drugs.length})</h3>
+          <button
+            onClick={() => setShowPicker(true)}
+            className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
+          >
+            {editable ? "+ Add" : "View"}
+          </button>
         </div>
 
-        {drugs.length === 0 && (
-          <p className="text-sm text-slate-500 italic">No drugs carried.</p>
-        )}
+        {drugs.length === 0 && <p className="text-sm text-slate-500 italic">No drugs carried.</p>}
 
         <div className="space-y-3 sm:hidden">
           {drugs.map((item) => (
@@ -120,6 +115,7 @@ export function DrugsTab({ drugs, editable, onUpdate }: DrugsTabProps) {
 
       {showPicker && (
         <DrugPicker
+          editable={editable}
           onSelect={addDrug}
           onClose={() => setShowPicker(false)}
         />

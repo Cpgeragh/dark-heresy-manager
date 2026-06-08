@@ -14,10 +14,7 @@ interface UseCharacterSheetProps {
   characterIdParam: string | undefined;
 }
 
-export function useCharacterSheet({
-  campaignIdParam,
-  characterIdParam,
-}: UseCharacterSheetProps) {
+export function useCharacterSheet({ campaignIdParam, characterIdParam }: UseCharacterSheetProps) {
   // ================================================================
   // PATH VALIDATION
   // ================================================================
@@ -36,7 +33,11 @@ export function useCharacterSheet({
   // ================================================================
   // DATA LOADING
   // ================================================================
-  const { character, claimLog, loading: characterLoading } = useCharacterData({
+  const {
+    character,
+    claimLog,
+    loading: characterLoading,
+  } = useCharacterData({
     campaignId: path?.campaignId,
     characterId: path?.characterId,
     isDM,

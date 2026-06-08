@@ -77,10 +77,9 @@ export function DrugRow({
             />
           )}
         </div>
-        {ref?.duration && (
-          <p className="text-xs text-slate-500 mt-0.5">Duration: {ref.duration}</p>
-        )}
+        {ref?.duration && <p className="text-xs text-slate-500 mt-0.5">Duration: {ref.duration}</p>}
         <ItemMetaChips
+          weight={item.weight ?? ref?.weight ?? "0 kg"}
           value={item.value ?? ref?.value}
           rarity={item.rarity ?? ref?.rarity}
           source={item.source}

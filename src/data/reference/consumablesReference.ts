@@ -20,7 +20,6 @@ export interface ConsumableRef {
 // ─── Reference Data ───────────────────────────────────────────────────────────
 
 export const CONSUMABLES_REFERENCE: ConsumableRef[] = [
-
   // ── Core Rulebook ─────────────────────────────────────────────────────────
 
   {

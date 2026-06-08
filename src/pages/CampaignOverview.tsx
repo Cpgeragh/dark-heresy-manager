@@ -16,31 +16,26 @@ export default function CampaignOverview() {
   const campaignId = params.campaignId;
 
   const isDM = useIsDM(campaignId);
-  const { sessions, loading: sessionsLoading, deleteSession, updateSession } = useSessions(campaignId);
+  const {
+    sessions,
+    loading: sessionsLoading,
+    deleteSession,
+    updateSession,
+  } = useSessions(campaignId);
   const { characters, loading } = useCharacterSummaries(campaignId);
   const [showSessionForm, setShowSessionForm] = useState(false);
   const [search, setSearch] = useState("");
 
   if (!campaignId) {
-    return (
-      <div className="text-slate-300 text-center py-10">
-        No campaign selected.
-      </div>
-    );
+    return <div className="text-slate-300 text-center py-10">No campaign selected.</div>;
   }
 
   if (loading) {
-    return (
-      <div className="text-slate-300 text-center py-10">
-        Loading campaign...
-      </div>
-    );
+    return <div className="text-slate-300 text-center py-10">Loading campaign...</div>;
   }
 
   const filteredCharacters = search.trim()
-    ? characters.filter((c) =>
-        c.characterName.toLowerCase().includes(search.trim().toLowerCase())
-      )
+    ? characters.filter((c) => c.characterName.toLowerCase().includes(search.trim().toLowerCase()))
     : characters;
 
   return (
@@ -110,7 +105,12 @@ export default function CampaignOverview() {
                 isDM={isDM}
                 onDelete={isDM ? () => deleteSession(session.id) : undefined}
                 onSave={isDM ? (data) => updateSession(session.id, data) : undefined}
-                onApplyXp={isDM ? () => applySessionXp(campaignId, session.id, session.attendees, session.xpAwarded) : undefined}
+                onApplyXp={
+                  isDM
+                    ? () =>
+                        applySessionXp(campaignId, session.id, session.attendees, session.xpAwarded)
+                    : undefined
+                }
               />
             ))}
           </div>

@@ -1,7 +1,11 @@
 // src/pages/characterSheet/CyberneticsTab/index.tsx
 
 import { useState, useCallback } from "react";
-import type { CyberneticItem, CyberneticCraftsmanship, ArmourLocationKey } from "../../../types/Character";
+import type {
+  CyberneticItem,
+  CyberneticCraftsmanship,
+  ArmourLocationKey,
+} from "../../../types/Character";
 import type { CyberneticRef } from "../../../data/reference/cyberneticsReference";
 import { ImplantPicker } from "./ImplantPicker";
 import { ImplantRow } from "./ImplantRow";
@@ -23,7 +27,11 @@ export function CyberneticsTab({ cybernetics, editable, onUpdate }: CyberneticsT
   const [showPicker, setShowPicker] = useState(false);
 
   const install = useCallback(
-    (ref: CyberneticRef, craftsmanship: CyberneticCraftsmanship, bodyLocation?: ArmourLocationKey[]) => {
+    (
+      ref: CyberneticRef,
+      craftsmanship: CyberneticCraftsmanship,
+      bodyLocation?: ArmourLocationKey[]
+    ) => {
       if (!editable) return;
       onUpdate([
         ...cybernetics,
@@ -74,17 +82,13 @@ export function CyberneticsTab({ cybernetics, editable, onUpdate }: CyberneticsT
     <div className="space-y-6">
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className={uiSectionHeader}>
-            Installed Implants ({cybernetics.length})
-          </h3>
-          {editable && (
-            <button
-              onClick={() => setShowPicker(true)}
-              className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
-            >
-              + Install
-            </button>
-          )}
+          <h3 className={uiSectionHeader}>Installed Implants ({cybernetics.length})</h3>
+          <button
+            onClick={() => setShowPicker(true)}
+            className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
+          >
+            {editable ? "+ Install" : "View"}
+          </button>
         </div>
 
         {cybernetics.length === 0 && (
@@ -126,11 +130,11 @@ export function CyberneticsTab({ cybernetics, editable, onUpdate }: CyberneticsT
 
       {showPicker && (
         <ImplantPicker
+          editable={editable}
           onSelect={install}
           onClose={() => setShowPicker(false)}
         />
       )}
-
     </div>
   );
 }

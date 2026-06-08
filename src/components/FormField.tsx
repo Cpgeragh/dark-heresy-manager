@@ -52,10 +52,7 @@ export function FormField({
   );
 
   return (
-    <label
-      htmlFor={inputId}
-      className={`flex flex-col gap-0.5 ${className}`}
-    >
+    <label htmlFor={inputId} className={`flex flex-col gap-0.5 ${className}`}>
       <span className="text-xs font-medium uppercase tracking-wide text-slate-100">{label}</span>
 
       {type === "textarea" ? (
@@ -69,11 +66,7 @@ export function FormField({
           rows={rows}
           aria-label={label}
           aria-describedby={
-            error
-              ? `${inputId}-error`
-              : description
-              ? `${inputId}-desc`
-              : undefined
+            error ? `${inputId}-error` : description ? `${inputId}-desc` : undefined
           }
           aria-invalid={hasError}
           className={baseInputClass + " resize-y"}
@@ -89,11 +82,7 @@ export function FormField({
           placeholder={placeholder}
           aria-label={label}
           aria-describedby={
-            error
-              ? `${inputId}-error`
-              : description
-              ? `${inputId}-desc`
-              : undefined
+            error ? `${inputId}-error` : description ? `${inputId}-desc` : undefined
           }
           aria-invalid={hasError}
           className={baseInputClass}
@@ -102,11 +91,7 @@ export function FormField({
 
       {/* Error message (takes precedence over description) */}
       {hasError && (
-        <span
-          id={`${inputId}-error`}
-          className="text-[10px] text-red-400 mt-0.5"
-          role="alert"
-        >
+        <span id={`${inputId}-error`} className="text-[10px] text-red-400 mt-0.5" role="alert">
           {error}
         </span>
       )}

@@ -11,9 +11,9 @@ interface Props {
   isForceReleasing?: boolean;
 }
 
-export default function DMTools({ 
-  recovery, 
-  onForceAssign, 
+export default function DMTools({
+  recovery,
+  onForceAssign,
   onForceRelease,
   isForceAssigning = false,
   isForceReleasing = false,
@@ -32,9 +32,7 @@ export default function DMTools({
 
   return (
     <div className="border border-amber-600 bg-amber-900/20 p-4 rounded mt-6">
-      <h2 className="text-lg font-semibold text-amber-300 mb-2">
-        DM Tools
-      </h2>
+      <h2 className="text-lg font-semibold text-amber-300 mb-2">DM Tools</h2>
 
       <p className="text-sm text-amber-200 mb-2">
         Campaign: <code>{recovery.campaignId}</code>

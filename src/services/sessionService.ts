@@ -16,10 +16,7 @@ interface SessionData {
  * Creates a new session document and distributes XP to all attendees atomically.
  * If xpAwarded is 0, no character documents are updated.
  */
-export async function createSession(
-  campaignId: string,
-  session: SessionData
-): Promise<void> {
+export async function createSession(campaignId: string, session: SessionData): Promise<void> {
   const batch = writeBatch(db);
   const sessionRef = doc(collection(db, "campaigns", campaignId, "sessions"));
 
@@ -59,10 +56,9 @@ export async function applySessionXp(
   });
 
   for (const characterId of attendeeIds) {
-    batch.update(
-      doc(db, "campaigns", campaignId, "characters", characterId),
-      { "experience.total": increment(xpAmount) }
-    );
+    batch.update(doc(db, "campaigns", campaignId, "characters", characterId), {
+      "experience.total": increment(xpAmount),
+    });
   }
 
   await batch.commit();

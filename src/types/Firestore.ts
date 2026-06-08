@@ -15,6 +15,12 @@ export interface CampaignDocument {
 }
 
 /**
+ * Campaign document with its Firestore document id injected.
+ * Used as the converter type for campaignsCollectionRef.
+ */
+export type CampaignWithId = CampaignDocument & { id: string };
+
+/**
  * User document stored in /users/{userId}
  */
 export interface UserDocument {

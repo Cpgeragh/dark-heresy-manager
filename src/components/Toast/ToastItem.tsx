@@ -60,9 +60,7 @@ export function ToastItem({ toast }: ToastItemProps) {
       </div>
 
       {/* Message */}
-      <div className="flex-1 min-w-0 text-sm whitespace-pre-wrap break-all">
-        {toast.message}
-      </div>
+      <div className="flex-1 min-w-0 text-sm whitespace-pre-wrap break-all">{toast.message}</div>
 
       {/* Actions */}
       <div className="flex-shrink-0 flex gap-1">

@@ -64,7 +64,9 @@ export function ManageModal({
         {/* Recovery Code */}
         {recoveryCode && (
           <section className={uiSection + " space-y-2"}>
-            <p className="text-xs font-semibold text-slate-100 uppercase tracking-wide">Recovery Code</p>
+            <p className="text-xs font-semibold text-slate-100 uppercase tracking-wide">
+              Recovery Code
+            </p>
             <div className="flex items-center gap-2">
               <code className="flex-1 px-2 py-1 bg-slate-800 border border-slate-500 rounded text-amber-300 text-sm break-all">
                 {recoveryCode}
@@ -83,9 +85,14 @@ export function ManageModal({
         {/* Export */}
         {canExport && (
           <section className={uiSection + " space-y-2"}>
-            <p className="text-xs font-semibold text-slate-100 uppercase tracking-wide">Character Data</p>
+            <p className="text-xs font-semibold text-slate-100 uppercase tracking-wide">
+              Character Data
+            </p>
             <button
-              onClick={() => { onExport(); onClose(); }}
+              onClick={() => {
+                onExport();
+                onClose();
+              }}
               className="px-2 py-1 text-xs rounded bg-slate-700 border border-slate-500 text-slate-100 hover:bg-slate-600"
             >
               Export JSON
@@ -96,7 +103,9 @@ export function ManageModal({
         {/* Release */}
         {canPlayerRelease && (
           <section className={uiSection + " space-y-2"}>
-            <p className="text-xs font-semibold text-slate-100 uppercase tracking-wide">Release Character</p>
+            <p className="text-xs font-semibold text-slate-100 uppercase tracking-wide">
+              Release Character
+            </p>
             <p className="text-xs text-slate-400">Unlinks this character from your account.</p>
             <button
               onClick={onPlayerRelease}

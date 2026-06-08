@@ -5,9 +5,11 @@ import { useEffect, useState } from "react";
 import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase";
 import type { CharacterListItem } from "../types/Firestore";
+import { useToast } from "../components/Toast/ToastContext";
 
 export function useCampaignCharacters(campaignId: string | null) {
   const [characters, setCharacters] = useState<CharacterListItem[]>([]);
+  const { error: toastError } = useToast();
 
   useEffect(() => {
     if (!campaignId) {
@@ -28,11 +30,12 @@ export function useCampaignCharacters(campaignId: string | null) {
       },
       (err) => {
         console.error("Campaign characters snapshot error:", err);
+        toastError("Failed to load characters. Please refresh the page.");
       }
     );
 
     return () => unsub();
-  }, [campaignId]);
+  }, [campaignId, toastError]);
 
   return { characters };
 }

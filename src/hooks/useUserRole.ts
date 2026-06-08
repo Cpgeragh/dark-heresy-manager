@@ -13,20 +13,12 @@ interface UseUserRoleArgs {
   onRoleChange: (role: Role) => void;
 }
 
-export function useUserRole({
-  currentUser,
-  activeCampaignId,
-  onRoleChange,
-}: UseUserRoleArgs) {
+export function useUserRole({ currentUser, activeCampaignId, onRoleChange }: UseUserRoleArgs) {
   const switchToDM = useCallback(async () => {
     if (!currentUser) return;
 
     try {
-      await setDoc(
-        doc(db, "users", currentUser.uid),
-        { role: "dm" },
-        { merge: true }
-      );
+      await setDoc(doc(db, "users", currentUser.uid), { role: "dm" }, { merge: true });
       onRoleChange("dm");
 
       if (activeCampaignId) {
@@ -42,11 +34,7 @@ export function useUserRole({
     if (!currentUser) return;
 
     try {
-      await setDoc(
-        doc(db, "users", currentUser.uid),
-        { role: "player" },
-        { merge: true }
-      );
+      await setDoc(doc(db, "users", currentUser.uid), { role: "player" }, { merge: true });
       onRoleChange("player");
 
       if (activeCampaignId) {

@@ -52,7 +52,9 @@ export function CustomPieceForm({ onAdd, onCancel }: Props) {
       </div>
 
       <div className="space-y-1">
-        <label className="text-xs font-medium uppercase tracking-wide text-slate-100">Locations covered</label>
+        <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+          Locations covered
+        </label>
         <div className="flex flex-wrap gap-2">
           {LOCATION_ORDER.map((loc) => (
             <button
@@ -72,7 +74,9 @@ export function CustomPieceForm({ onAdd, onCancel }: Props) {
       </div>
 
       <div className="flex items-center gap-3">
-        <label className="text-xs font-medium uppercase tracking-wide text-slate-100 w-6 shrink-0">AP</label>
+        <label className="text-xs font-medium uppercase tracking-wide text-slate-100 w-6 shrink-0">
+          AP
+        </label>
         <input
           type="number"
           min={0}

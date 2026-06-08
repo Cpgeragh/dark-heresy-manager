@@ -2,7 +2,7 @@
 
 /**
  * Dark Heresy Game Mechanics Constants
- * 
+ *
  * These values are derived from the Dark Heresy rulebook
  * and should only be changed if the game rules change.
  */
@@ -17,24 +17,9 @@
  */
 export const CHARACTERISTIC_BONUS_DIVISOR = 10;
 
-/**
- * Maximum characteristic value in Dark Heresy
- */
 export const MAX_CHARACTERISTIC_VALUE = 100;
-
-/**
- * Minimum characteristic value in Dark Heresy
- */
 export const MIN_CHARACTERISTIC_VALUE = 0;
-
-/**
- * Maximum number of advances per characteristic
- */
 export const MAX_CHARACTERISTIC_ADVANCES = 4;
-
-/**
- * Value added per characteristic advance
- */
 export const CHARACTERISTIC_ADVANCE_INCREMENT = 5;
 
 // ============================================

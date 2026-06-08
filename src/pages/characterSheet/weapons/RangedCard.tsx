@@ -2,7 +2,13 @@
 // RangedPicker, CustomRangedForm, RangedCard — co-located for navigability.
 
 import { useState, useEffect } from "react";
-import type { RangedWeapon, WeaponAmmoEntry, GrenadeItem, ArcheotechItem, WeaponCraftsmanship } from "../../../types/Character";
+import type {
+  RangedWeapon,
+  WeaponAmmoEntry,
+  GrenadeItem,
+  ArcheotechItem,
+  WeaponCraftsmanship,
+} from "../../../types/Character";
 import {
   RANGED_WEAPON_REFERENCE,
   type RangedWeaponRef,
@@ -79,9 +85,9 @@ export function RangedPicker({
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<RangedWeaponRef | null>(null);
   const [craftsmanship, setCraftsmanship] = useState<WeaponCraftsmanship>("Common");
-  const filtered = references.filter((r) =>
-    r.name.toLowerCase().includes(query.toLowerCase())
-  ).sort((a, b) => a.name.localeCompare(b.name));
+  const filtered = references
+    .filter((r) => r.name.toLowerCase().includes(query.toLowerCase()))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   function resetPicker() {
     setSelected(null);
@@ -94,7 +100,10 @@ export function RangedPicker({
         <div className="w-full max-w-md bg-slate-900 border border-slate-500 rounded-xl shadow-2xl">
           <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
             <h3 className="text-sm font-semibold text-slate-200">{selected.name}</h3>
-            <button onClick={resetPicker} className="text-slate-400 hover:text-slate-200 text-lg leading-none">
+            <button
+              onClick={resetPicker}
+              className="text-slate-400 hover:text-slate-200 text-lg leading-none"
+            >
               {"\u00D7"}
             </button>
           </div>
@@ -152,14 +161,16 @@ export function RangedPicker({
       onQueryChange={setQuery}
       onClose={onClose}
       isEmpty={filtered.length === 0}
-      footer={editable && showCustom ? (
-        <button
-          onClick={onCustom}
-          className="w-full text-sm text-amber-400 hover:text-amber-300 text-center py-1"
-        >
-          + Add custom weapon
-        </button>
-      ) : undefined}
+      footer={
+        editable && showCustom ? (
+          <button
+            onClick={onCustom}
+            className="w-full text-sm text-amber-400 hover:text-amber-300 text-center py-1"
+          >
+            + Add custom weapon
+          </button>
+        ) : undefined
+      }
     >
       {filtered.map((ref) => (
         <button
@@ -167,7 +178,9 @@ export function RangedPicker({
           onClick={editable ? () => setSelected(ref) : undefined}
           className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
-          <span className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}>
+          <span
+            className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}
+          >
             {ref.name}
           </span>
           <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5 flex-wrap font-mono">
@@ -194,12 +207,20 @@ export function CustomRangedForm({
   onCancel: () => void;
 }) {
   const [fields, setFields] = useState<Omit<RangedWeapon, "id" | "custom">>({
-    name: "", class: "", damage: "", pen: "", range: "", rof: "", clip: "", rld: "", weight: "", specialRules: "",
+    name: "",
+    class: "",
+    damage: "",
+    pen: "",
+    range: "",
+    rof: "",
+    clip: "",
+    rld: "",
+    weight: "",
+    specialRules: "",
   });
 
-  const makeFieldSetter =
-    (k: keyof typeof fields) => (e: React.ChangeEvent<HTMLInputElement>) =>
-      setFields((prev) => ({ ...prev, [k]: e.target.value }));
+  const makeFieldSetter = (k: keyof typeof fields) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    setFields((prev) => ({ ...prev, [k]: e.target.value }));
 
   return (
     <div className="border border-amber-500/30 bg-slate-900/60 rounded-lg p-4 space-y-3">
@@ -208,7 +229,18 @@ export function CustomRangedForm({
       </p>
       <div className="grid grid-cols-2 gap-2">
         {(
-          ["name", "class", "range", "rof", "damage", "pen", "clip", "rld", "weight", "specialRules"] as const
+          [
+            "name",
+            "class",
+            "range",
+            "rof",
+            "damage",
+            "pen",
+            "clip",
+            "rld",
+            "weight",
+            "specialRules",
+          ] as const
         ).map((k) => (
           <div key={k} className={k === "name" || k === "specialRules" ? "col-span-2" : ""}>
             <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
@@ -288,8 +320,8 @@ function AmmoEntryRow({
               entry.loaded
                 ? "bg-green-400"
                 : editable
-                ? "bg-slate-600 hover:bg-green-500"
-                : "bg-slate-600"
+                  ? "bg-slate-600 hover:bg-green-500"
+                  : "bg-slate-600"
             }`}
           />
           <span className="text-xs text-slate-200 truncate">{displayName}</span>
@@ -304,7 +336,9 @@ function AmmoEntryRow({
                   {isChargePack && (
                     <div className="space-y-1">
                       <p className="text-sm font-semibold text-slate-100">Recharging Power Packs</p>
-                      <p className="text-sm text-slate-300 leading-relaxed">{RECHARGING_POWER_PACKS_TEXT}</p>
+                      <p className="text-sm text-slate-300 leading-relaxed">
+                        {RECHARGING_POWER_PACKS_TEXT}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -371,9 +405,7 @@ function AmmoEntryRow({
             />
           </div>
         )}
-        <span className="text-[10px] text-slate-500 ml-auto">
-          {formatWeight(weightKg ?? 0)} kg
-        </span>
+        <span className="text-[10px] text-slate-500 ml-auto">{formatWeight(weightKg ?? 0)} kg</span>
       </div>
     </div>
   );
@@ -529,7 +561,9 @@ export function RangedCard({
   forceExpanded?: boolean;
 }) {
   const [expanded, setExpanded] = useState(isEquipped);
-  useEffect(() => { setExpanded(isEquipped); }, [isEquipped]);
+  useEffect(() => {
+    setExpanded(isEquipped);
+  }, [isEquipped]);
 
   const [showQualities, setShowQualities] = useState(false);
   const [showItemRules, setShowItemRules] = useState(false);
@@ -547,9 +581,10 @@ export function RangedCard({
         (r) => r.name === weapon.name && (!weapon.source || r.source === weapon.source)
       );
   const craftsmanship = weapon.craftsmanship ?? "Common";
-  const baseSpecialRules = craftsmanship === "Common"
-    ? (weaponRef?.specialRules ?? weapon.specialRules)
-    : (weapon.specialRules ?? weaponRef?.specialRules);
+  const baseSpecialRules =
+    craftsmanship === "Common"
+      ? (weaponRef?.specialRules ?? weapon.specialRules)
+      : (weapon.specialRules ?? weaponRef?.specialRules);
   const baseWeapon = weaponRef ? { ...weapon, specialRules: baseSpecialRules } : weapon;
   const ammoEntries = weapon.ammoEntries ?? [];
   const loadedAmmoEntry = ammoEntries.find((entry) => entry.loaded);
@@ -557,12 +592,7 @@ export function RangedCard({
     ? AMMO_REFERENCE.find((ammo) => ammo.id === loadedAmmoEntry.referenceId)
     : undefined;
   const effective = effectiveRangedStats(baseWeapon, attachmentRefs, loadedAmmoRef);
-  const compatible = getCompatibleUpgrades(
-    weapon.class ?? "",
-    weapon.name,
-    false,
-    attachmentIds
-  );
+  const compatible = getCompatibleUpgrades(weapon.class ?? "", weapon.name, false, attachmentIds);
   const visibleCompatible = allowAttachments ? compatible : [];
 
   const rulesText = effective.specialRules?.trim() ?? "";
@@ -584,8 +614,7 @@ export function RangedCard({
     weapon.class?.toLowerCase().includes("thrown") ||
     weaponRef?.class.toLowerCase().includes("thrown");
   const isGrenadeLauncher =
-    weapon.referenceId === "cr-grenade-launcher" ||
-    weapon.referenceId === "cr-rpg-launcher";
+    weapon.referenceId === "cr-grenade-launcher" || weapon.referenceId === "cr-rpg-launcher";
   const hasAmmo = !isThrown && !isGrenadeLauncher && !!(weaponRef?.ammoType || weapon.custom);
 
   const existingAmmoNames = new Set(ammoEntries.map((e) => formatAmmoName(e.name)));
@@ -639,9 +668,7 @@ export function RangedCard({
           disabled={forceExpanded}
         >
           <p className="text-sm font-semibold text-slate-200">{weapon.name}</p>
-          {weapon.class && (
-            <p className="text-xs text-slate-500">{weapon.class}</p>
-          )}
+          {weapon.class && <p className="text-xs text-slate-500">{weapon.class}</p>}
         </button>
         <div className="flex items-center gap-2 shrink-0">
           {onToggleEquip && (
@@ -658,265 +685,275 @@ export function RangedCard({
               className="text-slate-400 hover:text-slate-200 transition"
               aria-label={expanded ? "Collapse" : "Expand"}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={`w-4 h-4 transition-transform ${expanded ? "" : "-rotate-90"}`}>
-                <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd"/>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                className={`w-4 h-4 transition-transform ${expanded ? "" : "-rotate-90"}`}
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                  clipRule="evenodd"
+                />
               </svg>
             </button>
           )}
           {editable && (expanded || forceExpanded) && (
-            <button
-              onClick={onRemove}
-              className="text-xs text-red-400 hover:text-red-300 shrink-0"
-            >
+            <button onClick={onRemove} className="text-xs text-red-400 hover:text-red-300 shrink-0">
               Remove
             </button>
           )}
         </div>
       </div>
 
-      {(expanded || forceExpanded) && (<>
-      {/* Stats grid */}
-      <div className="flex flex-wrap gap-1.5">
-        {effective.range && <StatChip label="Range" value={effective.range} />}
-        {weapon.rof && <StatChip label="RoF" value={weapon.rof} />}
-        {effective.damage && (
-          <StatChip
-            label="Damage"
-            value={effective.damage.replace(/\s*[IREX]$/i, "").trim()}
-          />
-        )}
-        {effective.damage && <DamageTypeChip damage={effective.damage} />}
-        {effective.pen && <StatChip label="Pen" value={effective.pen} />}
-        {effective.clip && <StatChip label="Clip" value={effective.clip} />}
-        {weapon.rld && <StatChip label="Reload" value={weapon.rld} />}
-      </div>
-
-      {/* Special rules */}
-      {false && (
-        <div className="flex items-center gap-1.5">
-          <span className="text-xs text-slate-400 italic">
-            {rulesDisplayText}
-          </span>
-          {hasModal && (
-            <button
-              onClick={() => setShowQualities(true)}
-              title="Explain special rules"
-              className="text-slate-500 hover:text-amber-400 text-sm transition"
-            >
-              ⓘ
-            </button>
-          )}
-        </div>
-      )}
-
-      <div className="space-y-1">
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Qualities</span>
-          <span className="text-xs text-slate-400 italic">
-            {hasQualities ? rulesText : "-"}
-          </span>
-          {hasQualityModal && (
-            <InfoModal
-              title={`${weapon.name} Qualities`}
-              content={<SpecialRulesContent rules={effective.specialRules ?? ""} />}
-            />
-          )}
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Rules</span>
-          {hasItemRules ? (
-            <InfoModal
-              title={`${weapon.name} Rules`}
-              content={<SpecialRulesContent rules="" description={rulesDescription} />}
-            />
-          ) : (
-            <span className="text-xs text-slate-600 italic">-</span>
-          )}
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Craftsmanship</span>
-          <span className="text-xs text-slate-400 italic">{craftsmanship}</span>
-          <InfoModal
-            title={`${craftsmanship} Weapon`}
-            content={rangedCraftsmanshipDescription(craftsmanship)}
-          />
-        </div>
-      </div>
-
-      {/* Weight / Value / Rarity / Source */}
-      <ItemMetaChips
-        weight={weapon.weight}
-        value={weapon.value}
-        rarity={weapon.rarity}
-        source={weapon.source}
-        className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1"
-      />
-
-      {/* Thrown weapon: quantity counter */}
-      {isThrown && (
-        <div className="border-t border-slate-800 pt-2 flex items-center justify-between gap-2">
-          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Quantity</span>
-          <QuantityControl
-            quantity={weapon.quantity ?? 0}
-            editable={editable}
-            size="sm"
-            onUpdate={onUpdateQuantity}
-          />
-        </div>
-      )}
-
-      {/* Grenade launcher: ammo drawn from grenade inventory */}
-      {isGrenadeLauncher && (
-        <div className="border-t border-slate-800 pt-2 space-y-2">
-          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Grenades</span>
-          {(grenades ?? []).filter((g) => g.type !== "Mine").length === 0 && (archeotechGrenades ?? []).length === 0 ? (
-            <p className="text-xs text-slate-600 italic">
-              No grenades — add via the Grenades & Mines section below.
-            </p>
-          ) : (
-            <div className="space-y-1.5">
-              {(grenades ?? []).filter((g) => g.type !== "Mine").map((g) => (
-                <div
-                  key={g.id}
-                  className="rounded bg-slate-800/60 px-2.5 py-2 flex items-center justify-between gap-2"
-                >
-                  <span className="text-xs text-slate-200 truncate">{g.name}</span>
-                  <QuantityControl
-                    quantity={g.quantity}
-                    editable={editable}
-                    size="sm"
-                    onUpdate={(qty) =>
-                      onUpdateGrenades?.(
-                        (grenades ?? []).map((x) => (x.id === g.id ? { ...x, quantity: qty } : x))
-                      )
-                    }
-                  />
-                </div>
-              ))}
-              {(archeotechGrenades ?? []).map((g) => (
-                <div
-                  key={g.id}
-                  className="rounded bg-amber-900/20 border border-amber-700/30 px-2.5 py-2 flex items-center justify-between gap-2"
-                >
-                  <span className="text-xs text-slate-200 truncate">{g.name}</span>
-                  <span className="text-[10px] text-amber-400 border border-amber-700/50 rounded px-1.5 py-0.5">
-                    Archeotech
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Regular weapon: ammo entries */}
-      {hasAmmo && (
-        <div className="border-t border-slate-800 pt-2 space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] text-slate-500 uppercase tracking-wide">Ammo</span>
-            {editable && (
-              <button
-                onClick={() => setShowAmmoPicker(true)}
-                className="text-xs text-amber-400 hover:text-amber-300"
-              >
-                + Add
-              </button>
+      {(expanded || forceExpanded) && (
+        <>
+          {/* Stats grid */}
+          <div className="flex flex-wrap gap-1.5">
+            {effective.range && <StatChip label="Range" value={effective.range} />}
+            {weapon.rof && <StatChip label="RoF" value={weapon.rof} />}
+            {effective.damage && (
+              <StatChip label="Damage" value={effective.damage.replace(/\s*[IREX]$/i, "").trim()} />
             )}
+            {effective.damage && <DamageTypeChip damage={effective.damage} />}
+            {effective.pen && <StatChip label="Pen" value={effective.pen} />}
+            {effective.clip && <StatChip label="Clip" value={effective.clip} />}
+            {weapon.rld && <StatChip label="Reload" value={weapon.rld} />}
           </div>
 
-          {ammoEntries.length === 0 ? (
-            <p className="text-xs text-slate-600 italic">No ammo tracked</p>
-          ) : (
-            <div className="space-y-1.5">
-              {ammoEntries.map((entry) => (
-                <AmmoEntryRow
-                  key={entry.id}
-                  entry={entry}
-                  editable={editable}
-                  clipSize={weapon.clip}
-                  weightKg={calcEntryWeight(weapon, entry)}
-                  onSetLoaded={() => handleSetLoaded(entry.id)}
-                  onRemove={() => handleRemoveAmmo(entry.id)}
-                  onUpdateClips={(qty) => handleUpdateEntry(entry.id, { clips: qty })}
-                  onUpdateRounds={(qty) => handleUpdateEntry(entry.id, { rounds: qty })}
-                />
-              ))}
+          {/* Special rules */}
+          {false && (
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs text-slate-400 italic">{rulesDisplayText}</span>
+              {hasModal && (
+                <button
+                  onClick={() => setShowQualities(true)}
+                  title="Explain special rules"
+                  className="text-slate-500 hover:text-amber-400 text-sm transition"
+                >
+                  ⓘ
+                </button>
+              )}
             </div>
           )}
-        </div>
-      )}
 
-      {/* Attachments */}
-      {(attachmentRefs.length > 0 || (editable && visibleCompatible.length > 0)) && (
-        <div className="border-t border-slate-800 pt-2 space-y-1.5">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] text-slate-500 uppercase tracking-wide">
-              Attachments
-            </span>
-            {editable && visibleCompatible.length > 0 && (
-              <button
-                onClick={() => setShowAttachPicker(true)}
-                className="text-xs text-amber-400 hover:text-amber-300"
-              >
-                + Add
-              </button>
-            )}
+          <div className="space-y-1">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] text-slate-500 uppercase tracking-wide">Qualities</span>
+              <span className="text-xs text-slate-400 italic">
+                {hasQualities ? rulesText : "-"}
+              </span>
+              {hasQualityModal && (
+                <InfoModal
+                  title={`${weapon.name} Qualities`}
+                  content={<SpecialRulesContent rules={effective.specialRules ?? ""} />}
+                />
+              )}
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] text-slate-500 uppercase tracking-wide">Rules</span>
+              {hasItemRules ? (
+                <InfoModal
+                  title={`${weapon.name} Rules`}
+                  content={<SpecialRulesContent rules="" description={rulesDescription} />}
+                />
+              ) : (
+                <span className="text-xs text-slate-600 italic">-</span>
+              )}
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] text-slate-500 uppercase tracking-wide">
+                Craftsmanship
+              </span>
+              <span className="text-xs text-slate-400 italic">{craftsmanship}</span>
+              <InfoModal
+                title={`${craftsmanship} Weapon`}
+                content={rangedCraftsmanshipDescription(craftsmanship)}
+              />
+            </div>
           </div>
-          {attachmentRefs.length === 0 ? (
-            <p className="text-xs text-slate-600 italic">None fitted</p>
-          ) : (
-            <div className="space-y-1.5">
-              {attachmentRefs.map((upgrade) => (
-                <AttachmentCard
-                  key={upgrade.id}
-                  upgrade={upgrade}
-                  editable={editable}
-                  onRemove={onRemoveAttachment}
-                />
-              ))}
+
+          {/* Weight / Value / Rarity / Source */}
+          <ItemMetaChips
+            weight={weapon.weight}
+            value={weapon.value}
+            rarity={weapon.rarity}
+            source={weapon.source}
+            className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1"
+          />
+
+          {/* Thrown weapon: quantity counter */}
+          {isThrown && (
+            <div className="border-t border-slate-800 pt-2 flex items-center justify-between gap-2">
+              <span className="text-[10px] text-slate-500 uppercase tracking-wide">Quantity</span>
+              <QuantityControl
+                quantity={weapon.quantity ?? 0}
+                editable={editable}
+                size="sm"
+                onUpdate={onUpdateQuantity}
+              />
             </div>
           )}
-        </div>
-      )}
 
-      {/* Modals */}
-      {showQualities && (
-        <SpecialRulesModal
-          rules={effective.specialRules ?? ""}
-          title="Qualities"
-          onClose={() => setShowQualities(false)}
-        />
-      )}
+          {/* Grenade launcher: ammo drawn from grenade inventory */}
+          {isGrenadeLauncher && (
+            <div className="border-t border-slate-800 pt-2 space-y-2">
+              <span className="text-[10px] text-slate-500 uppercase tracking-wide">Grenades</span>
+              {(grenades ?? []).filter((g) => g.type !== "Mine").length === 0 &&
+              (archeotechGrenades ?? []).length === 0 ? (
+                <p className="text-xs text-slate-600 italic">
+                  No grenades — add via the Grenades & Mines section below.
+                </p>
+              ) : (
+                <div className="space-y-1.5">
+                  {(grenades ?? [])
+                    .filter((g) => g.type !== "Mine")
+                    .map((g) => (
+                      <div
+                        key={g.id}
+                        className="rounded bg-slate-800/60 px-2.5 py-2 flex items-center justify-between gap-2"
+                      >
+                        <span className="text-xs text-slate-200 truncate">{g.name}</span>
+                        <QuantityControl
+                          quantity={g.quantity}
+                          editable={editable}
+                          size="sm"
+                          onUpdate={(qty) =>
+                            onUpdateGrenades?.(
+                              (grenades ?? []).map((x) =>
+                                x.id === g.id ? { ...x, quantity: qty } : x
+                              )
+                            )
+                          }
+                        />
+                      </div>
+                    ))}
+                  {(archeotechGrenades ?? []).map((g) => (
+                    <div
+                      key={g.id}
+                      className="rounded bg-amber-900/20 border border-amber-700/30 px-2.5 py-2 flex items-center justify-between gap-2"
+                    >
+                      <span className="text-xs text-slate-200 truncate">{g.name}</span>
+                      <span className="text-[10px] text-amber-400 border border-amber-700/50 rounded px-1.5 py-0.5">
+                        Archeotech
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
-      {showItemRules && rulesDescription && (
-        <SpecialRulesModal
-          rules=""
-          description={rulesDescription}
-          title="Rules"
-          onClose={() => setShowItemRules(false)}
-        />
-      )}
+          {/* Regular weapon: ammo entries */}
+          {hasAmmo && (
+            <div className="border-t border-slate-800 pt-2 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] text-slate-500 uppercase tracking-wide">Ammo</span>
+                {editable && (
+                  <button
+                    onClick={() => setShowAmmoPicker(true)}
+                    className="text-xs text-amber-400 hover:text-amber-300"
+                  >
+                    + Add
+                  </button>
+                )}
+              </div>
 
-      {showAttachPicker && (
-        <AttachmentPicker
-          compatibleUpgrades={visibleCompatible}
-          onSelect={(id) => {
-            onAddAttachment(id);
-            setShowAttachPicker(false);
-          }}
-          onClose={() => setShowAttachPicker(false)}
-        />
-      )}
+              {ammoEntries.length === 0 ? (
+                <p className="text-xs text-slate-600 italic">No ammo tracked</p>
+              ) : (
+                <div className="space-y-1.5">
+                  {ammoEntries.map((entry) => (
+                    <AmmoEntryRow
+                      key={entry.id}
+                      entry={entry}
+                      editable={editable}
+                      clipSize={weapon.clip}
+                      weightKg={calcEntryWeight(weapon, entry)}
+                      onSetLoaded={() => handleSetLoaded(entry.id)}
+                      onRemove={() => handleRemoveAmmo(entry.id)}
+                      onUpdateClips={(qty) => handleUpdateEntry(entry.id, { clips: qty })}
+                      onUpdateRounds={(qty) => handleUpdateEntry(entry.id, { rounds: qty })}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
-      {showAmmoPicker && (
-        <AmmoPicker
-          compatibleIds={weaponRef?.compatibleAmmoIds}
-          existingNames={existingAmmoNames}
-          onSelect={handleAddAmmo}
-          onClose={() => setShowAmmoPicker(false)}
-        />
+          {/* Attachments */}
+          {(attachmentRefs.length > 0 || (editable && visibleCompatible.length > 0)) && (
+            <div className="border-t border-slate-800 pt-2 space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] text-slate-500 uppercase tracking-wide">
+                  Attachments
+                </span>
+                {editable && visibleCompatible.length > 0 && (
+                  <button
+                    onClick={() => setShowAttachPicker(true)}
+                    className="text-xs text-amber-400 hover:text-amber-300"
+                  >
+                    + Add
+                  </button>
+                )}
+              </div>
+              {attachmentRefs.length === 0 ? (
+                <p className="text-xs text-slate-600 italic">None fitted</p>
+              ) : (
+                <div className="space-y-1.5">
+                  {attachmentRefs.map((upgrade) => (
+                    <AttachmentCard
+                      key={upgrade.id}
+                      upgrade={upgrade}
+                      editable={editable}
+                      onRemove={onRemoveAttachment}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Modals */}
+          {showQualities && (
+            <SpecialRulesModal
+              rules={effective.specialRules ?? ""}
+              title="Qualities"
+              onClose={() => setShowQualities(false)}
+            />
+          )}
+
+          {showItemRules && rulesDescription && (
+            <SpecialRulesModal
+              rules=""
+              description={rulesDescription}
+              title="Rules"
+              onClose={() => setShowItemRules(false)}
+            />
+          )}
+
+          {showAttachPicker && (
+            <AttachmentPicker
+              compatibleUpgrades={visibleCompatible}
+              onSelect={(id) => {
+                onAddAttachment(id);
+                setShowAttachPicker(false);
+              }}
+              onClose={() => setShowAttachPicker(false)}
+            />
+          )}
+
+          {showAmmoPicker && (
+            <AmmoPicker
+              compatibleIds={weaponRef?.compatibleAmmoIds}
+              existingNames={existingAmmoNames}
+              onSelect={handleAddAmmo}
+              onClose={() => setShowAmmoPicker(false)}
+            />
+          )}
+        </>
       )}
-      </>)}
     </div>
   );
 }

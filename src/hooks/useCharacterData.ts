@@ -78,14 +78,7 @@ export function useCharacterData({
       return;
     }
 
-    const logsRef = collection(
-      db,
-      "campaigns",
-      campaignId,
-      "characters",
-      characterId,
-      "claimLog"
-    );
+    const logsRef = collection(db, "campaigns", campaignId, "characters", characterId, "claimLog");
 
     const logsQuery = query(logsRef, orderBy("timestamp", "desc"));
 

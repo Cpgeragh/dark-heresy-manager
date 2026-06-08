@@ -11,29 +11,16 @@ interface ClaimPreviewProps {
   onClaim: () => Promise<void> | void;
 }
 
-export function ClaimPreview({
-  character,
-  campaign,
-  ownership,
-  onClaim,
-}: ClaimPreviewProps) {
+export function ClaimPreview({ character, campaign, ownership, onClaim }: ClaimPreviewProps) {
   const name = character.header?.characterName ?? "Unnamed Character";
 
   function renderStatus() {
     switch (ownership) {
       case "unclaimed":
-        return (
-          <p className="text-green-400 text-sm">
-            This character is unclaimed and available.
-          </p>
-        );
+        return <p className="text-green-400 text-sm">This character is unclaimed and available.</p>;
 
       case "claimed-by-you":
-        return (
-          <p className="text-amber-300 text-sm">
-            You already own this character.
-          </p>
-        );
+        return <p className="text-amber-300 text-sm">You already own this character.</p>;
 
       case "claimed-by-other":
         return (
@@ -44,9 +31,7 @@ export function ClaimPreview({
 
       case "locked":
         return (
-          <p className="text-red-400 text-sm">
-            This character is claimed and locked by the DM.
-          </p>
+          <p className="text-red-400 text-sm">This character is claimed and locked by the DM.</p>
         );
     }
   }
@@ -62,9 +47,7 @@ export function ClaimPreview({
 
   return (
     <div className="border border-slate-700 bg-slate-900 p-4 rounded space-y-4">
-      <h2 className="text-xl font-semibold text-slate-100">
-        Character Found
-      </h2>
+      <h2 className="text-xl font-semibold text-slate-100">Character Found</h2>
 
       <div className="text-slate-300 text-sm space-y-1">
         <p>
@@ -74,9 +57,7 @@ export function ClaimPreview({
 
         <p>
           <span className="text-slate-400">Campaign:</span>{" "}
-          <span className="font-semibold">
-            {campaign.name ?? "Unnamed Campaign"}
-          </span>
+          <span className="font-semibold">{campaign.name ?? "Unnamed Campaign"}</span>
         </p>
       </div>
 
@@ -94,9 +75,7 @@ export function ClaimPreview({
               : "bg-slate-700 text-slate-400 cursor-not-allowed"
           }`}
       >
-        {ownership === "unclaimed"
-          ? "Claim This Character"
-          : "Claim Unavailable"}
+        {ownership === "unclaimed" ? "Claim This Character" : "Claim Unavailable"}
       </button>
     </div>
   );

@@ -7,9 +7,7 @@ export function ToastTester() {
 
   return (
     <div className="fixed bottom-20 left-4 z-50 bg-slate-800 border border-slate-600 rounded-lg p-4 shadow-lg">
-      <h3 className="text-sm font-semibold text-slate-100 mb-3">
-        Toast Tester
-      </h3>
+      <h3 className="text-sm font-semibold text-slate-100 mb-3">Toast Tester</h3>
 
       <div className="flex flex-col gap-2">
         <button

@@ -19,14 +19,14 @@ export interface GearRef {
 // ─── Gear Reference ──────────────────────────────────────────────────────────
 
 export const GEAR_REFERENCE: GearRef[] = [
-
   // ── Core Rulebook — Clothing & Personal Items ─────────────────────────────
 
   {
     id: "cr-backpack",
     name: "Backpack",
     source: SkillSource.CR,
-    description: "A personal carrying device, usually a bag with attached straps. Can carry approximately 50 kilograms.",
+    description:
+      "A personal carrying device, usually a bag with attached straps. Can carry approximately 50 kilograms.",
     weight: "1 kg",
     value: "10 Thrones",
     rarity: "Plentiful",
@@ -606,8 +606,7 @@ export const GEAR_REFERENCE: GearRef[] = [
     id: "eikon",
     name: "Eikon",
     source: SkillSource.BoM,
-    description:
-      "No specific game effect.",
+    description: "No specific game effect.",
     weight: "—",
     value: "Varies",
     rarity: "Common",
@@ -652,8 +651,7 @@ export const GEAR_REFERENCE: GearRef[] = [
     id: "pilgrims-travel-staff",
     name: "Pilgrim's Travel Staff",
     source: SkillSource.BoM,
-    description:
-      "Can be used as a Staff in combat.",
+    description: "Can be used as a Staff in combat.",
     weight: "3 kg",
     value: "15 Thrones",
     rarity: "Common",
@@ -673,8 +671,7 @@ export const GEAR_REFERENCE: GearRef[] = [
     id: "questing-pilgrim-badge",
     name: "Questing Pilgrim Badge",
     source: SkillSource.BoM,
-    description:
-      "No specific game effect.",
+    description: "No specific game effect.",
     weight: "—",
     value: "Varies",
     rarity: "Common",
@@ -693,8 +690,7 @@ export const GEAR_REFERENCE: GearRef[] = [
     id: "ring-of-suffrage",
     name: "Ring of Suffrage",
     source: SkillSource.BoM,
-    description:
-      "Treated as a charm.",
+    description: "Treated as a charm.",
     weight: "0 kg",
     value: "10 Thrones",
     rarity: "Rare",
@@ -714,8 +710,7 @@ export const GEAR_REFERENCE: GearRef[] = [
     id: "sarissa",
     name: "Sarissa (Bolter Attachment)",
     source: SkillSource.BoM,
-    description:
-      "When mounted on a bolter, a sarissa counts as an axe in close combat.",
+    description: "When mounted on a bolter, a sarissa counts as an axe in close combat.",
     weight: "+2 kg",
     value: "50 Thrones",
     rarity: "Rare",
@@ -933,5 +928,4 @@ export const GEAR_REFERENCE: GearRef[] = [
     value: "600 Thrones",
     rarity: "Very Rare",
   },
-
 ];

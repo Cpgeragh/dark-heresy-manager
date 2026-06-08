@@ -2,20 +2,14 @@
 
 import { useMemo } from "react";
 import type { SkillWithComputed } from "./useSkillComputation";
-import {
-  GROUP_ORDER,
-  type SortMode,
-} from "../pages/characterSheet/SkillsTab/skillsConstants";
+import { GROUP_ORDER, type SortMode } from "../pages/characterSheet/SkillsTab/skillsConstants";
 
 interface UseSkillSortingArgs {
   skills: SkillWithComputed[];
   sortMode: SortMode;
 }
 
-export function useSkillSorting({
-  skills,
-  sortMode,
-}: UseSkillSortingArgs): SkillWithComputed[] {
+export function useSkillSorting({ skills, sortMode }: UseSkillSortingArgs): SkillWithComputed[] {
   return useMemo(() => {
     const arr = [...skills]; // Create copy to avoid mutating original
 

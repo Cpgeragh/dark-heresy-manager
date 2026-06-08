@@ -20,14 +20,31 @@ export function PieceNotesModal({ piece, onClose }: Props) {
       <div className="w-full max-w-md bg-slate-900 border border-slate-500 rounded-xl shadow-2xl">
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
           <h3 className="text-sm font-semibold text-slate-200">{piece.name}</h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-200 text-lg leading-none">×</button>
+          <button
+            onClick={onClose}
+            className="text-slate-400 hover:text-slate-200 text-lg leading-none"
+          >
+            ×
+          </button>
         </div>
         <div className="px-4 py-3 space-y-3">
           <div className="flex flex-wrap gap-4 text-xs text-slate-400">
-            <span>AP: <span className="text-slate-200 font-mono">{piece.ap}</span></span>
-            <span>Covers: <span className="text-slate-200">{locationLabel(piece.locations)}</span></span>
-            {piece.weight && <span>⚖ <span className="text-slate-200">{piece.weight}</span></span>}
-            {piece.value  && <span>₮ <span className="text-slate-200">{piece.value}</span></span>}
+            <span>
+              AP: <span className="text-slate-200 font-mono">{piece.ap}</span>
+            </span>
+            <span>
+              Covers: <span className="text-slate-200">{locationLabel(piece.locations)}</span>
+            </span>
+            {piece.weight && (
+              <span>
+                ⚖ <span className="text-slate-200">{piece.weight}</span>
+              </span>
+            )}
+            {piece.value && (
+              <span>
+                ₮ <span className="text-slate-200">{piece.value}</span>
+              </span>
+            )}
             {piece.rarity && <span className={rarityColour(piece.rarity)}>{piece.rarity}</span>}
           </div>
           {Object.keys(piece.apOverrides ?? {}).length > 0 && (
@@ -35,7 +52,8 @@ export function PieceNotesModal({ piece, onClose }: Props) {
               Overrides:{" "}
               {Object.entries(piece.apOverrides!).map(([loc, ap]) => (
                 <span key={loc} className="mr-2">
-                  {LOCATION_LABELS[loc as ArmourLocationKey]}: <span className="text-slate-200">{ap}</span>
+                  {LOCATION_LABELS[loc as ArmourLocationKey]}:{" "}
+                  <span className="text-slate-200">{ap}</span>
                 </span>
               ))}
             </div>

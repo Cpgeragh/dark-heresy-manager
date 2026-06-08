@@ -25,11 +25,16 @@ export function parseDamageType(
 ): { letter: string; label: string; colour: string } | null {
   const letter = damage.trim().slice(-1).toUpperCase();
   switch (letter) {
-    case "I": return { letter: "I", label: "Impact",    colour: "text-blue-400" };
-    case "R": return { letter: "R", label: "Rending",   colour: "text-red-400" };
-    case "E": return { letter: "E", label: "Energy",    colour: "text-orange-400" };
-    case "X": return { letter: "X", label: "Explosive", colour: "text-yellow-400" };
-    default:  return null;
+    case "I":
+      return { letter: "I", label: "Impact", colour: "text-blue-400" };
+    case "R":
+      return { letter: "R", label: "Rending", colour: "text-red-400" };
+    case "E":
+      return { letter: "E", label: "Energy", colour: "text-orange-400" };
+    case "X":
+      return { letter: "X", label: "Explosive", colour: "text-yellow-400" };
+    default:
+      return null;
   }
 }
 
@@ -39,7 +44,9 @@ export function DamageTypeChip({ damage }: { damage: string }) {
   return (
     <div className="flex flex-col items-center bg-slate-800/60 rounded px-2 py-1 min-w-[52px]">
       <span className="text-[10px] text-slate-500 uppercase tracking-wide">Type</span>
-      <span className={`text-sm font-semibold mt-0.5 ${damageType.colour}`}>{damageType.label}</span>
+      <span className={`text-sm font-semibold mt-0.5 ${damageType.colour}`}>
+        {damageType.label}
+      </span>
     </div>
   );
 }
@@ -112,9 +119,7 @@ export function EquipToggle({
       </div>
       <span
         className={`text-[10px] uppercase tracking-wide ${
-          equipped
-            ? "text-green-400"
-            : "text-slate-500 group-hover:text-slate-300"
+          equipped ? "text-green-400" : "text-slate-500 group-hover:text-slate-300"
         }`}
       >
         {equipped ? labels.equipped : labels.unequipped}
@@ -139,9 +144,7 @@ export function SpecialRulesContent({
 
   return (
     <div className="space-y-4">
-      {description && (
-        <p className="text-sm text-slate-300 leading-relaxed">{description}</p>
-      )}
+      {description && <p className="text-sm text-slate-300 leading-relaxed">{description}</p>}
       {ruleNames.map((name) => {
         const desc = WEAPON_SPECIAL_RULES[name];
         return (
@@ -214,12 +217,8 @@ export function AttachmentCard({
             title={upgrade.name}
             content={
               <div className="space-y-2">
-                <p className="text-sm text-slate-300 leading-relaxed">
-                  {upgrade.description}
-                </p>
-                <p className="text-xs text-slate-500 italic">
-                  {upgrade.applicableTo}
-                </p>
+                <p className="text-sm text-slate-300 leading-relaxed">{upgrade.description}</p>
+                <p className="text-xs text-slate-500 italic">{upgrade.applicableTo}</p>
               </div>
             }
           />

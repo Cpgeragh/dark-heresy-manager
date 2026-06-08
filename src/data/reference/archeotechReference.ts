@@ -30,7 +30,6 @@ export interface ArcheotechRef {
 // ─── Reference Data ───────────────────────────────────────────────────────────
 
 export const ARCHEOTECH_REFERENCE: ArcheotechRef[] = [
-
   // ── Lost Dataslate ──────────────────────────────────────────────────────────
   {
     id: "ld-cameleoline-grid",
@@ -199,5 +198,4 @@ export const ARCHEOTECH_REFERENCE: ArcheotechRef[] = [
       "requires an auspex and a Very Hard (–30) Tech-Use Test every five minutes as it constantly switches " +
       "frequencies. Only the Inquisition may authorise its use.",
   },
-
 ];
