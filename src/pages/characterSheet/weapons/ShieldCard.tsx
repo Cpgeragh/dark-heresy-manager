@@ -7,7 +7,7 @@ import {
   SHIELD_REFERENCE,
   type ShieldRef,
 } from "../../../data/reference/weaponReference";
-import { sectionContainerClass } from "../../../ui/editableStyles";
+import { uiSection } from "../../../ui/editableStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
 import { InfoModal } from "../../../components/InfoModal";
@@ -88,7 +88,7 @@ export function ShieldCard({
     .filter((name) => Boolean(name) && Boolean(WEAPON_SPECIAL_RULES[name]));
 
   return (
-    <div className={sectionContainerClass(editable) + " space-y-3"}>
+    <div className={uiSection + " space-y-3"}>
       {/* Header — always visible */}
       <div className="flex items-start justify-between gap-2">
         <button

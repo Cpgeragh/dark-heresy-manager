@@ -52,11 +52,6 @@ export function editableTextareaClass(isEditable: boolean) {
   ].join(" ");
 }
 
-/** @deprecated Use uiSection directly */
-export function sectionContainerClass(_isEditable: boolean) {
-  return uiSection;
-}
-
 // ─── Shared UI tokens ─────────────────────────────────────────────────────────
 // Use these instead of hardcoding the same Tailwind strings across components.
 

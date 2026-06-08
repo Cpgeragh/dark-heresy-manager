@@ -45,20 +45,6 @@ export const TOAST_ANIMATION_DURATION = 300;
 export const SEARCH_DEBOUNCE_DELAY = 300;
 
 // ============================================
-// PAGINATION & LIMITS
-// ============================================
-
-/**
- * Maximum number of recent chats to load at once
- */
-export const MAX_RECENT_CHATS = 20;
-
-/**
- * Default number of items per page
- */
-export const DEFAULT_PAGE_SIZE = 10;
-
-// ============================================
 // RECOVERY CODES
 // ============================================
 

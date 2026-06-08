@@ -2,7 +2,7 @@
 
 import type { GearItem } from "../../../types/Character";
 import { GEAR_REFERENCE } from "../../../data/reference/gearReference";
-import { sectionContainerClass } from "../../../ui/editableStyles";
+import { uiSection } from "../../../ui/editableStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { InfoModal } from "../../../components/InfoModal";
 
@@ -24,7 +24,7 @@ export function ItemRow({ item, editable, onRemove }: Props) {
   const rarity = item.rarity ?? ref?.rarity;
 
   return (
-    <div className={sectionContainerClass(editable)}>
+    <div className={uiSection}>
       <div className="flex items-start gap-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">

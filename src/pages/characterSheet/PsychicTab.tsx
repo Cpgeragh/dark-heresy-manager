@@ -9,7 +9,7 @@ import {
   type PsychicDiscipline,
 } from "../../data/reference/psychicReference";
 import {
-  sectionContainerClass,
+  uiSection,
   uiSectionHeader,
 } from "../../ui/editableStyles";
 import { PowerCard } from "./components/PowerCard";
@@ -264,7 +264,7 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
   return (
     <div className="space-y-6">
       {/* PSY RATING & DISCIPLINES ────────────────────────────────────────── */}
-      <div className={sectionContainerClass(editable) + " flex flex-col items-center space-y-3"}>
+      <div className={uiSection + " flex flex-col items-center space-y-3"}>
 
         {/* Psy Rating — derived from highest Psy Rating talent */}
         <div className="inline-flex flex-col items-center gap-1">

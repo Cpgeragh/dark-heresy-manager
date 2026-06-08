@@ -8,7 +8,7 @@ import type { TraitData } from "../../data/traitData";
 import { TALENT_LIST } from "../../data/talentData";
 import { TRAIT_LIST } from "../../data/traitData";
 import type { SkillSource } from "../../types/SkillSource";
-import { editableInputClass, sectionContainerClass, uiSectionHeader } from "../../ui/editableStyles";
+import { editableInputClass, uiSection, uiSectionHeader } from "../../ui/editableStyles";
 import { InfoModal } from "../../components/InfoModal";
 import { TALENT_DESCRIPTIONS } from "../../data/talentDescriptions";
 import { TRAIT_DESCRIPTIONS } from "../../data/traitDescriptions";
@@ -293,7 +293,7 @@ export function EntrySection({
         </span>
       </div>
 
-      <section className={sectionContainerClass(editable) + " space-y-2"}>
+      <section className={uiSection + " space-y-2"}>
         {entries.length === 0 && (
           <p className="text-sm text-slate-500 italic">None added yet.</p>
         )}

@@ -9,7 +9,7 @@ import type {
 } from "../../types/Character";
 import { TALENT_LIST } from "../../data/talentData";
 import { WEAPON_TRAINING_GROUPS } from "../../data/weaponTrainingData";
-import { editableInputClass, sectionContainerClass, uiSectionHeader } from "../../ui/editableStyles";
+import { editableInputClass, uiSection, uiSectionHeader } from "../../ui/editableStyles";
 import { EntryCard, EntrySection, TalentPickerModal } from "./talentComponents";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -69,7 +69,7 @@ function FaithTalentSection({
         </span>
       </div>
 
-      <section className={sectionContainerClass(editable) + " space-y-4"}>
+      <section className={uiSection + " space-y-4"}>
       {FAITH_GROUP_ORDER.map((group) => {
         const groupEntries = entries
           .filter((e) => getFaithGroup(e.talentId) === group)
@@ -200,7 +200,7 @@ export function TalentsTab({
       {/* WEAPON TRAINING */}
       <div>
       <h3 className={`${uiSectionHeader} mb-3`}>Weapon Training</h3>
-      <section className={sectionContainerClass(editable) + " space-y-4"}>
+      <section className={uiSection + " space-y-4"}>
 
         {WEAPON_TRAINING_GROUPS.map((group) => (
           <div key={group.label}>

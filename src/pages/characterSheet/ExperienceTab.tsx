@@ -3,7 +3,7 @@
 import { useState, useCallback, useMemo } from "react";
 import type { ExperienceBlock, RankAdvances } from "../../types/Character";
 import {
-  sectionContainerClass,
+  uiSection,
   readOnlyBadgeClass,
   uiSectionHeader,
 } from "../../ui/editableStyles";
@@ -125,7 +125,7 @@ export function ExperienceTab({
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
         {/* Total XP — editable by DM */}
-        <div className={sectionContainerClass(isDM) + " text-center"}>
+        <div className={uiSection + " text-center"}>
           {isDM ? (
             <label className="flex flex-col gap-0.5">
               <span className="text-xs font-medium uppercase tracking-wide text-slate-100">Total XP</span>
@@ -146,12 +146,12 @@ export function ExperienceTab({
           )}
         </div>
 
-        <div className={sectionContainerClass(false) + " text-center"}>
+        <div className={uiSection + " text-center"}>
           <div className="text-xs text-slate-400 mb-1">Spent XP</div>
           <div className="text-2xl font-semibold font-mono text-slate-100">{experience.spent}</div>
         </div>
 
-        <div className={sectionContainerClass(false) + " text-center"}>
+        <div className={uiSection + " text-center"}>
           <div className="text-xs text-slate-400 mb-1">Remaining XP</div>
           <div className={`text-2xl font-semibold font-mono ${remaining < 0 ? "text-red-400" : "text-slate-100"}`}>
             {remaining}
@@ -170,7 +170,7 @@ export function ExperienceTab({
 
         <div className="space-y-4">
           {experience.ranks.map((rankBlock) => (
-            <div key={rankBlock.rank} className={sectionContainerClass(false)}>
+            <div key={rankBlock.rank} className={uiSection}>
               <h4 className="text-sm font-semibold text-slate-100 mb-2">
                 Rank {rankBlock.rank}
               </h4>

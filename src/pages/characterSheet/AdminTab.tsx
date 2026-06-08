@@ -5,7 +5,7 @@ import type { Character } from "../../types/Character";
 import type { ClaimLog } from "../../types/ClaimLog";
 import {
   editableInputClass,
-  sectionContainerClass,
+  uiSection,
   readOnlyBadgeClass,
 } from "../../ui/editableStyles";
 import { useXpProposals } from "../../hooks/useXpProposals";
@@ -93,7 +93,7 @@ export function AdminTab({
       )}
 
       {/* OWNERSHIP */}
-      <section className={sectionContainerClass(true)}>
+      <section className={uiSection}>
         <div className="flex items-center justify-between mb-2">
           <h3 className="font-semibold text-red-300">Ownership</h3>
           <span className={readOnlyBadgeClass()}>
@@ -169,7 +169,7 @@ export function AdminTab({
       </section>
 
       {/* PENDING XP PROPOSALS */}
-      <section className={sectionContainerClass(false)}>
+      <section className={uiSection}>
         <h3 className="font-semibold mb-2">Pending XP Proposals</h3>
 
         {pendingProposals.length === 0 ? (
@@ -206,7 +206,7 @@ export function AdminTab({
       </section>
 
       {/* CLAIM HISTORY */}
-      <section className={sectionContainerClass(false)}>
+      <section className={uiSection}>
         <div className="flex items-center justify-between mb-2">
           <h3 className="font-semibold">Claim History</h3>
           <span className={readOnlyBadgeClass()}>

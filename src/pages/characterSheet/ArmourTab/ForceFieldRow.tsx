@@ -1,7 +1,7 @@
 // src/pages/characterSheet/ArmourTab/ForceFieldRow.tsx
 
 import type { WornArmourPiece } from "../../../types/Character";
-import { sectionContainerClass } from "../../../ui/editableStyles";
+import { uiSection } from "../../../ui/editableStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 
 interface Props {
@@ -17,7 +17,7 @@ export function ForceFieldRow({ piece, editable, onToggle, onRemove, onInfo }: P
   return (
     <div
       className={[
-        sectionContainerClass(editable),
+        uiSection,
         "flex items-center gap-3",
         !active ? "opacity-60" : "",
       ].join(" ")}

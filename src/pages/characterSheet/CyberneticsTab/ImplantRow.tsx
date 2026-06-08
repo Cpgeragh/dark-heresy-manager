@@ -2,7 +2,7 @@
 
 import type { CyberneticItem } from "../../../types/Character";
 import { CYBERNETICS_REFERENCE } from "../../../data/reference/cyberneticsReference";
-import { sectionContainerClass } from "../../../ui/editableStyles";
+import { uiSection } from "../../../ui/editableStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { CRAFTSMANSHIP_STYLE, LOCATION_DISPLAY } from "./cyberneticsConstants";
 import { availableCraftsmanship, craftsmanshipDescription } from "./cyberneticsHelpers";
@@ -27,7 +27,7 @@ export function ImplantRow({ item, editable, onCycleQuality, onRemove }: Props) 
     : item.notes ?? "No rules recorded.";
 
   return (
-    <div className={[sectionContainerClass(editable), "flex items-start gap-3"].join(" ")}>
+    <div className={[uiSection, "flex items-start gap-3"].join(" ")}>
       {/* Name + craftsmanship description */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5 min-w-0">
