@@ -12,7 +12,7 @@ const firebaseConfig = {
   projectId: "dark-heresy-manager",
   storageBucket: "dark-heresy-manager.firebasestorage.app",
   messagingSenderId: "628100439548",
-  appId: "1:628100439548:web:cb04ccaba23aa03441e679"
+  appId: "1:628100439548:web:cb04ccaba23aa03441e679",
 };
 
 const app = initializeApp(firebaseConfig);

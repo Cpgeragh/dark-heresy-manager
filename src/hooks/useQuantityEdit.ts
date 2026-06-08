@@ -10,10 +10,7 @@ import { useState, useCallback } from "react";
  * @param quantity  The current numeric value (read from the item).
  * @param onUpdate  Called with the new value on commit.
  */
-export function useQuantityEdit(
-  quantity: number,
-  onUpdate: (qty: number) => void,
-) {
+export function useQuantityEdit(quantity: number, onUpdate: (qty: number) => void) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
 
@@ -33,7 +30,7 @@ export function useQuantityEdit(
       if (e.key === "Enter") commit();
       if (e.key === "Escape") setEditing(false);
     },
-    [commit],
+    [commit]
   );
 
   return { editing, draft, setDraft, start, commit, handleKeyDown };

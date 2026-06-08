@@ -12,9 +12,7 @@ import type { SkillEntry } from "../types/Character";
 export function normaliseSkills(raw: unknown): SkillEntry[] {
   if (!Array.isArray(raw)) return DEFAULT_SKILLS;
 
-  const savedById = new Map(
-    (raw as SkillEntry[]).map((skill) => [skill.id, skill])
-  );
+  const savedById = new Map((raw as SkillEntry[]).map((skill) => [skill.id, skill]));
 
   return DEFAULT_SKILLS.map((skill) => {
     const saved = savedById.get(skill.id);

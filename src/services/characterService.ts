@@ -13,10 +13,7 @@ import {
 } from "firebase/firestore";
 
 import { db, auth } from "../firebase";
-import {
-  characterDocRef,
-  charactersCollectionRef,
-} from "../firebase/converters";
+import { characterDocRef, charactersCollectionRef } from "../firebase/converters";
 
 import type { Character } from "../types/Character";
 import { buildClaimLogPayload } from "../utils/claimLog";
@@ -171,30 +168,28 @@ export async function deleteCharacter(
  * in the recovery index atomically.
  * Returns the clone's character name.
  */
-export async function cloneCharacter(
-  campaignId: string,
-  characterId: string
-): Promise<string> {
-  const sourceRef = doc(db, "campaigns", campaignId, "characters", characterId);
+export async function cloneCharacter(campaignId: string, characterId: string): Promise<string> {
+  const sourceRef = characterDocRef(campaignId, characterId);
   const sourceSnap = await getDoc(sourceRef);
   if (!sourceSnap.exists()) throw new Error("Source character not found.");
 
-  const sourceData = sourceSnap.data();
+  const sourceData = sourceSnap.data()!; // typed as Character
   const originalName = sourceData.header?.characterName ?? "Unnamed Character";
   const cloneName = `Copy of ${originalName}`;
   const recoveryCode = generateRecoveryCode();
 
-  const cloneData = {
+  const newCharRef = doc(charactersCollectionRef(campaignId));
+  const cloneData: Character = {
     ...sourceData,
+    id: newCharRef.id,
     userId: null,
     isEditableByPlayer: false,
     recoveryCode,
     header: { ...sourceData.header, characterName: cloneName },
   };
 
-  const newCharRef = doc(collection(db, "campaigns", campaignId, "characters"));
   const batch = writeBatch(db);
-  batch.set(newCharRef, cloneData);
+  batch.set(newCharRef, cloneData); // converter strips id on write
   batch.set(doc(db, "recoveryIndex", recoveryCode), { campaignId, characterId: newCharRef.id });
   await batch.commit();
 
@@ -226,12 +221,14 @@ export async function importCharacter(
  * Creates a new empty character in a campaign with a recovery code.
  * Returns the recovery code so the caller can display it to the DM.
  */
-export async function createNewCharacter(
-  campaignId: string,
-  name: string
-): Promise<string> {
+export async function createNewCharacter(campaignId: string, name: string): Promise<string> {
   const recoveryCode = generateRecoveryCode();
-  const characterData = createEmptyCharacterData({ campaignId, recoveryCode, userId: null, characterName: name });
+  const characterData = createEmptyCharacterData({
+    campaignId,
+    recoveryCode,
+    userId: null,
+    characterName: name,
+  });
   const charRef = doc(collection(db, "campaigns", campaignId, "characters"));
   const recoveryRef = doc(db, "recoveryIndex", recoveryCode);
   const batch = writeBatch(db);

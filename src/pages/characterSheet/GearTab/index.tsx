@@ -132,7 +132,7 @@ export function GearTab({ gear, consumables, editable, onUpdate, onUpdateConsuma
               onClick={() => setShowGearPicker(true)}
               className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
             >
-              {editable ? "+ Add Item" : "View"}
+              {editable ? "+ Add" : "View"}
             </button>
           )}
         </div>

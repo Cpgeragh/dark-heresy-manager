@@ -35,11 +35,23 @@ export function BackgroundTab({
     (v: string) => updateHeaderField("characterName", v),
     [updateHeaderField]
   );
-  const handlePlayerName  = useCallback((v: string) => updateHeaderField("playerName",  v), [updateHeaderField]);
-  const handleCareer      = useCallback((v: string) => updateHeaderField("career",      v), [updateHeaderField]);
-  const handleRank        = useCallback((v: string) => updateHeaderField("rank",        v), [updateHeaderField]);
-  const handleDivination  = useCallback((v: string) => updateHeaderField("divination",  v), [updateHeaderField]);
-  const handleDescription = useCallback((v: string) => updateHeaderField("description", v), [updateHeaderField]);
+  const handlePlayerName = useCallback(
+    (v: string) => updateHeaderField("playerName", v),
+    [updateHeaderField]
+  );
+  const handleCareer = useCallback(
+    (v: string) => updateHeaderField("career", v),
+    [updateHeaderField]
+  );
+  const handleRank = useCallback((v: string) => updateHeaderField("rank", v), [updateHeaderField]);
+  const handleDivination = useCallback(
+    (v: string) => updateHeaderField("divination", v),
+    [updateHeaderField]
+  );
+  const handleDescription = useCallback(
+    (v: string) => updateHeaderField("description", v),
+    [updateHeaderField]
+  );
 
   // ── Talent / homeworld helpers ─────────────────────────────────────────────
   const handleHomeworldChange = useCallback(
@@ -60,7 +72,6 @@ export function BackgroundTab({
 
   return (
     <div className="space-y-6 text-slate-100">
-
       {/* IDENTITY */}
       <div>
         <p className={`${uiSectionHeader} mb-3`}>Identity</p>
@@ -139,42 +150,40 @@ export function BackgroundTab({
       <div>
         <p className={`${uiSectionHeader} mb-3`}>Homeworld</p>
         <section className={uiSection + " space-y-3"}>
+          <div className="flex flex-col gap-1">
+            <select
+              disabled={!editable}
+              value={talents.homeworld}
+              onChange={handleHomeworldChange}
+              className={editableInputClass(editable) + " appearance-none"}
+            >
+              <option value="">— Select homeworld —</option>
+              {[...HOMEWORLD_LIST]
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((hw) => (
+                  <option key={hw.id} value={hw.id}>
+                    {hw.name} ({hw.source})
+                  </option>
+                ))}
+            </select>
+            {selectedHomeworld && (
+              <p className="text-xs text-slate-100 italic px-1 mt-1">
+                {selectedHomeworld.description}
+              </p>
+            )}
+          </div>
 
-        <div className="flex flex-col gap-1">
-          <select
-            disabled={!editable}
-            value={talents.homeworld}
-            onChange={handleHomeworldChange}
-            className={editableInputClass(editable) + " appearance-none"}
-          >
-            <option value="">— Select homeworld —</option>
-            {[...HOMEWORLD_LIST]
-              .sort((a, b) => a.name.localeCompare(b.name))
-              .map((hw) => (
-                <option key={hw.id} value={hw.id}>
-                  {hw.name} ({hw.source})
-                </option>
-              ))}
-          </select>
-          {selectedHomeworld && (
-            <p className="text-xs text-slate-100 italic px-1 mt-1">
-              {selectedHomeworld.description}
-            </p>
-          )}
-        </div>
-
-        <FormField
-          label="Background Notes"
-          value={talents.homeworldNotes ?? ""}
-          onChange={handleBackgroundNotes}
-          editable={editable}
-          type="textarea"
-          rows={4}
-          placeholder="Origin story, connections, history…"
-        />
+          <FormField
+            label="Background Notes"
+            value={talents.homeworldNotes ?? ""}
+            onChange={handleBackgroundNotes}
+            editable={editable}
+            type="textarea"
+            rows={4}
+            placeholder="Origin story, connections, history…"
+          />
         </section>
       </div>
-
     </div>
   );
 }

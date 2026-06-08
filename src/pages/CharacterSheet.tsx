@@ -54,7 +54,6 @@ import { exportCharacterJson } from "../utils/exportCharacter";
 import { normaliseSkills, skillsNeedNormalisation } from "../utils/skillUtils";
 import { SectionDrawer } from "../components/SectionDrawer";
 
-
 // ================================================================
 // COMPONENT
 // ================================================================
@@ -102,6 +101,15 @@ export default function CharacterSheet() {
     [character?.skills]
   );
 
+  const psyRating = useMemo(
+    () =>
+      (character?.talentsAndTraits.talents ?? []).reduce((max, entry) => {
+        const match = entry.talentId.match(/^psy-rating-(\d+)$/);
+        return match ? Math.max(max, parseInt(match[1], 10)) : max;
+      }, 0),
+    [character?.talentsAndTraits.talents]
+  );
+
   useEffect(() => {
     if (!character || !allowedToEdit) return;
     if (skillsNeedNormalisation(character.skills, normalisedSkills)) {
@@ -109,31 +117,34 @@ export default function CharacterSheet() {
     }
   }, [character, allowedToEdit, normalisedSkills, updateField]);
 
-  const handleTabChange = useCallback((tab: TabId) => {
-    navigate(`?tab=${tab}`);
-    window.scrollTo({ top: 0, behavior: "instant" });
-  }, [navigate]);
+  const handleTabChange = useCallback(
+    (tab: TabId) => {
+      navigate(`?tab=${tab}`);
+      window.scrollTo({ top: 0, behavior: "instant" });
+    },
+    [navigate]
+  );
 
   const basePath = `/campaign/${params.campaignId}/character/${params.characterId}`;
   useEffect(() => {
-    window.history.pushState(null, '', window.location.href);
+    window.history.pushState(null, "", window.location.href);
 
     const handlePopState = () => {
       const onCharSheet = window.location.pathname.startsWith(basePath);
-      const atFloor = onCharSheet && !window.location.search.includes('tab=');
+      const atFloor = onCharSheet && !window.location.search.includes("tab=");
 
       if (!onCharSheet) {
         // Safety net — redirect back if somehow the sentinel was exhausted
         navigate(`${basePath}?tab=stats`, { replace: true });
       } else if (atFloor) {
         // Hit the floor (stats, no tab param) — replenish the sentinel
-        window.history.pushState(null, '', window.location.href);
+        window.history.pushState(null, "", window.location.href);
       }
       // Tab-to-tab back navigation — do nothing, works normally
     };
 
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
   }, [basePath, navigate]);
 
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -144,7 +155,8 @@ export default function CharacterSheet() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const { setBackHref, clearBackHref, setKebabContent, clearKebabContent } = useHeaderExtensionSetters();
+  const { setBackHref, clearBackHref, setKebabContent, clearKebabContent } =
+    useHeaderExtensionSetters();
 
   useEffect(() => {
     if (!character) return;
@@ -166,12 +178,23 @@ export default function CharacterSheet() {
       clearBackHref();
       clearKebabContent();
     };
-  }, [character, isDM, isOwner, canPlayerRelease, releaseCharacter, isReleasing, setBackHref, clearBackHref, setKebabContent, clearKebabContent]);
+  }, [
+    character,
+    isDM,
+    isOwner,
+    canPlayerRelease,
+    releaseCharacter,
+    isReleasing,
+    setBackHref,
+    clearBackHref,
+    setKebabContent,
+    clearKebabContent,
+  ]);
 
   // ================================================================
   // STABLE UPDATE CALLBACKS (eliminate inline functions)
   // ================================================================
-  
+
   const handleUpdateHeader = useCallback(
     (next: CharacterHeader) => updateField("header", next),
     [updateField]
@@ -282,19 +305,11 @@ export default function CharacterSheet() {
   // ================================================================
 
   if (!path) {
-    return (
-      <div className="text-slate-300 text-center py-10">
-        Invalid character route.
-      </div>
-    );
+    return <div className="text-slate-300 text-center py-10">Invalid character route.</div>;
   }
 
   if (characterLoading) {
-    return (
-      <div className="text-slate-300 text-center py-10">
-        Loading character…
-      </div>
-    );
+    return <div className="text-slate-300 text-center py-10">Loading character…</div>;
   }
 
   if (!character) {
@@ -312,40 +327,35 @@ export default function CharacterSheet() {
   const dmOverrideActive = isDM && !dmReadOnly;
 
   const TAB_TITLES: Record<TabId, string> = {
-    vitals:      "Vitals",
-    stats:       "Characteristics",
-    skills:      "Skills",
-    talents:     "Talents",
-    traits:      "Traits",
-    weapons:     "Weapons",
-    armour:      "Armour",
+    vitals: "Vitals",
+    stats: "Characteristics",
+    skills: "Skills",
+    talents: "Talents",
+    traits: "Traits",
+    weapons: "Weapons",
+    armour: "Armour",
     cybernetics: "Cybernetics",
-    psychic:     "Psychic Powers",
-    gear:        "Gear",
-    drugs:       "Drugs",
-    xp:          "Experience",
-    notes:       "Notes",
-    background:  "Background",
-    archeotech:  "Archeotech",
-    admin:       "Admin",
+    psychic: "Psychic Powers",
+    gear: "Gear",
+    drugs: "Drugs",
+    xp: "Experience",
+    notes: "Notes",
+    background: "Background",
+    archeotech: "Archeotech",
+    admin: "Admin",
   };
 
   const containerClass = [
     "border p-4 rounded-lg transition-colors",
-    dmOverrideActive
-      ? "border-amber-400 bg-amber-500/10"
-      : "border-slate-700 bg-slate-900/40",
+    dmOverrideActive ? "border-amber-400 bg-amber-500/10" : "border-slate-700 bg-slate-900/40",
   ].join(" ");
 
   return (
     <div>
-
       {/* DM NAV / OVERRIDE BAR */}
       {isDM && (
         <div className="flex items-center justify-between mb-4 p-2 rounded border border-slate-700 bg-slate-900/60">
-          <span className="text-xs text-slate-400">
-            DM View
-          </span>
+          <span className="text-xs text-slate-400">DM View</span>
 
           <button
             onClick={toggleDmReadOnly}
@@ -371,11 +381,7 @@ export default function CharacterSheet() {
       </div>
 
       {/* CONTENT CONTAINER */}
-      <div
-        className={containerClass}
-        role="tabpanel"
-        aria-label={`${activeTab} content`}
-      >
+      <div className={containerClass} role="tabpanel" aria-label={`${activeTab} content`}>
         <ErrorBoundary
           fallback={
             <div className="p-6 text-center space-y-4">
@@ -480,10 +486,7 @@ export default function CharacterSheet() {
           {activeTab === "psychic" && (
             <PsychicTab
               psychic={character.psychic}
-              psyRating={(character.talentsAndTraits.talents ?? []).reduce((max, entry) => {
-                const match = entry.talentId.match(/^psy-rating-(\d+)$/);
-                return match ? Math.max(max, parseInt(match[1], 10)) : max;
-              }, 0)}
+              psyRating={psyRating}
               editable={allowedToEdit}
               onUpdate={handleUpdatePsychic}
             />
@@ -567,12 +570,18 @@ export default function CharacterSheet() {
           aria-label="Scroll to top"
           className="fixed bottom-6 right-4 z-50 w-9 h-9 rounded bg-slate-800/85 border border-slate-600 flex items-center justify-center text-slate-300 hover:bg-slate-700/90 transition shadow-lg"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2.5}
+            stroke="currentColor"
+            className="w-5 h-5"
+          >
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
           </svg>
         </button>
       )}
-
     </div>
   );
 }

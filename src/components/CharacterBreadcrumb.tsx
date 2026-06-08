@@ -10,9 +10,7 @@ interface CharacterBreadcrumbProps {
 export function CharacterBreadcrumb({ isDM }: CharacterBreadcrumbProps) {
   const navigate = useNavigate();
 
-  const label = isDM
-    ? "← Back to DM Dashboard"
-    : "← Back to My Characters";
+  const label = isDM ? "← Back to DM Dashboard" : "← Back to My Characters";
 
   const target = isDM ? "/dm" : "/player";
 

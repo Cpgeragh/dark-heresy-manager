@@ -17,8 +17,8 @@ interface SkillRowProps {
 
 const LEVEL_BADGE: Record<string, string> = {
   trained: "bg-amber-500/10 border-amber-400 text-amber-400",
-  "+10":   "bg-sky-500/10 border-sky-400 text-sky-400",
-  "+20":   "bg-green-500/10 border-green-400 text-green-400",
+  "+10": "bg-sky-500/10 border-sky-400 text-sky-400",
+  "+20": "bg-green-500/10 border-green-400 text-green-400",
 };
 
 export function SkillRow({ skill, editable, updateLevel, updateMisc }: SkillRowProps) {
@@ -35,8 +35,7 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc }: SkillRowP
   );
 
   const handleMiscChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) =>
-      updateMisc(skill.id, Number(e.target.value)),
+    (e: React.ChangeEvent<HTMLInputElement>) => updateMisc(skill.id, Number(e.target.value)),
     [skill.id, updateMisc]
   );
 
@@ -47,7 +46,6 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc }: SkillRowP
 
   return (
     <div className="rounded border border-slate-500 bg-slate-800/60 overflow-hidden">
-
       {/* COLLAPSED ROW */}
       <button
         onClick={handleToggle}
@@ -55,21 +53,26 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc }: SkillRowP
         className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-slate-700/40 transition"
       >
         <div className="flex items-center gap-1.5 flex-1 min-w-0">
-          <span className="text-sm font-semibold text-slate-100 truncate">
-            {skill.name}
-          </span>
+          <span className="text-sm font-semibold text-slate-100 truncate">{skill.name}</span>
           {SKILL_DESCRIPTIONS[skill.name] && (
-            <span className="inline-flex items-center leading-[0]" onClick={(e) => e.stopPropagation()}>
+            <span
+              className="inline-flex items-center leading-[0]"
+              onClick={(e) => e.stopPropagation()}
+            >
               <InfoModal title={skill.name} content={SKILL_DESCRIPTIONS[skill.name]} />
             </span>
           )}
         </div>
 
-        <span className={`px-1.5 py-0.5 rounded border bg-slate-800 text-[10px] font-mono shrink-0 ${charColour(skill.characteristic)}`}>
+        <span
+          className={`px-1.5 py-0.5 rounded border bg-slate-800 text-[10px] font-mono shrink-0 ${charColour(skill.characteristic)}`}
+        >
           {CHAR_LABEL[skill.characteristic]}
         </span>
 
-        <span className={`px-1.5 py-0.5 rounded border text-[10px] font-semibold shrink-0 ${levelBadgeClass}`}>
+        <span
+          className={`px-1.5 py-0.5 rounded border text-[10px] font-semibold shrink-0 ${levelBadgeClass}`}
+        >
           {skill.level === "trained" ? "Trained" : skill.level}
         </span>
 
@@ -77,15 +80,12 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc }: SkillRowP
           {skill.total ?? "--"}
         </span>
 
-        <span className="text-slate-400 text-xs shrink-0">
-          {expanded ? "▼" : "▲"}
-        </span>
+        <span className="text-slate-400 text-xs shrink-0">{expanded ? "▼" : "▲"}</span>
       </button>
 
       {/* EXPANDED BODY */}
       {expanded && (
         <div className="px-3 pb-3 pt-2 border-t border-slate-600 space-y-3">
-
           {/* Level buttons */}
           {editable && (
             <div className="flex flex-wrap items-center gap-2">
@@ -137,12 +137,13 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc }: SkillRowP
             </div>
             <div className="text-center rounded border border-slate-500 bg-slate-900/60 px-2 py-1.5">
               <div className="text-[10px] text-slate-100 uppercase tracking-wide">Opposed</div>
-              <div className={`text-sm font-mono font-semibold mt-1 ${getTotalColor(skill.opposed)}`}>
+              <div
+                className={`text-sm font-mono font-semibold mt-1 ${getTotalColor(skill.opposed)}`}
+              >
                 {skill.opposed ?? "--"}
               </div>
             </div>
           </div>
-
         </div>
       )}
     </div>

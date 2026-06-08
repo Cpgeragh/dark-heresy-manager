@@ -8,10 +8,7 @@ import {
   type PsychicPowerRef,
   type PsychicDiscipline,
 } from "../../data/reference/psychicReference";
-import {
-  uiSection,
-  uiSectionHeader,
-} from "../../ui/editableStyles";
+import { uiSection, uiSectionHeader } from "../../ui/editableStyles";
 import { PowerCard } from "./components/PowerCard";
 import { PickerModal } from "../../ui/PickerModal";
 import { InfoModal } from "../../components/InfoModal";
@@ -98,23 +95,25 @@ function PowerPicker({
           {d}
         </button>
       ))}
-      footer={editable ? (
-        <div className="flex gap-2">
-          <button
-            onClick={onCustomMinor}
-            className="flex-1 text-sm text-amber-400 hover:text-amber-300 text-center py-1 transition"
-          >
-            + Custom minor power
-          </button>
-          <div className="w-px bg-slate-700 self-stretch" />
-          <button
-            onClick={onCustomMajor}
-            className="flex-1 text-sm text-amber-400 hover:text-amber-300 text-center py-1 transition"
-          >
-            + Custom major power
-          </button>
-        </div>
-      ) : undefined}
+      footer={
+        editable ? (
+          <div className="flex gap-2">
+            <button
+              onClick={onCustomMinor}
+              className="flex-1 text-sm text-amber-400 hover:text-amber-300 text-center py-1 transition"
+            >
+              + Custom minor power
+            </button>
+            <div className="w-px bg-slate-700 self-stretch" />
+            <button
+              onClick={onCustomMajor}
+              className="flex-1 text-sm text-amber-400 hover:text-amber-300 text-center py-1 transition"
+            >
+              + Custom major power
+            </button>
+          </div>
+        ) : undefined
+      }
     >
       {filtered.map((ref) => (
         <button
@@ -127,25 +126,30 @@ function PowerPicker({
               {ref.name}
             </span>
             {ref.description && (
-              <span className="inline-flex items-center leading-[0] shrink-0" onClick={(e) => e.stopPropagation()}>
+              <span
+                className="inline-flex items-center leading-[0] shrink-0"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <InfoModal
                   title={ref.name}
-                  content={<p className="text-sm text-slate-300 leading-relaxed">{ref.description}</p>}
+                  content={
+                    <p className="text-sm text-slate-300 leading-relaxed">{ref.description}</p>
+                  }
                 />
               </span>
             )}
           </div>
           <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5 flex-wrap">
-            <span className={`rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(ref.source)}`}>
+            <span
+              className={`rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(ref.source)}`}
+            >
               {ref.source}
             </span>
             <span className="text-indigo-400/80">{ref.discipline}</span>
             <span className="font-mono">PT {ref.threshold}</span>
             <span>{ref.focusTime}</span>
             <span>{ref.range}</span>
-            {ref.sustained && (
-              <span className="text-amber-500/80">Sustained</span>
-            )}
+            {ref.sustained && <span className="text-amber-500/80">Sustained</span>}
           </div>
         </button>
       ))}
@@ -174,24 +178,14 @@ function PowerGrid({
     <>
       <div className="space-y-3 sm:hidden">
         {sortedPowers.map((power) => (
-          <PowerCard
-            key={power.id}
-            power={power}
-            editable={editable}
-            onRemove={onRemove}
-          />
+          <PowerCard key={power.id} power={power} editable={editable} onRemove={onRemove} />
         ))}
       </div>
       <div className="hidden sm:grid sm:grid-cols-2 sm:gap-3 sm:items-start">
         {columns.map((column, index) => (
           <div key={index} className="space-y-3">
             {column.map((power) => (
-              <PowerCard
-                key={power.id}
-                power={power}
-                editable={editable}
-                onRemove={onRemove}
-              />
+              <PowerCard key={power.id} power={power} editable={editable} onRemove={onRemove} />
             ))}
           </div>
         ))}
@@ -209,9 +203,7 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
     (d: string) => {
       if (!editable) return;
       const current = psychic.disciplines ?? [];
-      const next = current.includes(d)
-        ? current.filter((x) => x !== d)
-        : [...current, d];
+      const next = current.includes(d) ? current.filter((x) => x !== d) : [...current, d];
       onUpdate({ ...psychic, disciplines: next });
     },
     [editable, psychic, onUpdate]
@@ -219,12 +211,11 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
 
   // ── Power array operations ────────────────────────────────────────────────
 
-  const {
-    addMinorPower,
-    addMajorPower,
-    removeMinorPower,
-    removeMajorPower,
-  } = usePsychicPowers({ psychic, editable, onUpdate });
+  const { addMinorPower, addMajorPower, removeMinorPower, removeMajorPower } = usePsychicPowers({
+    psychic,
+    editable,
+    onUpdate,
+  });
 
   /** Add a power from the reference picker */
   const fromReference = useCallback(
@@ -258,17 +249,17 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
 
   // ── Render ────────────────────────────────────────────────────────────────
 
-  const pickerInitialDiscipline: DisciplineFilter =
-    pickerTarget === "minor" ? "Minor" : "All";
+  const pickerInitialDiscipline: DisciplineFilter = pickerTarget === "minor" ? "Minor" : "All";
 
   return (
     <div className="space-y-6">
       {/* PSY RATING & DISCIPLINES ────────────────────────────────────────── */}
       <div className={uiSection + " flex flex-col items-center space-y-3"}>
-
         {/* Psy Rating — derived from highest Psy Rating talent */}
         <div className="inline-flex flex-col items-center gap-1">
-          <span className="text-xs font-medium uppercase tracking-wide text-slate-100">Psy Rating</span>
+          <span className="text-xs font-medium uppercase tracking-wide text-slate-100">
+            Psy Rating
+          </span>
           <div className="relative inline-flex">
             <div className="w-[26px] h-[26px] flex items-center justify-center rounded border border-indigo-500/50 bg-indigo-950/40">
               <span className="text-sm font-bold font-mono text-indigo-300">{psyRating}</span>
@@ -277,7 +268,11 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
               <div className="absolute left-full ml-1 top-1/2 -translate-y-1/2">
                 <InfoModal
                   title={`Psy Rating ${psyRating}`}
-                  content={<p className="text-sm text-slate-300 leading-relaxed">{TALENT_DESCRIPTIONS[`psy-rating-${psyRating}`]}</p>}
+                  content={
+                    <p className="text-sm text-slate-300 leading-relaxed">
+                      {TALENT_DESCRIPTIONS[`psy-rating-${psyRating}`]}
+                    </p>
+                  }
                 />
               </div>
             )}
@@ -286,7 +281,9 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
 
         {/* Disciplines — toggle chips, one per major discipline */}
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-100 mb-1.5 text-center">Disciplines</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-100 mb-1.5 text-center">
+            Disciplines
+          </p>
           <div className="flex flex-wrap gap-1.5 justify-center">
             {PSYCHIC_DISCIPLINES.filter((d) => d !== "Minor").map((d) => {
               const active = (psychic.disciplines ?? []).includes(d);
@@ -301,8 +298,8 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
                     active
                       ? "bg-indigo-600 border-indigo-500 text-white font-semibold"
                       : editable
-                      ? "border-slate-500 text-slate-100 hover:bg-slate-800"
-                      : "border-slate-700 text-slate-500 opacity-60 cursor-not-allowed",
+                        ? "border-slate-500 text-slate-100 hover:bg-slate-800"
+                        : "border-slate-700 text-slate-500 opacity-60 cursor-not-allowed",
                   ].join(" ")}
                 >
                   {d}
@@ -311,7 +308,6 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
             })}
           </div>
         </div>
-
       </div>
 
       {/* MINOR POWERS ────────────────────────────────────────────────────── */}
@@ -330,11 +326,7 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
         {psychic.minorPowers.length === 0 ? (
           <p className="text-sm text-slate-400">No minor powers recorded.</p>
         ) : (
-          <PowerGrid
-            powers={psychic.minorPowers}
-            editable={editable}
-            onRemove={removeMinorPower}
-          />
+          <PowerGrid powers={psychic.minorPowers} editable={editable} onRemove={removeMinorPower} />
         )}
       </section>
 
@@ -354,11 +346,7 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
         {psychic.majorPowers.length === 0 ? (
           <p className="text-sm text-slate-400">No major powers recorded.</p>
         ) : (
-          <PowerGrid
-            powers={psychic.majorPowers}
-            editable={editable}
-            onRemove={removeMajorPower}
-          />
+          <PowerGrid powers={psychic.majorPowers} editable={editable} onRemove={removeMajorPower} />
         )}
       </section>
 
@@ -369,10 +357,12 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
           excludeMinor={pickerTarget === "major"}
           minorOnly={pickerTarget === "minor"}
           editable={editable}
-          existingNames={new Set([
-            ...psychic.minorPowers.map((p) => p.name),
-            ...psychic.majorPowers.map((p) => p.name),
-          ])}
+          existingNames={
+            new Set([
+              ...psychic.minorPowers.map((p) => p.name),
+              ...psychic.majorPowers.map((p) => p.name),
+            ])
+          }
           onSelect={fromReference}
           onCustomMinor={() => {
             setPickerTarget(null);

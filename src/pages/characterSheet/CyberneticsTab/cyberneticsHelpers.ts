@@ -39,7 +39,10 @@ export function nextAvailableCraftsmanship(
   return qualities[(idx + 1) % qualities.length];
 }
 
-export function craftsmanshipDescription(ref: CyberneticRef, quality: CyberneticCraftsmanship): string {
+export function craftsmanshipDescription(
+  ref: CyberneticRef,
+  quality: CyberneticCraftsmanship
+): string {
   const desc = quality === "Poor" ? ref.poor : quality === "Good" ? ref.good : ref.common;
   return desc ?? "No specific rules for this craftsmanship level.";
 }

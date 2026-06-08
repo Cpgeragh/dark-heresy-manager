@@ -29,15 +29,18 @@ export default function ClaimCharacterPage() {
     lookup(code);
   }, [lookup, code]);
 
-  const handleForceAssign = useCallback(async (uid: string) => {
-    if (!data) return;
-    try {
-      await forceAssign(data.campaignId, data.character, uid);
-    } catch (err) {
-      console.error("Force assign failed:", err);
-      toast.error("Failed to assign character. Please try again.");
-    }
-  }, [data, forceAssign, toast]);
+  const handleForceAssign = useCallback(
+    async (uid: string) => {
+      if (!data) return;
+      try {
+        await forceAssign(data.campaignId, data.character, uid);
+      } catch (err) {
+        console.error("Force assign failed:", err);
+        toast.error("Failed to assign character. Please try again.");
+      }
+    },
+    [data, forceAssign, toast]
+  );
 
   const handleForceRelease = useCallback(async () => {
     if (!data) return;
@@ -65,7 +68,10 @@ export default function ClaimCharacterPage() {
 
       navigate(buildRoute.characterSheet(data.campaignId, data.characterId));
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Failed to claim character. It may have been claimed already.";
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Failed to claim character. It may have been claimed already.";
       toast.error(message);
       setClaimError(message);
     } finally {
@@ -75,17 +81,10 @@ export default function ClaimCharacterPage() {
 
   return (
     <div className="max-w-lg mx-auto space-y-6 text-slate-200">
-      <h1 className="text-3xl font-bold text-center mb-4">
-        Claim Character
-      </h1>
+      <h1 className="text-3xl font-bold text-center mb-4">Claim Character</h1>
 
       {/* CLAIM FORM */}
-      <ClaimForm
-        code={code}
-        onCodeChange={setCode}
-        onSubmit={handleLookup}
-        loading={loading}
-      />
+      <ClaimForm code={code} onCodeChange={setCode} onSubmit={handleLookup} loading={loading} />
 
       {/* LOOKUP ERROR */}
       {error && (
@@ -122,11 +121,7 @@ export default function ClaimCharacterPage() {
         />
       )}
 
-      {claiming && (
-        <p className="text-xs text-slate-400 text-center">
-          Claiming character…
-        </p>
-      )}
+      {claiming && <p className="text-xs text-slate-400 text-center">Claiming character…</p>}
     </div>
   );
 }

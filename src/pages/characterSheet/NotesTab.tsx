@@ -1,11 +1,7 @@
 // src/pages/characterSheet/NotesTab.tsx
 
 import { useCallback } from "react";
-import {
-  editableTextareaClass,
-  uiSection,
-  readOnlyBadgeClass,
-} from "../../ui/editableStyles";
+import { editableTextareaClass, uiSection, readOnlyBadgeClass } from "../../ui/editableStyles";
 
 interface NotesTabProps {
   notes: string;
@@ -14,9 +10,12 @@ interface NotesTabProps {
 }
 
 export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    onSave(e.target.value);
-  }, [onSave]);
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      onSave(e.target.value);
+    },
+    [onSave]
+  );
 
   return (
     <div className="space-y-3">
@@ -25,13 +24,9 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
       {!editable ? (
         <div className={uiSection}>
           {notes ? (
-            <p className="whitespace-pre-wrap text-sm leading-relaxed">
-              {notes}
-            </p>
+            <p className="whitespace-pre-wrap text-sm leading-relaxed">{notes}</p>
           ) : (
-            <p className="text-sm text-slate-400">
-              No notes recorded.
-            </p>
+            <p className="text-sm text-slate-400">No notes recorded.</p>
           )}
         </div>
       ) : (

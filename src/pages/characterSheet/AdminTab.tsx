@@ -3,11 +3,7 @@
 import { useState, useCallback } from "react";
 import type { Character } from "../../types/Character";
 import type { ClaimLog } from "../../types/ClaimLog";
-import {
-  editableInputClass,
-  uiSection,
-  readOnlyBadgeClass,
-} from "../../ui/editableStyles";
+import { editableInputClass, uiSection, readOnlyBadgeClass } from "../../ui/editableStyles";
 import { useXpProposals } from "../../hooks/useXpProposals";
 import { approveXpProposal, rejectXpProposal } from "../../services/xpService";
 import { useToast } from "../../components/Toast";
@@ -42,25 +38,31 @@ export function AdminTab({
   const { proposals } = useXpProposals(campaignId, characterId);
   const pendingProposals = proposals.filter((p) => p.status === "pending");
 
-  const handleApprove = useCallback(async (proposalId: string, xpCost: number) => {
-    try {
-      await approveXpProposal(campaignId, characterId, proposalId, xpCost);
-      toast.success("Proposal approved.");
-    } catch (err) {
-      console.error("Failed to approve XP proposal:", err);
-      toast.error("Failed to approve proposal. Please try again.");
-    }
-  }, [campaignId, characterId, toast]);
+  const handleApprove = useCallback(
+    async (proposalId: string, xpCost: number) => {
+      try {
+        await approveXpProposal(campaignId, characterId, proposalId, xpCost);
+        toast.success("Proposal approved.");
+      } catch (err) {
+        console.error("Failed to approve XP proposal:", err);
+        toast.error("Failed to approve proposal. Please try again.");
+      }
+    },
+    [campaignId, characterId, toast]
+  );
 
-  const handleReject = useCallback(async (proposalId: string) => {
-    try {
-      await rejectXpProposal(campaignId, characterId, proposalId);
-      toast.success("Proposal rejected.");
-    } catch (err) {
-      console.error("Failed to reject XP proposal:", err);
-      toast.error("Failed to reject proposal. Please try again.");
-    }
-  }, [campaignId, characterId, toast]);
+  const handleReject = useCallback(
+    async (proposalId: string) => {
+      try {
+        await rejectXpProposal(campaignId, characterId, proposalId);
+        toast.success("Proposal rejected.");
+      } catch (err) {
+        console.error("Failed to reject XP proposal:", err);
+        toast.error("Failed to reject proposal. Please try again.");
+      }
+    },
+    [campaignId, characterId, toast]
+  );
 
   const handleAssignUIDChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setAssignUID(e.target.value);
@@ -96,9 +98,7 @@ export function AdminTab({
       <section className={uiSection}>
         <div className="flex items-center justify-between mb-2">
           <h3 className="font-semibold text-red-300">Ownership</h3>
-          <span className={readOnlyBadgeClass()}>
-            DM authority
-          </span>
+          <span className={readOnlyBadgeClass()}>DM authority</span>
         </div>
 
         <div className="space-y-1 text-sm">
@@ -209,15 +209,11 @@ export function AdminTab({
       <section className={uiSection}>
         <div className="flex items-center justify-between mb-2">
           <h3 className="font-semibold">Claim History</h3>
-          <span className={readOnlyBadgeClass()}>
-            Immutable
-          </span>
+          <span className={readOnlyBadgeClass()}>Immutable</span>
         </div>
 
         {claimLog.length === 0 && (
-          <p className="text-sm text-slate-400">
-            No claim events recorded yet.
-          </p>
+          <p className="text-sm text-slate-400">No claim events recorded yet.</p>
         )}
 
         <ul className="space-y-2 max-h-64 overflow-y-auto pr-1">
@@ -237,10 +233,7 @@ export function AdminTab({
                 </div>
 
                 <div className="text-slate-400">
-                  Actor:{" "}
-                  <span className="font-mono break-all">
-                    {entry.actorUid}
-                  </span>
+                  Actor: <span className="font-mono break-all">{entry.actorUid}</span>
                 </div>
               </li>
             );

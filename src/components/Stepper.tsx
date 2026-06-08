@@ -18,22 +18,14 @@ interface StepperProps {
  * - Enter or blur commits; Escape cancels.
  * - Invalid/negative input is clamped to `min`.
  */
-export function Stepper({
-  value,
-  min = 0,
-  editable,
-  onChange,
-  dangerClassName,
-}: StepperProps) {
+export function Stepper({ value, min = 0, editable, onChange, dangerClassName }: StepperProps) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
 
   const commit = useCallback(
     (raw: string) => {
       const parsed = parseInt(raw, 10);
-      const next = isNaN(parsed)
-        ? value
-        : Math.max(min, Math.round(Math.abs(parsed)));
+      const next = isNaN(parsed) ? value : Math.max(min, Math.round(Math.abs(parsed)));
       onChange(next);
       setEditing(false);
     },

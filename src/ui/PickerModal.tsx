@@ -68,7 +68,6 @@ export function PickerModal({
         className={`w-full max-w-lg bg-slate-900 border border-slate-700 rounded-xl shadow-2xl flex flex-col ${maxHeight}`}
         onClick={(e) => e.stopPropagation()}
       >
-
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
           <h3 className="text-sm font-semibold text-slate-200">{title}</h3>
@@ -103,19 +102,12 @@ export function PickerModal({
 
         {/* Scrollable list */}
         <div className="overflow-y-auto flex-1 divide-y divide-slate-800">
-          {isEmpty && (
-            <p className="p-4 text-sm text-slate-500 text-center">{emptyMessage}</p>
-          )}
+          {isEmpty && <p className="p-4 text-sm text-slate-500 text-center">{emptyMessage}</p>}
           {children}
         </div>
 
         {/* Optional footer (e.g. "+ Add custom" button or specialisation form) */}
-        {footer && (
-          <div className="px-4 py-3 border-t border-slate-700">
-            {footer}
-          </div>
-        )}
-
+        {footer && <div className="px-4 py-3 border-t border-slate-700">{footer}</div>}
       </div>
     </div>
   );

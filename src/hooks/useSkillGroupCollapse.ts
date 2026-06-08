@@ -20,15 +20,11 @@ export function useSkillGroupCollapse(initialKeys: string[]) {
   }, []);
 
   const expandAll = useCallback(() => {
-    setCollapsed((prev) =>
-      Object.fromEntries(Object.keys(prev).map((k) => [k, false]))
-    );
+    setCollapsed((prev) => Object.fromEntries(Object.keys(prev).map((k) => [k, false])));
   }, []);
 
   const collapseAll = useCallback(() => {
-    setCollapsed((prev) =>
-      Object.fromEntries(Object.keys(prev).map((k) => [k, true]))
-    );
+    setCollapsed((prev) => Object.fromEntries(Object.keys(prev).map((k) => [k, true])));
   }, []);
 
   return {

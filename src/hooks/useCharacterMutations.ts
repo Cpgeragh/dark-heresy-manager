@@ -42,10 +42,7 @@ export function useCharacterMutations({
   // UPDATE FIELD (GENERIC)
   // ================================================================
   const updateField = useCallback(
-    async <K extends keyof Character>(
-      field: K,
-      value: Character[K]
-    ): Promise<void> => {
+    async <K extends keyof Character>(field: K, value: Character[K]): Promise<void> => {
       if (!allowedToEdit || !character) return;
 
       setIsUpdating(true);
@@ -66,10 +63,7 @@ export function useCharacterMutations({
   // UPDATE CHARACTERISTIC
   // ================================================================
   const updateCharacteristic = useCallback(
-    async (
-      statKey: keyof Characteristics,
-      value: CharField
-    ): Promise<void> => {
+    async (statKey: keyof Characteristics, value: CharField): Promise<void> => {
       if (!allowedToEdit || !character) return;
 
       setIsUpdating(true);
@@ -102,7 +96,14 @@ export function useCharacterMutations({
     try {
       const previousOwner = character.userId;
 
-      const logsRef = collection(db, "campaigns", campaignId, "characters", characterId, "claimLog");
+      const logsRef = collection(
+        db,
+        "campaigns",
+        campaignId,
+        "characters",
+        characterId,
+        "claimLog"
+      );
 
       const batch = writeBatch(db);
       batch.update(charRef, { userId: null, isEditableByPlayer: false });
@@ -169,14 +170,12 @@ export function useCharacterMutations({
     setIsDmTogglingEdit(true);
     try {
       const newValue = !character.isEditableByPlayer;
-      
+
       await updateDoc(charRef, {
         isEditableByPlayer: newValue,
       });
 
-      toast.success(
-        newValue ? "Player editing enabled" : "Player editing disabled"
-      );
+      toast.success(newValue ? "Player editing enabled" : "Player editing disabled");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to toggle edit permission";
       toast.error(`Toggle failed: ${message}`);
@@ -194,7 +193,7 @@ export function useCharacterMutations({
     dmForceRelease,
     dmForceAssign,
     dmToggleEdit,
-    
+
     // Loading states
     isUpdating,
     isReleasing,

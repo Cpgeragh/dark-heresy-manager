@@ -41,8 +41,8 @@ export function ArmourPicker({ editable = true, onSelect, onCustom, onClose }: P
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<ArmourRef | null>(null);
   const [craftsmanship, setCraftsmanship] = useState<ArmourCraftsmanship>("Common");
-  const filtered = ARMOUR_REFERENCE.filter((r) =>
-    !r.isForceField && r.name.toLowerCase().includes(query.toLowerCase())
+  const filtered = ARMOUR_REFERENCE.filter(
+    (r) => !r.isForceField && r.name.toLowerCase().includes(query.toLowerCase())
   ).sort((a, b) => a.name.localeCompare(b.name));
 
   function resetPicker() {
@@ -56,7 +56,10 @@ export function ArmourPicker({ editable = true, onSelect, onCustom, onClose }: P
         <div className="w-full max-w-md bg-slate-900 border border-slate-500 rounded-xl shadow-2xl">
           <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
             <h3 className="text-sm font-semibold text-slate-200">{selected.name}</h3>
-            <button onClick={resetPicker} className="text-slate-400 hover:text-slate-200 text-lg leading-none">
+            <button
+              onClick={resetPicker}
+              className="text-slate-400 hover:text-slate-200 text-lg leading-none"
+            >
               {"\u00D7"}
             </button>
           </div>
@@ -114,14 +117,16 @@ export function ArmourPicker({ editable = true, onSelect, onCustom, onClose }: P
       onQueryChange={setQuery}
       onClose={onClose}
       isEmpty={filtered.length === 0}
-      footer={editable ? (
-        <button
-          onClick={onCustom}
-          className="w-full text-sm text-amber-400 hover:text-amber-300 text-center py-1"
-        >
-          + Add custom piece
-        </button>
-      ) : undefined}
+      footer={
+        editable ? (
+          <button
+            onClick={onCustom}
+            className="w-full text-sm text-amber-400 hover:text-amber-300 text-center py-1"
+          >
+            + Add custom piece
+          </button>
+        ) : undefined
+      }
     >
       {filtered.map((ref) => (
         <button
@@ -129,11 +134,16 @@ export function ArmourPicker({ editable = true, onSelect, onCustom, onClose }: P
           onClick={editable ? () => setSelected(ref) : undefined}
           className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
-          <span className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}>
+          <span
+            className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}
+          >
             {ref.name}
           </span>
           <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5 flex-wrap font-mono">
-            <span>AP {ref.ap}{Object.keys(ref.apOverrides ?? {}).length > 0 ? "*" : ""}</span>
+            <span>
+              AP {ref.ap}
+              {Object.keys(ref.apOverrides ?? {}).length > 0 ? "*" : ""}
+            </span>
             <span>{locationLabel(ref.locations)}</span>
             {ref.notes && <span className="font-sans not-italic">{ref.notes}</span>}
           </div>

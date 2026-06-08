@@ -121,7 +121,9 @@ export function CustomAmmoForm({
           />
         </div>
         <div className="col-span-2">
-          <label className="text-xs font-medium uppercase tracking-wide text-slate-100">Starting Amount</label>
+          <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+            Starting Amount
+          </label>
           <input
             type="number"
             min={0}
@@ -255,25 +257,17 @@ export function AmmoCard({
                     </p>
                   )}
                   {item.description && (
-                    <p className="text-sm text-slate-300 leading-relaxed">
-                      {item.description}
-                    </p>
+                    <p className="text-sm text-slate-300 leading-relaxed">{item.description}</p>
                   )}
                 </div>
               }
             />
           )}
           {isChargePack && (
-            <InfoModal
-              title="Recharging Power Packs"
-              content={RECHARGING_POWER_PACKS_TEXT}
-            />
+            <InfoModal title="Recharging Power Packs" content={RECHARGING_POWER_PACKS_TEXT} />
           )}
           {editable && (
-            <button
-              onClick={onRemove}
-              className="text-xs text-red-400 hover:text-red-300"
-            >
+            <button onClick={onRemove} className="text-xs text-red-400 hover:text-red-300">
               Remove
             </button>
           )}

@@ -46,14 +46,12 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField }: SkillsTa
   );
 
   const handleAdd = useCallback(
-    (id: string) =>
-      onUpdate(skills.map((s) => (s.id === id ? { ...s, level: "trained" } : s))),
+    (id: string) => onUpdate(skills.map((s) => (s.id === id ? { ...s, level: "trained" } : s))),
     [skills, onUpdate]
   );
 
   return (
     <div className="space-y-4 text-slate-100">
-
       {/* Header */}
       <div className="flex items-center justify-between">
         <p className={uiSectionHeader}>Trained Skills</p>
@@ -89,13 +87,13 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField }: SkillsTa
             {trainedSkillColumns.map((column, index) => (
               <div key={index} className="space-y-2">
                 {column.map((skill) => (
-            <SkillRow
-              key={skill.id}
-              skill={skill}
-              editable={editable}
-              updateLevel={updateLevel}
-              updateMisc={updateMisc}
-            />
+                  <SkillRow
+                    key={skill.id}
+                    skill={skill}
+                    editable={editable}
+                    updateLevel={updateLevel}
+                    updateMisc={updateMisc}
+                  />
                 ))}
               </div>
             ))}
@@ -111,7 +109,6 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField }: SkillsTa
         untrainedSkills={untrainedSkills}
         onAdd={handleAdd}
       />
-
     </div>
   );
 }

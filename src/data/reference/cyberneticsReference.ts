@@ -44,7 +44,6 @@ export interface CyberneticRef {
 // ─── Reference Data ───────────────────────────────────────────────────────────
 
 export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
-
   // ── Core Rulebook ─────────────────────────────────────────────────────────
 
   {
@@ -81,10 +80,8 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
     poor:
       "Halves the character's Movement Rates (round up). Characters that attempt to run must succeed " +
       "on an Agility Test or fall at the end of their movement.",
-    common:
-      "Accomplishes full integration without any loss of function over the human norm.",
-    good:
-      "Grants the Sprint talent. Adds a +20 bonus to Athletics Tests made to jump or leap.",
+    common: "Accomplishes full integration without any loss of function over the human norm.",
+    good: "Grants the Sprint talent. Adds a +20 bonus to Athletics Tests made to jump or leap.",
   },
 
   {
@@ -100,8 +97,7 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
       "Same +20 bonus to resist airborne toxins as Common. However, the system is raucously loud " +
       "and the character takes a –20 penalty to all Silent Move checks. All tests involving strenuous " +
       "physical activity are increased by one level of Difficulty.",
-    common:
-      "Grants a +20 bonus to Toughness Tests made to resist airborne toxins and gas weapons.",
+    common: "Grants a +20 bonus to Toughness Tests made to resist airborne toxins and gas weapons.",
     good:
       "Counts as a full life support system — if the user's own respiratory system fails, the bionic " +
       "lungs will keep their blood oxygenated. Their presence may be unnoticeable if designed to be so.",
@@ -118,10 +114,8 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
     poor:
       "Possesses only a single detection ability (either heat, radiation or electromagnetics) " +
       "and only functions within 20 metres.",
-    common:
-      "Functions identically to a standard auspex.",
-    good:
-      "Functions as a full auspex and allows re-rolls on all Perception-based Tests when using its functions.",
+    common: "Functions identically to a standard auspex.",
+    good: "Functions as a full auspex and allows re-rolls on all Perception-based Tests when using its functions.",
   },
 
   {
@@ -135,8 +129,7 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
       "Counts as a laspistol with the Compact upgrade. As a Reaction, the Tech-Priest may fire it as an off-hand " +
       "weapon with no penalties to hit. Has no optical targeting facilities. " +
       "Requires the Mechadendrite Use talent to operate. All mechadendrites are Good craftsmanship unless noted.",
-    common:
-      "All mechadendrites are considered Good craftsmanship by default.",
+    common: "All mechadendrites are considered Good craftsmanship by default.",
     good:
       "Standard quality for mechadendrites. Fires as a Compact laspistol and may be used as a Reaction " +
       "with no off-hand penalty.",
@@ -160,8 +153,7 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
     source: SkillSource.CR,
     value: "5,000 Thrones",
     rarity: "Very Rare",
-    notes:
-      "Used to repair a severely damaged brain or augment its abilities.",
+    notes: "Used to repair a severely damaged brain or augment its abilities.",
     poor:
       "Restores brain function but destroys the personality and memories of the subject, " +
       "effectively making them a servitor. Unsuitable for player characters.",
@@ -205,10 +197,8 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
       "Grants +20 to Strength Tests. Tipped with crushing pincers that can tether the user as a Free Action. " +
       "May be used as a Primitive weapon dealing 1d5+2 Impact damage. " +
       "Cannot perform fine manipulation. Requires Mechadendrite Use talent. All mechadendrites are Good craftsmanship unless noted.",
-    common:
-      "All mechadendrites are considered Good craftsmanship by default.",
-    good:
-      "Standard quality for mechadendrites. Grants +20 to Strength Tests; pincers deal 1d5+2 I.",
+    common: "All mechadendrites are considered Good craftsmanship by default.",
+    good: "Standard quality for mechadendrites. Grants +20 to Strength Tests; pincers deal 1d5+2 I.",
     weapon: {
       type: "melee",
       name: "Crushing Pincers",
@@ -230,10 +220,8 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
       "Flesh staplers can staunch Blood Loss as a Half Action. Small chainscalpel reduces limb amputation to Challenging (+0) " +
       "and deals 1d5 Rending damage as an improvised weapon. Grants +10 to Interrogation Tests. " +
       "May be shoulder or sternum-mounted. Requires Mechadendrite Use talent. All mechadendrites are Good craftsmanship unless noted.",
-    common:
-      "All mechadendrites are considered Good craftsmanship by default.",
-    good:
-      "Standard quality for mechadendrites. Grants +10 Medicae, +10 Interrogation, 6 injector pistons, and chainscalpel.",
+    common: "All mechadendrites are considered Good craftsmanship by default.",
+    good: "Standard quality for mechadendrites. Grants +10 Medicae, +10 Interrogation, 6 injector pistons, and chainscalpel.",
     weapon: {
       type: "melee",
       name: "Chainscalpel",
@@ -252,8 +240,7 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
     notes:
       "Also known as a sense-link. Allows direct interface with machines and technological devices. " +
       "Basic or crude MIU involves a single spinal or cortex connector; advanced variants add wrist connectors and mechadendrite probes.",
-    poor:
-      "Requires a successful Willpower Test to use and imposes a –10 penalty to interact with machine spirits.",
+    poor: "Requires a successful Willpower Test to use and imposes a –10 penalty to interact with machine spirits.",
     common:
       "Imposes no modifiers to machine spirit communication. Adds +10 to Tech-Use, Pilot or Drive Tests " +
       "used in conjunction with MIU-capable devices.",
@@ -274,10 +261,8 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
       "May be used as a telescopic sight. Fitted with infra-red torch and sensors — no penalties in darkness " +
       "and +20 to vision-based Perception Tests at night. Fitted with a tinted light. " +
       "May be shoulder or sternum-mounted. Requires Mechadendrite Use talent. All mechadendrites are Good craftsmanship unless noted.",
-    common:
-      "All mechadendrites are considered Good craftsmanship by default.",
-    good:
-      "Standard quality for mechadendrites. Grants +10 Perception, no darkness penalties, +20 to night vision Tests.",
+    common: "All mechadendrites are considered Good craftsmanship by default.",
+    good: "Standard quality for mechadendrites. Grants +10 Perception, no darkness penalties, +20 to night vision Tests.",
   },
 
   {
@@ -293,10 +278,8 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
       "living creatures within 2m for one Round (Half Action). Censer active: +10 to Perception Tests relying on smell to detect the Tech-Priest. " +
       "Contains a cutting blade counting as a knife with Defensive quality and mono upgrade. " +
       "Requires Mechadendrite Use talent. All mechadendrites are Good craftsmanship unless noted.",
-    common:
-      "All mechadendrites are considered Good craftsmanship by default.",
-    good:
-      "Standard quality for mechadendrites. Grants +10 Tech-Use, combi-tool, censer, and mono knife.",
+    common: "All mechadendrites are considered Good craftsmanship by default.",
+    good: "Standard quality for mechadendrites. Grants +10 Tech-Use, combi-tool, censer, and mono knife.",
     weapon: {
       type: "melee",
       name: "Knife",
@@ -386,10 +369,8 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
       "Electrical Succour takes half a minute and becomes Easy (+30); " +
       "Ferric Lure/Summons become Free Actions; " +
       "Integrated Weapon gains the Reliable quality.",
-    poor:
-      "Noticeably hunched form — permanently reduces the user's Agility by 1d10.",
-    common:
-      "Provides all Enhanced Potentia Coil benefits at standard efficiency.",
+    poor: "Noticeably hunched form — permanently reduces the user's Agility by 1d10.",
+    common: "Provides all Enhanced Potentia Coil benefits at standard efficiency.",
   },
 
   {
@@ -405,8 +386,7 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
       "Also grants a bonus to Climb Tests. " +
       "Requires the Mechadendrite Use (Utility) Talent. All mechadendrites are Good craftsmanship unless noted.",
     common: "All mechadendrites are considered Good craftsmanship by default.",
-    good:
-      "Standard quality for mechadendrites. Grants Braced, Sturdy, and gravity/terrain immunity while active.",
+    good: "Standard quality for mechadendrites. Grants Braced, Sturdy, and gravity/terrain immunity while active.",
   },
 
   {
@@ -426,8 +406,7 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
       "Requires Mechadendrite Use (Manipulator) and (Utility) Talents, and the Mechanicus Implants Trait. " +
       "All mechadendrites are Good craftsmanship unless noted.",
     common: "All mechadendrites are considered Good craftsmanship by default.",
-    good:
-      "Standard quality for mechadendrites. Full harness with torch, plasma cutter, and manoeuvring thrusters.",
+    good: "Standard quality for mechadendrites. Full harness with torch, plasma cutter, and manoeuvring thrusters.",
   },
 
   {
@@ -444,8 +423,7 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
       "Can substitute as a Manipulator Mechadendrite at –10 to all associated Tests. " +
       "Requires the Mechadendrite Use (Manipulator) Talent. All mechadendrites are Good craftsmanship unless noted.",
     common: "All mechadendrites are considered Good craftsmanship by default.",
-    good:
-      "Standard quality for mechadendrites. Deals 1d10+10 R, Pen 4, Tearing; can attack as a Reaction.",
+    good: "Standard quality for mechadendrites. Deals 1d10+10 R, Pen 4, Tearing; can attack as a Reaction.",
     weapon: {
       type: "melee",
       name: "Servo-Claw",
@@ -467,12 +445,9 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
     notes:
       "Inserted just beneath the skin. Adds +1 AP to the head location, stacking with other armour " +
       "and Talents that provide Armour Points (such as The Flesh is Weak).",
-    poor:
-      "Crude and obvious. Permanently reduces the user's Fellowship by 1d10.",
-    common:
-      "Adds +1 AP to the head, stacking with all other sources of head protection.",
-    good:
-      "Adds an additional +1 AP to the head (total of +2).",
+    poor: "Crude and obvious. Permanently reduces the user's Fellowship by 1d10.",
+    common: "Adds +1 AP to the head, stacking with all other sources of head protection.",
+    good: "Adds an additional +1 AP to the head (total of +2).",
   },
 
   {
@@ -483,8 +458,7 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
     rarity: "Very Rare",
     notes:
       "Dense vat-grown muscle tissue augmented with flakweave, implanted into existing muscle tissue.",
-    common:
-      "Grants +1 to the user's Strength Bonus.",
+    common: "Grants +1 to the user's Strength Bonus.",
     good:
       "Grants the Unnatural Strength (×2) Trait, but imposes a –10 penalty to all Agility Tests " +
       "due to the misshapen nature of the body.",

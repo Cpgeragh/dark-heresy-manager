@@ -22,7 +22,7 @@ interface CharacterSectionProps {
 function CharacterSection({ campaignId, characters }: CharacterSectionProps) {
   const navigate = useNavigate();
   const toast = useToast();
-  
+
   const [characterName, setCharacterName] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
@@ -37,44 +37,53 @@ function CharacterSection({ campaignId, characters }: CharacterSectionProps) {
     [navigate, campaignId]
   );
 
-  const handleDelete = useCallback(async (character: CharacterListItem) => {
-    try {
-      await deleteCharacter(campaignId, character.id, character.recoveryCode);
-      setConfirmDeleteId(null);
-    } catch (err) {
-      console.error("Character deletion error:", err);
-      toast.error("Failed to delete character. Please try again.");
-    }
-  }, [campaignId, toast]);
-
-  const handleClone = useCallback(async (character: CharacterListItem) => {
-    try {
-      const cloneName = await cloneCharacter(campaignId, character.id);
-      toast.success(`Character cloned as "${cloneName}"`);
-    } catch (err) {
-      console.error("Character clone error:", err);
-      toast.error("Failed to clone character. Please try again.");
-    }
-  }, [campaignId, toast]);
-
-  const handleImport = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    try {
-      const text = await file.text();
-      const data = JSON.parse(text);
-      if (typeof data.recoveryCode !== "string" || typeof data.isEditableByPlayer !== "boolean") {
-        toast.error("Invalid character file.");
-        return;
+  const handleDelete = useCallback(
+    async (character: CharacterListItem) => {
+      try {
+        await deleteCharacter(campaignId, character.id, character.recoveryCode);
+        setConfirmDeleteId(null);
+      } catch (err) {
+        console.error("Character deletion error:", err);
+        toast.error("Failed to delete character. Please try again.");
       }
-      const characterName = await importCharacter(campaignId, data);
-      toast.success(`Imported "${characterName}" successfully`, IMPORTANT_TOAST_DURATION);
-    } catch (err) {
-      console.error("Failed to import character:", err);
-      toast.error("Failed to import character. Check the file and try again.");
-    }
-    e.target.value = "";
-  }, [campaignId, toast]);
+    },
+    [campaignId, toast]
+  );
+
+  const handleClone = useCallback(
+    async (character: CharacterListItem) => {
+      try {
+        const cloneName = await cloneCharacter(campaignId, character.id);
+        toast.success(`Character cloned as "${cloneName}"`);
+      } catch (err) {
+        console.error("Character clone error:", err);
+        toast.error("Failed to clone character. Please try again.");
+      }
+    },
+    [campaignId, toast]
+  );
+
+  const handleImport = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        if (typeof data.recoveryCode !== "string" || typeof data.isEditableByPlayer !== "boolean") {
+          toast.error("Invalid character file.");
+          return;
+        }
+        const characterName = await importCharacter(campaignId, data);
+        toast.success(`Imported "${characterName}" successfully`, IMPORTANT_TOAST_DURATION);
+      } catch (err) {
+        console.error("Failed to import character:", err);
+        toast.error("Failed to import character. Check the file and try again.");
+      }
+      e.target.value = "";
+    },
+    [campaignId, toast]
+  );
 
   const handleCreate = useCallback(async () => {
     const trimmedName = characterName.trim();
@@ -90,7 +99,7 @@ function CharacterSection({ campaignId, characters }: CharacterSectionProps) {
       toast.success(
         `Character created successfully!\n\nRecovery Code: ${recoveryCode}\n\n(Click the copy button to save this code)`,
         IMPORTANT_TOAST_DURATION,
-        recoveryCode,
+        recoveryCode
       );
       setCharacterName("");
     } catch (err) {
@@ -124,12 +133,7 @@ function CharacterSection({ campaignId, characters }: CharacterSectionProps) {
 
         <label className="px-4 py-2 bg-slate-700 text-slate-200 font-semibold rounded cursor-pointer hover:bg-slate-600">
           Import JSON
-          <input
-            type="file"
-            accept=".json"
-            className="hidden"
-            onChange={handleImport}
-          />
+          <input type="file" accept=".json" className="hidden" onChange={handleImport} />
         </label>
       </div>
 
@@ -142,11 +146,7 @@ function CharacterSection({ campaignId, characters }: CharacterSectionProps) {
             No characters yet.
           </p>
         ) : (
-          <ul
-            className="flex flex-col gap-2"
-            role="list"
-            aria-label="Characters in this campaign"
-          >
+          <ul className="flex flex-col gap-2" role="list" aria-label="Characters in this campaign">
             {characters.map((character) => (
               <li
                 key={character.id}

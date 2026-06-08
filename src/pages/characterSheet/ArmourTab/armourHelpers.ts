@@ -13,7 +13,12 @@ export const LOCATION_LABELS: Record<ArmourLocationKey, string> = {
 };
 
 export const LOCATION_ORDER: ArmourLocationKey[] = [
-  "head", "body", "rightArm", "leftArm", "rightLeg", "leftLeg",
+  "head",
+  "body",
+  "rightArm",
+  "leftArm",
+  "rightLeg",
+  "leftLeg",
 ];
 
 /** AP contributed by one piece to one location */

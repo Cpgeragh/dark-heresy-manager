@@ -16,11 +16,7 @@ interface Props {
   onActiveCampaignChange: (id: string | null) => void;
 }
 
-export default function DMDashboard({
-  user,
-  activeCampaignId,
-  onActiveCampaignChange,
-}: Props) {
+export default function DMDashboard({ user, activeCampaignId, onActiveCampaignChange }: Props) {
   const { campaigns, loading } = useCampaigns(user.uid);
   const { characters } = useCampaignCharacters(activeCampaignId);
   const [showQR, setShowQR] = useState(false);
@@ -59,10 +55,7 @@ export default function DMDashboard({
 
       {activeCampaignId && (
         <div className="mt-10">
-          <CharacterSection
-            campaignId={activeCampaignId}
-            characters={characters}
-          />
+          <CharacterSection campaignId={activeCampaignId} characters={characters} />
         </div>
       )}
     </div>

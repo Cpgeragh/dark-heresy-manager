@@ -13,8 +13,14 @@ interface Props {
   onRemove: (id: string) => void;
 }
 
+function displayWeight(weight?: string | null) {
+  const value = weight?.trim();
+  if (!value || value === "\u2014" || value.includes("\u20ac")) return "0 kg";
+  return value;
+}
+
 export function ConsumableRow({ item, editable, onUpdateQty, onRemove }: Props) {
-  const hasDesc = !!(item.description?.trim());
+  const hasDesc = !!item.description?.trim();
 
   return (
     <div className={uiSection}>
@@ -35,12 +41,14 @@ export function ConsumableRow({ item, editable, onUpdateQty, onRemove }: Props) 
             {hasDesc && (
               <InfoModal
                 title={item.name}
-                content={<p className="text-sm text-slate-300 leading-relaxed">{item.description}</p>}
+                content={
+                  <p className="text-sm text-slate-300 leading-relaxed">{item.description}</p>
+                }
               />
             )}
           </div>
           <ItemMetaChips
-            weight={item.weight ?? "—"}
+            weight={displayWeight(item.weight)}
             value={item.value}
             rarity={item.rarity}
             source={item.source}

@@ -21,9 +21,9 @@ function CharacterCard({
   campaignId: string;
 }) {
   const navigate = useNavigate();
-  const name   = character.header?.characterName ?? "Unnamed Character";
+  const name = character.header?.characterName ?? "Unnamed Character";
   const career = character.header?.career;
-  const rank   = character.header?.rank;
+  const rank = character.header?.rank;
   const xpLeft = character.experience
     ? character.experience.total - character.experience.spent
     : null;
@@ -52,12 +52,15 @@ function CharacterCard({
           {character.wounds && (
             <span>
               ❤{" "}
-              <span className={character.wounds.current <= 2 ? "text-red-400 font-semibold" : "text-slate-200"}>
+              <span
+                className={
+                  character.wounds.current <= 2 ? "text-red-400 font-semibold" : "text-slate-200"
+                }
+              >
                 {character.wounds.current}
               </span>
               <span className="text-slate-600"> / </span>
-              <span className="text-slate-200">{character.wounds.total}</span>
-              {" "}Wounds
+              <span className="text-slate-200">{character.wounds.total}</span> Wounds
             </span>
           )}
           {xpLeft !== null && (
@@ -65,16 +68,14 @@ function CharacterCard({
               ✦{" "}
               <span className={xpLeft < 0 ? "text-red-400 font-semibold" : "text-slate-200"}>
                 {xpLeft}
-              </span>
-              {" "}XP remaining
+              </span>{" "}
+              XP remaining
             </span>
           )}
         </div>
       )}
 
-      <div className="text-xs text-slate-600 font-mono">
-        Recovery: {character.recoveryCode}
-      </div>
+      <div className="text-xs text-slate-600 font-mono">Recovery: {character.recoveryCode}</div>
     </div>
   );
 }
@@ -96,9 +97,7 @@ function CampaignSection({
     <div className="border border-slate-700 rounded-lg p-4 space-y-4 bg-slate-900/40">
       <h2 className="font-semibold text-lg text-slate-100">{campaignName}</h2>
 
-      {loading && (
-        <p className="text-sm text-slate-500">Loading characters…</p>
-      )}
+      {loading && <p className="text-sm text-slate-500">Loading characters…</p>}
 
       {!loading && characters.length === 0 && (
         <p className="text-sm text-slate-500">No characters claimed in this campaign.</p>
@@ -143,14 +142,13 @@ export default function PlayerDashboard({ user }: Props) {
         </p>
       )}
 
-      {loading && (
-        <p className="text-slate-400 text-sm">Loading campaigns…</p>
-      )}
+      {loading && <p className="text-slate-400 text-sm">Loading campaigns…</p>}
 
       {isEmpty && (
         <div className="space-y-4 text-center py-8">
           <p className="text-slate-400">
-            You are not part of any campaigns yet. Ask your DM for a recovery code to claim your character.
+            You are not part of any campaigns yet. Ask your DM for a recovery code to claim your
+            character.
           </p>
           <button
             onClick={() => navigate(ROUTES.CLAIM_CHARACTER)}

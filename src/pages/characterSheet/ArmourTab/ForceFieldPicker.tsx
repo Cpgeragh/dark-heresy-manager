@@ -12,8 +12,8 @@ interface Props {
 
 export function ForceFieldPicker({ editable = true, onSelect, onClose }: Props) {
   const [query, setQuery] = useState("");
-  const filtered = ARMOUR_REFERENCE.filter((r) =>
-    r.isForceField && r.name.toLowerCase().includes(query.toLowerCase())
+  const filtered = ARMOUR_REFERENCE.filter(
+    (r) => r.isForceField && r.name.toLowerCase().includes(query.toLowerCase())
   ).sort((a, b) => a.name.localeCompare(b.name));
 
   return (
@@ -31,7 +31,9 @@ export function ForceFieldPicker({ editable = true, onSelect, onClose }: Props) 
           onClick={editable ? () => onSelect(ref) : undefined}
           className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
-          <span className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}>
+          <span
+            className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}
+          >
             {ref.name}
           </span>
           <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5 flex-wrap font-mono">

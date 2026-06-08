@@ -28,7 +28,7 @@ const ToastContext = createContext<ToastContextValue | null>(null);
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
-  
+
   // Store timer IDs to enable cleanup
   const timersRef = useRef<Map<string, number>>(new Map());
 
@@ -39,12 +39,17 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       clearTimeout(timer);
       timersRef.current.delete(id);
     }
-    
+
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
   const addToast = useCallback(
-    (message: string, type: ToastType = "info", duration = DEFAULT_TOAST_DURATION, copyText?: string) => {
+    (
+      message: string,
+      type: ToastType = "info",
+      duration = DEFAULT_TOAST_DURATION,
+      copyText?: string
+    ) => {
       const id = crypto.randomUUID();
       const toast: Toast = { id, message, type, duration, ...(copyText ? { copyText } : {}) };
 
@@ -54,7 +59,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         const timer = setTimeout(() => {
           removeToast(id);
         }, duration);
-        
+
         // Store timer ID for cleanup
         timersRef.current.set(id, timer);
       }
@@ -63,7 +68,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   );
 
   const success = useCallback(
-    (message: string, duration?: number, copyText?: string) => addToast(message, "success", duration, copyText),
+    (message: string, duration?: number, copyText?: string) =>
+      addToast(message, "success", duration, copyText),
     [addToast]
   );
 
@@ -83,9 +89,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   );
 
   return (
-    <ToastContext.Provider
-      value={{ toasts, addToast, removeToast, success, error, info, warning }}
-    >
+    <ToastContext.Provider value={{ toasts, addToast, removeToast, success, error, info, warning }}>
       {children}
     </ToastContext.Provider>
   );

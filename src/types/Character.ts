@@ -2,7 +2,7 @@
 
 import type { Timestamp } from "firebase/firestore";
 import type { CharField } from "../utils/characterFactory";
-import { SkillSource } from "./SkillSource";   // ← NEW
+import { SkillSource } from "./SkillSource"; // ← NEW
 
 /**
  * CHARACTERISTICS
@@ -92,17 +92,17 @@ export interface MovementBlock {
  * One entry is marked `loaded` — the currently chambered type.
  */
 export interface WeaponAmmoEntry {
-  id: string;           // unique per entry (crypto.randomUUID())
+  id: string; // unique per entry (crypto.randomUUID())
   referenceId?: string; // AmmoRef.id if created from reference data
-  name: string;         // e.g. "Bolt Shells", "Psybolt Ammunition"
-  clips: number;        // full clips/magazines carried, including the loaded clip
-  rounds: number;       // loose individual rounds carried
-  loaded: boolean;      // true = currently chambered
+  name: string; // e.g. "Bolt Shells", "Psybolt Ammunition"
+  clips: number; // full clips/magazines carried, including the loaded clip
+  rounds: number; // loose individual rounds carried
+  loaded: boolean; // true = currently chambered
 }
 
 export interface RangedWeapon {
   id: string;
-  referenceId?: string;   // set when created from RANGED_WEAPON_REFERENCE
+  referenceId?: string; // set when created from RANGED_WEAPON_REFERENCE
   name: string;
   class?: string;
   damage?: string;
@@ -115,19 +115,19 @@ export interface RangedWeapon {
   weight?: string;
   value?: string;
   rarity?: string;
-  source?: string;        // e.g. "CR", "BoJ" — which book to look this up in
-  custom?: boolean;       // true when created via "Add Custom"
+  source?: string; // e.g. "CR", "BoJ" — which book to look this up in
+  custom?: boolean; // true when created via "Add Custom"
   craftsmanship?: WeaponCraftsmanship;
   attachments?: string[]; // WeaponUpgradeRef.id values for fitted upgrades
   ammoEntries?: WeaponAmmoEntry[]; // ammo types carried; one marked loaded
-  quantity?: number;      // for thrown weapons (bolas, throwing stars) — how many carried
-  description?: string;   // rules text copied from reference data when needed
-  equipped?: boolean;     // true = carried on body, shown expanded and pinned to top
+  quantity?: number; // for thrown weapons (bolas, throwing stars) — how many carried
+  description?: string; // rules text copied from reference data when needed
+  equipped?: boolean; // true = carried on body, shown expanded and pinned to top
 }
 
 export interface MeleeWeapon {
   id: string;
-  referenceId?: string;   // set when created from MELEE_WEAPON_REFERENCE
+  referenceId?: string; // set when created from MELEE_WEAPON_REFERENCE
   name: string;
   class?: string;
   damage?: string;
@@ -140,30 +140,30 @@ export interface MeleeWeapon {
   custom?: boolean;
   craftsmanship?: WeaponCraftsmanship;
   attachments?: string[]; // WeaponUpgradeRef.id values for fitted upgrades
-  quantity?: number;      // for thrown melee weapons (knives, spears) — how many carried
-  equipped?: boolean;     // true = carried on body, shown expanded and pinned to top
+  quantity?: number; // for thrown melee weapons (knives, spears) — how many carried
+  equipped?: boolean; // true = carried on body, shown expanded and pinned to top
 }
 
 export type WeaponCraftsmanship = "Poor" | "Common" | "Good" | "Best";
 
 export interface ShieldItem {
   id: string;
-  referenceId?: string;   // set when created from SHIELD_REFERENCE
+  referenceId?: string; // set when created from SHIELD_REFERENCE
   name: string;
   /** AP provided while actively using the shield */
   ap: number;
   /** Human-readable locations covered, e.g. "Arm & Body" */
   locations?: string;
-  damage?: string;        // melee bash damage
+  damage?: string; // melee bash damage
   pen?: string;
   specialRules?: string;
-  notes?: string;         // full rules text
+  notes?: string; // full rules text
   weight?: string;
   value?: string;
   rarity?: string;
   source?: string;
   custom?: boolean;
-  equipped?: boolean;   // true = currently active shield
+  equipped?: boolean; // true = currently active shield
 }
 
 /**
@@ -173,19 +173,13 @@ export interface ShieldItem {
  * This supports layering (e.g. underarmour beneath carapace) and lets players
  * stow looted pieces without discarding them.
  */
-export type ArmourLocationKey =
-  | "head"
-  | "body"
-  | "rightArm"
-  | "leftArm"
-  | "rightLeg"
-  | "leftLeg";
+export type ArmourLocationKey = "head" | "body" | "rightArm" | "leftArm" | "rightLeg" | "leftLeg";
 
 export type ArmourCraftsmanship = "Poor" | "Common" | "Good" | "Best";
 
 export interface WornArmourPiece {
   id: string;
-  referenceId?: string;   // links back to ArmourRef.id
+  referenceId?: string; // links back to ArmourRef.id
   name: string;
   /** Locations this piece covers */
   locations: ArmourLocationKey[];
@@ -201,7 +195,7 @@ export interface WornArmourPiece {
   rarity?: string;
   source?: string;
   craftsmanship?: ArmourCraftsmanship;
-  custom?: boolean;       // true when created via "Add Custom"
+  custom?: boolean; // true when created via "Add Custom"
   /** true for force fields — no locations or AP, tracked separately in the Armour tab */
   isForceField?: boolean;
   /** Protection Rating for force fields */
@@ -215,10 +209,10 @@ export type CyberneticCraftsmanship = "Poor" | "Common" | "Good";
 
 export interface CyberneticItem {
   id: string;
-  referenceId?: string;  // links back to CyberneticRef.id
+  referenceId?: string; // links back to CyberneticRef.id
   name: string;
   craftsmanship: CyberneticCraftsmanship;
-  notes?: string;        // player-added notes
+  notes?: string; // player-added notes
   value?: string;
   rarity?: string;
   source?: string;
@@ -231,7 +225,7 @@ export interface CyberneticItem {
  */
 export interface GearItem {
   id: string;
-  referenceId?: string;   // links back to GearRef.id
+  referenceId?: string; // links back to GearRef.id
   name: string;
   description?: string;
   weight?: string;
@@ -245,7 +239,7 @@ export interface GearItem {
  */
 export interface ArcheotechItem {
   id: string;
-  referenceId?: string;   // links back to ArcheotechRef.id
+  referenceId?: string; // links back to ArcheotechRef.id
   name: string;
   /** Broad category: "Weapon", "Device", "Tool", "Other" */
   type?: string;
@@ -256,7 +250,7 @@ export interface ArcheotechItem {
   value?: string;
   rarity?: string;
   source?: string;
-  equipped?: boolean;     // true = counts toward slot budget, shown expanded and pinned to top
+  equipped?: boolean; // true = counts toward slot budget, shown expanded and pinned to top
 }
 
 /**
@@ -264,13 +258,14 @@ export interface ArcheotechItem {
  */
 export interface DrugItem {
   id: string;
-  referenceId?: string;  // links back to DrugRef.id
+  referenceId?: string; // links back to DrugRef.id
   name: string;
   quantity: number;
+  weight?: string;
   value?: string;
   rarity?: string;
   source?: string;
-  notes?: string;        // player-added notes
+  notes?: string; // player-added notes
 }
 
 /**
@@ -278,12 +273,12 @@ export interface DrugItem {
  */
 export interface ConsumableItem {
   id: string;
-  referenceId?: string;  // links back to ConsumableRef.id
+  referenceId?: string; // links back to ConsumableRef.id
   name: string;
   quantity: number;
   description?: string;
   weight?: string;
-  value?: string;        // cost per dose/unit
+  value?: string; // cost per dose/unit
   rarity?: string;
   source?: string;
 }
@@ -293,15 +288,15 @@ export interface ConsumableItem {
  */
 export interface AmmoItem {
   id: string;
-  referenceId?: string;     // links back to AmmoRef.id
+  referenceId?: string; // links back to AmmoRef.id
   name: string;
-  compatibleWith?: string;  // e.g. "Bolt", "SP Pistol" — free text
+  compatibleWith?: string; // e.g. "Bolt", "SP Pistol" — free text
   amount: number;
   weight?: string;
   value?: string;
   rarity?: string;
   source?: string;
-  description?: string;     // game-mechanical effects for special ammo
+  description?: string; // game-mechanical effects for special ammo
 }
 
 /**
@@ -309,18 +304,18 @@ export interface AmmoItem {
  */
 export interface GrenadeItem {
   id: string;
-  referenceId?: string;  // links back to GrenadeRef.id
+  referenceId?: string; // links back to GrenadeRef.id
   name: string;
   quantity: number;
   /** "Grenade" or "Mine" — used to exclude mines from launcher panels */
   type?: string;
-  equipped?: boolean;     // true = up to 3 shown in expanded card, remainder in stowed card
+  equipped?: boolean; // true = up to 3 shown in expanded card, remainder in stowed card
   class?: string;
   damage?: string;
   pen?: string;
   specialRules?: string;
   weight?: string;
-  value?: string;        // cost per grenade
+  value?: string; // cost per grenade
   rarity?: string;
   source?: string;
 }
@@ -331,29 +326,53 @@ export interface GrenadeItem {
 
 /** A single talent or trait instance on a character sheet. */
 export interface TalentEntry {
-  uid: string;             // unique per-character instance (crypto.randomUUID())
-  talentId: string;        // references TalentData.id or TraitData.id
-  name: string;            // display name, e.g. "Hatred (Heretics)"
+  uid: string; // unique per-character instance (crypto.randomUUID())
+  talentId: string; // references TalentData.id or TraitData.id
+  name: string; // display name, e.g. "Hatred (Heretics)"
   specialisation?: string; // chosen value when hasSpecialisation is true
-  notes?: string;          // optional player notes
+  notes?: string; // optional player notes
 }
 
 export interface TalentsAndTraitsBlock {
-  homeworld: string;        // HomeworldId (e.g. "hive-world") or "" if unset
-  homeworldNotes?: string;  // optional freeform background notes
+  homeworld: string; // HomeworldId (e.g. "hive-world") or "" if unset
+  homeworldNotes?: string; // optional freeform background notes
   talents: TalentEntry[];
   traits: TalentEntry[];
 }
 
 export type WeaponTrainingTalentId =
-  | "basic-bolt" | "basic-flame" | "basic-las" | "basic-launcher"
-  | "basic-melta" | "basic-plasma" | "basic-primitive" | "basic-sp"
-  | "heavy-bolt" | "heavy-flame" | "heavy-las" | "heavy-launcher"
-  | "heavy-melta" | "heavy-plasma" | "heavy-primitive" | "heavy-sp"
-  | "pistol-bolt" | "pistol-flame" | "pistol-las" | "pistol-launcher"
-  | "pistol-melta" | "pistol-plasma" | "pistol-primitive" | "pistol-sp"
-  | "melee-primitive" | "melee-chain" | "melee-shock" | "melee-power"
-  | "thrown-primitive" | "thrown-chain" | "thrown-shock" | "thrown-power";
+  | "basic-bolt"
+  | "basic-flame"
+  | "basic-las"
+  | "basic-launcher"
+  | "basic-melta"
+  | "basic-plasma"
+  | "basic-primitive"
+  | "basic-sp"
+  | "heavy-bolt"
+  | "heavy-flame"
+  | "heavy-las"
+  | "heavy-launcher"
+  | "heavy-melta"
+  | "heavy-plasma"
+  | "heavy-primitive"
+  | "heavy-sp"
+  | "pistol-bolt"
+  | "pistol-flame"
+  | "pistol-las"
+  | "pistol-launcher"
+  | "pistol-melta"
+  | "pistol-plasma"
+  | "pistol-primitive"
+  | "pistol-sp"
+  | "melee-primitive"
+  | "melee-chain"
+  | "melee-shock"
+  | "melee-power"
+  | "thrown-primitive"
+  | "thrown-chain"
+  | "thrown-shock"
+  | "thrown-power";
 
 export interface WeaponTrainingBlock {
   trained: WeaponTrainingTalentId[];
@@ -423,8 +442,8 @@ export interface CharacterHeader {
  * Firestore stores everything except `id`.
  */
 export interface Character {
-  id: string;           
-  campaignId: string;   
+  id: string;
+  campaignId: string;
 
   userId: string | null;
   recoveryCode: string;

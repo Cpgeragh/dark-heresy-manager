@@ -17,18 +17,19 @@ interface Props {
 }
 
 export function ArcheotechPickerModal({ editable = true, onSelect, onClose }: Props) {
-  const [query,    setQuery]    = useState("");
-  const [pending,  setPending]  = useState<ArcheotechRef | null>(null);
-  const [gmCost,   setGmCost]   = useState("");
+  const [query, setQuery] = useState("");
+  const [pending, setPending] = useState<ArcheotechRef | null>(null);
+  const [gmCost, setGmCost] = useState("");
   const [gmRarity, setGmRarity] = useState("");
 
   const filtered = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
     return [...ARCHEOTECH_REFERENCE]
-      .filter((r) =>
-        !normalizedQuery ||
-        r.name.toLowerCase().includes(normalizedQuery) ||
-        r.type.toLowerCase().includes(normalizedQuery)
+      .filter(
+        (r) =>
+          !normalizedQuery ||
+          r.name.toLowerCase().includes(normalizedQuery) ||
+          r.type.toLowerCase().includes(normalizedQuery)
       )
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [query]);
@@ -46,8 +47,8 @@ export function ArcheotechPickerModal({ editable = true, onSelect, onClose }: Pr
     }
   }
 
-  const costNum    = Number(gmCost);
-  const costValid  = gmCost.trim() !== "" && Number.isInteger(costNum) && costNum >= 1;
+  const costNum = Number(gmCost);
+  const costValid = gmCost.trim() !== "" && Number.isInteger(costNum) && costNum >= 1;
   const canConfirm = costValid && gmRarity !== "";
 
   function handleConfirm() {
@@ -70,8 +71,8 @@ export function ArcheotechPickerModal({ editable = true, onSelect, onClose }: Pr
         // ── Step 2: GM form ──────────────────────────────────────────────────
         <div className="p-4 space-y-4">
           <p className="text-sm text-slate-400">
-            <span className="font-medium text-slate-200">{pending.name}</span> has no
-            standard cost or availability. Enter the values the GM has assigned.
+            <span className="font-medium text-slate-200">{pending.name}</span> has no standard cost
+            or availability. Enter the values the GM has assigned.
           </p>
 
           <div className="space-y-1">
@@ -103,7 +104,9 @@ export function ArcheotechPickerModal({ editable = true, onSelect, onClose }: Pr
             >
               <option value="">— Select rarity —</option>
               {RARITY_OPTIONS.map((r) => (
-                <option key={r} value={r}>{r}</option>
+                <option key={r} value={r}>
+                  {r}
+                </option>
               ))}
             </select>
           </div>
@@ -132,12 +135,16 @@ export function ArcheotechPickerModal({ editable = true, onSelect, onClose }: Pr
             onClick={editable ? () => handleRowClick(ref) : undefined}
             className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
           >
-            <span className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}>
+            <span
+              className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}
+            >
               {ref.name}
             </span>
             <div className="flex items-center gap-2 text-xs mt-0.5 flex-wrap">
               <span className="text-slate-500">{ref.type}</span>
-              <span className={`rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(ref.source)}`}>
+              <span
+                className={`rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(ref.source)}`}
+              >
                 {ref.source}
               </span>
               {ref.rarity && ref.rarity !== "—" && (
@@ -146,9 +153,7 @@ export function ArcheotechPickerModal({ editable = true, onSelect, onClose }: Pr
               {ref.rarity === "—" && (
                 <span className="text-amber-400/70 italic">GM determines cost &amp; rarity</span>
               )}
-              {ref.description && (
-                <span className="text-slate-500">{ref.description}</span>
-              )}
+              {ref.description && <span className="text-slate-500">{ref.description}</span>}
             </div>
           </button>
         ))

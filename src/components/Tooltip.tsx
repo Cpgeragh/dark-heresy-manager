@@ -51,10 +51,7 @@ export function Tooltip({ children, content, maxWidth = 240 }: TooltipProps) {
       if (!tooltipRef.current || !triggerRef.current) return;
       const target = e.target as Node;
 
-      if (
-        !tooltipRef.current.contains(target) &&
-        !triggerRef.current.contains(target)
-      ) {
+      if (!tooltipRef.current.contains(target) && !triggerRef.current.contains(target)) {
         setOpen(false);
       }
     }

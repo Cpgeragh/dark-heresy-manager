@@ -22,7 +22,6 @@ export function useCharacterPermissions({
   isDM,
   dmReadOnly,
 }: UseCharacterPermissionsArgs): UseCharacterPermissionsResult {
-
   const isOwner = useMemo(() => {
     return !!(userId && character && character.userId === userId);
   }, [userId, character]);
@@ -33,10 +32,7 @@ export function useCharacterPermissions({
     if (isDM) {
       return !dmReadOnly;
     } else {
-      return (
-        character.userId === userId &&
-        character.isEditableByPlayer === true
-      );
+      return character.userId === userId && character.isEditableByPlayer === true;
     }
   }, [character, userId, isDM, dmReadOnly]);
 

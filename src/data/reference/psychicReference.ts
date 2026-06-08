@@ -39,7 +39,6 @@ export interface PsychicPowerRef {
 // ─── Psychic Power Reference ─────────────────────────────────────────────────
 
 export const PSYCHIC_POWER_REFERENCE: PsychicPowerRef[] = [
-
   // ── Minor Powers ──────────────────────────────────────────────────────────
   {
     id: "call-creatures",

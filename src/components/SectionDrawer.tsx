@@ -15,10 +15,10 @@ const CATEGORIES: {
   {
     label: "Abilities",
     tabs: [
-      { id: "psychic",  label: "Psychic" },
-      { id: "skills",   label: "Skills" },
-      { id: "talents",  label: "Talents" },
-      { id: "traits",   label: "Traits" },
+      { id: "psychic", label: "Psychic" },
+      { id: "skills", label: "Skills" },
+      { id: "talents", label: "Talents" },
+      { id: "traits", label: "Traits" },
     ],
   },
   {
@@ -30,26 +30,26 @@ const CATEGORIES: {
     label: "Character",
     tabs: [
       { id: "background", label: "Background" },
-      { id: "stats",      label: "Characteristics" },
-      { id: "notes",      label: "Notes" },
-      { id: "xp",         label: "XP" },
+      { id: "stats", label: "Characteristics" },
+      { id: "notes", label: "Notes" },
+      { id: "xp", label: "XP" },
     ],
   },
   {
     label: "Combat",
     tabs: [
-      { id: "armour",  label: "Armour" },
-      { id: "vitals",  label: "Vitals" },
+      { id: "armour", label: "Armour" },
+      { id: "vitals", label: "Vitals" },
       { id: "weapons", label: "Weapons" },
     ],
   },
   {
     label: "Equipment",
     tabs: [
-      { id: "archeotech",  label: "Archeotech" },
+      { id: "archeotech", label: "Archeotech" },
       { id: "cybernetics", label: "Cybernetics" },
-      { id: "drugs",       label: "Drugs" },
-      { id: "gear",        label: "Gear" },
+      { id: "drugs", label: "Drugs" },
+      { id: "gear", label: "Gear" },
     ],
   },
 ];
@@ -151,7 +151,6 @@ export function SectionDrawer({ activeTab, onTabChange, isDM }: SectionDrawerPro
 
         {/* Sliding panels */}
         <div className="relative overflow-hidden flex-1">
-
           {/* Level 1 — Categories */}
           <div
             className={`absolute inset-0 overflow-y-auto transition-transform duration-300 ease-in-out ${
@@ -187,9 +186,7 @@ export function SectionDrawer({ activeTab, onTabChange, isDM }: SectionDrawerPro
                   className="flex items-center gap-2 px-4 py-3 w-full text-sm hover:bg-slate-800 transition border-b border-slate-700"
                 >
                   <span className="text-slate-400">‹</span>
-                  <span className="font-semibold text-slate-100">
-                    {activeCategory.label}
-                  </span>
+                  <span className="font-semibold text-slate-100">{activeCategory.label}</span>
                 </button>
 
                 {/* Page list */}
@@ -212,7 +209,6 @@ export function SectionDrawer({ activeTab, onTabChange, isDM }: SectionDrawerPro
               </>
             )}
           </div>
-
         </div>
       </div>
     </>

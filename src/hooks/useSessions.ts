@@ -1,12 +1,22 @@
 // src/hooks/useSessions.ts
 
 import { useCallback, useEffect, useState } from "react";
-import { collection, deleteDoc, doc, onSnapshot, orderBy, query, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  orderBy,
+  query,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "../firebase";
 import type { SessionDocument } from "../types/Firestore";
 
 type SessionWithId = SessionDocument & { id: string };
-type SessionUpdateData = Partial<Pick<SessionDocument, "date" | "summary" | "dmNotes" | "xpAwarded" | "attendees">>;
+type SessionUpdateData = Partial<
+  Pick<SessionDocument, "date" | "summary" | "dmNotes" | "xpAwarded" | "attendees">
+>;
 
 export function useSessions(campaignId: string | undefined): {
   sessions: SessionWithId[];
@@ -50,25 +60,34 @@ export function useSessions(campaignId: string | undefined): {
     return () => unsub();
   }, [campaignId]);
 
-  const deleteSession = useCallback(async (sessionId: string) => {
-    if (!campaignId) return;
-    try {
-      await deleteDoc(doc(db, "campaigns", campaignId, "sessions", sessionId));
-    } catch (err) {
-      console.error("Failed to delete session:", err);
-      throw err;
-    }
-  }, [campaignId]);
+  const deleteSession = useCallback(
+    async (sessionId: string) => {
+      if (!campaignId) return;
+      try {
+        await deleteDoc(doc(db, "campaigns", campaignId, "sessions", sessionId));
+      } catch (err) {
+        console.error("Failed to delete session:", err);
+        throw err;
+      }
+    },
+    [campaignId]
+  );
 
-  const updateSession = useCallback(async (sessionId: string, data: SessionUpdateData) => {
-    if (!campaignId) return;
-    try {
-      await updateDoc(doc(db, "campaigns", campaignId, "sessions", sessionId), data as Record<string, unknown>);
-    } catch (err) {
-      console.error("Failed to update session:", err);
-      throw err;
-    }
-  }, [campaignId]);
+  const updateSession = useCallback(
+    async (sessionId: string, data: SessionUpdateData) => {
+      if (!campaignId) return;
+      try {
+        await updateDoc(
+          doc(db, "campaigns", campaignId, "sessions", sessionId),
+          data as Record<string, unknown>
+        );
+      } catch (err) {
+        console.error("Failed to update session:", err);
+        throw err;
+      }
+    },
+    [campaignId]
+  );
 
   return { sessions, loading, deleteSession, updateSession };
 }

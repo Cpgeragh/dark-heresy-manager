@@ -55,12 +55,16 @@ export function ItemMetaChips({
         </span>
       )}
       {rarity && (
-        <span className={`text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 ${rarityColour(rarity)}`}>
+        <span
+          className={`text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 ${rarityColour(rarity)}`}
+        >
           {rarity}
         </span>
       )}
       {source && (
-        <span className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(source)}`}>
+        <span
+          className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(source)}`}
+        >
           {source}
         </span>
       )}

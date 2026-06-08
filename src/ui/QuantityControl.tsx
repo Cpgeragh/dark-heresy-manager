@@ -38,7 +38,7 @@ export function QuantityControl({ quantity, editable, onUpdate, size = "md" }: P
   const sizeStyles = SIZE[size];
   const { editing, draft, setDraft, start, commit, handleKeyDown } = useQuantityEdit(
     quantity,
-    onUpdate,
+    onUpdate
   );
 
   return (

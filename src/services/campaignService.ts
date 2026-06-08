@@ -1,14 +1,7 @@
 // src/services/campaignService.ts
 // Firestore operations for campaign documents.
 
-import {
-  collection,
-  doc,
-  getDocs,
-  setDoc,
-  updateDoc,
-  writeBatch,
-} from "firebase/firestore";
+import { collection, doc, getDocs, setDoc, updateDoc, writeBatch } from "firebase/firestore";
 import { db } from "../firebase";
 import type { CampaignDocument } from "../types/Firestore";
 
@@ -50,9 +43,7 @@ export async function deleteCampaign(campaignId: string): Promise<void> {
   const batch = writeBatch(db);
 
   // ── Characters ─────────────────────────────────────────────────────────────
-  const charactersSnap = await getDocs(
-    collection(db, "campaigns", campaignId, "characters")
-  );
+  const charactersSnap = await getDocs(collection(db, "campaigns", campaignId, "characters"));
 
   for (const charDoc of charactersSnap.docs) {
     // claimLog subcollection
@@ -78,9 +69,7 @@ export async function deleteCampaign(campaignId: string): Promise<void> {
   }
 
   // ── Sessions ────────────────────────────────────────────────────────────────
-  const sessionsSnap = await getDocs(
-    collection(db, "campaigns", campaignId, "sessions")
-  );
+  const sessionsSnap = await getDocs(collection(db, "campaigns", campaignId, "sessions"));
   sessionsSnap.docs.forEach((d) => batch.delete(d.ref));
 
   // ── Campaign document ───────────────────────────────────────────────────────

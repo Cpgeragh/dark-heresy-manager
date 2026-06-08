@@ -45,10 +45,7 @@ export function validateNumberRange(
 /**
  * Validate a non-negative number
  */
-export function validateNonNegative(
-  value: number,
-  fieldName: string = "Value"
-): ValidationResult {
+export function validateNonNegative(value: number, fieldName: string = "Value"): ValidationResult {
   if (isNaN(value)) {
     return { isValid: false, error: `${fieldName} must be a number` };
   }
@@ -63,10 +60,7 @@ export function validateNonNegative(
 /**
  * Validate an integer (no decimals)
  */
-export function validateInteger(
-  value: number,
-  fieldName: string = "Value"
-): ValidationResult {
+export function validateInteger(value: number, fieldName: string = "Value"): ValidationResult {
   if (isNaN(value)) {
     return { isValid: false, error: `${fieldName} must be a number` };
   }
@@ -85,10 +79,7 @@ export function validateInteger(
 /**
  * Validate a required string field
  */
-export function validateRequired(
-  value: string,
-  fieldName: string = "Field"
-): ValidationResult {
+export function validateRequired(value: string, fieldName: string = "Field"): ValidationResult {
   const trimmed = value.trim();
 
   if (trimmed.length === 0) {
@@ -158,10 +149,7 @@ export function validateCharacteristicAdvances(value: number): ValidationResult 
 /**
  * Validate characteristic total doesn't exceed 100
  */
-export function validateCharacteristicTotal(
-  base: number,
-  advances: number
-): ValidationResult {
+export function validateCharacteristicTotal(base: number, advances: number): ValidationResult {
   const total = base + advances * 5;
 
   if (total > MAX_CHARACTERISTIC_VALUE) {
@@ -177,10 +165,7 @@ export function validateCharacteristicTotal(
 /**
  * Validate wounds
  */
-export function validateWounds(
-  current: number,
-  total: number
-): ValidationResult {
+export function validateWounds(current: number, total: number): ValidationResult {
   const currentCheck = validateNonNegative(current, "Current wounds");
   if (!currentCheck.isValid) return currentCheck;
 
@@ -200,10 +185,7 @@ export function validateWounds(
 /**
  * Validate fate points
  */
-export function validateFatePoints(
-  current: number,
-  total: number
-): ValidationResult {
+export function validateFatePoints(current: number, total: number): ValidationResult {
   const currentCheck = validateNonNegative(current, "Current fate");
   if (!currentCheck.isValid) return currentCheck;
 

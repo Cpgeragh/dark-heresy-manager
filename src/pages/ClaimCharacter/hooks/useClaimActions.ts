@@ -40,10 +40,7 @@ export function useClaimActions() {
       // Step 3: Claim ownership, join campaign member list, write audit log atomically
       transaction.update(charRef, { userId: user.uid });
       transaction.update(campaignRef, { memberIds: arrayUnion(user.uid) });
-      transaction.set(
-        doc(logsRef),
-        buildClaimLogPayload("claim", user.uid, null, user.uid)
-      );
+      transaction.set(doc(logsRef), buildClaimLogPayload("claim", user.uid, null, user.uid));
     });
   }
 

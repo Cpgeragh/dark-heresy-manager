@@ -31,45 +31,59 @@ function armourCraftsmanshipInfo(craftsmanship: NonNullable<WornArmourPiece["cra
 
 export function PieceRow({ piece, editable, worn, onToggle, onRemove, onInfo }: Props) {
   const apDesc =
-    Object.keys(piece.apOverrides ?? {}).length > 0
-      ? `AP ${piece.ap}*`
-      : `AP ${piece.ap}`;
+    Object.keys(piece.apOverrides ?? {}).length > 0 ? `AP ${piece.ap}*` : `AP ${piece.ap}`;
   const craftsmanship = piece.craftsmanship ?? "Common";
 
   return (
-    <div
-      className={[
-        uiSection,
-        "flex items-center gap-3",
-        !worn ? "opacity-60" : "",
-      ].join(" ")}
-    >
+    <div className={[uiSection, "flex items-center gap-3", !worn ? "opacity-60" : ""].join(" ")}>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
-          <span className="text-sm font-medium text-slate-200 truncate">
-            {piece.name}
-          </span>
+          <span className="text-sm font-medium text-slate-200 truncate">{piece.name}</span>
           <span className="inline-flex items-center leading-[0]">
             <button
               onClick={() => onInfo(piece)}
               title="View rules"
               className="inline-flex h-[13.5px] w-[18px] shrink-0 my-auto items-center justify-center rounded bg-slate-700 border border-slate-600 text-slate-300 leading-none hover:bg-slate-600"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-2.5 h-2.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+                className="w-2.5 h-2.5"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"
+                />
               </svg>
             </button>
           </span>
         </div>
         <div className="flex flex-wrap gap-1.5 mt-1">
-          <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-300">{locationLabel(piece.locations)}</span>
-          <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 font-mono text-slate-200">{apDesc}</span>
-          <ItemMetaChips bare weight={piece.weight} value={piece.value} rarity={piece.rarity} source={piece.source} />
+          <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-300">
+            {locationLabel(piece.locations)}
+          </span>
+          <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 font-mono text-slate-200">
+            {apDesc}
+          </span>
+          <ItemMetaChips
+            bare
+            weight={piece.weight}
+            value={piece.value}
+            rarity={piece.rarity}
+            source={piece.source}
+          />
         </div>
         <div className="flex items-center gap-1.5 mt-1">
           <span className="text-[10px] text-slate-500 uppercase tracking-wide">Craftsmanship</span>
           <span className="text-xs text-slate-400 italic">{craftsmanship}</span>
-          <InfoModal title={`${craftsmanship} Armour`} content={armourCraftsmanshipInfo(craftsmanship)} />
+          <InfoModal
+            title={`${craftsmanship} Armour`}
+            content={armourCraftsmanshipInfo(craftsmanship)}
+          />
         </div>
       </div>
 
