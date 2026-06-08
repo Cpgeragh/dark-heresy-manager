@@ -2,7 +2,7 @@
 // Orchestration layer: state management and layout for all weapon categories.
 // Card components, pickers and helpers live in ./weapons/.
 
-import { useState, useCallback, Fragment, type ReactNode } from "react";
+import { useState, useCallback, Fragment } from "react";
 import type {
   RangedWeapon,
   MeleeWeapon,
@@ -16,8 +16,6 @@ import type {
 import { CYBERNETICS_REFERENCE } from "../../data/reference/cyberneticsReference";
 import { ARCHEOTECH_REFERENCE } from "../../data/reference/archeotechReference";
 import {
-  RANGED_WEAPON_REFERENCE,
-  MELEE_WEAPON_REFERENCE,
   type RangedWeaponRef,
   type MeleeWeaponRef,
   type GrenadeRef,
@@ -29,7 +27,17 @@ import { GrenadeCard, GrenadePicker } from "./weapons/GrenadeCard";
 import { ShieldCard, ShieldPicker } from "./weapons/ShieldCard";
 import { CyberneticWeaponCard } from "./weapons/CyberneticWeaponCard";
 import { ArcheotechWeaponCard } from "./weapons/ArcheotechWeaponCard";
-import { PickerModal } from "../../ui/PickerModal";
+import { IndependentCardGrid } from "./weapons/IndependentCardGrid";
+import { IntegratedWeaponPicker } from "./weapons/IntegratedWeaponPicker";
+import {
+  isIntegratedRangedWeapon,
+  isIntegratedMeleeWeapon,
+  NORMAL_RANGED_REFS,
+  NORMAL_MELEE_REFS,
+  rangedRulesForCraftsmanship,
+  meleeDamageForCraftsmanship,
+  compareWeaponEntries,
+} from "../../utils/weaponUtils";
 import { uiSectionHeader } from "../../ui/editableStyles";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -52,175 +60,6 @@ interface WeaponsTabProps {
 
 type PickerTarget = "ranged" | "melee" | "integrated" | "grenades" | "shields" | null;
 
-function IndependentCardGrid({
-  items,
-  breakpoint = "sm",
-}: {
-  items: ReactNode[];
-  breakpoint?: "sm" | "lg";
-}) {
-  const columns = [
-    items.filter((_, index) => index % 2 === 0),
-    items.filter((_, index) => index % 2 === 1),
-  ];
-
-  const mobileClass = breakpoint === "lg" ? "space-y-3 lg:hidden" : "space-y-3 sm:hidden";
-  const desktopClass =
-    breakpoint === "lg"
-      ? "hidden lg:grid lg:grid-cols-2 lg:gap-3 lg:items-start"
-      : "hidden sm:grid sm:grid-cols-2 sm:gap-3 sm:items-start";
-
-  return (
-    <>
-      <div className={mobileClass}>{items}</div>
-      <div className={desktopClass}>
-        {columns.map((column, index) => (
-          <div key={index} className="space-y-3">
-            {column}
-          </div>
-        ))}
-      </div>
-    </>
-  );
-}
-
-const INTEGRATED_RANGED_IDS = new Set([
-  "lw-lathe-laspistol",
-  "lw-lathe-lasrifle",
-  "lw-lathe-lasblaster",
-  "lw-phased-plasma-rifle",
-  "lw-catalytic-mass-driver",
-  "lw-heavy-catalytic-mass-driver",
-  "lw-graviton-pulse-launcher",
-]);
-
-const INTEGRATED_MELEE_IDS = new Set(["lw-coil-whip", "lw-lathes-arc-welder"]);
-
-const INTEGRATED_RANGED_NAMES = new Set([
-  "lathe laspistol",
-  "lathe-laspistol",
-  "lathe lasrifle",
-  "lathe-lasrifle",
-  "lathe lasblaster",
-  "lathe-lasblaster",
-  "phased plasma rifle",
-  "catalytic mass driver",
-  "heavy catalytic mass driver",
-  "graviton pulse launcher",
-]);
-
-const INTEGRATED_MELEE_NAMES = new Set([
-  "coil whip",
-  "coil-whip",
-  "lathes arc welder",
-  "lathes arc-welder",
-]);
-
-function normaliseName(name: string): string {
-  return name.toLowerCase().replace(/\s+/g, " ").trim();
-}
-
-function isIntegratedRangedRef(ref: RangedWeaponRef): boolean {
-  return INTEGRATED_RANGED_IDS.has(ref.id);
-}
-
-function isIntegratedMeleeRef(ref: MeleeWeaponRef): boolean {
-  return INTEGRATED_MELEE_IDS.has(ref.id);
-}
-
-function isIntegratedRangedWeapon(weapon: RangedWeapon): boolean {
-  // referenceId is the primary check. The name fallback handles weapons added
-  // before referenceId existed — legacy data only has a name, not an id.
-  return (
-    (weapon.referenceId ? INTEGRATED_RANGED_IDS.has(weapon.referenceId) : false) ||
-    INTEGRATED_RANGED_NAMES.has(normaliseName(weapon.name))
-  );
-}
-
-function isIntegratedMeleeWeapon(weapon: MeleeWeapon): boolean {
-  // referenceId is the primary check. The name fallback handles weapons added
-  // before referenceId existed — legacy data only has a name, not an id.
-  return (
-    (weapon.referenceId ? INTEGRATED_MELEE_IDS.has(weapon.referenceId) : false) ||
-    INTEGRATED_MELEE_NAMES.has(normaliseName(weapon.name))
-  );
-}
-
-const NORMAL_RANGED_REFS = RANGED_WEAPON_REFERENCE.filter((ref) => !isIntegratedRangedRef(ref));
-const NORMAL_MELEE_REFS = MELEE_WEAPON_REFERENCE.filter((ref) => !isIntegratedMeleeRef(ref));
-const INTEGRATED_RANGED_REFS = RANGED_WEAPON_REFERENCE.filter(isIntegratedRangedRef);
-const INTEGRATED_MELEE_REFS = MELEE_WEAPON_REFERENCE.filter(isIntegratedMeleeRef);
-
-function IntegratedWeaponPicker({
-  editable = true,
-  onSelectRanged,
-  onSelectMelee,
-  onClose,
-}: {
-  editable?: boolean;
-  onSelectRanged: (ref: RangedWeaponRef) => void;
-  onSelectMelee: (ref: MeleeWeaponRef) => void;
-  onClose: () => void;
-}) {
-  const [query, setQuery] = useState("");
-  const lowerQuery = query.toLowerCase();
-  const ranged = INTEGRATED_RANGED_REFS.filter((ref) =>
-    ref.name.toLowerCase().includes(lowerQuery)
-  );
-  const melee = INTEGRATED_MELEE_REFS.filter((ref) => ref.name.toLowerCase().includes(lowerQuery));
-  const isEmpty = ranged.length === 0 && melee.length === 0;
-
-  return (
-    <PickerModal
-      title="Add Integrated Weapon"
-      placeholder="Search integrated weapons..."
-      query={query}
-      onQueryChange={setQuery}
-      onClose={onClose}
-      isEmpty={isEmpty}
-    >
-      {ranged.map((ref) => (
-        <button
-          key={ref.id}
-          onClick={editable ? () => onSelectRanged(ref) : undefined}
-          className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
-        >
-          <span
-            className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}
-          >
-            {ref.name}
-          </span>
-          <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5 flex-wrap font-mono">
-            <span>{ref.class}</span>
-            <span>{ref.range}</span>
-            <span>{ref.rof}</span>
-            <span>{ref.damage}</span>
-            <span>Pen {ref.pen}</span>
-          </div>
-        </button>
-      ))}
-      {melee.map((ref) => (
-        <button
-          key={ref.id}
-          onClick={editable ? () => onSelectMelee(ref) : undefined}
-          className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
-        >
-          <span
-            className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}
-          >
-            {ref.name}
-          </span>
-          <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5 flex-wrap font-mono">
-            <span>{ref.class}</span>
-            <span>{ref.damage}</span>
-            <span>Pen {ref.pen}</span>
-          </div>
-        </button>
-      ))}
-    </PickerModal>
-  );
-}
-
 // ─── Slot System ─────────────────────────────────────────────────────────────
 
 const MAX_WEAPON_SLOTS = 4;
@@ -231,35 +70,6 @@ function getRangedSlots(weapon: RangedWeapon): number {
 }
 function getMeleeSlots(weapon: MeleeWeapon): number {
   return (weapon.class ?? "").toLowerCase().includes("two-handed") ? 2 : 1;
-}
-
-function addSpecialRule(rules: string, rule: string): string {
-  const cleaned = rules.trim();
-  if (!cleaned || cleaned === "-" || cleaned === "—") return rule;
-  const existing = cleaned.split(",").map((entry) => entry.trim().toLowerCase());
-  if (existing.includes(rule.toLowerCase())) return cleaned;
-  return `${cleaned}, ${rule}`;
-}
-
-function rangedRulesForCraftsmanship(rules: string, craftsmanship: WeaponCraftsmanship): string {
-  if (craftsmanship === "Poor") return addSpecialRule(rules, "Unreliable");
-  if (craftsmanship === "Good") return addSpecialRule(rules, "Reliable");
-  return rules;
-}
-
-function modifyDamageBonus(damage: string, delta: number): string {
-  const match = damage.trim().match(/^(\d*d\d+)([+-]\d+)?\s*([IREX])?$/i);
-  if (!match) return damage;
-  const dice = match[1];
-  const bonus = (match[2] ? parseInt(match[2], 10) : 0) + delta;
-  const type = match[3] ? ` ${match[3].toUpperCase()}` : "";
-  if (bonus === 0) return `${dice}${type}`.trim();
-  return `${dice}${bonus > 0 ? "+" : ""}${bonus}${type}`.trim();
-}
-
-function meleeDamageForCraftsmanship(damage: string, craftsmanship: WeaponCraftsmanship): string {
-  if (craftsmanship !== "Best") return damage;
-  return modifyDamageBonus(damage, 1);
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
@@ -342,32 +152,7 @@ export function WeaponsTab({
       item,
       name: item.name,
     })),
-  ].sort((a, b) => {
-    if (a.kind === "cybernetic" && b.kind !== "cybernetic") return -1;
-    if (b.kind === "cybernetic" && a.kind !== "cybernetic") return 1;
-    const aEq =
-      a.kind === "regular"
-        ? a.weapon.equipped
-          ? 0
-          : 1
-        : a.kind === "archeotech"
-          ? a.item.equipped
-            ? 0
-            : 1
-          : 0;
-    const bEq =
-      b.kind === "regular"
-        ? b.weapon.equipped
-          ? 0
-          : 1
-        : b.kind === "archeotech"
-          ? b.item.equipped
-            ? 0
-            : 1
-          : 0;
-    if (aEq !== bEq) return aEq - bEq;
-    return a.name.localeCompare(b.name);
-  });
+  ].sort(compareWeaponEntries);
 
   const allMeleeEntries = [
     ...normalMeleeWeapons.map(({ weapon, index }) => ({
@@ -387,32 +172,7 @@ export function WeaponsTab({
       item,
       name: item.name,
     })),
-  ].sort((a, b) => {
-    if (a.kind === "cybernetic" && b.kind !== "cybernetic") return -1;
-    if (b.kind === "cybernetic" && a.kind !== "cybernetic") return 1;
-    const aEq =
-      a.kind === "regular"
-        ? a.weapon.equipped
-          ? 0
-          : 1
-        : a.kind === "archeotech"
-          ? a.item.equipped
-            ? 0
-            : 1
-          : 0;
-    const bEq =
-      b.kind === "regular"
-        ? b.weapon.equipped
-          ? 0
-          : 1
-        : b.kind === "archeotech"
-          ? b.item.equipped
-            ? 0
-            : 1
-          : 0;
-    if (aEq !== bEq) return aEq - bEq;
-    return a.name.localeCompare(b.name);
-  });
+  ].sort(compareWeaponEntries);
 
   const allGrenadeEntries = [
     ...grenades.map((item) => ({ kind: "regular" as const, item, name: item.name })),
