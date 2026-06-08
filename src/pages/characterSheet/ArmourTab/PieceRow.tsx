@@ -1,7 +1,7 @@
 // src/pages/characterSheet/ArmourTab/PieceRow.tsx
 
 import type { WornArmourPiece } from "../../../types/Character";
-import { sectionContainerClass } from "../../../ui/editableStyles";
+import { uiSection } from "../../../ui/editableStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { InfoModal } from "../../../components/InfoModal";
 import { locationLabel } from "./armourHelpers";
@@ -39,7 +39,7 @@ export function PieceRow({ piece, editable, worn, onToggle, onRemove, onInfo }: 
   return (
     <div
       className={[
-        sectionContainerClass(editable),
+        uiSection,
         "flex items-center gap-3",
         !worn ? "opacity-60" : "",
       ].join(" ")}

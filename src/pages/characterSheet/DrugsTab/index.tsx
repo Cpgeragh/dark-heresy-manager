@@ -3,7 +3,6 @@
 import { useState, useCallback } from "react";
 import type { DrugItem } from "../../../types/Character";
 import type { DrugRef } from "../../../data/reference/drugsReference";
-import { DrugInfoModal } from "./DrugInfoModal";
 import { DrugPicker } from "./DrugPicker";
 import { DrugRow } from "./DrugRow";
 import { uiSectionHeader } from "../../../ui/editableStyles";
@@ -16,7 +15,6 @@ interface DrugsTabProps {
 
 export function DrugsTab({ drugs, editable, onUpdate }: DrugsTabProps) {
   const [showPicker, setShowPicker] = useState(false);
-  const [infoTarget, setInfoTarget] = useState<DrugItem | null>(null);
 
   const addDrug = useCallback(
     (ref: DrugRef) => {
@@ -64,10 +62,10 @@ export function DrugsTab({ drugs, editable, onUpdate }: DrugsTabProps) {
       {/* Excessive Drug Use rule */}
       <div className="rounded-lg border border-violet-700/40 bg-violet-900/10 px-4 py-3 text-xs text-slate-400 leading-relaxed">
         <span className="font-semibold text-violet-400 uppercase tracking-wide mr-1">
-          Excessive Drug Use ·
+          Excessive Drug Use -
         </span>
         Using more than one dose of the same drug within a 24-hour period requires a Toughness Test
-        for each use after the first, with a cumulative –20 penalty. On a failure, the drug has no
+        for each use after the first, with a cumulative -20 penalty. On a failure, the drug has no
         effect and further doses do not affect the character for a full 24 hours.
       </div>
 
@@ -99,7 +97,6 @@ export function DrugsTab({ drugs, editable, onUpdate }: DrugsTabProps) {
               editable={editable}
               onUpdateQty={updateQty}
               onRemove={removeDrug}
-              onInfo={setInfoTarget}
             />
           ))}
         </div>
@@ -114,7 +111,6 @@ export function DrugsTab({ drugs, editable, onUpdate }: DrugsTabProps) {
                   editable={editable}
                   onUpdateQty={updateQty}
                   onRemove={removeDrug}
-                  onInfo={setInfoTarget}
                 />
               ))}
             </div>
@@ -122,21 +118,10 @@ export function DrugsTab({ drugs, editable, onUpdate }: DrugsTabProps) {
         </div>
       </section>
 
-      <p className="text-xs text-slate-600">
-        Cost shown is per dose. Tap ⓘ to view full effect, duration and side effects.
-      </p>
-
       {showPicker && (
         <DrugPicker
           onSelect={addDrug}
           onClose={() => setShowPicker(false)}
-        />
-      )}
-
-      {infoTarget && (
-        <DrugInfoModal
-          item={infoTarget}
-          onClose={() => setInfoTarget(null)}
         />
       )}
     </div>

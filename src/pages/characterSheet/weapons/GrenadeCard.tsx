@@ -7,7 +7,7 @@ import {
   GRENADE_REFERENCE,
   type GrenadeRef,
 } from "../../../data/reference/weaponReference";
-import { sectionContainerClass } from "../../../ui/editableStyles";
+import { uiSection } from "../../../ui/editableStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import { PickerModal } from "../../../ui/PickerModal";
@@ -140,7 +140,7 @@ export function GrenadeCard({
   // ── Stowed overflow card — read-only, always collapsed ────────────────────
   if (isStowedCard) {
     return (
-      <div className={sectionContainerClass(false) + " opacity-60"}>
+      <div className={uiSection + " opacity-60"}>
         <div className="flex items-center justify-between gap-2">
           <div className="min-w-0">
             <p className="text-sm font-semibold text-slate-400 truncate">{item.name}</p>
@@ -169,7 +169,7 @@ export function GrenadeCard({
   const showMishaps = item.type !== "Mine";
 
   return (
-    <div className={sectionContainerClass(editable) + " space-y-2"}>
+    <div className={uiSection + " space-y-2"}>
       {/* Header — always visible */}
       <div className="flex items-start justify-between gap-2">
         <button

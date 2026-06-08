@@ -9,7 +9,7 @@ import {
 } from "../../../data/reference/weaponReference";
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
 import { WEAPON_UPGRADE_REFERENCE } from "../../../data/reference/weaponUpgradeReference";
-import { editableInputClass, sectionContainerClass } from "../../../ui/editableStyles";
+import { editableInputClass, uiSection } from "../../../ui/editableStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
 import { QuantityControl } from "../../../ui/QuantityControl";
@@ -320,7 +320,7 @@ export function MeleeCard({
     weaponRef?.class.toLowerCase().includes("thrown");
 
   return (
-    <div className={sectionContainerClass(editable) + " space-y-3"}>
+    <div className={uiSection + " space-y-3"}>
       {/* Header — always visible */}
       <div className="flex items-start justify-between gap-2">
         <button

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { ArcheotechItem } from "../../../types/Character";
 import { ARCHEOTECH_REFERENCE } from "../../../data/reference/archeotechReference";
-import { sectionContainerClass } from "../../../ui/editableStyles";
+import { uiSection } from "../../../ui/editableStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { InfoModal } from "../../../components/InfoModal";
 
@@ -29,7 +29,7 @@ export function ItemCard({ item, editable, onRemove }: Props) {
   const source       = item.source  ?? ref?.source;
 
   return (
-    <div className={sectionContainerClass(editable)}>
+    <div className={uiSection}>
       <div className="flex items-start gap-2">
         <div className="flex-1 min-w-0">
 

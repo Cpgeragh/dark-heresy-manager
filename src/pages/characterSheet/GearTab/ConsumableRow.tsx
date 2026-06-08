@@ -1,7 +1,7 @@
 // src/pages/characterSheet/GearTab/ConsumableRow.tsx
 
 import type { ConsumableItem } from "../../../types/Character";
-import { sectionContainerClass } from "../../../ui/editableStyles";
+import { uiSection } from "../../../ui/editableStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import { InfoModal } from "../../../components/InfoModal";
@@ -17,7 +17,7 @@ export function ConsumableRow({ item, editable, onUpdateQty, onRemove }: Props) 
   const hasDesc = !!(item.description?.trim());
 
   return (
-    <div className={sectionContainerClass(editable)}>
+    <div className={uiSection}>
       <div className="flex items-start gap-3">
         <div className="flex flex-col items-center shrink-0">
           <span className="text-[10px] text-slate-500 uppercase tracking-wide mb-0.5">Qty</span>

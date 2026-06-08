@@ -445,8 +445,6 @@ export interface Character {
 
   rangedWeapons: RangedWeapon[];
   meleeWeapons: MeleeWeapon[];
-  /** @deprecated Ammo is now tracked per-weapon on RangedWeapon.ammoAmount. Kept optional for Firestore backwards compat. */
-  ammo?: AmmoItem[];
   armour: WornArmourPiece[];
 
   talentsAndTraits: TalentsAndTraitsBlock;

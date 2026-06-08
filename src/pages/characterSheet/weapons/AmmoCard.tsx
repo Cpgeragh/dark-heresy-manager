@@ -10,7 +10,7 @@ import {
   isChargePackAmmoName,
   type AmmoRef,
 } from "../../../data/reference/ammoReference";
-import { editableInputClass, sectionContainerClass } from "../../../ui/editableStyles";
+import { editableInputClass, uiSection } from "../../../ui/editableStyles";
 import { rarityColour, sourceColour } from "../../../ui/sourceStyles";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import { PickerModal } from "../../../ui/PickerModal";
@@ -231,7 +231,7 @@ export function AmmoCard({
   const isChargePack = isChargePackAmmoName(displayName);
 
   return (
-    <div className={sectionContainerClass(editable)}>
+    <div className={uiSection}>
       {/* Header */}
       <div className="flex items-start justify-between gap-2 mb-2">
         <div className="min-w-0 flex-1">

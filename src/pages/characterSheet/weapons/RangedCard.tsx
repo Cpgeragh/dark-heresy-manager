@@ -15,7 +15,7 @@ import {
   usesUnitAmmoTracking,
 } from "../../../data/reference/ammoReference";
 import { WEAPON_UPGRADE_REFERENCE } from "../../../data/reference/weaponUpgradeReference";
-import { editableInputClass, sectionContainerClass } from "../../../ui/editableStyles";
+import { editableInputClass, uiSection } from "../../../ui/editableStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
 import { QuantityControl } from "../../../ui/QuantityControl";
@@ -630,7 +630,7 @@ export function RangedCard({
   }
 
   return (
-    <div className={sectionContainerClass(editable) + " space-y-3"}>
+    <div className={uiSection + " space-y-3"}>
       {/* Header — always visible */}
       <div className="flex items-start justify-between gap-2">
         <button

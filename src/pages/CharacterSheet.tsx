@@ -51,7 +51,7 @@ import type {
 } from "../types/Character";
 
 import { exportCharacterJson } from "../utils/exportCharacter";
-import { normaliseArmour, normaliseGear, normaliseSkills, skillsNeedNormalisation } from "../utils/characterMigration";
+import { normaliseSkills, skillsNeedNormalisation } from "../utils/skillUtils";
 import { SectionDrawer } from "../components/SectionDrawer";
 
 
@@ -461,7 +461,7 @@ export default function CharacterSheet() {
 
           {activeTab === "armour" && (
             <ArmourTab
-              armour={normaliseArmour(character.armour)}
+              armour={character.armour}
               toughnessBonus={Math.floor(getCharTotal("t") / CHARACTERISTIC_BONUS_DIVISOR)}
               editable={allowedToEdit}
               onUpdate={handleUpdateArmour}
@@ -491,7 +491,7 @@ export default function CharacterSheet() {
 
           {activeTab === "gear" && (
             <GearTab
-              gear={normaliseGear(character.gear)}
+              gear={character.gear}
               consumables={character.consumables ?? []}
               editable={allowedToEdit}
               onUpdate={handleUpdateGear}

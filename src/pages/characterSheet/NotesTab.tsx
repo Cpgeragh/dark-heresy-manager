@@ -3,7 +3,7 @@
 import { useCallback } from "react";
 import {
   editableTextareaClass,
-  sectionContainerClass,
+  uiSection,
   readOnlyBadgeClass,
 } from "../../ui/editableStyles";
 
@@ -23,7 +23,7 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
       {!editable && <span className={readOnlyBadgeClass()}>Read-only</span>}
 
       {!editable ? (
-        <div className={sectionContainerClass(false)}>
+        <div className={uiSection}>
           {notes ? (
             <p className="whitespace-pre-wrap text-sm leading-relaxed">
               {notes}
