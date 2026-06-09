@@ -1,11 +1,13 @@
 // src/App.tsx
 
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { useState } from "react";
+import { Routes, Route, Navigate, useLocation, useMatch } from "react-router-dom";
 
 import { useAuth } from "./hooks/useAuth";
 import { useUserRole } from "./hooks/useUserRole";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { AppHeader } from "./components/AppHeader";
+import { MessageDrawer } from "./components/MessageDrawer";
 import { CampaignsProvider } from "./context/CampaignsContext";
 import { HeaderExtensionProvider } from "./context/HeaderExtensionContext";
 import { ToastProvider, ToastContainer } from "./components/Toast";
@@ -23,6 +25,10 @@ import Settings from "./pages/Settings";
 
 export default function App() {
   const location = useLocation();
+  const [messagesOpen, setMessagesOpen] = useState(false);
+  const characterSheetMatch = useMatch(ROUTE_PATTERNS.CHARACTER_SHEET);
+  const contextCampaignId = characterSheetMatch?.params?.campaignId ?? null;
+  const contextCharacterId = characterSheetMatch?.params?.characterId ?? null;
 
   // -------------------------------------------------
   // AUTH & USER STATE
@@ -89,6 +95,7 @@ export default function App() {
           <AppHeader
             isDM={isDM}
             currentPath={location.pathname}
+            onOpenMessages={!isDM ? () => setMessagesOpen(true) : undefined}
           />
 
           {/* ROUTES */}
@@ -138,6 +145,16 @@ export default function App() {
                 </Routes>
               </ErrorBoundary>
             </main>
+
+          {!isDM && (
+            <MessageDrawer
+              user={currentUser}
+              isOpen={messagesOpen}
+              onClose={() => setMessagesOpen(false)}
+              campaignId={contextCampaignId}
+              characterId={contextCharacterId}
+            />
+          )}
           </CampaignsProvider>
 
           <ToastContainer />
