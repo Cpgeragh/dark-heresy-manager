@@ -46,7 +46,6 @@ export default function App() {
   // -------------------------------------------------
   const { switchToDM, switchToPlayer } = useUserRole({
     currentUser,
-    activeCampaignId,
     onRoleChange: setUserRole,
   });
 
@@ -107,8 +106,6 @@ export default function App() {
           <AppHeader
             isDM={isDM}
             currentPath={location.pathname}
-            onSwitchToDM={switchToDM}
-            onSwitchToPlayer={switchToPlayer}
           />
 
           {/* ROUTES */}
@@ -123,8 +120,6 @@ export default function App() {
                         element={
                           <DMDashboard
                             user={currentUser}
-                            activeCampaignId={activeCampaignId}
-                            onActiveCampaignChange={handleActiveCampaignChange}
                           />
                         }
                       />

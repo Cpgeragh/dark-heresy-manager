@@ -8,23 +8,21 @@ import { ROUTES } from "../constants/routes";
 interface AppHeaderProps {
   isDM: boolean;
   currentPath: string;
-  onSwitchToDM?: () => void;
-  onSwitchToPlayer?: () => void;
 }
 
-export function AppHeader({ isDM, currentPath, onSwitchToDM, onSwitchToPlayer }: AppHeaderProps) {
+export function AppHeader({ isDM, currentPath }: AppHeaderProps) {
   const { backHref, kebabContent } = useHeaderExtension();
   const [kebabOpen, setKebabOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-900/80 backdrop-blur">
       <div className="max-w-5xl mx-auto px-4 py-2 flex items-center relative">
-        {/* Icon column — Hub link on character sheet, plain icon elsewhere */}
-        {backHref ? (
+        {/* Icon column — back/home button everywhere except the dashboard */}
+        {(backHref || currentPath !== (isDM ? ROUTES.DM_DASHBOARD : ROUTES.PLAYER_DASHBOARD)) && (
           <Link
-            to={backHref}
+            to={backHref ?? (isDM ? ROUTES.DM_DASHBOARD : ROUTES.PLAYER_DASHBOARD)}
             className="shrink-0 h-8 w-8 rounded-lg bg-slate-800 border border-slate-600 flex items-center justify-center hover:bg-slate-700 transition"
-            aria-label="Campaign Hub"
+            aria-label={backHref ? "Back" : "Dashboard"}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -41,17 +39,11 @@ export function AppHeader({ isDM, currentPath, onSwitchToDM, onSwitchToPlayer }:
               />
             </svg>
           </Link>
-        ) : (
-          <img
-            src="/icon-192.png"
-            alt="Dark Heresy Manager"
-            className="h-8 w-8 rounded-lg object-cover shrink-0"
-          />
         )}
 
         {/* App name — centred */}
         <div className="absolute inset-x-0 flex items-center justify-center gap-2 pointer-events-none">
-          <img src="/icon-192.png" alt="" className="h-6 w-6 rounded-lg object-cover" />
+          <img src="/icon-192.png" alt="" className="h-7 w-7 rounded-lg object-cover" />
           <span className={`font-semibold text-slate-100 ${backHref ? "text-base" : "text-sm"}`}>
             Dark Heresy Manager
           </span>
@@ -65,23 +57,6 @@ export function AppHeader({ isDM, currentPath, onSwitchToDM, onSwitchToPlayer }:
               label="Select Campaign"
               current={currentPath === "/select"}
             />
-          )}
-
-          {onSwitchToPlayer && onSwitchToDM && (
-            <>
-              <button
-                onClick={onSwitchToPlayer}
-                className="px-2 py-0.5 text-xs rounded-full bg-blue-600 text-white border border-blue-500 hover:bg-blue-500"
-              >
-                Player
-              </button>
-              <button
-                onClick={onSwitchToDM}
-                className="px-2 py-0.5 text-xs rounded-full bg-green-600 text-white border border-green-500 hover:bg-green-500"
-              >
-                DM
-              </button>
-            </>
           )}
 
           {/* Settings */}
