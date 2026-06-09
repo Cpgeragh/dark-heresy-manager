@@ -10,6 +10,7 @@ import { sendMessage } from "../services/messageService";
 import { MessageThread } from "../components/MessageThread";
 import { MessageInput } from "../components/MessageInput";
 import { buildRoute, ROUTES } from "../constants/routes";
+import { useToast } from "../components/Toast";
 import type { CharacterListItem } from "../types/Firestore";
 
 type Props = {
@@ -28,12 +29,18 @@ function PlayerThread({
   playerUid: string;
 }) {
   const { messages, loading } = useThreadMessages(campaignId, characterId);
+  const toast = useToast();
 
   const handleSend = useCallback(
     async (text: string) => {
-      await sendMessage(campaignId, characterId, playerUid, text, true);
+      try {
+        await sendMessage(campaignId, characterId, playerUid, text, true);
+      } catch (err) {
+        console.error("Failed to send message:", err);
+        toast.error("Failed to send message. Please try again.");
+      }
     },
-    [campaignId, characterId, playerUid]
+    [campaignId, characterId, playerUid, toast]
   );
 
   return (

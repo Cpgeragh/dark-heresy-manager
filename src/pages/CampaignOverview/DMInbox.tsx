@@ -42,9 +42,14 @@ function ThreadView({
 
   const handleSend = useCallback(
     async (text: string) => {
-      await sendMessage(campaignId, characterId, dmUid, text, false);
+      try {
+        await sendMessage(campaignId, characterId, dmUid, text, false);
+      } catch (err) {
+        console.error("Failed to send message:", err);
+        toast.error("Failed to send message. Please try again.");
+      }
     },
-    [campaignId, characterId, dmUid]
+    [campaignId, characterId, dmUid, toast]
   );
 
   const handleClear = useCallback(async () => {
