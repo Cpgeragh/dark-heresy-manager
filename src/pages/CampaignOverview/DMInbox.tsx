@@ -11,28 +11,25 @@ import type { CharacterListItem } from "../../types/Firestore";
 
 // ── Helper ────────────────────────────────────────────────────────────────────
 
-function getPlayerLabel(playerUid: string, characters: CharacterListItem[]): string {
-  const owned = characters.filter((c) => c.userId === playerUid);
-  if (owned.length > 0) {
-    return owned.map((c) => c.header?.characterName ?? "Unnamed").join(", ");
-  }
-  return `${playerUid.slice(0, 8)}…`;
+function getCharacterLabel(characterId: string, characters: CharacterListItem[]): string {
+  const char = characters.find((c) => c.id === characterId);
+  return char?.header?.characterName ?? `${characterId.slice(0, 8)}…`;
 }
 
 // ── ThreadView — only mounted when a thread is expanded ───────────────────────
 
 function ThreadView({
   campaignId,
-  playerUid,
+  characterId,
   dmUid,
   label,
 }: {
   campaignId: string;
-  playerUid: string;
+  characterId: string;
   dmUid: string;
   label: string;
 }) {
-  const { messages, loading } = useThreadMessages(campaignId, playerUid);
+  const { messages, loading } = useThreadMessages(campaignId, characterId);
   const toast = useToast();
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [clearText, setClearText] = useState("");
@@ -40,20 +37,20 @@ function ThreadView({
 
   // Mark thread as read when DM opens it
   useEffect(() => {
-    void markThreadRead(campaignId, playerUid);
-  }, [campaignId, playerUid]);
+    void markThreadRead(campaignId, characterId);
+  }, [campaignId, characterId]);
 
   const handleSend = useCallback(
     async (text: string) => {
-      await sendMessage(campaignId, playerUid, dmUid, text);
+      await sendMessage(campaignId, characterId, dmUid, text, false);
     },
-    [campaignId, playerUid, dmUid]
+    [campaignId, characterId, dmUid]
   );
 
   const handleClear = useCallback(async () => {
     setClearing(true);
     try {
-      await clearThread(campaignId, playerUid);
+      await clearThread(campaignId, characterId);
       setShowClearConfirm(false);
       setClearText("");
       toast.success("Chat cleared.");
@@ -63,7 +60,7 @@ function ThreadView({
     } finally {
       setClearing(false);
     }
-  }, [campaignId, playerUid, toast]);
+  }, [campaignId, characterId, toast]);
 
   return (
     <div className="mt-2 border border-slate-700 rounded-lg p-3 bg-slate-900/40">
@@ -126,10 +123,10 @@ export function DMInbox({
   characters: CharacterListItem[];
 }) {
   const { threads, loading } = useThreads(campaignId);
-  const [expandedUid, setExpandedUid] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  const toggleThread = useCallback((playerUid: string) => {
-    setExpandedUid((prev) => (prev === playerUid ? null : playerUid));
+  const toggleThread = useCallback((characterId: string) => {
+    setExpandedId((prev) => (prev === characterId ? null : characterId));
   }, []);
 
   if (loading) return null;
@@ -141,14 +138,14 @@ export function DMInbox({
   return (
     <div className="space-y-2">
       {threads.map((thread) => {
-        const label = getPlayerLabel(thread.playerUid, characters);
-        const isExpanded = expandedUid === thread.playerUid;
+        const label = getCharacterLabel(thread.characterId, characters);
+        const isExpanded = expandedId === thread.characterId;
         const hasUnread = thread.unreadForDM > 0;
 
         return (
-          <div key={thread.playerUid}>
+          <div key={thread.characterId}>
             <button
-              onClick={() => toggleThread(thread.playerUid)}
+              onClick={() => toggleThread(thread.characterId)}
               className="w-full flex items-center gap-3 px-3 py-2 rounded border border-slate-700 bg-slate-900/40 hover:bg-slate-800 transition text-left"
             >
               <div className="flex-1 min-w-0">
@@ -172,7 +169,7 @@ export function DMInbox({
             {isExpanded && (
               <ThreadView
                 campaignId={campaignId}
-                playerUid={thread.playerUid}
+                characterId={thread.characterId}
                 dmUid={dmUid}
                 label={label}
               />

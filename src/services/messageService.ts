@@ -13,19 +13,21 @@ import {
 import { db } from "../firebase";
 
 /**
- * Sends a message in a player-DM thread and updates the thread summary.
+ * Sends a message in a character-DM thread and updates the thread summary.
+ * Thread is keyed by characterId — one thread per character, not per player.
  * Thread summary is created automatically on first message (setDoc + merge).
- * If sender is the player, increments unreadForDM on the summary.
+ * If sender is the player (isFromPlayer), increments unreadForDM on the summary.
  */
 export async function sendMessage(
   campaignId: string,
-  playerUid: string,
+  characterId: string,
   fromUid: string,
-  text: string
+  text: string,
+  isFromPlayer: boolean
 ): Promise<void> {
   const batch = writeBatch(db);
 
-  const messagesRef = collection(db, "campaigns", campaignId, "threads", playerUid, "messages");
+  const messagesRef = collection(db, "campaigns", campaignId, "threads", characterId, "messages");
   const messageRef = doc(messagesRef);
 
   batch.set(messageRef, {
@@ -35,13 +37,12 @@ export async function sendMessage(
     read: false,
   });
 
-  const threadRef = doc(db, "campaigns", campaignId, "threads", playerUid);
-  const isFromPlayer = fromUid === playerUid;
+  const threadRef = doc(db, "campaigns", campaignId, "threads", characterId);
 
   batch.set(
     threadRef,
     {
-      playerUid,
+      characterId,
       lastMessage: text.trim(),
       lastTimestamp: serverTimestamp(),
       ...(isFromPlayer ? { unreadForDM: increment(1) } : {}),
@@ -57,9 +58,9 @@ export async function sendMessage(
  */
 export async function markThreadRead(
   campaignId: string,
-  playerUid: string
+  characterId: string
 ): Promise<void> {
-  const threadRef = doc(db, "campaigns", campaignId, "threads", playerUid);
+  const threadRef = doc(db, "campaigns", campaignId, "threads", characterId);
   await updateDoc(threadRef, { unreadForDM: 0 });
 }
 
@@ -69,21 +70,21 @@ export async function markThreadRead(
  */
 export async function clearThread(
   campaignId: string,
-  playerUid: string
+  characterId: string
 ): Promise<void> {
   const messagesRef = collection(
-    db, "campaigns", campaignId, "threads", playerUid, "messages"
+    db, "campaigns", campaignId, "threads", characterId, "messages"
   );
   const snap = await getDocs(messagesRef);
   const docs = snap.docs;
-  const threadRef = doc(db, "campaigns", campaignId, "threads", playerUid);
+  const threadRef = doc(db, "campaigns", campaignId, "threads", characterId);
 
   const CHUNK = 499; // leave 1 slot for the summary reset in the final batch
 
   if (docs.length === 0) {
     // No messages — just reset the summary
     await setDoc(threadRef, {
-      playerUid,
+      characterId,
       lastMessage: null,
       lastTimestamp: null,
       unreadForDM: 0,
@@ -98,7 +99,7 @@ export async function clearThread(
     // Reset summary on the final batch
     if (i + CHUNK >= docs.length) {
       batch.set(threadRef, {
-        playerUid,
+        characterId,
         lastMessage: null,
         lastTimestamp: null,
         unreadForDM: 0,

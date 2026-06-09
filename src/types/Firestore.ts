@@ -117,7 +117,7 @@ export interface ThreadMessage {
  * Stored in /campaigns/{campaignId}/threads/{playerUid}
  */
 export interface ThreadSummary {
-  playerUid: string;
+  characterId: string;
   lastMessage: string | null;
   lastTimestamp: Timestamp | null;
   unreadForDM: number;

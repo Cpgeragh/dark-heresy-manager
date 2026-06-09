@@ -1,24 +1,24 @@
 // src/hooks/useThreadMessages.ts
-// Real-time listener for messages in a single player-DM thread.
+// Real-time listener for messages in a single character-DM thread.
 
 import { useEffect, useState } from "react";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase";
 import type { ThreadMessage } from "../types/Firestore";
 
-export function useThreadMessages(campaignId: string | null, playerUid: string | null) {
+export function useThreadMessages(campaignId: string | null, characterId: string | null) {
   const [messages, setMessages] = useState<ThreadMessage[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!campaignId || !playerUid) {
+    if (!campaignId || !characterId) {
       setLoading(false);
       return;
     }
 
     const unsubscribe = onSnapshot(
       query(
-        collection(db, "campaigns", campaignId, "threads", playerUid, "messages"),
+        collection(db, "campaigns", campaignId, "threads", characterId, "messages"),
         orderBy("timestamp", "asc")
       ),
       (snap) => {
@@ -32,7 +32,7 @@ export function useThreadMessages(campaignId: string | null, playerUid: string |
     );
 
     return () => unsubscribe();
-  }, [campaignId, playerUid]);
+  }, [campaignId, characterId]);
 
   return { messages, loading };
 }

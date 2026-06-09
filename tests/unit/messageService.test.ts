@@ -76,37 +76,44 @@ function makeDocs(refs: string[]) {
 describe("sendMessage", () => {
 
   it("writes the message doc with correct fields", async () => {
-    await sendMessage("c1", "p1", "p1", "Hello");
+    await sendMessage("c1", "char-1", "p1", "Hello", true);
 
     // First batch.set call is the message doc (auto-id ref)
     expect(mockBatchSet).toHaveBeenNthCalledWith(
       1,
-      "campaigns/c1/threads/p1/messages/auto-id",
+      "campaigns/c1/threads/char-1/messages/auto-id",
       { fromUid: "p1", text: "Hello", timestamp: "SERVER_TIMESTAMP", read: false }
     );
   });
 
-  it("increments unreadForDM when the sender is the player", async () => {
-    await sendMessage("c1", "p1", "p1", "Hello");
+  it("increments unreadForDM when isFromPlayer is true", async () => {
+    await sendMessage("c1", "char-1", "p1", "Hello", true);
 
     // Second batch.set call is the thread summary
     expect(mockBatchSet).toHaveBeenNthCalledWith(
       2,
-      "campaigns/c1/threads/p1",
+      "campaigns/c1/threads/char-1",
       expect.objectContaining({ unreadForDM: { _increment: 1 } }),
       { merge: true }
     );
   });
 
-  it("does not include unreadForDM when the sender is the DM", async () => {
-    await sendMessage("c1", "p1", "dm-1", "Reply");
+  it("does not include unreadForDM when isFromPlayer is false (DM reply)", async () => {
+    await sendMessage("c1", "char-1", "dm-1", "Reply", false);
 
     const [, summaryData] = mockBatchSet.mock.calls[1];
     expect(summaryData).not.toHaveProperty("unreadForDM");
   });
 
+  it("stores characterId in the thread summary", async () => {
+    await sendMessage("c1", "char-1", "p1", "Hello", true);
+
+    const [, summaryData] = mockBatchSet.mock.calls[1];
+    expect(summaryData).toMatchObject({ characterId: "char-1" });
+  });
+
   it("trims whitespace from text in both the message doc and thread summary", async () => {
-    await sendMessage("c1", "p1", "p1", "  spaces  ");
+    await sendMessage("c1", "char-1", "p1", "  spaces  ", true);
 
     const [, messageData] = mockBatchSet.mock.calls[0];
     const [, summaryData] = mockBatchSet.mock.calls[1];
@@ -115,7 +122,7 @@ describe("sendMessage", () => {
   });
 
   it("commits the batch exactly once", async () => {
-    await sendMessage("c1", "p1", "p1", "Hello");
+    await sendMessage("c1", "char-1", "p1", "Hello", true);
     expect(mockBatchCommit).toHaveBeenCalledOnce();
   });
 });
@@ -125,16 +132,16 @@ describe("sendMessage", () => {
 describe("markThreadRead", () => {
 
   it("calls updateDoc with unreadForDM: 0 on the correct thread ref", async () => {
-    await markThreadRead("c1", "p1");
+    await markThreadRead("c1", "char-1");
 
     expect(mockUpdateDoc).toHaveBeenCalledWith(
-      "campaigns/c1/threads/p1",
+      "campaigns/c1/threads/char-1",
       { unreadForDM: 0 }
     );
   });
 
   it("calls updateDoc exactly once", async () => {
-    await markThreadRead("c1", "p1");
+    await markThreadRead("c1", "char-1");
     expect(mockUpdateDoc).toHaveBeenCalledOnce();
   });
 });
@@ -146,18 +153,18 @@ describe("clearThread", () => {
   it("batch-deletes all messages and resets the thread summary", async () => {
     mockGetDocs.mockResolvedValue(
       makeDocs([
-        "campaigns/c1/threads/p1/messages/m1",
-        "campaigns/c1/threads/p1/messages/m2",
+        "campaigns/c1/threads/char-1/messages/m1",
+        "campaigns/c1/threads/char-1/messages/m2",
       ])
     );
 
-    await clearThread("c1", "p1");
+    await clearThread("c1", "char-1");
 
-    expect(mockBatchDelete).toHaveBeenCalledWith("campaigns/c1/threads/p1/messages/m1");
-    expect(mockBatchDelete).toHaveBeenCalledWith("campaigns/c1/threads/p1/messages/m2");
+    expect(mockBatchDelete).toHaveBeenCalledWith("campaigns/c1/threads/char-1/messages/m1");
+    expect(mockBatchDelete).toHaveBeenCalledWith("campaigns/c1/threads/char-1/messages/m2");
     expect(mockBatchSet).toHaveBeenCalledWith(
-      "campaigns/c1/threads/p1",
-      { playerUid: "p1", lastMessage: null, lastTimestamp: null, unreadForDM: 0 }
+      "campaigns/c1/threads/char-1",
+      { characterId: "char-1", lastMessage: null, lastTimestamp: null, unreadForDM: 0 }
     );
     expect(mockBatchCommit).toHaveBeenCalledOnce();
   });
@@ -165,13 +172,13 @@ describe("clearThread", () => {
   it("handles an empty thread gracefully — setDoc only, no batch", async () => {
     mockGetDocs.mockResolvedValue(makeDocs([]));
 
-    await clearThread("c1", "p1");
+    await clearThread("c1", "char-1");
 
     expect(mockBatchDelete).not.toHaveBeenCalled();
     expect(mockBatchCommit).not.toHaveBeenCalled();
     expect(mockSetDoc).toHaveBeenCalledWith(
-      "campaigns/c1/threads/p1",
-      { playerUid: "p1", lastMessage: null, lastTimestamp: null, unreadForDM: 0 }
+      "campaigns/c1/threads/char-1",
+      { characterId: "char-1", lastMessage: null, lastTimestamp: null, unreadForDM: 0 }
     );
   });
 });

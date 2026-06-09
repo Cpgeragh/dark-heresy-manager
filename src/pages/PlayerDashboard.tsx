@@ -16,16 +16,48 @@ type Props = {
   user: User;
 };
 
+// ─── Player Thread — one per character ───────────────────────────────────────
+
+function PlayerThread({
+  campaignId,
+  characterId,
+  playerUid,
+}: {
+  campaignId: string;
+  characterId: string;
+  playerUid: string;
+}) {
+  const { messages, loading } = useThreadMessages(campaignId, characterId);
+
+  const handleSend = useCallback(
+    async (text: string) => {
+      await sendMessage(campaignId, characterId, playerUid, text, true);
+    },
+    [campaignId, characterId, playerUid]
+  );
+
+  return (
+    <div className="mt-3 border border-slate-700 rounded-lg p-3 bg-slate-900/40">
+      <MessageThread messages={messages} currentUid={playerUid} loading={loading} />
+      <MessageInput onSend={handleSend} placeholder="Message your DM…" />
+    </div>
+  );
+}
+
 // ─── Character Card ───────────────────────────────────────────────────────────
 
 function CharacterCard({
   character,
   campaignId,
+  currentUid,
 }: {
   character: CharacterListItem;
   campaignId: string;
+  currentUid: string;
 }) {
   const navigate = useNavigate();
+  const [showMessages, setShowMessages] = useState(false);
+
   const name = character.header?.characterName ?? "Unnamed Character";
   const career = character.header?.career;
   const rank = character.header?.rank;
@@ -81,32 +113,24 @@ function CharacterCard({
       )}
 
       <div className="text-xs text-slate-600 font-mono">Recovery: {character.recoveryCode}</div>
-    </div>
-  );
-}
 
-// ─── Player Thread — player's conversation with the DM ───────────────────────
+      {/* Message DM — per character */}
+      <div className="pt-3 border-t border-slate-800">
+        <button
+          onClick={() => setShowMessages((v) => !v)}
+          className="text-sm text-slate-400 hover:text-slate-200 transition-colors"
+        >
+          {showMessages ? "▾" : "▸"} Message DM
+        </button>
 
-function PlayerThread({
-  campaignId,
-  playerUid,
-}: {
-  campaignId: string;
-  playerUid: string;
-}) {
-  const { messages, loading } = useThreadMessages(campaignId, playerUid);
-
-  const handleSend = useCallback(
-    async (text: string) => {
-      await sendMessage(campaignId, playerUid, playerUid, text);
-    },
-    [campaignId, playerUid]
-  );
-
-  return (
-    <div className="mt-3 border border-slate-700 rounded-lg p-3 bg-slate-900/40">
-      <MessageThread messages={messages} currentUid={playerUid} loading={loading} />
-      <MessageInput onSend={handleSend} placeholder="Message your DM…" />
+        {showMessages && (
+          <PlayerThread
+            campaignId={campaignId}
+            characterId={character.id}
+            playerUid={currentUid}
+          />
+        )}
+      </div>
     </div>
   );
 }
@@ -125,7 +149,6 @@ function CampaignSection({
   currentUid: string;
 }) {
   const { characters, loading } = usePlayerCharacters(campaignId, userId);
-  const [showMessages, setShowMessages] = useState(false);
 
   return (
     <div className="border border-slate-700 rounded-lg p-4 space-y-4 bg-slate-900/40">
@@ -140,24 +163,15 @@ function CampaignSection({
       {!loading && characters.length > 0 && (
         <div className="space-y-3">
           {characters.map((c) => (
-            <CharacterCard key={c.id} character={c} campaignId={campaignId} />
+            <CharacterCard
+              key={c.id}
+              character={c}
+              campaignId={campaignId}
+              currentUid={currentUid}
+            />
           ))}
         </div>
       )}
-
-      {/* Message DM */}
-      <div className="pt-3 border-t border-slate-800">
-        <button
-          onClick={() => setShowMessages((v) => !v)}
-          className="text-sm text-slate-400 hover:text-slate-200 transition-colors"
-        >
-          {showMessages ? "▾" : "▸"} Message DM
-        </button>
-
-        {showMessages && (
-          <PlayerThread campaignId={campaignId} playerUid={currentUid} />
-        )}
-      </div>
     </div>
   );
 }

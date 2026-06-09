@@ -298,8 +298,9 @@ service cloud.firestore {
 
     // ============================
     // MESSAGES
+    // Threads are keyed by characterId — one thread per character, not per player.
     // ============================
-    match /campaigns/{campaignId}/threads/{playerUid} {
+    match /campaigns/{campaignId}/threads/{characterId} {
 
       function dmOwnsMessagingCampaign() {
         return request.auth != null &&
@@ -307,25 +308,28 @@ service cloud.firestore {
                  .data.dmId == request.auth.uid;
       }
 
-      // DM reads all thread summaries; player reads only their own
-      allow read: if dmOwnsMessagingCampaign() ||
-                     (request.auth != null && request.auth.uid == playerUid);
+      // The player who owns this character (character.userId == request.auth.uid)
+      function playerOwnsCharacter() {
+        return request.auth != null &&
+               get(/databases/$(database)/documents/campaigns/$(campaignId)/characters/$(characterId))
+                 .data.userId == request.auth.uid;
+      }
 
-      // DM or the player can create/update the summary (sendMessage + markRead)
-      allow create, update: if dmOwnsMessagingCampaign() ||
-                               (request.auth != null && request.auth.uid == playerUid);
+      // DM reads all thread summaries; player reads only their own character's thread
+      allow read: if dmOwnsMessagingCampaign() || playerOwnsCharacter();
+
+      // DM or the character owner can create/update the summary (sendMessage + markRead)
+      allow create, update: if dmOwnsMessagingCampaign() || playerOwnsCharacter();
 
       // Only DM can delete a thread summary (clear chat)
       allow delete: if dmOwnsMessagingCampaign();
 
       match /messages/{messageId} {
-        // DM reads all; player reads only their own thread's messages
-        allow read: if dmOwnsMessagingCampaign() ||
-                       (request.auth != null && request.auth.uid == playerUid);
+        // DM reads all; player reads only their own character's thread messages
+        allow read: if dmOwnsMessagingCampaign() || playerOwnsCharacter();
 
-        // DM or the thread's player can send messages; fromUid must match sender
-        allow create: if (dmOwnsMessagingCampaign() ||
-                         (request.auth != null && request.auth.uid == playerUid)) &&
+        // DM or the character owner can send messages; fromUid must match sender
+        allow create: if (dmOwnsMessagingCampaign() || playerOwnsCharacter()) &&
                          request.resource.data.fromUid == request.auth.uid;
 
         // DM can delete messages (clear chat); nobody can edit
