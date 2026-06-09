@@ -73,6 +73,7 @@ export interface CharacterListItem {
     total: number;
     spent: number;
   };
+  portraitUrl?: string;
 }
 
 /**

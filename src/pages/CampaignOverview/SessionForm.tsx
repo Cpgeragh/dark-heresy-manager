@@ -59,8 +59,8 @@ export function SessionForm({ campaignId, characters, onClose }: Props) {
   }, [campaignId, date, summary, dmNotes, xpAwarded, attendees, toast, onClose]);
 
   return (
-    <div className="border border-slate-600 rounded p-4 bg-slate-900/60 space-y-4">
-      <h3 className="text-lg font-semibold">New Session</h3>
+    <div className="rounded-lg border border-slate-500 bg-slate-900/60 p-3 space-y-4">
+      <h3 className="border-l-2 border-amber-500 pl-2 text-xs font-semibold uppercase tracking-widest text-amber-400">New Session</h3>
 
       <div className="grid grid-cols-2 gap-4">
         <div>

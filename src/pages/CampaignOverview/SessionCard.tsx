@@ -211,7 +211,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
   }
 
   return (
-    <div className="border border-slate-700 rounded p-4 bg-slate-900/40 space-y-2">
+    <div className="rounded-lg border border-slate-500 bg-slate-900/60 p-3 space-y-2">
       <div className="flex items-center justify-between">
         <span className="font-semibold">{dateStr}</span>
         <div className="flex items-center gap-2">
