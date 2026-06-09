@@ -101,6 +101,14 @@ export async function reclaimIdentity(uid: string, code: string): Promise<"dm" |
       if (!campaignsSnap.empty) {
         const batch = writeBatch(db);
         for (const campDoc of campaignsSnap.docs) {
+          // Swap old uid out of memberIds and new uid in
+          const campData = campDoc.data() as { memberIds: string[] };
+          const newMemberIds = campData.memberIds
+            .filter((id) => id !== oldUid)
+            .concat(uid);
+          batch.update(campDoc.ref, { memberIds: newMemberIds });
+
+          // Migrate characters owned by the old uid
           const charsSnap = await getDocs(
             query(
               collection(db, "campaigns", campDoc.id, "characters"),
