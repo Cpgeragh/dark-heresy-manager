@@ -171,6 +171,30 @@ describe("Firestore Rules: Campaigns", () => {
     ).rejects.toThrow();
   });
 
+  it("DM can restore their own archived campaign", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+
+    await createCampaign(env, "c1", "dm-1", { name: "Sample", archivedAt: new Date() });
+
+    const dmDb = dbAs(env, "dm-1");
+
+    await expect(
+      dmDb.collection("campaigns").doc("c1").update({ archivedAt: null })
+    ).resolves.toBeUndefined();
+  });
+
+  it("non-DM cannot restore someone else's archived campaign", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+
+    await createCampaign(env, "c1", "dm-1", { name: "Sample", archivedAt: new Date() });
+
+    const playerDb = dbAs(env, "player-1");
+
+    await expect(
+      playerDb.collection("campaigns").doc("c1").update({ archivedAt: null })
+    ).rejects.toThrow();
+  });
+
   it("reclaimer can transfer dmId to their uid when a valid reclaim doc exists", async () => {
     const env = await getTestEnv() as RulesTestEnvironment;
     await createCampaign(env, "c1", "dm-old", { name: "Sample" });

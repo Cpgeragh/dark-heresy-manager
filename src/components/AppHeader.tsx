@@ -51,14 +51,6 @@ export function AppHeader({ isDM, currentPath }: AppHeaderProps) {
 
         {/* Nav + kebab */}
         <div className="ml-auto flex items-center gap-2 shrink-0">
-          {isDM && (
-            <NavLinkButton
-              to="/select"
-              label="Select Campaign"
-              current={currentPath === "/select"}
-            />
-          )}
-
           {/* Settings */}
           <Link
             to={ROUTES.SETTINGS}
@@ -98,21 +90,3 @@ export function AppHeader({ isDM, currentPath }: AppHeaderProps) {
   );
 }
 
-// -------------------------------------------------
-// NAV LINK BUTTON
-// -------------------------------------------------
-function NavLinkButton(props: { to: string; label: string; current?: boolean }) {
-  return (
-    <Link
-      to={props.to}
-      className={`px-3 py-1 rounded-full text-sm border transition
-        ${
-          props.current
-            ? "bg-amber-500 text-slate-900 border-amber-400 shadow"
-            : "border-slate-600 text-slate-200 hover:bg-slate-800"
-        }`}
-    >
-      {props.label}
-    </Link>
-  );
-}
