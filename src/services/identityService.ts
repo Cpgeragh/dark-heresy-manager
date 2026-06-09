@@ -136,6 +136,27 @@ export async function reclaimIdentity(uid: string, code: string): Promise<"dm" |
 }
 
 /**
+ * Reads the user's current recovery code from identitySecret.
+ * Returns null if no code exists (e.g. user hasn't completed onboarding).
+ */
+export async function getRecoveryCode(uid: string): Promise<string | null> {
+  const snap = await getDoc(doc(db, "identitySecret", uid));
+  if (!snap.exists()) return null;
+  return (snap.data() as { code: string }).code;
+}
+
+/**
+ * Rotates the user's recovery code.
+ * Fetches the current code, then calls registerIdentityRecovery with it so the
+ * old identityRecovery entry is cleaned up atomically.
+ * Returns the new code so the UI can display it.
+ */
+export async function rotateRecoveryCode(uid: string, role: "dm" | "player"): Promise<string> {
+  const existingCode = await getRecoveryCode(uid);
+  return registerIdentityRecovery(uid, role, existingCode ?? undefined);
+}
+
+/**
  * Removes both identity recovery documents for a user.
  * Called when a user explicitly opts out of recovery, or before re-registering.
  */
