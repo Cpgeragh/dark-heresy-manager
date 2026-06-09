@@ -57,6 +57,21 @@ service cloud.firestore {
            get(/databases/$(database)/documents/identityReclaims/$(request.auth.uid)).data.oldUid
              == resource.data.dmId;
 
+      // Identity reclaim (player): swap the old uid out of memberIds and the new uid in.
+      // Guards: only memberIds changes; new uid is present; old uid is absent;
+      // every other previous member is still present (no one else was removed).
+      allow update:
+        if request.auth != null &&
+           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberIds']) &&
+           request.auth.uid in request.resource.data.get('memberIds', []) &&
+           !(get(/databases/$(database)/documents/identityReclaims/$(request.auth.uid)).data.oldUid
+               in request.resource.data.get('memberIds', [])) &&
+           request.resource.data.get('memberIds', []).hasAll(
+             resource.data.get('memberIds', []).removeAll([
+               get(/databases/$(database)/documents/identityReclaims/$(request.auth.uid)).data.oldUid
+             ])
+           );
+
       // ============================
       // CHARACTERS
       // ============================

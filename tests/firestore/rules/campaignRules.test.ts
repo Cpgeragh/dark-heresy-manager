@@ -190,4 +190,38 @@ describe("Firestore Rules: Campaigns", () => {
     ).rejects.toThrow();
   });
 
+  it("reclaimer can swap memberIds (old uid out, new uid in) with a valid reclaim doc", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+    await createCampaign(env, "c1", "dm-1", {
+      name: "Sample",
+      memberIds: ["player-old", "player-other"],
+    });
+    await createIdentityReclaimEntry(env, "player-new", {
+      oldUid: "player-old",
+      code: "DH-CODE",
+    });
+
+    await expect(
+      dbAs(env, "player-new")
+        .collection("campaigns")
+        .doc("c1")
+        .update({ memberIds: ["player-other", "player-new"] })
+    ).resolves.toBeUndefined();
+  });
+
+  it("user without a reclaim doc cannot use the reclaim path to change memberIds", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+    await createCampaign(env, "c1", "dm-1", {
+      name: "Sample",
+      memberIds: ["player-old", "player-other"],
+    });
+
+    await expect(
+      dbAs(env, "player-new")
+        .collection("campaigns")
+        .doc("c1")
+        .update({ memberIds: ["player-other", "player-new"] })
+    ).rejects.toThrow();
+  });
+
 });

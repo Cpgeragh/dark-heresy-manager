@@ -163,10 +163,17 @@ function makeRecoverySnap(uid: string, role: string) {
 function makeEmptySnap() {
   return { exists: () => false, data: () => null };
 }
-function makeQuerySnap(refs: string[]) {
+function makeQuerySnap(
+  refs: string[],
+  getData?: (ref: string) => Record<string, unknown>
+) {
   return {
     empty: refs.length === 0,
-    docs:  refs.map((ref) => ({ ref, id: ref.split("/").pop() })),
+    docs:  refs.map((ref) => ({
+      ref,
+      id:   ref.split("/").pop(),
+      data: getData ? () => getData(ref) : () => ({}),
+    })),
   };
 }
 
@@ -220,14 +227,27 @@ describe("reclaimIdentity", () => {
     expect(mockBatchCommit).toHaveBeenCalledOnce();
   });
 
-  it("queries member campaigns then character userId for player reclaim", async () => {
+  it("queries member campaigns then swaps memberIds and character userId for player reclaim", async () => {
     mockGetDoc.mockResolvedValue(makeRecoverySnap("uid-old", "player"));
     mockGetDocs
-      .mockResolvedValueOnce(makeQuerySnap(["campaigns/camp-1"]))           // campaigns query
-      .mockResolvedValueOnce(makeQuerySnap(["campaigns/camp-1/characters/char-1"])); // chars query
+      // First call: campaigns where memberIds contains uid-old
+      .mockResolvedValueOnce(
+        makeQuerySnap(["campaigns/camp-1"], () => ({
+          memberIds: ["uid-old", "player-other"],
+        }))
+      )
+      // Second call: characters in that campaign owned by uid-old
+      .mockResolvedValueOnce(
+        makeQuerySnap(["campaigns/camp-1/characters/char-1"])
+      );
 
     await reclaimIdentity("uid-new", "DH-CODE");
 
+    // memberIds: uid-old replaced with uid-new, other members preserved
+    expect(mockBatchUpdate).toHaveBeenCalledWith("campaigns/camp-1", {
+      memberIds: ["player-other", "uid-new"],
+    });
+    // character userId transferred
     expect(mockBatchUpdate).toHaveBeenCalledWith(
       "campaigns/camp-1/characters/char-1",
       { userId: "uid-new" }
