@@ -7,10 +7,10 @@ import { useState } from "react";
 import type { User } from "firebase/auth";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
-import { registerIdentityRecovery } from "../services/identityService";
+import { registerIdentityRecovery, reclaimIdentity } from "../services/identityService";
 
 type Role = "dm" | "player";
-type Step = "pick-role" | "show-code";
+type Step = "pick-role" | "show-code" | "reclaim";
 
 interface Props {
   user: User;
@@ -23,6 +23,7 @@ export default function Onboarding({ user, onComplete }: Props) {
   const [code, setCode] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [reclaimCode, setReclaimCode] = useState("");
 
   async function handleRoleSelect(chosen: Role) {
     setBusy(true);
@@ -46,6 +47,26 @@ export default function Onboarding({ user, onComplete }: Props) {
 
   function handleConfirm() {
     if (role) onComplete(role);
+  }
+
+  async function handleReclaim() {
+    const trimmed = reclaimCode.trim().toUpperCase();
+    if (!trimmed) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const reclaimedRole = await reclaimIdentity(user.uid, trimmed);
+      onComplete(reclaimedRole);
+    } catch (err) {
+      console.error("Reclaim error:", err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Something went wrong. Please check your code and try again."
+      );
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -80,6 +101,51 @@ export default function Onboarding({ user, onComplete }: Props) {
                 {busy ? "Setting up…" : "I'm a Player"}
               </button>
             </div>
+
+            {error && (
+              <p className="mt-4 text-red-400 text-sm text-center">{error}</p>
+            )}
+
+            <button
+              onClick={() => { setError(null); setStep("reclaim"); }}
+              className="mt-8 w-full text-sm text-slate-500 hover:text-slate-300 transition text-center"
+            >
+              Returning user? Reclaim your identity →
+            </button>
+          </>
+        )}
+
+        {/* ── Step: Reclaim ── */}
+        {step === "reclaim" && (
+          <>
+            <button
+              onClick={() => { setError(null); setStep("pick-role"); }}
+              className="mb-6 text-sm text-slate-500 hover:text-slate-300 transition"
+            >
+              ← Back
+            </button>
+
+            <h1 className="text-2xl font-bold mb-2">Returning User</h1>
+            <p className="text-slate-400 mb-6">
+              Enter the recovery code you saved when you first set up the app.
+            </p>
+
+            <input
+              type="text"
+              value={reclaimCode}
+              onChange={(e) => setReclaimCode(e.target.value.toUpperCase())}
+              placeholder="DH-XXXX-YYYY"
+              disabled={busy}
+              className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-600 text-slate-100 font-mono text-base placeholder:text-slate-600 focus:outline-none focus:border-amber-500 disabled:opacity-50 mb-4"
+            />
+
+            <button
+              onClick={handleReclaim}
+              disabled={busy || !reclaimCode.trim()}
+              className="w-full py-3 rounded-xl bg-amber-500 text-slate-900 font-bold text-base hover:bg-amber-400 transition disabled:opacity-50"
+            >
+              {busy ? "Reclaiming…" : "Reclaim Identity"}
+            </button>
 
             {error && (
               <p className="mt-4 text-red-400 text-sm text-center">{error}</p>

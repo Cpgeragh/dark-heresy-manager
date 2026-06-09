@@ -8,6 +8,7 @@ import {
   dbAnon,
   createIdentityRecoveryEntry,
   createIdentitySecretEntry,
+  createIdentityReclaimEntry,
 } from "../helpers";
 
 // ============================================================
@@ -138,6 +139,138 @@ describe("Firestore Rules: identitySecret", () => {
         .collection("identitySecret")
         .doc("uid-2")
         .set({ code: "CODE-XYZ" })
+    ).rejects.toThrow();
+  });
+});
+
+// ============================================================
+// identityReclaims/{uid}
+// Temporary proof documents created during identity migration.
+// ============================================================
+describe("Firestore Rules: identityReclaims", () => {
+
+  afterEach(async () => {
+    const env = await getTestEnv();
+    await env.clearFirestore();
+  });
+
+  it("owner can create a reclaim request when the code matches identitySecret", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+    await createIdentitySecretEntry(env, "uid-old", { code: "DH-CORRECT-CODE" });
+
+    await expect(
+      dbAs(env, "uid-new")
+        .collection("identityReclaims")
+        .doc("uid-new")
+        .set({ oldUid: "uid-old", code: "DH-CORRECT-CODE" })
+    ).resolves.toBeUndefined();
+  });
+
+  it("owner cannot create a reclaim request with a wrong code", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+    await createIdentitySecretEntry(env, "uid-old", { code: "DH-CORRECT-CODE" });
+
+    await expect(
+      dbAs(env, "uid-new")
+        .collection("identityReclaims")
+        .doc("uid-new")
+        .set({ oldUid: "uid-old", code: "DH-WRONG-CODE" })
+    ).rejects.toThrow();
+  });
+
+  it("unauthenticated user cannot create a reclaim request", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+    await createIdentitySecretEntry(env, "uid-old", { code: "DH-CORRECT-CODE" });
+
+    await expect(
+      dbAnon(env)
+        .collection("identityReclaims")
+        .doc("uid-new")
+        .set({ oldUid: "uid-old", code: "DH-CORRECT-CODE" })
+    ).rejects.toThrow();
+  });
+
+  it("user cannot create a reclaim request for another uid", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+    await createIdentitySecretEntry(env, "uid-old", { code: "DH-CORRECT-CODE" });
+
+    await expect(
+      dbAs(env, "uid-new")
+        .collection("identityReclaims")
+        .doc("uid-other")  // document id doesn't match auth uid
+        .set({ oldUid: "uid-old", code: "DH-CORRECT-CODE" })
+    ).rejects.toThrow();
+  });
+
+  it("owner can read their own reclaim document", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+    await createIdentityReclaimEntry(env, "uid-new", { oldUid: "uid-old", code: "DH-CODE" });
+
+    await expect(
+      dbAs(env, "uid-new").collection("identityReclaims").doc("uid-new").get()
+    ).resolves.toBeDefined();
+  });
+
+  it("another user cannot read someone else's reclaim document", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+    await createIdentityReclaimEntry(env, "uid-new", { oldUid: "uid-old", code: "DH-CODE" });
+
+    await expect(
+      dbAs(env, "uid-other").collection("identityReclaims").doc("uid-new").get()
+    ).rejects.toThrow();
+  });
+
+  it("owner can delete their own reclaim document", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+    await createIdentityReclaimEntry(env, "uid-new", { oldUid: "uid-old", code: "DH-CODE" });
+
+    await expect(
+      dbAs(env, "uid-new").collection("identityReclaims").doc("uid-new").delete()
+    ).resolves.toBeUndefined();
+  });
+
+  it("another user cannot delete someone else's reclaim document", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+    await createIdentityReclaimEntry(env, "uid-new", { oldUid: "uid-old", code: "DH-CODE" });
+
+    await expect(
+      dbAs(env, "uid-other").collection("identityReclaims").doc("uid-new").delete()
+    ).rejects.toThrow();
+  });
+});
+
+// ============================================================
+// identityRecovery — update (reclaim path)
+// ============================================================
+describe("Firestore Rules: identityRecovery update (reclaim)", () => {
+
+  afterEach(async () => {
+    const env = await getTestEnv();
+    await env.clearFirestore();
+  });
+
+  it("reclaimer can update identityRecovery uid when a valid reclaim doc exists", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+    await createIdentityRecoveryEntry(env, "DH-CODE", { uid: "uid-old", role: "dm" });
+    await createIdentityReclaimEntry(env, "uid-new", { oldUid: "uid-old", code: "DH-CODE" });
+
+    await expect(
+      dbAs(env, "uid-new")
+        .collection("identityRecovery")
+        .doc("DH-CODE")
+        .update({ uid: "uid-new" })
+    ).resolves.toBeUndefined();
+  });
+
+  it("user without a reclaim doc cannot update identityRecovery uid", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+    await createIdentityRecoveryEntry(env, "DH-CODE", { uid: "uid-old", role: "dm" });
+
+    await expect(
+      dbAs(env, "uid-new")
+        .collection("identityRecovery")
+        .doc("DH-CODE")
+        .update({ uid: "uid-new" })
     ).rejects.toThrow();
   });
 });

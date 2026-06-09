@@ -3,7 +3,7 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { getTestEnv } from "../setup";
 import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
-import { dbAs, createCampaign } from "../helpers";
+import { dbAs, createCampaign, createIdentityReclaimEntry } from "../helpers";
 
 describe("Firestore Rules: Campaigns", () => {
 
@@ -168,6 +168,25 @@ describe("Firestore Rules: Campaigns", () => {
 
     await expect(
       playerDb.collection("campaigns").doc("c1").update({ archivedAt: new Date() })
+    ).rejects.toThrow();
+  });
+
+  it("reclaimer can transfer dmId to their uid when a valid reclaim doc exists", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+    await createCampaign(env, "c1", "dm-old", { name: "Sample" });
+    await createIdentityReclaimEntry(env, "dm-new", { oldUid: "dm-old", code: "DH-CODE" });
+
+    await expect(
+      dbAs(env, "dm-new").collection("campaigns").doc("c1").update({ dmId: "dm-new" })
+    ).resolves.toBeUndefined();
+  });
+
+  it("user without a reclaim doc cannot use the reclaim path to change dmId", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+    await createCampaign(env, "c1", "dm-old", { name: "Sample" });
+
+    await expect(
+      dbAs(env, "dm-new").collection("campaigns").doc("c1").update({ dmId: "dm-new" })
     ).rejects.toThrow();
   });
 
