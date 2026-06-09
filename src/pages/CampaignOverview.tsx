@@ -11,6 +11,7 @@ import { useCampaignCharacters } from "../hooks/useCampaignCharacters";
 import { SessionForm } from "./CampaignOverview/SessionForm";
 import { SessionCard } from "./CampaignOverview/SessionCard";
 import { CharacterRow } from "./CampaignOverview/CharacterRow";
+import { DMInbox } from "./CampaignOverview/DMInbox";
 import { applySessionXp } from "../services/sessionService";
 import { createNewCharacter, importCharacter } from "../services/characterService";
 import { validateCharacterName } from "../utils/validation";
@@ -165,6 +166,18 @@ export default function CampaignOverview() {
           )}
         </div>
       </div>
+
+      {/* MESSAGES */}
+      {isDM && (
+        <div>
+          <h2 className="text-xl font-semibold mb-3">Messages</h2>
+          <DMInbox
+            campaignId={campaignId}
+            dmUid={campaign?.dmId ?? ""}
+            characters={characters}
+          />
+        </div>
+      )}
 
       {/* SESSION HISTORY */}
       <div>

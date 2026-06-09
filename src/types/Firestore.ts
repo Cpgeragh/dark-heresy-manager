@@ -26,7 +26,7 @@ export type CampaignWithId = CampaignDocument & { id: string };
  */
 export interface UserDocument {
   role: "player" | "dm";
-  activeCampaignId: string | null;
+  activeCampaignId?: string | null;
   createdAt: Timestamp | Date | FieldValue;
   lastSeen: Timestamp | Date | FieldValue;
   onboarded?: boolean;
@@ -98,4 +98,27 @@ export interface XpProposalDocument {
   xpCost: number;
   status: "pending" | "approved" | "rejected";
   proposedAt: Timestamp | Date | FieldValue;
+}
+
+/**
+ * A single message in a player-DM thread.
+ * Stored in /campaigns/{campaignId}/threads/{playerUid}/messages/{messageId}
+ */
+export interface ThreadMessage {
+  id: string;
+  fromUid: string;
+  text: string;
+  timestamp: Timestamp | null; // null briefly before serverTimestamp resolves
+  read: boolean;
+}
+
+/**
+ * Thread summary doc — one per player per campaign.
+ * Stored in /campaigns/{campaignId}/threads/{playerUid}
+ */
+export interface ThreadSummary {
+  playerUid: string;
+  lastMessage: string | null;
+  lastTimestamp: Timestamp | null;
+  unreadForDM: number;
 }
