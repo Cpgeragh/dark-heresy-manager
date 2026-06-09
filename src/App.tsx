@@ -1,10 +1,8 @@
 // src/App.tsx
 
-import { useCallback } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 
 import { useAuth } from "./hooks/useAuth";
-import { updateActiveCampaign } from "./services/userService";
 import { useUserRole } from "./hooks/useUserRole";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { AppHeader } from "./components/AppHeader";
@@ -18,7 +16,6 @@ import { ROUTES, ROUTE_PATTERNS } from "./constants/routes";
 import DMDashboard from "./pages/DMDashboard";
 import PlayerDashboard from "./pages/PlayerDashboard";
 import ClaimCharacterPage from "./pages/ClaimCharacter/ClaimCharacterPage";
-import SelectCampaign from "./pages/SelectCampaign";
 import CharacterSheet from "./pages/CharacterSheet";
 import CampaignOverview from "./pages/CampaignOverview";
 import Onboarding from "./pages/Onboarding";
@@ -33,33 +30,19 @@ export default function App() {
   const {
     currentUser,
     userRole,
-    activeCampaignId,
     loading,
     onboarded,
     setUserRole,
-    setActiveCampaignId,
     setOnboarded,
   } = useAuth();
 
   // -------------------------------------------------
-  // ROLE SWITCHING (DEV ONLY)
+  // ROLE SWITCHING
   // -------------------------------------------------
   const { switchToDM, switchToPlayer } = useUserRole({
     currentUser,
     onRoleChange: setUserRole,
   });
-
-  // -------------------------------------------------
-  // ACTIVE CAMPAIGN HANDLER
-  // -------------------------------------------------
-  const handleActiveCampaignChange = useCallback(
-    (id: string | null) => {
-      setActiveCampaignId(id);
-      if (!currentUser) return;
-      void updateActiveCampaign(currentUser.uid, id); // intentional fire-and-forget
-    },
-    [currentUser, setActiveCampaignId]
-  );
 
   // -------------------------------------------------
   // LOADING STATES
@@ -114,27 +97,10 @@ export default function App() {
               <ErrorBoundary>
                 <Routes>
                   {isDM && (
-                    <>
-                      <Route
-                        path={ROUTES.DM_DASHBOARD}
-                        element={
-                          <DMDashboard
-                            user={currentUser}
-                          />
-                        }
-                      />
-                      <Route
-                        path={ROUTES.SELECT_CAMPAIGN}
-                        element={
-                          <SelectCampaign
-                            user={currentUser}
-                            role="dm"
-                            activeCampaignId={activeCampaignId}
-                            onActiveCampaignChange={handleActiveCampaignChange}
-                          />
-                        }
-                      />
-                    </>
+                    <Route
+                      path={ROUTES.DM_DASHBOARD}
+                      element={<DMDashboard user={currentUser} />}
+                    />
                   )}
 
                   {!isDM && (

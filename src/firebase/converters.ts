@@ -62,6 +62,10 @@ export function campaignsCollectionRef() {
   return collection(db, "campaigns").withConverter(campaignConverter);
 }
 
+export function campaignDocRef(campaignId: string) {
+  return doc(db, "campaigns", campaignId).withConverter(campaignConverter);
+}
+
 /**
  * USER CONVERTER
  * - No id field to strip/inject — ensures the document shape is typed

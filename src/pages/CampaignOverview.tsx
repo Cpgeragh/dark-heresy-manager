@@ -4,6 +4,7 @@ import { useState, useCallback, useRef } from "react";
 import { useParams } from "react-router-dom";
 
 import { useIsDM } from "../hooks/useIsDM";
+import { useCampaign } from "../hooks/useCampaign";
 import { useSessions } from "../hooks/useSessions";
 import { useCharacterSummaries } from "../hooks/useCharacterSummaries";
 import { useCampaignCharacters } from "../hooks/useCampaignCharacters";
@@ -21,6 +22,7 @@ export default function CampaignOverview() {
   const campaignId = params.campaignId;
 
   const isDM = useIsDM(campaignId);
+  const { campaign } = useCampaign(campaignId ?? null);
   const { sessions, loading: sessionsLoading, deleteSession, updateSession } = useSessions(campaignId);
   const { characters: summaries, loading } = useCharacterSummaries(campaignId);
   const { characters } = useCampaignCharacters(campaignId ?? null);
@@ -89,7 +91,7 @@ export default function CampaignOverview() {
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Campaign Overview</h1>
+        <h1 className="text-3xl font-bold">{campaign?.name ?? "Campaign Overview"}</h1>
         {isDM && !showSessionForm && (
           <button
             onClick={() => setShowSessionForm(true)}
