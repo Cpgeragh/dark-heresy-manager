@@ -27,8 +27,12 @@ export default function Settings({ user, currentRole, onSwitchToDM, onSwitchToPl
   async function handleReveal() {
     setRevealing(true);
     try {
-      const code = await getRecoveryCode(user.uid);
-      setRevealedCode(code ?? "No code found — try rotating to generate one.");
+      let code = await getRecoveryCode(user.uid);
+      if (!code) {
+        code = await rotateRecoveryCode(user.uid, currentRole);
+        toast.success("Recovery code generated.");
+      }
+      setRevealedCode(code);
     } catch (err) {
       console.error("Failed to reveal recovery code:", err);
       toast.error("Failed to load recovery code.");
