@@ -2,6 +2,7 @@
 
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
+import { PortraitUpload } from "../components/PortraitUpload";
 import type { User } from "firebase/auth";
 import { useCampaignsForUser } from "../hooks/useCampaignsForUser";
 import { usePlayerCharacters } from "../hooks/usePlayerCharacters";
@@ -34,7 +35,14 @@ function CharacterCard({
       to={buildRoute.characterSheet(campaignId, character.id)}
       className="border border-slate-700 rounded-lg p-4 bg-slate-900/60 block hover:bg-slate-800 transition-colors"
     >
-      <div className="space-y-1">
+      <div className="flex items-center gap-3">
+        <PortraitUpload
+          campaignId={campaignId}
+          characterId={character.id}
+          currentPortraitUrl={character.portraitUrl}
+          canEdit={true}
+        />
+      <div className="flex-1 space-y-1">
         <div className="font-semibold text-slate-100 leading-tight">{name}</div>
         {(career || rank) && (
           <div className="text-sm text-slate-400">
@@ -65,6 +73,7 @@ function CharacterCard({
           </div>
         )}
         <div className="text-xs text-slate-600 font-mono">Recovery: {character.recoveryCode}</div>
+      </div>
       </div>
     </Link>
   );
