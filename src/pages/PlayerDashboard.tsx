@@ -1,70 +1,26 @@
 // src/pages/PlayerDashboard.tsx
 
-import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import type { User } from "firebase/auth";
 import { useCampaignsForUser } from "../hooks/useCampaignsForUser";
 import { usePlayerCharacters } from "../hooks/usePlayerCharacters";
-import { useThreadMessages } from "../hooks/useThreadMessages";
-import { sendMessage } from "../services/messageService";
-import { MessageThread } from "../components/MessageThread";
-import { MessageInput } from "../components/MessageInput";
 import { buildRoute, ROUTES } from "../constants/routes";
-import { useToast } from "../components/Toast";
 import type { CharacterListItem } from "../types/Firestore";
 
 type Props = {
   user: User;
 };
 
-// ─── Player Thread — one per character ───────────────────────────────────────
-
-function PlayerThread({
-  campaignId,
-  characterId,
-  playerUid,
-}: {
-  campaignId: string;
-  characterId: string;
-  playerUid: string;
-}) {
-  const { messages, loading } = useThreadMessages(campaignId, characterId);
-  const toast = useToast();
-
-  const handleSend = useCallback(
-    async (text: string) => {
-      try {
-        await sendMessage(campaignId, characterId, playerUid, text, true);
-      } catch (err) {
-        console.error("Failed to send message:", err);
-        toast.error("Failed to send message. Please try again.");
-      }
-    },
-    [campaignId, characterId, playerUid, toast]
-  );
-
-  return (
-    <div className="mt-3 border border-slate-700 rounded-lg p-3 bg-slate-900/40">
-      <MessageThread messages={messages} currentUid={playerUid} loading={loading} />
-      <MessageInput onSend={handleSend} placeholder="Message your DM…" />
-    </div>
-  );
-}
-
 // ─── Character Card ───────────────────────────────────────────────────────────
 
 function CharacterCard({
   character,
   campaignId,
-  currentUid,
 }: {
   character: CharacterListItem;
   campaignId: string;
-  currentUid: string;
 }) {
   const navigate = useNavigate();
-  const [showMessages, setShowMessages] = useState(false);
-
   const name = character.header?.characterName ?? "Unnamed Character";
   const career = character.header?.career;
   const rank = character.header?.rank;
@@ -120,24 +76,6 @@ function CharacterCard({
       )}
 
       <div className="text-xs text-slate-600 font-mono">Recovery: {character.recoveryCode}</div>
-
-      {/* Message DM — per character */}
-      <div className="pt-3 border-t border-slate-800">
-        <button
-          onClick={() => setShowMessages((v) => !v)}
-          className="text-sm text-slate-400 hover:text-slate-200 transition-colors"
-        >
-          {showMessages ? "▾" : "▸"} Message DM
-        </button>
-
-        {showMessages && (
-          <PlayerThread
-            campaignId={campaignId}
-            characterId={character.id}
-            playerUid={currentUid}
-          />
-        )}
-      </div>
     </div>
   );
 }
@@ -148,12 +86,10 @@ function CampaignSection({
   campaignId,
   campaignName,
   userId,
-  currentUid,
 }: {
   campaignId: string;
   campaignName: string;
   userId: string;
-  currentUid: string;
 }) {
   const { characters, loading } = usePlayerCharacters(campaignId, userId);
 
@@ -170,12 +106,7 @@ function CampaignSection({
       {!loading && characters.length > 0 && (
         <div className="space-y-3">
           {characters.map((c) => (
-            <CharacterCard
-              key={c.id}
-              character={c}
-              campaignId={campaignId}
-              currentUid={currentUid}
-            />
+            <CharacterCard key={c.id} character={c} campaignId={campaignId} />
           ))}
         </div>
       )}
@@ -236,7 +167,6 @@ export default function PlayerDashboard({ user }: Props) {
               campaignId={campaign.id}
               campaignName={campaign.name}
               userId={user.uid}
-              currentUid={user.uid}
             />
           ))}
         </div>
