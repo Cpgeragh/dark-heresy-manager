@@ -169,6 +169,7 @@ export default function CampaignOverview() {
                   characterName={char.header?.characterName ?? "Unnamed Character"}
                   userId={char.userId ?? null}
                   recoveryCode={char.recoveryCode}
+                  portraitUrl={char.portraitUrl}
                   isDM={isDM}
                 />
               ))

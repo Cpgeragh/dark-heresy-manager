@@ -8,6 +8,7 @@ import { useToast } from "../../components/Toast";
 import { cloneCharacter, deleteCharacter } from "../../services/characterService";
 import { uiSection } from "../../ui/editableStyles";
 import type { ClaimLogAction } from "../../utils/claimLog";
+import { PortraitUpload } from "../../components/PortraitUpload";
 
 function formatAction(action: ClaimLogAction): string {
   switch (action) {
@@ -37,6 +38,7 @@ export function CharacterRow({
   characterName,
   userId,
   recoveryCode,
+  portraitUrl,
   isDM,
 }: {
   campaignId: string;
@@ -44,6 +46,7 @@ export function CharacterRow({
   characterName: string;
   userId: string | null;
   recoveryCode?: string;
+  portraitUrl?: string;
   isDM: boolean;
 }) {
   const { logs } = useClaimLogs(campaignId, characterId);
@@ -81,15 +84,23 @@ export function CharacterRow({
         className={uiSection + " block hover:bg-slate-800 transition-colors"}
       >
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-          <div>
-            <span className="font-semibold text-slate-100 text-sm leading-tight">{characterName}</span>
-            <p className="text-xs text-slate-500 font-mono mt-0.5">Recovery: {recoveryCode ?? "—"}</p>
-            <p className="text-xs mt-0.5">
-              {userId
-                ? <span className="text-green-400">Claimed</span>
-                : <span className="text-slate-500">Unclaimed</span>
-              }
-            </p>
+          <div className="flex items-center gap-3">
+            <PortraitUpload
+              campaignId={campaignId}
+              characterId={characterId}
+              currentPortraitUrl={portraitUrl}
+              canEdit={false}
+            />
+            <div>
+              <span className="font-semibold text-slate-100 text-sm leading-tight">{characterName}</span>
+              <p className="text-xs text-slate-500 font-mono mt-0.5">Recovery: {recoveryCode ?? "—"}</p>
+              <p className="text-xs mt-0.5">
+                {userId
+                  ? <span className="text-green-400">Claimed</span>
+                  : <span className="text-slate-500">Unclaimed</span>
+                }
+              </p>
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 sm:shrink-0 justify-center sm:justify-start">
