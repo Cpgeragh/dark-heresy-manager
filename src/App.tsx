@@ -22,6 +22,7 @@ import SelectCampaign from "./pages/SelectCampaign";
 import CharacterSheet from "./pages/CharacterSheet";
 import CampaignOverview from "./pages/CampaignOverview";
 import Onboarding from "./pages/Onboarding";
+import Settings from "./pages/Settings";
 
 export default function App() {
   const location = useLocation();
@@ -154,6 +155,18 @@ export default function App() {
                   <Route path={ROUTE_PATTERNS.CHARACTER_SHEET} element={<CharacterSheet />} />
 
                   <Route path={ROUTE_PATTERNS.CAMPAIGN_OVERVIEW} element={<CampaignOverview />} />
+
+                  <Route
+                    path={ROUTES.SETTINGS}
+                    element={
+                      <Settings
+                        user={currentUser}
+                        currentRole={isDM ? "dm" : "player"}
+                        onSwitchToDM={switchToDM}
+                        onSwitchToPlayer={switchToPlayer}
+                      />
+                    }
+                  />
 
                   <Route
                     path="*"

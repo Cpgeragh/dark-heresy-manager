@@ -245,7 +245,11 @@ service cloud.firestore {
     // Never readable by clients — only accessed via get() in security rule
     // evaluation when verifying a reclaim attempt.
     match /identitySecret/{uid} {
-      allow read:  if false;
+      // Owner can read their own code (needed for the Settings page reveal/rotate flow).
+      // Other users cannot read anyone else's code — the security model is intact.
+      // Note: get() calls inside security rules bypass this allow read entirely,
+      // so the identityReclaims verification rule is unaffected.
+      allow read:  if request.auth != null && uid == request.auth.uid;
       allow write: if request.auth != null && uid == request.auth.uid;
     }
 

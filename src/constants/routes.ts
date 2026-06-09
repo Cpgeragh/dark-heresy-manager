@@ -15,6 +15,7 @@ export const ROUTES = {
   PLAYER_DASHBOARD: "/player",
   SELECT_CAMPAIGN: "/select",
   CLAIM_CHARACTER: "/claim",
+  SETTINGS: "/settings",
 } as const;
 
 // Route patterns (for React Router)

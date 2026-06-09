@@ -70,6 +70,8 @@ import {
   registerIdentityRecovery,
   clearIdentityRecovery,
   reclaimIdentity,
+  getRecoveryCode,
+  rotateRecoveryCode,
 } from "../../src/services/identityService";
 
 // ── Setup ──────────────────────────────────────────────────────────────────
@@ -271,5 +273,67 @@ describe("reclaimIdentity", () => {
     await reclaimIdentity("uid-new", "DH-CODE");
 
     expect(mockDeleteDoc).toHaveBeenCalledWith("identityReclaims/uid-new");
+  });
+});
+
+// ── getRecoveryCode ───────────────────────────────────────────────────────
+
+describe("getRecoveryCode", () => {
+
+  it("returns the code when identitySecret document exists", async () => {
+    mockGetDoc.mockResolvedValue({
+      exists: () => true,
+      data: () => ({ code: "DH-MY-CODE" }),
+    });
+
+    const result = await getRecoveryCode("uid-1");
+
+    expect(result).toBe("DH-MY-CODE");
+    expect(mockDoc).toHaveBeenCalledWith("mock-db", "identitySecret", "uid-1");
+  });
+
+  it("returns null when no identitySecret document exists", async () => {
+    mockGetDoc.mockResolvedValue({ exists: () => false, data: () => null });
+
+    const result = await getRecoveryCode("uid-1");
+
+    expect(result).toBeNull();
+  });
+});
+
+// ── rotateRecoveryCode ────────────────────────────────────────────────────
+
+describe("rotateRecoveryCode", () => {
+
+  it("fetches the current code and passes it as existingCode to registerIdentityRecovery", async () => {
+    // getRecoveryCode returns the current code
+    mockGetDoc.mockResolvedValue({
+      exists: () => true,
+      data: () => ({ code: "DH-OLD-CODE" }),
+    });
+
+    await rotateRecoveryCode("uid-1", "dm");
+
+    // The batch delete should remove the OLD identityRecovery entry
+    expect(mockBatchDelete).toHaveBeenCalledWith("identityRecovery/DH-OLD-CODE");
+  });
+
+  it("returns the newly generated code", async () => {
+    mockGetDoc.mockResolvedValue({
+      exists: () => true,
+      data: () => ({ code: "DH-OLD-CODE" }),
+    });
+
+    const result = await rotateRecoveryCode("uid-1", "player");
+
+    expect(result).toBe("DH-GENERATED-CODE");
+  });
+
+  it("handles no existing code gracefully (first-time rotate)", async () => {
+    mockGetDoc.mockResolvedValue({ exists: () => false, data: () => null });
+
+    // Should not throw; registerIdentityRecovery called without existingCode
+    await expect(rotateRecoveryCode("uid-1", "dm")).resolves.toBe("DH-GENERATED-CODE");
+    expect(mockBatchDelete).not.toHaveBeenCalled();
   });
 });
