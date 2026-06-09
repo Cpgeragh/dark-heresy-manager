@@ -9,9 +9,10 @@ interface AppHeaderProps {
   isDM: boolean;
   currentPath: string;
   onOpenMessages?: () => void;
+  onPlayerInstall?: () => void;
 }
 
-export function AppHeader({ isDM, currentPath, onOpenMessages }: AppHeaderProps) {
+export function AppHeader({ isDM, currentPath, onOpenMessages, onPlayerInstall }: AppHeaderProps) {
   const { backHref, kebabContent } = useHeaderExtension();
   const [kebabOpen, setKebabOpen] = useState(false);
   const isOnCharacterSheet = !!useMatch(ROUTE_PATTERNS.CHARACTER_SHEET);
@@ -78,6 +79,20 @@ export function AppHeader({ isDM, currentPath, onOpenMessages }: AppHeaderProps)
 
         {/* Nav + kebab */}
         <div className="flex items-center justify-end gap-2">
+          {/* Player Install — DM dashboard only */}
+          {isDM && isOnDashboard && onPlayerInstall && (
+            <button
+              onClick={onPlayerInstall}
+              aria-label="Player Install"
+              className="h-8 w-8 flex items-center justify-center rounded-lg border border-amber-500 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 transition"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z" />
+              </svg>
+            </button>
+          )}
+
           {/* Settings — dashboard only */}
           {isOnDashboard && (
             <Link

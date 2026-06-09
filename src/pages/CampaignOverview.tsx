@@ -1,6 +1,6 @@
 // src/pages/CampaignOverview.tsx
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
 import { useIsDM } from "../hooks/useIsDM";
@@ -17,6 +17,8 @@ import { createNewCharacter, importCharacter } from "../services/characterServic
 import { validateCharacterName } from "../utils/validation";
 import { useToast } from "../components/Toast";
 import { IMPORTANT_TOAST_DURATION } from "../constants/ui";
+import { uiSectionHeader, editableInputClass } from "../ui/editableStyles";
+import { useHeaderExtensionSetters } from "../context/HeaderExtensionContext";
 
 export default function CampaignOverview() {
   const params = useParams<{ campaignId: string }>();
@@ -28,11 +30,11 @@ export default function CampaignOverview() {
   const { characters: summaries, loading } = useCharacterSummaries(campaignId);
   const { characters } = useCampaignCharacters(campaignId ?? null);
   const toast = useToast();
+  const { setKebabContent, clearKebabContent } = useHeaderExtensionSetters();
 
   const [showSessionForm, setShowSessionForm] = useState(false);
   const [search, setSearch] = useState("");
   const [newCharacterName, setNewCharacterName] = useState("");
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleCreate = useCallback(async () => {
     const name = newCharacterName.trim();
@@ -75,6 +77,24 @@ export default function CampaignOverview() {
     e.target.value = "";
   }, [campaignId, toast]);
 
+  // Inject Import JSON into header kebab for DMs
+  useEffect(() => {
+    if (!isDM) {
+      clearKebabContent();
+      return;
+    }
+    setKebabContent(
+      <div className="space-y-2">
+        <p className="text-xs font-semibold text-slate-100 uppercase tracking-wide">Character Data</p>
+        <label className="block px-2 py-1 text-xs rounded bg-slate-700 border border-slate-500 text-slate-100 hover:bg-slate-600 cursor-pointer">
+          Import JSON
+          <input type="file" accept=".json" className="hidden" onChange={handleImport} />
+        </label>
+      </div>
+    );
+    return () => clearKebabContent();
+  }, [isDM, handleImport, setKebabContent, clearKebabContent]);
+
   if (!campaignId) {
     return <div className="text-slate-300 text-center py-10">No campaign selected.</div>;
   }
@@ -90,121 +110,122 @@ export default function CampaignOverview() {
     : characters;
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">{campaign?.name ?? "Campaign Overview"}</h1>
-        {isDM && !showSessionForm && (
-          <button
-            onClick={() => setShowSessionForm(true)}
-            className="px-4 py-2 bg-amber-500 text-slate-900 font-semibold rounded text-sm"
-          >
-            New Session
-          </button>
-        )}
-      </div>
+    <div className="space-y-6 text-slate-100">
+      <h1 className="text-lg font-semibold text-slate-100 text-center">
+        {campaign?.name ?? "Campaign Overview"}
+      </h1>
 
-      {isDM && showSessionForm && (
-        <SessionForm
-          campaignId={campaignId}
-          characters={summaries}
-          onClose={() => setShowSessionForm(false)}
-        />
-      )}
-
-      {/* CHARACTERS */}
-      <div>
-        <div className="flex items-center gap-3 mb-3">
-          <h2 className="text-xl font-semibold">Characters</h2>
-          <input
-            placeholder="Search by name…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-sm w-48"
+      <div className="border border-slate-700 bg-slate-900/40 p-4 rounded-lg space-y-6">
+        {/* Session form — shown inline when creating */}
+        {isDM && showSessionForm && (
+          <SessionForm
+            campaignId={campaignId}
+            characters={summaries}
+            onClose={() => setShowSessionForm(false)}
           />
+        )}
+
+        {/* CHARACTERS */}
+        <div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+            <p className={uiSectionHeader}>Characters</p>
+            <input
+              placeholder="Search…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className={editableInputClass(true) + " w-full sm:w-36 text-xs py-1"}
+            />
+          </div>
+
+          {isDM && (
+            <div className="flex flex-col sm:flex-row gap-2 mb-3">
+              <input
+                className={editableInputClass(true) + " flex-1"}
+                placeholder="Character Name"
+                value={newCharacterName}
+                onChange={(e) => setNewCharacterName(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") void handleCreate(); }}
+              />
+              <button
+                onClick={handleCreate}
+                className="px-4 py-2 bg-amber-500 text-slate-900 font-semibold rounded text-sm hover:bg-amber-400 transition"
+              >
+                Create
+              </button>
+            </div>
+          )}
+
+          <div className="space-y-3">
+            {filteredCharacters.length === 0 ? (
+              <p className="text-slate-400 text-sm">
+                {search.trim() ? `No characters match "${search}".` : "No characters yet."}
+              </p>
+            ) : (
+              filteredCharacters.map((char) => (
+                <CharacterRow
+                  key={char.id}
+                  campaignId={campaignId}
+                  characterId={char.id}
+                  characterName={char.header?.characterName ?? "Unnamed Character"}
+                  userId={char.userId ?? null}
+                  recoveryCode={char.recoveryCode}
+                  isDM={isDM}
+                />
+              ))
+            )}
+          </div>
         </div>
 
-        {/* DM create / import */}
+        {/* MESSAGES — DM only */}
         {isDM && (
-          <div className="flex gap-2 mb-4">
-            <input
-              className="px-3 py-2 bg-slate-800 border border-slate-600 rounded w-56 text-sm"
-              placeholder="Character Name"
-              value={newCharacterName}
-              onChange={(e) => setNewCharacterName(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") void handleCreate(); }}
+          <div>
+            <p className={`${uiSectionHeader} mb-3`}>Messages</p>
+            <DMInbox
+              campaignId={campaignId}
+              dmUid={campaign?.dmId ?? ""}
+              characters={characters}
             />
-            <button
-              onClick={handleCreate}
-              className="px-4 py-2 bg-amber-500 text-slate-900 font-semibold rounded text-sm"
-            >
-              Create
-            </button>
-            <label className="px-4 py-2 bg-slate-700 text-slate-200 font-semibold rounded text-sm cursor-pointer hover:bg-slate-600">
-              Import JSON
-              <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
-            </label>
           </div>
         )}
 
-        <div className="space-y-4">
-          {filteredCharacters.length === 0 ? (
-            <p className="text-slate-400 text-sm">
-              {search.trim() ? `No characters match "${search}".` : "No characters yet."}
-            </p>
+        {/* SESSION HISTORY */}
+        <div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+            <p className={uiSectionHeader}>Session History</p>
+            {isDM && !showSessionForm && (
+              <button
+                onClick={() => setShowSessionForm(true)}
+                className="w-full sm:w-auto px-3 py-1.5 bg-amber-500 text-slate-900 font-semibold rounded text-sm hover:bg-amber-400 transition"
+              >
+                New Session
+              </button>
+            )}
+          </div>
+
+          {sessionsLoading ? (
+            <p className="text-slate-400 text-sm">Loading sessions…</p>
+          ) : sessions.length === 0 ? (
+            <p className="text-slate-400 text-sm">No sessions recorded yet.</p>
           ) : (
-            filteredCharacters.map((char) => (
-              <CharacterRow
-                key={char.id}
-                campaignId={campaignId}
-                characterId={char.id}
-                characterName={char.header?.characterName ?? "Unnamed Character"}
-                userId={char.userId ?? null}
-                recoveryCode={char.recoveryCode}
-                isDM={isDM}
-              />
-            ))
+            <div className="space-y-3">
+              {sessions.map((session) => (
+                <SessionCard
+                  key={session.id}
+                  session={session}
+                  characters={summaries}
+                  isDM={isDM}
+                  onDelete={isDM ? () => deleteSession(session.id) : undefined}
+                  onSave={isDM ? (data) => updateSession(session.id, data) : undefined}
+                  onApplyXp={
+                    isDM
+                      ? () => applySessionXp(campaignId, session.id, session.attendees, session.xpAwarded)
+                      : undefined
+                  }
+                />
+              ))}
+            </div>
           )}
         </div>
-      </div>
-
-      {/* MESSAGES */}
-      {isDM && (
-        <div>
-          <h2 className="text-xl font-semibold mb-3">Messages</h2>
-          <DMInbox
-            campaignId={campaignId}
-            dmUid={campaign?.dmId ?? ""}
-            characters={characters}
-          />
-        </div>
-      )}
-
-      {/* SESSION HISTORY */}
-      <div>
-        <h2 className="text-xl font-semibold mb-3">Session History</h2>
-        {sessionsLoading ? (
-          <p className="text-slate-400 text-sm">Loading sessions…</p>
-        ) : sessions.length === 0 ? (
-          <p className="text-slate-400 text-sm">No sessions recorded yet.</p>
-        ) : (
-          <div className="space-y-3">
-            {sessions.map((session) => (
-              <SessionCard
-                key={session.id}
-                session={session}
-                characters={summaries}
-                isDM={isDM}
-                onDelete={isDM ? () => deleteSession(session.id) : undefined}
-                onSave={isDM ? (data) => updateSession(session.id, data) : undefined}
-                onApplyXp={
-                  isDM
-                    ? () => applySessionXp(campaignId, session.id, session.attendees, session.xpAwarded)
-                    : undefined
-                }
-              />
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );

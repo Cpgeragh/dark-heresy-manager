@@ -480,4 +480,5 @@ export interface Character {
   psychic: PsychicBlock;
 
   notes?: string;
+  portraitUrl?: string;
 }

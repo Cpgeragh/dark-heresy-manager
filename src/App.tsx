@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Routes, Route, Navigate, useLocation, useMatch } from "react-router-dom";
+import { QRCodeSVG } from "qrcode.react";
 
 import { useAuth } from "./hooks/useAuth";
 import { useUserRole } from "./hooks/useUserRole";
@@ -26,6 +27,7 @@ import Settings from "./pages/Settings";
 export default function App() {
   const location = useLocation();
   const [messagesOpen, setMessagesOpen] = useState(false);
+  const [showQR, setShowQR] = useState(false);
   const characterSheetMatch = useMatch(ROUTE_PATTERNS.CHARACTER_SHEET);
   const contextCampaignId = characterSheetMatch?.params?.campaignId ?? null;
   const contextCharacterId = characterSheetMatch?.params?.characterId ?? null;
@@ -96,7 +98,34 @@ export default function App() {
             isDM={isDM}
             currentPath={location.pathname}
             onOpenMessages={!isDM ? () => setMessagesOpen(true) : undefined}
+            onPlayerInstall={isDM ? () => setShowQR((v) => !v) : undefined}
           />
+
+          {/* QR modal */}
+          {showQR && (
+            <>
+              <div
+                className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+                onClick={() => setShowQR(false)}
+              />
+              <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+                <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 flex flex-col gap-3 pointer-events-auto">
+                  <div className="flex justify-end">
+                    <button
+                      onClick={() => setShowQR(false)}
+                      aria-label="Close"
+                      className="w-7 h-7 flex items-center justify-center rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 text-slate-300 text-lg leading-none transition"
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <div className="p-4 bg-white rounded-lg">
+                    <QRCodeSVG value="https://dark-heresy-manager.web.app" size={260} />
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
 
           {/* ROUTES */}
           <CampaignsProvider uid={currentUser.uid} role={isDM ? "dm" : "player"}>
