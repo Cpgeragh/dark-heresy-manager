@@ -297,6 +297,44 @@ service cloud.firestore {
     }
 
     // ============================
+    // MESSAGES
+    // ============================
+    match /campaigns/{campaignId}/threads/{playerUid} {
+
+      function dmOwnsMessagingCampaign() {
+        return request.auth != null &&
+               get(/databases/$(database)/documents/campaigns/$(campaignId))
+                 .data.dmId == request.auth.uid;
+      }
+
+      // DM reads all thread summaries; player reads only their own
+      allow read: if dmOwnsMessagingCampaign() ||
+                     (request.auth != null && request.auth.uid == playerUid);
+
+      // DM or the player can create/update the summary (sendMessage + markRead)
+      allow create, update: if dmOwnsMessagingCampaign() ||
+                               (request.auth != null && request.auth.uid == playerUid);
+
+      // Only DM can delete a thread summary (clear chat)
+      allow delete: if dmOwnsMessagingCampaign();
+
+      match /messages/{messageId} {
+        // DM reads all; player reads only their own thread's messages
+        allow read: if dmOwnsMessagingCampaign() ||
+                       (request.auth != null && request.auth.uid == playerUid);
+
+        // DM or the thread's player can send messages; fromUid must match sender
+        allow create: if (dmOwnsMessagingCampaign() ||
+                         (request.auth != null && request.auth.uid == playerUid)) &&
+                         request.resource.data.fromUid == request.auth.uid;
+
+        // DM can delete messages (clear chat); nobody can edit
+        allow delete: if dmOwnsMessagingCampaign();
+        allow update: if false;
+      }
+    }
+
+    // ============================
     // XP PROPOSALS
     // ============================
     match /campaigns/{campaignId}/characters/{characterId}/xpProposals/{proposalId} {

@@ -1,9 +1,14 @@
 // src/pages/PlayerDashboard.tsx
 
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import type { User } from "firebase/auth";
 import { useCampaignsForUser } from "../hooks/useCampaignsForUser";
 import { usePlayerCharacters } from "../hooks/usePlayerCharacters";
+import { useThreadMessages } from "../hooks/useThreadMessages";
+import { sendMessage } from "../services/messageService";
+import { MessageThread } from "../components/MessageThread";
+import { MessageInput } from "../components/MessageInput";
 import { buildRoute, ROUTES } from "../constants/routes";
 import type { CharacterListItem } from "../types/Firestore";
 
@@ -80,18 +85,47 @@ function CharacterCard({
   );
 }
 
+// ─── Player Thread — player's conversation with the DM ───────────────────────
+
+function PlayerThread({
+  campaignId,
+  playerUid,
+}: {
+  campaignId: string;
+  playerUid: string;
+}) {
+  const { messages, loading } = useThreadMessages(campaignId, playerUid);
+
+  const handleSend = useCallback(
+    async (text: string) => {
+      await sendMessage(campaignId, playerUid, playerUid, text);
+    },
+    [campaignId, playerUid]
+  );
+
+  return (
+    <div className="mt-3 border border-slate-700 rounded-lg p-3 bg-slate-900/40">
+      <MessageThread messages={messages} currentUid={playerUid} loading={loading} />
+      <MessageInput onSend={handleSend} placeholder="Message your DM…" />
+    </div>
+  );
+}
+
 // ─── Campaign Section ─────────────────────────────────────────────────────────
 
 function CampaignSection({
   campaignId,
   campaignName,
   userId,
+  currentUid,
 }: {
   campaignId: string;
   campaignName: string;
   userId: string;
+  currentUid: string;
 }) {
   const { characters, loading } = usePlayerCharacters(campaignId, userId);
+  const [showMessages, setShowMessages] = useState(false);
 
   return (
     <div className="border border-slate-700 rounded-lg p-4 space-y-4 bg-slate-900/40">
@@ -110,6 +144,20 @@ function CampaignSection({
           ))}
         </div>
       )}
+
+      {/* Message DM */}
+      <div className="pt-3 border-t border-slate-800">
+        <button
+          onClick={() => setShowMessages((v) => !v)}
+          className="text-sm text-slate-400 hover:text-slate-200 transition-colors"
+        >
+          {showMessages ? "▾" : "▸"} Message DM
+        </button>
+
+        {showMessages && (
+          <PlayerThread campaignId={campaignId} playerUid={currentUid} />
+        )}
+      </div>
     </div>
   );
 }
@@ -167,6 +215,7 @@ export default function PlayerDashboard({ user }: Props) {
               campaignId={campaign.id}
               campaignName={campaign.name}
               userId={user.uid}
+              currentUid={user.uid}
             />
           ))}
         </div>
