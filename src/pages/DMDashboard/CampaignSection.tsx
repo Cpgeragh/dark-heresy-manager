@@ -7,6 +7,7 @@ import { validateCampaignName } from "../../utils/validation";
 import { useToast } from "../../components/Toast";
 import { buildRoute } from "../../constants/routes";
 import { createCampaign, deleteCampaign, updateCampaignName } from "../../services/campaignService";
+import { archiveCampaign } from "../../utils/campaignActions";
 
 type CampaignWithId = CampaignDocument & { id: string };
 
@@ -29,7 +30,10 @@ function CampaignSection({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [confirmArchiveId, setConfirmArchiveId] = useState<string | null>(null);
+  const [archiving, setArchiving] = useState(false);
   const toast = useToast();
 
   const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -66,6 +70,26 @@ function CampaignSection({
     setEditName("");
   }, []);
 
+  const handleArchive = useCallback(
+    async (campaignId: string) => {
+      setArchiving(true);
+      try {
+        await archiveCampaign(campaignId);
+        if (activeCampaignId === campaignId) {
+          onCampaignSelect(null);
+        }
+        setConfirmArchiveId(null);
+        toast.success("Campaign archived.");
+      } catch (err) {
+        console.error("Failed to archive campaign:", err);
+        toast.error("Failed to archive campaign. Please try again.");
+      } finally {
+        setArchiving(false);
+      }
+    },
+    [activeCampaignId, onCampaignSelect, toast]
+  );
+
   const handleDeleteConfirm = useCallback(
     async (campaignId: string) => {
       setDeleting(true);
@@ -75,6 +99,7 @@ function CampaignSection({
           onCampaignSelect(null);
         }
         setConfirmDeleteId(null);
+        setDeleteConfirmText("");
         toast.success("Campaign deleted.");
       } catch (err) {
         console.error("Failed to delete campaign:", err);
@@ -192,23 +217,64 @@ function CampaignSection({
                     >
                       Edit
                     </button>
-                    {confirmDeleteId === campaign.id ? (
+                    {/* Archive */}
+                    {confirmArchiveId === campaign.id ? (
                       <div className="flex items-center gap-1">
-                        <span className="text-xs text-red-400">Delete?</span>
+                        <span className="text-xs text-amber-400">Archive?</span>
                         <button
-                          onClick={() => handleDeleteConfirm(campaign.id)}
-                          disabled={deleting}
-                          className="text-xs px-2 py-1 bg-red-700 text-white rounded hover:bg-red-600 disabled:opacity-50"
+                          onClick={() => handleArchive(campaign.id)}
+                          disabled={archiving}
+                          className="text-xs px-2 py-1 bg-amber-600 text-white rounded hover:bg-amber-500 disabled:opacity-50"
                         >
-                          {deleting ? "…" : "Yes"}
+                          {archiving ? "…" : "Yes"}
                         </button>
                         <button
-                          onClick={() => setConfirmDeleteId(null)}
-                          disabled={deleting}
+                          onClick={() => setConfirmArchiveId(null)}
+                          disabled={archiving}
                           className="text-xs px-2 py-1 bg-slate-700 text-slate-300 rounded hover:bg-slate-600"
                         >
                           No
                         </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setConfirmArchiveId(campaign.id)}
+                        className="text-xs px-2 py-1 bg-amber-900/40 text-amber-400 rounded hover:bg-amber-900/70"
+                        aria-label={`Archive ${campaign.name}`}
+                      >
+                        Archive
+                      </button>
+                    )}
+
+                    {/* Delete — requires typing DELETE to confirm */}
+                    {confirmDeleteId === campaign.id ? (
+                      <div className="flex flex-col gap-1 items-start">
+                        <span className="text-xs text-red-400">Type DELETE to confirm</span>
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="text"
+                            value={deleteConfirmText}
+                            onChange={(e) => setDeleteConfirmText(e.target.value)}
+                            placeholder="DELETE"
+                            autoFocus
+                            disabled={deleting}
+                            className="px-2 py-1 bg-slate-700 border border-slate-500 rounded text-xs text-slate-100 w-20 font-mono placeholder:text-slate-600 disabled:opacity-50"
+                          />
+                          <button
+                            onClick={() => handleDeleteConfirm(campaign.id)}
+                            disabled={deleting || deleteConfirmText !== "DELETE"}
+                            className="text-xs px-2 py-1 bg-red-700 text-white rounded hover:bg-red-600 disabled:opacity-50"
+                          >
+                            {deleting ? "…" : "Yes"}
+                          </button>
+                          <button
+                            onClick={() => { setConfirmDeleteId(null); setDeleteConfirmText(""); }}
+                            disabled={deleting}
+                            className="text-xs px-2 py-1 bg-slate-700 text-slate-300 rounded hover:bg-slate-600"
+                          >
+                            No
+                          </button>
+                        </div>
                       </div>
                     ) : (
                       <button
