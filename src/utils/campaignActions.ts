@@ -13,3 +13,13 @@ export async function archiveCampaign(campaignId: string): Promise<void> {
     archivedAt: serverTimestamp(),
   });
 }
+
+/**
+ * Restores an archived campaign by clearing archivedAt back to null.
+ * The campaign will reappear in all active CampaignsContext queries.
+ */
+export async function restoreCampaign(campaignId: string): Promise<void> {
+  await updateDoc(doc(db, "campaigns", campaignId), {
+    archivedAt: null,
+  });
+}

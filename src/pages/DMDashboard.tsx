@@ -4,21 +4,16 @@ import { useState } from "react";
 import type { User } from "firebase/auth";
 import { QRCodeSVG } from "qrcode.react";
 import { useCampaigns } from "../hooks/useCampaigns";
-import { useCampaignCharacters } from "../hooks/useCampaignCharacters";
 import CampaignSection from "./DMDashboard/CampaignSection";
-import CharacterSection from "./DMDashboard/CharacterSection";
 
 const APP_URL = "https://dark-heresy-manager.web.app";
 
 interface Props {
   user: User;
-  activeCampaignId: string | null;
-  onActiveCampaignChange: (id: string | null) => void;
 }
 
-export default function DMDashboard({ user, activeCampaignId, onActiveCampaignChange }: Props) {
+export default function DMDashboard({ user }: Props) {
   const { campaigns, loading } = useCampaigns(user.uid);
-  const { characters } = useCampaignCharacters(activeCampaignId);
   const [showQR, setShowQR] = useState(false);
 
   return (
@@ -49,15 +44,7 @@ export default function DMDashboard({ user, activeCampaignId, onActiveCampaignCh
         userUid={user.uid}
         campaigns={campaigns}
         loading={loading}
-        activeCampaignId={activeCampaignId}
-        onCampaignSelect={onActiveCampaignChange}
       />
-
-      {activeCampaignId && (
-        <div className="mt-10">
-          <CharacterSection campaignId={activeCampaignId} characters={characters} />
-        </div>
-      )}
     </div>
   );
 }

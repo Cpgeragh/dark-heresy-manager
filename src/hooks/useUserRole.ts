@@ -9,42 +9,29 @@ type Role = "player" | "dm";
 
 interface UseUserRoleArgs {
   currentUser: User | null;
-  activeCampaignId: string | null;
   onRoleChange: (role: Role) => void;
 }
 
-export function useUserRole({ currentUser, activeCampaignId, onRoleChange }: UseUserRoleArgs) {
+export function useUserRole({ currentUser, onRoleChange }: UseUserRoleArgs) {
   const switchToDM = useCallback(async () => {
     if (!currentUser) return;
-
     try {
       await setDoc(doc(db, "users", currentUser.uid), { role: "dm" }, { merge: true });
       onRoleChange("dm");
-
-      if (activeCampaignId) {
-        const campRef = doc(db, "campaigns", activeCampaignId);
-        await setDoc(campRef, { dmId: currentUser.uid }, { merge: true });
-      }
     } catch (err) {
       console.error("Failed to switch to DM:", err);
     }
-  }, [currentUser, activeCampaignId, onRoleChange]);
+  }, [currentUser, onRoleChange]);
 
   const switchToPlayer = useCallback(async () => {
     if (!currentUser) return;
-
     try {
       await setDoc(doc(db, "users", currentUser.uid), { role: "player" }, { merge: true });
       onRoleChange("player");
-
-      if (activeCampaignId) {
-        const campRef = doc(db, "campaigns", activeCampaignId);
-        await setDoc(campRef, { dmId: null }, { merge: true });
-      }
     } catch (err) {
       console.error("Failed to switch to player:", err);
     }
-  }, [currentUser, activeCampaignId, onRoleChange]);
+  }, [currentUser, onRoleChange]);
 
   return { switchToDM, switchToPlayer };
 }
