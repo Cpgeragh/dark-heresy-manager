@@ -15,8 +15,10 @@ interface UseAuthResult {
   userRole: Role | null;
   activeCampaignId: string | null;
   loading: boolean;
+  onboarded: boolean;
   setUserRole: (role: Role) => void;
   setActiveCampaignId: (id: string | null) => void;
+  setOnboarded: (value: boolean) => void;
 }
 
 export function useAuth(): UseAuthResult {
@@ -24,6 +26,9 @@ export function useAuth(): UseAuthResult {
   const [userRole, setUserRole] = useState<Role | null>(null);
   const [activeCampaignId, setActiveCampaignId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  // Default true so existing (legacy) users never see the onboarding screen.
+  // Flipped to false only when a brand-new user doc is created.
+  const [onboarded, setOnboarded] = useState(true);
 
   useEffect(() => {
     let ignore = false;
@@ -50,6 +55,7 @@ export function useAuth(): UseAuthResult {
             activeCampaignId: null,
             createdAt: serverTimestamp(),
             lastSeen: serverTimestamp(),
+            onboarded: false,
           };
 
           await setDoc(ref, newUserDoc);
@@ -58,6 +64,7 @@ export function useAuth(): UseAuthResult {
 
           setUserRole("player");
           setActiveCampaignId(null);
+          setOnboarded(false);
         } else {
           const data = snap.data();
           const role: Role = data.role === "dm" ? "dm" : "player";
@@ -66,6 +73,8 @@ export function useAuth(): UseAuthResult {
 
           setUserRole(role);
           setActiveCampaignId(data.activeCampaignId ?? null);
+          // undefined means a legacy user created before onboarding existed — treat as onboarded
+          setOnboarded(data.onboarded !== false);
         }
 
         await updateDoc(ref, { lastSeen: serverTimestamp() });
@@ -89,7 +98,9 @@ export function useAuth(): UseAuthResult {
     userRole,
     activeCampaignId,
     loading,
+    onboarded,
     setUserRole,
     setActiveCampaignId,
+    setOnboarded,
   };
 }

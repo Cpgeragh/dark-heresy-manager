@@ -30,7 +30,9 @@ export function CyberneticsTab({ cybernetics, editable, onUpdate }: CyberneticsT
     (
       ref: CyberneticRef,
       craftsmanship: CyberneticCraftsmanship,
-      bodyLocation?: ArmourLocationKey[]
+      bodyLocation?: ArmourLocationKey[],
+      gmValue?: string,
+      gmRarity?: string
     ) => {
       if (!editable) return;
       onUpdate([
@@ -40,8 +42,8 @@ export function CyberneticsTab({ cybernetics, editable, onUpdate }: CyberneticsT
           referenceId: ref.id,
           name: ref.name,
           craftsmanship,
-          value: ref.value,
-          rarity: ref.rarity,
+          value: gmValue ?? ref.value,
+          rarity: gmRarity ?? ref.rarity,
           source: ref.source,
           ...(bodyLocation ? { bodyLocation } : {}),
         },
@@ -123,10 +125,6 @@ export function CyberneticsTab({ cybernetics, editable, onUpdate }: CyberneticsT
           ))}
         </div>
       </section>
-
-      <p className="text-xs text-slate-600">
-        Cost shown is for Common craftsmanship. Available qualities depend on the implant's rules.
-      </p>
 
       {showPicker && (
         <ImplantPicker

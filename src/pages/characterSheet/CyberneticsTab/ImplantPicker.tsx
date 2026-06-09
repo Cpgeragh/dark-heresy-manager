@@ -6,9 +6,10 @@ import {
   CYBERNETICS_REFERENCE,
   type CyberneticRef,
 } from "../../../data/reference/cyberneticsReference";
-import { rarityColour } from "../../../ui/sourceStyles";
 import { PickerModal } from "../../../ui/PickerModal";
 import { InfoModal } from "../../../components/InfoModal";
+import { ItemMetaChips } from "../../../ui/ItemMetaChips";
+import { editableInputClass } from "../../../ui/editableStyles";
 import { CRAFTSMANSHIP_STYLE, LOCATION_DISPLAY } from "./cyberneticsConstants";
 import {
   availableCraftsmanship,
@@ -21,16 +22,44 @@ interface Props {
   onSelect: (
     ref: CyberneticRef,
     craftsmanship: CyberneticCraftsmanship,
-    bodyLocation?: ArmourLocationKey[]
+    bodyLocation?: ArmourLocationKey[],
+    gmValue?: string,
+    gmRarity?: string
   ) => void;
   onClose: () => void;
+}
+
+const RARITY_OPTIONS = [
+  "Abundant",
+  "Plentiful",
+  "Common",
+  "Average",
+  "Uncommon",
+  "Scarce",
+  "Rare",
+  "Very Rare",
+  "Extremely Rare",
+  "Near Unique",
+  "Unique",
+  "Issued Only",
+  "Adeptus Mechanicus Only",
+] as const;
+
+function isVariableMeta(value?: string | null) {
+  const normalized = value?.trim().toLowerCase();
+  return !normalized || normalized === "\u2014" || normalized === "variable" || normalized === "varies";
 }
 
 export function ImplantPicker({ editable = true, onSelect, onClose }: Props) {
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<CyberneticRef | null>(null);
+  const [pendingCost, setPendingCost] = useState<CyberneticRef | null>(null);
   const [location, setLocation] = useState<ArmourLocationKey[] | null>(null);
   const [craftsmanship, setCraftsmanship] = useState<CyberneticCraftsmanship>("Common");
+  const [gmCost, setGmCost] = useState("");
+  const [gmRarity, setGmRarity] = useState("");
+  const [assignedValue, setAssignedValue] = useState<string | undefined>();
+  const [assignedRarity, setAssignedRarity] = useState<string | undefined>();
 
   const filtered = CYBERNETICS_REFERENCE.filter((r) =>
     r.name.toLowerCase().includes(query.toLowerCase())
@@ -38,13 +67,36 @@ export function ImplantPicker({ editable = true, onSelect, onClose }: Props) {
 
   const resetPicker = () => {
     setSelected(null);
+    setPendingCost(null);
     setLocation(null);
     setCraftsmanship("Common");
+    setGmCost("");
+    setGmRarity("");
+    setAssignedValue(undefined);
+    setAssignedRarity(undefined);
   };
   const selectImplant = (ref: CyberneticRef) => {
     if (!editable) return;
+    if (isVariableMeta(ref.value) || isVariableMeta(ref.rarity)) {
+      setPendingCost(ref);
+      setGmCost("");
+      setGmRarity("");
+      return;
+    }
     setSelected(ref);
     setCraftsmanship(defaultCraftsmanship(ref));
+  };
+  const costNum = Number(gmCost);
+  const costValid = gmCost.trim() !== "" && Number.isInteger(costNum) && costNum >= 1;
+  const pendingNeedsRarity = pendingCost ? isVariableMeta(pendingCost.rarity) : false;
+  const canConfirmCost = costValid && (!pendingNeedsRarity || gmRarity !== "");
+  const confirmCost = () => {
+    if (!pendingCost || !canConfirmCost) return;
+    setAssignedValue(`${gmCost} Thrones`);
+    setAssignedRarity(pendingNeedsRarity ? gmRarity : undefined);
+    setSelected(pendingCost);
+    setPendingCost(null);
+    setCraftsmanship(defaultCraftsmanship(pendingCost));
   };
   const implantInfo = (ref: CyberneticRef) => (
     <div className="space-y-3">
@@ -68,6 +120,85 @@ export function ImplantPicker({ editable = true, onSelect, onClose }: Props) {
       ))}
     </div>
   );
+
+  if (pendingCost) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+        <div className="w-full max-w-md bg-slate-900 border border-slate-500 rounded-xl shadow-2xl">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
+            <h3 className="text-sm font-semibold text-slate-200">Assigned Cost</h3>
+            <button
+              onClick={resetPicker}
+              className="text-slate-400 hover:text-slate-200 text-lg leading-none"
+            >
+              ×
+            </button>
+          </div>
+
+          <div className="px-4 py-4 space-y-4">
+            <p className="text-sm text-slate-400">
+              <span className="font-medium text-slate-200">{pendingCost.name}</span> has no listed
+              cost or availability. Enter the values assigned for this implant.
+            </p>
+
+            <div className="space-y-1">
+              <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+                Cost (Thrones) <span className="text-red-400">*</span>
+              </label>
+              <input
+                type="number"
+                min={1}
+                step={1}
+                value={gmCost}
+                onChange={(e) => setGmCost(e.target.value)}
+                placeholder="e.g. 5000"
+                className={editableInputClass(true)}
+              />
+              {gmCost.trim() !== "" && !costValid && (
+                <p className="text-xs text-red-400">Must be a whole number of 1 or more.</p>
+              )}
+            </div>
+
+            {pendingNeedsRarity && (
+              <div className="space-y-1">
+                <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+                  Rarity <span className="text-red-400">*</span>
+                </label>
+                <select
+                  value={gmRarity}
+                  onChange={(e) => setGmRarity(e.target.value)}
+                  className={editableInputClass(true) + " appearance-none"}
+                >
+                  <option value="">— Select rarity —</option>
+                  {RARITY_OPTIONS.map((r) => (
+                    <option key={r} value={r}>
+                      {r}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+
+          <div className="px-4 py-3 border-t border-slate-700 flex gap-2">
+            <button
+              onClick={resetPicker}
+              className="px-4 py-1.5 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm text-slate-100"
+            >
+              Back
+            </button>
+            <button
+              onClick={confirmCost}
+              disabled={!canConfirmCost}
+              className="flex-1 py-1.5 rounded bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed text-sm text-slate-900 font-semibold"
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // ── Step 2: Location picker (arm/leg implants only) ───────────────────────
   if (selected && selected.requiresLocation && !location) {
@@ -185,7 +316,15 @@ export function ImplantPicker({ editable = true, onSelect, onClose }: Props) {
               Back
             </button>
             <button
-              onClick={() => onSelect(selected, craftsmanship, location ?? undefined)}
+              onClick={() =>
+                onSelect(
+                  selected,
+                  craftsmanship,
+                  location ?? undefined,
+                  assignedValue,
+                  assignedRarity
+                )
+              }
               disabled={!editable}
               className="flex-1 py-1.5 rounded bg-amber-600 hover:bg-amber-500 text-sm text-slate-900 font-semibold"
             >
@@ -200,7 +339,7 @@ export function ImplantPicker({ editable = true, onSelect, onClose }: Props) {
   // ── Step 1: Search list ───────────────────────────────────────────────────
   return (
     <PickerModal
-      title="Install Cybernetic"
+      title="Add Cybernetic"
       placeholder="Search implants…"
       query={query}
       onQueryChange={setQuery}
@@ -227,8 +366,16 @@ export function ImplantPicker({ editable = true, onSelect, onClose }: Props) {
               )}
             </div>
             <div className="flex items-center gap-2 shrink-0 text-xs">
-              <span className="text-amber-400/80 font-mono">₮ {ref.value}</span>
-              <span className={rarityColour(ref.rarity)}>{ref.rarity}</span>
+              <ItemMetaChips
+                bare
+                value={isVariableMeta(ref.value) ? undefined : ref.value}
+                rarity={isVariableMeta(ref.rarity) ? undefined : ref.rarity}
+                source={ref.source}
+                valueAmber
+              />
+              {(isVariableMeta(ref.value) || isVariableMeta(ref.rarity)) && (
+                <span className="text-amber-400/70 italic">Cost assigned on add</span>
+              )}
             </div>
           </div>
         </button>

@@ -50,27 +50,32 @@ export function sourceColour(source: string): string {
  */
 export function rarityColour(rarity: string | undefined): string {
   switch (rarity) {
-    case "Plentiful":
     case "Abundant":
+      return "text-slate-500";
+    case "Plentiful":
       return "text-slate-400";
     case "Common":
-      return "text-green-400";
+      return "text-emerald-400";
     case "Average":
-      return "text-slate-300";
+      return "text-sky-400";
+    case "Uncommon":
+      return "text-teal-400";
     case "Scarce":
       return "text-yellow-400";
     case "Rare":
       return "text-orange-400";
     case "Very Rare":
-      return "text-red-400";
+      return "text-rose-400";
     case "Extremely Rare":
       return "text-purple-400";
     case "Near Unique":
-    case "Unique":
       return "text-pink-400";
+    case "Unique":
+      return "text-fuchsia-400";
     case "Issued Only":
-    case "Adeptus Mechanicus Only":
       return "text-cyan-400";
+    case "Adeptus Mechanicus Only":
+      return "text-red-500";
     default:
       return "text-slate-400";
   }

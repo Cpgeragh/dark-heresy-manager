@@ -17,8 +17,8 @@ interface Props {
    */
   bare?: boolean;
   /**
-   * When true, renders the value chip in amber (₮ currency style).
-   * Defaults to slate. Use for drugs, cybernetics, archeotech.
+   * Kept for compatibility with existing callers. Value chips represent money
+   * and render in amber by default across the app.
    */
   valueAmber?: boolean;
 }
@@ -34,7 +34,6 @@ export function ItemMetaChips({
   source,
   className,
   bare,
-  valueAmber,
 }: Props) {
   if (!weight && !value && !rarity && !source) return null;
 
@@ -46,11 +45,7 @@ export function ItemMetaChips({
         </span>
       )}
       {value && (
-        <span
-          className={`text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 ${
-            valueAmber ? "text-amber-400/80 font-mono" : "text-slate-400"
-          }`}
-        >
+        <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-amber-400/80 font-mono">
           ₮ {value}
         </span>
       )}

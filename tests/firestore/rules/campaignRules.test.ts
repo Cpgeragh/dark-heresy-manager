@@ -135,7 +135,7 @@ describe("Firestore Rules: Campaigns", () => {
     ).rejects.toThrow();
   });
 
-  it("DM cannot delete a campaign (no delete rule)", async () => {
+  it("DM can delete their own campaign", async () => {
     const env = await getTestEnv() as RulesTestEnvironment;
 
     await createCampaign(env, "c1", "dm-1", { name: "Sample" });
@@ -144,6 +144,30 @@ describe("Firestore Rules: Campaigns", () => {
 
     await expect(
       dmDb.collection("campaigns").doc("c1").delete()
+    ).resolves.toBeUndefined();
+  });
+
+  it("DM can archive their own campaign", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+
+    await createCampaign(env, "c1", "dm-1", { name: "Sample" });
+
+    const dmDb = dbAs(env, "dm-1");
+
+    await expect(
+      dmDb.collection("campaigns").doc("c1").update({ archivedAt: new Date() })
+    ).resolves.toBeUndefined();
+  });
+
+  it("non-DM cannot archive a campaign", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+
+    await createCampaign(env, "c1", "dm-1", { name: "Sample" });
+
+    const playerDb = dbAs(env, "player-1");
+
+    await expect(
+      playerDb.collection("campaigns").doc("c1").update({ archivedAt: new Date() })
     ).rejects.toThrow();
   });
 

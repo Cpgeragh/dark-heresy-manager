@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { InfoModal } from "../../../components/InfoModal";
 import { CONSUMABLES_REFERENCE, type ConsumableRef } from "../../../data/reference/consumablesReference";
-import { rarityColour } from "../../../ui/sourceStyles";
+import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
 
 interface Props {
@@ -54,9 +54,13 @@ export function ConsumablePicker({ editable = true, onSelect, onClose }: Props) 
               )}
             </div>
             <div className="flex items-center gap-2 shrink-0 text-xs">
-              <span className="text-slate-400">{displayWeight(ref.weight)}</span>
-              <span className="text-amber-400/80 font-mono">₮ {ref.value}</span>
-              <span className={rarityColour(ref.rarity)}>{ref.rarity}</span>
+              <ItemMetaChips
+                bare
+                weight={displayWeight(ref.weight)}
+                value={ref.value}
+                rarity={ref.rarity}
+                source={ref.source}
+              />
             </div>
           </div>
         </button>

@@ -3,15 +3,32 @@
 import { useState } from "react";
 import { InfoModal } from "../../../components/InfoModal";
 import { GEAR_REFERENCE, type GearRef } from "../../../data/reference/gearReference";
-import { rarityColour } from "../../../ui/sourceStyles";
+import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
+import { editableInputClass } from "../../../ui/editableStyles";
 
 interface Props {
   editable?: boolean;
-  onSelect: (ref: GearRef) => void;
+  onSelect: (ref: GearRef, gmValue?: string, gmRarity?: string) => void;
   onCustom: () => void;
   onClose: () => void;
 }
+
+const RARITY_OPTIONS = [
+  "Abundant",
+  "Plentiful",
+  "Common",
+  "Average",
+  "Uncommon",
+  "Scarce",
+  "Rare",
+  "Very Rare",
+  "Extremely Rare",
+  "Near Unique",
+  "Unique",
+  "Issued Only",
+  "Adeptus Mechanicus Only",
+] as const;
 
 function displayWeight(weight?: string | null) {
   const value = weight?.trim();
@@ -19,33 +36,127 @@ function displayWeight(weight?: string | null) {
   return value;
 }
 
+function isVariableMeta(value?: string | null) {
+  const normalized = value?.trim().toLowerCase();
+  return !normalized || normalized === "\u2014" || normalized === "variable" || normalized === "varies";
+}
+
 export function GearPicker({ editable = true, onSelect, onCustom, onClose }: Props) {
   const [query, setQuery] = useState("");
+  const [pending, setPending] = useState<GearRef | null>(null);
+  const [gmCost, setGmCost] = useState("");
+  const [gmRarity, setGmRarity] = useState("");
   const filtered = GEAR_REFERENCE.filter((r) =>
     r.name.toLowerCase().includes(query.toLowerCase())
   ).sort((a, b) => a.name.localeCompare(b.name));
+  const pendingNeedsRarity = pending ? isVariableMeta(pending.rarity) : false;
+  const costNum = Number(gmCost);
+  const costValid = gmCost.trim() !== "" && Number.isInteger(costNum) && costNum >= 1;
+  const canConfirm = costValid && (!pendingNeedsRarity || gmRarity !== "");
+
+  function handleSelect(ref: GearRef) {
+    if (!editable) return;
+    if (isVariableMeta(ref.value)) {
+      setPending(ref);
+      setGmCost("");
+      setGmRarity("");
+      return;
+    }
+    onSelect(ref);
+  }
+
+  function handleConfirm() {
+    if (!pending || !canConfirm) return;
+    onSelect(pending, `${gmCost} Thrones`, pendingNeedsRarity ? gmRarity : undefined);
+  }
 
   return (
     <PickerModal
-      title="Add"
+      title={pending ? "Assigned Cost" : "Add Item"}
       placeholder="Search gear…"
       query={query}
       onQueryChange={setQuery}
-      onClose={onClose}
-      isEmpty={filtered.length === 0}
-      footer={editable ? (
-        <button
-          onClick={onCustom}
-          className="w-full text-sm text-amber-400 hover:text-amber-300 text-center py-1"
-        >
-          + Add custom item
-        </button>
-      ) : undefined}
+      onClose={pending ? () => setPending(null) : onClose}
+      closeLabel={pending ? "←" : "×"}
+      hideSearch={!!pending}
+      isEmpty={!pending && filtered.length === 0}
+      filterRow={
+        !pending && editable ? (
+          <button
+            onClick={onCustom}
+            className="w-full text-xs px-3 py-1.5 rounded border border-amber-600/50 bg-amber-600/10 text-amber-400 hover:bg-amber-600/20 transition text-center"
+          >
+            + Custom Item
+          </button>
+        ) : undefined
+      }
     >
-      {filtered.map((ref) => (
+      {pending ? (
+        <div className="p-4 space-y-4">
+          <p className="text-sm text-slate-400">
+            <span className="font-medium text-slate-200">{pending.name}</span> has a variable or
+            unlisted cost. Enter the value assigned for this item.
+          </p>
+
+          <div className="space-y-1">
+            <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+              Cost (Thrones) <span className="text-red-400">*</span>
+            </label>
+            <input
+              type="number"
+              min={1}
+              step={1}
+              value={gmCost}
+              onChange={(e) => setGmCost(e.target.value)}
+              placeholder="e.g. 500"
+              className={editableInputClass(true)}
+            />
+            {gmCost.trim() !== "" && !costValid && (
+              <p className="text-xs text-red-400">Must be a whole number of 1 or more.</p>
+            )}
+          </div>
+
+          {pendingNeedsRarity && (
+            <div className="space-y-1">
+              <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+                Rarity <span className="text-red-400">*</span>
+              </label>
+              <select
+                value={gmRarity}
+                onChange={(e) => setGmRarity(e.target.value)}
+                className={editableInputClass(true) + " appearance-none"}
+              >
+                <option value="">— Select rarity —</option>
+                {RARITY_OPTIONS.map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <div className="flex gap-2 pt-1">
+            <button
+              onClick={() => setPending(null)}
+              className="px-4 py-1.5 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm text-slate-100 transition"
+            >
+              Back
+            </button>
+            <button
+              onClick={handleConfirm}
+              disabled={!canConfirm}
+              className="flex-1 py-1.5 rounded bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed text-sm text-slate-900 font-semibold transition"
+            >
+              Add to Inventory
+            </button>
+          </div>
+        </div>
+      ) : (
+        filtered.map((ref) => (
         <button
           key={ref.id}
-          onClick={editable ? () => onSelect(ref) : undefined}
+          onClick={editable ? () => handleSelect(ref) : undefined}
           className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
           <div className="flex items-center justify-between gap-2">
@@ -63,13 +174,21 @@ export function GearPicker({ editable = true, onSelect, onCustom, onClose }: Pro
               )}
             </div>
             <div className="flex items-center gap-2 shrink-0 text-xs">
-              <span className="text-slate-400">{displayWeight(ref.weight)}</span>
-              <span className="text-amber-400/80 font-mono">₮ {ref.value}</span>
-              <span className={rarityColour(ref.rarity)}>{ref.rarity}</span>
+              <ItemMetaChips
+                bare
+                weight={displayWeight(ref.weight)}
+                value={isVariableMeta(ref.value) ? undefined : ref.value}
+                rarity={isVariableMeta(ref.rarity) ? undefined : ref.rarity}
+                source={ref.source}
+              />
+              {isVariableMeta(ref.value) && (
+                <span className="text-amber-400/70 italic">Cost assigned on add</span>
+              )}
             </div>
           </div>
         </button>
-      ))}
+        ))
+      )}
     </PickerModal>
   );
 }

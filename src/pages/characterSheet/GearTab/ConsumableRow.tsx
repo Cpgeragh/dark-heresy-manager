@@ -52,7 +52,6 @@ export function ConsumableRow({ item, editable, onUpdateQty, onRemove }: Props) 
             value={item.value}
             rarity={item.rarity}
             source={item.source}
-            valueAmber
             className="flex flex-wrap gap-1.5 mt-1"
           />
         </div>

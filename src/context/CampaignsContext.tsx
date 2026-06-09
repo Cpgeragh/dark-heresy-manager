@@ -35,7 +35,7 @@ export function CampaignsProvider({
     const op = role === "dm" ? "==" : "array-contains";
 
     const unsubscribe = onSnapshot(
-      query(campaignsCollectionRef(), where(field, op, uid)),
+      query(campaignsCollectionRef(), where(field, op, uid), where("archivedAt", "==", null)),
       (snap) => {
         setCampaigns(snap.docs.map((d) => d.data()));
         setLoading(false);
