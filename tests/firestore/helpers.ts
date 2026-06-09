@@ -119,3 +119,35 @@ export async function createRecoveryIndexEntry(
       .set(data);
   });
 }
+
+/**
+ * Create an identityRecovery entry bypassing rules.
+ */
+export async function createIdentityRecoveryEntry(
+  env: RulesTestEnvironment,
+  code: string,
+  data: Record<string, unknown>
+) {
+  await env.withSecurityRulesDisabled(async (ctx: RulesTestContext) => {
+    await ctx.firestore()
+      .collection("identityRecovery")
+      .doc(code)
+      .set(data);
+  });
+}
+
+/**
+ * Create an identitySecret entry bypassing rules.
+ */
+export async function createIdentitySecretEntry(
+  env: RulesTestEnvironment,
+  uid: string,
+  data: Record<string, unknown>
+) {
+  await env.withSecurityRulesDisabled(async (ctx: RulesTestContext) => {
+    await ctx.firestore()
+      .collection("identitySecret")
+      .doc(uid)
+      .set(data);
+  });
+}

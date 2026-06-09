@@ -12,6 +12,7 @@ export interface CampaignDocument {
   dmId: string;
   memberIds: string[];
   createdAt: Timestamp | Date | FieldValue;
+  archivedAt: Timestamp | Date | null;
 }
 
 /**
@@ -28,6 +29,7 @@ export interface UserDocument {
   activeCampaignId: string | null;
   createdAt: Timestamp | Date | FieldValue;
   lastSeen: Timestamp | Date | FieldValue;
+  onboarded?: boolean;
 }
 
 /**

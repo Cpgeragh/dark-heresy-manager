@@ -17,6 +17,7 @@ export async function createCampaign(name: string, dmId: string): Promise<string
     dmId,
     memberIds: [],
     createdAt: new Date(),
+    archivedAt: null,
   };
 
   await setDoc(newRef, campaignData);

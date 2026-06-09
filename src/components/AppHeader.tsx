@@ -66,7 +66,7 @@ export function AppHeader({ isDM, currentPath, onSwitchToDM, onSwitchToPlayer }:
             />
           )}
 
-          {import.meta.env.DEV && onSwitchToPlayer && onSwitchToDM && (
+          {onSwitchToPlayer && onSwitchToDM && (
             <>
               <button
                 onClick={onSwitchToPlayer}

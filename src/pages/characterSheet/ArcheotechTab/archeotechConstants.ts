@@ -4,13 +4,17 @@ export const ITEM_TYPES = ["Weapon", "Grenade", "Mine", "Device", "Tool", "Other
 export type ItemType = (typeof ITEM_TYPES)[number];
 
 export const RARITY_OPTIONS = [
+  "Abundant",
   "Plentiful",
   "Common",
   "Average",
+  "Uncommon",
   "Scarce",
   "Rare",
   "Very Rare",
   "Extremely Rare",
   "Near Unique",
   "Unique",
+  "Issued Only",
+  "Adeptus Mechanicus Only",
 ] as const;

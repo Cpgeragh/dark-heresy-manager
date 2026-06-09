@@ -5,14 +5,14 @@ import type { PsychicBlock } from "../../src/types/Character";
 
 const emptyPsychic: PsychicBlock = {
   psyRating: 0,
-  discipline: "",
+  disciplines: [],
   minorPowers: [],
   majorPowers: [],
 };
 
 const psychicWithPowers: PsychicBlock = {
   psyRating: 3,
-  discipline: "Telepathy",
+  disciplines: ["Telepathy"],
   minorPowers: [
     { id: "p1", name: "Sense Presence", known: true, isMinor: true },
     { id: "p2", name: "Deja Vu", known: true, isMinor: true },
@@ -69,23 +69,23 @@ describe("usePsychicPowers", () => {
   });
 
   describe("removePower", () => {
-    it("removes a minor power by index", () => {
+    it("removes a minor power by id", () => {
       const onUpdate = vi.fn();
       const { result } = renderHook(() =>
         usePsychicPowers({ psychic: psychicWithPowers, editable: true, onUpdate })
       );
-      act(() => result.current.removeMinorPower(0));
+      act(() => result.current.removeMinorPower("p1"));
       const updated: PsychicBlock = onUpdate.mock.calls[0][0];
       expect(updated.minorPowers).toHaveLength(1);
       expect(updated.minorPowers[0].name).toBe("Deja Vu");
     });
 
-    it("removes a major power by index", () => {
+    it("removes a major power by id", () => {
       const onUpdate = vi.fn();
       const { result } = renderHook(() =>
         usePsychicPowers({ psychic: psychicWithPowers, editable: true, onUpdate })
       );
-      act(() => result.current.removeMajorPower(0));
+      act(() => result.current.removeMajorPower("p3"));
       const updated: PsychicBlock = onUpdate.mock.calls[0][0];
       expect(updated.majorPowers).toHaveLength(0);
     });
@@ -95,7 +95,7 @@ describe("usePsychicPowers", () => {
       const { result } = renderHook(() =>
         usePsychicPowers({ psychic: psychicWithPowers, editable: false, onUpdate })
       );
-      act(() => result.current.removeMinorPower(0));
+      act(() => result.current.removeMinorPower("p1"));
       expect(onUpdate).not.toHaveBeenCalled();
     });
   });

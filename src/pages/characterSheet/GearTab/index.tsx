@@ -73,7 +73,7 @@ export function GearTab({ gear, consumables, editable, onUpdate, onUpdateConsuma
   // ── Gear handlers ────────────────────────────────────────────────────────
 
   const addFromRef = useCallback(
-    (ref: GearRef) => {
+    (ref: GearRef, gmValue?: string, gmRarity?: string) => {
       if (!editable) return;
       onUpdate([
         ...gear,
@@ -83,8 +83,8 @@ export function GearTab({ gear, consumables, editable, onUpdate, onUpdateConsuma
           name: ref.name,
           description: ref.description,
           weight: ref.weight,
-          value: ref.value,
-          rarity: ref.rarity,
+          value: gmValue ?? ref.value,
+          rarity: gmRarity ?? ref.rarity,
           source: ref.source,
         },
       ]);

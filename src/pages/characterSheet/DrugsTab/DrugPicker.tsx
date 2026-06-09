@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { InfoModal } from "../../../components/InfoModal";
 import { DRUGS_REFERENCE, type DrugRef } from "../../../data/reference/drugsReference";
-import { rarityColour } from "../../../ui/sourceStyles";
+import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
 
 function drugInfoContent(ref: DrugRef) {
@@ -91,11 +91,14 @@ export function DrugPicker({
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-2 shrink-0 text-xs">
-                <span className="text-slate-400">{ref.weight ?? "0 kg"}</span>
-                <span className="text-amber-400/80 font-mono">{ref.value}</span>
-                <span className={rarityColour(ref.rarity)}>{ref.rarity}</span>
-              </div>
+              <ItemMetaChips
+                bare
+                weight={ref.weight ?? "0 kg"}
+                value={ref.value}
+                rarity={ref.rarity}
+                source={ref.source}
+                valueAmber
+              />
             </div>
             {ref.duration && (
               <p className="text-xs text-slate-500 mt-0.5">Duration: {ref.duration}</p>

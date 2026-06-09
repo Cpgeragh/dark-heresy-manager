@@ -729,6 +729,6 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
       "Without power, the armour cannot move. Far too bulky to be worn by a human.",
     weight: "60 kg",
     value: "—",
-    rarity: "Unavailable",
+    rarity: "—",
   },
 ];

@@ -21,6 +21,7 @@ import ClaimCharacterPage from "./pages/ClaimCharacter/ClaimCharacterPage";
 import SelectCampaign from "./pages/SelectCampaign";
 import CharacterSheet from "./pages/CharacterSheet";
 import CampaignOverview from "./pages/CampaignOverview";
+import Onboarding from "./pages/Onboarding";
 
 export default function App() {
   const location = useLocation();
@@ -28,8 +29,16 @@ export default function App() {
   // -------------------------------------------------
   // AUTH & USER STATE
   // -------------------------------------------------
-  const { currentUser, userRole, activeCampaignId, loading, setUserRole, setActiveCampaignId } =
-    useAuth();
+  const {
+    currentUser,
+    userRole,
+    activeCampaignId,
+    loading,
+    onboarded,
+    setUserRole,
+    setActiveCampaignId,
+    setOnboarded,
+  } = useAuth();
 
   // -------------------------------------------------
   // ROLE SWITCHING (DEV ONLY)
@@ -68,6 +77,19 @@ export default function App() {
       <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-100">
         Initialising user…
       </div>
+    );
+  }
+
+  // First-launch: user hasn't chosen a role or saved their recovery code yet.
+  if (!onboarded) {
+    return (
+      <Onboarding
+        user={currentUser}
+        onComplete={(role) => {
+          setUserRole(role);
+          setOnboarded(true);
+        }}
+      />
     );
   }
 

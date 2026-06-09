@@ -14,10 +14,11 @@ import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 interface Props {
   editable?: boolean;
   onSelect: (ref: ArcheotechRef, gmValue?: string, gmRarity?: string) => void;
+  onCustom: () => void;
   onClose: () => void;
 }
 
-export function ArcheotechPickerModal({ editable = true, onSelect, onClose }: Props) {
+export function ArcheotechPickerModal({ editable = true, onSelect, onCustom, onClose }: Props) {
   const [query, setQuery] = useState("");
   const [pending, setPending] = useState<ArcheotechRef | null>(null);
   const [gmCost, setGmCost] = useState("");
@@ -35,7 +36,10 @@ export function ArcheotechPickerModal({ editable = true, onSelect, onClose }: Pr
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [query]);
 
-  const isUnknownMeta = (value?: string) => !value || value.trim() === "—";
+  const isUnknownMeta = (value?: string) => {
+    const normalized = value?.trim().toLowerCase();
+    return !normalized || normalized === "—" || normalized === "variable" || normalized === "varies";
+  };
   const needsGmInput = (ref: ArcheotechRef) => isUnknownMeta(ref.value) || isUnknownMeta(ref.rarity);
 
   function handleRowClick(ref: ArcheotechRef) {
@@ -60,7 +64,7 @@ export function ArcheotechPickerModal({ editable = true, onSelect, onClose }: Pr
 
   return (
     <PickerModal
-      title={pending ? "GM-Assigned Values" : "Add Known Archeotech"}
+      title={pending ? "GM-Assigned Values" : "Add Archeotech"}
       placeholder="Search archeotech…"
       query={query}
       onQueryChange={setQuery}
@@ -68,6 +72,16 @@ export function ArcheotechPickerModal({ editable = true, onSelect, onClose }: Pr
       closeLabel={pending ? "←" : "×"}
       isEmpty={!pending && filtered.length === 0}
       hideSearch={!!pending}
+      filterRow={
+        !pending && editable ? (
+          <button
+            onClick={onCustom}
+            className="w-full text-xs px-3 py-1.5 rounded border border-amber-600/50 bg-amber-600/10 text-amber-400 hover:bg-amber-600/20 transition text-center"
+          >
+            + Custom Item
+          </button>
+        ) : undefined
+      }
     >
       {pending ? (
         // ── Step 2: GM form ──────────────────────────────────────────────────
