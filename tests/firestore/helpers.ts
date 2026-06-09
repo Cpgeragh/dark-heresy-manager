@@ -151,3 +151,19 @@ export async function createIdentitySecretEntry(
       .set(data);
   });
 }
+
+/**
+ * Create an identityReclaims proof document bypassing rules.
+ */
+export async function createIdentityReclaimEntry(
+  env: RulesTestEnvironment,
+  uid: string,
+  data: Record<string, unknown>
+) {
+  await env.withSecurityRulesDisabled(async (ctx: RulesTestContext) => {
+    await ctx.firestore()
+      .collection("identityReclaims")
+      .doc(uid)
+      .set(data);
+  });
+}
