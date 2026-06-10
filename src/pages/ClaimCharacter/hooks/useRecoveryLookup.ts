@@ -7,7 +7,7 @@ import { characterDocRef } from "../../../firebase/converters";
 import type { RecoveryIndexDocument, CampaignDocument } from "../../../types/Firestore";
 import type { Character } from "../../../types/Character";
 
-export type OwnershipState = "unclaimed" | "claimed-by-you" | "claimed-by-other" | "locked" | "linkable";
+export type OwnershipState = "unclaimed" | "claimed-by-you" | "claimed-by-other" | "locked";
 
 export interface RecoveryLookupResult {
   campaignId: string;
@@ -61,15 +61,8 @@ export function useRecoveryLookup() {
         ownership = "unclaimed";
       } else if (uid && characterData.userId === uid) {
         ownership = "claimed-by-you";
-      } else if (uid) {
-        const linkSnap = await getDoc(doc(db, "userLinks", uid));
-        if (linkSnap.exists() && (linkSnap.data().primaryUid as string) === characterData.userId) {
-          ownership = "claimed-by-you"; // already linked — this device has access
-        } else if (characterData.isEditableByPlayer === false) {
-          ownership = "locked";
-        } else {
-          ownership = "linkable";
-        }
+      } else if (characterData.isEditableByPlayer === false) {
+        ownership = "locked";
       } else {
         ownership = "claimed-by-other";
       }

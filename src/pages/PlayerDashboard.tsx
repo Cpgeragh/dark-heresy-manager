@@ -6,7 +6,6 @@ import { PortraitUpload } from "../components/PortraitUpload";
 import type { User } from "firebase/auth";
 import { useCampaignsForUser } from "../hooks/useCampaignsForUser";
 import { usePlayerCharacters } from "../hooks/usePlayerCharacters";
-import { useDeviceLink } from "../hooks/useDeviceLink";
 import { useToast } from "../components/Toast";
 import { buildRoute, ROUTES } from "../constants/routes";
 import type { CharacterListItem } from "../types/Firestore";
@@ -14,6 +13,9 @@ import { uiSectionHeader } from "../ui/editableStyles";
 
 type Props = {
   user: User;
+  effectiveUserId: string;
+  isLinked: boolean;
+  unlink: () => Promise<void>;
 };
 
 // ─── Character Card ───────────────────────────────────────────────────────────
@@ -119,13 +121,12 @@ function CampaignSection({
 
 // ─── Player Dashboard ─────────────────────────────────────────────────────────
 
-export default function PlayerDashboard({ user }: Props) {
+export default function PlayerDashboard({ user, effectiveUserId, isLinked, unlink }: Props) {
   const navigate = useNavigate();
   const toast = useToast();
-  const { campaigns, loading, error } = useCampaignsForUser(user.uid, "player");
-  const { isLinked, effectiveUserId, unlink, loading: linkLoading } = useDeviceLink(user.uid);
+  const { campaigns, loading, error } = useCampaignsForUser(effectiveUserId, "player");
 
-  const isEmpty = !loading && !linkLoading && !error && campaigns.length === 0;
+  const isEmpty = !loading && !error && campaigns.length === 0;
 
   async function handleUnlink() {
     try {
@@ -158,7 +159,7 @@ export default function PlayerDashboard({ user }: Props) {
           </p>
         )}
 
-        {(loading || linkLoading) && <p className="text-slate-400 text-sm">Loading campaigns…</p>}
+        {loading && <p className="text-slate-400 text-sm">Loading campaigns…</p>}
 
         {isEmpty && (
           <div className="space-y-4 text-center py-8">
@@ -169,7 +170,7 @@ export default function PlayerDashboard({ user }: Props) {
           </div>
         )}
 
-        {!loading && !linkLoading && campaigns.length > 0 && (
+        {!loading && campaigns.length > 0 && (
           <div className="space-y-4">
             {campaigns.map((campaign) => (
               <CampaignSection

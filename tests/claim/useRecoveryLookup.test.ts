@@ -87,10 +87,7 @@ describe("useRecoveryLookup ownership derivation", () => {
     mockGetDocSequence([
       { exists: () => true, data: () => ({ campaignId: "c1", characterId: "ch1" }) },
       { exists: () => true, data: () => ({}) },
-      { exists: () =>
-          true,
-        data: () => ({ userId: "A", isEditableByPlayer: true }),
-      },
+      { exists: () => true, data: () => ({ userId: "A", isEditableByPlayer: true }) },
     ]);
 
     const { result } = renderHook(() => useRecoveryLookup());
@@ -106,10 +103,7 @@ describe("useRecoveryLookup ownership derivation", () => {
     mockGetDocSequence([
       { exists: () => true, data: () => ({ campaignId: "c1", characterId: "ch1" }) },
       { exists: () => true, data: () => ({}) },
-      { exists: () =>
-          true,
-        data: () => ({ userId: "A", isEditableByPlayer: false }),
-      },
+      { exists: () => true, data: () => ({ userId: "A", isEditableByPlayer: false }) },
     ]);
 
     const { result } = renderHook(() => useRecoveryLookup());

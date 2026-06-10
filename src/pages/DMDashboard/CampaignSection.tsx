@@ -17,9 +17,10 @@ interface CampaignSectionProps {
   userUid: string;
   campaigns: CampaignWithId[];
   loading: boolean;
+  isLinked?: boolean;
 }
 
-function CampaignSection({ userUid, campaigns, loading }: CampaignSectionProps) {
+function CampaignSection({ userUid, campaigns, loading, isLinked = false }: CampaignSectionProps) {
   const { campaigns: archivedCampaigns } = useArchivedCampaigns(userUid);
 
   const [newCampaignName, setNewCampaignName] = useState("");
@@ -127,28 +128,30 @@ function CampaignSection({ userUid, campaigns, loading }: CampaignSectionProps) 
 
   return (
     <div className="space-y-6">
-      {/* CREATE CAMPAIGN */}
-      <div>
-        <p className={`${uiSectionHeader} mb-3`}>Create Campaign</p>
-        <div className="flex gap-2">
-          <input
-            id="campaign-name-input"
-            className={editableInputClass(true) + " flex-1"}
-            placeholder="Campaign Name"
-            value={newCampaignName}
-            onChange={handleNameChange}
-            onKeyDown={(e) => { if (e.key === "Enter") void handleCreate(); }}
-            aria-label="New campaign name"
-          />
-          <button
-            className="px-4 py-2 bg-amber-500 text-slate-900 font-semibold rounded text-sm hover:bg-amber-400 transition"
-            onClick={handleCreate}
-            aria-label="Create new campaign"
-          >
-            Create
-          </button>
+      {/* CREATE CAMPAIGN — hidden for linked devices (Firestore requires dmId == auth.uid) */}
+      {!isLinked && (
+        <div>
+          <p className={`${uiSectionHeader} mb-3`}>Create Campaign</p>
+          <div className="flex gap-2">
+            <input
+              id="campaign-name-input"
+              className={editableInputClass(true) + " flex-1"}
+              placeholder="Campaign Name"
+              value={newCampaignName}
+              onChange={handleNameChange}
+              onKeyDown={(e) => { if (e.key === "Enter") void handleCreate(); }}
+              aria-label="New campaign name"
+            />
+            <button
+              className="px-4 py-2 bg-amber-500 text-slate-900 font-semibold rounded text-sm hover:bg-amber-400 transition"
+              onClick={handleCreate}
+              aria-label="Create new campaign"
+            >
+              Create
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* YOUR CAMPAIGNS */}
       <div>

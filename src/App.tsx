@@ -6,6 +6,7 @@ import { QRCodeSVG } from "qrcode.react";
 
 import { useAuth } from "./hooks/useAuth";
 import { useUserRole } from "./hooks/useUserRole";
+import { useDeviceLink } from "./hooks/useDeviceLink";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { AppHeader } from "./components/AppHeader";
 import { MessageDrawer } from "./components/MessageDrawer";
@@ -53,9 +54,19 @@ export default function App() {
   });
 
   // -------------------------------------------------
+  // DEVICE LINK — must be called unconditionally before any early returns
+  // -------------------------------------------------
+  const {
+    isLinked,
+    effectiveUserId,
+    unlink,
+    loading: linkLoading,
+  } = useDeviceLink(currentUser?.uid ?? "");
+
+  // -------------------------------------------------
   // LOADING STATES
   // -------------------------------------------------
-  if (loading) {
+  if (loading || linkLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-100">
         Loading…
@@ -128,14 +139,21 @@ export default function App() {
           )}
 
           {/* ROUTES */}
-          <CampaignsProvider uid={currentUser.uid} role={isDM ? "dm" : "player"}>
+          <CampaignsProvider key={effectiveUserId} uid={effectiveUserId} role={isDM ? "dm" : "player"}>
             <main className="max-w-5xl mx-auto px-4 py-6">
               <ErrorBoundary>
                 <Routes>
                   {isDM && (
                     <Route
                       path={ROUTES.DM_DASHBOARD}
-                      element={<DMDashboard user={currentUser} />}
+                      element={
+                        <DMDashboard
+                          user={currentUser}
+                          effectiveUserId={effectiveUserId}
+                          isLinked={isLinked}
+                          unlink={unlink}
+                        />
+                      }
                     />
                   )}
 
@@ -143,7 +161,14 @@ export default function App() {
                     <>
                       <Route
                         path={ROUTES.PLAYER_DASHBOARD}
-                        element={<PlayerDashboard user={currentUser} />}
+                        element={
+                          <PlayerDashboard
+                            user={currentUser}
+                            effectiveUserId={effectiveUserId}
+                            isLinked={isLinked}
+                            unlink={unlink}
+                          />
+                        }
                       />
                       <Route path={ROUTES.CLAIM_CHARACTER} element={<ClaimCharacterPage />} />
                     </>
@@ -161,6 +186,8 @@ export default function App() {
                         currentRole={isDM ? "dm" : "player"}
                         onSwitchToDM={switchToDM}
                         onSwitchToPlayer={switchToPlayer}
+                        isLinked={isLinked}
+                        unlink={unlink}
                       />
                     }
                   />

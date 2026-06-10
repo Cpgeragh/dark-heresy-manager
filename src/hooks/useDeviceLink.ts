@@ -1,7 +1,13 @@
 // src/hooks/useDeviceLink.ts
+// Resolves whether the current device is secondary (linked) and provides the
+// effective user ID to use for Firestore queries.
+//
+// Uses an onSnapshot listener so the state updates automatically when
+// useLinkDevice writes to (or unlink deletes from) userLinks/{myUid} —
+// no page reload required.
 
 import { useState, useEffect } from "react";
-import { doc, getDoc, deleteDoc } from "firebase/firestore";
+import { doc, onSnapshot, deleteDoc } from "firebase/firestore";
 import { db } from "../firebase";
 
 interface DeviceLinkState {
@@ -16,28 +22,32 @@ export function useDeviceLink(myUid: string): DeviceLinkState {
   const [primaryUid, setPrimaryUid] = useState<string | null>(null);
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function resolve() {
-      try {
-        const snap = await getDoc(doc(db, "userLinks", myUid));
-        if (!cancelled) {
-          setPrimaryUid(snap.exists() ? (snap.data().primaryUid as string) : null);
-        }
-      } catch {
-        // treat lookup failure as not linked
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
+    // Called before auth is ready (myUid is ""); skip and mark as not linked.
+    if (!myUid) {
+      setLoading(false);
+      return;
     }
 
-    resolve();
-    return () => { cancelled = true; };
+    setLoading(true);
+
+    const unsubscribe = onSnapshot(
+      doc(db, "userLinks", myUid),
+      (snap) => {
+        setPrimaryUid(snap.exists() ? (snap.data().primaryUid as string) : null);
+        setLoading(false);
+      },
+      () => {
+        // Treat lookup failure as not linked
+        setLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
   }, [myUid]);
 
   async function unlink() {
     await deleteDoc(doc(db, "userLinks", myUid));
-    setPrimaryUid(null);
+    // onSnapshot fires and sets primaryUid → null automatically
   }
 
   return {
