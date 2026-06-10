@@ -8,20 +8,15 @@ import { auth } from "../firebase";
 import { userDocRef } from "../firebase/converters";
 import type { UserDocument } from "../types/Firestore";
 
-type Role = "player" | "dm";
-
 interface UseAuthResult {
   currentUser: User | null;
-  userRole: Role | null;
   loading: boolean;
   onboarded: boolean;
-  setUserRole: (role: Role) => void;
   setOnboarded: (value: boolean) => void;
 }
 
 export function useAuth(): UseAuthResult {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [userRole, setUserRole] = useState<Role | null>(null);
   const [loading, setLoading] = useState(true);
   // Default true so existing (legacy) users never see the onboarding screen.
   // Flipped to false only when a brand-new user doc is created.
@@ -48,7 +43,6 @@ export function useAuth(): UseAuthResult {
 
         if (!snap.exists()) {
           const newUserDoc: UserDocument = {
-            role: "player",
             createdAt: serverTimestamp(),
             lastSeen: serverTimestamp(),
             onboarded: false,
@@ -58,15 +52,12 @@ export function useAuth(): UseAuthResult {
 
           if (ignore) return;
 
-          setUserRole("player");
           setOnboarded(false);
         } else {
           const data = snap.data();
-          const role: Role = data.role === "dm" ? "dm" : "player";
 
           if (ignore) return;
 
-          setUserRole(role);
           // undefined means a legacy user created before onboarding existed — treat as onboarded
           setOnboarded(data.onboarded !== false);
         }
@@ -89,10 +80,8 @@ export function useAuth(): UseAuthResult {
 
   return {
     currentUser,
-    userRole,
     loading,
     onboarded,
-    setUserRole,
     setOnboarded,
   };
 }
