@@ -68,7 +68,7 @@ export default function App() {
     return (
       <Onboarding
         user={currentUser}
-        onComplete={(_role) => setOnboarded(true)}
+        onComplete={() => setOnboarded(true)}
       />
     );
   }
