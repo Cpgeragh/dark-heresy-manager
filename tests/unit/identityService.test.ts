@@ -220,7 +220,11 @@ describe("reclaimIdentity", () => {
 
   it("queries campaigns by dmId and batch-updates each dmId for DM reclaim", async () => {
     mockGetDoc.mockResolvedValue(makeRecoverySnap("uid-old", "dm"));
-    mockGetDocs.mockResolvedValue(makeQuerySnap(["campaigns/camp-1", "campaigns/camp-2"]));
+    mockGetDocs
+      // First call: campaigns owned by uid-old as DM
+      .mockResolvedValueOnce(makeQuerySnap(["campaigns/camp-1", "campaigns/camp-2"]))
+      // Second call: campaigns where uid-old is a member (none for a DM-only account)
+      .mockResolvedValueOnce(makeQuerySnap([]));
 
     await reclaimIdentity("uid-new", "DH-CODE");
 
@@ -232,13 +236,15 @@ describe("reclaimIdentity", () => {
   it("queries member campaigns then swaps memberIds and character userId for player reclaim", async () => {
     mockGetDoc.mockResolvedValue(makeRecoverySnap("uid-old", "player"));
     mockGetDocs
-      // First call: campaigns where memberIds contains uid-old
+      // First call: campaigns owned by uid-old as DM (none for a player-only account)
+      .mockResolvedValueOnce(makeQuerySnap([]))
+      // Second call: campaigns where memberIds contains uid-old
       .mockResolvedValueOnce(
         makeQuerySnap(["campaigns/camp-1"], () => ({
           memberIds: ["uid-old", "player-other"],
         }))
       )
-      // Second call: characters in that campaign owned by uid-old
+      // Third call: characters in that campaign owned by uid-old
       .mockResolvedValueOnce(
         makeQuerySnap(["campaigns/camp-1/characters/char-1"])
       );

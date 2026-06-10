@@ -25,7 +25,7 @@ export type CampaignWithId = CampaignDocument & { id: string };
  * User document stored in /users/{userId}
  */
 export interface UserDocument {
-  role: "player" | "dm";
+  role?: "player" | "dm";
   activeCampaignId?: string | null;
   createdAt: Timestamp | Date | FieldValue;
   lastSeen: Timestamp | Date | FieldValue;

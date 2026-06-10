@@ -11,6 +11,7 @@
 // Static routes
 export const ROUTES = {
   HOME: "/",
+  DASHBOARD: "/",
   DM_DASHBOARD: "/dm",
   PLAYER_DASHBOARD: "/player",
   SELECT_CAMPAIGN: "/select",
