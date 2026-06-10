@@ -16,13 +16,14 @@ import DMTools from "./DMTools";
 export default function ClaimCharacterPage() {
   const [code, setCode] = useState("");
   const [claiming, setClaiming] = useState(false);
+  const [linking, setLinking] = useState(false);
   const [claimError, setClaimError] = useState<string | null>(null);
 
   const navigate = useNavigate();
   const toast = useToast();
 
   const { loading, error, data, lookup } = useRecoveryLookup();
-  const { claimCharacter } = useClaimActions();
+  const { claimCharacter, linkDevice } = useClaimActions();
   const { forceAssign, forceRelease, isForceAssigning, isForceReleasing } = useDmActions();
 
   const handleLookup = useCallback(() => {
@@ -79,6 +80,22 @@ export default function ClaimCharacterPage() {
     }
   }
 
+  async function handleLinkDevice() {
+    if (!data || linking) return;
+    if (data.ownership !== "linkable") return;
+
+    try {
+      setLinking(true);
+      await linkDevice(data.character.userId!);
+      navigate(buildRoute.characterSheet(data.campaignId, data.characterId));
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to link device.";
+      toast.error(message);
+    } finally {
+      setLinking(false);
+    }
+  }
+
   return (
     <div className="max-w-lg mx-auto space-y-6 text-slate-200">
       <h1 className="text-3xl font-bold text-center mb-4">Claim Character</h1>
@@ -107,6 +124,7 @@ export default function ClaimCharacterPage() {
           campaign={data.campaign}
           ownership={data.ownership}
           onClaim={handleClaim}
+          onLinkDevice={handleLinkDevice}
         />
       )}
 
@@ -122,6 +140,7 @@ export default function ClaimCharacterPage() {
       )}
 
       {claiming && <p className="text-xs text-slate-400 text-center">Claiming character…</p>}
+      {linking && <p className="text-xs text-slate-400 text-center">Linking device…</p>}
     </div>
   );
 }

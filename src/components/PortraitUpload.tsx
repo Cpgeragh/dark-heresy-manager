@@ -1,6 +1,7 @@
 // src/components/PortraitUpload.tsx
 
 import { useState, useCallback, useRef } from "react";
+import { createPortal } from "react-dom";
 import Cropper from "react-easy-crop";
 import type { Point, Area } from "react-easy-crop";
 import { uploadPortrait } from "../services/portraitService";
@@ -13,7 +14,6 @@ function createImage(url: string): Promise<HTMLImageElement> {
     const img = new Image();
     img.addEventListener("load", () => resolve(img));
     img.addEventListener("error", reject);
-    img.setAttribute("crossOrigin", "anonymous");
     img.src = url;
   });
 }
@@ -101,7 +101,7 @@ export function PortraitUpload({
       toast.success("Portrait updated.");
     } catch (err) {
       console.error("Portrait upload failed:", err);
-      toast.error("Failed to upload portrait.");
+      toast.error(`Failed to upload portrait: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setUploading(false);
     }
@@ -166,8 +166,8 @@ export function PortraitUpload({
         />
       </div>
 
-      {/* Crop modal */}
-      {imageSrc && (
+      {/* Crop modal — rendered in a portal to escape Link event bubbling */}
+      {imageSrc && createPortal(
         <>
           <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" />
           <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
@@ -231,7 +231,8 @@ export function PortraitUpload({
               </div>
             </div>
           </div>
-        </>
+        </>,
+        document.body
       )}
     </>
   );

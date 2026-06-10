@@ -4,6 +4,22 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // ============================
+    // HELPER FUNCTIONS
+    // ============================
+
+    // Returns true if the authenticated user is the owner of the given userId,
+    // or if their device is linked to that owner via userLinks.
+    function playerOwnsOrLinked(ownerId) {
+      return request.auth != null && (
+        request.auth.uid == ownerId ||
+        (
+          exists(/databases/$(database)/documents/userLinks/$(request.auth.uid)) &&
+          get(/databases/$(database)/documents/userLinks/$(request.auth.uid)).data.primaryUid == ownerId
+        )
+      );
+    }
+
+    // ============================
     // USERS
     // ============================
     match /users/{userId} {
@@ -101,7 +117,7 @@ service cloud.firestore {
             request.auth != null &&
             resource != null &&
             resource.data != null &&
-            resource.data.userId == request.auth.uid &&
+            playerOwnsOrLinked(resource.data.userId) &&
             resource.data.isEditableByPlayer == true &&
             (
               !("userId" in request.resource.data) ||
@@ -264,6 +280,21 @@ service cloud.firestore {
     }
 
     // ============================
+    // USER LINKS — multi-device access
+    // ============================
+    // A secondary device writes its own UID as the document key, with
+    // primaryUid pointing to the account it is linked to.
+    // Maximum 3 linked devices per primary UID is enforced client-side.
+    match /userLinks/{uid} {
+      allow read, delete: if request.auth != null && uid == request.auth.uid;
+      allow create, update:
+        if request.auth != null &&
+           uid == request.auth.uid &&
+           request.resource.data.primaryUid is string &&
+           request.resource.data.primaryUid != request.auth.uid;
+    }
+
+    // ============================
     // SESSIONS
     // ============================
     match /campaigns/{campaignId}/sessions/{sessionId} {
@@ -291,11 +322,12 @@ service cloud.firestore {
                  .data.dmId == request.auth.uid;
       }
 
-      // The player who owns this character (character.userId == request.auth.uid)
+      // The player who owns this character — or a linked device — can access the thread.
       function playerOwnsCharacter() {
-        return request.auth != null &&
-               get(/databases/$(database)/documents/campaigns/$(campaignId)/characters/$(characterId))
-                 .data.userId == request.auth.uid;
+        return playerOwnsOrLinked(
+          get(/databases/$(database)/documents/campaigns/$(campaignId)/characters/$(characterId))
+            .data.userId
+        );
       }
 
       // DM reads all thread summaries; player reads only their own character's thread
@@ -334,26 +366,26 @@ service cloud.firestore {
 
       allow read, list:
         if dmOwnsCampaign() ||
-        (
-          request.auth != null &&
+        playerOwnsOrLinked(
           get(/databases/$(database)/documents/campaigns/$(campaignId)/characters/$(characterId))
-            .data.userId == request.auth.uid
+            .data.userId
         );
 
       allow create:
         if request.auth != null &&
            request.resource.data.playerId == request.auth.uid &&
            request.resource.data.status == "pending" &&
-           get(/databases/$(database)/documents/campaigns/$(campaignId)/characters/$(characterId))
-             .data.userId == request.auth.uid;
+           playerOwnsOrLinked(
+             get(/databases/$(database)/documents/campaigns/$(campaignId)/characters/$(characterId))
+               .data.userId
+           );
 
       allow update, delete: if dmOwnsCampaign();
     }
 
     // Required for collectionGroup("characters") queries — restricted to own characters only.
     match /{path=**}/characters/{characterId} {
-      allow read: if request.auth != null &&
-                     resource.data.userId == request.auth.uid;
+      allow read: if playerOwnsOrLinked(resource.data.userId);
     }
 
     // All unlisted paths are denied by default.

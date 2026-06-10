@@ -6,6 +6,8 @@ import { PortraitUpload } from "../components/PortraitUpload";
 import type { User } from "firebase/auth";
 import { useCampaignsForUser } from "../hooks/useCampaignsForUser";
 import { usePlayerCharacters } from "../hooks/usePlayerCharacters";
+import { useDeviceLink } from "../hooks/useDeviceLink";
+import { useToast } from "../components/Toast";
 import { buildRoute, ROUTES } from "../constants/routes";
 import type { CharacterListItem } from "../types/Firestore";
 import { uiSectionHeader } from "../ui/editableStyles";
@@ -36,12 +38,14 @@ function CharacterCard({
       className="border border-slate-700 rounded-lg p-4 bg-slate-900/60 block hover:bg-slate-800 transition-colors"
     >
       <div className="flex items-center gap-3">
-        <PortraitUpload
-          campaignId={campaignId}
-          characterId={character.id}
-          currentPortraitUrl={character.portraitUrl}
-          canEdit={true}
-        />
+        <div onClick={(e) => e.stopPropagation()}>
+          <PortraitUpload
+            campaignId={campaignId}
+            characterId={character.id}
+            currentPortraitUrl={character.portraitUrl}
+            canEdit={true}
+          />
+        </div>
       <div className="flex-1 space-y-1">
         <div className="font-semibold text-slate-100 leading-tight">{name}</div>
         {(career || rank) && (
@@ -117,13 +121,35 @@ function CampaignSection({
 
 export default function PlayerDashboard({ user }: Props) {
   const navigate = useNavigate();
+  const toast = useToast();
   const { campaigns, loading, error } = useCampaignsForUser(user.uid, "player");
+  const { isLinked, effectiveUserId, unlink, loading: linkLoading } = useDeviceLink(user.uid);
 
-  const isEmpty = !loading && !error && campaigns.length === 0;
+  const isEmpty = !loading && !linkLoading && !error && campaigns.length === 0;
+
+  async function handleUnlink() {
+    try {
+      await unlink();
+    } catch {
+      toast.error("Failed to unlink device. Please try again.");
+    }
+  }
 
   return (
     <div className="space-y-6 text-slate-100">
       <h1 className="text-lg font-semibold text-slate-100 text-center">Campaign Hub</h1>
+
+      {isLinked && (
+        <div className="border border-amber-700 bg-amber-900/20 p-4 rounded-lg flex items-center justify-between gap-4">
+          <p className="text-sm text-amber-300">This device is linked to another player's account.</p>
+          <button
+            onClick={handleUnlink}
+            className="shrink-0 px-3 py-1.5 rounded text-sm font-semibold bg-slate-700 text-slate-200 hover:bg-slate-600"
+          >
+            Unlink
+          </button>
+        </div>
+      )}
 
       <div className="border border-slate-700 bg-slate-900/40 p-4 rounded-lg space-y-6">
         {error && (
@@ -132,7 +158,7 @@ export default function PlayerDashboard({ user }: Props) {
           </p>
         )}
 
-        {loading && <p className="text-slate-400 text-sm">Loading campaigns…</p>}
+        {(loading || linkLoading) && <p className="text-slate-400 text-sm">Loading campaigns…</p>}
 
         {isEmpty && (
           <div className="space-y-4 text-center py-8">
@@ -143,14 +169,14 @@ export default function PlayerDashboard({ user }: Props) {
           </div>
         )}
 
-        {!loading && campaigns.length > 0 && (
+        {!loading && !linkLoading && campaigns.length > 0 && (
           <div className="space-y-4">
             {campaigns.map((campaign) => (
               <CampaignSection
                 key={campaign.id}
                 campaignId={campaign.id}
                 campaignName={campaign.name}
-                userId={user.uid}
+                userId={effectiveUserId}
               />
             ))}
           </div>

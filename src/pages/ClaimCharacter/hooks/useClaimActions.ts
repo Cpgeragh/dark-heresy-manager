@@ -1,6 +1,6 @@
 // src/pages/ClaimCharacter/hooks/useClaimActions.ts
 
-import { arrayUnion, collection, doc, runTransaction } from "firebase/firestore";
+import { arrayUnion, collection, doc, getDocs, query, runTransaction, serverTimestamp, setDoc, where } from "firebase/firestore";
 import { db, auth } from "../../../firebase";
 import { buildClaimLogPayload } from "../../../utils/claimLog";
 
@@ -44,5 +44,21 @@ export function useClaimActions() {
     });
   }
 
-  return { claimCharacter };
+  async function linkDevice(primaryUid: string) {
+    const user = auth.currentUser;
+    if (!user) throw new Error("Not signed in.");
+
+    const q = query(collection(db, "userLinks"), where("primaryUid", "==", primaryUid));
+    const snapshot = await getDocs(q);
+    if (snapshot.size >= 3) {
+      throw new Error("This player already has 3 linked devices — the maximum allowed.");
+    }
+
+    await setDoc(doc(db, "userLinks", user.uid), {
+      primaryUid,
+      linkedAt: serverTimestamp(),
+    });
+  }
+
+  return { claimCharacter, linkDevice };
 }
