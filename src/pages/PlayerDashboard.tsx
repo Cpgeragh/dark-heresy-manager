@@ -121,7 +121,7 @@ function CampaignSection({
 
 // ─── Player Dashboard ─────────────────────────────────────────────────────────
 
-export default function PlayerDashboard({ user, effectiveUserId, isLinked, unlink }: Props) {
+export default function PlayerDashboard({ user: _user, effectiveUserId, isLinked, unlink }: Props) {
   const navigate = useNavigate();
   const toast = useToast();
   const { campaigns, loading, error } = useCampaignsForUser(effectiveUserId, "player");

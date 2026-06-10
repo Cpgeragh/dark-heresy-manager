@@ -80,6 +80,7 @@ service cloud.firestore {
         if request.auth != null &&
            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['dmId']) &&
            request.resource.data.dmId == request.auth.uid &&
+           exists(/databases/$(database)/documents/identityReclaims/$(request.auth.uid)) &&
            get(/databases/$(database)/documents/identityReclaims/$(request.auth.uid)).data.oldUid
              == resource.data.dmId;
 
@@ -90,6 +91,7 @@ service cloud.firestore {
         if request.auth != null &&
            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberIds']) &&
            request.auth.uid in request.resource.data.get('memberIds', []) &&
+           exists(/databases/$(database)/documents/identityReclaims/$(request.auth.uid)) &&
            !(get(/databases/$(database)/documents/identityReclaims/$(request.auth.uid)).data.oldUid
                in request.resource.data.get('memberIds', [])) &&
            request.resource.data.get('memberIds', []).hasAll(
@@ -104,9 +106,8 @@ service cloud.firestore {
       match /characters/{characterId} {
 
         function dmOwnsCampaign() {
-          return dmOwnsOrLinked(
-            get(/databases/$(database)/documents/campaigns/$(campaignId)).data.dmId
-          );
+          let camp = get(/databases/$(database)/documents/campaigns/$(campaignId));
+          return camp != null && dmOwnsOrLinked(camp.data.dmId);
         }
 
         // Any authenticated user can read characters (needed for party overview
@@ -156,6 +157,7 @@ service cloud.firestore {
           if request.auth != null &&
              request.resource.data.diff(resource.data).affectedKeys().hasOnly(['userId']) &&
              request.resource.data.userId == request.auth.uid &&
+             exists(/databases/$(database)/documents/identityReclaims/$(request.auth.uid)) &&
              resource.data.userId ==
                get(/databases/$(database)/documents/identityReclaims/$(request.auth.uid)).data.oldUid;
 
@@ -167,9 +169,8 @@ service cloud.firestore {
         match /claimLog/{logId} {
 
           function dmOwnsCampaign() {
-            return dmOwnsOrLinked(
-              get(/databases/$(database)/documents/campaigns/$(campaignId)).data.dmId
-            );
+            let camp = get(/databases/$(database)/documents/campaigns/$(campaignId));
+            return camp != null && dmOwnsOrLinked(camp.data.dmId);
           }
 
           allow read, list: if dmOwnsCampaign();
@@ -222,21 +223,24 @@ service cloud.firestore {
         if request.auth != null &&
            ("campaignId" in request.resource.data) &&
            ("characterId" in request.resource.data) &&
+           exists(/databases/$(database)/documents/campaigns/$(request.resource.data.campaignId)) &&
            dmOwnsOrLinked(
              get(/databases/$(database)/documents/campaigns/$(request.resource.data.campaignId))
                .data.dmId
            ) &&
            (request.method == "create" ||
-            dmOwnsOrLinked(
-              get(/databases/$(database)/documents/campaigns/$(resource.data.campaignId))
-                .data.dmId
-            ));
+            (exists(/databases/$(database)/documents/campaigns/$(resource.data.campaignId)) &&
+             dmOwnsOrLinked(
+               get(/databases/$(database)/documents/campaigns/$(resource.data.campaignId))
+                 .data.dmId
+             )));
 
       allow delete:
-        if dmOwnsOrLinked(
-          get(/databases/$(database)/documents/campaigns/$(resource.data.campaignId))
-            .data.dmId
-        );
+        if exists(/databases/$(database)/documents/campaigns/$(resource.data.campaignId)) &&
+           dmOwnsOrLinked(
+             get(/databases/$(database)/documents/campaigns/$(resource.data.campaignId))
+               .data.dmId
+           );
     }
 
     // ============================

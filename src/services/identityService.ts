@@ -31,7 +31,7 @@ type Role = "dm" | "player";
  */
 export async function registerIdentityRecovery(
   uid: string,
-  role: Role,
+  role: Role = "player",
   existingCode?: string
 ): Promise<string> {
   const code = generateRecoveryCode();
@@ -72,7 +72,7 @@ export async function reclaimIdentity(uid: string, code: string): Promise<"dm" |
     throw new Error("Recovery code not found.");
   }
 
-  const { uid: oldUid, role } = recoverySnap.data() as { uid: string; role: "dm" | "player" };
+  const { uid: oldUid, role } = recoverySnap.data() as { uid: string; role?: "dm" | "player" };
 
   if (oldUid === uid) {
     throw new Error("This code is already registered to your account.");
@@ -83,56 +83,55 @@ export async function reclaimIdentity(uid: string, code: string): Promise<"dm" |
   await setDoc(reclaimRef, { oldUid, code });
 
   try {
-    if (role === "dm") {
-      // 3a. Migrate all campaigns owned by the old uid
-      const campaignsSnap = await getDocs(
-        query(collection(db, "campaigns"), where("dmId", "==", oldUid))
-      );
-      if (!campaignsSnap.empty) {
-        const batch = writeBatch(db);
-        campaignsSnap.docs.forEach((d) => batch.update(d.ref, { dmId: uid }));
-        await batch.commit();
-      }
-    } else {
-      // 3b. Migrate characters across all campaigns the old uid was a member of
-      const campaignsSnap = await getDocs(
-        query(collection(db, "campaigns"), where("memberIds", "array-contains", oldUid))
-      );
-      if (!campaignsSnap.empty) {
-        const batch = writeBatch(db);
-        for (const campDoc of campaignsSnap.docs) {
-          // Swap old uid out of memberIds and new uid in
-          const campData = campDoc.data() as { memberIds: string[] };
-          const newMemberIds = campData.memberIds
-            .filter((id) => id !== oldUid)
-            .concat(uid);
-          batch.update(campDoc.ref, { memberIds: newMemberIds });
+    // 3a. Migrate any campaigns owned by the old uid (DM data)
+    const dmCampaignsSnap = await getDocs(
+      query(collection(db, "campaigns"), where("dmId", "==", oldUid))
+    );
+    if (!dmCampaignsSnap.empty) {
+      const batch = writeBatch(db);
+      dmCampaignsSnap.docs.forEach((d) => batch.update(d.ref, { dmId: uid }));
+      await batch.commit();
+    }
 
-          // Migrate characters owned by the old uid
-          const charsSnap = await getDocs(
-            query(
-              collection(db, "campaigns", campDoc.id, "characters"),
-              where("userId", "==", oldUid)
-            )
-          );
-          charsSnap.docs.forEach((d) => batch.update(d.ref, { userId: uid }));
-        }
-        await batch.commit();
+    // 3b. Migrate characters across all campaigns the old uid was a member of (player data)
+    const playerCampaignsSnap = await getDocs(
+      query(collection(db, "campaigns"), where("memberIds", "array-contains", oldUid))
+    );
+    if (!playerCampaignsSnap.empty) {
+      const batch = writeBatch(db);
+      for (const campDoc of playerCampaignsSnap.docs) {
+        // Swap old uid out of memberIds and new uid in
+        const campData = campDoc.data() as { memberIds: string[] };
+        const newMemberIds = campData.memberIds
+          .filter((id) => id !== oldUid)
+          .concat(uid);
+        batch.update(campDoc.ref, { memberIds: newMemberIds });
+
+        // Migrate characters owned by the old uid
+        const charsSnap = await getDocs(
+          query(
+            collection(db, "campaigns", campDoc.id, "characters"),
+            where("userId", "==", oldUid)
+          )
+        );
+        charsSnap.docs.forEach((d) => batch.update(d.ref, { userId: uid }));
       }
+      await batch.commit();
     }
 
     // 4. Transfer the recovery entry and secret to the new uid
     await updateDoc(recoveryRef, { uid });
     await setDoc(doc(db, "identitySecret", uid), { code });
 
-    // 5. Stamp the new user doc with the reclaimed role
-    await setDoc(doc(db, "users", uid), { role, onboarded: true }, { merge: true });
+    // 5. Mark the new user doc as onboarded
+    await setDoc(doc(db, "users", uid), { onboarded: true }, { merge: true });
   } finally {
     // 6. Always clean up the proof document regardless of success or failure
     await deleteDoc(reclaimRef);
   }
 
-  return role;
+  // Return legacy role value for backwards compatibility during transition
+  return role ?? "player";
 }
 
 /**
@@ -151,7 +150,7 @@ export async function getRecoveryCode(uid: string): Promise<string | null> {
  * old identityRecovery entry is cleaned up atomically.
  * Returns the new code so the UI can display it.
  */
-export async function rotateRecoveryCode(uid: string, role: "dm" | "player"): Promise<string> {
+export async function rotateRecoveryCode(uid: string, role: "dm" | "player" = "player"): Promise<string> {
   const existingCode = await getRecoveryCode(uid);
   return registerIdentityRecovery(uid, role, existingCode ?? undefined);
 }
