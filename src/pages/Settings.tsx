@@ -10,11 +10,12 @@ import { uiSection, uiSectionHeader } from "../ui/editableStyles";
 
 interface Props {
   user: User;
+  effectiveUserId: string;
   isLinked: boolean;
   unlink: () => Promise<void>;
 }
 
-export default function Settings({ user, isLinked, unlink }: Props) {
+export default function Settings({ user: _user, effectiveUserId, isLinked, unlink }: Props) {
   const toast = useToast();
 
   // ── Recovery code state ──────────────────────────────────────────────────
@@ -32,9 +33,9 @@ export default function Settings({ user, isLinked, unlink }: Props) {
   async function handleReveal() {
     setRevealing(true);
     try {
-      let code = await getRecoveryCode(user.uid);
+      let code = await getRecoveryCode(effectiveUserId);
       if (!code) {
-        code = await rotateRecoveryCode(user.uid);
+        code = await rotateRecoveryCode(effectiveUserId);
         toast.success("Recovery code generated.");
       }
       setRevealedCode(code);
@@ -50,7 +51,7 @@ export default function Settings({ user, isLinked, unlink }: Props) {
     setRotating(true);
     setConfirmRotate(false);
     try {
-      const newCode = await rotateRecoveryCode(user.uid);
+      const newCode = await rotateRecoveryCode(effectiveUserId);
       setRevealedCode(newCode);
       toast.success("Recovery code rotated. Write down your new code.");
     } catch (err) {
