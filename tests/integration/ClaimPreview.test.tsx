@@ -120,45 +120,4 @@ describe("ClaimPreview", () => {
     expect(screen.getByText("Unnamed Character")).toBeInTheDocument();
   });
 
-  it("shows link message and enabled button when linkable", () => {
-    render(
-      <ClaimPreview
-        character={mockCharacter}
-        campaign={mockCampaign}
-        ownership="linkable"
-        onClaim={vi.fn()}
-        onLinkDevice={vi.fn()}
-      />
-    );
-    expect(screen.getByText(/link this device/i)).toBeInTheDocument();
-    const button = screen.getByRole("button", { name: /link this device/i });
-    expect(button).not.toBeDisabled();
-  });
-
-  it("calls onLinkDevice when link button clicked", () => {
-    const onLinkDevice = vi.fn();
-    render(
-      <ClaimPreview
-        character={mockCharacter}
-        campaign={mockCampaign}
-        ownership="linkable"
-        onClaim={vi.fn()}
-        onLinkDevice={onLinkDevice}
-      />
-    );
-    fireEvent.click(screen.getByRole("button", { name: /link this device/i }));
-    expect(onLinkDevice).toHaveBeenCalledOnce();
-  });
-
-  it("does not show link button when ownership is not linkable", () => {
-    render(
-      <ClaimPreview
-        character={mockCharacter}
-        campaign={mockCampaign}
-        ownership="claimed-by-other"
-        onClaim={vi.fn()}
-      />
-    );
-    expect(screen.queryByRole("button", { name: /link this device/i })).not.toBeInTheDocument();
-  });
 });

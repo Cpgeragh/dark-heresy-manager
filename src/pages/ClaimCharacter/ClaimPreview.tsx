@@ -9,10 +9,9 @@ interface ClaimPreviewProps {
   campaign: CampaignDocument;
   ownership: OwnershipState;
   onClaim: () => Promise<void> | void;
-  onLinkDevice?: () => Promise<void> | void;
 }
 
-export function ClaimPreview({ character, campaign, ownership, onClaim, onLinkDevice }: ClaimPreviewProps) {
+export function ClaimPreview({ character, campaign, ownership, onClaim }: ClaimPreviewProps) {
   const name = character.header?.characterName ?? "Unnamed Character";
 
   function renderStatus() {
@@ -22,13 +21,6 @@ export function ClaimPreview({ character, campaign, ownership, onClaim, onLinkDe
 
       case "claimed-by-you":
         return <p className="text-amber-300 text-sm">You already own this character.</p>;
-
-      case "linkable":
-        return (
-          <p className="text-blue-400 text-sm">
-            This character is claimed on another device. You can link this device to access it.
-          </p>
-        );
 
       case "claimed-by-other":
         return (
@@ -49,11 +41,6 @@ export function ClaimPreview({ character, campaign, ownership, onClaim, onLinkDe
     onClaim();
   }, [ownership, onClaim]);
 
-  const handleLinkDevice = useCallback(() => {
-    if (ownership !== "linkable") return;
-    onLinkDevice?.();
-  }, [ownership, onLinkDevice]);
-
   return (
     <div className="border border-slate-700 bg-slate-900 p-4 rounded space-y-4">
       <h2 className="text-xl font-semibold text-slate-100">Character Found</h2>
@@ -72,25 +59,14 @@ export function ClaimPreview({ character, campaign, ownership, onClaim, onLinkDe
 
       {renderStatus()}
 
-      {ownership === "unclaimed" && (
+      {ownership === "unclaimed" ? (
         <button
           onClick={handleClaim}
           className="w-full px-4 py-2 rounded font-semibold bg-green-600 text-white hover:bg-green-500"
         >
           Claim This Character
         </button>
-      )}
-
-      {ownership === "linkable" && (
-        <button
-          onClick={handleLinkDevice}
-          className="w-full px-4 py-2 rounded font-semibold bg-blue-600 text-white hover:bg-blue-500"
-        >
-          Link This Device
-        </button>
-      )}
-
-      {ownership !== "unclaimed" && ownership !== "linkable" && (
+      ) : (
         <button
           disabled
           className="w-full px-4 py-2 rounded font-semibold bg-slate-700 text-slate-400 cursor-not-allowed"

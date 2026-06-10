@@ -47,12 +47,6 @@ export async function deleteCampaign(campaignId: string): Promise<void> {
   const charactersSnap = await getDocs(collection(db, "campaigns", campaignId, "characters"));
 
   for (const charDoc of charactersSnap.docs) {
-    // claimLog subcollection
-    const claimLogSnap = await getDocs(
-      collection(db, "campaigns", campaignId, "characters", charDoc.id, "claimLog")
-    );
-    claimLogSnap.docs.forEach((d) => batch.delete(d.ref));
-
     // xpProposals subcollection
     const xpProposalsSnap = await getDocs(
       collection(db, "campaigns", campaignId, "characters", charDoc.id, "xpProposals")

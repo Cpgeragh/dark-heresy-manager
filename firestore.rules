@@ -19,6 +19,18 @@ service cloud.firestore {
       );
     }
 
+    // Returns true if the authenticated user is the DM with the given dmId,
+    // or if their device is linked to that DM via userLinks.
+    function dmOwnsOrLinked(dmId) {
+      return request.auth != null && (
+        request.auth.uid == dmId ||
+        (
+          exists(/databases/$(database)/documents/userLinks/$(request.auth.uid)) &&
+          get(/databases/$(database)/documents/userLinks/$(request.auth.uid)).data.primaryUid == dmId
+        )
+      );
+    }
+
     // ============================
     // USERS
     // ============================
@@ -41,19 +53,17 @@ service cloud.firestore {
         if request.auth != null &&
            request.resource.data.dmId == request.auth.uid;
 
-      // DM can update any campaign field (except transferring ownership).
+      // DM (or a linked device) can update any campaign field (except transferring ownership).
       allow update:
-        if request.auth != null &&
-           resource.data.dmId == request.auth.uid &&
+        if dmOwnsOrLinked(resource.data.dmId) &&
            (
              !("dmId" in request.resource.data) ||
              request.resource.data.dmId == resource.data.dmId
            );
 
-      // DM can delete their own campaign (cascading delete handled client-side).
+      // DM (or a linked device) can delete their campaign (cascading delete handled client-side).
       allow delete:
-        if request.auth != null &&
-           resource.data.dmId == request.auth.uid;
+        if dmOwnsOrLinked(resource.data.dmId);
 
       // Any authenticated user can add themselves to memberIds (claim flow).
       // Guards: only memberIds may change, they must be in the result, and no
@@ -94,9 +104,9 @@ service cloud.firestore {
       match /characters/{characterId} {
 
         function dmOwnsCampaign() {
-          return request.auth != null &&
-                 get(/databases/$(database)/documents/campaigns/$(campaignId))
-                   .data.dmId == request.auth.uid;
+          return dmOwnsOrLinked(
+            get(/databases/$(database)/documents/campaigns/$(campaignId)).data.dmId
+          );
         }
 
         // Any authenticated user can read characters (needed for party overview
@@ -157,9 +167,9 @@ service cloud.firestore {
         match /claimLog/{logId} {
 
           function dmOwnsCampaign() {
-            return request.auth != null &&
-                   get(/databases/$(database)/documents/campaigns/$(campaignId))
-                     .data.dmId == request.auth.uid;
+            return dmOwnsOrLinked(
+              get(/databases/$(database)/documents/campaigns/$(campaignId)).data.dmId
+            );
           }
 
           allow read, list: if dmOwnsCampaign();
@@ -186,7 +196,9 @@ service cloud.firestore {
                 ) ||
                 (
                   request.resource.data.action == "release" &&
-                  get(/databases/$(database)/documents/campaigns/$(campaignId)/characters/$(characterId)).data.userId == request.auth.uid
+                  playerOwnsOrLinked(
+                    get(/databases/$(database)/documents/campaigns/$(campaignId)/characters/$(characterId)).data.userId
+                  )
                 )
               )
             );
@@ -210,16 +222,21 @@ service cloud.firestore {
         if request.auth != null &&
            ("campaignId" in request.resource.data) &&
            ("characterId" in request.resource.data) &&
-           get(/databases/$(database)/documents/campaigns/$(request.resource.data.campaignId))
-             .data.dmId == request.auth.uid &&
+           dmOwnsOrLinked(
+             get(/databases/$(database)/documents/campaigns/$(request.resource.data.campaignId))
+               .data.dmId
+           ) &&
            (request.method == "create" ||
-            get(/databases/$(database)/documents/campaigns/$(resource.data.campaignId))
-              .data.dmId == request.auth.uid);
+            dmOwnsOrLinked(
+              get(/databases/$(database)/documents/campaigns/$(resource.data.campaignId))
+                .data.dmId
+            ));
 
       allow delete:
-        if request.auth != null &&
-           get(/databases/$(database)/documents/campaigns/$(resource.data.campaignId))
-             .data.dmId == request.auth.uid;
+        if dmOwnsOrLinked(
+          get(/databases/$(database)/documents/campaigns/$(resource.data.campaignId))
+            .data.dmId
+        );
     }
 
     // ============================
@@ -300,9 +317,9 @@ service cloud.firestore {
     match /campaigns/{campaignId}/sessions/{sessionId} {
 
       function dmOwnsCampaign() {
-        return request.auth != null &&
-               get(/databases/$(database)/documents/campaigns/$(campaignId))
-                 .data.dmId == request.auth.uid;
+        return dmOwnsOrLinked(
+          get(/databases/$(database)/documents/campaigns/$(campaignId)).data.dmId
+        );
       }
 
       // Any authenticated user can read sessions.
@@ -317,9 +334,9 @@ service cloud.firestore {
     match /campaigns/{campaignId}/threads/{characterId} {
 
       function dmOwnsMessagingCampaign() {
-        return request.auth != null &&
-               get(/databases/$(database)/documents/campaigns/$(campaignId))
-                 .data.dmId == request.auth.uid;
+        return dmOwnsOrLinked(
+          get(/databases/$(database)/documents/campaigns/$(campaignId)).data.dmId
+        );
       }
 
       // The player who owns this character — or a linked device — can access the thread.
@@ -359,9 +376,9 @@ service cloud.firestore {
     match /campaigns/{campaignId}/characters/{characterId}/xpProposals/{proposalId} {
 
       function dmOwnsCampaign() {
-        return request.auth != null &&
-               get(/databases/$(database)/documents/campaigns/$(campaignId))
-                 .data.dmId == request.auth.uid;
+        return dmOwnsOrLinked(
+          get(/databases/$(database)/documents/campaigns/$(campaignId)).data.dmId
+        );
       }
 
       allow read, list:
