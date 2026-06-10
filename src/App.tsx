@@ -114,6 +114,7 @@ export default function App() {
                     element={
                       <Settings
                         user={currentUser}
+                        effectiveUserId={effectiveUserId}
                         isLinked={isLinked}
                         unlink={unlink}
                       />

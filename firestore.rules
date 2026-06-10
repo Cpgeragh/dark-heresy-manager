@@ -252,9 +252,9 @@ service cloud.firestore {
       allow get:    if request.auth != null;
       allow list:   if false;
       allow create: if request.auth != null &&
-                       request.resource.data.uid == request.auth.uid;
+                       playerOwnsOrLinked(request.resource.data.uid);
       allow delete: if request.auth != null &&
-                       resource.data.uid == request.auth.uid;
+                       playerOwnsOrLinked(resource.data.uid);
       // Identity reclaim: allow transferring this code's uid to the reclaimer's
       // new uid when a valid reclaim document confirms the handshake.
       allow update:
@@ -271,12 +271,10 @@ service cloud.firestore {
     // Never readable by clients — only accessed via get() in security rule
     // evaluation when verifying a reclaim attempt.
     match /identitySecret/{uid} {
-      // Owner can read their own code (needed for the Settings page reveal/rotate flow).
-      // Other users cannot read anyone else's code — the security model is intact.
-      // Note: get() calls inside security rules bypass this allow read entirely,
-      // so the identityReclaims verification rule is unaffected.
-      allow read:  if request.auth != null && uid == request.auth.uid;
-      allow write: if request.auth != null && uid == request.auth.uid;
+      // Owner or a linked device can read/write — linked devices need this to
+      // reveal and rotate the primary account's recovery code from Settings.
+      allow read:  if playerOwnsOrLinked(uid);
+      allow write: if playerOwnsOrLinked(uid);
     }
 
     // ============================
