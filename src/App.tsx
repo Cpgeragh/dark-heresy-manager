@@ -1,6 +1,6 @@
 // src/App.tsx
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Routes, Route, Navigate, useLocation, useMatch } from "react-router-dom";
 
 import { useAuth } from "./hooks/useAuth";
@@ -10,16 +10,29 @@ import { AppHeader } from "./components/AppHeader";
 import { MessageDrawer } from "./components/MessageDrawer";
 import { CampaignsProvider } from "./context/CampaignsContext";
 import { HeaderExtensionProvider } from "./context/HeaderExtensionContext";
-import { ToastProvider, ToastContainer } from "./components/Toast";
+import { ToastProvider, ToastContainer, useToast } from "./components/Toast";
 import { OfflineIndicator } from "./components/OfflineIndicator";
 import { ToastTester } from "./components/ToastTester";
 import { ROUTES, ROUTE_PATTERNS } from "./constants/routes";
+import { consumeUpdateStalled } from "./pwaUpdateState";
 
 import Dashboard from "./pages/Dashboard";
 import CharacterSheet from "./pages/CharacterSheet";
 import CampaignOverview from "./pages/CampaignOverview";
 import Onboarding from "./pages/Onboarding";
 import Settings from "./pages/Settings";
+
+// Shows a one-off toast if a service-worker update started downloading but
+// stalled (flag set in main.tsx). Must live inside ToastProvider.
+function UpdateStallNotice() {
+  const toast = useToast();
+  useEffect(() => {
+    if (consumeUpdateStalled()) {
+      toast.warning("Couldn't download the latest update");
+    }
+  }, [toast]);
+  return null;
+}
 
 export default function App() {
   const location = useLocation();
@@ -78,6 +91,7 @@ export default function App() {
   return (
     <HeaderExtensionProvider>
       <ToastProvider>
+        <UpdateStallNotice />
         <div className="min-h-screen bg-slate-950 text-slate-100">
           {/* HEADER */}
           <AppHeader

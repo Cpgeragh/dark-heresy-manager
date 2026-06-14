@@ -3,17 +3,72 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { registerSW } from "virtual:pwa-register";
 import App from "./App";
+import { markUpdateStalled } from "./pwaUpdateState";
 import "./index.css";
 
-// Register the service worker. With registerType: "autoUpdate", a newly
-// deployed version is downloaded in the background and the page reloads once
-// it takes control — so updates appear on the first app open, not the second.
-registerSW({ immediate: true });
+const root = ReactDOM.createRoot(document.getElementById("root")!);
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  </React.StrictMode>
-);
+function Splash({ label }: { label: string }) {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-100">
+      {label}
+    </div>
+  );
+}
+
+let settled = false;
+
+function renderApp() {
+  if (settled) return;
+  settled = true;
+  root.render(
+    <React.StrictMode>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </React.StrictMode>
+  );
+}
+
+function renderUpdating() {
+  if (settled) return;
+  settled = true;
+  root.render(<Splash label="Updating…" />);
+  // If the update stalls (connection drops mid-download), fall back to the
+  // cached app rather than hanging on "Updating…" forever.
+  window.setTimeout(() => {
+    settled = false;
+    markUpdateStalled();
+    renderApp();
+  }, 30000);
+}
+
+// Neutral splash while we decide whether an update is pending.
+root.render(<Splash label="Loading…" />);
+
+registerSW({
+  immediate: true,
+  onRegisteredSW(_swUrl, registration) {
+    // First visit / not yet controlled by a worker → nothing cached can be
+    // stale, so just show the app.
+    if (!registration || !navigator.serviceWorker.controller) {
+      renderApp();
+      return;
+    }
+    // Safety net: never hold the splash longer than this on the check itself.
+    window.setTimeout(renderApp, 3000);
+    // Force an update check. If a new version is installing, stay on the
+    // "Updating…" splash (autoUpdate reloads once it's ready); otherwise the
+    // cached version is current, so render it.
+    registration
+      .update()
+      .then(() => {
+        if (registration.installing || registration.waiting) renderUpdating();
+        else renderApp();
+      })
+      .catch(() => renderApp());
+  },
+  onRegisterError() {
+    renderApp();
+  },
+});
