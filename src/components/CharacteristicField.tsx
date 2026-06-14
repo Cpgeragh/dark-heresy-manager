@@ -146,7 +146,7 @@ export default function CharacteristicField({ label, value, editable, onChange }
                 ${filled ? "bg-amber-500 border-amber-400" : "bg-slate-900 border-slate-600"}
                 ${
                   editable
-                    ? "cursor-pointer hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    ? "cursor-pointer hover:bg-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
                     : "opacity-50 cursor-not-allowed"
                 }`}
             />

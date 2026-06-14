@@ -16,7 +16,6 @@ import { ToastTester } from "./components/ToastTester";
 import { ROUTES, ROUTE_PATTERNS } from "./constants/routes";
 
 import Dashboard from "./pages/Dashboard";
-import ClaimCharacterPage from "./pages/ClaimCharacter/ClaimCharacterPage";
 import CharacterSheet from "./pages/CharacterSheet";
 import CampaignOverview from "./pages/CampaignOverview";
 import Onboarding from "./pages/Onboarding";
@@ -98,12 +97,9 @@ export default function App() {
                         user={currentUser}
                         effectiveUserId={effectiveUserId}
                         isLinked={isLinked}
-                        unlink={unlink}
                       />
                     }
                   />
-
-                  <Route path={ROUTES.CLAIM_CHARACTER} element={<ClaimCharacterPage />} />
 
                   <Route path={ROUTE_PATTERNS.CHARACTER_SHEET} element={<CharacterSheet />} />
 
