@@ -19,7 +19,7 @@ import { useArchivedCampaigns } from "../hooks/useArchivedCampaigns";
 import { useToast } from "../components/Toast";
 import { PortraitUpload } from "../components/PortraitUpload";
 import { validateCampaignName } from "../utils/validation";
-import { buildRoute, ROUTES } from "../constants/routes";
+import { buildRoute } from "../constants/routes";
 import {
   createCampaign,
   deleteCampaign,
@@ -28,12 +28,17 @@ import {
 import { archiveCampaign, restoreCampaign } from "../utils/campaignActions";
 import type { CampaignWithId, CharacterListItem } from "../types/Firestore";
 import { uiSection, uiSectionHeader, editableInputClass } from "../ui/editableStyles";
+import { ClaimForm } from "./ClaimCharacter/ClaimForm";
+import { ClaimPreview } from "./ClaimCharacter/ClaimPreview";
+import DMTools from "./ClaimCharacter/DMTools";
+import { useRecoveryLookup } from "./ClaimCharacter/hooks/useRecoveryLookup";
+import { useClaimActions } from "./ClaimCharacter/hooks/useClaimActions";
+import { useDmActions } from "./ClaimCharacter/hooks/useDmActions";
 
 interface Props {
   user: User;
   effectiveUserId: string;
   isLinked: boolean;
-  unlink: () => Promise<void>;
 }
 
 // ─── Player character card ────────────────────────────────────────────────────
@@ -467,119 +472,207 @@ function DmCampaignList({
   );
 }
 
-// ─── QR code panel ────────────────────────────────────────────────────────────
+// ─── QR code modal ────────────────────────────────────────────────────────────
+
+function QrModal({ title, url, onClose }: { title: string; url: string; onClose: () => void }) {
+  return (
+    <>
+      <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+        <div className="bg-slate-900 border border-slate-700 rounded-xl p-5 flex flex-col gap-4 pointer-events-auto max-w-xs w-full mx-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-semibold text-slate-200">{title}</span>
+            <button
+              onClick={onClose}
+              className="w-7 h-7 flex items-center justify-center rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 text-slate-300 text-lg leading-none transition"
+            >
+              ×
+            </button>
+          </div>
+          <div className="p-3 bg-white rounded-lg flex justify-center">
+            <QRCodeSVG value={url} size={220} />
+          </div>
+          <p className="text-xs text-slate-500 break-all text-center">{url}</p>
+        </div>
+      </div>
+    </>
+  );
+}
 
 function QrPanel() {
-  const [open, setOpen] = useState(false);
-  const fullUrl = window.location.origin;
-  const playerUrl = `${fullUrl}?invite=player`;
+  const [open, setOpen] = useState<"full" | "player" | null>(null);
+  const origin = window.location.origin;
+  const fullUrl = `${origin}?invite=full`;
+  const playerUrl = `${origin}?invite=player`;
 
   return (
     <>
-      <button
-        onClick={() => setOpen(true)}
-        className="w-full py-2 px-4 border border-slate-600 rounded-lg text-sm text-slate-400 hover:text-slate-200 hover:border-slate-500 transition text-left"
-      >
-        Share app invite links →
-      </button>
+      <div>
+        <p className={`${uiSectionHeader} mb-3`}>Share App</p>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setOpen("full")}
+            className="flex-1 px-3 py-2 bg-slate-700 text-slate-300 rounded text-sm hover:bg-slate-600 transition"
+          >
+            Share full app
+          </button>
+          <button
+            onClick={() => setOpen("player")}
+            className="flex-1 px-3 py-2 bg-slate-700 text-slate-300 rounded text-sm hover:bg-slate-600 transition"
+          >
+            Share player invite
+          </button>
+        </div>
+      </div>
 
-      {open && (
-        <>
-          <div
-            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
-            onClick={() => setOpen(false)}
-          />
-          <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
-            <div className="bg-slate-900 border border-slate-700 rounded-xl p-5 flex flex-col gap-5 pointer-events-auto max-w-sm w-full mx-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-slate-200">Share App</span>
-                <button
-                  onClick={() => setOpen(false)}
-                  className="w-7 h-7 flex items-center justify-center rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 text-slate-300 text-lg leading-none transition"
-                >
-                  ×
-                </button>
-              </div>
-
-              {/* Full app */}
-              <div className="space-y-2">
-                <p className="text-xs text-slate-400 font-semibold uppercase tracking-wide">
-                  Full app (DM + player)
-                </p>
-                <div className="p-3 bg-white rounded-lg flex justify-center">
-                  <QRCodeSVG value={fullUrl} size={180} />
-                </div>
-                <p className="text-xs text-slate-500 break-all">{fullUrl}</p>
-              </div>
-
-              {/* Player-only */}
-              <div className="space-y-2">
-                <p className="text-xs text-slate-400 font-semibold uppercase tracking-wide">
-                  Player-only install
-                </p>
-                <div className="p-3 bg-white rounded-lg flex justify-center">
-                  <QRCodeSVG value={playerUrl} size={180} />
-                </div>
-                <p className="text-xs text-slate-500 break-all">{playerUrl}</p>
-              </div>
-            </div>
-          </div>
-        </>
+      {open === "full" && (
+        <QrModal title="Full App" url={fullUrl} onClose={() => setOpen(null)} />
+      )}
+      {open === "player" && (
+        <QrModal title="Player Invite" url={playerUrl} onClose={() => setOpen(null)} />
       )}
     </>
   );
 }
 
-// ─── Main Dashboard ───────────────────────────────────────────────────────────
+// ─── Claim a character (inline) ───────────────────────────────────────────────
 
-export default function Dashboard({ user: _user, effectiveUserId, isLinked, unlink }: Props) {
+function ClaimCharacterSection() {
+  const [code, setCode] = useState("");
+  const [claiming, setClaiming] = useState(false);
+  const [claimError, setClaimError] = useState<string | null>(null);
+
   const navigate = useNavigate();
   const toast = useToast();
+
+  const { loading, error, data, lookup } = useRecoveryLookup();
+  const { claimCharacter } = useClaimActions();
+  const { forceAssign, forceRelease, isForceAssigning, isForceReleasing } = useDmActions();
+
+  const handleLookup = useCallback(() => {
+    lookup(code);
+  }, [lookup, code]);
+
+  const handleForceAssign = useCallback(
+    async (uid: string) => {
+      if (!data) return;
+      try {
+        await forceAssign(data.campaignId, data.character, uid);
+      } catch (err) {
+        console.error("Force assign failed:", err);
+        toast.error("Failed to assign character. Please try again.");
+      }
+    },
+    [data, forceAssign, toast]
+  );
+
+  const handleForceRelease = useCallback(async () => {
+    if (!data) return;
+    try {
+      await forceRelease(data.campaignId, data.character);
+    } catch (err) {
+      console.error("Force release failed:", err);
+      toast.error("Failed to release character. Please try again.");
+    }
+  }, [data, forceRelease, toast]);
+
+  const handleClaim = useCallback(async () => {
+    if (!data || claiming) return;
+    if (data.ownership !== "unclaimed") {
+      setClaimError("This character cannot be claimed.");
+      return;
+    }
+    try {
+      setClaiming(true);
+      setClaimError(null);
+      await claimCharacter(data.campaignId, data.character);
+      navigate(buildRoute.characterSheet(data.campaignId, data.characterId));
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Failed to claim character. It may have been claimed already.";
+      toast.error(message);
+      setClaimError(message);
+    } finally {
+      setClaiming(false);
+    }
+  }, [data, claiming, claimCharacter, navigate, toast]);
+
+  return (
+    <div>
+      <p className={`${uiSectionHeader} mb-3`}>Claim a Character</p>
+
+      <div className="space-y-4">
+        <ClaimForm code={code} onCodeChange={setCode} onSubmit={handleLookup} loading={loading} />
+
+        {error && (
+          <p className="text-red-400 text-sm border border-red-600 bg-red-900/20 p-2 rounded">
+            {error}
+          </p>
+        )}
+
+        {claimError && (
+          <p className="text-red-400 text-sm border border-red-600 bg-red-900/20 p-2 rounded">
+            {claimError}
+          </p>
+        )}
+
+        {data && (
+          <ClaimPreview
+            character={data.character}
+            campaign={data.campaign}
+            ownership={data.ownership}
+            onClaim={handleClaim}
+          />
+        )}
+
+        {data && (
+          <DMTools
+            recovery={data}
+            onForceAssign={handleForceAssign}
+            onForceRelease={handleForceRelease}
+            isForceAssigning={isForceAssigning}
+            isForceReleasing={isForceReleasing}
+          />
+        )}
+
+        {claiming && <p className="text-xs text-slate-400 text-center">Claiming character…</p>}
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Dashboard ───────────────────────────────────────────────────────────
+
+export default function Dashboard({ user: _user, effectiveUserId, isLinked }: Props) {
   const { dmCampaigns, playerCampaigns, loading } = useCampaignsContext();
   const installMode = useInstallMode();
-
-  async function handleUnlink() {
-    try {
-      await unlink();
-    } catch {
-      toast.error("Failed to unlink device. Please try again.");
-    }
-  }
 
   return (
     <div className="space-y-6 text-slate-100">
       <h1 className="text-lg font-semibold text-slate-100 text-center">Dashboard</h1>
 
-      {/* Linked-device banner */}
-      {isLinked && (
-        <div className="border border-amber-700 bg-amber-900/20 p-4 rounded-lg flex items-center justify-between gap-4">
-          <p className="text-sm text-amber-300">This device is linked to another account.</p>
-          <button
-            onClick={handleUnlink}
-            className="shrink-0 px-3 py-1.5 rounded text-sm font-semibold bg-slate-700 text-slate-200 hover:bg-slate-600"
-          >
-            Unlink
-          </button>
-        </div>
-      )}
-
-      {/* ── DM section ─────────────────────────────────────────────────── */}
-      {installMode === "full" && (
-        <div className="border border-slate-700 bg-slate-900/40 p-4 rounded-lg space-y-6">
-          <DmCampaignList
-            userUid={effectiveUserId}
-            campaigns={dmCampaigns}
-            loading={loading}
-          />
-
-          {/* QR codes — only show once the user has at least one campaign */}
-          {dmCampaigns.length > 0 && !isLinked && <QrPanel />}
-        </div>
-      )}
-
-      {/* ── Player section ─────────────────────────────────────────────── */}
       <div className="border border-slate-700 bg-slate-900/40 p-4 rounded-lg space-y-6">
-        <p className={`${uiSectionHeader}`}>Campaigns You Play In</p>
+
+        {/* ── DM section ───────────────────────────────────────────────── */}
+        {installMode === "full" && (
+          <>
+            <DmCampaignList
+              userUid={effectiveUserId}
+              campaigns={dmCampaigns}
+              loading={loading}
+            />
+
+            {/* QR codes — only show once the user has at least one campaign */}
+            {dmCampaigns.length > 0 && !isLinked && <QrPanel />}
+
+            <hr className="border-slate-700" />
+          </>
+        )}
+
+        {/* ── Player section ───────────────────────────────────────────── */}
+        <p className={uiSectionHeader}>Campaigns You Play In</p>
 
         {loading && <p className="text-slate-400 text-sm">Loading campaigns…</p>}
 
@@ -602,25 +695,13 @@ export default function Dashboard({ user: _user, effectiveUserId, isLinked, unli
             ))}
           </div>
         )}
-      </div>
 
-      {/* Claim character FAB */}
-      <button
-        onClick={() => navigate(ROUTES.CLAIM_CHARACTER)}
-        aria-label="Claim a Character"
-        className="fixed bottom-6 right-6 h-10 w-10 rounded-full bg-amber-500 text-slate-900 shadow-lg hover:bg-amber-400 transition flex items-center justify-center z-30"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={2.5}
-          stroke="currentColor"
-          className="w-5 h-5"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-        </svg>
-      </button>
+        <hr className="border-slate-700" />
+
+        {/* ── Claim a character ────────────────────────────────────────── */}
+        <ClaimCharacterSection />
+
+      </div>
     </div>
   );
 }

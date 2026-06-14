@@ -95,7 +95,7 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc }: SkillRowP
                   aria-pressed={skill.level === value}
                   aria-label={`Set skill level to ${value}`}
                   onClick={() => handleLevelClick(value)}
-                  className={`px-3 py-1 rounded border text-xs transition ${
+                  className={`px-3 py-1 rounded border text-xs transition focus:outline-none ${
                     skill.level === value
                       ? "bg-amber-500 border-amber-400 text-slate-900 font-semibold"
                       : "border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
@@ -107,7 +107,7 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc }: SkillRowP
 
               <button
                 onClick={handleRemove}
-                className="ml-auto text-xs text-red-400 hover:text-red-300 transition"
+                className="ml-auto text-xs text-red-400 hover:text-red-300 transition focus:outline-none"
                 aria-label={`Remove ${skill.name}`}
               >
                 Remove

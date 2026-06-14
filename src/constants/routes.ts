@@ -15,7 +15,6 @@ export const ROUTES = {
   DM_DASHBOARD: "/dm",
   PLAYER_DASHBOARD: "/player",
   SELECT_CAMPAIGN: "/select",
-  CLAIM_CHARACTER: "/claim",
   SETTINGS: "/settings",
 } as const;
 
