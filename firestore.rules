@@ -334,7 +334,28 @@ service cloud.firestore {
         if request.auth != null &&
            uid == request.auth.uid &&
            request.resource.data.primaryUid is string &&
-           request.resource.data.primaryUid != request.auth.uid;
+           request.resource.data.primaryUid != request.auth.uid &&
+           exists(/databases/$(database)/documents/linkProofs/$(request.auth.uid)) &&
+           get(/databases/$(database)/documents/linkProofs/$(request.auth.uid)).data.primaryUid
+             == request.resource.data.primaryUid;
+    }
+
+    // ============================
+    // LINK PROOFS — temporary proof that the linker knows the target account's
+    // recovery code. The create rule verifies the supplied code against
+    // identitySecret; the userLinks create rule then requires a matching proof.
+    // The proof is owner-readable only and deleted right after linking.
+    // ============================
+    match /linkProofs/{uid} {
+      allow read: if request.auth != null && uid == request.auth.uid;
+      allow create:
+        if request.auth != null &&
+           uid == request.auth.uid &&
+           request.resource.data.keys().hasOnly(['primaryUid', 'code']) &&
+           get(/databases/$(database)/documents/identitySecret/$(request.resource.data.primaryUid)).data.code
+             == request.resource.data.code;
+      allow delete: if request.auth != null && uid == request.auth.uid;
+      allow update: if false;
     }
 
     // ============================

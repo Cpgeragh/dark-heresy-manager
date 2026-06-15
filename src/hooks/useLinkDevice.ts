@@ -11,6 +11,7 @@ import {
   getDocs,
   query,
   setDoc,
+  deleteDoc,
   serverTimestamp,
   where,
 } from "firebase/firestore";
@@ -29,7 +30,8 @@ export function useLinkDevice() {
 
     try {
       // 1. Look up the identity recovery code
-      const snap = await getDoc(doc(db, "identityRecovery", recoveryCode.trim()));
+      const code = recoveryCode.trim();
+      const snap = await getDoc(doc(db, "identityRecovery", code));
       if (!snap.exists()) {
         throw new Error("No account found with that recovery code.");
       }
@@ -48,11 +50,18 @@ export function useLinkDevice() {
         throw new Error("This account already has 3 linked devices — the maximum allowed.");
       }
 
-      // 4. Write the link
-      await setDoc(doc(db, "userLinks", user.uid), {
-        primaryUid,
-        linkedAt: serverTimestamp(),
-      });
+      // 4. Prove we know the account's recovery code (the rule verifies it
+      //    against identitySecret), create the link, then delete the proof.
+      const proofRef = doc(db, "linkProofs", user.uid);
+      await setDoc(proofRef, { primaryUid, code });
+      try {
+        await setDoc(doc(db, "userLinks", user.uid), {
+          primaryUid,
+          linkedAt: serverTimestamp(),
+        });
+      } finally {
+        await deleteDoc(proofRef);
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to link device.";
       setError(message);
