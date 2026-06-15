@@ -25,6 +25,17 @@ export default function Onboarding({ user, onComplete, setFirstName }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [reclaimCode, setReclaimCode] = useState("");
   const [name, setName] = useState("");
+  const [savedConfirmed, setSavedConfirmed] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  async function handleFinish() {
+    try {
+      await updateDoc(doc(db, "users", user.uid), { recoveryBackedUp: true });
+    } catch (err) {
+      console.error("Failed to mark recovery backed up:", err);
+    }
+    onComplete();
+  }
 
   async function handleGetStarted() {
     const trimmedName = name.trim();
@@ -188,9 +199,34 @@ export default function Onboarding({ user, onComplete, setFirstName }: Props) {
               in Settings.
             </p>
 
+            <div className="flex justify-center mb-4">
+              <button
+                onClick={() => { navigator.clipboard?.writeText(code); setCopied(true); }}
+                className="px-3 py-1.5 text-sm rounded-lg border border-slate-600 text-slate-300 hover:bg-slate-800 transition"
+              >
+                {copied ? "Copied" : "Copy code"}
+              </button>
+            </div>
+
+            <label className="flex items-start gap-2 mb-2 text-sm text-slate-300 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={savedConfirmed}
+                onChange={(e) => setSavedConfirmed(e.target.checked)}
+                disabled={!copied}
+                className="mt-0.5"
+              />
+              <span>I've saved my recovery code somewhere safe.</span>
+            </label>
+
+            {!copied && (
+              <p className="text-xs text-slate-500 mb-4">Copy your code, then tick the box to continue.</p>
+            )}
+
             <button
-              onClick={onComplete}
-              className="w-full py-3 rounded-xl bg-amber-500 text-slate-900 font-bold text-base hover:bg-amber-400 transition"
+              onClick={handleFinish}
+              disabled={!savedConfirmed || !copied}
+              className="w-full py-3 rounded-xl bg-amber-500 text-slate-900 font-bold text-base hover:bg-amber-400 transition disabled:opacity-50"
             >
               I've saved my code
             </button>
