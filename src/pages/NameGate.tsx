@@ -40,26 +40,23 @@ export default function NameGate({ user, onSaved }: Props) {
       <div className="max-w-sm w-full">
         <h1 className="text-2xl font-bold mb-2">One quick thing</h1>
         <p className="text-slate-400 mb-6">
-          Please add your first name to continue. It's shown on your dashboard and lets your DM
-          and party know who you are.
+          Please add your name. First name only. Used on your dashboard and your character sheets.
         </p>
 
-        <label className="block mb-2">
+        <label className="block mb-6">
           <span className="text-xs font-medium uppercase tracking-wide text-slate-400">
             First name
           </span>
           <input
             type="text"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => setName(e.target.value.replace(/\s/g, ""))}
             placeholder="e.g. David"
             disabled={busy}
             maxLength={50}
             className="mt-1 w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-600 text-slate-100 text-base placeholder:text-slate-600 focus:outline-none focus:border-amber-500 disabled:opacity-50"
           />
         </label>
-
-        <p className="text-[11px] text-slate-500 mb-6">First name only, for data protection.</p>
 
         <button
           onClick={handleSave}

@@ -93,14 +93,15 @@ export default function Onboarding({ user, onComplete, setFirstName }: Props) {
               <input
                 type="text"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => setName(e.target.value.replace(/\s/g, ""))}
                 placeholder="e.g. David"
                 disabled={busy}
                 maxLength={50}
                 className="mt-1 w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-600 text-slate-100 text-base placeholder:text-slate-600 focus:outline-none focus:border-amber-500 disabled:opacity-50"
               />
               <span className="mt-1 block text-[11px] text-slate-500">
-                First name only. Shared with your DM and party so they know who you are.
+                Please add your name. First name only. Used on your dashboard and your character
+                sheets.
               </span>
             </label>
 
