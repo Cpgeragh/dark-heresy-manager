@@ -31,10 +31,8 @@ import type { CampaignWithId, CharacterListItem } from "../types/Firestore";
 import { uiSection, uiSectionHeader, editableInputClass } from "../ui/editableStyles";
 import { ClaimForm } from "./ClaimCharacter/ClaimForm";
 import { ClaimPreview } from "./ClaimCharacter/ClaimPreview";
-import DMTools from "./ClaimCharacter/DMTools";
 import { useRecoveryLookup } from "./ClaimCharacter/hooks/useRecoveryLookup";
 import { useClaimActions } from "./ClaimCharacter/hooks/useClaimActions";
-import { useDmActions } from "./ClaimCharacter/hooks/useDmActions";
 
 interface Props {
   user: User;
@@ -549,34 +547,10 @@ function ClaimCharacterSection() {
 
   const { loading, error, data, lookup } = useRecoveryLookup();
   const { claimCharacter } = useClaimActions();
-  const { forceAssign, forceRelease, isForceAssigning, isForceReleasing } = useDmActions();
 
   const handleLookup = useCallback(() => {
     lookup(code);
   }, [lookup, code]);
-
-  const handleForceAssign = useCallback(
-    async (uid: string) => {
-      if (!data) return;
-      try {
-        await forceAssign(data.campaignId, data.character, uid);
-      } catch (err) {
-        console.error("Force assign failed:", err);
-        toast.error("Failed to assign character. Please try again.");
-      }
-    },
-    [data, forceAssign, toast]
-  );
-
-  const handleForceRelease = useCallback(async () => {
-    if (!data) return;
-    try {
-      await forceRelease(data.campaignId, data.character);
-    } catch (err) {
-      console.error("Force release failed:", err);
-      toast.error("Failed to release character. Please try again.");
-    }
-  }, [data, forceRelease, toast]);
 
   const handleClaim = useCallback(async () => {
     if (!data || claiming) return;
@@ -626,16 +600,6 @@ function ClaimCharacterSection() {
             campaign={data.campaign}
             ownership={data.ownership}
             onClaim={handleClaim}
-          />
-        )}
-
-        {data && (
-          <DMTools
-            recovery={data}
-            onForceAssign={handleForceAssign}
-            onForceRelease={handleForceRelease}
-            isForceAssigning={isForceAssigning}
-            isForceReleasing={isForceReleasing}
           />
         )}
 

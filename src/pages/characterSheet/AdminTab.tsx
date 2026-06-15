@@ -1,9 +1,9 @@
 // src/pages/characterSheet/AdminTab.tsx
 
-import { useState, useCallback } from "react";
+import { useCallback } from "react";
 import type { Character } from "../../types/Character";
 import type { ClaimLog } from "../../types/ClaimLog";
-import { editableInputClass, uiSection, readOnlyBadgeClass } from "../../ui/editableStyles";
+import { uiSection, readOnlyBadgeClass } from "../../ui/editableStyles";
 import { useXpProposals } from "../../hooks/useXpProposals";
 import { approveXpProposal, rejectXpProposal } from "../../services/xpService";
 import { useToast } from "../../components/Toast";
@@ -14,10 +14,8 @@ interface AdminTabProps {
   ownerName: string | null;
   claimLog: ClaimLog[];
   onDMForceRelease: () => void;
-  onDMForceAssign: (uid: string) => void;
   onDMToggleEdit: () => void;
   isDmForceReleasing?: boolean;
-  isDmForceAssigning?: boolean;
   isDmTogglingEdit?: boolean;
   campaignId: string;
   characterId: string;
@@ -28,15 +26,12 @@ export function AdminTab({
   ownerName,
   claimLog,
   onDMForceRelease,
-  onDMForceAssign,
   onDMToggleEdit,
   isDmForceReleasing = false,
-  isDmForceAssigning = false,
   isDmTogglingEdit = false,
   campaignId,
   characterId,
 }: AdminTabProps) {
-  const [assignUID, setAssignUID] = useState("");
   const toast = useToast();
   const { proposals } = useXpProposals(campaignId, characterId);
   const pendingProposals = proposals.filter((p) => p.status === "pending");
@@ -66,17 +61,6 @@ export function AdminTab({
     },
     [campaignId, characterId, toast]
   );
-
-  const handleAssignUIDChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setAssignUID(e.target.value);
-  }, []);
-
-  const handleForceAssign = useCallback(() => {
-    const clean = assignUID.trim();
-    if (clean) {
-      onDMForceAssign(clean);
-    }
-  }, [assignUID, onDMForceAssign]);
 
   const latest = claimLog.length > 0 ? claimLog[0] : null;
   // Show the current owner's real name when the character is claimed; fall back
@@ -154,29 +138,6 @@ export function AdminTab({
             }`}
           >
             {isDmTogglingEdit ? "Updating..." : "Toggle Player Edit Permission"}
-          </button>
-        </div>
-
-        {/* FORCE ASSIGN */}
-        <div className="flex flex-wrap items-center gap-2 mt-4">
-          <input
-            value={assignUID}
-            onChange={handleAssignUIDChange}
-            placeholder="Enter player UID"
-            disabled={isDmForceAssigning}
-            className={editableInputClass(!isDmForceAssigning) + " font-mono text-xs max-w-xs"}
-          />
-
-          <button
-            onClick={handleForceAssign}
-            disabled={isDmForceAssigning}
-            className={`px-3 py-1 text-sm rounded border transition ${
-              isDmForceAssigning
-                ? "bg-blue-800 border-blue-700 text-blue-300 cursor-wait"
-                : "bg-blue-600 border-blue-500 text-white hover:bg-blue-500"
-            }`}
-          >
-            {isDmForceAssigning ? "Assigning..." : "Assign to Player"}
           </button>
         </div>
       </section>

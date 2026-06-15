@@ -81,13 +81,11 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
     updateField,
     releaseCharacter,
     dmForceRelease,
-    dmForceAssign,
     dmToggleEdit,
 
     // Loading states
     isReleasing,
     isDmForceReleasing,
-    isDmForceAssigning,
     isDmTogglingEdit,
   } = useCharacterSheet({
     campaignIdParam: params.campaignId,
@@ -562,10 +560,8 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
               ownerName={ownerName}
               claimLog={claimLog}
               onDMForceRelease={dmForceRelease}
-              onDMForceAssign={dmForceAssign}
               onDMToggleEdit={dmToggleEdit}
               isDmForceReleasing={isDmForceReleasing}
-              isDmForceAssigning={isDmForceAssigning}
               isDmTogglingEdit={isDmTogglingEdit}
               campaignId={path.campaignId}
               characterId={character.id}
