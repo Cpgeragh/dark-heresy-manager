@@ -83,47 +83,40 @@ export async function reclaimIdentity(uid: string, code: string): Promise<"dm" |
   await setDoc(reclaimRef, { oldUid, code });
 
   try {
-    // 3a. Migrate any campaigns owned by the old uid (DM data)
+    // Read everything first, then apply ALL ownership migrations in a single
+    // atomic batch, so a failure can't leave the account half-migrated.
     const dmCampaignsSnap = await getDocs(
       query(collection(db, "campaigns"), where("dmId", "==", oldUid))
     );
-    if (!dmCampaignsSnap.empty) {
-      const batch = writeBatch(db);
-      dmCampaignsSnap.docs.forEach((d) => batch.update(d.ref, { dmId: uid }));
-      await batch.commit();
-    }
-
-    // 3b. Migrate characters across all campaigns the old uid was a member of (player data)
     const playerCampaignsSnap = await getDocs(
       query(collection(db, "campaigns"), where("memberIds", "array-contains", oldUid))
     );
-    if (!playerCampaignsSnap.empty) {
-      const batch = writeBatch(db);
-      for (const campDoc of playerCampaignsSnap.docs) {
-        // Swap old uid out of memberIds and new uid in
-        const campData = campDoc.data() as { memberIds: string[] };
-        const newMemberIds = campData.memberIds
-          .filter((id) => id !== oldUid)
-          .concat(uid);
-        batch.update(campDoc.ref, { memberIds: newMemberIds });
 
-        // Migrate characters owned by the old uid
-        const charsSnap = await getDocs(
-          query(
-            collection(db, "campaigns", campDoc.id, "characters"),
-            where("userId", "==", oldUid)
-          )
-        );
-        charsSnap.docs.forEach((d) => batch.update(d.ref, { userId: uid }));
-      }
-      await batch.commit();
+    const batch = writeBatch(db);
+
+    // DM data: campaigns owned by the old uid
+    dmCampaignsSnap.docs.forEach((d) => batch.update(d.ref, { dmId: uid }));
+
+    // Player data: swap old uid → new uid in memberIds, and migrate owned characters
+    for (const campDoc of playerCampaignsSnap.docs) {
+      const campData = campDoc.data() as { memberIds: string[] };
+      const newMemberIds = campData.memberIds.filter((id) => id !== oldUid).concat(uid);
+      batch.update(campDoc.ref, { memberIds: newMemberIds });
+
+      const charsSnap = await getDocs(
+        query(
+          collection(db, "campaigns", campDoc.id, "characters"),
+          where("userId", "==", oldUid)
+        )
+      );
+      charsSnap.docs.forEach((d) => batch.update(d.ref, { userId: uid }));
     }
 
-    // 4. Transfer the recovery entry and secret to the new uid
+    await batch.commit();
+
+    // Transfer the recovery entry + secret to the new uid, and mark it onboarded.
     await updateDoc(recoveryRef, { uid });
     await setDoc(doc(db, "identitySecret", uid), { code });
-
-    // 5. Mark the new user doc as onboarded
     await setDoc(doc(db, "users", uid), { onboarded: true }, { merge: true });
   } finally {
     // 6. Always clean up the proof document regardless of success or failure
