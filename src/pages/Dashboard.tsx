@@ -18,6 +18,7 @@ import { usePlayerCharacters } from "../hooks/usePlayerCharacters";
 import { useArchivedCampaigns } from "../hooks/useArchivedCampaigns";
 import { useToast } from "../components/Toast";
 import { PortraitUpload } from "../components/PortraitUpload";
+import { RecoveryBackupBanner } from "../components/RecoveryBackupBanner";
 import { validateCampaignName } from "../utils/validation";
 import { buildRoute } from "../constants/routes";
 import {
@@ -646,7 +647,7 @@ function ClaimCharacterSection() {
 
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 
-export default function Dashboard({ user: _user, effectiveUserId, isLinked, firstName }: Props) {
+export default function Dashboard({ user, effectiveUserId, isLinked, firstName }: Props) {
   const { dmCampaigns, playerCampaigns, loading } = useCampaignsContext();
   const installMode = useInstallMode();
 
@@ -655,6 +656,8 @@ export default function Dashboard({ user: _user, effectiveUserId, isLinked, firs
       <h1 className="text-lg font-semibold text-slate-100 text-center">
         {firstName ? `${firstName}'s Dashboard` : "Dashboard"}
       </h1>
+
+      <RecoveryBackupBanner ownUid={user.uid} effectiveUserId={effectiveUserId} />
 
       <div className="border border-slate-700 bg-slate-900/40 p-4 rounded-lg space-y-6">
 

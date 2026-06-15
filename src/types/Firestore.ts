@@ -30,6 +30,7 @@ export interface UserDocument {
   createdAt: Timestamp | Date | FieldValue;
   lastSeen: Timestamp | Date | FieldValue;
   onboarded?: boolean;
+  recoveryBackedUp?: boolean;
 }
 
 /**
