@@ -46,29 +46,35 @@ function renderUpdating() {
 // Neutral splash while we decide whether an update is pending.
 root.render(<Splash label="Loading…" />);
 
-registerSW({
-  immediate: true,
-  onRegisteredSW(_swUrl, registration) {
-    // First visit / not yet controlled by a worker → nothing cached can be
-    // stale, so just show the app.
-    if (!registration || !navigator.serviceWorker.controller) {
+if (import.meta.env.DEV) {
+  // In dev no service worker is registered, so registerSW's callbacks never
+  // fire — render the app directly instead of waiting on them forever.
+  renderApp();
+} else {
+  registerSW({
+    immediate: true,
+    onRegisteredSW(_swUrl, registration) {
+      // First visit / not yet controlled by a worker → nothing cached can be
+      // stale, so just show the app.
+      if (!registration || !navigator.serviceWorker.controller) {
+        renderApp();
+        return;
+      }
+      // Safety net: never hold the splash longer than this on the check itself.
+      window.setTimeout(renderApp, 3000);
+      // Force an update check. If a new version is installing, stay on the
+      // "Updating…" splash (autoUpdate reloads once it's ready); otherwise the
+      // cached version is current, so render it.
+      registration
+        .update()
+        .then(() => {
+          if (registration.installing || registration.waiting) renderUpdating();
+          else renderApp();
+        })
+        .catch(() => renderApp());
+    },
+    onRegisterError() {
       renderApp();
-      return;
-    }
-    // Safety net: never hold the splash longer than this on the check itself.
-    window.setTimeout(renderApp, 3000);
-    // Force an update check. If a new version is installing, stay on the
-    // "Updating…" splash (autoUpdate reloads once it's ready); otherwise the
-    // cached version is current, so render it.
-    registration
-      .update()
-      .then(() => {
-        if (registration.installing || registration.waiting) renderUpdating();
-        else renderApp();
-      })
-      .catch(() => renderApp());
-  },
-  onRegisterError() {
-    renderApp();
-  },
-});
+    },
+  });
+}
