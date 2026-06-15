@@ -1,7 +1,6 @@
 // src/pages/characterSheet/useCharacterSheet.ts
 
 import { useMemo } from "react";
-import { auth } from "../../firebase";
 import { useIsDM } from "../../hooks/useIsDM";
 import { useDMOverride } from "../../hooks/useDMOverride";
 import { useCharacterData } from "../../hooks/useCharacterData";
@@ -12,9 +11,14 @@ import { useCharacterHelpers } from "../../hooks/useCharacterHelpers";
 interface UseCharacterSheetProps {
   campaignIdParam: string | undefined;
   characterIdParam: string | undefined;
+  effectiveUserId: string | null;
 }
 
-export function useCharacterSheet({ campaignIdParam, characterIdParam }: UseCharacterSheetProps) {
+export function useCharacterSheet({
+  campaignIdParam,
+  characterIdParam,
+  effectiveUserId,
+}: UseCharacterSheetProps) {
   // ================================================================
   // PATH VALIDATION
   // ================================================================
@@ -26,8 +30,8 @@ export function useCharacterSheet({ campaignIdParam, characterIdParam }: UseChar
   // ================================================================
   // USER & ROLE
   // ================================================================
-  const userId = auth.currentUser?.uid ?? null;
-  const isDM = useIsDM(path?.campaignId);
+  const userId = effectiveUserId;
+  const isDM = useIsDM(path?.campaignId, userId);
   const { dmReadOnly, toggleDmReadOnly } = useDMOverride();
 
   // ================================================================

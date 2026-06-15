@@ -33,6 +33,15 @@ export interface UserDocument {
 }
 
 /**
+ * Public profile document stored in /userProfiles/{userId}
+ * First name only (data protection). Readable by any authenticated user so
+ * DMs and party members can display the owner's name on character sheets.
+ */
+export interface UserProfileDocument {
+  firstName: string;
+}
+
+/**
  * Recovery index document stored in /recoveryIndex/{code}
  */
 export interface RecoveryIndexDocument {

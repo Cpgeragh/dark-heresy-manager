@@ -10,6 +10,8 @@ interface BackgroundTabProps {
   header: CharacterHeader;
   talents: TalentsAndTraitsBlock;
   editable: boolean;
+  /** Owner's first name, derived from their account profile. Read-only. */
+  playerName: string | null;
   onUpdateHeader: (next: CharacterHeader) => void;
   onUpdateTalents: (next: TalentsAndTraitsBlock) => void;
 }
@@ -18,6 +20,7 @@ export function BackgroundTab({
   header,
   talents,
   editable,
+  playerName,
   onUpdateHeader,
   onUpdateTalents,
 }: BackgroundTabProps) {
@@ -33,10 +36,6 @@ export function BackgroundTab({
 
   const handleCharacterName = useCallback(
     (v: string) => updateHeaderField("characterName", v),
-    [updateHeaderField]
-  );
-  const handlePlayerName = useCallback(
-    (v: string) => updateHeaderField("playerName", v),
     [updateHeaderField]
   );
   const handleCareer = useCallback(
@@ -85,10 +84,11 @@ export function BackgroundTab({
           />
           <FormField
             label="Player Name"
-            value={header.playerName ?? ""}
-            onChange={handlePlayerName}
-            editable={editable}
-            placeholder="Your name"
+            value={playerName ?? ""}
+            onChange={() => {}}
+            editable={false}
+            placeholder="Set from the player's account"
+            description="Taken from the player's account name."
           />
         </section>
       </div>

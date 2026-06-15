@@ -2,25 +2,18 @@
 
 import { useState, useEffect } from "react";
 import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "../firebase";
+import { db } from "../firebase";
 
-export function useIsDM(campaignId: string | undefined): boolean {
+export function useIsDM(campaignId: string | undefined, userId: string | null): boolean {
   const [isDM, setIsDM] = useState(false);
 
   useEffect(() => {
-    if (!campaignId) {
-      setIsDM(false);
-      return;
-    }
-
-    const user = auth.currentUser;
-    if (!user) {
+    if (!campaignId || !userId) {
       setIsDM(false);
       return;
     }
 
     let ignore = false;
-    const userUid = user.uid;
 
     async function checkDM() {
       try {
@@ -31,7 +24,7 @@ export function useIsDM(campaignId: string | undefined): boolean {
 
         if (campSnap.exists()) {
           const data = campSnap.data();
-          setIsDM(data.dmId === userUid);
+          setIsDM(data.dmId === userId);
         } else {
           setIsDM(false);
         }
@@ -45,7 +38,7 @@ export function useIsDM(campaignId: string | undefined): boolean {
     return () => {
       ignore = true;
     };
-  }, [campaignId]);
+  }, [campaignId, userId]);
 
   return isDM;
 }

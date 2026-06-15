@@ -10,6 +10,8 @@ import { useToast } from "../../components/Toast";
 
 interface AdminTabProps {
   character: Character;
+  /** Current owner's first name, derived from their account profile. */
+  ownerName: string | null;
   claimLog: ClaimLog[];
   onDMForceRelease: () => void;
   onDMForceAssign: (uid: string) => void;
@@ -23,6 +25,7 @@ interface AdminTabProps {
 
 export function AdminTab({
   character,
+  ownerName,
   claimLog,
   onDMForceRelease,
   onDMForceAssign,
@@ -76,6 +79,9 @@ export function AdminTab({
   }, [assignUID, onDMForceAssign]);
 
   const latest = claimLog.length > 0 ? claimLog[0] : null;
+  // Show the current owner's real name when the character is claimed; fall back
+  // to the actor UID for unclaimed characters or events with no resolvable name.
+  const latestActorLabel = (character.userId && ownerName) || latest?.actorUid;
 
   return (
     <div className="space-y-6">
@@ -89,7 +95,7 @@ export function AdminTab({
         <p className="text-xs text-slate-400">
           Last ownership event:{" "}
           <span className="font-mono text-slate-300">
-            {latest.action} by {latest.actorUid}
+            {latest.action} by {latestActorLabel}
           </span>
         </p>
       )}
@@ -103,11 +109,18 @@ export function AdminTab({
 
         <div className="space-y-1 text-sm">
           <div>
-            Current owner UID:{" "}
-            <span className="font-mono text-slate-200 break-all">
-              {character.userId ?? "None (unclaimed)"}
+            Current owner:{" "}
+            <span className="text-slate-200">
+              {character.userId ? (ownerName ?? "Unknown player") : "None (unclaimed)"}
             </span>
           </div>
+
+          {character.userId && (
+            <div>
+              Owner UID:{" "}
+              <span className="font-mono text-slate-200 break-all">{character.userId}</span>
+            </div>
+          )}
 
           <div>
             Player editable:{" "}

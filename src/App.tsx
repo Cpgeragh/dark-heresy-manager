@@ -20,6 +20,7 @@ import Dashboard from "./pages/Dashboard";
 import CharacterSheet from "./pages/CharacterSheet";
 import CampaignOverview from "./pages/CampaignOverview";
 import Onboarding from "./pages/Onboarding";
+import NameGate from "./pages/NameGate";
 import Settings from "./pages/Settings";
 
 // Shows a one-off toast if a service-worker update started downloading but
@@ -44,7 +45,7 @@ export default function App() {
   // -------------------------------------------------
   // AUTH & USER STATE
   // -------------------------------------------------
-  const { currentUser, loading, onboarded, setOnboarded } = useAuth();
+  const { currentUser, loading, onboarded, firstName, setOnboarded, setFirstName } = useAuth();
 
   // -------------------------------------------------
   // DEVICE LINK — must be called unconditionally before any early returns
@@ -81,8 +82,15 @@ export default function App() {
       <Onboarding
         user={currentUser}
         onComplete={() => setOnboarded(true)}
+        setFirstName={setFirstName}
       />
     );
+  }
+
+  // Existing users who onboarded before first names existed must add one
+  // before using the app again.
+  if (!firstName) {
+    return <NameGate user={currentUser} onSaved={setFirstName} />;
   }
 
   // -------------------------------------------------
@@ -111,13 +119,20 @@ export default function App() {
                         user={currentUser}
                         effectiveUserId={effectiveUserId}
                         isLinked={isLinked}
+                        firstName={firstName}
                       />
                     }
                   />
 
-                  <Route path={ROUTE_PATTERNS.CHARACTER_SHEET} element={<CharacterSheet />} />
+                  <Route
+                    path={ROUTE_PATTERNS.CHARACTER_SHEET}
+                    element={<CharacterSheet effectiveUserId={effectiveUserId} />}
+                  />
 
-                  <Route path={ROUTE_PATTERNS.CAMPAIGN_OVERVIEW} element={<CampaignOverview />} />
+                  <Route
+                    path={ROUTE_PATTERNS.CAMPAIGN_OVERVIEW}
+                    element={<CampaignOverview effectiveUserId={effectiveUserId} />}
+                  />
 
                   <Route
                     path={ROUTES.SETTINGS}

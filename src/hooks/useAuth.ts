@@ -6,13 +6,16 @@ import { getDoc, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
 import type { User } from "firebase/auth";
 import { auth } from "../firebase";
 import { userDocRef } from "../firebase/converters";
+import { getFirstName } from "../services/profileService";
 import type { UserDocument } from "../types/Firestore";
 
 interface UseAuthResult {
   currentUser: User | null;
   loading: boolean;
   onboarded: boolean;
+  firstName: string | null;
   setOnboarded: (value: boolean) => void;
+  setFirstName: (value: string | null) => void;
 }
 
 export function useAuth(): UseAuthResult {
@@ -21,6 +24,10 @@ export function useAuth(): UseAuthResult {
   // Default true so existing (legacy) users never see the onboarding screen.
   // Flipped to false only when a brand-new user doc is created.
   const [onboarded, setOnboarded] = useState(true);
+  // The user's first name from /userProfiles. null means "not set yet" — the
+  // app gates on this so every account has a name (new users via onboarding,
+  // existing users via the name gate).
+  const [firstName, setFirstName] = useState<string | null>(null);
 
   useEffect(() => {
     let ignore = false;
@@ -35,6 +42,10 @@ export function useAuth(): UseAuthResult {
         if (ignore) return;
 
         setCurrentUser(user);
+
+        const profileName = await getFirstName(user.uid);
+        if (ignore) return;
+        setFirstName(profileName);
 
         const ref = userDocRef(user.uid);
         const snap = await getDoc(ref);
@@ -82,6 +93,8 @@ export function useAuth(): UseAuthResult {
     currentUser,
     loading,
     onboarded,
+    firstName,
     setOnboarded,
+    setFirstName,
   };
 }
