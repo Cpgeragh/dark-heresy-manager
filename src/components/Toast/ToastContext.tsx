@@ -30,7 +30,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   // Store timer IDs to enable cleanup
-  const timersRef = useRef<Map<string, number>>(new Map());
+  const timersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   const removeToast = useCallback((id: string) => {
     // Clear the timer if it exists

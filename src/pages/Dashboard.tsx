@@ -537,7 +537,7 @@ function QrPanel() {
 
 // ─── Claim a character (inline) ───────────────────────────────────────────────
 
-function ClaimCharacterSection() {
+function ClaimCharacterSection({ effectiveUserId }: { effectiveUserId: string }) {
   const [code, setCode] = useState("");
   const [claiming, setClaiming] = useState(false);
   const [claimError, setClaimError] = useState<string | null>(null);
@@ -561,7 +561,7 @@ function ClaimCharacterSection() {
     try {
       setClaiming(true);
       setClaimError(null);
-      await claimCharacter(data.campaignId, data.character);
+      await claimCharacter(data.campaignId, data.character, effectiveUserId);
       navigate(buildRoute.characterSheet(data.campaignId, data.characterId));
     } catch (err: unknown) {
       const message =
@@ -573,7 +573,7 @@ function ClaimCharacterSection() {
     } finally {
       setClaiming(false);
     }
-  }, [data, claiming, claimCharacter, navigate, toast]);
+  }, [data, claiming, claimCharacter, navigate, toast, effectiveUserId]);
 
   return (
     <div>
@@ -669,7 +669,7 @@ export default function Dashboard({ user, effectiveUserId, isLinked, firstName }
         <hr className="border-slate-700" />
 
         {/* ── Claim a character ────────────────────────────────────────── */}
-        <ClaimCharacterSection />
+        <ClaimCharacterSection effectiveUserId={effectiveUserId} />
 
       </div>
     </div>

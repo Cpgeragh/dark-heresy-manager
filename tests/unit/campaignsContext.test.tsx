@@ -15,8 +15,8 @@ import type { CampaignWithId } from "../../src/types/Firestore";
 const { mockOnSnapshot, mockWhere, mockQuery, mockUnsubscribeDm, mockUnsubscribePlayer } =
   vi.hoisted(() => ({
     mockOnSnapshot: vi.fn(),
-    mockWhere: vi.fn(() => "where-clause"),
-    mockQuery: vi.fn(() => "query-ref"),
+    mockWhere: vi.fn((..._args: unknown[]) => "where-clause"),
+    mockQuery: vi.fn((..._args: unknown[]) => "query-ref"),
     mockUnsubscribeDm: vi.fn(),
     mockUnsubscribePlayer: vi.fn(),
   }));

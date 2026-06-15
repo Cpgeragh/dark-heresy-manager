@@ -10,7 +10,8 @@ export function useClaimActions() {
     character: {
       id: string;
       userId: string | null;
-    }
+    },
+    ownerId: string
   ) {
     const user = auth.currentUser;
     if (!user) {
@@ -37,10 +38,11 @@ export function useClaimActions() {
         throw new Error("Character is already claimed.");
       }
 
-      // Step 3: Claim ownership, join campaign member list, write audit log atomically
-      transaction.update(charRef, { userId: user.uid });
-      transaction.update(campaignRef, { memberIds: arrayUnion(user.uid) });
-      transaction.set(doc(logsRef), buildClaimLogPayload("claim", user.uid, null, user.uid));
+      // Step 3: Claim ownership for the account (ownerId), join campaign member
+      // list, write audit log atomically. actorUid is the device performing it.
+      transaction.update(charRef, { userId: ownerId });
+      transaction.update(campaignRef, { memberIds: arrayUnion(ownerId) });
+      transaction.set(doc(logsRef), buildClaimLogPayload("claim", user.uid, null, ownerId));
     });
   }
 

@@ -9,7 +9,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 const { mockUpdateDoc, mockDoc, mockServerTimestamp } = vi.hoisted(() => ({
   mockUpdateDoc: vi.fn().mockResolvedValue(undefined),
-  mockDoc: vi.fn(() => "doc-ref"),
+  mockDoc: vi.fn((..._args: unknown[]) => "doc-ref"),
   mockServerTimestamp: vi.fn(() => "server-timestamp"),
 }));
 

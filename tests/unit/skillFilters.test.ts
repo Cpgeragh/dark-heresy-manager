@@ -4,9 +4,13 @@ import { useSkillFiltering } from "../../src/hooks/useSkillFiltering";
 import type { SkillWithComputed } from "../../src/hooks/useSkillComputation";
 
 const makeSkill = (name: string, level: SkillWithComputed["level"]): SkillWithComputed => ({
+  id: name,
   name,
   characteristic: "ag",
   level,
+  category: "General",
+  advanced: false,
+  source: "CR",
   total: 30,
   half: 15,
   full: 30,

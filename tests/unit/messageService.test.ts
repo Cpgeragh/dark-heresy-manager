@@ -29,7 +29,7 @@ const {
       ? `${String(args[0])}/auto-id`
       : (args.slice(1) as string[]).join("/")
   ),
-  mockCollection:      vi.fn((_db: unknown, ...path: string[]) => path.join("/")),
+  mockCollection:      vi.fn((...args: unknown[]) => args.slice(1).join("/")),
   mockGetDocs:         vi.fn(),
   mockServerTimestamp: vi.fn(() => "SERVER_TIMESTAMP"),
   mockSetDoc:          vi.fn().mockResolvedValue(undefined),
