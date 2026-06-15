@@ -90,7 +90,14 @@ service cloud.firestore {
       allow update:
         if request.auth != null &&
            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberIds']) &&
-           request.auth.uid in request.resource.data.get('memberIds', []) &&
+           (
+             request.auth.uid in request.resource.data.get('memberIds', []) ||
+             (
+               exists(/databases/$(database)/documents/userLinks/$(request.auth.uid)) &&
+               get(/databases/$(database)/documents/userLinks/$(request.auth.uid)).data.primaryUid
+                 in request.resource.data.get('memberIds', [])
+             )
+           ) &&
            request.resource.data.get('memberIds', []).hasAll(resource.data.get('memberIds', []));
 
       // Identity reclaim: allow transferring dmId to the reclaimer's new uid
@@ -163,12 +170,12 @@ service cloud.firestore {
             )
           );
 
-        // Players can claim an unclaimed character (set userId to own UID, nothing else).
+        // Players can claim an unclaimed character (set userId to their own
+        // account, or the primary their device is linked to, nothing else).
         allow update:
-          if request.auth != null &&
-             resource.data.userId == null &&
+          if resource.data.userId == null &&
              request.resource.data.diff(resource.data).affectedKeys().hasOnly(['userId']) &&
-             request.resource.data.userId == request.auth.uid;
+             playerOwnsOrLinked(request.resource.data.userId);
 
         // Identity reclaim: allow transferring userId to the reclaimer's new uid
         // when a valid reclaim document confirms they're taking over the old userId.

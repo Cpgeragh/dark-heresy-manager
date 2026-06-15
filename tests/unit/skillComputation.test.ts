@@ -1,17 +1,32 @@
 import { describe, it, expect } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { useSkillComputation } from "../../src/hooks/useSkillComputation";
-import type { Characteristics } from "../../src/types/Character";
+import type { Characteristics, SkillEntry } from "../../src/types/Character";
 import type { CharField } from "../../src/utils/characterFactory";
 
 const makeGetCharField = (base: number, advances: number) =>
   (_key: keyof Characteristics): CharField => ({ base, advances });
 
+const makeSkill = (
+  name: string,
+  level: SkillEntry["level"],
+  extra: Partial<SkillEntry> = {}
+): SkillEntry => ({
+  id: name,
+  name,
+  characteristic: "ag",
+  level,
+  category: "General",
+  advanced: false,
+  source: "CR",
+  ...extra,
+});
+
 describe("useSkillComputation", () => {
   it("computes total for untrained skill", () => {
     const { result } = renderHook(() =>
       useSkillComputation({
-        skills: [{ name: "Acrobatics", characteristic: "ag", level: "untrained" }],
+        skills: [makeSkill("Acrobatics", "untrained")],
         getCharField: makeGetCharField(30, 0),
       })
     );
@@ -21,7 +36,7 @@ describe("useSkillComputation", () => {
   it("adds +10 for +10 skill level", () => {
     const { result } = renderHook(() =>
       useSkillComputation({
-        skills: [{ name: "Acrobatics", characteristic: "ag", level: "+10" }],
+        skills: [makeSkill("Acrobatics", "+10")],
         getCharField: makeGetCharField(30, 0),
       })
     );
@@ -31,7 +46,7 @@ describe("useSkillComputation", () => {
   it("adds +20 for +20 skill level", () => {
     const { result } = renderHook(() =>
       useSkillComputation({
-        skills: [{ name: "Acrobatics", characteristic: "ag", level: "+20" }],
+        skills: [makeSkill("Acrobatics", "+20")],
         getCharField: makeGetCharField(30, 0),
       })
     );
@@ -41,7 +56,7 @@ describe("useSkillComputation", () => {
   it("includes characteristic advances in total", () => {
     const { result } = renderHook(() =>
       useSkillComputation({
-        skills: [{ name: "Acrobatics", characteristic: "ag", level: "trained" }],
+        skills: [makeSkill("Acrobatics", "trained")],
         getCharField: makeGetCharField(30, 10),
       })
     );
@@ -51,7 +66,7 @@ describe("useSkillComputation", () => {
   it("applies miscModifier", () => {
     const { result } = renderHook(() =>
       useSkillComputation({
-        skills: [{ name: "Acrobatics", characteristic: "ag", level: "trained", miscModifier: 5 }],
+        skills: [makeSkill("Acrobatics", "trained", { miscModifier: 5 })],
         getCharField: makeGetCharField(30, 0),
       })
     );
@@ -61,7 +76,7 @@ describe("useSkillComputation", () => {
   it("computes half value as floor(total / 2)", () => {
     const { result } = renderHook(() =>
       useSkillComputation({
-        skills: [{ name: "Acrobatics", characteristic: "ag", level: "trained" }],
+        skills: [makeSkill("Acrobatics", "trained")],
         getCharField: makeGetCharField(31, 0),
       })
     );
@@ -72,8 +87,8 @@ describe("useSkillComputation", () => {
     const { result } = renderHook(() =>
       useSkillComputation({
         skills: [
-          { name: "Acrobatics", characteristic: "ag", level: "trained" },
-          { name: "Athletics", characteristic: "ag", level: "+10" },
+          makeSkill("Acrobatics", "trained"),
+          makeSkill("Athletics", "+10"),
         ],
         getCharField: makeGetCharField(25, 0),
       })

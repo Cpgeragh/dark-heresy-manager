@@ -7,16 +7,19 @@ const makeSkill = (
   name: string,
   characteristic: SkillWithComputed["characteristic"],
   total: number,
-  category?: string
+  category: string = "General"
 ): SkillWithComputed => ({
+  id: name,
   name,
   characteristic,
   level: "trained",
+  category,
+  advanced: false,
+  source: "CR",
   total,
   half: Math.floor(total / 2),
   full: total,
   opposed: total,
-  category,
 });
 
 const skills: SkillWithComputed[] = [

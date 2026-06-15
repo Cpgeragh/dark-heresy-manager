@@ -6,7 +6,7 @@ import { resolve } from "path";
 
 let testEnv: RulesTestEnvironment | null = null;
 
-export async function getTestEnv() {
+export async function getTestEnv(): Promise<RulesTestEnvironment> {
   if (!testEnv) {
     const rulesPath = resolve(process.cwd(), "firestore.rules");
     const rules = readFileSync(rulesPath, "utf8");
@@ -25,7 +25,7 @@ export async function getTestEnv() {
     }
   }
 
-  return testEnv;
+  return testEnv!;
 }
 
 // NO global cleanup - it overwhelms the emulator
