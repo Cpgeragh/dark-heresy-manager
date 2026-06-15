@@ -5,6 +5,7 @@ import { Routes, Route, Navigate, useLocation, useMatch } from "react-router-dom
 
 import { useAuth } from "./hooks/useAuth";
 import { useDeviceLink } from "./hooks/useDeviceLink";
+import { useUserProfile } from "./hooks/useUserProfile";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { AppHeader } from "./components/AppHeader";
 import { MessageDrawer } from "./components/MessageDrawer";
@@ -45,7 +46,7 @@ export default function App() {
   // -------------------------------------------------
   // AUTH & USER STATE
   // -------------------------------------------------
-  const { currentUser, loading, onboarded, firstName, setOnboarded, setFirstName } = useAuth();
+  const { currentUser, loading, onboarded, setOnboarded } = useAuth();
 
   // -------------------------------------------------
   // DEVICE LINK — must be called unconditionally before any early returns
@@ -57,10 +58,14 @@ export default function App() {
     loading: linkLoading,
   } = useDeviceLink(currentUser?.uid ?? "");
 
+  // First name lives on the shared account profile, read live so it syncs
+  // across linked devices.
+  const { firstName, loading: profileLoading } = useUserProfile(effectiveUserId);
+
   // -------------------------------------------------
   // LOADING STATES
   // -------------------------------------------------
-  if (loading || linkLoading) {
+  if (loading || linkLoading || profileLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-100">
         Loading…
@@ -82,7 +87,7 @@ export default function App() {
       <Onboarding
         user={currentUser}
         onComplete={() => setOnboarded(true)}
-        setFirstName={setFirstName}
+        effectiveUserId={effectiveUserId}
       />
     );
   }
@@ -90,7 +95,7 @@ export default function App() {
   // Existing users who onboarded before first names existed must add one
   // before using the app again.
   if (!firstName) {
-    return <NameGate user={currentUser} onSaved={setFirstName} />;
+    return <NameGate effectiveUserId={effectiveUserId} />;
   }
 
   // -------------------------------------------------

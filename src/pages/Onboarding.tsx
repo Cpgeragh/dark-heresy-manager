@@ -17,10 +17,10 @@ type Step = "welcome" | "show-code" | "reclaim";
 interface Props {
   user: User;
   onComplete: () => void;
-  setFirstName: (value: string) => void;
+  effectiveUserId: string;
 }
 
-export default function Onboarding({ user, onComplete, setFirstName }: Props) {
+export default function Onboarding({ user, onComplete, effectiveUserId }: Props) {
   // The current step lives in the URL (?step=…) so browser/phone Back and
   // Forward move between steps natively. Unknown/absent values → welcome.
   const [searchParams, setSearchParams] = useSearchParams();
@@ -74,9 +74,8 @@ export default function Onboarding({ user, onComplete, setFirstName }: Props) {
     setBusy(true);
     setError(null);
     try {
-      await saveFirstName(user.uid, trimmedName);
+      await saveFirstName(effectiveUserId, trimmedName);
       const generatedCode = await rotateRecoveryCode(user.uid);
-      setFirstName(trimmedName);
       setCode(generatedCode);
       setCopied(false);
       setSavedConfirmed(false);

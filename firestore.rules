@@ -51,8 +51,7 @@ service cloud.firestore {
     match /userProfiles/{userId} {
       allow read: if request.auth != null;
       allow create, update:
-        if request.auth != null &&
-           request.auth.uid == userId &&
+        if playerOwnsOrLinked(userId) &&
            request.resource.data.keys().hasOnly(['firstName']) &&
            request.resource.data.firstName is string &&
            request.resource.data.firstName.size() > 0 &&
