@@ -20,11 +20,11 @@ import { IMPORTANT_TOAST_DURATION } from "../constants/ui";
 import { uiSectionHeader, editableInputClass } from "../ui/editableStyles";
 import { useHeaderExtensionSetters } from "../context/HeaderExtensionContext";
 
-export default function CampaignOverview() {
+export default function CampaignOverview({ effectiveUserId }: { effectiveUserId: string }) {
   const params = useParams<{ campaignId: string }>();
   const campaignId = params.campaignId;
 
-  const isDM = useIsDM(campaignId);
+  const isDM = useIsDM(campaignId, effectiveUserId);
   const { campaign } = useCampaign(campaignId ?? null);
   const { sessions, loading: sessionsLoading, deleteSession, updateSession } = useSessions(campaignId);
   const { characters: summaries, loading } = useCharacterSummaries(campaignId);

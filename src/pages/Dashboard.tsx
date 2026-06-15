@@ -39,6 +39,7 @@ interface Props {
   user: User;
   effectiveUserId: string;
   isLinked: boolean;
+  firstName: string | null;
 }
 
 // ─── Player character card ────────────────────────────────────────────────────
@@ -645,13 +646,15 @@ function ClaimCharacterSection() {
 
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 
-export default function Dashboard({ user: _user, effectiveUserId, isLinked }: Props) {
+export default function Dashboard({ user: _user, effectiveUserId, isLinked, firstName }: Props) {
   const { dmCampaigns, playerCampaigns, loading } = useCampaignsContext();
   const installMode = useInstallMode();
 
   return (
     <div className="space-y-6 text-slate-100">
-      <h1 className="text-lg font-semibold text-red-500 text-center">Dashboard</h1>
+      <h1 className="text-lg font-semibold text-slate-100 text-center">
+        {firstName ? `${firstName}'s Dashboard` : "Dashboard"}
+      </h1>
 
       <div className="border border-slate-700 bg-slate-900/40 p-4 rounded-lg space-y-6">
 

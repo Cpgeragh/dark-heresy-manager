@@ -41,6 +41,26 @@ service cloud.firestore {
     }
 
     // ============================
+    // USER PROFILES (public first-name directory)
+    // ============================
+    // Readable by any authenticated user so DMs and party members can display
+    // the owner's first name on character sheets (consistent with campaigns and
+    // characters, which are already authed-readable). Only the owner can write,
+    // and only a single non-empty firstName field — first name only, by design,
+    // for data protection.
+    match /userProfiles/{userId} {
+      allow read: if request.auth != null;
+      allow create, update:
+        if request.auth != null &&
+           request.auth.uid == userId &&
+           request.resource.data.keys().hasOnly(['firstName']) &&
+           request.resource.data.firstName is string &&
+           request.resource.data.firstName.size() > 0 &&
+           request.resource.data.firstName.size() <= 50;
+      allow delete: if false;
+    }
+
+    // ============================
     // CAMPAIGNS
     // ============================
     match /campaigns/{campaignId} {

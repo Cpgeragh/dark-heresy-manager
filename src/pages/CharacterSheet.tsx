@@ -53,12 +53,13 @@ import type {
 import { exportCharacterJson } from "../utils/exportCharacter";
 import { normaliseSkills, skillsNeedNormalisation } from "../utils/skillUtils";
 import { SectionDrawer } from "../components/SectionDrawer";
+import { useUserProfile } from "../hooks/useUserProfile";
 
 // ================================================================
 // COMPONENT
 // ================================================================
 
-export default function CharacterSheet() {
+export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: string }) {
   const params = useParams<{ campaignId: string; characterId: string }>();
 
   const {
@@ -91,11 +92,18 @@ export default function CharacterSheet() {
   } = useCharacterSheet({
     campaignIdParam: params.campaignId,
     characterIdParam: params.characterId,
+    effectiveUserId,
   });
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const activeTab = (searchParams.get("tab") as TabId) ?? "stats";
+
+  // The owner's player name is derived live from their public profile so it
+  // stays in sync with their account first name (falls back to the legacy
+  // header.playerName for characters claimed before profiles existed).
+  const { firstName: ownerFirstName } = useUserProfile(character?.userId);
+  const ownerName = ownerFirstName ?? character?.header.playerName?.trim() ?? null;
   const normalisedSkills = useMemo(
     () => (character ? normaliseSkills(character.skills) : []),
     [character?.skills]
@@ -534,6 +542,7 @@ export default function CharacterSheet() {
               header={character.header}
               talents={character.talentsAndTraits}
               editable={allowedToEdit}
+              playerName={ownerName}
               onUpdateHeader={handleUpdateHeader}
               onUpdateTalents={handleUpdateTalents}
             />
@@ -550,6 +559,7 @@ export default function CharacterSheet() {
           {activeTab === "admin" && isDM && (
             <AdminTab
               character={character}
+              ownerName={ownerName}
               claimLog={claimLog}
               onDMForceRelease={dmForceRelease}
               onDMForceAssign={dmForceAssign}

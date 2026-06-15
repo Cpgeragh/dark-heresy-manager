@@ -8,27 +8,37 @@ import type { User } from "firebase/auth";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { registerIdentityRecovery, reclaimIdentity } from "../services/identityService";
+import { saveFirstName } from "../services/profileService";
 
 type Step = "welcome" | "show-code" | "reclaim";
 
 interface Props {
   user: User;
   onComplete: () => void;
+  setFirstName: (value: string) => void;
 }
 
-export default function Onboarding({ user, onComplete }: Props) {
+export default function Onboarding({ user, onComplete, setFirstName }: Props) {
   const [step, setStep] = useState<Step>("welcome");
   const [code, setCode] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reclaimCode, setReclaimCode] = useState("");
+  const [name, setName] = useState("");
 
   async function handleGetStarted() {
+    const trimmedName = name.trim();
+    if (!trimmedName) {
+      setError("Please enter your first name.");
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
+      await saveFirstName(user.uid, trimmedName);
       const generatedCode = await registerIdentityRecovery(user.uid);
       await updateDoc(doc(db, "users", user.uid), { onboarded: true });
+      setFirstName(trimmedName);
       setCode(generatedCode);
       setStep("show-code");
     } catch (err) {
@@ -71,13 +81,32 @@ export default function Onboarding({ user, onComplete }: Props) {
               <h1 className="text-2xl font-bold">Dark Heresy Manager</h1>
             </div>
 
-            <p className="text-slate-400 mb-8">
-              Welcome. Tap Get Started to set up your account and receive a recovery code.
+            <p className="text-slate-400 mb-6">
+              Welcome. Enter your first name, then tap Get Started to set up your account and
+              receive a recovery code.
             </p>
+
+            <label className="block mb-6">
+              <span className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                First name
+              </span>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. David"
+                disabled={busy}
+                maxLength={50}
+                className="mt-1 w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-600 text-slate-100 text-base placeholder:text-slate-600 focus:outline-none focus:border-amber-500 disabled:opacity-50"
+              />
+              <span className="mt-1 block text-[11px] text-slate-500">
+                First name only. Shared with your DM and party so they know who you are.
+              </span>
+            </label>
 
             <button
               onClick={handleGetStarted}
-              disabled={busy}
+              disabled={busy || !name.trim()}
               className="w-full py-4 rounded-xl border border-amber-500 text-amber-400 font-semibold text-lg hover:bg-amber-500/10 transition disabled:opacity-50"
             >
               {busy ? "Setting up…" : "Get Started"}
