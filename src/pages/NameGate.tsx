@@ -3,15 +3,13 @@
 // on their public profile. They must provide one before using the app again.
 
 import { useState } from "react";
-import type { User } from "firebase/auth";
 import { saveFirstName } from "../services/profileService";
 
 interface Props {
-  user: User;
-  onSaved: (name: string) => void;
+  effectiveUserId: string;
 }
 
-export default function NameGate({ user, onSaved }: Props) {
+export default function NameGate({ effectiveUserId }: Props) {
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,8 +23,7 @@ export default function NameGate({ user, onSaved }: Props) {
     setBusy(true);
     setError(null);
     try {
-      await saveFirstName(user.uid, trimmed);
-      onSaved(trimmed);
+      await saveFirstName(effectiveUserId, trimmed);
     } catch (err) {
       console.error("Failed to save name:", err);
       setError("Something went wrong. Please try again.");
