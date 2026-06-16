@@ -19,7 +19,6 @@ import {
   StatChip,
   DamageTypeChip,
   computeMeleeTotalDamage,
-  SpecialRulesModal,
   SpecialRulesContent,
   AttachmentPicker,
   AttachmentCard,
@@ -288,8 +287,6 @@ export function MeleeCard({
     setExpanded(isEquipped);
   }, [isEquipped]);
 
-  const [showQualities, setShowQualities] = useState(false);
-  const [showItemRules, setShowItemRules] = useState(false);
   const [showAttachPicker, setShowAttachPicker] = useState(false);
 
   const attachmentIds = weapon.attachments ?? [];
@@ -306,13 +303,10 @@ export function MeleeCard({
   const compatible = getCompatibleUpgrades(weapon.class ?? "", weapon.name, true, attachmentIds);
   const visibleCompatible = allowAttachments ? compatible : [];
   const rulesText = effective.specialRules?.trim() ?? "";
-  const hasRules = Boolean(rulesText && rulesText !== "—" && rulesText !== "-");
   const ruleNamesInLookup = (effective.specialRules ?? "")
     .split(",")
     .map((r) => r.trim().replace(/\s*\(.*?\)/, ""))
     .filter((name) => Boolean(name) && Boolean(WEAPON_SPECIAL_RULES[name]));
-  const hasModal = !!weaponRef?.description || ruleNamesInLookup.length > 0;
-  const rulesDisplayText = hasRules ? rulesText : hasModal ? "Special rules" : "";
   const hasQualities = Boolean(
     rulesText && rulesText !== "—" && rulesText !== "-" && rulesText !== "â€”"
   );
@@ -387,21 +381,6 @@ export function MeleeCard({
               />
             )}
           </div>
-
-          {false && (
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs text-slate-400 italic">{rulesDisplayText}</span>
-              {hasModal && (
-                <button
-                  onClick={() => setShowQualities(true)}
-                  title="Explain special rules"
-                  className="text-slate-500 hover:text-amber-400 text-sm transition"
-                >
-                  ⓘ
-                </button>
-              )}
-            </div>
-          )}
 
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
@@ -491,23 +470,6 @@ export function MeleeCard({
                 </div>
               )}
             </div>
-          )}
-
-          {showQualities && (
-            <SpecialRulesModal
-              rules={effective.specialRules ?? ""}
-              title="Qualities"
-              onClose={() => setShowQualities(false)}
-            />
-          )}
-
-          {showItemRules && rulesDescription && (
-            <SpecialRulesModal
-              rules=""
-              description={rulesDescription}
-              title="Rules"
-              onClose={() => setShowItemRules(false)}
-            />
           )}
 
           {showAttachPicker && (

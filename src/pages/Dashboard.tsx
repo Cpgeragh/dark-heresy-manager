@@ -299,18 +299,16 @@ function DmCampaignList({
                     autoFocus
                     aria-label="Edit campaign name"
                   />
-                  <button
-                    onClick={handleEditSave}
-                    className="text-xs px-2 py-1 bg-amber-500 text-slate-900 rounded font-semibold"
-                  >
+                  <Button size="sm" onClick={handleEditSave}>
                     Save
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
                     onClick={() => { setEditingId(null); setEditName(""); }}
-                    className="text-xs px-2 py-1 bg-slate-700 text-slate-300 rounded hover:bg-slate-600"
                   >
                     Cancel
-                  </button>
+                  </Button>
                 </div>
               ) : (
                 <Link
@@ -320,12 +318,13 @@ function DmCampaignList({
                 >
                   <span className="flex-1 font-medium">{campaign.name}</span>
 
-                  <button
+                  <Button
+                    variant="secondary"
+                    size="sm"
                     onClick={(e) => { e.preventDefault(); setEditingId(campaign.id); setEditName(campaign.name); }}
-                    className="text-xs px-2 py-1 bg-slate-700 text-slate-300 rounded hover:bg-slate-600"
                   >
                     Edit
-                  </button>
+                  </Button>
 
                   <ConfirmInline
                     triggerLabel="Archive"
@@ -366,13 +365,14 @@ function DmCampaignList({
                   <div key={campaign.id} className={uiSection + " flex items-center gap-2 opacity-60"}>
                     <span className="flex-1 text-slate-400 italic">{campaign.name}</span>
 
-                    <button
+                    <Button
+                      variant="secondary"
+                      size="sm"
                       onClick={() => handleRestore(campaign.id)}
                       disabled={restoring}
-                      className="text-xs px-2 py-1 bg-slate-700 text-slate-200 rounded hover:bg-slate-600 disabled:opacity-50"
                     >
                       Restore
-                    </button>
+                    </Button>
 
                     <ConfirmInline
                       triggerLabel="Delete"

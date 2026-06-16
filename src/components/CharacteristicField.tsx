@@ -142,7 +142,7 @@ export default function CharacteristicField({ label, value, editable, onChange }
               aria-label={`${label} advance ${idx + 1} of ${MAX_CHARACTERISTIC_ADVANCES}`}
               aria-pressed={filled}
               tabIndex={editable ? 0 : -1}
-              className={`h-5 w-5 border rounded flex items-center justify-center
+              className={`h-8 w-8 sm:h-6 sm:w-6 border rounded flex items-center justify-center
                 ${filled ? "bg-amber-500 border-amber-400" : "bg-slate-900 border-slate-600"}
                 ${
                   editable

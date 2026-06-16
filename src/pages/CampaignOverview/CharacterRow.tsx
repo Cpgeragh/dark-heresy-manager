@@ -7,6 +7,7 @@ import { useClaimLogs } from "../../hooks/useClaimLogs";
 import { useToast } from "../../components/Toast";
 import { cloneCharacter, deleteCharacter } from "../../services/characterService";
 import { uiSection } from "../../ui/editableStyles";
+import { Button } from "../../ui/Button";
 import { ConfirmInline } from "../../ui/ConfirmInline";
 import type { ClaimLogAction } from "../../utils/claimLog";
 import { PortraitUpload } from "../../components/PortraitUpload";
@@ -102,21 +103,19 @@ export function CharacterRow({
           </div>
 
           <div className="flex flex-wrap items-center gap-2 sm:shrink-0 justify-center sm:justify-start">
-            <button
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={(e) => { e.preventDefault(); setShowHistory(true); }}
-              className="text-xs px-2 py-1 bg-slate-700 text-slate-300 rounded hover:bg-slate-600"
             >
               History
-            </button>
+            </Button>
 
             {isDM && (
               <>
-                <button
-                  onClick={handleClone}
-                  className="text-xs px-2 py-1 bg-amber-900/40 text-amber-400 rounded hover:bg-amber-900/70"
-                >
+                <Button variant="warningGhost" size="sm" onClick={handleClone}>
                   Clone
-                </button>
+                </Button>
                 <ConfirmInline
                   triggerLabel="Delete"
                   question="Delete?"
