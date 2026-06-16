@@ -11,7 +11,8 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
-    "test:rules": "vitest run tests/firestore",
+    "test:rules": "firebase emulators:exec --only firestore --project dh-test \"vitest run --config vitest.config.rules.ts\"",
+    "test:all": "npm run test:run && npm run test:rules",
     "format": "prettier --write src/"
   },
   "dependencies": {
