@@ -398,6 +398,7 @@ export interface PsychicPower {
   description?: string;
   source?: string;
   isMinor?: boolean;
+  custom?: boolean;
   known: boolean;
 }
 

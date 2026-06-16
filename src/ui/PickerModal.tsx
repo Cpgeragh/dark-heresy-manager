@@ -61,11 +61,11 @@ export function PickerModal({
 }: Props) {
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 p-4 sm:items-center"
       onClick={onClose}
     >
       <div
-        className={`w-full max-w-lg bg-slate-900 border border-slate-700 rounded-xl shadow-2xl flex flex-col ${maxHeight}`}
+        className={`w-full min-h-0 max-w-lg bg-slate-900 border border-slate-700 rounded-xl shadow-2xl flex flex-col ${maxHeight}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -101,7 +101,7 @@ export function PickerModal({
         )}
 
         {/* Scrollable list */}
-        <div className="overflow-y-auto flex-1 divide-y divide-slate-800">
+        <div className="min-h-0 overflow-y-auto flex-1 divide-y divide-slate-800">
           {isEmpty && <p className="p-4 text-sm text-slate-500 text-center">{emptyMessage}</p>}
           {children}
         </div>
