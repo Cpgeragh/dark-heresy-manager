@@ -30,6 +30,8 @@ import { archiveCampaign, restoreCampaign } from "../utils/campaignActions";
 import type { CampaignWithId, CharacterListItem } from "../types/Firestore";
 import { uiSection, uiSectionHeader, editableInputClass } from "../ui/editableStyles";
 import { Button } from "../ui/Button";
+import { PageShell } from "../ui/PageShell";
+import { Panel } from "../ui/Panel";
 import { ClaimForm } from "./ClaimCharacter/ClaimForm";
 import { ClaimPreview } from "./ClaimCharacter/ClaimPreview";
 import { useRecoveryLookup } from "./ClaimCharacter/hooks/useRecoveryLookup";
@@ -606,14 +608,10 @@ export default function Dashboard({ user, effectiveUserId, isLinked, firstName }
   const installMode = useInstallMode();
 
   return (
-    <div className="space-y-6 text-slate-100">
-      <h1 className="text-lg font-semibold text-slate-100 text-center">
-        {firstName ? `${firstName}'s Dashboard` : "Dashboard"}
-      </h1>
-
+    <PageShell title={firstName ? `${firstName}'s Dashboard` : "Dashboard"}>
       <RecoveryBackupBanner ownUid={user.uid} effectiveUserId={effectiveUserId} />
 
-      <div className="border border-slate-700 bg-slate-900/40 p-4 rounded-lg space-y-6">
+      <Panel>
 
         {/* ── DM section ───────────────────────────────────────────────── */}
         {installMode === "full" && (
@@ -661,7 +659,7 @@ export default function Dashboard({ user, effectiveUserId, isLinked, firstName }
         {/* ── Claim a character ────────────────────────────────────────── */}
         <ClaimCharacterSection effectiveUserId={effectiveUserId} />
 
-      </div>
-    </div>
+      </Panel>
+    </PageShell>
   );
 }

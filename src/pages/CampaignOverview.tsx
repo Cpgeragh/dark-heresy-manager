@@ -19,6 +19,8 @@ import { useToast } from "../components/Toast";
 import { IMPORTANT_TOAST_DURATION } from "../constants/ui";
 import { uiSectionHeader, editableInputClass } from "../ui/editableStyles";
 import { Button } from "../ui/Button";
+import { PageShell } from "../ui/PageShell";
+import { Panel } from "../ui/Panel";
 import { useHeaderExtensionSetters } from "../context/HeaderExtensionContext";
 
 export default function CampaignOverview({ effectiveUserId }: { effectiveUserId: string }) {
@@ -111,12 +113,8 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
     : characters;
 
   return (
-    <div className="space-y-6 text-slate-100">
-      <h1 className="text-lg font-semibold text-slate-100 text-center">
-        {campaign?.name ?? "Campaign Overview"}
-      </h1>
-
-      <div className="border border-slate-700 bg-slate-900/40 p-4 rounded-lg space-y-6">
+    <PageShell title={campaign?.name ?? "Campaign Overview"}>
+      <Panel>
         {/* Session form — shown inline when creating */}
         {isDM && showSessionForm && (
           <SessionForm
@@ -220,7 +218,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </Panel>
+    </PageShell>
   );
 }
