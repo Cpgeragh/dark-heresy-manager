@@ -9,6 +9,7 @@ import type { User } from "firebase/auth";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { rotateRecoveryCode, reclaimIdentity, getRecoveryCode } from "../services/identityService";
+import { formatRecoveryCodeInput } from "../utils/recoveryCode";
 import { saveFirstName } from "../services/profileService";
 import { uiSectionHeader } from "../ui/editableStyles";
 
@@ -110,7 +111,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-6">
+    <div className="min-h-svh bg-slate-950 text-slate-100 flex items-center justify-center p-6">
       <div className="max-w-sm w-full">
 
         {/* ── Welcome ── */}
@@ -119,7 +120,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
             <h1 className="text-lg font-semibold text-slate-100 text-center">Welcome</h1>
 
             <div className="border border-slate-700 bg-slate-900/40 p-4 rounded-lg space-y-4">
-              <p className="text-slate-400 text-sm">
+              <p className="text-slate-300 text-sm">
                 Enter your first name, then tap Get Started to set up your account and receive a
                 recovery code.
               </p>
@@ -135,7 +136,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
                   maxLength={50}
                   className="mt-1 w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-600 text-slate-100 text-base placeholder:text-slate-600 focus:outline-none focus:border-amber-500 disabled:opacity-50"
                 />
-                <span className="mt-1 block text-[11px] text-slate-500">
+                <span className="mt-1 block text-[11px] text-amber-300 text-center">
                   First name only. Used on your dashboard and your character sheets.
                 </span>
               </label>
@@ -143,7 +144,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
               <button
                 onClick={handleGetStarted}
                 disabled={busy || !name.trim()}
-                className="w-full py-3 rounded-lg border border-amber-500 text-amber-400 font-semibold hover:bg-amber-500/10 transition disabled:opacity-50"
+                className="w-full py-3 rounded-lg bg-amber-500 text-slate-900 font-bold text-base hover:bg-amber-400 transition disabled:opacity-50"
               >
                 {busy ? "Setting up…" : "Get Started"}
               </button>
@@ -162,46 +163,63 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
 
         {/* ── Reclaim ── */}
         {step === "reclaim" && (
-          <>
-            <button
-              onClick={() => { setError(null); goToStep("welcome"); }}
-              className="mb-6 text-sm text-slate-500 hover:text-slate-300 transition"
-            >
-              ← Back
-            </button>
+          <div className="space-y-6 text-slate-100">
+            <div className="relative flex items-center justify-center">
+              <button
+                onClick={() => { setError(null); goToStep("welcome"); }}
+                className="absolute left-0 text-sm text-slate-400 hover:text-slate-200 transition"
+              >
+                ← Back
+              </button>
+              <h1 className="text-lg font-semibold text-slate-100 text-center">Returning User</h1>
+            </div>
 
-            <h1 className="text-2xl font-bold mb-2">Returning User</h1>
-            <p className="text-slate-400 mb-6">
-              Enter the recovery code you saved when you first set up the app.
-            </p>
+            <div className="border border-slate-700 bg-slate-900/40 p-4 rounded-lg space-y-4">
+              <p className="text-slate-300 text-sm">
+                Enter the recovery code you saved when you first set up the app.
+              </p>
 
-            <input
-              type="text"
-              value={reclaimCode}
-              onChange={(e) => setReclaimCode(e.target.value.toUpperCase())}
-              placeholder="DH-XXXX-YYYY"
-              disabled={busy}
-              className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-600 text-slate-100 font-mono text-base placeholder:text-slate-600 focus:outline-none focus:border-amber-500 disabled:opacity-50 mb-4"
-            />
+              <label className="block">
+                <span className={uiSectionHeader}>Recovery code</span>
+                <input
+                  type="text"
+                  value={reclaimCode}
+                  onChange={(e) => setReclaimCode(formatRecoveryCodeInput(e.target.value))}
+                  placeholder="DH-XXXX-YYYY"
+                  autoCapitalize="characters"
+                  autoComplete="off"
+                  spellCheck={false}
+                  maxLength={12}
+                  disabled={busy}
+                  className="mt-1 w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-600 text-slate-100 font-code [font-feature-settings:'zero'] text-base placeholder:text-slate-600 focus:outline-none focus:border-amber-500 disabled:opacity-50"
+                />
+              </label>
 
-            <button
-              onClick={handleReclaim}
-              disabled={busy || !reclaimCode.trim()}
-              className="w-full py-3 rounded-xl bg-amber-500 text-slate-900 font-bold text-base hover:bg-amber-400 transition disabled:opacity-50"
-            >
-              {busy ? "Reclaiming…" : "Reclaim Identity"}
-            </button>
+              <button
+                onClick={handleReclaim}
+                disabled={busy || !reclaimCode.trim()}
+                className="w-full py-3 rounded-lg bg-amber-500 text-slate-900 font-bold text-base hover:bg-amber-400 transition disabled:opacity-50"
+              >
+                {busy ? "Reclaiming…" : "Reclaim Identity"}
+              </button>
 
-            {error && (
-              <p className="mt-4 text-red-400 text-sm text-center">{error}</p>
-            )}
-          </>
+              {error && <p className="text-red-400 text-sm text-center">{error}</p>}
+            </div>
+          </div>
         )}
 
         {/* ── Show code ── */}
         {step === "show-code" && code && (
           <div className="space-y-6 text-slate-100">
-            <h1 className="text-lg font-semibold text-slate-100 text-center">Data Recovery Code</h1>
+            <div className="relative flex items-center justify-center">
+              <button
+                onClick={() => goToStep("welcome")}
+                className="absolute left-0 text-sm text-slate-400 hover:text-slate-200 transition"
+              >
+                ← Back
+              </button>
+              <h1 className="text-lg font-semibold text-slate-100 text-center">Data Recovery Code</h1>
+            </div>
 
             <div className="border border-slate-700 bg-slate-900/40 p-4 rounded-lg space-y-4">
               <p className="text-slate-300 text-sm text-center">
@@ -216,7 +234,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
                 <p className="text-xs font-semibold text-amber-400 uppercase tracking-widest mb-2">
                   Recovery Code
                 </p>
-                <span className="font-mono text-xl text-white tracking-widest break-all select-all">
+                <span className="font-code [font-feature-settings:'zero'] text-xl text-white tracking-widest break-all select-all">
                   {code}
                 </span>
               </div>
@@ -260,13 +278,6 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
                 className="w-full py-3 rounded-lg bg-amber-500 text-slate-900 font-bold text-base hover:bg-amber-400 transition disabled:opacity-50"
               >
                 I've saved my code
-              </button>
-
-              <button
-                onClick={() => goToStep("welcome")}
-                className="w-full text-sm text-slate-300 hover:text-slate-100 transition text-center"
-              >
-                ← Change name
               </button>
             </div>
           </div>

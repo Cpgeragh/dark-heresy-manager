@@ -62,3 +62,8 @@ export const RECOVERY_CODE_SEGMENTS = 2;
  * Recovery code prefix
  */
 export const RECOVERY_CODE_PREFIX = "DH";
+
+/**
+ * Alphabet for recovery-code segments: full uppercase alphanumeric set.
+ */
+export const RECOVERY_CODE_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";

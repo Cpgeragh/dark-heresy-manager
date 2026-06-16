@@ -106,7 +106,7 @@ export default function Settings({ user: _user, effectiveUserId, isLinked, unlin
                   <p className="text-xs text-slate-500 uppercase tracking-widest mb-2">
                     Recovery Code
                   </p>
-                  <span className="font-mono text-lg text-amber-400 tracking-widest break-all select-all">
+                  <span className="font-code [font-feature-settings:'zero'] text-lg text-amber-400 tracking-widest break-all select-all">
                     {revealedCode}
                   </span>
                 </div>
