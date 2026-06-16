@@ -8,7 +8,11 @@ module.exports = {
     hoverOnlyWhenSupported: true,
   },
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        code: ['RobotoMonoZero', 'Roboto', 'ui-sans-serif', 'sans-serif'],
+      },
+    },
   },
   plugins: [],
 };

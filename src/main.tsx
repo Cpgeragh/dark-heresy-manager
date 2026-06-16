@@ -5,6 +5,7 @@ import { registerSW } from "virtual:pwa-register";
 import App from "./App";
 import { markUpdateStalled } from "./pwaUpdateState";
 import "./index.css";
+import "@fontsource/roboto/400.css";
 
 const root = ReactDOM.createRoot(document.getElementById("root")!);
 

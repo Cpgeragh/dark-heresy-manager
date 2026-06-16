@@ -93,7 +93,7 @@ export function CharacterRow({
             />
             <div>
               <span className="font-semibold text-slate-100 text-sm leading-tight">{characterName}</span>
-              <p className="text-xs text-slate-500 font-mono mt-0.5">Recovery: {recoveryCode ?? "—"}</p>
+              <p className="text-xs text-slate-500 font-code [font-feature-settings:'zero'] mt-0.5">Recovery: {recoveryCode ?? "—"}</p>
               <p className="text-xs mt-0.5">
                 {userId
                   ? <span className="text-green-400">Claimed</span>

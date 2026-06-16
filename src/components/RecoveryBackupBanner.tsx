@@ -67,7 +67,7 @@ export function RecoveryBackupBanner({ ownUid, effectiveUserId }: Props) {
       {code ? (
         <>
           <div className="bg-slate-900 border border-slate-600 rounded p-3 text-center">
-            <span className="font-mono text-lg text-amber-400 tracking-widest break-all select-all">
+            <span className="font-code [font-feature-settings:'zero'] text-lg text-amber-400 tracking-widest break-all select-all">
               {code}
             </span>
           </div>
