@@ -7,6 +7,7 @@ import { sendMessage, markThreadRead, clearThread } from "../../services/message
 import { MessageThread } from "../../components/MessageThread";
 import { MessageInput } from "../../components/MessageInput";
 import { useToast } from "../../components/Toast";
+import { ConfirmInline } from "../../ui/ConfirmInline";
 import type { CharacterListItem } from "../../types/Firestore";
 
 // ── Helper ────────────────────────────────────────────────────────────────────
@@ -31,8 +32,6 @@ function ThreadView({
 }) {
   const { messages, loading } = useThreadMessages(campaignId, characterId);
   const toast = useToast();
-  const [showClearConfirm, setShowClearConfirm] = useState(false);
-  const [clearText, setClearText] = useState("");
   const [clearing, setClearing] = useState(false);
 
   // Mark thread as read when DM opens it
@@ -56,8 +55,6 @@ function ThreadView({
     setClearing(true);
     try {
       await clearThread(campaignId, characterId);
-      setShowClearConfirm(false);
-      setClearText("");
       toast.success("Chat cleared.");
     } catch (err) {
       console.error("Failed to clear thread:", err);
@@ -74,43 +71,14 @@ function ThreadView({
 
       {/* Clear chat */}
       <div className="mt-3 pt-3 border-t border-slate-800">
-        {showClearConfirm ? (
-          <div className="space-y-2">
-            <p className="text-xs text-red-400">Type DELETE to clear all messages</p>
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={clearText}
-                onChange={(e) => setClearText(e.target.value)}
-                placeholder="DELETE"
-                autoFocus
-                disabled={clearing}
-                className="px-2 py-1 bg-slate-700 border border-slate-500 rounded text-xs text-slate-100 w-24 font-mono placeholder:text-slate-600 disabled:opacity-50"
-              />
-              <button
-                onClick={handleClear}
-                disabled={clearing || clearText !== "DELETE"}
-                className="text-xs px-2 py-1 bg-red-700 text-white rounded hover:bg-red-600 disabled:opacity-50"
-              >
-                {clearing ? "…" : "Yes"}
-              </button>
-              <button
-                onClick={() => { setShowClearConfirm(false); setClearText(""); }}
-                disabled={clearing}
-                className="text-xs px-2 py-1 bg-slate-700 text-slate-300 rounded hover:bg-slate-600"
-              >
-                No
-              </button>
-            </div>
-          </div>
-        ) : (
-          <button
-            onClick={() => setShowClearConfirm(true)}
-            className="text-xs text-red-400/60 hover:text-red-400 transition-colors"
-          >
-            Clear chat
-          </button>
-        )}
+        <ConfirmInline
+          triggerLabel="Clear chat"
+          requireText="DELETE"
+          requirePrompt="Type DELETE to clear all messages"
+          size="sm"
+          busy={clearing}
+          onConfirm={handleClear}
+        />
       </div>
     </div>
   );

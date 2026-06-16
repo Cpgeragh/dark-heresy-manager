@@ -7,6 +7,7 @@ import { useClaimLogs } from "../../hooks/useClaimLogs";
 import { useToast } from "../../components/Toast";
 import { cloneCharacter, deleteCharacter } from "../../services/characterService";
 import { uiSection } from "../../ui/editableStyles";
+import { ConfirmInline } from "../../ui/ConfirmInline";
 import type { ClaimLogAction } from "../../utils/claimLog";
 import { PortraitUpload } from "../../components/PortraitUpload";
 
@@ -51,7 +52,6 @@ export function CharacterRow({
 }) {
   const { logs } = useClaimLogs(campaignId, characterId);
   const toast = useToast();
-  const [confirmDelete, setConfirmDelete] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
 
   const handleClone = useCallback(async (e: React.MouseEvent) => {
@@ -65,12 +65,10 @@ export function CharacterRow({
     }
   }, [campaignId, characterId, toast]);
 
-  const handleDelete = useCallback(async (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleDelete = useCallback(async () => {
     if (!recoveryCode) return;
     try {
       await deleteCharacter(campaignId, characterId, recoveryCode);
-      setConfirmDelete(false);
     } catch (err) {
       console.error("Character deletion error:", err);
       toast.error("Failed to delete character.");
@@ -119,30 +117,12 @@ export function CharacterRow({
                 >
                   Clone
                 </button>
-                {confirmDelete ? (
-                  <>
-                    <span className="text-xs text-red-400">Delete?</span>
-                    <button
-                      onClick={handleDelete}
-                      className="px-2 py-1 text-xs rounded bg-red-600 text-white hover:bg-red-500"
-                    >
-                      Yes
-                    </button>
-                    <button
-                      onClick={(e) => { e.preventDefault(); setConfirmDelete(false); }}
-                      className="px-2 py-1 text-xs rounded bg-slate-700 text-slate-300 hover:bg-slate-600"
-                    >
-                      No
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    onClick={(e) => { e.preventDefault(); setConfirmDelete(true); }}
-                    className="text-xs px-2 py-1 bg-red-900/40 text-red-400 rounded hover:bg-red-900/70"
-                  >
-                    Delete
-                  </button>
-                )}
+                <ConfirmInline
+                  triggerLabel="Delete"
+                  question="Delete?"
+                  size="sm"
+                  onConfirm={handleDelete}
+                />
               </>
             )}
           </div>

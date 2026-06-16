@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import type { Timestamp } from "firebase/firestore";
 import type { SessionDocument } from "../../types/Firestore";
 import { useToast } from "../../components/Toast";
+import { ConfirmInline } from "../../ui/ConfirmInline";
 
 interface Character {
   id: string;
@@ -37,7 +38,7 @@ function toInputDate(value: SessionDocument["date"]): string {
 
 export function SessionCard({ session, characters, isDM, onDelete, onSave, onApplyXp }: Props) {
   const toast = useToast();
-  const [mode, setMode] = useState<"view" | "edit" | "confirmDelete">("view");
+  const [mode, setMode] = useState<"view" | "edit">("view");
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [applyingXp, setApplyingXp] = useState(false);
@@ -101,7 +102,6 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
     } catch (err) {
       console.error("Failed to delete session:", err);
       toast.error("Failed to delete session. Please try again.");
-      setMode("view");
     } finally {
       setDeleting(false);
     }
@@ -245,32 +245,14 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
               Edit
             </button>
           )}
-          {isDM && onDelete && mode !== "confirmDelete" && (
-            <button
-              onClick={() => setMode("confirmDelete")}
-              className="text-xs px-2 py-1 bg-red-900/40 text-red-400 rounded hover:bg-red-900/70"
-            >
-              Delete
-            </button>
-          )}
-          {mode === "confirmDelete" && (
-            <div className="flex items-center gap-1">
-              <span className="text-xs text-red-400">Delete?</span>
-              <button
-                onClick={handleDelete}
-                disabled={deleting}
-                className="text-xs px-2 py-1 bg-red-700 text-white rounded hover:bg-red-600 disabled:opacity-50"
-              >
-                {deleting ? "…" : "Yes"}
-              </button>
-              <button
-                onClick={() => setMode("view")}
-                disabled={deleting}
-                className="text-xs px-2 py-1 bg-slate-700 text-slate-300 rounded hover:bg-slate-600"
-              >
-                No
-              </button>
-            </div>
+          {isDM && onDelete && (
+            <ConfirmInline
+              triggerLabel="Delete"
+              question="Delete?"
+              size="sm"
+              busy={deleting}
+              onConfirm={handleDelete}
+            />
           )}
         </div>
       </div>
