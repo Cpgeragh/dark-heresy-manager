@@ -104,7 +104,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
   }
 
   if (loading) {
-    return <div className="text-slate-300 text-center py-10">Loading campaign...</div>;
+    return <div className="text-slate-300 text-center py-10">Loading campaign…</div>;
   }
 
   const filteredCharacters = search.trim()

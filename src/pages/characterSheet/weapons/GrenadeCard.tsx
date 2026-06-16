@@ -39,7 +39,7 @@ export const EXPLOSIVE_MISHAPS_CONTENT = (
           <tr>
             <td className="py-2 pr-3 align-top font-mono text-slate-300 whitespace-nowrap">6-8</td>
             <td className="py-2 text-slate-300">
-              <span className="font-semibold text-slate-100">"It might be ok..."</span> Nothing
+              <span className="font-semibold text-slate-100">"It might be ok…"</span> Nothing
               happens. Roll again on this table next round.
             </td>
           </tr>

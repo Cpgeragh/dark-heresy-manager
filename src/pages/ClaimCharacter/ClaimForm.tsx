@@ -55,7 +55,7 @@ export function ClaimForm({ code, onCodeChange, onSubmit, loading }: ClaimFormPr
       </div>
 
       <Button fullWidth disabled={loading || !isValid} onClick={handleSubmit}>
-        {loading ? "Checking..." : "Look Up Character"}
+        {loading ? "Checking…" : "Look Up Character"}
       </Button>
     </div>
   );

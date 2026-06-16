@@ -125,7 +125,7 @@ export function AdminTab({
                 : "bg-red-700 border-red-500 text-white hover:bg-red-600"
             }`}
           >
-            {isDmForceReleasing ? "Releasing..." : "Force Release Ownership"}
+            {isDmForceReleasing ? "Releasing…" : "Force Release Ownership"}
           </button>
 
           <button
@@ -137,7 +137,7 @@ export function AdminTab({
                 : "bg-yellow-600 border-yellow-500 text-black hover:bg-yellow-500"
             }`}
           >
-            {isDmTogglingEdit ? "Updating..." : "Toggle Player Edit Permission"}
+            {isDmTogglingEdit ? "Updating…" : "Toggle Player Edit Permission"}
           </button>
         </div>
       </section>

@@ -60,7 +60,7 @@ export function DrugPicker({
   return (
     <PickerModal
       title="Add Drug"
-      placeholder="Search drugs..."
+      placeholder="Search drugs…"
       query={query}
       onQueryChange={setQuery}
       onClose={onClose}

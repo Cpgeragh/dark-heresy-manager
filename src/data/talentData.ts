@@ -828,7 +828,7 @@ export const TALENT_LIST: readonly TalentData[] = [
   },
   {
     id: "only-in-death",
-    name: "Only in Death...",
+    name: "Only in Death…",
     source: SkillSource.BoM,
     hasSpecialisation: false,
   },
