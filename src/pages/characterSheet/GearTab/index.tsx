@@ -9,7 +9,7 @@ import { ConsumablePicker } from "./ConsumablePicker";
 import { ItemRow } from "./ItemRow";
 import { GearPicker } from "./GearPicker";
 import { CustomItemForm } from "./CustomItemForm";
-import { uiSectionHeader } from "../../../ui/editableStyles";
+import { SectionHeader } from "../../../ui/SectionHeader";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -124,9 +124,7 @@ export function GearTab({ gear, consumables, editable, onUpdate, onUpdateConsuma
     <div className="space-y-6">
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className={uiSectionHeader}>
-            Items ({gear.length})
-          </h3>
+          <SectionHeader>Items ({gear.length})</SectionHeader>
           {!showCustomForm && (
             <button
               onClick={() => setShowGearPicker(true)}
@@ -177,9 +175,7 @@ export function GearTab({ gear, consumables, editable, onUpdate, onUpdateConsuma
       {/* CONSUMABLES ──────────────────────────────────────────────────────── */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className={uiSectionHeader}>
-            Consumables ({consumables.length})
-          </h3>
+          <SectionHeader>Consumables ({consumables.length})</SectionHeader>
           <button
             onClick={() => setShowConsumablePicker(true)}
             className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"

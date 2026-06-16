@@ -8,7 +8,8 @@ import {
   type PsychicPowerRef,
   type PsychicDiscipline,
 } from "../../data/reference/psychicReference";
-import { uiSection, uiSectionHeader } from "../../ui/editableStyles";
+import { uiSection } from "../../ui/editableStyles";
+import { SectionHeader } from "../../ui/SectionHeader";
 import { PowerCard } from "./components/PowerCard";
 import { PickerModal } from "../../ui/PickerModal";
 import { InfoModal } from "../../components/InfoModal";
@@ -313,7 +314,7 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
       {/* MINOR POWERS ────────────────────────────────────────────────────── */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className={uiSectionHeader}>Minor Powers</h3>
+          <SectionHeader>Minor Powers</SectionHeader>
           <button
             onClick={openPickerForMinor}
             className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
@@ -333,7 +334,7 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
       {/* MAJOR POWERS ────────────────────────────────────────────────────── */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className={uiSectionHeader}>Major Powers</h3>
+          <SectionHeader>Major Powers</SectionHeader>
           <button
             onClick={openPickerForMajor}
             className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"

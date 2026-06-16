@@ -12,10 +12,10 @@ import type {
 import {
   editableInputClass,
   uiSection,
-  uiSectionHeader,
   uiCell,
   uiCellValue,
 } from "../../ui/editableStyles";
+import { SectionHeader } from "../../ui/SectionHeader";
 import { FormField } from "../../components/FormField";
 import { WOUNDS_CRITICAL_THRESHOLD, FATE_CRITICAL_THRESHOLD } from "../../constants/gameRules";
 
@@ -97,7 +97,7 @@ export function VitalsTab({
     <div className="space-y-6 text-slate-100">
       {/* COMBAT STATUS */}
       <div>
-        <p className={`${uiSectionHeader} mb-2`}>Combat Status</p>
+        <SectionHeader className="mb-2">Combat Status</SectionHeader>
         <section className={uiSection}>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {/* Total Wounds */}
@@ -161,7 +161,7 @@ export function VitalsTab({
 
       {/* FATE */}
       <div>
-        <p className={`${uiSectionHeader} mb-2`}>Fate Points</p>
+        <SectionHeader className="mb-2">Fate Points</SectionHeader>
         <section className={uiSection}>
           <div className="grid grid-cols-2 gap-3">
             {/* Total */}
@@ -203,7 +203,7 @@ export function VitalsTab({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* INSANITY */}
         <div>
-          <p className={`${uiSectionHeader} mb-2`}>Insanity</p>
+          <SectionHeader className="mb-2">Insanity</SectionHeader>
           <section className={uiSection + " space-y-3"}>
             <div className="flex items-center gap-3">
               <span className="text-xs text-slate-100 uppercase tracking-wide">Points</span>
@@ -227,7 +227,7 @@ export function VitalsTab({
 
         {/* CORRUPTION */}
         <div>
-          <p className={`${uiSectionHeader} mb-2`}>Corruption</p>
+          <SectionHeader className="mb-2">Corruption</SectionHeader>
           <section className={uiSection + " space-y-3"}>
             <div className="flex items-center gap-3">
               <span className="text-xs text-slate-100 uppercase tracking-wide">Points</span>

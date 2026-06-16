@@ -15,11 +15,11 @@ import {
 import { calculateCharacteristicTotal } from "../../utils/stats";
 import {
   uiSection,
-  uiSectionHeader,
   uiCell,
   uiCellLabel,
   uiCellValueSm,
 } from "../../ui/editableStyles";
+import { SectionHeader } from "../../ui/SectionHeader";
 
 // ─── StatBlock ────────────────────────────────────────────────────────────────
 // Extracted to module level to avoid re-creating the component on every render.
@@ -90,7 +90,7 @@ export function CharacteristicsTab({
     <div className="space-y-6 text-slate-100">
       {/* Stats */}
       <div>
-        <p className={`${uiSectionHeader} mb-2`}>Stats</p>
+        <SectionHeader className="mb-2">Stats</SectionHeader>
         <div className="grid grid-cols-9 gap-1">
           {(
             [
@@ -115,7 +115,7 @@ export function CharacteristicsTab({
 
       {/* Characteristic Bonuses */}
       <div>
-        <p className={`${uiSectionHeader} mb-2`}>Characteristic Bonuses</p>
+        <SectionHeader className="mb-2">Characteristic Bonuses</SectionHeader>
         <div className="grid grid-cols-7 gap-1">
           {[
             { label: "SB", value: SB },
@@ -137,7 +137,7 @@ export function CharacteristicsTab({
       {/* Movement */}
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <p className={uiSectionHeader}>Movement</p>
+          <SectionHeader>Movement</SectionHeader>
           <InfoModal
             title="Movement"
             content={

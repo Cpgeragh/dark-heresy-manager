@@ -38,7 +38,7 @@ import {
   meleeDamageForCraftsmanship,
   compareWeaponEntries,
 } from "../../utils/weaponUtils";
-import { uiSectionHeader } from "../../ui/editableStyles";
+import { SectionHeader } from "../../ui/SectionHeader";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -535,7 +535,7 @@ export function WeaponsTab({
         {/* ── RANGED ─────────────────────────────────────────────────────── */}
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className={uiSectionHeader}>Ranged</h3>
+            <SectionHeader>Ranged</SectionHeader>
             {!showCustomRanged && (
               <button
                 onClick={() => setPicker("ranged")}
@@ -604,7 +604,7 @@ export function WeaponsTab({
         {/* ── MELEE ──────────────────────────────────────────────────────── */}
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className={uiSectionHeader}>Melee</h3>
+            <SectionHeader>Melee</SectionHeader>
             {!showCustomMelee && (
               <button
                 onClick={() => setPicker("melee")}
@@ -671,7 +671,7 @@ export function WeaponsTab({
       {/* ── GRENADES & MINES ─────────────────────────────────────────────── */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className={uiSectionHeader}>Grenades & Mines ({allGrenadeEntries.length})</h3>
+          <SectionHeader>Grenades & Mines ({allGrenadeEntries.length})</SectionHeader>
           <button
             onClick={() => setPicker("grenades")}
             className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
@@ -729,7 +729,7 @@ export function WeaponsTab({
       {/* ── INTEGRATED WEAPONS ───────────────────────────────────────────── */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className={uiSectionHeader}>Integrated Weapons ({integratedWeaponCount})</h3>
+          <SectionHeader>Integrated Weapons ({integratedWeaponCount})</SectionHeader>
           <button
             onClick={() => setPicker("integrated")}
             className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
@@ -783,7 +783,7 @@ export function WeaponsTab({
       {/* ── SHIELDS ──────────────────────────────────────────────────────── */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className={uiSectionHeader}>Shields</h3>
+          <SectionHeader>Shields</SectionHeader>
           <button
             onClick={() => setPicker("shields")}
             className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"

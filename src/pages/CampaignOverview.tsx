@@ -17,10 +17,11 @@ import { createNewCharacter, importCharacter } from "../services/characterServic
 import { validateCharacterName } from "../utils/validation";
 import { useToast } from "../components/Toast";
 import { IMPORTANT_TOAST_DURATION } from "../constants/ui";
-import { uiSectionHeader, editableInputClass } from "../ui/editableStyles";
+import { editableInputClass } from "../ui/editableStyles";
 import { Button } from "../ui/Button";
 import { PageShell } from "../ui/PageShell";
 import { Panel } from "../ui/Panel";
+import { SectionHeader } from "../ui/SectionHeader";
 import { useHeaderExtensionSetters } from "../context/HeaderExtensionContext";
 
 export default function CampaignOverview({ effectiveUserId }: { effectiveUserId: string }) {
@@ -127,7 +128,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
         {/* CHARACTERS */}
         <div>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
-            <p className={uiSectionHeader}>Characters</p>
+            <SectionHeader>Characters</SectionHeader>
             <input
               placeholder="Search…"
               value={search}
@@ -174,7 +175,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
         {/* MESSAGES — DM only */}
         {isDM && (
           <div>
-            <p className={`${uiSectionHeader} mb-3`}>Messages</p>
+            <SectionHeader className="mb-3">Messages</SectionHeader>
             <DMInbox
               campaignId={campaignId}
               dmUid={campaign?.dmId ?? ""}
@@ -186,7 +187,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
         {/* SESSION HISTORY */}
         <div>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
-            <p className={uiSectionHeader}>Session History</p>
+            <SectionHeader>Session History</SectionHeader>
             {isDM && !showSessionForm && (
               <Button className="w-full sm:w-auto" onClick={() => setShowSessionForm(true)}>
                 New Session

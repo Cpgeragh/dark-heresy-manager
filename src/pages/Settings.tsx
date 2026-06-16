@@ -6,10 +6,11 @@ import type { User } from "firebase/auth";
 import { getRecoveryCode, rotateRecoveryCode } from "../services/identityService";
 import { useLinkDevice } from "../hooks/useLinkDevice";
 import { useToast } from "../components/Toast";
-import { uiSection, uiSectionHeader } from "../ui/editableStyles";
+import { uiSection } from "../ui/editableStyles";
 import { Button } from "../ui/Button";
 import { PageShell } from "../ui/PageShell";
 import { Panel } from "../ui/Panel";
+import { SectionHeader } from "../ui/SectionHeader";
 
 interface Props {
   user: User;
@@ -94,7 +95,7 @@ export default function Settings({ user: _user, effectiveUserId, isLinked, unlin
 
         {/* ── Recovery Code ───────────────────────────────────────────────── */}
         <div>
-          <p className={`${uiSectionHeader} mb-3`}>Recovery Code</p>
+          <SectionHeader className="mb-3">Recovery Code</SectionHeader>
           <section className={uiSection + " space-y-3"}>
             <p className="text-slate-400 text-sm">
               Use this code to reclaim your campaigns and characters if you lose access to
@@ -150,7 +151,7 @@ export default function Settings({ user: _user, effectiveUserId, isLinked, unlin
 
         {/* ── Linked Device ───────────────────────────────────────────────── */}
         <div>
-          <p className={`${uiSectionHeader} mb-3`}>Linked Device</p>
+          <SectionHeader className="mb-3">Linked Device</SectionHeader>
           <section className={uiSection + " space-y-3"}>
             {isLinked ? (
               <>
