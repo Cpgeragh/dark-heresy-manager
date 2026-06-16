@@ -38,6 +38,10 @@ export function sourceColour(source: string): string {
       return "text-sky-400 border-sky-700/50";
     case "SDS":
       return "text-emerald-400 border-emerald-700/50";
+    case "Custom":
+      return "text-fuchsia-400 border-fuchsia-700/50";
+    case "2nd Ed":
+      return "text-lime-400 border-lime-700/50";
     default:
       return "text-slate-400 border-slate-600";
   }

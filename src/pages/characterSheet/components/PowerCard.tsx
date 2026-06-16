@@ -3,6 +3,7 @@
 import { InfoModal } from "../../../components/InfoModal";
 import { sourceColour } from "../../../ui/sourceStyles";
 import type { PsychicPower } from "../../../types/Character";
+import { psychicDisciplineColour } from "../psychicStyles";
 
 interface PowerCardProps {
   power: PsychicPower;
@@ -26,7 +27,13 @@ function PowerStats({ power }: { power: PsychicPower }) {
           {power.source}
         </span>
       )}
-      {power.discipline && <span className="text-indigo-400">{power.discipline}</span>}
+      {power.discipline && (
+        <span
+          className={`rounded border px-1.5 py-0.5 font-medium ${psychicDisciplineColour(power.discipline)}`}
+        >
+          {power.discipline}
+        </span>
+      )}
       {power.threshold && (
         <span>
           <span className="text-slate-500">PT </span>
