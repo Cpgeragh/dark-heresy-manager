@@ -113,7 +113,7 @@ export function TalentPickerModal({
             onChange={(e) => setSpecialisation(e.target.value)}
             className={editableInputClass(true)}
           >
-            <option value="">{talentData.specialisationLabel ?? "Specialisation"}...</option>
+            <option value="">{talentData.specialisationLabel ?? "Specialisation"}…</option>
             {specialisationOptions.map((option) => (
               <option key={option} value={option}>
                 {option}
