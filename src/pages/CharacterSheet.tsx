@@ -53,7 +53,7 @@ import type {
 import { exportCharacterJson } from "../utils/exportCharacter";
 import { normaliseSkills, skillsNeedNormalisation } from "../utils/skillUtils";
 import { SectionDrawer } from "../components/SectionDrawer";
-import { TabButton } from "../components/TabButton";
+import { DesktopTabNav } from "../components/DesktopTabNav";
 import { useUserProfile } from "../hooks/useUserProfile";
 
 // ================================================================
@@ -155,6 +155,7 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
   }, [basePath, navigate]);
 
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [desktopNavCategory, setDesktopNavCategory] = useState<string | null>(null);
 
   useEffect(() => {
     const handleScroll = () => setShowScrollTop(window.scrollY > 200);
@@ -352,14 +353,6 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
     admin: "Admin",
   };
 
-  // Order for the desktop tab strip; Admin only for DMs.
-  const desktopTabs: TabId[] = [
-    "vitals", "stats", "skills", "talents", "traits", "weapons", "armour",
-    "cybernetics", "psychic", "gear", "drugs", "xp", "notes", "background",
-    "archeotech",
-    ...(isDM ? (["admin"] as TabId[]) : []),
-  ];
-
   const containerClass = [
     "border p-4 rounded-lg transition-colors",
     dmOverrideActive ? "border-amber-400 bg-amber-500/10" : "border-slate-700 bg-slate-900/40",
@@ -388,30 +381,27 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
       )}
 
       {/* NAV BAR */}
-      {/* Mobile: drawer + centered tab title */}
+      {/* Mobile: hamburger lives inside SectionDrawer; this row just shows the tab title */}
       <div className="sm:hidden relative flex items-center mb-4 py-1">
-        <SectionDrawer activeTab={activeTab} onTabChange={handleTabChange} isDM={isDM} />
         <span className="absolute inset-x-0 text-center font-semibold text-slate-100 text-lg pointer-events-none">
           {TAB_TITLES[activeTab]}
         </span>
       </div>
+      <SectionDrawer
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        isDM={isDM}
+        externalOpen={desktopNavCategory !== null}
+        externalCategoryLabel={desktopNavCategory}
+        onExternalClose={() => setDesktopNavCategory(null)}
+      />
 
-      {/* Desktop: persistent wrapping tab strip */}
-      <div
-        className="hidden sm:flex flex-wrap justify-center gap-1.5 mb-4"
-        role="tablist"
-        aria-label="Character sheet sections"
-      >
-        {desktopTabs.map((id) => (
-          <TabButton
-            key={id}
-            label={TAB_TITLES[id]}
-            tabId={id}
-            active={activeTab === id}
-            onTabChange={handleTabChange}
-          />
-        ))}
-      </div>
+      {/* Desktop: category bar — clicking opens the side drawer at that category */}
+      <DesktopTabNav
+        activeTab={activeTab}
+        isDM={isDM}
+        onCategoryClick={(label) => setDesktopNavCategory(label)}
+      />
 
       {/* CONTENT CONTAINER */}
       <div className={containerClass} role="tabpanel" aria-label={`${activeTab} content`}>

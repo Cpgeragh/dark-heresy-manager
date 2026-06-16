@@ -9,6 +9,7 @@ interface PowerCardProps {
   power: PsychicPower;
   editable: boolean;
   onRemove: (id: string) => void;
+  onEdit?: (power: PsychicPower) => void;
 }
 
 /** Shared stat row — used in both the card and the InfoModal header. */
@@ -57,12 +58,10 @@ function PowerStats({ power }: { power: PsychicPower }) {
   );
 }
 
-export function PowerCard({ power, editable, onRemove }: PowerCardProps) {
+export function PowerCard({ power, editable, onRemove, onEdit }: PowerCardProps) {
+  const isCustomPower = power.custom || power.source === "Custom" || power.source === "2nd Ed";
   const modalContent = (
     <>
-      <div className="pb-2 mb-2 border-b border-slate-700">
-        <PowerStats power={power} />
-      </div>
       {power.description ? (
         <p className="text-sm text-slate-100 leading-relaxed">{power.description}</p>
       ) : (
@@ -78,12 +77,21 @@ export function PowerCard({ power, editable, onRemove }: PowerCardProps) {
           <p className="font-medium text-slate-100">
             {power.name || <span className="italic text-slate-500">Unnamed power</span>}
           </p>
-          <InfoModal title={power.name || "Psychic Power"} content={modalContent} />
+          <InfoModal title={power.name || "Psychic Power"} content={modalContent} hideTitle />
         </div>
         <PowerStats power={power} />
       </div>
 
       <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
+        {editable && isCustomPower && onEdit && (
+          <button
+            onClick={() => onEdit(power)}
+            aria-label={`Edit ${power.name || "power"}`}
+            className="text-slate-500 hover:text-amber-300 transition text-xs"
+          >
+            Edit
+          </button>
+        )}
         {editable && (
           <button
             onClick={() => onRemove(power.id)}

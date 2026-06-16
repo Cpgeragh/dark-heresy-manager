@@ -43,8 +43,8 @@ export function CustomPieceForm({ onAdd, onCancel }: Props) {
   }
 
   return (
-    <div className="border border-amber-500/30 bg-slate-900/60 rounded-lg p-4 space-y-3">
-      <p className="text-xs font-semibold text-amber-400 uppercase tracking-wide">Custom Piece</p>
+    <div className="border border-red-700/30 bg-slate-900/60 rounded-lg p-4 space-y-3">
+      <p className="text-xs font-semibold text-red-500 uppercase tracking-wide">Custom Piece</p>
 
       <div className="space-y-1">
         <label className="text-xs font-medium uppercase tracking-wide text-slate-100">Name</label>
@@ -69,7 +69,7 @@ export function CustomPieceForm({ onAdd, onCancel }: Props) {
               className={[
                 "text-xs px-2 py-1 rounded border transition",
                 selectedLocs.has(loc)
-                  ? "border-amber-500 bg-amber-500/20 text-amber-300"
+                  ? "border-red-600 bg-red-600/20 text-red-400"
                   : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500",
               ].join(" ")}
             >

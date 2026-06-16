@@ -122,8 +122,8 @@ export default function CharacteristicField({ label, value, editable, onChange }
           aria-describedby={error ? `${label}-error` : undefined}
           className={`w-20 px-2 py-1 rounded text-slate-100 ${
             error && editable
-              ? "bg-slate-800 border border-red-500 focus:border-red-400"
-              : "bg-slate-800 border border-slate-600 focus:border-amber-400"
+              ? "bg-slate-800 border border-red-700 focus:border-red-600"
+              : "bg-slate-800 border border-slate-600 focus:border-red-500"
           } focus:outline-none`}
         />
       </div>
@@ -143,10 +143,10 @@ export default function CharacteristicField({ label, value, editable, onChange }
               aria-pressed={filled}
               tabIndex={editable ? 0 : -1}
               className={`h-8 w-8 sm:h-6 sm:w-6 border rounded flex items-center justify-center
-                ${filled ? "bg-amber-500 border-amber-400" : "bg-slate-900 border-slate-600"}
+                ${filled ? "bg-red-700 border-red-500" : "bg-slate-900 border-slate-600"}
                 ${
                   editable
-                    ? "cursor-pointer hover:bg-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+                    ? "cursor-pointer hover:bg-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
                     : "opacity-50 cursor-not-allowed"
                 }`}
             />
@@ -162,7 +162,7 @@ export default function CharacteristicField({ label, value, editable, onChange }
 
       {/* Error message */}
       {error && editable && (
-        <div id={`${label}-error`} className="text-xs text-red-400 mt-2" role="alert">
+        <div id={`${label}-error`} className="text-xs text-red-600 mt-2" role="alert">
           {error}
         </div>
       )}

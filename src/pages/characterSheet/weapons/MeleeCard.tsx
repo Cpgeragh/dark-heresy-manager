@@ -158,7 +158,7 @@ export function MeleePicker({
         editable && showCustom ? (
           <button
             onClick={onCustom}
-            className="w-full text-sm text-amber-400 hover:text-amber-300 text-center py-1"
+            className="w-full text-sm text-red-500 hover:text-red-400 text-center py-1"
           >
             + Add custom weapon
           </button>
@@ -208,8 +208,8 @@ export function CustomMeleeForm({
     setFields((prev) => ({ ...prev, [k]: e.target.value }));
 
   return (
-    <div className="border border-amber-500/30 bg-slate-900/60 rounded-lg p-4 space-y-3">
-      <p className="text-xs font-semibold text-amber-400 uppercase tracking-wide">
+    <div className="border border-red-700/30 bg-slate-900/60 rounded-lg p-4 space-y-3">
+      <p className="text-xs font-semibold text-red-500 uppercase tracking-wide">
         Custom Melee Weapon
       </p>
       <div className="grid grid-cols-2 gap-2">
@@ -449,7 +449,7 @@ export function MeleeCard({
                 {editable && visibleCompatible.length > 0 && (
                   <button
                     onClick={() => setShowAttachPicker(true)}
-                    className="text-xs text-amber-400 hover:text-amber-300"
+                    className="text-xs text-red-500 hover:text-red-400"
                   >
                     + Add
                   </button>

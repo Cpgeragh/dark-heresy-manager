@@ -44,7 +44,7 @@ export function MessageInput({
       <button
         onClick={handleSend}
         disabled={disabled || sending || !text.trim()}
-        className="px-3 py-2 bg-amber-500 text-slate-900 font-semibold rounded text-sm hover:bg-amber-400 disabled:opacity-50 transition"
+        className="px-3 py-2 border border-red-500 text-red-500 font-semibold rounded text-sm hover:bg-red-500/10 disabled:opacity-50 transition"
       >
         {sending ? "…" : "Send"}
       </button>

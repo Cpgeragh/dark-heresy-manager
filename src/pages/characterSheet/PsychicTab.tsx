@@ -33,6 +33,7 @@ type PowerGroup = "minor" | "major";
 type DisciplineFilter = PsychicDiscipline | "All";
 type CustomPowerOrigin = "Custom" | "2nd Ed";
 type CustomRangeMode = "meters" | "km-radius" | "you" | "unlimited";
+type EditingCustomPower = { target: PowerGroup; power: PsychicPower } | null;
 
 // ─── Sub-component: Power Picker Modal ───────────────────────────────────────
 
@@ -105,7 +106,7 @@ function PowerPicker({
         editable ? (
           <button
             onClick={onCustom}
-            className="w-full text-sm text-amber-400 hover:text-amber-300 text-center py-1 transition"
+            className="w-full text-sm text-red-500 hover:text-red-400 text-center py-1 transition"
           >
             {minorOnly ? "+ Custom minor power" : "+ Custom major power"}
           </button>
@@ -132,6 +133,7 @@ function PowerPicker({
                   content={
                     <p className="text-sm text-slate-300 leading-relaxed">{ref.description}</p>
                   }
+                  hideTitle
                 />
               </span>
             )}
@@ -158,35 +160,68 @@ function PowerPicker({
   );
 }
 
+function rangeToFormValue(range?: string): { mode: CustomRangeMode; value: string } {
+  if (range === "You") return { mode: "you", value: "" };
+  if (range === "Unlimited") return { mode: "unlimited", value: "" };
+
+  const kmMatch = range?.match(/^([1-9]\d*(?:\.\d)?) km radius$/);
+  if (kmMatch) return { mode: "km-radius", value: kmMatch[1] };
+
+  const metresMatch = range?.match(/^([1-9]\d*)m$/);
+  if (metresMatch) return { mode: "meters", value: metresMatch[1] };
+
+  return { mode: "meters", value: "" };
+}
+
 function CustomPowerForm({
   target,
   existingNames,
+  initialPower,
   onAdd,
+  onBack,
   onCancel,
 }: {
   target: PowerGroup;
   existingNames: Set<string>;
+  initialPower?: PsychicPower;
   onAdd: (power: PsychicPower) => void;
+  onBack: () => void;
   onCancel: () => void;
 }) {
   const majorDisciplines = PSYCHIC_DISCIPLINES.filter((d) => d !== "Minor");
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+  const initialRange = rangeToFormValue(initialPower?.range);
+  const [name, setName] = useState(initialPower?.name ?? "");
+  const [description, setDescription] = useState(initialPower?.description ?? "");
   const [discipline, setDiscipline] = useState<PsychicDiscipline | "">(
-    target === "minor" ? "Minor" : ""
+    target === "minor" ? "Minor" : (initialPower?.discipline as PsychicDiscipline | undefined) ?? ""
   );
-  const [threshold, setThreshold] = useState("");
-  const [focusTime, setFocusTime] = useState<"" | "Half Action" | "Full Action">("");
-  const [rangeMode, setRangeMode] = useState<CustomRangeMode>("meters");
-  const [rangeValue, setRangeValue] = useState("");
-  const [sustained, setSustained] = useState<"" | "Yes" | "No">("");
-  const [origin, setOrigin] = useState<"" | CustomPowerOrigin>("");
+  const [threshold, setThreshold] = useState(initialPower?.threshold ?? "");
+  const [focusTime, setFocusTime] = useState<"" | "Half Action" | "Full Action">(
+    initialPower?.focusTime === "Half Action" || initialPower?.focusTime === "Full Action"
+      ? initialPower.focusTime
+      : ""
+  );
+  const [rangeMode, setRangeMode] = useState<CustomRangeMode>(initialRange.mode);
+  const [rangeValue, setRangeValue] = useState(initialRange.value);
+  const [sustained, setSustained] = useState<"" | "Yes" | "No">(
+    initialPower?.sustained === "Yes" || initialPower?.sustained === "No"
+      ? initialPower.sustained
+      : ""
+  );
+  const [origin, setOrigin] = useState<"" | CustomPowerOrigin>(
+    initialPower?.source === "2nd Ed" ? "2nd Ed" : initialPower ? "Custom" : ""
+  );
 
   const trimmedName = name.trim();
-  const nameExists = existingNames.has(trimmedName);
+  const initialName = initialPower?.name.trim() ?? "";
+  const nameExists = trimmedName !== initialName && existingNames.has(trimmedName);
   const thresholdIsValid = /^[1-9]\d*$/.test(threshold);
+  const metresRangeIsValid = /^[1-9]\d*$/.test(rangeValue);
+  const kmRangeIsValid = /^[1-9]\d*(?:\.\d)?$/.test(rangeValue);
   const rangeValueIsValid =
-    rangeMode === "you" || rangeMode === "unlimited" || /^[1-9]\d*$/.test(rangeValue);
+    rangeMode === "you" ||
+    rangeMode === "unlimited" ||
+    (rangeMode === "km-radius" ? kmRangeIsValid : metresRangeIsValid);
   const canAdd =
     !!trimmedName &&
     !nameExists &&
@@ -198,7 +233,11 @@ function CustomPowerForm({
     !!origin;
 
   function handlePositiveIntegerChange(value: string, setter: (next: string) => void) {
-    if (/^\d*$/.test(value)) setter(value);
+    if (value === "" || /^[1-9]\d*$/.test(value)) setter(value);
+  }
+
+  function handlePositiveKmChange(value: string) {
+    if (value === "" || /^[1-9]\d*(?:\.\d?)?$/.test(value)) setRangeValue(value);
   }
 
   function formatRange() {
@@ -211,7 +250,7 @@ function CustomPowerForm({
   function handleAdd() {
     if (!canAdd) return;
     onAdd({
-      id: crypto.randomUUID(),
+      id: initialPower?.id ?? crypto.randomUUID(),
       name: trimmedName,
       discipline,
       threshold,
@@ -222,17 +261,17 @@ function CustomPowerForm({
       description: description.trim() || undefined,
       isMinor: target === "minor",
       custom: true,
-      known: true,
+      known: initialPower?.known ?? true,
     });
   }
 
   return (
     <PickerModal
-      title={`Custom ${target === "minor" ? "Minor" : "Major"} Power`}
+      title={`${initialPower ? "Edit" : "Custom"} ${target === "minor" ? "Minor" : "Major"} Power`}
       query=""
       onQueryChange={() => undefined}
-      onClose={onCancel}
-      closeLabel="←"
+      onClose={initialPower ? onCancel : onBack}
+      closeLabel={initialPower ? undefined : "←"}
       hideSearch
       isEmpty={false}
       maxHeight="max-h-[85vh]"
@@ -261,7 +300,7 @@ function CustomPowerForm({
           </label>
           {target === "minor" ? (
             <div
-              className={`inline-flex rounded border px-2 py-1 text-xs font-medium ${psychicDisciplineColour("Minor")}`}
+              className={`flex w-fit rounded border px-2 py-1 text-xs font-medium ${psychicDisciplineColour("Minor")}`}
             >
               Minor
             </div>
@@ -314,7 +353,7 @@ function CustomPowerForm({
                   className={[
                     "text-xs px-2 py-1 rounded border transition",
                     focusTime === action
-                      ? "border-amber-400 bg-amber-500 text-slate-950 font-semibold"
+                      ? "border-red-500 bg-red-500/20 text-red-400 font-semibold"
                       : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
                   ].join(" ")}
                 >
@@ -343,7 +382,7 @@ function CustomPowerForm({
                 className={[
                   "text-xs px-2 py-1 rounded border transition",
                   rangeMode === mode
-                    ? "border-amber-400 bg-amber-500 text-slate-950 font-semibold"
+                    ? "border-red-500 bg-red-500/20 text-red-400 font-semibold"
                     : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
                 ].join(" ")}
               >
@@ -355,10 +394,14 @@ function CustomPowerForm({
             <div className="flex items-center gap-2 pt-1">
               <input
                 type="text"
-                inputMode="numeric"
+                inputMode={rangeMode === "km-radius" ? "decimal" : "numeric"}
                 value={rangeValue}
-                onChange={(e) => handlePositiveIntegerChange(e.target.value, setRangeValue)}
-                placeholder="e.g. 10"
+                onChange={(e) =>
+                  rangeMode === "km-radius"
+                    ? handlePositiveKmChange(e.target.value)
+                    : handlePositiveIntegerChange(e.target.value, setRangeValue)
+                }
+                placeholder={rangeMode === "km-radius" ? "e.g. 1.5" : "e.g. 10"}
                 className={editableInputClass(true) + " w-28 font-mono"}
               />
               <span className="text-xs text-slate-400">
@@ -382,7 +425,7 @@ function CustomPowerForm({
                   className={[
                     "text-xs px-2 py-1 rounded border transition",
                     sustained === value
-                      ? "border-amber-400 bg-amber-500 text-slate-950 font-semibold"
+                      ? "border-red-500 bg-red-500/20 text-red-400 font-semibold"
                       : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
                   ].join(" ")}
                 >
@@ -431,7 +474,7 @@ function CustomPowerForm({
 
         <div className="flex gap-2 pt-1">
           <Button className="flex-1" onClick={handleAdd} disabled={!canAdd}>
-            Add Power
+            {initialPower ? "Save Power" : "Add Power"}
           </Button>
           <button
             type="button"
@@ -452,17 +495,25 @@ function PowerGrid({
   powers,
   editable,
   onRemove,
+  onEdit,
 }: {
   powers: PsychicPower[];
   editable: boolean;
   onRemove: (id: string) => void;
+  onEdit: (power: PsychicPower) => void;
 }) {
   const sortedPowers = [...powers].sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <div className="space-y-3">
       {sortedPowers.map((power) => (
-        <PowerCard key={power.id} power={power} editable={editable} onRemove={onRemove} />
+        <PowerCard
+          key={power.id}
+          power={power}
+          editable={editable}
+          onRemove={onRemove}
+          onEdit={onEdit}
+        />
       ))}
     </div>
   );
@@ -471,6 +522,7 @@ function PowerGrid({
 export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTabProps) {
   const [pickerTarget, setPickerTarget] = useState<PickerTarget>(null);
   const [customTarget, setCustomTarget] = useState<PickerTarget>(null);
+  const [editingCustomPower, setEditingCustomPower] = useState<EditingCustomPower>(null);
   const [activePowerGroup, setActivePowerGroup] = useState<PowerGroup>(() =>
     psychic.minorPowers.length === 0 && psychic.majorPowers.length > 0 ? "major" : "minor"
   );
@@ -554,6 +606,18 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
     },
     [editable, customTarget, psychic, onUpdate]
   );
+  const updateCustomPower = useCallback(
+    (power: PsychicPower) => {
+      if (!editable || editingCustomPower === null) return;
+      const type = editingCustomPower.target === "minor" ? "minorPowers" : "majorPowers";
+      onUpdate({
+        ...psychic,
+        [type]: psychic[type].map((existing) => (existing.id === power.id ? power : existing)),
+      });
+      setEditingCustomPower(null);
+    },
+    [editable, editingCustomPower, psychic, onUpdate]
+  );
   const switchPowerGroup = useCallback((group?: PowerGroup) => {
     setActivePowerGroup((current) => {
       const next = group ?? (current === "minor" ? "major" : "minor");
@@ -586,6 +650,7 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
     activePowerGroup === "minor" ? removeMinorPower : removeMajorPower;
   const activeOpenPicker =
     activePowerGroup === "minor" ? openPickerForMinor : openPickerForMajor;
+  const activeEditPower = (power: PsychicPower) => setEditingCustomPower({ target: activePowerGroup, power });
   const activeTitle = activePowerGroup === "minor" ? "Minor Powers" : "Major Powers";
   const activeEmptyText =
     activePowerGroup === "minor" ? "No minor powers recorded." : "No major powers recorded.";
@@ -713,7 +778,7 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
             <SectionHeader>{activeTitle}</SectionHeader>
             <button
               onClick={activeOpenPicker}
-              className="text-xs px-3 py-1 rounded border border-amber-400 bg-amber-500 text-slate-950 font-semibold hover:bg-amber-400 transition"
+              className="text-xs px-3 py-1 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
               aria-label={editable ? `Add ${activeTitle.slice(0, -1)}` : `View ${activeTitle}`}
             >
               {editable ? activeAddLabel : "View"}
@@ -723,7 +788,12 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
           {activePowers.length === 0 ? (
             <p className="text-sm text-slate-400">{activeEmptyText}</p>
           ) : (
-            <PowerGrid powers={activePowers} editable={editable} onRemove={activeRemove} />
+            <PowerGrid
+              powers={activePowers}
+              editable={editable}
+              onRemove={activeRemove}
+              onEdit={activeEditPower}
+            />
           )}
         </section>
       </div>
@@ -734,7 +804,7 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
           <SectionHeader>Minor Powers</SectionHeader>
           <button
             onClick={openPickerForMinor}
-            className="text-xs px-3 py-1 rounded border border-amber-400 bg-amber-500 text-slate-950 font-semibold hover:bg-amber-400 transition"
+            className="text-xs px-3 py-1 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
             aria-label={editable ? "Add Minor Power" : "View Minor Powers"}
           >
             {editable ? "+ Add Minor Power" : "View"}
@@ -744,7 +814,12 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
         {psychic.minorPowers.length === 0 ? (
           <p className="text-sm text-slate-400">No minor powers recorded.</p>
         ) : (
-          <PowerGrid powers={psychic.minorPowers} editable={editable} onRemove={removeMinorPower} />
+          <PowerGrid
+            powers={psychic.minorPowers}
+            editable={editable}
+            onRemove={removeMinorPower}
+            onEdit={(power) => setEditingCustomPower({ target: "minor", power })}
+          />
         )}
       </section>
 
@@ -754,7 +829,7 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
           <SectionHeader>Major Powers</SectionHeader>
           <button
             onClick={openPickerForMajor}
-            className="text-xs px-3 py-1 rounded border border-amber-400 bg-amber-500 text-slate-950 font-semibold hover:bg-amber-400 transition"
+            className="text-xs px-3 py-1 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
             aria-label={editable ? "Add Major Power" : "View Major Powers"}
           >
             {editable ? "+ Add Major Power" : "View"}
@@ -764,7 +839,12 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
         {psychic.majorPowers.length === 0 ? (
           <p className="text-sm text-slate-400">No major powers recorded.</p>
         ) : (
-          <PowerGrid powers={psychic.majorPowers} editable={editable} onRemove={removeMajorPower} />
+          <PowerGrid
+            powers={psychic.majorPowers}
+            editable={editable}
+            onRemove={removeMajorPower}
+            onEdit={(power) => setEditingCustomPower({ target: "major", power })}
+          />
         )}
       </section>
 
@@ -793,7 +873,22 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
           target={customTarget}
           existingNames={existingPowerNames}
           onAdd={addCustomPower}
+          onBack={() => {
+            setPickerTarget(customTarget);
+            setCustomTarget(null);
+          }}
           onCancel={() => setCustomTarget(null)}
+        />
+      )}
+
+      {editingCustomPower !== null && (
+        <CustomPowerForm
+          target={editingCustomPower.target}
+          existingNames={existingPowerNames}
+          initialPower={editingCustomPower.power}
+          onAdd={updateCustomPower}
+          onBack={() => setEditingCustomPower(null)}
+          onCancel={() => setEditingCustomPower(null)}
         />
       )}
     </div>

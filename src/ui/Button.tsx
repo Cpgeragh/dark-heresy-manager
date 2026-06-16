@@ -19,7 +19,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const VARIANTS: Record<Variant, string> = {
   primary:
-    "bg-amber-500 text-slate-900 font-semibold hover:bg-amber-400 border border-transparent",
+    "border border-red-500 text-red-500 font-semibold hover:bg-red-500/10",
   secondary: "bg-slate-700 text-slate-300 hover:bg-slate-600 border border-transparent",
   ghost: "border border-slate-600 text-slate-400 hover:bg-slate-800",
   danger: "bg-red-700 text-white hover:bg-red-600 border border-transparent",
@@ -45,7 +45,7 @@ export function Button({
     <button
       className={[
         "rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed",
-        "focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500",
         VARIANTS[variant],
         SIZES[size],
         fullWidth ? "w-full" : "",

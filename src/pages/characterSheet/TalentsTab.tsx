@@ -215,7 +215,7 @@ export function TalentsTab({
                       aria-pressed={active}
                       className={`px-2.5 py-1 rounded border text-xs transition ${
                         active
-                          ? "bg-amber-500 border-amber-400 text-slate-900 font-semibold"
+                          ? "bg-red-500/20 border-red-500 text-red-400 font-semibold"
                           : editable
                             ? "border-slate-500 text-slate-100 hover:bg-slate-800"
                             : "border-slate-700 text-slate-500 opacity-60 cursor-not-allowed"

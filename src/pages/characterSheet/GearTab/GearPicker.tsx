@@ -85,7 +85,7 @@ export function GearPicker({ editable = true, onSelect, onCustom, onClose }: Pro
         !pending && editable ? (
           <button
             onClick={onCustom}
-            className="w-full text-xs px-3 py-1.5 rounded border border-amber-600/50 bg-amber-600/10 text-amber-400 hover:bg-amber-600/20 transition text-center"
+            className="w-full text-xs px-3 py-1.5 rounded border border-red-700/50 bg-red-700/10 text-red-500 hover:bg-red-700/20 transition text-center"
           >
             + Custom Item
           </button>

@@ -15,8 +15,8 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
   const [description, setDescription] = useState("");
 
   return (
-    <div className="border border-amber-500/30 bg-slate-900/60 rounded-lg p-4 space-y-3">
-      <p className="text-xs font-semibold text-amber-400 uppercase tracking-wide">Custom Item</p>
+    <div className="border border-red-700/30 bg-slate-900/60 rounded-lg p-4 space-y-3">
+      <p className="text-xs font-semibold text-red-500 uppercase tracking-wide">Custom Item</p>
       <div className="space-y-1">
         <label className="text-xs font-medium uppercase tracking-wide text-slate-100">Name</label>
         <input
