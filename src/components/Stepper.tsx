@@ -83,7 +83,7 @@ export function Stepper({ value, min = 0, editable, onChange, dangerClassName }:
           onChange={(e) => setDraft(e.target.value)}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
-          className="h-10 sm:h-8 w-14 text-center bg-slate-700 border border-slate-500 rounded-lg text-base font-mono text-slate-100 px-1 focus:outline-none focus:border-amber-400"
+          className="h-10 sm:h-8 w-14 text-center bg-slate-700 border border-slate-500 rounded-lg text-base font-mono text-slate-100 px-1 focus:outline-none focus:border-red-500"
         />
       ) : (
         <span

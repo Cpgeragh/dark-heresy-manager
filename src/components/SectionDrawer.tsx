@@ -62,9 +62,19 @@ interface SectionDrawerProps {
   activeTab: TabId;
   onTabChange: (tab: TabId) => void;
   isDM: boolean;
+  externalOpen?: boolean;
+  externalCategoryLabel?: string | null;
+  onExternalClose?: () => void;
 }
 
-export function SectionDrawer({ activeTab, onTabChange, isDM }: SectionDrawerProps) {
+export function SectionDrawer({
+  activeTab,
+  onTabChange,
+  isDM,
+  externalOpen,
+  externalCategoryLabel,
+  onExternalClose,
+}: SectionDrawerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [level, setLevel] = useState<"categories" | "pages">("categories");
   const [activeCategoryIndex, setActiveCategoryIndex] = useState<number | null>(null);
@@ -73,11 +83,32 @@ export function SectionDrawer({ activeTab, onTabChange, isDM }: SectionDrawerPro
   const activeCategory =
     activeCategoryIndex !== null ? visibleCategories[activeCategoryIndex] : null;
 
+  const open = useCallback(() => {
+    const cats = CATEGORIES.filter((c) => !c.dmOnly || isDM);
+    const idx = cats.findIndex((c) => c.tabs.some((t) => t.id === activeTab));
+    if (idx !== -1) {
+      setActiveCategoryIndex(idx);
+      setLevel("pages");
+    }
+    setIsOpen(true);
+  }, [activeTab, isDM]);
+
+  // Desktop bar trigger: open and jump straight to the requested category's pages
+  useEffect(() => {
+    if (!externalOpen || !externalCategoryLabel) return;
+    const cats = CATEGORIES.filter((c) => !c.dmOnly || isDM);
+    const idx = cats.findIndex((c) => c.label === externalCategoryLabel);
+    if (idx === -1) return;
+    setActiveCategoryIndex(idx);
+    setLevel("pages");
+    setIsOpen(true);
+  }, [externalOpen, externalCategoryLabel, isDM]);
+
   // Reset to category level after drawer fully closes
   const close = useCallback(() => {
     setIsOpen(false);
-    setTimeout(() => setLevel("categories"), 300);
-  }, []);
+    onExternalClose?.();
+  }, [onExternalClose]);
 
   const openCategory = useCallback((index: number) => {
     setActiveCategoryIndex(index);
@@ -110,9 +141,9 @@ export function SectionDrawer({ activeTab, onTabChange, isDM }: SectionDrawerPro
     <>
       {/* Trigger — hamburger only */}
       <button
-        onClick={() => setIsOpen(true)}
+        onClick={open}
         aria-label="Open section navigation"
-        className="px-3 py-2 rounded-lg border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition text-base leading-none"
+        className="sm:hidden px-3 py-2 rounded-lg border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition text-base leading-none"
       >
         ☰
       </button>
@@ -197,7 +228,7 @@ export function SectionDrawer({ activeTab, onTabChange, isDM }: SectionDrawerPro
                         onClick={() => selectTab(tab.id)}
                         className={`w-full px-4 py-3 text-sm text-left transition ${
                           activeTab === tab.id
-                            ? "text-amber-400 bg-amber-500/10 border-l-2 border-amber-400"
+                            ? "text-red-500 font-semibold border-l-2 border-red-500"
                             : "text-slate-100 hover:bg-slate-800"
                         }`}
                       >

@@ -195,7 +195,7 @@ export function TalentPickerModal({
                 : undefined
             }
             className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"} ${
-              isSelected ? "bg-slate-800 ring-1 ring-inset ring-amber-500/40" : ""
+              isSelected ? "bg-slate-800 ring-1 ring-inset ring-red-500/40" : ""
             }`}
           >
             <div className="flex items-center justify-between gap-2">

@@ -125,8 +125,8 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
 
   if (mode === "edit") {
     return (
-      <div className="border border-amber-600/40 rounded p-4 bg-slate-900/60 space-y-4">
-        <h3 className="text-sm font-semibold text-amber-400">Edit Session</h3>
+      <div className="border border-red-700/40 rounded p-4 bg-slate-900/60 space-y-4">
+        <h3 className="text-sm font-semibold text-red-500">Edit Session</h3>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -194,7 +194,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-3 py-1.5 bg-amber-500 text-slate-900 font-semibold rounded text-sm disabled:opacity-50"
+            className="px-3 py-1.5 border border-red-500 text-red-500 font-semibold rounded text-sm hover:bg-red-500/10 disabled:opacity-50"
           >
             {saving ? "Saving…" : "Save"}
           </button>
@@ -216,7 +216,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
         <span className="font-semibold">{dateStr}</span>
         <div className="flex items-center gap-2">
           {session.xpAwarded > 0 && (
-            <span className="text-xs px-2 py-1 bg-amber-500/20 text-amber-400 rounded">
+            <span className="text-xs px-2 py-1 bg-red-500/20 text-red-500 rounded">
               +{session.xpAwarded} XP
             </span>
           )}
@@ -232,7 +232,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
               <button
                 onClick={handleApplyXp}
                 disabled={applyingXp}
-                className="text-xs px-2 py-1 bg-amber-600 text-slate-900 font-semibold rounded hover:bg-amber-500 disabled:opacity-50 transition"
+                className="text-xs px-2 py-1 border border-red-500 text-red-500 font-semibold rounded hover:bg-red-500/10 disabled:opacity-50 transition"
               >
                 {applyingXp ? "Applying…" : "Apply XP"}
               </button>

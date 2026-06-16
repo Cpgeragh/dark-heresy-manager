@@ -145,7 +145,7 @@ export function ExperienceTab({
                 min={0}
                 value={experience.total}
                 onChange={handleTotalChange}
-                className="mt-2 w-full px-2 py-1 bg-slate-800 border border-slate-500 rounded text-center text-xl font-semibold font-mono text-slate-100 focus:border-amber-400 focus:outline-none"
+                className="mt-2 w-full px-2 py-1 bg-slate-800 border border-slate-500 rounded text-center text-xl font-semibold font-mono text-slate-100 focus:border-red-500 focus:outline-none"
                 aria-label="Total XP"
               />
             </label>
@@ -214,7 +214,7 @@ export function ExperienceTab({
         {/* ADD ADVANCE FORM — DM only */}
         {isDM && (
           <div className="border border-slate-500 rounded-lg p-4 space-y-3 bg-slate-800/60">
-            <p className="text-xs font-semibold text-amber-400 uppercase tracking-wide">
+            <p className="text-xs font-semibold text-red-500 uppercase tracking-wide">
               Add Advance
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -228,7 +228,7 @@ export function ExperienceTab({
                     const v = e.target.value;
                     setNewRank(v === "elite" ? "elite" : (Number(v) as RankAdvances["rank"]));
                   }}
-                  className="mt-0.5 w-full px-2 py-1 bg-slate-800 border border-slate-500 rounded text-sm text-slate-100 focus:border-amber-400 focus:outline-none"
+                  className="mt-0.5 w-full px-2 py-1 bg-slate-800 border border-slate-500 rounded text-sm text-slate-100 focus:border-red-500 focus:outline-none"
                 >
                   {RANK_OPTIONS.map((r) => (
                     <option key={String(r)} value={String(r)}>
@@ -247,7 +247,7 @@ export function ExperienceTab({
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
                   placeholder="e.g. +10 Weapon Skill"
-                  className="mt-0.5 w-full px-2 py-1 bg-slate-800 border border-slate-500 rounded text-sm text-slate-100 focus:border-amber-400 focus:outline-none"
+                  className="mt-0.5 w-full px-2 py-1 bg-slate-800 border border-slate-500 rounded text-sm text-slate-100 focus:border-red-500 focus:outline-none"
                 />
               </div>
 
@@ -260,7 +260,7 @@ export function ExperienceTab({
                   min={0}
                   value={newCost}
                   onChange={(e) => setNewCost(Math.max(0, Number(e.target.value)))}
-                  className="mt-0.5 w-full px-2 py-1 bg-slate-800 border border-slate-500 rounded text-sm text-slate-100 focus:border-amber-400 focus:outline-none"
+                  className="mt-0.5 w-full px-2 py-1 bg-slate-800 border border-slate-500 rounded text-sm text-slate-100 focus:border-red-500 focus:outline-none"
                 />
               </div>
             </div>
@@ -274,7 +274,7 @@ export function ExperienceTab({
                 value={newNotes}
                 onChange={(e) => setNewNotes(e.target.value)}
                 placeholder="e.g. Approved session 3"
-                className="mt-0.5 w-full px-2 py-1 bg-slate-800 border border-slate-500 rounded text-sm text-slate-100 focus:border-amber-400 focus:outline-none"
+                className="mt-0.5 w-full px-2 py-1 bg-slate-800 border border-slate-500 rounded text-sm text-slate-100 focus:border-red-500 focus:outline-none"
               />
             </div>
 

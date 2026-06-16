@@ -16,7 +16,7 @@ interface SkillRowProps {
 }
 
 const LEVEL_BADGE: Record<string, string> = {
-  trained: "bg-amber-500/10 border-amber-400 text-amber-400",
+  trained: "bg-red-500/10 border-red-500 text-red-500",
   "+10": "bg-sky-500/10 border-sky-400 text-sky-400",
   "+20": "bg-green-500/10 border-green-400 text-green-400",
 };
@@ -97,7 +97,7 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc }: SkillRowP
                   onClick={() => handleLevelClick(value)}
                   className={`px-3 py-1 rounded border text-xs transition focus:outline-none ${
                     skill.level === value
-                      ? "bg-amber-500 border-amber-400 text-slate-900 font-semibold"
+                      ? "bg-red-500/20 border-red-500 text-red-400 font-semibold"
                       : "border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
                   }`}
                 >

@@ -60,7 +60,7 @@ export function SessionForm({ campaignId, characters, onClose }: Props) {
 
   return (
     <div className="rounded-lg border border-slate-500 bg-slate-900/60 p-3 space-y-4">
-      <h3 className="border-l-2 border-amber-500 pl-2 text-xs font-semibold uppercase tracking-widest text-amber-400">New Session</h3>
+      <h3 className="border-l-2 border-red-700 pl-2 text-xs font-semibold uppercase tracking-widest text-red-500">New Session</h3>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
@@ -124,7 +124,7 @@ export function SessionForm({ campaignId, characters, onClose }: Props) {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="px-4 py-2 bg-amber-500 text-slate-900 font-semibold rounded text-sm disabled:opacity-50"
+          className="px-4 py-2 border border-red-500 text-red-500 font-semibold rounded text-sm hover:bg-red-500/10 disabled:opacity-50"
         >
           {saving ? "Saving…" : "Save Session"}
         </button>

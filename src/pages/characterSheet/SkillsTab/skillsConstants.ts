@@ -55,7 +55,7 @@ export const CHAR_FULL_LABEL: Record<keyof Characteristics, string> = {
 export function getTotalColor(total: number | null): string {
   if (total === null) return "text-slate-400";
   if (total >= SKILL_EXPERT_THRESHOLD) return "text-green-400";
-  if (total >= SKILL_TRAINED_THRESHOLD) return "text-amber-300";
+  if (total >= SKILL_TRAINED_THRESHOLD) return "text-red-500";
   if (total >= SKILL_BASIC_THRESHOLD) return "text-slate-200";
   return "text-red-400";
 }

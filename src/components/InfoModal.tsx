@@ -6,9 +6,10 @@ import type { ReactNode } from "react";
 interface InfoModalProps {
   title: string;
   content: ReactNode;
+  hideTitle?: boolean;
 }
 
-export function InfoModal({ title, content }: InfoModalProps) {
+export function InfoModal({ title, content, hideTitle = false }: InfoModalProps) {
   const [open, setOpen] = useState(false);
   const dialogRef = useRef<HTMLDialogElement | null>(null);
 
@@ -55,17 +56,30 @@ export function InfoModal({ title, content }: InfoModalProps) {
         onClose={() => setOpen(false)}
         className="w-[90vw] max-w-sm max-h-[70vh] overflow-y-auto rounded-lg bg-slate-800 border border-slate-600 shadow-xl p-0 text-slate-200 backdrop:bg-black/60 whitespace-normal"
       >
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700 sticky top-0 bg-slate-800">
-          <h3 className="text-sm font-semibold">{title}</h3>
-          <button
-            onClick={() => setOpen(false)}
-            aria-label="Close"
-            className="text-slate-400 hover:text-slate-200 text-base leading-none ml-4"
-          >
-            {"\u00D7"}
-          </button>
+        {!hideTitle && (
+          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700 sticky top-0 bg-slate-800">
+            <h3 className="text-sm font-semibold">{title}</h3>
+            <button
+              onClick={() => setOpen(false)}
+              aria-label="Close"
+              className="text-slate-400 hover:text-slate-200 text-base leading-none ml-4"
+            >
+              {"\u00D7"}
+            </button>
+          </div>
+        )}
+        <div className="px-4 py-3 text-sm text-slate-300 space-y-1.5">
+          {hideTitle && (
+            <button
+              onClick={() => setOpen(false)}
+              aria-label="Close"
+              className="float-right ml-3 mb-1 text-slate-400 hover:text-slate-200 text-base leading-none"
+            >
+              {"\u00D7"}
+            </button>
+          )}
+          {content}
         </div>
-        <div className="px-4 py-3 text-sm text-slate-300 space-y-1.5">{content}</div>
       </dialog>
     </>
   );

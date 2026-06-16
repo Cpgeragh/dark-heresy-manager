@@ -37,7 +37,7 @@ export function FormField({
       editable
         ? hasError
           ? "bg-slate-800 border-red-500 text-slate-100 focus:border-red-400 focus:outline-none"
-          : "bg-slate-800 border-slate-500 text-slate-100 focus:border-amber-400 focus:outline-none"
+          : "bg-slate-800 border-slate-500 text-slate-100 focus:border-red-500 focus:outline-none"
         : "bg-slate-900 border-slate-500 text-slate-100 cursor-not-allowed"
     }
   `.trim();

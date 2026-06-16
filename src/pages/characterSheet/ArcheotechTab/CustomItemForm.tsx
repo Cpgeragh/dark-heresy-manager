@@ -74,8 +74,8 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
   }
 
   return (
-    <div className="border border-amber-500/30 bg-slate-900/60 rounded-lg p-4 space-y-3">
-      <p className="text-xs font-semibold text-amber-400 uppercase tracking-wide">
+    <div className="border border-red-700/30 bg-slate-900/60 rounded-lg p-4 space-y-3">
+      <p className="text-xs font-semibold text-red-500 uppercase tracking-wide">
         Custom Archeotech Item
       </p>
 

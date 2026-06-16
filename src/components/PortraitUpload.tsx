@@ -141,7 +141,7 @@ export function PortraitUpload({
         {canEdit && (
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); fileInputRef.current?.click(); }}
-            className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-amber-500 text-slate-900 flex items-center justify-center hover:bg-amber-400 transition"
+            className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border border-red-500 text-red-500 flex items-center justify-center hover:bg-red-500/10 transition"
             aria-label="Upload portrait"
           >
             <svg
@@ -209,7 +209,7 @@ export function PortraitUpload({
                   step={0.01}
                   value={zoom}
                   onChange={(e) => setZoom(Number(e.target.value))}
-                  className="flex-1 accent-amber-500"
+                  className="flex-1 accent-red-600"
                 />
               </div>
 
@@ -217,7 +217,7 @@ export function PortraitUpload({
                 <button
                   onClick={handleSave}
                   disabled={uploading}
-                  className="flex-1 px-4 py-2 bg-amber-500 text-slate-900 font-semibold rounded text-sm hover:bg-amber-400 transition disabled:opacity-50"
+                  className="flex-1 px-4 py-2 border border-red-500 text-red-500 font-semibold rounded text-sm hover:bg-red-500/10 transition disabled:opacity-50"
                 >
                   {uploading ? "Uploading…" : "Save"}
                 </button>

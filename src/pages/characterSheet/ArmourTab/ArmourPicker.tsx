@@ -119,7 +119,7 @@ export function ArmourPicker({ editable = true, onSelect, onCustom, onClose }: P
         editable ? (
           <button
             onClick={onCustom}
-            className="w-full text-sm text-amber-400 hover:text-amber-300 text-center py-1"
+            className="w-full text-sm text-red-500 hover:text-red-400 text-center py-1"
           >
             + Add custom piece
           </button>
