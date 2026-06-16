@@ -4,7 +4,7 @@
 import type { CharacterDocument } from "../types/Firestore";
 
 export function exportCharacterJson(character: CharacterDocument): void {
-  const { id, ...data } = character;
+  const { id: _id, ...data } = character;
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");

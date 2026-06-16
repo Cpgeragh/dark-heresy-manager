@@ -20,7 +20,7 @@ import type { CampaignWithId, UserDocument } from "../types/Firestore";
 export const characterConverter: FirestoreDataConverter<Character> = {
   toFirestore(character: Character) {
     // Do not store `id` in document data
-    const { id, ...rest } = character;
+    const { id: _id, ...rest } = character;
     return rest;
   },
 
