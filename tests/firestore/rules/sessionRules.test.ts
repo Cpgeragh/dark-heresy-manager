@@ -1,7 +1,7 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { getTestEnv } from "../setup";
 import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
-import { dbAs, dbAnon, createCampaign, createCharacter } from "../helpers";
+import { dbAs, dbAnon, createCampaign } from "../helpers";
 
 async function createSession(
   env: RulesTestEnvironment,

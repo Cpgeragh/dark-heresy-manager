@@ -20,7 +20,8 @@ export function CustomPieceForm({ onAdd, onCancel }: Props) {
   function toggleLoc(loc: ArmourLocationKey) {
     setSelectedLocs((prev) => {
       const next = new Set(prev);
-      next.has(loc) ? next.delete(loc) : next.add(loc);
+      if (next.has(loc)) next.delete(loc);
+      else next.add(loc);
       return next;
     });
   }

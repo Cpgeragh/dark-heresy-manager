@@ -3,7 +3,7 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { getTestEnv } from "../setup";
 import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
-import { dbAs, createCampaign } from "../helpers";
+import { dbAs } from "../helpers";
 
 describe("Firestore Rules: Edge Cases", () => {
 

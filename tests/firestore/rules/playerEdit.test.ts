@@ -22,10 +22,7 @@ describe("Firestore Rules: Player Editing Permissions", () => {
       });
     });
 
-    const p1 = env.authenticatedContext("player-1");
     const p2 = env.authenticatedContext("player-2");
-
-    const p1Db = p1.firestore();
 
     // Create character owned by player-1
     await env.withSecurityRulesDisabled(async (context) => {

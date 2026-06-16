@@ -1,6 +1,6 @@
 // src/components/Tooltip.tsx
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useId } from "react";
 import type { ReactNode } from "react";
 
 interface TooltipProps {
@@ -15,7 +15,7 @@ export function Tooltip({ children, content, maxWidth = 240 }: TooltipProps) {
 
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
-  const tooltipId = useRef(`tooltip-${Math.random().toString(36).slice(2, 9)}`);
+  const tooltipId = useId();
 
   function toggle() {
     setOpen((s) => !s);
@@ -73,7 +73,7 @@ export function Tooltip({ children, content, maxWidth = 240 }: TooltipProps) {
         ref={triggerRef}
         onClick={toggle}
         aria-expanded={open}
-        aria-controls={tooltipId.current}
+        aria-controls={tooltipId}
         aria-label="Show additional information"
         className="text-slate-300 px-2 py-0.5 rounded bg-slate-700 border border-slate-600 hover:bg-slate-600 text-xs"
       >
@@ -82,7 +82,7 @@ export function Tooltip({ children, content, maxWidth = 240 }: TooltipProps) {
 
       {open && (
         <div
-          id={tooltipId.current}
+          id={tooltipId}
           ref={tooltipRef}
           role="tooltip"
           style={{
