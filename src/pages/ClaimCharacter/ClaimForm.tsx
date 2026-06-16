@@ -1,6 +1,7 @@
 // src/pages/ClaimCharacter/ClaimForm.tsx
 
 import { useCallback } from "react";
+import { Button } from "../../ui/Button";
 
 const RECOVERY_CODE_REGEX = /^DH-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
 
@@ -53,20 +54,9 @@ export function ClaimForm({ code, onCodeChange, onSubmit, loading }: ClaimFormPr
         </span>
       </div>
 
-      <button
-        disabled={loading || !isValid}
-        onClick={handleSubmit}
-        className={`w-full px-4 py-2 rounded font-semibold text-slate-900
-          ${
-            loading
-              ? "bg-amber-300 cursor-wait"
-              : !isValid
-                ? "bg-slate-700 text-slate-300 cursor-not-allowed"
-                : "bg-amber-500 hover:bg-amber-400"
-          }`}
-      >
+      <Button fullWidth disabled={loading || !isValid} onClick={handleSubmit}>
         {loading ? "Checking..." : "Look Up Character"}
-      </button>
+      </Button>
     </div>
   );
 }

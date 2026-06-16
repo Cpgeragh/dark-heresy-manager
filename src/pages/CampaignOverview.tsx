@@ -18,6 +18,7 @@ import { validateCharacterName } from "../utils/validation";
 import { useToast } from "../components/Toast";
 import { IMPORTANT_TOAST_DURATION } from "../constants/ui";
 import { uiSectionHeader, editableInputClass } from "../ui/editableStyles";
+import { Button } from "../ui/Button";
 import { useHeaderExtensionSetters } from "../context/HeaderExtensionContext";
 
 export default function CampaignOverview({ effectiveUserId }: { effectiveUserId: string }) {
@@ -146,12 +147,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
                 onChange={(e) => setNewCharacterName(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") void handleCreate(); }}
               />
-              <button
-                onClick={handleCreate}
-                className="px-4 py-2 bg-amber-500 text-slate-900 font-semibold rounded text-sm hover:bg-amber-400 transition"
-              >
-                Create
-              </button>
+              <Button onClick={handleCreate}>Create</Button>
             </div>
           )}
 
@@ -194,12 +190,9 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
             <p className={uiSectionHeader}>Session History</p>
             {isDM && !showSessionForm && (
-              <button
-                onClick={() => setShowSessionForm(true)}
-                className="w-full sm:w-auto px-3 py-1.5 bg-amber-500 text-slate-900 font-semibold rounded text-sm hover:bg-amber-400 transition"
-              >
+              <Button className="w-full sm:w-auto" onClick={() => setShowSessionForm(true)}>
                 New Session
-              </button>
+              </Button>
             )}
           </div>
 

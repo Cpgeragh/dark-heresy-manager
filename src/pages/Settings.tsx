@@ -7,6 +7,7 @@ import { getRecoveryCode, rotateRecoveryCode } from "../services/identityService
 import { useLinkDevice } from "../hooks/useLinkDevice";
 import { useToast } from "../components/Toast";
 import { uiSection, uiSectionHeader } from "../ui/editableStyles";
+import { Button } from "../ui/Button";
 
 interface Props {
   user: User;
@@ -112,37 +113,27 @@ export default function Settings({ user: _user, effectiveUserId, isLinked, unlin
                 </div>
 
                 <div className="flex gap-3">
-                  <button
-                    onClick={() => setRevealedCode(null)}
-                    className="px-3 py-2 text-sm rounded-lg border border-slate-600 text-slate-400 hover:bg-slate-800 transition"
-                  >
+                  <Button variant="ghost" onClick={() => setRevealedCode(null)}>
                     Hide
-                  </button>
+                  </Button>
                   {confirmRotate ? (
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-amber-400">Rotate code?</span>
-                      <button
-                        onClick={handleRotate}
-                        disabled={rotating}
-                        className="px-3 py-2 text-sm rounded-lg bg-amber-600 text-white hover:bg-amber-500 transition disabled:opacity-50"
-                      >
+                      <Button onClick={handleRotate} disabled={rotating}>
                         {rotating ? "Rotating…" : "Yes, rotate"}
-                      </button>
-                      <button
-                        onClick={() => setConfirmRotate(false)}
-                        className="px-3 py-2 text-sm rounded-lg border border-slate-600 text-slate-400 hover:bg-slate-800 transition"
-                      >
+                      </Button>
+                      <Button variant="ghost" onClick={() => setConfirmRotate(false)}>
                         Cancel
-                      </button>
+                      </Button>
                     </div>
                   ) : (
-                    <button
+                    <Button
+                      variant="ghost"
                       onClick={() => setConfirmRotate(true)}
                       disabled={rotating}
-                      className="px-3 py-2 text-sm rounded-lg border border-slate-600 text-slate-400 hover:bg-slate-800 transition disabled:opacity-50"
                     >
                       Rotate Code
-                    </button>
+                    </Button>
                   )}
                 </div>
                 <p className="text-xs text-slate-600">
@@ -150,13 +141,9 @@ export default function Settings({ user: _user, effectiveUserId, isLinked, unlin
                 </p>
               </>
             ) : (
-              <button
-                onClick={handleReveal}
-                disabled={revealing}
-                className="px-3 py-2 text-sm rounded-lg bg-amber-500 text-slate-900 font-semibold hover:bg-amber-400 transition disabled:opacity-50"
-              >
+              <Button onClick={handleReveal} disabled={revealing}>
                 {revealing ? "Loading…" : "Reveal Recovery Code"}
-              </button>
+              </Button>
             )}
           </section>
         </div>
@@ -174,28 +161,21 @@ export default function Settings({ user: _user, effectiveUserId, isLinked, unlin
                 {confirmUnlink ? (
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-sm text-amber-400">Unlink this device?</span>
-                    <button
-                      onClick={handleUnlink}
-                      disabled={unlinking}
-                      className="px-3 py-2 text-sm rounded-lg bg-amber-600 text-white hover:bg-amber-500 transition disabled:opacity-50"
-                    >
+                    <Button onClick={handleUnlink} disabled={unlinking}>
                       {unlinking ? "Unlinking…" : "Yes, unlink"}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="ghost"
                       onClick={() => setConfirmUnlink(false)}
                       disabled={unlinking}
-                      className="px-3 py-2 text-sm rounded-lg border border-slate-600 text-slate-400 hover:bg-slate-800 transition"
                     >
                       Cancel
-                    </button>
+                    </Button>
                   </div>
                 ) : (
-                  <button
-                    onClick={() => setConfirmUnlink(true)}
-                    className="px-3 py-2 text-sm rounded-lg border border-slate-600 text-slate-400 hover:bg-slate-800 transition"
-                  >
+                  <Button variant="ghost" onClick={() => setConfirmUnlink(true)}>
                     Unlink This Device
-                  </button>
+                  </Button>
                 )}
               </>
             ) : (
@@ -212,13 +192,9 @@ export default function Settings({ user: _user, effectiveUserId, isLinked, unlin
                   className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-600 text-slate-100 text-sm placeholder:text-slate-500 focus:outline-none focus:border-amber-500"
                 />
                 {linkError && <p className="text-red-400 text-sm">{linkError}</p>}
-                <button
-                  onClick={handleLinkDevice}
-                  disabled={linking || !linkCode.trim()}
-                  className="px-3 py-2 text-sm rounded-lg bg-amber-500 text-slate-900 font-semibold hover:bg-amber-400 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                >
+                <Button onClick={handleLinkDevice} disabled={linking || !linkCode.trim()}>
                   {linking ? "Linking…" : "Link This Device"}
-                </button>
+                </Button>
               </>
             )}
           </section>

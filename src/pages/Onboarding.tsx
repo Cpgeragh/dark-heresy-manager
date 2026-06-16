@@ -12,6 +12,7 @@ import { rotateRecoveryCode, reclaimIdentity, getRecoveryCode } from "../service
 import { formatRecoveryCodeInput } from "../utils/recoveryCode";
 import { saveFirstName } from "../services/profileService";
 import { uiSectionHeader } from "../ui/editableStyles";
+import { Button } from "../ui/Button";
 
 type Step = "welcome" | "show-code" | "reclaim";
 
@@ -141,13 +142,14 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
                 </span>
               </label>
 
-              <button
+              <Button
+                fullWidth
+                size="lg"
                 onClick={handleGetStarted}
                 disabled={busy || !name.trim()}
-                className="w-full py-3 rounded-lg bg-amber-500 text-slate-900 font-bold text-base hover:bg-amber-400 transition disabled:opacity-50"
               >
                 {busy ? "Setting up…" : "Get Started"}
-              </button>
+              </Button>
 
               {error && <p className="text-red-400 text-sm text-center">{error}</p>}
 
@@ -195,13 +197,14 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
                 />
               </label>
 
-              <button
+              <Button
+                fullWidth
+                size="lg"
                 onClick={handleReclaim}
                 disabled={busy || !reclaimCode.trim()}
-                className="w-full py-3 rounded-lg bg-amber-500 text-slate-900 font-bold text-base hover:bg-amber-400 transition disabled:opacity-50"
               >
                 {busy ? "Reclaiming…" : "Reclaim Identity"}
-              </button>
+              </Button>
 
               {error && <p className="text-red-400 text-sm text-center">{error}</p>}
             </div>
@@ -245,13 +248,12 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
               </p>
 
               <div className="flex justify-center">
-                <button
+                <Button
                   onClick={() => { navigator.clipboard?.writeText(code); setCopied(true); }}
                   disabled={copied}
-                  className="px-3 py-1.5 text-sm font-semibold rounded-lg bg-amber-500 text-slate-900 hover:bg-amber-400 transition disabled:opacity-50"
                 >
                   {copied ? "Copied" : "Copy code"}
-                </button>
+                </Button>
 
               </div>
 
@@ -272,13 +274,14 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
                 </p>
               )}
 
-              <button
+              <Button
+                fullWidth
+                size="lg"
                 onClick={handleFinish}
                 disabled={!savedConfirmed || !copied}
-                className="w-full py-3 rounded-lg bg-amber-500 text-slate-900 font-bold text-base hover:bg-amber-400 transition disabled:opacity-50"
               >
                 I've saved my code
-              </button>
+              </Button>
             </div>
           </div>
         )}
