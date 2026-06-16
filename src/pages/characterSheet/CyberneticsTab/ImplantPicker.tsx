@@ -7,6 +7,7 @@ import {
   type CyberneticRef,
 } from "../../../data/reference/cyberneticsReference";
 import { PickerModal } from "../../../ui/PickerModal";
+import { Button } from "../../../ui/Button";
 import { InfoModal } from "../../../components/InfoModal";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { editableInputClass } from "../../../ui/editableStyles";
@@ -187,13 +188,9 @@ export function ImplantPicker({ editable = true, onSelect, onClose }: Props) {
             >
               Back
             </button>
-            <button
-              onClick={confirmCost}
-              disabled={!canConfirmCost}
-              className="flex-1 py-1.5 rounded bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed text-sm text-slate-900 font-semibold"
-            >
+            <Button className="flex-1" onClick={confirmCost} disabled={!canConfirmCost}>
               Continue
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -315,7 +312,8 @@ export function ImplantPicker({ editable = true, onSelect, onClose }: Props) {
             >
               Back
             </button>
-            <button
+            <Button
+              className="flex-1"
               onClick={() =>
                 onSelect(
                   selected,
@@ -326,10 +324,9 @@ export function ImplantPicker({ editable = true, onSelect, onClose }: Props) {
                 )
               }
               disabled={!editable}
-              className="flex-1 py-1.5 rounded bg-amber-600 hover:bg-amber-500 text-sm text-slate-900 font-semibold"
             >
               Install
-            </button>
+            </Button>
           </div>
         </div>
       </div>

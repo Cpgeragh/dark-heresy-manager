@@ -11,6 +11,7 @@ import { TALENT_LIST } from "../../data/talentData";
 import { WEAPON_TRAINING_GROUPS } from "../../data/weaponTrainingData";
 import { editableInputClass, uiSection } from "../../ui/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
+import { Button } from "../../ui/Button";
 import { EntryCard, EntrySection, TalentPickerModal } from "./talentComponents";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -270,13 +271,9 @@ export function TalentsTab({
                   placeholder="e.g. Needle Pistol"
                   className={editableInputClass(true) + " flex-1"}
                 />
-                <button
-                  onClick={handleAddExotic}
-                  disabled={!newExotic.trim()}
-                  className="px-3 py-1 text-sm rounded border border-amber-500 bg-amber-600 text-white hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed transition"
-                >
+                <Button onClick={handleAddExotic} disabled={!newExotic.trim()}>
                   Add
-                </button>
+                </Button>
               </div>
             )}
           </div>

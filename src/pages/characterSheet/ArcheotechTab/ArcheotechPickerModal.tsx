@@ -8,6 +8,7 @@ import {
 import { editableInputClass } from "../../../ui/editableStyles";
 import { RARITY_OPTIONS } from "./archeotechConstants";
 import { PickerModal } from "../../../ui/PickerModal";
+import { Button } from "../../../ui/Button";
 import { InfoModal } from "../../../components/InfoModal";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 
@@ -134,13 +135,9 @@ export function ArcheotechPickerModal({ editable = true, onSelect, onCustom, onC
             >
               Back
             </button>
-            <button
-              onClick={handleConfirm}
-              disabled={!canConfirm}
-              className="flex-1 py-1.5 rounded bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed text-sm text-slate-900 font-semibold transition"
-            >
+            <Button className="flex-1" onClick={handleConfirm} disabled={!canConfirm}>
               Add to Inventory
-            </button>
+            </Button>
           </div>
         </div>
       ) : (

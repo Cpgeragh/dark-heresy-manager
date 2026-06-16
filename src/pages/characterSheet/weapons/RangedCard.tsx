@@ -22,6 +22,7 @@ import {
 } from "../../../data/reference/ammoReference";
 import { WEAPON_UPGRADE_REFERENCE } from "../../../data/reference/weaponUpgradeReference";
 import { editableInputClass, uiSection } from "../../../ui/editableStyles";
+import { Button } from "../../../ui/Button";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
 import { QuantityControl } from "../../../ui/QuantityControl";
@@ -141,12 +142,9 @@ export function RangedPicker({
             >
               Back
             </button>
-            <button
-              onClick={() => onSelect(selected, craftsmanship)}
-              className="flex-1 py-1.5 rounded bg-amber-600 hover:bg-amber-500 text-sm text-slate-900 font-semibold"
-            >
+            <Button className="flex-1" onClick={() => onSelect(selected, craftsmanship)}>
               Add Weapon
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -256,13 +254,13 @@ export function CustomRangedForm({
         ))}
       </div>
       <div className="flex gap-2 pt-1">
-        <button
+        <Button
+          className="flex-1"
           onClick={() => onAdd({ id: crypto.randomUUID(), custom: true, ...fields })}
           disabled={!fields.name?.trim()}
-          className="flex-1 py-1.5 rounded bg-amber-600 hover:bg-amber-500 disabled:opacity-40 text-sm text-slate-900 font-semibold"
         >
           Add
-        </button>
+        </Button>
         <button
           onClick={onCancel}
           className="px-4 py-1.5 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm text-slate-100"
@@ -482,7 +480,7 @@ function AmmoPicker({
             placeholder="Ammo name…"
             className="flex-1 text-sm bg-slate-800 border border-slate-600 rounded px-2 py-1 text-slate-100 focus:outline-none focus:border-indigo-500"
           />
-          <button
+          <Button
             onClick={() => {
               if (customName.trim()) {
                 onSelect(customName.trim());
@@ -490,10 +488,9 @@ function AmmoPicker({
               }
             }}
             disabled={!customName.trim() || existingNames.has(customName.trim())}
-            className="px-3 py-1 rounded bg-amber-600 hover:bg-amber-500 disabled:opacity-40 text-sm text-slate-900 font-semibold"
           >
             Add
-          </button>
+          </Button>
         </div>
       </div>
     </PickerModal>
