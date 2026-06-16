@@ -11,6 +11,7 @@ import {
   type AmmoRef,
 } from "../../../data/reference/ammoReference";
 import { editableInputClass, uiSection } from "../../../ui/editableStyles";
+import { Button } from "../../../ui/Button";
 import { rarityColour, sourceColour } from "../../../ui/sourceStyles";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import { PickerModal } from "../../../ui/PickerModal";
@@ -170,7 +171,8 @@ export function CustomAmmoForm({
         </div>
       </div>
       <div className="flex gap-2 pt-1">
-        <button
+        <Button
+          className="flex-1"
           onClick={() =>
             onAdd({
               id: crypto.randomUUID(),
@@ -183,10 +185,9 @@ export function CustomAmmoForm({
             })
           }
           disabled={!name.trim()}
-          className="flex-1 py-1.5 rounded bg-amber-600 hover:bg-amber-500 disabled:opacity-40 text-sm text-slate-900 font-semibold"
         >
           Add
-        </button>
+        </Button>
         <button
           onClick={onCancel}
           className="px-4 py-1.5 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm text-slate-100"

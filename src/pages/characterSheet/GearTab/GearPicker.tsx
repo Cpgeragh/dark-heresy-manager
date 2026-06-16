@@ -5,6 +5,7 @@ import { InfoModal } from "../../../components/InfoModal";
 import { GEAR_REFERENCE, type GearRef } from "../../../data/reference/gearReference";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
+import { Button } from "../../../ui/Button";
 import { editableInputClass } from "../../../ui/editableStyles";
 
 interface Props {
@@ -143,13 +144,9 @@ export function GearPicker({ editable = true, onSelect, onCustom, onClose }: Pro
             >
               Back
             </button>
-            <button
-              onClick={handleConfirm}
-              disabled={!canConfirm}
-              className="flex-1 py-1.5 rounded bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed text-sm text-slate-900 font-semibold transition"
-            >
+            <Button className="flex-1" onClick={handleConfirm} disabled={!canConfirm}>
               Add to Inventory
-            </button>
+            </Button>
           </div>
         </div>
       ) : (

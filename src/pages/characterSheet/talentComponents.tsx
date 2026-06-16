@@ -10,6 +10,7 @@ import { TRAIT_LIST } from "../../data/traitData";
 import type { SkillSource } from "../../types/SkillSource";
 import { editableInputClass, uiSection } from "../../ui/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
+import { Button } from "../../ui/Button";
 import { InfoModal } from "../../components/InfoModal";
 import { TALENT_DESCRIPTIONS } from "../../data/talentDescriptions";
 import { TRAIT_DESCRIPTIONS } from "../../data/traitDescriptions";
@@ -154,13 +155,9 @@ export function TalentPickerModal({
           />
         )}
 
-        <button
-          onClick={handleSpecAdd}
-          disabled={!canAdd}
-          className="w-full px-3 py-1.5 text-sm rounded border border-amber-500 bg-amber-600 text-white hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed transition"
-        >
+        <Button fullWidth onClick={handleSpecAdd} disabled={!canAdd}>
           Add {picked.name}
-        </button>
+        </Button>
       </div>
     ) : undefined;
 

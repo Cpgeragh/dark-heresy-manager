@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { ArmourCraftsmanship } from "../../../types/Character";
 import { ARMOUR_REFERENCE, type ArmourRef } from "../../../data/reference/armourReference";
 import { PickerModal } from "../../../ui/PickerModal";
+import { Button } from "../../../ui/Button";
 import { locationLabel } from "./armourHelpers";
 
 const ARMOUR_CRAFTSMANSHIP_OPTIONS: ArmourCraftsmanship[] = ["Poor", "Common", "Good", "Best"];
@@ -97,12 +98,9 @@ export function ArmourPicker({ editable = true, onSelect, onCustom, onClose }: P
             >
               Back
             </button>
-            <button
-              onClick={() => onSelect(selected, craftsmanship)}
-              className="flex-1 py-1.5 rounded bg-amber-600 hover:bg-amber-500 text-sm text-slate-900 font-semibold"
-            >
+            <Button className="flex-1" onClick={() => onSelect(selected, craftsmanship)}>
               Add Armour
-            </button>
+            </Button>
           </div>
         </div>
       </div>
