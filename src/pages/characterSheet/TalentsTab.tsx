@@ -9,7 +9,8 @@ import type {
 } from "../../types/Character";
 import { TALENT_LIST } from "../../data/talentData";
 import { WEAPON_TRAINING_GROUPS } from "../../data/weaponTrainingData";
-import { editableInputClass, uiSection, uiSectionHeader } from "../../ui/editableStyles";
+import { editableInputClass, uiSection } from "../../ui/editableStyles";
+import { SectionHeader } from "../../ui/SectionHeader";
 import { EntryCard, EntrySection, TalentPickerModal } from "./talentComponents";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -60,7 +61,7 @@ function FaithTalentSection({
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
-        <h3 className={uiSectionHeader}>Faith Talents</h3>
+        <SectionHeader>Faith Talents</SectionHeader>
         <span className="text-xs text-slate-500">
           {entries.length} {entries.length === 1 ? "talent" : "faith talents"}
         </span>
@@ -195,7 +196,7 @@ export function TalentsTab({
 
       {/* WEAPON TRAINING */}
       <div>
-        <h3 className={`${uiSectionHeader} mb-3`}>Weapon Training</h3>
+        <SectionHeader className="mb-3">Weapon Training</SectionHeader>
         <section className={uiSection + " space-y-4"}>
           {WEAPON_TRAINING_GROUPS.map((group) => (
             <div key={group.label}>

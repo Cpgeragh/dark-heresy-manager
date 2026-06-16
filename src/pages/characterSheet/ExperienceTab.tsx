@@ -2,8 +2,9 @@
 
 import { useState, useCallback, useMemo } from "react";
 import type { ExperienceBlock, RankAdvances } from "../../types/Character";
-import { uiSection, readOnlyBadgeClass, uiSectionHeader } from "../../ui/editableStyles";
+import { uiSection, readOnlyBadgeClass } from "../../ui/editableStyles";
 import { Button } from "../../ui/Button";
+import { SectionHeader } from "../../ui/SectionHeader";
 import { useXpProposals } from "../../hooks/useXpProposals";
 import { proposeXpSpend } from "../../services/xpService";
 import { useToast } from "../../components/Toast/ToastContext";
@@ -175,7 +176,7 @@ export function ExperienceTab({
 
       {/* PURCHASED ADVANCES */}
       <section className="space-y-3">
-        <h3 className={uiSectionHeader}>Purchased Advances</h3>
+        <SectionHeader>Purchased Advances</SectionHeader>
 
         {experience.ranks.length === 0 && (
           <p className="text-sm text-slate-400">No advances purchased yet.</p>
@@ -287,7 +288,7 @@ export function ExperienceTab({
       {/* XP PROPOSALS — player only */}
       {isOwnedByCurrentPlayer && (
         <section className="space-y-3">
-          <h3 className={uiSectionHeader}>Propose XP Spend</h3>
+          <SectionHeader>Propose XP Spend</SectionHeader>
 
           <div className="flex flex-col sm:flex-row gap-2">
             <input

@@ -28,10 +28,11 @@ import {
 } from "../services/campaignService";
 import { archiveCampaign, restoreCampaign } from "../utils/campaignActions";
 import type { CampaignWithId, CharacterListItem } from "../types/Firestore";
-import { uiSection, uiSectionHeader, editableInputClass } from "../ui/editableStyles";
+import { uiSection, editableInputClass } from "../ui/editableStyles";
 import { Button } from "../ui/Button";
 import { PageShell } from "../ui/PageShell";
 import { Panel } from "../ui/Panel";
+import { SectionHeader } from "../ui/SectionHeader";
 import { ClaimForm } from "./ClaimCharacter/ClaimForm";
 import { ClaimPreview } from "./ClaimCharacter/ClaimPreview";
 import { useRecoveryLookup } from "./ClaimCharacter/hooks/useRecoveryLookup";
@@ -136,7 +137,7 @@ function PlayerCampaignRow({
 
   return (
     <div>
-      <p className={`${uiSectionHeader} mb-3`}>{campaignName}</p>
+      <SectionHeader className="mb-3">{campaignName}</SectionHeader>
 
       {loading && <p className="text-sm text-slate-500">Loading characters…</p>}
 
@@ -269,7 +270,7 @@ function DmCampaignList({
     <div className="space-y-6">
       {/* Create */}
       <div>
-        <p className={`${uiSectionHeader} mb-3`}>Create Campaign</p>
+        <SectionHeader className="mb-3">Create Campaign</SectionHeader>
         <div className="flex gap-2">
           <input
             className={editableInputClass(true) + " flex-1"}
@@ -285,7 +286,7 @@ function DmCampaignList({
 
       {/* Active campaigns */}
       <div>
-        <p className={`${uiSectionHeader} mb-3`}>Your Campaigns</p>
+        <SectionHeader className="mb-3">Your Campaigns</SectionHeader>
 
         {loading ? (
           <p className="text-slate-400 text-sm">Loading campaigns…</p>
@@ -506,7 +507,7 @@ function QrPanel() {
   return (
     <>
       <div>
-        <p className={`${uiSectionHeader} mb-3`}>Share App</p>
+        <SectionHeader className="mb-3">Share App</SectionHeader>
         <div className="flex gap-2">
           <Button variant="secondary" className="flex-1" onClick={() => setOpen("full")}>
             Share full app
@@ -569,7 +570,7 @@ function ClaimCharacterSection({ effectiveUserId }: { effectiveUserId: string })
 
   return (
     <div>
-      <p className={`${uiSectionHeader} mb-3`}>Claim a Character</p>
+      <SectionHeader className="mb-3">Claim a Character</SectionHeader>
 
       <div className="space-y-4">
         <ClaimForm code={code} onCodeChange={setCode} onSubmit={handleLookup} loading={loading} />
@@ -630,7 +631,7 @@ export default function Dashboard({ user, effectiveUserId, isLinked, firstName }
         )}
 
         {/* ── Player section ───────────────────────────────────────────── */}
-        <p className={uiSectionHeader}>Campaigns You Play In</p>
+        <SectionHeader>Campaigns You Play In</SectionHeader>
 
         {loading && <p className="text-slate-400 text-sm">Loading campaigns…</p>}
 

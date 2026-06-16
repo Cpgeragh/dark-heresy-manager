@@ -10,7 +10,7 @@ import type { CyberneticRef } from "../../../data/reference/cyberneticsReference
 import { ImplantPicker } from "./ImplantPicker";
 import { ImplantRow } from "./ImplantRow";
 import { nextAvailableCraftsmanship } from "./cyberneticsHelpers";
-import { uiSectionHeader } from "../../../ui/editableStyles";
+import { SectionHeader } from "../../../ui/SectionHeader";
 import { CYBERNETICS_REFERENCE } from "../../../data/reference/cyberneticsReference";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -84,7 +84,7 @@ export function CyberneticsTab({ cybernetics, editable, onUpdate }: CyberneticsT
     <div className="space-y-6">
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className={uiSectionHeader}>Installed Implants ({cybernetics.length})</h3>
+          <SectionHeader>Installed Implants ({cybernetics.length})</SectionHeader>
           <button
             onClick={() => setShowPicker(true)}
             className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"

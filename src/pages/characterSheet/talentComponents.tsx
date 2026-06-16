@@ -8,7 +8,8 @@ import type { TraitData } from "../../data/traitData";
 import { TALENT_LIST } from "../../data/talentData";
 import { TRAIT_LIST } from "../../data/traitData";
 import type { SkillSource } from "../../types/SkillSource";
-import { editableInputClass, uiSection, uiSectionHeader } from "../../ui/editableStyles";
+import { editableInputClass, uiSection } from "../../ui/editableStyles";
+import { SectionHeader } from "../../ui/SectionHeader";
 import { InfoModal } from "../../components/InfoModal";
 import { TALENT_DESCRIPTIONS } from "../../data/talentDescriptions";
 import { TRAIT_DESCRIPTIONS } from "../../data/traitDescriptions";
@@ -314,7 +315,7 @@ export function EntrySection({
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
-        <h3 className={uiSectionHeader}>{title}</h3>
+        <SectionHeader>{title}</SectionHeader>
         <span className="text-xs text-slate-500">
           {entries.length} {entries.length === 1 ? singular.toLowerCase() : title.toLowerCase()}
         </span>

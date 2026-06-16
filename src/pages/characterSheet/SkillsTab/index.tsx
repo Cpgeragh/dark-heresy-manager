@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import type { Characteristics, SkillEntry } from "../../../types/Character";
 import type { CharField } from "../../../utils/characterFactory";
 import { useSkillComputation } from "../../../hooks/useSkillComputation";
-import { uiSectionHeader } from "../../../ui/editableStyles";
+import { SectionHeader } from "../../../ui/SectionHeader";
 import { SkillRow } from "./SkillRow";
 import { AddSkillModal } from "./AddSkillModal";
 import { IndependentCardGrid } from "../weapons/IndependentCardGrid";
@@ -50,7 +50,7 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField }: SkillsTa
     <div className="space-y-4 text-slate-100">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <p className={uiSectionHeader}>Trained Skills</p>
+        <SectionHeader>Trained Skills</SectionHeader>
         <button
           onClick={() => setIsAddOpen(true)}
           className="text-xs px-3 py-1.5 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"

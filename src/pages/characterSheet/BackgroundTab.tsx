@@ -3,7 +3,8 @@
 import { useCallback } from "react";
 import type { CharacterHeader, TalentsAndTraitsBlock } from "../../types/Character";
 import { FormField } from "../../components/FormField";
-import { editableInputClass, uiSection, uiSectionHeader } from "../../ui/editableStyles";
+import { editableInputClass, uiSection } from "../../ui/editableStyles";
+import { SectionHeader } from "../../ui/SectionHeader";
 import { HOMEWORLD_LIST } from "../../data/homeworldData";
 
 interface BackgroundTabProps {
@@ -73,7 +74,7 @@ export function BackgroundTab({
     <div className="space-y-6 text-slate-100">
       {/* IDENTITY */}
       <div>
-        <p className={`${uiSectionHeader} mb-3`}>Identity</p>
+        <SectionHeader className="mb-3">Identity</SectionHeader>
         <section className={uiSection + " space-y-3"}>
           <FormField
             label="Character Name"
@@ -95,7 +96,7 @@ export function BackgroundTab({
 
       {/* CAREER */}
       <div>
-        <p className={`${uiSectionHeader} mb-3`}>Career</p>
+        <SectionHeader className="mb-3">Career</SectionHeader>
         <section className={uiSection}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <FormField
@@ -118,7 +119,7 @@ export function BackgroundTab({
 
       {/* DIVINATION */}
       <div>
-        <p className={`${uiSectionHeader} mb-3`}>Divination</p>
+        <SectionHeader className="mb-3">Divination</SectionHeader>
         <section className={uiSection}>
           <FormField
             label="Divination"
@@ -132,7 +133,7 @@ export function BackgroundTab({
 
       {/* APPEARANCE */}
       <div>
-        <p className={`${uiSectionHeader} mb-3`}>Appearance</p>
+        <SectionHeader className="mb-3">Appearance</SectionHeader>
         <section className={uiSection}>
           <FormField
             label="Description"
@@ -148,7 +149,7 @@ export function BackgroundTab({
 
       {/* HOMEWORLD */}
       <div>
-        <p className={`${uiSectionHeader} mb-3`}>Homeworld</p>
+        <SectionHeader className="mb-3">Homeworld</SectionHeader>
         <section className={uiSection + " space-y-3"}>
           <div className="flex flex-col gap-1">
             <select

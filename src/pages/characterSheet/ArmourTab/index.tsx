@@ -15,7 +15,8 @@ import { PieceNotesModal } from "./PieceNotesModal";
 import { CustomPieceForm } from "./CustomPieceForm";
 import { ForceFieldRow } from "./ForceFieldRow";
 import { PieceRow } from "./PieceRow";
-import { uiSectionHeader, uiSection } from "../../../ui/editableStyles";
+import { uiSection } from "../../../ui/editableStyles";
+import { SectionHeader } from "../../../ui/SectionHeader";
 
 interface ArmourTabProps {
   armour: WornArmourPiece[];
@@ -256,7 +257,7 @@ export function ArmourTab({
     <div className="space-y-6">
       {/* LOCATION SUMMARY */}
       <section>
-        <h3 className={`${uiSectionHeader} mb-2`}>Location Summary</h3>
+        <SectionHeader className="mb-2">Location Summary</SectionHeader>
         <div className={uiSection}>
           <div className="overflow-x-auto">
             <table className="w-full text-sm border-collapse">
@@ -305,7 +306,7 @@ export function ArmourTab({
       {/* WORN PIECES */}
       <section className="space-y-2">
         <div className="flex items-center justify-between">
-          <h3 className={uiSectionHeader}>Worn ({worn.length})</h3>
+          <SectionHeader>Worn ({worn.length})</SectionHeader>
           {!showCustomForm && (
             <button
               onClick={() => {
@@ -334,7 +335,7 @@ export function ArmourTab({
       {/* STOWED PIECES */}
       <section className="space-y-2">
         <div className="flex items-center justify-between">
-          <h3 className={uiSectionHeader}>Stowed ({stowed.length})</h3>
+          <SectionHeader>Stowed ({stowed.length})</SectionHeader>
           {!showCustomForm && (
             <button
               onClick={() => {
@@ -363,7 +364,7 @@ export function ArmourTab({
       {/* FORCE FIELDS */}
       <section className="space-y-2">
         <div className="flex items-center justify-between">
-          <h3 className={uiSectionHeader}>Force Fields ({forceFields.length})</h3>
+          <SectionHeader>Force Fields ({forceFields.length})</SectionHeader>
           <button
             onClick={() => setShowFieldPicker(true)}
             className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
