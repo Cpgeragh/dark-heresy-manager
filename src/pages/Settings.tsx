@@ -8,6 +8,8 @@ import { useLinkDevice } from "../hooks/useLinkDevice";
 import { useToast } from "../components/Toast";
 import { uiSection, uiSectionHeader } from "../ui/editableStyles";
 import { Button } from "../ui/Button";
+import { PageShell } from "../ui/PageShell";
+import { Panel } from "../ui/Panel";
 
 interface Props {
   user: User;
@@ -87,10 +89,8 @@ export default function Settings({ user: _user, effectiveUserId, isLinked, unlin
   }
 
   return (
-    <div className="space-y-6 text-slate-100">
-      <h1 className="text-lg font-semibold text-slate-100 text-center">Settings</h1>
-
-      <div className="border border-slate-700 bg-slate-900/40 p-4 rounded-lg space-y-6">
+    <PageShell title="Settings">
+      <Panel>
 
         {/* ── Recovery Code ───────────────────────────────────────────────── */}
         <div>
@@ -200,7 +200,7 @@ export default function Settings({ user: _user, effectiveUserId, isLinked, unlin
           </section>
         </div>
 
-      </div>
-    </div>
+      </Panel>
+    </PageShell>
   );
 }
