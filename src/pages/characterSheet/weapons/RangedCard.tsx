@@ -30,7 +30,6 @@ import { InfoModal } from "../../../components/InfoModal";
 import {
   StatChip,
   DamageTypeChip,
-  SpecialRulesModal,
   SpecialRulesContent,
   AttachmentPicker,
   AttachmentCard,
@@ -562,8 +561,6 @@ export function RangedCard({
     setExpanded(isEquipped);
   }, [isEquipped]);
 
-  const [showQualities, setShowQualities] = useState(false);
-  const [showItemRules, setShowItemRules] = useState(false);
   const [showAttachPicker, setShowAttachPicker] = useState(false);
   const [showAmmoPicker, setShowAmmoPicker] = useState(false);
 
@@ -593,14 +590,11 @@ export function RangedCard({
   const visibleCompatible = allowAttachments ? compatible : [];
 
   const rulesText = effective.specialRules?.trim() ?? "";
-  const hasRules = Boolean(rulesText && rulesText !== "—" && rulesText !== "-");
   const ruleNamesInLookup = (effective.specialRules ?? "")
     .split(",")
     .map((r) => r.trim().replace(/\s*\(.*?\)/, ""))
     .filter((name) => Boolean(name) && Boolean(WEAPON_SPECIAL_RULES[name]));
   const rulesDescription = weaponRef?.description ?? weapon.description;
-  const hasModal = !!rulesDescription || ruleNamesInLookup.length > 0;
-  const rulesDisplayText = hasRules ? rulesText : hasModal ? "Special rules" : "";
   const hasQualities = Boolean(
     rulesText && rulesText !== "—" && rulesText !== "-" && rulesText !== "â€”"
   );
@@ -718,22 +712,6 @@ export function RangedCard({
             {effective.clip && <StatChip label="Clip" value={effective.clip} />}
             {weapon.rld && <StatChip label="Reload" value={weapon.rld} />}
           </div>
-
-          {/* Special rules */}
-          {false && (
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs text-slate-400 italic">{rulesDisplayText}</span>
-              {hasModal && (
-                <button
-                  onClick={() => setShowQualities(true)}
-                  title="Explain special rules"
-                  className="text-slate-500 hover:text-amber-400 text-sm transition"
-                >
-                  ⓘ
-                </button>
-              )}
-            </div>
-          )}
 
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
@@ -910,24 +888,6 @@ export function RangedCard({
                 </div>
               )}
             </div>
-          )}
-
-          {/* Modals */}
-          {showQualities && (
-            <SpecialRulesModal
-              rules={effective.specialRules ?? ""}
-              title="Qualities"
-              onClose={() => setShowQualities(false)}
-            />
-          )}
-
-          {showItemRules && rulesDescription && (
-            <SpecialRulesModal
-              rules=""
-              description={rulesDescription}
-              title="Rules"
-              onClose={() => setShowItemRules(false)}
-            />
           )}
 
           {showAttachPicker && (

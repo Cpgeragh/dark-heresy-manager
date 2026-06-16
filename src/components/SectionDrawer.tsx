@@ -7,7 +7,7 @@ import type { TabId } from "../pages/characterSheet/types";
 // NAVIGATION STRUCTURE
 // ================================================================
 
-const CATEGORIES: {
+export const CATEGORIES: {
   label: string;
   dmOnly?: boolean;
   tabs: { id: TabId; label: string }[];

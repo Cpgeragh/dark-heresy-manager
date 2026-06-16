@@ -18,19 +18,19 @@ interface Props {
 
 const SIZE = {
   sm: {
-    btn: "w-5 h-5 text-xs",
+    btn: "w-7 h-7 sm:w-5 sm:h-5 text-sm sm:text-xs",
     display: "text-sm min-w-[2rem]",
-    input: "w-12 text-sm",
+    input: "h-7 sm:h-auto w-12 text-sm",
   },
   md: {
-    btn: "w-6 h-6 text-sm",
+    btn: "w-9 h-9 sm:w-6 sm:h-6 text-lg sm:text-sm",
     display: "text-base min-w-[2rem]",
-    input: "w-14 text-base",
+    input: "h-9 sm:h-auto w-14 text-base",
   },
   lg: {
-    btn: "w-6 h-6 text-sm",
+    btn: "w-10 h-10 sm:w-6 sm:h-6 text-lg sm:text-sm",
     display: "text-lg min-w-[2.5rem]",
-    input: "w-16 text-lg",
+    input: "h-10 sm:h-auto w-16 text-lg",
   },
 } as const;
 

@@ -284,22 +284,6 @@ export interface ConsumableItem {
 }
 
 /**
- * AMMUNITION
- */
-export interface AmmoItem {
-  id: string;
-  referenceId?: string; // links back to AmmoRef.id
-  name: string;
-  compatibleWith?: string; // e.g. "Bolt", "SP Pistol" — free text
-  amount: number;
-  weight?: string;
-  value?: string;
-  rarity?: string;
-  source?: string;
-  description?: string; // game-mechanical effects for special ammo
-}
-
-/**
  * GRENADES
  */
 export interface GrenadeItem {

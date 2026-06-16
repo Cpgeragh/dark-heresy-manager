@@ -56,9 +56,9 @@ export function Stepper({ value, min = 0, editable, onChange, dangerClassName }:
     [editable, min, value, onChange]
   );
 
-  const btnClass = `px-2 py-0.5 border rounded text-xs text-slate-100 transition ${
+  const btnClass = `flex items-center justify-center h-10 w-10 sm:h-8 sm:w-8 border rounded-lg text-lg leading-none text-slate-100 transition select-none ${
     editable
-      ? "bg-slate-800 border-slate-500 hover:bg-slate-700"
+      ? "bg-slate-800 border-slate-500 hover:bg-slate-700 active:bg-slate-600"
       : "bg-slate-800 border-slate-500 opacity-50 cursor-not-allowed"
   }`;
 
@@ -83,7 +83,7 @@ export function Stepper({ value, min = 0, editable, onChange, dangerClassName }:
           onChange={(e) => setDraft(e.target.value)}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
-          className="w-12 text-center bg-slate-700 border border-slate-500 rounded text-sm font-mono text-slate-100 px-1 py-0.5 focus:outline-none focus:border-amber-400"
+          className="h-10 sm:h-8 w-14 text-center bg-slate-700 border border-slate-500 rounded-lg text-base font-mono text-slate-100 px-1 focus:outline-none focus:border-amber-400"
         />
       ) : (
         <span
