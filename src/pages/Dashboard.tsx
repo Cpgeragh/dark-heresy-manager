@@ -33,6 +33,7 @@ import { Button } from "../ui/Button";
 import { PageShell } from "../ui/PageShell";
 import { Panel } from "../ui/Panel";
 import { SectionHeader } from "../ui/SectionHeader";
+import { ConfirmInline } from "../ui/ConfirmInline";
 import { ClaimForm } from "./ClaimCharacter/ClaimForm";
 import { ClaimPreview } from "./ClaimCharacter/ClaimPreview";
 import { useRecoveryLookup } from "./ClaimCharacter/hooks/useRecoveryLookup";
@@ -171,10 +172,7 @@ function DmCampaignList({
   const [newCampaignName, setNewCampaignName] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
-  const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [deleting, setDeleting] = useState(false);
-  const [confirmArchiveId, setConfirmArchiveId] = useState<string | null>(null);
   const [archiving, setArchiving] = useState(false);
   const [restoring, setRestoring] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
@@ -220,7 +218,6 @@ function DmCampaignList({
       setArchiving(true);
       try {
         await archiveCampaign(campaignId);
-        setConfirmArchiveId(null);
         toast.success("Campaign archived.");
       } catch (err) {
         console.error("Failed to archive campaign:", err);
@@ -253,8 +250,6 @@ function DmCampaignList({
       setDeleting(true);
       try {
         await deleteCampaign(campaignId);
-        setConfirmDeleteId(null);
-        setDeleteConfirmText("");
         toast.success("Campaign deleted.");
       } catch (err) {
         console.error("Failed to delete campaign:", err);
@@ -332,68 +327,23 @@ function DmCampaignList({
                     Edit
                   </button>
 
-                  {confirmArchiveId === campaign.id ? (
-                    <div className="flex items-center gap-1" onClick={(e) => e.preventDefault()}>
-                      <span className="text-xs text-amber-400">Archive?</span>
-                      <button
-                        onClick={(e) => { e.preventDefault(); void handleArchive(campaign.id); }}
-                        disabled={archiving}
-                        className="text-xs px-2 py-1 bg-amber-600 text-white rounded hover:bg-amber-500 disabled:opacity-50"
-                      >
-                        {archiving ? "…" : "Yes"}
-                      </button>
-                      <button
-                        onClick={(e) => { e.preventDefault(); setConfirmArchiveId(null); }}
-                        className="text-xs px-2 py-1 bg-slate-700 text-slate-300 rounded hover:bg-slate-600"
-                      >
-                        No
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={(e) => { e.preventDefault(); setConfirmArchiveId(campaign.id); }}
-                      className="text-xs px-2 py-1 bg-amber-900/40 text-amber-400 rounded hover:bg-amber-900/70"
-                    >
-                      Archive
-                    </button>
-                  )}
+                  <ConfirmInline
+                    triggerLabel="Archive"
+                    question="Archive?"
+                    variant="warning"
+                    size="sm"
+                    busy={archiving}
+                    onConfirm={() => handleArchive(campaign.id)}
+                  />
 
-                  {confirmDeleteId === campaign.id ? (
-                    <div className="flex flex-col gap-1 items-start" onClick={(e) => e.preventDefault()}>
-                      <span className="text-xs text-red-400">Type DELETE to confirm</span>
-                      <div className="flex items-center gap-1">
-                        <input
-                          type="text"
-                          value={deleteConfirmText}
-                          onChange={(e) => setDeleteConfirmText(e.target.value)}
-                          placeholder="DELETE"
-                          autoFocus
-                          disabled={deleting}
-                          className="px-2 py-1 bg-slate-700 border border-slate-500 rounded text-xs text-slate-100 w-20 font-mono placeholder:text-slate-600 disabled:opacity-50"
-                        />
-                        <button
-                          onClick={(e) => { e.preventDefault(); void handleDeleteConfirm(campaign.id); }}
-                          disabled={deleting || deleteConfirmText !== "DELETE"}
-                          className="text-xs px-2 py-1 bg-red-700 text-white rounded hover:bg-red-600 disabled:opacity-50"
-                        >
-                          {deleting ? "…" : "Yes"}
-                        </button>
-                        <button
-                          onClick={(e) => { e.preventDefault(); setConfirmDeleteId(null); setDeleteConfirmText(""); }}
-                          className="text-xs px-2 py-1 bg-slate-700 text-slate-300 rounded hover:bg-slate-600"
-                        >
-                          No
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={(e) => { e.preventDefault(); setConfirmDeleteId(campaign.id); }}
-                      className="text-xs px-2 py-1 bg-red-900/40 text-red-400 rounded hover:bg-red-900/70"
-                    >
-                      Delete
-                    </button>
-                  )}
+                  <ConfirmInline
+                    triggerLabel="Delete"
+                    requireText="DELETE"
+                    requirePrompt="Type DELETE to confirm"
+                    size="sm"
+                    busy={deleting}
+                    onConfirm={() => handleDeleteConfirm(campaign.id)}
+                  />
                 </Link>
               )
             )}
@@ -424,42 +374,14 @@ function DmCampaignList({
                       Restore
                     </button>
 
-                    {confirmDeleteId === campaign.id ? (
-                      <div className="flex flex-col gap-1 items-start">
-                        <span className="text-xs text-red-400">Type DELETE to confirm</span>
-                        <div className="flex items-center gap-1">
-                          <input
-                            type="text"
-                            value={deleteConfirmText}
-                            onChange={(e) => setDeleteConfirmText(e.target.value)}
-                            placeholder="DELETE"
-                            autoFocus
-                            disabled={deleting}
-                            className="px-2 py-1 bg-slate-700 border border-slate-500 rounded text-xs text-slate-100 w-20 font-mono placeholder:text-slate-600 disabled:opacity-50"
-                          />
-                          <button
-                            onClick={() => void handleDeleteConfirm(campaign.id)}
-                            disabled={deleting || deleteConfirmText !== "DELETE"}
-                            className="text-xs px-2 py-1 bg-red-700 text-white rounded hover:bg-red-600 disabled:opacity-50"
-                          >
-                            {deleting ? "…" : "Yes"}
-                          </button>
-                          <button
-                            onClick={() => { setConfirmDeleteId(null); setDeleteConfirmText(""); }}
-                            className="text-xs px-2 py-1 bg-slate-700 text-slate-300 rounded hover:bg-slate-600"
-                          >
-                            No
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => setConfirmDeleteId(campaign.id)}
-                        className="text-xs px-2 py-1 bg-red-900/40 text-red-400 rounded hover:bg-red-900/70"
-                      >
-                        Delete
-                      </button>
-                    )}
+                    <ConfirmInline
+                      triggerLabel="Delete"
+                      requireText="DELETE"
+                      requirePrompt="Type DELETE to confirm"
+                      size="sm"
+                      busy={deleting}
+                      onConfirm={() => handleDeleteConfirm(campaign.id)}
+                    />
                   </div>
                 ))}
               </div>
