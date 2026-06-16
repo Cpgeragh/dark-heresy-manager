@@ -29,6 +29,7 @@ import {
 import { archiveCampaign, restoreCampaign } from "../utils/campaignActions";
 import type { CampaignWithId, CharacterListItem } from "../types/Firestore";
 import { uiSection, uiSectionHeader, editableInputClass } from "../ui/editableStyles";
+import { Button } from "../ui/Button";
 import { ClaimForm } from "./ClaimCharacter/ClaimForm";
 import { ClaimPreview } from "./ClaimCharacter/ClaimPreview";
 import { useRecoveryLookup } from "./ClaimCharacter/hooks/useRecoveryLookup";
@@ -276,12 +277,7 @@ function DmCampaignList({
             onKeyDown={(e) => { if (e.key === "Enter") void handleCreate(); }}
             aria-label="New campaign name"
           />
-          <button
-            className="px-4 py-2 bg-amber-500 text-slate-900 font-semibold rounded text-sm hover:bg-amber-400 transition"
-            onClick={handleCreate}
-          >
-            Create
-          </button>
+          <Button onClick={handleCreate}>Create</Button>
         </div>
       </div>
 
@@ -510,18 +506,12 @@ function QrPanel() {
       <div>
         <p className={`${uiSectionHeader} mb-3`}>Share App</p>
         <div className="flex gap-2">
-          <button
-            onClick={() => setOpen("full")}
-            className="flex-1 px-3 py-2 bg-slate-700 text-slate-300 rounded text-sm hover:bg-slate-600 transition"
-          >
+          <Button variant="secondary" className="flex-1" onClick={() => setOpen("full")}>
             Share full app
-          </button>
-          <button
-            onClick={() => setOpen("player")}
-            className="flex-1 px-3 py-2 bg-slate-700 text-slate-300 rounded text-sm hover:bg-slate-600 transition"
-          >
+          </Button>
+          <Button variant="secondary" className="flex-1" onClick={() => setOpen("player")}>
             Share player invite
-          </button>
+          </Button>
         </div>
       </div>
 

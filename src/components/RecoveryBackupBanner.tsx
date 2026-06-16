@@ -9,6 +9,7 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { getRecoveryCode, rotateRecoveryCode } from "../services/identityService";
 import { useToast } from "./Toast";
+import { Button } from "../ui/Button";
 
 interface Props {
   ownUid: string;
@@ -72,34 +73,26 @@ export function RecoveryBackupBanner({ ownUid, effectiveUserId }: Props) {
             </span>
           </div>
           <div className="flex gap-2">
-            <button
+            <Button
+              variant="ghost"
               onClick={() => {
                 navigator.clipboard?.writeText(code);
                 setCopied(true);
                 toast.success("Copied.");
               }}
-              className="px-3 py-1.5 text-sm rounded border border-slate-600 text-slate-200 hover:bg-slate-800"
             >
               {copied ? "Copied" : "Copy"}
-            </button>
-            <button
-              onClick={confirm}
-              disabled={!copied}
-              className="px-3 py-1.5 text-sm rounded bg-amber-500 text-slate-900 font-semibold hover:bg-amber-400 disabled:opacity-50"
-            >
+            </Button>
+            <Button onClick={confirm} disabled={!copied}>
               I've saved it
-            </button>
+            </Button>
           </div>
           {!copied && <p className="text-xs text-amber-100/70">Copy your code first.</p>}
         </>
       ) : (
-        <button
-          onClick={reveal}
-          disabled={busy}
-          className="px-3 py-1.5 text-sm rounded bg-amber-500 text-slate-900 font-semibold hover:bg-amber-400 disabled:opacity-50"
-        >
+        <Button onClick={reveal} disabled={busy}>
           {busy ? "Loading…" : "Reveal my code"}
-        </button>
+        </Button>
       )}
     </div>
   );

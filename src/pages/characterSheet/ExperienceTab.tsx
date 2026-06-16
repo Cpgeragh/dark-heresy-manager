@@ -3,6 +3,7 @@
 import { useState, useCallback, useMemo } from "react";
 import type { ExperienceBlock, RankAdvances } from "../../types/Character";
 import { uiSection, readOnlyBadgeClass, uiSectionHeader } from "../../ui/editableStyles";
+import { Button } from "../../ui/Button";
 import { useXpProposals } from "../../hooks/useXpProposals";
 import { proposeXpSpend } from "../../services/xpService";
 import { useToast } from "../../components/Toast/ToastContext";
@@ -276,13 +277,9 @@ export function ExperienceTab({
               />
             </div>
 
-            <button
-              onClick={handleAddAdvance}
-              disabled={!newName.trim() || newCost <= 0}
-              className="px-4 py-1.5 bg-amber-500 text-slate-900 font-semibold rounded text-sm disabled:opacity-40 hover:bg-amber-400 transition"
-            >
+            <Button onClick={handleAddAdvance} disabled={!newName.trim() || newCost <= 0}>
               Add
-            </button>
+            </Button>
           </div>
         )}
       </section>
@@ -308,13 +305,12 @@ export function ExperienceTab({
                 onChange={(e) => setXpCost(Math.max(0, Number(e.target.value)))}
                 className="w-24 px-2 py-1 bg-slate-800 border border-slate-500 rounded text-sm"
               />
-              <button
+              <Button
                 onClick={handlePropose}
                 disabled={submitting || !description.trim() || xpCost <= 0}
-                className="px-3 py-1 bg-amber-500 text-slate-900 font-semibold rounded text-sm disabled:opacity-50"
               >
                 {submitting ? "…" : "Propose"}
-              </button>
+              </Button>
             </div>
           </div>
 

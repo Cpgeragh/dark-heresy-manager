@@ -4,6 +4,7 @@
 
 import { useState } from "react";
 import { saveFirstName } from "../services/profileService";
+import { Button } from "../ui/Button";
 
 interface Props {
   effectiveUserId: string;
@@ -55,13 +56,9 @@ export default function NameGate({ effectiveUserId }: Props) {
           />
         </label>
 
-        <button
-          onClick={handleSave}
-          disabled={busy || !name.trim()}
-          className="w-full py-3 rounded-xl bg-amber-500 text-slate-900 font-bold text-base hover:bg-amber-400 transition disabled:opacity-50"
-        >
+        <Button fullWidth size="lg" onClick={handleSave} disabled={busy || !name.trim()}>
           {busy ? "Saving…" : "Continue"}
-        </button>
+        </Button>
 
         {error && <p className="mt-4 text-red-400 text-sm text-center">{error}</p>}
       </div>

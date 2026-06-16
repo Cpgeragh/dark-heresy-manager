@@ -2,6 +2,7 @@
 
 import React, { Component } from "react";
 import type { ReactNode } from "react";
+import { Button } from "../ui/Button";
 
 interface Props {
   children: ReactNode;
@@ -104,18 +105,12 @@ function ErrorFallback({ error, onReset }: ErrorFallbackProps) {
 
         {/* Actions */}
         <div className="flex flex-col gap-2">
-          <button
-            onClick={onReset}
-            className="w-full px-4 py-2 bg-amber-500 text-slate-900 font-semibold rounded hover:bg-amber-400 transition"
-          >
+          <Button fullWidth onClick={onReset}>
             Try Again
-          </button>
-          <button
-            onClick={() => (window.location.href = "/")}
-            className="w-full px-4 py-2 bg-slate-800 text-slate-200 border border-slate-700 rounded hover:bg-slate-700 transition"
-          >
+          </Button>
+          <Button variant="secondary" fullWidth onClick={() => (window.location.href = "/")}>
             Go to Home
-          </button>
+          </Button>
         </div>
 
         {/* Help Text */}
