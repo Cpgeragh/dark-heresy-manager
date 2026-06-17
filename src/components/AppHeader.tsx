@@ -18,7 +18,7 @@ export function AppHeader({ currentPath, onOpenMessages }: AppHeaderProps) {
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-900/80 backdrop-blur">
-      <div className="max-w-5xl mx-auto px-4 py-2 grid grid-cols-[1fr_auto_1fr] items-center">
+      <div className="max-w-7xl mx-auto px-4 lg:px-6 py-2 grid grid-cols-[1fr_auto_1fr] items-center">
         {/* Left icons — home/back + messages */}
         <div className="flex items-center gap-2">
           {(backHref || currentPath !== ROUTES.DASHBOARD) && (
@@ -70,7 +70,7 @@ export function AppHeader({ currentPath, onOpenMessages }: AppHeaderProps) {
 
         {/* App name — centred */}
         <div className="flex items-center justify-center pointer-events-none">
-          <span className="font-cinzel font-bold text-slate-100 text-base tracking-wide">Dark Heresy Manager</span>
+          <span className="font-cinzel font-bold text-slate-200 text-base tracking-wide">Dark Heresy Manager</span>
         </div>
 
         {/* Settings + kebab */}

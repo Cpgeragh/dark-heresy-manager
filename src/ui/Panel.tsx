@@ -12,7 +12,7 @@ export function Panel({
   children: ReactNode;
 }) {
   return (
-    <div className={`border border-slate-700 bg-slate-900/40 p-4 rounded-lg space-y-6 ${className}`}>
+    <div className={`border border-slate-700 bg-slate-900/40 p-4 lg:p-5 rounded-lg space-y-6 ${className}`}>
       {children}
     </div>
   );

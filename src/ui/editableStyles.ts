@@ -14,15 +14,14 @@
 
 export function editableInputClass(isEditable: boolean) {
   return [
-    "w-full rounded border px-2 py-1 text-sm transition",
+    "w-full rounded border px-2 py-1 text-sm lg:text-base transition",
     isEditable
       ? [
           "bg-slate-900",
           "border-slate-500",
-          "text-slate-100",
+          "text-slate-200",
           "focus:outline-none",
-          "focus:ring-2",
-          "focus:ring-red-600",
+          "focus:border-red-500",
         ].join(" ")
       : [
           "bg-slate-800",
@@ -36,15 +35,14 @@ export function editableInputClass(isEditable: boolean) {
 
 export function editableTextareaClass(isEditable: boolean) {
   return [
-    "w-full rounded border px-2 py-1 text-sm transition resize-y",
+    "w-full rounded border px-2 py-1 text-sm lg:text-base transition resize-y",
     isEditable
       ? [
           "bg-slate-900",
           "border-slate-500",
-          "text-slate-100",
+          "text-slate-200",
           "focus:outline-none",
-          "focus:ring-2",
-          "focus:ring-red-600",
+          "focus:border-red-500",
         ].join(" ")
       : [
           "bg-slate-800",
@@ -61,22 +59,22 @@ export function editableTextareaClass(isEditable: boolean) {
 
 /** Section header label — amber left-border accent, sits outside or at the top of its box. */
 export const uiSectionHeader =
-  "border-l-2 border-red-700 pl-2 text-xs font-cinzel font-semibold uppercase tracking-widest text-red-500";
+  "border-l-2 border-red-700 pl-2 text-xs lg:text-sm font-cinzel font-semibold uppercase tracking-widest text-red-500";
 
 /** Standard section card — bright border, semi-transparent background. */
-export const uiSection = "rounded-lg border border-slate-500 bg-slate-900/60 p-3";
+export const uiSection = "rounded-lg border border-slate-500 bg-slate-900/60 p-3 lg:p-4";
 
 /** Inner cell within a section (no padding — add your own). */
 export const uiCell = "rounded border border-slate-500 bg-slate-950/60";
 
 /** Label inside a compact stat cell (tight column grids: Quick View, bonuses, movement). */
-export const uiCellLabel = "text-[10px] text-slate-100 leading-tight";
+export const uiCellLabel = "text-[10px] lg:text-xs text-slate-300 leading-tight";
 
 /** Value inside a compact stat cell (tight column grids — keeps text-base to fit). */
-export const uiCellValueSm = "text-base font-semibold font-mono text-slate-100 leading-tight";
+export const uiCellValueSm = "text-base lg:text-lg font-semibold font-mono text-slate-200 leading-tight";
 
 /** Value inside a standard-width display cell — matches the Stepper value size. */
-export const uiCellValue = "text-xl font-semibold font-mono text-slate-100";
+export const uiCellValue = "text-xl lg:text-2xl font-semibold font-mono text-slate-200";
 
 // ──────────────────────────────────────────────────────────────────────────────
 

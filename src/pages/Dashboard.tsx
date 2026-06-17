@@ -77,7 +77,7 @@ function CharacterCard({
           />
         </div>
         <div className="flex-1 space-y-1">
-          <div className="font-semibold text-slate-100 leading-tight">{name}</div>
+          <div className="font-semibold text-slate-200 leading-tight">{name}</div>
           {(career || rank) && (
             <div className="text-sm text-slate-400">
               {[career, rank].filter(Boolean).join(" · ")}
@@ -316,7 +316,7 @@ function DmCampaignList({
                   to={buildRoute.campaignOverview(campaign.id)}
                   className={uiSection + " flex items-center gap-2 hover:bg-slate-800 transition-colors"}
                 >
-                  <span className="flex-1 font-medium">{campaign.name}</span>
+                  <span className="flex-1 font-medium text-slate-200">{campaign.name}</span>
 
                   <Button
                     variant="secondary"
@@ -400,12 +400,12 @@ function QrModal({ title, url, onClose }: { title: string; url: string; onClose:
     <>
       <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
-        <div className="bg-slate-900 border border-slate-700 rounded-xl p-5 flex flex-col gap-4 pointer-events-auto max-w-xs w-full mx-4">
+        <div className="bg-slate-900 border border-slate-700 rounded-xl p-5 lg:p-6 flex flex-col gap-4 pointer-events-auto max-w-xs lg:max-w-sm w-full mx-4">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold text-slate-200">{title}</span>
+            <span className="text-sm lg:text-base font-semibold text-slate-200">{title}</span>
             <button
               onClick={onClose}
-              className="w-7 h-7 flex items-center justify-center rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 text-slate-300 text-lg leading-none transition"
+              className="w-7 h-7 lg:w-8 lg:h-8 flex items-center justify-center rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 text-slate-300 text-lg lg:text-xl leading-none transition"
             >
               ×
             </button>
@@ -413,7 +413,7 @@ function QrModal({ title, url, onClose }: { title: string; url: string; onClose:
           <div className="p-3 bg-white rounded-lg flex justify-center">
             <QRCodeSVG value={url} size={220} />
           </div>
-          <p className="text-xs text-slate-500 break-all text-center">{url}</p>
+          <p className="text-xs lg:text-sm text-slate-500 break-all text-center">{url}</p>
         </div>
       </div>
     </>

@@ -46,7 +46,7 @@ export function ManageModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-sm bg-slate-900 border border-slate-500 rounded-xl shadow-2xl p-5 space-y-5"
+        className="w-full max-w-sm lg:max-w-lg bg-slate-900 border border-slate-500 rounded-xl shadow-2xl p-5 lg:p-6 space-y-5"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -55,7 +55,7 @@ export function ManageModal({
           <button
             onClick={onClose}
             aria-label="Close"
-            className="text-slate-400 hover:text-slate-100 text-lg leading-none"
+            className="text-slate-400 hover:text-slate-100 text-lg lg:text-xl leading-none"
           >
             ✕
           </button>
@@ -64,17 +64,17 @@ export function ManageModal({
         {/* Recovery Code */}
         {recoveryCode && (
           <section className={uiSection + " space-y-2"}>
-            <p className="text-xs font-semibold text-slate-100 uppercase tracking-wide">
+            <p className="text-xs lg:text-sm font-semibold text-slate-100 uppercase tracking-wide">
               Recovery Code
             </p>
             <div className="flex items-center gap-2">
-              <code className="flex-1 px-2 py-1 bg-slate-800 border border-slate-500 rounded text-amber-300 text-sm break-all">
+              <code className="flex-1 px-2 py-1 bg-slate-800 border border-slate-500 rounded text-amber-300 text-sm lg:text-base break-all">
                 {recoveryCode}
               </code>
               <button
                 onClick={copyCode}
                 aria-label="Copy recovery code"
-                className="px-2 py-1 text-xs rounded bg-slate-700 border border-slate-500 text-slate-100 hover:bg-slate-600 shrink-0"
+                className="px-2 py-1 text-xs lg:text-sm rounded bg-slate-700 border border-slate-500 text-slate-100 hover:bg-slate-600 shrink-0"
               >
                 {copied ? "Copied" : "Copy"}
               </button>
@@ -85,7 +85,7 @@ export function ManageModal({
         {/* Export */}
         {canExport && (
           <section className={uiSection + " space-y-2"}>
-            <p className="text-xs font-semibold text-slate-100 uppercase tracking-wide">
+            <p className="text-xs lg:text-sm font-semibold text-slate-100 uppercase tracking-wide">
               Character Data
             </p>
             <button
@@ -93,7 +93,7 @@ export function ManageModal({
                 onExport();
                 onClose();
               }}
-              className="px-2 py-1 text-xs rounded bg-slate-700 border border-slate-500 text-slate-100 hover:bg-slate-600"
+              className="px-2 py-1 text-xs lg:text-sm rounded bg-slate-700 border border-slate-500 text-slate-100 hover:bg-slate-600"
             >
               Export JSON
             </button>
@@ -103,14 +103,14 @@ export function ManageModal({
         {/* Release */}
         {canPlayerRelease && (
           <section className={uiSection + " space-y-2"}>
-            <p className="text-xs font-semibold text-slate-100 uppercase tracking-wide">
+            <p className="text-xs lg:text-sm font-semibold text-slate-100 uppercase tracking-wide">
               Release Character
             </p>
-            <p className="text-xs text-slate-400">Unlinks this character from your account.</p>
+            <p className="text-xs lg:text-sm text-slate-400">Unlinks this character from your account.</p>
             <button
               onClick={onPlayerRelease}
               disabled={isReleasing}
-              className={`px-3 py-2 rounded border text-sm transition ${
+              className={`px-3 py-2 rounded border text-sm lg:text-base transition ${
                 isReleasing
                   ? "bg-red-800 border-red-900 text-red-300 cursor-wait"
                   : "bg-red-600 border-red-700 text-white hover:bg-red-500"
