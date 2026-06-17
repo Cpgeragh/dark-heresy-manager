@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
 
-export function useIsDM(campaignId: string | undefined, userId: string | null): boolean {
-  const [isDM, setIsDM] = useState(false);
+export function useIsDM(campaignId: string | undefined, userId: string | null): boolean | null {
+  const [isDM, setIsDM] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (!campaignId || !userId) {
