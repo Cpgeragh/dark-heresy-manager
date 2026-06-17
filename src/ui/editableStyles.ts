@@ -61,7 +61,7 @@ export function editableTextareaClass(isEditable: boolean) {
 
 /** Section header label — amber left-border accent, sits outside or at the top of its box. */
 export const uiSectionHeader =
-  "border-l-2 border-red-700 pl-2 text-xs font-semibold uppercase tracking-widest text-red-500";
+  "border-l-2 border-red-700 pl-2 text-xs font-cinzel font-semibold uppercase tracking-widest text-red-500";
 
 /** Standard section card — bright border, semi-transparent background. */
 export const uiSection = "rounded-lg border border-slate-500 bg-slate-900/60 p-3";

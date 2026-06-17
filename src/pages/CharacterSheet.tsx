@@ -318,7 +318,7 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
     return <div className="text-slate-300 text-center py-10">Invalid character route.</div>;
   }
 
-  if (characterLoading) {
+  if (characterLoading || isDMLoading) {
     return <div className="text-slate-300 text-center py-10">Loading character…</div>;
   }
 
@@ -385,7 +385,7 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
       {/* NAV BAR */}
       {/* Mobile: hamburger lives inside SectionDrawer; this row just shows the tab title */}
       <div className="sm:hidden relative flex items-center mb-4 py-1">
-        <span className="absolute inset-x-0 text-center font-semibold text-slate-100 text-lg pointer-events-none">
+        <span className="absolute inset-x-0 text-center font-cinzel font-bold text-slate-100 text-lg pointer-events-none">
           {TAB_TITLES[activeTab]}
         </span>
       </div>
