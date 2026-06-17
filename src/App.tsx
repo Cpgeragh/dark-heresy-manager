@@ -67,16 +67,18 @@ export default function App() {
   // -------------------------------------------------
   if (loading || linkLoading || profileLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-100">
-        Loading…
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-slate-950 text-slate-100">
+        <div className="w-8 h-8 rounded-full border-4 border-slate-700 border-t-red-600 animate-spin" />
+        <span className="text-sm text-slate-400">Loading…</span>
       </div>
     );
   }
 
   if (!currentUser) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-100">
-        Initialising user…
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-slate-950 text-slate-100">
+        <div className="w-8 h-8 rounded-full border-4 border-slate-700 border-t-red-600 animate-spin" />
+        <span className="text-sm text-slate-400">Loading…</span>
       </div>
     );
   }
