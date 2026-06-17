@@ -11,8 +11,9 @@ const root = ReactDOM.createRoot(document.getElementById("root")!);
 
 function Splash({ label }: { label: string }) {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-100">
-      {label}
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-slate-950 text-slate-100">
+      <div className="w-8 h-8 rounded-full border-4 border-slate-700 border-t-red-600 animate-spin" />
+      <span className="text-sm text-slate-400">{label}</span>
     </div>
   );
 }
@@ -34,6 +35,7 @@ function renderApp() {
 function renderUpdating() {
   if (settled) return;
   settled = true;
+  sessionStorage.setItem("pwa-just-upgraded", "1");
   root.render(<Splash label="Updating…" />);
   // If the update stalls (connection drops mid-download), fall back to the
   // cached app rather than hanging on "Updating…" forever.
@@ -58,6 +60,11 @@ if (import.meta.env.DEV) {
       // First visit / not yet controlled by a worker → nothing cached can be
       // stale, so just show the app.
       if (!registration || !navigator.serviceWorker.controller) {
+        renderApp();
+        return;
+      }
+      if (sessionStorage.getItem("pwa-just-upgraded")) {
+        sessionStorage.removeItem("pwa-just-upgraded");
         renderApp();
         return;
       }
