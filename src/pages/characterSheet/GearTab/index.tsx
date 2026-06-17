@@ -128,7 +128,7 @@ export function GearTab({ gear, consumables, editable, onUpdate, onUpdateConsuma
           {!showCustomForm && (
             <button
               onClick={() => setShowGearPicker(true)}
-              className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
+              className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
             >
               {editable ? "+ Add" : "View"}
             </button>
@@ -136,7 +136,7 @@ export function GearTab({ gear, consumables, editable, onUpdate, onUpdateConsuma
         </div>
 
         {gear.length === 0 && !showCustomForm && (
-          <p className="text-sm text-slate-500 italic">No items recorded.</p>
+          <p className="text-sm lg:text-base text-slate-500 italic">No items recorded.</p>
         )}
 
         <div className="space-y-3 sm:hidden">
@@ -178,14 +178,14 @@ export function GearTab({ gear, consumables, editable, onUpdate, onUpdateConsuma
           <SectionHeader>Consumables ({consumables.length})</SectionHeader>
           <button
             onClick={() => setShowConsumablePicker(true)}
-            className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
+            className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
           >
             {editable ? "+ Add" : "View"}
           </button>
         </div>
 
         {consumables.length === 0 && (
-          <p className="text-sm text-slate-500 italic">No consumables recorded.</p>
+          <p className="text-sm lg:text-base text-slate-500 italic">No consumables recorded.</p>
         )}
 
         <div className="space-y-3 sm:hidden">

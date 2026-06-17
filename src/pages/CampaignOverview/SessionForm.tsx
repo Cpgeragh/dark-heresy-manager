@@ -59,56 +59,56 @@ export function SessionForm({ campaignId, characters, onClose }: Props) {
   }, [campaignId, date, summary, dmNotes, xpAwarded, attendees, toast, onClose]);
 
   return (
-    <div className="rounded-lg border border-slate-500 bg-slate-900/60 p-3 space-y-4">
-      <h3 className="border-l-2 border-red-700 pl-2 text-xs font-semibold uppercase tracking-widest text-red-500">New Session</h3>
+    <div className="rounded-lg border border-slate-500 bg-slate-900/60 p-3 lg:p-4 space-y-4">
+      <h3 className="border-l-2 border-red-700 pl-2 text-xs lg:text-sm font-semibold uppercase tracking-widest text-red-500">New Session</h3>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs text-slate-400 mb-1">Date</label>
+          <label className="block text-xs lg:text-sm text-slate-400 mb-1">Date</label>
           <input
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="w-full px-2 py-1 bg-slate-800 border border-slate-600 rounded text-sm"
+            className="w-full px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-800 border border-slate-600 rounded text-sm lg:text-base"
           />
         </div>
         <div>
-          <label className="block text-xs text-slate-400 mb-1">XP Awarded</label>
+          <label className="block text-xs lg:text-sm text-slate-400 mb-1">XP Awarded</label>
           <input
             type="number"
             min={0}
             value={xpAwarded}
             onChange={(e) => setXpAwarded(Math.max(0, Number(e.target.value)))}
-            className="w-full px-2 py-1 bg-slate-800 border border-slate-600 rounded text-sm"
+            className="w-full px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-800 border border-slate-600 rounded text-sm lg:text-base"
           />
         </div>
       </div>
 
       <div>
-        <label className="block text-xs text-slate-400 mb-1">Summary</label>
+        <label className="block text-xs lg:text-sm text-slate-400 mb-1">Summary</label>
         <textarea
           value={summary}
           onChange={(e) => setSummary(e.target.value)}
           rows={3}
-          className="w-full px-2 py-1 bg-slate-800 border border-slate-600 rounded text-sm resize-none"
+          className="w-full px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-800 border border-slate-600 rounded text-sm lg:text-base resize-none"
         />
       </div>
 
       <div>
-        <label className="block text-xs text-slate-400 mb-1">DM Notes (private)</label>
+        <label className="block text-xs lg:text-sm text-slate-400 mb-1">DM Notes (private)</label>
         <textarea
           value={dmNotes}
           onChange={(e) => setDmNotes(e.target.value)}
           rows={2}
-          className="w-full px-2 py-1 bg-slate-800 border border-slate-600 rounded text-sm resize-none"
+          className="w-full px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-800 border border-slate-600 rounded text-sm lg:text-base resize-none"
         />
       </div>
 
       <div>
-        <p className="text-xs text-slate-400 mb-2">Attendees</p>
+        <p className="text-xs lg:text-sm text-slate-400 mb-2">Attendees</p>
         <div className="flex flex-wrap gap-3">
           {characters.map((char) => (
-            <label key={char.id} className="flex items-center gap-1 text-sm cursor-pointer">
+            <label key={char.id} className="flex items-center gap-1 text-sm lg:text-base cursor-pointer">
               <input
                 type="checkbox"
                 checked={attendees.has(char.id)}
@@ -124,14 +124,14 @@ export function SessionForm({ campaignId, characters, onClose }: Props) {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="px-4 py-2 border border-red-500 text-red-500 font-semibold rounded text-sm hover:bg-red-500/10 disabled:opacity-50"
+          className="px-4 lg:px-5 py-2 lg:py-2.5 border border-red-500 text-red-500 font-semibold rounded text-sm lg:text-base hover:bg-red-500/10 disabled:opacity-50"
         >
           {saving ? "Saving…" : "Save Session"}
         </button>
         <button
           onClick={onClose}
           disabled={saving}
-          className="px-4 py-2 bg-slate-700 text-slate-300 rounded text-sm hover:bg-slate-600"
+          className="px-4 lg:px-5 py-2 lg:py-2.5 bg-slate-700 text-slate-300 rounded text-sm lg:text-base hover:bg-slate-600"
         >
           Cancel
         </button>

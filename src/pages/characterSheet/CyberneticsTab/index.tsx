@@ -87,14 +87,14 @@ export function CyberneticsTab({ cybernetics, editable, onUpdate }: CyberneticsT
           <SectionHeader>Installed Implants ({cybernetics.length})</SectionHeader>
           <button
             onClick={() => setShowPicker(true)}
-            className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
+            className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
           >
             {editable ? "+ Install" : "View"}
           </button>
         </div>
 
         {cybernetics.length === 0 && (
-          <p className="text-sm text-slate-500 italic">No cybernetics installed.</p>
+          <p className="text-sm lg:text-base text-slate-500 italic">No cybernetics installed.</p>
         )}
 
         <div className="space-y-3 sm:hidden">

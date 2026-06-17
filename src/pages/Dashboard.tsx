@@ -77,14 +77,14 @@ function CharacterCard({
           />
         </div>
         <div className="flex-1 space-y-1">
-          <div className="font-semibold text-slate-200 leading-tight">{name}</div>
+          <div className="font-semibold text-slate-200 leading-tight lg:text-lg">{name}</div>
           {(career || rank) && (
-            <div className="text-sm text-slate-400">
+            <div className="text-sm lg:text-base text-slate-400">
               {[career, rank].filter(Boolean).join(" · ")}
             </div>
           )}
           {(character.wounds || xpLeft !== null) && (
-            <div className="flex flex-wrap gap-3 text-xs text-slate-400">
+            <div className="flex flex-wrap gap-3 text-xs lg:text-sm text-slate-400">
               {character.wounds && (
                 <span>
                   ❤{" "}
@@ -114,7 +114,7 @@ function CharacterCard({
               )}
             </div>
           )}
-          <div className="text-xs text-slate-600 font-mono">
+          <div className="text-xs lg:text-sm text-slate-600 font-mono">
             Recovery: {character.recoveryCode}
           </div>
         </div>
@@ -140,10 +140,10 @@ function PlayerCampaignRow({
     <div>
       <SectionHeader className="mb-3">{campaignName}</SectionHeader>
 
-      {loading && <p className="text-sm text-slate-500">Loading characters…</p>}
+      {loading && <p className="text-sm lg:text-base text-slate-500">Loading characters…</p>}
 
       {!loading && characters.length === 0 && (
-        <p className="text-sm text-slate-500">No characters claimed in this campaign.</p>
+        <p className="text-sm lg:text-base text-slate-500">No characters claimed in this campaign.</p>
       )}
 
       {!loading && characters.length > 0 && (
@@ -284,9 +284,9 @@ function DmCampaignList({
         <SectionHeader className="mb-3">Your Campaigns</SectionHeader>
 
         {loading ? (
-          <p className="text-slate-400 text-sm">Loading campaigns…</p>
+          <p className="text-slate-400 text-sm lg:text-base">Loading campaigns…</p>
         ) : campaigns.length === 0 ? (
-          <p className="text-slate-400 text-sm">No campaigns created yet.</p>
+          <p className="text-slate-400 text-sm lg:text-base">No campaigns created yet.</p>
         ) : (
           <div className="flex flex-col gap-3">
             {campaigns.map((campaign) =>
@@ -316,7 +316,7 @@ function DmCampaignList({
                   to={buildRoute.campaignOverview(campaign.id)}
                   className={uiSection + " flex items-center gap-2 hover:bg-slate-800 transition-colors"}
                 >
-                  <span className="flex-1 font-medium text-slate-200">{campaign.name}</span>
+                  <span className="flex-1 font-medium text-slate-200 lg:text-lg">{campaign.name}</span>
 
                   <Button
                     variant="secondary"
@@ -354,7 +354,7 @@ function DmCampaignList({
           <div className="mt-4">
             <button
               onClick={() => setShowArchived((v) => !v)}
-              className="text-sm text-slate-500 hover:text-slate-300 transition-colors"
+              className="text-sm lg:text-base text-slate-500 hover:text-slate-300 transition-colors"
             >
               {showArchived ? "▾" : "▸"} Archived ({archivedCampaigns.length})
             </button>
@@ -363,7 +363,7 @@ function DmCampaignList({
               <div className="flex flex-col gap-2 mt-2">
                 {archivedCampaigns.map((campaign) => (
                   <div key={campaign.id} className={uiSection + " flex items-center gap-2 opacity-60"}>
-                    <span className="flex-1 text-slate-400 italic">{campaign.name}</span>
+                    <span className="flex-1 text-slate-400 italic lg:text-lg">{campaign.name}</span>
 
                     <Button
                       variant="secondary"
@@ -498,13 +498,13 @@ function ClaimCharacterSection({ effectiveUserId }: { effectiveUserId: string })
         <ClaimForm code={code} onCodeChange={setCode} onSubmit={handleLookup} loading={loading} />
 
         {error && (
-          <p className="text-red-400 text-sm border border-red-600 bg-red-900/20 p-2 rounded">
+          <p className="text-red-400 text-sm lg:text-base border border-red-600 bg-red-900/20 p-2 lg:p-3 rounded">
             {error}
           </p>
         )}
 
         {claimError && (
-          <p className="text-red-400 text-sm border border-red-600 bg-red-900/20 p-2 rounded">
+          <p className="text-red-400 text-sm lg:text-base border border-red-600 bg-red-900/20 p-2 lg:p-3 rounded">
             {claimError}
           </p>
         )}
@@ -518,7 +518,7 @@ function ClaimCharacterSection({ effectiveUserId }: { effectiveUserId: string })
           />
         )}
 
-        {claiming && <p className="text-xs text-slate-400 text-center">Claiming character…</p>}
+        {claiming && <p className="text-xs lg:text-sm text-slate-400 text-center">Claiming character…</p>}
       </div>
     </div>
   );
@@ -555,10 +555,10 @@ export default function Dashboard({ user, effectiveUserId, isLinked, firstName }
         {/* ── Player section ───────────────────────────────────────────── */}
         <SectionHeader>Campaigns You Play In</SectionHeader>
 
-        {loading && <p className="text-slate-400 text-sm">Loading campaigns…</p>}
+        {loading && <p className="text-slate-400 text-sm lg:text-base">Loading campaigns…</p>}
 
         {!loading && playerCampaigns.length === 0 && (
-          <p className="text-slate-400 text-sm">
+          <p className="text-slate-400 text-sm lg:text-base">
             You are not part of any campaigns yet. Ask your DM for a recovery code to claim
             your character.
           </p>

@@ -40,25 +40,25 @@ export function ItemMetaChips({
   const chips = (
     <>
       {weight && (
-        <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">
+        <span className="text-xs lg:text-sm rounded border border-slate-700 bg-slate-800/40 px-1.5 lg:px-2 py-0.5 text-slate-400">
           ⚖ {weight}
         </span>
       )}
       {value && (
-        <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-amber-400/80 font-mono">
+        <span className="text-xs lg:text-sm rounded border border-slate-700 bg-slate-800/40 px-1.5 lg:px-2 py-0.5 text-amber-400/80 font-mono">
           ₮ {value}
         </span>
       )}
       {rarity && (
         <span
-          className={`text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 ${rarityColour(rarity)}`}
+          className={`text-xs lg:text-sm rounded border border-slate-700 bg-slate-800/40 px-1.5 lg:px-2 py-0.5 ${rarityColour(rarity)}`}
         >
           {rarity}
         </span>
       )}
       {source && (
         <span
-          className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(source)}`}
+          className={`text-xs lg:text-sm rounded border bg-slate-800/40 px-1.5 lg:px-2 py-0.5 font-mono ${sourceColour(source)}`}
         >
           {source}
         </span>

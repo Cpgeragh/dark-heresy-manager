@@ -26,7 +26,7 @@ export function DrugRow({
       {/* Name + duration + chips */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <p className="text-sm font-medium text-slate-200">{item.name}</p>
+          <p className="text-sm lg:text-base font-medium text-slate-200">{item.name}</p>
           {hasInfo && (
             <InfoModal
               title={item.name}
@@ -34,42 +34,42 @@ export function DrugRow({
                 <>
                   {ref?.duration && (
                     <div>
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
+                      <p className="text-xs lg:text-sm font-semibold text-slate-500 uppercase tracking-wide mb-1">
                         Duration
                       </p>
-                      <p className="text-sm text-slate-300 leading-relaxed">{ref.duration}</p>
+                      <p className="text-sm lg:text-base text-slate-300 leading-relaxed">{ref.duration}</p>
                     </div>
                   )}
                   {ref?.effect && (
                     <div>
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
+                      <p className="text-xs lg:text-sm font-semibold text-slate-500 uppercase tracking-wide mb-1">
                         Effect
                       </p>
-                      <p className="text-sm text-slate-300 leading-relaxed">{ref.effect}</p>
+                      <p className="text-sm lg:text-base text-slate-300 leading-relaxed">{ref.effect}</p>
                     </div>
                   )}
                   {ref?.sideEffect && (
                     <div>
-                      <p className="text-xs font-semibold text-red-500/70 uppercase tracking-wide mb-1">
+                      <p className="text-xs lg:text-sm font-semibold text-red-500/70 uppercase tracking-wide mb-1">
                         Side Effects
                       </p>
-                      <p className="text-sm text-slate-400 leading-relaxed">{ref.sideEffect}</p>
+                      <p className="text-sm lg:text-base text-slate-400 leading-relaxed">{ref.sideEffect}</p>
                     </div>
                   )}
                   {ref?.notes && (
                     <div>
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
+                      <p className="text-xs lg:text-sm font-semibold text-slate-500 uppercase tracking-wide mb-1">
                         Notes
                       </p>
-                      <p className="text-sm text-slate-400 leading-relaxed">{ref.notes}</p>
+                      <p className="text-sm lg:text-base text-slate-400 leading-relaxed">{ref.notes}</p>
                     </div>
                   )}
                   {item.notes && (
                     <div>
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
+                      <p className="text-xs lg:text-sm font-semibold text-slate-500 uppercase tracking-wide mb-1">
                         Player Notes
                       </p>
-                      <p className="text-sm text-slate-400 leading-relaxed">{item.notes}</p>
+                      <p className="text-sm lg:text-base text-slate-400 leading-relaxed">{item.notes}</p>
                     </div>
                   )}
                 </>
@@ -77,7 +77,7 @@ export function DrugRow({
             />
           )}
         </div>
-        {ref?.duration && <p className="text-xs text-slate-500 mt-0.5">Duration: {ref.duration}</p>}
+        {ref?.duration && <p className="text-xs lg:text-sm text-slate-500 mt-0.5">Duration: {ref.duration}</p>}
         <ItemMetaChips
           weight={item.weight ?? ref?.weight ?? "0 kg"}
           value={item.value ?? ref?.value}
@@ -99,7 +99,7 @@ export function DrugRow({
       {editable && (
         <button
           onClick={() => onRemove(item.id)}
-          className="text-xs text-red-400 hover:text-red-300 transition shrink-0"
+          className="text-xs lg:text-sm text-red-400 hover:text-red-300 transition shrink-0"
         >
           Remove
         </button>

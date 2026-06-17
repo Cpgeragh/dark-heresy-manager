@@ -74,14 +74,14 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
   }
 
   return (
-    <div className="border border-red-700/30 bg-slate-900/60 rounded-lg p-4 space-y-3">
-      <p className="text-xs font-semibold text-red-500 uppercase tracking-wide">
+    <div className="border border-red-700/30 bg-slate-900/60 rounded-lg p-4 lg:p-5 space-y-3">
+      <p className="text-xs lg:text-sm font-semibold text-red-500 uppercase tracking-wide">
         Custom Archeotech Item
       </p>
 
       {/* Name */}
       <div className="space-y-1">
-        <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+        <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
           Name <span className="text-red-400">*</span>
         </label>
         <input
@@ -96,7 +96,7 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
 
       {/* Type */}
       <div className="space-y-1">
-        <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+        <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
           Type <span className="text-slate-600">(optional)</span>
         </label>
         <select
@@ -116,7 +116,7 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
       {/* Weight + Value on one row */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
-          <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+          <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
             Weight <span className="text-red-400">*</span>
           </label>
           <input
@@ -129,7 +129,7 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
           />
         </div>
         <div className="space-y-1">
-          <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+          <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
             Value <span className="text-red-400">*</span>
           </label>
           <input
@@ -145,7 +145,7 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
 
       {/* Rarity */}
       <div className="space-y-1">
-        <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+        <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
           Rarity <span className="text-slate-600">(optional)</span>
         </label>
         <select
@@ -164,7 +164,7 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
 
       {/* Description */}
       <div className="space-y-1">
-        <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+        <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
           Description / Rules <span className="text-slate-600">(optional)</span>
         </label>
         <textarea
@@ -178,7 +178,7 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
 
       {/* Notes */}
       <div className="space-y-1">
-        <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+        <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
           Notes <span className="text-slate-600">(optional)</span>
         </label>
         <textarea
@@ -197,7 +197,7 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
         </Button>
         <button
           onClick={onCancel}
-          className="px-4 py-1.5 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm text-slate-100 transition"
+          className="px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100 transition"
         >
           Cancel
         </button>

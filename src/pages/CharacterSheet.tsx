@@ -326,7 +326,7 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
     return (
       <div className="text-slate-300 text-center py-10 space-y-4">
         <p className="text-lg font-semibold">Character not found.</p>
-        <p className="text-sm text-slate-400">
+        <p className="text-sm lg:text-base text-slate-400">
           This character may have been deleted or the link is invalid.
         </p>
       </div>
@@ -365,13 +365,13 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
       {/* DM NAV / OVERRIDE BAR */}
       {isDM && (
         <div className="flex items-center justify-between mb-4 p-2 rounded border border-slate-700 bg-slate-900/60">
-          <span className="text-xs text-slate-400">DM View</span>
+          <span className="text-xs lg:text-sm text-slate-400">DM View</span>
 
           <button
             onClick={toggleDmReadOnly}
             aria-label={dmReadOnly ? "Enable editing mode" : "Disable editing mode"}
             aria-pressed={!dmReadOnly}
-            className={`text-xs px-3 py-1 rounded border ${
+            className={`text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border ${
               dmReadOnly
                 ? "border-slate-600 bg-slate-800 text-slate-300"
                 : "border-amber-400 bg-amber-500 text-slate-900 font-semibold"
@@ -412,13 +412,13 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
             <div className="p-6 text-center space-y-4">
               <div className="text-slate-300">
                 <p className="text-lg font-semibold mb-2">Failed to load this tab</p>
-                <p className="text-sm text-slate-400">
+                <p className="text-sm lg:text-base text-slate-400">
                   An error occurred while displaying this content.
                 </p>
               </div>
               <button
                 onClick={() => handleTabChange("vitals")}
-                className="px-4 py-2 bg-slate-800 text-slate-200 rounded border border-slate-700 hover:bg-slate-700 transition"
+                className="px-4 lg:px-5 py-2 lg:py-2.5 bg-slate-800 text-slate-200 rounded border border-slate-700 hover:bg-slate-700 transition text-sm lg:text-base"
               >
                 Back to Overview
               </button>

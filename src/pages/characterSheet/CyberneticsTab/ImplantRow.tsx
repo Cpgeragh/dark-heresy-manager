@@ -31,7 +31,7 @@ export function ImplantRow({ item, editable, onCycleQuality, onRemove }: Props) 
       {/* Name + craftsmanship description */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5 min-w-0">
-          <p className="text-sm font-medium text-slate-200 truncate">{item.name}</p>
+          <p className="text-sm lg:text-base font-medium text-slate-200 truncate">{item.name}</p>
           <InfoModal
             title={item.name}
             content={
@@ -58,7 +58,7 @@ export function ImplantRow({ item, editable, onCycleQuality, onRemove }: Props) 
         </div>
         <div className="flex flex-wrap gap-1.5 mt-1">
           {item.bodyLocation && item.bodyLocation.length > 0 && (
-            <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-400">
+            <span className="text-xs lg:text-sm rounded border border-slate-700 bg-slate-800/40 px-1.5 lg:px-2 py-0.5 text-slate-400">
               {item.bodyLocation.map((l) => LOCATION_DISPLAY[l]).join(" & ")}
             </span>
           )}
@@ -71,7 +71,7 @@ export function ImplantRow({ item, editable, onCycleQuality, onRemove }: Props) 
           />
         </div>
         <div className="flex items-center gap-1.5 mt-1">
-          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Quality</span>
+          <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Quality</span>
           <button
             onClick={() => canChangeQuality && onCycleQuality(item.id)}
             title={
@@ -81,7 +81,7 @@ export function ImplantRow({ item, editable, onCycleQuality, onRemove }: Props) 
             }
             disabled={!canChangeQuality}
             className={[
-              "text-xs px-1.5 py-0.5 rounded border font-medium transition shrink-0",
+              "text-xs lg:text-sm px-1.5 lg:px-2 py-0.5 rounded border font-medium transition shrink-0",
               CRAFTSMANSHIP_STYLE[displayedCraftsmanship],
               canChangeQuality ? "cursor-pointer hover:opacity-80" : "cursor-default",
             ].join(" ")}
@@ -105,7 +105,7 @@ export function ImplantRow({ item, editable, onCycleQuality, onRemove }: Props) 
       {editable && (
         <button
           onClick={() => onRemove(item.id)}
-          className="text-xs text-red-400 hover:text-red-300 transition shrink-0"
+          className="text-xs lg:text-sm text-red-400 hover:text-red-300 transition shrink-0"
         >
           Remove
         </button>

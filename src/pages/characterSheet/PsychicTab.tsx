@@ -91,7 +91,7 @@ function PowerPicker({
           key={d}
           onClick={() => setDiscipline(d)}
           className={[
-            "text-xs px-2.5 py-0.5 rounded border transition",
+            "text-xs lg:text-sm px-2.5 lg:px-3 py-0.5 lg:py-1 rounded border transition",
             discipline === d
               ? d === "All"
                 ? "border-slate-400 bg-slate-700 text-slate-100"
@@ -106,7 +106,7 @@ function PowerPicker({
         editable ? (
           <button
             onClick={onCustom}
-            className="w-full text-sm text-red-500 hover:text-red-400 text-center py-1 transition"
+            className="w-full text-sm lg:text-base text-red-500 hover:text-red-400 text-center py-1 lg:py-1.5 transition"
           >
             {minorOnly ? "+ Custom minor power" : "+ Custom major power"}
           </button>
@@ -117,10 +117,10 @@ function PowerPicker({
         <button
           key={ref.id}
           onClick={editable ? () => onSelect(ref) : undefined}
-          className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
+          className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
           <div className="flex items-center gap-1.5">
-            <span className="text-sm font-medium text-slate-200 group-hover:text-white">
+            <span className="text-sm lg:text-base font-medium text-slate-200 group-hover:text-white">
               {ref.name}
             </span>
             {ref.description && (
@@ -131,14 +131,14 @@ function PowerPicker({
                 <InfoModal
                   title={ref.name}
                   content={
-                    <p className="text-sm text-slate-300 leading-relaxed">{ref.description}</p>
+                    <p className="text-sm lg:text-base text-slate-300 leading-relaxed">{ref.description}</p>
                   }
                   hideTitle
                 />
               </span>
             )}
           </div>
-          <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5 flex-wrap">
+          <div className="flex items-center gap-2 text-xs lg:text-sm text-slate-500 mt-0.5 flex-wrap">
             <span
               className={`rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(ref.source)}`}
             >
@@ -276,9 +276,9 @@ function CustomPowerForm({
       isEmpty={false}
       maxHeight="max-h-[85vh]"
     >
-      <div className="p-4 space-y-4">
+      <div className="p-4 lg:p-5 space-y-4">
         <div className="space-y-1">
-          <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+          <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
             Name <span className="text-red-400">*</span>
           </label>
           <input
@@ -290,17 +290,17 @@ function CustomPowerForm({
             autoFocus
           />
           {nameExists && (
-            <p className="text-xs text-red-300">That power is already on this character.</p>
+            <p className="text-xs lg:text-sm text-red-300">That power is already on this character.</p>
           )}
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+          <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
             Discipline <span className="text-red-400">*</span>
           </label>
           {target === "minor" ? (
             <div
-              className={`flex w-fit rounded border px-2 py-1 text-xs font-medium ${psychicDisciplineColour("Minor")}`}
+              className={`flex w-fit rounded border px-2 lg:px-3 py-1 lg:py-1.5 text-xs lg:text-sm font-medium ${psychicDisciplineColour("Minor")}`}
             >
               Minor
             </div>
@@ -312,7 +312,7 @@ function CustomPowerForm({
                   type="button"
                   onClick={() => setDiscipline(d)}
                   className={[
-                    "text-xs px-2.5 py-1 rounded border transition",
+                    "text-xs lg:text-sm px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border transition",
                     discipline === d
                       ? `${psychicDisciplineColour(d)} font-semibold`
                       : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
@@ -327,7 +327,7 @@ function CustomPowerForm({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="space-y-1">
-            <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+            <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
               PT <span className="text-red-400">*</span>
             </label>
             <input
@@ -341,7 +341,7 @@ function CustomPowerForm({
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+            <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
               Action <span className="text-red-400">*</span>
             </label>
             <div className="grid grid-cols-2 gap-1.5">
@@ -351,7 +351,7 @@ function CustomPowerForm({
                   type="button"
                   onClick={() => setFocusTime(action)}
                   className={[
-                    "text-xs px-2 py-1 rounded border transition",
+                    "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
                     focusTime === action
                       ? "border-red-500 bg-red-500/20 text-red-400 font-semibold"
                       : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
@@ -365,7 +365,7 @@ function CustomPowerForm({
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+          <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
             Range <span className="text-red-400">*</span>
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
@@ -380,7 +380,7 @@ function CustomPowerForm({
                 type="button"
                 onClick={() => setRangeMode(mode as CustomRangeMode)}
                 className={[
-                  "text-xs px-2 py-1 rounded border transition",
+                  "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
                   rangeMode === mode
                     ? "border-red-500 bg-red-500/20 text-red-400 font-semibold"
                     : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
@@ -404,7 +404,7 @@ function CustomPowerForm({
                 placeholder={rangeMode === "km-radius" ? "e.g. 1.5" : "e.g. 10"}
                 className={editableInputClass(true) + " w-28 font-mono"}
               />
-              <span className="text-xs text-slate-400">
+              <span className="text-xs lg:text-sm text-slate-400">
                 {rangeMode === "km-radius" ? "km radius" : "metres"}
               </span>
             </div>
@@ -413,7 +413,7 @@ function CustomPowerForm({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="space-y-1">
-            <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+            <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
               Sustained <span className="text-red-400">*</span>
             </label>
             <div className="grid grid-cols-2 gap-1.5">
@@ -423,7 +423,7 @@ function CustomPowerForm({
                   type="button"
                   onClick={() => setSustained(value)}
                   className={[
-                    "text-xs px-2 py-1 rounded border transition",
+                    "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
                     sustained === value
                       ? "border-red-500 bg-red-500/20 text-red-400 font-semibold"
                       : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
@@ -436,7 +436,7 @@ function CustomPowerForm({
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+            <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
               Origin <span className="text-red-400">*</span>
             </label>
             <div className="grid grid-cols-2 gap-1.5">
@@ -446,7 +446,7 @@ function CustomPowerForm({
                   type="button"
                   onClick={() => setOrigin(value)}
                   className={[
-                    "text-xs px-2 py-1 rounded border transition",
+                    "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
                     origin === value
                       ? `${sourceColour(value)} bg-slate-800/70 font-semibold`
                       : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
@@ -460,7 +460,7 @@ function CustomPowerForm({
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+          <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
             Description <span className="text-slate-600">(optional)</span>
           </label>
           <textarea
@@ -479,7 +479,7 @@ function CustomPowerForm({
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-1.5 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm text-slate-100 transition"
+            className="px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100 transition"
           >
             Cancel
           </button>
@@ -673,7 +673,7 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
       <div className={uiSection + " flex flex-col items-center space-y-3"}>
         {/* Psy Rating — derived from highest Psy Rating talent */}
         <div className="inline-flex flex-col items-center gap-2">
-          <span className="text-xs font-medium uppercase tracking-wide text-slate-100">
+          <span className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
             Psy Rating
           </span>
           <div className="relative inline-flex">
@@ -683,7 +683,7 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
                 psyRatingGlow(psyRating),
               ].join(" ")}
             >
-              <span className="text-sm font-bold font-mono text-indigo-300">{psyRating}</span>
+              <span className="text-sm lg:text-base font-bold font-mono text-indigo-300">{psyRating}</span>
             </div>
             {psyRating > 0 && (
               <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2">
@@ -702,7 +702,7 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
 
         {/* Disciplines — toggle chips, one per major discipline */}
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-100 mb-1.5 text-center">
+          <p className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100 mb-1.5 text-center">
             Disciplines
           </p>
           <div className="flex flex-wrap gap-1.5 justify-center">
@@ -715,7 +715,7 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
                   onClick={() => handleToggleDiscipline(d)}
                   aria-pressed={active}
                   className={[
-                    "px-2.5 py-1 rounded border text-xs transition",
+                    "px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm transition",
                     active
                       ? `${psychicDisciplineColour(d)} font-semibold`
                       : editable
@@ -754,7 +754,7 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
                 aria-selected={active}
                 onClick={() => switchPowerGroup(group)}
                 className={[
-                  "rounded-md px-3 py-1.5 text-xs font-semibold transition border",
+                  "rounded-md px-3 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm font-semibold transition border",
                   active
                     ? powerGroupActiveColour(group)
                     : "border-transparent text-slate-400 hover:bg-slate-800 hover:text-slate-200",
@@ -778,7 +778,7 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
             <SectionHeader>{activeTitle}</SectionHeader>
             <button
               onClick={activeOpenPicker}
-              className="text-xs px-3 py-1 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
+              className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
               aria-label={editable ? `Add ${activeTitle.slice(0, -1)}` : `View ${activeTitle}`}
             >
               {editable ? activeAddLabel : "View"}
@@ -786,7 +786,7 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
           </div>
 
           {activePowers.length === 0 ? (
-            <p className="text-sm text-slate-400">{activeEmptyText}</p>
+            <p className="text-sm lg:text-base text-slate-400">{activeEmptyText}</p>
           ) : (
             <PowerGrid
               powers={activePowers}
@@ -804,7 +804,7 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
           <SectionHeader>Minor Powers</SectionHeader>
           <button
             onClick={openPickerForMinor}
-            className="text-xs px-3 py-1 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
+            className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
             aria-label={editable ? "Add Minor Power" : "View Minor Powers"}
           >
             {editable ? "+ Add Minor Power" : "View"}
@@ -812,7 +812,7 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
         </div>
 
         {psychic.minorPowers.length === 0 ? (
-          <p className="text-sm text-slate-400">No minor powers recorded.</p>
+          <p className="text-sm lg:text-base text-slate-400">No minor powers recorded.</p>
         ) : (
           <PowerGrid
             powers={psychic.minorPowers}
@@ -829,7 +829,7 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
           <SectionHeader>Major Powers</SectionHeader>
           <button
             onClick={openPickerForMajor}
-            className="text-xs px-3 py-1 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
+            className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
             aria-label={editable ? "Add Major Power" : "View Major Powers"}
           >
             {editable ? "+ Add Major Power" : "View"}
@@ -837,7 +837,7 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
         </div>
 
         {psychic.majorPowers.length === 0 ? (
-          <p className="text-sm text-slate-400">No major powers recorded.</p>
+          <p className="text-sm lg:text-base text-slate-400">No major powers recorded.</p>
         ) : (
           <PowerGrid
             powers={psychic.majorPowers}

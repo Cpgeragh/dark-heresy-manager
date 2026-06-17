@@ -50,10 +50,10 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc }: SkillRowP
       <button
         onClick={handleToggle}
         aria-expanded={expanded}
-        className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-slate-700/40 transition"
+        className="w-full flex items-center gap-3 px-3 lg:px-4 py-2.5 lg:py-3 text-left hover:bg-slate-700/40 transition"
       >
         <div className="flex items-center gap-1.5 flex-1 min-w-0">
-          <span className="text-sm font-semibold text-slate-100 truncate">{skill.name}</span>
+          <span className="text-sm lg:text-base font-semibold text-slate-100 truncate">{skill.name}</span>
           {SKILL_DESCRIPTIONS[skill.name] && (
             <span
               className="inline-flex items-center leading-[0]"
@@ -65,18 +65,18 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc }: SkillRowP
         </div>
 
         <span
-          className={`px-1.5 py-0.5 rounded border bg-slate-800 text-[10px] font-mono shrink-0 ${charColour(skill.characteristic)}`}
+          className={`px-1.5 lg:px-2 py-0.5 rounded border bg-slate-800 text-[10px] lg:text-xs font-mono shrink-0 ${charColour(skill.characteristic)}`}
         >
           {CHAR_LABEL[skill.characteristic]}
         </span>
 
         <span
-          className={`px-1.5 py-0.5 rounded border text-[10px] font-semibold shrink-0 ${levelBadgeClass}`}
+          className={`px-1.5 lg:px-2 py-0.5 rounded border text-[10px] lg:text-xs font-semibold shrink-0 ${levelBadgeClass}`}
         >
           {skill.level === "trained" ? "Trained" : skill.level}
         </span>
 
-        <span className={`text-base font-mono font-semibold shrink-0 ${totalColor}`}>
+        <span className={`text-base lg:text-lg font-mono font-semibold shrink-0 ${totalColor}`}>
           {skill.total ?? "--"}
         </span>
 
@@ -85,7 +85,7 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc }: SkillRowP
 
       {/* EXPANDED BODY */}
       {expanded && (
-        <div className="px-3 pb-3 pt-2 border-t border-slate-600 space-y-3">
+        <div className="px-3 lg:px-4 pb-3 lg:pb-4 pt-2 lg:pt-3 border-t border-slate-600 space-y-3">
           {/* Level buttons */}
           {editable && (
             <div className="flex flex-wrap items-center gap-2">
@@ -95,7 +95,7 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc }: SkillRowP
                   aria-pressed={skill.level === value}
                   aria-label={`Set skill level to ${value}`}
                   onClick={() => handleLevelClick(value)}
-                  className={`px-3 py-1 rounded border text-xs transition focus:outline-none ${
+                  className={`px-3 lg:px-4 py-1 rounded border text-xs lg:text-sm transition focus:outline-none ${
                     skill.level === value
                       ? "bg-red-500/20 border-red-500 text-red-400 font-semibold"
                       : "border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
@@ -107,7 +107,7 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc }: SkillRowP
 
               <button
                 onClick={handleRemove}
-                className="ml-auto text-xs text-red-400 hover:text-red-300 transition focus:outline-none"
+                className="ml-auto text-xs lg:text-sm text-red-400 hover:text-red-300 transition focus:outline-none"
                 aria-label={`Remove ${skill.name}`}
               >
                 Remove
@@ -119,7 +119,7 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc }: SkillRowP
           <div className={`grid gap-2 ${editable ? "grid-cols-3" : "grid-cols-2"}`}>
             {editable && (
               <div className="text-center rounded border border-slate-500 bg-slate-900/60 px-2 py-1.5">
-                <div className="text-[10px] text-slate-100 uppercase tracking-wide mb-1">Misc</div>
+                <div className="text-[10px] lg:text-xs text-slate-100 uppercase tracking-wide mb-1">Misc</div>
                 <input
                   type="number"
                   value={skill.miscModifier ?? 0}
@@ -130,15 +130,15 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc }: SkillRowP
               </div>
             )}
             <div className="text-center rounded border border-slate-500 bg-slate-900/60 px-2 py-1.5">
-              <div className="text-[10px] text-slate-100 uppercase tracking-wide">Half</div>
-              <div className={`text-sm font-mono font-semibold mt-1 ${getTotalColor(skill.half)}`}>
+              <div className="text-[10px] lg:text-xs text-slate-100 uppercase tracking-wide">Half</div>
+              <div className={`text-sm lg:text-base font-mono font-semibold mt-1 ${getTotalColor(skill.half)}`}>
                 {skill.half ?? "--"}
               </div>
             </div>
             <div className="text-center rounded border border-slate-500 bg-slate-900/60 px-2 py-1.5">
-              <div className="text-[10px] text-slate-100 uppercase tracking-wide">Opposed</div>
+              <div className="text-[10px] lg:text-xs text-slate-100 uppercase tracking-wide">Opposed</div>
               <div
-                className={`text-sm font-mono font-semibold mt-1 ${getTotalColor(skill.opposed)}`}
+                className={`text-sm lg:text-base font-mono font-semibold mt-1 ${getTotalColor(skill.opposed)}`}
               >
                 {skill.opposed ?? "--"}
               </div>

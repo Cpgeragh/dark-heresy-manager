@@ -33,11 +33,11 @@ export function ClaimForm({ code, onCodeChange, onSubmit, loading }: ClaimFormPr
   }, [isValid, loading, onSubmit]);
 
   return (
-    <div className="border border-slate-700 bg-slate-900 p-4 rounded space-y-3">
-      <label className="block text-sm text-slate-300">Enter Recovery Code</label>
+    <div className="border border-slate-700 bg-slate-900 p-4 lg:p-5 rounded space-y-3">
+      <label className="block text-sm lg:text-base text-slate-300">Enter Recovery Code</label>
 
       <input
-        className="px-3 py-2 bg-slate-800 border border-slate-600 rounded w-full font-code [font-feature-settings:'zero'] text-slate-100 focus:outline-none focus:border-red-500"
+        className="px-3 lg:px-4 py-2 lg:py-2.5 bg-slate-800 border border-slate-600 rounded w-full font-code [font-feature-settings:'zero'] text-sm lg:text-base text-slate-100 focus:outline-none focus:border-red-500"
         placeholder="DH-XXXX-XXXX"
         value={code}
         onChange={handleChange}
@@ -47,7 +47,7 @@ export function ClaimForm({ code, onCodeChange, onSubmit, loading }: ClaimFormPr
       />
 
       {/* Format helper */}
-      <div className="text-xs text-slate-400">
+      <div className="text-xs lg:text-sm text-slate-400">
         Format: <span className="font-code [font-feature-settings:'zero']">DH-XXXX-XXXX</span>{" "}
         <span className={isValid ? "text-green-400" : "text-slate-500"}>
           {isValid ? "Valid" : "Not valid yet"}

@@ -27,15 +27,15 @@ export function CyberneticWeaponCard({
     .filter((name) => Boolean(name) && Boolean(WEAPON_SPECIAL_RULES[name]));
 
   return (
-    <div className="border border-cyan-700/40 bg-cyan-900/10 rounded-lg p-3 space-y-3">
+    <div className="border border-cyan-700/40 bg-cyan-900/10 rounded-lg p-3 lg:p-4 space-y-3">
       <div>
         <div className="flex items-center gap-2">
-          <p className="text-sm font-semibold text-slate-200">{weapon.name}</p>
-          <span className="text-[10px] uppercase tracking-wide text-cyan-400 border border-cyan-700/50 rounded px-1.5 py-0.5 font-medium">
+          <p className="text-sm lg:text-base font-semibold text-slate-200">{weapon.name}</p>
+          <span className="text-[10px] lg:text-xs uppercase tracking-wide text-cyan-400 border border-cyan-700/50 rounded px-1.5 lg:px-2 py-0.5 font-medium">
             Cybernetic
           </span>
         </div>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs lg:text-sm text-slate-500">
           {cyberneticName}
           {weapon.class ? ` · ${weapon.class}` : ""}
         </p>
@@ -68,8 +68,8 @@ export function CyberneticWeaponCard({
 
       <div className="space-y-1">
         <div className="flex items-center gap-1.5">
-          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Qualities</span>
-          <span className="text-xs text-slate-400 italic">
+          <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Qualities</span>
+          <span className="text-xs lg:text-sm text-slate-400 italic">
             {hasRules ? weapon.specialRules : "-"}
           </span>
           {ruleNamesInLookup.length > 0 && (
@@ -80,8 +80,8 @@ export function CyberneticWeaponCard({
           )}
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Rules</span>
-          <span className="text-xs text-slate-600 italic">-</span>
+          <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Rules</span>
+          <span className="text-xs lg:text-sm text-slate-600 italic">-</span>
         </div>
       </div>
     </div>

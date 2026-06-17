@@ -105,7 +105,7 @@ export function DMInbox({
   if (loading) return null;
 
   if (threads.length === 0) {
-    return <p className="text-slate-400 text-sm">No messages yet.</p>;
+    return <p className="text-slate-400 text-sm lg:text-base">No messages yet.</p>;
   }
 
   return (
@@ -119,22 +119,22 @@ export function DMInbox({
           <div key={thread.characterId}>
             <button
               onClick={() => toggleThread(thread.characterId)}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded border border-slate-700 bg-slate-900/40 hover:bg-slate-800 transition text-left"
+              className="w-full flex items-center gap-3 px-3 lg:px-4 py-2 lg:py-2.5 rounded border border-slate-700 bg-slate-900/40 hover:bg-slate-800 transition text-left"
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-slate-100">{label}</span>
+                  <span className="text-sm lg:text-base font-medium text-slate-100">{label}</span>
                   {hasUnread && (
-                    <span className="text-xs px-1.5 py-0.5 bg-amber-500 text-slate-900 rounded-full font-semibold leading-none">
+                    <span className="text-xs lg:text-sm px-1.5 lg:px-2 py-0.5 bg-amber-500 text-slate-900 rounded-full font-semibold leading-none">
                       {thread.unreadForDM}
                     </span>
                   )}
                 </div>
                 {thread.lastMessage && (
-                  <p className="text-xs text-slate-500 truncate mt-0.5">{thread.lastMessage}</p>
+                  <p className="text-xs lg:text-sm text-slate-500 truncate mt-0.5">{thread.lastMessage}</p>
                 )}
               </div>
-              <span className="text-slate-500 text-xs shrink-0">
+              <span className="text-slate-500 text-xs lg:text-sm shrink-0">
                 {isExpanded ? "▾" : "▸"}
               </span>
             </button>

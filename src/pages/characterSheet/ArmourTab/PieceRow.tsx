@@ -38,7 +38,7 @@ export function PieceRow({ piece, editable, worn, onToggle, onRemove, onInfo }: 
     <div className={[uiSection, "flex items-center gap-3", !worn ? "opacity-60" : ""].join(" ")}>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
-          <span className="text-sm font-medium text-slate-200 truncate">{piece.name}</span>
+          <span className="text-sm lg:text-base font-medium text-slate-200 truncate">{piece.name}</span>
           <span className="inline-flex items-center leading-[0]">
             <button
               onClick={() => onInfo(piece)}
@@ -63,10 +63,10 @@ export function PieceRow({ piece, editable, worn, onToggle, onRemove, onInfo }: 
           </span>
         </div>
         <div className="flex flex-wrap gap-1.5 mt-1">
-          <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 text-slate-300">
+          <span className="text-xs lg:text-sm rounded border border-slate-700 bg-slate-800/40 px-1.5 lg:px-2 py-0.5 text-slate-300">
             {locationLabel(piece.locations)}
           </span>
-          <span className="text-xs rounded border border-slate-700 bg-slate-800/40 px-1.5 py-0.5 font-mono text-slate-200">
+          <span className="text-xs lg:text-sm rounded border border-slate-700 bg-slate-800/40 px-1.5 lg:px-2 py-0.5 font-mono text-slate-200">
             {apDesc}
           </span>
           <ItemMetaChips
@@ -78,8 +78,8 @@ export function PieceRow({ piece, editable, worn, onToggle, onRemove, onInfo }: 
           />
         </div>
         <div className="flex items-center gap-1.5 mt-1">
-          <span className="text-[10px] text-slate-500 uppercase tracking-wide">Craftsmanship</span>
-          <span className="text-xs text-slate-400 italic">{craftsmanship}</span>
+          <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Craftsmanship</span>
+          <span className="text-xs lg:text-sm text-slate-400 italic">{craftsmanship}</span>
           <InfoModal
             title={`${craftsmanship} Armour`}
             content={armourCraftsmanshipInfo(craftsmanship)}
@@ -90,7 +90,7 @@ export function PieceRow({ piece, editable, worn, onToggle, onRemove, onInfo }: 
       {editable && (
         <button
           onClick={() => onToggle(piece.id)}
-          className="text-xs px-2 py-1 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 transition whitespace-nowrap"
+          className="text-xs lg:text-sm px-2 lg:px-3 py-1 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 transition whitespace-nowrap"
         >
           {worn ? "Stow" : "Wear"}
         </button>
@@ -99,7 +99,7 @@ export function PieceRow({ piece, editable, worn, onToggle, onRemove, onInfo }: 
       {editable && (
         <button
           onClick={() => onRemove(piece.id)}
-          className="text-xs text-red-400 hover:text-red-300 transition"
+          className="text-xs lg:text-sm text-red-400 hover:text-red-300 transition"
         >
           Remove
         </button>

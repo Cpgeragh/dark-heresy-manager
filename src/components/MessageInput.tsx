@@ -27,9 +27,9 @@ export function MessageInput({
   };
 
   return (
-    <div className="flex gap-2 mt-2">
+    <div className="flex gap-2 lg:gap-3 mt-2">
       <input
-        className="flex-1 px-3 py-2 bg-slate-800 border border-slate-600 rounded text-sm text-slate-100 placeholder:text-slate-500 disabled:opacity-50"
+        className="flex-1 px-3 lg:px-4 py-2 lg:py-2.5 bg-slate-800 border border-slate-600 rounded text-sm lg:text-base text-slate-100 placeholder:text-slate-500 disabled:opacity-50"
         placeholder={placeholder}
         value={text}
         onChange={(e) => setText(e.target.value)}
@@ -44,7 +44,7 @@ export function MessageInput({
       <button
         onClick={handleSend}
         disabled={disabled || sending || !text.trim()}
-        className="px-3 py-2 border border-red-500 text-red-500 font-semibold rounded text-sm hover:bg-red-500/10 disabled:opacity-50 transition"
+        className="px-3 lg:px-4 py-2 lg:py-2.5 border border-red-500 text-red-500 font-semibold rounded text-sm lg:text-base hover:bg-red-500/10 disabled:opacity-50 transition"
       >
         {sending ? "…" : "Send"}
       </button>

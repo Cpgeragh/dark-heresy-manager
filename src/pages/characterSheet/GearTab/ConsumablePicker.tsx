@@ -37,23 +37,23 @@ export function ConsumablePicker({ editable = true, onSelect, onClose }: Props) 
         <button
           key={ref.id}
           onClick={editable ? () => onSelect(ref) : undefined}
-          className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
+          className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-1.5 flex-1 min-w-0">
-              <span className={`text-sm font-medium text-slate-200 truncate ${editable ? "group-hover:text-white" : ""}`}>
+              <span className={`text-sm lg:text-base font-medium text-slate-200 truncate ${editable ? "group-hover:text-white" : ""}`}>
                 {ref.name}
               </span>
               {ref.description && (
                 <span className="inline-flex items-center leading-[0]" onClick={(e) => e.stopPropagation()}>
                   <InfoModal
                     title={ref.name}
-                    content={<p className="text-sm text-slate-300 leading-relaxed">{ref.description}</p>}
+                    content={<p className="text-sm lg:text-base text-slate-300 leading-relaxed">{ref.description}</p>}
                   />
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-2 shrink-0 text-xs">
+            <div className="flex items-center gap-2 shrink-0 text-xs lg:text-sm">
               <ItemMetaChips
                 bare
                 weight={displayWeight(ref.weight)}

@@ -22,7 +22,7 @@ export function CharacterBreadcrumb({ isDM }: CharacterBreadcrumbProps) {
     <div className="mb-4">
       <button
         onClick={handleClick}
-        className="text-xs px-2 py-1 rounded bg-slate-700 hover:bg-slate-600 text-slate-200"
+        className="text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded bg-slate-700 hover:bg-slate-600 text-slate-200"
       >
         {label}
       </button>

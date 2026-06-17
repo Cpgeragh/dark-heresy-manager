@@ -29,14 +29,14 @@ export function ForceFieldPicker({ editable = true, onSelect, onClose }: Props) 
         <button
           key={ref.id}
           onClick={editable ? () => onSelect(ref) : undefined}
-          className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
+          className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
           <span
-            className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}
+            className={`text-sm lg:text-base font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}
           >
             {ref.name}
           </span>
-          <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5 flex-wrap font-mono">
+          <div className="flex items-center gap-2 text-xs lg:text-sm text-slate-500 mt-0.5 flex-wrap font-mono">
             <span>PR {ref.protectionRating}</span>
             {ref.notes && <span className="font-sans">{ref.notes}</span>}
           </div>

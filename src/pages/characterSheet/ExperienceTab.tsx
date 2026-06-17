@@ -137,7 +137,7 @@ export function ExperienceTab({
         <div className={uiSection + " text-center"}>
           {isDM ? (
             <label className="flex flex-col gap-0.5">
-              <span className="text-xs font-medium uppercase tracking-wide text-slate-100">
+              <span className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
                 Total XP
               </span>
               <input
@@ -145,14 +145,14 @@ export function ExperienceTab({
                 min={0}
                 value={experience.total}
                 onChange={handleTotalChange}
-                className="mt-2 w-full px-2 py-1 bg-slate-800 border border-slate-500 rounded text-center text-xl font-semibold font-mono text-slate-100 focus:border-red-500 focus:outline-none"
+                className="mt-2 w-full px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-800 border border-slate-500 rounded text-center text-xl lg:text-2xl font-semibold font-mono text-slate-100 focus:border-red-500 focus:outline-none"
                 aria-label="Total XP"
               />
             </label>
           ) : (
             <>
-              <div className="text-xs text-slate-400 mb-1">Total XP</div>
-              <div className="text-2xl font-semibold font-mono text-slate-100">
+              <div className="text-xs lg:text-sm text-slate-400 mb-1">Total XP</div>
+              <div className="text-2xl lg:text-3xl font-semibold font-mono text-slate-100">
                 {experience.total}
               </div>
             </>
@@ -160,14 +160,14 @@ export function ExperienceTab({
         </div>
 
         <div className={uiSection + " text-center"}>
-          <div className="text-xs text-slate-400 mb-1">Spent XP</div>
-          <div className="text-2xl font-semibold font-mono text-slate-100">{experience.spent}</div>
+          <div className="text-xs lg:text-sm text-slate-400 mb-1">Spent XP</div>
+          <div className="text-2xl lg:text-3xl font-semibold font-mono text-slate-100">{experience.spent}</div>
         </div>
 
         <div className={uiSection + " text-center"}>
-          <div className="text-xs text-slate-400 mb-1">Remaining XP</div>
+          <div className="text-xs lg:text-sm text-slate-400 mb-1">Remaining XP</div>
           <div
-            className={`text-2xl font-semibold font-mono ${remaining < 0 ? "text-red-400" : "text-slate-100"}`}
+            className={`text-2xl lg:text-3xl font-semibold font-mono ${remaining < 0 ? "text-red-400" : "text-slate-100"}`}
           >
             {remaining}
           </div>
@@ -179,31 +179,31 @@ export function ExperienceTab({
         <SectionHeader>Purchased Advances</SectionHeader>
 
         {experience.ranks.length === 0 && (
-          <p className="text-sm text-slate-400">No advances purchased yet.</p>
+          <p className="text-sm lg:text-base text-slate-400">No advances purchased yet.</p>
         )}
 
         <div className="space-y-4">
           {experience.ranks.map((rankBlock) => (
             <div key={rankBlock.rank} className={uiSection}>
-              <h4 className="text-sm font-semibold text-slate-100 mb-2">Rank {rankBlock.rank}</h4>
+              <h4 className="text-sm lg:text-base font-semibold text-slate-100 mb-2">Rank {rankBlock.rank}</h4>
               <ul className="space-y-2">
                 {rankBlock.advances.map((adv) => (
                   <li key={adv.id} className="rounded border border-slate-500 bg-slate-900/60 p-3">
                     <div className="flex items-baseline justify-between gap-4">
-                      <div className="font-mono text-sm text-slate-100">{adv.name}</div>
+                    <div className="font-mono text-sm lg:text-base text-slate-100">{adv.name}</div>
                       <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-xs text-slate-400">{adv.cost} XP</span>
+                        <span className="text-xs lg:text-sm text-slate-400">{adv.cost} XP</span>
                         {isDM && (
                           <button
                             onClick={() => handleRemoveAdvance(rankBlock.rank, adv.id)}
-                            className="text-xs text-red-400 hover:text-red-300"
+                            className="text-xs lg:text-sm text-red-400 hover:text-red-300"
                           >
                             Remove
                           </button>
                         )}
                       </div>
                     </div>
-                    {adv.notes && <div className="mt-1 text-xs text-slate-400">{adv.notes}</div>}
+                    {adv.notes && <div className="mt-1 text-xs lg:text-sm text-slate-400">{adv.notes}</div>}
                   </li>
                 ))}
               </ul>
@@ -214,12 +214,12 @@ export function ExperienceTab({
         {/* ADD ADVANCE FORM — DM only */}
         {isDM && (
           <div className="border border-slate-500 rounded-lg p-4 space-y-3 bg-slate-800/60">
-            <p className="text-xs font-semibold text-red-500 uppercase tracking-wide">
+            <p className="text-xs lg:text-sm font-semibold text-red-500 uppercase tracking-wide">
               Add Advance
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <div>
-                <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+                <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
                   Rank
                 </label>
                 <select
@@ -228,7 +228,7 @@ export function ExperienceTab({
                     const v = e.target.value;
                     setNewRank(v === "elite" ? "elite" : (Number(v) as RankAdvances["rank"]));
                   }}
-                  className="mt-0.5 w-full px-2 py-1 bg-slate-800 border border-slate-500 rounded text-sm text-slate-100 focus:border-red-500 focus:outline-none"
+                  className="mt-0.5 w-full px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-800 border border-slate-500 rounded text-sm lg:text-base text-slate-100 focus:border-red-500 focus:outline-none"
                 >
                   {RANK_OPTIONS.map((r) => (
                     <option key={String(r)} value={String(r)}>
@@ -239,7 +239,7 @@ export function ExperienceTab({
               </div>
 
               <div className="col-span-2 sm:col-span-2">
-                <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+                <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
                   Advance Name
                 </label>
                 <input
@@ -247,12 +247,12 @@ export function ExperienceTab({
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
                   placeholder="e.g. +10 Weapon Skill"
-                  className="mt-0.5 w-full px-2 py-1 bg-slate-800 border border-slate-500 rounded text-sm text-slate-100 focus:border-red-500 focus:outline-none"
+                  className="mt-0.5 w-full px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-800 border border-slate-500 rounded text-sm lg:text-base text-slate-100 focus:border-red-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+                <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
                   XP Cost
                 </label>
                 <input
@@ -260,13 +260,13 @@ export function ExperienceTab({
                   min={0}
                   value={newCost}
                   onChange={(e) => setNewCost(Math.max(0, Number(e.target.value)))}
-                  className="mt-0.5 w-full px-2 py-1 bg-slate-800 border border-slate-500 rounded text-sm text-slate-100 focus:border-red-500 focus:outline-none"
+                  className="mt-0.5 w-full px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-800 border border-slate-500 rounded text-sm lg:text-base text-slate-100 focus:border-red-500 focus:outline-none"
                 />
               </div>
             </div>
 
             <div>
-              <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
                 Notes (optional)
               </label>
               <input
@@ -274,7 +274,7 @@ export function ExperienceTab({
                 value={newNotes}
                 onChange={(e) => setNewNotes(e.target.value)}
                 placeholder="e.g. Approved session 3"
-                className="mt-0.5 w-full px-2 py-1 bg-slate-800 border border-slate-500 rounded text-sm text-slate-100 focus:border-red-500 focus:outline-none"
+                className="mt-0.5 w-full px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-800 border border-slate-500 rounded text-sm lg:text-base text-slate-100 focus:border-red-500 focus:outline-none"
               />
             </div>
 
@@ -295,7 +295,7 @@ export function ExperienceTab({
               placeholder="What are you buying?"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="flex-1 min-w-0 px-2 py-1 bg-slate-800 border border-slate-500 rounded text-sm"
+              className="flex-1 min-w-0 px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-800 border border-slate-500 rounded text-sm lg:text-base"
             />
             <div className="flex gap-2">
               <input
@@ -304,7 +304,7 @@ export function ExperienceTab({
                 placeholder="Cost"
                 value={xpCost}
                 onChange={(e) => setXpCost(Math.max(0, Number(e.target.value)))}
-                className="w-24 px-2 py-1 bg-slate-800 border border-slate-500 rounded text-sm"
+                className="w-24 lg:w-32 px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-800 border border-slate-500 rounded text-sm lg:text-base"
               />
               <Button
                 onClick={handlePropose}
@@ -316,7 +316,7 @@ export function ExperienceTab({
           </div>
 
           {pendingProposals.length === 0 && resolvedProposals.length === 0 && (
-            <p className="text-sm text-slate-400">No proposals yet.</p>
+            <p className="text-sm lg:text-base text-slate-400">No proposals yet.</p>
           )}
 
           {pendingProposals.length > 0 && (
@@ -324,7 +324,7 @@ export function ExperienceTab({
               {pendingProposals.map((p) => (
                 <div
                   key={p.id}
-                  className="flex items-center justify-between border border-slate-500 rounded px-3 py-2 text-sm"
+                  className="flex items-center justify-between border border-slate-500 rounded px-3 lg:px-4 py-2 lg:py-2.5 text-sm lg:text-base"
                 >
                   <span>
                     {p.description} — {p.xpCost} XP
@@ -339,7 +339,7 @@ export function ExperienceTab({
             <div className="space-y-2">
               <button
                 onClick={() => setShowHistory((v) => !v)}
-                className="text-xs text-slate-400 hover:text-slate-200"
+                className="text-xs lg:text-sm text-slate-400 hover:text-slate-200"
               >
                 {showHistory ? "Hide" : "Show"} history ({resolvedProposals.length})
               </button>
@@ -349,7 +349,7 @@ export function ExperienceTab({
                   {resolvedProposals.map((p) => (
                     <div
                       key={p.id}
-                      className="flex items-center justify-between border border-slate-500/50 rounded px-3 py-2 text-sm opacity-60"
+                      className="flex items-center justify-between border border-slate-500/50 rounded px-3 lg:px-4 py-2 lg:py-2.5 text-sm lg:text-base opacity-60"
                     >
                       <span>
                         {p.description} — {p.xpCost} XP

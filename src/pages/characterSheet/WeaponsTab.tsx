@@ -539,7 +539,7 @@ export function WeaponsTab({
             {!showCustomRanged && (
               <button
                 onClick={() => setPicker("ranged")}
-                className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
+                className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
               >
                 {editable ? "+ Add" : "View"}
               </button>
@@ -547,7 +547,7 @@ export function WeaponsTab({
           </div>
 
           {allRangedEntries.length === 0 && !showCustomRanged && (
-            <p className="text-sm text-slate-500 italic">No ranged weapons.</p>
+            <p className="text-sm lg:text-base text-slate-500 italic">No ranged weapons.</p>
           )}
 
           {allRangedEntries.map((entry) => {
@@ -608,7 +608,7 @@ export function WeaponsTab({
             {!showCustomMelee && (
               <button
                 onClick={() => setPicker("melee")}
-                className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
+                className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
               >
                 {editable ? "+ Add" : "View"}
               </button>
@@ -616,7 +616,7 @@ export function WeaponsTab({
           </div>
 
           {allMeleeEntries.length === 0 && !showCustomMelee && (
-            <p className="text-sm text-slate-500 italic">No melee weapons.</p>
+            <p className="text-sm lg:text-base text-slate-500 italic">No melee weapons.</p>
           )}
 
           {allMeleeEntries.map((entry) => {
@@ -674,14 +674,14 @@ export function WeaponsTab({
           <SectionHeader>Grenades & Mines ({allGrenadeEntries.length})</SectionHeader>
           <button
             onClick={() => setPicker("grenades")}
-            className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
+            className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
           >
             {editable ? "+ Add" : "View"}
           </button>
         </div>
 
         {allGrenadeEntries.length === 0 && (
-          <p className="text-sm text-slate-500 italic">No grenades or mines carried.</p>
+          <p className="text-sm lg:text-base text-slate-500 italic">No grenades or mines carried.</p>
         )}
 
         <IndependentCardGrid
@@ -732,14 +732,14 @@ export function WeaponsTab({
           <SectionHeader>Integrated Weapons ({integratedWeaponCount})</SectionHeader>
           <button
             onClick={() => setPicker("integrated")}
-            className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
+            className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
           >
             {editable ? "+ Add" : "View"}
           </button>
         </div>
 
         {integratedWeaponCount === 0 && (
-          <p className="text-sm text-slate-500 italic">No integrated weapons installed.</p>
+          <p className="text-sm lg:text-base text-slate-500 italic">No integrated weapons installed.</p>
         )}
 
         <IndependentCardGrid
@@ -786,14 +786,14 @@ export function WeaponsTab({
           <SectionHeader>Shields</SectionHeader>
           <button
             onClick={() => setPicker("shields")}
-            className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
+            className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
           >
             {editable ? "+ Add" : "View"}
           </button>
         </div>
 
         {(shields ?? []).length === 0 && (
-          <p className="text-sm text-slate-500 italic">No shields carried.</p>
+          <p className="text-sm lg:text-base text-slate-500 italic">No shields carried.</p>
         )}
 
         <IndependentCardGrid

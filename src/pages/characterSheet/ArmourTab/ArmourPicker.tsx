@@ -54,9 +54,9 @@ export function ArmourPicker({ editable = true, onSelect, onCustom, onClose }: P
   if (selected) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-        <div className="w-full max-w-md bg-slate-900 border border-slate-500 rounded-xl shadow-2xl">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
-            <h3 className="text-sm font-semibold text-slate-200">{selected.name}</h3>
+        <div className="w-full max-w-md lg:max-w-lg bg-slate-900 border border-slate-500 rounded-xl shadow-2xl">
+          <div className="flex items-center justify-between px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
+            <h3 className="text-sm lg:text-base font-semibold text-slate-200">{selected.name}</h3>
             <button
               onClick={resetPicker}
               className="text-slate-400 hover:text-slate-200 text-lg leading-none"
@@ -65,16 +65,16 @@ export function ArmourPicker({ editable = true, onSelect, onCustom, onClose }: P
             </button>
           </div>
 
-          <div className="px-4 py-4 space-y-4">
+          <div className="px-4 lg:px-5 py-4 lg:py-5 space-y-4">
             <div>
-              <p className="text-xs text-slate-400 mb-2">Select armour quality:</p>
+              <p className="text-xs lg:text-sm text-slate-400 mb-2">Select armour quality:</p>
               <div className="flex gap-2">
                 {ARMOUR_CRAFTSMANSHIP_OPTIONS.map((q) => (
                   <button
                     key={q}
                     onClick={() => setCraftsmanship(q)}
                     className={[
-                      "flex-1 py-1.5 rounded border text-sm font-medium transition",
+                      "flex-1 py-1.5 lg:py-2 rounded border text-sm lg:text-base font-medium transition",
                       craftsmanship === q
                         ? ARMOUR_CRAFTSMANSHIP_STYLE[q]
                         : "border-slate-700 bg-slate-800 text-slate-400 hover:border-slate-500",
@@ -86,15 +86,15 @@ export function ArmourPicker({ editable = true, onSelect, onCustom, onClose }: P
               </div>
             </div>
 
-            <div className="text-xs text-slate-400 bg-slate-800/60 rounded p-3 leading-relaxed">
+            <div className="text-xs lg:text-sm text-slate-400 bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed">
               {craftsmanshipDescription(craftsmanship)}
             </div>
           </div>
 
-          <div className="px-4 py-3 border-t border-slate-700 flex gap-2">
+          <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700 flex gap-2">
             <button
               onClick={resetPicker}
-              className="px-4 py-1.5 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm text-slate-100"
+              className="px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100"
             >
               Back
             </button>
@@ -119,7 +119,7 @@ export function ArmourPicker({ editable = true, onSelect, onCustom, onClose }: P
         editable ? (
           <button
             onClick={onCustom}
-            className="w-full text-sm text-red-500 hover:text-red-400 text-center py-1"
+            className="w-full text-sm lg:text-base text-red-500 hover:text-red-400 text-center py-1 lg:py-1.5"
           >
             + Add custom piece
           </button>
@@ -130,14 +130,14 @@ export function ArmourPicker({ editable = true, onSelect, onCustom, onClose }: P
         <button
           key={ref.id}
           onClick={editable ? () => setSelected(ref) : undefined}
-          className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
+          className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
           <span
-            className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}
+            className={`text-sm lg:text-base font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}
           >
             {ref.name}
           </span>
-          <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5 flex-wrap font-mono">
+          <div className="flex items-center gap-2 text-xs lg:text-sm text-slate-500 mt-0.5 flex-wrap font-mono">
             <span>
               AP {ref.ap}
               {Object.keys(ref.apOverrides ?? {}).length > 0 ? "*" : ""}

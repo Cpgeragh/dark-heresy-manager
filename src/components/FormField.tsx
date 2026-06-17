@@ -32,7 +32,7 @@ export function FormField({
   const hasError = !!error && editable;
 
   const baseInputClass = `
-    px-2 py-1 rounded border text-sm
+    px-2 lg:px-3 py-1 lg:py-1.5 rounded border text-sm lg:text-base
     ${
       editable
         ? hasError
@@ -53,7 +53,7 @@ export function FormField({
 
   return (
     <label htmlFor={inputId} className={`flex flex-col gap-0.5 ${className}`}>
-      <span className="text-xs font-medium uppercase tracking-wide text-slate-100">{label}</span>
+      <span className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">{label}</span>
 
       {type === "textarea" ? (
         <textarea
@@ -91,14 +91,14 @@ export function FormField({
 
       {/* Error message (takes precedence over description) */}
       {hasError && (
-        <span id={`${inputId}-error`} className="text-[10px] text-red-400 mt-0.5" role="alert">
+        <span id={`${inputId}-error`} className="text-[10px] lg:text-xs text-red-400 mt-0.5" role="alert">
           {error}
         </span>
       )}
 
       {/* Description (only shown if no error) */}
       {!hasError && description && (
-        <span id={`${inputId}-desc`} className="text-[10px] text-slate-500 mt-0.5">
+        <span id={`${inputId}-desc`} className="text-[10px] lg:text-xs text-slate-500 mt-0.5">
           {description}
         </span>
       )}

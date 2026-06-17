@@ -44,10 +44,10 @@ export function AddSkillModal({
         <button
           key={skill.id}
           onClick={editable ? () => onAdd(skill.id) : undefined}
-          className={`w-full flex items-center gap-3 px-4 py-3 text-left transition ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
+          className={`w-full flex items-center gap-3 px-4 lg:px-5 py-3 lg:py-4 text-left transition ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
           <div className="flex items-center gap-1.5 flex-1 min-w-0">
-            <span className="text-sm text-slate-100 truncate">{skill.name}</span>
+            <span className="text-sm lg:text-base text-slate-100 truncate">{skill.name}</span>
             {SKILL_DESCRIPTIONS[skill.name] && (
               <span
                 className="inline-flex items-center leading-[0]"
@@ -58,12 +58,12 @@ export function AddSkillModal({
             )}
           </div>
           <span
-            className={`px-1.5 py-0.5 rounded border bg-slate-800 text-[10px] font-mono shrink-0 ${charColour(skill.characteristic)}`}
+            className={`px-1.5 lg:px-2 py-0.5 rounded border bg-slate-800 text-[10px] lg:text-xs font-mono shrink-0 ${charColour(skill.characteristic)}`}
           >
             {CHAR_LABEL[skill.characteristic]}
           </span>
           <span
-            className={`px-1.5 py-0.5 rounded border text-[10px] shrink-0 ${
+            className={`px-1.5 lg:px-2 py-0.5 rounded border text-[10px] lg:text-xs shrink-0 ${
               skill.advanced
                 ? "bg-purple-700/40 border-purple-500 text-purple-300"
                 : "bg-teal-900/40 border-teal-700/50 text-teal-300"
