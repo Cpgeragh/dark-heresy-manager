@@ -85,6 +85,7 @@ export function useCharacterSheet({
 
     // Role & permissions
     isDM,
+    isDMLoading: rawIsDM === null,
     dmReadOnly,
     toggleDmReadOnly,
     allowedToEdit,
