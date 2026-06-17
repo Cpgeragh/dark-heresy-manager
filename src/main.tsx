@@ -46,8 +46,13 @@ function renderUpdating() {
   }, 30000);
 }
 
-// Neutral splash while we decide whether an update is pending.
-root.render(<Splash label="Loading…" />);
+// Post-upgrade reload: skip the splash entirely — the app is ready immediately.
+const justUpgraded = sessionStorage.getItem("pwa-just-upgraded");
+if (justUpgraded) sessionStorage.removeItem("pwa-just-upgraded");
+
+if (!justUpgraded) {
+  root.render(<Splash label="Loading…" />);
+}
 
 if (import.meta.env.DEV) {
   // In dev no service worker is registered, so registerSW's callbacks never
@@ -60,11 +65,6 @@ if (import.meta.env.DEV) {
       // First visit / not yet controlled by a worker → nothing cached can be
       // stale, so just show the app.
       if (!registration || !navigator.serviceWorker.controller) {
-        renderApp();
-        return;
-      }
-      if (sessionStorage.getItem("pwa-just-upgraded")) {
-        sessionStorage.removeItem("pwa-just-upgraded");
         renderApp();
         return;
       }

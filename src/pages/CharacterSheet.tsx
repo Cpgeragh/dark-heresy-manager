@@ -72,6 +72,7 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
     canPlayerRelease,
     claimLog,
     isDM,
+    isDMLoading,
 
     dmReadOnly,
     toggleDmReadOnly,
@@ -167,7 +168,7 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
     useHeaderExtensionSetters();
 
   useEffect(() => {
-    if (!character) return;
+    if (!character || isDMLoading) return;
 
     setBackHref(isDM ? "/dm" : "/player");
 
@@ -189,6 +190,7 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
   }, [
     character,
     isDM,
+    isDMLoading,
     isOwner,
     canPlayerRelease,
     releaseCharacter,
