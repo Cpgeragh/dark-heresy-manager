@@ -143,7 +143,7 @@ export function SectionDrawer({
       <button
         onClick={open}
         aria-label="Open section navigation"
-        className="sm:hidden px-3 py-2 rounded-lg border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition text-base leading-none"
+        className="sm:hidden mb-4 px-3 py-2 rounded-lg border border-slate-500 bg-slate-800 text-slate-200 hover:bg-slate-700 transition text-base leading-none"
       >
         ☰
       </button>
@@ -168,13 +168,13 @@ export function SectionDrawer({
       >
         {/* Drawer header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700 shrink-0">
-          <span className="text-sm font-semibold text-slate-100 uppercase tracking-wide">
+          <span className="text-sm font-semibold text-slate-200 uppercase tracking-wide">
             Navigate
           </span>
           <button
             onClick={close}
             aria-label="Close navigation"
-            className="text-slate-400 hover:text-slate-100 text-lg leading-none transition"
+            className="text-slate-400 hover:text-slate-200 text-lg leading-none transition"
           >
             ✕
           </button>
@@ -193,7 +193,7 @@ export function SectionDrawer({
                 <li key={cat.label}>
                   <button
                     onClick={() => openCategory(index)}
-                    className="w-full flex items-center justify-between px-4 py-3 text-sm text-slate-100 hover:bg-slate-800 transition text-left"
+                    className="w-full flex items-center justify-between px-4 py-3 text-sm text-slate-200 hover:bg-slate-800 transition text-left"
                   >
                     <span>{cat.label}</span>
                     <span className="text-slate-400 text-xs">›</span>
@@ -217,7 +217,7 @@ export function SectionDrawer({
                   className="flex items-center gap-2 px-4 py-3 w-full text-sm hover:bg-slate-800 transition border-b border-slate-700"
                 >
                   <span className="text-slate-400">‹</span>
-                  <span className="font-semibold text-slate-100">{activeCategory.label}</span>
+                  <span className="font-semibold text-slate-200">{activeCategory.label}</span>
                 </button>
 
                 {/* Page list */}
@@ -229,7 +229,7 @@ export function SectionDrawer({
                         className={`w-full px-4 py-3 text-sm text-left transition ${
                           activeTab === tab.id
                             ? "text-red-500 font-semibold border-l-2 border-red-500"
-                            : "text-slate-100 hover:bg-slate-800"
+                            : "text-slate-200 hover:bg-slate-800"
                         }`}
                       >
                         {tab.label}

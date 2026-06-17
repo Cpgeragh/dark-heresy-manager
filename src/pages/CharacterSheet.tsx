@@ -356,7 +356,7 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
   };
 
   const containerClass = [
-    "border p-4 rounded-lg transition-colors",
+    "border p-4 lg:p-5 rounded-lg transition-colors",
     dmOverrideActive ? "border-amber-400 bg-amber-500/10" : "border-slate-700 bg-slate-900/40",
   ].join(" ");
 

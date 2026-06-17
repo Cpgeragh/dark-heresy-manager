@@ -9,11 +9,11 @@ import { useUserProfile } from "./hooks/useUserProfile";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { AppHeader } from "./components/AppHeader";
 import { MessageDrawer } from "./components/MessageDrawer";
+import { SplashScreen } from "./components/SplashScreen";
 import { CampaignsProvider } from "./context/CampaignsContext";
 import { HeaderExtensionProvider } from "./context/HeaderExtensionContext";
 import { ToastProvider, ToastContainer, useToast } from "./components/Toast";
 import { OfflineIndicator } from "./components/OfflineIndicator";
-import { ToastTester } from "./components/ToastTester";
 import { ROUTES, ROUTE_PATTERNS } from "./constants/routes";
 import { consumeUpdateStalled, consumePostUpgrade } from "./pwaUpdateState";
 
@@ -67,49 +67,11 @@ export default function App() {
   // LOADING STATES
   // -------------------------------------------------
   if (loading || linkLoading || profileLoading) {
-    return (
-      <div className="min-h-svh flex flex-col items-center justify-center gap-5 bg-slate-950 text-slate-100">
-        <div className="flex flex-col items-center gap-3">
-          <img src="/icon-1026%20x%201600.png" alt="" className="h-20 w-auto" />
-          <div className="flex flex-col items-center gap-1">
-            <span className="font-cinzel text-4xl font-bold tracking-[0.1em] text-red-600">Dark Heresy</span>
-            <span className="font-cinzel text-sm tracking-[0.55em] text-slate-500 uppercase">Manager</span>
-          </div>
-        </div>
-        <div className="flex items-center gap-3 w-64">
-          <div className="flex-1 border-t-4 border-double border-slate-800" />
-          <img src="/Icon-eagle.png" alt="" className="h-4 w-auto opacity-60" />
-          <div className="flex-1 border-t-4 border-double border-slate-800" />
-        </div>
-        <div className="w-8 h-8 rounded-full border-2 border-slate-800 border-t-red-600 animate-spin" />
-        {isPostUpgrade && (
-          <span className="text-[0.6rem] tracking-widest text-slate-500 uppercase">Updating…</span>
-        )}
-      </div>
-    );
+    return <SplashScreen label={isPostUpgrade ? "Updating…" : "Loading…"} />;
   }
 
   if (!currentUser) {
-    return (
-      <div className="min-h-svh flex flex-col items-center justify-center gap-5 bg-slate-950 text-slate-100">
-        <div className="flex flex-col items-center gap-3">
-          <img src="/icon-1026%20x%201600.png" alt="" className="h-20 w-auto" />
-          <div className="flex flex-col items-center gap-1">
-            <span className="font-cinzel text-4xl font-bold tracking-[0.1em] text-red-600">Dark Heresy</span>
-            <span className="font-cinzel text-sm tracking-[0.55em] text-slate-500 uppercase">Manager</span>
-          </div>
-        </div>
-        <div className="flex items-center gap-3 w-64">
-          <div className="flex-1 border-t-4 border-double border-slate-800" />
-          <img src="/Icon-eagle.png" alt="" className="h-4 w-auto opacity-60" />
-          <div className="flex-1 border-t-4 border-double border-slate-800" />
-        </div>
-        <div className="w-8 h-8 rounded-full border-2 border-slate-800 border-t-red-600 animate-spin" />
-        {isPostUpgrade && (
-          <span className="text-[0.6rem] tracking-widest text-slate-500 uppercase">Updating…</span>
-        )}
-      </div>
-    );
+    return <SplashScreen label={isPostUpgrade ? "Updating…" : "Loading…"} />;
   }
 
   // First-launch: user hasn't completed onboarding yet.
@@ -145,7 +107,7 @@ export default function App() {
 
           {/* ROUTES */}
           <CampaignsProvider key={effectiveUserId} uid={effectiveUserId}>
-            <main className="max-w-5xl mx-auto px-4 py-6">
+            <main className="max-w-7xl mx-auto px-4 lg:px-6 py-6">
               <ErrorBoundary>
                 <Routes>
                   <Route
@@ -198,7 +160,6 @@ export default function App() {
 
           <ToastContainer />
           <OfflineIndicator />
-          {import.meta.env.DEV && <ToastTester />}
         </div>
       </ToastProvider>
     </HeaderExtensionProvider>

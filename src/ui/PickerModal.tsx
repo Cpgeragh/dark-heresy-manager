@@ -65,16 +65,16 @@ export function PickerModal({
       onClick={onClose}
     >
       <div
-        className={`w-full min-h-0 max-w-lg bg-slate-900 border border-slate-700 rounded-xl shadow-2xl flex flex-col ${maxHeight}`}
+        className={`w-full min-h-0 max-w-lg lg:max-w-2xl bg-slate-900 border border-slate-700 rounded-xl shadow-2xl flex flex-col ${maxHeight}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
-          <h3 className="text-sm font-semibold text-slate-200">{title}</h3>
+        <div className="flex items-center justify-between px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
+          <h3 className="text-sm lg:text-base font-semibold text-slate-200">{title}</h3>
           <button
             onClick={onClose}
             aria-label="Close"
-            className="text-slate-400 hover:text-slate-200 text-lg leading-none"
+            className="text-slate-400 hover:text-slate-200 text-lg lg:text-xl leading-none"
           >
             {closeLabel}
           </button>
@@ -82,7 +82,7 @@ export function PickerModal({
 
         {/* Search */}
         {!hideSearch && (
-          <div className="px-4 py-2 border-b border-slate-800">
+          <div className="px-4 lg:px-5 py-2 lg:py-3 border-b border-slate-800">
             <input
               type="text"
               placeholder={placeholder}
@@ -95,19 +95,19 @@ export function PickerModal({
 
         {/* Optional filter row (e.g. discipline chips) */}
         {filterRow && (
-          <div className="px-4 py-2 border-b border-slate-800 flex flex-wrap gap-1.5">
+          <div className="px-4 lg:px-5 py-2 lg:py-3 border-b border-slate-800 flex flex-wrap gap-1.5">
             {filterRow}
           </div>
         )}
 
         {/* Scrollable list */}
         <div className="min-h-0 overflow-y-auto flex-1 divide-y divide-slate-800">
-          {isEmpty && <p className="p-4 text-sm text-slate-500 text-center">{emptyMessage}</p>}
+          {isEmpty && <p className="p-4 lg:p-5 text-sm lg:text-base text-slate-500 text-center">{emptyMessage}</p>}
           {children}
         </div>
 
         {/* Optional footer (e.g. "+ Add custom" button or specialisation form) */}
-        {footer && <div className="px-4 py-3 border-t border-slate-700">{footer}</div>}
+        {footer && <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700">{footer}</div>}
       </div>
     </div>
   );

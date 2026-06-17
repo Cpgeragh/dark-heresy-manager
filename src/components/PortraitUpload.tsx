@@ -171,14 +171,14 @@ export function PortraitUpload({
         <>
           <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" />
           <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
-            <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 flex flex-col gap-4 pointer-events-auto w-80 max-w-[90vw]">
+            <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 lg:p-5 flex flex-col gap-4 pointer-events-auto w-80 lg:w-96 max-w-[90vw]">
               <div className="flex items-center">
-                <p className="text-sm font-semibold text-slate-100 text-center flex-1">
+                <p className="text-sm lg:text-base font-semibold text-slate-100 text-center flex-1">
                   Position Portrait
                 </p>
                 <button
                   onClick={handleCancel}
-                  className="w-7 h-7 flex items-center justify-center rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 text-slate-300 text-lg leading-none transition"
+                  className="w-7 h-7 lg:w-8 lg:h-8 flex items-center justify-center rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 text-slate-300 text-lg lg:text-xl leading-none transition"
                 >
                   ×
                 </button>
@@ -201,7 +201,7 @@ export function PortraitUpload({
 
               {/* Zoom slider */}
               <div className="flex items-center gap-3">
-                <span className="text-xs text-slate-500">Zoom</span>
+                <span className="text-xs lg:text-sm text-slate-500">Zoom</span>
                 <input
                   type="range"
                   min={1}
@@ -217,14 +217,14 @@ export function PortraitUpload({
                 <button
                   onClick={handleSave}
                   disabled={uploading}
-                  className="flex-1 px-4 py-2 border border-red-500 text-red-500 font-semibold rounded text-sm hover:bg-red-500/10 transition disabled:opacity-50"
+                  className="flex-1 px-4 py-2 border border-red-500 text-red-500 font-semibold rounded text-sm lg:text-base hover:bg-red-500/10 transition disabled:opacity-50"
                 >
                   {uploading ? "Uploading…" : "Save"}
                 </button>
                 <button
                   onClick={handleCancel}
                   disabled={uploading}
-                  className="flex-1 px-4 py-2 bg-slate-700 text-slate-300 rounded text-sm hover:bg-slate-600 transition"
+                  className="flex-1 px-4 py-2 bg-slate-700 text-slate-300 rounded text-sm lg:text-base hover:bg-slate-600 transition"
                 >
                   Cancel
                 </button>
