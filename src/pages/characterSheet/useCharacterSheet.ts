@@ -31,7 +31,8 @@ export function useCharacterSheet({
   // USER & ROLE
   // ================================================================
   const userId = effectiveUserId;
-  const isDM = useIsDM(path?.campaignId, userId);
+  const rawIsDM = useIsDM(path?.campaignId, userId);
+  const isDM = rawIsDM ?? false;
   const { dmReadOnly, toggleDmReadOnly } = useDMOverride();
 
   // ================================================================

@@ -103,7 +103,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
     return <div className="text-slate-300 text-center py-10">No campaign selected.</div>;
   }
 
-  if (loading) {
+  if (loading || isDM === null) {
     return <div className="text-slate-300 text-center py-10">Loading campaign…</div>;
   }
 
