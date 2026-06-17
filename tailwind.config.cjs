@@ -11,6 +11,7 @@ module.exports = {
     extend: {
       fontFamily: {
         code: ['RobotoMonoZero', 'Roboto', 'ui-sans-serif', 'sans-serif'],
+      cinzel: ["'Cinzel'", 'serif'],
       },
     },
   },

@@ -15,7 +15,7 @@ import { ToastProvider, ToastContainer, useToast } from "./components/Toast";
 import { OfflineIndicator } from "./components/OfflineIndicator";
 import { ToastTester } from "./components/ToastTester";
 import { ROUTES, ROUTE_PATTERNS } from "./constants/routes";
-import { consumeUpdateStalled } from "./pwaUpdateState";
+import { consumeUpdateStalled, consumePostUpgrade } from "./pwaUpdateState";
 
 import Dashboard from "./pages/Dashboard";
 import CharacterSheet from "./pages/CharacterSheet";
@@ -37,6 +37,7 @@ function UpdateStallNotice() {
 }
 
 export default function App() {
+  const [isPostUpgrade] = useState(() => consumePostUpgrade());
   const location = useLocation();
   const [messagesOpen, setMessagesOpen] = useState(false);
   const characterSheetMatch = useMatch(ROUTE_PATTERNS.CHARACTER_SHEET);
@@ -67,18 +68,46 @@ export default function App() {
   // -------------------------------------------------
   if (loading || linkLoading || profileLoading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-slate-950 text-slate-100">
-        <div className="w-8 h-8 rounded-full border-4 border-slate-700 border-t-red-600 animate-spin" />
-        <span className="text-sm text-slate-400">Loading…</span>
+      <div className="min-h-svh flex flex-col items-center justify-center gap-5 bg-slate-950 text-slate-100">
+        <div className="flex flex-col items-center gap-3">
+          <img src="/icon-1026%20x%201600.png" alt="" className="h-20 w-auto" />
+          <div className="flex flex-col items-center gap-1">
+            <span className="font-cinzel text-4xl font-bold tracking-[0.1em] text-red-600">Dark Heresy</span>
+            <span className="font-cinzel text-sm tracking-[0.55em] text-slate-500 uppercase">Manager</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 w-64">
+          <div className="flex-1 border-t-4 border-double border-slate-800" />
+          <img src="/Icon-eagle.png" alt="" className="h-4 w-auto opacity-60" />
+          <div className="flex-1 border-t-4 border-double border-slate-800" />
+        </div>
+        <div className="w-8 h-8 rounded-full border-2 border-slate-800 border-t-red-600 animate-spin" />
+        {isPostUpgrade && (
+          <span className="text-[0.6rem] tracking-widest text-slate-500 uppercase">Updating…</span>
+        )}
       </div>
     );
   }
 
   if (!currentUser) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-slate-950 text-slate-100">
-        <div className="w-8 h-8 rounded-full border-4 border-slate-700 border-t-red-600 animate-spin" />
-        <span className="text-sm text-slate-400">Loading…</span>
+      <div className="min-h-svh flex flex-col items-center justify-center gap-5 bg-slate-950 text-slate-100">
+        <div className="flex flex-col items-center gap-3">
+          <img src="/icon-1026%20x%201600.png" alt="" className="h-20 w-auto" />
+          <div className="flex flex-col items-center gap-1">
+            <span className="font-cinzel text-4xl font-bold tracking-[0.1em] text-red-600">Dark Heresy</span>
+            <span className="font-cinzel text-sm tracking-[0.55em] text-slate-500 uppercase">Manager</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 w-64">
+          <div className="flex-1 border-t-4 border-double border-slate-800" />
+          <img src="/Icon-eagle.png" alt="" className="h-4 w-auto opacity-60" />
+          <div className="flex-1 border-t-4 border-double border-slate-800" />
+        </div>
+        <div className="w-8 h-8 rounded-full border-2 border-slate-800 border-t-red-600 animate-spin" />
+        {isPostUpgrade && (
+          <span className="text-[0.6rem] tracking-widest text-slate-500 uppercase">Updating…</span>
+        )}
       </div>
     );
   }

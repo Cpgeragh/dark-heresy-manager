@@ -70,7 +70,7 @@ export function AppHeader({ currentPath, onOpenMessages }: AppHeaderProps) {
 
         {/* App name — centred */}
         <div className="flex items-center justify-center pointer-events-none">
-          <span className="font-semibold text-slate-100 text-base">Dark Heresy Manager</span>
+          <span className="font-cinzel font-bold text-slate-100 text-base tracking-wide">Dark Heresy Manager</span>
         </div>
 
         {/* Settings + kebab */}

@@ -4,6 +4,7 @@
 // downloading but stalled, so the app can warn the user once it mounts.
 
 let stalled = false;
+let postUpgrade = false;
 
 export const markUpdateStalled = () => {
   stalled = true;
@@ -12,5 +13,15 @@ export const markUpdateStalled = () => {
 export const consumeUpdateStalled = () => {
   const value = stalled;
   stalled = false;
+  return value;
+};
+
+export const markPostUpgrade = () => {
+  postUpgrade = true;
+};
+
+export const consumePostUpgrade = () => {
+  const value = postUpgrade;
+  postUpgrade = false;
   return value;
 };
