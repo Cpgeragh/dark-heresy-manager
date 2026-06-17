@@ -194,7 +194,7 @@ export function TalentPickerModal({
                   }
                 : undefined
             }
-            className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"} ${
+            className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"} ${
               isSelected ? "bg-slate-800 ring-1 ring-inset ring-red-500/40" : ""
             }`}
           >
@@ -221,7 +221,7 @@ export function TalentPickerModal({
                 {sources.map((src) => (
                   <span
                     key={src}
-                    className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(src)}`}
+                    className={`text-xs lg:text-sm rounded border bg-slate-800/40 px-1.5 lg:px-2 py-0.5 font-mono ${sourceColour(src)}`}
                   >
                     {src}
                   </span>
@@ -229,7 +229,7 @@ export function TalentPickerModal({
               </div>
             </div>
             {row.prerequisites && (
-              <div className="text-xs text-slate-500 mt-0.5">
+              <div className="text-xs lg:text-sm text-slate-500 mt-0.5">
                 Prerequisites: {row.prerequisites}
               </div>
             )}
@@ -256,14 +256,14 @@ export function EntryCard({ entry, editable, onRemove }: EntryCardProps) {
   const refSources = refData ? normaliseSources(refData.source) : [];
 
   return (
-    <div className="flex items-start justify-between gap-2 rounded border border-slate-500 bg-slate-900/60 px-3 py-2 text-sm">
+    <div className="flex items-start justify-between gap-2 rounded border border-slate-500 bg-slate-900/60 px-3 lg:px-4 py-2 lg:py-3 text-sm lg:text-base">
       <div className="space-y-0.5 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="font-medium text-slate-100 break-words">{entry.name}</span>
           {refSources.map((src) => (
             <span
               key={src}
-              className={`text-xs rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(src)}`}
+              className={`text-xs lg:text-sm rounded border bg-slate-800/40 px-1.5 lg:px-2 py-0.5 font-mono ${sourceColour(src)}`}
             >
               {src}
             </span>
@@ -275,7 +275,7 @@ export function EntryCard({ entry, editable, onRemove }: EntryCardProps) {
         <button
           onClick={() => onRemove(entry.uid)}
           aria-label={`Remove ${entry.name}`}
-          className="shrink-0 mt-0.5 text-slate-500 hover:text-red-400 transition text-xs"
+          className="shrink-0 mt-0.5 text-slate-500 hover:text-red-400 transition text-xs lg:text-sm"
         >
           ✕
         </button>
@@ -313,13 +313,13 @@ export function EntrySection({
     <div>
       <div className="flex items-center justify-between mb-3">
         <SectionHeader>{title}</SectionHeader>
-        <span className="text-xs text-slate-500">
+        <span className="text-xs lg:text-sm text-slate-500">
           {entries.length} {entries.length === 1 ? singular.toLowerCase() : title.toLowerCase()}
         </span>
       </div>
 
       <section className={uiSection + " space-y-2"}>
-        {entries.length === 0 && <p className="text-sm text-slate-500 italic">None added yet.</p>}
+        {entries.length === 0 && <p className="text-sm lg:text-base text-slate-500 italic">None added yet.</p>}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {[...entries]
@@ -331,7 +331,7 @@ export function EntrySection({
 
         <button
           onClick={() => setShowPicker(true)}
-          className="mt-1 px-3 py-1 text-xs rounded border border-slate-500 text-slate-100 hover:bg-slate-800 transition"
+          className="mt-1 px-3 lg:px-4 py-1 text-xs lg:text-sm rounded border border-slate-500 text-slate-100 hover:bg-slate-800 transition"
         >
           {editable ? `+ Add ${singular}` : `View ${singular}s`}
         </button>

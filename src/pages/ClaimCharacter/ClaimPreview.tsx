@@ -17,21 +17,21 @@ export function ClaimPreview({ character, campaign, ownership, onClaim }: ClaimP
   function renderStatus() {
     switch (ownership) {
       case "unclaimed":
-        return <p className="text-green-400 text-sm">This character is unclaimed and available.</p>;
+        return <p className="text-green-400 text-sm lg:text-base">This character is unclaimed and available.</p>;
 
       case "claimed-by-you":
-        return <p className="text-amber-300 text-sm">You already own this character.</p>;
+        return <p className="text-amber-300 text-sm lg:text-base">You already own this character.</p>;
 
       case "claimed-by-other":
         return (
-          <p className="text-red-400 text-sm">
+          <p className="text-red-400 text-sm lg:text-base">
             This character is already claimed by another player.
           </p>
         );
 
       case "locked":
         return (
-          <p className="text-red-400 text-sm">This character is claimed and locked by the DM.</p>
+          <p className="text-red-400 text-sm lg:text-base">This character is claimed and locked by the DM.</p>
         );
     }
   }
@@ -42,10 +42,10 @@ export function ClaimPreview({ character, campaign, ownership, onClaim }: ClaimP
   }, [ownership, onClaim]);
 
   return (
-    <div className="border border-slate-700 bg-slate-900 p-4 rounded space-y-4">
-      <h2 className="text-xl font-semibold text-slate-100">Character Found</h2>
+    <div className="border border-slate-700 bg-slate-900 p-4 lg:p-5 rounded space-y-4">
+      <h2 className="text-xl lg:text-2xl font-semibold text-slate-100">Character Found</h2>
 
-      <div className="text-slate-300 text-sm space-y-1">
+      <div className="text-slate-300 text-sm lg:text-base space-y-1">
         <p>
           <span className="text-slate-400">Character:</span>{" "}
           <span className="font-semibold">{name}</span>
@@ -62,14 +62,14 @@ export function ClaimPreview({ character, campaign, ownership, onClaim }: ClaimP
       {ownership === "unclaimed" ? (
         <button
           onClick={handleClaim}
-          className="w-full px-4 py-2 rounded font-semibold bg-green-600 text-white hover:bg-green-500"
+          className="w-full px-4 lg:px-5 py-2 lg:py-2.5 rounded font-semibold bg-green-600 text-white hover:bg-green-500 text-sm lg:text-base"
         >
           Claim This Character
         </button>
       ) : (
         <button
           disabled
-          className="w-full px-4 py-2 rounded font-semibold bg-slate-700 text-slate-400 cursor-not-allowed"
+          className="w-full px-4 lg:px-5 py-2 lg:py-2.5 rounded font-semibold bg-slate-700 text-slate-400 cursor-not-allowed text-sm lg:text-base"
         >
           Unavailable
         </button>

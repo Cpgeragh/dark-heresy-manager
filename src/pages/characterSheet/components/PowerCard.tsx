@@ -20,7 +20,7 @@ function PowerStats({ power }: { power: PsychicPower }) {
   if (!hasAny) return null;
 
   return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs">
+    <div className="flex flex-wrap items-center gap-x-3 lg:gap-x-4 gap-y-0.5 text-xs lg:text-sm">
       {power.source && (
         <span
           className={`rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(power.source)}`}
@@ -71,7 +71,7 @@ export function PowerCard({ power, editable, onRemove, onEdit }: PowerCardProps)
   );
 
   return (
-    <div className="flex items-start justify-between gap-2 rounded border border-slate-500 bg-slate-900/60 px-3 py-2 text-sm">
+    <div className="flex items-start justify-between gap-2 rounded border border-slate-500 bg-slate-900/60 px-3 lg:px-4 py-2 lg:py-3 text-sm lg:text-base">
       <div className="space-y-1 min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
           <p className="font-medium text-slate-100">
@@ -87,7 +87,7 @@ export function PowerCard({ power, editable, onRemove, onEdit }: PowerCardProps)
           <button
             onClick={() => onEdit(power)}
             aria-label={`Edit ${power.name || "power"}`}
-            className="text-slate-500 hover:text-amber-300 transition text-xs"
+            className="text-slate-500 hover:text-amber-300 transition text-xs lg:text-sm"
           >
             Edit
           </button>
@@ -96,7 +96,7 @@ export function PowerCard({ power, editable, onRemove, onEdit }: PowerCardProps)
           <button
             onClick={() => onRemove(power.id)}
             aria-label={`Remove ${power.name || "power"}`}
-            className="text-slate-500 hover:text-red-400 transition text-xs"
+            className="text-slate-500 hover:text-red-400 transition text-xs lg:text-sm"
           >
             ✕
           </button>

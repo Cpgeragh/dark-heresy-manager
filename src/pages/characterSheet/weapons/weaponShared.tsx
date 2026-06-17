@@ -11,9 +11,9 @@ import type { WeaponUpgradeRef } from "../../../data/reference/weaponUpgradeRefe
 
 export function StatChip({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-col items-center bg-slate-800/60 rounded px-2 py-1 min-w-[52px]">
-      <span className="text-[10px] text-slate-500 uppercase tracking-wide">{label}</span>
-      <span className="text-sm font-mono text-slate-200 mt-0.5">{value || "—"}</span>
+    <div className="flex flex-col items-center bg-slate-800/60 rounded px-2 lg:px-3 py-1 lg:py-1.5 min-w-[52px] lg:min-w-[64px]">
+      <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">{label}</span>
+      <span className="text-sm lg:text-base font-mono text-slate-200 mt-0.5">{value || "—"}</span>
     </div>
   );
 }
@@ -42,9 +42,9 @@ export function DamageTypeChip({ damage }: { damage: string }) {
   const damageType = parseDamageType(damage);
   if (!damageType) return null;
   return (
-    <div className="flex flex-col items-center bg-slate-800/60 rounded px-2 py-1 min-w-[52px]">
-      <span className="text-[10px] text-slate-500 uppercase tracking-wide">Type</span>
-      <span className={`text-sm font-semibold mt-0.5 ${damageType.colour}`}>
+    <div className="flex flex-col items-center bg-slate-800/60 rounded px-2 lg:px-3 py-1 lg:py-1.5 min-w-[52px] lg:min-w-[64px]">
+      <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Type</span>
+      <span className={`text-sm lg:text-base font-semibold mt-0.5 ${damageType.colour}`}>
         {damageType.label}
       </span>
     </div>
@@ -79,7 +79,7 @@ export function EquipToggle({
 }) {
   if (!editable) {
     return equipped ? (
-      <span className="text-[10px] text-green-400 border border-green-700/50 rounded px-1.5 py-0.5 font-medium uppercase tracking-wide shrink-0">
+      <span className="text-[10px] lg:text-xs text-green-400 border border-green-700/50 rounded px-1.5 lg:px-2 py-0.5 font-medium uppercase tracking-wide shrink-0">
         {labels.equipped}
       </span>
     ) : null;
@@ -118,7 +118,7 @@ export function EquipToggle({
         )}
       </div>
       <span
-        className={`text-[10px] uppercase tracking-wide ${
+        className={`text-[10px] lg:text-xs uppercase tracking-wide ${
           equipped ? "text-green-400" : "text-slate-500 group-hover:text-slate-300"
         }`}
       >
@@ -144,13 +144,13 @@ export function SpecialRulesContent({
 
   return (
     <div className="space-y-4">
-      {description && <p className="text-sm text-slate-300 leading-relaxed">{description}</p>}
+      {description && <p className="text-sm lg:text-base text-slate-300 leading-relaxed">{description}</p>}
       {ruleNames.map((name) => {
         const desc = WEAPON_SPECIAL_RULES[name];
         return (
           <div key={name}>
-            <p className="text-sm font-semibold text-amber-300">{name}</p>
-            <p className="text-sm text-slate-300 mt-1 leading-relaxed">{desc}</p>
+            <p className="text-sm lg:text-base font-semibold text-amber-300">{name}</p>
+            <p className="text-sm lg:text-base text-slate-300 mt-1 leading-relaxed">{desc}</p>
           </div>
         );
       })}
@@ -170,23 +170,23 @@ export function AttachmentCard({
   onRemove: (upgradeId: string) => void;
 }) {
   return (
-    <div className="bg-slate-800/60 rounded border border-slate-500 px-2 py-1.5">
+    <div className="bg-slate-800/60 rounded border border-slate-500 px-2 lg:px-3 py-1.5 lg:py-2">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-xs font-medium text-slate-300">{upgrade.name}</span>
+        <span className="text-xs lg:text-sm font-medium text-slate-300">{upgrade.name}</span>
         <div className="flex items-center gap-1.5 shrink-0">
           <InfoModal
             title={upgrade.name}
             content={
               <div className="space-y-2">
-                <p className="text-sm text-slate-300 leading-relaxed">{upgrade.description}</p>
-                <p className="text-xs text-slate-500 italic">{upgrade.applicableTo}</p>
+                <p className="text-sm lg:text-base text-slate-300 leading-relaxed">{upgrade.description}</p>
+                <p className="text-xs lg:text-sm text-slate-500 italic">{upgrade.applicableTo}</p>
               </div>
             }
           />
           {editable && (
             <button
               onClick={() => onRemove(upgrade.id)}
-              className="text-slate-500 hover:text-red-400 leading-none text-sm"
+              className="text-slate-500 hover:text-red-400 leading-none text-sm lg:text-base"
               title={`Remove ${upgrade.name}`}
             >
               ×
@@ -196,15 +196,15 @@ export function AttachmentCard({
       </div>
       <div className="flex flex-wrap gap-1 mt-1">
         {upgrade.weightModifier !== "—" && (
-          <span className="text-[10px] rounded border border-slate-700 bg-slate-900/40 px-1 py-0.5 text-slate-400">
+          <span className="text-[10px] lg:text-xs rounded border border-slate-700 bg-slate-900/40 px-1 lg:px-1.5 py-0.5 text-slate-400">
             ⚖ {upgrade.weightModifier}
           </span>
         )}
-        <span className="text-[10px] rounded border border-slate-700 bg-slate-900/40 px-1 py-0.5 text-amber-400/80 font-mono">
+        <span className="text-[10px] lg:text-xs rounded border border-slate-700 bg-slate-900/40 px-1 lg:px-1.5 py-0.5 text-amber-400/80 font-mono">
           ₮ {upgrade.value}
         </span>
         <span
-          className={`text-[10px] rounded border bg-slate-900/40 px-1 py-0.5 font-mono ${sourceColour(upgrade.source)}`}
+          className={`text-[10px] lg:text-xs rounded border bg-slate-900/40 px-1 lg:px-1.5 py-0.5 font-mono ${sourceColour(upgrade.source)}`}
         >
           {upgrade.source}
         </span>
@@ -226,9 +226,9 @@ export function AttachmentPicker({
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-md bg-slate-900 border border-slate-500 rounded-xl shadow-2xl flex flex-col max-h-[80vh]">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
-          <h3 className="text-sm font-semibold text-slate-200">Add Attachment</h3>
+      <div className="w-full max-w-md lg:max-w-lg bg-slate-900 border border-slate-500 rounded-xl shadow-2xl flex flex-col max-h-[80vh]">
+        <div className="flex items-center justify-between px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
+          <h3 className="text-sm lg:text-base font-semibold text-slate-200">Add Attachment</h3>
           <button
             onClick={onClose}
             className="text-slate-400 hover:text-slate-200 text-lg leading-none"
@@ -238,7 +238,7 @@ export function AttachmentPicker({
         </div>
         <div className="overflow-y-auto flex-1 divide-y divide-slate-800">
           {compatibleUpgrades.length === 0 && (
-            <p className="p-4 text-sm text-slate-500 text-center">
+            <p className="p-4 lg:p-5 text-sm lg:text-base text-slate-500 text-center">
               No compatible upgrades available.
             </p>
           )}
@@ -246,13 +246,13 @@ export function AttachmentPicker({
             <button
               key={upgrade.id}
               onClick={() => onSelect(upgrade.id)}
-              className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group"
+              className="w-full text-left px-4 lg:px-5 py-3 lg:py-4 hover:bg-slate-800 transition group"
             >
               <div className="flex items-center justify-between gap-2 mb-1">
-                <span className="text-sm font-medium text-slate-200 group-hover:text-white">
+                <span className="text-sm lg:text-base font-medium text-slate-200 group-hover:text-white">
                   {upgrade.name}
                 </span>
-                <div className="flex items-center gap-1.5 text-xs shrink-0">
+                <div className="flex items-center gap-1.5 text-xs lg:text-sm shrink-0">
                   <span className={rarityColour(upgrade.rarity)}>{upgrade.rarity}</span>
                   <span className="text-slate-600">·</span>
                   <span className="text-amber-400/80 font-mono">₮ {upgrade.value}</span>
@@ -260,15 +260,15 @@ export function AttachmentPicker({
                   <span className="text-slate-400">{upgrade.weightModifier}</span>
                 </div>
               </div>
-              <p className="text-xs text-slate-400 leading-relaxed">{upgrade.description}</p>
-              <p className="text-xs text-slate-600 mt-1 italic">{upgrade.applicableTo}</p>
+              <p className="text-xs lg:text-sm text-slate-400 leading-relaxed">{upgrade.description}</p>
+              <p className="text-xs lg:text-sm text-slate-600 mt-1 italic">{upgrade.applicableTo}</p>
             </button>
           ))}
         </div>
-        <div className="px-4 py-3 border-t border-slate-700">
+        <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700">
           <button
             onClick={onClose}
-            className="w-full py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-sm text-slate-100"
+            className="w-full py-1.5 lg:py-2 rounded bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100"
           >
             Cancel
           </button>

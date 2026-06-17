@@ -61,7 +61,7 @@ export function DrugsTab({ drugs, editable, onUpdate }: DrugsTabProps) {
   return (
     <div className="space-y-6">
       {/* Excessive Drug Use rule */}
-      <div className="rounded-lg border border-violet-700/40 bg-violet-900/10 px-4 py-3 text-xs text-slate-400 leading-relaxed">
+      <div className="rounded-lg border border-violet-700/40 bg-violet-900/10 px-4 lg:px-5 py-3 lg:py-4 text-xs lg:text-sm text-slate-400 leading-relaxed">
         <span className="font-semibold text-violet-400 uppercase tracking-wide mr-1">
           Excessive Drug Use -
         </span>
@@ -76,13 +76,13 @@ export function DrugsTab({ drugs, editable, onUpdate }: DrugsTabProps) {
           <SectionHeader>Carried ({drugs.length})</SectionHeader>
           <button
             onClick={() => setShowPicker(true)}
-            className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
+            className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
           >
             {editable ? "+ Add" : "View"}
           </button>
         </div>
 
-        {drugs.length === 0 && <p className="text-sm text-slate-500 italic">No drugs carried.</p>}
+        {drugs.length === 0 && <p className="text-sm lg:text-base text-slate-500 italic">No drugs carried.</p>}
 
         <div className="space-y-3 sm:hidden">
           {drugs.map((item) => (

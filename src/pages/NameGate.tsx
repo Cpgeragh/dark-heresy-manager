@@ -35,14 +35,14 @@ export default function NameGate({ effectiveUserId }: Props) {
 
   return (
     <div className="min-h-svh bg-slate-950 text-slate-100 flex items-center justify-center p-6">
-      <div className="max-w-sm w-full">
-        <h1 className="text-2xl font-bold mb-2">One quick thing</h1>
-        <p className="text-slate-400 mb-6">
+      <div className="max-w-sm lg:max-w-md w-full">
+        <h1 className="text-2xl lg:text-3xl font-bold mb-2">One quick thing</h1>
+        <p className="text-sm lg:text-base text-slate-400 mb-6">
           Please add your name. First name only. Used on your dashboard and your character sheets.
         </p>
 
         <label className="block mb-6">
-          <span className="text-xs font-medium uppercase tracking-wide text-slate-400">
+          <span className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-400">
             First name
           </span>
           <input
@@ -52,7 +52,7 @@ export default function NameGate({ effectiveUserId }: Props) {
             placeholder="e.g. David"
             disabled={busy}
             maxLength={50}
-            className="mt-1 w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-600 text-slate-100 text-base placeholder:text-slate-600 focus:outline-none focus:border-amber-500 disabled:opacity-50"
+            className="mt-1 w-full px-4 lg:px-5 py-3 lg:py-3.5 rounded-xl bg-slate-800 border border-slate-600 text-slate-100 text-base lg:text-lg placeholder:text-slate-600 focus:outline-none focus:border-amber-500 disabled:opacity-50"
           />
         </label>
 
@@ -60,7 +60,7 @@ export default function NameGate({ effectiveUserId }: Props) {
           {busy ? "Saving…" : "Continue"}
         </Button>
 
-        {error && <p className="mt-4 text-red-400 text-sm text-center">{error}</p>}
+        {error && <p className="mt-4 text-red-400 text-sm lg:text-base text-center">{error}</p>}
       </div>
     </div>
   );

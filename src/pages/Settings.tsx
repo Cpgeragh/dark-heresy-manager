@@ -97,7 +97,7 @@ export default function Settings({ user: _user, effectiveUserId, isLinked, unlin
         <div>
           <SectionHeader className="mb-3">Recovery Code</SectionHeader>
           <section className={uiSection + " space-y-3"}>
-            <p className="text-slate-400 text-sm">
+            <p className="text-slate-400 text-sm lg:text-base">
               Use this code to reclaim your campaigns and characters if you lose access to
               this device. Keep it somewhere safe and private.
             </p>
@@ -105,10 +105,10 @@ export default function Settings({ user: _user, effectiveUserId, isLinked, unlin
             {revealedCode ? (
               <>
                 <div className="bg-slate-800 border border-slate-600 rounded-lg p-3 text-center">
-                  <p className="text-xs text-slate-500 uppercase tracking-widest mb-2">
+                  <p className="text-xs lg:text-sm text-slate-500 uppercase tracking-widest mb-2">
                     Recovery Code
                   </p>
-                  <span className="font-code [font-feature-settings:'zero'] text-lg text-amber-400 tracking-widest break-all select-all">
+                  <span className="font-code [font-feature-settings:'zero'] text-lg lg:text-xl text-amber-400 tracking-widest break-all select-all">
                     {revealedCode}
                   </span>
                 </div>
@@ -119,7 +119,7 @@ export default function Settings({ user: _user, effectiveUserId, isLinked, unlin
                   </Button>
                   {confirmRotate ? (
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-amber-400">Rotate code?</span>
+                      <span className="text-sm lg:text-base text-amber-400">Rotate code?</span>
                       <Button onClick={handleRotate} disabled={rotating}>
                         {rotating ? "Rotating…" : "Yes, rotate"}
                       </Button>
@@ -137,7 +137,7 @@ export default function Settings({ user: _user, effectiveUserId, isLinked, unlin
                     </Button>
                   )}
                 </div>
-                <p className="text-xs text-slate-600">
+                <p className="text-xs lg:text-sm text-slate-600">
                   Rotating generates a new code and invalidates the old one.
                 </p>
               </>
@@ -155,13 +155,13 @@ export default function Settings({ user: _user, effectiveUserId, isLinked, unlin
           <section className={uiSection + " space-y-3"}>
             {isLinked ? (
               <>
-                <p className="text-slate-400 text-sm">
+                <p className="text-slate-400 text-sm lg:text-base">
                   This device is linked to another account. All campaigns and characters
                   from that account are accessible here.
                 </p>
                 {confirmUnlink ? (
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm text-amber-400">Unlink this device?</span>
+                    <span className="text-sm lg:text-base text-amber-400">Unlink this device?</span>
                     <Button onClick={handleUnlink} disabled={unlinking}>
                       {unlinking ? "Unlinking…" : "Yes, unlink"}
                     </Button>
@@ -181,7 +181,7 @@ export default function Settings({ user: _user, effectiveUserId, isLinked, unlin
               </>
             ) : (
               <>
-                <p className="text-slate-400 text-sm">
+                <p className="text-slate-400 text-sm lg:text-base">
                   Enter the recovery code from your other device to access all its campaigns
                   and characters here.
                 </p>
@@ -190,9 +190,9 @@ export default function Settings({ user: _user, effectiveUserId, isLinked, unlin
                   value={linkCode}
                   onChange={(e) => setLinkCode(e.target.value)}
                   placeholder="Paste recovery code here"
-                  className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-600 text-slate-100 text-sm placeholder:text-slate-500 focus:outline-none focus:border-amber-500"
+                  className="w-full px-3 lg:px-4 py-2 lg:py-2.5 rounded-lg bg-slate-800 border border-slate-600 text-slate-100 text-sm lg:text-base placeholder:text-slate-500 focus:outline-none focus:border-amber-500"
                 />
-                {linkError && <p className="text-red-400 text-sm">{linkError}</p>}
+                {linkError && <p className="text-red-400 text-sm lg:text-base">{linkError}</p>}
                 <Button onClick={handleLinkDevice} disabled={linking || !linkCode.trim()}>
                   {linking ? "Linking…" : "Link This Device"}
                 </Button>

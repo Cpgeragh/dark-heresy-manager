@@ -6,6 +6,8 @@ import App from "./App";
 import { SplashScreen } from "./components/SplashScreen";
 import { markUpdateStalled, markPostUpgrade } from "./pwaUpdateState";
 import "./index.css";
+import "@fontsource/im-fell-english/400.css";
+import "@fontsource/cinzel/700.css";
 import "@fontsource/roboto/400.css";
 
 const root = ReactDOM.createRoot(document.getElementById("root")!);

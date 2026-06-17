@@ -113,15 +113,15 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
 
   return (
     <div className="min-h-svh bg-slate-950 text-slate-100 flex items-center justify-center p-6">
-      <div className="max-w-sm w-full">
+      <div className="max-w-sm lg:max-w-md w-full">
 
         {/* ── Welcome ── */}
         {step === "welcome" && (
           <div className="space-y-6 text-slate-100">
-            <h1 className="text-lg font-semibold text-slate-100 text-center">Welcome</h1>
+            <h1 className="text-lg lg:text-xl font-semibold text-slate-100 text-center">Welcome</h1>
 
-            <div className="border border-slate-700 bg-slate-900/40 p-4 rounded-lg space-y-4">
-              <p className="text-slate-300 text-sm">
+            <div className="border border-slate-700 bg-slate-900/40 p-4 lg:p-5 rounded-lg space-y-4">
+              <p className="text-slate-300 text-sm lg:text-base">
                 Enter your first name, then tap Get Started to set up your account and receive a
                 recovery code.
               </p>
@@ -135,9 +135,9 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
                   placeholder="e.g. David"
                   disabled={busy}
                   maxLength={50}
-                  className="mt-1 w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-600 text-slate-100 text-base placeholder:text-slate-600 focus:outline-none focus:border-amber-500 disabled:opacity-50"
+                  className="mt-1 w-full px-4 lg:px-5 py-3 lg:py-3.5 rounded-lg bg-slate-800 border border-slate-600 text-slate-100 text-base lg:text-lg placeholder:text-slate-600 focus:outline-none focus:border-amber-500 disabled:opacity-50"
                 />
-                <span className="mt-1 block text-[11px] text-amber-300 text-center">
+                <span className="mt-1 block text-[11px] lg:text-xs text-amber-300 text-center">
                   First name only. Used on your dashboard and your character sheets.
                 </span>
               </label>
@@ -151,11 +151,11 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
                 {busy ? "Setting up…" : "Get Started"}
               </Button>
 
-              {error && <p className="text-red-400 text-sm text-center">{error}</p>}
+              {error && <p className="text-red-400 text-sm lg:text-base text-center">{error}</p>}
 
               <button
                 onClick={() => { setError(null); goToStep("reclaim"); }}
-                className="w-full text-sm text-slate-300 hover:text-slate-100 transition text-center"
+                className="w-full text-sm lg:text-base text-slate-300 hover:text-slate-100 transition text-center"
               >
                 Returning user? Reclaim your identity →
               </button>
@@ -169,15 +169,15 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
             <div className="relative flex items-center justify-center">
               <button
                 onClick={() => { setError(null); goToStep("welcome"); }}
-                className="absolute left-0 text-sm text-slate-400 hover:text-slate-200 transition"
+                className="absolute left-0 text-sm lg:text-base text-slate-400 hover:text-slate-200 transition"
               >
                 ← Back
               </button>
-              <h1 className="text-lg font-semibold text-slate-100 text-center">Returning User</h1>
+              <h1 className="text-lg lg:text-xl font-semibold text-slate-100 text-center">Returning User</h1>
             </div>
 
-            <div className="border border-slate-700 bg-slate-900/40 p-4 rounded-lg space-y-4">
-              <p className="text-slate-300 text-sm">
+            <div className="border border-slate-700 bg-slate-900/40 p-4 lg:p-5 rounded-lg space-y-4">
+              <p className="text-slate-300 text-sm lg:text-base">
                 Enter the recovery code you saved when you first set up the app.
               </p>
 
@@ -193,7 +193,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
                   spellCheck={false}
                   maxLength={12}
                   disabled={busy}
-                  className="mt-1 w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-600 text-slate-100 font-code [font-feature-settings:'zero'] text-base placeholder:text-slate-600 focus:outline-none focus:border-amber-500 disabled:opacity-50"
+                  className="mt-1 w-full px-4 lg:px-5 py-3 lg:py-3.5 rounded-lg bg-slate-800 border border-slate-600 text-slate-100 font-code [font-feature-settings:'zero'] text-base lg:text-lg placeholder:text-slate-600 focus:outline-none focus:border-amber-500 disabled:opacity-50"
                 />
               </label>
 
@@ -206,7 +206,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
                 {busy ? "Reclaiming…" : "Reclaim Identity"}
               </Button>
 
-              {error && <p className="text-red-400 text-sm text-center">{error}</p>}
+              {error && <p className="text-red-400 text-sm lg:text-base text-center">{error}</p>}
             </div>
           </div>
         )}
@@ -217,32 +217,32 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
             <div className="relative flex items-center justify-center">
               <button
                 onClick={() => goToStep("welcome")}
-                className="absolute left-0 text-sm text-slate-400 hover:text-slate-200 transition"
+                className="absolute left-0 text-sm lg:text-base text-slate-400 hover:text-slate-200 transition"
               >
                 ← Back
               </button>
-              <h1 className="text-lg font-semibold text-slate-100 text-center">Data Recovery Code</h1>
+              <h1 className="text-lg lg:text-xl font-semibold text-slate-100 text-center">Data Recovery Code</h1>
             </div>
 
-            <div className="border border-slate-700 bg-slate-900/40 p-4 rounded-lg space-y-4">
-              <p className="text-slate-300 text-sm text-center">
+            <div className="border border-slate-700 bg-slate-900/40 p-4 lg:p-5 rounded-lg space-y-4">
+              <p className="text-slate-300 text-sm lg:text-base text-center">
                 If you ever lose access to this device, use this code to reclaim your campaigns
                 and characters.
               </p>
-              <p className="text-slate-100 text-sm text-center font-semibold">
+              <p className="text-slate-100 text-sm lg:text-base text-center font-semibold">
                 Write it down somewhere safe.
               </p>
 
               <div className="bg-slate-800 border border-slate-600 rounded-lg p-6 text-center">
-                <p className="text-xs font-semibold text-amber-400 uppercase tracking-widest mb-2">
+                <p className="text-xs lg:text-sm font-semibold text-amber-400 uppercase tracking-widest mb-2">
                   Recovery Code
                 </p>
-                <span className="font-code [font-feature-settings:'zero'] text-xl text-white tracking-widest break-all select-all">
+                <span className="font-code [font-feature-settings:'zero'] text-xl lg:text-2xl text-white tracking-widest break-all select-all">
                   {code}
                 </span>
               </div>
 
-              <p className="text-sm text-amber-300 text-center">
+              <p className="text-sm lg:text-base text-amber-300 text-center">
                 This code is shown only once and cannot be retrieved again without rotating it
                 in Settings.
               </p>
@@ -257,7 +257,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
 
               </div>
 
-              <label className="flex items-center justify-center gap-2 text-sm text-slate-300 cursor-pointer">
+              <label className="flex items-center justify-center gap-2 text-sm lg:text-base text-slate-300 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={savedConfirmed}
@@ -269,7 +269,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
               </label>
 
               {!copied && (
-                <p className="text-xs text-amber-300 text-center">
+                <p className="text-xs lg:text-sm text-amber-300 text-center">
                   Copy your code, then tick the box to continue.
                 </p>
               )}

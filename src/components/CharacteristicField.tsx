@@ -102,12 +102,12 @@ export default function CharacteristicField({ label, value, editable, onChange }
   const total = base + advances * CHARACTERISTIC_ADVANCE_INCREMENT;
 
   return (
-    <div className="mb-4 p-3 border border-slate-700 rounded-md bg-slate-900/60">
-      <div className="font-semibold mb-1">{label}</div>
+    <div className="mb-4 p-3 lg:p-4 border border-slate-700 rounded-md bg-slate-900/60">
+      <div className="font-semibold lg:text-lg mb-1">{label}</div>
 
       {/* Base value */}
       <div className="flex items-center gap-2 mb-2">
-        <span className="text-sm text-slate-400">Base:</span>
+        <span className="text-sm lg:text-base text-slate-400">Base:</span>
         <input
           type="text"
           inputMode="numeric"
@@ -120,7 +120,7 @@ export default function CharacteristicField({ label, value, editable, onChange }
           aria-label={`${label} base value`}
           aria-invalid={!!error}
           aria-describedby={error ? `${label}-error` : undefined}
-          className={`w-20 px-2 py-1 rounded text-slate-100 ${
+          className={`w-20 lg:w-24 px-2 lg:px-3 py-1 lg:py-1.5 rounded text-sm lg:text-base text-slate-100 ${
             error && editable
               ? "bg-slate-800 border border-red-700 focus:border-red-600"
               : "bg-slate-800 border border-slate-600 focus:border-red-500"
@@ -130,7 +130,7 @@ export default function CharacteristicField({ label, value, editable, onChange }
 
       {/* Advances */}
       <div className="flex items-center gap-2 mb-2">
-        <span className="text-sm text-slate-400">Advances:</span>
+        <span className="text-sm lg:text-base text-slate-400">Advances:</span>
         {Array.from({ length: MAX_CHARACTERISTIC_ADVANCES }).map((_, idx) => {
           const filled = idx < advances;
           return (
@@ -142,7 +142,7 @@ export default function CharacteristicField({ label, value, editable, onChange }
               aria-label={`${label} advance ${idx + 1} of ${MAX_CHARACTERISTIC_ADVANCES}`}
               aria-pressed={filled}
               tabIndex={editable ? 0 : -1}
-              className={`h-8 w-8 sm:h-6 sm:w-6 border rounded flex items-center justify-center
+              className={`h-8 w-8 sm:h-6 sm:w-6 lg:h-8 lg:w-8 border rounded flex items-center justify-center
                 ${filled ? "bg-red-700 border-red-500" : "bg-slate-900 border-slate-600"}
                 ${
                   editable
@@ -155,14 +155,14 @@ export default function CharacteristicField({ label, value, editable, onChange }
       </div>
 
       {/* Total */}
-      <div className="text-sm">
+      <div className="text-sm lg:text-base">
         <span className="text-slate-400">Total:</span>
         <span className="ml-2 font-bold">{total}</span>
       </div>
 
       {/* Error message */}
       {error && editable && (
-        <div id={`${label}-error`} className="text-xs text-red-600 mt-2" role="alert">
+        <div id={`${label}-error`} className="text-xs lg:text-sm text-red-600 mt-2" role="alert">
           {error}
         </div>
       )}

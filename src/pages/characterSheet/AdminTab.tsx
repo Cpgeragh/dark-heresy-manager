@@ -70,13 +70,13 @@ export function AdminTab({
   return (
     <div className="space-y-6">
       {/* CONTEXT NOTE */}
-      <p className="text-xs text-slate-400">
+      <p className="text-xs lg:text-sm text-slate-400">
         DM-only controls. Changes here immediately affect player access.
       </p>
 
       {/* LATEST EVENT */}
       {latest && (
-        <p className="text-xs text-slate-400">
+        <p className="text-xs lg:text-sm text-slate-400">
           Last ownership event:{" "}
           <span className="font-mono text-slate-300">
             {latest.action} by {latestActorLabel}
@@ -91,7 +91,7 @@ export function AdminTab({
           <span className={readOnlyBadgeClass()}>DM authority</span>
         </div>
 
-        <div className="space-y-1 text-sm">
+        <div className="space-y-1 text-sm lg:text-base">
           <div>
             Current owner:{" "}
             <span className="text-slate-200">
@@ -119,7 +119,7 @@ export function AdminTab({
           <button
             onClick={onDMForceRelease}
             disabled={isDmForceReleasing}
-            className={`px-3 py-1 text-sm rounded border transition ${
+            className={`px-3 lg:px-4 py-1 lg:py-1.5 text-sm lg:text-base rounded border transition ${
               isDmForceReleasing
                 ? "bg-red-900 border-red-800 text-red-300 cursor-wait"
                 : "bg-red-700 border-red-500 text-white hover:bg-red-600"
@@ -131,7 +131,7 @@ export function AdminTab({
           <button
             onClick={onDMToggleEdit}
             disabled={isDmTogglingEdit}
-            className={`px-3 py-1 text-sm rounded border transition ${
+            className={`px-3 lg:px-4 py-1 lg:py-1.5 text-sm lg:text-base rounded border transition ${
               isDmTogglingEdit
                 ? "bg-yellow-800 border-yellow-700 text-yellow-900 cursor-wait"
                 : "bg-yellow-600 border-yellow-500 text-black hover:bg-yellow-500"
@@ -147,13 +147,13 @@ export function AdminTab({
         <h3 className="font-semibold mb-2">Pending XP Proposals</h3>
 
         {pendingProposals.length === 0 ? (
-          <p className="text-sm text-slate-400">No pending proposals.</p>
+          <p className="text-sm lg:text-base text-slate-400">No pending proposals.</p>
         ) : (
           <ul className="space-y-2">
             {pendingProposals.map((p) => (
               <li
                 key={p.id}
-                className="flex flex-col sm:flex-row sm:items-center gap-2 border border-slate-500 rounded px-3 py-2 text-sm"
+                className="flex flex-col sm:flex-row sm:items-center gap-2 border border-slate-500 rounded px-3 lg:px-4 py-2 lg:py-2.5 text-sm lg:text-base"
               >
                 <div>
                   <span className="text-slate-200">{p.description}</span>
@@ -162,13 +162,13 @@ export function AdminTab({
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleApprove(p.id, p.xpCost)}
-                    className="px-2 py-1 text-xs rounded bg-green-700 text-white hover:bg-green-600"
+                    className="px-2 lg:px-3 py-1 lg:py-1.5 text-xs lg:text-sm rounded bg-green-700 text-white hover:bg-green-600"
                   >
                     Approve
                   </button>
                   <button
                     onClick={() => handleReject(p.id)}
-                    className="px-2 py-1 text-xs rounded bg-red-800 text-red-200 hover:bg-red-700"
+                    className="px-2 lg:px-3 py-1 lg:py-1.5 text-xs lg:text-sm rounded bg-red-800 text-red-200 hover:bg-red-700"
                   >
                     Reject
                   </button>
@@ -187,7 +187,7 @@ export function AdminTab({
         </div>
 
         {claimLog.length === 0 && (
-          <p className="text-sm text-slate-400">No claim events recorded yet.</p>
+          <p className="text-sm lg:text-base text-slate-400">No claim events recorded yet.</p>
         )}
 
         <ul className="space-y-2 max-h-64 overflow-y-auto pr-1">
@@ -200,7 +200,7 @@ export function AdminTab({
             return (
               <li
                 key={entry.id ?? i}
-                className="rounded border border-slate-500 bg-slate-900/60 p-2 text-xs"
+                className="rounded border border-slate-500 bg-slate-900/60 p-2 lg:p-3 text-xs lg:text-sm"
               >
                 <div className="font-mono text-slate-200">
                   {entry.action} @ {when}

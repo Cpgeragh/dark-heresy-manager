@@ -40,14 +40,14 @@ export function ShieldPicker({
         <button
           key={ref.id}
           onClick={editable ? () => onSelect(ref) : undefined}
-          className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
+          className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
           <span
-            className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}
+            className={`text-sm lg:text-base font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}
           >
             {ref.name}
           </span>
-          <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5 flex-wrap font-mono">
+          <div className="flex items-center gap-2 text-xs lg:text-sm text-slate-500 mt-0.5 flex-wrap font-mono">
             <span className="text-cyan-400">AP {ref.ap}</span>
             <span>{ref.locations}</span>
             <span>{ref.damage}</span>
@@ -93,8 +93,8 @@ export function ShieldCard({
       {/* Header — always visible */}
       <div className="flex items-start justify-between gap-2">
         <button className="flex-1 min-w-0 text-left" onClick={() => setExpanded((e) => !e)}>
-          <p className="text-sm font-semibold text-slate-200">{item.name}</p>
-          <p className="text-xs text-slate-500">
+          <p className="text-sm lg:text-base font-semibold text-slate-200">{item.name}</p>
+          <p className="text-xs lg:text-sm text-slate-500">
             Shield{item.locations ? ` · ${item.locations}` : ""}
           </p>
         </button>
@@ -126,7 +126,7 @@ export function ShieldCard({
             </svg>
           </button>
           {editable && expanded && (
-            <button onClick={onRemove} className="text-xs text-red-400 hover:text-red-300 shrink-0">
+            <button onClick={onRemove} className="text-xs lg:text-sm text-red-400 hover:text-red-300 shrink-0">
               Remove
             </button>
           )}
@@ -137,9 +137,9 @@ export function ShieldCard({
         <>
           {/* Stats — AP chip in cyan to distinguish from weapon damage */}
           <div className="flex flex-wrap gap-1.5">
-            <div className="flex flex-col items-center bg-slate-800/60 rounded px-2 py-1 min-w-[52px]">
-              <span className="text-[10px] text-cyan-500 uppercase tracking-wide">AP</span>
-              <span className="text-sm font-mono text-cyan-300 mt-0.5">{item.ap}</span>
+            <div className="flex flex-col items-center bg-slate-800/60 rounded px-2 lg:px-3 py-1 lg:py-1.5 min-w-[52px] lg:min-w-[64px]">
+              <span className="text-[10px] lg:text-xs text-cyan-500 uppercase tracking-wide">AP</span>
+              <span className="text-sm lg:text-base font-mono text-cyan-300 mt-0.5">{item.ap}</span>
             </div>
             {item.damage && (
               <StatChip label="Bash" value={item.damage.replace(/\s*[IREX]$/i, "").trim()} />
@@ -151,8 +151,8 @@ export function ShieldCard({
           {/* Qualities / Rules */}
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] text-slate-500 uppercase tracking-wide">Qualities</span>
-              <span className="text-xs text-slate-400 italic">
+              <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Qualities</span>
+              <span className="text-xs lg:text-sm text-slate-400 italic">
                 {hasRules ? item.specialRules : "-"}
               </span>
               {ruleNamesInLookup.length > 0 && (
@@ -163,14 +163,14 @@ export function ShieldCard({
               )}
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] text-slate-500 uppercase tracking-wide">Rules</span>
+              <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Rules</span>
               {item.notes ? (
                 <InfoModal
                   title={`${item.name} Rules`}
-                  content={<p className="text-sm text-slate-300 leading-relaxed">{item.notes}</p>}
+                  content={<p className="text-sm lg:text-base text-slate-300 leading-relaxed">{item.notes}</p>}
                 />
               ) : (
-                <span className="text-xs text-slate-600 italic">-</span>
+                <span className="text-xs lg:text-sm text-slate-600 italic">-</span>
               )}
             </div>
           </div>

@@ -125,56 +125,56 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
 
   if (mode === "edit") {
     return (
-      <div className="border border-red-700/40 rounded p-4 bg-slate-900/60 space-y-4">
-        <h3 className="text-sm font-semibold text-red-500">Edit Session</h3>
+      <div className="border border-red-700/40 rounded p-4 lg:p-5 bg-slate-900/60 space-y-4">
+        <h3 className="text-sm lg:text-base font-semibold text-red-500">Edit Session</h3>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs text-slate-400 mb-1">Date</label>
+            <label className="block text-xs lg:text-sm text-slate-400 mb-1">Date</label>
             <input
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full px-2 py-1 bg-slate-800 border border-slate-600 rounded text-sm"
+              className="w-full px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-800 border border-slate-600 rounded text-sm lg:text-base"
             />
           </div>
           <div>
-            <label className="block text-xs text-slate-400 mb-1">XP Awarded</label>
+            <label className="block text-xs lg:text-sm text-slate-400 mb-1">XP Awarded</label>
             <input
               type="number"
               min={0}
               value={xpAwarded}
               onChange={(e) => setXpAwarded(Math.max(0, Number(e.target.value)))}
-              className="w-full px-2 py-1 bg-slate-800 border border-slate-600 rounded text-sm"
+              className="w-full px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-800 border border-slate-600 rounded text-sm lg:text-base"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-xs text-slate-400 mb-1">Summary</label>
+          <label className="block text-xs lg:text-sm text-slate-400 mb-1">Summary</label>
           <textarea
             value={summary}
             onChange={(e) => setSummary(e.target.value)}
             rows={3}
-            className="w-full px-2 py-1 bg-slate-800 border border-slate-600 rounded text-sm resize-none"
+            className="w-full px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-800 border border-slate-600 rounded text-sm lg:text-base resize-none"
           />
         </div>
 
         <div>
-          <label className="block text-xs text-slate-400 mb-1">DM Notes (private)</label>
+          <label className="block text-xs lg:text-sm text-slate-400 mb-1">DM Notes (private)</label>
           <textarea
             value={dmNotes}
             onChange={(e) => setDmNotes(e.target.value)}
             rows={2}
-            className="w-full px-2 py-1 bg-slate-800 border border-slate-600 rounded text-sm resize-none"
+            className="w-full px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-800 border border-slate-600 rounded text-sm lg:text-base resize-none"
           />
         </div>
 
         <div>
-          <p className="text-xs text-slate-400 mb-2">Attendees</p>
+          <p className="text-xs lg:text-sm text-slate-400 mb-2">Attendees</p>
           <div className="flex flex-wrap gap-3">
             {characters.map((char) => (
-              <label key={char.id} className="flex items-center gap-1 text-sm cursor-pointer">
+              <label key={char.id} className="flex items-center gap-1 text-sm lg:text-base cursor-pointer">
                 <input
                   type="checkbox"
                   checked={attendees.has(char.id)}
@@ -186,7 +186,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
           </div>
         </div>
 
-        <p className="text-xs text-slate-500">
+        <p className="text-xs lg:text-sm text-slate-500">
           Note: XP changes do not retroactively adjust character totals.
         </p>
 
@@ -194,14 +194,14 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-3 py-1.5 border border-red-500 text-red-500 font-semibold rounded text-sm hover:bg-red-500/10 disabled:opacity-50"
+            className="px-3 lg:px-4 py-1.5 lg:py-2 border border-red-500 text-red-500 font-semibold rounded text-sm lg:text-base hover:bg-red-500/10 disabled:opacity-50"
           >
             {saving ? "Saving…" : "Save"}
           </button>
           <button
             onClick={handleCancelEdit}
             disabled={saving}
-            className="px-3 py-1.5 bg-slate-700 text-slate-300 rounded text-sm hover:bg-slate-600"
+            className="px-3 lg:px-4 py-1.5 lg:py-2 bg-slate-700 text-slate-300 rounded text-sm lg:text-base hover:bg-slate-600"
           >
             Cancel
           </button>
@@ -211,12 +211,12 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
   }
 
   return (
-    <div className="rounded-lg border border-slate-500 bg-slate-900/60 p-3 space-y-2">
+    <div className="rounded-lg border border-slate-500 bg-slate-900/60 p-3 lg:p-4 space-y-2">
       <div className="flex items-center justify-between">
-        <span className="font-semibold">{dateStr}</span>
+        <span className="font-semibold lg:text-lg">{dateStr}</span>
         <div className="flex items-center gap-2">
           {session.xpAwarded > 0 && (
-            <span className="text-xs px-2 py-1 bg-red-500/20 text-red-500 rounded">
+            <span className="text-xs lg:text-sm px-2 lg:px-3 py-1 bg-red-500/20 text-red-500 rounded">
               +{session.xpAwarded} XP
             </span>
           )}
@@ -225,14 +225,14 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
             session.attendees.length > 0 &&
             session.xpApplied !== undefined &&
             (session.xpApplied === true ? (
-              <span className="text-xs px-2 py-1 bg-green-500/20 text-green-400 rounded">
+              <span className="text-xs lg:text-sm px-2 lg:px-3 py-1 bg-green-500/20 text-green-400 rounded">
                 XP Applied ✓
               </span>
             ) : (
               <button
                 onClick={handleApplyXp}
                 disabled={applyingXp}
-                className="text-xs px-2 py-1 border border-red-500 text-red-500 font-semibold rounded hover:bg-red-500/10 disabled:opacity-50 transition"
+                className="text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 border border-red-500 text-red-500 font-semibold rounded hover:bg-red-500/10 disabled:opacity-50 transition"
               >
                 {applyingXp ? "Applying…" : "Apply XP"}
               </button>
@@ -240,7 +240,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
           {isDM && onSave && (
             <button
               onClick={() => setMode("edit")}
-              className="text-xs px-2 py-1 bg-slate-700 text-slate-300 rounded hover:bg-slate-600"
+              className="text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-700 text-slate-300 rounded hover:bg-slate-600"
             >
               Edit
             </button>
@@ -258,15 +258,15 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
       </div>
 
       {session.attendees.length > 0 && (
-        <p className="text-xs text-slate-400">
+        <p className="text-xs lg:text-sm text-slate-400">
           Attendees: {session.attendees.map((id) => nameById[id] ?? id).join(", ")}
         </p>
       )}
 
-      {session.summary && <p className="text-sm text-slate-300">{session.summary}</p>}
+      {session.summary && <p className="text-sm lg:text-base text-slate-300">{session.summary}</p>}
 
       {isDM && session.dmNotes && (
-        <p className="text-xs text-slate-500 italic border-t border-slate-700 pt-2">
+        <p className="text-xs lg:text-sm text-slate-500 italic border-t border-slate-700 pt-2">
           DM: {session.dmNotes}
         </p>
       )}

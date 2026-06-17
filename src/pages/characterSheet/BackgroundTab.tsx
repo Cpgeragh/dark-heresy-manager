@@ -168,7 +168,7 @@ export function BackgroundTab({
                 ))}
             </select>
             {selectedHomeworld && (
-              <p className="text-xs text-slate-100 italic px-1 mt-1">
+              <p className="text-xs lg:text-sm text-slate-100 italic px-1 mt-1">
                 {selectedHomeworld.description}
               </p>
             )}

@@ -54,17 +54,17 @@ export function ArcheotechWeaponCard({
   const showMishaps = item.type === "Grenade";
 
   return (
-    <div className="border border-amber-700/40 bg-amber-900/10 rounded-lg p-3 space-y-3">
+    <div className="border border-amber-700/40 bg-amber-900/10 rounded-lg p-3 lg:p-4 space-y-3">
       {/* Header — always visible */}
       <div className="flex items-start justify-between gap-2">
         <button className="flex-1 min-w-0 text-left" onClick={() => setExpanded((e) => !e)}>
           <div className="flex items-center gap-2 flex-wrap">
-            <p className="text-sm font-semibold text-slate-200">{item.name}</p>
-            <span className="text-[10px] uppercase tracking-wide text-amber-400 border border-amber-700/50 rounded px-1.5 py-0.5 font-medium shrink-0">
+            <p className="text-sm lg:text-base font-semibold text-slate-200">{item.name}</p>
+            <span className="text-[10px] lg:text-xs uppercase tracking-wide text-amber-400 border border-amber-700/50 rounded px-1.5 lg:px-2 py-0.5 font-medium shrink-0">
               Archeotech
             </span>
           </div>
-          {ref?.weaponClass && <p className="text-xs text-slate-500">{ref.weaponClass}</p>}
+          {ref?.weaponClass && <p className="text-xs lg:text-sm text-slate-500">{ref.weaponClass}</p>}
         </button>
         <div className="flex items-center gap-2 shrink-0">
           {onToggleEquip && (
@@ -127,8 +127,8 @@ export function ArcheotechWeaponCard({
           {/* Qualities / Rules */}
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] text-slate-500 uppercase tracking-wide">Qualities</span>
-              <span className="text-xs text-slate-400 italic">{hasRules ? specialRules : "-"}</span>
+              <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Qualities</span>
+              <span className="text-xs lg:text-sm text-slate-400 italic">{hasRules ? specialRules : "-"}</span>
               {ruleNamesInLookup.length > 0 && (
                 <InfoModal
                   title={`${item.name} Qualities`}
@@ -137,19 +137,19 @@ export function ArcheotechWeaponCard({
               )}
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] text-slate-500 uppercase tracking-wide">Rules</span>
+              <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Rules</span>
               {description ? (
                 <InfoModal
                   title={`${item.name} Rules`}
-                  content={<p className="text-sm text-slate-300 leading-relaxed">{description}</p>}
+                  content={<p className="text-sm lg:text-base text-slate-300 leading-relaxed">{description}</p>}
                 />
               ) : (
-                <span className="text-xs text-slate-600 italic">-</span>
+                <span className="text-xs lg:text-sm text-slate-600 italic">-</span>
               )}
             </div>
             {showMishaps && (
               <div className="flex items-center gap-1.5">
-                <span className="text-[10px] text-slate-500 uppercase tracking-wide">Mishaps</span>
+                <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Mishaps</span>
                 <InfoModal title="Explosive Mishaps" content={EXPLOSIVE_MISHAPS_CONTENT} />
               </div>
             )}

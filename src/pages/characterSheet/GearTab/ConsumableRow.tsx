@@ -26,7 +26,7 @@ export function ConsumableRow({ item, editable, onUpdateQty, onRemove }: Props) 
     <div className={uiSection}>
       <div className="flex items-start gap-3">
         <div className="flex flex-col items-center shrink-0">
-          <span className="text-[10px] text-slate-500 uppercase tracking-wide mb-0.5">Qty</span>
+          <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide mb-0.5">Qty</span>
           <QuantityControl
             quantity={item.quantity}
             editable={editable}
@@ -37,7 +37,7 @@ export function ConsumableRow({ item, editable, onUpdateQty, onRemove }: Props) 
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <p className="text-sm font-medium text-slate-200">{item.name}</p>
+            <p className="text-sm lg:text-base font-medium text-slate-200">{item.name}</p>
             {hasDesc && (
               <InfoModal
                 title={item.name}
@@ -59,7 +59,7 @@ export function ConsumableRow({ item, editable, onUpdateQty, onRemove }: Props) 
         {editable && (
           <button
             onClick={() => onRemove(item.id)}
-            className="text-xs text-red-400 hover:text-red-300 transition shrink-0"
+            className="text-xs lg:text-sm text-red-400 hover:text-red-300 transition shrink-0"
           >
             Remove
           </button>

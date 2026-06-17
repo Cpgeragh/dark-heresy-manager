@@ -260,9 +260,9 @@ export function ArmourTab({
         <SectionHeader className="mb-2">Location Summary</SectionHeader>
         <div className={uiSection}>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm border-collapse">
+            <table className="w-full text-sm lg:text-base border-collapse">
               <thead>
-                <tr className="text-xs text-slate-500 uppercase">
+                <tr className="text-xs lg:text-sm text-slate-500 uppercase">
                   <th className="text-left py-1.5 pr-4 font-medium">Location</th>
                   <th className="text-center py-1.5 px-3 font-medium">AP</th>
                   <th className="text-center py-1.5 px-3 font-medium">TB</th>
@@ -296,7 +296,7 @@ export function ArmourTab({
               </tbody>
             </table>
           </div>
-          <p className="text-xs text-slate-600 mt-2">
+          <p className="text-xs lg:text-sm text-slate-600 mt-2">
             Total = Armour Points (worn only) + Toughness Bonus + Bionic (+2 per installed bionic
             limb)
           </p>
@@ -313,13 +313,13 @@ export function ArmourTab({
                 setPickerMode("worn");
                 setShowPicker(true);
               }}
-              className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
+              className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
             >
               {editable ? "+ Equip" : "View"}
             </button>
           )}
         </div>
-        {worn.length === 0 && <p className="text-sm text-slate-500 italic">No armour worn.</p>}
+        {worn.length === 0 && <p className="text-sm lg:text-base text-slate-500 italic">No armour worn.</p>}
         {worn.length > 0 && (
           <ArmourPieceGrid
             pieces={worn}
@@ -342,13 +342,13 @@ export function ArmourTab({
                 setPickerMode("stowed");
                 setShowPicker(true);
               }}
-              className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
+              className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
             >
               {editable ? "+ Stow" : "View"}
             </button>
           )}
         </div>
-        {stowed.length === 0 && <p className="text-sm text-slate-500 italic">No armour stowed.</p>}
+        {stowed.length === 0 && <p className="text-sm lg:text-base text-slate-500 italic">No armour stowed.</p>}
         {stowed.length > 0 && (
           <ArmourPieceGrid
             pieces={stowed}
@@ -367,13 +367,13 @@ export function ArmourTab({
           <SectionHeader>Force Fields ({forceFields.length})</SectionHeader>
           <button
             onClick={() => setShowFieldPicker(true)}
-            className="text-xs px-3 py-1 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
+            className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
           >
             {editable ? "+ Add" : "View"}
           </button>
         </div>
         {forceFields.length === 0 && (
-          <p className="text-sm text-slate-500 italic">No force field equipped.</p>
+          <p className="text-sm lg:text-base text-slate-500 italic">No force field equipped.</p>
         )}
         {forceFields.length > 0 && (
           <ForceFieldGrid

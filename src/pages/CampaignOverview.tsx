@@ -89,8 +89,8 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
     }
     setKebabContent(
       <div className="space-y-2">
-        <p className="text-xs font-semibold text-slate-100 uppercase tracking-wide">Character Data</p>
-        <label className="block px-2 py-1 text-xs rounded bg-slate-700 border border-slate-500 text-slate-100 hover:bg-slate-600 cursor-pointer">
+        <p className="text-xs lg:text-sm font-semibold text-slate-100 uppercase tracking-wide">Character Data</p>
+        <label className="block px-2 lg:px-3 py-1 lg:py-1.5 text-xs lg:text-sm rounded bg-slate-700 border border-slate-500 text-slate-100 hover:bg-slate-600 cursor-pointer">
           Import JSON
           <input type="file" accept=".json" className="hidden" onChange={handleImport} />
         </label>
@@ -133,7 +133,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
               placeholder="Search…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className={editableInputClass(true) + " w-full sm:w-36 text-xs py-1"}
+              className={editableInputClass(true) + " w-full sm:w-36 lg:w-48 text-xs lg:text-sm py-1 lg:py-1.5"}
             />
           </div>
 
@@ -152,7 +152,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
 
           <div className="space-y-3">
             {filteredCharacters.length === 0 ? (
-              <p className="text-slate-400 text-sm">
+              <p className="text-slate-400 text-sm lg:text-base">
                 {search.trim() ? `No characters match "${search}".` : "No characters yet."}
               </p>
             ) : (
@@ -196,9 +196,9 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
           </div>
 
           {sessionsLoading ? (
-            <p className="text-slate-400 text-sm">Loading sessions…</p>
+            <p className="text-slate-400 text-sm lg:text-base">Loading sessions…</p>
           ) : sessions.length === 0 ? (
-            <p className="text-slate-400 text-sm">No sessions recorded yet.</p>
+            <p className="text-slate-400 text-sm lg:text-base">No sessions recorded yet.</p>
           ) : (
             <div className="space-y-3">
               {sessions.map((session) => (

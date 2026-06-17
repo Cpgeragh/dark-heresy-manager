@@ -34,16 +34,16 @@ export function ItemCard({ item, editable, onRemove }: Props) {
         <div className="flex-1 min-w-0">
           {/* Title row */}
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-medium text-slate-200">{item.name}</span>
+            <span className="text-sm lg:text-base font-medium text-slate-200">{item.name}</span>
             {item.type && (
-              <span className="text-xs text-slate-500 border border-slate-700 rounded px-1.5 py-0.5">
+              <span className="text-xs lg:text-sm text-slate-500 border border-slate-700 rounded px-1.5 lg:px-2 py-0.5">
                 {item.type}
               </span>
             )}
             {hasBody && (
               <button
                 onClick={() => setExpanded((v) => !v)}
-                className="text-slate-500 hover:text-slate-300 text-xs transition"
+                className="text-slate-500 hover:text-slate-300 text-xs lg:text-sm transition"
               >
                 {expanded ? "▲" : "▼"}
               </button>
@@ -55,18 +55,18 @@ export function ItemCard({ item, editable, onRemove }: Props) {
           {expanded && (
             <div className="mt-2 space-y-1.5">
               {specialRules && (
-                <p className="text-xs text-slate-400">
-                  <span className="text-slate-500 uppercase tracking-wide text-[10px] mr-1">
+                <p className="text-xs lg:text-sm text-slate-400">
+                  <span className="text-slate-500 uppercase tracking-wide text-[10px] lg:text-xs mr-1">
                     Special
                   </span>
                   {specialRules}
                 </p>
               )}
               {description && (
-                <p className="text-xs text-slate-400 leading-relaxed">{description}</p>
+                <p className="text-xs lg:text-sm text-slate-400 leading-relaxed">{description}</p>
               )}
               {item.notes?.trim() && (
-                <p className="text-xs text-amber-300/70 italic leading-relaxed">{item.notes}</p>
+                <p className="text-xs lg:text-sm text-amber-300/70 italic leading-relaxed">{item.notes}</p>
               )}
             </div>
           )}
@@ -85,7 +85,7 @@ export function ItemCard({ item, editable, onRemove }: Props) {
         {editable && (
           <button
             onClick={onRemove}
-            className="text-xs text-red-400 hover:text-red-300 transition shrink-0 mt-0.5"
+            className="text-xs lg:text-sm text-red-400 hover:text-red-300 transition shrink-0 mt-0.5"
           >
             Remove
           </button>

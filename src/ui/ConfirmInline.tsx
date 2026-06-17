@@ -82,7 +82,7 @@ export function ConfirmInline({
   if (requireText !== undefined) {
     return (
       <div className="flex flex-col gap-1 items-start" onClick={(e) => e.preventDefault()}>
-        <span className={`text-xs ${accent}`}>
+        <span className={`text-xs lg:text-sm ${accent}`}>
           {requirePrompt ?? `Type ${requireText} to confirm`}
         </span>
         <div className="flex items-center gap-1">
@@ -93,7 +93,7 @@ export function ConfirmInline({
             placeholder={requireText}
             autoFocus
             disabled={busy}
-            className="px-2 py-1 bg-slate-700 border border-slate-500 rounded text-xs text-slate-100 w-24 font-mono placeholder:text-slate-600 disabled:opacity-50"
+            className="px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-700 border border-slate-500 rounded text-xs lg:text-sm text-slate-100 w-24 lg:w-32 font-mono placeholder:text-slate-600 disabled:opacity-50"
           />
           <Button
             variant={confirmVariant}
@@ -113,7 +113,7 @@ export function ConfirmInline({
 
   return (
     <div className="flex items-center gap-1" onClick={(e) => e.preventDefault()}>
-      {question && <span className={`text-xs ${accent}`}>{question}</span>}
+      {question && <span className={`text-xs lg:text-sm ${accent}`}>{question}</span>}
       <Button variant={confirmVariant} size={size} disabled={busy} onClick={handle(runConfirm)}>
         {busy ? busyLabel : confirmLabel}
       </Button>

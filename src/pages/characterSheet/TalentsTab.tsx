@@ -63,7 +63,7 @@ function FaithTalentSection({
     <div>
       <div className="flex items-center justify-between mb-3">
         <SectionHeader>Faith Talents</SectionHeader>
-        <span className="text-xs text-slate-500">
+        <span className="text-xs lg:text-sm text-slate-500">
           {entries.length} {entries.length === 1 ? "talent" : "faith talents"}
         </span>
       </div>
@@ -75,10 +75,10 @@ function FaithTalentSection({
             .sort((a, b) => a.name.localeCompare(b.name));
           return (
             <div key={group}>
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-100 mb-1.5">
+              <p className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100 mb-1.5">
                 {FAITH_GROUP_LABELS[group]}
               </p>
-              {groupEntries.length === 0 && <p className="text-sm text-slate-500 italic">None.</p>}
+              {groupEntries.length === 0 && <p className="text-sm lg:text-base text-slate-500 italic">None.</p>}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {groupEntries.map((entry) => (
                   <EntryCard
@@ -95,7 +95,7 @@ function FaithTalentSection({
 
         <button
           onClick={() => setShowPicker(true)}
-          className="mt-1 px-3 py-1 text-xs rounded border border-slate-600 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition"
+          className="mt-1 px-3 lg:px-4 py-1 lg:py-1.5 text-xs lg:text-sm rounded border border-slate-600 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition"
         >
           {editable ? "+ Add Faith Talent" : "View Faith Talents"}
         </button>
@@ -201,7 +201,7 @@ export function TalentsTab({
         <section className={uiSection + " space-y-4"}>
           {WEAPON_TRAINING_GROUPS.map((group) => (
             <div key={group.label}>
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-100 mb-1.5">
+              <p className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100 mb-1.5">
                 {group.label}
               </p>
               <div className="flex flex-wrap gap-1.5">
@@ -213,7 +213,7 @@ export function TalentsTab({
                       disabled={!editable}
                       onClick={() => handleToggleTraining(id as WeaponTrainingTalentId)}
                       aria-pressed={active}
-                      className={`px-2.5 py-1 rounded border text-xs transition ${
+                      className={`px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm transition ${
                         active
                           ? "bg-red-500/20 border-red-500 text-red-400 font-semibold"
                           : editable
@@ -231,26 +231,26 @@ export function TalentsTab({
 
           {/* Exotic Weapon Training */}
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-100 mb-1.5">
+            <p className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100 mb-1.5">
               Exotic Weapon Training
             </p>
 
             {weaponTraining.exoticWeapons.length === 0 && !editable && (
-              <p className="text-sm text-slate-500 italic">None.</p>
+              <p className="text-sm lg:text-base text-slate-500 italic">None.</p>
             )}
 
             <div className="space-y-1.5 mb-2">
               {weaponTraining.exoticWeapons.map((weapon, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between rounded border border-slate-500 bg-slate-900/60 px-3 py-1.5 text-sm"
+                  className="flex items-center justify-between rounded border border-slate-500 bg-slate-900/60 px-3 lg:px-4 py-1.5 lg:py-2 text-sm lg:text-base"
                 >
                   <span className="text-slate-200">{weapon}</span>
                   {editable && (
                     <button
                       onClick={() => handleRemoveExotic(index)}
                       aria-label={`Remove ${weapon}`}
-                      className="text-slate-500 hover:text-red-400 transition text-xs"
+                      className="text-slate-500 hover:text-red-400 transition text-xs lg:text-sm"
                     >
                       ✕
                     </button>

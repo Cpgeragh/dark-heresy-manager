@@ -53,7 +53,7 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField }: SkillsTa
         <SectionHeader>Trained Skills</SectionHeader>
         <button
           onClick={() => setIsAddOpen(true)}
-          className="text-xs px-3 py-1.5 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
+          className="text-xs lg:text-sm px-3 lg:px-4 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
         >
           {editable ? "+ Add Skill" : "View Skills"}
         </button>
@@ -61,7 +61,7 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField }: SkillsTa
 
       {/* Skill list */}
       {trainedSkills.length === 0 ? (
-        <p className="text-sm text-slate-400 text-center py-8">
+        <p className="text-sm lg:text-base text-slate-400 text-center py-8">
           {editable
             ? 'No trained skills yet. Tap "+ Add Skill" to get started.'
             : "No trained skills yet."}

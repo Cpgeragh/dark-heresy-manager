@@ -53,8 +53,8 @@ function StatBlock({
     <div className={uiSection + " space-y-2"}>
       {/* Header */}
       <div className="flex items-baseline justify-between">
-        <span className="text-sm text-slate-100">{label}</span>
-        <span className="text-xl font-semibold font-mono text-slate-100">{statTotal}</span>
+        <span className="text-sm lg:text-base text-slate-100">{label}</span>
+        <span className="text-xl lg:text-2xl font-semibold font-mono text-slate-100">{statTotal}</span>
       </div>
 
       {/* Base / Advances */}
@@ -105,7 +105,7 @@ export function CharacteristicsTab({
               { label: "Fel", key: "fel" },
             ] as { label: string; key: keyof Characteristics }[]
           ).map(({ label, key }) => (
-            <div key={key} className={`${uiCell} text-center py-1 px-0.5`}>
+            <div key={key} className={`${uiCell} text-center py-1 lg:py-1.5 px-0.5 lg:px-1`}>
               <div className={uiCellLabel}>{label}</div>
               <div className={uiCellValueSm}>{getCharTotal(key)}</div>
             </div>
@@ -126,7 +126,7 @@ export function CharacteristicsTab({
             { label: "WPB", value: WPB },
             { label: "FB", value: FB },
           ].map(({ label, value }) => (
-            <div key={label} className={`${uiCell} text-center py-1 px-0.5`}>
+            <div key={label} className={`${uiCell} text-center py-1 lg:py-1.5 px-0.5 lg:px-1`}>
               <div className={uiCellLabel}>{label}</div>
               <div className={uiCellValueSm}>{value}</div>
             </div>
@@ -158,7 +158,7 @@ export function CharacteristicsTab({
             { label: "Charge", value: AB * MOVEMENT_CHARGE_MULTIPLIER },
             { label: "Run", value: AB * MOVEMENT_RUN_MULTIPLIER },
           ].map(({ label, value }) => (
-            <div key={label} className={`${uiCell} text-center py-1 px-0.5`}>
+            <div key={label} className={`${uiCell} text-center py-1 lg:py-1.5 px-0.5 lg:px-1`}>
               <div className={uiCellLabel}>{label}</div>
               <div className={uiCellValueSm}>{value}</div>
             </div>

@@ -59,16 +59,16 @@ export function RecoveryBackupBanner({ ownUid, effectiveUserId }: Props) {
   }
 
   return (
-    <div className="border border-amber-500/60 bg-amber-500/10 rounded-lg p-4 space-y-3">
-      <p className="text-sm font-semibold text-amber-200">⚠ Back up your recovery code</p>
-      <p className="text-xs text-amber-100/80">
+    <div className="border border-amber-500/60 bg-amber-500/10 rounded-lg p-4 lg:p-5 space-y-3">
+      <p className="text-sm lg:text-base font-semibold text-amber-200">⚠ Back up your recovery code</p>
+      <p className="text-xs lg:text-sm text-amber-100/80">
         It's the only way to restore your account on a new device or if your browser data is
         cleared.
       </p>
       {code ? (
         <>
           <div className="bg-slate-900 border border-slate-600 rounded p-3 text-center">
-            <span className="font-code [font-feature-settings:'zero'] text-lg text-amber-400 tracking-widest break-all select-all">
+            <span className="font-code [font-feature-settings:'zero'] text-lg lg:text-xl text-amber-400 tracking-widest break-all select-all">
               {code}
             </span>
           </div>
@@ -87,7 +87,7 @@ export function RecoveryBackupBanner({ ownUid, effectiveUserId }: Props) {
               I've saved it
             </Button>
           </div>
-          {!copied && <p className="text-xs text-amber-100/70">Copy your code first.</p>}
+          {!copied && <p className="text-xs lg:text-sm text-amber-100/70">Copy your code first.</p>}
         </>
       ) : (
         <Button onClick={reveal} disabled={busy}>

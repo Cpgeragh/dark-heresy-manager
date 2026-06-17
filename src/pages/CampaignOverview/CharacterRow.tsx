@@ -91,9 +91,9 @@ export function CharacterRow({
               canEdit={false}
             />
             <div>
-              <span className="font-semibold text-slate-100 text-sm leading-tight">{characterName}</span>
-              <p className="text-xs text-slate-500 font-code [font-feature-settings:'zero'] mt-0.5">Recovery: {recoveryCode ?? "—"}</p>
-              <p className="text-xs mt-0.5">
+              <span className="font-semibold text-slate-100 text-sm lg:text-base leading-tight">{characterName}</span>
+              <p className="text-xs lg:text-sm text-slate-500 font-code [font-feature-settings:'zero'] mt-0.5">Recovery: {recoveryCode ?? "—"}</p>
+              <p className="text-xs lg:text-sm mt-0.5">
                 {userId
                   ? <span className="text-green-400">Claimed</span>
                   : <span className="text-slate-500">Unclaimed</span>
@@ -136,22 +136,22 @@ export function CharacterRow({
             onClick={() => setShowHistory(false)}
           />
           <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
-            <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 flex flex-col gap-3 pointer-events-auto w-80 max-w-[90vw]">
+            <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 lg:p-5 flex flex-col gap-3 pointer-events-auto w-80 lg:w-96 max-w-[90vw]">
               <div className="flex justify-between items-center">
-                <p className="text-sm font-semibold text-slate-100 text-center flex-1">History</p>
+                <p className="text-sm lg:text-base font-semibold text-slate-100 text-center flex-1">History</p>
                 <button
                   onClick={() => setShowHistory(false)}
-                  className="w-7 h-7 flex items-center justify-center rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 text-slate-300 text-lg leading-none transition"
+                  className="w-7 h-7 lg:w-8 lg:h-8 flex items-center justify-center rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 text-slate-300 text-lg lg:text-xl leading-none transition"
                 >
                   ×
                 </button>
               </div>
               <div className="space-y-1">
                 {logs.length === 0 ? (
-                  <p className="text-xs text-slate-500">No history yet.</p>
+                  <p className="text-xs lg:text-sm text-slate-500">No history yet.</p>
                 ) : (
                   logs.map((log) => (
-                    <p key={log.id} className="text-xs text-slate-400">
+                    <p key={log.id} className="text-xs lg:text-sm text-slate-400">
                       <span className="text-slate-200">{formatAction(log.action)}</span>
                       {log.timestamp && (
                         <span className="text-slate-600"> · {formatTimestamp(log.timestamp)}</span>

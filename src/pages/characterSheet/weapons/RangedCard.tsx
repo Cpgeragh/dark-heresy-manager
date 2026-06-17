@@ -97,9 +97,9 @@ export function RangedPicker({
   if (selected) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-        <div className="w-full max-w-md bg-slate-900 border border-slate-500 rounded-xl shadow-2xl">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
-            <h3 className="text-sm font-semibold text-slate-200">{selected.name}</h3>
+        <div className="w-full max-w-md lg:max-w-lg bg-slate-900 border border-slate-500 rounded-xl shadow-2xl">
+          <div className="flex items-center justify-between px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
+            <h3 className="text-sm lg:text-base font-semibold text-slate-200">{selected.name}</h3>
             <button
               onClick={resetPicker}
               className="text-slate-400 hover:text-slate-200 text-lg leading-none"
@@ -108,16 +108,16 @@ export function RangedPicker({
             </button>
           </div>
 
-          <div className="px-4 py-4 space-y-4">
+          <div className="px-4 lg:px-5 py-4 lg:py-5 space-y-4">
             <div>
-              <p className="text-xs text-slate-400 mb-2">Select weapon craftsmanship:</p>
+              <p className="text-xs lg:text-sm text-slate-400 mb-2">Select weapon craftsmanship:</p>
               <div className="flex gap-2">
                 {WEAPON_CRAFTSMANSHIP_OPTIONS.map((q) => (
                   <button
                     key={q}
                     onClick={() => setCraftsmanship(q)}
                     className={[
-                      "flex-1 py-1.5 rounded border text-sm font-medium transition",
+                      "flex-1 py-1.5 lg:py-2 rounded border text-sm lg:text-base font-medium transition",
                       craftsmanship === q
                         ? WEAPON_CRAFTSMANSHIP_STYLE[q]
                         : "border-slate-700 bg-slate-800 text-slate-400 hover:border-slate-500",
@@ -129,15 +129,15 @@ export function RangedPicker({
               </div>
             </div>
 
-            <div className="text-xs text-slate-400 bg-slate-800/60 rounded p-3 leading-relaxed">
+            <div className="text-xs lg:text-sm text-slate-400 bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed">
               {rangedCraftsmanshipDescription(craftsmanship)}
             </div>
           </div>
 
-          <div className="px-4 py-3 border-t border-slate-700 flex gap-2">
+          <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700 flex gap-2">
             <button
               onClick={resetPicker}
-              className="px-4 py-1.5 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm text-slate-100"
+              className="px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100"
             >
               Back
             </button>
@@ -162,7 +162,7 @@ export function RangedPicker({
         editable && showCustom ? (
           <button
             onClick={onCustom}
-            className="w-full text-sm text-red-500 hover:text-red-400 text-center py-1"
+            className="w-full text-sm lg:text-base text-red-500 hover:text-red-400 text-center py-1 lg:py-1.5"
           >
             + Add custom weapon
           </button>
@@ -173,14 +173,14 @@ export function RangedPicker({
         <button
           key={ref.id}
           onClick={editable ? () => setSelected(ref) : undefined}
-          className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
+          className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
           <span
-            className={`text-sm font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}
+            className={`text-sm lg:text-base font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}
           >
             {ref.name}
           </span>
-          <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5 flex-wrap font-mono">
+          <div className="flex items-center gap-2 text-xs lg:text-sm text-slate-500 mt-0.5 flex-wrap font-mono">
             <span>{ref.class}</span>
             <span>{ref.range}</span>
             <span>{ref.rof}</span>
@@ -220,8 +220,8 @@ export function CustomRangedForm({
     setFields((prev) => ({ ...prev, [k]: e.target.value }));
 
   return (
-    <div className="border border-red-700/30 bg-slate-900/60 rounded-lg p-4 space-y-3">
-      <p className="text-xs font-semibold text-red-500 uppercase tracking-wide">
+    <div className="border border-red-700/30 bg-slate-900/60 rounded-lg p-4 lg:p-5 space-y-3">
+      <p className="text-xs lg:text-sm font-semibold text-red-500 uppercase tracking-wide">
         Custom Ranged Weapon
       </p>
       <div className="grid grid-cols-2 gap-2">
@@ -240,7 +240,7 @@ export function CustomRangedForm({
           ] as const
         ).map((k) => (
           <div key={k} className={k === "name" || k === "specialRules" ? "col-span-2" : ""}>
-            <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+            <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
               {k === "rld" ? "Reload" : k}
             </label>
             <input
@@ -262,7 +262,7 @@ export function CustomRangedForm({
         </Button>
         <button
           onClick={onCancel}
-          className="px-4 py-1.5 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm text-slate-100"
+          className="px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100"
         >
           Cancel
         </button>
@@ -306,7 +306,7 @@ function AmmoEntryRow({
   const visibleClipSizeLabel = usesUnitTracking ? undefined : clipSizeLabel;
 
   return (
-    <div className="rounded bg-slate-800/60 px-2.5 py-2 space-y-1.5">
+    <div className="rounded bg-slate-800/60 px-2.5 lg:px-3 py-2 lg:py-2.5 space-y-1.5">
       {/* Name row */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 min-w-0">
@@ -321,19 +321,19 @@ function AmmoEntryRow({
                   : "bg-slate-600"
             }`}
           />
-          <span className="text-xs text-slate-200 truncate">{displayName}</span>
+          <span className="text-xs lg:text-sm text-slate-200 truncate">{displayName}</span>
           {hasAmmoInfo && (
             <InfoModal
               title={displayName}
               content={
                 <div className="space-y-2">
                   {ammoRef?.description && (
-                    <p className="text-sm text-slate-300 leading-relaxed">{ammoRef.description}</p>
+                    <p className="text-sm lg:text-base text-slate-300 leading-relaxed">{ammoRef.description}</p>
                   )}
                   {isChargePack && (
                     <div className="space-y-1">
-                      <p className="text-sm font-semibold text-slate-100">Recharging Power Packs</p>
-                      <p className="text-sm text-slate-300 leading-relaxed">
+                      <p className="text-sm lg:text-base font-semibold text-slate-100">Recharging Power Packs</p>
+                      <p className="text-sm lg:text-base text-slate-300 leading-relaxed">
                         {RECHARGING_POWER_PACKS_TEXT}
                       </p>
                     </div>
@@ -343,7 +343,7 @@ function AmmoEntryRow({
             />
           )}
           {entry.loaded && (
-            <span className="text-[10px] text-green-500 uppercase tracking-wide shrink-0">
+            <span className="text-[10px] lg:text-xs text-green-500 uppercase tracking-wide shrink-0">
               Loaded
             </span>
           )}
@@ -351,7 +351,7 @@ function AmmoEntryRow({
         {editable && (
           <button
             onClick={onRemove}
-            className="text-xs text-red-400 hover:text-red-300 shrink-0 leading-none"
+            className="text-xs lg:text-sm text-red-400 hover:text-red-300 shrink-0 leading-none"
           >
             ×
           </button>
@@ -359,7 +359,7 @@ function AmmoEntryRow({
       </div>
 
       {(ammoRef || visibleClipSizeLabel) && (
-        <div className="flex flex-wrap items-center gap-1.5 text-[10px]">
+        <div className="flex flex-wrap items-center gap-1.5 text-[10px] lg:text-xs">
           {visibleClipSizeLabel && (
             <span className="rounded border border-slate-700 bg-slate-900/40 px-1.5 py-0.5 text-slate-400">
               {visibleClipSizeLabel}
@@ -381,7 +381,7 @@ function AmmoEntryRow({
       {/* Count + Weight */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-1.5">
-          <span className="text-[10px] text-slate-500 uppercase tracking-wide">
+          <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">
             {usesUnitTracking ? "Qty" : "Clips"}
           </span>
           <QuantityControl
@@ -393,7 +393,7 @@ function AmmoEntryRow({
         </div>
         {!usesUnitTracking && (
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px] text-slate-500 uppercase tracking-wide">Rounds</span>
+            <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Rounds</span>
             <QuantityControl
               quantity={entry.rounds}
               editable={editable}
@@ -402,7 +402,7 @@ function AmmoEntryRow({
             />
           </div>
         )}
-        <span className="text-[10px] text-slate-500 ml-auto">{formatWeight(weightKg ?? 0)} kg</span>
+        <span className="text-[10px] lg:text-xs text-slate-500 ml-auto">{formatWeight(weightKg ?? 0)} kg</span>
       </div>
     </div>
   );
@@ -449,13 +449,13 @@ function AmmoPicker({
             onClose();
           }}
           disabled={existingNames.has(formatAmmoName(ammo.name))}
-          className="w-full text-left px-4 py-3 hover:bg-slate-800 transition group disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full text-left px-4 lg:px-5 py-3 lg:py-4 hover:bg-slate-800 transition group disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <div className="flex items-center justify-between gap-2">
-            <span className="text-sm font-medium text-slate-200 group-hover:text-white">
+            <span className="text-sm lg:text-base font-medium text-slate-200 group-hover:text-white">
               {formatAmmoName(ammo.name)}
             </span>
-            <div className="flex items-center gap-1.5 text-xs shrink-0">
+            <div className="flex items-center gap-1.5 text-xs lg:text-sm shrink-0">
               <span className="text-slate-500">{ammo.rarity}</span>
               <span className="text-slate-600">·</span>
               <span className="text-amber-400/80 font-mono">₮ {ammo.cost}</span>
@@ -463,21 +463,21 @@ function AmmoPicker({
             </div>
           </div>
           {ammo.description && (
-            <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{ammo.description}</p>
+            <p className="text-xs lg:text-sm text-slate-500 mt-0.5 line-clamp-2">{ammo.description}</p>
           )}
         </button>
       ))}
 
       {/* Custom / unlisted ammo */}
-      <div className="px-4 py-3 border-t border-slate-800 space-y-2">
-        <p className="text-xs text-slate-500">Custom / unlisted ammo</p>
+      <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-800 space-y-2">
+        <p className="text-xs lg:text-sm text-slate-500">Custom / unlisted ammo</p>
         <div className="flex gap-2">
           <input
             type="text"
             value={customName}
             onChange={(e) => setCustomName(e.target.value)}
             placeholder="Ammo name…"
-            className="flex-1 text-sm bg-slate-800 border border-slate-600 rounded px-2 py-1 text-slate-100 focus:outline-none focus:border-indigo-500"
+            className="flex-1 text-sm lg:text-base bg-slate-800 border border-slate-600 rounded px-2 lg:px-3 py-1 lg:py-1.5 text-slate-100 focus:outline-none focus:border-indigo-500"
           />
           <Button
             onClick={() => {
@@ -658,8 +658,8 @@ export function RangedCard({
           onClick={() => !forceExpanded && setExpanded((e) => !e)}
           disabled={forceExpanded}
         >
-          <p className="text-sm font-semibold text-slate-200">{weapon.name}</p>
-          {weapon.class && <p className="text-xs text-slate-500">{weapon.class}</p>}
+          <p className="text-sm lg:text-base font-semibold text-slate-200">{weapon.name}</p>
+          {weapon.class && <p className="text-xs lg:text-sm text-slate-500">{weapon.class}</p>}
         </button>
         <div className="flex items-center gap-2 shrink-0">
           {onToggleEquip && (
@@ -691,7 +691,7 @@ export function RangedCard({
             </button>
           )}
           {editable && (expanded || forceExpanded) && (
-            <button onClick={onRemove} className="text-xs text-red-400 hover:text-red-300 shrink-0">
+            <button onClick={onRemove} className="text-xs lg:text-sm text-red-400 hover:text-red-300 shrink-0">
               Remove
             </button>
           )}
@@ -715,8 +715,8 @@ export function RangedCard({
 
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] text-slate-500 uppercase tracking-wide">Qualities</span>
-              <span className="text-xs text-slate-400 italic">
+              <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Qualities</span>
+              <span className="text-xs lg:text-sm text-slate-400 italic">
                 {hasQualities ? rulesText : "-"}
               </span>
               {hasQualityModal && (
@@ -727,21 +727,21 @@ export function RangedCard({
               )}
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] text-slate-500 uppercase tracking-wide">Rules</span>
+              <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Rules</span>
               {hasItemRules ? (
                 <InfoModal
                   title={`${weapon.name} Rules`}
                   content={<SpecialRulesContent rules="" description={rulesDescription} />}
                 />
               ) : (
-                <span className="text-xs text-slate-600 italic">-</span>
+                <span className="text-xs lg:text-sm text-slate-600 italic">-</span>
               )}
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] text-slate-500 uppercase tracking-wide">
+              <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">
                 Craftsmanship
               </span>
-              <span className="text-xs text-slate-400 italic">{craftsmanship}</span>
+              <span className="text-xs lg:text-sm text-slate-400 italic">{craftsmanship}</span>
               <InfoModal
                 title={`${craftsmanship} Weapon`}
                 content={rangedCraftsmanshipDescription(craftsmanship)}
@@ -761,7 +761,7 @@ export function RangedCard({
           {/* Thrown weapon: quantity counter */}
           {isThrown && (
             <div className="border-t border-slate-800 pt-2 flex items-center justify-between gap-2">
-              <span className="text-[10px] text-slate-500 uppercase tracking-wide">Quantity</span>
+              <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Quantity</span>
               <QuantityControl
                 quantity={weapon.quantity ?? 0}
                 editable={editable}
@@ -774,10 +774,10 @@ export function RangedCard({
           {/* Grenade launcher: ammo drawn from grenade inventory */}
           {isGrenadeLauncher && (
             <div className="border-t border-slate-800 pt-2 space-y-2">
-              <span className="text-[10px] text-slate-500 uppercase tracking-wide">Grenades</span>
+              <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Grenades</span>
               {(grenades ?? []).filter((g) => g.type !== "Mine").length === 0 &&
               (archeotechGrenades ?? []).length === 0 ? (
-                <p className="text-xs text-slate-600 italic">
+                <p className="text-xs lg:text-sm text-slate-600 italic">
                   No grenades — add via the Grenades & Mines section below.
                 </p>
               ) : (
@@ -787,9 +787,9 @@ export function RangedCard({
                     .map((g) => (
                       <div
                         key={g.id}
-                        className="rounded bg-slate-800/60 px-2.5 py-2 flex items-center justify-between gap-2"
+                        className="rounded bg-slate-800/60 px-2.5 lg:px-3 py-2 lg:py-2.5 flex items-center justify-between gap-2"
                       >
-                        <span className="text-xs text-slate-200 truncate">{g.name}</span>
+                        <span className="text-xs lg:text-sm text-slate-200 truncate">{g.name}</span>
                         <QuantityControl
                           quantity={g.quantity}
                           editable={editable}
@@ -807,10 +807,10 @@ export function RangedCard({
                   {(archeotechGrenades ?? []).map((g) => (
                     <div
                       key={g.id}
-                      className="rounded bg-amber-900/20 border border-amber-700/30 px-2.5 py-2 flex items-center justify-between gap-2"
+                      className="rounded bg-amber-900/20 border border-amber-700/30 px-2.5 lg:px-3 py-2 lg:py-2.5 flex items-center justify-between gap-2"
                     >
-                      <span className="text-xs text-slate-200 truncate">{g.name}</span>
-                      <span className="text-[10px] text-amber-400 border border-amber-700/50 rounded px-1.5 py-0.5">
+                      <span className="text-xs lg:text-sm text-slate-200 truncate">{g.name}</span>
+                      <span className="text-[10px] lg:text-xs text-amber-400 border border-amber-700/50 rounded px-1.5 py-0.5">
                         Archeotech
                       </span>
                     </div>
@@ -824,11 +824,11 @@ export function RangedCard({
           {hasAmmo && (
             <div className="border-t border-slate-800 pt-2 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] text-slate-500 uppercase tracking-wide">Ammo</span>
+                <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Ammo</span>
                 {editable && (
                   <button
                     onClick={() => setShowAmmoPicker(true)}
-                    className="text-xs text-red-500 hover:text-red-400"
+                    className="text-xs lg:text-sm text-red-500 hover:text-red-400"
                   >
                     + Add
                   </button>
@@ -836,7 +836,7 @@ export function RangedCard({
               </div>
 
               {ammoEntries.length === 0 ? (
-                <p className="text-xs text-slate-600 italic">No ammo tracked</p>
+                <p className="text-xs lg:text-sm text-slate-600 italic">No ammo tracked</p>
               ) : (
                 <div className="space-y-1.5">
                   {ammoEntries.map((entry) => (
@@ -861,20 +861,20 @@ export function RangedCard({
           {(attachmentRefs.length > 0 || (editable && visibleCompatible.length > 0)) && (
             <div className="border-t border-slate-800 pt-2 space-y-1.5">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] text-slate-500 uppercase tracking-wide">
+                <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">
                   Attachments
                 </span>
                 {editable && visibleCompatible.length > 0 && (
                   <button
                     onClick={() => setShowAttachPicker(true)}
-                    className="text-xs text-red-500 hover:text-red-400"
+                    className="text-xs lg:text-sm text-red-500 hover:text-red-400"
                   >
                     + Add
                   </button>
                 )}
               </div>
               {attachmentRefs.length === 0 ? (
-                <p className="text-xs text-slate-600 italic">None fitted</p>
+                <p className="text-xs lg:text-sm text-slate-600 italic">None fitted</p>
               ) : (
                 <div className="space-y-1.5">
                   {attachmentRefs.map((upgrade) => (

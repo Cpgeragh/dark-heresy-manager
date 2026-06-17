@@ -77,7 +77,7 @@ export function ArcheotechPickerModal({ editable = true, onSelect, onCustom, onC
         !pending && editable ? (
           <button
             onClick={onCustom}
-            className="w-full text-xs px-3 py-1.5 rounded border border-red-700/50 bg-red-700/10 text-red-500 hover:bg-red-700/20 transition text-center"
+            className="w-full text-xs lg:text-sm px-3 lg:px-4 py-1.5 lg:py-2 rounded border border-red-700/50 bg-red-700/10 text-red-500 hover:bg-red-700/20 transition text-center"
           >
             + Custom Item
           </button>
@@ -86,14 +86,14 @@ export function ArcheotechPickerModal({ editable = true, onSelect, onCustom, onC
     >
       {pending ? (
         // ── Step 2: GM form ──────────────────────────────────────────────────
-        <div className="p-4 space-y-4">
-          <p className="text-sm text-slate-400">
+        <div className="p-4 lg:p-5 space-y-4">
+          <p className="text-sm lg:text-base text-slate-400">
             <span className="font-medium text-slate-200">{pending.name}</span> has no standard cost
             or availability. Enter the values the GM has assigned.
           </p>
 
           <div className="space-y-1">
-            <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+            <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
               Cost (Thrones) <span className="text-red-400">*</span>
             </label>
             <input
@@ -106,12 +106,12 @@ export function ArcheotechPickerModal({ editable = true, onSelect, onCustom, onC
               className={editableInputClass(true)}
             />
             {gmCost.trim() !== "" && !costValid && (
-              <p className="text-xs text-red-400">Must be a whole number of 1 or more.</p>
+              <p className="text-xs lg:text-sm text-red-400">Must be a whole number of 1 or more.</p>
             )}
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-medium uppercase tracking-wide text-slate-100">
+            <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
               Rarity <span className="text-red-400">*</span>
             </label>
             <select
@@ -131,7 +131,7 @@ export function ArcheotechPickerModal({ editable = true, onSelect, onCustom, onC
           <div className="flex gap-2 pt-1">
             <button
               onClick={() => setPending(null)}
-              className="px-4 py-1.5 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm text-slate-100 transition"
+              className="px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100 transition"
             >
               Back
             </button>
@@ -146,11 +146,11 @@ export function ArcheotechPickerModal({ editable = true, onSelect, onCustom, onC
           <button
             key={ref.id}
             onClick={editable ? () => handleRowClick(ref) : undefined}
-            className={`w-full text-left px-4 py-3 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
+            className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
           >
             <div className="flex items-center gap-1.5 min-w-0">
               <span
-                className={`text-sm font-medium text-slate-200 truncate ${editable ? "group-hover:text-white" : ""}`}
+                className={`text-sm lg:text-base font-medium text-slate-200 truncate ${editable ? "group-hover:text-white" : ""}`}
               >
                 {ref.name}
               </span>
@@ -158,12 +158,12 @@ export function ArcheotechPickerModal({ editable = true, onSelect, onCustom, onC
                 <span className="inline-flex items-center leading-[0]" onClick={(e) => e.stopPropagation()}>
                   <InfoModal
                     title={ref.name}
-                    content={<p className="text-sm text-slate-300 leading-relaxed">{ref.description}</p>}
+                    content={<p className="text-sm lg:text-base text-slate-300 leading-relaxed">{ref.description}</p>}
                   />
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-2 text-xs mt-0.5 flex-wrap">
+            <div className="flex items-center gap-2 text-xs lg:text-sm mt-0.5 flex-wrap">
               <span className="text-slate-500">{ref.type}</span>
               <ItemMetaChips
                 bare

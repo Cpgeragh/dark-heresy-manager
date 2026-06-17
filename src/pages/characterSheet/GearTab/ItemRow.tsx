@@ -32,7 +32,7 @@ export function ItemRow({ item, editable, onRemove }: Props) {
       <div className="flex items-start gap-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <p className="text-sm font-medium text-slate-200">{item.name}</p>
+            <p className="text-sm lg:text-base font-medium text-slate-200">{item.name}</p>
             {hasDesc && (
               <InfoModal
                 title={item.name}
@@ -54,7 +54,7 @@ export function ItemRow({ item, editable, onRemove }: Props) {
         {editable && (
           <button
             onClick={onRemove}
-            className="text-xs text-red-400 hover:text-red-300 transition shrink-0"
+            className="text-xs lg:text-sm text-red-400 hover:text-red-300 transition shrink-0"
           >
             Remove
           </button>

@@ -18,19 +18,19 @@ interface Props {
 
 const SIZE = {
   sm: {
-    btn: "w-7 h-7 sm:w-5 sm:h-5 text-sm sm:text-xs",
-    display: "text-sm min-w-[2rem]",
-    input: "h-7 sm:h-auto w-12 text-sm",
+    btn: "w-7 h-7 sm:w-5 sm:h-5 lg:w-7 lg:h-7 text-sm sm:text-xs lg:text-sm",
+    display: "text-sm lg:text-base min-w-[2rem]",
+    input: "h-7 sm:h-auto lg:h-8 w-12 lg:w-14 text-sm lg:text-base",
   },
   md: {
-    btn: "w-9 h-9 sm:w-6 sm:h-6 text-lg sm:text-sm",
-    display: "text-base min-w-[2rem]",
-    input: "h-9 sm:h-auto w-14 text-base",
+    btn: "w-9 h-9 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-lg sm:text-sm lg:text-base",
+    display: "text-base lg:text-lg min-w-[2rem]",
+    input: "h-9 sm:h-auto lg:h-9 w-14 lg:w-16 text-base lg:text-lg",
   },
   lg: {
-    btn: "w-10 h-10 sm:w-6 sm:h-6 text-lg sm:text-sm",
-    display: "text-lg min-w-[2.5rem]",
-    input: "h-10 sm:h-auto w-16 text-lg",
+    btn: "w-10 h-10 sm:w-6 sm:h-6 lg:w-9 lg:h-9 text-lg sm:text-sm lg:text-lg",
+    display: "text-lg lg:text-xl min-w-[2.5rem]",
+    input: "h-10 sm:h-auto lg:h-10 w-16 lg:w-20 text-lg lg:text-xl",
   },
 } as const;
 
