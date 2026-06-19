@@ -62,15 +62,16 @@ export function PieceRow({ piece, editable, worn, onToggle, onRemove, onInfo }: 
             </button>
           </span>
         </div>
-        <div className="flex flex-wrap gap-1.5 mt-1">
-          <span className="text-xs lg:text-sm rounded border border-slate-700 bg-slate-800/40 px-1.5 lg:px-2 py-0.5 text-slate-300">
-            {locationLabel(piece.locations)}
-          </span>
-          <span className="text-xs lg:text-sm rounded border border-slate-700 bg-slate-800/40 px-1.5 lg:px-2 py-0.5 font-mono text-slate-200">
-            {apDesc}
-          </span>
+        <div className="mt-1 space-y-1">
+          <div className="flex flex-wrap gap-1.5">
+            <span className="text-xs lg:text-sm rounded border border-slate-700 bg-slate-800/40 px-1.5 lg:px-2 py-0.5 text-slate-300">
+              {locationLabel(piece.locations)}
+            </span>
+            <span className="text-xs lg:text-sm rounded border border-slate-700 bg-slate-800/40 px-1.5 lg:px-2 py-0.5 font-mono text-slate-200">
+              {apDesc}
+            </span>
+          </div>
           <ItemMetaChips
-            bare
             weight={piece.weight}
             value={piece.value}
             rarity={piece.rarity}
