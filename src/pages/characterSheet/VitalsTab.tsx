@@ -28,7 +28,7 @@ interface VitalsTabProps {
 }
 
 const totalInputClass =
-  "w-full rounded border px-2 lg:px-3 py-1.5 lg:py-2 text-center text-xl lg:text-2xl font-semibold font-mono transition bg-slate-900 border-slate-500 text-slate-200 focus:outline-none focus:border-red-500";
+  "w-full rounded border px-2 lg:px-3 py-1.5 lg:py-2 text-center text-xl lg:text-2xl font-semibold font-code transition bg-slate-900 border-slate-500 text-slate-200 focus:outline-none focus:border-red-500";
 
 export function VitalsTab({
   character,

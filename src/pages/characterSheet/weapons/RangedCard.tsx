@@ -180,7 +180,7 @@ export function RangedPicker({
           >
             {ref.name}
           </span>
-          <div className="flex items-center gap-2 text-xs lg:text-sm text-slate-500 mt-0.5 flex-wrap font-mono">
+          <div className="flex items-center gap-2 text-xs lg:text-sm text-slate-500 mt-0.5 flex-wrap font-code">
             <span>{ref.class}</span>
             <span>{ref.range}</span>
             <span>{ref.rof}</span>
@@ -367,7 +367,7 @@ function AmmoEntryRow({
           )}
           {ammoRef && (
             <>
-              <span className="rounded border border-slate-700 bg-slate-900/40 px-1.5 py-0.5 text-amber-400/80 font-mono">
+              <span className="rounded border border-slate-700 bg-slate-900/40 px-1.5 py-0.5 text-amber-400/80 font-code">
                 ₮ {ammoRef.cost}
               </span>
               <span className="rounded border border-slate-700 bg-slate-900/40 px-1.5 py-0.5 text-slate-400">
@@ -458,7 +458,7 @@ function AmmoPicker({
             <div className="flex items-center gap-1.5 text-xs lg:text-sm shrink-0">
               <span className="text-slate-500">{ammo.rarity}</span>
               <span className="text-slate-600">·</span>
-              <span className="text-amber-400/80 font-mono">₮ {ammo.cost}</span>
+              <span className="text-amber-400/80 font-code">₮ {ammo.cost}</span>
               <span className="text-slate-500">/ {ammo.purchaseAmount}</span>
             </div>
           </div>

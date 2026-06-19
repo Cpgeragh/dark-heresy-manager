@@ -278,16 +278,16 @@ export function ArmourTab({
                   return (
                     <tr key={loc} className="hover:bg-slate-800/40 transition">
                       <td className="py-2 pr-4 text-slate-100">{LOCATION_LABELS[loc]}</td>
-                      <td className="py-2 px-3 text-center font-mono text-slate-200">{ap}</td>
-                      <td className="py-2 px-3 text-center font-mono text-slate-400">
+                      <td className="py-2 px-3 text-center font-code text-slate-200">{ap}</td>
+                      <td className="py-2 px-3 text-center font-code text-slate-400">
                         {toughnessBonus}
                       </td>
                       <td
-                        className={`py-2 px-3 text-center font-mono ${bionic > 0 ? "text-cyan-400" : "text-slate-700"}`}
+                        className={`py-2 px-3 text-center font-code ${bionic > 0 ? "text-cyan-400" : "text-slate-700"}`}
                       >
                         {bionic > 0 ? `+${bionic}` : "—"}
                       </td>
-                      <td className="py-2 px-3 text-center font-mono font-semibold text-amber-300">
+                      <td className="py-2 px-3 text-center font-code font-semibold text-amber-300">
                         {total}
                       </td>
                     </tr>

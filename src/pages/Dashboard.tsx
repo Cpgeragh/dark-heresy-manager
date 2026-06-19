@@ -114,7 +114,7 @@ function CharacterCard({
               )}
             </div>
           )}
-          <div className="text-xs lg:text-sm text-slate-600 font-mono">
+          <div className="text-xs lg:text-sm text-slate-600 font-code">
             Recovery: {character.recoveryCode}
           </div>
         </div>

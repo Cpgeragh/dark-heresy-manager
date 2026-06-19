@@ -221,7 +221,7 @@ export function TalentPickerModal({
                 {sources.map((src) => (
                   <span
                     key={src}
-                    className={`text-xs lg:text-sm rounded border bg-slate-800/40 px-1.5 lg:px-2 py-0.5 font-mono ${sourceColour(src)}`}
+                    className={`text-xs lg:text-sm rounded border bg-slate-800/40 px-1.5 lg:px-2 py-0.5 font-code ${sourceColour(src)}`}
                   >
                     {src}
                   </span>
@@ -263,7 +263,7 @@ export function EntryCard({ entry, editable, onRemove }: EntryCardProps) {
           {refSources.map((src) => (
             <span
               key={src}
-              className={`text-xs lg:text-sm rounded border bg-slate-800/40 px-1.5 lg:px-2 py-0.5 font-mono ${sourceColour(src)}`}
+              className={`text-xs lg:text-sm rounded border bg-slate-800/40 px-1.5 lg:px-2 py-0.5 font-code ${sourceColour(src)}`}
             >
               {src}
             </span>

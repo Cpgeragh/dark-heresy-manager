@@ -71,10 +71,10 @@ export const uiCell = "rounded border border-slate-500 bg-slate-950/60";
 export const uiCellLabel = "text-[10px] lg:text-xs text-slate-300 leading-tight";
 
 /** Value inside a compact stat cell (tight column grids — keeps text-base to fit). */
-export const uiCellValueSm = "text-base lg:text-lg font-semibold font-mono text-slate-200 leading-tight";
+export const uiCellValueSm = "text-base lg:text-lg font-semibold font-code text-slate-200 leading-tight";
 
 /** Value inside a standard-width display cell — matches the Stepper value size. */
-export const uiCellValue = "text-xl lg:text-2xl font-semibold font-mono text-slate-200";
+export const uiCellValue = "text-xl lg:text-2xl font-semibold font-code text-slate-200";
 
 // ──────────────────────────────────────────────────────────────────────────────
 

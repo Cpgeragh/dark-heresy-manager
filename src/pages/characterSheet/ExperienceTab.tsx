@@ -145,14 +145,14 @@ export function ExperienceTab({
                 min={0}
                 value={experience.total}
                 onChange={handleTotalChange}
-                className="mt-2 w-full px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-800 border border-slate-500 rounded text-center text-xl lg:text-2xl font-semibold font-mono text-slate-100 focus:border-red-500 focus:outline-none"
+                className="mt-2 w-full px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-800 border border-slate-500 rounded text-center text-xl lg:text-2xl font-semibold font-code text-slate-100 focus:border-red-500 focus:outline-none"
                 aria-label="Total XP"
               />
             </label>
           ) : (
             <>
               <div className="text-xs lg:text-sm text-slate-400 mb-1">Total XP</div>
-              <div className="text-2xl lg:text-3xl font-semibold font-mono text-slate-100">
+              <div className="text-2xl lg:text-3xl font-semibold font-code text-slate-100">
                 {experience.total}
               </div>
             </>
@@ -161,13 +161,13 @@ export function ExperienceTab({
 
         <div className={uiSection + " text-center"}>
           <div className="text-xs lg:text-sm text-slate-400 mb-1">Spent XP</div>
-          <div className="text-2xl lg:text-3xl font-semibold font-mono text-slate-100">{experience.spent}</div>
+          <div className="text-2xl lg:text-3xl font-semibold font-code text-slate-100">{experience.spent}</div>
         </div>
 
         <div className={uiSection + " text-center"}>
           <div className="text-xs lg:text-sm text-slate-400 mb-1">Remaining XP</div>
           <div
-            className={`text-2xl lg:text-3xl font-semibold font-mono ${remaining < 0 ? "text-red-400" : "text-slate-100"}`}
+            className={`text-2xl lg:text-3xl font-semibold font-code ${remaining < 0 ? "text-red-400" : "text-slate-100"}`}
           >
             {remaining}
           </div>
@@ -190,7 +190,7 @@ export function ExperienceTab({
                 {rankBlock.advances.map((adv) => (
                   <li key={adv.id} className="rounded border border-slate-500 bg-slate-900/60 p-3">
                     <div className="flex items-baseline justify-between gap-4">
-                    <div className="font-mono text-sm lg:text-base text-slate-100">{adv.name}</div>
+                    <div className="font-code text-sm lg:text-base text-slate-100">{adv.name}</div>
                       <div className="flex items-center gap-2 shrink-0">
                         <span className="text-xs lg:text-sm text-slate-400">{adv.cost} XP</span>
                         {isDM && (

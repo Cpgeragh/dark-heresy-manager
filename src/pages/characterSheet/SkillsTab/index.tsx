@@ -6,6 +6,7 @@ import type { Characteristics, SkillEntry } from "../../../types/Character";
 import type { CharField } from "../../../utils/characterFactory";
 import { useSkillComputation } from "../../../hooks/useSkillComputation";
 import { SectionHeader } from "../../../ui/SectionHeader";
+import { uiSection } from "../../../ui/editableStyles";
 import { SkillRow } from "./SkillRow";
 import { SkillGroupRow } from "./SkillGroupRow";
 import { AddSkillModal } from "./AddSkillModal";
@@ -32,44 +33,60 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField }: SkillsTa
 
   const computedSkills = useSkillComputation({ skills, getCharField });
 
-  const trainedSkills = computedSkills
-    .filter((s) => s.level !== "untrained")
-    .sort((a, b) => a.name.localeCompare(b.name));
+  const trainedSkills = useMemo(
+    () =>
+      computedSkills
+        .filter((s) => s.level !== "untrained")
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    [computedSkills]
+  );
 
-  const untrainedSkills = computedSkills
-    .filter((s) => s.level === "untrained")
-    .sort((a, b) => a.name.localeCompare(b.name));
+  const untrainedSkills = useMemo(
+    () =>
+      computedSkills
+        .filter((s) => s.level === "untrained")
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    [computedSkills]
+  );
 
-  const displayItems = useMemo((): DisplayItem[] => {
-    const groups = new Map<string, SkillWithComputed[]>();
-    for (const skill of trainedSkills) {
-      const arr = groups.get(skill.category) ?? [];
-      arr.push(skill);
-      groups.set(skill.category, arr);
-    }
-
-    const items: DisplayItem[] = [];
-    for (const [category, catSkills] of groups) {
-      if (category === "General" || catSkills.length === 1) {
-        for (const skill of catSkills) {
-          items.push({ type: "skill", skill });
-        }
-      } else {
-        items.push({ type: "group", category, skills: catSkills });
+  const buildItems = useCallback(
+    (view: SkillsView): DisplayItem[] => {
+      const groups = new Map<string, SkillWithComputed[]>();
+      for (const skill of trainedSkills) {
+        const arr = groups.get(skill.category) ?? [];
+        arr.push(skill);
+        groups.set(skill.category, arr);
       }
-    }
 
-    return items
-      .filter((item) => {
-        const isAdv = item.type === "skill" ? item.skill.advanced : item.skills[0].advanced;
-        return isAdv === (activeView === "advanced");
-      })
-      .sort((a, b) => {
-        const aKey = a.type === "skill" ? a.skill.name : a.category;
-        const bKey = b.type === "skill" ? b.skill.name : b.category;
-        return aKey.localeCompare(bKey);
-      });
-  }, [trainedSkills, activeView]);
+      const items: DisplayItem[] = [];
+      for (const [category, catSkills] of groups) {
+        if (category === "General" || catSkills.length === 1) {
+          for (const skill of catSkills) items.push({ type: "skill", skill });
+        } else {
+          items.push({ type: "group", category, skills: catSkills });
+        }
+      }
+
+      return items
+        .filter((item) => {
+          const isAdv = item.type === "skill" ? item.skill.advanced : item.skills[0].advanced;
+          return isAdv === (view === "advanced");
+        })
+        .sort((a, b) => {
+          const aKey = a.type === "skill" ? a.skill.name : a.category;
+          const bKey = b.type === "skill" ? b.skill.name : b.category;
+          return aKey.localeCompare(bKey);
+        });
+    },
+    [trainedSkills]
+  );
+
+  const activeItems = useMemo(() => buildItems(activeView), [buildItems, activeView]);
+  const basicItems = useMemo(() => buildItems("basic"), [buildItems]);
+  const advancedItems = useMemo(() => buildItems("advanced"), [buildItems]);
+
+  const basicCount = useMemo(() => trainedSkills.filter((s) => !s.advanced).length, [trainedSkills]);
+  const advancedCount = useMemo(() => trainedSkills.filter((s) => s.advanced).length, [trainedSkills]);
 
   const switchView = useCallback((view?: SkillsView) => {
     setActiveView((current) => {
@@ -85,13 +102,16 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField }: SkillsTa
     touchStartX.current = e.touches[0]?.clientX ?? null;
   }, []);
 
-  const handleTouchEnd = useCallback((e: TouchEvent<HTMLDivElement>) => {
-    const startX = touchStartX.current;
-    const endX = e.changedTouches[0]?.clientX;
-    touchStartX.current = null;
-    if (startX === null || endX === undefined || Math.abs(endX - startX) < 50) return;
-    switchView();
-  }, [switchView]);
+  const handleTouchEnd = useCallback(
+    (e: TouchEvent<HTMLDivElement>) => {
+      const startX = touchStartX.current;
+      const endX = e.changedTouches[0]?.clientX;
+      touchStartX.current = null;
+      if (startX === null || endX === undefined || Math.abs(endX - startX) < 50) return;
+      switchView();
+    },
+    [switchView]
+  );
 
   const transitionClass =
     viewTransition === "sliding"
@@ -99,9 +119,6 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField }: SkillsTa
         ? "opacity-0 -translate-x-3"
         : "opacity-0 translate-x-3"
       : "opacity-100 translate-x-0";
-
-  const basicCount = trainedSkills.filter((s) => !s.advanced).length;
-  const advancedCount = trainedSkills.filter((s) => s.advanced).length;
 
   const updateLevel = useCallback(
     (id: string, level: SkillEntry["level"]) =>
@@ -120,6 +137,32 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField }: SkillsTa
     [skills, onUpdate]
   );
 
+  const renderItems = (items: DisplayItem[]) =>
+    items.map((item) =>
+      item.type === "skill" ? (
+        <SkillRow
+          key={item.skill.id}
+          skill={item.skill}
+          editable={editable}
+          updateLevel={updateLevel}
+          updateMisc={updateMisc}
+        />
+      ) : (
+        <SkillGroupRow
+          key={item.category}
+          category={item.category}
+          skills={item.skills}
+          editable={editable}
+          updateLevel={updateLevel}
+          updateMisc={updateMisc}
+        />
+      )
+    );
+
+  const emptyMessage = editable
+    ? 'No trained skills yet. Tap "+ Add Skill" to get started.'
+    : "No trained skills yet.";
+
   return (
     <div className="space-y-4 text-slate-100">
       {/* Header */}
@@ -133,8 +176,8 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField }: SkillsTa
         </button>
       </div>
 
-      <div onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} className="space-y-4">
-        {/* Tab switcher */}
+      {/* MOBILE: tab switcher + swipe */}
+      <div className="lg:hidden space-y-4" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
         <div
           className="grid grid-cols-2 rounded-lg border border-slate-600 bg-slate-950/70 p-1"
           role="tablist"
@@ -151,7 +194,7 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField }: SkillsTa
                 aria-selected={active}
                 onClick={() => switchView(view)}
                 className={[
-                  "rounded-md px-3 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm font-semibold transition border",
+                  "rounded-md px-3 py-1.5 text-xs font-semibold transition border",
                   active
                     ? view === "basic"
                       ? "border-teal-400 bg-teal-600/80 text-white shadow-sm shadow-teal-950/50"
@@ -165,48 +208,43 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField }: SkillsTa
           })}
         </div>
 
-        {/* Skill list */}
         {trainedSkills.length === 0 ? (
-          <p className="text-sm lg:text-base text-slate-400 text-center py-8">
-            {editable
-              ? 'No trained skills yet. Tap "+ Add Skill" to get started.'
-              : "No trained skills yet."}
-          </p>
-        ) : displayItems.length === 0 ? (
-          <p className="text-sm lg:text-base text-slate-400 text-center py-8">
+          <p className="text-sm text-slate-400 text-center py-8">{emptyMessage}</p>
+        ) : activeItems.length === 0 ? (
+          <p className="text-sm text-slate-400 text-center py-8">
             No {activeView} skills trained yet.
           </p>
         ) : (
           <section
             key={activeView}
             role="tabpanel"
-            className={`grid grid-cols-1 sm:grid-cols-2 gap-2 transition-all duration-150 ease-out motion-reduce:transition-none ${transitionClass}`}
+            className={`space-y-2 transition-all duration-150 ease-out motion-reduce:transition-none ${transitionClass}`}
           >
-            {displayItems.map((item) => {
-              if (item.type === "skill") {
-                return (
-                  <SkillRow
-                    key={item.skill.id}
-                    skill={item.skill}
-                    editable={editable}
-                    updateLevel={updateLevel}
-                    updateMisc={updateMisc}
-                  />
-                );
-              }
-              return (
-                <SkillGroupRow
-                  key={item.category}
-                  category={item.category}
-                  skills={item.skills}
-                  editable={editable}
-                  updateLevel={updateLevel}
-                  updateMisc={updateMisc}
-                />
-              );
-            })}
+            {renderItems(activeItems)}
           </section>
         )}
+      </div>
+
+      {/* DESKTOP: both columns side by side */}
+      <div className="hidden lg:grid lg:grid-cols-2 lg:gap-4 lg:items-start">
+        <section className={uiSection + " space-y-3"}>
+          <SectionHeader>Basic Skills</SectionHeader>
+          {trainedSkills.length === 0 ? (
+            <p className="text-sm text-slate-400">{emptyMessage}</p>
+          ) : basicItems.length === 0 ? (
+            <p className="text-sm text-slate-400">No basic skills trained yet.</p>
+          ) : (
+            <div className="space-y-2">{renderItems(basicItems)}</div>
+          )}
+        </section>
+        <section className={uiSection + " space-y-3"}>
+          <SectionHeader>Advanced Skills</SectionHeader>
+          {advancedItems.length === 0 ? (
+            <p className="text-sm text-slate-400">No advanced skills trained yet.</p>
+          ) : (
+            <div className="space-y-2">{renderItems(advancedItems)}</div>
+          )}
+        </section>
       </div>
 
       {/* Add skill modal */}

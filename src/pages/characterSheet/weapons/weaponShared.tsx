@@ -13,7 +13,7 @@ export function StatChip({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col items-center bg-slate-800/60 rounded px-2 lg:px-3 py-1 lg:py-1.5 min-w-[52px] lg:min-w-[64px]">
       <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">{label}</span>
-      <span className="text-sm lg:text-base font-mono text-slate-200 mt-0.5">{value || "—"}</span>
+      <span className="text-sm lg:text-base font-code text-slate-200 mt-0.5">{value || "—"}</span>
     </div>
   );
 }
@@ -200,11 +200,11 @@ export function AttachmentCard({
             ⚖ {upgrade.weightModifier}
           </span>
         )}
-        <span className="text-[10px] lg:text-xs rounded border border-slate-700 bg-slate-900/40 px-1 lg:px-1.5 py-0.5 text-amber-400/80 font-mono">
+        <span className="text-[10px] lg:text-xs rounded border border-slate-700 bg-slate-900/40 px-1 lg:px-1.5 py-0.5 text-amber-400/80 font-code">
           ₮ {upgrade.value}
         </span>
         <span
-          className={`text-[10px] lg:text-xs rounded border bg-slate-900/40 px-1 lg:px-1.5 py-0.5 font-mono ${sourceColour(upgrade.source)}`}
+          className={`text-[10px] lg:text-xs rounded border bg-slate-900/40 px-1 lg:px-1.5 py-0.5 font-code ${sourceColour(upgrade.source)}`}
         >
           {upgrade.source}
         </span>
@@ -255,7 +255,7 @@ export function AttachmentPicker({
                 <div className="flex items-center gap-1.5 text-xs lg:text-sm shrink-0">
                   <span className={rarityColour(upgrade.rarity)}>{upgrade.rarity}</span>
                   <span className="text-slate-600">·</span>
-                  <span className="text-amber-400/80 font-mono">₮ {upgrade.value}</span>
+                  <span className="text-amber-400/80 font-code">₮ {upgrade.value}</span>
                   <span className="text-slate-600">·</span>
                   <span className="text-slate-400">{upgrade.weightModifier}</span>
                 </div>

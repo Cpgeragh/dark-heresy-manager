@@ -29,7 +29,7 @@ export const EXPLOSIVE_MISHAPS_CONTENT = (
         </thead>
         <tbody className="divide-y divide-slate-700/60">
           <tr>
-            <td className="py-2 pr-3 align-top font-mono text-slate-300 whitespace-nowrap">1-5</td>
+            <td className="py-2 pr-3 align-top font-code text-slate-300 whitespace-nowrap">1-5</td>
             <td className="py-2 text-slate-300">
               <span className="font-semibold text-slate-100">Dud.</span> The explosive or round
               fails to explode and, in the case of grenade launchers, the weapon must be reloaded
@@ -37,14 +37,14 @@ export const EXPLOSIVE_MISHAPS_CONTENT = (
             </td>
           </tr>
           <tr>
-            <td className="py-2 pr-3 align-top font-mono text-slate-300 whitespace-nowrap">6-8</td>
+            <td className="py-2 pr-3 align-top font-code text-slate-300 whitespace-nowrap">6-8</td>
             <td className="py-2 text-slate-300">
               <span className="font-semibold text-slate-100">"It might be ok…"</span> Nothing
               happens. Roll again on this table next round.
             </td>
           </tr>
           <tr>
-            <td className="py-2 pr-3 align-top font-mono text-slate-300 whitespace-nowrap">9-0</td>
+            <td className="py-2 pr-3 align-top font-code text-slate-300 whitespace-nowrap">9-0</td>
             <td className="py-2 text-slate-300">
               <span className="font-semibold text-slate-100">BOOM!</span> The round or explosive
               detonates immediately. Centre the effect on the character. If this was the result of
@@ -99,7 +99,7 @@ export function GrenadePicker({
           >
             {ref.name}
           </span>
-          <div className="flex items-center gap-2 text-xs lg:text-sm mt-0.5 flex-wrap font-mono">
+          <div className="flex items-center gap-2 text-xs lg:text-sm mt-0.5 flex-wrap font-code">
             <span className={rarityColour(ref.rarity)}>{ref.rarity}</span>
             <span className="text-amber-400/80">₮ {ref.value}</span>
             <span className="text-slate-500">{ref.damage !== "—" ? ref.damage : "No damage"}</span>
@@ -228,7 +228,7 @@ export function GrenadeCard({
             {item.damage === "Special" && (
               <div className="flex flex-col items-center bg-slate-800/60 rounded px-2 lg:px-3 py-1 lg:py-1.5 min-w-[52px] lg:min-w-[64px]">
                 <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Damage</span>
-                <span className="text-sm lg:text-base font-mono text-amber-400 mt-0.5">Special</span>
+                <span className="text-sm lg:text-base font-code text-amber-400 mt-0.5">Special</span>
               </div>
             )}
             <StatChip label="Pen" value={item.pen && item.pen !== "—" ? item.pen : "—"} />

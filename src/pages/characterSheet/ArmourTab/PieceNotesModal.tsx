@@ -30,7 +30,7 @@ export function PieceNotesModal({ piece, onClose }: Props) {
         <div className="px-4 lg:px-5 py-3 lg:py-4 space-y-3">
           <div className="flex flex-wrap gap-4 text-xs lg:text-sm text-slate-400">
             <span>
-              AP: <span className="text-slate-200 font-mono">{piece.ap}</span>
+              AP: <span className="text-slate-200 font-code">{piece.ap}</span>
             </span>
             <span>
               Covers: <span className="text-slate-200">{locationLabel(piece.locations)}</span>

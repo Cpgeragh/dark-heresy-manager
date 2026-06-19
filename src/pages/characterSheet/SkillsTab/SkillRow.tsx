@@ -4,9 +4,9 @@ import { useState, useCallback } from "react";
 import type { SkillAdvanceLevel } from "../../../types/Character";
 import { CHAR_LABEL, getTotalColor, type SkillWithComputed } from "./skillsConstants";
 import { charColour } from "../../../ui/sourceStyles";
-import { editableInputClass } from "../../../ui/editableStyles";
 import { InfoModal } from "../../../components/InfoModal";
 import { SKILL_DESCRIPTIONS } from "../../../data/skillDescriptions";
+import { Stepper } from "../../../components/Stepper";
 
 interface SkillRowProps {
   skill: SkillWithComputed;
@@ -35,7 +35,7 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc }: SkillRowP
   );
 
   const handleMiscChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => updateMisc(skill.id, Number(e.target.value)),
+    (value: number) => updateMisc(skill.id, value),
     [skill.id, updateMisc]
   );
 
@@ -50,58 +50,67 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc }: SkillRowP
       <button
         onClick={handleToggle}
         aria-expanded={expanded}
-        className="w-full flex items-center gap-3 px-3 lg:px-4 py-2.5 lg:py-3 text-left hover:bg-slate-700/40 transition"
+        className="w-full px-3 lg:px-4 py-2.5 lg:py-3 text-left hover:bg-slate-700/40 transition"
       >
-        <div className="flex items-center gap-1.5 flex-1 min-w-0">
-          <span className="text-sm lg:text-base font-semibold text-slate-100 truncate">{skill.name}</span>
-          {SKILL_DESCRIPTIONS[skill.name] && (
-            <span
-              className="inline-flex items-center leading-[0]"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <InfoModal title={skill.name} content={SKILL_DESCRIPTIONS[skill.name]} />
+        {/* Mobile: name + total + chevron on row 1, chips on row 2 */}
+        <div className="lg:hidden space-y-1.5">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 flex-1 min-w-0">
+              <span className="text-sm font-semibold text-slate-100 truncate">{skill.name}</span>
+              {SKILL_DESCRIPTIONS[skill.name] && (
+                <span className="inline-flex items-center leading-[0]" onClick={(e) => e.stopPropagation()}>
+                  <InfoModal title={skill.name} content={SKILL_DESCRIPTIONS[skill.name]} />
+                </span>
+              )}
+            </div>
+            <span className={`text-base font-code font-semibold shrink-0 ${totalColor}`}>
+              {skill.total ?? "--"}
             </span>
-          )}
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+              className={`w-4 h-4 text-slate-400 shrink-0 transition-transform ${expanded ? "" : "-rotate-90"}`}>
+              <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className={`px-1.5 py-0.5 rounded border bg-slate-800 text-[10px] font-code shrink-0 ${charColour(skill.characteristic)}`}>
+              {CHAR_LABEL[skill.characteristic]}
+            </span>
+            <span className={`px-1.5 py-0.5 rounded border text-[10px] shrink-0 ${skill.advanced ? "bg-purple-700/40 border-purple-500 text-purple-300" : "bg-teal-900/40 border-teal-700/50 text-teal-300"}`}>
+              {skill.advanced ? "Advanced" : "Basic"}
+            </span>
+            <span className={`px-1.5 py-0.5 rounded border text-[10px] font-semibold shrink-0 ${levelBadgeClass}`}>
+              {skill.level === "trained" ? "Trained" : skill.level}
+            </span>
+          </div>
         </div>
 
-        <span
-          className={`px-1.5 lg:px-2 py-0.5 rounded border bg-slate-800 text-[10px] lg:text-xs font-mono shrink-0 ${charColour(skill.characteristic)}`}
-        >
-          {CHAR_LABEL[skill.characteristic]}
-        </span>
-
-        <span
-          className={`px-1.5 lg:px-2 py-0.5 rounded border text-[10px] lg:text-xs shrink-0 ${
-            skill.advanced
-              ? "bg-purple-700/40 border-purple-500 text-purple-300"
-              : "bg-teal-900/40 border-teal-700/50 text-teal-300"
-          }`}
-        >
-          {skill.advanced ? "Advanced" : "Basic"}
-        </span>
-
-        <span
-          className={`px-1.5 lg:px-2 py-0.5 rounded border text-[10px] lg:text-xs font-semibold shrink-0 ${levelBadgeClass}`}
-        >
-          {skill.level === "trained" ? "Trained" : skill.level}
-        </span>
-
-        <span className={`text-base lg:text-lg font-mono font-semibold shrink-0 ${totalColor}`}>
-          {skill.total ?? "--"}
-        </span>
-
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-          className={`w-4 h-4 text-slate-400 shrink-0 transition-transform ${expanded ? "" : "-rotate-90"}`}
-        >
-          <path
-            fillRule="evenodd"
-            d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-            clipRule="evenodd"
-          />
-        </svg>
+        {/* Desktop: single row */}
+        <div className="hidden lg:flex lg:items-center lg:gap-3">
+          <div className="flex items-center gap-1.5 flex-1 min-w-0">
+            <span className="text-base font-semibold text-slate-100 truncate">{skill.name}</span>
+            {SKILL_DESCRIPTIONS[skill.name] && (
+              <span className="inline-flex items-center leading-[0]" onClick={(e) => e.stopPropagation()}>
+                <InfoModal title={skill.name} content={SKILL_DESCRIPTIONS[skill.name]} />
+              </span>
+            )}
+          </div>
+          <span className={`px-2 py-0.5 rounded border bg-slate-800 text-xs font-code shrink-0 ${charColour(skill.characteristic)}`}>
+            {CHAR_LABEL[skill.characteristic]}
+          </span>
+          <span className={`px-2 py-0.5 rounded border text-xs shrink-0 ${skill.advanced ? "bg-purple-700/40 border-purple-500 text-purple-300" : "bg-teal-900/40 border-teal-700/50 text-teal-300"}`}>
+            {skill.advanced ? "Advanced" : "Basic"}
+          </span>
+          <span className={`px-2 py-0.5 rounded border text-xs font-semibold shrink-0 ${levelBadgeClass}`}>
+            {skill.level === "trained" ? "Trained" : skill.level}
+          </span>
+          <span className={`text-lg font-code font-semibold shrink-0 ${totalColor}`}>
+            {skill.total ?? "--"}
+          </span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+            className={`w-4 h-4 text-slate-400 shrink-0 transition-transform ${expanded ? "" : "-rotate-90"}`}>
+            <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
+          </svg>
+        </div>
       </button>
 
       {/* EXPANDED BODY */}
@@ -141,25 +150,24 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc }: SkillRowP
             {editable && (
               <div className="text-center rounded border border-slate-500 bg-slate-900/60 px-2 py-1.5">
                 <div className="text-[10px] lg:text-xs text-slate-100 uppercase tracking-wide mb-1">Misc</div>
-                <input
-                  type="number"
+                <Stepper
                   value={skill.miscModifier ?? 0}
+                  min={-100}
+                  editable={editable}
                   onChange={handleMiscChange}
-                  aria-label={`${skill.name} miscellaneous modifier`}
-                  className={editableInputClass(true) + " text-center text-xs py-0.5"}
                 />
               </div>
             )}
             <div className="text-center rounded border border-slate-500 bg-slate-900/60 px-2 py-1.5">
               <div className="text-[10px] lg:text-xs text-slate-100 uppercase tracking-wide">Half</div>
-              <div className={`text-sm lg:text-base font-mono font-semibold mt-1 ${getTotalColor(skill.half)}`}>
+              <div className={`text-sm lg:text-base font-code font-semibold mt-1 ${getTotalColor(skill.half)}`}>
                 {skill.half ?? "--"}
               </div>
             </div>
             <div className="text-center rounded border border-slate-500 bg-slate-900/60 px-2 py-1.5">
               <div className="text-[10px] lg:text-xs text-slate-100 uppercase tracking-wide">Opposed</div>
               <div
-                className={`text-sm lg:text-base font-mono font-semibold mt-1 ${getTotalColor(skill.opposed)}`}
+                className={`text-sm lg:text-base font-code font-semibold mt-1 ${getTotalColor(skill.opposed)}`}
               >
                 {skill.opposed ?? "--"}
               </div>

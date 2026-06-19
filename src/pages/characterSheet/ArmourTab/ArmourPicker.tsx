@@ -137,7 +137,7 @@ export function ArmourPicker({ editable = true, onSelect, onCustom, onClose }: P
           >
             {ref.name}
           </span>
-          <div className="flex items-center gap-2 text-xs lg:text-sm text-slate-500 mt-0.5 flex-wrap font-mono">
+          <div className="flex items-center gap-2 text-xs lg:text-sm text-slate-500 mt-0.5 flex-wrap font-code">
             <span>
               AP {ref.ap}
               {Object.keys(ref.apOverrides ?? {}).length > 0 ? "*" : ""}

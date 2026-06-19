@@ -90,7 +90,7 @@ export function CustomPieceForm({ onAdd, onCancel }: Props) {
           value={ap}
           onChange={(e) => setAp(e.target.value)}
           placeholder="0"
-          className={editableInputClass(true) + " w-20 font-mono"}
+          className={editableInputClass(true) + " w-20 font-code"}
         />
       </div>
 
@@ -109,7 +109,7 @@ export function CustomPieceForm({ onAdd, onCancel }: Props) {
             setWeight(v);
           }}
           placeholder="0"
-          className={editableInputClass(true) + " w-20 font-mono"}
+          className={editableInputClass(true) + " w-20 font-code"}
         />
         <span className="text-xs lg:text-sm text-slate-400">kg</span>
       </div>

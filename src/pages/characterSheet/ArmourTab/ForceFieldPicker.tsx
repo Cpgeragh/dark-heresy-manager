@@ -36,7 +36,7 @@ export function ForceFieldPicker({ editable = true, onSelect, onClose }: Props) 
           >
             {ref.name}
           </span>
-          <div className="flex items-center gap-2 text-xs lg:text-sm text-slate-500 mt-0.5 flex-wrap font-mono">
+          <div className="flex items-center gap-2 text-xs lg:text-sm text-slate-500 mt-0.5 flex-wrap font-code">
             <span>PR {ref.protectionRating}</span>
             {ref.notes && <span className="font-sans">{ref.notes}</span>}
           </div>

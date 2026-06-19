@@ -78,7 +78,7 @@ export function AdminTab({
       {latest && (
         <p className="text-xs lg:text-sm text-slate-400">
           Last ownership event:{" "}
-          <span className="font-mono text-slate-300">
+          <span className="font-code text-slate-300">
             {latest.action} by {latestActorLabel}
           </span>
         </p>
@@ -102,13 +102,13 @@ export function AdminTab({
           {character.userId && (
             <div>
               Owner UID:{" "}
-              <span className="font-mono text-slate-200 break-all">{character.userId}</span>
+              <span className="font-code text-slate-200 break-all">{character.userId}</span>
             </div>
           )}
 
           <div>
             Player editable:{" "}
-            <span className="font-mono text-slate-200">
+            <span className="font-code text-slate-200">
               {character.isEditableByPlayer ? "true" : "false"}
             </span>
           </div>
@@ -202,12 +202,12 @@ export function AdminTab({
                 key={entry.id ?? i}
                 className="rounded border border-slate-500 bg-slate-900/60 p-2 lg:p-3 text-xs lg:text-sm"
               >
-                <div className="font-mono text-slate-200">
+                <div className="font-code text-slate-200">
                   {entry.action} @ {when}
                 </div>
 
                 <div className="text-slate-400">
-                  Actor: <span className="font-mono break-all">{entry.actorUid}</span>
+                  Actor: <span className="font-code break-all">{entry.actorUid}</span>
                 </div>
               </li>
             );

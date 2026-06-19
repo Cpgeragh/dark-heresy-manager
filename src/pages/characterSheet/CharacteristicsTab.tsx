@@ -54,7 +54,7 @@ function StatBlock({
       {/* Header */}
       <div className="flex items-baseline justify-between">
         <span className="text-sm lg:text-base text-slate-100">{label}</span>
-        <span className="text-xl lg:text-2xl font-semibold font-mono text-slate-100">{statTotal}</span>
+        <span className="text-xl lg:text-2xl font-semibold font-code text-slate-100">{statTotal}</span>
       </div>
 
       {/* Base / Advances */}

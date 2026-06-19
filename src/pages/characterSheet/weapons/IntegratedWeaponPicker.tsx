@@ -42,7 +42,7 @@ export function IntegratedWeaponPicker({
           >
             {ref.name}
           </span>
-          <div className="flex items-center gap-2 text-xs lg:text-sm text-slate-500 mt-0.5 flex-wrap font-mono">
+          <div className="flex items-center gap-2 text-xs lg:text-sm text-slate-500 mt-0.5 flex-wrap font-code">
             <span>{ref.class}</span>
             <span>{ref.range}</span>
             <span>{ref.rof}</span>
@@ -62,7 +62,7 @@ export function IntegratedWeaponPicker({
           >
             {ref.name}
           </span>
-          <div className="flex items-center gap-2 text-xs lg:text-sm text-slate-500 mt-0.5 flex-wrap font-mono">
+          <div className="flex items-center gap-2 text-xs lg:text-sm text-slate-500 mt-0.5 flex-wrap font-code">
             <span>{ref.class}</span>
             <span>{ref.damage}</span>
             <span>Pen {ref.pen}</span>
