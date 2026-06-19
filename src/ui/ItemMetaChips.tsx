@@ -45,7 +45,7 @@ export function ItemMetaChips({
         </span>
       )}
       {value && (
-        <span className="text-xs lg:text-sm rounded border border-slate-700 bg-slate-800/40 px-1.5 lg:px-2 py-0.5 text-amber-400/80 font-mono whitespace-nowrap">
+        <span className="text-xs lg:text-sm rounded border border-slate-700 bg-slate-800/40 px-1.5 lg:px-2 py-0.5 text-amber-400/80 font-code whitespace-nowrap">
           ₮ {value}
         </span>
       )}
@@ -58,7 +58,7 @@ export function ItemMetaChips({
       )}
       {source && (
         <span
-          className={`text-xs lg:text-sm rounded border bg-slate-800/40 px-1.5 lg:px-2 py-0.5 font-mono whitespace-nowrap ${sourceColour(source)}`}
+          className={`text-xs lg:text-sm rounded border bg-slate-800/40 px-1.5 lg:px-2 py-0.5 font-code whitespace-nowrap ${sourceColour(source)}`}
         >
           {source}
         </span>

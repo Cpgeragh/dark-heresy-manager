@@ -61,13 +61,13 @@ export function QuantityControl({ quantity, editable, onUpdate, size = "md" }: P
           onChange={(e) => setDraft(e.target.value.replace(/\D/g, ""))}
           onBlur={commit}
           onKeyDown={handleKeyDown}
-          className={`${sizeStyles.input} font-mono text-slate-100 text-center bg-slate-800 border border-slate-600 rounded focus:outline-none focus:border-indigo-500`}
+          className={`${sizeStyles.input} font-code text-slate-100 text-center bg-slate-800 border border-slate-600 rounded focus:outline-none focus:border-indigo-500`}
         />
       ) : (
         <span
           onClick={editable ? start : undefined}
           title={editable ? "Click to set quantity" : undefined}
-          className={`${sizeStyles.display} font-mono text-slate-100 text-center ${
+          className={`${sizeStyles.display} font-code text-slate-100 text-center ${
             editable
               ? "cursor-pointer hover:text-white hover:underline decoration-slate-500 decoration-dotted underline-offset-2"
               : ""

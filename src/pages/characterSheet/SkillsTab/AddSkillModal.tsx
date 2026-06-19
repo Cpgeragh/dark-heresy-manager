@@ -119,7 +119,7 @@ export function AddSkillModal({
                 {item.category}
               </span>
               <span
-                className={`px-1.5 lg:px-2 py-0.5 rounded border bg-slate-800 text-[10px] lg:text-xs font-mono shrink-0 ${charColour(item.skills[0].characteristic)}`}
+                className={`px-1.5 lg:px-2 py-0.5 rounded border bg-slate-800 text-[10px] lg:text-xs font-code shrink-0 ${charColour(item.skills[0].characteristic)}`}
               >
                 {CHAR_LABEL[item.skills[0].characteristic]}
               </span>
@@ -191,7 +191,7 @@ function SkillPickerRow({
         )}
       </div>
       <span
-        className={`px-1.5 lg:px-2 py-0.5 rounded border bg-slate-800 text-[10px] lg:text-xs font-mono shrink-0 ${charColour(
+        className={`px-1.5 lg:px-2 py-0.5 rounded border bg-slate-800 text-[10px] lg:text-xs font-code shrink-0 ${charColour(
           skill.characteristic
         )}`}
       >

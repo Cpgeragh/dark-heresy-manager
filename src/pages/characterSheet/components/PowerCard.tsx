@@ -23,7 +23,7 @@ function PowerStats({ power }: { power: PsychicPower }) {
     <div className="flex flex-wrap items-center gap-x-3 lg:gap-x-4 gap-y-0.5 text-xs lg:text-sm">
       {power.source && (
         <span
-          className={`rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(power.source)}`}
+          className={`rounded border bg-slate-800/40 px-1.5 py-0.5 font-code ${sourceColour(power.source)}`}
         >
           {power.source}
         </span>
@@ -38,7 +38,7 @@ function PowerStats({ power }: { power: PsychicPower }) {
       {power.threshold && (
         <span>
           <span className="text-slate-500">PT </span>
-          <span className="text-slate-200 font-mono">{power.threshold}</span>
+          <span className="text-slate-200 font-code">{power.threshold}</span>
         </span>
       )}
       {power.focusTime && <span className="text-slate-100">{power.focusTime}</span>}

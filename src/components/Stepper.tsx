@@ -56,10 +56,10 @@ export function Stepper({ value, min = 0, editable, onChange, dangerClassName }:
     [editable, min, value, onChange]
   );
 
-  const btnClass = `flex items-center justify-center h-10 w-10 sm:h-8 sm:w-8 lg:h-10 lg:w-10 border rounded-lg text-lg lg:text-xl leading-none text-slate-100 transition select-none ${
+  const btnClass = `flex items-center justify-center h-7 w-7 sm:h-8 sm:w-8 lg:h-10 lg:w-10 rounded text-base lg:text-xl leading-none text-slate-300 transition select-none ${
     editable
-      ? "bg-slate-800 border-slate-500 hover:bg-slate-700 active:bg-slate-600"
-      : "bg-slate-800 border-slate-500 opacity-50 cursor-not-allowed"
+      ? "bg-slate-700 hover:bg-slate-600"
+      : "bg-slate-700 opacity-50 cursor-not-allowed"
   }`;
 
   return (
@@ -83,13 +83,13 @@ export function Stepper({ value, min = 0, editable, onChange, dangerClassName }:
           onChange={(e) => setDraft(e.target.value)}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
-          className="h-10 sm:h-8 lg:h-10 w-14 lg:w-16 text-center bg-slate-700 border border-slate-500 rounded-lg text-base lg:text-lg font-mono text-slate-100 px-1 focus:outline-none focus:border-red-500"
+          className="h-10 sm:h-8 lg:h-10 w-14 lg:w-16 text-center bg-slate-700 border border-slate-500 rounded-lg text-base lg:text-lg font-code text-slate-100 px-1 focus:outline-none focus:border-red-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
         />
       ) : (
         <span
           onClick={handleClick}
           title={editable ? "Click to edit" : undefined}
-          className={`min-w-[2.5ch] text-center text-xl lg:text-2xl font-semibold font-mono select-none ${
+          className={`min-w-[2.5ch] text-center text-xl lg:text-2xl font-semibold font-code select-none ${
             dangerClassName || "text-slate-100"
           } ${editable ? "cursor-pointer hover:opacity-80" : ""}`}
         >

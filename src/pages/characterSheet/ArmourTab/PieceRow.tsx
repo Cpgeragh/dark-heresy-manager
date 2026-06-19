@@ -67,7 +67,7 @@ export function PieceRow({ piece, editable, worn, onToggle, onRemove, onInfo }: 
             <span className="text-xs lg:text-sm rounded border border-slate-700 bg-slate-800/40 px-1.5 lg:px-2 py-0.5 text-slate-300">
               {locationLabel(piece.locations)}
             </span>
-            <span className="text-xs lg:text-sm rounded border border-slate-700 bg-slate-800/40 px-1.5 lg:px-2 py-0.5 font-mono text-slate-200">
+            <span className="text-xs lg:text-sm rounded border border-slate-700 bg-slate-800/40 px-1.5 lg:px-2 py-0.5 font-code text-slate-200">
               {apDesc}
             </span>
           </div>

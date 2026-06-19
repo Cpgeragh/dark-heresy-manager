@@ -140,7 +140,7 @@ function PowerPicker({
           </div>
           <div className="flex items-center gap-2 text-xs lg:text-sm text-slate-500 mt-0.5 flex-wrap">
             <span
-              className={`rounded border bg-slate-800/40 px-1.5 py-0.5 font-mono ${sourceColour(ref.source)}`}
+              className={`rounded border bg-slate-800/40 px-1.5 py-0.5 font-code ${sourceColour(ref.source)}`}
             >
               {ref.source}
             </span>
@@ -149,7 +149,7 @@ function PowerPicker({
             >
               {ref.discipline}
             </span>
-            <span className="font-mono">PT {ref.threshold}</span>
+            <span className="font-code">PT {ref.threshold}</span>
             <span>{ref.focusTime}</span>
             <span>{ref.range}</span>
             {ref.sustained && <span className="text-amber-500/80">Sustained</span>}
@@ -336,7 +336,7 @@ function CustomPowerForm({
               value={threshold}
               onChange={(e) => handlePositiveIntegerChange(e.target.value, setThreshold)}
               placeholder="e.g. 8"
-              className={editableInputClass(true) + " font-mono"}
+              className={editableInputClass(true) + " font-code"}
             />
           </div>
 
@@ -402,7 +402,7 @@ function CustomPowerForm({
                     : handlePositiveIntegerChange(e.target.value, setRangeValue)
                 }
                 placeholder={rangeMode === "km-radius" ? "e.g. 1.5" : "e.g. 10"}
-                className={editableInputClass(true) + " w-28 font-mono"}
+                className={editableInputClass(true) + " w-28 font-code"}
               />
               <span className="text-xs lg:text-sm text-slate-400">
                 {rangeMode === "km-radius" ? "km radius" : "metres"}
@@ -683,7 +683,7 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
                 psyRatingGlow(psyRating),
               ].join(" ")}
             >
-              <span className="text-sm lg:text-base font-bold font-mono text-indigo-300">{psyRating}</span>
+              <span className="text-sm lg:text-base font-bold font-code text-indigo-300">{psyRating}</span>
             </div>
             {psyRating > 0 && (
               <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2">

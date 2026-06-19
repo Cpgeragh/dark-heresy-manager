@@ -47,7 +47,7 @@ export function ShieldPicker({
           >
             {ref.name}
           </span>
-          <div className="flex items-center gap-2 text-xs lg:text-sm text-slate-500 mt-0.5 flex-wrap font-mono">
+          <div className="flex items-center gap-2 text-xs lg:text-sm text-slate-500 mt-0.5 flex-wrap font-code">
             <span className="text-cyan-400">AP {ref.ap}</span>
             <span>{ref.locations}</span>
             <span>{ref.damage}</span>
@@ -139,7 +139,7 @@ export function ShieldCard({
           <div className="flex flex-wrap gap-1.5">
             <div className="flex flex-col items-center bg-slate-800/60 rounded px-2 lg:px-3 py-1 lg:py-1.5 min-w-[52px] lg:min-w-[64px]">
               <span className="text-[10px] lg:text-xs text-cyan-500 uppercase tracking-wide">AP</span>
-              <span className="text-sm lg:text-base font-mono text-cyan-300 mt-0.5">{item.ap}</span>
+              <span className="text-sm lg:text-base font-code text-cyan-300 mt-0.5">{item.ap}</span>
             </div>
             {item.damage && (
               <StatChip label="Bash" value={item.damage.replace(/\s*[IREX]$/i, "").trim()} />
