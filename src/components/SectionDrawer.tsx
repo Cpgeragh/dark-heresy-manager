@@ -84,14 +84,9 @@ export function SectionDrawer({
     activeCategoryIndex !== null ? visibleCategories[activeCategoryIndex] : null;
 
   const open = useCallback(() => {
-    const cats = CATEGORIES.filter((c) => !c.dmOnly || isDM);
-    const idx = cats.findIndex((c) => c.tabs.some((t) => t.id === activeTab));
-    if (idx !== -1) {
-      setActiveCategoryIndex(idx);
-      setLevel("pages");
-    }
+    setLevel("categories");
     setIsOpen(true);
-  }, [activeTab, isDM]);
+  }, []);
 
   // Desktop bar trigger: open and jump straight to the requested category's pages
   useEffect(() => {

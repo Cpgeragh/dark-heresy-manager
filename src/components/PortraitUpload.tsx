@@ -116,8 +116,8 @@ export function PortraitUpload({
   return (
     <>
       {/* Portrait circle */}
-      <div className="relative shrink-0 w-12 h-12">
-        <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-700 border border-slate-600 flex items-center justify-center">
+      <div className="relative shrink-0 w-12 h-12 lg:w-14 lg:h-14">
+        <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-full overflow-hidden bg-slate-700 border border-slate-600 flex items-center justify-center">
           {currentPortraitUrl ? (
             <img src={currentPortraitUrl} alt="Portrait" className="w-full h-full object-cover" />
           ) : (

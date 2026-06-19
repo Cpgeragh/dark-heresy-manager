@@ -8,6 +8,14 @@
    recovery-code font (Roboto) can borrow its slashed zero via unicode-range
    while every other character stays in the normal font. */
 @font-face {
+  font-family: 'Cinzel';
+  font-style: normal;
+  font-weight: 700;
+  font-display: block;
+  src: url('/fonts/cinzel-700.woff2') format('woff2');
+}
+
+@font-face {
   font-family: 'RobotoMonoZero';
   font-style: normal;
   font-weight: 400;

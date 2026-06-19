@@ -22,7 +22,7 @@ export function psychicDisciplineColour(discipline?: string | null): string {
 export function powerGroupActiveColour(group: "minor" | "major"): string {
   return group === "minor"
     ? "border-violet-400 bg-violet-600/80 text-white shadow-sm shadow-violet-950/50"
-    : "border-amber-400 bg-amber-500/25 text-amber-100 shadow-sm shadow-amber-950/50";
+    : "border-fuchsia-400 bg-fuchsia-600/80 text-white shadow-sm shadow-fuchsia-950/50";
 }
 
 export function psyRatingGlow(psyRating: number): string {

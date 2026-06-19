@@ -215,23 +215,24 @@ export function GrenadeCard({
       {expanded && (
         <>
           {/* Stat chips */}
-          {((item.damage && item.damage !== "—") || (item.pen && item.pen !== "—")) && (
-            <div className="flex flex-wrap gap-1.5">
-              {item.damage && item.damage !== "—" && item.damage !== "Special" && (
-                <>
-                  <StatChip label="Damage" value={item.damage.replace(/\s*[IREX]$/i, "").trim()} />
-                  <DamageTypeChip damage={item.damage} />
-                </>
-              )}
-              {item.damage === "Special" && (
-                <div className="flex flex-col items-center bg-slate-800/60 rounded px-2 lg:px-3 py-1 lg:py-1.5 min-w-[52px] lg:min-w-[64px]">
-                  <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Damage</span>
-                  <span className="text-sm lg:text-base font-mono text-amber-400 mt-0.5">Special</span>
-                </div>
-              )}
-              {item.pen && item.pen !== "—" && <StatChip label="Pen" value={item.pen} />}
-            </div>
-          )}
+          <div className="flex flex-wrap gap-1.5">
+            {(!item.damage || item.damage === "—") && (
+              <StatChip label="Damage" value="—" />
+            )}
+            {item.damage && item.damage !== "—" && item.damage !== "Special" && (
+              <>
+                <StatChip label="Damage" value={item.damage.replace(/\s*[IREX]$/i, "").trim()} />
+                <DamageTypeChip damage={item.damage} />
+              </>
+            )}
+            {item.damage === "Special" && (
+              <div className="flex flex-col items-center bg-slate-800/60 rounded px-2 lg:px-3 py-1 lg:py-1.5 min-w-[52px] lg:min-w-[64px]">
+                <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Damage</span>
+                <span className="text-sm lg:text-base font-mono text-amber-400 mt-0.5">Special</span>
+              </div>
+            )}
+            <StatChip label="Pen" value={item.pen && item.pen !== "—" ? item.pen : "—"} />
+          </div>
 
           {/* Qualities / Rules */}
           <div className="space-y-1">
