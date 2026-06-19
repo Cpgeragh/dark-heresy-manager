@@ -71,6 +71,16 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc }: SkillRowP
         </span>
 
         <span
+          className={`px-1.5 lg:px-2 py-0.5 rounded border text-[10px] lg:text-xs shrink-0 ${
+            skill.advanced
+              ? "bg-purple-700/40 border-purple-500 text-purple-300"
+              : "bg-teal-900/40 border-teal-700/50 text-teal-300"
+          }`}
+        >
+          {skill.advanced ? "Advanced" : "Basic"}
+        </span>
+
+        <span
           className={`px-1.5 lg:px-2 py-0.5 rounded border text-[10px] lg:text-xs font-semibold shrink-0 ${levelBadgeClass}`}
         >
           {skill.level === "trained" ? "Trained" : skill.level}
@@ -80,7 +90,18 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc }: SkillRowP
           {skill.total ?? "--"}
         </span>
 
-        <span className="text-slate-400 text-xs shrink-0">{expanded ? "▼" : "▲"}</span>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          className={`w-4 h-4 text-slate-400 shrink-0 transition-transform ${expanded ? "" : "-rotate-90"}`}
+        >
+          <path
+            fillRule="evenodd"
+            d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+            clipRule="evenodd"
+          />
+        </svg>
       </button>
 
       {/* EXPANDED BODY */}
