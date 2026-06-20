@@ -207,7 +207,7 @@ export function TalentPickerModal({
                 </span>
                 {(TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]) && (
                   <span
-                    className="inline-flex items-center leading-[0]"
+                    className="inline-flex items-center -translate-y-[1.4px]"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <InfoModal
@@ -268,7 +268,11 @@ export function EntryCard({ entry, editable, onRemove }: EntryCardProps) {
               {src}
             </span>
           ))}
-          {description && <InfoModal title={entry.name} content={description} />}
+          {description && (
+            <span className="inline-flex items-center -translate-y-[1.4px]">
+              <InfoModal title={entry.name} content={description} />
+            </span>
+          )}
         </div>
       </div>
       {editable && (

@@ -25,16 +25,16 @@ export function Stepper({ value, min = 0, editable, onChange, dangerClassName }:
   const commit = useCallback(
     (raw: string) => {
       const parsed = parseInt(raw, 10);
-      const next = isNaN(parsed) ? value : Math.max(min, Math.round(Math.abs(parsed)));
+      const next = isNaN(parsed) ? 0 : Math.max(min, Math.round(parsed));
       onChange(next);
       setEditing(false);
     },
-    [value, min, onChange]
+    [min, onChange]
   );
 
   const handleClick = useCallback(() => {
     if (!editable) return;
-    setDraft(String(value));
+    setDraft(value === 0 ? "" : String(value));
     setEditing(true);
   }, [editable, value]);
 

@@ -130,19 +130,23 @@ export function ArcheotechWeaponCard({
               <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Qualities</span>
               <span className="text-xs lg:text-sm text-slate-400 italic">{hasRules ? specialRules : "-"}</span>
               {ruleNamesInLookup.length > 0 && (
-                <InfoModal
-                  title={`${item.name} Qualities`}
-                  content={<SpecialRulesContent rules={specialRules ?? ""} />}
-                />
+                <span className="inline-flex items-center -translate-y-[1.4px]">
+                  <InfoModal
+                    title={`${item.name} Qualities`}
+                    content={<SpecialRulesContent rules={specialRules ?? ""} />}
+                  />
+                </span>
               )}
             </div>
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Rules</span>
               {description ? (
-                <InfoModal
-                  title={`${item.name} Rules`}
-                  content={<p className="text-sm lg:text-base text-slate-300 leading-relaxed">{description}</p>}
-                />
+                <span className="inline-flex items-center -translate-y-[1.4px]">
+                  <InfoModal
+                    title={`${item.name} Rules`}
+                    content={<p className="text-sm lg:text-base text-slate-300 leading-relaxed">{description}</p>}
+                  />
+                </span>
               ) : (
                 <span className="text-xs lg:text-sm text-slate-600 italic">-</span>
               )}
@@ -150,7 +154,9 @@ export function ArcheotechWeaponCard({
             {showMishaps && (
               <div className="flex items-center gap-1.5">
                 <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Mishaps</span>
-                <InfoModal title="Explosive Mishaps" content={EXPLOSIVE_MISHAPS_CONTENT} />
+                <span className="inline-flex items-center -translate-y-[1.4px]">
+                  <InfoModal title="Explosive Mishaps" content={EXPLOSIVE_MISHAPS_CONTENT} />
+                </span>
               </div>
             )}
           </div>

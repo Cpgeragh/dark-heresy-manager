@@ -13,15 +13,17 @@ interface SkillRowProps {
   editable: boolean;
   updateLevel: (id: string, level: SkillAdvanceLevel) => void;
   updateMisc: (id: string, value: number) => void;
+  previewMode?: boolean;
 }
 
 const LEVEL_BADGE: Record<string, string> = {
-  trained: "bg-red-500/10 border-red-500 text-red-500",
+  untrained: "bg-red-500/10 border-red-500 text-red-500",
+  trained: "bg-orange-500/10 border-orange-400 text-orange-400",
   "+10": "bg-sky-500/10 border-sky-400 text-sky-400",
   "+20": "bg-green-500/10 border-green-400 text-green-400",
 };
 
-export function SkillRow({ skill, editable, updateLevel, updateMisc }: SkillRowProps) {
+export function SkillRow({ skill, editable, updateLevel, updateMisc, previewMode = false }: SkillRowProps) {
   const [expanded, setExpanded] = useState(false);
 
   const totalColor = getTotalColor(skill.total);
@@ -58,7 +60,7 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc }: SkillRowP
             <div className="flex items-center gap-1.5 flex-1 min-w-0">
               <span className="text-sm font-semibold text-slate-100 truncate">{skill.name}</span>
               {SKILL_DESCRIPTIONS[skill.name] && (
-                <span className="inline-flex items-center leading-[0]" onClick={(e) => e.stopPropagation()}>
+                <span className="inline-flex items-center -translate-y-[1.4px]" onClick={(e) => e.stopPropagation()}>
                   <InfoModal title={skill.name} content={SKILL_DESCRIPTIONS[skill.name]} />
                 </span>
               )}
@@ -79,7 +81,7 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc }: SkillRowP
               {skill.advanced ? "Advanced" : "Basic"}
             </span>
             <span className={`px-1.5 py-0.5 rounded border text-[10px] font-semibold shrink-0 ${levelBadgeClass}`}>
-              {skill.level === "trained" ? "Trained" : skill.level}
+              {skill.level === "trained" ? "Trained" : skill.level === "untrained" ? "Untrained" : skill.level}
             </span>
           </div>
         </div>
@@ -89,7 +91,7 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc }: SkillRowP
           <div className="flex items-center gap-1.5 flex-1 min-w-0">
             <span className="text-base font-semibold text-slate-100 truncate">{skill.name}</span>
             {SKILL_DESCRIPTIONS[skill.name] && (
-              <span className="inline-flex items-center leading-[0]" onClick={(e) => e.stopPropagation()}>
+              <span className="inline-flex items-center -translate-y-[1.4px]" onClick={(e) => e.stopPropagation()}>
                 <InfoModal title={skill.name} content={SKILL_DESCRIPTIONS[skill.name]} />
               </span>
             )}
@@ -101,7 +103,7 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc }: SkillRowP
             {skill.advanced ? "Advanced" : "Basic"}
           </span>
           <span className={`px-2 py-0.5 rounded border text-xs font-semibold shrink-0 ${levelBadgeClass}`}>
-            {skill.level === "trained" ? "Trained" : skill.level}
+            {skill.level === "trained" ? "Trained" : skill.level === "untrained" ? "Untrained" : skill.level}
           </span>
           <span className={`text-lg font-code font-semibold shrink-0 ${totalColor}`}>
             {skill.total ?? "--"}
@@ -117,37 +119,44 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc }: SkillRowP
       {expanded && (
         <div className="px-3 lg:px-4 pb-3 lg:pb-4 pt-2 lg:pt-3 border-t border-slate-600 space-y-3">
           {/* Level buttons */}
-          {editable && (
+          {(editable || previewMode) && (
             <div className="flex flex-wrap items-center gap-2">
-              {(["trained", "+10", "+20"] as const).map((value) => (
+              {(skill.advanced
+                ? (["trained", "+10", "+20"] as const)
+                : (["untrained", "trained", "+10", "+20"] as const)
+              ).map((value) => (
                 <button
                   key={value}
                   aria-pressed={skill.level === value}
                   aria-label={`Set skill level to ${value}`}
-                  onClick={() => handleLevelClick(value)}
-                  className={`px-3 lg:px-4 py-1 rounded border text-xs lg:text-sm transition focus:outline-none ${
+                  onClick={previewMode ? undefined : () => handleLevelClick(value)}
+                  className={`px-3 lg:px-4 py-1 rounded border text-xs lg:text-sm ${
+                    previewMode ? "cursor-default" : "transition focus:outline-none"
+                  } ${
                     skill.level === value
-                      ? "bg-red-500/20 border-red-500 text-red-400 font-semibold"
+                      ? `${LEVEL_BADGE[value]} font-semibold`
                       : "border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
                   }`}
                 >
-                  {value === "trained" ? "Trained" : value}
+                  {value === "trained" ? "Trained" : value === "untrained" ? "Untrained" : value}
                 </button>
               ))}
 
-              <button
-                onClick={handleRemove}
-                className="ml-auto text-xs lg:text-sm text-red-400 hover:text-red-300 transition focus:outline-none"
-                aria-label={`Remove ${skill.name}`}
-              >
-                Remove
-              </button>
+              {skill.advanced && !previewMode && (
+                <button
+                  onClick={handleRemove}
+                  className="ml-auto text-xs lg:text-sm text-red-400 hover:text-red-300 transition focus:outline-none"
+                  aria-label={`Remove ${skill.name}`}
+                >
+                  Remove
+                </button>
+              )}
             </div>
           )}
 
           {/* Stats */}
-          <div className={`grid gap-2 ${editable ? "grid-cols-3" : "grid-cols-2"}`}>
-            {editable && (
+          <div className={`grid gap-2 ${editable && !previewMode ? "grid-cols-2" : "grid-cols-1"}`}>
+            {editable && !previewMode && (
               <div className="text-center rounded border border-slate-500 bg-slate-900/60 px-2 py-1.5">
                 <div className="text-[10px] lg:text-xs text-slate-100 uppercase tracking-wide mb-1">Misc</div>
                 <Stepper
@@ -159,17 +168,9 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc }: SkillRowP
               </div>
             )}
             <div className="text-center rounded border border-slate-500 bg-slate-900/60 px-2 py-1.5">
-              <div className="text-[10px] lg:text-xs text-slate-100 uppercase tracking-wide">Half</div>
-              <div className={`text-sm lg:text-base font-code font-semibold mt-1 ${getTotalColor(skill.half)}`}>
+              <div className="text-[10px] lg:text-xs text-slate-100 uppercase tracking-wide mb-1">Half</div>
+              <div className={`h-7 sm:h-8 lg:h-10 flex items-center justify-center text-xl lg:text-2xl font-code font-semibold ${getTotalColor(skill.half)}`}>
                 {skill.half ?? "--"}
-              </div>
-            </div>
-            <div className="text-center rounded border border-slate-500 bg-slate-900/60 px-2 py-1.5">
-              <div className="text-[10px] lg:text-xs text-slate-100 uppercase tracking-wide">Opposed</div>
-              <div
-                className={`text-sm lg:text-base font-code font-semibold mt-1 ${getTotalColor(skill.opposed)}`}
-              >
-                {skill.opposed ?? "--"}
               </div>
             </div>
           </div>

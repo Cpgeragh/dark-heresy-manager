@@ -6,6 +6,7 @@ import { editableInputClass } from "./editableStyles";
 
 interface Props {
   title: string;
+  titleClassName?: string;
   placeholder?: string;
   query: string;
   onQueryChange: (q: string) => void;
@@ -52,6 +53,7 @@ export function PickerModal({
   onClose,
   isEmpty,
   emptyMessage = "No matches.",
+  titleClassName,
   closeLabel = "×",
   hideSearch = false,
   filterRow,
@@ -70,7 +72,7 @@ export function PickerModal({
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
-          <h3 className="text-sm lg:text-base font-semibold text-slate-200">{title}</h3>
+          <h3 className={`text-sm lg:text-base font-semibold ${titleClassName ?? "text-slate-200"}`}>{title}</h3>
           <button
             onClick={onClose}
             aria-label="Close"

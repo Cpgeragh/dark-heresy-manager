@@ -174,15 +174,17 @@ export function AttachmentCard({
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs lg:text-sm font-medium text-slate-300">{upgrade.name}</span>
         <div className="flex items-center gap-1.5 shrink-0">
-          <InfoModal
-            title={upgrade.name}
-            content={
-              <div className="space-y-2">
-                <p className="text-sm lg:text-base text-slate-300 leading-relaxed">{upgrade.description}</p>
-                <p className="text-xs lg:text-sm text-slate-500 italic">{upgrade.applicableTo}</p>
-              </div>
-            }
-          />
+          <span className="inline-flex items-center -translate-y-[1.4px]">
+            <InfoModal
+              title={upgrade.name}
+              content={
+                <div className="space-y-2">
+                  <p className="text-sm lg:text-base text-slate-300 leading-relaxed">{upgrade.description}</p>
+                  <p className="text-xs lg:text-sm text-slate-500 italic">{upgrade.applicableTo}</p>
+                </div>
+              }
+            />
+          </span>
           {editable && (
             <button
               onClick={() => onRemove(upgrade.id)}

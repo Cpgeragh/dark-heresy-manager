@@ -125,7 +125,7 @@ function PowerPicker({
             </span>
             {ref.description && (
               <span
-                className="inline-flex items-center leading-[0] shrink-0"
+                className="inline-flex items-center -translate-y-[1.4px] shrink-0"
                 onClick={(e) => e.stopPropagation()}
               >
                 <InfoModal
@@ -744,8 +744,6 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
         >
           {(["minor", "major"] as const).map((group) => {
             const active = activePowerGroup === group;
-            const count =
-              group === "minor" ? psychic.minorPowers.length : psychic.majorPowers.length;
             return (
               <button
                 key={group}
@@ -760,7 +758,7 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
                     : "border-transparent text-slate-400 hover:bg-slate-800 hover:text-slate-200",
                 ].join(" ")}
               >
-                {group === "minor" ? "Minor" : "Major"} ({count})
+                {group === "minor" ? "Minor" : "Major"}
               </button>
             );
           })}

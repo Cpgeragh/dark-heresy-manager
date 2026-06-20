@@ -84,7 +84,7 @@ export function DrugPicker({
                 </span>
                 {hasInfo && (
                   <span
-                    className="inline-flex items-center leading-[0]"
+                    className="inline-flex items-center -translate-y-[1.4px]"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <InfoModal title={ref.name} content={drugInfoContent(ref)} />

@@ -34,12 +34,14 @@ export function ItemRow({ item, editable, onRemove }: Props) {
           <div className="flex items-center gap-2">
             <p className="text-sm lg:text-base font-medium text-slate-200">{item.name}</p>
             {hasDesc && (
-              <InfoModal
-                title={item.name}
-                content={
-                  <p className="text-sm text-slate-300 leading-relaxed">{item.description}</p>
-                }
-              />
+              <span className="inline-flex items-center -translate-y-[1.4px]">
+                <InfoModal
+                  title={item.name}
+                  content={
+                    <p className="text-sm text-slate-300 leading-relaxed">{item.description}</p>
+                  }
+                />
+              </span>
             )}
           </div>
           <ItemMetaChips

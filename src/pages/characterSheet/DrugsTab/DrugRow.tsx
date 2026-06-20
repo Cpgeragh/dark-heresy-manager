@@ -28,6 +28,7 @@ export function DrugRow({
         <div className="flex items-center gap-2">
           <p className="text-sm lg:text-base font-medium text-slate-200">{item.name}</p>
           {hasInfo && (
+            <span className="inline-flex items-center -translate-y-[1.4px]">
             <InfoModal
               title={item.name}
               content={
@@ -75,6 +76,7 @@ export function DrugRow({
                 </>
               }
             />
+            </span>
           )}
         </div>
         {ref?.duration && <p className="text-xs lg:text-sm text-slate-500 mt-0.5">Duration: {ref.duration}</p>}

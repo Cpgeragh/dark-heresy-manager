@@ -242,21 +242,25 @@ export function GrenadeCard({
                 {hasRules ? item.specialRules : "-"}
               </span>
               {ruleNamesInLookup.length > 0 && (
-                <InfoModal
-                  title={`${item.name} Qualities`}
-                  content={<SpecialRulesContent rules={item.specialRules ?? ""} />}
-                />
+                <span className="inline-flex items-center -translate-y-[1.4px]">
+                  <InfoModal
+                    title={`${item.name} Qualities`}
+                    content={<SpecialRulesContent rules={item.specialRules ?? ""} />}
+                  />
+                </span>
               )}
             </div>
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Rules</span>
               {hasInfo ? (
-                <InfoModal
-                  title={`${item.name} Rules`}
-                  content={
-                    <p className="text-sm lg:text-base text-slate-300 leading-relaxed">{ref!.description}</p>
-                  }
-                />
+                <span className="inline-flex items-center -translate-y-[1.4px]">
+                  <InfoModal
+                    title={`${item.name} Rules`}
+                    content={
+                      <p className="text-sm lg:text-base text-slate-300 leading-relaxed">{ref!.description}</p>
+                    }
+                  />
+                </span>
               ) : (
                 <span className="text-xs lg:text-sm text-slate-600 italic">-</span>
               )}
@@ -264,7 +268,9 @@ export function GrenadeCard({
             {showMishaps && (
               <div className="flex items-center gap-1.5">
                 <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Mishaps</span>
-                <InfoModal title="Explosive Mishaps" content={EXPLOSIVE_MISHAPS_CONTENT} />
+                <span className="inline-flex items-center -translate-y-[1.4px]">
+                  <InfoModal title="Explosive Mishaps" content={EXPLOSIVE_MISHAPS_CONTENT} />
+                </span>
               </div>
             )}
           </div>

@@ -48,7 +48,11 @@ export function ItemCard({ item, editable, onRemove }: Props) {
                 {expanded ? "▲" : "▼"}
               </button>
             )}
-            {description && !hasBody && <InfoModal title={item.name} content={description} />}
+            {description && !hasBody && (
+              <span className="inline-flex items-center -translate-y-[1.4px]">
+                <InfoModal title={item.name} content={description} />
+              </span>
+            )}
           </div>
 
           {/* Expanded body */}

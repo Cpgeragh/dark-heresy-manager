@@ -138,18 +138,20 @@ export function CharacteristicsTab({
       <div>
         <div className="flex items-center gap-2 mb-2">
           <SectionHeader>Movement</SectionHeader>
-          <InfoModal
-            title="Movement"
-            content={
-              <>
-                <div>AB = Agility ÷ {CHARACTERISTIC_BONUS_DIVISOR}</div>
-                <div>Half: AB × {MOVEMENT_HALF_MULTIPLIER}</div>
-                <div>Full: AB × {MOVEMENT_FULL_MULTIPLIER}</div>
-                <div>Charge: AB × {MOVEMENT_CHARGE_MULTIPLIER}</div>
-                <div>Run: AB × {MOVEMENT_RUN_MULTIPLIER}</div>
-              </>
-            }
-          />
+          <span className="inline-flex items-center -translate-y-[1.4px]">
+            <InfoModal
+              title="Movement"
+              content={
+                <>
+                  <div>AB = Agility ÷ {CHARACTERISTIC_BONUS_DIVISOR}</div>
+                  <div>Half: AB × {MOVEMENT_HALF_MULTIPLIER}</div>
+                  <div>Full: AB × {MOVEMENT_FULL_MULTIPLIER}</div>
+                  <div>Charge: AB × {MOVEMENT_CHARGE_MULTIPLIER}</div>
+                  <div>Run: AB × {MOVEMENT_RUN_MULTIPLIER}</div>
+                </>
+              }
+            />
+          </span>
         </div>
         <div className="grid grid-cols-4 gap-1">
           {[

@@ -19,7 +19,7 @@ export function ForceFieldRow({ piece, editable, onToggle, onRemove, onInfo }: P
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
           <span className="text-sm lg:text-base font-medium text-slate-200 truncate">{piece.name}</span>
-          <span className="inline-flex items-center leading-[0]">
+          <span className="inline-flex items-center -translate-y-[1.4px]">
             <button
               onClick={() => onInfo(piece)}
               title="View rules"

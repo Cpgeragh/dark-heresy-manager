@@ -39,6 +39,11 @@ export function SkillGroupRow({
         >
           {CHAR_LABEL[skills[0].characteristic]}
         </span>
+        {skills[0].advanced && (
+          <span className="px-1.5 lg:px-2 py-0.5 rounded border text-[10px] lg:text-xs shrink-0 bg-purple-700/40 border-purple-500 text-purple-300">
+            Advanced
+          </span>
+        )}
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 20 20"
