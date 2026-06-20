@@ -33,7 +33,7 @@ export function InfoModal({ title, content, hideTitle = false }: InfoModalProps)
           setOpen(true);
         }}
         aria-label={`Show information about ${title}`}
-        className="inline-flex h-[13.5px] w-[18px] shrink-0 my-auto md:translate-y-[1px] items-center justify-center rounded bg-slate-700 border border-slate-600 text-slate-300 text-sm leading-none hover:bg-slate-600"
+        className="inline-flex h-[13.5px] w-[18px] shrink-0 items-center justify-center rounded bg-slate-700 border border-slate-600 text-slate-300 text-sm leading-none hover:bg-slate-600"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

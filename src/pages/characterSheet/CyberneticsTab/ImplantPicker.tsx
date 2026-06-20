@@ -357,7 +357,7 @@ export function ImplantPicker({ editable = true, onSelect, onClose }: Props) {
                 {ref.name}
               </span>
               {(ref.notes || ref.poor || ref.common || ref.good) && (
-                <span className="inline-flex items-center leading-[0]" onClick={(e) => e.stopPropagation()}>
+                <span className="inline-flex items-center -translate-y-[1.4px]" onClick={(e) => e.stopPropagation()}>
                   <InfoModal title={ref.name} content={implantInfo(ref)} />
                 </span>
               )}

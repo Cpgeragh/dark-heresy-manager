@@ -323,24 +323,26 @@ function AmmoEntryRow({
           />
           <span className="text-xs lg:text-sm text-slate-200 truncate">{displayName}</span>
           {hasAmmoInfo && (
-            <InfoModal
-              title={displayName}
-              content={
-                <div className="space-y-2">
-                  {ammoRef?.description && (
-                    <p className="text-sm lg:text-base text-slate-300 leading-relaxed">{ammoRef.description}</p>
-                  )}
-                  {isChargePack && (
-                    <div className="space-y-1">
-                      <p className="text-sm lg:text-base font-semibold text-slate-100">Recharging Power Packs</p>
-                      <p className="text-sm lg:text-base text-slate-300 leading-relaxed">
-                        {RECHARGING_POWER_PACKS_TEXT}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              }
-            />
+            <span className="inline-flex items-center -translate-y-[1.4px]">
+              <InfoModal
+                title={displayName}
+                content={
+                  <div className="space-y-2">
+                    {ammoRef?.description && (
+                      <p className="text-sm lg:text-base text-slate-300 leading-relaxed">{ammoRef.description}</p>
+                    )}
+                    {isChargePack && (
+                      <div className="space-y-1">
+                        <p className="text-sm lg:text-base font-semibold text-slate-100">Recharging Power Packs</p>
+                        <p className="text-sm lg:text-base text-slate-300 leading-relaxed">
+                          {RECHARGING_POWER_PACKS_TEXT}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                }
+              />
+            </span>
           )}
           {entry.loaded && (
             <span className="text-[10px] lg:text-xs text-green-500 uppercase tracking-wide shrink-0">
@@ -720,19 +722,23 @@ export function RangedCard({
                 {hasQualities ? rulesText : "-"}
               </span>
               {hasQualityModal && (
-                <InfoModal
-                  title={`${weapon.name} Qualities`}
-                  content={<SpecialRulesContent rules={effective.specialRules ?? ""} />}
-                />
+                <span className="inline-flex items-center -translate-y-[1.4px]">
+                  <InfoModal
+                    title={`${weapon.name} Qualities`}
+                    content={<SpecialRulesContent rules={effective.specialRules ?? ""} />}
+                  />
+                </span>
               )}
             </div>
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Rules</span>
               {hasItemRules ? (
-                <InfoModal
-                  title={`${weapon.name} Rules`}
-                  content={<SpecialRulesContent rules="" description={rulesDescription} />}
-                />
+                <span className="inline-flex items-center -translate-y-[1.4px]">
+                  <InfoModal
+                    title={`${weapon.name} Rules`}
+                    content={<SpecialRulesContent rules="" description={rulesDescription} />}
+                  />
+                </span>
               ) : (
                 <span className="text-xs lg:text-sm text-slate-600 italic">-</span>
               )}
@@ -742,10 +748,12 @@ export function RangedCard({
                 Craftsmanship
               </span>
               <span className="text-xs lg:text-sm text-slate-400 italic">{craftsmanship}</span>
-              <InfoModal
-                title={`${craftsmanship} Weapon`}
-                content={rangedCraftsmanshipDescription(craftsmanship)}
-              />
+              <span className="inline-flex items-center -translate-y-[1.4px]">
+                <InfoModal
+                  title={`${craftsmanship} Weapon`}
+                  content={rangedCraftsmanshipDescription(craftsmanship)}
+                />
+              </span>
             </div>
           </div>
 

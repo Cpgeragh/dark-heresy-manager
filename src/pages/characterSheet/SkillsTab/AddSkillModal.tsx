@@ -6,10 +6,13 @@ import { charColour } from "../../../ui/sourceStyles";
 import { InfoModal } from "../../../components/InfoModal";
 import { SKILL_DESCRIPTIONS } from "../../../data/skillDescriptions";
 import { PickerModal } from "../../../ui/PickerModal";
+import { SkillRow } from "./SkillRow";
 
 interface AddSkillModalProps {
   isOpen: boolean;
+  title?: string;
   editable?: boolean;
+  previewMode?: boolean;
   onClose: () => void;
   untrainedSkills: SkillWithComputed[];
   onAdd: (id: string) => void;
@@ -21,7 +24,9 @@ type ListItem =
 
 export function AddSkillModal({
   isOpen,
+  title = "Add Skill",
   editable = true,
+  previewMode = false,
   onClose,
   untrainedSkills,
   onAdd,
@@ -88,7 +93,8 @@ export function AddSkillModal({
 
   return (
     <PickerModal
-      title="Add Skill"
+      title={title}
+      titleClassName={previewMode ? "text-red-500" : "text-slate-200"}
       placeholder="Search skills…"
       query={search}
       onQueryChange={setSearch}
@@ -98,7 +104,16 @@ export function AddSkillModal({
     >
       {listItems.map((item) => {
         if (item.type === "skill") {
-          return (
+          return previewMode ? (
+            <SkillRow
+              key={item.skill.id}
+              skill={item.skill}
+              editable={false}
+              previewMode
+              updateLevel={() => {}}
+              updateMisc={() => {}}
+            />
+          ) : (
             <SkillPickerRow
               key={item.skill.id}
               skill={item.skill}
@@ -112,7 +127,14 @@ export function AddSkillModal({
         return (
           <div key={item.category}>
             <button
-              onClick={() => toggleGroup(item.category)}
+              onClick={(e) => {
+                const wasExpanded = expandedGroups.has(item.category);
+                toggleGroup(item.category);
+                if (!wasExpanded) {
+                  const btn = e.currentTarget;
+                  setTimeout(() => btn.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
+                }
+              }}
               className="w-full flex items-center gap-3 px-4 lg:px-5 py-3 lg:py-4 text-left hover:bg-slate-800 transition"
             >
               <span className="text-sm lg:text-base font-semibold text-slate-100 flex-1 min-w-0 truncate">
@@ -123,6 +145,11 @@ export function AddSkillModal({
               >
                 {CHAR_LABEL[item.skills[0].characteristic]}
               </span>
+              {item.skills[0].advanced && (
+                <span className="px-1.5 lg:px-2 py-0.5 rounded border text-[10px] lg:text-xs shrink-0 bg-purple-700/40 border-purple-500 text-purple-300">
+                  Advanced
+                </span>
+              )}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 20 20"
@@ -138,7 +165,16 @@ export function AddSkillModal({
             </button>
             {isExpanded && (
               <div className="border-t border-slate-700/50 bg-slate-900/40">
-                {item.skills.map((skill) => (
+                {item.skills.map((skill) => previewMode ? (
+                  <SkillRow
+                    key={skill.id}
+                    skill={skill}
+                    editable={false}
+                    previewMode
+                    updateLevel={() => {}}
+                    updateMisc={() => {}}
+                  />
+                ) : (
                   <SkillPickerRow
                     key={skill.id}
                     skill={skill}
@@ -183,7 +219,7 @@ function SkillPickerRow({
         <span className="text-sm lg:text-base text-slate-100 truncate">{displayName}</span>
         {SKILL_DESCRIPTIONS[skill.name] && (
           <span
-            className="inline-flex items-center leading-[0]"
+            className="inline-flex items-center -translate-y-[1.4px]"
             onClick={(e) => e.stopPropagation()}
           >
             <InfoModal title={skill.name} content={SKILL_DESCRIPTIONS[skill.name]} />

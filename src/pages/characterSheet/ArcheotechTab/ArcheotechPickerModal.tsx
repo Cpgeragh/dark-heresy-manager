@@ -155,7 +155,7 @@ export function ArcheotechPickerModal({ editable = true, onSelect, onCustom, onC
                 {ref.name}
               </span>
               {ref.description && (
-                <span className="inline-flex items-center leading-[0]" onClick={(e) => e.stopPropagation()}>
+                <span className="inline-flex items-center -translate-y-[1.4px]" onClick={(e) => e.stopPropagation()}>
                   <InfoModal
                     title={ref.name}
                     content={<p className="text-sm lg:text-base text-slate-300 leading-relaxed">{ref.description}</p>}

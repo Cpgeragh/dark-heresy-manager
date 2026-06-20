@@ -77,7 +77,9 @@ export function PowerCard({ power, editable, onRemove, onEdit }: PowerCardProps)
           <p className="font-medium text-slate-100">
             {power.name || <span className="italic text-slate-500">Unnamed power</span>}
           </p>
-          <InfoModal title={power.name || "Psychic Power"} content={modalContent} hideTitle />
+          <span className="inline-flex items-center -translate-y-[1.4px]">
+            <InfoModal title={power.name || "Psychic Power"} content={modalContent} hideTitle />
+          </span>
         </div>
         <PowerStats power={power} />
       </div>

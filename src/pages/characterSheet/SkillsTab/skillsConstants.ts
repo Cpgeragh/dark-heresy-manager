@@ -3,11 +3,7 @@
 import type { Characteristics } from "../../../types/Character";
 
 export type SortMode = "category" | "characteristic" | "name" | "total";
-import {
-  SKILL_EXPERT_THRESHOLD,
-  SKILL_TRAINED_THRESHOLD,
-  SKILL_BASIC_THRESHOLD,
-} from "../../../constants/gameRules";
+import { SKILL_BASIC_THRESHOLD } from "../../../constants/gameRules";
 
 // Re-export type from hook (so existing imports don't break)
 export type { SkillWithComputed } from "../../../hooks/useSkillComputation";
@@ -53,9 +49,6 @@ export const CHAR_FULL_LABEL: Record<keyof Characteristics, string> = {
 
 // Color helper for skill totals (uses imported constants)
 export function getTotalColor(total: number | null): string {
-  if (total === null) return "text-slate-400";
-  if (total >= SKILL_EXPERT_THRESHOLD) return "text-green-400";
-  if (total >= SKILL_TRAINED_THRESHOLD) return "text-red-500";
-  if (total >= SKILL_BASIC_THRESHOLD) return "text-slate-200";
-  return "text-red-400";
+  if (total !== null && total < SKILL_BASIC_THRESHOLD) return "text-red-400";
+  return "text-slate-200";
 }

@@ -73,10 +73,12 @@ export function CyberneticWeaponCard({
             {hasRules ? weapon.specialRules : "-"}
           </span>
           {ruleNamesInLookup.length > 0 && (
-            <InfoModal
-              title={`${weapon.name} Qualities`}
-              content={<SpecialRulesContent rules={weapon.specialRules ?? ""} />}
-            />
+            <span className="inline-flex items-center -translate-y-[1.4px]">
+              <InfoModal
+                title={`${weapon.name} Qualities`}
+                content={<SpecialRulesContent rules={weapon.specialRules ?? ""} />}
+              />
+            </span>
           )}
         </div>
         <div className="flex items-center gap-1.5">

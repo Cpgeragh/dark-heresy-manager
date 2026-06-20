@@ -32,29 +32,31 @@ export function ImplantRow({ item, editable, onCycleQuality, onRemove }: Props) 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5 min-w-0">
           <p className="text-sm lg:text-base font-medium text-slate-200 truncate">{item.name}</p>
-          <InfoModal
-            title={item.name}
-            content={
-              <div className="space-y-3">
-                {ref?.notes && (
-                  <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
-                      Item Rules
-                    </p>
-                    <p className="text-sm text-slate-300 leading-relaxed">{ref.notes}</p>
-                  </div>
-                )}
-                {item.notes && (
-                  <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
-                      Notes
-                    </p>
-                    <p className="text-sm text-slate-300 leading-relaxed">{item.notes}</p>
-                  </div>
-                )}
-              </div>
-            }
-          />
+          <span className="inline-flex items-center -translate-y-[1.4px]">
+            <InfoModal
+              title={item.name}
+              content={
+                <div className="space-y-3">
+                  {ref?.notes && (
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
+                        Item Rules
+                      </p>
+                      <p className="text-sm text-slate-300 leading-relaxed">{ref.notes}</p>
+                    </div>
+                  )}
+                  {item.notes && (
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
+                        Notes
+                      </p>
+                      <p className="text-sm text-slate-300 leading-relaxed">{item.notes}</p>
+                    </div>
+                  )}
+                </div>
+              }
+            />
+          </span>
         </div>
         <div className="flex flex-wrap gap-1.5 mt-1">
           {item.bodyLocation && item.bodyLocation.length > 0 && (
@@ -88,10 +90,12 @@ export function ImplantRow({ item, editable, onCycleQuality, onRemove }: Props) 
           >
             {displayedCraftsmanship}
           </button>
-          <InfoModal
-            title={`${displayedCraftsmanship} ${item.name}`}
-            content={qualityDescription}
-          />
+          <span className="inline-flex items-center -translate-y-[1.4px]">
+            <InfoModal
+              title={`${displayedCraftsmanship} ${item.name}`}
+              content={qualityDescription}
+            />
+          </span>
         </div>
       </div>
 
