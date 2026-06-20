@@ -315,30 +315,26 @@ export function EntrySection({
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-3">
+      <div className="mb-3 flex items-center justify-between">
         <SectionHeader>{title}</SectionHeader>
-        <span className="text-xs lg:text-sm text-slate-500">
-          {entries.length} {entries.length === 1 ? singular.toLowerCase() : title.toLowerCase()}
-        </span>
+        <button
+          onClick={() => setShowPicker(true)}
+          className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
+        >
+          {editable ? `+ Add ${singular}` : `View ${singular}s`}
+        </button>
       </div>
 
       <section className={uiSection + " space-y-2"}>
         {entries.length === 0 && <p className="text-sm lg:text-base text-slate-500 italic">None added yet.</p>}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 gap-2">
           {[...entries]
             .sort((a, b) => a.name.localeCompare(b.name))
             .map((entry) => (
               <EntryCard key={entry.uid} entry={entry} editable={editable} onRemove={onRemove} />
             ))}
         </div>
-
-        <button
-          onClick={() => setShowPicker(true)}
-          className="mt-1 px-3 lg:px-4 py-1 text-xs lg:text-sm rounded border border-slate-500 text-slate-100 hover:bg-slate-800 transition"
-        >
-          {editable ? `+ Add ${singular}` : `View ${singular}s`}
-        </button>
 
         {showPicker && (
           <TalentPickerModal
