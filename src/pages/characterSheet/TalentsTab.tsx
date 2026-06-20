@@ -1,27 +1,22 @@
 // src/pages/characterSheet/TalentsTab.tsx
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import type { TouchEvent } from "react";
 import type {
   TalentsAndTraitsBlock,
   TalentEntry,
-  WeaponTrainingBlock,
-  WeaponTrainingTalentId,
 } from "../../types/Character";
 import { TALENT_LIST } from "../../data/talentData";
-import { WEAPON_TRAINING_GROUPS } from "../../data/weaponTrainingData";
-import { editableInputClass, uiSection } from "../../ui/editableStyles";
+import { uiSection } from "../../ui/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
-import { Button } from "../../ui/Button";
 import { EntryCard, EntrySection, TalentPickerModal } from "./talentComponents";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 interface TalentsTabProps {
   talents: TalentsAndTraitsBlock;
-  weaponTraining: WeaponTrainingBlock;
   editable: boolean;
   onUpdateTalents: (next: TalentsAndTraitsBlock) => void;
-  onUpdateTraining: (next: WeaponTrainingBlock) => void;
 }
 
 // ─── Faith Talent constants ───────────────────────────────────────────────────
@@ -61,11 +56,14 @@ function FaithTalentSection({
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-3">
+      <div className="mb-3 flex items-center justify-between">
         <SectionHeader>Faith Talents</SectionHeader>
-        <span className="text-xs lg:text-sm text-slate-500">
-          {entries.length} {entries.length === 1 ? "talent" : "faith talents"}
-        </span>
+        <button
+          onClick={() => setShowPicker(true)}
+          className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
+        >
+          {editable ? "+ Add Faith Talent" : "View Faith Talents"}
+        </button>
       </div>
 
       <section className={uiSection + " space-y-4"}>
@@ -93,13 +91,6 @@ function FaithTalentSection({
           );
         })}
 
-        <button
-          onClick={() => setShowPicker(true)}
-          className="mt-1 px-3 lg:px-4 py-1 lg:py-1.5 text-xs lg:text-sm rounded border border-slate-600 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition"
-        >
-          {editable ? "+ Add Faith Talent" : "View Faith Talents"}
-        </button>
-
         {showPicker && (
           <TalentPickerModal
             title="Add Faith Talent"
@@ -119,10 +110,8 @@ function FaithTalentSection({
 
 export function TalentsTab({
   talents,
-  weaponTraining,
   editable,
   onUpdateTalents,
-  onUpdateTraining,
 }: TalentsTabProps) {
   // ── Talents ──
   const handleAddTalent = useCallback(
@@ -142,143 +131,134 @@ export function TalentsTab({
     [talents, onUpdateTalents]
   );
 
-  // ── Weapon Training ──
-  const handleToggleTraining = useCallback(
-    (id: WeaponTrainingTalentId) => {
-      if (!editable) return;
-      const current = weaponTraining.trained;
-      const next = current.includes(id) ? current.filter((t) => t !== id) : [...current, id];
-      onUpdateTraining({ ...weaponTraining, trained: next });
-    },
-    [editable, weaponTraining, onUpdateTraining]
-  );
+const [activeView, setActiveView] = useState<"talents" | "faith">("talents");
+  const [viewTransition, setViewTransition] = useState<"idle" | "sliding">("idle");
+  const touchStartX = useRef<number | null>(null);
 
-  const [newExotic, setNewExotic] = useState("");
-
-  const handleAddExotic = useCallback(() => {
-    if (!newExotic.trim()) return;
-    onUpdateTraining({
-      ...weaponTraining,
-      exoticWeapons: [...weaponTraining.exoticWeapons, newExotic.trim()],
+  const switchView = useCallback((view?: "talents" | "faith") => {
+    setActiveView((current) => {
+      const next = view ?? (current === "talents" ? "faith" : "talents");
+      if (next === current) return current;
+      setViewTransition("sliding");
+      window.setTimeout(() => setViewTransition("idle"), 180);
+      return next;
     });
-    setNewExotic("");
-  }, [newExotic, weaponTraining, onUpdateTraining]);
+  }, []);
 
-  const handleRemoveExotic = useCallback(
-    (index: number) => {
-      onUpdateTraining({
-        ...weaponTraining,
-        exoticWeapons: weaponTraining.exoticWeapons.filter((_, i) => i !== index),
-      });
-    },
-    [weaponTraining, onUpdateTraining]
-  );
+  const handleTouchStart = useCallback((e: TouchEvent<HTMLDivElement>) => {
+    touchStartX.current = e.touches[0]?.clientX ?? null;
+  }, []);
+
+  const handleTouchEnd = useCallback((e: TouchEvent<HTMLDivElement>) => {
+    const startX = touchStartX.current;
+    const endX = e.changedTouches[0]?.clientX;
+    touchStartX.current = null;
+    if (startX === null || endX === undefined || Math.abs(endX - startX) < 50) return;
+    switchView();
+  }, [switchView]);
+
+  const transitionClass = viewTransition === "sliding"
+    ? activeView === "talents" ? "opacity-0 -translate-x-3" : "opacity-0 translate-x-3"
+    : "opacity-100 translate-x-0";
+
+  const hasFaithTalents = talents.talents.some((e) => FAITH_TALENT_IDS.has(e.talentId));
+  const showFaith = editable || hasFaithTalents;
 
   return (
     <div className="space-y-8">
-      {/* TALENTS */}
-      <EntrySection
-        title="Talents"
-        singular="Talent"
-        entries={talents.talents.filter((e) => !FAITH_TALENT_IDS.has(e.talentId))}
-        listData={REGULAR_TALENT_LIST}
-        editable={editable}
-        onAdd={handleAddTalent}
-        onRemove={handleRemoveTalent}
-      />
-
-      {/* FAITH TALENTS */}
-      <FaithTalentSection
-        entries={talents.talents.filter((e) => FAITH_TALENT_IDS.has(e.talentId))}
-        editable={editable}
-        onAdd={handleAddTalent}
-        onRemove={handleRemoveTalent}
-      />
-
-      {/* WEAPON TRAINING */}
-      <div>
-        <SectionHeader className="mb-3">Weapon Training</SectionHeader>
-        <section className={uiSection + " space-y-4"}>
-          {WEAPON_TRAINING_GROUPS.map((group) => (
-            <div key={group.label}>
-              <p className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100 mb-1.5">
-                {group.label}
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {group.items.map(({ id, display }) => {
-                  const active = weaponTraining.trained.includes(id as WeaponTrainingTalentId);
-                  return (
-                    <button
-                      key={id}
-                      disabled={!editable}
-                      onClick={() => handleToggleTraining(id as WeaponTrainingTalentId)}
-                      aria-pressed={active}
-                      className={`px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm transition ${
-                        active
-                          ? "bg-red-500/20 border-red-500 text-red-400 font-semibold"
-                          : editable
-                            ? "border-slate-500 text-slate-100 hover:bg-slate-800"
-                            : "border-slate-700 text-slate-500 opacity-60 cursor-not-allowed"
-                      }`}
-                    >
-                      {display}
-                    </button>
-                  );
-                })}
-              </div>
+      {/* MOBILE: swipe tabs */}
+      <div className="lg:hidden">
+        {showFaith ? (
+          <>
+            <div
+              className="grid grid-cols-2 rounded-lg border border-slate-600 bg-slate-950/70 p-1 mb-4"
+              role="tablist"
+              aria-label="Talent groups"
+            >
+              {(["talents", "faith"] as const).map((view) => {
+                const active = activeView === view;
+                return (
+                  <button
+                    key={view}
+                    type="button"
+                    role="tab"
+                    aria-selected={active}
+                    onClick={() => switchView(view)}
+                    className={[
+                      "rounded-md px-3 py-1.5 text-xs font-semibold transition border",
+                      active
+                        ? view === "talents"
+                          ? "border-violet-400 bg-violet-600/80 text-white shadow-sm shadow-violet-950/50"
+                          : "border-fuchsia-400 bg-fuchsia-600/80 text-white shadow-sm shadow-fuchsia-950/50"
+                        : "border-transparent text-slate-400 hover:bg-slate-800 hover:text-slate-200",
+                    ].join(" ")}
+                  >
+                    {view === "talents" ? "Talents" : "Faith Talents"}
+                  </button>
+                );
+              })}
             </div>
-          ))}
-
-          {/* Exotic Weapon Training */}
-          <div>
-            <p className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100 mb-1.5">
-              Exotic Weapon Training
-            </p>
-
-            {weaponTraining.exoticWeapons.length === 0 && !editable && (
-              <p className="text-sm lg:text-base text-slate-500 italic">None.</p>
-            )}
-
-            <div className="space-y-1.5 mb-2">
-              {weaponTraining.exoticWeapons.map((weapon, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between rounded border border-slate-500 bg-slate-900/60 px-3 lg:px-4 py-1.5 lg:py-2 text-sm lg:text-base"
-                >
-                  <span className="text-slate-200">{weapon}</span>
-                  {editable && (
-                    <button
-                      onClick={() => handleRemoveExotic(index)}
-                      aria-label={`Remove ${weapon}`}
-                      className="text-slate-500 hover:text-red-400 transition text-xs lg:text-sm"
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {editable && (
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={newExotic}
-                  onChange={(e) => setNewExotic(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") handleAddExotic();
-                  }}
-                  placeholder="e.g. Needle Pistol"
-                  className={editableInputClass(true) + " flex-1"}
+            <section
+              key={activeView}
+              className={`transition-all duration-150 ease-out motion-reduce:transition-none ${transitionClass}`}
+              role="tabpanel"
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+            >
+              {activeView === "talents" ? (
+                <EntrySection
+                  title="Talents"
+                  singular="Talent"
+                  entries={talents.talents.filter((e) => !FAITH_TALENT_IDS.has(e.talentId))}
+                  listData={REGULAR_TALENT_LIST}
+                  editable={editable}
+                  onAdd={handleAddTalent}
+                  onRemove={handleRemoveTalent}
                 />
-                <Button onClick={handleAddExotic} disabled={!newExotic.trim()}>
-                  Add
-                </Button>
-              </div>
-            )}
-          </div>
-        </section>
+              ) : (
+                <FaithTalentSection
+                  entries={talents.talents.filter((e) => FAITH_TALENT_IDS.has(e.talentId))}
+                  editable={editable}
+                  onAdd={handleAddTalent}
+                  onRemove={handleRemoveTalent}
+                />
+              )}
+            </section>
+          </>
+        ) : (
+          <EntrySection
+            title="Talents"
+            singular="Talent"
+            entries={talents.talents.filter((e) => !FAITH_TALENT_IDS.has(e.talentId))}
+            listData={REGULAR_TALENT_LIST}
+            editable={editable}
+            onAdd={handleAddTalent}
+            onRemove={handleRemoveTalent}
+          />
+        )}
       </div>
+
+      {/* DESKTOP: two-column grid when faith talents visible, full width otherwise */}
+      <div className={`hidden lg:grid lg:gap-6 lg:items-start ${showFaith ? "lg:grid-cols-2" : "lg:grid-cols-1"}`}>
+        <EntrySection
+          title="Talents"
+          singular="Talent"
+          entries={talents.talents.filter((e) => !FAITH_TALENT_IDS.has(e.talentId))}
+          listData={REGULAR_TALENT_LIST}
+          editable={editable}
+          onAdd={handleAddTalent}
+          onRemove={handleRemoveTalent}
+        />
+        {showFaith && (
+          <FaithTalentSection
+            entries={talents.talents.filter((e) => FAITH_TALENT_IDS.has(e.talentId))}
+            editable={editable}
+            onAdd={handleAddTalent}
+            onRemove={handleRemoveTalent}
+          />
+        )}
+      </div>
+
     </div>
   );
 }

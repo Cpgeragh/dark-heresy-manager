@@ -19,6 +19,7 @@ export const CATEGORIES: {
       { id: "skills", label: "Skills" },
       { id: "talents", label: "Talents" },
       { id: "traits", label: "Traits" },
+      { id: "training", label: "Weapon Training" },
     ],
   },
   {
@@ -138,7 +139,7 @@ export function SectionDrawer({
       <button
         onClick={open}
         aria-label="Open section navigation"
-        className="sm:hidden mb-4 px-3 py-2 rounded-lg border border-slate-500 bg-slate-800 text-slate-200 hover:bg-slate-700 transition text-base leading-none"
+        className="px-3 py-2 rounded-lg border border-slate-500 bg-slate-800 text-slate-200 hover:bg-slate-700 transition text-base leading-none"
       >
         ☰
       </button>

@@ -14,4 +14,5 @@ export type TabId =
   | "notes"
   | "archeotech"
   | "background"
+  | "training"
   | "admin";

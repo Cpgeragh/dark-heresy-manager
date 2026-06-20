@@ -25,6 +25,7 @@ import { NotesTab } from "./characterSheet/NotesTab";
 import { AdminTab } from "./characterSheet/AdminTab";
 import { ArcheotechTab } from "./characterSheet/ArcheotechTab";
 import { BackgroundTab } from "./characterSheet/BackgroundTab";
+import { WeaponTrainingTab } from "./characterSheet/WeaponTrainingTab";
 
 import type { TabId } from "./characterSheet/types";
 import type {
@@ -53,7 +54,6 @@ import type {
 import { exportCharacterJson } from "../utils/exportCharacter";
 import { normaliseSkills, skillsNeedNormalisation } from "../utils/skillUtils";
 import { SectionDrawer } from "../components/SectionDrawer";
-import { DesktopTabNav } from "../components/DesktopTabNav";
 import { useUserProfile } from "../hooks/useUserProfile";
 
 // ================================================================
@@ -341,6 +341,7 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
     stats: "Characteristics",
     skills: "Skills",
     talents: "Talents",
+    training: "Weapon Training",
     traits: "Traits",
     weapons: "Weapons",
     armour: "Armour",
@@ -384,26 +385,19 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
 
       {/* NAV BAR */}
       {/* Mobile: hamburger lives inside SectionDrawer; this row just shows the tab title */}
-      <div className="sm:hidden relative flex items-center mb-4 py-1">
-        <span className="absolute inset-x-0 text-center font-cinzel font-bold text-slate-100 text-lg pointer-events-none">
+      <div className="relative flex items-center mb-4 py-1">
+        <SectionDrawer
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          isDM={isDM}
+          externalOpen={desktopNavCategory !== null}
+          externalCategoryLabel={desktopNavCategory}
+          onExternalClose={() => setDesktopNavCategory(null)}
+        />
+        <span className="absolute inset-x-0 text-center font-cinzel font-bold text-red-500 text-lg pointer-events-none">
           {TAB_TITLES[activeTab]}
         </span>
       </div>
-      <SectionDrawer
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-        isDM={isDM}
-        externalOpen={desktopNavCategory !== null}
-        externalCategoryLabel={desktopNavCategory}
-        onExternalClose={() => setDesktopNavCategory(null)}
-      />
-
-      {/* Desktop: category bar — clicking opens the side drawer at that category */}
-      <DesktopTabNav
-        activeTab={activeTab}
-        isDM={isDM}
-        onCategoryClick={(label) => setDesktopNavCategory(label)}
-      />
 
       {/* CONTENT CONTAINER */}
       <div className={containerClass} role="tabpanel" aria-label={`${activeTab} content`}>
@@ -457,10 +451,16 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
           {activeTab === "talents" && (
             <TalentsTab
               talents={character.talentsAndTraits}
-              weaponTraining={character.weaponTraining}
               editable={allowedToEdit}
               onUpdateTalents={handleUpdateTalents}
-              onUpdateTraining={handleUpdateWeaponTraining}
+            />
+          )}
+
+          {activeTab === "training" && (
+            <WeaponTrainingTab
+              weaponTraining={character.weaponTraining}
+              editable={allowedToEdit}
+              onUpdate={handleUpdateWeaponTraining}
             />
           )}
 
