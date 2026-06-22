@@ -7,7 +7,7 @@ import type {
   TalentEntry,
 } from "../../types/Character";
 import { TALENT_LIST } from "../../data/talentData";
-import { uiSection } from "../../ui/editableStyles";
+import { uiSection, uiTextPlaceholder } from "../../ui/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { EntryCard, EntrySection, TalentPickerModal } from "./talentComponents";
 
@@ -76,7 +76,7 @@ function FaithTalentSection({
               <p className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100 mb-1.5">
                 {FAITH_GROUP_LABELS[group]}
               </p>
-              {groupEntries.length === 0 && <p className="text-sm lg:text-base text-slate-500 italic">None.</p>}
+              {groupEntries.length === 0 && <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>None.</p>}
               <div className="grid grid-cols-1 gap-2">
                 {groupEntries.map((entry) => (
                   <EntryCard

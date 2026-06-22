@@ -10,6 +10,13 @@ import type { WeaponUpgradeRef } from "../../../data/reference/weaponUpgradeRefe
 import { PickerModal } from "../../../ui/PickerModal";
 import { formatWeightForDisplay } from "../../../ui/weightFormat";
 import { formatMoneyForDisplay } from "../../../ui/moneyFormat";
+import {
+  uiTextBody,
+  uiTextLabel,
+  uiTextMuted,
+  uiTextPlaceholder,
+  uiTextSubtle,
+} from "../../../ui/editableStyles";
 
 export const WEAPON_QUALITY_OPTIONS = Object.keys(WEAPON_SPECIAL_RULES).sort((a, b) =>
   a.localeCompare(b)
@@ -145,7 +152,7 @@ export function WeaponQualitySelector({
 export function StatChip({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col items-center bg-slate-800/60 rounded px-2 lg:px-3 py-1 lg:py-1.5 min-w-[52px] lg:min-w-[64px]">
-      <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">{label}</span>
+      <span className={uiTextLabel}>{label}</span>
       <span className="text-sm lg:text-base font-code text-slate-200 mt-0.5">{value || "—"}</span>
     </div>
   );
@@ -176,7 +183,7 @@ export function DamageTypeChip({ damage }: { damage: string }) {
   if (!damageType) return null;
   return (
     <div className="flex flex-col items-center bg-slate-800/60 rounded px-2 lg:px-3 py-1 lg:py-1.5 min-w-[52px] lg:min-w-[64px]">
-      <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Type</span>
+      <span className={uiTextLabel}>Type</span>
       <span className={`text-sm lg:text-base font-semibold mt-0.5 ${damageType.colour}`}>
         {damageType.label}
       </span>
@@ -277,13 +284,13 @@ export function SpecialRulesContent({
 
   return (
     <div className="space-y-4">
-      {description && <p className="text-sm lg:text-base text-slate-300 leading-relaxed">{description}</p>}
+      {description && <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{description}</p>}
       {ruleNames.map((name) => {
         const desc = WEAPON_SPECIAL_RULES[name];
         return (
           <div key={name}>
             <p className="text-sm lg:text-base font-semibold text-amber-300">{name}</p>
-            <p className="text-sm lg:text-base text-slate-300 mt-1 leading-relaxed">{desc}</p>
+            <p className={`text-sm lg:text-base ${uiTextBody} mt-1 leading-relaxed`}>{desc}</p>
           </div>
         );
       })}
@@ -314,8 +321,8 @@ export function AttachmentCard({
               title={upgrade.name}
               content={
                 <div className="space-y-2">
-                  <p className="text-sm lg:text-base text-slate-300 leading-relaxed">{upgrade.description}</p>
-                  <p className="text-xs lg:text-sm text-slate-500 italic">{upgrade.applicableTo}</p>
+                  <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{upgrade.description}</p>
+                  <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>{upgrade.applicableTo}</p>
                 </div>
               }
             />
@@ -332,7 +339,7 @@ export function AttachmentCard({
         </div>
       </div>
       <div className="flex flex-wrap gap-1 mt-1">
-        <span className="text-[10px] lg:text-xs rounded border border-slate-700 bg-slate-900/40 px-1 lg:px-1.5 py-0.5 text-slate-400">
+        <span className={`text-[10px] lg:text-xs rounded border border-slate-700 bg-slate-900/40 px-1 lg:px-1.5 py-0.5 ${uiTextMuted}`}>
           ⚖ {displayedWeightModifier}
         </span>
         <span className="text-[10px] lg:text-xs rounded border border-slate-700 bg-slate-900/40 px-1 lg:px-1.5 py-0.5 text-amber-400/80">
@@ -393,14 +400,14 @@ export function AttachmentPicker({
             </span>
             <div className="flex items-center gap-1.5 text-xs lg:text-sm shrink-0">
               <span className={rarityColour(upgrade.rarity)}>{upgrade.rarity}</span>
-              <span className="text-slate-600">·</span>
+              <span className={uiTextSubtle}>·</span>
               <span className="text-amber-400/80">{formatMoneyForDisplay(upgrade.value)}</span>
-              <span className="text-slate-600">·</span>
-              <span className="text-slate-400">⚖ {formatWeightModifier(upgrade.weightModifier)}</span>
+              <span className={uiTextSubtle}>·</span>
+              <span className={uiTextMuted}>⚖ {formatWeightModifier(upgrade.weightModifier)}</span>
             </div>
           </div>
-          <p className="text-xs lg:text-sm text-slate-400 leading-relaxed">{upgrade.description}</p>
-          <p className="text-xs lg:text-sm text-slate-600 mt-1 italic">{upgrade.applicableTo}</p>
+          <p className={`text-xs lg:text-sm ${uiTextBody} leading-relaxed`}>{upgrade.description}</p>
+          <p className={`text-xs lg:text-sm ${uiTextPlaceholder} mt-1`}>{upgrade.applicableTo}</p>
         </button>
       ))}
     </PickerModal>

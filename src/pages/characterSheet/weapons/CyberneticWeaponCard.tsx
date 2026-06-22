@@ -4,6 +4,7 @@
 import type { CyberneticWeapon } from "../../../data/reference/cyberneticsReference";
 import { InfoModal } from "../../../components/InfoModal";
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
+import { uiTextLabel, uiTextMuted, uiTextPlaceholder } from "../../../ui/editableStyles";
 import {
   StatChip,
   DamageTypeChip,
@@ -35,7 +36,7 @@ export function CyberneticWeaponCard({
             Cybernetic
           </span>
         </div>
-        <p className="text-xs lg:text-sm text-slate-500">
+        <p className={`text-xs lg:text-sm ${uiTextMuted}`}>
           {cyberneticName}
           {weapon.class ? ` · ${weapon.class}` : ""}
         </p>
@@ -68,8 +69,8 @@ export function CyberneticWeaponCard({
 
       <div className="space-y-1">
         <div className="flex items-center gap-1.5">
-          <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Qualities</span>
-          <span className="text-xs lg:text-sm text-slate-400 italic">
+          <span className={uiTextLabel}>Qualities</span>
+          <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>
             {hasRules ? weapon.specialRules : "-"}
           </span>
           {ruleNamesInLookup.length > 0 && (
@@ -82,8 +83,8 @@ export function CyberneticWeaponCard({
           )}
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Rules</span>
-          <span className="text-xs lg:text-sm text-slate-600 italic">-</span>
+          <span className={uiTextLabel}>Rules</span>
+          <span className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>-</span>
         </div>
       </div>
     </div>

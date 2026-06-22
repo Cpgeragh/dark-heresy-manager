@@ -5,24 +5,25 @@ import { InfoModal } from "../../../components/InfoModal";
 import { DRUGS_REFERENCE, type DrugRef } from "../../../data/reference/drugsReference";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
+import { uiTextBody, uiTextLabel, uiTextMuted } from "../../../ui/editableStyles";
 
 function drugInfoContent(ref: DrugRef) {
   return (
     <>
       {ref.duration && (
         <div>
-          <p className="text-xs lg:text-sm font-semibold text-slate-500 uppercase tracking-wide mb-1">
+          <p className={`${uiTextLabel} font-semibold mb-1`}>
             Duration
           </p>
-          <p className="text-sm lg:text-base text-slate-300 leading-relaxed">{ref.duration}</p>
+          <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ref.duration}</p>
         </div>
       )}
       {ref.effect && (
         <div>
-          <p className="text-xs lg:text-sm font-semibold text-slate-500 uppercase tracking-wide mb-1">
+          <p className={`${uiTextLabel} font-semibold mb-1`}>
             Effect
           </p>
-          <p className="text-sm lg:text-base text-slate-300 leading-relaxed">{ref.effect}</p>
+          <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ref.effect}</p>
         </div>
       )}
       {ref.sideEffect && (
@@ -30,13 +31,13 @@ function drugInfoContent(ref: DrugRef) {
           <p className="text-xs lg:text-sm font-semibold text-red-500/70 uppercase tracking-wide mb-1">
             Side Effects
           </p>
-          <p className="text-sm lg:text-base text-slate-400 leading-relaxed">{ref.sideEffect}</p>
+          <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ref.sideEffect}</p>
         </div>
       )}
       {ref.notes && (
         <div>
-          <p className="text-xs lg:text-sm font-semibold text-slate-500 uppercase tracking-wide mb-1">Notes</p>
-          <p className="text-sm lg:text-base text-slate-400 leading-relaxed">{ref.notes}</p>
+          <p className={`${uiTextLabel} font-semibold mb-1`}>Notes</p>
+          <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ref.notes}</p>
         </div>
       )}
     </>
@@ -103,7 +104,7 @@ export function DrugPicker({
               />
             </div>
             {ref.duration && (
-              <p className="text-xs lg:text-sm text-slate-500 mt-0.5">Duration: {ref.duration}</p>
+              <p className={`text-xs lg:text-sm ${uiTextMuted} mt-0.5`}>Duration: {ref.duration}</p>
             )}
           </div>
         );

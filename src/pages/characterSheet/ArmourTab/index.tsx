@@ -15,7 +15,7 @@ import { PieceNotesModal } from "./PieceNotesModal";
 import { CustomPieceForm } from "./CustomPieceForm";
 import { ForceFieldRow } from "./ForceFieldRow";
 import { PieceRow } from "./PieceRow";
-import { uiSection } from "../../../ui/editableStyles";
+import { uiSection, uiTextLabel, uiTextMuted, uiTextPlaceholder } from "../../../ui/editableStyles";
 import { SectionHeader } from "../../../ui/SectionHeader";
 
 interface ArmourTabProps {
@@ -262,7 +262,7 @@ export function ArmourTab({
           <div className="overflow-x-auto">
             <table className="w-full text-sm lg:text-base border-collapse">
               <thead>
-                <tr className="text-xs lg:text-sm text-slate-500 uppercase">
+                <tr className={uiTextLabel}>
                   <th className="text-left py-1.5 pr-4 font-medium">Location</th>
                   <th className="text-center py-1.5 px-3 font-medium">AP</th>
                   <th className="text-center py-1.5 px-3 font-medium">TB</th>
@@ -279,7 +279,7 @@ export function ArmourTab({
                     <tr key={loc} className="hover:bg-slate-800/40 transition">
                       <td className="py-2 pr-4 text-slate-100">{LOCATION_LABELS[loc]}</td>
                       <td className="py-2 px-3 text-center font-code text-slate-200">{ap}</td>
-                      <td className="py-2 px-3 text-center font-code text-slate-400">
+                      <td className={`py-2 px-3 text-center font-code ${uiTextMuted}`}>
                         {toughnessBonus}
                       </td>
                       <td
@@ -296,7 +296,7 @@ export function ArmourTab({
               </tbody>
             </table>
           </div>
-          <p className="text-xs lg:text-sm text-slate-600 mt-2">
+          <p className={`text-xs lg:text-sm ${uiTextMuted} mt-2`}>
             Total = Armour Points (worn only) + Toughness Bonus + Bionic (+2 per installed bionic
             limb)
           </p>
@@ -319,7 +319,7 @@ export function ArmourTab({
             </button>
           )}
         </div>
-        {worn.length === 0 && <p className="text-sm lg:text-base text-slate-500 italic">No armour worn.</p>}
+        {worn.length === 0 && <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No armour worn.</p>}
         {worn.length > 0 && (
           <ArmourPieceGrid
             pieces={worn}
@@ -348,7 +348,7 @@ export function ArmourTab({
             </button>
           )}
         </div>
-        {stowed.length === 0 && <p className="text-sm lg:text-base text-slate-500 italic">No armour stowed.</p>}
+        {stowed.length === 0 && <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No armour stowed.</p>}
         {stowed.length > 0 && (
           <ArmourPieceGrid
             pieces={stowed}
@@ -373,7 +373,7 @@ export function ArmourTab({
           </button>
         </div>
         {forceFields.length === 0 && (
-          <p className="text-sm lg:text-base text-slate-500 italic">No force field equipped.</p>
+          <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No force field equipped.</p>
         )}
         {forceFields.length > 0 && (
           <ForceFieldGrid

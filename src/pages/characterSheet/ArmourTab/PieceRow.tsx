@@ -1,7 +1,7 @@
 // src/pages/characterSheet/ArmourTab/PieceRow.tsx
 
 import type { WornArmourPiece } from "../../../types/Character";
-import { uiSection } from "../../../ui/editableStyles";
+import { uiSection, uiTextLabel, uiTextMuted } from "../../../ui/editableStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { InfoModal } from "../../../components/InfoModal";
 import { locationLabel } from "./armourHelpers";
@@ -79,8 +79,8 @@ export function PieceRow({ piece, editable, worn, onToggle, onRemove, onInfo }: 
           />
         </div>
         <div className="flex items-center gap-1.5 mt-1">
-          <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Craftsmanship</span>
-          <span className="text-xs lg:text-sm text-slate-400 italic">{craftsmanship}</span>
+          <span className={uiTextLabel}>Craftsmanship</span>
+          <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>{craftsmanship}</span>
           <InfoModal
             title={`${craftsmanship} Armour`}
             content={armourCraftsmanshipInfo(craftsmanship)}

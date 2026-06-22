@@ -6,7 +6,7 @@ import { GEAR_REFERENCE, type GearRef } from "../../../data/reference/gearRefere
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
 import { Button } from "../../../ui/Button";
-import { editableInputClass } from "../../../ui/editableStyles";
+import { editableInputClass, uiTextBody } from "../../../ui/editableStyles";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 
 interface Props {
@@ -89,7 +89,7 @@ export function GearPicker({ editable = true, onSelect, onCustom, onClose }: Pro
     >
       {pending ? (
         <div className="p-4 lg:p-5 space-y-4">
-          <p className="text-sm lg:text-base text-slate-400">
+          <p className={`text-sm lg:text-base ${uiTextBody}`}>
             <span className="font-medium text-slate-200">{pending.name}</span> has a variable or
             unlisted cost. Enter the value assigned for this item.
           </p>
@@ -161,7 +161,7 @@ export function GearPicker({ editable = true, onSelect, onCustom, onClose }: Pro
                 <span className="inline-flex items-center -translate-y-[1.4px]" onClick={(e) => e.stopPropagation()}>
                   <InfoModal
                     title={ref.name}
-                    content={<p className="text-sm lg:text-base text-slate-300 leading-relaxed">{ref.description}</p>}
+                    content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ref.description}</p>}
                   />
                 </span>
               )}

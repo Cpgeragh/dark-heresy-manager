@@ -5,6 +5,12 @@ import { useState, useEffect } from "react";
 import type { ArcheotechItem } from "../../../types/Character";
 import { ARCHEOTECH_REFERENCE } from "../../../data/reference/archeotechReference";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
+import {
+  uiTextBody,
+  uiTextLabel,
+  uiTextMuted,
+  uiTextPlaceholder,
+} from "../../../ui/editableStyles";
 import { InfoModal } from "../../../components/InfoModal";
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
 import {
@@ -64,7 +70,7 @@ export function ArcheotechWeaponCard({
               Archeotech
             </span>
           </div>
-          {ref?.weaponClass && <p className="text-xs lg:text-sm text-slate-500">{ref.weaponClass}</p>}
+          {ref?.weaponClass && <p className={`text-xs lg:text-sm ${uiTextMuted}`}>{ref.weaponClass}</p>}
         </button>
         <div className="flex items-center gap-2 shrink-0">
           {onToggleEquip && (
@@ -127,8 +133,8 @@ export function ArcheotechWeaponCard({
           {/* Qualities / Rules */}
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Qualities</span>
-              <span className="text-xs lg:text-sm text-slate-400 italic">{hasRules ? specialRules : "-"}</span>
+              <span className={uiTextLabel}>Qualities</span>
+              <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>{hasRules ? specialRules : "-"}</span>
               {ruleNamesInLookup.length > 0 && (
                 <span className="inline-flex items-center -translate-y-[1.4px]">
                   <InfoModal
@@ -139,21 +145,21 @@ export function ArcheotechWeaponCard({
               )}
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Rules</span>
+              <span className={uiTextLabel}>Rules</span>
               {description ? (
                 <span className="inline-flex items-center -translate-y-[1.4px]">
                   <InfoModal
                     title={`${item.name} Rules`}
-                    content={<p className="text-sm lg:text-base text-slate-300 leading-relaxed">{description}</p>}
+                    content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{description}</p>}
                   />
                 </span>
               ) : (
-                <span className="text-xs lg:text-sm text-slate-600 italic">-</span>
+                <span className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>-</span>
               )}
             </div>
             {showMishaps && (
               <div className="flex items-center gap-1.5">
-                <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Mishaps</span>
+                <span className={uiTextLabel}>Mishaps</span>
                 <span className="inline-flex items-center -translate-y-[1.4px]">
                   <InfoModal title="Explosive Mishaps" content={EXPLOSIVE_MISHAPS_CONTENT} />
                 </span>

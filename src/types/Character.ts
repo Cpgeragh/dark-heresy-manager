@@ -124,6 +124,7 @@ export interface RangedWeapon {
   ammoType?: string; // custom/reference ammo family label used for chip display and ammo filtering
   quantity?: number; // for thrown weapons (bolas, throwing stars) — how many carried
   description?: string; // rules text copied from reference data when needed
+  integrated?: boolean; // true for custom built-in weapons without a reference id
   equipped?: boolean; // true = carried on body, shown expanded and pinned to top
 }
 
@@ -144,6 +145,7 @@ export interface MeleeWeapon {
   attachments?: string[]; // WeaponUpgradeRef.id values for fitted upgrades
   quantity?: number; // for thrown melee weapons (knives, spears) — how many carried
   description?: string; // custom rules text separate from qualities
+  integrated?: boolean; // true for custom built-in weapons without a reference id
   equipped?: boolean; // true = carried on body, shown expanded and pinned to top
 }
 
@@ -305,6 +307,8 @@ export interface GrenadeItem {
   value?: string; // cost per grenade
   rarity?: string;
   source?: string;
+  description?: string; // custom rules text
+  custom?: boolean;
 }
 
 /**

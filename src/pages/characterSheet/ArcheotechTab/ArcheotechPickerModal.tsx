@@ -5,7 +5,7 @@ import {
   ARCHEOTECH_REFERENCE,
   type ArcheotechRef,
 } from "../../../data/reference/archeotechReference";
-import { editableInputClass } from "../../../ui/editableStyles";
+import { editableInputClass, uiTextBody, uiTextMuted } from "../../../ui/editableStyles";
 import { RARITY_OPTIONS } from "./archeotechConstants";
 import { PickerModal } from "../../../ui/PickerModal";
 import { Button } from "../../../ui/Button";
@@ -88,7 +88,7 @@ export function ArcheotechPickerModal({ editable = true, onSelect, onCustom, onC
       {pending ? (
         // ── Step 2: GM form ──────────────────────────────────────────────────
         <div className="p-4 lg:p-5 space-y-4">
-          <p className="text-sm lg:text-base text-slate-400">
+          <p className={`text-sm lg:text-base ${uiTextBody}`}>
             <span className="font-medium text-slate-200">{pending.name}</span> has no standard cost
             or availability. Enter the values the GM has assigned.
           </p>
@@ -158,13 +158,13 @@ export function ArcheotechPickerModal({ editable = true, onSelect, onCustom, onC
                 <span className="inline-flex items-center -translate-y-[1.4px]" onClick={(e) => e.stopPropagation()}>
                   <InfoModal
                     title={ref.name}
-                    content={<p className="text-sm lg:text-base text-slate-300 leading-relaxed">{ref.description}</p>}
+                    content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ref.description}</p>}
                   />
                 </span>
               )}
             </div>
             <div className="flex items-center gap-2 text-xs lg:text-sm mt-0.5 flex-wrap">
-              <span className="text-slate-500">{ref.type}</span>
+              <span className={uiTextMuted}>{ref.type}</span>
               <ItemMetaChips
                 bare
                 weight={ref.weight}

@@ -24,8 +24,8 @@ import {
 } from "../../data/reference/weaponReference";
 import { RangedCard, RangedPicker, CustomRangedForm } from "./weapons/RangedCard";
 import { MeleeCard, MeleePicker, CustomMeleeForm } from "./weapons/MeleeCard";
-import { GrenadeCard, GrenadePicker } from "./weapons/GrenadeCard";
-import { ShieldCard, ShieldPicker } from "./weapons/ShieldCard";
+import { GrenadeCard, GrenadePicker, CustomGrenadeForm } from "./weapons/GrenadeCard";
+import { ShieldCard, ShieldPicker, CustomShieldForm } from "./weapons/ShieldCard";
 import { CyberneticWeaponCard } from "./weapons/CyberneticWeaponCard";
 import { ArcheotechWeaponCard } from "./weapons/ArcheotechWeaponCard";
 import { IndependentCardGrid } from "./weapons/IndependentCardGrid";
@@ -40,6 +40,7 @@ import {
   compareWeaponEntries,
 } from "../../utils/weaponUtils";
 import { SectionHeader } from "../../ui/SectionHeader";
+import { uiTextPlaceholder } from "../../ui/editableStyles";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -132,6 +133,10 @@ export function WeaponsTab({
   const [picker, setPicker] = useState<PickerTarget>(null);
   const [showCustomRanged, setShowCustomRanged] = useState(false);
   const [showCustomMelee, setShowCustomMelee] = useState(false);
+  const [showCustomIntegratedRanged, setShowCustomIntegratedRanged] = useState(false);
+  const [showCustomIntegratedMelee, setShowCustomIntegratedMelee] = useState(false);
+  const [showCustomGrenade, setShowCustomGrenade] = useState(false);
+  const [showCustomShield, setShowCustomShield] = useState(false);
   const [activeWeaponSection, setActiveWeaponSection] = useState<WeaponMobileSection>("ranged");
   const [weaponSectionTransition, setWeaponSectionTransition] = useState<"idle" | "sliding">(
     "idle"
@@ -278,6 +283,15 @@ export function WeaponsTab({
     [editable, grenades, onUpdateGrenades]
   );
 
+  const addCustomGrenade = useCallback(
+    (item: GrenadeItem) => {
+      if (!editable) return;
+      onUpdateGrenades([...grenades, item]);
+      setShowCustomGrenade(false);
+    },
+    [editable, grenades, onUpdateGrenades]
+  );
+
   const removeGrenade = useCallback(
     (id: string) => {
       if (!editable) return;
@@ -337,6 +351,18 @@ export function WeaponsTab({
         { ...weapon, craftsmanship: weapon.craftsmanship ?? "Common" },
       ]);
       setShowCustomRanged(false);
+    },
+    [editable, rangedWeapons, onUpdateRanged]
+  );
+
+  const addCustomIntegratedRanged = useCallback(
+    (weapon: RangedWeapon) => {
+      if (!editable) return;
+      onUpdateRanged([
+        ...rangedWeapons,
+        { ...weapon, integrated: true, craftsmanship: weapon.craftsmanship ?? "Common" },
+      ]);
+      setShowCustomIntegratedRanged(false);
     },
     [editable, rangedWeapons, onUpdateRanged]
   );
@@ -442,6 +468,18 @@ export function WeaponsTab({
     [editable, meleeWeapons, onUpdateMelee]
   );
 
+  const addCustomIntegratedMelee = useCallback(
+    (weapon: MeleeWeapon) => {
+      if (!editable) return;
+      onUpdateMelee([
+        ...meleeWeapons,
+        { ...weapon, integrated: true, craftsmanship: weapon.craftsmanship ?? "Common" },
+      ]);
+      setShowCustomIntegratedMelee(false);
+    },
+    [editable, meleeWeapons, onUpdateMelee]
+  );
+
   const removeMelee = useCallback(
     (index: number) => {
       if (!editable) return;
@@ -515,6 +553,15 @@ export function WeaponsTab({
         },
       ]);
       setPicker(null);
+    },
+    [editable, shields, onUpdateShields]
+  );
+
+  const addCustomShield = useCallback(
+    (item: ShieldItem) => {
+      if (!editable || !onUpdateShields) return;
+      onUpdateShields([...(shields ?? []), item]);
+      setShowCustomShield(false);
     },
     [editable, shields, onUpdateShields]
   );
@@ -681,7 +728,7 @@ export function WeaponsTab({
           </div>
 
           {allRangedEntries.length === 0 && !showCustomRanged && (
-            <p className="text-sm lg:text-base text-slate-500 italic">No ranged weapons.</p>
+            <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No ranged weapons.</p>
           )}
 
           {allRangedEntries.map((entry) => {
@@ -750,7 +797,7 @@ export function WeaponsTab({
           </div>
 
           {allMeleeEntries.length === 0 && !showCustomMelee && (
-            <p className="text-sm lg:text-base text-slate-500 italic">No melee weapons.</p>
+            <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No melee weapons.</p>
           )}
 
           {allMeleeEntries.map((entry) => {
@@ -815,7 +862,7 @@ export function WeaponsTab({
         </div>
 
         {allGrenadeEntries.length === 0 && (
-          <p className="text-sm lg:text-base text-slate-500 italic">No grenades or mines carried.</p>
+          <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No grenades or mines carried.</p>
         )}
 
         <IndependentCardGrid
@@ -839,6 +886,7 @@ export function WeaponsTab({
                 <GrenadeCard
                   item={item}
                   editable={editable}
+                  strengthBonus={strengthBonus}
                   onRemove={() => removeGrenade(item.id)}
                   onUpdateQty={(qty) => updateGrenadeQty(item.id, qty)}
                   isEquipped={isEquipped}
@@ -849,6 +897,7 @@ export function WeaponsTab({
                   <GrenadeCard
                     item={{ ...item, quantity: stowedCount }}
                     editable={false}
+                    strengthBonus={strengthBonus}
                     onRemove={() => {}}
                     onUpdateQty={() => {}}
                     isStowedCard
@@ -873,7 +922,7 @@ export function WeaponsTab({
         </div>
 
         {integratedWeaponCount === 0 && (
-          <p className="text-sm lg:text-base text-slate-500 italic">No integrated weapons installed.</p>
+          <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No integrated weapons installed.</p>
         )}
 
         <IndependentCardGrid
@@ -927,7 +976,7 @@ export function WeaponsTab({
         </div>
 
         {(shields ?? []).length === 0 && (
-          <p className="text-sm lg:text-base text-slate-500 italic">No shields carried.</p>
+          <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No shields carried.</p>
         )}
 
         <IndependentCardGrid
@@ -981,13 +1030,26 @@ export function WeaponsTab({
           editable={editable}
           onSelectRanged={addFromRangedRef}
           onSelectMelee={addFromMeleeRef}
+          onCustomRanged={() => {
+            setPicker(null);
+            setShowCustomIntegratedRanged(true);
+          }}
+          onCustomMelee={() => {
+            setPicker(null);
+            setShowCustomIntegratedMelee(true);
+          }}
           onClose={() => setPicker(null)}
         />
       )}
       {picker === "grenades" && (
         <GrenadePicker
           editable={editable}
+          strengthBonus={strengthBonus}
           onSelect={addFromGrenadeRef}
+          onCustom={() => {
+            setPicker(null);
+            setShowCustomGrenade(true);
+          }}
           onClose={() => setPicker(null)}
         />
       )}
@@ -995,7 +1057,39 @@ export function WeaponsTab({
         <ShieldPicker
           editable={editable}
           onSelect={addFromShieldRef}
+          onCustom={() => {
+            setPicker(null);
+            setShowCustomShield(true);
+          }}
           onClose={() => setPicker(null)}
+        />
+      )}
+      {showCustomIntegratedRanged && (
+        <CustomRangedForm
+          title="Custom Integrated Ranged Weapon"
+          integrated
+          onAdd={addCustomIntegratedRanged}
+          onCancel={() => setShowCustomIntegratedRanged(false)}
+        />
+      )}
+      {showCustomIntegratedMelee && (
+        <CustomMeleeForm
+          title="Custom Integrated Melee Weapon"
+          integrated
+          onAdd={addCustomIntegratedMelee}
+          onCancel={() => setShowCustomIntegratedMelee(false)}
+        />
+      )}
+      {showCustomGrenade && (
+        <CustomGrenadeForm
+          onAdd={addCustomGrenade}
+          onCancel={() => setShowCustomGrenade(false)}
+        />
+      )}
+      {showCustomShield && (
+        <CustomShieldForm
+          onAdd={addCustomShield}
+          onCancel={() => setShowCustomShield(false)}
         />
       )}
     </div>

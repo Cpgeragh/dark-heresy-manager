@@ -7,6 +7,7 @@ import { ARMOUR_REFERENCE } from "../../../data/reference/armourReference";
 import { rarityColour } from "../../../ui/sourceStyles";
 import { formatWeightForDisplay } from "../../../ui/weightFormat";
 import { formatMoneyForDisplay } from "../../../ui/moneyFormat";
+import { uiTextBody, uiTextMuted, uiTextPlaceholder } from "../../../ui/editableStyles";
 import { LOCATION_LABELS, locationLabel } from "./armourHelpers";
 
 interface Props {
@@ -45,7 +46,7 @@ export function PieceNotesModal({ piece, onClose }: Props) {
         </button>
       </div>
       <div className="px-4 lg:px-5 py-3 lg:py-4 space-y-3">
-        <div className="flex flex-wrap gap-4 text-xs lg:text-sm text-slate-400">
+        <div className={`flex flex-wrap gap-4 text-xs lg:text-sm ${uiTextMuted}`}>
           <span>
             AP: <span className="text-slate-200 font-code">{piece.ap}</span>
           </span>
@@ -63,7 +64,7 @@ export function PieceNotesModal({ piece, onClose }: Props) {
           {piece.rarity && <span className={rarityColour(piece.rarity)}>{piece.rarity}</span>}
         </div>
         {Object.keys(piece.apOverrides ?? {}).length > 0 && (
-          <div className="text-xs lg:text-sm text-slate-400">
+          <div className={`text-xs lg:text-sm ${uiTextMuted}`}>
             Overrides:{" "}
             {Object.entries(piece.apOverrides!).map(([loc, ap]) => (
               <span key={loc} className="mr-2">
@@ -74,9 +75,9 @@ export function PieceNotesModal({ piece, onClose }: Props) {
           </div>
         )}
         {notes ? (
-          <p className="text-sm lg:text-base text-slate-300 leading-relaxed">{notes}</p>
+          <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{notes}</p>
         ) : (
-          <p className="text-sm lg:text-base text-slate-500 italic">No special rules.</p>
+          <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No special rules.</p>
         )}
       </div>
       <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700">

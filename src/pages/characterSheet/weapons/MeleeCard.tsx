@@ -10,7 +10,16 @@ import {
 } from "../../../data/reference/weaponReference";
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
 import { WEAPON_UPGRADE_REFERENCE } from "../../../data/reference/weaponUpgradeReference";
-import { editableInputClass, editableTextareaClass, uiSection, uiSectionHeader } from "../../../ui/editableStyles";
+import {
+  editableInputClass,
+  editableTextareaClass,
+  uiSection,
+  uiSectionHeader,
+  uiTextBody,
+  uiTextLabel,
+  uiTextMuted,
+  uiTextPlaceholder,
+} from "../../../ui/editableStyles";
 import { Button } from "../../../ui/Button";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
@@ -151,7 +160,7 @@ export function MeleePicker({
             </div>
           </div>
 
-          <div className="text-xs lg:text-sm text-slate-400 bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed">
+          <div className={`text-xs lg:text-sm ${uiTextBody} bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed`}>
             {meleeCraftsmanshipDescription(craftsmanship)}
           </div>
         </div>
@@ -207,15 +216,15 @@ export function MeleePicker({
           <div className="flex flex-wrap gap-1.5 mt-1">
             <ItemMetaChips weight={ref.weight} value={ref.value} rarity={ref.rarity} source={ref.source} />
           </div>
-          <div className="flex items-center gap-2 text-xs lg:text-sm text-slate-500 mt-0.5 flex-wrap font-code">
+          <div className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted} mt-0.5 flex-wrap font-code`}>
             <span>{ref.twoHanded ? "Two-Handed" : ref.class}</span>
             <span>{ref.damage}</span>
             <span>Pen {ref.pen}</span>
           </div>
           {ref.specialRules && ref.specialRules !== "—" && (
             <div className="flex items-center gap-1.5 mt-1">
-              <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Qualities</span>
-              <span className="text-xs lg:text-sm text-slate-400 italic">{ref.specialRules}</span>
+              <span className={uiTextLabel}>Qualities</span>
+              <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>{ref.specialRules}</span>
               <span className="inline-flex items-center -translate-y-[1.4px]">
                 <InfoModal title={`${ref.name} Qualities`} content={<SpecialRulesContent rules={ref.specialRules} />} />
               </span>
@@ -223,7 +232,7 @@ export function MeleePicker({
           )}
           {ref.description && (
             <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Rules</span>
+              <span className={uiTextLabel}>Rules</span>
               <span className="inline-flex items-center -translate-y-[1.4px]">
                 <InfoModal title={ref.name} content={<SpecialRulesContent rules="" description={ref.description} />} />
               </span>
@@ -240,9 +249,13 @@ export function MeleePicker({
 export function CustomMeleeForm({
   onAdd,
   onCancel,
+  title = "Custom Melee Weapon",
+  integrated = false,
 }: {
   onAdd: (w: MeleeWeapon) => void;
   onCancel: () => void;
+  title?: string;
+  integrated?: boolean;
 }) {
   const [name, setName] = useState("");
   const [weaponClass, setWeaponClass] = useState("");
@@ -283,13 +296,14 @@ export function CustomMeleeForm({
       value: formatMoneyInput(value),
       specialRules: selectedQualities.length > 0 ? selectedQualities.join(", ") : undefined,
       description: description.trim() || undefined,
+      integrated,
       quantity: weaponClass.toLowerCase().includes("thrown") ? 1 : undefined,
     });
   };
 
   return (
     <PickerModal
-      title="Custom Melee Weapon"
+      title={title}
       query=""
       onQueryChange={() => {}}
       onClose={onCancel}
@@ -587,7 +601,7 @@ export function MeleeCard({
           disabled={forceExpanded}
         >
           <p className="text-sm lg:text-base font-semibold text-slate-200">{weapon.name}</p>
-          {weapon.class && <p className="text-xs lg:text-sm text-slate-500">{weapon.class}</p>}
+          {weapon.class && <p className={`text-xs lg:text-sm ${uiTextMuted}`}>{weapon.class}</p>}
         </button>
         <div className="flex items-center gap-2 shrink-0">
           {onToggleEquip && (
@@ -643,8 +657,8 @@ export function MeleeCard({
 
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Qualities</span>
-              <span className="text-xs lg:text-sm text-slate-400 italic">
+              <span className={uiTextLabel}>Qualities</span>
+              <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>
                 {hasQualities ? rulesText : "-"}
               </span>
               {hasQualityModal && (
@@ -657,7 +671,7 @@ export function MeleeCard({
               )}
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Rules</span>
+              <span className={uiTextLabel}>Rules</span>
               {hasItemRules ? (
                 <span className="inline-flex items-center -translate-y-[1.4px]">
                   <InfoModal
@@ -666,14 +680,14 @@ export function MeleeCard({
                   />
                 </span>
               ) : (
-                <span className="text-xs lg:text-sm text-slate-600 italic">-</span>
+                <span className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>-</span>
               )}
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">
+              <span className={uiTextLabel}>
                 Craftsmanship
               </span>
-              <span className="text-xs lg:text-sm text-slate-400 italic">{craftsmanship}</span>
+              <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>{craftsmanship}</span>
               <span className="inline-flex items-center -translate-y-[1.4px]">
                 <InfoModal
                   title={`${craftsmanship} Weapon`}
@@ -694,7 +708,7 @@ export function MeleeCard({
 
           {isThrown && (
             <div className="border-t border-slate-800 pt-2 flex items-center justify-between gap-2">
-              <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Quantity</span>
+              <span className={uiTextLabel}>Quantity</span>
               <QuantityControl
                 quantity={weapon.quantity ?? 1}
                 editable={editable}
@@ -708,7 +722,7 @@ export function MeleeCard({
           {(attachmentRefs.length > 0 || visibleCompatible.length > 0) && (
             <div className="border-t border-slate-800 pt-2 space-y-1.5">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">
+                <span className={uiTextLabel}>
                   Attachments
                 </span>
                 {(editable ? visibleCompatible.length > 0 : attachmentRefs.length > 0 || visibleCompatible.length > 0) && (
@@ -721,7 +735,7 @@ export function MeleeCard({
                 )}
               </div>
               {attachmentRefs.length === 0 ? (
-                <p className="text-xs lg:text-sm text-slate-600 italic">None fitted</p>
+                <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>None fitted</p>
               ) : (
                 <div className="space-y-1.5">
                   {attachmentRefs.map((upgrade) => (

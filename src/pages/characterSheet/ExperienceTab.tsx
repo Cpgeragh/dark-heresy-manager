@@ -2,7 +2,12 @@
 
 import { useState, useCallback, useMemo } from "react";
 import type { ExperienceBlock, RankAdvances } from "../../types/Character";
-import { uiSection, readOnlyBadgeClass } from "../../ui/editableStyles";
+import {
+  uiSection,
+  readOnlyBadgeClass,
+  uiTextMuted,
+  uiTextPlaceholder,
+} from "../../ui/editableStyles";
 import { Button } from "../../ui/Button";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { useXpProposals } from "../../hooks/useXpProposals";
@@ -179,7 +184,7 @@ export function ExperienceTab({
         <SectionHeader>Purchased Advances</SectionHeader>
 
         {experience.ranks.length === 0 && (
-          <p className="text-sm lg:text-base text-slate-400">No advances purchased yet.</p>
+          <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No advances purchased yet.</p>
         )}
 
         <div className="space-y-4">
@@ -203,7 +208,7 @@ export function ExperienceTab({
                         )}
                       </div>
                     </div>
-                    {adv.notes && <div className="mt-1 text-xs lg:text-sm text-slate-400">{adv.notes}</div>}
+                    {adv.notes && <div className={`mt-1 text-xs lg:text-sm ${uiTextMuted}`}>{adv.notes}</div>}
                   </li>
                 ))}
               </ul>
@@ -316,7 +321,7 @@ export function ExperienceTab({
           </div>
 
           {pendingProposals.length === 0 && resolvedProposals.length === 0 && (
-            <p className="text-sm lg:text-base text-slate-400">No proposals yet.</p>
+            <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No proposals yet.</p>
           )}
 
           {pendingProposals.length > 0 && (

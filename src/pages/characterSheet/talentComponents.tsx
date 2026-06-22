@@ -8,7 +8,12 @@ import type { TraitData } from "../../data/traitData";
 import { TALENT_LIST } from "../../data/talentData";
 import { TRAIT_LIST } from "../../data/traitData";
 import type { SkillSource } from "../../types/SkillSource";
-import { editableInputClass, uiSection } from "../../ui/editableStyles";
+import {
+  editableInputClass,
+  uiSection,
+  uiTextMuted,
+  uiTextPlaceholder,
+} from "../../ui/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { Button } from "../../ui/Button";
 import { InfoModal } from "../../components/InfoModal";
@@ -105,7 +110,7 @@ export function TalentPickerModal({
   const specialisationFooter =
     editable && picked && talentData?.hasSpecialisation ? (
       <div className="space-y-2">
-        <p className="text-xs text-slate-400">
+        <p className={`text-xs ${uiTextMuted}`}>
           Adding: <span className="text-slate-200 font-medium">{picked.name}</span>
         </p>
 
@@ -137,7 +142,7 @@ export function TalentPickerModal({
               placeholder={talentData.specialisationLabel ?? "Value…"}
               className={editableInputClass(true)}
             />
-            <p className="text-xs text-slate-500">
+            <p className={`text-xs ${uiTextPlaceholder}`}>
               {talentData.specialisationMax !== undefined
                 ? `Whole number ${talentData.specialisationMin}–${talentData.specialisationMax}.`
                 : `Whole number, ${talentData.specialisationMin} or higher.`}
@@ -235,7 +240,7 @@ export function TalentPickerModal({
               </div>
             </div>
             {row.prerequisites && (
-              <div className="text-xs lg:text-sm text-slate-500 mt-0.5">
+              <div className={`text-xs lg:text-sm ${uiTextMuted} mt-0.5`}>
                 Prerequisites: {row.prerequisites}
               </div>
             )}
@@ -334,7 +339,7 @@ export function EntrySection({
       </div>
 
       <section className={uiSection + " space-y-2"}>
-        {entries.length === 0 && <p className="text-sm lg:text-base text-slate-500 italic">None added yet.</p>}
+        {entries.length === 0 && <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>None added yet.</p>}
 
         <div className={`grid gap-2 ${columns === 2 ? "lg:grid-cols-2" : "grid-cols-1"}`}>
           {[...entries]
