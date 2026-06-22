@@ -40,8 +40,8 @@ function renderTab(props: Partial<React.ComponentProps<typeof WeaponsTab>> = {})
 describe("WeaponsTab", () => {
   it("renders the Ranged and Melee sections", () => {
     renderTab();
-    expect(screen.getByText("Ranged")).toBeInTheDocument();
-    expect(screen.getByText("Melee")).toBeInTheDocument();
+    expect(screen.getAllByText("Ranged").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Melee").length).toBeGreaterThanOrEqual(1);
   });
 
   it("renders provided weapons by name", () => {

@@ -41,21 +41,13 @@ export function ItemMetaChips({
 
   const displayedWeight = formatWeightForDisplay(weight);
   const displayedValue = value !== undefined && value !== null ? formatMoneyForDisplay(value) : undefined;
-  const weightParts = displayedWeight.match(/^([+-]?\d+(?:\.\d+)?)(.*)$/);
 
   const chips = (
     <>
       {displayedWeight && (
         <span className="inline-flex items-center gap-1 text-xs lg:text-sm leading-none rounded border border-slate-700 bg-slate-800/40 px-1.5 lg:px-2 py-0.5 text-slate-400 whitespace-nowrap">
           <span className="leading-none">⚖</span>
-          {weightParts ? (
-            <span className="leading-none">
-              <span className="relative -top-[3px]">{weightParts[1]}</span>
-              {weightParts[2]}
-            </span>
-          ) : (
-            <span className="leading-none">{displayedWeight}</span>
-          )}
+          <span className="leading-none">{displayedWeight}</span>
         </span>
       )}
       {displayedValue && (

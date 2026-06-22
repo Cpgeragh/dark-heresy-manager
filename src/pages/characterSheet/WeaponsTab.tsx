@@ -2,7 +2,8 @@
 // Orchestration layer: state management and layout for all weapon categories.
 // Card components, pickers and helpers live in ./weapons/.
 
-import { useState, useCallback, Fragment } from "react";
+import { useState, useCallback, useRef, Fragment } from "react";
+import type { TouchEvent } from "react";
 import type {
   RangedWeapon,
   MeleeWeapon,
@@ -59,6 +60,45 @@ interface WeaponsTabProps {
 }
 
 type PickerTarget = "ranged" | "melee" | "integrated" | "grenades" | "shields" | null;
+type WeaponMobileSection = NonNullable<PickerTarget>;
+
+const MOBILE_WEAPON_SECTIONS: {
+  id: WeaponMobileSection;
+  label: string;
+  ariaLabel: string;
+  activeClass: string;
+}[] = [
+  {
+    id: "ranged",
+    label: "Ranged",
+    ariaLabel: "Ranged weapons",
+    activeClass: "border-sky-400 bg-sky-600/80 text-white shadow-sm shadow-sky-950/50",
+  },
+  {
+    id: "melee",
+    label: "Melee",
+    ariaLabel: "Melee weapons",
+    activeClass: "border-rose-400 bg-rose-600/80 text-white shadow-sm shadow-rose-950/50",
+  },
+  {
+    id: "grenades",
+    label: "Gren.",
+    ariaLabel: "Grenades and mines",
+    activeClass: "border-orange-400 bg-orange-600/80 text-white shadow-sm shadow-orange-950/50",
+  },
+  {
+    id: "integrated",
+    label: "Built-in",
+    ariaLabel: "Integrated weapons",
+    activeClass: "border-violet-400 bg-violet-600/80 text-white shadow-sm shadow-violet-950/50",
+  },
+  {
+    id: "shields",
+    label: "Shields",
+    ariaLabel: "Shields",
+    activeClass: "border-emerald-400 bg-emerald-600/80 text-white shadow-sm shadow-emerald-950/50",
+  },
+];
 
 // ─── Slot System ─────────────────────────────────────────────────────────────
 
@@ -92,6 +132,11 @@ export function WeaponsTab({
   const [picker, setPicker] = useState<PickerTarget>(null);
   const [showCustomRanged, setShowCustomRanged] = useState(false);
   const [showCustomMelee, setShowCustomMelee] = useState(false);
+  const [activeWeaponSection, setActiveWeaponSection] = useState<WeaponMobileSection>("ranged");
+  const [weaponSectionTransition, setWeaponSectionTransition] = useState<"idle" | "sliding">(
+    "idle"
+  );
+  const touchStartX = useRef<number | null>(null);
 
   // ── Archeotech weapons ─────────────────────────────────────────────────────
   const archeotechGrenadeItems = (archeotech ?? []).filter((a) => a.type === "Grenade");
@@ -530,11 +575,99 @@ export function WeaponsTab({
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
+  const showWeaponSection = useCallback((section: WeaponMobileSection) => {
+    setActiveWeaponSection((current) => {
+      if (section === current) return current;
+      setWeaponSectionTransition("sliding");
+      window.setTimeout(() => setWeaponSectionTransition("idle"), 180);
+      return section;
+    });
+  }, []);
+
+  const shiftWeaponSection = useCallback((offset: -1 | 1) => {
+    setActiveWeaponSection((current) => {
+      const currentIndex = MOBILE_WEAPON_SECTIONS.findIndex((section) => section.id === current);
+      const nextIndex =
+        (currentIndex + offset + MOBILE_WEAPON_SECTIONS.length) % MOBILE_WEAPON_SECTIONS.length;
+      const next = MOBILE_WEAPON_SECTIONS[nextIndex].id;
+      if (next === current) return current;
+      setWeaponSectionTransition("sliding");
+      window.setTimeout(() => setWeaponSectionTransition("idle"), 180);
+      return next;
+    });
+  }, []);
+
+  const handleWeaponTouchStart = useCallback((event: TouchEvent<HTMLDivElement>) => {
+    touchStartX.current = event.touches[0]?.clientX ?? null;
+  }, []);
+
+  const handleWeaponTouchEnd = useCallback(
+    (event: TouchEvent<HTMLDivElement>) => {
+      const startX = touchStartX.current;
+      const endX = event.changedTouches[0]?.clientX;
+      touchStartX.current = null;
+      if (startX === null || endX === undefined) return;
+
+      const deltaX = endX - startX;
+      if (Math.abs(deltaX) < 50) return;
+      shiftWeaponSection(deltaX < 0 ? 1 : -1);
+    },
+    [shiftWeaponSection]
+  );
+
+  const mobileSectionTransition =
+    weaponSectionTransition === "sliding" ? "opacity-0 translate-x-3" : "opacity-100";
+  const visibleWeaponSectionClass = (section: WeaponMobileSection) =>
+    [
+      "space-y-3",
+      activeWeaponSection === section
+        ? `min-h-[45vh] lg:min-h-0 transition-all duration-150 ease-out motion-reduce:transition-none ${mobileSectionTransition}`
+        : "hidden lg:block",
+    ].join(" ");
+  const weaponPairClass = [
+    "grid grid-cols-1 lg:grid-cols-2 gap-8",
+    activeWeaponSection === "ranged" || activeWeaponSection === "melee" ? "" : "hidden lg:grid",
+  ].join(" ");
+
   return (
-    <div className="space-y-8">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div
+      className="space-y-8"
+      onTouchStart={handleWeaponTouchStart}
+      onTouchEnd={handleWeaponTouchEnd}
+    >
+      <div className="lg:hidden">
+        <div
+          className="grid grid-cols-5 gap-1 rounded-lg border border-slate-600 bg-slate-950/70 p-1"
+          role="tablist"
+          aria-label="Weapon sections"
+        >
+          {MOBILE_WEAPON_SECTIONS.map((section) => {
+            const active = activeWeaponSection === section.id;
+            return (
+              <button
+                key={section.id}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                aria-label={section.ariaLabel}
+                onClick={() => showWeaponSection(section.id)}
+                className={[
+                  "rounded-md px-1 py-1.5 text-[11px] font-semibold transition border",
+                  active
+                    ? section.activeClass
+                    : "border-transparent text-slate-400 hover:bg-slate-800 hover:text-slate-200",
+                ].join(" ")}
+              >
+                {section.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className={weaponPairClass}>
         {/* ── RANGED ─────────────────────────────────────────────────────── */}
-        <section className="space-y-3">
+        <section className={visibleWeaponSectionClass("ranged")}>
           <div className="flex items-center justify-between">
             <SectionHeader>Ranged</SectionHeader>
             {!showCustomRanged && (
@@ -603,7 +736,7 @@ export function WeaponsTab({
         </section>
 
         {/* ── MELEE ──────────────────────────────────────────────────────── */}
-        <section className="space-y-3">
+        <section className={visibleWeaponSectionClass("melee")}>
           <div className="flex items-center justify-between">
             <SectionHeader>Melee</SectionHeader>
             {!showCustomMelee && (
@@ -670,9 +803,9 @@ export function WeaponsTab({
       </div>
 
       {/* ── GRENADES & MINES ─────────────────────────────────────────────── */}
-      <section className="space-y-3">
+      <section className={visibleWeaponSectionClass("grenades")}>
         <div className="flex items-center justify-between">
-          <SectionHeader>Grenades & Mines ({allGrenadeEntries.length})</SectionHeader>
+          <SectionHeader>Grenades & Mines</SectionHeader>
           <button
             onClick={() => setPicker("grenades")}
             className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
@@ -728,9 +861,9 @@ export function WeaponsTab({
       </section>
 
       {/* ── INTEGRATED WEAPONS ───────────────────────────────────────────── */}
-      <section className="space-y-3">
+      <section className={visibleWeaponSectionClass("integrated")}>
         <div className="flex items-center justify-between">
-          <SectionHeader>Integrated Weapons ({integratedWeaponCount})</SectionHeader>
+          <SectionHeader>Integrated Weapons</SectionHeader>
           <button
             onClick={() => setPicker("integrated")}
             className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
@@ -782,7 +915,7 @@ export function WeaponsTab({
       </section>
 
       {/* ── SHIELDS ──────────────────────────────────────────────────────── */}
-      <section className="space-y-3">
+      <section className={visibleWeaponSectionClass("shields")}>
         <div className="flex items-center justify-between">
           <SectionHeader>Shields</SectionHeader>
           <button

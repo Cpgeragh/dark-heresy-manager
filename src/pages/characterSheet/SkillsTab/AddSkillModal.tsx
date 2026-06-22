@@ -113,6 +113,7 @@ export function AddSkillModal({
               previewMode
               updateLevel={() => {}}
               updateMisc={() => {}}
+              onSelect={editable ? onAdd : undefined}
             />
           ) : (
             <SkillPickerRow
@@ -174,6 +175,7 @@ export function AddSkillModal({
                     previewMode
                     updateLevel={() => {}}
                     updateMisc={() => {}}
+                    onSelect={editable ? onAdd : undefined}
                   />
                 ) : (
                   <SkillPickerRow
