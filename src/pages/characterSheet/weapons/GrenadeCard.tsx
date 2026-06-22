@@ -76,7 +76,7 @@ export function GrenadePicker({
 
   return (
     <PickerModal
-      title="Add Grenade"
+      title={editable ? "Add Grenade" : "View Grenades"}
       placeholder="Search grenades…"
       query={query}
       onQueryChange={setQuery}

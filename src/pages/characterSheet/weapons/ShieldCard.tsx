@@ -29,7 +29,7 @@ export function ShieldPicker({
 
   return (
     <PickerModal
-      title="Add Shield"
+      title={editable ? "Add Shield" : "View Shields"}
       placeholder="Search shields…"
       query={query}
       onQueryChange={setQuery}

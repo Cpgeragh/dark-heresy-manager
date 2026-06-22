@@ -77,7 +77,7 @@ function FaithTalentSection({
                 {FAITH_GROUP_LABELS[group]}
               </p>
               {groupEntries.length === 0 && <p className="text-sm lg:text-base text-slate-500 italic">None.</p>}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 gap-2">
                 {groupEntries.map((entry) => (
                   <EntryCard
                     key={entry.uid}
@@ -93,7 +93,7 @@ function FaithTalentSection({
 
         {showPicker && (
           <TalentPickerModal
-            title="Add Faith Talent"
+            title={editable ? "Add Faith Talent" : "View Faith Talents"}
             listData={FAITH_TALENT_LIST}
             selectedIds={selectedIds}
             editable={editable}
@@ -159,7 +159,7 @@ const [activeView, setActiveView] = useState<"talents" | "faith">("talents");
 
   const transitionClass = viewTransition === "sliding"
     ? activeView === "talents" ? "opacity-0 -translate-x-3" : "opacity-0 translate-x-3"
-    : "opacity-100 translate-x-0";
+    : "opacity-100";
 
   const hasFaithTalents = talents.talents.some((e) => FAITH_TALENT_IDS.has(e.talentId));
   const showFaith = editable || hasFaithTalents;

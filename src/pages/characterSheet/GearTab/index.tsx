@@ -128,7 +128,7 @@ export function GearTab({ gear, consumables, editable, onUpdate, onUpdateConsuma
           {!showCustomForm && (
             <button
               onClick={() => setShowGearPicker(true)}
-              className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
+              className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
             >
               {editable ? "+ Add" : "View"}
             </button>
@@ -178,7 +178,7 @@ export function GearTab({ gear, consumables, editable, onUpdate, onUpdateConsuma
           <SectionHeader>Consumables ({consumables.length})</SectionHeader>
           <button
             onClick={() => setShowConsumablePicker(true)}
-            className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
+            className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
           >
             {editable ? "+ Add" : "View"}
           </button>

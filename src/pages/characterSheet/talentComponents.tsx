@@ -45,6 +45,7 @@ export function TalentPickerModal({
   const [query, setQuery] = useState("");
   const [picked, setPicked] = useState<AnyListItem | null>(null);
   const [specialisation, setSpecialisation] = useState("");
+  const modalTitle = editable ? title : title.replace(/^Add\b/, "View");
 
   const filtered = useMemo(() => {
     const seen = new Set<string>();
@@ -163,7 +164,7 @@ export function TalentPickerModal({
 
   return (
     <PickerModal
-      title={title}
+      title={modalTitle}
       placeholder="Search…"
       query={query}
       onQueryChange={(q) => {
@@ -180,8 +181,13 @@ export function TalentPickerModal({
         const sources = normaliseSources(item.source as SkillSource | SkillSource[]);
         const isSelected = picked?.id === item.id;
         return (
-          <button
+          <div
             key={item.id}
+            role="button"
+            tabIndex={editable ? 0 : -1}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") e.currentTarget.click();
+            }}
             onClick={
               editable
                 ? () => {
@@ -233,7 +239,7 @@ export function TalentPickerModal({
                 Prerequisites: {row.prerequisites}
               </div>
             )}
-          </button>
+          </div>
         );
       })}
     </PickerModal>
@@ -296,6 +302,7 @@ interface EntrySectionProps {
   entries: TalentEntry[];
   listData: readonly AnyListItem[];
   editable: boolean;
+  columns?: 1 | 2;
   onAdd: (entry: TalentEntry) => void;
   onRemove: (uid: string) => void;
 }
@@ -306,6 +313,7 @@ export function EntrySection({
   entries,
   listData,
   editable,
+  columns = 1,
   onAdd,
   onRemove,
 }: EntrySectionProps) {
@@ -328,7 +336,7 @@ export function EntrySection({
       <section className={uiSection + " space-y-2"}>
         {entries.length === 0 && <p className="text-sm lg:text-base text-slate-500 italic">None added yet.</p>}
 
-        <div className="grid grid-cols-1 gap-2">
+        <div className={`grid gap-2 ${columns === 2 ? "lg:grid-cols-2" : "grid-cols-1"}`}>
           {[...entries]
             .sort((a, b) => a.name.localeCompare(b.name))
             .map((entry) => (
@@ -338,7 +346,7 @@ export function EntrySection({
 
         {showPicker && (
           <TalentPickerModal
-            title={`Add ${singular}`}
+            title={editable ? `Add ${singular}` : `View ${singular}s`}
             listData={listData}
             selectedIds={selectedIds}
             editable={editable}

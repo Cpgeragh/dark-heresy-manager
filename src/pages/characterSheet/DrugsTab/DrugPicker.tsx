@@ -59,7 +59,7 @@ export function DrugPicker({
 
   return (
     <PickerModal
-      title="Add Drug"
+      title={editable ? "Add Drug" : "View Drugs"}
       placeholder="Search drugs…"
       query={query}
       onQueryChange={setQuery}
@@ -70,8 +70,10 @@ export function DrugPicker({
         const hasInfo = !!(ref.duration || ref.effect || ref.sideEffect || ref.notes);
 
         return (
-          <button
+          <div
             key={ref.id}
+            role="button"
+            tabIndex={editable ? 0 : -1}
             onClick={editable ? () => onSelect(ref) : undefined}
             className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${
               editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"
@@ -103,7 +105,7 @@ export function DrugPicker({
             {ref.duration && (
               <p className="text-xs lg:text-sm text-slate-500 mt-0.5">Duration: {ref.duration}</p>
             )}
-          </button>
+          </div>
         );
       })}
     </PickerModal>

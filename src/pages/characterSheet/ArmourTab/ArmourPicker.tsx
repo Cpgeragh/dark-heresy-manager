@@ -1,6 +1,7 @@
 // src/pages/characterSheet/ArmourTab/ArmourPicker.tsx
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import type { ArmourCraftsmanship } from "../../../types/Character";
 import { ARMOUR_REFERENCE, type ArmourRef } from "../../../data/reference/armourReference";
 import { PickerModal } from "../../../ui/PickerModal";
@@ -51,65 +52,69 @@ export function ArmourPicker({ editable = true, onSelect, onCustom, onClose }: P
     setCraftsmanship("Common");
   }
 
+  const craftDialogRef = useRef<HTMLDialogElement | null>(null);
+  useEffect(() => {
+    const d = craftDialogRef.current;
+    if (!d) return;
+    d.showModal();
+    return () => { if (d.open) d.close(); };
+  }, [selected]);
+
   if (selected) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-        <div className="w-full max-w-md lg:max-w-lg bg-slate-900 border border-slate-500 rounded-xl shadow-2xl">
-          <div className="flex items-center justify-between px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
-            <h3 className="text-sm lg:text-base font-semibold text-slate-200">{selected.name}</h3>
-            <button
-              onClick={resetPicker}
-              className="text-slate-400 hover:text-slate-200 text-lg leading-none"
-            >
-              {"\u00D7"}
-            </button>
-          </div>
+    return createPortal(
+      <dialog
+        ref={craftDialogRef}
+        onClose={resetPicker}
+        onClick={(e) => { if (e.target === craftDialogRef.current) resetPicker(); }}
+        className="m-auto w-[calc(100%-2rem)] max-w-md lg:max-w-lg bg-slate-900 border border-slate-500 rounded-xl shadow-2xl p-0 backdrop:bg-black/50 backdrop:backdrop-blur-sm"
+      >
+        <div className="flex items-center justify-between px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
+          <h3 className="text-sm lg:text-base font-semibold text-slate-200">{selected.name}</h3>
+          <button onClick={resetPicker} className="text-slate-400 hover:text-slate-200 text-lg leading-none">{"\u00D7"}</button>
+        </div>
 
-          <div className="px-4 lg:px-5 py-4 lg:py-5 space-y-4">
-            <div>
-              <p className="text-xs lg:text-sm text-slate-400 mb-2">Select armour quality:</p>
-              <div className="flex gap-2">
-                {ARMOUR_CRAFTSMANSHIP_OPTIONS.map((q) => (
-                  <button
-                    key={q}
-                    onClick={() => setCraftsmanship(q)}
-                    className={[
-                      "flex-1 py-1.5 lg:py-2 rounded border text-sm lg:text-base font-medium transition",
-                      craftsmanship === q
-                        ? ARMOUR_CRAFTSMANSHIP_STYLE[q]
-                        : "border-slate-700 bg-slate-800 text-slate-400 hover:border-slate-500",
-                    ].join(" ")}
-                  >
-                    {q}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="text-xs lg:text-sm text-slate-400 bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed">
-              {craftsmanshipDescription(craftsmanship)}
+        <div className="px-4 lg:px-5 py-4 lg:py-5 space-y-4">
+          <div>
+            <p className="text-xs lg:text-sm text-slate-400 mb-2">Select armour quality:</p>
+            <div className="flex gap-2">
+              {ARMOUR_CRAFTSMANSHIP_OPTIONS.map((q) => (
+                <button
+                  key={q}
+                  onClick={() => setCraftsmanship(q)}
+                  className={[
+                    "flex-1 py-1.5 lg:py-2 rounded border text-sm lg:text-base font-medium transition",
+                    craftsmanship === q
+                      ? ARMOUR_CRAFTSMANSHIP_STYLE[q]
+                      : "border-slate-700 bg-slate-800 text-slate-400 hover:border-slate-500",
+                  ].join(" ")}
+                >
+                  {q}
+                </button>
+              ))}
             </div>
           </div>
 
-          <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700 flex gap-2">
-            <button
-              onClick={resetPicker}
-              className="px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100"
-            >
-              Back
-            </button>
-            <Button className="flex-1" onClick={() => onSelect(selected, craftsmanship)}>
-              Add Armour
-            </Button>
+          <div className="text-xs lg:text-sm text-slate-400 bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed">
+            {craftsmanshipDescription(craftsmanship)}
           </div>
         </div>
-      </div>
+
+        <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700 flex gap-2">
+          <button onClick={resetPicker} className="px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100">
+            Back
+          </button>
+          <Button className="flex-1" onClick={() => onSelect(selected, craftsmanship)}>
+            Add Armour
+          </Button>
+        </div>
+      </dialog>,
+      document.body
     );
   }
 
   return (
     <PickerModal
-      title="Add Armour"
+      title={editable ? "Add Armour" : "View Armour"}
       placeholder="Search armour…"
       query={query}
       onQueryChange={setQuery}

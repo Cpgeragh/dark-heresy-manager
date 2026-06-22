@@ -6,6 +6,7 @@ import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules
 import { rarityColour, sourceColour } from "../../../ui/sourceStyles";
 import { InfoModal } from "../../../components/InfoModal";
 import type { WeaponUpgradeRef } from "../../../data/reference/weaponUpgradeReference";
+import { PickerModal } from "../../../ui/PickerModal";
 
 // ─── Stat Chip ────────────────────────────────────────────────────────────────
 
@@ -219,63 +220,57 @@ export function AttachmentCard({
 
 export function AttachmentPicker({
   compatibleUpgrades,
+  editable = true,
   onSelect,
   onClose,
 }: {
   compatibleUpgrades: WeaponUpgradeRef[];
+  editable?: boolean;
   onSelect: (id: string) => void;
   onClose: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-md lg:max-w-lg bg-slate-900 border border-slate-500 rounded-xl shadow-2xl flex flex-col max-h-[80vh]">
-        <div className="flex items-center justify-between px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
-          <h3 className="text-sm lg:text-base font-semibold text-slate-200">Add Attachment</h3>
-          <button
-            onClick={onClose}
-            className="text-slate-400 hover:text-slate-200 text-lg leading-none"
-          >
-            ×
-          </button>
-        </div>
-        <div className="overflow-y-auto flex-1 divide-y divide-slate-800">
-          {compatibleUpgrades.length === 0 && (
-            <p className="p-4 lg:p-5 text-sm lg:text-base text-slate-500 text-center">
-              No compatible upgrades available.
-            </p>
-          )}
-          {compatibleUpgrades.map((upgrade) => (
-            <button
-              key={upgrade.id}
-              onClick={() => onSelect(upgrade.id)}
-              className="w-full text-left px-4 lg:px-5 py-3 lg:py-4 hover:bg-slate-800 transition group"
-            >
-              <div className="flex items-center justify-between gap-2 mb-1">
-                <span className="text-sm lg:text-base font-medium text-slate-200 group-hover:text-white">
-                  {upgrade.name}
-                </span>
-                <div className="flex items-center gap-1.5 text-xs lg:text-sm shrink-0">
-                  <span className={rarityColour(upgrade.rarity)}>{upgrade.rarity}</span>
-                  <span className="text-slate-600">·</span>
-                  <span className="text-amber-400/80 font-code">₮ {upgrade.value}</span>
-                  <span className="text-slate-600">·</span>
-                  <span className="text-slate-400">{upgrade.weightModifier}</span>
-                </div>
-              </div>
-              <p className="text-xs lg:text-sm text-slate-400 leading-relaxed">{upgrade.description}</p>
-              <p className="text-xs lg:text-sm text-slate-600 mt-1 italic">{upgrade.applicableTo}</p>
-            </button>
-          ))}
-        </div>
-        <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700">
-          <button
-            onClick={onClose}
-            className="w-full py-1.5 lg:py-2 rounded bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100"
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
-    </div>
+    <PickerModal
+      title={editable ? "Add Attachment" : "View Attachments"}
+      query=""
+      onQueryChange={() => {}}
+      onClose={onClose}
+      isEmpty={compatibleUpgrades.length === 0}
+      emptyMessage="No compatible upgrades available."
+      hideSearch
+      footer={
+        <button
+          onClick={onClose}
+          className="w-full py-1.5 lg:py-2 rounded bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100"
+        >
+          Cancel
+        </button>
+      }
+    >
+      {compatibleUpgrades.map((upgrade) => (
+        <button
+          key={upgrade.id}
+          onClick={editable ? () => onSelect(upgrade.id) : undefined}
+          className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${
+            editable ? "hover:bg-slate-800" : "cursor-default"
+          }`}
+        >
+          <div className="flex items-center justify-between gap-2 mb-1">
+            <span className="text-sm lg:text-base font-medium text-slate-200 group-hover:text-white">
+              {upgrade.name}
+            </span>
+            <div className="flex items-center gap-1.5 text-xs lg:text-sm shrink-0">
+              <span className={rarityColour(upgrade.rarity)}>{upgrade.rarity}</span>
+              <span className="text-slate-600">·</span>
+              <span className="text-amber-400/80 font-code">₮ {upgrade.value}</span>
+              <span className="text-slate-600">·</span>
+              <span className="text-slate-400">{upgrade.weightModifier}</span>
+            </div>
+          </div>
+          <p className="text-xs lg:text-sm text-slate-400 leading-relaxed">{upgrade.description}</p>
+          <p className="text-xs lg:text-sm text-slate-600 mt-1 italic">{upgrade.applicableTo}</p>
+        </button>
+      ))}
+    </PickerModal>
   );
 }

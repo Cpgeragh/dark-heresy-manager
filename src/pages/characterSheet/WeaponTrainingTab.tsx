@@ -1,6 +1,7 @@
 // src/pages/characterSheet/WeaponTrainingTab.tsx
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import type { WeaponTrainingBlock, WeaponTrainingTalentId } from "../../types/Character";
 import { WEAPON_TRAINING_GROUPS } from "../../data/weaponTrainingData";
 
@@ -47,6 +48,14 @@ export function WeaponTrainingTab({ weaponTraining, editable, onUpdate }: Weapon
     setNewExotic("");
     setShowExoticModal(false);
   }, []);
+
+  const dialogRef = useRef<HTMLDialogElement | null>(null);
+  useEffect(() => {
+    const d = dialogRef.current;
+    if (!d) return;
+    d.showModal();
+    return () => { if (d.open) d.close(); };
+  }, [showExoticModal]);
 
   return (
     <div className="space-y-6 text-center">
@@ -120,37 +129,40 @@ export function WeaponTrainingTab({ weaponTraining, editable, onUpdate }: Weapon
         </div>
       </div>
 
-      {showExoticModal && (
-        <>
-          <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" onClick={closeModal} />
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="w-full max-w-sm rounded-lg border border-slate-700 bg-slate-900 shadow-xl p-5 space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="font-semibold text-slate-100">Add Exotic Weapon</span>
-                <button onClick={closeModal} className="text-slate-400 hover:text-slate-200 transition">✕</button>
-              </div>
-              <input
-                autoFocus
-                type="text"
-                value={newExotic}
-                onChange={(e) => setNewExotic(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && newExotic.trim()) { handleAddExotic(); setShowExoticModal(false); }
-                  if (e.key === "Escape") closeModal();
-                }}
-                placeholder="e.g. Needle Pistol"
-                className="w-full px-3 py-2 rounded border border-slate-600 bg-slate-800 text-sm text-slate-200 placeholder-slate-500"
-              />
-              <button
-                onClick={() => { handleAddExotic(); setShowExoticModal(false); }}
-                disabled={!newExotic.trim()}
-                className="w-full text-xs lg:text-sm px-3 py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition disabled:opacity-40"
-              >
-                + Add Exotic
-              </button>
+      {showExoticModal && createPortal(
+        <dialog
+          ref={dialogRef}
+          onClose={closeModal}
+          onClick={(e) => { if (e.target === dialogRef.current) closeModal(); }}
+          className="m-auto w-[calc(100%-2rem)] max-w-sm bg-slate-900 border border-slate-700 rounded-lg shadow-xl p-5 backdrop:bg-black/50 backdrop:backdrop-blur-sm"
+        >
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="font-semibold text-slate-100">Add Exotic Weapon</span>
+              <button onClick={closeModal} className="text-slate-400 hover:text-slate-200 transition">✕</button>
             </div>
+            <input
+              autoFocus
+              type="text"
+              value={newExotic}
+              onChange={(e) => setNewExotic(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && newExotic.trim()) { handleAddExotic(); setShowExoticModal(false); }
+                if (e.key === "Escape") closeModal();
+              }}
+              placeholder="e.g. Needle Pistol"
+              className="w-full px-3 py-2 rounded border border-slate-600 bg-slate-800 text-sm text-slate-200 placeholder-slate-500"
+            />
+            <button
+              onClick={() => { handleAddExotic(); setShowExoticModal(false); }}
+              disabled={!newExotic.trim()}
+              className="w-full text-xs lg:text-sm px-3 py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition disabled:opacity-40"
+            >
+              + Add Exotic
+            </button>
           </div>
-        </>
+        </dialog>,
+        document.body
       )}
     </div>
   );

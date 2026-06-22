@@ -73,7 +73,7 @@ export function GearPicker({ editable = true, onSelect, onCustom, onClose }: Pro
 
   return (
     <PickerModal
-      title={pending ? "Assigned Cost" : "Add Item"}
+      title={pending ? "Assigned Cost" : editable ? "Add Item" : "View Items"}
       placeholder="Search gear…"
       query={query}
       onQueryChange={setQuery}
@@ -151,8 +151,10 @@ export function GearPicker({ editable = true, onSelect, onCustom, onClose }: Pro
         </div>
       ) : (
         filtered.map((ref) => (
-        <button
+        <div
           key={ref.id}
+          role="button"
+          tabIndex={editable ? 0 : -1}
           onClick={editable ? () => handleSelect(ref) : undefined}
           className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
@@ -183,7 +185,7 @@ export function GearPicker({ editable = true, onSelect, onCustom, onClose }: Pro
               )}
             </div>
           </div>
-        </button>
+        </div>
         ))
       )}
     </PickerModal>

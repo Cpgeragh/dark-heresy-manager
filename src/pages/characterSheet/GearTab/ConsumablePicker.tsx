@@ -26,7 +26,7 @@ export function ConsumablePicker({ editable = true, onSelect, onClose }: Props) 
 
   return (
     <PickerModal
-      title="Add Consumable"
+      title={editable ? "Add Consumable" : "View Consumables"}
       placeholder="Search consumables…"
       query={query}
       onQueryChange={setQuery}
