@@ -22,13 +22,14 @@ import {
   usesUnitAmmoTracking,
 } from "../../../data/reference/ammoReference";
 import { WEAPON_UPGRADE_REFERENCE } from "../../../data/reference/weaponUpgradeReference";
-import { editableInputClass, uiSection } from "../../../ui/editableStyles";
+import { editableInputClass, editableTextareaClass, uiSection, uiSectionHeader } from "../../../ui/editableStyles";
 import { Button } from "../../../ui/Button";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import { formatWeightForDisplay, formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
 import { formatMoneyForDisplay, formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
+import { sourceColour } from "../../../ui/sourceStyles";
 import { InfoModal } from "../../../components/InfoModal";
 import {
   StatChip,
@@ -37,6 +38,13 @@ import {
   AttachmentPicker,
   AttachmentCard,
   EquipToggle,
+  WeaponQualitySelector,
+  DAMAGE_TYPE_OPTIONS,
+  formatDamageInput,
+  isValidDiceInput,
+  sanitizeDiceInput,
+  sanitizeNonNegativeIntegerInput,
+  sanitizePositiveIntegerInput,
 } from "./weaponShared";
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
 import { effectiveRangedStats, getCompatibleUpgrades } from "./weaponHelpers";
@@ -50,7 +58,112 @@ const WEAPON_CRAFTSMANSHIP_STYLE: Record<WeaponCraftsmanship, string> = {
   Best: "border-amber-400 bg-amber-500/20 text-amber-300",
 };
 
+const CUSTOM_RANGED_CLASS_OPTIONS = ["Pistol", "Basic", "Heavy", "Thrown", "Exotic"] as const;
+const RELOAD_TYPE_OPTIONS = ["Half", "Full", "Round", "Special", "—"] as const;
+const CUSTOM_WEAPON_ORIGIN_OPTIONS = ["Custom", "2nd Ed"] as const;
+const CUSTOM_AMMO_FAMILY_OPTIONS = [
+  {
+    label: "Las",
+    ammoType: "Las",
+    compatibleAmmoIds: [
+      "cr-charge-pack-pistol",
+      "cr-charge-pack-basic",
+      "cr-charge-pack-heavy",
+      "cr-hot-shot-charge",
+    ],
+  },
+  {
+    label: "Bolt",
+    ammoType: "Bolt",
+    compatibleAmmoIds: ["cr-bolt-shells", "cr-inferno-shells", "dh-psybolt-ammunition"],
+  },
+  {
+    label: "Solid Projectile",
+    ammoType: "Solid Projectile",
+    compatibleAmmoIds: ["cr-bullets", "cr-dumdum-bullets", "cr-man-stopper-bullets"],
+  },
+  {
+    label: "Shell",
+    ammoType: "Shell",
+    compatibleAmmoIds: ["cr-shells", "cr-inferno-shells", "dh-cryptus-shotgun-shells"],
+  },
+  {
+    label: "Flame",
+    ammoType: "Flame",
+    compatibleAmmoIds: ["cr-fuel-pistol", "cr-fuel-basic", "dh-psyflame-ammunition"],
+  },
+  {
+    label: "Melta",
+    ammoType: "Melta",
+    compatibleAmmoIds: ["cr-melta-canister-pistol", "cr-melta-canister-basic"],
+  },
+  {
+    label: "Plasma",
+    ammoType: "Plasma",
+    compatibleAmmoIds: ["cr-plasma-flask-pistol", "cr-plasma-flask-basic"],
+  },
+  { label: "Launcher", ammoType: "Launcher", compatibleAmmoIds: [] },
+  {
+    label: "Primitive",
+    ammoType: "Primitive",
+    compatibleAmmoIds: ["cr-arrows-quarrels", "cr-shot", "lw-purity-round"],
+  },
+  { label: "Shuriken", ammoType: "Shuriken", compatibleAmmoIds: ["ca-shuriken-clip"] },
+  { label: "Power Cell", ammoType: "Power Cell", compatibleAmmoIds: ["dh-synapse-power-cell"] },
+  { label: "Exotic", ammoType: "Exotic", compatibleAmmoIds: ["cr-exotic"] },
+] as const;
+
 type AmmoTrackingMode = NonNullable<RangedWeapon["ammoTracking"]>;
+
+function ammoFamilyChip(ammoType?: string): { label: string; className: string } | undefined {
+  if (!ammoType) return undefined;
+  const normalized = ammoType.toLowerCase();
+  if (normalized === "las" || normalized.includes("charge pack")) {
+    return { label: "Las", className: "border-red-500/60 bg-red-500/10 text-red-300" };
+  }
+  if (normalized === "bolt" || normalized.includes("bolt")) {
+    return { label: "Bolt", className: "border-amber-500/60 bg-amber-500/10 text-amber-300" };
+  }
+  if (normalized === "solid projectile" || normalized.includes("bullet")) {
+    return {
+      label: "Solid Projectile",
+      className: "border-slate-500/70 bg-slate-700/40 text-slate-300",
+    };
+  }
+  if (normalized === "shell" || normalized.includes("shell") || normalized === "shot") {
+    return { label: "Shell", className: "border-lime-500/60 bg-lime-500/10 text-lime-300" };
+  }
+  if (normalized === "flame" || normalized.includes("fuel")) {
+    return { label: "Flame", className: "border-orange-500/60 bg-orange-500/10 text-orange-300" };
+  }
+  if (normalized === "melta" || normalized.includes("melta")) {
+    return { label: "Melta", className: "border-violet-500/60 bg-violet-500/10 text-violet-300" };
+  }
+  if (normalized === "plasma" || normalized.includes("plasma")) {
+    return { label: "Plasma", className: "border-sky-500/60 bg-sky-500/10 text-sky-300" };
+  }
+  if (normalized === "launcher" || normalized.includes("grenade")) {
+    return { label: "Launcher", className: "border-yellow-500/60 bg-yellow-500/10 text-yellow-300" };
+  }
+  if (normalized === "primitive" || normalized.includes("arrow") || normalized.includes("quarrel")) {
+    return { label: "Primitive", className: "border-stone-500/70 bg-stone-700/30 text-stone-300" };
+  }
+  if (normalized === "shuriken" || normalized.includes("shuriken")) {
+    return { label: "Shuriken", className: "border-fuchsia-500/60 bg-fuchsia-500/10 text-fuchsia-300" };
+  }
+  if (normalized === "power cell" || normalized.includes("power cell")) {
+    return { label: "Power Cell", className: "border-cyan-500/60 bg-cyan-500/10 text-cyan-300" };
+  }
+  if (normalized === "exotic" || normalized.includes("exotic")) {
+    return { label: "Exotic", className: "border-teal-500/60 bg-teal-500/10 text-teal-300" };
+  }
+  return { label: ammoType, className: "border-slate-500/70 bg-slate-700/40 text-slate-300" };
+}
+
+function compatibleAmmoIdsForAmmoType(ammoType?: string): readonly string[] | undefined {
+  return CUSTOM_AMMO_FAMILY_OPTIONS.find((option) => option.ammoType === ammoType)
+    ?.compatibleAmmoIds;
+}
 
 function rangedCraftsmanshipDescription(craftsmanship: WeaponCraftsmanship): string {
   switch (craftsmanship) {
@@ -243,90 +356,419 @@ export function CustomRangedForm({
   onAdd: (w: RangedWeapon) => void;
   onCancel: () => void;
 }) {
-  const [fields, setFields] = useState<Omit<RangedWeapon, "id" | "custom">>({
-    name: "",
-    class: "",
-    damage: "",
-    pen: "",
-    range: "",
-    rof: "",
-    clip: "",
-    rld: "",
-    weight: "",
-    value: "",
-    specialRules: "",
-  });
+  const [name, setName] = useState("");
+  const [weaponClass, setWeaponClass] = useState("");
+  const [craftsmanship, setCraftsmanship] = useState<"" | WeaponCraftsmanship>("");
+  const [origin, setOrigin] = useState<"" | (typeof CUSTOM_WEAPON_ORIGIN_OPTIONS)[number]>("");
+  const [rangeMeters, setRangeMeters] = useState("");
+  const [ammoType, setAmmoType] = useState("");
+  const [singleShot, setSingleShot] = useState(true);
+  const [semiAuto, setSemiAuto] = useState("");
+  const [fullAuto, setFullAuto] = useState("");
+  const [damageBase, setDamageBase] = useState("1d10");
+  const [damagePlus, setDamagePlus] = useState("0");
+  const [damageType, setDamageType] = useState<(typeof DAMAGE_TYPE_OPTIONS)[number]["value"]>("I");
+  const [pen, setPen] = useState("");
+  const [clip, setClip] = useState("");
+  const [reloadAmount, setReloadAmount] = useState("");
+  const [reloadType, setReloadType] = useState("");
+  const [ammoTracking, setAmmoTracking] = useState<"" | AmmoTrackingMode>("");
+  const [weight, setWeight] = useState("");
+  const [value, setValue] = useState("");
+  const [selectedQualities, setSelectedQualities] = useState<string[]>([]);
+  const [description, setDescription] = useState("");
 
-  const makeFieldSetter = (k: keyof typeof fields) => (e: React.ChangeEvent<HTMLInputElement>) =>
-    setFields((prev) => ({
-      ...prev,
-      [k]:
-        k === "weight"
-          ? sanitizeWeightInput(e.target.value)
-          : k === "value"
-            ? sanitizeMoneyInput(e.target.value)
-            : e.target.value,
-    }));
+  const rof = `${singleShot ? "S" : "–"}/${semiAuto || "–"}/${fullAuto || "–"}`;
+  const rld =
+    reloadType === "Special" || reloadType === "—"
+      ? reloadType
+      : reloadAmount
+        ? `${reloadAmount} ${reloadType}`
+        : reloadType;
+  const canAdd =
+    Boolean(name.trim()) &&
+    Boolean(weaponClass) &&
+    Boolean(craftsmanship) &&
+    Boolean(origin) &&
+    Boolean(rangeMeters) &&
+    Boolean(ammoType) &&
+    (singleShot || Boolean(semiAuto) || Boolean(fullAuto)) &&
+    isValidDiceInput(damageBase) &&
+    Boolean(damagePlus) &&
+    Boolean(pen) &&
+    Boolean(clip) &&
+    Boolean(reloadType) &&
+    Boolean(ammoTracking) &&
+    Boolean(weight.trim()) &&
+    Boolean(value);
+
+  const addWeapon = () => {
+    if (!canAdd || !ammoTracking || !craftsmanship || !origin) return;
+    onAdd({
+      id: crypto.randomUUID(),
+      custom: true,
+      name: name.trim(),
+      class: weaponClass,
+      craftsmanship,
+      source: origin,
+      range: `${rangeMeters}m`,
+      ammoType,
+      rof,
+      damage: formatDamageInput(damageBase, damagePlus, damageType),
+      pen,
+      clip,
+      rld,
+      ammoTracking,
+      weight: formatWeightInput(weight),
+      value: formatMoneyInput(value),
+      specialRules: selectedQualities.length > 0 ? selectedQualities.join(", ") : undefined,
+      description: description.trim() || undefined,
+      quantity: weaponClass.toLowerCase().includes("thrown") ? 1 : undefined,
+    });
+  };
 
   return (
-    <div className="border border-red-700/30 bg-slate-900/60 rounded-lg p-4 lg:p-5 space-y-3">
-      <p className="text-xs lg:text-sm font-semibold text-red-500 uppercase tracking-wide">
-        Custom Ranged Weapon
-      </p>
-      <div className="grid grid-cols-2 gap-2">
-        {(
-          [
-            "name",
-            "class",
-            "range",
-            "rof",
-            "damage",
-            "pen",
-            "clip",
-            "rld",
-            "weight",
-            "value",
-            "specialRules",
-          ] as const
-        ).map((k) => (
-          <div key={k} className={k === "name" || k === "specialRules" ? "col-span-2" : ""}>
-            <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
-              {k === "rld" ? "Reload" : k}
-            </label>
-            <input
-              type="text"
-              inputMode={k === "weight" ? "decimal" : k === "value" ? "numeric" : undefined}
-              value={fields[k] ?? ""}
-              onChange={makeFieldSetter(k)}
-              className={editableInputClass(true) + " mt-0.5"}
-            />
+    <PickerModal
+      title="Custom Ranged Weapon"
+      query=""
+      onQueryChange={() => {}}
+      onClose={onCancel}
+      isEmpty={false}
+      hideSearch
+      maxHeight="max-h-[92vh]"
+      footer={
+        <div className="space-y-2">
+          {!canAdd && (
+            <p className="text-xs lg:text-sm text-slate-300"><span className="text-red-500">*</span> Required</p>
+          )}
+          <div className="flex gap-2">
+            <Button className="flex-1" onClick={addWeapon} disabled={!canAdd}>
+              Add
+            </Button>
+            <button
+              onClick={onCancel}
+              className="px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100"
+            >
+              Cancel
+            </button>
           </div>
-        ))}
+        </div>
+      }
+    >
+      <div className="p-4 lg:p-5 space-y-4">
+        <p className={uiSectionHeader}>Identity</p>
+        <div className={uiSection + " space-y-3"}>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="col-span-2">
+              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                className={editableInputClass(true) + " mt-0.5"}
+              />
+            </div>
+
+            <div className="col-span-2">
+              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                Class <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={weaponClass}
+                onChange={(event) => setWeaponClass(event.target.value)}
+                className={editableInputClass(true) + " mt-0.5"}
+              >
+                <option value="">Choose class</option>
+                {CUSTOM_RANGED_CLASS_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <p className={uiSectionHeader}>Craftsmanship & Origin</p>
+        <div className={uiSection + " space-y-3"}>
+          <div className="space-y-1">
+            <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+              Craftsmanship <span className="text-red-500">*</span>
+            </label>
+            <div className="grid grid-cols-4 gap-1.5">
+              {WEAPON_CRAFTSMANSHIP_OPTIONS.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => setCraftsmanship(option)}
+                  className={[
+                    "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
+                    craftsmanship === option
+                      ? WEAPON_CRAFTSMANSHIP_STYLE[option]
+                      : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
+                  ].join(" ")}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+              Origin <span className="text-red-500">*</span>
+            </label>
+            <div className="grid grid-cols-2 gap-1.5">
+              {CUSTOM_WEAPON_ORIGIN_OPTIONS.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => setOrigin(option)}
+                  className={[
+                    "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
+                    origin === option
+                      ? `${sourceColour(option)} bg-slate-800/70 font-semibold`
+                      : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
+                  ].join(" ")}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <p className={uiSectionHeader}>Combat</p>
+        <div className={uiSection + " space-y-3"}>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                Range (m) <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={rangeMeters}
+                onChange={(event) => setRangeMeters(sanitizePositiveIntegerInput(event.target.value))}
+                className={editableInputClass(true) + " mt-0.5"}
+              />
+            </div>
+
+            <div>
+              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                Ammo Family <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={ammoType}
+                onChange={(event) => setAmmoType(event.target.value)}
+                className={editableInputClass(true) + " mt-0.5"}
+              >
+                <option value="">Choose ammo family</option>
+                {CUSTOM_AMMO_FAMILY_OPTIONS.map((option) => (
+                  <option key={option.ammoType} value={option.ammoType}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="col-span-2">
+              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                Rate of Fire <span className="text-red-500">*</span>
+              </label>
+              <div className="grid grid-cols-3 gap-2 mt-0.5">
+                <label className="flex items-center justify-center gap-2 rounded border border-slate-600 bg-slate-900 px-2 py-1 text-sm lg:text-base text-slate-200">
+                  <input
+                    type="checkbox"
+                    checked={singleShot}
+                    onChange={(event) => setSingleShot(event.target.checked)}
+                  />
+                  Single
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={semiAuto}
+                  onChange={(event) => setSemiAuto(sanitizePositiveIntegerInput(event.target.value))}
+                  placeholder="Semi"
+                  className={editableInputClass(true)}
+                />
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={fullAuto}
+                  onChange={(event) => setFullAuto(sanitizePositiveIntegerInput(event.target.value))}
+                  placeholder="Full"
+                  className={editableInputClass(true)}
+                />
+              </div>
+            </div>
+
+            <div className="col-span-2">
+              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                Damage <span className="text-red-500">*</span>
+              </label>
+              <div className="grid grid-cols-3 gap-2 mt-0.5">
+                <input
+                  type="text"
+                  value={damageBase}
+                  onChange={(event) => setDamageBase(sanitizeDiceInput(event.target.value))}
+                  placeholder="1d10"
+                  className={editableInputClass(true)}
+                />
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={damagePlus}
+                  onChange={(event) => setDamagePlus(sanitizeNonNegativeIntegerInput(event.target.value))}
+                  placeholder="Plus"
+                  className={editableInputClass(true)}
+                />
+                <select
+                  value={damageType}
+                  onChange={(event) =>
+                    setDamageType(event.target.value as (typeof DAMAGE_TYPE_OPTIONS)[number]["value"])
+                  }
+                  className={editableInputClass(true)}
+                >
+                  {DAMAGE_TYPE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                Pen <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={pen}
+                onChange={(event) => setPen(sanitizeNonNegativeIntegerInput(event.target.value))}
+                className={editableInputClass(true) + " mt-0.5"}
+              />
+            </div>
+
+            <div>
+              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                Clip <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={clip}
+                onChange={(event) => setClip(sanitizeNonNegativeIntegerInput(event.target.value))}
+                className={editableInputClass(true) + " mt-0.5"}
+              />
+            </div>
+
+            <div className="col-span-2">
+              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                Reload <span className="text-red-500">*</span>
+              </label>
+              <div className="grid grid-cols-2 gap-2 mt-0.5">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={reloadAmount}
+                  onChange={(event) => setReloadAmount(sanitizePositiveIntegerInput(event.target.value))}
+                  placeholder="Amount"
+                  disabled={reloadType === "Special" || reloadType === "—"}
+                  className={editableInputClass(reloadType !== "Special" && reloadType !== "—")}
+                />
+                <select
+                  value={reloadType}
+                  onChange={(event) => {
+                    setReloadType(event.target.value);
+                    if (event.target.value === "Special" || event.target.value === "—") {
+                      setReloadAmount("");
+                    }
+                  }}
+                  className={editableInputClass(true)}
+                >
+                  <option value="">Choose reload</option>
+                  {RELOAD_TYPE_OPTIONS.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="col-span-2">
+              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                Ammo Tracking <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={ammoTracking}
+                onChange={(event) => setAmmoTracking(event.target.value as "" | AmmoTrackingMode)}
+                className={editableInputClass(true) + " mt-0.5"}
+              >
+                <option value="">Choose tracking</option>
+                <option value="clip">Clips + rounds</option>
+                <option value="loose">Rounds only</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <p className={uiSectionHeader}>Details</p>
+        <div className={uiSection + " space-y-3"}>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                Weight <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                inputMode="decimal"
+                value={weight}
+                onChange={(event) => setWeight(sanitizeWeightInput(event.target.value))}
+                className={editableInputClass(true) + " mt-0.5"}
+              />
+            </div>
+
+            <div>
+              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                Cost <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={value}
+                onChange={(event) => setValue(sanitizeMoneyInput(event.target.value))}
+                className={editableInputClass(true) + " mt-0.5"}
+              />
+            </div>
+          </div>
+        </div>
+
+        <p className={uiSectionHeader}>Rules</p>
+        <div className={uiSection + " space-y-3"}>
+          <div className="grid grid-cols-2 gap-2">
+            <WeaponQualitySelector selected={selectedQualities} onChange={setSelectedQualities} />
+
+            <div className="col-span-2">
+              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                Rules
+              </label>
+              <textarea
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+                rows={3}
+                className={editableTextareaClass(true) + " mt-0.5"}
+              />
+            </div>
+          </div>
+        </div>
       </div>
-      <div className="flex gap-2 pt-1">
-        <Button
-          className="flex-1"
-          onClick={() =>
-            onAdd({
-              id: crypto.randomUUID(),
-              custom: true,
-              ...fields,
-              weight: formatWeightInput(fields.weight ?? ""),
-              value: formatMoneyInput(fields.value ?? ""),
-            })
-          }
-          disabled={!fields.name?.trim()}
-        >
-          Add
-        </Button>
-        <button
-          onClick={onCancel}
-          className="px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100"
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
+    </PickerModal>
   );
 }
 
@@ -501,7 +943,7 @@ function AmmoPicker({
   onSelect,
   onClose,
 }: {
-  compatibleIds?: string[];
+  compatibleIds?: readonly string[];
   existingNames: Set<string>;
   editable?: boolean;
   onSelect: (name: string, referenceId?: string) => void;
@@ -689,8 +1131,9 @@ export function RangedCard({
     ? AMMO_REFERENCE.find((ammo) => ammo.id === loadedAmmoEntry.referenceId)
     : undefined;
   const effective = effectiveRangedStats(baseWeapon, attachmentRefs, loadedAmmoRef);
-  const addableCompatible = getCompatibleUpgrades(weapon.class ?? "", weapon.name, false, attachmentIds);
-  const viewableCompatible = getCompatibleUpgrades(weapon.class ?? "", weapon.name, false, []);
+  const resolvedAmmoType = weaponRef?.ammoType ?? weapon.ammoType;
+  const addableCompatible = getCompatibleUpgrades(weapon.class ?? "", weapon.name, false, attachmentIds, resolvedAmmoType);
+  const viewableCompatible = getCompatibleUpgrades(weapon.class ?? "", weapon.name, false, [], resolvedAmmoType);
   const visibleCompatible = allowAttachments
     ? editable
       ? addableCompatible
@@ -702,6 +1145,7 @@ export function RangedCard({
     .split(",")
     .map((r) => r.trim().replace(/\s*\(.*?\)/, ""))
     .filter((name) => Boolean(name) && Boolean(WEAPON_SPECIAL_RULES[name]));
+  const ammoFamily = ammoFamilyChip(weaponRef?.ammoType ?? weapon.ammoType);
   const rulesDescription = weaponRef?.description ?? weapon.description;
   const hasQualities = Boolean(
     rulesText && rulesText !== "—" && rulesText !== "-" && rulesText !== "â€”"
@@ -714,7 +1158,8 @@ export function RangedCard({
     weaponRef?.class.toLowerCase().includes("thrown");
   const isGrenadeLauncher =
     weapon.referenceId === "cr-grenade-launcher" || weapon.referenceId === "cr-rpg-launcher";
-  const hasAmmo = !isThrown && !isGrenadeLauncher && !!(weaponRef?.ammoType || weapon.custom);
+  const hasAmmo =
+    !isThrown && !isGrenadeLauncher && !!(weaponRef?.ammoType || weapon.ammoType || weapon.custom);
 
   const existingAmmoNames = new Set(ammoEntries.map((e) => formatAmmoName(e.name)));
 
@@ -767,7 +1212,21 @@ export function RangedCard({
           disabled={forceExpanded}
         >
           <p className="text-sm lg:text-base font-semibold text-slate-200">{weapon.name}</p>
-          {weapon.class && <p className="text-xs lg:text-sm text-slate-500">{weapon.class}</p>}
+          {(weapon.class || ammoFamily) && (
+            <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+              {weapon.class && <span className="text-xs lg:text-sm text-slate-500">{weapon.class}</span>}
+              {ammoFamily && (
+                <span
+                  className={[
+                    "text-[10px] lg:text-xs rounded border px-1.5 py-0.5 font-medium whitespace-nowrap",
+                    ammoFamily.className,
+                  ].join(" ")}
+                >
+                  {ammoFamily.label}
+                </span>
+              )}
+            </div>
+          )}
         </button>
         <div className="flex items-center gap-2 shrink-0">
           {onToggleEquip && (
@@ -864,13 +1323,15 @@ export function RangedCard({
           </div>
 
           {/* Weight / Value / Rarity / Source */}
-          <ItemMetaChips
-            weight={effective.weight}
-            value={weapon.value}
-            rarity={weapon.rarity}
-            source={weapon.source}
-            className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1"
-          />
+          <div className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1">
+            <ItemMetaChips
+              weight={effective.weight}
+              value={weapon.value}
+              rarity={weapon.rarity}
+              source={weapon.source}
+              bare
+            />
+          </div>
 
           {/* Thrown weapon: quantity counter */}
           {isThrown && (
@@ -1018,7 +1479,7 @@ export function RangedCard({
 
           {showAmmoPicker && (
             <AmmoPicker
-              compatibleIds={weaponRef?.compatibleAmmoIds}
+              compatibleIds={weaponRef?.compatibleAmmoIds ?? compatibleAmmoIdsForAmmoType(weapon.ammoType)}
               existingNames={existingAmmoNames}
               editable={editable}
               onSelect={handleAddAmmo}

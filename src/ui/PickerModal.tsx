@@ -134,7 +134,7 @@ export function PickerModal({
         {/* Header */}
         <div className="grid grid-cols-[2rem_1fr_2rem] items-center px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
           <span aria-hidden />
-          <h3 className={`text-center text-sm lg:text-base font-semibold ${titleClassName ?? "text-red-500"}`}>{title}</h3>
+          <h3 className={`text-center text-sm lg:text-base font-cinzel font-bold ${titleClassName ?? "text-red-500"}`}>{title}</h3>
           <button
             onClick={onClose}
             aria-label="Close"

@@ -2,6 +2,7 @@
 // Shared display primitives: StatChip, DamageTypeChip,
 // AttachmentPicker, and related pure helpers.
 
+import { useMemo, useState } from "react";
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
 import { rarityColour, sourceColour } from "../../../ui/sourceStyles";
 import { InfoModal } from "../../../components/InfoModal";
@@ -9,6 +10,135 @@ import type { WeaponUpgradeRef } from "../../../data/reference/weaponUpgradeRefe
 import { PickerModal } from "../../../ui/PickerModal";
 import { formatWeightForDisplay } from "../../../ui/weightFormat";
 import { formatMoneyForDisplay } from "../../../ui/moneyFormat";
+
+export const WEAPON_QUALITY_OPTIONS = Object.keys(WEAPON_SPECIAL_RULES).sort((a, b) =>
+  a.localeCompare(b)
+);
+
+export const DAMAGE_TYPE_OPTIONS = [
+  { label: "Impact", value: "I" },
+  { label: "Rending", value: "R" },
+  { label: "Energy", value: "E" },
+  { label: "Explosive", value: "X" },
+] as const;
+
+const PARAMETERIZED_WEAPON_QUALITIES = new Set(["Blast", "Felling", "Haywire", "Proven"]);
+
+function baseQualityName(quality: string): string {
+  return quality.replace(/\s*\([^)]*\)\s*$/, "").trim();
+}
+
+export function sanitizeNonNegativeIntegerInput(value: string): string {
+  return value.replace(/\D/g, "").replace(/^0+(?=\d)/, "");
+}
+
+export function sanitizePositiveIntegerInput(value: string): string {
+  return value.replace(/\D/g, "").replace(/^0+/, "");
+}
+
+export function sanitizeDiceInput(value: string): string {
+  const cleaned = value.toLowerCase().replace(/[^0-9d]/g, "");
+  const [first = "", ...rest] = cleaned.split("d");
+  return rest.length === 0 ? first : `${first}d${rest.join("")}`;
+}
+
+export function isValidDiceInput(value: string): boolean {
+  const match = value.match(/^(\d+)d(\d+)$/i);
+  if (!match) return false;
+  return Number(match[1]) > 0 && Number(match[2]) > 0;
+}
+
+export function formatDamageInput(baseDice: string, plusValue: string, type: string): string {
+  const plus = Number(plusValue || "0");
+  const plusPart = plus > 0 ? `+${plus}` : "";
+  return `${baseDice}${plusPart} ${type}`.trim();
+}
+
+export function WeaponQualitySelector({
+  selected,
+  onChange,
+}: {
+  selected: string[];
+  onChange: (next: string[]) => void;
+}) {
+  const [pending, setPending] = useState("");
+  const [parameterValue, setParameterValue] = useState("");
+  const available = useMemo(
+    () => {
+      const selectedBaseNames = new Set(selected.map(baseQualityName));
+      return WEAPON_QUALITY_OPTIONS.filter((quality) => !selectedBaseNames.has(quality));
+    },
+    [selected]
+  );
+  const pendingQuality = pending && available.includes(pending) ? pending : available[0] ?? "";
+  const needsParameter = PARAMETERIZED_WEAPON_QUALITIES.has(pendingQuality);
+  const canAdd = Boolean(pendingQuality && (!needsParameter || parameterValue));
+
+  return (
+    <div className="col-span-2 space-y-2">
+      <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+        Qualities
+      </label>
+      <div className="flex gap-2">
+        <select
+          value={pendingQuality}
+          onChange={(event) => {
+            setPending(event.target.value);
+            setParameterValue("");
+          }}
+          className="w-full rounded border border-slate-500 bg-slate-900 px-2 py-1 text-sm lg:text-base text-slate-200 focus:outline-none focus:border-red-500"
+        >
+          {available.map((quality) => (
+            <option key={quality} value={quality}>
+              {quality}
+            </option>
+          ))}
+        </select>
+        {needsParameter && (
+          <input
+            type="text"
+            inputMode="numeric"
+            value={parameterValue}
+            onChange={(event) => setParameterValue(sanitizePositiveIntegerInput(event.target.value))}
+            aria-label={`${pendingQuality} value`}
+            placeholder="Value"
+            className="w-20 rounded border border-slate-500 bg-slate-900 px-2 py-1 text-sm lg:text-base text-slate-200 focus:outline-none focus:border-red-500"
+          />
+        )}
+        <button
+          type="button"
+          onClick={() => {
+            if (!canAdd) return;
+            const nextQuality = needsParameter
+              ? `${pendingQuality} (${parameterValue})`
+              : pendingQuality;
+            onChange([...selected, nextQuality]);
+            setPending("");
+            setParameterValue("");
+          }}
+          disabled={!canAdd}
+          className="px-3 lg:px-4 py-1 rounded border border-slate-500 bg-slate-800 text-sm lg:text-base text-slate-100 transition hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Add
+        </button>
+      </div>
+      {selected.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {selected.map((quality) => (
+            <button
+              key={quality}
+              type="button"
+              onClick={() => onChange(selected.filter((item) => item !== quality))}
+              className="rounded border border-slate-600 bg-slate-800/80 px-2 py-0.5 text-xs lg:text-sm text-slate-200 transition hover:border-red-500 hover:text-red-400"
+            >
+              {quality} <span aria-hidden="true" className="text-slate-500">×</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ─── Stat Chip ────────────────────────────────────────────────────────────────
 

@@ -280,7 +280,7 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField }: SkillsTa
         onAdd={handleAdd}
       />
       <AddSkillModal
-        title="Untrained"
+        title="Untrained Basic Skills"
         previewMode
         isOpen={isUntrainedBasicOpen}
         editable={editable}

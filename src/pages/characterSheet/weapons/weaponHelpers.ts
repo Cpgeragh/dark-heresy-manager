@@ -175,7 +175,8 @@ export function getCompatibleUpgrades(
   weaponClass: string,
   weaponName: string,
   isMelee: boolean,
-  currentIds: string[]
+  currentIds: string[],
+  ammoType?: string,
 ): WeaponUpgradeRef[] {
   const cls = weaponClass.toLowerCase();
   const name = weaponName.toLowerCase();
@@ -198,8 +199,11 @@ export function getCompatibleUpgrades(
         return !isMelee && cls === "basic";
       case "cr-mono":
         return isMelee;
-      case "cr-overcharge-pack":
-        return !isMelee && (cls === "pistol" || cls === "basic");
+      case "cr-overcharge-pack": {
+        const ammoLower = ammoType?.toLowerCase() ?? "";
+        const isLas = ammoLower === "las" || ammoLower.includes("charge pack");
+        return !isMelee && (cls === "pistol" || cls === "basic") && isLas;
+      }
       case "cr-red-dot-laser-sight":
         return !isMelee && !hasSight && (cls === "pistol" || cls === "basic");
       case "cr-silencer":

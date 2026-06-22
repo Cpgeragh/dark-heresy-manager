@@ -14,6 +14,7 @@ interface SkillRowProps {
   updateLevel: (id: string, level: SkillAdvanceLevel) => void;
   updateMisc: (id: string, value: number) => void;
   previewMode?: boolean;
+  onSelect?: (id: string) => void;
 }
 
 const LEVEL_BADGE: Record<string, string> = {
@@ -23,7 +24,7 @@ const LEVEL_BADGE: Record<string, string> = {
   "+20": "bg-green-500/10 border-green-400 text-green-400",
 };
 
-export function SkillRow({ skill, editable, updateLevel, updateMisc, previewMode = false }: SkillRowProps) {
+export function SkillRow({ skill, editable, updateLevel, updateMisc, previewMode = false, onSelect }: SkillRowProps) {
   const [expanded, setExpanded] = useState(false);
 
   const totalColor = getTotalColor(skill.total);
@@ -50,7 +51,7 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc, previewMode
     <div className="rounded border border-slate-500 bg-slate-800/60 overflow-hidden">
       {/* COLLAPSED ROW */}
       <button
-        onClick={handleToggle}
+        onClick={onSelect ? () => onSelect(skill.id) : handleToggle}
         aria-expanded={expanded}
         className="w-full px-3 lg:px-4 py-2.5 lg:py-3 text-left hover:bg-slate-700/40 transition"
       >
@@ -68,10 +69,19 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc, previewMode
             <span className={`text-base font-code font-semibold shrink-0 ${totalColor}`}>
               {skill.total ?? "--"}
             </span>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-              className={`w-4 h-4 text-slate-400 shrink-0 transition-transform ${expanded ? "" : "-rotate-90"}`}>
-              <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
-            </svg>
+            {onSelect ? (
+              <span onClick={(e) => { e.stopPropagation(); handleToggle(); }} className="p-1 -m-1">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                  className={`w-4 h-4 text-slate-400 shrink-0 transition-transform ${expanded ? "" : "-rotate-90"}`}>
+                  <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
+                </svg>
+              </span>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                className={`w-4 h-4 text-slate-400 shrink-0 transition-transform ${expanded ? "" : "-rotate-90"}`}>
+                <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
+              </svg>
+            )}
           </div>
           <div className="flex items-center gap-1.5">
             <span className={`px-1.5 py-0.5 rounded border bg-slate-800 text-[10px] font-code shrink-0 ${charColour(skill.characteristic)}`}>
@@ -108,10 +118,19 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc, previewMode
           <span className={`text-lg font-code font-semibold shrink-0 ${totalColor}`}>
             {skill.total ?? "--"}
           </span>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-            className={`w-4 h-4 text-slate-400 shrink-0 transition-transform ${expanded ? "" : "-rotate-90"}`}>
-            <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
-          </svg>
+          {onSelect ? (
+            <span onClick={(e) => { e.stopPropagation(); handleToggle(); }} className="p-1 -m-1">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                className={`w-4 h-4 text-slate-400 shrink-0 transition-transform ${expanded ? "" : "-rotate-90"}`}>
+                <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
+              </svg>
+            </span>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+              className={`w-4 h-4 text-slate-400 shrink-0 transition-transform ${expanded ? "" : "-rotate-90"}`}>
+              <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
+            </svg>
+          )}
         </div>
       </button>
 
@@ -123,7 +142,7 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc, previewMode
             <div className="flex flex-wrap items-center gap-2">
               {(skill.advanced
                 ? (["trained", "+10", "+20"] as const)
-                : (["untrained", "trained", "+10", "+20"] as const)
+                : (previewMode ? ["untrained", "trained", "+10", "+20"] : ["trained", "+10", "+20"]) as readonly ("untrained" | "trained" | "+10" | "+20")[]
               ).map((value) => (
                 <button
                   key={value}
@@ -142,7 +161,7 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc, previewMode
                 </button>
               ))}
 
-              {skill.advanced && !previewMode && (
+              {!previewMode && skill.level !== "untrained" && (
                 <button
                   onClick={handleRemove}
                   className="ml-auto text-xs lg:text-sm text-red-400 hover:text-red-300 transition focus:outline-none"
