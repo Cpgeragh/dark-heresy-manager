@@ -1,10 +1,11 @@
 // src/pages/characterSheet/weapons/weaponShared.tsx
 // Shared display primitives: StatChip, DamageTypeChip,
-// AttachmentPicker, and related pure helpers.
+// UpgradePicker, and related pure helpers.
 
 import { useMemo, useState } from "react";
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
-import { rarityColour, sourceColour } from "../../../ui/sourceStyles";
+import { sourceColour } from "../../../ui/sourceStyles";
+import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { InfoModal } from "../../../components/InfoModal";
 import type { WeaponUpgradeRef } from "../../../data/reference/weaponUpgradeReference";
 import { PickerModal } from "../../../ui/PickerModal";
@@ -27,6 +28,19 @@ export const DAMAGE_TYPE_OPTIONS = [
   { label: "Rending", value: "R" },
   { label: "Energy", value: "E" },
   { label: "Explosive", value: "X" },
+] as const;
+
+export const CUSTOM_AVAILABILITY_OPTIONS = [
+  "Abundant",
+  "Plentiful",
+  "Common",
+  "Average",
+  "Scarce",
+  "Rare",
+  "Very Rare",
+  "Extremely Rare",
+  "Near Unique",
+  "Unique",
 ] as const;
 
 const PARAMETERIZED_WEAPON_QUALITIES = new Set(["Blast", "Felling", "Haywire", "Proven"]);
@@ -298,9 +312,9 @@ export function SpecialRulesContent({
   );
 }
 
-// ─── Attachment Card ──────────────────────────────────────────────────────────
+// ─── Upgrade Card ──────────────────────────────────────────────────────────
 
-export function AttachmentCard({
+export function UpgradeCard({
   upgrade,
   editable,
   onRemove,
@@ -355,9 +369,9 @@ export function AttachmentCard({
   );
 }
 
-// ─── Attachment Picker ────────────────────────────────────────────────────────
+// ─── Upgrade Picker ────────────────────────────────────────────────────────
 
-export function AttachmentPicker({
+export function UpgradePicker({
   compatibleUpgrades,
   editable = true,
   onSelect,
@@ -370,7 +384,7 @@ export function AttachmentPicker({
 }) {
   return (
     <PickerModal
-      title={editable ? "Add Attachment" : "View Attachments"}
+      title={editable ? "Add Upgrade" : "View Upgrades"}
       query=""
       onQueryChange={() => {}}
       onClose={onClose}
@@ -399,7 +413,7 @@ export function AttachmentPicker({
               {upgrade.name}
             </span>
             <div className="flex items-center gap-1.5 text-xs lg:text-sm shrink-0">
-              <span className={rarityColour(upgrade.rarity)}>{upgrade.rarity}</span>
+              <ItemMetaChips availability={upgrade.availability} bare />
               <span className={uiTextSubtle}>·</span>
               <span className="text-amber-400/80">{formatMoneyForDisplay(upgrade.value)}</span>
               <span className={uiTextSubtle}>·</span>

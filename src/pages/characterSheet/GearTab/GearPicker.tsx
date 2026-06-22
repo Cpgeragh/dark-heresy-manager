@@ -16,7 +16,7 @@ interface Props {
   onClose: () => void;
 }
 
-const RARITY_OPTIONS = [
+const AVAILABILITY_OPTIONS = [
   "Abundant",
   "Plentiful",
   "Common",
@@ -45,7 +45,7 @@ export function GearPicker({ editable = true, onSelect, onCustom, onClose }: Pro
   const filtered = GEAR_REFERENCE.filter((r) =>
     r.name.toLowerCase().includes(query.toLowerCase())
   ).sort((a, b) => a.name.localeCompare(b.name));
-  const pendingNeedsRarity = pending ? isVariableMeta(pending.rarity) : false;
+  const pendingNeedsRarity = pending ? isVariableMeta(pending.availability) : false;
   const costNum = Number(gmCost);
   const costValid = gmCost.trim() !== "" && Number.isInteger(costNum) && costNum >= 0;
   const canConfirm = costValid && (!pendingNeedsRarity || gmRarity !== "");
@@ -121,8 +121,8 @@ export function GearPicker({ editable = true, onSelect, onCustom, onClose }: Pro
                 onChange={(e) => setGmRarity(e.target.value)}
                 className={editableInputClass(true) + " appearance-none"}
               >
-                <option value="">— Select rarity —</option>
-                {RARITY_OPTIONS.map((r) => (
+                <option value="">— Select availability —</option>
+                {AVAILABILITY_OPTIONS.map((r) => (
                   <option key={r} value={r}>
                     {r}
                   </option>
@@ -171,7 +171,7 @@ export function GearPicker({ editable = true, onSelect, onCustom, onClose }: Pro
                 bare
                 weight={ref.weight}
                 value={isVariableMeta(ref.value) ? undefined : ref.value}
-                rarity={isVariableMeta(ref.rarity) ? undefined : ref.rarity}
+                availability={isVariableMeta(ref.availability) ? undefined : ref.availability}
                 source={ref.source}
               />
               {isVariableMeta(ref.value) && (

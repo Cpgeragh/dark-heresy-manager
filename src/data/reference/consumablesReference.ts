@@ -14,7 +14,7 @@ export interface ConsumableRef {
   weight?: string;
   /** Cost per dose, pack, or bottle */
   value: string;
-  rarity: string;
+  availability: string;
 }
 
 // ─── Reference Data ───────────────────────────────────────────────────────────
@@ -30,7 +30,7 @@ export const CONSUMABLES_REFERENCE: ConsumableRef[] = [
       "A popular alcoholic drink distilled from wine. It can range from lesser brews barely fit " +
       "for firebombs to well-aged and flavourful brands suitable for only the finest of the Emperor's servants.",
     value: "50 Thrones",
-    rarity: "Scarce",
+    availability: "Scarce",
   },
   {
     id: "cr-injector",
@@ -41,7 +41,7 @@ export const CONSUMABLES_REFERENCE: ConsumableRef[] = [
       "hypo-sprays and even bio-attuned skin patches. An injector can hold a single dose of any drug, " +
       "which a character may administer as a Full Action.",
     value: "5 Thrones",
-    rarity: "Abundant",
+    availability: "Abundant",
   },
   {
     id: "cr-lho-sticks",
@@ -52,7 +52,7 @@ export const CONSUMABLES_REFERENCE: ConsumableRef[] = [
       "a scented, mildly narcotic (and addictive) plant-derived substance, which is then lit and the " +
       "resulting smoke inhaled through the tube.",
     value: "10 Thrones",
-    rarity: "Common",
+    availability: "Common",
   },
   {
     id: "cr-medikit",
@@ -64,7 +64,7 @@ export const CONSUMABLES_REFERENCE: ConsumableRef[] = [
       "bonus to their Test. Medikits also come with 6 doses of stimm, which must be replaced separately when used.",
     weight: "2 kg",
     value: "150 Thrones",
-    rarity: "Common",
+    availability: "Common",
   },
   {
     id: "cr-ration-packs",
@@ -75,7 +75,7 @@ export const CONSUMABLES_REFERENCE: ConsumableRef[] = [
       "anything edible. Quality varies widely, from corpse starch rations and cultured algae up to " +
       "flavourful strips of grox meat and finest nutrislurry.",
     value: "10 Thrones",
-    rarity: "Plentiful",
+    availability: "Plentiful",
   },
   {
     id: "cr-recaf",
@@ -85,7 +85,7 @@ export const CONSUMABLES_REFERENCE: ConsumableRef[] = [
       "A popular hot beverage made from crushed and brewed leaves. Composition varies from planet " +
       "to planet, but most blends have a stimulant such as caffeine as a basic release agent.",
     value: "5 Thrones",
-    rarity: "Abundant",
+    availability: "Abundant",
   },
   {
     id: "cr-rotgut-booze",
@@ -96,7 +96,7 @@ export const CONSUMABLES_REFERENCE: ConsumableRef[] = [
       "for at least one kind of fermented liquid. The catch-all term for these more basic brews " +
       "(especially by travellers) is rotgut booze.",
     value: "10 Thrones",
-    rarity: "Abundant",
+    availability: "Abundant",
   },
   {
     id: "cr-sacred-machine-oil",
@@ -107,6 +107,6 @@ export const CONSUMABLES_REFERENCE: ConsumableRef[] = [
       "to Jamming for a number of shots equal to its clip size. If the weapon is already Jammed and the " +
       "oil is applied, it immediately unjams, but there is no further effect.",
     value: "150 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
   },
 ];

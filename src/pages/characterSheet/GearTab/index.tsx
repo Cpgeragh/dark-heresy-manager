@@ -44,7 +44,7 @@ export function GearTab({ gear, consumables, editable, onUpdate, onUpdateConsuma
           description: ref.description,
           weight: ref.weight,
           value: ref.value,
-          rarity: ref.rarity,
+          availability: ref.availability,
           source: ref.source,
         },
       ]);
@@ -85,7 +85,7 @@ export function GearTab({ gear, consumables, editable, onUpdate, onUpdateConsuma
           description: ref.description,
           weight: ref.weight,
           value: gmValue ?? ref.value,
-          rarity: gmRarity ?? ref.rarity,
+          availability: gmRarity ?? ref.availability,
           source: ref.source,
         },
       ]);

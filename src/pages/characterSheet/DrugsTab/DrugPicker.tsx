@@ -98,7 +98,7 @@ export function DrugPicker({
                 bare
                 weight={ref.weight ?? "0 kg"}
                 value={ref.value}
-                rarity={ref.rarity}
+                availability={ref.availability}
                 source={ref.source}
                 valueAmber
               />

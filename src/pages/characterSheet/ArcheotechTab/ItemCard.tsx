@@ -25,7 +25,7 @@ export function ItemCard({ item, editable, onRemove }: Props) {
   const specialRules = ref?.specialRules;
   const weight = item.weight ?? ref?.weight;
   const value = item.value ?? ref?.value;
-  const rarity = item.rarity ?? ref?.rarity;
+  const availability = item.availability ?? ref?.availability;
   const source = item.source ?? ref?.source;
 
   return (
@@ -79,7 +79,7 @@ export function ItemCard({ item, editable, onRemove }: Props) {
           <ItemMetaChips
             weight={weight}
             value={value}
-            rarity={rarity}
+            availability={availability}
             source={source}
             valueAmber
             className="flex flex-wrap gap-1.5 mt-1.5"

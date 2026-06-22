@@ -31,6 +31,7 @@ import {
   EquipToggle,
   WeaponQualitySelector,
   DAMAGE_TYPE_OPTIONS,
+  CUSTOM_AVAILABILITY_OPTIONS,
   formatDamageInput,
   isValidDiceInput,
   sanitizeDiceInput,
@@ -40,18 +41,6 @@ import {
 
 const CUSTOM_GRENADE_ORIGIN_OPTIONS = ["Custom", "2nd Ed"] as const;
 const CUSTOM_GRENADE_TYPE_OPTIONS = ["Grenade", "Mine"] as const;
-const CUSTOM_RARITY_OPTIONS = [
-  "Abundant",
-  "Plentiful",
-  "Common",
-  "Average",
-  "Scarce",
-  "Rare",
-  "Very Rare",
-  "Extremely Rare",
-  "Near Unique",
-  "Unique",
-] as const;
 
 export const EXPLOSIVE_MISHAPS_CONTENT = (
   <div className="space-y-3">
@@ -138,11 +127,8 @@ export function GrenadePicker({
         ) : undefined
       }
       filterRow={
-        <p className={`text-[0px] text-transparent ${uiTextBody} italic`}>
-          <span className={`text-xs lg:text-sm ${uiTextBody}`}>
-            Range for all thrown grenades: {thrownRange}
-          </span>
-          Range for all thrown grenades: SBx3 (Strength Bonus × 3 metres)
+        <p className={`text-xs lg:text-sm ${uiTextBody} italic`}>
+          Range for all thrown grenades: {thrownRange}
         </p>
       }
     >
@@ -160,7 +146,7 @@ export function GrenadePicker({
             {ref.name}
           </span>
           <div className="flex flex-wrap gap-1.5 mt-1">
-            <ItemMetaChips weight={ref.weight} value={ref.value} rarity={ref.rarity} source={ref.source} valueAmber />
+            <ItemMetaChips weight={ref.weight} value={ref.value} availability={ref.availability} source={ref.source} valueAmber />
           </div>
           <div className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted} mt-0.5 flex-wrap font-code`}>
             <span>{ref.type ?? "Grenade"}</span>
@@ -203,7 +189,7 @@ export function CustomGrenadeForm({
   const [name, setName] = useState("");
   const [type, setType] = useState<"" | (typeof CUSTOM_GRENADE_TYPE_OPTIONS)[number]>("");
   const [origin, setOrigin] = useState<"" | (typeof CUSTOM_GRENADE_ORIGIN_OPTIONS)[number]>("");
-  const [rarity, setRarity] = useState("");
+  const [availability, setAvailability] = useState("");
   const [damageMode, setDamageMode] = useState<"damage" | "special" | "none">("damage");
   const [damageBase, setDamageBase] = useState("1d10");
   const [damagePlus, setDamagePlus] = useState("0");
@@ -225,7 +211,7 @@ export function CustomGrenadeForm({
     Boolean(name.trim()) &&
     Boolean(type) &&
     Boolean(origin) &&
-    Boolean(rarity) &&
+    Boolean(availability) &&
     (damageMode !== "damage" || isValidDiceInput(damageBase)) &&
     Boolean(damagePlus) &&
     Boolean(pen) &&
@@ -247,7 +233,7 @@ export function CustomGrenadeForm({
       specialRules: selectedQualities.length > 0 ? selectedQualities.join(", ") : undefined,
       weight: formatWeightInput(weight),
       value: formatMoneyInput(value),
-      rarity,
+      availability,
       source: origin,
       description: description.trim() || undefined,
     });
@@ -387,11 +373,11 @@ export function CustomGrenadeForm({
             </div>
             <div className="col-span-2">
               <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
-                Rarity <span className="text-red-500">*</span>
+                Availability <span className="text-red-500">*</span>
               </label>
-              <select value={rarity} onChange={(event) => setRarity(event.target.value)} className={editableInputClass(true) + " mt-0.5"}>
-                <option value="">Choose rarity</option>
-                {CUSTOM_RARITY_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
+              <select value={availability} onChange={(event) => setAvailability(event.target.value)} className={editableInputClass(true) + " mt-0.5"}>
+                <option value="">Choose availability</option>
+                {CUSTOM_AVAILABILITY_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
               </select>
             </div>
           </div>
@@ -602,11 +588,11 @@ export function GrenadeCard({
             )}
           </div>
 
-          {/* Weight / Value / Rarity / Source */}
+          {/* Weight / Value / Availability / Source */}
           <ItemMetaChips
             weight={item.weight}
             value={item.value}
-            rarity={item.rarity}
+            availability={item.availability}
             source={item.source}
             valueAmber
             className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1"

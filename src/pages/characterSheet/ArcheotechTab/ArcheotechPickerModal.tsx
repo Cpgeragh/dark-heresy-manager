@@ -6,7 +6,7 @@ import {
   type ArcheotechRef,
 } from "../../../data/reference/archeotechReference";
 import { editableInputClass, uiTextBody, uiTextMuted } from "../../../ui/editableStyles";
-import { RARITY_OPTIONS } from "./archeotechConstants";
+import { AVAILABILITY_OPTIONS } from "./archeotechConstants";
 import { PickerModal } from "../../../ui/PickerModal";
 import { Button } from "../../../ui/Button";
 import { InfoModal } from "../../../components/InfoModal";
@@ -42,7 +42,7 @@ export function ArcheotechPickerModal({ editable = true, onSelect, onCustom, onC
     const normalized = value?.trim().toLowerCase();
     return !normalized || normalized === "—" || normalized === "variable" || normalized === "varies";
   };
-  const needsGmInput = (ref: ArcheotechRef) => isUnknownMeta(ref.value) || isUnknownMeta(ref.rarity);
+  const needsGmInput = (ref: ArcheotechRef) => isUnknownMeta(ref.value) || isUnknownMeta(ref.availability);
 
   function handleRowClick(ref: ArcheotechRef) {
     if (!editable) return;
@@ -119,8 +119,8 @@ export function ArcheotechPickerModal({ editable = true, onSelect, onCustom, onC
               onChange={(e) => setGmRarity(e.target.value)}
               className={editableInputClass(true) + " appearance-none"}
             >
-              <option value="">— Select rarity —</option>
-              {RARITY_OPTIONS.map((r) => (
+              <option value="">— Select availability —</option>
+              {AVAILABILITY_OPTIONS.map((r) => (
                 <option key={r} value={r}>
                   {r}
                 </option>
@@ -169,12 +169,12 @@ export function ArcheotechPickerModal({ editable = true, onSelect, onCustom, onC
                 bare
                 weight={ref.weight}
                 value={isUnknownMeta(ref.value) ? undefined : ref.value}
-                rarity={isUnknownMeta(ref.rarity) ? undefined : ref.rarity}
+                availability={isUnknownMeta(ref.availability) ? undefined : ref.availability}
                 source={ref.source}
                 valueAmber
               />
               {needsGmInput(ref) && (
-                <span className="text-amber-400/70 italic">GM determines cost &amp; rarity</span>
+                <span className="text-amber-400/70 italic">GM determines cost &amp; availability</span>
               )}
             </div>
           </button>

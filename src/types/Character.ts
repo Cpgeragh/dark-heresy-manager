@@ -114,11 +114,11 @@ export interface RangedWeapon {
   specialRules?: string;
   weight?: string;
   value?: string;
-  rarity?: string;
+  availability?: string;
   source?: string; // e.g. "CR", "BoJ" — which book to look this up in
   custom?: boolean; // true when created via "Add Custom"
   craftsmanship?: WeaponCraftsmanship;
-  attachments?: string[]; // WeaponUpgradeRef.id values for fitted upgrades
+  upgrades?: string[]; // WeaponUpgradeRef.id values for fitted upgrades
   ammoEntries?: WeaponAmmoEntry[]; // ammo types carried; one marked loaded
   ammoTracking?: "clip" | "loose"; // clip = spare clips plus partial rounds; loose = rounds only
   ammoType?: string; // custom/reference ammo family label used for chip display and ammo filtering
@@ -138,11 +138,11 @@ export interface MeleeWeapon {
   specialRules?: string;
   weight?: string;
   value?: string;
-  rarity?: string;
+  availability?: string;
   source?: string;
   custom?: boolean;
   craftsmanship?: WeaponCraftsmanship;
-  attachments?: string[]; // WeaponUpgradeRef.id values for fitted upgrades
+  upgrades?: string[]; // WeaponUpgradeRef.id values for fitted upgrades
   quantity?: number; // for thrown melee weapons (knives, spears) — how many carried
   description?: string; // custom rules text separate from qualities
   integrated?: boolean; // true for custom built-in weapons without a reference id
@@ -165,7 +165,7 @@ export interface ShieldItem {
   notes?: string; // full rules text
   weight?: string;
   value?: string;
-  rarity?: string;
+  availability?: string;
   source?: string;
   custom?: boolean;
   equipped?: boolean; // true = currently active shield
@@ -197,7 +197,7 @@ export interface WornArmourPiece {
   notes?: string;
   weight?: string;
   value?: string;
-  rarity?: string;
+  availability?: string;
   source?: string;
   craftsmanship?: ArmourCraftsmanship;
   custom?: boolean; // true when created via "Add Custom"
@@ -219,7 +219,7 @@ export interface CyberneticItem {
   craftsmanship: CyberneticCraftsmanship;
   notes?: string; // player-added notes
   value?: string;
-  rarity?: string;
+  availability?: string;
   source?: string;
   /** Specific body locations where this implant is installed (e.g. ["rightArm"]) */
   bodyLocation?: ArmourLocationKey[];
@@ -235,7 +235,7 @@ export interface GearItem {
   description?: string;
   weight?: string;
   value?: string;
-  rarity?: string;
+  availability?: string;
   source?: string;
 }
 
@@ -253,7 +253,7 @@ export interface ArcheotechItem {
   notes?: string;
   weight?: string;
   value?: string;
-  rarity?: string;
+  availability?: string;
   source?: string;
   equipped?: boolean; // true = counts toward slot budget, shown expanded and pinned to top
 }
@@ -268,7 +268,7 @@ export interface DrugItem {
   quantity: number;
   weight?: string;
   value?: string;
-  rarity?: string;
+  availability?: string;
   source?: string;
   notes?: string; // player-added notes
 }
@@ -284,7 +284,7 @@ export interface ConsumableItem {
   description?: string;
   weight?: string;
   value?: string; // cost per dose/unit
-  rarity?: string;
+  availability?: string;
   source?: string;
 }
 
@@ -305,7 +305,7 @@ export interface GrenadeItem {
   specialRules?: string;
   weight?: string;
   value?: string; // cost per grenade
-  rarity?: string;
+  availability?: string;
   source?: string;
   description?: string; // custom rules text
   custom?: boolean;

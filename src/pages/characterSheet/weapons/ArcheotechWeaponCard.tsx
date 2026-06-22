@@ -47,7 +47,7 @@ export function ArcheotechWeaponCard({
   const description = item.description ?? ref?.description;
   const weight = item.weight ?? ref?.weight;
   const value = item.value ?? ref?.value;
-  const rarity = item.rarity ?? ref?.rarity;
+  const availability = item.availability ?? ref?.availability;
   const source = item.source ?? ref?.source;
 
   const hasRules = !!specialRules?.trim();
@@ -167,11 +167,11 @@ export function ArcheotechWeaponCard({
             )}
           </div>
 
-          {/* Weight / Value / Rarity / Source */}
+          {/* Weight / Value / Availability / Source */}
           <ItemMetaChips
             weight={weight}
             value={value}
-            rarity={rarity}
+            availability={availability}
             source={source}
             valueAmber
             className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1"

@@ -21,7 +21,7 @@ export interface ArmourRef {
   notes?: string;
   weight: string;
   value: string;
-  rarity: string;
+  availability: string;
   /** true for force fields — they have a Protection Rating, not AP, and cover no fixed locations */
   isForceField?: boolean;
   /** Protection Rating for force fields */
@@ -59,7 +59,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     notes: PRIMITIVE_NOTE,
     weight: "5 kg",
     value: "25 Thrones",
-    rarity: "Average",
+    availability: "Average",
   },
   {
     id: "cr-heavy-leathers",
@@ -70,7 +70,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     notes: PRIMITIVE_NOTE,
     weight: "7 kg",
     value: "100 Thrones",
-    rarity: "Common",
+    availability: "Common",
   },
   {
     id: "cr-quilted-vest",
@@ -81,7 +81,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     notes: PRIMITIVE_NOTE,
     weight: "2 kg",
     value: "10 Thrones",
-    rarity: "Common",
+    availability: "Common",
   },
   {
     id: "cr-beast-furs",
@@ -92,7 +92,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     notes: PRIMITIVE_NOTE,
     weight: "10 kg",
     value: "5 Thrones",
-    rarity: "Average",
+    availability: "Average",
   },
   {
     id: "cr-grox-hides",
@@ -103,7 +103,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     notes: PRIMITIVE_NOTE,
     weight: "14 kg",
     value: "60 Thrones",
-    rarity: "Common",
+    availability: "Common",
   },
   {
     id: "cr-chain-coat",
@@ -114,7 +114,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     notes: PRIMITIVE_NOTE,
     weight: "18 kg",
     value: "50 Thrones",
-    rarity: "Average",
+    availability: "Average",
   },
   {
     id: "cr-feudal-plate",
@@ -125,7 +125,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     notes: PRIMITIVE_NOTE,
     weight: "30 kg",
     value: "120 Thrones",
-    rarity: "Scarce",
+    availability: "Scarce",
   },
   {
     id: "cr-xeno-hides",
@@ -136,7 +136,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     notes: PRIMITIVE_NOTE,
     weight: "22 kg",
     value: "5,000 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
   },
 
   // ── Core Rulebook — Flak Armour ───────────────────────────────────────────
@@ -149,7 +149,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     notes: FLAK_NOTE,
     weight: "2 kg",
     value: "25 Thrones",
-    rarity: "Average",
+    availability: "Average",
   },
   {
     id: "cr-flak-gauntlets",
@@ -160,7 +160,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     notes: FLAK_NOTE,
     weight: "1 kg",
     value: "50 Thrones",
-    rarity: "Average",
+    availability: "Average",
   },
   {
     id: "cr-light-flak-coat",
@@ -171,7 +171,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     notes: FLAK_NOTE,
     weight: "4 kg",
     value: "80 Thrones",
-    rarity: "Scarce",
+    availability: "Scarce",
   },
   {
     id: "cr-flak-vest",
@@ -182,7 +182,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     notes: FLAK_NOTE,
     weight: "5 kg",
     value: "50 Thrones",
-    rarity: "Average",
+    availability: "Average",
   },
   {
     id: "cr-flak-jacket",
@@ -193,7 +193,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     notes: FLAK_NOTE,
     weight: "6 kg",
     value: "100 Thrones",
-    rarity: "Average",
+    availability: "Average",
   },
   {
     id: "cr-flak-cloak",
@@ -204,7 +204,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     notes: FLAK_NOTE,
     weight: "8 kg",
     value: "80 Thrones",
-    rarity: "Scarce",
+    availability: "Scarce",
   },
   {
     id: "cr-guard-flak-armour",
@@ -215,7 +215,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     notes: FLAK_NOTE,
     weight: "11 kg",
     value: "300 Thrones",
-    rarity: "Scarce",
+    availability: "Scarce",
   },
 
   // ── Core Rulebook — Mesh Armour ───────────────────────────────────────────
@@ -228,7 +228,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     notes: MESH_NOTE,
     weight: "0.5 kg",
     value: "100 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
   },
   {
     id: "cr-mesh-gloves",
@@ -239,7 +239,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     notes: MESH_NOTE,
     weight: "0.5 kg",
     value: "120 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
   },
   {
     id: "cr-xeno-mesh",
@@ -250,7 +250,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     notes: MESH_NOTE,
     weight: "2 kg",
     value: "375 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
   },
   {
     id: "cr-mesh-vest",
@@ -261,7 +261,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     notes: MESH_NOTE,
     weight: "1 kg",
     value: "150 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
   },
   {
     id: "cr-mesh-combat-cloak",
@@ -272,7 +272,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     notes: MESH_NOTE,
     weight: "1.5 kg",
     value: "350 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
   },
 
   // ── Core Rulebook — Carapace Armour ──────────────────────────────────────
@@ -285,7 +285,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     notes: "Densely layered armaplas, ceramite, or other highly durable material.",
     weight: "2 kg",
     value: "250 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
   },
   {
     id: "cr-carapace-vambraces",
@@ -297,7 +297,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
       "Densely layered plates of armaplas, ceramite, or another highly durable material. Heavy to wear and difficult to fit over flexible areas such as joints.",
     weight: "2 kg",
     value: "300 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
   },
   {
     id: "cr-carapace-greaves",
@@ -309,7 +309,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
       "Densely layered plates of armaplas, ceramite, or another highly durable material. Heavy to wear and difficult to fit over flexible areas such as joints.",
     weight: "3 kg",
     value: "375 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
   },
   {
     id: "cr-enforcer-light-carapace",
@@ -321,7 +321,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
       "Densely layered plates of armaplas, ceramite, or another highly durable material. Heavy to wear and difficult to fit over flexible areas such as joints.",
     weight: "15 kg",
     value: "575 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
   },
   {
     id: "cr-carapace-chest-plate",
@@ -333,7 +333,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
       "Densely layered plates of armaplas, ceramite, or another highly durable material. Heavy to wear and difficult to fit over flexible areas such as joints.",
     weight: "7 kg",
     value: "600 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
   },
   {
     id: "cr-storm-trooper-carapace",
@@ -345,7 +345,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
       "Densely layered plates of armaplas, ceramite, or another highly durable material. Heavy to wear and difficult to fit over flexible areas such as joints.",
     weight: "17 kg",
     value: "3,750 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
   },
 
   // ── Core Rulebook — Power Armour ──────────────────────────────────────────
@@ -360,7 +360,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
       "Requires a constant power supply; a standard non-military supply lasts 1d5 hours before needing replacement or recharging.",
     weight: "40 kg",
     value: "8,500 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
   },
   {
     id: "cr-power-armour",
@@ -373,7 +373,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
       "Requires a constant power supply; a standard non-military supply lasts 1d5 hours before needing replacement or recharging.",
     weight: "65 kg",
     value: "15,000 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
   },
 
   // ── Book of Judgement ─────────────────────────────────────────────────────
@@ -389,7 +389,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
       "Lock gloves count as recoil gloves. Helmet can be hermetically sealed.",
     weight: "14 kg",
     value: "3,000 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
   },
   {
     id: "arbites-riot-armour",
@@ -402,7 +402,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
       "all other damage types bypass it entirely. Reduces Agility by 10 while worn.",
     weight: "4 kg",
     value: "270 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
   },
   {
     id: "ballistic-cloth-surcoat",
@@ -415,7 +415,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
       "Adds +1 AP to Arms and Body.",
     weight: "1 kg",
     value: "275 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
   },
   {
     id: "gutterforged-armour",
@@ -428,7 +428,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
       "wearer suffers –15 to Agility.",
     weight: "41.5 kg",
     value: "350 Thrones",
-    rarity: "Scarce",
+    availability: "Scarce",
   },
   {
     id: "judge-armour",
@@ -442,7 +442,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
       "from the planet where the Judge is stationed.",
     weight: "16.5 kg",
     value: "5,500 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
   },
   {
     id: "verispex-armour",
@@ -455,7 +455,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
       "+10 to Awareness and Medicae Tests made to find information in the field.",
     weight: "5.5 kg",
     value: "500 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
   },
   {
     id: "verispex-helm",
@@ -467,7 +467,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
       "Includes both infra-red goggles and a photo-visor. Adds +10 to Search and Tracking Tests.",
     weight: "2.5 kg",
     value: "750 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
   },
 
   // ── Blood of Martyrs ──────────────────────────────────────────────────────
@@ -485,7 +485,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
       "hours in such a combination, the wearer must pass a Toughness Test or gain 1 Level of Fatigue.",
     weight: "4 kg",
     value: "500 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
   },
   {
     id: "ecclesiarchy-overlay",
@@ -498,7 +498,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
       "+10 bonus to Command and Fellowship Tests when inspiring, leading, or rallying the faithful.",
     weight: "+2 kg",
     value: "1,000 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
   },
   {
     id: "hospitaller-carapace",
@@ -514,7 +514,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
       "Helmet incorporates a re-breather.",
     weight: "20 kg",
     value: "10,000 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
   },
   {
     id: "praesidium-protectiva",
@@ -530,7 +530,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
       "Can be worn on either arm — adjust the covered location accordingly.",
     weight: "14 kg",
     value: "7,500 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
   },
   {
     id: "sanctified-carapace",
@@ -546,7 +546,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
       "All supernatural creatures within 20 metres take a –10 penalty to Willpower Tests.",
     weight: "18 kg",
     value: "6,000 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
   },
   {
     id: "sanctified-chain-coat",
@@ -559,7 +559,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
       "that deal damage directly, and against attacks made with the Warp Weapon quality.",
     weight: "15 kg",
     value: "750 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
   },
   {
     id: "shield-robes",
@@ -572,7 +572,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
       "Can be worn as secondary clothing while Power Armour is under maintenance.",
     weight: "2 kg",
     value: "5,000 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
   },
   {
     id: "sororitas-power-armour",
@@ -592,7 +592,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
       "Problems continue until repaired with a Challenging (+0) Tech-Use Test.",
     weight: "35 kg",
     value: "20,000 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
   },
 
   // ── Daemon Hunter ─────────────────────────────────────────────────────────
@@ -607,7 +607,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
       "Critical damage to the Head location is reduced by 2.",
     weight: "3 kg",
     value: "20 Thrones",
-    rarity: "Common",
+    availability: "Common",
   },
   {
     id: "dh-malleus-power-armour",
@@ -621,7 +621,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
       "Power pack lasts one week without recharging. Otherwise identical to standard Power Armour.",
     weight: "180 kg",
     value: "25,000 Thrones",
-    rarity: "Near Unique",
+    availability: "Near Unique",
   },
   {
     id: "dh-malleus-terminator-armour",
@@ -637,7 +637,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
       "Daemons striking the wearer with natural weapons take 1d5 damage ignoring Armour and Toughness Bonus.",
     weight: "400 kg",
     value: "—",
-    rarity: "Unique",
+    availability: "Unique",
   },
 
   // ── Daemon Hunter — Force Fields ─────────────────────────────────────────
@@ -658,7 +658,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
       "or repaired with the Luminen Charge Talent or a Very Hard (-30) Tech-Use Test.",
     weight: "0.3 kg",
     value: "5,000 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
   },
   {
     id: "dh-refraction-field-brontian",
@@ -677,7 +677,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
       "recharged or repaired with the Luminen Charge Talent or a Very Hard (-30) Tech-Use Test.",
     weight: "0.4 kg",
     value: "15,000 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
   },
   {
     id: "dh-jokaerian-field",
@@ -695,7 +695,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
       "An overloaded field ceases to function until recharged or repaired with the Luminen Charge Talent or a Very Hard (-30) Tech-Use Test.",
     weight: "0.5 kg",
     value: "50,000 Thrones",
-    rarity: "Near Unique",
+    availability: "Near Unique",
   },
 
   // ── Lathe Worlds ─────────────────────────────────────────────────────────
@@ -712,7 +712,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
       "The intimidating skull-shaped mask also grants +10 to Intimidate Tests.",
     weight: "6 kg",
     value: "12,500 Thrones",
-    rarity: "Extremely Rare",
+    availability: "Extremely Rare",
   },
 
   // ── Creatures Anathema ───────────────────────────────────────────────────
@@ -729,6 +729,6 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
       "Without power, the armour cannot move. Far too bulky to be worn by a human.",
     weight: "60 kg",
     value: "—",
-    rarity: "—",
+    availability: "—",
   },
 ];

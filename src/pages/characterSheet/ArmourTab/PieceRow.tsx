@@ -74,7 +74,7 @@ export function PieceRow({ piece, editable, worn, onToggle, onRemove, onInfo }: 
           <ItemMetaChips
             weight={piece.weight}
             value={piece.value}
-            rarity={piece.rarity}
+            availability={piece.availability}
             source={piece.source}
           />
         </div>

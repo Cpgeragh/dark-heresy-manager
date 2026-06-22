@@ -53,7 +53,7 @@ export function ConsumablePicker({ editable = true, onSelect, onClose }: Props) 
                 bare
                 weight={ref.weight}
                 value={ref.value}
-                rarity={ref.rarity}
+                availability={ref.availability}
                 source={ref.source}
               />
             </div>

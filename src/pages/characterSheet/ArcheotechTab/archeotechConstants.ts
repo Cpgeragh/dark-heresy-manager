@@ -3,7 +3,7 @@
 export const ITEM_TYPES = ["Weapon", "Grenade", "Mine", "Device", "Tool", "Other"] as const;
 export type ItemType = (typeof ITEM_TYPES)[number];
 
-export const RARITY_OPTIONS = [
+export const AVAILABILITY_OPTIONS = [
   "Abundant",
   "Plentiful",
   "Common",

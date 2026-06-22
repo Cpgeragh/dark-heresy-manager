@@ -208,7 +208,7 @@ export function ArmourTab({
         worn: true,
         weight: crafted.weight,
         value: ref.value,
-        rarity: ref.rarity,
+        availability: ref.availability,
         source: ref.source,
       });
     },

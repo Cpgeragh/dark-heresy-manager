@@ -68,7 +68,7 @@ export function ImplantRow({ item, editable, onCycleQuality, onRemove }: Props) 
             bare
             valueAmber
             value={item.value ?? ref?.value}
-            rarity={item.rarity ?? ref?.rarity}
+            availability={item.availability ?? ref?.availability}
             source={item.source ?? ref?.source}
           />
         </div>

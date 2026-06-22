@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import { useState } from "react";
 import type { RangedWeaponRef, MeleeWeaponRef } from "../../../data/reference/weaponReference";
 import type { WeaponCraftsmanship } from "../../../types/Character";
 import { Button } from "../../../ui/Button";
@@ -53,32 +52,30 @@ export function IntegratedWeaponPicker({
     setCraftsmanship("Common");
   }
 
-  const craftDialogRef = useRef<HTMLDialogElement | null>(null);
-  useEffect(() => {
-    const d = craftDialogRef.current;
-    if (!d) return;
-    d.showModal();
-    return () => { if (d.open) d.close(); };
-  }, [selected]);
-
   if (selected) {
-    return createPortal(
-      <dialog
-        ref={craftDialogRef}
+    return (
+      <PickerModal
+        title={selected.ref.name}
+        titleClassName="text-slate-200"
+        closeLabel="\u2190"
+        query=""
+        onQueryChange={() => {}}
         onClose={resetPicker}
-        onClick={(event) => { if (event.target === craftDialogRef.current) resetPicker(); }}
-        className="m-auto w-[calc(100%-2rem)] max-w-md lg:max-w-lg bg-slate-900 border border-slate-500 rounded-xl shadow-2xl p-0 backdrop:bg-black/50 backdrop:backdrop-blur-sm"
-      >
-        <div className="flex items-center justify-between px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
-          <h3 className="text-sm lg:text-base font-semibold text-slate-200">{selected.ref.name}</h3>
-          <button
-            onClick={resetPicker}
-            className="text-slate-400 hover:text-slate-200 text-lg leading-none"
+        isEmpty={false}
+        hideSearch
+        footer={
+          <Button
+            className="w-full"
+            onClick={() =>
+              selected.kind === "ranged"
+                ? onSelectRanged(selected.ref, craftsmanship)
+                : onSelectMelee(selected.ref, craftsmanship)
+            }
           >
-            {"\u00D7"}
-          </button>
-        </div>
-
+            Add Weapon
+          </Button>
+        }
+      >
         <div className="px-4 lg:px-5 py-4 lg:py-5 space-y-4">
           <div>
             <p className={`text-xs lg:text-sm ${uiTextMuted} mb-2`}>Select weapon craftsmanship:</p>
@@ -99,32 +96,11 @@ export function IntegratedWeaponPicker({
               ))}
             </div>
           </div>
-
           <div className={`text-xs lg:text-sm ${uiTextBody} bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed`}>
             Integrated weapons use the same craftsmanship choices as the matching ranged or melee weapon.
           </div>
         </div>
-
-        <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700 flex gap-2">
-          <button
-            onClick={resetPicker}
-            className="px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100"
-          >
-            Back
-          </button>
-          <Button
-            className="flex-1"
-            onClick={() =>
-              selected.kind === "ranged"
-                ? onSelectRanged(selected.ref, craftsmanship)
-                : onSelectMelee(selected.ref, craftsmanship)
-            }
-          >
-            Add Weapon
-          </Button>
-        </div>
-      </dialog>,
-      document.body
+      </PickerModal>
     );
   }
 
@@ -179,7 +155,7 @@ export function IntegratedWeaponPicker({
             <span className="px-1.5 py-0.5 rounded border text-xs font-semibold border-sky-500/60 bg-sky-500/10 text-sky-300">
               Ranged
             </span>
-            <ItemMetaChips weight={ref.weight} value={ref.value} rarity={ref.rarity} source={ref.source} />
+            <ItemMetaChips weight={ref.weight} value={ref.value} availability={ref.availability} source={ref.source} />
           </div>
           <div className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted} mt-0.5 flex-wrap font-code`}>
             <span>{ref.class}</span>
@@ -228,7 +204,7 @@ export function IntegratedWeaponPicker({
             <span className="px-1.5 py-0.5 rounded border text-xs font-semibold border-rose-500/60 bg-rose-500/10 text-rose-300">
               Melee
             </span>
-            <ItemMetaChips weight={ref.weight} value={ref.value} rarity={ref.rarity} source={ref.source} />
+            <ItemMetaChips weight={ref.weight} value={ref.value} availability={ref.availability} source={ref.source} />
           </div>
           <div className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted} mt-0.5 flex-wrap font-code`}>
             <span>{ref.class}</span>

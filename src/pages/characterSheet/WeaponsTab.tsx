@@ -274,7 +274,7 @@ export function WeaponsTab({
           specialRules: ref.specialRules,
           weight: ref.weight,
           value: ref.value,
-          rarity: ref.rarity,
+          availability: ref.availability,
           source: ref.source,
         },
       ]);
@@ -331,7 +331,7 @@ export function WeaponsTab({
           specialRules,
           weight: ref.weight,
           value: ref.value,
-          rarity: ref.rarity,
+          availability: ref.availability,
           source: ref.source,
           craftsmanship,
           ammoTracking: ref.ammoTracking,
@@ -377,13 +377,13 @@ export function WeaponsTab({
     [editable, rangedWeapons, onUpdateRanged]
   );
 
-  const addAttachmentToRanged = useCallback(
+  const addUpgradeToRanged = useCallback(
     (weaponId: string, upgradeId: string) => {
       if (!editable) return;
       onUpdateRanged(
         rangedWeapons.map((weapon) =>
           weapon.id === weaponId
-            ? { ...weapon, attachments: [...(weapon.attachments ?? []), upgradeId] }
+            ? { ...weapon, upgrades: [...(weapon.upgrades ?? []), upgradeId] }
             : weapon
         )
       );
@@ -391,7 +391,7 @@ export function WeaponsTab({
     [editable, rangedWeapons, onUpdateRanged]
   );
 
-  const removeAttachmentFromRanged = useCallback(
+  const removeUpgradeFromRanged = useCallback(
     (weaponId: string, upgradeId: string) => {
       if (!editable) return;
       onUpdateRanged(
@@ -399,7 +399,7 @@ export function WeaponsTab({
           weapon.id === weaponId
             ? {
                 ...weapon,
-                attachments: (weapon.attachments ?? []).filter((id) => id !== upgradeId),
+                upgrades: (weapon.upgrades ?? []).filter((id) => id !== upgradeId),
               }
             : weapon
         )
@@ -445,7 +445,7 @@ export function WeaponsTab({
           specialRules: ref.specialRules,
           weight: ref.weight,
           value: ref.value,
-          rarity: ref.rarity,
+          availability: ref.availability,
           source: ref.source,
           craftsmanship,
           quantity: isThrown ? 1 : undefined,
@@ -490,13 +490,13 @@ export function WeaponsTab({
     [editable, meleeWeapons, onUpdateMelee]
   );
 
-  const addAttachmentToMelee = useCallback(
+  const addUpgradeToMelee = useCallback(
     (weaponId: string, upgradeId: string) => {
       if (!editable) return;
       onUpdateMelee(
         meleeWeapons.map((weapon) =>
           weapon.id === weaponId
-            ? { ...weapon, attachments: [...(weapon.attachments ?? []), upgradeId] }
+            ? { ...weapon, upgrades: [...(weapon.upgrades ?? []), upgradeId] }
             : weapon
         )
       );
@@ -504,7 +504,7 @@ export function WeaponsTab({
     [editable, meleeWeapons, onUpdateMelee]
   );
 
-  const removeAttachmentFromMelee = useCallback(
+  const removeUpgradeFromMelee = useCallback(
     (weaponId: string, upgradeId: string) => {
       if (!editable) return;
       onUpdateMelee(
@@ -512,7 +512,7 @@ export function WeaponsTab({
           weapon.id === weaponId
             ? {
                 ...weapon,
-                attachments: (weapon.attachments ?? []).filter((id) => id !== upgradeId),
+                upgrades: (weapon.upgrades ?? []).filter((id) => id !== upgradeId),
               }
             : weapon
         )
@@ -548,7 +548,7 @@ export function WeaponsTab({
           notes: ref.notes,
           weight: ref.weight,
           value: ref.value,
-          rarity: ref.rarity,
+          availability: ref.availability,
           source: ref.source,
         },
       ]);
@@ -759,9 +759,9 @@ export function WeaponsTab({
                 weapon={entry.weapon}
                 editable={editable}
                 onRemove={() => removeRanged(entry.index)}
-                onAddAttachment={(upgradeId) => addAttachmentToRanged(entry.weapon.id, upgradeId)}
-                onRemoveAttachment={(upgradeId) =>
-                  removeAttachmentFromRanged(entry.weapon.id, upgradeId)
+                onAddUpgrade={(upgradeId) => addUpgradeToRanged(entry.weapon.id, upgradeId)}
+                onRemoveUpgrade={(upgradeId) =>
+                  removeUpgradeFromRanged(entry.weapon.id, upgradeId)
                 }
                 onUpdateAmmoEntries={(entries) => updateRangedAmmoEntries(entry.weapon.id, entries)}
                 onUpdateQuantity={(qty) => updateRangedQuantity(entry.weapon.id, qty)}
@@ -829,9 +829,9 @@ export function WeaponsTab({
                 editable={editable}
                 strengthBonus={strengthBonus}
                 onRemove={() => removeMelee(entry.index)}
-                onAddAttachment={(upgradeId) => addAttachmentToMelee(entry.weapon.id, upgradeId)}
-                onRemoveAttachment={(upgradeId) =>
-                  removeAttachmentFromMelee(entry.weapon.id, upgradeId)
+                onAddUpgrade={(upgradeId) => addUpgradeToMelee(entry.weapon.id, upgradeId)}
+                onRemoveUpgrade={(upgradeId) =>
+                  removeUpgradeFromMelee(entry.weapon.id, upgradeId)
                 }
                 onUpdateQuantity={(qty) => updateMeleeQuantity(entry.weapon.id, qty)}
                 isEquipped={entry.weapon.equipped ?? false}
@@ -934,14 +934,14 @@ export function WeaponsTab({
                 weapon={weapon}
                 editable={editable}
                 onRemove={() => removeRanged(index)}
-                onAddAttachment={(upgradeId) => addAttachmentToRanged(weapon.id, upgradeId)}
-                onRemoveAttachment={(upgradeId) => removeAttachmentFromRanged(weapon.id, upgradeId)}
+                onAddUpgrade={(upgradeId) => addUpgradeToRanged(weapon.id, upgradeId)}
+                onRemoveUpgrade={(upgradeId) => removeUpgradeFromRanged(weapon.id, upgradeId)}
                 onUpdateAmmoEntries={(entries) => updateRangedAmmoEntries(weapon.id, entries)}
                 onUpdateQuantity={(qty) => updateRangedQuantity(weapon.id, qty)}
                 grenades={grenades}
                 onUpdateGrenades={onUpdateGrenades}
                 archeotechGrenades={archeotechGrenadeItems}
-                allowAttachments={false}
+                allowUpgrades={false}
                 forceExpanded
               />
             )),
@@ -952,10 +952,10 @@ export function WeaponsTab({
                 editable={editable}
                 strengthBonus={strengthBonus}
                 onRemove={() => removeMelee(index)}
-                onAddAttachment={(upgradeId) => addAttachmentToMelee(weapon.id, upgradeId)}
-                onRemoveAttachment={(upgradeId) => removeAttachmentFromMelee(weapon.id, upgradeId)}
+                onAddUpgrade={(upgradeId) => addUpgradeToMelee(weapon.id, upgradeId)}
+                onRemoveUpgrade={(upgradeId) => removeUpgradeFromMelee(weapon.id, upgradeId)}
                 onUpdateQuantity={(qty) => updateMeleeQuantity(weapon.id, qty)}
-                allowAttachments={false}
+                allowUpgrades={false}
                 forceExpanded
               />
             )),

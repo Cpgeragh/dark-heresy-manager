@@ -1,5 +1,5 @@
 // src/ui/sourceStyles.ts
-// Colour classes for source-book badges, rarity chips, and characteristic chips across all tabs.
+// Colour classes for source-book badges, availability chips, and characteristic chips across all tabs.
 
 /**
  * Returns Tailwind text + border classes for a given SkillSource code.
@@ -48,12 +48,12 @@ export function sourceColour(source: string): string {
 }
 
 /**
- * Returns a Tailwind text colour class for a given rarity string.
+ * Returns a Tailwind text colour class for a given availability string.
  * Used inline as:
- *   <span className={`… ${rarityColour(item.rarity)}`}>{item.rarity}</span>
+ *   <span className={`… ${availabilityColour(item.availability)}`}>{item.availability}</span>
  */
-export function rarityColour(rarity: string | undefined): string {
-  switch (rarity) {
+export function availabilityColour(availability: string | undefined): string {
+  switch (availability) {
     case "Abundant":
       return "text-slate-500";
     case "Plentiful":

@@ -15,11 +15,11 @@ interface Props {
 export function ItemRow({ item, editable, onRemove }: Props) {
   const hasDesc = !!item.description?.trim();
 
-  // Fall back to reference data for items saved before weight/value/rarity were stored
+  // Fall back to reference data for items saved before weight/value/availability were stored
   const ref = item.referenceId ? GEAR_REFERENCE.find((r) => r.id === item.referenceId) : undefined;
   const weight = item.weight ?? ref?.weight;
   const value = item.value ?? ref?.value;
-  const rarity = item.rarity ?? ref?.rarity;
+  const availability = item.availability ?? ref?.availability;
 
   return (
     <div className={uiSection}>
@@ -41,7 +41,7 @@ export function ItemRow({ item, editable, onRemove }: Props) {
           <ItemMetaChips
             weight={weight}
             value={value}
-            rarity={rarity}
+            availability={availability}
             source={item.source}
             className="flex flex-wrap gap-1.5 mt-1"
           />

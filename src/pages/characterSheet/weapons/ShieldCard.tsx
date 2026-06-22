@@ -29,6 +29,7 @@ import {
   EquipToggle,
   WeaponQualitySelector,
   DAMAGE_TYPE_OPTIONS,
+  CUSTOM_AVAILABILITY_OPTIONS,
   formatDamageInput,
   isValidDiceInput,
   sanitizeDiceInput,
@@ -36,18 +37,6 @@ import {
 } from "./weaponShared";
 
 const CUSTOM_SHIELD_ORIGIN_OPTIONS = ["Custom", "2nd Ed"] as const;
-const CUSTOM_RARITY_OPTIONS = [
-  "Abundant",
-  "Plentiful",
-  "Common",
-  "Average",
-  "Scarce",
-  "Rare",
-  "Very Rare",
-  "Extremely Rare",
-  "Near Unique",
-  "Unique",
-] as const;
 
 // ─── Shield Picker ────────────────────────────────────────────────────────────
 
@@ -100,7 +89,7 @@ export function ShieldPicker({
             {ref.name}
           </span>
           <div className="flex flex-wrap gap-1.5 mt-1">
-            <ItemMetaChips weight={ref.weight} value={ref.value} rarity={ref.rarity} source={ref.source} valueAmber />
+            <ItemMetaChips weight={ref.weight} value={ref.value} availability={ref.availability} source={ref.source} valueAmber />
           </div>
           <div className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted} mt-0.5 flex-wrap font-code`}>
             <span className="text-cyan-400">AP {ref.ap}</span>
@@ -142,7 +131,7 @@ export function CustomShieldForm({
 }) {
   const [name, setName] = useState("");
   const [origin, setOrigin] = useState<"" | (typeof CUSTOM_SHIELD_ORIGIN_OPTIONS)[number]>("");
-  const [rarity, setRarity] = useState("");
+  const [availability, setAvailability] = useState("");
   const [ap, setAp] = useState("");
   const [locations, setLocations] = useState("");
   const [damageBase, setDamageBase] = useState("1d10");
@@ -157,7 +146,7 @@ export function CustomShieldForm({
   const canAdd =
     Boolean(name.trim()) &&
     Boolean(origin) &&
-    Boolean(rarity) &&
+    Boolean(availability) &&
     Boolean(ap) &&
     Boolean(locations.trim()) &&
     isValidDiceInput(damageBase) &&
@@ -180,7 +169,7 @@ export function CustomShieldForm({
       notes: notes.trim() || undefined,
       weight: formatWeightInput(weight),
       value: formatMoneyInput(value),
-      rarity,
+      availability,
       source: origin,
     });
   };
@@ -300,11 +289,11 @@ export function CustomShieldForm({
             </div>
             <div className="col-span-2">
               <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
-                Rarity <span className="text-red-500">*</span>
+                Availability <span className="text-red-500">*</span>
               </label>
-              <select value={rarity} onChange={(event) => setRarity(event.target.value)} className={editableInputClass(true) + " mt-0.5"}>
-                <option value="">Choose rarity</option>
-                {CUSTOM_RARITY_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
+              <select value={availability} onChange={(event) => setAvailability(event.target.value)} className={editableInputClass(true) + " mt-0.5"}>
+                <option value="">Choose availability</option>
+                {CUSTOM_AVAILABILITY_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
               </select>
             </div>
           </div>
@@ -444,11 +433,11 @@ export function ShieldCard({
             </div>
           </div>
 
-          {/* Weight / Value / Rarity / Source */}
+          {/* Weight / Value / Availability / Source */}
           <ItemMetaChips
             weight={item.weight}
             value={item.value}
-            rarity={item.rarity}
+            availability={item.availability}
             source={item.source}
             valueAmber
             className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1"

@@ -26,7 +26,7 @@ export interface CyberneticRef {
   source: SkillSource;
   /** Cost listed is for Common craftsmanship */
   value: string;
-  rarity: string;
+  availability: string;
   /** General rules that apply regardless of craftsmanship */
   notes?: string;
   /** Rules at Poor craftsmanship */
@@ -51,7 +51,7 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
     name: "Bionic Arm",
     source: SkillSource.CR,
     value: "1,000 Thrones",
-    rarity: "Scarce",
+    availability: "Scarce",
     requiresLocation: "arm",
     notes:
       "Adds +2 to Toughness Bonus against hits to the arm location. Replacement limbs can only " +
@@ -72,7 +72,7 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
     name: "Bionic Locomotion",
     source: SkillSource.CR,
     value: "1,500 Thrones",
-    rarity: "Scarce",
+    availability: "Scarce",
     requiresLocation: "leg",
     notes:
       "Covers legs, hips, pelvis, etc. Must be fully integrated into the spine and nervous system. " +
@@ -89,7 +89,7 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
     name: "Bionic Respiratory System",
     source: SkillSource.CR,
     value: "800 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
     notes:
       "Mimics the action of human lungs. Common and above grants a +20 bonus to Toughness Tests " +
       "made to resist airborne toxins and gas weapons.",
@@ -108,7 +108,7 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
     name: "Auger Arrays",
     source: SkillSource.CR,
     value: "1,000 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
     notes:
       "Implanted devices duplicating the effects of special sensors. Use requires concentration and a Half Action.",
     poor:
@@ -123,7 +123,7 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
     name: "Ballistic Mechadendrite",
     source: SkillSource.CR,
     value: "600 Thrones",
-    rarity: "Adeptus Mechanicus Only",
+    availability: "Adeptus Mechanicus Only",
     notes:
       "Solid, shoulder-mounted two-metre mechadendrite with a built-in laspistol of Adeptus Mechanicus design. " +
       "Counts as a laspistol with the Compact upgrade. As a Reaction, the Tech-Priest may fire it as an off-hand " +
@@ -152,7 +152,7 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
     name: "Cortex Implants",
     source: SkillSource.CR,
     value: "5,000 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
     notes: "Used to repair a severely damaged brain or augment its abilities.",
     poor:
       "Restores brain function but destroys the personality and memories of the subject, " +
@@ -171,7 +171,7 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
     name: "Cybernetic Senses",
     source: SkillSource.CR,
     value: "2,250 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
     notes:
       "Sight, hearing, touch, taste or more esoteric senses may be duplicated artificially. " +
       "Good cyber-eyes may incorporate telescopic sights, a photo-visor, and/or Dark Sight. " +
@@ -191,7 +191,7 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
     name: "Manipulator Mechadendrite",
     source: SkillSource.CR,
     value: "500 Thrones",
-    rarity: "Adeptus Mechanicus Only",
+    availability: "Adeptus Mechanicus Only",
     notes:
       "Powerful shoulder-mounted mechadendrite of fire-hardened ceramite and steel, extending to 1.5m. " +
       "Grants +20 to Strength Tests. Tipped with crushing pincers that can tether the user as a Free Action. " +
@@ -214,7 +214,7 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
     name: "Medicae Mechadendrite",
     source: SkillSource.CR,
     value: "500 Thrones",
-    rarity: "Adeptus Mechanicus Only",
+    availability: "Adeptus Mechanicus Only",
     notes:
       "Two-metre flexible limb granting +10 to Medicae Tests. Houses six injector pistons (doses must be supplied separately). " +
       "Flesh staplers can staunch Blood Loss as a Half Action. Small chainscalpel reduces limb amputation to Challenging (+0) " +
@@ -236,7 +236,7 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
     name: "Mind Impulse Unit",
     source: SkillSource.CR,
     value: "1,750 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
     notes:
       "Also known as a sense-link. Allows direct interface with machines and technological devices. " +
       "Basic or crude MIU involves a single spinal or cortex connector; advanced variants add wrist connectors and mechadendrite probes.",
@@ -254,7 +254,7 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
     name: "Optical Mechadendrite",
     source: SkillSource.CR,
     value: "400 Thrones",
-    rarity: "Adeptus Mechanicus Only",
+    availability: "Adeptus Mechanicus Only",
     notes:
       "Highly flexible, camera-studded mechadendrite extending to 3m (reduces to pencil-width). " +
       "Grants +10 to all Perception-based Tests. Allows microscopic examination. " +
@@ -270,7 +270,7 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
     name: "Utility Mechadendrite",
     source: SkillSource.CR,
     value: "500 Thrones",
-    rarity: "Adeptus Mechanicus Only",
+    availability: "Adeptus Mechanicus Only",
     notes:
       "Two-metre limb housing a variety of tools. Counts as a combi-tool, granting +10 to all Tech-Use Tests. " +
       "Houses six injector pistons for sacred machine oil (must be supplied separately). " +
@@ -297,7 +297,7 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
     name: "Constructer Interface",
     source: SkillSource.BoJ,
     value: "—",
-    rarity: "—",
+    availability: "—",
     notes:
       "Required to interface with Subrique-pattern Cyber-Mastiffs and Grapple-Hawks. " +
       "Allows silent Command Tests using Tech-Use in place of Command skill. " +
@@ -313,7 +313,7 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
     name: "Karrikian Lock-Arm",
     source: SkillSource.BoJ,
     value: "—",
-    rarity: "—",
+    availability: "—",
     requiresLocation: "arm",
     notes:
       "Servo-enhanced augmetic arm. Treated as Unnatural Strength (×3) for grappling or restraining. " +
@@ -327,7 +327,7 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
     name: "Landrian Revealer",
     source: SkillSource.BoJ,
     value: "—",
-    rarity: "—",
+    availability: "—",
     notes:
       "Ocular augmetic that allows the user to literally see scents and biological markers. " +
       "Grants Heightened Sense (Smell) and Talented (Tracking). " +
@@ -343,7 +343,7 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
     name: "Alatus-Pattern Jump Pack",
     source: SkillSource.LW,
     value: "3,000 Thrones",
-    rarity: "Adeptus Mechanicus Only",
+    availability: "Adeptus Mechanicus Only",
     notes:
       "Surgically attached and powered internally by the user's Potentia Coil, with plugs linking " +
       "directly into the nervous system. Often styled as sweeping mechanical wings. " +
@@ -358,7 +358,7 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
     name: "Enhanced Potentia Coil",
     source: SkillSource.LW,
     value: "6,000 Thrones",
-    rarity: "Adeptus Mechanicus Only",
+    availability: "Adeptus Mechanicus Only",
     notes:
       "Heavy-duty replacement for the standard internal power unit. Installation is invasive — takes 1d5+1 weeks. " +
       "Enhances Machine Cult abilities: Luminen Blast/Flare gains +1d10 Damage, Pen equal to WPB, and Shocking; " +
@@ -378,7 +378,7 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
     name: "Lathes Mechadendrite Stabilisers",
     source: SkillSource.LW,
     value: "300 Thrones",
-    rarity: "Adeptus Mechanicus Only",
+    availability: "Adeptus Mechanicus Only",
     notes:
       "Pairs of gyroscopically stabilised, heavily clawed talon mechadendrites for anchoring to surfaces. " +
       "Half Action to activate or deactivate. While active and stationary: counts as Braced and gains the Sturdy Trait. " +
@@ -394,7 +394,7 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
     name: "Perinetus-Pattern Servo-Harness",
     source: SkillSource.LW,
     value: "1,500 Thrones",
-    rarity: "Adeptus Mechanicus Only",
+    availability: "Adeptus Mechanicus Only",
     notes:
       "Large backpack cybernetic for zero-gravity operations. Includes: one Manipulator Mechadendrite, " +
       "one Utility Mechadendrite, a Combi-tool, a Fyeeline Torch (counts as a Flamer), and a Plasma Cutter " +
@@ -414,7 +414,7 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
     name: "Servo-Claw",
     source: SkillSource.LW,
     value: "600 Thrones",
-    rarity: "Adeptus Mechanicus Only",
+    availability: "Adeptus Mechanicus Only",
     notes:
       "Combat-focused mechadendrite mounted at waist height, leaving the hands free. " +
       "Can make any normal Attack Action as a melee weapon, or a Standard Attack as a Reaction " +
@@ -441,7 +441,7 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
     name: "Cranial Armour",
     source: SkillSource.LD,
     value: "600 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
     notes:
       "Inserted just beneath the skin. Adds +1 AP to the head location, stacking with other armour " +
       "and Talents that provide Armour Points (such as The Flesh is Weak).",
@@ -455,7 +455,7 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
     name: "Synthmuscle Graft",
     source: SkillSource.LD,
     value: "2,000 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
     notes:
       "Dense vat-grown muscle tissue augmented with flakweave, implanted into existing muscle tissue.",
     common: "Grants +1 to the user's Strength Bonus.",
@@ -469,7 +469,7 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
     name: "Malfian Dermaguise",
     source: SkillSource.BoJ,
     value: "—",
-    rarity: "—",
+    availability: "—",
     notes:
       "Electro-flexible plates beneath the skin linked to micro-servos, reshaping facial structure. " +
       "Requires 5 Rounds and a Challenging (+0) Tech-Use Test: +20 to Disguise (rising to +30 after healing). " +

@@ -8,7 +8,7 @@ import {
   type WeaponUpgradeRef,
 } from "../../../data/reference/weaponUpgradeReference";
 
-// ─── Attachment Stat Modifiers ────────────────────────────────────────────────
+// ─── Upgrade Stat Modifiers ────────────────────────────────────────────────
 
 export function modifyDamageBonus(damage: string, delta: number): string {
   const dmgMatch = damage.trim().match(/^(\d*d\d+)([+-]\d+)?\s*([IREX])?$/i);
@@ -91,20 +91,20 @@ function parseWeightModifier(modifier: string): { multiplier: number; flatKg: nu
 
 export function effectiveWeaponWeight(
   weight: string | undefined,
-  attachmentRefs: WeaponUpgradeRef[]
+  upgradeRefs: WeaponUpgradeRef[]
 ): string {
   const baseWeight = parseKg(weight);
-  const modifiers = attachmentRefs.map((ref) => parseWeightModifier(ref.weightModifier));
+  const modifiers = upgradeRefs.map((ref) => parseWeightModifier(ref.weightModifier));
   const multiplier = modifiers.reduce((total, modifier) => total * modifier.multiplier, 1);
   const flatKg = modifiers.reduce((total, modifier) => total + modifier.flatKg, 0);
   return formatKg(baseWeight * multiplier + flatKg);
 }
 
-// ─── Effective Stats (after attachments) ─────────────────────────────────────
+// ─── Effective Stats (after upgrades) ─────────────────────────────────────
 
 export function effectiveRangedStats(
   weapon: RangedWeapon,
-  attachmentRefs: WeaponUpgradeRef[],
+  upgradeRefs: WeaponUpgradeRef[],
   loadedAmmoRef?: AmmoRef
 ): { damage: string; range: string; clip: string; pen: string; specialRules: string; weight: string } {
   let damage = weapon.damage ?? "";
@@ -112,8 +112,8 @@ export function effectiveRangedStats(
   let clip = weapon.clip ?? "";
   let pen = weapon.pen ?? "";
   let specialRules = weapon.specialRules ?? "";
-  const weight = effectiveWeaponWeight(weapon.weight, attachmentRefs);
-  for (const ref of attachmentRefs) {
+  const weight = effectiveWeaponWeight(weapon.weight, upgradeRefs);
+  for (const ref of upgradeRefs) {
     if (ref.id === "cr-compact") {
       damage = modifyDamageBonus(damage, -1);
       range = halveRange(range);
@@ -155,12 +155,12 @@ export function effectiveRangedStats(
 
 export function effectiveMeleeStats(
   weapon: MeleeWeapon,
-  attachmentRefs: WeaponUpgradeRef[]
+  upgradeRefs: WeaponUpgradeRef[]
 ): { pen: string; specialRules: string; weight: string } {
   let pen = weapon.pen ?? "";
   let specialRules = weapon.specialRules ?? "";
-  const weight = effectiveWeaponWeight(weapon.weight, attachmentRefs);
-  for (const ref of attachmentRefs) {
+  const weight = effectiveWeaponWeight(weapon.weight, upgradeRefs);
+  for (const ref of upgradeRefs) {
     if (ref.id === "cr-mono") {
       pen = modifyPen(pen, +2);
       specialRules = removeSpecialRule(specialRules, "Primitive");
@@ -195,7 +195,7 @@ export function getCompatibleUpgrades(
         return !isMelee && cls === "basic";
       case "cr-fire-selector":
         return !isMelee && (cls === "pistol" || cls === "basic");
-      case "cr-melee-attachment":
+      case "cr-melee-upgrade":
         return !isMelee && cls === "basic";
       case "cr-mono":
         return isMelee;
