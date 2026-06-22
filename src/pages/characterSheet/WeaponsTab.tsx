@@ -673,7 +673,7 @@ export function WeaponsTab({
             {!showCustomRanged && (
               <button
                 onClick={() => setPicker("ranged")}
-                className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
+                className="text-sm lg:text-base px-2 py-0.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
               >
                 {editable ? "+ Add" : "View"}
               </button>
@@ -742,7 +742,7 @@ export function WeaponsTab({
             {!showCustomMelee && (
               <button
                 onClick={() => setPicker("melee")}
-                className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
+                className="text-sm lg:text-base px-2 py-0.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
               >
                 {editable ? "+ Add" : "View"}
               </button>
@@ -808,7 +808,7 @@ export function WeaponsTab({
           <SectionHeader>Grenades & Mines</SectionHeader>
           <button
             onClick={() => setPicker("grenades")}
-            className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
+            className="text-sm lg:text-base px-2 py-0.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
           >
             {editable ? "+ Add" : "View"}
           </button>
@@ -866,7 +866,7 @@ export function WeaponsTab({
           <SectionHeader>Integrated Weapons</SectionHeader>
           <button
             onClick={() => setPicker("integrated")}
-            className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
+            className="text-sm lg:text-base px-2 py-0.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
           >
             {editable ? "+ Add" : "View"}
           </button>
@@ -920,7 +920,7 @@ export function WeaponsTab({
           <SectionHeader>Shields</SectionHeader>
           <button
             onClick={() => setPicker("shields")}
-            className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
+            className="text-sm lg:text-base px-2 py-0.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
           >
             {editable ? "+ Add" : "View"}
           </button>

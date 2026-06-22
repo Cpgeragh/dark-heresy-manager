@@ -115,6 +115,23 @@ const CUSTOM_AMMO_FAMILY_OPTIONS = [
 
 type AmmoTrackingMode = NonNullable<RangedWeapon["ammoTracking"]>;
 
+const WEAPON_CLASS_STYLES: Record<string, { active: string; inactive: string }> = {
+  Pistol: { active: "border-sky-500/60 bg-sky-500/10 text-sky-300", inactive: "border-sky-500/30 bg-sky-500/5 text-sky-400/50" },
+  Basic:  { active: "border-teal-500/60 bg-teal-500/10 text-teal-300", inactive: "border-teal-500/30 bg-teal-500/5 text-teal-400/50" },
+  Heavy:  { active: "border-violet-500/60 bg-violet-500/10 text-violet-300", inactive: "border-violet-500/30 bg-violet-500/5 text-violet-400/50" },
+  Thrown: { active: "border-amber-500/60 bg-amber-500/10 text-amber-300", inactive: "border-amber-500/30 bg-amber-500/5 text-amber-400/50" },
+  Exotic: { active: "border-fuchsia-500/60 bg-fuchsia-500/10 text-fuchsia-300", inactive: "border-fuchsia-500/30 bg-fuchsia-500/5 text-fuchsia-400/50" },
+};
+
+function weaponClassChip(cls?: string): { label: string; active: string; inactive: string } | undefined {
+  if (!cls) return undefined;
+  const n = cls.toLowerCase();
+  for (const [key, style] of Object.entries(WEAPON_CLASS_STYLES)) {
+    if (n.includes(key.toLowerCase())) return { label: key, ...style };
+  }
+  return { label: cls, active: "border-slate-500/60 bg-slate-700/40 text-slate-300", inactive: "border-slate-500/30 bg-slate-700/20 text-slate-400/50" };
+}
+
 function ammoFamilyChip(ammoType?: string): { label: string; className: string } | undefined {
   if (!ammoType) return undefined;
   const normalized = ammoType.toLowerCase();
@@ -203,8 +220,20 @@ export function RangedPicker({
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<RangedWeaponRef | null>(null);
   const [craftsmanship, setCraftsmanship] = useState<WeaponCraftsmanship>("Common");
+  const [classFilter, setClassFilter] = useState<string | null>(null);
+  const [familyFilter, setFamilyFilter] = useState<string | null>(null);
+  const families = Array.from(
+    new Map(
+      references
+        .map((r) => ammoFamilyChip(r.ammoType))
+        .filter((f): f is NonNullable<typeof f> => f !== undefined)
+        .map((f) => [f.label, f])
+    ).values()
+  );
   const filtered = references
     .filter((r) => r.name.toLowerCase().includes(query.toLowerCase()))
+    .filter((r) => !classFilter || r.class.includes(classFilter))
+    .filter((r) => !familyFilter || ammoFamilyChip(r.ammoType)?.label === familyFilter)
     .sort((a, b) => a.name.localeCompare(b.name));
   const modalTitle = editable ? title : title.replace(/^Add\b/, "View");
 
@@ -289,6 +318,30 @@ export function RangedPicker({
       onQueryChange={setQuery}
       onClose={onClose}
       isEmpty={filtered.length === 0}
+      filterRow={
+        <div className="flex gap-2 w-full">
+          <select
+            value={classFilter ?? ""}
+            onChange={(e) => setClassFilter(e.target.value || null)}
+            className="flex-1 rounded border border-slate-500 bg-slate-900 px-2 py-1 text-xs lg:text-sm text-slate-200 focus:outline-none focus:border-red-500"
+          >
+            <option value="">All Classes</option>
+            {(["Pistol", "Basic", "Heavy", "Thrown", "Exotic"] as const).map((cls) => (
+              <option key={cls} value={cls}>{cls}</option>
+            ))}
+          </select>
+          <select
+            value={familyFilter ?? ""}
+            onChange={(e) => setFamilyFilter(e.target.value || null)}
+            className="flex-1 rounded border border-slate-500 bg-slate-900 px-2 py-1 text-xs lg:text-sm text-slate-200 focus:outline-none focus:border-red-500"
+          >
+            <option value="">All Types</option>
+            {families.map((f) => (
+              <option key={f.label} value={f.label}>{f.label}</option>
+            ))}
+          </select>
+        </div>
+      }
       footer={
         editable && showCustom ? (
           <button
@@ -314,15 +367,21 @@ export function RangedPicker({
             {ref.name}
           </span>
           <div className="flex flex-wrap gap-1.5 mt-1">
+            {(() => { const c = weaponClassChip(ref.class); return c ? (
+              <span className={`px-1.5 py-0.5 rounded border text-xs font-semibold ${c.active}`}>{c.label}</span>
+            ) : null; })()}
+            {(() => { const f = ammoFamilyChip(ref.ammoType); return f ? (
+              <span className={`px-1.5 py-0.5 rounded border text-xs font-semibold ${f.className}`}>{f.label}</span>
+            ) : null; })()}
             <ItemMetaChips weight={ref.weight} value={ref.value} rarity={ref.rarity} source={ref.source} />
           </div>
           <div className="flex items-center gap-2 text-xs lg:text-sm text-slate-500 mt-0.5 flex-wrap font-code">
-            <span>{ref.class}</span>
             <span>{ref.range}</span>
             <span>{ref.rof}</span>
             <span>{ref.damage}</span>
             <span>Pen {ref.pen}</span>
             <span>Clip {ref.clip}</span>
+            {ref.ammoType && <span>{ref.ammoType}</span>}
           </div>
           {ref.specialRules && ref.specialRules !== "—" && (
             <div className="flex items-center gap-1.5 mt-1">
@@ -1214,7 +1273,9 @@ export function RangedCard({
           <p className="text-sm lg:text-base font-semibold text-slate-200">{weapon.name}</p>
           {(weapon.class || ammoFamily) && (
             <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
-              {weapon.class && <span className="text-xs lg:text-sm text-slate-500">{weapon.class}</span>}
+              {(() => { const c = weaponClassChip(weapon.class); return c ? (
+                <span className={`text-[10px] lg:text-xs rounded border px-1.5 py-0.5 font-medium whitespace-nowrap ${c.active}`}>{c.label}</span>
+              ) : null; })()}
               {ammoFamily && (
                 <span
                   className={[
@@ -1399,10 +1460,10 @@ export function RangedCard({
           {hasAmmo && (
             <div className="border-t border-slate-800 pt-2 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Ammo</span>
+                <span className="text-[10px] lg:text-xs text-red-500 uppercase tracking-wide">Ammo</span>
                 <button
                   onClick={() => setShowAmmoPicker(true)}
-                  className="text-xs lg:text-sm text-red-500 hover:text-red-400"
+                  className="text-xs lg:text-sm px-2 py-0.5 rounded border border-red-500 text-red-500 hover:bg-red-500/10 transition"
                 >
                   {editable ? "+ Add" : "View"}
                 </button>
@@ -1436,13 +1497,11 @@ export function RangedCard({
           {(attachmentRefs.length > 0 || visibleCompatible.length > 0) && (
             <div className="border-t border-slate-800 pt-2 space-y-1.5">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">
-                  Attachments
-                </span>
+                <span className="text-[10px] lg:text-xs text-red-500 uppercase tracking-wide">Attachments</span>
                 {(editable ? visibleCompatible.length > 0 : attachmentRefs.length > 0 || visibleCompatible.length > 0) && (
                   <button
                     onClick={() => setShowAttachPicker(true)}
-                    className="text-xs lg:text-sm text-red-500 hover:text-red-400"
+                    className="text-xs lg:text-sm px-2 py-0.5 rounded border border-red-500 text-red-500 hover:bg-red-500/10 transition"
                   >
                     {editable ? "+ Add" : "View"}
                   </button>
