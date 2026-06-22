@@ -165,7 +165,7 @@ export function PickerModal({
 
         {/* Optional filter row (e.g. discipline chips) */}
         {filterRow && (
-          <div className="px-4 lg:px-5 py-2 lg:py-3 border-b border-slate-800 flex flex-wrap gap-1.5">
+          <div className="px-4 lg:px-5 py-2 lg:py-3 border-b border-slate-800 flex flex-wrap gap-1.5 justify-center">
             {filterRow}
           </div>
         )}
