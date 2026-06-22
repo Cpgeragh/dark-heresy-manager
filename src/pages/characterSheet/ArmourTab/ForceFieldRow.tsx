@@ -52,7 +52,7 @@ export function ForceFieldRow({ piece, editable, onToggle, onRemove, onInfo }: P
             bare
             weight={piece.weight}
             value={piece.value}
-            rarity={piece.rarity}
+            availability={piece.availability}
             source={piece.source}
           />
         </div>

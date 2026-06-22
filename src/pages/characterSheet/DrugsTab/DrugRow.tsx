@@ -83,7 +83,7 @@ export function DrugRow({
         <ItemMetaChips
           weight={item.weight ?? ref?.weight ?? "0 kg"}
           value={item.value ?? ref?.value}
-          rarity={item.rarity ?? ref?.rarity}
+          availability={item.availability ?? ref?.availability}
           source={item.source}
           valueAmber
           className="flex flex-wrap gap-1.5 mt-1"

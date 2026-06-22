@@ -6,7 +6,7 @@ import { editableInputClass, editableTextareaClass } from "../../../ui/editableS
 import { Button } from "../../../ui/Button";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
-import { ITEM_TYPES, RARITY_OPTIONS, type ItemType } from "./archeotechConstants";
+import { ITEM_TYPES, AVAILABILITY_OPTIONS, type ItemType } from "./archeotechConstants";
 
 interface Props {
   onAdd: (item: ArcheotechItem) => void;
@@ -20,7 +20,7 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
   const [notes, setNotes] = useState("");
   const [weight, setWeight] = useState("");
   const [value, setValue] = useState("");
-  const [rarity, setRarity] = useState("");
+  const [availability, setRarity] = useState("");
 
   const formattedWeight = formatWeightInput(weight);
   const formattedValue = formatMoneyInput(value);
@@ -44,7 +44,7 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
       notes: notes.trim() || undefined,
       weight: formattedWeight,
       value: formattedValue,
-      rarity: rarity || undefined,
+      availability: availability || undefined,
     });
   }
 
@@ -124,12 +124,12 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
           Rarity <span className="text-slate-600">(optional)</span>
         </label>
         <select
-          value={rarity}
+          value={availability}
           onChange={(e) => setRarity(e.target.value)}
           className={editableInputClass(true) + " appearance-none"}
         >
-          <option value="">— Select rarity —</option>
-          {RARITY_OPTIONS.map((r) => (
+          <option value="">— Select availability —</option>
+          {AVAILABILITY_OPTIONS.map((r) => (
             <option key={r} value={r}>
               {r}
             </option>

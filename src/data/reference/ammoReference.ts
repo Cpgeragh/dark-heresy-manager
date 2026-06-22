@@ -20,7 +20,7 @@ export interface AmmoRef {
    * where the amount equals the weapon's own clip size.
    */
   purchaseAmount: string;
-  rarity: string;
+  availability: string;
   /** Game-mechanical effects for special ammunition */
   description?: string;
 }
@@ -65,7 +65,7 @@ export const AMMO_REFERENCE: AmmoRef[] = [
     compatibleWith: "Bows, crossbows and hand bows",
     cost: "1 Throne",
     purchaseAmount: "20",
-    rarity: "Common",
+    availability: "Common",
     description:
       "Arrows and quarrels come in a variety of shapes, sizes and materials ranging from crude wooden shafts with flint tips to steel darts with razor-sharp points.",
   },
@@ -76,7 +76,7 @@ export const AMMO_REFERENCE: AmmoRef[] = [
     compatibleWith: "Flintlock pistol and musket",
     cost: "1 Throne",
     purchaseAmount: "20",
-    rarity: "Common",
+    availability: "Common",
     description:
       "Solid lead or stone balls and a powder charge used in primitive blackpowder weapons.",
   },
@@ -88,7 +88,7 @@ export const AMMO_REFERENCE: AmmoRef[] = [
       "Autopistol, stub revolver, stub automatic, hand cannon, autogun, hunting rifle and heavy stubber",
     cost: "1 Throne",
     purchaseAmount: "20",
-    rarity: "Plentiful",
+    availability: "Plentiful",
     description:
       "Hard rounds common to many weapons. Bullets from one kind of firearm cannot be used in another unless they are very similar in make.",
   },
@@ -99,7 +99,7 @@ export const AMMO_REFERENCE: AmmoRef[] = [
     compatibleWith: "Shotguns, pump-action shotguns and combat shotguns",
     cost: "1 Throne",
     purchaseAmount: "20",
-    rarity: "Common",
+    availability: "Common",
     description:
       "Shells contain dozens of tiny balls and scatter over a wide area when fired, making them ideal for close-in work where accuracy is less important.",
   },
@@ -113,7 +113,7 @@ export const AMMO_REFERENCE: AmmoRef[] = [
     compatibleWith: "Laspistol, las carbine, lasgun, long las, MP lascannon",
     cost: "10 Thrones",
     purchaseAmount: "full clip",
-    rarity: "Common",
+    availability: "Common",
     description:
       "Powerful batteries used almost exclusively by las weapons. Provides shots equal to the weapon's full clip value.",
   },
@@ -124,7 +124,7 @@ export const AMMO_REFERENCE: AmmoRef[] = [
     compatibleWith: "Laspistol, las carbine, lasgun, long las, MP lascannon",
     cost: "15 Thrones",
     purchaseAmount: "full clip",
-    rarity: "Common",
+    availability: "Common",
     description:
       "Powerful batteries used almost exclusively by las weapons. Provides shots equal to the weapon's full clip value.",
   },
@@ -135,7 +135,7 @@ export const AMMO_REFERENCE: AmmoRef[] = [
     compatibleWith: "Laspistol, las carbine, lasgun, long las, MP lascannon",
     cost: "30 Thrones",
     purchaseAmount: "full clip",
-    rarity: "Rare",
+    availability: "Rare",
     description:
       "Powerful batteries used almost exclusively by las weapons. Provides shots equal to the weapon's full clip value.",
   },
@@ -149,7 +149,7 @@ export const AMMO_REFERENCE: AmmoRef[] = [
     compatibleWith: "Hand flamer and flamer",
     cost: "8 Thrones",
     purchaseAmount: "full clip",
-    rarity: "Scarce",
+    availability: "Scarce",
     description:
       "Liquid fuel for flame weapons, ranging from purest promethium to crude flammable alcohols. Provides shots equal to the weapon's full clip value.",
   },
@@ -160,7 +160,7 @@ export const AMMO_REFERENCE: AmmoRef[] = [
     compatibleWith: "Hand flamer and flamer",
     cost: "10 Thrones",
     purchaseAmount: "full clip",
-    rarity: "Scarce",
+    availability: "Scarce",
     description:
       "Liquid fuel for flame weapons, ranging from purest promethium to crude flammable alcohols. Provides shots equal to the weapon's full clip value.",
   },
@@ -174,7 +174,7 @@ export const AMMO_REFERENCE: AmmoRef[] = [
     compatibleWith: "Bolt pistols, bolters and heavy bolters",
     cost: "16 Thrones",
     purchaseAmount: "1",
-    rarity: "Rare",
+    availability: "Rare",
     description:
       "The mass-reactive explosive bolt shell is among the deadliest rounds in the Imperial arsenal. The difficulty and cost of manufacture restricts its use to all but the most wealthy or well connected.",
   },
@@ -188,7 +188,7 @@ export const AMMO_REFERENCE: AmmoRef[] = [
     compatibleWith: "Inferno pistols and meltaguns",
     cost: "20 Thrones",
     purchaseAmount: "full clip",
-    rarity: "Very Rare",
+    availability: "Very Rare",
     description:
       "Specially refined chemicals injected into highly pressurised canisters for meltaguns. Provides shots equal to the weapon's full clip value.",
   },
@@ -199,7 +199,7 @@ export const AMMO_REFERENCE: AmmoRef[] = [
     compatibleWith: "Inferno pistols and meltaguns",
     cost: "15 Thrones",
     purchaseAmount: "full clip",
-    rarity: "Rare",
+    availability: "Rare",
     description:
       "Specially refined chemicals injected into highly pressurised canisters for meltaguns. Provides shots equal to the weapon's full clip value.",
   },
@@ -213,7 +213,7 @@ export const AMMO_REFERENCE: AmmoRef[] = [
     compatibleWith: "Plasma pistols and plasma guns",
     cost: "24 Thrones",
     purchaseAmount: "full clip",
-    rarity: "Rare",
+    availability: "Rare",
     description:
       "Highly dangerous and volatile photonic hydrogen, compressed and contained within reinforced flasks. Provides shots equal to the weapon's full clip value.",
   },
@@ -224,7 +224,7 @@ export const AMMO_REFERENCE: AmmoRef[] = [
     compatibleWith: "Plasma pistols and plasma guns",
     cost: "18 Thrones",
     purchaseAmount: "full clip",
-    rarity: "Rare",
+    availability: "Rare",
     description:
       "Highly dangerous and volatile photonic hydrogen, compressed and contained within reinforced flasks. Provides shots equal to the weapon's full clip value.",
   },
@@ -238,9 +238,9 @@ export const AMMO_REFERENCE: AmmoRef[] = [
     compatibleWith: "Needle pistol, needle rifle, web pistol and webber",
     cost: "20 Thrones",
     purchaseAmount: "1",
-    rarity: "Very Rare",
+    availability: "Very Rare",
     description:
-      "Many weapons use unusual ammunition, from the viscous gel of a webber to the finely crafted darts of a needle pistol. GMs may increase the cost of exotic ammunition depending on its rarity.",
+      "Many weapons use unusual ammunition, from the viscous gel of a webber to the finely crafted darts of a needle pistol. GMs may increase the cost of exotic ammunition depending on its availability.",
   },
   {
     id: "cr-dumdum-bullets",
@@ -249,7 +249,7 @@ export const AMMO_REFERENCE: AmmoRef[] = [
     compatibleWith: "Stub revolvers, stub automatics and hand cannons",
     cost: "5 Thrones",
     purchaseAmount: "6",
-    rarity: "Scarce",
+    availability: "Scarce",
     description:
       "Heavy blunt bullets designed to cause maximum tissue damage. Add 2 to the weapon's Damage. Armour Points count double against them.",
   },
@@ -260,7 +260,7 @@ export const AMMO_REFERENCE: AmmoRef[] = [
     compatibleWith: "Laspistols, las carbines, lasguns and long las",
     cost: "15 Thrones",
     purchaseAmount: "1",
-    rarity: "Scarce",
+    availability: "Scarce",
     description:
       "A single powerful charge pack. Add 1 to Damage, roll two dice for Damage and pick the highest, and gain Penetration 4. The weapon loses its Reliable quality and its clip is reduced to 1 (one-use).",
   },
@@ -271,7 +271,7 @@ export const AMMO_REFERENCE: AmmoRef[] = [
     compatibleWith: "Shotguns, pump-action shotguns, combat shotguns and all bolt weapons",
     cost: "18 Thrones",
     purchaseAmount: "1",
-    rarity: "Rare",
+    availability: "Rare",
     description:
       "Shells containing a phosphorous gel that ignites on contact. A target hit must make an Agility Test or catch on fire, in addition to normal damage. May also be used to set objects ablaze.",
   },
@@ -282,7 +282,7 @@ export const AMMO_REFERENCE: AmmoRef[] = [
     compatibleWith: "Stub revolvers, stub automatics, hand cannons, autopistols and autoguns",
     cost: "5 Thrones",
     purchaseAmount: "6",
-    rarity: "Scarce",
+    availability: "Scarce",
     description:
       "Densely tipped bullets designed to punch through armour. Add 3 to the weapon's Penetration.",
   },
@@ -296,7 +296,7 @@ export const AMMO_REFERENCE: AmmoRef[] = [
     compatibleWith: "Shotguns",
     cost: "50 Thrones",
     purchaseAmount: "5",
-    rarity: "Rare",
+    availability: "Rare",
     description:
       "Shotgun shells made from the glass of the destroyed Templum of Cryptus, naturally resistant to the Warp. " +
       "Attacks count as Sanctified. Daemonic or Warp creatures struck at short range must pass a Challenging (+0) " +
@@ -309,7 +309,7 @@ export const AMMO_REFERENCE: AmmoRef[] = [
     compatibleWith: "Bolt weapons",
     cost: "100 Thrones",
     purchaseAmount: "1",
-    rarity: "Very Rare",
+    availability: "Very Rare",
     description:
       "Psychically charged bolt shells tipped with truesilver. Ignores any protection granted by psychic powers " +
       "or Sorcery. Counts as Sanctified. Adds the user's Psy Rating to damage dealt.",
@@ -321,7 +321,7 @@ export const AMMO_REFERENCE: AmmoRef[] = [
     compatibleWith: "Flame weapons",
     cost: "100 Thrones",
     purchaseAmount: "1",
-    rarity: "Very Rare",
+    availability: "Very Rare",
     description:
       "Psychically charged promethium for flamer weapons. Ignores protection from psychic powers or Sorcery. " +
       "Counts as Sanctified. Targets in the area of effect suffer –5 to their Agility Test per point of the user's Psy Rating.",
@@ -334,7 +334,7 @@ export const AMMO_REFERENCE: AmmoRef[] = [
     compatibleWith: "Synapse Disruptor",
     cost: "200 Thrones",
     purchaseAmount: "1",
-    rarity: "Very Rare",
+    availability: "Very Rare",
     description:
       "Specially crafted power cell for the Synapse Disruptor. " +
       "Cannot be substituted with standard charge packs.",
@@ -346,7 +346,7 @@ export const AMMO_REFERENCE: AmmoRef[] = [
     compatibleWith: "Sting-Blunt",
     cost: "50 Thrones",
     purchaseAmount: "full clip",
-    rarity: "Scarce",
+    availability: "Scarce",
     description:
       "Proprietary circuitry-traced bullets specially created for the Sting-Blunt. " +
       "Imperial standard ammunition cannot be adapted for this weapon.",
@@ -360,7 +360,7 @@ export const AMMO_REFERENCE: AmmoRef[] = [
     compatibleWith: "Crossbow, Hand Bow (or Stub Revolver / Stub Automatic at double cost)",
     cost: "300 Thrones",
     purchaseAmount: "1",
-    rarity: "Very Rare",
+    availability: "Very Rare",
     description:
       "Favoured by the Cult of the Pure Form, each round contains a small haywire generator that " +
       "activates on impact. Grants the Haywire (2) quality to the attack. " +
@@ -376,7 +376,7 @@ export const AMMO_REFERENCE: AmmoRef[] = [
     compatibleWith: "Shuriken Pistol, Avenger Shuriken Catapult",
     cost: "500 Thrones",
     purchaseAmount: "full clip",
-    rarity: "Very Rare",
+    availability: "Very Rare",
     description:
       "Solid core monomolecular discs. Imperial technology cannot replicate this ammunition — " +
       "it is only available through xenos sources.",

@@ -36,7 +36,7 @@ export function ArcheotechTab({ archeotech, editable, onUpdate }: ArcheotechTabP
           source: ref.source,
           // Store GM-assigned values directly on the item so they override "—"
           value: gmValue || undefined,
-          rarity: gmRarity || undefined,
+          availability: gmRarity || undefined,
         },
       ]);
       setShowPicker(false);

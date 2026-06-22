@@ -1,8 +1,7 @@
 // src/pages/characterSheet/weapons/RangedCard.tsx
 // RangedPicker, CustomRangedForm, RangedCard — co-located for navigability.
 
-import { useState, useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
+import { useState, useEffect } from "react";
 import type {
   RangedWeapon,
   WeaponAmmoEntry,
@@ -45,11 +44,12 @@ import {
   StatChip,
   DamageTypeChip,
   SpecialRulesContent,
-  AttachmentPicker,
-  AttachmentCard,
+  UpgradePicker,
+  UpgradeCard,
   EquipToggle,
   WeaponQualitySelector,
   DAMAGE_TYPE_OPTIONS,
+  CUSTOM_AVAILABILITY_OPTIONS,
   formatDamageInput,
   isValidDiceInput,
   sanitizeDiceInput,
@@ -252,35 +252,26 @@ export function RangedPicker({
     setCraftsmanship("Common");
   }
 
-  const craftDialogRef = useRef<HTMLDialogElement | null>(null);
-  useEffect(() => {
-    const d = craftDialogRef.current;
-    if (!d) return;
-    d.showModal();
-    return () => { if (d.open) d.close(); };
-  }, [selected]);
-
   if (selected) {
-    return createPortal(
-      <dialog
-        ref={craftDialogRef}
+    return (
+      <PickerModal
+        title={selected.name}
+        titleClassName="text-slate-200"
+        closeLabel="\u2190"
+        query=""
+        onQueryChange={() => {}}
         onClose={resetPicker}
-        onClick={(e) => { if (e.target === craftDialogRef.current) resetPicker(); }}
-        className="m-auto w-[calc(100%-2rem)] max-w-md lg:max-w-lg bg-slate-900 border border-slate-500 rounded-xl shadow-2xl p-0 backdrop:bg-black/50 backdrop:backdrop-blur-sm"
+        isEmpty={false}
+        hideSearch
+        footer={
+          <Button className="w-full" onClick={() => onSelect(selected, craftsmanship)}>
+            Add Weapon
+          </Button>
+        }
       >
-        <div className="flex items-center justify-between px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
-          <h3 className="text-sm lg:text-base font-semibold text-slate-200">{selected.name}</h3>
-          <button
-            onClick={resetPicker}
-            className="text-slate-400 hover:text-slate-200 text-lg leading-none"
-          >
-            {"\u00D7"}
-          </button>
-        </div>
-
         <div className="px-4 lg:px-5 py-4 lg:py-5 space-y-4">
           <div>
-            <p className="text-xs lg:text-sm text-slate-400 mb-2">Select weapon craftsmanship:</p>
+            <p className={`text-xs lg:text-sm ${uiTextMuted} mb-2`}>Select weapon craftsmanship:</p>
             <div className="flex gap-2">
               {WEAPON_CRAFTSMANSHIP_OPTIONS.map((q) => (
                 <button
@@ -298,25 +289,11 @@ export function RangedPicker({
               ))}
             </div>
           </div>
-
           <div className={`text-xs lg:text-sm ${uiTextBody} bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed`}>
             {rangedCraftsmanshipDescription(craftsmanship)}
           </div>
         </div>
-
-        <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700 flex gap-2">
-          <button
-            onClick={resetPicker}
-            className="px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100"
-          >
-            Back
-          </button>
-          <Button className="flex-1" onClick={() => onSelect(selected, craftsmanship)}>
-            Add Weapon
-          </Button>
-        </div>
-      </dialog>,
-      document.body
+      </PickerModal>
     );
   }
 
@@ -383,7 +360,7 @@ export function RangedPicker({
             {(() => { const f = ammoFamilyChip(ref.ammoType); return f ? (
               <span className={`px-1.5 py-0.5 rounded border text-xs font-semibold ${f.className}`}>{f.label}</span>
             ) : null; })()}
-            <ItemMetaChips weight={ref.weight} value={ref.value} rarity={ref.rarity} source={ref.source} />
+            <ItemMetaChips weight={ref.weight} value={ref.value} availability={ref.availability} source={ref.source} />
           </div>
           <div className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted} mt-0.5 flex-wrap font-code`}>
             <span>{ref.range}</span>
@@ -448,6 +425,7 @@ export function CustomRangedForm({
   const [ammoTracking, setAmmoTracking] = useState<"" | AmmoTrackingMode>("");
   const [weight, setWeight] = useState("");
   const [value, setValue] = useState("");
+  const [availability, setAvailability] = useState("");
   const [selectedQualities, setSelectedQualities] = useState<string[]>([]);
   const [description, setDescription] = useState("");
 
@@ -473,7 +451,8 @@ export function CustomRangedForm({
     Boolean(reloadType) &&
     Boolean(ammoTracking) &&
     Boolean(weight.trim()) &&
-    Boolean(value);
+    Boolean(value) &&
+    Boolean(availability);
 
   const addWeapon = () => {
     if (!canAdd || !ammoTracking || !craftsmanship || !origin) return;
@@ -494,6 +473,7 @@ export function CustomRangedForm({
       ammoTracking,
       weight: formatWeightInput(weight),
       value: formatMoneyInput(value),
+      availability,
       specialRules: selectedQualities.length > 0 ? selectedQualities.join(", ") : undefined,
       description: description.trim() || undefined,
       integrated,
@@ -825,6 +805,15 @@ export function CustomRangedForm({
                 className={editableInputClass(true) + " mt-0.5"}
               />
             </div>
+            <div className="col-span-2">
+              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                Availability <span className="text-red-500">*</span>
+              </label>
+              <select value={availability} onChange={(event) => setAvailability(event.target.value)} className={editableInputClass(true) + " mt-0.5"}>
+                <option value="">Choose availability</option>
+                {CUSTOM_AVAILABILITY_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
+              </select>
+            </div>
           </div>
         </div>
 
@@ -1096,7 +1085,7 @@ function AmmoPicker({
               {formatAmmoName(ammo.name)}
             </span>
             <div className="flex items-center gap-1.5 text-xs lg:text-sm shrink-0">
-              <span className={uiTextSubtle}>{ammo.rarity}</span>
+              <span className={uiTextSubtle}>{ammo.availability}</span>
               <span className={uiTextSubtle}>·</span>
               <span className="text-amber-400/80">{formatMoneyForDisplay(ammo.cost)}</span>
               <span className={uiTextSubtle}>/ {ammo.purchaseAmount}</span>
@@ -1150,14 +1139,14 @@ export function RangedCard({
   weapon,
   editable,
   onRemove,
-  onAddAttachment,
-  onRemoveAttachment,
+  onAddUpgrade,
+  onRemoveUpgrade,
   onUpdateAmmoEntries,
   onUpdateQuantity,
   grenades,
   onUpdateGrenades,
   archeotechGrenades,
-  allowAttachments = true,
+  allowUpgrades = true,
   isEquipped = false,
   onToggleEquip,
   slotsDisabled = false,
@@ -1166,14 +1155,14 @@ export function RangedCard({
   weapon: RangedWeapon;
   editable: boolean;
   onRemove: () => void;
-  onAddAttachment: (upgradeId: string) => void;
-  onRemoveAttachment: (upgradeId: string) => void;
+  onAddUpgrade: (upgradeId: string) => void;
+  onRemoveUpgrade: (upgradeId: string) => void;
   onUpdateAmmoEntries: (entries: WeaponAmmoEntry[]) => void;
   onUpdateQuantity: (qty: number) => void;
   grenades?: GrenadeItem[];
   onUpdateGrenades?: (next: GrenadeItem[]) => void;
   archeotechGrenades?: ArcheotechItem[];
-  allowAttachments?: boolean;
+  allowUpgrades?: boolean;
   isEquipped?: boolean;
   onToggleEquip?: () => void;
   slotsDisabled?: boolean;
@@ -1184,12 +1173,12 @@ export function RangedCard({
     setExpanded(isEquipped);
   }, [isEquipped]);
 
-  const [showAttachPicker, setShowAttachPicker] = useState(false);
+  const [showUpgradePicker, setShowUpgradePicker] = useState(false);
   const [showAmmoPicker, setShowAmmoPicker] = useState(false);
 
-  const attachmentIds = weapon.attachments ?? [];
-  const attachmentRefs = WEAPON_UPGRADE_REFERENCE.filter((upgrade) =>
-    attachmentIds.includes(upgrade.id)
+  const upgradeIds = weapon.upgrades ?? [];
+  const upgradeRefs = WEAPON_UPGRADE_REFERENCE.filter((upgrade) =>
+    upgradeIds.includes(upgrade.id)
   );
   // Resolve reference data first — source of truth for stats, avoids stale stored character data
   const weaponRef = weapon.referenceId
@@ -1209,11 +1198,11 @@ export function RangedCard({
   const loadedAmmoRef = loadedAmmoEntry?.referenceId
     ? AMMO_REFERENCE.find((ammo) => ammo.id === loadedAmmoEntry.referenceId)
     : undefined;
-  const effective = effectiveRangedStats(baseWeapon, attachmentRefs, loadedAmmoRef);
+  const effective = effectiveRangedStats(baseWeapon, upgradeRefs, loadedAmmoRef);
   const resolvedAmmoType = weaponRef?.ammoType ?? weapon.ammoType;
-  const addableCompatible = getCompatibleUpgrades(weapon.class ?? "", weapon.name, false, attachmentIds, resolvedAmmoType);
+  const addableCompatible = getCompatibleUpgrades(weapon.class ?? "", weapon.name, false, upgradeIds, resolvedAmmoType);
   const viewableCompatible = getCompatibleUpgrades(weapon.class ?? "", weapon.name, false, [], resolvedAmmoType);
-  const visibleCompatible = allowAttachments
+  const visibleCompatible = allowUpgrades
     ? editable
       ? addableCompatible
       : viewableCompatible
@@ -1403,12 +1392,12 @@ export function RangedCard({
             </div>
           </div>
 
-          {/* Weight / Value / Rarity / Source */}
+          {/* Weight / Value / Availability / Source */}
           <div className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1">
             <ItemMetaChips
               weight={effective.weight}
               value={weapon.value}
-              rarity={weapon.rarity}
+              availability={weapon.availability}
               source={weapon.source}
               bare
             />
@@ -1513,30 +1502,30 @@ export function RangedCard({
             </div>
           )}
 
-          {/* Attachments */}
-          {(attachmentRefs.length > 0 || visibleCompatible.length > 0) && (
+          {/* Upgrades */}
+          {(upgradeRefs.length > 0 || visibleCompatible.length > 0) && (
             <div className="border-t border-slate-800 pt-2 space-y-1.5">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] lg:text-xs text-red-500 uppercase tracking-wide">Attachments</span>
-                {(editable ? visibleCompatible.length > 0 : attachmentRefs.length > 0 || visibleCompatible.length > 0) && (
+                <span className="text-[10px] lg:text-xs text-red-500 uppercase tracking-wide">Upgrades</span>
+                {(editable ? visibleCompatible.length > 0 : upgradeRefs.length > 0 || visibleCompatible.length > 0) && (
                   <button
-                    onClick={() => setShowAttachPicker(true)}
+                    onClick={() => setShowUpgradePicker(true)}
                     className="text-xs lg:text-sm px-2 py-0.5 rounded border border-red-500 text-red-500 hover:bg-red-500/10 transition"
                   >
                     {editable ? "+ Add" : "View"}
                   </button>
                 )}
               </div>
-              {attachmentRefs.length === 0 ? (
+              {upgradeRefs.length === 0 ? (
                 <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>None fitted</p>
               ) : (
                 <div className="space-y-1.5">
-                  {attachmentRefs.map((upgrade) => (
-                    <AttachmentCard
+                  {upgradeRefs.map((upgrade) => (
+                    <UpgradeCard
                       key={upgrade.id}
                       upgrade={upgrade}
                       editable={editable}
-                      onRemove={onRemoveAttachment}
+                      onRemove={onRemoveUpgrade}
                     />
                   ))}
                 </div>
@@ -1544,15 +1533,15 @@ export function RangedCard({
             </div>
           )}
 
-          {showAttachPicker && (
-            <AttachmentPicker
+          {showUpgradePicker && (
+            <UpgradePicker
               compatibleUpgrades={visibleCompatible}
               editable={editable}
               onSelect={(id) => {
-                onAddAttachment(id);
-                setShowAttachPicker(false);
+                onAddUpgrade(id);
+                setShowUpgradePicker(false);
               }}
-              onClose={() => setShowAttachPicker(false)}
+              onClose={() => setShowUpgradePicker(false)}
             />
           )}
 

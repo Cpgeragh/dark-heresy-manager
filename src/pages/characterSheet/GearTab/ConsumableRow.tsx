@@ -46,7 +46,7 @@ export function ConsumableRow({ item, editable, onUpdateQty, onRemove }: Props) 
           <ItemMetaChips
             weight={item.weight}
             value={item.value}
-            rarity={item.rarity}
+            availability={item.availability}
             source={item.source}
             className="flex flex-wrap gap-1.5 mt-1"
           />

@@ -32,7 +32,7 @@ interface Props {
   onClose: () => void;
 }
 
-const RARITY_OPTIONS = [
+const AVAILABILITY_OPTIONS = [
   "Abundant",
   "Plentiful",
   "Common",
@@ -93,7 +93,7 @@ export function ImplantPicker({ editable = true, onSelect, onClose }: Props) {
   };
   const selectImplant = (ref: CyberneticRef) => {
     if (!editable) return;
-    if (isVariableMeta(ref.value) || isVariableMeta(ref.rarity)) {
+    if (isVariableMeta(ref.value) || isVariableMeta(ref.availability)) {
       setPendingCost(ref);
       setGmCost("");
       setGmRarity("");
@@ -104,7 +104,7 @@ export function ImplantPicker({ editable = true, onSelect, onClose }: Props) {
   };
   const costNum = Number(gmCost);
   const costValid = gmCost.trim() !== "" && Number.isInteger(costNum) && costNum >= 0;
-  const pendingNeedsRarity = pendingCost ? isVariableMeta(pendingCost.rarity) : false;
+  const pendingNeedsRarity = pendingCost ? isVariableMeta(pendingCost.availability) : false;
   const canConfirmCost = costValid && (!pendingNeedsRarity || gmRarity !== "");
   const confirmCost = () => {
     if (!pendingCost || !canConfirmCost) return;
@@ -183,8 +183,8 @@ export function ImplantPicker({ editable = true, onSelect, onClose }: Props) {
                 onChange={(e) => setGmRarity(e.target.value)}
                 className={editableInputClass(true) + " appearance-none"}
               >
-                <option value="">— Select rarity —</option>
-                {RARITY_OPTIONS.map((r) => (
+                <option value="">— Select availability —</option>
+                {AVAILABILITY_OPTIONS.map((r) => (
                   <option key={r} value={r}>{r}</option>
                 ))}
               </select>
@@ -359,11 +359,11 @@ export function ImplantPicker({ editable = true, onSelect, onClose }: Props) {
               <ItemMetaChips
                 bare
                 value={isVariableMeta(ref.value) ? undefined : ref.value}
-                rarity={isVariableMeta(ref.rarity) ? undefined : ref.rarity}
+                availability={isVariableMeta(ref.availability) ? undefined : ref.availability}
                 source={ref.source}
                 valueAmber
               />
-              {(isVariableMeta(ref.value) || isVariableMeta(ref.rarity)) && (
+              {(isVariableMeta(ref.value) || isVariableMeta(ref.availability)) && (
                 <span className="text-amber-400/70 italic">Cost assigned on add</span>
               )}
             </div>

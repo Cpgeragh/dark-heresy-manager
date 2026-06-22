@@ -13,7 +13,7 @@ export interface GearRef {
   description: string;
   weight: string;
   value: string;
-  rarity: string;
+  availability: string;
 }
 
 // ─── Gear Reference ──────────────────────────────────────────────────────────
@@ -29,7 +29,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "A personal carrying device, usually a bag with attached straps. Can carry approximately 50 kilograms.",
     weight: "1 kg",
     value: "10 Thrones",
-    rarity: "Plentiful",
+    availability: "Plentiful",
   },
   {
     id: "cr-cameleoline-cloak",
@@ -41,7 +41,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "being at Extreme Range when targeted by ranged weapons.",
     weight: "0.5 kg",
     value: "500 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
   },
   {
     id: "cr-charm",
@@ -53,7 +53,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "random character, at the GM's discretion a character with a charm will be exempt.",
     weight: "—",
     value: "Variable",
-    rarity: "Average",
+    availability: "Average",
   },
   {
     id: "cr-chrono",
@@ -62,7 +62,7 @@ export const GEAR_REFERENCE: GearRef[] = [
     description: "A hand-held or wrist-worn timepiece, generally dependable and simple to use.",
     weight: "—",
     value: "40 Thrones",
-    rarity: "Abundant",
+    availability: "Abundant",
   },
   {
     id: "cr-clip-drop-harness",
@@ -74,7 +74,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "a +30 bonus to Climb Tests and cannot fall if he fails.",
     weight: "2 kg",
     value: "25 Thrones",
-    rarity: "Common",
+    availability: "Common",
   },
   {
     id: "cr-clothing",
@@ -85,7 +85,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Cost varies from a few Thrones for basic rags up to thousands for exquisite attire.",
     weight: "—",
     value: "Variable",
-    rarity: "Abundant",
+    availability: "Abundant",
   },
   {
     id: "cr-explosive-collar",
@@ -98,7 +98,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "requires a Hard (–20) Tech-Use Test; a serious or worse failure causes it to explode.",
     weight: "1 kg",
     value: "55 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
   },
   {
     id: "cr-filtration-plugs",
@@ -109,7 +109,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Grants a +20 bonus to any Toughness Test made to resist the effects of gas.",
     weight: "—",
     value: "15 Thrones",
-    rarity: "Common",
+    availability: "Common",
   },
   {
     id: "cr-infra-red-goggles",
@@ -121,7 +121,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Perception Tests at night. Advanced models can be disguised as simple eyeglasses.",
     weight: "0.5 kg",
     value: "275 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
   },
   {
     id: "cr-photo-visors",
@@ -133,7 +133,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Good Quality visors also make the wearer immune to the effects of photon ash grenades.",
     weight: "0.5 kg",
     value: "100 Thrones",
-    rarity: "Scarce",
+    availability: "Scarce",
   },
   {
     id: "cr-re-breather",
@@ -146,7 +146,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Replacement canisters cost 25 Thrones and are Scarce.",
     weight: "1 kg",
     value: "50 Thrones",
-    rarity: "Scarce",
+    availability: "Scarce",
   },
   {
     id: "cr-recoil-glove",
@@ -159,7 +159,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "require two hands can be used one-handed without penalty.",
     weight: "0.5 kg",
     value: "85 Thrones",
-    rarity: "Common",
+    availability: "Common",
   },
   {
     id: "cr-respirator",
@@ -171,7 +171,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "+30 bonus to Toughness Tests made to resist the effects of gas, and may re-roll failed results.",
     weight: "0.5 kg",
     value: "25 Thrones",
-    rarity: "Average",
+    availability: "Average",
   },
   {
     id: "cr-void-suit",
@@ -182,7 +182,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Incorporates a re-breather and allows the wearer to survive in vacuum.",
     weight: "8 kg",
     value: "100 Thrones",
-    rarity: "Plentiful",
+    availability: "Plentiful",
   },
   {
     id: "cr-synskin",
@@ -195,7 +195,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "and Dark Sight.",
     weight: "2 kg",
     value: "2,500 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
   },
 
   // ── Core Rulebook — Tools ─────────────────────────────────────────────────
@@ -211,7 +211,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "thick and certain shielding materials can block the scanner.",
     weight: "0.5 kg",
     value: "145 Thrones",
-    rarity: "Scarce",
+    availability: "Scarce",
   },
   {
     id: "cr-auto-quill",
@@ -222,7 +222,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "with great accuracy. A character with the Trade (Copyist) skill gains +10 to their Skill Tests.",
     weight: "—",
     value: "55 Thrones",
-    rarity: "Scarce",
+    availability: "Scarce",
   },
   {
     id: "cr-combi-tool",
@@ -233,7 +233,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Grants a +10 bonus to Tech-Use Tests.",
     weight: "1 kg",
     value: "200 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
   },
   {
     id: "cr-data-slate",
@@ -245,7 +245,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "from other devices.",
     weight: "0.5 kg",
     value: "25 Thrones",
-    rarity: "Common",
+    availability: "Common",
   },
   {
     id: "cr-demolition-charge",
@@ -258,7 +258,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Blast radius = kilograms used × 5 metres.",
     weight: "1 kg",
     value: "250 Thrones",
-    rarity: "Scarce",
+    availability: "Scarce",
   },
   {
     id: "cr-excruciator-kit",
@@ -269,7 +269,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "the questioning of captured enemies. Grants a +20 bonus to all Interrogation Tests.",
     weight: "1 kg",
     value: "375 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
   },
   {
     id: "cr-glow-globe",
@@ -280,7 +280,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Lasts 1d5 hours before needing to be recharged or have its power cell replaced.",
     weight: "0.5 kg",
     value: "15 Thrones",
-    rarity: "Abundant",
+    availability: "Abundant",
   },
   {
     id: "cr-grapnel",
@@ -292,7 +292,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "projectile weapon, counting as a single-shot crossbow.",
     weight: "2 kg",
     value: "30 Thrones",
-    rarity: "Common",
+    availability: "Common",
   },
   {
     id: "cr-lascutter",
@@ -304,7 +304,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Too unwieldy to be used in combat.",
     weight: "4 kg",
     value: "65 Thrones",
-    rarity: "Average",
+    availability: "Average",
   },
   {
     id: "cr-magnoculars",
@@ -316,7 +316,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "snapshots for later analysis.",
     weight: "0.5 kg",
     value: "55 Thrones",
-    rarity: "Average",
+    availability: "Average",
   },
   {
     id: "cr-manacles",
@@ -327,7 +327,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "hands of more nefarious individuals for darker purposes.",
     weight: "1 kg",
     value: "35 Thrones",
-    rarity: "Plentiful",
+    availability: "Plentiful",
   },
   {
     id: "cr-micro-bead",
@@ -338,7 +338,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Bad weather, dense terrain and intervening rock or plasteel can greatly reduce this range.",
     weight: "—",
     value: "20 Thrones",
-    rarity: "Average",
+    availability: "Average",
   },
   {
     id: "cr-multikey",
@@ -349,7 +349,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Grants a +30 bonus to any Security Test when trying to open locks.",
     weight: "—",
     value: "150 Thrones",
-    rarity: "Scarce",
+    availability: "Scarce",
   },
   {
     id: "cr-pict-recorder",
@@ -360,7 +360,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "as well as recording.",
     weight: "1 kg",
     value: "100 Thrones",
-    rarity: "Average",
+    availability: "Average",
   },
   {
     id: "cr-psy-focus",
@@ -372,7 +372,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "+10 bonus.",
     weight: "—",
     value: "100 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
   },
   {
     id: "cr-screamers",
@@ -384,7 +384,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "motions. If triggered, sounds an alarm audible up to one kilometre away.",
     weight: "2 kg",
     value: "140 Thrones",
-    rarity: "Scarce",
+    availability: "Scarce",
   },
   {
     id: "cr-stummers",
@@ -396,7 +396,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "before needing to be recharged (approximately one hour).",
     weight: "2 kg",
     value: "25 Thrones",
-    rarity: "Average",
+    availability: "Average",
   },
   {
     id: "cr-vox-caster",
@@ -408,7 +408,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Ordinary (+10) Tech-Use Test.",
     weight: "4 kg",
     value: "300 Thrones",
-    rarity: "Scarce",
+    availability: "Scarce",
   },
   {
     id: "cr-writing-kit",
@@ -417,7 +417,7 @@ export const GEAR_REFERENCE: GearRef[] = [
     description: "Contains papers, inks and quills.",
     weight: "2 kg",
     value: "20 Thrones",
-    rarity: "Common",
+    availability: "Common",
   },
 
   // ── Book of Judgement — Gear ──────────────────────────────────────────────
@@ -431,7 +431,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Complex genetic factors (twins, manipulation, xenos tampering) may interfere at GM's discretion.",
     weight: "15 kg",
     value: "1,500 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
   },
   {
     id: "goreman-carta-sanguine",
@@ -444,7 +444,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Once the terms are met, redeem for ten times the original value.",
     weight: "0.1 kg",
     value: "100 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
   },
   {
     id: "lock-punch",
@@ -458,7 +458,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Poor Craftsmanship imposes -10 to Tech-Use Tests.",
     weight: "0.2 kg",
     value: "300 Thrones",
-    rarity: "Scarce",
+    availability: "Scarce",
   },
   {
     id: "magnacles",
@@ -470,7 +470,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "penalty and take three times as long as normal.",
     weight: "1.5 kg",
     value: "120 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
   },
   {
     id: "magnetic-harness",
@@ -483,7 +483,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "If Quick Draw is already possessed, stowing is also a Free Action.",
     weight: "10 kg",
     value: "500 Thrones",
-    rarity: "Scarce",
+    availability: "Scarce",
   },
   {
     id: "pinner",
@@ -496,7 +496,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Good/Best Craftsmanship increase the radius by 5 m / 10 m. Poor Craftsmanship reduces it by 10 m.",
     weight: "5 kg",
     value: "2,000 Thrones",
-    rarity: "Near Unique",
+    availability: "Near Unique",
   },
   {
     id: "strait-cape",
@@ -510,7 +510,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "sight, sound, voice, limbs, or hands.",
     weight: "5 kg",
     value: "100 Thrones",
-    rarity: "Scarce",
+    availability: "Scarce",
   },
   {
     id: "vertical-spindle-set",
@@ -525,7 +525,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Best: monofibre hairs allow climbing any surface. Poor: no detachable plates or monoline.",
     weight: "20 kg",
     value: "1,500 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
   },
   {
     id: "vox-pickup",
@@ -538,7 +538,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "an Opposed Search Test pitting the searcher's Search against the planter's Intelligence.",
     weight: "0.01 kg",
     value: "100 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
   },
   {
     id: "vox-privacy-field",
@@ -550,7 +550,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Usually mounted in a small handheld case or on a Servo-Skull.",
     weight: "1 kg",
     value: "500 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
   },
   {
     id: "wall-eater",
@@ -564,7 +564,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "in wooden, bone, or ivory cages. No craftsmanship variants exist.",
     weight: "1 kg",
     value: "500 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
   },
 
   // ── Blood of Martyrs ──────────────────────────────────────────────────────
@@ -577,7 +577,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "made against members of the Ecclesiarchy of equal or lower status (GM's discretion).",
     weight: "1 kg",
     value: "1,000 Thrones",
-    rarity: "Issued Only",
+    availability: "Issued Only",
   },
   {
     id: "cilice",
@@ -589,7 +589,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "must make a Toughness Test or suffer 1 Level of Fatigue.",
     weight: "Varies",
     value: "Varies",
-    rarity: "Rare",
+    availability: "Rare",
   },
   {
     id: "dialogous-staff",
@@ -600,7 +600,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Sturdy enough to use in combat as a Staff. Grants +10 to understand sounds at a distance.",
     weight: "4 kg",
     value: "—",
-    rarity: "Issued Only",
+    availability: "Issued Only",
   },
   {
     id: "eikon",
@@ -609,7 +609,7 @@ export const GEAR_REFERENCE: GearRef[] = [
     description: "No specific game effect.",
     weight: "—",
     value: "Varies",
-    rarity: "Common",
+    availability: "Common",
   },
   {
     id: "hospitaller-medicae-tools",
@@ -622,7 +622,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "(including Fatigue and Blood Loss), and may (GM discretion) heal 1d5 wounds suffered in the loss of the limb.",
     weight: "10 kg",
     value: "—",
-    rarity: "Issued Only",
+    availability: "Issued Only",
   },
   {
     id: "liber-heresius",
@@ -633,7 +633,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Issued only to proven Witch Hunters.",
     weight: "10 kg",
     value: "—",
-    rarity: "Issued Only",
+    availability: "Issued Only",
   },
   {
     id: "litanies-of-faith",
@@ -645,7 +645,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Abridged versions (concentrating primarily on prayers) provide only +10.",
     weight: "10 kg",
     value: "500 Thrones",
-    rarity: "Uncommon",
+    availability: "Uncommon",
   },
   {
     id: "pilgrims-travel-staff",
@@ -654,7 +654,7 @@ export const GEAR_REFERENCE: GearRef[] = [
     description: "Can be used as a Staff in combat.",
     weight: "3 kg",
     value: "15 Thrones",
-    rarity: "Common",
+    availability: "Common",
   },
   {
     id: "psyocculum",
@@ -665,7 +665,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Can only detect psykers. Using the psyocculum requires a Full Action.",
     weight: "2 kg",
     value: "3,000 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
   },
   {
     id: "questing-pilgrim-badge",
@@ -674,7 +674,7 @@ export const GEAR_REFERENCE: GearRef[] = [
     description: "No specific game effect.",
     weight: "—",
     value: "Varies",
-    rarity: "Common",
+    availability: "Common",
   },
   {
     id: "reliquary",
@@ -684,7 +684,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "No specific game effect. Used to contain relics, charms, or holographic images of actual relics.",
     weight: "1 kg",
     value: "Varies",
-    rarity: "Common",
+    availability: "Common",
   },
   {
     id: "ring-of-suffrage",
@@ -693,7 +693,7 @@ export const GEAR_REFERENCE: GearRef[] = [
     description: "Treated as a charm.",
     weight: "0 kg",
     value: "10 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
   },
   {
     id: "rule-of-sororitas",
@@ -704,7 +704,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Mutants, or the Adepta Sororitas.",
     weight: "5 kg",
     value: "100 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
   },
   {
     id: "sarissa",
@@ -713,7 +713,7 @@ export const GEAR_REFERENCE: GearRef[] = [
     description: "When mounted on a bolter, a sarissa counts as an axe in close combat.",
     weight: "+2 kg",
     value: "50 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
   },
   {
     id: "sarissa-standalone",
@@ -723,7 +723,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "A heavy spiked blade; when not mounted on a bolter, counts as an axe in close combat.",
     weight: "2 kg",
     value: "200 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
   },
   {
     id: "seraphim-jump-pack",
@@ -736,7 +736,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "one minute before the turbines require one minute to cool.",
     weight: "15 kg",
     value: "5,000 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
   },
   {
     id: "simulacrum-imperialis",
@@ -748,7 +748,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "benefit from this effect.",
     weight: "10 kg",
     value: "—",
-    rarity: "Issued Only",
+    availability: "Issued Only",
   },
   {
     id: "witch-cage",
@@ -759,7 +759,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "takes –40 to all Invocation Tests, and is considered Blind and Deaf.",
     weight: "15 kg",
     value: "4,000 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
   },
 
   // ── Daemon Hunter — Gear ──────────────────────────────────────────────────
@@ -774,7 +774,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Wards last one month (GM may remove earlier if armour is soaked, burned, etc.).",
     weight: "—",
     value: "50 Thrones",
-    rarity: "Common",
+    availability: "Common",
   },
   {
     id: "dh-consecrated-scrolls",
@@ -785,7 +785,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Must be prepared specifically for the bearer.",
     weight: "1 kg",
     value: "100 Thrones",
-    rarity: "Scarce",
+    availability: "Scarce",
   },
   {
     id: "dh-grimoire-of-true-names",
@@ -798,7 +798,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Knowledge fades after 2d10+Intelligence Bonus days and must be re-studied.",
     weight: "10 kg",
     value: "5,000 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
   },
   {
     id: "dh-litany-micro-beads",
@@ -813,7 +813,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Wearer is Deafened while not transmitting.",
     weight: "—",
     value: "100 Thrones",
-    rarity: "Scarce",
+    availability: "Scarce",
   },
   {
     id: "dh-neural-scourge",
@@ -826,7 +826,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "If the subject wins the opposed Test, they take 1d5 Damage ignoring Toughness Bonus.",
     weight: "2 kg",
     value: "1,700 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
   },
   {
     id: "dh-psyocculum",
@@ -839,7 +839,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Using for more than one minute causes 1 Fatigue; cannot remove this fatigue while worn.",
     weight: "1.5 kg",
     value: "1,200 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
   },
   {
     id: "dh-soubirous-power-pack",
@@ -852,7 +852,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Cannot be recharged once blessed. Single use.",
     weight: "—",
     value: "150 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
   },
   {
     id: "dh-ulumeathi-plasma-siphon",
@@ -864,7 +864,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Plasma weapons affected also lose the Volatile quality.",
     weight: "10 kg",
     value: "8,000 Thrones",
-    rarity: "Near Unique",
+    availability: "Near Unique",
   },
 
   // ── Lathe Worlds ─────────────────────────────────────────────────────────
@@ -880,7 +880,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "every hour. Each canister contains enough for two applications.",
     weight: "—",
     value: "500 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
   },
 
   {
@@ -895,7 +895,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Good Quality: range 50m. Best Quality: range 100m.",
     weight: "10 kg",
     value: "450 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
   },
 
   // ── Lost Dataslate ────────────────────────────────────────────────────────
@@ -912,7 +912,7 @@ export const GEAR_REFERENCE: GearRef[] = [
       "plus clothing and basic equipment.",
     weight: "—",
     value: "450 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
   },
 
   {
@@ -926,6 +926,6 @@ export const GEAR_REFERENCE: GearRef[] = [
       "Effects last 1d5 hours; when they wear off, the character gains 1d5 levels of Fatigue.",
     weight: "—",
     value: "600 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
   },
 ];

@@ -13,7 +13,7 @@ export interface WeaponUpgradeRef {
   /** Weight modifier, e.g. "×1/2", "+1 kg", "—" */
   weightModifier: string;
   value: string;
-  rarity: string;
+  availability: string;
   /** Full rules description */
   description: string;
   /** What weapon types this upgrade can be applied to */
@@ -33,7 +33,7 @@ export const WEAPON_UPGRADE_REFERENCE: WeaponUpgradeRef[] = [
     source: SkillSource.CR,
     weightModifier: "×1/2",
     value: "50 Thrones",
-    rarity: "Average",
+    availability: "Average",
     description:
       "A smaller version of a pistol or basic weapon favoured for concealment over stopping power. " +
       "Halves the weapon's weight, clip size, and range, and reduces its Damage by 1.",
@@ -46,7 +46,7 @@ export const WEAPON_UPGRADE_REFERENCE: WeaponUpgradeRef[] = [
     source: SkillSource.CR,
     weightModifier: "+1 kg",
     value: "35 Thrones",
-    rarity: "Common",
+    availability: "Common",
     description:
       "A small one-shot flamer device. Instead of firing the weapon normally, the shooter may " +
       "use the exterminator cartridge, resolving effects as if firing a flamer. " +
@@ -60,7 +60,7 @@ export const WEAPON_UPGRADE_REFERENCE: WeaponUpgradeRef[] = [
     source: SkillSource.CR,
     weightModifier: "×1/3",
     value: "25 Thrones",
-    rarity: "Plentiful",
+    availability: "Plentiful",
     description:
       "Also known as a pistol grip. Allows the weapon to be wielded in one hand without the " +
       "usual –20 penalty for firing a basic weapon one-handed. Range is halved.",
@@ -73,7 +73,7 @@ export const WEAPON_UPGRADE_REFERENCE: WeaponUpgradeRef[] = [
     source: SkillSource.CR,
     weightModifier: "+0.5 kg",
     value: "25 Thrones",
-    rarity: "Scarce",
+    availability: "Scarce",
     description:
       "Allows the weapon to hold up to three different clips simultaneously. " +
       "At the start of the shooter's Turn he may choose which clip to draw ammunition from that round.",
@@ -81,12 +81,12 @@ export const WEAPON_UPGRADE_REFERENCE: WeaponUpgradeRef[] = [
   },
 
   {
-    id: "cr-melee-attachment",
+    id: "cr-melee-upgrade",
     name: "Melee Attachment",
     source: SkillSource.CR,
     weightModifier: "+2 kg",
     value: "25 Thrones",
-    rarity: "Plentiful",
+    availability: "Plentiful",
     description:
       "A bayonet, chain blade, or other long-bladed combat attachment. " +
       "A weapon fitted with a melee attachment counts as a spear in close combat.",
@@ -99,7 +99,7 @@ export const WEAPON_UPGRADE_REFERENCE: WeaponUpgradeRef[] = [
     source: SkillSource.CR,
     weightModifier: "0",
     value: "40 Thrones",
-    rarity: "Scarce",
+    availability: "Scarce",
     description:
       "Mono weapons have specially fashioned blades with superfine edges that cut through " +
       "armour and never lose their edge. The weapon no longer counts as Primitive and gains +2 Penetration.",
@@ -112,7 +112,7 @@ export const WEAPON_UPGRADE_REFERENCE: WeaponUpgradeRef[] = [
     source: SkillSource.CR,
     weightModifier: "+0.5 kg",
     value: "15 Thrones",
-    rarity: "Common",
+    availability: "Common",
     description:
       "An enhanced power pack for a las weapon. Adds 1 to the weapon's Damage. " +
       "The increased output halves the clip size.",
@@ -125,7 +125,7 @@ export const WEAPON_UPGRADE_REFERENCE: WeaponUpgradeRef[] = [
     source: SkillSource.CR,
     weightModifier: "+0.5 kg",
     value: "50 Thrones",
-    rarity: "Scarce",
+    availability: "Scarce",
     description:
       "Grants a +10 bonus to Ballistic Skill Tests when the weapon is fired on single shot. " +
       "Counts as a sight — a weapon may only have one sight fitted.",
@@ -138,7 +138,7 @@ export const WEAPON_UPGRADE_REFERENCE: WeaponUpgradeRef[] = [
     source: SkillSource.CR,
     weightModifier: "+0.5 kg",
     value: "10 Thrones",
-    rarity: "Plentiful",
+    availability: "Plentiful",
     description:
       "Lowers the noise and flash from a weapon's discharge, preventing easy detection. " +
       "Awareness Tests to hear shots made with a silenced weapon suffer an additional –20 penalty " +
@@ -152,7 +152,7 @@ export const WEAPON_UPGRADE_REFERENCE: WeaponUpgradeRef[] = [
     source: SkillSource.CR,
     weightModifier: "+1 kg",
     value: "35 Thrones",
-    rarity: "Average",
+    availability: "Average",
     description:
       "Magnifies the target's image for precise long-range shots. Ignores all penalties for " +
       "long and extreme range, provided the shooter takes a Full Action to aim. " +
@@ -166,7 +166,7 @@ export const WEAPON_UPGRADE_REFERENCE: WeaponUpgradeRef[] = [
     source: SkillSource.LW,
     weightModifier: "+0.5 kg",
     value: "200 Thrones",
-    rarity: "Extremely Rare",
+    availability: "Extremely Rare",
     description:
       "Used to create new Integrated Weapons; this is creation component data, not a normal fitted attachment. " +
       "Integrated weapons are linked to a Potentia Coil, have unlimited ammunition, do not need to reload unless otherwise noted, and do not Jam; a Jam instead gives the user 1 Fatigue. " +

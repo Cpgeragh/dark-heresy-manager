@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import type { ArmourLocationKey, WornArmourPiece } from "../../../types/Character";
 import { ARMOUR_REFERENCE } from "../../../data/reference/armourReference";
-import { rarityColour } from "../../../ui/sourceStyles";
+import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { formatWeightForDisplay } from "../../../ui/weightFormat";
 import { formatMoneyForDisplay } from "../../../ui/moneyFormat";
 import { uiTextBody, uiTextMuted, uiTextPlaceholder } from "../../../ui/editableStyles";
@@ -61,7 +61,7 @@ export function PieceNotesModal({ piece, onClose }: Props) {
               <span className="text-slate-200">{formatMoneyForDisplay(piece.value)}</span>
             </span>
           )}
-          {piece.rarity && <span className={rarityColour(piece.rarity)}>{piece.rarity}</span>}
+          <ItemMetaChips availability={piece.availability} bare />
         </div>
         {Object.keys(piece.apOverrides ?? {}).length > 0 && (
           <div className={`text-xs lg:text-sm ${uiTextMuted}`}>

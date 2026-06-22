@@ -1,14 +1,14 @@
 // src/ui/ItemMetaChips.tsx
 // Shared chip row used on item cards throughout all tabs.
 
-import { rarityColour, sourceColour } from "./sourceStyles";
+import { availabilityColour, sourceColour } from "./sourceStyles";
 import { formatWeightForDisplay } from "./weightFormat";
 import { formatMoneyForDisplay } from "./moneyFormat";
 
 interface Props {
   weight?: string | null;
   value?: string | null;
-  rarity?: string | null;
+  availability?: string | null;
   source?: string | null;
   /** Override the wrapper className. Defaults to "flex flex-wrap gap-1.5". */
   className?: string;
@@ -26,18 +26,18 @@ interface Props {
 }
 
 /**
- * Renders weight, value, rarity, and source metadata chips.
+ * Renders weight, value, availability, and source metadata chips.
  * Returns null when all props are falsy — callers need no guard.
  */
 export function ItemMetaChips({
   weight,
   value,
-  rarity,
+  availability,
   source,
   className,
   bare,
 }: Props) {
-  if (!weight && !value && !rarity && !source) return null;
+  if (!weight && !value && !availability && !source) return null;
 
   const displayedWeight = formatWeightForDisplay(weight);
   const displayedValue = value !== undefined && value !== null ? formatMoneyForDisplay(value) : undefined;
@@ -55,11 +55,11 @@ export function ItemMetaChips({
           {displayedValue}
         </span>
       )}
-      {rarity && (
+      {availability && (
         <span
-          className={`text-xs lg:text-sm rounded border border-slate-700 bg-slate-800/40 px-1.5 lg:px-2 py-0.5 whitespace-nowrap ${rarityColour(rarity)}`}
+          className={`text-xs lg:text-sm rounded border border-slate-700 bg-slate-800/40 px-1.5 lg:px-2 py-0.5 whitespace-nowrap ${availabilityColour(availability)}`}
         >
-          {rarity}
+          {availability}
         </span>
       )}
       {source && (

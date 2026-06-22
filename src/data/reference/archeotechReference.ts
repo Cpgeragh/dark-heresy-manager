@@ -16,7 +16,7 @@ export interface ArcheotechRef {
   specialRules?: string;
   weight?: string;
   value?: string;
-  rarity?: string;
+  availability?: string;
   /** Structured weapon stats — only present on type "Weapon" items */
   weaponClass?: string;
   damage?: string;
@@ -38,7 +38,7 @@ export const ARCHEOTECH_REFERENCE: ArcheotechRef[] = [
     type: "Device",
     weight: "Varies",
     value: "—",
-    rarity: "—",
+    availability: "—",
     description:
       "A series of flexible interlocking screens held up by tungsten rods up to six metres high. " +
       "No two grids are alike, varying in size from several metres to several hundred metres across. " +
@@ -56,7 +56,7 @@ export const ARCHEOTECH_REFERENCE: ArcheotechRef[] = [
     specialRules: "Blast (2)",
     weight: "0.5 kg",
     value: "8,000 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
     description:
       "Produced in very small quantities on the Calixian forge world of Belecane. Stasis grenades trap " +
       "or preserve those caught in the blast within a bubble of slowed time. They have a radius of 2 metres, " +
@@ -73,7 +73,7 @@ export const ARCHEOTECH_REFERENCE: ArcheotechRef[] = [
     specialRules: "Blast (6)",
     weight: "20 kg",
     value: "19,000 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
     description:
       "A larger Belecane stasis device with a variable detection radius of up to 5 metres, which can be " +
       "set to detect creatures of a specific Size. Once triggered, everything within its 6 metre radius is " +
@@ -93,7 +93,7 @@ export const ARCHEOTECH_REFERENCE: ArcheotechRef[] = [
     type: "Device",
     weight: "0.5 kg",
     value: "—",
-    rarity: "—",
+    availability: "—",
     description:
       "Creates a duplicate holographic image of the user, fooling attackers into thinking the user " +
       "is in two places at once. While active, grants +30 to all Dodge and Parry Tests. An attacker " +
@@ -109,7 +109,7 @@ export const ARCHEOTECH_REFERENCE: ArcheotechRef[] = [
     type: "Device",
     weight: "3 kg",
     value: "—",
-    rarity: "—",
+    availability: "—",
     description:
       "A hyper-advanced auspex worn as a hood, with data-displays over each eye and an augmented " +
       "reality interface. Half Action to activate. Once active: see any living creature within 50m " +
@@ -127,7 +127,7 @@ export const ARCHEOTECH_REFERENCE: ArcheotechRef[] = [
     type: "Weapon",
     weight: "1 kg",
     value: "—",
-    rarity: "—",
+    availability: "—",
     specialRules: "Special, Power Field",
     weaponClass: "Melee",
     damage: "2d10 E",
@@ -148,7 +148,7 @@ export const ARCHEOTECH_REFERENCE: ArcheotechRef[] = [
     type: "Implant",
     weight: "0 kg",
     value: "—",
-    rarity: "—",
+    availability: "—",
     description:
       "Heretical cybernetic implants installed in the head following standard cybernetic implantation " +
       "rules. On implantation the user gains 2d10 Insanity and 1d10 Corruption Points. If they " +
@@ -165,7 +165,7 @@ export const ARCHEOTECH_REFERENCE: ArcheotechRef[] = [
     type: "Weapon",
     weight: "8 kg",
     value: "—",
-    rarity: "—",
+    availability: "—",
     specialRules: "Special, Shocking, Toxic",
     weaponClass: "Basic",
     damage: "3d10 R",
@@ -188,7 +188,7 @@ export const ARCHEOTECH_REFERENCE: ArcheotechRef[] = [
     type: "Device",
     weight: "20 kg",
     value: "—",
-    rarity: "—",
+    availability: "—",
     description:
       "Officially: the Hades-Pattern Rotating Gravimetric Harmonic Disruption Device. Uses gravimetric and " +
       "soundwave transmissions to disrupt and eventually overload a voidship's Gellar Field, spilling raw Warp " +

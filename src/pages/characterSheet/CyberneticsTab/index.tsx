@@ -44,7 +44,7 @@ export function CyberneticsTab({ cybernetics, editable, onUpdate }: CyberneticsT
           name: ref.name,
           craftsmanship,
           value: gmValue ?? ref.value,
-          rarity: gmRarity ?? ref.rarity,
+          availability: gmRarity ?? ref.availability,
           source: ref.source,
           ...(bodyLocation ? { bodyLocation } : {}),
         },

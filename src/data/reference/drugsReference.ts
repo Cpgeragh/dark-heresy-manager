@@ -13,7 +13,7 @@ export interface DrugRef {
   weight?: string;
   /** Cost per dose */
   value: string;
-  rarity: string;
+  availability: string;
   /** Primary mechanical effect when taken */
   effect: string;
   /** How long the effect lasts */
@@ -34,7 +34,7 @@ export const DRUGS_REFERENCE: DrugRef[] = [
     name: "De-Tox",
     source: SkillSource.CR,
     value: "65 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
     effect:
       "Immediately ends the ongoing effects, both positive and negative, of any drugs, toxins or " +
       "gases affecting the character (unless the effect states that de-tox is not effective against them).",
@@ -48,7 +48,7 @@ export const DRUGS_REFERENCE: DrugRef[] = [
     name: "Frenzon",
     source: SkillSource.CR,
     value: "95 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
     effect: "Gains the Frenzy talent and immunity to Fear.",
     duration: "1d10 minutes",
     notes:
@@ -61,7 +61,7 @@ export const DRUGS_REFERENCE: DrugRef[] = [
     name: "Obscura",
     source: SkillSource.CR,
     value: "285 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
     effect:
       "User enters a dream-like state. If required to engage in combat, treat as under the " +
       "effects of a hallucinogen grenade.",
@@ -79,7 +79,7 @@ export const DRUGS_REFERENCE: DrugRef[] = [
     name: "Slaught",
     source: SkillSource.CR,
     value: "75 Thrones",
-    rarity: "Scarce",
+    availability: "Scarce",
     effect: "Increases the user's Agility Bonus and Perception Bonus by 3.",
     duration: "2d10 minutes",
     sideEffect:
@@ -95,7 +95,7 @@ export const DRUGS_REFERENCE: DrugRef[] = [
     name: "Spook",
     source: SkillSource.CR,
     value: "395 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
     effect:
       "Without Psy Rating: Willpower Test or gain 1d5 Insanity Points. On a success, gain a random " +
       "minor psychic power (Table 5–15) for 1d5 hours, manifested via a Hard (–20) Willpower Test. " +
@@ -111,7 +111,7 @@ export const DRUGS_REFERENCE: DrugRef[] = [
     name: "Stimm",
     source: SkillSource.CR,
     value: "20 Thrones",
-    rarity: "Average",
+    availability: "Average",
     effect:
       "Ignores all negative effects to Characteristics from Damage or Critical Damage. " +
       "Cannot be Stunned.",
@@ -131,7 +131,7 @@ export const DRUGS_REFERENCE: DrugRef[] = [
     name: "Sandstone",
     source: SkillSource.BoJ,
     value: "95 Thrones",
-    rarity: "Scarce",
+    availability: "Scarce",
     effect: "+30 to all Willpower-based Tests and +10 to resist Interrogation.",
     duration: "1d5+3 hours",
     sideEffect:
@@ -144,7 +144,7 @@ export const DRUGS_REFERENCE: DrugRef[] = [
     name: "Clear",
     source: SkillSource.BoJ,
     value: "110 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
     effect:
       "Grants the Decadence Talent and +30 to Toughness-based Tests vs passing out or poison effects.",
     sideEffect:
@@ -157,7 +157,7 @@ export const DRUGS_REFERENCE: DrugRef[] = [
     name: "Eazille",
     source: SkillSource.BoJ,
     value: "230 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
     effect:
       "Powerful inhibition reducer. User ignores moral constraints and must pass an Ordinary (+10) " +
       "Willpower Test to resist baser instincts.",
@@ -171,7 +171,7 @@ export const DRUGS_REFERENCE: DrugRef[] = [
     name: "Holdfast",
     source: SkillSource.BoJ,
     value: "165 Thrones",
-    rarity: "Very Rare",
+    availability: "Very Rare",
     effect: "Neurological drugs are at –30 to their normal effects.",
     duration: "2d5 hours",
     sideEffect: "–20 to all Willpower-based Tests while under effect.",
@@ -183,7 +183,7 @@ export const DRUGS_REFERENCE: DrugRef[] = [
     name: "Hyperexia",
     source: SkillSource.BoJ,
     value: "80 Thrones",
-    rarity: "Scarce",
+    availability: "Scarce",
     effect:
       "Thickens skin to a rubbery texture. Grants Resistance (Cold, Heat) and inflicts 1 Fatigue.",
     duration: "Ongoing — one dose per week required to maintain the effect.",
@@ -195,7 +195,7 @@ export const DRUGS_REFERENCE: DrugRef[] = [
     name: "Karrikian Red-Eye",
     source: SkillSource.BoJ,
     value: "185 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
     effect:
       "Extends vision into the infra-red spectrum. +20 to Awareness Tests to detect heat-based images.",
     duration: "1d5 hours",
@@ -209,7 +209,7 @@ export const DRUGS_REFERENCE: DrugRef[] = [
     name: "Leatherwort",
     source: SkillSource.BoJ,
     value: "115 Thrones",
-    rarity: "Scarce",
+    availability: "Scarce",
     effect:
       "Treated areas count as having 2 additional AP (stacks with regular armour) and +10 to " +
       "Toughness-based Tests.",
@@ -224,7 +224,7 @@ export const DRUGS_REFERENCE: DrugRef[] = [
     name: "Scav-Glysten",
     source: SkillSource.BoJ,
     value: "155 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
     effect:
       "-30 to any tracking attempts by scent against the user. Gain the Concealment and Shadowing " +
       "skills when attempting to hide from or track animals.",
@@ -237,7 +237,7 @@ export const DRUGS_REFERENCE: DrugRef[] = [
     name: "Scraper-Ripper",
     source: SkillSource.BoJ,
     value: "90 Thrones",
-    rarity: "Scarce",
+    availability: "Scarce",
     effect: "+30 to all Agility-based Tests.",
     duration: "1d5 hours",
     sideEffect:
@@ -250,7 +250,7 @@ export const DRUGS_REFERENCE: DrugRef[] = [
     name: "Sisk Ash",
     source: SkillSource.BoJ,
     value: "80 Thrones",
-    rarity: "Scarce",
+    availability: "Scarce",
     effect:
       "Induces calm; user may need an Easy (+30) Willpower Test to perform reluctant tasks. " +
       "Smoke interferes with Cybermastiff scent-tracking.",
@@ -265,7 +265,7 @@ export const DRUGS_REFERENCE: DrugRef[] = [
     name: "The Truth Revealed",
     source: SkillSource.BoJ,
     value: "135 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
     effect:
       "–50 to all Tests made to resist Interrogation or other attempts to extract information.",
     duration: "3d5 hours minus Toughness Bonus",
@@ -277,7 +277,7 @@ export const DRUGS_REFERENCE: DrugRef[] = [
     name: "Zumthorian Greyve",
     source: SkillSource.BoJ,
     value: "125 Thrones",
-    rarity: "Rare",
+    availability: "Rare",
     effect:
       "Ignore Fatigue for the duration. +40 to all Toughness-based Tests and to resist Interrogation.",
     duration: "2d5 hours",
@@ -292,7 +292,7 @@ export const DRUGS_REFERENCE: DrugRef[] = [
     name: "Dreamjuice",
     source: SkillSource.DH,
     value: "75 Thrones",
-    rarity: "Scarce",
+    availability: "Scarce",
     effect: "+10 to all Intelligence Tests.",
     duration: "30 minutes",
     sideEffect:
@@ -306,7 +306,7 @@ export const DRUGS_REFERENCE: DrugRef[] = [
     name: "Imperium's Fervour",
     source: SkillSource.DH,
     value: "20 Thrones",
-    rarity: "Scarce",
+    availability: "Scarce",
     effect:
       "Fear Tests reduced by one degree of severity. Insanity Points gained are reduced by 2 " +
       "(minimum 1). –10 to Perception Tests while active.",
