@@ -6,7 +6,7 @@ import type { Characteristics, SkillEntry } from "../../../types/Character";
 import type { CharField } from "../../../utils/characterFactory";
 import { useSkillComputation } from "../../../hooks/useSkillComputation";
 import { SectionHeader } from "../../../ui/SectionHeader";
-import { uiSection } from "../../../ui/editableStyles";
+import { uiSection, uiTextPlaceholder } from "../../../ui/editableStyles";
 import { SkillRow } from "./SkillRow";
 import { SkillGroupRow } from "./SkillGroupRow";
 import { AddSkillModal } from "./AddSkillModal";
@@ -231,7 +231,7 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField }: SkillsTa
           {activeView === "basic" ? (
             renderBasicSection()
           ) : activeItems.length === 0 ? (
-            <p className="text-sm text-slate-400 text-center py-8">
+            <p className={`text-sm ${uiTextPlaceholder} text-center py-8`}>
               No advanced skills trained yet.
             </p>
           ) : (
@@ -265,7 +265,7 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField }: SkillsTa
             </button>
           </div>
           {advancedItems.length === 0 ? (
-            <p className="text-sm text-slate-400">No advanced skills trained yet.</p>
+            <p className={`text-sm ${uiTextPlaceholder}`}>No advanced skills trained yet.</p>
           ) : (
             <div className="space-y-2">{renderItems(advancedItems)}</div>
           )}

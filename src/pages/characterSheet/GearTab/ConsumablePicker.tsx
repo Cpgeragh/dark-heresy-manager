@@ -5,6 +5,7 @@ import { InfoModal } from "../../../components/InfoModal";
 import { CONSUMABLES_REFERENCE, type ConsumableRef } from "../../../data/reference/consumablesReference";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
+import { uiTextBody } from "../../../ui/editableStyles";
 
 interface Props {
   editable?: boolean;
@@ -42,7 +43,7 @@ export function ConsumablePicker({ editable = true, onSelect, onClose }: Props) 
                 <span className="inline-flex items-center -translate-y-[1.4px]" onClick={(e) => e.stopPropagation()}>
                   <InfoModal
                     title={ref.name}
-                    content={<p className="text-sm lg:text-base text-slate-300 leading-relaxed">{ref.description}</p>}
+                    content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ref.description}</p>}
                   />
                 </span>
               )}

@@ -6,6 +6,7 @@ import type { DrugRef } from "../../../data/reference/drugsReference";
 import { DrugPicker } from "./DrugPicker";
 import { DrugRow } from "./DrugRow";
 import { SectionHeader } from "../../../ui/SectionHeader";
+import { uiTextBody, uiTextPlaceholder } from "../../../ui/editableStyles";
 
 interface DrugsTabProps {
   drugs: DrugItem[];
@@ -61,7 +62,7 @@ export function DrugsTab({ drugs, editable, onUpdate }: DrugsTabProps) {
   return (
     <div className="space-y-6">
       {/* Excessive Drug Use rule */}
-      <div className="rounded-lg border border-violet-700/40 bg-violet-900/10 px-4 lg:px-5 py-3 lg:py-4 text-xs lg:text-sm text-slate-400 leading-relaxed">
+      <div className={`rounded-lg border border-violet-700/40 bg-violet-900/10 px-4 lg:px-5 py-3 lg:py-4 text-xs lg:text-sm ${uiTextBody} leading-relaxed`}>
         <span className="font-semibold text-violet-400 uppercase tracking-wide mr-1">
           Excessive Drug Use -
         </span>
@@ -82,7 +83,7 @@ export function DrugsTab({ drugs, editable, onUpdate }: DrugsTabProps) {
           </button>
         </div>
 
-        {drugs.length === 0 && <p className="text-sm lg:text-base text-slate-500 italic">No drugs carried.</p>}
+        {drugs.length === 0 && <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No drugs carried.</p>}
 
         <div className="space-y-3 sm:hidden">
           {drugs.map((item) => (

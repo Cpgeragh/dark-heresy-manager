@@ -22,7 +22,17 @@ import {
   usesUnitAmmoTracking,
 } from "../../../data/reference/ammoReference";
 import { WEAPON_UPGRADE_REFERENCE } from "../../../data/reference/weaponUpgradeReference";
-import { editableInputClass, editableTextareaClass, uiSection, uiSectionHeader } from "../../../ui/editableStyles";
+import {
+  editableInputClass,
+  editableTextareaClass,
+  uiSection,
+  uiSectionHeader,
+  uiTextBody,
+  uiTextLabel,
+  uiTextMuted,
+  uiTextPlaceholder,
+  uiTextSubtle,
+} from "../../../ui/editableStyles";
 import { Button } from "../../../ui/Button";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
@@ -289,7 +299,7 @@ export function RangedPicker({
             </div>
           </div>
 
-          <div className="text-xs lg:text-sm text-slate-400 bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed">
+          <div className={`text-xs lg:text-sm ${uiTextBody} bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed`}>
             {rangedCraftsmanshipDescription(craftsmanship)}
           </div>
         </div>
@@ -375,7 +385,7 @@ export function RangedPicker({
             ) : null; })()}
             <ItemMetaChips weight={ref.weight} value={ref.value} rarity={ref.rarity} source={ref.source} />
           </div>
-          <div className="flex items-center gap-2 text-xs lg:text-sm text-slate-500 mt-0.5 flex-wrap font-code">
+          <div className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted} mt-0.5 flex-wrap font-code`}>
             <span>{ref.range}</span>
             <span>{ref.rof}</span>
             <span>{ref.damage}</span>
@@ -385,8 +395,8 @@ export function RangedPicker({
           </div>
           {ref.specialRules && ref.specialRules !== "—" && (
             <div className="flex items-center gap-1.5 mt-1">
-              <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Qualities</span>
-              <span className="text-xs lg:text-sm text-slate-400 italic">{ref.specialRules}</span>
+              <span className={uiTextLabel}>Qualities</span>
+              <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>{ref.specialRules}</span>
               <span className="inline-flex items-center -translate-y-[1.4px]">
                 <InfoModal title={`${ref.name} Qualities`} content={<SpecialRulesContent rules={ref.specialRules} />} />
               </span>
@@ -394,7 +404,7 @@ export function RangedPicker({
           )}
           {ref.description && (
             <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Rules</span>
+              <span className={uiTextLabel}>Rules</span>
               <span className="inline-flex items-center -translate-y-[1.4px]">
                 <InfoModal title={ref.name} content={<SpecialRulesContent rules="" description={ref.description} />} />
               </span>
@@ -411,9 +421,13 @@ export function RangedPicker({
 export function CustomRangedForm({
   onAdd,
   onCancel,
+  title = "Custom Ranged Weapon",
+  integrated = false,
 }: {
   onAdd: (w: RangedWeapon) => void;
   onCancel: () => void;
+  title?: string;
+  integrated?: boolean;
 }) {
   const [name, setName] = useState("");
   const [weaponClass, setWeaponClass] = useState("");
@@ -482,13 +496,14 @@ export function CustomRangedForm({
       value: formatMoneyInput(value),
       specialRules: selectedQualities.length > 0 ? selectedQualities.join(", ") : undefined,
       description: description.trim() || undefined,
+      integrated,
       quantity: weaponClass.toLowerCase().includes("thrown") ? 1 : undefined,
     });
   };
 
   return (
     <PickerModal
-      title="Custom Ranged Weapon"
+      title={title}
       query=""
       onQueryChange={() => {}}
       onClose={onCancel}
@@ -637,14 +652,19 @@ export function CustomRangedForm({
                 Rate of Fire <span className="text-red-500">*</span>
               </label>
               <div className="grid grid-cols-3 gap-2 mt-0.5">
-                <label className="flex items-center justify-center gap-2 rounded border border-slate-600 bg-slate-900 px-2 py-1 text-sm lg:text-base text-slate-200">
-                  <input
-                    type="checkbox"
-                    checked={singleShot}
-                    onChange={(event) => setSingleShot(event.target.checked)}
-                  />
+                <button
+                  type="button"
+                  onClick={() => setSingleShot((value) => !value)}
+                  aria-pressed={singleShot}
+                  className={[
+                    "rounded border px-2 py-1 text-sm lg:text-base font-medium transition",
+                    singleShot
+                      ? "border-slate-400 bg-slate-700/70 text-slate-100"
+                      : "border-slate-600 bg-slate-900 text-slate-400 hover:border-slate-500 hover:text-slate-300",
+                  ].join(" ")}
+                >
                   Single
-                </label>
+                </button>
                 <input
                   type="text"
                   inputMode="numeric"
@@ -894,12 +914,12 @@ function AmmoEntryRow({
                 content={
                   <div className="space-y-2">
                     {ammoRef?.description && (
-                      <p className="text-sm lg:text-base text-slate-300 leading-relaxed">{ammoRef.description}</p>
+                      <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ammoRef.description}</p>
                     )}
                     {isChargePack && (
                       <div className="space-y-1">
                         <p className="text-sm lg:text-base font-semibold text-slate-100">Recharging Power Packs</p>
-                        <p className="text-sm lg:text-base text-slate-300 leading-relaxed">
+                        <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
                           {RECHARGING_POWER_PACKS_TEXT}
                         </p>
                       </div>
@@ -928,7 +948,7 @@ function AmmoEntryRow({
       {(ammoRef || visibleClipSizeLabel || weightKg !== undefined) && (
         <div className="flex flex-wrap items-center gap-1.5 text-[10px] lg:text-xs">
           {visibleClipSizeLabel && (
-            <span className="rounded border border-slate-700 bg-slate-900/40 px-1.5 py-0.5 text-slate-400">
+            <span className={`rounded border border-slate-700 bg-slate-900/40 px-1.5 py-0.5 ${uiTextMuted}`}>
               {visibleClipSizeLabel}
             </span>
           )}
@@ -937,12 +957,12 @@ function AmmoEntryRow({
               <span className="rounded border border-slate-700 bg-slate-900/40 px-1.5 py-0.5 text-amber-400/80">
                 {formatMoneyForDisplay(ammoRef.cost)}
               </span>
-              <span className="rounded border border-slate-700 bg-slate-900/40 px-1.5 py-0.5 text-slate-400">
+              <span className={`rounded border border-slate-700 bg-slate-900/40 px-1.5 py-0.5 ${uiTextMuted}`}>
                 per {ammoRef.purchaseAmount}
               </span>
             </>
           )}
-          <span className="rounded border border-slate-700 bg-slate-900/40 px-1.5 py-0.5 text-slate-400">
+          <span className={`rounded border border-slate-700 bg-slate-900/40 px-1.5 py-0.5 ${uiTextMuted}`}>
             ⚖ {formatWeightForDisplay(formatWeight(weightKg ?? 0))}
           </span>
         </div>
@@ -952,7 +972,7 @@ function AmmoEntryRow({
       <div className="flex items-center gap-4">
         {ammoTracking === "loose" ? (
           <div className="flex items-center gap-1.5">
-            <span className="w-16 lg:w-[4.5rem] text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">
+            <span className={`w-16 lg:w-[4.5rem] ${uiTextLabel}`}>
               Rounds
             </span>
             <QuantityControl
@@ -965,7 +985,7 @@ function AmmoEntryRow({
         ) : (
           <div className="flex flex-col items-start gap-1.5">
             <div className="flex items-center gap-1.5">
-              <span className="w-16 lg:w-[4.5rem] text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">
+              <span className={`w-16 lg:w-[4.5rem] ${uiTextLabel}`}>
                 Clips
               </span>
               <QuantityControl
@@ -976,7 +996,7 @@ function AmmoEntryRow({
               />
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="w-16 lg:w-[4.5rem] text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">
+              <span className={`w-16 lg:w-[4.5rem] ${uiTextLabel}`}>
                 Rounds
               </span>
               <QuantityControl
@@ -1030,7 +1050,7 @@ function AmmoPicker({
       footer={
         editable ? (
           <div className="space-y-2">
-            <p className="text-xs lg:text-sm text-slate-500">Custom / unlisted ammo</p>
+            <p className={`text-xs lg:text-sm ${uiTextMuted}`}>Custom / unlisted ammo</p>
             <div className="flex gap-2">
               <input
                 type="text"
@@ -1076,14 +1096,14 @@ function AmmoPicker({
               {formatAmmoName(ammo.name)}
             </span>
             <div className="flex items-center gap-1.5 text-xs lg:text-sm shrink-0">
-              <span className="text-slate-500">{ammo.rarity}</span>
-              <span className="text-slate-600">·</span>
+              <span className={uiTextSubtle}>{ammo.rarity}</span>
+              <span className={uiTextSubtle}>·</span>
               <span className="text-amber-400/80">{formatMoneyForDisplay(ammo.cost)}</span>
-              <span className="text-slate-500">/ {ammo.purchaseAmount}</span>
+              <span className={uiTextSubtle}>/ {ammo.purchaseAmount}</span>
             </div>
           </div>
           {ammo.description && (
-            <p className="text-xs lg:text-sm text-slate-500 mt-0.5 line-clamp-2">{ammo.description}</p>
+            <p className={`text-xs lg:text-sm ${uiTextMuted} mt-0.5 line-clamp-2`}>{ammo.description}</p>
           )}
         </button>
       ))}
@@ -1343,8 +1363,8 @@ export function RangedCard({
 
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Qualities</span>
-              <span className="text-xs lg:text-sm text-slate-400 italic">
+              <span className={uiTextLabel}>Qualities</span>
+              <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>
                 {hasQualities ? rulesText : "-"}
               </span>
               {hasQualityModal && (
@@ -1357,7 +1377,7 @@ export function RangedCard({
               )}
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Rules</span>
+              <span className={uiTextLabel}>Rules</span>
               {hasItemRules ? (
                 <span className="inline-flex items-center -translate-y-[1.4px]">
                   <InfoModal
@@ -1366,14 +1386,14 @@ export function RangedCard({
                   />
                 </span>
               ) : (
-                <span className="text-xs lg:text-sm text-slate-600 italic">-</span>
+                <span className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>-</span>
               )}
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">
+              <span className={uiTextLabel}>
                 Craftsmanship
               </span>
-              <span className="text-xs lg:text-sm text-slate-400 italic">{craftsmanship}</span>
+              <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>{craftsmanship}</span>
               <span className="inline-flex items-center -translate-y-[1.4px]">
                 <InfoModal
                   title={`${craftsmanship} Weapon`}
@@ -1397,7 +1417,7 @@ export function RangedCard({
           {/* Thrown weapon: quantity counter */}
           {isThrown && (
             <div className="border-t border-slate-800 pt-2 flex items-center justify-between gap-2">
-              <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Quantity</span>
+              <span className={uiTextLabel}>{isThrown ? "Quantity" : "Rounds"}</span>
               <QuantityControl
                 quantity={weapon.quantity ?? 0}
                 editable={editable}
@@ -1410,10 +1430,10 @@ export function RangedCard({
           {/* Grenade launcher: ammo drawn from grenade inventory */}
           {isGrenadeLauncher && (
             <div className="border-t border-slate-800 pt-2 space-y-2">
-              <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Grenades</span>
+              <span className={uiTextLabel}>Grenades</span>
               {(grenades ?? []).filter((g) => g.type !== "Mine").length === 0 &&
               (archeotechGrenades ?? []).length === 0 ? (
-                <p className="text-xs lg:text-sm text-slate-600 italic">
+                <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>
                   No grenades — add via the Grenades & Mines section below.
                 </p>
               ) : (
@@ -1470,7 +1490,7 @@ export function RangedCard({
               </div>
 
               {ammoEntries.length === 0 ? (
-                <p className="text-xs lg:text-sm text-slate-600 italic">No ammo tracked</p>
+                <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>No ammo tracked</p>
               ) : (
                 <div className="space-y-1.5">
                   {ammoEntries.map((entry) => (
@@ -1508,7 +1528,7 @@ export function RangedCard({
                 )}
               </div>
               {attachmentRefs.length === 0 ? (
-                <p className="text-xs lg:text-sm text-slate-600 italic">None fitted</p>
+                <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>None fitted</p>
               ) : (
                 <div className="space-y-1.5">
                   {attachmentRefs.map((upgrade) => (

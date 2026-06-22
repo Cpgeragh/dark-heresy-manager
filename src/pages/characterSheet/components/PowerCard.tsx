@@ -4,6 +4,7 @@ import { InfoModal } from "../../../components/InfoModal";
 import { sourceColour } from "../../../ui/sourceStyles";
 import type { PsychicPower } from "../../../types/Character";
 import { psychicDisciplineColour } from "../psychicStyles";
+import { uiTextBody, uiTextPlaceholder, uiTextSubtle } from "../../../ui/editableStyles";
 
 interface PowerCardProps {
   power: PsychicPower;
@@ -37,20 +38,20 @@ function PowerStats({ power }: { power: PsychicPower }) {
       )}
       {power.threshold && (
         <span>
-          <span className="text-slate-500">PT </span>
+          <span className={uiTextSubtle}>PT </span>
           <span className="text-slate-200 font-code">{power.threshold}</span>
         </span>
       )}
       {power.focusTime && <span className="text-slate-100">{power.focusTime}</span>}
       {power.range && (
         <span>
-          <span className="text-slate-500">Range: </span>
+          <span className={uiTextSubtle}>Range: </span>
           <span className="text-slate-200">{power.range}</span>
         </span>
       )}
       {power.sustained && (
         <span>
-          <span className="text-slate-500">Sustained: </span>
+          <span className={uiTextSubtle}>Sustained: </span>
           <span className="text-slate-200">{power.sustained}</span>
         </span>
       )}
@@ -63,9 +64,9 @@ export function PowerCard({ power, editable, onRemove, onEdit }: PowerCardProps)
   const modalContent = (
     <>
       {power.description ? (
-        <p className="text-sm text-slate-100 leading-relaxed">{power.description}</p>
+        <p className={`text-sm ${uiTextBody} leading-relaxed`}>{power.description}</p>
       ) : (
-        <p className="text-sm text-slate-500 italic">No description recorded.</p>
+        <p className={`text-sm ${uiTextPlaceholder}`}>No description recorded.</p>
       )}
     </>
   );
@@ -75,7 +76,7 @@ export function PowerCard({ power, editable, onRemove, onEdit }: PowerCardProps)
       <div className="space-y-1 min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
           <p className="font-medium text-slate-100">
-            {power.name || <span className="italic text-slate-500">Unnamed power</span>}
+            {power.name || <span className={uiTextPlaceholder}>Unnamed power</span>}
           </p>
           <span className="inline-flex items-center -translate-y-[1.4px]">
             <InfoModal title={power.name || "Psychic Power"} content={modalContent} hideTitle />

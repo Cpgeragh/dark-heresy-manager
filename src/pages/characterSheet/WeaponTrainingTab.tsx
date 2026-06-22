@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import type { WeaponTrainingBlock, WeaponTrainingTalentId } from "../../types/Character";
 import { WEAPON_TRAINING_GROUPS } from "../../data/weaponTrainingData";
+import { uiTextPlaceholder } from "../../ui/editableStyles";
 
 interface WeaponTrainingTabProps {
   weaponTraining: WeaponTrainingBlock;
@@ -105,7 +106,7 @@ export function WeaponTrainingTab({ weaponTraining, editable, onUpdate }: Weapon
         </p>
 
         {weaponTraining.exoticWeapons.length === 0 && !editable && (
-          <p className="text-sm lg:text-base text-slate-500 italic">None.</p>
+          <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>None.</p>
         )}
 
         <div className="flex flex-wrap justify-center gap-1.5 max-w-xl mx-auto">

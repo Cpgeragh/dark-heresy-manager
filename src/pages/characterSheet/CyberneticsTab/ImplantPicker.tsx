@@ -11,7 +11,7 @@ import { PickerModal } from "../../../ui/PickerModal";
 import { Button } from "../../../ui/Button";
 import { InfoModal } from "../../../components/InfoModal";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
-import { editableInputClass } from "../../../ui/editableStyles";
+import { editableInputClass, uiTextBody, uiTextLabel, uiTextMuted } from "../../../ui/editableStyles";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import { CRAFTSMANSHIP_STYLE, LOCATION_DISPLAY } from "./cyberneticsConstants";
 import {
@@ -118,18 +118,18 @@ export function ImplantPicker({ editable = true, onSelect, onClose }: Props) {
     <div className="space-y-3">
       {ref.notes && (
         <div>
-          <p className="text-xs lg:text-sm font-semibold text-slate-500 uppercase tracking-wide mb-1">
+          <p className={`${uiTextLabel} font-semibold mb-1`}>
             Item Rules
           </p>
-          <p className="text-sm lg:text-base text-slate-300 leading-relaxed">{ref.notes}</p>
+          <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ref.notes}</p>
         </div>
       )}
       {availableCraftsmanship(ref).map((quality) => (
         <div key={quality}>
-          <p className="text-xs lg:text-sm font-semibold text-slate-500 uppercase tracking-wide mb-1">
+          <p className={`${uiTextLabel} font-semibold mb-1`}>
             {quality}
           </p>
-          <p className="text-sm lg:text-base text-slate-300 leading-relaxed">
+          <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
             {craftsmanshipDescription(ref, quality)}
           </p>
         </div>
@@ -151,7 +151,7 @@ export function ImplantPicker({ editable = true, onSelect, onClose }: Props) {
         </div>
 
         <div className="px-4 lg:px-5 py-4 lg:py-5 space-y-4">
-          <p className="text-sm lg:text-base text-slate-400">
+          <p className={`text-sm lg:text-base ${uiTextBody}`}>
             <span className="font-medium text-slate-200">{pendingCost.name}</span> has no listed
             cost or availability. Enter the values assigned for this implant.
           </p>
@@ -233,7 +233,7 @@ export function ImplantPicker({ editable = true, onSelect, onClose }: Props) {
         </div>
 
         <div className="px-4 lg:px-5 py-4 lg:py-5 space-y-3">
-          <p className="text-xs lg:text-sm text-slate-400">Select installation side:</p>
+          <p className={`text-xs lg:text-sm ${uiTextMuted}`}>Select installation side:</p>
           <div className="flex flex-col gap-2">
             {options.map((opt) => (
               <button
@@ -274,7 +274,7 @@ export function ImplantPicker({ editable = true, onSelect, onClose }: Props) {
 
         <div className="px-4 lg:px-5 py-4 lg:py-5 space-y-4">
           {location && (
-            <div className="flex items-center gap-2 text-xs lg:text-sm text-slate-400">
+            <div className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted}`}>
               <span>Installing on:</span>
               <span className="px-2 lg:px-3 py-0.5 rounded border border-slate-600 bg-slate-800 text-slate-300">
                 {location.map((l) => LOCATION_DISPLAY[l]).join(" & ")}
@@ -283,7 +283,7 @@ export function ImplantPicker({ editable = true, onSelect, onClose }: Props) {
           )}
 
           <div>
-            <p className="text-xs lg:text-sm text-slate-400 mb-2">Select craftsmanship quality:</p>
+            <p className={`text-xs lg:text-sm ${uiTextMuted} mb-2`}>Select craftsmanship quality:</p>
             <div className="flex gap-2">
               {qualities.map((q) => (
                 <button
@@ -302,7 +302,7 @@ export function ImplantPicker({ editable = true, onSelect, onClose }: Props) {
             </div>
           </div>
 
-          <div className="text-xs lg:text-sm text-slate-400 bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed">
+          <div className={`text-xs lg:text-sm ${uiTextBody} bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed`}>
             {craftsmanshipDescription(selected, craftsmanship)}
           </div>
         </div>

@@ -76,6 +76,25 @@ export const uiCellValueSm = "text-base lg:text-lg font-semibold font-code text-
 /** Value inside a standard-width display cell — matches the Stepper value size. */
 export const uiCellValue = "text-xl lg:text-2xl font-semibold font-code text-slate-200";
 
+// ─── Shared text tone tokens ─────────────────────────────────────────────────
+// Use these to keep real content readable and reserve the dimmest grey for
+// placeholders, empty states, and low-priority metadata.
+
+/** Primary readable body text for rules, notes, descriptions, and explanations. */
+export const uiTextBody = "text-slate-300";
+
+/** Secondary readable text for less prominent facts that are still meaningful. */
+export const uiTextMuted = "text-slate-300/90";
+
+/** Low-priority metadata, dividers, and compact supporting details. */
+export const uiTextSubtle = "text-slate-500";
+
+/** Empty-state or placeholder-like text. */
+export const uiTextPlaceholder = "text-slate-500 italic";
+
+/** Tiny uppercase label text used beside values. */
+export const uiTextLabel = "text-[10px] lg:text-xs text-sky-300/85 uppercase tracking-wide";
+
 // ──────────────────────────────────────────────────────────────────────────────
 
 export function readOnlyBadgeClass() {

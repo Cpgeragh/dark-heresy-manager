@@ -7,6 +7,7 @@ import { ArcheotechPickerModal } from "./ArcheotechPickerModal";
 import { ItemCard } from "./ItemCard";
 import { CustomItemForm } from "./CustomItemForm";
 import { SectionHeader } from "../../../ui/SectionHeader";
+import { uiTextPlaceholder } from "../../../ui/editableStyles";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -82,7 +83,7 @@ export function ArcheotechTab({ archeotech, editable, onUpdate }: ArcheotechTabP
         </div>
 
         {archeotech.length === 0 && !showCustomForm && (
-          <p className="text-sm lg:text-base text-slate-500 italic">No archeotech recorded.</p>
+          <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No archeotech recorded.</p>
         )}
 
         <div className="space-y-3 sm:hidden">

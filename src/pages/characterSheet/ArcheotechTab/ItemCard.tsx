@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { ArcheotechItem } from "../../../types/Character";
 import { ARCHEOTECH_REFERENCE } from "../../../data/reference/archeotechReference";
-import { uiSection } from "../../../ui/editableStyles";
+import { uiSection, uiTextBody, uiTextLabel, uiTextMuted } from "../../../ui/editableStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { InfoModal } from "../../../components/InfoModal";
 
@@ -36,7 +36,7 @@ export function ItemCard({ item, editable, onRemove }: Props) {
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-sm lg:text-base font-medium text-slate-200">{item.name}</span>
             {item.type && (
-              <span className="text-xs lg:text-sm text-slate-500 border border-slate-700 rounded px-1.5 lg:px-2 py-0.5">
+              <span className={`text-xs lg:text-sm ${uiTextMuted} border border-slate-700 rounded px-1.5 lg:px-2 py-0.5`}>
                 {item.type}
               </span>
             )}
@@ -59,15 +59,15 @@ export function ItemCard({ item, editable, onRemove }: Props) {
           {expanded && (
             <div className="mt-2 space-y-1.5">
               {specialRules && (
-                <p className="text-xs lg:text-sm text-slate-400">
-                  <span className="text-slate-500 uppercase tracking-wide text-[10px] lg:text-xs mr-1">
+                <p className={`text-xs lg:text-sm ${uiTextMuted}`}>
+                  <span className={`${uiTextLabel} mr-1`}>
                     Special
                   </span>
                   {specialRules}
                 </p>
               )}
               {description && (
-                <p className="text-xs lg:text-sm text-slate-400 leading-relaxed">{description}</p>
+                <p className={`text-xs lg:text-sm ${uiTextBody} leading-relaxed`}>{description}</p>
               )}
               {item.notes?.trim() && (
                 <p className="text-xs lg:text-sm text-amber-300/70 italic leading-relaxed">{item.notes}</p>

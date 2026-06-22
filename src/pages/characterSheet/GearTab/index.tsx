@@ -10,6 +10,7 @@ import { ItemRow } from "./ItemRow";
 import { GearPicker } from "./GearPicker";
 import { CustomItemForm } from "./CustomItemForm";
 import { SectionHeader } from "../../../ui/SectionHeader";
+import { uiTextPlaceholder } from "../../../ui/editableStyles";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -136,7 +137,7 @@ export function GearTab({ gear, consumables, editable, onUpdate, onUpdateConsuma
         </div>
 
         {gear.length === 0 && !showCustomForm && (
-          <p className="text-sm lg:text-base text-slate-500 italic">No items recorded.</p>
+          <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No items recorded.</p>
         )}
 
         <div className="space-y-3 sm:hidden">
@@ -185,7 +186,7 @@ export function GearTab({ gear, consumables, editable, onUpdate, onUpdateConsuma
         </div>
 
         {consumables.length === 0 && (
-          <p className="text-sm lg:text-base text-slate-500 italic">No consumables recorded.</p>
+          <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No consumables recorded.</p>
         )}
 
         <div className="space-y-3 sm:hidden">

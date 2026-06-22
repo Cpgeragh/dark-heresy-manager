@@ -3,7 +3,7 @@
 import { useCallback } from "react";
 import type { CharacterHeader, TalentsAndTraitsBlock } from "../../types/Character";
 import { FormField } from "../../components/FormField";
-import { editableInputClass, uiSection } from "../../ui/editableStyles";
+import { editableInputClass, uiSection, uiTextBody } from "../../ui/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { HOMEWORLD_LIST } from "../../data/homeworldData";
 
@@ -168,7 +168,7 @@ export function BackgroundTab({
                 ))}
             </select>
             {selectedHomeworld && (
-              <p className="text-xs lg:text-sm text-slate-100 italic px-1 mt-1">
+              <p className={`text-xs lg:text-sm ${uiTextBody} italic px-1 mt-1`}>
                 {selectedHomeworld.description}
               </p>
             )}

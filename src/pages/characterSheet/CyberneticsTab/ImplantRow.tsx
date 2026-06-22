@@ -2,7 +2,7 @@
 
 import type { CyberneticItem } from "../../../types/Character";
 import { CYBERNETICS_REFERENCE } from "../../../data/reference/cyberneticsReference";
-import { uiSection } from "../../../ui/editableStyles";
+import { uiSection, uiTextBody, uiTextLabel, uiTextMuted } from "../../../ui/editableStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { CRAFTSMANSHIP_STYLE, LOCATION_DISPLAY } from "./cyberneticsConstants";
 import { availableCraftsmanship, craftsmanshipDescription } from "./cyberneticsHelpers";
@@ -39,18 +39,18 @@ export function ImplantRow({ item, editable, onCycleQuality, onRemove }: Props) 
                 <div className="space-y-3">
                   {ref?.notes && (
                     <div>
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
+                      <p className={`${uiTextLabel} font-semibold mb-1`}>
                         Item Rules
                       </p>
-                      <p className="text-sm text-slate-300 leading-relaxed">{ref.notes}</p>
+                      <p className={`text-sm ${uiTextBody} leading-relaxed`}>{ref.notes}</p>
                     </div>
                   )}
                   {item.notes && (
                     <div>
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
+                      <p className={`${uiTextLabel} font-semibold mb-1`}>
                         Notes
                       </p>
-                      <p className="text-sm text-slate-300 leading-relaxed">{item.notes}</p>
+                      <p className={`text-sm ${uiTextBody} leading-relaxed`}>{item.notes}</p>
                     </div>
                   )}
                 </div>
@@ -60,7 +60,7 @@ export function ImplantRow({ item, editable, onCycleQuality, onRemove }: Props) 
         </div>
         <div className="flex flex-wrap gap-1.5 mt-1">
           {item.bodyLocation && item.bodyLocation.length > 0 && (
-            <span className="text-xs lg:text-sm rounded border border-slate-700 bg-slate-800/40 px-1.5 lg:px-2 py-0.5 text-slate-400">
+            <span className={`text-xs lg:text-sm rounded border border-slate-700 bg-slate-800/40 px-1.5 lg:px-2 py-0.5 ${uiTextMuted}`}>
               {item.bodyLocation.map((l) => LOCATION_DISPLAY[l]).join(" & ")}
             </span>
           )}
@@ -73,7 +73,7 @@ export function ImplantRow({ item, editable, onCycleQuality, onRemove }: Props) 
           />
         </div>
         <div className="flex items-center gap-1.5 mt-1">
-          <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Quality</span>
+          <span className={uiTextLabel}>Quality</span>
           <button
             onClick={() => canChangeQuality && onCycleQuality(item.id)}
             title={

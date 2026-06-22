@@ -12,6 +12,7 @@ import { ImplantRow } from "./ImplantRow";
 import { nextAvailableCraftsmanship } from "./cyberneticsHelpers";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { CYBERNETICS_REFERENCE } from "../../../data/reference/cyberneticsReference";
+import { uiTextPlaceholder } from "../../../ui/editableStyles";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -94,7 +95,7 @@ export function CyberneticsTab({ cybernetics, editable, onUpdate }: CyberneticsT
         </div>
 
         {cybernetics.length === 0 && (
-          <p className="text-sm lg:text-base text-slate-500 italic">No cybernetics installed.</p>
+          <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No cybernetics installed.</p>
         )}
 
         <div className="space-y-3 sm:hidden">
