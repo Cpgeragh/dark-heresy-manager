@@ -11,6 +11,7 @@ import { PickerModal } from "../../../ui/PickerModal";
 import { Button } from "../../../ui/Button";
 import { InfoModal } from "../../../components/InfoModal";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
+import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 
 interface Props {
   editable?: boolean;
@@ -55,12 +56,12 @@ export function ArcheotechPickerModal({ editable = true, onSelect, onCustom, onC
   }
 
   const costNum = Number(gmCost);
-  const costValid = gmCost.trim() !== "" && Number.isInteger(costNum) && costNum >= 1;
+  const costValid = gmCost.trim() !== "" && Number.isInteger(costNum) && costNum >= 0;
   const canConfirm = costValid && gmRarity !== "";
 
   function handleConfirm() {
     if (!pending || !canConfirm) return;
-    onSelect(pending, `${gmCost} Thrones`, gmRarity);
+    onSelect(pending, formatMoneyInput(gmCost), gmRarity);
   }
 
   return (
@@ -97,16 +98,15 @@ export function ArcheotechPickerModal({ editable = true, onSelect, onCustom, onC
               Cost (Thrones) <span className="text-red-400">*</span>
             </label>
             <input
-              type="number"
-              min={1}
-              step={1}
+              type="text"
+              inputMode="numeric"
               value={gmCost}
-              onChange={(e) => setGmCost(e.target.value)}
+              onChange={(e) => setGmCost(sanitizeMoneyInput(e.target.value))}
               placeholder="e.g. 5000"
               className={editableInputClass(true)}
             />
             {gmCost.trim() !== "" && !costValid && (
-              <p className="text-xs lg:text-sm text-red-400">Must be a whole number of 1 or more.</p>
+              <p className="text-xs lg:text-sm text-red-400">Must be a whole number of 0 or more.</p>
             )}
           </div>
 

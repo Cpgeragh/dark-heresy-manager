@@ -27,6 +27,8 @@ import { Button } from "../../../ui/Button";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
 import { QuantityControl } from "../../../ui/QuantityControl";
+import { formatWeightForDisplay, formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
+import { formatMoneyForDisplay, formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import { InfoModal } from "../../../components/InfoModal";
 import {
   StatChip,
@@ -47,6 +49,8 @@ const WEAPON_CRAFTSMANSHIP_STYLE: Record<WeaponCraftsmanship, string> = {
   Good: "border-emerald-500/70 bg-emerald-500/15 text-emerald-300",
   Best: "border-amber-400 bg-amber-500/20 text-amber-300",
 };
+
+type AmmoTrackingMode = NonNullable<RangedWeapon["ammoTracking"]>;
 
 function rangedCraftsmanshipDescription(craftsmanship: WeaponCraftsmanship): string {
   switch (craftsmanship) {
@@ -249,11 +253,20 @@ export function CustomRangedForm({
     clip: "",
     rld: "",
     weight: "",
+    value: "",
     specialRules: "",
   });
 
   const makeFieldSetter = (k: keyof typeof fields) => (e: React.ChangeEvent<HTMLInputElement>) =>
-    setFields((prev) => ({ ...prev, [k]: e.target.value }));
+    setFields((prev) => ({
+      ...prev,
+      [k]:
+        k === "weight"
+          ? sanitizeWeightInput(e.target.value)
+          : k === "value"
+            ? sanitizeMoneyInput(e.target.value)
+            : e.target.value,
+    }));
 
   return (
     <div className="border border-red-700/30 bg-slate-900/60 rounded-lg p-4 lg:p-5 space-y-3">
@@ -272,6 +285,7 @@ export function CustomRangedForm({
             "clip",
             "rld",
             "weight",
+            "value",
             "specialRules",
           ] as const
         ).map((k) => (
@@ -281,6 +295,7 @@ export function CustomRangedForm({
             </label>
             <input
               type="text"
+              inputMode={k === "weight" ? "decimal" : k === "value" ? "numeric" : undefined}
               value={fields[k] ?? ""}
               onChange={makeFieldSetter(k)}
               className={editableInputClass(true) + " mt-0.5"}
@@ -291,7 +306,15 @@ export function CustomRangedForm({
       <div className="flex gap-2 pt-1">
         <Button
           className="flex-1"
-          onClick={() => onAdd({ id: crypto.randomUUID(), custom: true, ...fields })}
+          onClick={() =>
+            onAdd({
+              id: crypto.randomUUID(),
+              custom: true,
+              ...fields,
+              weight: formatWeightInput(fields.weight ?? ""),
+              value: formatMoneyInput(fields.value ?? ""),
+            })
+          }
           disabled={!fields.name?.trim()}
         >
           Add
@@ -313,20 +336,24 @@ function AmmoEntryRow({
   entry,
   editable,
   clipSize,
+  ammoTracking,
   weightKg,
   onSetLoaded,
   onRemove,
   onUpdateClips,
   onUpdateRounds,
+  onSetLooseRounds,
 }: {
   entry: WeaponAmmoEntry;
   editable: boolean;
   clipSize?: string;
+  ammoTracking: AmmoTrackingMode;
   weightKg?: number;
   onSetLoaded: () => void;
   onRemove: () => void;
   onUpdateClips: (qty: number) => void;
   onUpdateRounds: (qty: number) => void;
+  onSetLooseRounds: (qty: number) => void;
 }) {
   const ammoRef = entry.referenceId
     ? AMMO_REFERENCE.find((ammo) => ammo.id === entry.referenceId)
@@ -334,12 +361,13 @@ function AmmoEntryRow({
   const displayName = formatAmmoName(ammoRef?.name ?? entry.name);
   const isChargePack = isChargePackAmmoName(displayName);
   const hasAmmoInfo = !!ammoRef?.description || isChargePack;
-  const usesUnitTracking = usesUnitAmmoTracking(ammoRef);
+  const clipSizeNumber = parseFloat(clipSize ?? "0") || 0;
+  const looseRoundCount = entry.rounds + entry.clips * (clipSizeNumber || 1);
   const clipSizeLabel =
     clipSize && clipSize !== "0" && clipSize !== "—" && clipSize !== "N/A"
       ? `${clipSize}/clip`
       : undefined;
-  const visibleClipSizeLabel = usesUnitTracking ? undefined : clipSizeLabel;
+  const visibleClipSizeLabel = ammoTracking === "clip" ? clipSizeLabel : undefined;
 
   return (
     <div className="rounded bg-slate-800/60 px-2.5 lg:px-3 py-2 lg:py-2.5 space-y-1.5">
@@ -396,7 +424,7 @@ function AmmoEntryRow({
         )}
       </div>
 
-      {(ammoRef || visibleClipSizeLabel) && (
+      {(ammoRef || visibleClipSizeLabel || weightKg !== undefined) && (
         <div className="flex flex-wrap items-center gap-1.5 text-[10px] lg:text-xs">
           {visibleClipSizeLabel && (
             <span className="rounded border border-slate-700 bg-slate-900/40 px-1.5 py-0.5 text-slate-400">
@@ -405,42 +433,60 @@ function AmmoEntryRow({
           )}
           {ammoRef && (
             <>
-              <span className="rounded border border-slate-700 bg-slate-900/40 px-1.5 py-0.5 text-amber-400/80 font-code">
-                ₮ {ammoRef.cost}
+              <span className="rounded border border-slate-700 bg-slate-900/40 px-1.5 py-0.5 text-amber-400/80">
+                {formatMoneyForDisplay(ammoRef.cost)}
               </span>
               <span className="rounded border border-slate-700 bg-slate-900/40 px-1.5 py-0.5 text-slate-400">
                 per {ammoRef.purchaseAmount}
               </span>
             </>
           )}
+          <span className="rounded border border-slate-700 bg-slate-900/40 px-1.5 py-0.5 text-slate-400">
+            ⚖ {formatWeightForDisplay(formatWeight(weightKg ?? 0))}
+          </span>
         </div>
       )}
 
-      {/* Count + Weight */}
+      {/* Count */}
       <div className="flex items-center gap-4">
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">
-            {usesUnitTracking ? "Qty" : "Clips"}
-          </span>
-          <QuantityControl
-            quantity={entry.clips}
-            editable={editable}
-            size="sm"
-            onUpdate={onUpdateClips}
-          />
-        </div>
-        {!usesUnitTracking && (
+        {ammoTracking === "loose" ? (
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Rounds</span>
+            <span className="w-16 lg:w-[4.5rem] text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">
+              Rounds
+            </span>
             <QuantityControl
-              quantity={entry.rounds}
+              quantity={looseRoundCount}
               editable={editable}
               size="sm"
-              onUpdate={onUpdateRounds}
+              onUpdate={onSetLooseRounds}
             />
           </div>
+        ) : (
+          <div className="flex flex-col items-start gap-1.5">
+            <div className="flex items-center gap-1.5">
+              <span className="w-16 lg:w-[4.5rem] text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">
+                Clips
+              </span>
+              <QuantityControl
+                quantity={entry.clips}
+                editable={editable}
+                size="sm"
+                onUpdate={onUpdateClips}
+              />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-16 lg:w-[4.5rem] text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">
+                Rounds
+              </span>
+              <QuantityControl
+                quantity={entry.rounds}
+                editable={editable}
+                size="sm"
+                onUpdate={onUpdateRounds}
+              />
+            </div>
+          </div>
         )}
-        <span className="text-[10px] lg:text-xs text-slate-500 ml-auto">{formatWeight(weightKg ?? 0)} kg</span>
       </div>
     </div>
   );
@@ -531,7 +577,7 @@ function AmmoPicker({
             <div className="flex items-center gap-1.5 text-xs lg:text-sm shrink-0">
               <span className="text-slate-500">{ammo.rarity}</span>
               <span className="text-slate-600">·</span>
-              <span className="text-amber-400/80 font-code">₮ {ammo.cost}</span>
+              <span className="text-amber-400/80">{formatMoneyForDisplay(ammo.cost)}</span>
               <span className="text-slate-500">/ {ammo.purchaseAmount}</span>
             </div>
           </div>
@@ -547,11 +593,19 @@ function AmmoPicker({
 // ─── Ammo Weight ─────────────────────────────────────────────────────────────
 // CR rule: a full clip weighs 10% of the weapon's weight.
 
-function calcEntryWeight(weapon: RangedWeapon, entry: WeaponAmmoEntry): number {
-  const weaponKg = parseFloat(weapon.weight ?? "0");
+function calcEntryWeight(
+  weaponWeight: string | undefined,
+  clip: string | undefined,
+  entry: WeaponAmmoEntry,
+  ammoTracking: AmmoTrackingMode
+): number {
+  const weaponKg = parseFloat(weaponWeight ?? "0");
   if (!weaponKg) return 0;
-  const clipSize = parseFloat(weapon.clip ?? "1") || 1;
+  const clipSize = parseFloat(clip ?? "1") || 1;
   const clipWeight = weaponKg * 0.1;
+  if (ammoTracking === "loose") {
+    return (entry.rounds + entry.clips * clipSize) * (clipWeight / clipSize);
+  }
   const ammoRef = entry.referenceId
     ? AMMO_REFERENCE.find((ammo) => ammo.id === entry.referenceId)
     : undefined;
@@ -628,6 +682,7 @@ export function RangedCard({
       ? (weaponRef?.specialRules ?? weapon.specialRules)
       : (weapon.specialRules ?? weaponRef?.specialRules);
   const baseWeapon = weaponRef ? { ...weapon, specialRules: baseSpecialRules } : weapon;
+  const ammoTracking: AmmoTrackingMode = weapon.ammoTracking ?? weaponRef?.ammoTracking ?? "clip";
   const ammoEntries = weapon.ammoEntries ?? [];
   const loadedAmmoEntry = ammoEntries.find((entry) => entry.loaded);
   const loadedAmmoRef = loadedAmmoEntry?.referenceId
@@ -670,7 +725,7 @@ export function RangedCard({
     const ammoRef = referenceId
       ? AMMO_REFERENCE.find((ammo) => ammo.id === referenceId)
       : undefined;
-    const usesUnitTracking = usesUnitAmmoTracking(ammoRef);
+    const usesUnitTracking = ammoTracking === "clip" && usesUnitAmmoTracking(ammoRef);
     onUpdateAmmoEntries([
       ...ammoEntries,
       {
@@ -810,7 +865,7 @@ export function RangedCard({
 
           {/* Weight / Value / Rarity / Source */}
           <ItemMetaChips
-            weight={weapon.weight}
+            weight={effective.weight}
             value={weapon.value}
             rarity={weapon.rarity}
             source={weapon.source}
@@ -901,12 +956,14 @@ export function RangedCard({
                       key={entry.id}
                       entry={entry}
                       editable={editable}
-                      clipSize={weapon.clip}
-                      weightKg={calcEntryWeight(weapon, entry)}
+                      clipSize={effective.clip}
+                      ammoTracking={ammoTracking}
+                      weightKg={calcEntryWeight(effective.weight, effective.clip, entry, ammoTracking)}
                       onSetLoaded={() => handleSetLoaded(entry.id)}
                       onRemove={() => handleRemoveAmmo(entry.id)}
                       onUpdateClips={(qty) => handleUpdateEntry(entry.id, { clips: qty })}
                       onUpdateRounds={(qty) => handleUpdateEntry(entry.id, { rounds: qty })}
+                      onSetLooseRounds={(qty) => handleUpdateEntry(entry.id, { clips: 0, rounds: qty })}
                     />
                   ))}
                 </div>

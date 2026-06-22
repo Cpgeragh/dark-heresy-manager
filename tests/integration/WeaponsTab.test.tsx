@@ -65,4 +65,65 @@ describe("WeaponsTab", () => {
     renderTab({ editable: false, rangedWeapons: [], meleeWeapons: [] });
     expect(screen.getAllByText("View").length).toBeGreaterThanOrEqual(2);
   });
+
+  it("shows only rounds for loose-loaded ranged ammo", () => {
+    renderTab({
+      meleeWeapons: [],
+      rangedWeapons: [
+        {
+          id: "shotgun",
+          referenceId: "cr-shotgun",
+          name: "Shotgun",
+          class: "Basic",
+          clip: "2",
+          weight: "5 kg",
+          equipped: true,
+          ammoEntries: [
+            {
+              id: "shells",
+              referenceId: "cr-shells",
+              name: "Shells",
+              clips: 3,
+              rounds: 1,
+              loaded: true,
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(screen.getByText("Rounds")).toBeInTheDocument();
+    expect(screen.queryByText("Clips")).not.toBeInTheDocument();
+    expect(screen.getByText("7")).toBeInTheDocument();
+  });
+
+  it("shows clips and rounds for clip-fed ranged ammo", () => {
+    renderTab({
+      meleeWeapons: [],
+      rangedWeapons: [
+        {
+          id: "autogun",
+          referenceId: "cr-autogun",
+          name: "Autogun",
+          class: "Basic",
+          clip: "30",
+          weight: "5 kg",
+          equipped: true,
+          ammoEntries: [
+            {
+              id: "bullets",
+              referenceId: "cr-bullets",
+              name: "Bullets",
+              clips: 2,
+              rounds: 5,
+              loaded: true,
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(screen.getByText("Clips")).toBeInTheDocument();
+    expect(screen.getByText("Rounds")).toBeInTheDocument();
+  });
 });

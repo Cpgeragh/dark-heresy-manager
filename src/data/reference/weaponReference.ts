@@ -45,6 +45,8 @@ export interface RangedWeaponRef {
   ammoType?: string;
   /** AmmoRef IDs compatible with this weapon — drives the ammo picker dropdown. */
   compatibleAmmoIds?: string[];
+  /** clip = spare clips/packs plus partial rounds; loose = individual rounds only. */
+  ammoTracking?: "clip" | "loose";
   /** True for thrown weapons where the item itself is the projectile (bolas, throwing stars). Shows a quantity counter instead of ammo entries. */
   isThrown?: boolean;
   /** Prose description / special rules note shown in the info modal. */
@@ -92,6 +94,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Common",
     ammoType: "Charge Pack (Pistol)",
     compatibleAmmoIds: ["cr-charge-pack-pistol", "cr-hot-shot-charge"],
+    ammoTracking: "clip",
   },
   {
     id: "cr-las-carbine",
@@ -113,6 +116,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Common",
     ammoType: "Charge Pack (Basic)",
     compatibleAmmoIds: ["cr-charge-pack-basic", "cr-hot-shot-charge"],
+    ammoTracking: "clip",
   },
   {
     id: "cr-lasgun",
@@ -133,6 +137,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Common",
     ammoType: "Charge Pack (Basic)",
     compatibleAmmoIds: ["cr-charge-pack-basic", "cr-hot-shot-charge"],
+    ammoTracking: "clip",
   },
   {
     id: "cr-long-las",
@@ -153,6 +158,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Scarce",
     ammoType: "Charge Pack (Basic)",
     compatibleAmmoIds: ["cr-charge-pack-basic", "cr-hot-shot-charge"],
+    ammoTracking: "clip",
   },
   {
     id: "cr-mp-lascannon",
@@ -173,6 +179,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Very Rare",
     ammoType: "Charge Pack (Heavy)",
     compatibleAmmoIds: ["cr-charge-pack-heavy"],
+    ammoTracking: "clip",
   },
 
   // Solid Projectile
@@ -195,6 +202,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Common",
     ammoType: "Bullets",
     compatibleAmmoIds: ["cr-bullets", "cr-man-stopper-bullets"],
+    ammoTracking: "clip",
   },
   {
     id: "cr-stub-revolver",
@@ -219,6 +227,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
       "cr-man-stopper-bullets",
       "lw-purity-round",
     ],
+    ammoTracking: "loose",
   },
   {
     id: "cr-stub-automatic",
@@ -244,6 +253,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
       "cr-man-stopper-bullets",
       "lw-purity-round",
     ],
+    ammoTracking: "clip",
   },
   {
     id: "cr-hand-cannon",
@@ -264,6 +274,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Average",
     ammoType: "Bullets",
     compatibleAmmoIds: ["cr-bullets", "cr-dumdum-bullets", "cr-man-stopper-bullets"],
+    ammoTracking: "loose",
   },
   {
     id: "cr-autogun",
@@ -284,6 +295,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Average",
     ammoType: "Bullets",
     compatibleAmmoIds: ["cr-bullets", "cr-man-stopper-bullets"],
+    ammoTracking: "clip",
   },
   {
     id: "cr-hunting-rifle",
@@ -304,6 +316,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Scarce",
     ammoType: "Bullets",
     compatibleAmmoIds: ["cr-bullets"],
+    ammoTracking: "loose",
   },
   {
     id: "cr-shotgun",
@@ -324,6 +337,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Common",
     ammoType: "Shells",
     compatibleAmmoIds: ["cr-shells", "cr-inferno-shells", "dh-cryptus-shotgun-shells"],
+    ammoTracking: "loose",
   },
   {
     id: "cr-pump-action-shotgun",
@@ -344,6 +358,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Average",
     ammoType: "Shells",
     compatibleAmmoIds: ["cr-shells", "cr-inferno-shells", "dh-cryptus-shotgun-shells"],
+    ammoTracking: "loose",
   },
   {
     id: "cr-combat-shotgun",
@@ -364,6 +379,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Scarce",
     ammoType: "Shells",
     compatibleAmmoIds: ["cr-shells", "cr-inferno-shells", "dh-cryptus-shotgun-shells"],
+    ammoTracking: "loose",
   },
   {
     id: "cr-heavy-stubber",
@@ -385,6 +401,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Scarce",
     ammoType: "Bullets",
     compatibleAmmoIds: ["cr-bullets"],
+    ammoTracking: "clip",
   },
 
   // Bolt
@@ -407,6 +424,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Rare",
     ammoType: "Bolt Shells",
     compatibleAmmoIds: ["cr-bolt-shells", "cr-inferno-shells", "dh-psybolt-ammunition"],
+    ammoTracking: "clip",
   },
   {
     id: "cr-boltgun",
@@ -427,6 +445,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Very Rare",
     ammoType: "Bolt Shells",
     compatibleAmmoIds: ["cr-bolt-shells", "cr-inferno-shells", "dh-psybolt-ammunition"],
+    ammoTracking: "clip",
   },
   {
     id: "cr-heavy-bolter",
@@ -447,6 +466,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Very Rare",
     ammoType: "Bolt Shells",
     compatibleAmmoIds: ["cr-bolt-shells", "cr-inferno-shells", "dh-psybolt-ammunition"],
+    ammoTracking: "clip",
   },
 
   // Melta
@@ -469,6 +489,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Very Rare",
     ammoType: "Melta Canister (pistol)",
     compatibleAmmoIds: ["cr-melta-canister-pistol", "cr-melta-canister-basic"],
+    ammoTracking: "clip",
   },
   {
     id: "cr-meltagun",
@@ -490,6 +511,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Rare",
     ammoType: "Melta Canister (basic)",
     compatibleAmmoIds: ["cr-melta-canister-pistol", "cr-melta-canister-basic"],
+    ammoTracking: "clip",
   },
 
   // Plasma
@@ -512,6 +534,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Very Rare",
     ammoType: "Plasma Flask (pistol)",
     compatibleAmmoIds: ["cr-plasma-flask-pistol", "cr-plasma-flask-basic"],
+    ammoTracking: "clip",
   },
   {
     id: "cr-plasma-gun",
@@ -533,6 +556,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Very Rare",
     ammoType: "Plasma Flask (basic)",
     compatibleAmmoIds: ["cr-plasma-flask-pistol", "cr-plasma-flask-basic"],
+    ammoTracking: "clip",
   },
 
   // Flame
@@ -555,6 +579,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Rare",
     ammoType: "Fuel (pistol)",
     compatibleAmmoIds: ["cr-fuel-pistol", "cr-fuel-basic", "dh-psyflame-ammunition"],
+    ammoTracking: "clip",
   },
   {
     id: "cr-flamer",
@@ -576,6 +601,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Scarce",
     ammoType: "Fuel (basic)",
     compatibleAmmoIds: ["cr-fuel-pistol", "cr-fuel-basic", "dh-psyflame-ammunition"],
+    ammoTracking: "clip",
   },
 
   // Primitive
@@ -617,6 +643,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Rare",
     ammoType: "Arrows/Quarrels",
     compatibleAmmoIds: ["cr-arrows-quarrels", "lw-purity-round"],
+    ammoTracking: "loose",
   },
   {
     id: "cr-flintlock-pistol",
@@ -637,6 +664,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Common",
     ammoType: "Shot",
     compatibleAmmoIds: ["cr-shot"],
+    ammoTracking: "loose",
   },
   {
     id: "cr-musket",
@@ -657,6 +685,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Common",
     ammoType: "Shot",
     compatibleAmmoIds: ["cr-shot"],
+    ammoTracking: "loose",
   },
   {
     id: "cr-bow",
@@ -677,6 +706,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Common",
     ammoType: "Arrows/Quarrels",
     compatibleAmmoIds: ["cr-arrows-quarrels"],
+    ammoTracking: "loose",
   },
   {
     id: "cr-sling",
@@ -714,6 +744,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Common",
     ammoType: "Arrows/Quarrels",
     compatibleAmmoIds: ["cr-arrows-quarrels", "lw-purity-round"],
+    ammoTracking: "loose",
   },
   {
     id: "cr-throwing-star-knife",
@@ -795,6 +826,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Very Rare",
     ammoType: "Exotic",
     compatibleAmmoIds: ["cr-exotic"],
+    ammoTracking: "loose",
   },
   {
     id: "cr-web-pistol",
@@ -815,6 +847,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Rare",
     ammoType: "Exotic",
     compatibleAmmoIds: ["cr-exotic"],
+    ammoTracking: "loose",
   },
   {
     id: "cr-needle-rifle",
@@ -835,6 +868,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Very Rare",
     ammoType: "Exotic",
     compatibleAmmoIds: ["cr-exotic"],
+    ammoTracking: "loose",
   },
   {
     id: "cr-webber",
@@ -855,6 +889,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Rare",
     ammoType: "Exotic",
     compatibleAmmoIds: ["cr-exotic"],
+    ammoTracking: "loose",
   },
 
   // ── Book of Judgement ─────────────────────────────────────────────────────
@@ -877,6 +912,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Average",
     ammoType: "Bullets",
     compatibleAmmoIds: ["cr-bullets", "cr-man-stopper-bullets"],
+    ammoTracking: "clip",
   },
   {
     id: "judgeslayer-handcannon",
@@ -897,6 +933,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Average",
     ammoType: "Bullets",
     compatibleAmmoIds: ["cr-bullets", "cr-dumdum-bullets", "cr-man-stopper-bullets"],
+    ammoTracking: "loose",
   },
   {
     id: "raffir-ringleader-pistol",
@@ -917,6 +954,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Rare",
     ammoType: "Bullets",
     compatibleAmmoIds: ["cr-bullets"],
+    ammoTracking: "loose",
   },
   {
     id: "raffir-pax-factorem-rifle",
@@ -937,6 +975,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Rare",
     ammoType: "Bullets",
     compatibleAmmoIds: ["cr-bullets"],
+    ammoTracking: "loose",
   },
   {
     id: "vox-legi-combat-shotgun",
@@ -958,6 +997,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Very Rare",
     ammoType: "Shells",
     compatibleAmmoIds: ["cr-shells", "cr-inferno-shells", "dh-cryptus-shotgun-shells"],
+    ammoTracking: "loose",
   },
   {
     id: "bulldog-heavy-stubber",
@@ -978,6 +1018,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Rare",
     ammoType: "Bullets",
     compatibleAmmoIds: ["cr-bullets"],
+    ammoTracking: "clip",
   },
 
   // ── Creatures Anathema ───────────────────────────────────────────────────
@@ -1002,6 +1043,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Scarce (Common for Orks)",
     ammoType: "Bullets",
     compatibleAmmoIds: ["cr-bullets"],
+    ammoTracking: "clip",
   },
   {
     id: "ca-shoota",
@@ -1022,6 +1064,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Scarce (Common for Orks)",
     ammoType: "Bullets",
     compatibleAmmoIds: ["cr-bullets"],
+    ammoTracking: "clip",
   },
   {
     id: "ca-snazzgun",
@@ -1043,6 +1086,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Rare (Scarce for Orks)",
     ammoType: "Bullets",
     compatibleAmmoIds: ["cr-bullets"],
+    ammoTracking: "clip",
   },
 
   // Eldar Weaponry
@@ -1065,6 +1109,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Very Rare",
     ammoType: "Shuriken Clip",
     compatibleAmmoIds: ["ca-shuriken-clip"],
+    ammoTracking: "clip",
   },
   {
     id: "ca-avenger-shuriken-catapult",
@@ -1086,6 +1131,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Very Rare",
     ammoType: "Shuriken Clip",
     compatibleAmmoIds: ["ca-shuriken-clip"],
+    ammoTracking: "clip",
   },
   {
     id: "ca-ranger-long-rifle",
@@ -1107,6 +1153,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Very Rare",
     ammoType: "Shuriken Clip",
     compatibleAmmoIds: ["ca-shuriken-clip"],
+    ammoTracking: "clip",
   },
 
   // ── Blood of Martyrs ──────────────────────────────────────────────────────
@@ -1129,6 +1176,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Very Rare",
     ammoType: "Bolt Shells",
     compatibleAmmoIds: ["cr-bolt-shells", "cr-inferno-shells", "dh-psybolt-ammunition"],
+    ammoTracking: "clip",
   },
   {
     id: "godwyn-deaz-storm-bolter",
@@ -1149,6 +1197,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Extremely Rare",
     ammoType: "Bolt Shells",
     compatibleAmmoIds: ["cr-bolt-shells", "cr-inferno-shells", "dh-psybolt-ammunition"],
+    ammoTracking: "clip",
   },
   {
     id: "seraphim-inferno-pistol",
@@ -1169,6 +1218,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Extremely Rare",
     ammoType: "Melta Canister (pistol)",
     compatibleAmmoIds: ["cr-melta-canister-pistol", "cr-melta-canister-basic"],
+    ammoTracking: "clip",
   },
   {
     id: "seraphim-hand-flamer",
@@ -1191,6 +1241,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Extremely Rare",
     ammoType: "Fuel (pistol)",
     compatibleAmmoIds: ["cr-fuel-pistol", "cr-fuel-basic", "dh-psyflame-ammunition"],
+    ammoTracking: "clip",
   },
   {
     id: "heavy-flamer",
@@ -1212,6 +1263,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Rare",
     ammoType: "Fuel (basic)",
     compatibleAmmoIds: ["cr-fuel-basic", "dh-psyflame-ammunition"],
+    ammoTracking: "clip",
   },
 
   // ── Daemon Hunter ─────────────────────────────────────────────────────────
@@ -1258,6 +1310,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Very Rare",
     ammoType: "Special Power Cell",
     compatibleAmmoIds: ["dh-synapse-power-cell"],
+    ammoTracking: "clip",
   },
 
   // Solid Projectile
@@ -1281,6 +1334,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Rare",
     ammoType: "Bullets",
     compatibleAmmoIds: ["cr-bullets"],
+    ammoTracking: "loose",
   },
   {
     id: "dh-hell-rifle",
@@ -1321,6 +1375,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Common",
     ammoType: "Sting-Blunt Magazine",
     compatibleAmmoIds: ["dh-sting-blunt-magazine"],
+    ammoTracking: "clip",
   },
 
   // Exotic
@@ -1344,6 +1399,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Unique",
     ammoType: "Exotic",
     compatibleAmmoIds: ["cr-exotic"],
+    ammoTracking: "loose",
   },
   {
     id: "dh-tyranicus-heavy-webber",
@@ -1365,6 +1421,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     rarity: "Rare",
     ammoType: "Exotic",
     compatibleAmmoIds: ["cr-exotic"],
+    ammoTracking: "loose",
   },
 
   // ── Lathe Worlds ─────────────────────────────────────────────────────────
@@ -2665,3 +2722,4 @@ export const SHIELD_REFERENCE: ShieldRef[] = [
     rarity: "Scarce",
   },
 ];
+

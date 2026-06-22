@@ -120,6 +120,7 @@ export interface RangedWeapon {
   craftsmanship?: WeaponCraftsmanship;
   attachments?: string[]; // WeaponUpgradeRef.id values for fitted upgrades
   ammoEntries?: WeaponAmmoEntry[]; // ammo types carried; one marked loaded
+  ammoTracking?: "clip" | "loose"; // clip = spare clips plus partial rounds; loose = rounds only
   quantity?: number; // for thrown weapons (bolas, throwing stars) — how many carried
   description?: string; // rules text copied from reference data when needed
   equipped?: boolean; // true = carried on body, shown expanded and pinned to top

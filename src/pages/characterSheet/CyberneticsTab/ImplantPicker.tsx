@@ -12,6 +12,7 @@ import { Button } from "../../../ui/Button";
 import { InfoModal } from "../../../components/InfoModal";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { editableInputClass } from "../../../ui/editableStyles";
+import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import { CRAFTSMANSHIP_STYLE, LOCATION_DISPLAY } from "./cyberneticsConstants";
 import {
   availableCraftsmanship,
@@ -102,12 +103,12 @@ export function ImplantPicker({ editable = true, onSelect, onClose }: Props) {
     setCraftsmanship(defaultCraftsmanship(ref));
   };
   const costNum = Number(gmCost);
-  const costValid = gmCost.trim() !== "" && Number.isInteger(costNum) && costNum >= 1;
+  const costValid = gmCost.trim() !== "" && Number.isInteger(costNum) && costNum >= 0;
   const pendingNeedsRarity = pendingCost ? isVariableMeta(pendingCost.rarity) : false;
   const canConfirmCost = costValid && (!pendingNeedsRarity || gmRarity !== "");
   const confirmCost = () => {
     if (!pendingCost || !canConfirmCost) return;
-    setAssignedValue(`${gmCost} Thrones`);
+    setAssignedValue(formatMoneyInput(gmCost));
     setAssignedRarity(pendingNeedsRarity ? gmRarity : undefined);
     setSelected(pendingCost);
     setPendingCost(null);
@@ -160,16 +161,15 @@ export function ImplantPicker({ editable = true, onSelect, onClose }: Props) {
               Cost (Thrones) <span className="text-red-400">*</span>
             </label>
             <input
-              type="number"
-              min={1}
-              step={1}
+              type="text"
+              inputMode="numeric"
               value={gmCost}
-              onChange={(e) => setGmCost(e.target.value)}
+              onChange={(e) => setGmCost(sanitizeMoneyInput(e.target.value))}
               placeholder="e.g. 5000"
               className={editableInputClass(true)}
             />
             {gmCost.trim() !== "" && !costValid && (
-              <p className="text-xs lg:text-sm text-red-400">Must be a whole number of 1 or more.</p>
+              <p className="text-xs lg:text-sm text-red-400">Must be a whole number of 0 or more.</p>
             )}
           </div>
 

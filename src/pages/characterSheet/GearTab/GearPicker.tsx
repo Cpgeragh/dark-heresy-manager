@@ -7,6 +7,7 @@ import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
 import { Button } from "../../../ui/Button";
 import { editableInputClass } from "../../../ui/editableStyles";
+import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 
 interface Props {
   editable?: boolean;
@@ -31,12 +32,6 @@ const RARITY_OPTIONS = [
   "Adeptus Mechanicus Only",
 ] as const;
 
-function displayWeight(weight?: string | null) {
-  const value = weight?.trim();
-  if (!value || value === "\u2014" || value.includes("\u20ac")) return "0 kg";
-  return value;
-}
-
 function isVariableMeta(value?: string | null) {
   const normalized = value?.trim().toLowerCase();
   return !normalized || normalized === "\u2014" || normalized === "variable" || normalized === "varies";
@@ -52,7 +47,7 @@ export function GearPicker({ editable = true, onSelect, onCustom, onClose }: Pro
   ).sort((a, b) => a.name.localeCompare(b.name));
   const pendingNeedsRarity = pending ? isVariableMeta(pending.rarity) : false;
   const costNum = Number(gmCost);
-  const costValid = gmCost.trim() !== "" && Number.isInteger(costNum) && costNum >= 1;
+  const costValid = gmCost.trim() !== "" && Number.isInteger(costNum) && costNum >= 0;
   const canConfirm = costValid && (!pendingNeedsRarity || gmRarity !== "");
 
   function handleSelect(ref: GearRef) {
@@ -68,7 +63,7 @@ export function GearPicker({ editable = true, onSelect, onCustom, onClose }: Pro
 
   function handleConfirm() {
     if (!pending || !canConfirm) return;
-    onSelect(pending, `${gmCost} Thrones`, pendingNeedsRarity ? gmRarity : undefined);
+    onSelect(pending, formatMoneyInput(gmCost), pendingNeedsRarity ? gmRarity : undefined);
   }
 
   return (
@@ -104,16 +99,15 @@ export function GearPicker({ editable = true, onSelect, onCustom, onClose }: Pro
               Cost (Thrones) <span className="text-red-400">*</span>
             </label>
             <input
-              type="number"
-              min={1}
-              step={1}
+              type="text"
+              inputMode="numeric"
               value={gmCost}
-              onChange={(e) => setGmCost(e.target.value)}
+              onChange={(e) => setGmCost(sanitizeMoneyInput(e.target.value))}
               placeholder="e.g. 500"
               className={editableInputClass(true)}
             />
             {gmCost.trim() !== "" && !costValid && (
-              <p className="text-xs lg:text-sm text-red-400">Must be a whole number of 1 or more.</p>
+              <p className="text-xs lg:text-sm text-red-400">Must be a whole number of 0 or more.</p>
             )}
           </div>
 
@@ -175,7 +169,7 @@ export function GearPicker({ editable = true, onSelect, onCustom, onClose }: Pro
             <div className="flex items-center gap-2 shrink-0 text-xs lg:text-sm">
               <ItemMetaChips
                 bare
-                weight={displayWeight(ref.weight)}
+                weight={ref.weight}
                 value={isVariableMeta(ref.value) ? undefined : ref.value}
                 rarity={isVariableMeta(ref.rarity) ? undefined : ref.rarity}
                 source={ref.source}

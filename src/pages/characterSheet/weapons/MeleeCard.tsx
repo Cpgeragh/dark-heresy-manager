@@ -15,6 +15,8 @@ import { Button } from "../../../ui/Button";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
 import { QuantityControl } from "../../../ui/QuantityControl";
+import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
+import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import { InfoModal } from "../../../components/InfoModal";
 import {
   StatChip,
@@ -237,11 +239,21 @@ export function CustomMeleeForm({
     class: "",
     damage: "",
     pen: "",
+    weight: "",
+    value: "",
     specialRules: "",
   });
 
   const makeFieldSetter = (k: keyof typeof fields) => (e: React.ChangeEvent<HTMLInputElement>) =>
-    setFields((prev) => ({ ...prev, [k]: e.target.value }));
+    setFields((prev) => ({
+      ...prev,
+      [k]:
+        k === "weight"
+          ? sanitizeWeightInput(e.target.value)
+          : k === "value"
+            ? sanitizeMoneyInput(e.target.value)
+            : e.target.value,
+    }));
 
   return (
     <div className="border border-red-700/30 bg-slate-900/60 rounded-lg p-4 lg:p-5 space-y-3">
@@ -249,13 +261,14 @@ export function CustomMeleeForm({
         Custom Melee Weapon
       </p>
       <div className="grid grid-cols-2 gap-2">
-        {(["name", "class", "damage", "pen", "specialRules"] as const).map((k) => (
+        {(["name", "class", "damage", "pen", "weight", "value", "specialRules"] as const).map((k) => (
           <div key={k} className={k === "name" || k === "specialRules" ? "col-span-2" : ""}>
             <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
               {k}
             </label>
             <input
               type="text"
+              inputMode={k === "weight" ? "decimal" : k === "value" ? "numeric" : undefined}
               value={fields[k] ?? ""}
               onChange={makeFieldSetter(k)}
               className={editableInputClass(true) + " mt-0.5"}
@@ -271,6 +284,8 @@ export function CustomMeleeForm({
               id: crypto.randomUUID(),
               custom: true,
               ...fields,
+              weight: formatWeightInput(fields.weight ?? ""),
+              value: formatMoneyInput(fields.value ?? ""),
               quantity: fields.class?.toLowerCase().includes("thrown") ? 1 : undefined,
             })
           }
@@ -467,7 +482,7 @@ export function MeleeCard({
 
           {/* Weight / Value / Rarity / Source */}
           <ItemMetaChips
-            weight={weapon.weight}
+            weight={effective.weight}
             value={weapon.value}
             rarity={weapon.rarity}
             source={weapon.source}

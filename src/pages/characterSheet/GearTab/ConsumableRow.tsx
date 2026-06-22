@@ -13,12 +13,6 @@ interface Props {
   onRemove: (id: string) => void;
 }
 
-function displayWeight(weight?: string | null) {
-  const value = weight?.trim();
-  if (!value || value === "\u2014" || value.includes("\u20ac")) return "0 kg";
-  return value;
-}
-
 export function ConsumableRow({ item, editable, onUpdateQty, onRemove }: Props) {
   const hasDesc = !!item.description?.trim();
 
@@ -50,7 +44,7 @@ export function ConsumableRow({ item, editable, onUpdateQty, onRemove }: Props) 
             )}
           </div>
           <ItemMetaChips
-            weight={displayWeight(item.weight)}
+            weight={item.weight}
             value={item.value}
             rarity={item.rarity}
             source={item.source}
