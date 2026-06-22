@@ -60,18 +60,59 @@ export function removeSpecialRule(rules: string, toRemove: string): string {
   return result || "—";
 }
 
+function formatKg(value: number): string {
+  if (!Number.isFinite(value) || value < 0) return "0 kg";
+  return `${Number(value.toFixed(2))} kg`;
+}
+
+function parseKg(value?: string): number {
+  const match = value?.trim().match(/^(\d+(?:\.\d+)?)\s*(?:kg)?$/i);
+  return match ? Number(match[1]) : 0;
+}
+
+function parseWeightModifier(modifier: string): { multiplier: number; flatKg: number } {
+  const trimmed = modifier.trim();
+  if (!trimmed || trimmed === "-" || trimmed === "—" || trimmed === "â€”" || trimmed === "0") {
+    return { multiplier: 1, flatKg: 0 };
+  }
+
+  const multiplier = trimmed.match(/^(?:×|x|Ã—)\s*(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)$/i);
+  if (multiplier) {
+    const numerator = Number(multiplier[1]);
+    const denominator = Number(multiplier[2]);
+    return { multiplier: denominator > 0 ? numerator / denominator : 1, flatKg: 0 };
+  }
+
+  const flat = trimmed.match(/^([+-]?\d+(?:\.\d+)?)\s*(?:kg)?$/i);
+  if (flat) return { multiplier: 1, flatKg: Number(flat[1]) };
+
+  return { multiplier: 1, flatKg: 0 };
+}
+
+export function effectiveWeaponWeight(
+  weight: string | undefined,
+  attachmentRefs: WeaponUpgradeRef[]
+): string {
+  const baseWeight = parseKg(weight);
+  const modifiers = attachmentRefs.map((ref) => parseWeightModifier(ref.weightModifier));
+  const multiplier = modifiers.reduce((total, modifier) => total * modifier.multiplier, 1);
+  const flatKg = modifiers.reduce((total, modifier) => total + modifier.flatKg, 0);
+  return formatKg(baseWeight * multiplier + flatKg);
+}
+
 // ─── Effective Stats (after attachments) ─────────────────────────────────────
 
 export function effectiveRangedStats(
   weapon: RangedWeapon,
   attachmentRefs: WeaponUpgradeRef[],
   loadedAmmoRef?: AmmoRef
-): { damage: string; range: string; clip: string; pen: string; specialRules: string } {
+): { damage: string; range: string; clip: string; pen: string; specialRules: string; weight: string } {
   let damage = weapon.damage ?? "";
   let range = weapon.range ?? "";
   let clip = weapon.clip ?? "";
   let pen = weapon.pen ?? "";
   let specialRules = weapon.specialRules ?? "";
+  const weight = effectiveWeaponWeight(weapon.weight, attachmentRefs);
   for (const ref of attachmentRefs) {
     if (ref.id === "cr-compact") {
       damage = modifyDamageBonus(damage, -1);
@@ -109,22 +150,23 @@ export function effectiveRangedStats(
     default:
       break;
   }
-  return { damage, range, clip, pen, specialRules };
+  return { damage, range, clip, pen, specialRules, weight };
 }
 
 export function effectiveMeleeStats(
   weapon: MeleeWeapon,
   attachmentRefs: WeaponUpgradeRef[]
-): { pen: string; specialRules: string } {
+): { pen: string; specialRules: string; weight: string } {
   let pen = weapon.pen ?? "";
   let specialRules = weapon.specialRules ?? "";
+  const weight = effectiveWeaponWeight(weapon.weight, attachmentRefs);
   for (const ref of attachmentRefs) {
     if (ref.id === "cr-mono") {
       pen = modifyPen(pen, +2);
       specialRules = removeSpecialRule(specialRules, "Primitive");
     }
   }
-  return { pen, specialRules };
+  return { pen, specialRules, weight };
 }
 
 // ─── Compatible Upgrades ──────────────────────────────────────────────────────

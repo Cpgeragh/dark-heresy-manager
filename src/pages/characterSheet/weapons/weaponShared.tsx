@@ -7,6 +7,8 @@ import { rarityColour, sourceColour } from "../../../ui/sourceStyles";
 import { InfoModal } from "../../../components/InfoModal";
 import type { WeaponUpgradeRef } from "../../../data/reference/weaponUpgradeReference";
 import { PickerModal } from "../../../ui/PickerModal";
+import { formatWeightForDisplay } from "../../../ui/weightFormat";
+import { formatMoneyForDisplay } from "../../../ui/moneyFormat";
 
 // ─── Stat Chip ────────────────────────────────────────────────────────────────
 
@@ -170,6 +172,8 @@ export function AttachmentCard({
   editable: boolean;
   onRemove: (upgradeId: string) => void;
 }) {
+  const displayedWeightModifier = formatWeightModifier(upgrade.weightModifier);
+
   return (
     <div className="bg-slate-800/60 rounded border border-slate-500 px-2 lg:px-3 py-1.5 lg:py-2">
       <div className="flex items-center justify-between gap-2">
@@ -198,13 +202,11 @@ export function AttachmentCard({
         </div>
       </div>
       <div className="flex flex-wrap gap-1 mt-1">
-        {upgrade.weightModifier !== "—" && (
-          <span className="text-[10px] lg:text-xs rounded border border-slate-700 bg-slate-900/40 px-1 lg:px-1.5 py-0.5 text-slate-400">
-            ⚖ {upgrade.weightModifier}
-          </span>
-        )}
-        <span className="text-[10px] lg:text-xs rounded border border-slate-700 bg-slate-900/40 px-1 lg:px-1.5 py-0.5 text-amber-400/80 font-code">
-          ₮ {upgrade.value}
+        <span className="text-[10px] lg:text-xs rounded border border-slate-700 bg-slate-900/40 px-1 lg:px-1.5 py-0.5 text-slate-400">
+          ⚖ {displayedWeightModifier}
+        </span>
+        <span className="text-[10px] lg:text-xs rounded border border-slate-700 bg-slate-900/40 px-1 lg:px-1.5 py-0.5 text-amber-400/80">
+          {formatMoneyForDisplay(upgrade.value)}
         </span>
         <span
           className={`text-[10px] lg:text-xs rounded border bg-slate-900/40 px-1 lg:px-1.5 py-0.5 font-code ${sourceColour(upgrade.source)}`}
@@ -262,9 +264,9 @@ export function AttachmentPicker({
             <div className="flex items-center gap-1.5 text-xs lg:text-sm shrink-0">
               <span className={rarityColour(upgrade.rarity)}>{upgrade.rarity}</span>
               <span className="text-slate-600">·</span>
-              <span className="text-amber-400/80 font-code">₮ {upgrade.value}</span>
+              <span className="text-amber-400/80">{formatMoneyForDisplay(upgrade.value)}</span>
               <span className="text-slate-600">·</span>
-              <span className="text-slate-400">{upgrade.weightModifier}</span>
+              <span className="text-slate-400">⚖ {formatWeightModifier(upgrade.weightModifier)}</span>
             </div>
           </div>
           <p className="text-xs lg:text-sm text-slate-400 leading-relaxed">{upgrade.description}</p>
@@ -273,4 +275,15 @@ export function AttachmentPicker({
       ))}
     </PickerModal>
   );
+}
+
+function formatWeightModifier(value?: string | null): string {
+  const trimmed = value?.trim() ?? "";
+  if (!trimmed || trimmed === "-" || trimmed === "—" || trimmed === "â€”" || trimmed === "0") {
+    return "0 kg";
+  }
+  if (/^[+-]?\d+(?:\.\d+)?\s*(?:kg)?$/i.test(trimmed)) {
+    return formatWeightForDisplay(trimmed);
+  }
+  return trimmed;
 }

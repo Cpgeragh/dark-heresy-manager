@@ -4,6 +4,8 @@ import { useState } from "react";
 import type { ArmourLocationKey, WornArmourPiece } from "../../../types/Character";
 import { editableInputClass } from "../../../ui/editableStyles";
 import { Button } from "../../../ui/Button";
+import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
+import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import { LOCATION_LABELS, LOCATION_ORDER } from "./armourHelpers";
 
 interface Props {
@@ -16,6 +18,7 @@ export function CustomPieceForm({ onAdd, onCancel }: Props) {
   const [name, setName] = useState("");
   const [ap, setAp] = useState("");
   const [weight, setWeight] = useState("");
+  const [value, setValue] = useState("");
   const [selectedLocs, setSelectedLocs] = useState<Set<ArmourLocationKey>>(new Set());
 
   function toggleLoc(loc: ArmourLocationKey) {
@@ -37,8 +40,8 @@ export function CustomPieceForm({ onAdd, onCancel }: Props) {
       worn: true,
       custom: true,
     };
-    const kg = Number(weight.trim());
-    if (weight.trim() && !Number.isNaN(kg)) piece.weight = `${kg} kg`;
+    piece.weight = formatWeightInput(weight);
+    piece.value = formatMoneyInput(value);
     onAdd(piece);
   }
 
@@ -102,16 +105,26 @@ export function CustomPieceForm({ onAdd, onCancel }: Props) {
           type="text"
           inputMode="decimal"
           value={weight}
-          onChange={(e) => {
-            let v = e.target.value.replace(/[^\d.]/g, "");
-            const parts = v.split(".");
-            if (parts.length > 2) v = parts[0] + "." + parts.slice(1).join("");
-            setWeight(v);
-          }}
+          onChange={(e) => setWeight(sanitizeWeightInput(e.target.value))}
           placeholder="0"
           className={editableInputClass(true) + " w-20 font-code"}
         />
         <span className="text-xs lg:text-sm text-slate-400">kg</span>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100 w-14 lg:w-20 shrink-0">
+          Cost
+        </label>
+        <input
+          type="text"
+          inputMode="numeric"
+          value={value}
+          onChange={(e) => setValue(sanitizeMoneyInput(e.target.value))}
+          placeholder="0"
+          className={editableInputClass(true) + " w-24 font-code"}
+        />
+        <span className="text-xs lg:text-sm text-slate-400">Thrones</span>
       </div>
 
       <div className="flex gap-2 pt-1">

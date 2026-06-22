@@ -1,23 +1,26 @@
 // tests/integration/formatAmmoValue.test.tsx
 import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
-import "@testing-library/jest-dom";
 
-import { formatAmmoValue } from "../../src/pages/characterSheet/weapons/AmmoCard";
+import {
+  formatMoneyForDisplay,
+  formatMoneyInput,
+  sanitizeMoneyInput,
+} from "../../src/ui/moneyFormat";
 
-describe("formatAmmoValue", () => {
-  it("renders split format with throne, times, and quantity spans", () => {
-    render(<>{formatAmmoValue("30 / 10")}</>);
-
-    expect(screen.getByText(/₮ 30/)).toBeInTheDocument();
-    expect(screen.getByText("×")).toBeInTheDocument();
-    expect(screen.getByText("10")).toBeInTheDocument();
+describe("money formatting", () => {
+  it("renders a symbol, formatted whole number, and Thrones", () => {
+    expect(formatMoneyForDisplay("1000 Thrones")).toBe("₮ 1,000 Thrones");
+    expect(formatMoneyForDisplay(30)).toBe("₮ 30 Thrones");
   });
 
-  it("renders plain format with a single throne span and no times symbol", () => {
-    render(<>{formatAmmoValue("15 Thrones")}</>);
+  it("normalizes empty and missing values to zero", () => {
+    expect(formatMoneyForDisplay("—")).toBe("₮ 0 Thrones");
+    expect(formatMoneyForDisplay("")).toBe("₮ 0 Thrones");
+    expect(formatMoneyInput("")).toBe("0 Thrones");
+  });
 
-    expect(screen.getByText(/₮ 15 Thrones/)).toBeInTheDocument();
-    expect(screen.queryByText("×")).not.toBeInTheDocument();
+  it("keeps custom cost input to non-negative whole-number digits", () => {
+    expect(sanitizeMoneyInput("1,200.75 Thrones")).toBe("120075");
+    expect(sanitizeMoneyInput("-50")).toBe("50");
   });
 });

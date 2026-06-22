@@ -4,6 +4,8 @@ import { useState } from "react";
 import type { GearItem } from "../../../types/Character";
 import { editableInputClass, editableTextareaClass } from "../../../ui/editableStyles";
 import { Button } from "../../../ui/Button";
+import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
+import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 
 interface Props {
   onAdd: (item: GearItem) => void;
@@ -12,6 +14,8 @@ interface Props {
 
 export function CustomItemForm({ onAdd, onCancel }: Props) {
   const [name, setName] = useState("");
+  const [weight, setWeight] = useState("");
+  const [value, setValue] = useState("");
   const [description, setDescription] = useState("");
 
   return (
@@ -26,6 +30,34 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
           placeholder="Item name…"
           className={editableInputClass(true)}
         />
+      </div>
+      <div className="flex items-center gap-3">
+        <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100 w-14 lg:w-20 shrink-0">
+          Weight
+        </label>
+        <input
+          type="text"
+          inputMode="decimal"
+          value={weight}
+          onChange={(e) => setWeight(sanitizeWeightInput(e.target.value))}
+          placeholder="0"
+          className={editableInputClass(true) + " w-20 font-code"}
+        />
+        <span className="text-xs lg:text-sm text-slate-400">kg</span>
+      </div>
+      <div className="flex items-center gap-3">
+        <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100 w-14 lg:w-20 shrink-0">
+          Cost
+        </label>
+        <input
+          type="text"
+          inputMode="numeric"
+          value={value}
+          onChange={(e) => setValue(sanitizeMoneyInput(e.target.value))}
+          placeholder="0"
+          className={editableInputClass(true) + " w-24 font-code"}
+        />
+        <span className="text-xs lg:text-sm text-slate-400">Thrones</span>
       </div>
       <div className="space-y-1">
         <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
@@ -46,6 +78,8 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
             onAdd({
               id: crypto.randomUUID(),
               name: name.trim(),
+              weight: formatWeightInput(weight),
+              value: formatMoneyInput(value),
               description: description.trim() || undefined,
             })
           }

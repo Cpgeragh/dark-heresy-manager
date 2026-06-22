@@ -275,6 +275,7 @@ export function WeaponsTab({
           rarity: ref.rarity,
           source: ref.source,
           craftsmanship,
+          ammoTracking: ref.ammoTracking,
           quantity: isThrown ? 1 : undefined,
         },
       ]);

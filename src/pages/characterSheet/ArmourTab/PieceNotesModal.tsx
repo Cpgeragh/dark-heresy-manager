@@ -5,6 +5,8 @@ import { createPortal } from "react-dom";
 import type { ArmourLocationKey, WornArmourPiece } from "../../../types/Character";
 import { ARMOUR_REFERENCE } from "../../../data/reference/armourReference";
 import { rarityColour } from "../../../ui/sourceStyles";
+import { formatWeightForDisplay } from "../../../ui/weightFormat";
+import { formatMoneyForDisplay } from "../../../ui/moneyFormat";
 import { LOCATION_LABELS, locationLabel } from "./armourHelpers";
 
 interface Props {
@@ -16,6 +18,7 @@ interface Props {
 export function PieceNotesModal({ piece, onClose }: Props) {
   const ref = ARMOUR_REFERENCE.find((r) => r.id === piece.referenceId);
   const notes = piece.notes || ref?.notes;
+  const displayedWeight = formatWeightForDisplay(piece.weight ?? ref?.weight);
 
   const dialogRef = useRef<HTMLDialogElement | null>(null);
   useEffect(() => {
@@ -49,14 +52,12 @@ export function PieceNotesModal({ piece, onClose }: Props) {
           <span>
             Covers: <span className="text-slate-200">{locationLabel(piece.locations)}</span>
           </span>
-          {piece.weight && (
+          <span>
+            ⚖ <span className="text-slate-200">{displayedWeight}</span>
+          </span>
+          {piece.value !== undefined && piece.value !== null && (
             <span>
-              ⚖ <span className="text-slate-200">{piece.weight}</span>
-            </span>
-          )}
-          {piece.value && (
-            <span>
-              ₮ <span className="text-slate-200">{piece.value}</span>
+              <span className="text-slate-200">{formatMoneyForDisplay(piece.value)}</span>
             </span>
           )}
           {piece.rarity && <span className={rarityColour(piece.rarity)}>{piece.rarity}</span>}

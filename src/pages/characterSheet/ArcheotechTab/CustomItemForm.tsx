@@ -4,33 +4,13 @@ import { useState } from "react";
 import type { ArcheotechItem } from "../../../types/Character";
 import { editableInputClass, editableTextareaClass } from "../../../ui/editableStyles";
 import { Button } from "../../../ui/Button";
+import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
+import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import { ITEM_TYPES, RARITY_OPTIONS, type ItemType } from "./archeotechConstants";
 
 interface Props {
   onAdd: (item: ArcheotechItem) => void;
   onCancel: () => void;
-}
-
-const WEIGHT_INPUT_RE = /^$|^\d+(?:\.\d?)?$/;
-const COMPLETE_WEIGHT_RE = /^\d+(?:\.\d)?$/;
-const VALUE_INPUT_RE = /^\d*$/;
-const COMPLETE_VALUE_RE = /^[1-9]\d*$/;
-
-function formatWeight(value: string): string | undefined {
-  const trimmed = value.trim();
-  if (!trimmed) return undefined;
-  if (!COMPLETE_WEIGHT_RE.test(trimmed)) return undefined;
-
-  const kg = Number(trimmed);
-  const formatted = Number.isInteger(kg) ? String(kg) : kg.toFixed(1);
-  return `${formatted} kg`;
-}
-
-function formatValue(value: string): string | undefined {
-  const trimmed = value.trim();
-  if (!trimmed) return undefined;
-  if (!COMPLETE_VALUE_RE.test(trimmed)) return undefined;
-  return `${trimmed} Thrones`;
 }
 
 export function CustomItemForm({ onAdd, onCancel }: Props) {
@@ -42,21 +22,16 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
   const [value, setValue] = useState("");
   const [rarity, setRarity] = useState("");
 
-  const formattedWeight = formatWeight(weight);
-  const formattedValue = formatValue(value);
-  const canAdd = name.trim().length > 0 && !!formattedWeight && !!formattedValue;
+  const formattedWeight = formatWeightInput(weight);
+  const formattedValue = formatMoneyInput(value);
+  const canAdd = name.trim().length > 0;
 
   function handleWeightChange(value: string) {
-    const next = value.replace(",", ".");
-    if (WEIGHT_INPUT_RE.test(next)) {
-      setWeight(next);
-    }
+    setWeight(sanitizeWeightInput(value));
   }
 
   function handleValueChange(value: string) {
-    if (VALUE_INPUT_RE.test(value)) {
-      setValue(value);
-    }
+    setValue(sanitizeMoneyInput(value));
   }
 
   function handleAdd() {
@@ -117,7 +92,7 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
           <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
-            Weight <span className="text-red-400">*</span>
+            Weight
           </label>
           <input
             type="text"

@@ -12,12 +12,6 @@ interface Props {
   onClose: () => void;
 }
 
-function displayWeight(weight?: string | null) {
-  const value = weight?.trim();
-  if (!value || value === "\u2014" || value.includes("\u20ac")) return "0 kg";
-  return value;
-}
-
 export function ConsumablePicker({ editable = true, onSelect, onClose }: Props) {
   const [query, setQuery] = useState("");
   const filtered = CONSUMABLES_REFERENCE.filter((r) =>
@@ -56,7 +50,7 @@ export function ConsumablePicker({ editable = true, onSelect, onClose }: Props) 
             <div className="flex items-center gap-2 shrink-0 text-xs lg:text-sm">
               <ItemMetaChips
                 bare
-                weight={displayWeight(ref.weight)}
+                weight={ref.weight}
                 value={ref.value}
                 rarity={ref.rarity}
                 source={ref.source}

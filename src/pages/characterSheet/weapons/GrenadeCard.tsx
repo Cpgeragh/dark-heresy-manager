@@ -9,6 +9,7 @@ import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import { PickerModal } from "../../../ui/PickerModal";
 import { rarityColour } from "../../../ui/sourceStyles";
+import { formatMoneyForDisplay } from "../../../ui/moneyFormat";
 import { InfoModal } from "../../../components/InfoModal";
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
 import { StatChip, DamageTypeChip, SpecialRulesContent, EquipToggle } from "./weaponShared";
@@ -101,7 +102,7 @@ export function GrenadePicker({
           </span>
           <div className="flex items-center gap-2 text-xs lg:text-sm mt-0.5 flex-wrap font-code">
             <span className={rarityColour(ref.rarity)}>{ref.rarity}</span>
-            <span className="text-amber-400/80">₮ {ref.value}</span>
+            <span className="text-amber-400/80">{formatMoneyForDisplay(ref.value)}</span>
             <span className="text-slate-500">{ref.damage !== "—" ? ref.damage : "No damage"}</span>
             <span className="text-slate-500">Pen {ref.pen}</span>
             <span className="text-slate-500">{ref.specialRules}</span>
