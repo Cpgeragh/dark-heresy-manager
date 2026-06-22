@@ -1,6 +1,7 @@
 // src/pages/characterSheet/CyberneticsTab/ImplantPicker.tsx
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import type { CyberneticCraftsmanship, ArmourLocationKey } from "../../../types/Character";
 import {
   CYBERNETICS_REFERENCE,
@@ -66,6 +67,19 @@ export function ImplantPicker({ editable = true, onSelect, onClose }: Props) {
     r.name.toLowerCase().includes(query.toLowerCase())
   ).sort((a, b) => a.name.localeCompare(b.name));
 
+  const step = pendingCost ? "cost"
+    : (selected && selected.requiresLocation && !location) ? "location"
+    : selected ? "craft"
+    : "list";
+
+  const dialogRef = useRef<HTMLDialogElement | null>(null);
+  useEffect(() => {
+    const d = dialogRef.current;
+    if (!d) return;
+    d.showModal();
+    return () => { if (d.open) d.close(); };
+  }, [step]);
+
   const resetPicker = () => {
     setSelected(null);
     setPendingCost(null);
@@ -123,77 +137,71 @@ export function ImplantPicker({ editable = true, onSelect, onClose }: Props) {
   );
 
   if (pendingCost) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-        <div className="w-full max-w-md lg:max-w-lg bg-slate-900 border border-slate-500 rounded-xl shadow-2xl">
-          <div className="flex items-center justify-between px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
-            <h3 className="text-sm lg:text-base font-semibold text-slate-200">Assigned Cost</h3>
-            <button
-              onClick={resetPicker}
-              className="text-slate-400 hover:text-slate-200 text-lg leading-none"
-            >
-              ×
-            </button>
-          </div>
+    return createPortal(
+      <dialog
+        ref={dialogRef}
+        onClose={resetPicker}
+        onClick={(e) => { if (e.target === dialogRef.current) resetPicker(); }}
+        className="m-auto w-[calc(100%-2rem)] max-w-md lg:max-w-lg bg-slate-900 border border-slate-500 rounded-xl shadow-2xl p-0 backdrop:bg-black/50 backdrop:backdrop-blur-sm"
+      >
+        <div className="flex items-center justify-between px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
+          <h3 className="text-sm lg:text-base font-semibold text-slate-200">Assigned Cost</h3>
+          <button onClick={resetPicker} className="text-slate-400 hover:text-slate-200 text-lg leading-none">×</button>
+        </div>
 
-          <div className="px-4 lg:px-5 py-4 lg:py-5 space-y-4">
-            <p className="text-sm lg:text-base text-slate-400">
-              <span className="font-medium text-slate-200">{pendingCost.name}</span> has no listed
-              cost or availability. Enter the values assigned for this implant.
-            </p>
+        <div className="px-4 lg:px-5 py-4 lg:py-5 space-y-4">
+          <p className="text-sm lg:text-base text-slate-400">
+            <span className="font-medium text-slate-200">{pendingCost.name}</span> has no listed
+            cost or availability. Enter the values assigned for this implant.
+          </p>
 
-            <div className="space-y-1">
-              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
-                Cost (Thrones) <span className="text-red-400">*</span>
-              </label>
-              <input
-                type="number"
-                min={1}
-                step={1}
-                value={gmCost}
-                onChange={(e) => setGmCost(e.target.value)}
-                placeholder="e.g. 5000"
-                className={editableInputClass(true)}
-              />
-              {gmCost.trim() !== "" && !costValid && (
-                <p className="text-xs lg:text-sm text-red-400">Must be a whole number of 1 or more.</p>
-              )}
-            </div>
-
-            {pendingNeedsRarity && (
-              <div className="space-y-1">
-                <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
-                  Rarity <span className="text-red-400">*</span>
-                </label>
-                <select
-                  value={gmRarity}
-                  onChange={(e) => setGmRarity(e.target.value)}
-                  className={editableInputClass(true) + " appearance-none"}
-                >
-                  <option value="">— Select rarity —</option>
-                  {RARITY_OPTIONS.map((r) => (
-                    <option key={r} value={r}>
-                      {r}
-                    </option>
-                  ))}
-                </select>
-              </div>
+          <div className="space-y-1">
+            <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+              Cost (Thrones) <span className="text-red-400">*</span>
+            </label>
+            <input
+              type="number"
+              min={1}
+              step={1}
+              value={gmCost}
+              onChange={(e) => setGmCost(e.target.value)}
+              placeholder="e.g. 5000"
+              className={editableInputClass(true)}
+            />
+            {gmCost.trim() !== "" && !costValid && (
+              <p className="text-xs lg:text-sm text-red-400">Must be a whole number of 1 or more.</p>
             )}
           </div>
 
-          <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700 flex gap-2">
-            <button
-              onClick={resetPicker}
-              className="px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100"
-            >
-              Back
-            </button>
-            <Button className="flex-1" onClick={confirmCost} disabled={!canConfirmCost}>
-              Continue
-            </Button>
-          </div>
+          {pendingNeedsRarity && (
+            <div className="space-y-1">
+              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                Rarity <span className="text-red-400">*</span>
+              </label>
+              <select
+                value={gmRarity}
+                onChange={(e) => setGmRarity(e.target.value)}
+                className={editableInputClass(true) + " appearance-none"}
+              >
+                <option value="">— Select rarity —</option>
+                {RARITY_OPTIONS.map((r) => (
+                  <option key={r} value={r}>{r}</option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
-      </div>
+
+        <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700 flex gap-2">
+          <button onClick={resetPicker} className="px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100">
+            Back
+          </button>
+          <Button className="flex-1" onClick={confirmCost} disabled={!canConfirmCost}>
+            Continue
+          </Button>
+        </div>
+      </dialog>,
+      document.body
     );
   }
 
@@ -212,131 +220,114 @@ export function ImplantPicker({ editable = true, onSelect, onClose }: Props) {
           { label: "Both Legs", value: ["leftLeg", "rightLeg"] },
         ];
 
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-        <div className="w-full max-w-md lg:max-w-lg bg-slate-900 border border-slate-500 rounded-xl shadow-2xl">
-          <div className="flex items-center justify-between px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
-            <h3 className="text-sm lg:text-base font-semibold text-slate-200">{selected.name}</h3>
-            <button
-              onClick={resetPicker}
-              className="text-slate-400 hover:text-slate-200 text-lg leading-none"
-            >
-              ×
-            </button>
-          </div>
+    return createPortal(
+      <dialog
+        ref={dialogRef}
+        onClose={resetPicker}
+        onClick={(e) => { if (e.target === dialogRef.current) resetPicker(); }}
+        className="m-auto w-[calc(100%-2rem)] max-w-md lg:max-w-lg bg-slate-900 border border-slate-500 rounded-xl shadow-2xl p-0 backdrop:bg-black/50 backdrop:backdrop-blur-sm"
+      >
+        <div className="flex items-center justify-between px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
+          <h3 className="text-sm lg:text-base font-semibold text-slate-200">{selected.name}</h3>
+          <button onClick={resetPicker} className="text-slate-400 hover:text-slate-200 text-lg leading-none">×</button>
+        </div>
 
-          <div className="px-4 lg:px-5 py-4 lg:py-5 space-y-3">
-            <p className="text-xs lg:text-sm text-slate-400">Select installation side:</p>
-            <div className="flex flex-col gap-2">
-              {options.map((opt) => (
-                <button
-                  key={opt.label}
-                  onClick={() => setLocation(opt.value)}
-                  className="py-2 lg:py-2.5 px-3 lg:px-4 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-200 text-left transition"
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700">
-            <button
-              onClick={resetPicker}
-              className="px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100"
-            >
-              Back
-            </button>
+        <div className="px-4 lg:px-5 py-4 lg:py-5 space-y-3">
+          <p className="text-xs lg:text-sm text-slate-400">Select installation side:</p>
+          <div className="flex flex-col gap-2">
+            {options.map((opt) => (
+              <button
+                key={opt.label}
+                onClick={() => setLocation(opt.value)}
+                className="py-2 lg:py-2.5 px-3 lg:px-4 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-200 text-left transition"
+              >
+                {opt.label}
+              </button>
+            ))}
           </div>
         </div>
-      </div>
+
+        <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700">
+          <button onClick={resetPicker} className="px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100">
+            Back
+          </button>
+        </div>
+      </dialog>,
+      document.body
     );
   }
 
   // ── Step 3: Craftsmanship picker ──────────────────────────────────────────
   if (selected) {
     const qualities = availableCraftsmanship(selected);
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-        <div className="w-full max-w-md lg:max-w-lg bg-slate-900 border border-slate-500 rounded-xl shadow-2xl">
-          <div className="flex items-center justify-between px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
-            <h3 className="text-sm lg:text-base font-semibold text-slate-200">{selected.name}</h3>
-            <button
-              onClick={resetPicker}
-              className="text-slate-400 hover:text-slate-200 text-lg leading-none"
-            >
-              ×
-            </button>
-          </div>
+    return createPortal(
+      <dialog
+        ref={dialogRef}
+        onClose={resetPicker}
+        onClick={(e) => { if (e.target === dialogRef.current) resetPicker(); }}
+        className="m-auto w-[calc(100%-2rem)] max-w-md lg:max-w-lg bg-slate-900 border border-slate-500 rounded-xl shadow-2xl p-0 backdrop:bg-black/50 backdrop:backdrop-blur-sm"
+      >
+        <div className="flex items-center justify-between px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
+          <h3 className="text-sm lg:text-base font-semibold text-slate-200">{selected.name}</h3>
+          <button onClick={resetPicker} className="text-slate-400 hover:text-slate-200 text-lg leading-none">×</button>
+        </div>
 
-          <div className="px-4 lg:px-5 py-4 lg:py-5 space-y-4">
-            {/* Location badge if set */}
-            {location && (
-              <div className="flex items-center gap-2 text-xs lg:text-sm text-slate-400">
-                <span>Installing on:</span>
-                <span className="px-2 lg:px-3 py-0.5 rounded border border-slate-600 bg-slate-800 text-slate-300">
-                  {location.map((l) => LOCATION_DISPLAY[l]).join(" & ")}
-                </span>
-              </div>
-            )}
-
-            <div>
-              <p className="text-xs lg:text-sm text-slate-400 mb-2">Select craftsmanship quality:</p>
-              <div className="flex gap-2">
-                {qualities.map((q) => (
-                  <button
-                    key={q}
-                    onClick={() => setCraftsmanship(q)}
-                    className={[
-                      "flex-1 py-1.5 lg:py-2 rounded border text-sm lg:text-base font-medium transition",
-                      craftsmanship === q
-                        ? CRAFTSMANSHIP_STYLE[q]
-                        : "border-slate-700 bg-slate-800 text-slate-400 hover:border-slate-500",
-                    ].join(" ")}
-                  >
-                    {q}
-                  </button>
-                ))}
-              </div>
+        <div className="px-4 lg:px-5 py-4 lg:py-5 space-y-4">
+          {location && (
+            <div className="flex items-center gap-2 text-xs lg:text-sm text-slate-400">
+              <span>Installing on:</span>
+              <span className="px-2 lg:px-3 py-0.5 rounded border border-slate-600 bg-slate-800 text-slate-300">
+                {location.map((l) => LOCATION_DISPLAY[l]).join(" & ")}
+              </span>
             </div>
+          )}
 
-            <div className="text-xs lg:text-sm text-slate-400 bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed">
-              {craftsmanshipDescription(selected, craftsmanship)}
+          <div>
+            <p className="text-xs lg:text-sm text-slate-400 mb-2">Select craftsmanship quality:</p>
+            <div className="flex gap-2">
+              {qualities.map((q) => (
+                <button
+                  key={q}
+                  onClick={() => setCraftsmanship(q)}
+                  className={[
+                    "flex-1 py-1.5 lg:py-2 rounded border text-sm lg:text-base font-medium transition",
+                    craftsmanship === q
+                      ? CRAFTSMANSHIP_STYLE[q]
+                      : "border-slate-700 bg-slate-800 text-slate-400 hover:border-slate-500",
+                  ].join(" ")}
+                >
+                  {q}
+                </button>
+              ))}
             </div>
           </div>
 
-          <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700 flex gap-2">
-            <button
-              onClick={resetPicker}
-              className="px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100"
-            >
-              Back
-            </button>
-            <Button
-              className="flex-1"
-              onClick={() =>
-                onSelect(
-                  selected,
-                  craftsmanship,
-                  location ?? undefined,
-                  assignedValue,
-                  assignedRarity
-                )
-              }
-              disabled={!editable}
-            >
-              Install
-            </Button>
+          <div className="text-xs lg:text-sm text-slate-400 bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed">
+            {craftsmanshipDescription(selected, craftsmanship)}
           </div>
         </div>
-      </div>
+
+        <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700 flex gap-2">
+          <button onClick={resetPicker} className="px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100">
+            Back
+          </button>
+          <Button
+            className="flex-1"
+            onClick={() => onSelect(selected, craftsmanship, location ?? undefined, assignedValue, assignedRarity)}
+            disabled={!editable}
+          >
+            Install
+          </Button>
+        </div>
+      </dialog>,
+      document.body
     );
   }
 
   // ── Step 1: Search list ───────────────────────────────────────────────────
   return (
     <PickerModal
-      title="Add Cybernetic"
+      title={editable ? "Add Cybernetic" : "View Cybernetics"}
       placeholder="Search implants…"
       query={query}
       onQueryChange={setQuery}
@@ -344,8 +335,10 @@ export function ImplantPicker({ editable = true, onSelect, onClose }: Props) {
       isEmpty={filtered.length === 0}
     >
       {filtered.map((ref) => (
-        <button
+        <div
           key={ref.id}
+          role="button"
+          tabIndex={editable ? 0 : -1}
           onClick={editable ? () => selectImplant(ref) : undefined}
           className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${
             editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"
@@ -375,7 +368,7 @@ export function ImplantPicker({ editable = true, onSelect, onClose }: Props) {
               )}
             </div>
           </div>
-        </button>
+        </div>
       ))}
     </PickerModal>
   );

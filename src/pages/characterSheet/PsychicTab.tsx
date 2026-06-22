@@ -79,13 +79,12 @@ function PowerPicker({
 
   return (
     <PickerModal
-      title="Add Psychic Power"
+      title={editable ? "Add Psychic Power" : "View Psychic Powers"}
       placeholder="Search powers…"
       query={query}
       onQueryChange={setQuery}
       onClose={onClose}
       isEmpty={filtered.length === 0}
-      maxHeight="max-h-[85vh]"
       filterRow={allFilters.map((d) => (
         <button
           key={d}
@@ -274,7 +273,6 @@ function CustomPowerForm({
       closeLabel={initialPower ? undefined : "←"}
       hideSearch
       isEmpty={false}
-      maxHeight="max-h-[85vh]"
     >
       <div className="p-4 lg:p-5 space-y-4">
         <div className="space-y-1">
@@ -661,7 +659,7 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
       ? activePowerGroup === "minor"
         ? "opacity-0 -translate-x-3"
         : "opacity-0 translate-x-3"
-      : "opacity-100 translate-x-0";
+      : "opacity-100";
   const existingPowerNames = new Set([
     ...psychic.minorPowers.map((p) => p.name),
     ...psychic.majorPowers.map((p) => p.name),

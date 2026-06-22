@@ -39,18 +39,18 @@ export const CATEGORIES: {
   {
     label: "Combat",
     tabs: [
-      { id: "armour", label: "Armour" },
       { id: "vitals", label: "Vitals" },
-      { id: "weapons", label: "Weapons" },
     ],
   },
   {
     label: "Equipment",
     tabs: [
       { id: "archeotech", label: "Archeotech" },
+      { id: "armour", label: "Armour" },
       { id: "cybernetics", label: "Cybernetics" },
       { id: "drugs", label: "Drugs" },
       { id: "gear", label: "Gear" },
+      { id: "weapons", label: "Weapons" },
     ],
   },
 ];
@@ -85,7 +85,6 @@ export function SectionDrawer({
     activeCategoryIndex !== null ? visibleCategories[activeCategoryIndex] : null;
 
   const open = useCallback(() => {
-    setLevel("categories");
     setIsOpen(true);
   }, []);
 
@@ -100,9 +99,10 @@ export function SectionDrawer({
     setIsOpen(true);
   }, [externalOpen, externalCategoryLabel, isDM]);
 
-  // Reset to category level after drawer fully closes
   const close = useCallback(() => {
     setIsOpen(false);
+    setLevel("categories");
+    setActiveCategoryIndex(null);
     onExternalClose?.();
   }, [onExternalClose]);
 

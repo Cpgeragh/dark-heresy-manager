@@ -24,7 +24,7 @@ type ListItem =
 
 export function AddSkillModal({
   isOpen,
-  title = "Add Skill",
+  title,
   editable = true,
   previewMode = false,
   onClose,
@@ -33,6 +33,7 @@ export function AddSkillModal({
 }: AddSkillModalProps) {
   const [search, setSearch] = useState("");
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const modalTitle = title ?? (editable ? "Add Skill" : "View Skills");
 
   const listItems = useMemo((): ListItem[] => {
     const query = search.toLowerCase();
@@ -93,8 +94,8 @@ export function AddSkillModal({
 
   return (
     <PickerModal
-      title={title}
-      titleClassName={previewMode ? "text-red-500" : "text-slate-200"}
+      title={modalTitle}
+      titleClassName="text-red-500"
       placeholder="Search skills…"
       query={search}
       onQueryChange={setSearch}

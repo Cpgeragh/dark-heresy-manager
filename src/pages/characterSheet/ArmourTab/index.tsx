@@ -313,7 +313,7 @@ export function ArmourTab({
                 setPickerMode("worn");
                 setShowPicker(true);
               }}
-              className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
+              className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
             >
               {editable ? "+ Equip" : "View"}
             </button>
@@ -342,7 +342,7 @@ export function ArmourTab({
                 setPickerMode("stowed");
                 setShowPicker(true);
               }}
-              className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
+              className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
             >
               {editable ? "+ Stow" : "View"}
             </button>
@@ -367,7 +367,7 @@ export function ArmourTab({
           <SectionHeader>Force Fields ({forceFields.length})</SectionHeader>
           <button
             onClick={() => setShowFieldPicker(true)}
-            className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700 transition"
+            className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
           >
             {editable ? "+ Add" : "View"}
           </button>

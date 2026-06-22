@@ -1,7 +1,8 @@
 // src/pages/characterSheet/weapons/RangedCard.tsx
 // RangedPicker, CustomRangedForm, RangedCard — co-located for navigability.
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import type {
   RangedWeapon,
   WeaponAmmoEntry,
@@ -88,71 +89,84 @@ export function RangedPicker({
   const filtered = references
     .filter((r) => r.name.toLowerCase().includes(query.toLowerCase()))
     .sort((a, b) => a.name.localeCompare(b.name));
+  const modalTitle = editable ? title : title.replace(/^Add\b/, "View");
 
   function resetPicker() {
     setSelected(null);
     setCraftsmanship("Common");
   }
 
+  const craftDialogRef = useRef<HTMLDialogElement | null>(null);
+  useEffect(() => {
+    const d = craftDialogRef.current;
+    if (!d) return;
+    d.showModal();
+    return () => { if (d.open) d.close(); };
+  }, [selected]);
+
   if (selected) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-        <div className="w-full max-w-md lg:max-w-lg bg-slate-900 border border-slate-500 rounded-xl shadow-2xl">
-          <div className="flex items-center justify-between px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
-            <h3 className="text-sm lg:text-base font-semibold text-slate-200">{selected.name}</h3>
-            <button
-              onClick={resetPicker}
-              className="text-slate-400 hover:text-slate-200 text-lg leading-none"
-            >
-              {"\u00D7"}
-            </button>
+    return createPortal(
+      <dialog
+        ref={craftDialogRef}
+        onClose={resetPicker}
+        onClick={(e) => { if (e.target === craftDialogRef.current) resetPicker(); }}
+        className="m-auto w-[calc(100%-2rem)] max-w-md lg:max-w-lg bg-slate-900 border border-slate-500 rounded-xl shadow-2xl p-0 backdrop:bg-black/50 backdrop:backdrop-blur-sm"
+      >
+        <div className="flex items-center justify-between px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
+          <h3 className="text-sm lg:text-base font-semibold text-slate-200">{selected.name}</h3>
+          <button
+            onClick={resetPicker}
+            className="text-slate-400 hover:text-slate-200 text-lg leading-none"
+          >
+            {"\u00D7"}
+          </button>
+        </div>
+
+        <div className="px-4 lg:px-5 py-4 lg:py-5 space-y-4">
+          <div>
+            <p className="text-xs lg:text-sm text-slate-400 mb-2">Select weapon craftsmanship:</p>
+            <div className="flex gap-2">
+              {WEAPON_CRAFTSMANSHIP_OPTIONS.map((q) => (
+                <button
+                  key={q}
+                  onClick={() => setCraftsmanship(q)}
+                  className={[
+                    "flex-1 py-1.5 lg:py-2 rounded border text-sm lg:text-base font-medium transition",
+                    craftsmanship === q
+                      ? WEAPON_CRAFTSMANSHIP_STYLE[q]
+                      : "border-slate-700 bg-slate-800 text-slate-400 hover:border-slate-500",
+                  ].join(" ")}
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
           </div>
 
-          <div className="px-4 lg:px-5 py-4 lg:py-5 space-y-4">
-            <div>
-              <p className="text-xs lg:text-sm text-slate-400 mb-2">Select weapon craftsmanship:</p>
-              <div className="flex gap-2">
-                {WEAPON_CRAFTSMANSHIP_OPTIONS.map((q) => (
-                  <button
-                    key={q}
-                    onClick={() => setCraftsmanship(q)}
-                    className={[
-                      "flex-1 py-1.5 lg:py-2 rounded border text-sm lg:text-base font-medium transition",
-                      craftsmanship === q
-                        ? WEAPON_CRAFTSMANSHIP_STYLE[q]
-                        : "border-slate-700 bg-slate-800 text-slate-400 hover:border-slate-500",
-                    ].join(" ")}
-                  >
-                    {q}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="text-xs lg:text-sm text-slate-400 bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed">
-              {rangedCraftsmanshipDescription(craftsmanship)}
-            </div>
-          </div>
-
-          <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700 flex gap-2">
-            <button
-              onClick={resetPicker}
-              className="px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100"
-            >
-              Back
-            </button>
-            <Button className="flex-1" onClick={() => onSelect(selected, craftsmanship)}>
-              Add Weapon
-            </Button>
+          <div className="text-xs lg:text-sm text-slate-400 bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed">
+            {rangedCraftsmanshipDescription(craftsmanship)}
           </div>
         </div>
-      </div>
+
+        <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700 flex gap-2">
+          <button
+            onClick={resetPicker}
+            className="px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100"
+          >
+            Back
+          </button>
+          <Button className="flex-1" onClick={() => onSelect(selected, craftsmanship)}>
+            Add Weapon
+          </Button>
+        </div>
+      </dialog>,
+      document.body
     );
   }
 
   return (
     <PickerModal
-      title={title}
+      title={modalTitle}
       placeholder={placeholder}
       query={query}
       onQueryChange={setQuery}
@@ -170,8 +184,10 @@ export function RangedPicker({
       }
     >
       {filtered.map((ref) => (
-        <button
+        <div
           key={ref.id}
+          role="button"
+          tabIndex={editable ? 0 : -1}
           onClick={editable ? () => setSelected(ref) : undefined}
           className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
@@ -180,6 +196,9 @@ export function RangedPicker({
           >
             {ref.name}
           </span>
+          <div className="flex flex-wrap gap-1.5 mt-1">
+            <ItemMetaChips weight={ref.weight} value={ref.value} rarity={ref.rarity} source={ref.source} />
+          </div>
           <div className="flex items-center gap-2 text-xs lg:text-sm text-slate-500 mt-0.5 flex-wrap font-code">
             <span>{ref.class}</span>
             <span>{ref.range}</span>
@@ -188,7 +207,24 @@ export function RangedPicker({
             <span>Pen {ref.pen}</span>
             <span>Clip {ref.clip}</span>
           </div>
-        </button>
+          {ref.specialRules && ref.specialRules !== "—" && (
+            <div className="flex items-center gap-1.5 mt-1">
+              <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Qualities</span>
+              <span className="text-xs lg:text-sm text-slate-400 italic">{ref.specialRules}</span>
+              <span className="inline-flex items-center -translate-y-[1.4px]">
+                <InfoModal title={`${ref.name} Qualities`} content={<SpecialRulesContent rules={ref.specialRules} />} />
+              </span>
+            </div>
+          )}
+          {ref.description && (
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Rules</span>
+              <span className="inline-flex items-center -translate-y-[1.4px]">
+                <InfoModal title={ref.name} content={<SpecialRulesContent rules="" description={ref.description} />} />
+              </span>
+            </div>
+          )}
+        </div>
       ))}
     </PickerModal>
   );
@@ -415,11 +451,13 @@ function AmmoEntryRow({
 function AmmoPicker({
   compatibleIds,
   existingNames,
+  editable = true,
   onSelect,
   onClose,
 }: {
   compatibleIds?: string[];
   existingNames: Set<string>;
+  editable?: boolean;
   onSelect: (name: string, referenceId?: string) => void;
   onClose: () => void;
 }) {
@@ -436,22 +474,55 @@ function AmmoPicker({
 
   return (
     <PickerModal
-      title="Add Ammo Type"
+      title={editable ? "Add Ammo Type" : "View Ammo Types"}
       placeholder="Search ammo…"
       query={query}
       onQueryChange={setQuery}
       onClose={onClose}
       isEmpty={options.length === 0}
+      footer={
+        editable ? (
+          <div className="space-y-2">
+            <p className="text-xs lg:text-sm text-slate-500">Custom / unlisted ammo</p>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={customName}
+                onChange={(e) => setCustomName(e.target.value)}
+                placeholder="Ammo name…"
+                className="flex-1 text-sm lg:text-base bg-slate-800 border border-slate-600 rounded px-2 lg:px-3 py-1 lg:py-1.5 text-slate-100 focus:outline-none focus:border-indigo-500"
+              />
+              <Button
+                onClick={() => {
+                  if (customName.trim()) {
+                    onSelect(customName.trim());
+                    onClose();
+                  }
+                }}
+                disabled={!customName.trim() || existingNames.has(customName.trim())}
+              >
+                Add
+              </Button>
+            </div>
+          </div>
+        ) : undefined
+      }
     >
       {options.map((ammo) => (
         <button
           key={ammo.id}
-          onClick={() => {
-            onSelect(formatAmmoName(ammo.name), ammo.id);
-            onClose();
-          }}
-          disabled={existingNames.has(formatAmmoName(ammo.name))}
-          className="w-full text-left px-4 lg:px-5 py-3 lg:py-4 hover:bg-slate-800 transition group disabled:opacity-40 disabled:cursor-not-allowed"
+          onClick={
+            editable
+              ? () => {
+                  onSelect(formatAmmoName(ammo.name), ammo.id);
+                  onClose();
+                }
+              : undefined
+          }
+          disabled={editable && existingNames.has(formatAmmoName(ammo.name))}
+          className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${
+            editable ? "hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed" : "cursor-default"
+          }`}
         >
           <div className="flex items-center justify-between gap-2">
             <span className="text-sm lg:text-base font-medium text-slate-200 group-hover:text-white">
@@ -469,31 +540,6 @@ function AmmoPicker({
           )}
         </button>
       ))}
-
-      {/* Custom / unlisted ammo */}
-      <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-800 space-y-2">
-        <p className="text-xs lg:text-sm text-slate-500">Custom / unlisted ammo</p>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={customName}
-            onChange={(e) => setCustomName(e.target.value)}
-            placeholder="Ammo name…"
-            className="flex-1 text-sm lg:text-base bg-slate-800 border border-slate-600 rounded px-2 lg:px-3 py-1 lg:py-1.5 text-slate-100 focus:outline-none focus:border-indigo-500"
-          />
-          <Button
-            onClick={() => {
-              if (customName.trim()) {
-                onSelect(customName.trim());
-                onClose();
-              }
-            }}
-            disabled={!customName.trim() || existingNames.has(customName.trim())}
-          >
-            Add
-          </Button>
-        </div>
-      </div>
     </PickerModal>
   );
 }
@@ -588,8 +634,13 @@ export function RangedCard({
     ? AMMO_REFERENCE.find((ammo) => ammo.id === loadedAmmoEntry.referenceId)
     : undefined;
   const effective = effectiveRangedStats(baseWeapon, attachmentRefs, loadedAmmoRef);
-  const compatible = getCompatibleUpgrades(weapon.class ?? "", weapon.name, false, attachmentIds);
-  const visibleCompatible = allowAttachments ? compatible : [];
+  const addableCompatible = getCompatibleUpgrades(weapon.class ?? "", weapon.name, false, attachmentIds);
+  const viewableCompatible = getCompatibleUpgrades(weapon.class ?? "", weapon.name, false, []);
+  const visibleCompatible = allowAttachments
+    ? editable
+      ? addableCompatible
+      : viewableCompatible
+    : [];
 
   const rulesText = effective.specialRules?.trim() ?? "";
   const ruleNamesInLookup = (effective.specialRules ?? "")
@@ -833,14 +884,12 @@ export function RangedCard({
             <div className="border-t border-slate-800 pt-2 space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">Ammo</span>
-                {editable && (
-                  <button
-                    onClick={() => setShowAmmoPicker(true)}
-                    className="text-xs lg:text-sm text-red-500 hover:text-red-400"
-                  >
-                    + Add
-                  </button>
-                )}
+                <button
+                  onClick={() => setShowAmmoPicker(true)}
+                  className="text-xs lg:text-sm text-red-500 hover:text-red-400"
+                >
+                  {editable ? "+ Add" : "View"}
+                </button>
               </div>
 
               {ammoEntries.length === 0 ? (
@@ -866,18 +915,18 @@ export function RangedCard({
           )}
 
           {/* Attachments */}
-          {(attachmentRefs.length > 0 || (editable && visibleCompatible.length > 0)) && (
+          {(attachmentRefs.length > 0 || visibleCompatible.length > 0) && (
             <div className="border-t border-slate-800 pt-2 space-y-1.5">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] lg:text-xs text-slate-500 uppercase tracking-wide">
                   Attachments
                 </span>
-                {editable && visibleCompatible.length > 0 && (
+                {(editable ? visibleCompatible.length > 0 : attachmentRefs.length > 0 || visibleCompatible.length > 0) && (
                   <button
                     onClick={() => setShowAttachPicker(true)}
                     className="text-xs lg:text-sm text-red-500 hover:text-red-400"
                   >
-                    + Add
+                    {editable ? "+ Add" : "View"}
                   </button>
                 )}
               </div>
@@ -901,6 +950,7 @@ export function RangedCard({
           {showAttachPicker && (
             <AttachmentPicker
               compatibleUpgrades={visibleCompatible}
+              editable={editable}
               onSelect={(id) => {
                 onAddAttachment(id);
                 setShowAttachPicker(false);
@@ -913,6 +963,7 @@ export function RangedCard({
             <AmmoPicker
               compatibleIds={weaponRef?.compatibleAmmoIds}
               existingNames={existingAmmoNames}
+              editable={editable}
               onSelect={handleAddAmmo}
               onClose={() => setShowAmmoPicker(false)}
             />

@@ -18,7 +18,7 @@ export function ForceFieldPicker({ editable = true, onSelect, onClose }: Props) 
 
   return (
     <PickerModal
-      title="Add Force Field"
+      title={editable ? "Add Force Field" : "View Force Fields"}
       placeholder="Search force fields…"
       query={query}
       onQueryChange={setQuery}

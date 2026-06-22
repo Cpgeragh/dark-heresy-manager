@@ -24,7 +24,7 @@ export function IntegratedWeaponPicker({
 
   return (
     <PickerModal
-      title="Add Integrated Weapon"
+      title={editable ? "Add Integrated Weapon" : "View Integrated Weapons"}
       placeholder="Search integrated weapons…"
       query={query}
       onQueryChange={setQuery}

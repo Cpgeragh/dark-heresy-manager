@@ -65,7 +65,7 @@ export function ArcheotechPickerModal({ editable = true, onSelect, onCustom, onC
 
   return (
     <PickerModal
-      title={pending ? "GM-Assigned Values" : "Add Archeotech"}
+      title={pending ? "GM-Assigned Values" : editable ? "Add Archeotech" : "View Archeotech"}
       placeholder="Search archeotech…"
       query={query}
       onQueryChange={setQuery}

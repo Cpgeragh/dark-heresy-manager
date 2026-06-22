@@ -41,6 +41,7 @@ export function TraitsTab({ talents, editable, onUpdateTalents }: TraitsTabProps
         entries={talents.traits}
         listData={TRAIT_LIST}
         editable={editable}
+        columns={2}
         onAdd={handleAddTrait}
         onRemove={handleRemoveTrait}
       />

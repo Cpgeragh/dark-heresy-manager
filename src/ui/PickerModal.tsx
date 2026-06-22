@@ -1,8 +1,51 @@
 // src/ui/PickerModal.tsx
 // Shared shell for reference-picker modals: backdrop, header, search input, scrollable list.
 
+import { createPortal } from "react-dom";
+import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { editableInputClass } from "./editableStyles";
+
+function getViewportState() {
+  return {
+    top: 0,
+    left: 0,
+    width: window.innerWidth,
+    height: window.innerHeight,
+  };
+}
+
+function useVisualViewport() {
+  const [viewport, setViewport] = useState(getViewportState);
+
+  useEffect(() => {
+    const visualViewport = window.visualViewport;
+    if (!visualViewport) {
+      const update = () => setViewport(getViewportState());
+      window.addEventListener("resize", update);
+      return () => window.removeEventListener("resize", update);
+    }
+
+    const update = () => {
+      setViewport({
+        top: visualViewport.offsetTop,
+        left: visualViewport.offsetLeft,
+        width: visualViewport.width,
+        height: visualViewport.height,
+      });
+    };
+
+    update();
+    visualViewport.addEventListener("resize", update);
+    visualViewport.addEventListener("scroll", update);
+    return () => {
+      visualViewport.removeEventListener("resize", update);
+      visualViewport.removeEventListener("scroll", update);
+    };
+  }, []);
+
+  return viewport;
+}
 
 interface Props {
   title: string;
@@ -34,7 +77,7 @@ interface Props {
    * Use for "+ Add custom …" buttons or specialisation confirm forms.
    */
   footer?: ReactNode;
-  /** Override the container max-height. Defaults to "max-h-[80vh]". */
+  /** Override the container max-height. Defaults to "max-h-[85vh]". */
   maxHeight?: string;
   /** The list rows. */
   children: ReactNode;
@@ -58,25 +101,44 @@ export function PickerModal({
   hideSearch = false,
   filterRow,
   footer,
-  maxHeight = "max-h-[80vh]",
+  maxHeight = "max-h-[85vh]",
   children,
 }: Props) {
-  return (
+  const viewport = useVisualViewport();
+  const useVisibleViewport =
+    viewport.width < window.innerWidth || viewport.height < window.innerHeight;
+  const modalMaxHeight = Math.max(0, viewport.height - 32);
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 p-4 sm:items-center"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/70 p-4"
+      style={
+        useVisibleViewport
+          ? {
+              top: viewport.top,
+              left: viewport.left,
+              right: "auto",
+              bottom: "auto",
+              width: viewport.width,
+              height: viewport.height,
+            }
+          : undefined
+      }
       onClick={onClose}
     >
       <div
-        className={`w-full min-h-0 max-w-lg lg:max-w-2xl bg-slate-900 border border-slate-700 rounded-xl shadow-2xl flex flex-col ${maxHeight}`}
+        className={`w-full min-h-0 max-w-lg lg:max-w-2xl bg-slate-900 border border-slate-700 rounded-xl shadow-2xl flex flex-col overflow-hidden ${maxHeight}`}
+        style={{ maxHeight: useVisibleViewport ? modalMaxHeight : undefined }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
-          <h3 className={`text-sm lg:text-base font-semibold ${titleClassName ?? "text-slate-200"}`}>{title}</h3>
+        <div className="grid grid-cols-[2rem_1fr_2rem] items-center px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
+          <span aria-hidden />
+          <h3 className={`text-center text-sm lg:text-base font-semibold ${titleClassName ?? "text-red-500"}`}>{title}</h3>
           <button
             onClick={onClose}
             aria-label="Close"
-            className="text-slate-400 hover:text-slate-200 text-lg lg:text-xl leading-none"
+            className="justify-self-end text-slate-400 hover:text-slate-200 text-lg lg:text-xl leading-none"
           >
             {closeLabel}
           </button>
@@ -90,6 +152,12 @@ export function PickerModal({
               placeholder={placeholder}
               value={query}
               onChange={(e) => onQueryChange(e.target.value)}
+              inputMode="search"
+              enterKeyHint="search"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="none"
+              spellCheck={false}
               className={editableInputClass(true)}
             />
           </div>
@@ -111,6 +179,7 @@ export function PickerModal({
         {/* Optional footer (e.g. "+ Add custom" button or specialisation form) */}
         {footer && <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700">{footer}</div>}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
