@@ -4,6 +4,7 @@
 import { useState, useEffect } from "react";
 import type { ArcheotechItem } from "../../../types/Character";
 import { ARCHEOTECH_REFERENCE } from "../../../data/reference/archeotechReference";
+import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import {
   uiTextBody,
@@ -66,9 +67,9 @@ export function ArcheotechWeaponCard({
         <button className="flex-1 min-w-0 text-left" onClick={() => setExpanded((e) => !e)}>
           <div className="flex items-center gap-2 flex-wrap">
             <p className="text-sm lg:text-base font-semibold text-slate-200">{item.name}</p>
-            <span className="text-[10px] lg:text-xs uppercase tracking-wide text-amber-400 border border-amber-700/50 rounded px-1.5 lg:px-2 py-0.5 font-medium shrink-0">
+            <Chip size="sm" className="border-amber-700/50 bg-amber-500/10 text-amber-400 uppercase tracking-wide shrink-0">
               Archeotech
-            </span>
+            </Chip>
           </div>
           {ref?.weaponClass && <p className={`text-xs lg:text-sm ${uiTextMuted}`}>{ref.weaponClass}</p>}
         </button>
@@ -173,7 +174,6 @@ export function ArcheotechWeaponCard({
             value={value}
             availability={availability}
             source={source}
-            valueAmber
             className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1"
           />
         </>

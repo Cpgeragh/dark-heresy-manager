@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { RangedWeaponRef, MeleeWeaponRef } from "../../../data/reference/weaponReference";
 import type { WeaponCraftsmanship } from "../../../types/Character";
 import { Button } from "../../../ui/Button";
+import { Chip } from "../../../ui/Chip";
 import { InfoModal } from "../../../components/InfoModal";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
@@ -149,12 +150,12 @@ export function IntegratedWeaponPicker({
             {ref.name}
           </span>
           <div className="flex flex-wrap gap-1.5 mt-1">
-            <span className="px-1.5 py-0.5 rounded border text-xs font-semibold border-violet-500/60 bg-violet-500/10 text-violet-300">
+            <Chip size="sm" className="border-violet-500/60 bg-violet-500/10 text-violet-300">
               Integrated
-            </span>
-            <span className="px-1.5 py-0.5 rounded border text-xs font-semibold border-sky-500/60 bg-sky-500/10 text-sky-300">
+            </Chip>
+            <Chip size="sm" className="border-sky-500/60 bg-sky-500/10 text-sky-300">
               Ranged
-            </span>
+            </Chip>
             <ItemMetaChips weight={ref.weight} value={ref.value} availability={ref.availability} source={ref.source} />
           </div>
           <div className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted} mt-0.5 flex-wrap font-code`}>
@@ -198,12 +199,12 @@ export function IntegratedWeaponPicker({
             {ref.name}
           </span>
           <div className="flex flex-wrap gap-1.5 mt-1">
-            <span className="px-1.5 py-0.5 rounded border text-xs font-semibold border-violet-500/60 bg-violet-500/10 text-violet-300">
+            <Chip size="sm" className="border-violet-500/60 bg-violet-500/10 text-violet-300">
               Integrated
-            </span>
-            <span className="px-1.5 py-0.5 rounded border text-xs font-semibold border-rose-500/60 bg-rose-500/10 text-rose-300">
+            </Chip>
+            <Chip size="sm" className="border-rose-500/60 bg-rose-500/10 text-rose-300">
               Melee
-            </span>
+            </Chip>
             <ItemMetaChips weight={ref.weight} value={ref.value} availability={ref.availability} source={ref.source} />
           </div>
           <div className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted} mt-0.5 flex-wrap font-code`}>

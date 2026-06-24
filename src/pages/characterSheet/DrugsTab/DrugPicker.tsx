@@ -47,10 +47,12 @@ function drugInfoContent(ref: DrugRef) {
 export function DrugPicker({
   editable = true,
   onSelect,
+  onCustom,
   onClose,
 }: {
   editable?: boolean;
   onSelect: (ref: DrugRef) => void;
+  onCustom?: () => void;
   onClose: () => void;
 }) {
   const [query, setQuery] = useState("");
@@ -66,6 +68,16 @@ export function DrugPicker({
       onQueryChange={setQuery}
       onClose={onClose}
       isEmpty={filtered.length === 0}
+      footer={
+        editable && onCustom ? (
+          <button
+            onClick={onCustom}
+            className="w-full text-sm lg:text-base text-red-500 hover:text-red-400 text-center py-1 lg:py-1.5"
+          >
+            + Add custom drug
+          </button>
+        ) : undefined
+      }
     >
       {filtered.map((ref) => {
         const hasInfo = !!(ref.duration || ref.effect || ref.sideEffect || ref.notes);
@@ -80,27 +92,26 @@ export function DrugPicker({
               editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"
             }`}
           >
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                <span className="text-sm lg:text-base font-medium text-slate-200 group-hover:text-white truncate">
-                  {ref.name}
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="text-sm lg:text-base font-medium text-slate-200 group-hover:text-white truncate">
+                {ref.name}
+              </span>
+              {hasInfo && (
+                <span
+                  className="inline-flex items-center -translate-y-[1.4px]"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <InfoModal title={ref.name} content={drugInfoContent(ref)} />
                 </span>
-                {hasInfo && (
-                  <span
-                    className="inline-flex items-center -translate-y-[1.4px]"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <InfoModal title={ref.name} content={drugInfoContent(ref)} />
-                  </span>
-                )}
-              </div>
+              )}
+            </div>
+            <div className="mt-1 flex flex-wrap items-center gap-1.5">
               <ItemMetaChips
                 bare
                 weight={ref.weight ?? "0 kg"}
                 value={ref.value}
                 availability={ref.availability}
                 source={ref.source}
-                valueAmber
               />
             </div>
             {ref.duration && (

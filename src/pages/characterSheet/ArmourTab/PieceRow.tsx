@@ -1,7 +1,8 @@
 // src/pages/characterSheet/ArmourTab/PieceRow.tsx
 
 import type { WornArmourPiece } from "../../../types/Character";
-import { uiSection, uiTextLabel, uiTextMuted } from "../../../ui/editableStyles";
+import { uiActionButtonCompact, uiSection, uiTextLabel, uiTextMuted } from "../../../ui/editableStyles";
+import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { InfoModal } from "../../../components/InfoModal";
 import { locationLabel } from "./armourHelpers";
@@ -64,9 +65,9 @@ export function PieceRow({ piece, editable, worn, onToggle, onRemove, onInfo }: 
         </div>
         <div className="mt-1 space-y-1">
           <div className="flex flex-wrap gap-1.5">
-            <span className="text-xs lg:text-sm rounded border border-slate-700 bg-slate-800/40 px-1.5 lg:px-2 py-0.5 text-slate-300">
+            <Chip className="border-slate-700 bg-slate-800/40 text-slate-300">
               {locationLabel(piece.locations)}
-            </span>
+            </Chip>
             <span className="text-xs lg:text-sm rounded border border-slate-700 bg-slate-800/40 px-1.5 lg:px-2 py-0.5 font-code text-slate-200">
               {apDesc}
             </span>
@@ -100,7 +101,7 @@ export function PieceRow({ piece, editable, worn, onToggle, onRemove, onInfo }: 
       {editable && (
         <button
           onClick={() => onRemove(piece.id)}
-          className="text-xs lg:text-sm text-red-400 hover:text-red-300 transition"
+          className={`${uiActionButtonCompact} shrink-0`}
         >
           Remove
         </button>

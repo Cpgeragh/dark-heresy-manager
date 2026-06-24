@@ -7,6 +7,7 @@ import { GRENADE_REFERENCE, type GrenadeRef } from "../../../data/reference/weap
 import {
   editableInputClass,
   editableTextareaClass,
+  uiActionButtonCompact,
   uiSection,
   uiSectionHeader,
   uiTextBody,
@@ -16,6 +17,7 @@ import {
   uiTextSubtle,
 } from "../../../ui/editableStyles";
 import { Button } from "../../../ui/Button";
+import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import { PickerModal } from "../../../ui/PickerModal";
@@ -146,7 +148,7 @@ export function GrenadePicker({
             {ref.name}
           </span>
           <div className="flex flex-wrap gap-1.5 mt-1">
-            <ItemMetaChips weight={ref.weight} value={ref.value} availability={ref.availability} source={ref.source} valueAmber />
+            <ItemMetaChips weight={ref.weight} value={ref.value} availability={ref.availability} source={ref.source} />
           </div>
           <div className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted} mt-0.5 flex-wrap font-code`}>
             <span>{ref.type ?? "Grenade"}</span>
@@ -195,7 +197,7 @@ export function CustomGrenadeForm({
   const [damagePlus, setDamagePlus] = useState("0");
   const [damageType, setDamageType] = useState<(typeof DAMAGE_TYPE_OPTIONS)[number]["value"]>("X");
   const [pen, setPen] = useState("0");
-  const [quantity, setQuantity] = useState("1");
+  const [quantity, setQuantity] = useState("");
   const [weight, setWeight] = useState("");
   const [value, setValue] = useState("");
   const [selectedQualities, setSelectedQualities] = useState<string[]>([]);
@@ -290,7 +292,7 @@ export function CustomGrenadeForm({
               <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
                 Quantity <span className="text-red-500">*</span>
               </label>
-              <input type="text" inputMode="numeric" value={quantity} onChange={(event) => setQuantity(sanitizePositiveIntegerInput(event.target.value))} className={editableInputClass(true) + " mt-0.5"} />
+              <input type="text" inputMode="numeric" value={quantity} onChange={(event) => setQuantity(sanitizePositiveIntegerInput(event.target.value))} placeholder="1+" className={editableInputClass(true) + " mt-0.5"} />
             </div>
           </div>
         </div>
@@ -435,9 +437,9 @@ export function GrenadeCard({
             <p className="text-sm lg:text-base font-semibold text-slate-400 truncate">{item.name}</p>
             <p className={`text-xs lg:text-sm ${uiTextSubtle}`}>Stowed · {item.quantity} remaining</p>
           </div>
-          <span className={`${uiTextLabel} border border-slate-700 rounded px-1.5 py-0.5 shrink-0`}>
+          <Chip size="sm" className="border-slate-600 bg-slate-800/40 text-slate-300 shrink-0">
             Stowed
-          </span>
+          </Chip>
         </div>
       </div>
     );
@@ -463,16 +465,15 @@ export function GrenadeCard({
       <div className="flex items-start justify-between gap-2">
         <button className="flex-1 min-w-0 text-left" onClick={() => setExpanded((e) => !e)}>
           <p className="text-sm lg:text-base font-semibold text-slate-200 truncate">{item.name}</p>
-          <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[0px] text-transparent">
-            <span className="text-[10px] lg:text-xs rounded border px-1.5 py-0.5 font-medium whitespace-nowrap border-amber-500/60 bg-amber-500/10 text-amber-300">
+          <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+            <Chip size="sm" className="border-amber-500/60 bg-amber-500/10 text-amber-300">
               Thrown
-            </span>
+            </Chip>
             {isEquipped && (
-              <span className={`text-[10px] lg:text-xs rounded border border-slate-600 bg-slate-800/70 px-1.5 py-0.5 font-medium whitespace-nowrap ${uiTextMuted}`}>
+              <Chip size="sm" className="border-emerald-500/60 bg-emerald-500/10 text-emerald-300">
                 {equippedCount} ready
-              </span>
+              </Chip>
             )}
-            {isEquipped ? `${equippedCount} ready · Range SBx3` : "Thrown · Range SBx3"}
           </div>
         </button>
         <div className="flex items-center gap-2 shrink-0">
@@ -503,7 +504,7 @@ export function GrenadeCard({
             </svg>
           </button>
           {editable && expanded && (
-            <button onClick={onRemove} className="text-xs lg:text-sm text-red-400 hover:text-red-300 shrink-0">
+            <button onClick={onRemove} className={`${uiActionButtonCompact} shrink-0`}>
               Remove
             </button>
           )}
@@ -594,7 +595,6 @@ export function GrenadeCard({
             value={item.value}
             availability={item.availability}
             source={item.source}
-            valueAmber
             className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1"
           />
         </>

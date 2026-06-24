@@ -1,5 +1,7 @@
 // src/ui/editableStyles.ts
 
+import { chipClassName } from "./Chip";
+
 /**
  * Shared UI styles and tokens.
  *
@@ -64,7 +66,16 @@ export const uiSectionHeader =
 /** Standard section card — bright border, semi-transparent background. */
 export const uiSection = "rounded-lg border border-slate-500 bg-slate-900/60 p-3 lg:p-4";
 
-/** Inner cell within a section (no padding — add your own). */
+/** Shared red outline action button styles. */
+const uiActionButtonBase =
+  "inline-flex items-center justify-center gap-1 rounded border border-red-500 text-red-500 font-semibold leading-none whitespace-nowrap hover:bg-red-500/10 transition";
+
+export const uiActionButton =
+  `${uiActionButtonBase} text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5`;
+
+export const uiActionButtonCompact =
+  `${uiActionButtonBase} text-xs lg:text-sm px-2 py-0.5`;
+
 export const uiCell = "rounded border border-slate-500 bg-slate-950/60";
 
 /** Label inside a compact stat cell (tight column grids: Quick View, bonuses, movement). */
@@ -98,14 +109,5 @@ export const uiTextLabel = "text-[10px] lg:text-xs text-sky-300/85 uppercase tra
 // ──────────────────────────────────────────────────────────────────────────────
 
 export function readOnlyBadgeClass() {
-  return [
-    "inline-block",
-    "px-2 py-0.5",
-    "rounded-full",
-    "text-xs",
-    "bg-slate-800",
-    "text-slate-400",
-    "border",
-    "border-slate-500",
-  ].join(" ");
+  return chipClassName({ className: "border-slate-600 bg-slate-800/40 text-slate-300" });
 }

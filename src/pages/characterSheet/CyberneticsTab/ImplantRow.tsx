@@ -2,7 +2,8 @@
 
 import type { CyberneticItem } from "../../../types/Character";
 import { CYBERNETICS_REFERENCE } from "../../../data/reference/cyberneticsReference";
-import { uiSection, uiTextBody, uiTextLabel, uiTextMuted } from "../../../ui/editableStyles";
+import { Chip } from "../../../ui/Chip";
+import { uiActionButtonCompact, uiSection, uiTextBody, uiTextLabel, uiTextMuted } from "../../../ui/editableStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { CRAFTSMANSHIP_STYLE, LOCATION_DISPLAY } from "./cyberneticsConstants";
 import { availableCraftsmanship, craftsmanshipDescription } from "./cyberneticsHelpers";
@@ -60,13 +61,12 @@ export function ImplantRow({ item, editable, onCycleQuality, onRemove }: Props) 
         </div>
         <div className="flex flex-wrap gap-1.5 mt-1">
           {item.bodyLocation && item.bodyLocation.length > 0 && (
-            <span className={`text-xs lg:text-sm rounded border border-slate-700 bg-slate-800/40 px-1.5 lg:px-2 py-0.5 ${uiTextMuted}`}>
+            <Chip className={`border-slate-700 bg-slate-800/40 ${uiTextMuted}`}>
               {item.bodyLocation.map((l) => LOCATION_DISPLAY[l]).join(" & ")}
-            </span>
+            </Chip>
           )}
           <ItemMetaChips
             bare
-            valueAmber
             value={item.value ?? ref?.value}
             availability={item.availability ?? ref?.availability}
             source={item.source ?? ref?.source}
@@ -74,7 +74,9 @@ export function ImplantRow({ item, editable, onCycleQuality, onRemove }: Props) 
         </div>
         <div className="flex items-center gap-1.5 mt-1">
           <span className={uiTextLabel}>Quality</span>
-          <button
+          <Chip
+            as="button"
+            type="button"
             onClick={() => canChangeQuality && onCycleQuality(item.id)}
             title={
               canChangeQuality
@@ -83,13 +85,13 @@ export function ImplantRow({ item, editable, onCycleQuality, onRemove }: Props) 
             }
             disabled={!canChangeQuality}
             className={[
-              "text-xs lg:text-sm px-1.5 lg:px-2 py-0.5 rounded border font-medium transition shrink-0",
               CRAFTSMANSHIP_STYLE[displayedCraftsmanship],
               canChangeQuality ? "cursor-pointer hover:opacity-80" : "cursor-default",
+              "transition shrink-0",
             ].join(" ")}
           >
             {displayedCraftsmanship}
-          </button>
+          </Chip>
           <span className="inline-flex items-center -translate-y-[1.4px]">
             <InfoModal
               title={`${displayedCraftsmanship} ${item.name}`}
@@ -109,7 +111,7 @@ export function ImplantRow({ item, editable, onCycleQuality, onRemove }: Props) 
       {editable && (
         <button
           onClick={() => onRemove(item.id)}
-          className="text-xs lg:text-sm text-red-400 hover:text-red-300 transition shrink-0"
+          className={`${uiActionButtonCompact} shrink-0`}
         >
           Remove
         </button>

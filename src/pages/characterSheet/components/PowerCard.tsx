@@ -1,10 +1,11 @@
 // src/pages/characterSheet/components/PowerCard.tsx
 
 import { InfoModal } from "../../../components/InfoModal";
+import { Chip } from "../../../ui/Chip";
 import { sourceColour } from "../../../ui/sourceStyles";
 import type { PsychicPower } from "../../../types/Character";
 import { psychicDisciplineColour } from "../psychicStyles";
-import { uiTextBody, uiTextPlaceholder, uiTextSubtle } from "../../../ui/editableStyles";
+import { uiActionButtonCompact, uiTextBody, uiTextPlaceholder, uiTextSubtle } from "../../../ui/editableStyles";
 
 interface PowerCardProps {
   power: PsychicPower;
@@ -23,18 +24,14 @@ function PowerStats({ power }: { power: PsychicPower }) {
   return (
     <div className="flex flex-wrap items-center gap-x-3 lg:gap-x-4 gap-y-0.5 text-xs lg:text-sm">
       {power.source && (
-        <span
-          className={`rounded border bg-slate-800/40 px-1.5 py-0.5 font-code ${sourceColour(power.source)}`}
-        >
+        <Chip className={`bg-slate-800/40 font-code ${sourceColour(power.source)}`}>
           {power.source}
-        </span>
+        </Chip>
       )}
       {power.discipline && (
-        <span
-          className={`rounded border px-1.5 py-0.5 font-medium ${psychicDisciplineColour(power.discipline)}`}
-        >
+        <Chip className={psychicDisciplineColour(power.discipline)}>
           {power.discipline}
-        </span>
+        </Chip>
       )}
       {power.threshold && (
         <span>
@@ -99,9 +96,9 @@ export function PowerCard({ power, editable, onRemove, onEdit }: PowerCardProps)
           <button
             onClick={() => onRemove(power.id)}
             aria-label={`Remove ${power.name || "power"}`}
-            className="text-slate-500 hover:text-red-400 transition text-xs lg:text-sm"
+            className={uiActionButtonCompact}
           >
-            ✕
+            Remove
           </button>
         )}
       </div>

@@ -3,7 +3,7 @@
 import type { DrugItem } from "../../../types/Character";
 import { InfoModal } from "../../../components/InfoModal";
 import { DRUGS_REFERENCE } from "../../../data/reference/drugsReference";
-import { uiSection, uiTextBody, uiTextLabel, uiTextMuted } from "../../../ui/editableStyles";
+import { uiActionButtonCompact, uiSection, uiTextBody, uiTextLabel, uiTextMuted } from "../../../ui/editableStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
 
@@ -85,7 +85,6 @@ export function DrugRow({
           value={item.value ?? ref?.value}
           availability={item.availability ?? ref?.availability}
           source={item.source}
-          valueAmber
           className="flex flex-wrap gap-1.5 mt-1"
         />
       </div>
@@ -101,7 +100,7 @@ export function DrugRow({
       {editable && (
         <button
           onClick={() => onRemove(item.id)}
-          className="text-xs lg:text-sm text-red-400 hover:text-red-300 transition shrink-0"
+          className={`${uiActionButtonCompact} shrink-0`}
         >
           Remove
         </button>

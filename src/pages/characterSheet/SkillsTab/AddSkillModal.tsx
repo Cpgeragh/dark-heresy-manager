@@ -5,6 +5,7 @@ import { CHAR_LABEL, type SkillWithComputed } from "./skillsConstants";
 import { charColour } from "../../../ui/sourceStyles";
 import { InfoModal } from "../../../components/InfoModal";
 import { SKILL_DESCRIPTIONS } from "../../../data/skillDescriptions";
+import { Chip } from "../../../ui/Chip";
 import { PickerModal } from "../../../ui/PickerModal";
 import { SkillRow } from "./SkillRow";
 
@@ -142,15 +143,13 @@ export function AddSkillModal({
               <span className="text-sm lg:text-base font-semibold text-slate-100 flex-1 min-w-0 truncate">
                 {item.category}
               </span>
-              <span
-                className={`px-1.5 lg:px-2 py-0.5 rounded border bg-slate-800 text-[10px] lg:text-xs font-code shrink-0 ${charColour(item.skills[0].characteristic)}`}
-              >
+              <Chip size="sm" className={`bg-slate-800 font-code shrink-0 ${charColour(item.skills[0].characteristic)}`}>
                 {CHAR_LABEL[item.skills[0].characteristic]}
-              </span>
+              </Chip>
               {item.skills[0].advanced && (
-                <span className="px-1.5 lg:px-2 py-0.5 rounded border text-[10px] lg:text-xs shrink-0 bg-purple-700/40 border-purple-500 text-purple-300">
+                <Chip size="sm" className="shrink-0 bg-purple-700/40 border-purple-500 text-purple-300">
                   Advanced
-                </span>
+                </Chip>
               )}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -229,22 +228,19 @@ function SkillPickerRow({
           </span>
         )}
       </div>
-      <span
-        className={`px-1.5 lg:px-2 py-0.5 rounded border bg-slate-800 text-[10px] lg:text-xs font-code shrink-0 ${charColour(
-          skill.characteristic
-        )}`}
-      >
+      <Chip size="sm" className={`bg-slate-800 font-code shrink-0 ${charColour(skill.characteristic)}`}>
         {CHAR_LABEL[skill.characteristic]}
-      </span>
-      <span
-        className={`px-1.5 lg:px-2 py-0.5 rounded border text-[10px] lg:text-xs shrink-0 ${
+      </Chip>
+      <Chip
+        size="sm"
+        className={`shrink-0 ${
           skill.advanced
             ? "bg-purple-700/40 border-purple-500 text-purple-300"
             : "bg-teal-900/40 border-teal-700/50 text-teal-300"
         }`}
       >
         {skill.advanced ? "Advanced" : "Basic"}
-      </span>
+      </Chip>
     </button>
   );
 }

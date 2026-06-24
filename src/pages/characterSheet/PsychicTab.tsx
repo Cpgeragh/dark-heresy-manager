@@ -11,6 +11,7 @@ import {
 } from "../../data/reference/psychicReference";
 import { editableInputClass, editableTextareaClass, uiSection } from "../../ui/editableStyles";
 import { Button } from "../../ui/Button";
+import { Chip } from "../../ui/Chip";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { PowerCard } from "./components/PowerCard";
 import { PickerModal } from "../../ui/PickerModal";
@@ -138,16 +139,12 @@ function PowerPicker({
             )}
           </div>
           <div className="flex items-center gap-2 text-xs lg:text-sm text-slate-500 mt-0.5 flex-wrap">
-            <span
-              className={`rounded border bg-slate-800/40 px-1.5 py-0.5 font-code ${sourceColour(ref.source)}`}
-            >
+            <Chip className={`bg-slate-800/40 font-code ${sourceColour(ref.source)}`}>
               {ref.source}
-            </span>
-            <span
-              className={`rounded border px-1.5 py-0.5 font-medium ${psychicDisciplineColour(ref.discipline)}`}
-            >
+            </Chip>
+            <Chip className={psychicDisciplineColour(ref.discipline)}>
               {ref.discipline}
-            </span>
+            </Chip>
             <span className="font-code">PT {ref.threshold}</span>
             <span>{ref.focusTime}</span>
             <span>{ref.range}</span>
@@ -297,11 +294,9 @@ function CustomPowerForm({
             Discipline <span className="text-red-400">*</span>
           </label>
           {target === "minor" ? (
-            <div
-              className={`flex w-fit rounded border px-2 lg:px-3 py-1 lg:py-1.5 text-xs lg:text-sm font-medium ${psychicDisciplineColour("Minor")}`}
-            >
+            <Chip className={`w-fit ${psychicDisciplineColour("Minor")}`}>
               Minor
-            </div>
+            </Chip>
           ) : (
             <div className="flex flex-wrap gap-1.5">
               {majorDisciplines.map((d) => (

@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import type { SkillAdvanceLevel } from "../../../types/Character";
 import { CHAR_LABEL, type SkillWithComputed } from "./skillsConstants";
 import { charColour } from "../../../ui/sourceStyles";
+import { Chip } from "../../../ui/Chip";
 import { SkillRow } from "./SkillRow";
 
 interface SkillGroupRowProps {
@@ -34,15 +35,13 @@ export function SkillGroupRow({
         <span className="text-sm lg:text-base font-semibold text-slate-100 flex-1 min-w-0 truncate">
           {category}
         </span>
-        <span
-          className={`px-1.5 lg:px-2 py-0.5 rounded border bg-slate-800 text-[10px] lg:text-xs font-code shrink-0 ${charColour(skills[0].characteristic)}`}
-        >
+        <Chip size="sm" className={`bg-slate-800 font-code shrink-0 ${charColour(skills[0].characteristic)}`}>
           {CHAR_LABEL[skills[0].characteristic]}
-        </span>
+        </Chip>
         {skills[0].advanced && (
-          <span className="px-1.5 lg:px-2 py-0.5 rounded border text-[10px] lg:text-xs shrink-0 bg-purple-700/40 border-purple-500 text-purple-300">
+          <Chip size="sm" className="shrink-0 bg-purple-700/40 border-purple-500 text-purple-300">
             Advanced
-          </span>
+          </Chip>
         )}
         <svg
           xmlns="http://www.w3.org/2000/svg"

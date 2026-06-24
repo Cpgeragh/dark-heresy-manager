@@ -2,13 +2,9 @@
 
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import type { ArmourLocationKey, WornArmourPiece } from "../../../types/Character";
+import type { WornArmourPiece } from "../../../types/Character";
 import { ARMOUR_REFERENCE } from "../../../data/reference/armourReference";
-import { ItemMetaChips } from "../../../ui/ItemMetaChips";
-import { formatWeightForDisplay } from "../../../ui/weightFormat";
-import { formatMoneyForDisplay } from "../../../ui/moneyFormat";
-import { uiTextBody, uiTextMuted, uiTextPlaceholder } from "../../../ui/editableStyles";
-import { LOCATION_LABELS, locationLabel } from "./armourHelpers";
+import { uiTextBody, uiTextPlaceholder } from "../../../ui/editableStyles";
 
 interface Props {
   piece: WornArmourPiece;
@@ -19,7 +15,6 @@ interface Props {
 export function PieceNotesModal({ piece, onClose }: Props) {
   const ref = ARMOUR_REFERENCE.find((r) => r.id === piece.referenceId);
   const notes = piece.notes || ref?.notes;
-  const displayedWeight = formatWeightForDisplay(piece.weight ?? ref?.weight);
 
   const dialogRef = useRef<HTMLDialogElement | null>(null);
   useEffect(() => {
@@ -46,34 +41,6 @@ export function PieceNotesModal({ piece, onClose }: Props) {
         </button>
       </div>
       <div className="px-4 lg:px-5 py-3 lg:py-4 space-y-3">
-        <div className={`flex flex-wrap gap-4 text-xs lg:text-sm ${uiTextMuted}`}>
-          <span>
-            AP: <span className="text-slate-200 font-code">{piece.ap}</span>
-          </span>
-          <span>
-            Covers: <span className="text-slate-200">{locationLabel(piece.locations)}</span>
-          </span>
-          <span>
-            ⚖ <span className="text-slate-200">{displayedWeight}</span>
-          </span>
-          {piece.value !== undefined && piece.value !== null && (
-            <span>
-              <span className="text-slate-200">{formatMoneyForDisplay(piece.value)}</span>
-            </span>
-          )}
-          <ItemMetaChips availability={piece.availability} bare />
-        </div>
-        {Object.keys(piece.apOverrides ?? {}).length > 0 && (
-          <div className={`text-xs lg:text-sm ${uiTextMuted}`}>
-            Overrides:{" "}
-            {Object.entries(piece.apOverrides!).map(([loc, ap]) => (
-              <span key={loc} className="mr-2">
-                {LOCATION_LABELS[loc as ArmourLocationKey]}:{" "}
-                <span className="text-slate-200">{ap}</span>
-              </span>
-            ))}
-          </div>
-        )}
         {notes ? (
           <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{notes}</p>
         ) : (

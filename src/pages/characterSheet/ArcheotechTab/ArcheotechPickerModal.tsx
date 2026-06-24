@@ -171,7 +171,6 @@ export function ArcheotechPickerModal({ editable = true, onSelect, onCustom, onC
                 value={isUnknownMeta(ref.value) ? undefined : ref.value}
                 availability={isUnknownMeta(ref.availability) ? undefined : ref.availability}
                 source={ref.source}
-                valueAmber
               />
               {needsGmInput(ref) && (
                 <span className="text-amber-400/70 italic">GM determines cost &amp; availability</span>

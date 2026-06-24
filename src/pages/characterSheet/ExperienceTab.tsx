@@ -4,6 +4,7 @@ import { useState, useCallback, useMemo } from "react";
 import type { ExperienceBlock, RankAdvances } from "../../types/Character";
 import {
   uiSection,
+  uiActionButtonCompact,
   readOnlyBadgeClass,
   uiTextMuted,
   uiTextPlaceholder,
@@ -201,7 +202,7 @@ export function ExperienceTab({
                         {isDM && (
                           <button
                             onClick={() => handleRemoveAdvance(rankBlock.rank, adv.id)}
-                            className="text-xs lg:text-sm text-red-400 hover:text-red-300"
+                            className={uiActionButtonCompact}
                           >
                             Remove
                           </button>
