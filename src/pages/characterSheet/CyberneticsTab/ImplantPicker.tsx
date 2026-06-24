@@ -10,6 +10,7 @@ import {
 import { PickerModal } from "../../../ui/PickerModal";
 import { Button } from "../../../ui/Button";
 import { InfoModal } from "../../../components/InfoModal";
+import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { editableInputClass, uiTextBody, uiTextLabel, uiTextMuted } from "../../../ui/editableStyles";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
@@ -276,9 +277,9 @@ export function ImplantPicker({ editable = true, onSelect, onClose }: Props) {
           {location && (
             <div className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted}`}>
               <span>Installing on:</span>
-              <span className="px-2 lg:px-3 py-0.5 rounded border border-slate-600 bg-slate-800 text-slate-300">
+              <Chip className="border-slate-600 bg-slate-800 text-slate-300">
                 {location.map((l) => LOCATION_DISPLAY[l]).join(" & ")}
-              </span>
+              </Chip>
             </div>
           )}
 
@@ -361,7 +362,6 @@ export function ImplantPicker({ editable = true, onSelect, onClose }: Props) {
                 value={isVariableMeta(ref.value) ? undefined : ref.value}
                 availability={isVariableMeta(ref.availability) ? undefined : ref.availability}
                 source={ref.source}
-                valueAmber
               />
               {(isVariableMeta(ref.value) || isVariableMeta(ref.availability)) && (
                 <span className="text-amber-400/70 italic">Cost assigned on add</span>

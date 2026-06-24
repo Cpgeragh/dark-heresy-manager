@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import type { WeaponTrainingBlock, WeaponTrainingTalentId } from "../../types/Character";
 import { WEAPON_TRAINING_GROUPS } from "../../data/weaponTrainingData";
+import { Chip } from "../../ui/Chip";
 import { uiTextPlaceholder } from "../../ui/editableStyles";
 
 interface WeaponTrainingTabProps {
@@ -111,9 +112,9 @@ export function WeaponTrainingTab({ weaponTraining, editable, onUpdate }: Weapon
 
         <div className="flex flex-wrap justify-center gap-1.5 max-w-xl mx-auto">
           {weaponTraining.exoticWeapons.map((weapon, index) => (
-            <span
+            <Chip
               key={index}
-              className="inline-flex items-center gap-1 px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm font-semibold border-orange-400 text-orange-400 hover:bg-orange-400/10"
+              className="border-orange-400 text-orange-400 hover:bg-orange-400/10"
             >
               {weapon}
               {editable && (
@@ -125,7 +126,7 @@ export function WeaponTrainingTab({ weaponTraining, editable, onUpdate }: Weapon
                   ✕
                 </button>
               )}
-            </span>
+            </Chip>
           ))}
         </div>
       </div>

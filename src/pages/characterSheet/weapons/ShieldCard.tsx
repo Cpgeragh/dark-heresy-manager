@@ -7,6 +7,7 @@ import { SHIELD_REFERENCE, type ShieldRef } from "../../../data/reference/weapon
 import {
   editableInputClass,
   editableTextareaClass,
+  uiActionButtonCompact,
   uiSection,
   uiSectionHeader,
   uiTextBody,
@@ -89,7 +90,7 @@ export function ShieldPicker({
             {ref.name}
           </span>
           <div className="flex flex-wrap gap-1.5 mt-1">
-            <ItemMetaChips weight={ref.weight} value={ref.value} availability={ref.availability} source={ref.source} valueAmber />
+            <ItemMetaChips weight={ref.weight} value={ref.value} availability={ref.availability} source={ref.source} />
           </div>
           <div className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted} mt-0.5 flex-wrap font-code`}>
             <span className="text-cyan-400">AP {ref.ap}</span>
@@ -380,7 +381,7 @@ export function ShieldCard({
             </svg>
           </button>
           {editable && expanded && (
-            <button onClick={onRemove} className="text-xs lg:text-sm text-red-400 hover:text-red-300 shrink-0">
+            <button onClick={onRemove} className={`${uiActionButtonCompact} shrink-0`}>
               Remove
             </button>
           )}
@@ -439,7 +440,6 @@ export function ShieldCard({
             value={item.value}
             availability={item.availability}
             source={item.source}
-            valueAmber
             className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1"
           />
         </>

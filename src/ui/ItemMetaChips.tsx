@@ -1,73 +1,76 @@
 // src/ui/ItemMetaChips.tsx
-// Shared chip row used on item cards throughout all tabs.
+// Shared helper for ordinary item metadata chips.
 
+import { Chip } from "./Chip";
+import { formatMoneyForDisplay } from "./moneyFormat";
 import { availabilityColour, sourceColour } from "./sourceStyles";
 import { formatWeightForDisplay } from "./weightFormat";
-import { formatMoneyForDisplay } from "./moneyFormat";
 
 interface Props {
   weight?: string | null;
   value?: string | null;
   availability?: string | null;
   source?: string | null;
+  purchaseAmount?: string | null;
   /** Override the wrapper className. Defaults to "flex flex-wrap gap-1.5". */
   className?: string;
   /**
    * When true, renders chips as a React Fragment with no wrapper div.
    * Use this when the chips sit inside an existing flex row alongside
-   * other chips (e.g. ArmourTab's PR chip, CyberneticsTab's location chip).
+   * other chips.
    */
   bare?: boolean;
-  /**
-   * Kept for compatibility with existing callers. Value chips represent money
-   * and render in amber by default across the app.
-   */
-  valueAmber?: boolean;
+  size?: "sm" | "md";
 }
 
 /**
- * Renders weight, value, availability, and source metadata chips.
- * Returns null when all props are falsy — callers need no guard.
+ * Renders normal item metadata chips. Returns null when all props are falsy.
  */
 export function ItemMetaChips({
   weight,
   value,
   availability,
   source,
+  purchaseAmount,
   className,
   bare,
+  size = "md",
 }: Props) {
-  if (!weight && !value && !availability && !source) return null;
+  if (!weight && !value && !purchaseAmount && !availability && !source) return null;
 
-  const displayedWeight = formatWeightForDisplay(weight);
+  const displayedWeight = weight ? formatWeightForDisplay(weight) : undefined;
   const displayedValue = value !== undefined && value !== null ? formatMoneyForDisplay(value) : undefined;
 
   const chips = (
     <>
       {displayedWeight && (
-        <span className="inline-flex items-center gap-1 text-xs lg:text-sm leading-none rounded border border-slate-700 bg-slate-800/40 px-1.5 lg:px-2 py-0.5 text-slate-400 whitespace-nowrap">
-          <span className="leading-none">⚖</span>
+        <Chip size={size} className="border-slate-700 bg-slate-900/40 text-slate-300">
+          <span className="leading-none">{"\u2696"}</span>
           <span className="leading-none">{displayedWeight}</span>
-        </span>
+        </Chip>
       )}
       {displayedValue && (
-        <span className="text-xs lg:text-sm rounded border border-slate-700 bg-slate-800/40 px-1.5 lg:px-2 py-0.5 text-amber-400/80 whitespace-nowrap">
+        <Chip size={size} className="border-slate-700 bg-slate-900/40 text-amber-400/80">
           {displayedValue}
-        </span>
+        </Chip>
+      )}
+      {purchaseAmount && (
+        <Chip size={size} className="border-slate-700 bg-slate-900/40 text-slate-300">
+          per {purchaseAmount}
+        </Chip>
       )}
       {availability && (
-        <span
-          className={`text-xs lg:text-sm rounded border border-slate-700 bg-slate-800/40 px-1.5 lg:px-2 py-0.5 whitespace-nowrap ${availabilityColour(availability)}`}
+        <Chip
+          size={size}
+          className={`border-slate-700 bg-slate-900/40 ${availabilityColour(availability)}`}
         >
           {availability}
-        </span>
+        </Chip>
       )}
       {source && (
-        <span
-          className={`text-xs lg:text-sm rounded border bg-slate-800/40 px-1.5 lg:px-2 py-0.5 font-code whitespace-nowrap ${sourceColour(source)}`}
-        >
+        <Chip size={size} className={`bg-slate-900/40 ${sourceColour(source)}`}>
           {source}
-        </span>
+        </Chip>
       )}
     </>
   );

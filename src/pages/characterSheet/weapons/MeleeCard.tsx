@@ -12,6 +12,7 @@ import { WEAPON_UPGRADE_REFERENCE } from "../../../data/reference/weaponUpgradeR
 import {
   editableInputClass,
   editableTextareaClass,
+  uiActionButtonCompact,
   uiSection,
   uiSectionHeader,
   uiTextBody,
@@ -622,7 +623,7 @@ export function MeleeCard({
             </button>
           )}
           {editable && (expanded || forceExpanded) && (
-            <button onClick={onRemove} className="text-xs lg:text-sm text-red-400 hover:text-red-300 shrink-0">
+            <button onClick={onRemove} className={`${uiActionButtonCompact} shrink-0`}>
               Remove
             </button>
           )}

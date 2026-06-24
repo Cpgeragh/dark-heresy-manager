@@ -76,13 +76,13 @@ export function GearPicker({ editable = true, onSelect, onCustom, onClose }: Pro
       closeLabel={pending ? "←" : "×"}
       hideSearch={!!pending}
       isEmpty={!pending && filtered.length === 0}
-      filterRow={
+      footer={
         !pending && editable ? (
           <button
             onClick={onCustom}
-            className="w-full text-xs lg:text-sm px-3 lg:px-4 py-1.5 lg:py-2 rounded border border-red-700/50 bg-red-700/10 text-red-500 hover:bg-red-700/20 transition text-center"
+            className="w-full text-sm lg:text-base text-red-500 hover:text-red-400 text-center py-1 lg:py-1.5"
           >
-            + Custom Item
+            + Add custom item
           </button>
         ) : undefined
       }
@@ -152,32 +152,30 @@ export function GearPicker({ editable = true, onSelect, onCustom, onClose }: Pro
           onClick={editable ? () => handleSelect(ref) : undefined}
           className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-1.5 flex-1 min-w-0">
-              <span className={`text-sm lg:text-base font-medium text-slate-200 truncate ${editable ? "group-hover:text-white" : ""}`}>
-                {ref.name}
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className={`text-sm lg:text-base font-medium text-slate-200 truncate ${editable ? "group-hover:text-white" : ""}`}>
+              {ref.name}
+            </span>
+            {ref.description && (
+              <span className="inline-flex items-center -translate-y-[1.4px]" onClick={(e) => e.stopPropagation()}>
+                <InfoModal
+                  title={ref.name}
+                  content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ref.description}</p>}
+                />
               </span>
-              {ref.description && (
-                <span className="inline-flex items-center -translate-y-[1.4px]" onClick={(e) => e.stopPropagation()}>
-                  <InfoModal
-                    title={ref.name}
-                    content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ref.description}</p>}
-                  />
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-2 shrink-0 text-xs lg:text-sm">
-              <ItemMetaChips
-                bare
-                weight={ref.weight}
-                value={isVariableMeta(ref.value) ? undefined : ref.value}
-                availability={isVariableMeta(ref.availability) ? undefined : ref.availability}
-                source={ref.source}
-              />
-              {isVariableMeta(ref.value) && (
-                <span className="text-amber-400/70 italic">Cost assigned on add</span>
-              )}
-            </div>
+            )}
+          </div>
+          <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs lg:text-sm">
+            <ItemMetaChips
+              bare
+              weight={ref.weight}
+              value={isVariableMeta(ref.value) ? undefined : ref.value}
+              availability={isVariableMeta(ref.availability) ? undefined : ref.availability}
+              source={ref.source}
+            />
+            {isVariableMeta(ref.value) && (
+              <span className="text-amber-400/70 italic">Cost assigned on add</span>
+            )}
           </div>
         </div>
         ))

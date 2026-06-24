@@ -2,7 +2,7 @@
 
 import type { GearItem } from "../../../types/Character";
 import { GEAR_REFERENCE } from "../../../data/reference/gearReference";
-import { uiSection } from "../../../ui/editableStyles";
+import { uiActionButtonCompact, uiSection } from "../../../ui/editableStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { InfoModal } from "../../../components/InfoModal";
 
@@ -50,7 +50,7 @@ export function ItemRow({ item, editable, onRemove }: Props) {
         {editable && (
           <button
             onClick={onRemove}
-            className="text-xs lg:text-sm text-red-400 hover:text-red-300 transition shrink-0"
+            className={`${uiActionButtonCompact} shrink-0`}
           >
             Remove
           </button>

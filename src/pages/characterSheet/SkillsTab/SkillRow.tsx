@@ -4,9 +4,11 @@ import { useState, useCallback } from "react";
 import type { SkillAdvanceLevel } from "../../../types/Character";
 import { CHAR_LABEL, getTotalColor, type SkillWithComputed } from "./skillsConstants";
 import { charColour } from "../../../ui/sourceStyles";
+import { Chip } from "../../../ui/Chip";
 import { InfoModal } from "../../../components/InfoModal";
 import { SKILL_DESCRIPTIONS } from "../../../data/skillDescriptions";
 import { Stepper } from "../../../components/Stepper";
+import { uiActionButtonCompact } from "../../../ui/editableStyles";
 
 interface SkillRowProps {
   skill: SkillWithComputed;
@@ -84,15 +86,15 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc, previewMode
             )}
           </div>
           <div className="flex items-center gap-1.5">
-            <span className={`px-1.5 py-0.5 rounded border bg-slate-800 text-[10px] font-code shrink-0 ${charColour(skill.characteristic)}`}>
+            <Chip size="sm" className={`bg-slate-800 font-code shrink-0 ${charColour(skill.characteristic)}`}>
               {CHAR_LABEL[skill.characteristic]}
-            </span>
-            <span className={`px-1.5 py-0.5 rounded border text-[10px] shrink-0 ${skill.advanced ? "bg-purple-700/40 border-purple-500 text-purple-300" : "bg-teal-900/40 border-teal-700/50 text-teal-300"}`}>
+            </Chip>
+            <Chip size="sm" className={`shrink-0 ${skill.advanced ? "bg-purple-700/40 border-purple-500 text-purple-300" : "bg-teal-900/40 border-teal-700/50 text-teal-300"}`}>
               {skill.advanced ? "Advanced" : "Basic"}
-            </span>
-            <span className={`px-1.5 py-0.5 rounded border text-[10px] font-semibold shrink-0 ${levelBadgeClass}`}>
+            </Chip>
+            <Chip size="sm" className={`shrink-0 ${levelBadgeClass}`}>
               {skill.level === "trained" ? "Trained" : skill.level === "untrained" ? "Untrained" : skill.level}
-            </span>
+            </Chip>
           </div>
         </div>
 
@@ -106,15 +108,15 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc, previewMode
               </span>
             )}
           </div>
-          <span className={`px-2 py-0.5 rounded border bg-slate-800 text-xs font-code shrink-0 ${charColour(skill.characteristic)}`}>
+          <Chip className={`bg-slate-800 font-code shrink-0 ${charColour(skill.characteristic)}`}>
             {CHAR_LABEL[skill.characteristic]}
-          </span>
-          <span className={`px-2 py-0.5 rounded border text-xs shrink-0 ${skill.advanced ? "bg-purple-700/40 border-purple-500 text-purple-300" : "bg-teal-900/40 border-teal-700/50 text-teal-300"}`}>
+          </Chip>
+          <Chip className={`shrink-0 ${skill.advanced ? "bg-purple-700/40 border-purple-500 text-purple-300" : "bg-teal-900/40 border-teal-700/50 text-teal-300"}`}>
             {skill.advanced ? "Advanced" : "Basic"}
-          </span>
-          <span className={`px-2 py-0.5 rounded border text-xs font-semibold shrink-0 ${levelBadgeClass}`}>
+          </Chip>
+          <Chip className={`shrink-0 ${levelBadgeClass}`}>
             {skill.level === "trained" ? "Trained" : skill.level === "untrained" ? "Untrained" : skill.level}
-          </span>
+          </Chip>
           <span className={`text-lg font-code font-semibold shrink-0 ${totalColor}`}>
             {skill.total ?? "--"}
           </span>
@@ -164,7 +166,7 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc, previewMode
               {!previewMode && skill.level !== "untrained" && (
                 <button
                   onClick={handleRemove}
-                  className="ml-auto text-xs lg:text-sm text-red-400 hover:text-red-300 transition focus:outline-none"
+                  className={`${uiActionButtonCompact} ml-auto focus:outline-none`}
                   aria-label={`Remove ${skill.name}`}
                 >
                   Remove

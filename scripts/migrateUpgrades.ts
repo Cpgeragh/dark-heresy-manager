@@ -14,19 +14,52 @@ const db = getFirestore();
 function migrateWeaponArray(weapons: any[]): { weapons: any[]; changed: boolean } {
   let changed = false;
   const migrated = weapons.map((weapon) => {
-    if (!Array.isArray(weapon.attachments)) return weapon;
-    changed = true;
-    const upgrades = (weapon.attachments as string[]).map((id: string) =>
-      id === "cr-melee-attachment" ? "cr-melee-upgrade" : id
-    );
-    const { attachments: _, ...rest } = weapon;
-    return { ...rest, upgrades };
+    let w = weapon;
+
+    if (Array.isArray(w.attachments)) {
+      changed = true;
+      const upgrades = (w.attachments as string[]).map((id: string) =>
+        id === "cr-melee-attachment" ? "cr-melee-upgrade" : id
+      );
+      const { attachments: _, ...rest } = w;
+      w = { ...rest, upgrades };
+    }
+
+    if ("rarity" in w) {
+      changed = true;
+      const { rarity, ...rest } = w;
+      w = { ...rest, availability: rarity };
+    }
+
+    return w;
   });
   return { weapons: migrated, changed };
 }
 
+function migrateItemArray(items: any[]): { items: any[]; changed: boolean } {
+  let changed = false;
+  const migrated = items.map((item) => {
+    if (!("rarity" in item)) return item;
+    changed = true;
+    const { rarity, ...rest } = item;
+    return { ...rest, availability: rarity };
+  });
+  return { items: migrated, changed };
+}
+
+const ITEM_ARRAYS = [
+  "shields",
+  "armour",
+  "cybernetics",
+  "gear",
+  "archeotech",
+  "drugs",
+  "consumables",
+  "grenades",
+] as const;
+
 async function runMigration() {
-  console.log("=== Upgrade Migration Start ===");
+  console.log("=== Migration Start ===");
 
   const campaignsSnap = await db.collection("campaigns").get();
   let totalUpdated = 0;
@@ -47,6 +80,14 @@ async function runMigration() {
 
       const melee = migrateWeaponArray(data.meleeWeapons ?? []);
       if (melee.changed) update.meleeWeapons = melee.weapons;
+
+      for (const key of ITEM_ARRAYS) {
+        if (data[key] !== undefined && !Array.isArray(data[key])) {
+          continue;
+        }
+        const result = migrateItemArray(data[key] ?? []);
+        if (result.changed) update[key] = result.items;
+      }
 
       if (Object.keys(update).length > 0) {
         await ch.ref.update(update);

@@ -3,7 +3,8 @@
 import { useState } from "react";
 import type { ArcheotechItem } from "../../../types/Character";
 import { ARCHEOTECH_REFERENCE } from "../../../data/reference/archeotechReference";
-import { uiSection, uiTextBody, uiTextLabel, uiTextMuted } from "../../../ui/editableStyles";
+import { uiActionButtonCompact, uiSection, uiTextBody, uiTextLabel, uiTextMuted } from "../../../ui/editableStyles";
+import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { InfoModal } from "../../../components/InfoModal";
 
@@ -36,9 +37,9 @@ export function ItemCard({ item, editable, onRemove }: Props) {
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-sm lg:text-base font-medium text-slate-200">{item.name}</span>
             {item.type && (
-              <span className={`text-xs lg:text-sm ${uiTextMuted} border border-slate-700 rounded px-1.5 lg:px-2 py-0.5`}>
+              <Chip className={`border-slate-700 bg-slate-800/40 ${uiTextMuted}`}>
                 {item.type}
-              </span>
+              </Chip>
             )}
             {hasBody && (
               <button
@@ -81,7 +82,6 @@ export function ItemCard({ item, editable, onRemove }: Props) {
             value={value}
             availability={availability}
             source={source}
-            valueAmber
             className="flex flex-wrap gap-1.5 mt-1.5"
           />
         </div>
@@ -89,7 +89,7 @@ export function ItemCard({ item, editable, onRemove }: Props) {
         {editable && (
           <button
             onClick={onRemove}
-            className="text-xs lg:text-sm text-red-400 hover:text-red-300 transition shrink-0 mt-0.5"
+            className={`${uiActionButtonCompact} shrink-0 mt-0.5`}
           >
             Remove
           </button>

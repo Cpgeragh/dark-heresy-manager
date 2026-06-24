@@ -10,12 +10,14 @@ import { TRAIT_LIST } from "../../data/traitData";
 import type { SkillSource } from "../../types/SkillSource";
 import {
   editableInputClass,
+  uiActionButtonCompact,
   uiSection,
   uiTextMuted,
   uiTextPlaceholder,
 } from "../../ui/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { Button } from "../../ui/Button";
+import { Chip } from "../../ui/Chip";
 import { InfoModal } from "../../components/InfoModal";
 import { TALENT_DESCRIPTIONS } from "../../data/talentDescriptions";
 import { TRAIT_DESCRIPTIONS } from "../../data/traitDescriptions";
@@ -230,12 +232,12 @@ export function TalentPickerModal({
               </div>
               <div className="flex gap-1 shrink-0">
                 {sources.map((src) => (
-                  <span
+                  <Chip
                     key={src}
-                    className={`text-xs lg:text-sm rounded border bg-slate-800/40 px-1.5 lg:px-2 py-0.5 font-code ${sourceColour(src)}`}
+                    className={`bg-slate-800/40 font-code ${sourceColour(src)}`}
                   >
                     {src}
-                  </span>
+                  </Chip>
                 ))}
               </div>
             </div>
@@ -272,12 +274,12 @@ export function EntryCard({ entry, editable, onRemove }: EntryCardProps) {
         <div className="flex items-center gap-2 flex-wrap">
           <span className="font-medium text-slate-100 break-words">{entry.name}</span>
           {refSources.map((src) => (
-            <span
+            <Chip
               key={src}
-              className={`text-xs lg:text-sm rounded border bg-slate-800/40 px-1.5 lg:px-2 py-0.5 font-code ${sourceColour(src)}`}
+              className={`bg-slate-800/40 font-code ${sourceColour(src)}`}
             >
               {src}
-            </span>
+            </Chip>
           ))}
           {description && (
             <span className="inline-flex items-center -translate-y-[1.4px]">
@@ -290,9 +292,9 @@ export function EntryCard({ entry, editable, onRemove }: EntryCardProps) {
         <button
           onClick={() => onRemove(entry.uid)}
           aria-label={`Remove ${entry.name}`}
-          className="shrink-0 mt-0.5 text-slate-500 hover:text-red-400 transition text-xs lg:text-sm"
+          className={`${uiActionButtonCompact} shrink-0 mt-0.5`}
         >
-          ✕
+          Remove
         </button>
       )}
     </div>

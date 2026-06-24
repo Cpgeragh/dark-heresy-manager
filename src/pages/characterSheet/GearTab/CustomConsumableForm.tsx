@@ -1,7 +1,7 @@
-// src/pages/characterSheet/GearTab/CustomItemForm.tsx
+// src/pages/characterSheet/GearTab/CustomConsumableForm.tsx
 
 import { useState } from "react";
-import type { GearItem } from "../../../types/Character";
+import type { ConsumableItem } from "../../../types/Character";
 import {
   editableInputClass,
   editableTextareaClass,
@@ -13,35 +13,40 @@ import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import { PickerModal } from "../../../ui/PickerModal";
 import { sourceColour } from "../../../ui/sourceStyles";
-import { CUSTOM_AVAILABILITY_OPTIONS } from "../weapons/weaponShared";
+import { CUSTOM_AVAILABILITY_OPTIONS, sanitizePositiveIntegerInput } from "../weapons/weaponShared";
 
 interface Props {
-  onAdd: (item: GearItem) => void;
+  onAdd: (item: ConsumableItem) => void;
   onCancel: () => void;
 }
 
-const CUSTOM_GEAR_ORIGIN_OPTIONS = ["Custom", "2nd Ed"] as const;
+const CUSTOM_CONSUMABLE_ORIGIN_OPTIONS = ["Custom", "2nd Ed"] as const;
 
-export function CustomItemForm({ onAdd, onCancel }: Props) {
+export function CustomConsumableForm({ onAdd, onCancel }: Props) {
   const [name, setName] = useState("");
-  const [origin, setOrigin] = useState<"" | (typeof CUSTOM_GEAR_ORIGIN_OPTIONS)[number]>("");
+  const [quantity, setQuantity] = useState("");
+  const [origin, setOrigin] = useState<"" | (typeof CUSTOM_CONSUMABLE_ORIGIN_OPTIONS)[number]>("");
   const [availability, setAvailability] = useState("");
   const [weight, setWeight] = useState("");
   const [value, setValue] = useState("");
   const [description, setDescription] = useState("");
+  const quantityNumber = Number(quantity);
+  const quantityValid = Number.isInteger(quantityNumber) && quantityNumber >= 1;
 
   const canAdd =
     Boolean(name.trim()) &&
+    quantityValid &&
     Boolean(origin) &&
     Boolean(availability) &&
     Boolean(weight.trim()) &&
     Boolean(value);
 
-  const addItem = () => {
+  const addConsumable = () => {
     if (!canAdd || !origin) return;
     onAdd({
       id: crypto.randomUUID(),
       name: name.trim(),
+      quantity: quantityNumber,
       weight: formatWeightInput(weight),
       value: formatMoneyInput(value),
       availability,
@@ -52,7 +57,7 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
 
   return (
     <PickerModal
-      title="Custom Item"
+      title="Custom Consumable"
       query=""
       onQueryChange={() => {}}
       onClose={onCancel}
@@ -67,7 +72,7 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
             </p>
           )}
           <div className="flex gap-2">
-            <Button className="flex-1" onClick={addItem} disabled={!canAdd}>
+            <Button className="flex-1" onClick={addConsumable} disabled={!canAdd}>
               Add
             </Button>
             <button
@@ -91,7 +96,20 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
               <input
                 value={name}
                 onChange={(event) => setName(event.target.value)}
-                placeholder="Item name..."
+                placeholder="Consumable name..."
+                className={editableInputClass(true) + " mt-0.5"}
+              />
+            </div>
+            <div>
+              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                Quantity <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={quantity}
+                onChange={(event) => setQuantity(sanitizePositiveIntegerInput(event.target.value))}
+                placeholder="1+"
                 className={editableInputClass(true) + " mt-0.5"}
               />
             </div>
@@ -101,7 +119,7 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
         <p className={uiSectionHeader}>Origin</p>
         <div className={uiSection + " space-y-3"}>
           <div className="grid grid-cols-2 gap-1.5">
-            {CUSTOM_GEAR_ORIGIN_OPTIONS.map((option) => (
+            {CUSTOM_CONSUMABLE_ORIGIN_OPTIONS.map((option) => (
               <button
                 key={option}
                 type="button"
@@ -176,7 +194,7 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
               <textarea
                 value={description}
                 onChange={(event) => setDescription(event.target.value)}
-                placeholder="Notes, properties, weight, craftsmanship..."
+                placeholder="Notes, dose, effects..."
                 rows={3}
                 className={editableTextareaClass(true) + " mt-0.5"}
               />

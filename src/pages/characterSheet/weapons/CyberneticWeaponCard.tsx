@@ -4,6 +4,7 @@
 import type { CyberneticWeapon } from "../../../data/reference/cyberneticsReference";
 import { InfoModal } from "../../../components/InfoModal";
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
+import { Chip } from "../../../ui/Chip";
 import { uiTextLabel, uiTextMuted, uiTextPlaceholder } from "../../../ui/editableStyles";
 import {
   StatChip,
@@ -32,9 +33,9 @@ export function CyberneticWeaponCard({
       <div>
         <div className="flex items-center gap-2">
           <p className="text-sm lg:text-base font-semibold text-slate-200">{weapon.name}</p>
-          <span className="text-[10px] lg:text-xs uppercase tracking-wide text-cyan-400 border border-cyan-700/50 rounded px-1.5 lg:px-2 py-0.5 font-medium">
+          <Chip size="sm" className="border-cyan-700/50 bg-cyan-500/10 text-cyan-400 uppercase tracking-wide">
             Cybernetic
-          </span>
+          </Chip>
         </div>
         <p className={`text-xs lg:text-sm ${uiTextMuted}`}>
           {cyberneticName}

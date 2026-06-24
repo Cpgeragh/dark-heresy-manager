@@ -5,6 +5,7 @@ import type { DrugItem } from "../../../types/Character";
 import type { DrugRef } from "../../../data/reference/drugsReference";
 import { DrugPicker } from "./DrugPicker";
 import { DrugRow } from "./DrugRow";
+import { CustomDrugForm } from "./CustomDrugForm";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { uiTextBody, uiTextPlaceholder } from "../../../ui/editableStyles";
 
@@ -16,6 +17,7 @@ interface DrugsTabProps {
 
 export function DrugsTab({ drugs, editable, onUpdate }: DrugsTabProps) {
   const [showPicker, setShowPicker] = useState(false);
+  const [showCustomForm, setShowCustomForm] = useState(false);
 
   const addDrug = useCallback(
     (ref: DrugRef) => {
@@ -46,6 +48,15 @@ export function DrugsTab({ drugs, editable, onUpdate }: DrugsTabProps) {
     [editable, drugs, onUpdate]
   );
 
+  const addCustomDrug = useCallback(
+    (item: DrugItem) => {
+      if (!editable) return;
+      onUpdate([...drugs, item]);
+      setShowCustomForm(false);
+    },
+    [editable, drugs, onUpdate]
+  );
+
   const removeDrug = useCallback(
     (id: string) => {
       if (!editable) return;
@@ -62,19 +73,21 @@ export function DrugsTab({ drugs, editable, onUpdate }: DrugsTabProps) {
   return (
     <div className="space-y-6">
       {/* Excessive Drug Use rule */}
-      <div className={`rounded-lg border border-violet-700/40 bg-violet-900/10 px-4 lg:px-5 py-3 lg:py-4 text-xs lg:text-sm ${uiTextBody} leading-relaxed`}>
-        <span className="font-semibold text-violet-400 uppercase tracking-wide mr-1">
-          Excessive Drug Use -
-        </span>
-        Using more than one dose of the same drug within a 24-hour period requires a Toughness Test
-        for each use after the first, with a cumulative -20 penalty. On a failure, the drug has no
-        effect and further doses do not affect the character for a full 24 hours.
+      <div className={`rounded-lg border border-violet-700/40 bg-violet-900/10 px-4 lg:px-5 py-3 lg:py-4 text-center text-xs lg:text-sm ${uiTextBody} leading-relaxed`}>
+        <p className="font-semibold text-violet-400 uppercase tracking-wide">
+          Excessive Drug Use
+        </p>
+        <p className="mt-1">
+          Using more than one dose of the same drug within a 24-hour period requires a Toughness Test
+          for each use after the first, with a cumulative -20 penalty. On a failure, the drug has no
+          effect and further doses do not affect the character for a full 24 hours.
+        </p>
       </div>
 
       {/* Carried drugs */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <SectionHeader>Carried ({drugs.length})</SectionHeader>
+          <SectionHeader>Carried</SectionHeader>
           <button
             onClick={() => setShowPicker(true)}
             className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
@@ -118,7 +131,18 @@ export function DrugsTab({ drugs, editable, onUpdate }: DrugsTabProps) {
         <DrugPicker
           editable={editable}
           onSelect={addDrug}
+          onCustom={() => {
+            setShowPicker(false);
+            setShowCustomForm(true);
+          }}
           onClose={() => setShowPicker(false)}
+        />
+      )}
+
+      {showCustomForm && (
+        <CustomDrugForm
+          onAdd={addCustomDrug}
+          onCancel={() => setShowCustomForm(false)}
         />
       )}
     </div>

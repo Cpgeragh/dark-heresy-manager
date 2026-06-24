@@ -4,19 +4,17 @@
 
 import { useMemo, useState } from "react";
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
-import { sourceColour } from "../../../ui/sourceStyles";
+import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { InfoModal } from "../../../components/InfoModal";
 import type { WeaponUpgradeRef } from "../../../data/reference/weaponUpgradeReference";
 import { PickerModal } from "../../../ui/PickerModal";
 import { formatWeightForDisplay } from "../../../ui/weightFormat";
-import { formatMoneyForDisplay } from "../../../ui/moneyFormat";
 import {
+  uiActionButtonCompact,
   uiTextBody,
   uiTextLabel,
-  uiTextMuted,
   uiTextPlaceholder,
-  uiTextSubtle,
 } from "../../../ui/editableStyles";
 
 export const WEAPON_QUALITY_OPTIONS = Object.keys(WEAPON_SPECIAL_RULES).sort((a, b) =>
@@ -146,14 +144,15 @@ export function WeaponQualitySelector({
       {selected.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {selected.map((quality) => (
-            <button
+            <Chip
               key={quality}
+              as="button"
               type="button"
               onClick={() => onChange(selected.filter((item) => item !== quality))}
-              className="rounded border border-slate-600 bg-slate-800/80 px-2 py-0.5 text-xs lg:text-sm text-slate-200 transition hover:border-red-500 hover:text-red-400"
+              className="border-slate-600 bg-slate-800/80 text-slate-200 transition hover:border-red-500 hover:text-red-400"
             >
               {quality} <span aria-hidden="true" className="text-slate-500">×</span>
-            </button>
+            </Chip>
           ))}
         </div>
       )}
@@ -233,9 +232,9 @@ export function EquipToggle({
 }) {
   if (!editable) {
     return equipped ? (
-      <span className="text-[10px] lg:text-xs text-green-400 border border-green-700/50 rounded px-1.5 lg:px-2 py-0.5 font-medium uppercase tracking-wide shrink-0">
+      <Chip size="sm" className="border-emerald-500/60 bg-emerald-500/10 text-emerald-300 uppercase tracking-wide shrink-0">
         {labels.equipped}
-      </span>
+      </Chip>
     ) : null;
   }
   return (
@@ -344,26 +343,20 @@ export function UpgradeCard({
           {editable && (
             <button
               onClick={() => onRemove(upgrade.id)}
-              className="text-slate-500 hover:text-red-400 leading-none text-sm lg:text-base"
+              className={`${uiActionButtonCompact} shrink-0`}
               title={`Remove ${upgrade.name}`}
             >
-              ×
+              Remove
             </button>
           )}
         </div>
       </div>
       <div className="flex flex-wrap gap-1 mt-1">
-        <span className={`text-[10px] lg:text-xs rounded border border-slate-700 bg-slate-900/40 px-1 lg:px-1.5 py-0.5 ${uiTextMuted}`}>
-          ⚖ {displayedWeightModifier}
-        </span>
-        <span className="text-[10px] lg:text-xs rounded border border-slate-700 bg-slate-900/40 px-1 lg:px-1.5 py-0.5 text-amber-400/80">
-          {formatMoneyForDisplay(upgrade.value)}
-        </span>
-        <span
-          className={`text-[10px] lg:text-xs rounded border bg-slate-900/40 px-1 lg:px-1.5 py-0.5 font-code ${sourceColour(upgrade.source)}`}
-        >
-          {upgrade.source}
-        </span>
+        <Chip size="sm" className="border-slate-700 bg-slate-900/40 text-slate-300">
+          <span className="leading-none">{"\u2696"}</span>
+          <span className="leading-none">{displayedWeightModifier}</span>
+        </Chip>
+        <ItemMetaChips value={upgrade.value} availability={upgrade.availability} source={upgrade.source} size="sm" bare />
       </div>
     </div>
   );
@@ -413,11 +406,11 @@ export function UpgradePicker({
               {upgrade.name}
             </span>
             <div className="flex items-center gap-1.5 text-xs lg:text-sm shrink-0">
-              <ItemMetaChips availability={upgrade.availability} bare />
-              <span className={uiTextSubtle}>·</span>
-              <span className="text-amber-400/80">{formatMoneyForDisplay(upgrade.value)}</span>
-              <span className={uiTextSubtle}>·</span>
-              <span className={uiTextMuted}>⚖ {formatWeightModifier(upgrade.weightModifier)}</span>
+              <Chip className="border-slate-700 bg-slate-900/40 text-slate-300">
+                <span className="leading-none">{"\u2696"}</span>
+                <span className="leading-none">{formatWeightModifier(upgrade.weightModifier)}</span>
+              </Chip>
+              <ItemMetaChips value={upgrade.value} availability={upgrade.availability} source={upgrade.source} bare />
             </div>
           </div>
           <p className={`text-xs lg:text-sm ${uiTextBody} leading-relaxed`}>{upgrade.description}</p>

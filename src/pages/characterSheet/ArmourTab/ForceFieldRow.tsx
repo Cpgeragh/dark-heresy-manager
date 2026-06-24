@@ -1,7 +1,8 @@
 // src/pages/characterSheet/ArmourTab/ForceFieldRow.tsx
 
 import type { WornArmourPiece } from "../../../types/Character";
-import { uiSection } from "../../../ui/editableStyles";
+import { uiActionButtonCompact, uiSection } from "../../../ui/editableStyles";
+import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 
 interface Props {
@@ -44,9 +45,9 @@ export function ForceFieldRow({ piece, editable, onToggle, onRemove, onInfo }: P
         </div>
         <div className="flex flex-wrap gap-1.5 mt-1">
           {piece.protectionRating !== undefined && (
-            <span className="text-xs lg:text-sm rounded border border-slate-700 bg-slate-800/40 px-1.5 lg:px-2 py-0.5 font-code text-slate-200">
+            <Chip className="border-slate-700 bg-slate-800/40 font-code text-slate-200">
               PR {piece.protectionRating}
-            </span>
+            </Chip>
           )}
           <ItemMetaChips
             bare
@@ -70,7 +71,7 @@ export function ForceFieldRow({ piece, editable, onToggle, onRemove, onInfo }: P
       {editable && (
         <button
           onClick={() => onRemove(piece.id)}
-          className="text-xs lg:text-sm text-red-400 hover:text-red-300 transition"
+          className={`${uiActionButtonCompact} shrink-0`}
         >
           Remove
         </button>

@@ -24,20 +24,21 @@ import { WEAPON_UPGRADE_REFERENCE } from "../../../data/reference/weaponUpgradeR
 import {
   editableInputClass,
   editableTextareaClass,
+  uiActionButtonCompact,
   uiSection,
   uiSectionHeader,
   uiTextBody,
   uiTextLabel,
   uiTextMuted,
   uiTextPlaceholder,
-  uiTextSubtle,
 } from "../../../ui/editableStyles";
 import { Button } from "../../../ui/Button";
+import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import { formatWeightForDisplay, formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
-import { formatMoneyForDisplay, formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
+import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import { sourceColour } from "../../../ui/sourceStyles";
 import { InfoModal } from "../../../components/InfoModal";
 import {
@@ -355,10 +356,10 @@ export function RangedPicker({
           </span>
           <div className="flex flex-wrap gap-1.5 mt-1">
             {(() => { const c = weaponClassChip(ref.class); return c ? (
-              <span className={`px-1.5 py-0.5 rounded border text-xs font-semibold ${c.active}`}>{c.label}</span>
+              <Chip size="sm" className={c.active}>{c.label}</Chip>
             ) : null; })()}
             {(() => { const f = ammoFamilyChip(ref.ammoType); return f ? (
-              <span className={`px-1.5 py-0.5 rounded border text-xs font-semibold ${f.className}`}>{f.label}</span>
+              <Chip size="sm" className={f.className}>{f.label}</Chip>
             ) : null; })()}
             <ItemMetaChips weight={ref.weight} value={ref.value} availability={ref.availability} source={ref.source} />
           </div>
@@ -880,7 +881,7 @@ function AmmoEntryRow({
   const visibleClipSizeLabel = ammoTracking === "clip" ? clipSizeLabel : undefined;
 
   return (
-    <div className="rounded bg-slate-800/60 px-2.5 lg:px-3 py-2 lg:py-2.5 space-y-1.5">
+    <div className="rounded border border-slate-500 bg-slate-800/60 px-2 lg:px-3 py-1.5 lg:py-2 space-y-1.5">
       {/* Name row */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 min-w-0">
@@ -927,9 +928,9 @@ function AmmoEntryRow({
         {editable && (
           <button
             onClick={onRemove}
-            className="text-xs lg:text-sm text-red-400 hover:text-red-300 shrink-0 leading-none"
+            className={`${uiActionButtonCompact} shrink-0`}
           >
-            ×
+            Remove
           </button>
         )}
       </div>
@@ -937,23 +938,16 @@ function AmmoEntryRow({
       {(ammoRef || visibleClipSizeLabel || weightKg !== undefined) && (
         <div className="flex flex-wrap items-center gap-1.5 text-[10px] lg:text-xs">
           {visibleClipSizeLabel && (
-            <span className={`rounded border border-slate-700 bg-slate-900/40 px-1.5 py-0.5 ${uiTextMuted}`}>
+            <Chip size="sm" className={`border-slate-700 bg-slate-900/40 ${uiTextMuted}`}>
               {visibleClipSizeLabel}
-            </span>
+            </Chip>
           )}
           {ammoRef && (
-            <>
-              <span className="rounded border border-slate-700 bg-slate-900/40 px-1.5 py-0.5 text-amber-400/80">
-                {formatMoneyForDisplay(ammoRef.cost)}
-              </span>
-              <span className={`rounded border border-slate-700 bg-slate-900/40 px-1.5 py-0.5 ${uiTextMuted}`}>
-                per {ammoRef.purchaseAmount}
-              </span>
-            </>
+            <ItemMetaChips value={ammoRef.cost} purchaseAmount={ammoRef.purchaseAmount} availability={ammoRef.availability} size="sm" bare />
           )}
-          <span className={`rounded border border-slate-700 bg-slate-900/40 px-1.5 py-0.5 ${uiTextMuted}`}>
+          <Chip size="sm" className={`border-slate-700 bg-slate-900/40 ${uiTextMuted}`}>
             ⚖ {formatWeightForDisplay(formatWeight(weightKg ?? 0))}
-          </span>
+          </Chip>
         </div>
       )}
 
@@ -1084,11 +1078,8 @@ function AmmoPicker({
             <span className="text-sm lg:text-base font-medium text-slate-200 group-hover:text-white">
               {formatAmmoName(ammo.name)}
             </span>
-            <div className="flex items-center gap-1.5 text-xs lg:text-sm shrink-0">
-              <span className={uiTextSubtle}>{ammo.availability}</span>
-              <span className={uiTextSubtle}>·</span>
-              <span className="text-amber-400/80">{formatMoneyForDisplay(ammo.cost)}</span>
-              <span className={uiTextSubtle}>/ {ammo.purchaseAmount}</span>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <ItemMetaChips availability={ammo.availability} value={ammo.cost} purchaseAmount={ammo.purchaseAmount} bare />
             </div>
           </div>
           {ammo.description && (
@@ -1283,17 +1274,12 @@ export function RangedCard({
           {(weapon.class || ammoFamily) && (
             <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
               {(() => { const c = weaponClassChip(weapon.class); return c ? (
-                <span className={`text-[10px] lg:text-xs rounded border px-1.5 py-0.5 font-medium whitespace-nowrap ${c.active}`}>{c.label}</span>
+                <Chip size="sm" className={c.active}>{c.label}</Chip>
               ) : null; })()}
               {ammoFamily && (
-                <span
-                  className={[
-                    "text-[10px] lg:text-xs rounded border px-1.5 py-0.5 font-medium whitespace-nowrap",
-                    ammoFamily.className,
-                  ].join(" ")}
-                >
+                <Chip size="sm" className={ammoFamily.className}>
                   {ammoFamily.label}
-                </span>
+                </Chip>
               )}
             </div>
           )}
@@ -1328,7 +1314,7 @@ export function RangedCard({
             </button>
           )}
           {editable && (expanded || forceExpanded) && (
-            <button onClick={onRemove} className="text-xs lg:text-sm text-red-400 hover:text-red-300 shrink-0">
+            <button onClick={onRemove} className={`${uiActionButtonCompact} shrink-0`}>
               Remove
             </button>
           )}
@@ -1455,9 +1441,9 @@ export function RangedCard({
                       className="rounded bg-amber-900/20 border border-amber-700/30 px-2.5 lg:px-3 py-2 lg:py-2.5 flex items-center justify-between gap-2"
                     >
                       <span className="text-xs lg:text-sm text-slate-200 truncate">{g.name}</span>
-                      <span className="text-[10px] lg:text-xs text-amber-400 border border-amber-700/50 rounded px-1.5 py-0.5">
+                      <Chip size="sm" className="border-amber-700/50 bg-amber-500/10 text-amber-400">
                         Archeotech
-                      </span>
+                      </Chip>
                     </div>
                   ))}
                 </div>

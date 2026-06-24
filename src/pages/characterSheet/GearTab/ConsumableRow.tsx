@@ -1,7 +1,7 @@
 // src/pages/characterSheet/GearTab/ConsumableRow.tsx
 
 import type { ConsumableItem } from "../../../types/Character";
-import { uiSection, uiTextBody, uiTextLabel } from "../../../ui/editableStyles";
+import { uiActionButtonCompact, uiSection, uiTextBody, uiTextLabel } from "../../../ui/editableStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import { InfoModal } from "../../../components/InfoModal";
@@ -55,7 +55,7 @@ export function ConsumableRow({ item, editable, onUpdateQty, onRemove }: Props) 
         {editable && (
           <button
             onClick={() => onRemove(item.id)}
-            className="text-xs lg:text-sm text-red-400 hover:text-red-300 transition shrink-0"
+            className={`${uiActionButtonCompact} shrink-0`}
           >
             Remove
           </button>
