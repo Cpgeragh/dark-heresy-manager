@@ -51,9 +51,11 @@ import { useCampaignCustomItems } from "../../hooks/useCampaignCustomItems";
 import {
   archiveCustomItem,
   createDraftCustomItem,
+  inferCustomItemStatus,
+  publishAndUpdateAllCopies,
   publishCustomItem,
+  removeAllCustomItemCopies,
   saveDraftCustomItem,
-  updateAllCustomItemCopies,
 } from "../../services/customItemService";
 import { useToast } from "../../components/Toast";
 
@@ -189,7 +191,7 @@ export function WeaponsTab({
   const touchStartX = useRef<number | null>(null);
   const toast = useToast();
 
-  const { items: campaignCustomWeaponItems } = useCampaignCustomItems({
+  const { items: campaignCustomWeaponItems, loading: weaponsLoading } = useCampaignCustomItems({
     campaignId,
     category: "weapon",
     mode: isDM ? "admin" : "picker",
@@ -209,7 +211,7 @@ export function WeaponsTab({
     () => campaignCustomWeapons.filter((item) => item.data.weaponKind === "grenade"),
     [campaignCustomWeapons]
   );
-  const { items: campaignCustomArmourItems } = useCampaignCustomItems({
+  const { items: campaignCustomArmourItems, loading: armoursLoading } = useCampaignCustomItems({
     campaignId,
     category: "armour",
     mode: isDM ? "admin" : "picker",
@@ -912,7 +914,8 @@ export function WeaponsTab({
           customItemId: libraryItem.id,
           actorUserId: userId,
         });
-        toast.success("Custom weapon archived.");
+        await removeAllCustomItemCopies({ campaignId, customItemId: libraryItem.id });
+        toast.success("Custom weapon archived and removed from all characters.");
       } catch (err) {
         console.error("Failed to archive custom weapon:", err);
         toast.error("Failed to archive custom weapon.");
@@ -928,11 +931,10 @@ export function WeaponsTab({
       if (!userId) return;
       setBusyLibraryAction({ itemId: libraryItem.id, action: "updateAll" });
       try {
-        const updatedCopies = await updateAllCustomItemCopies({
+        const updatedCopies = await publishAndUpdateAllCopies({
           campaignId,
           customItemId: libraryItem.id,
           actorUserId: userId,
-          versionId: libraryItem.publishedVersionId ?? libraryItem.latestVersionId,
         });
         toast.success(`Updated ${updatedCopies} weapon ${updatedCopies === 1 ? "copy" : "copies"}.`);
       } catch (err) {
@@ -977,7 +979,8 @@ export function WeaponsTab({
           customItemId: libraryItem.id,
           actorUserId: userId,
         });
-        toast.success("Custom shield archived.");
+        await removeAllCustomItemCopies({ campaignId, customItemId: libraryItem.id });
+        toast.success("Custom shield archived and removed from all characters.");
       } catch (err) {
         console.error("Failed to archive custom shield:", err);
         toast.error("Failed to archive custom shield.");
@@ -993,11 +996,10 @@ export function WeaponsTab({
       if (!userId) return;
       setBusyLibraryAction({ itemId: libraryItem.id, action: "updateAll" });
       try {
-        const updatedCopies = await updateAllCustomItemCopies({
+        const updatedCopies = await publishAndUpdateAllCopies({
           campaignId,
           customItemId: libraryItem.id,
           actorUserId: userId,
-          versionId: libraryItem.publishedVersionId ?? libraryItem.latestVersionId,
         });
         toast.success(`Updated ${updatedCopies} shield ${updatedCopies === 1 ? "copy" : "copies"}.`);
       } catch (err) {
@@ -1413,6 +1415,8 @@ export function WeaponsTab({
       userId,
     ]
   );
+
+  if (weaponsLoading || armoursLoading) return null;
 
   return (
     <div
@@ -2122,7 +2126,7 @@ function buildFallbackWeaponLibraryItem({
     id: weapon.customLibraryId ?? "",
     campaignId,
     category: "weapon",
-    status: "draft",
+    status: inferCustomItemStatus(weapon),
     name: weapon.name,
     creator,
     createdAt: new Date(),
@@ -2163,7 +2167,7 @@ function buildFallbackGrenadeLibraryItem({
     id: grenade.customLibraryId ?? "",
     campaignId,
     category: "weapon",
-    status: "draft",
+    status: inferCustomItemStatus(grenade),
     name: grenade.name,
     creator,
     createdAt: new Date(),
@@ -2204,7 +2208,7 @@ function buildFallbackShieldLibraryItem({
     id: shield.customLibraryId ?? "",
     campaignId,
     category: "armour",
-    status: "draft",
+    status: inferCustomItemStatus(shield),
     name: shield.name,
     creator,
     createdAt: new Date(),

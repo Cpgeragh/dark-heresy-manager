@@ -6,6 +6,7 @@ import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import { InfoModal } from "../../../components/InfoModal";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
+import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 
 interface Props {
   item: ConsumableItem;
@@ -86,44 +87,17 @@ export function ConsumableRow({
             source={item.source}
             className="flex flex-wrap gap-1.5 mt-1"
           />
-          {(canEditDefinition || isDM) && libraryItem && (
-            <div className="mt-2 flex flex-wrap gap-2">
-              {canEditDefinition && libraryItem.status !== "archived" && (
-                <button type="button" onClick={onEditDefinition} className={uiActionButtonCompact}>
-                  Edit Definition
-                </button>
-              )}
-              {isDM && libraryItem.status === "draft" && (
-                <button
-                  type="button"
-                  onClick={onPublish}
-                  disabled={busyAction === "publish"}
-                  className={`${uiActionButtonCompact} disabled:opacity-50`}
-                >
-                  {busyAction === "publish" ? "Publishing..." : "Publish"}
-                </button>
-              )}
-              {isDM && libraryItem.status !== "archived" && (
-                <button
-                  type="button"
-                  onClick={onArchive}
-                  disabled={busyAction === "archive"}
-                  className={`${uiActionButtonCompact} disabled:opacity-50`}
-                >
-                  {busyAction === "archive" ? "Archiving..." : "Archive"}
-                </button>
-              )}
-              {isDM && libraryItem.status === "published" && (
-                <button
-                  type="button"
-                  onClick={onUpdateAllCopies}
-                  disabled={busyAction === "updateAll"}
-                  className={`${uiActionButtonCompact} disabled:opacity-50`}
-                >
-                  {busyAction === "updateAll" ? "Updating..." : "Update All Copies"}
-                </button>
-              )}
-            </div>
+          {libraryItem && (
+            <CustomItemActionButtons
+              libraryItem={libraryItem}
+              isDM={isDM}
+              canEditDefinition={canEditDefinition}
+              busyAction={busyAction}
+              onEditDefinition={onEditDefinition}
+              onPublish={onPublish}
+              onArchive={onArchive}
+              onUpdateAllCopies={onUpdateAllCopies}
+            />
           )}
         </div>
 

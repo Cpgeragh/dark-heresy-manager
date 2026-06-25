@@ -1,7 +1,7 @@
 // tests/unit/customItemService.test.ts
 
 import { describe, expect, it } from "vitest";
-import { buildCharacterCopyUpdate } from "../../src/services/customItemService";
+import { buildCharacterCopyRemoval, buildCharacterCopyUpdate } from "../../src/services/customItemService";
 import type { Character } from "../../src/types/Character";
 import type {
   CustomArcheotechData,
@@ -84,6 +84,49 @@ function characterWithMeleeWeapons(meleeWeapons: Character["meleeWeapons"]): Cha
 function characterWithGrenades(grenades: Character["grenades"]): Character {
   return characterWithItems({ grenades });
 }
+
+describe("custom item copy removal", () => {
+  it("removes matching items from gear and leaves non-matching items untouched", () => {
+    const update = buildCharacterCopyRemoval(
+      characterWithItems({
+        gear: [
+          { id: "g1", name: "Auspex", customLibraryId: "lib-1" },
+          { id: "g2", name: "Lho Sticks" },
+        ],
+      }),
+      "lib-1"
+    );
+    expect(update?.removedCopies).toBe(1);
+    expect(update?.gear).toHaveLength(1);
+    expect(update?.gear?.[0]).toMatchObject({ id: "g2" });
+  });
+
+  it("removes across multiple arrays in one pass", () => {
+    const update = buildCharacterCopyRemoval(
+      characterWithItems({
+        gear: [{ id: "g1", name: "Auspex", customLibraryId: "lib-1" }],
+        consumables: [{ id: "c1", name: "Medkit", quantity: 2, customLibraryId: "lib-1" }],
+      }),
+      "lib-1"
+    );
+    expect(update?.removedCopies).toBe(2);
+    expect(update?.gear).toHaveLength(0);
+    expect(update?.consumables).toHaveLength(0);
+  });
+
+  it("returns null when no items match", () => {
+    const update = buildCharacterCopyRemoval(
+      characterWithItems({ gear: [{ id: "g1", name: "Lho Sticks" }] }),
+      "lib-1"
+    );
+    expect(update).toBeNull();
+  });
+
+  it("returns null when character has no relevant arrays", () => {
+    const update = buildCharacterCopyRemoval(characterWithItems({}), "lib-1");
+    expect(update).toBeNull();
+  });
+});
 
 describe("custom item copy updates", () => {
   it("updates linked consumable definition fields while preserving quantity", () => {

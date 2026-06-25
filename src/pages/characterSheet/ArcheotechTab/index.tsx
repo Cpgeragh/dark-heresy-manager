@@ -13,9 +13,11 @@ import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
 import {
   archiveCustomItem,
   createDraftCustomItem,
+  inferCustomItemStatus,
+  publishAndUpdateAllCopies,
   publishCustomItem,
+  removeAllCustomItemCopies,
   saveDraftCustomItem,
-  updateAllCustomItemCopies,
 } from "../../../services/customItemService";
 import { useToast } from "../../../components/Toast";
 
@@ -61,7 +63,7 @@ export function ArcheotechTab({
   } | null>(null);
   const toast = useToast();
 
-  const { items: campaignCustomArcheotechItems } = useCampaignCustomItems({
+  const { items: campaignCustomArcheotechItems, loading: archeotechLoading } = useCampaignCustomItems({
     campaignId,
     category: "archeotech",
     mode: isDM ? "admin" : "picker",
@@ -237,7 +239,8 @@ export function ArcheotechTab({
           customItemId: libraryItem.id,
           actorUserId: userId,
         });
-        toast.success("Custom archeotech archived.");
+        await removeAllCustomItemCopies({ campaignId, customItemId: libraryItem.id });
+        toast.success("Custom archeotech archived and removed from all characters.");
       } catch (err) {
         console.error("Failed to archive custom archeotech:", err);
         toast.error("Failed to archive custom archeotech.");
@@ -253,11 +256,10 @@ export function ArcheotechTab({
       if (!userId) return;
       setBusyLibraryAction({ itemId: libraryItem.id, action: "updateAll" });
       try {
-        const updatedCopies = await updateAllCustomItemCopies({
+        const updatedCopies = await publishAndUpdateAllCopies({
           campaignId,
           customItemId: libraryItem.id,
           actorUserId: userId,
-          versionId: libraryItem.publishedVersionId ?? libraryItem.latestVersionId,
         });
         toast.success(
           `Updated ${updatedCopies} archeotech ${updatedCopies === 1 ? "copy" : "copies"}.`
@@ -318,6 +320,8 @@ export function ArcheotechTab({
       />
     );
   };
+
+  if (archeotechLoading) return null;
 
   return (
     <div className="space-y-8">
@@ -445,7 +449,7 @@ function buildFallbackArcheotechLibraryItem({
     id: item.customLibraryId ?? "",
     campaignId,
     category: "archeotech",
-    status: "draft",
+    status: inferCustomItemStatus(item),
     name: item.name,
     creator,
     createdAt: new Date(),

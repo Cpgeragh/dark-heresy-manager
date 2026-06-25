@@ -163,7 +163,8 @@ service cloud.firestore {
             "latestVersionId",
             "latestVersionNumber",
             "updatedAt",
-            "updatedBy"
+            "updatedBy",
+            "status"
           ]);
         }
 
@@ -192,7 +193,8 @@ service cloud.firestore {
              (
                userOwnsCreator(resource.data) &&
                resource.data.status != "archived" &&
-               request.resource.data.status == resource.data.status &&
+               (request.resource.data.status == resource.data.status ||
+                 (resource.data.status == "published" && request.resource.data.status == "draft")) &&
                request.resource.data.creator == resource.data.creator &&
                request.resource.data.campaignId == resource.data.campaignId &&
                request.resource.data.category == resource.data.category &&

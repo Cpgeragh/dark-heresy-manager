@@ -224,6 +224,57 @@ describe("Firestore Rules: Campaign Custom Items", () => {
     await expect(dmDb.doc(customItemPath()).delete()).resolves.toBeUndefined();
   });
 
+  it("creator can transition a published item back to draft when saving an edit", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await createCampaign(env, campaignId, "dm-1");
+    await seedCustomItem(env, { status: "published", publishedVersionId: versionId, draftVersionId: null });
+
+    await expect(
+      dbAs(env, "player-1").doc(customItemPath()).update({
+        name: "Revised Auspex",
+        data: gearData("Revised Auspex"),
+        status: "draft",
+        draftVersionId: "version-2",
+        latestVersionId: "version-2",
+        latestVersionNumber: 2,
+        updatedAt: 2,
+        updatedBy: { userId: "player-1", characterId: "char-1", characterName: "Acolyte" },
+      })
+    ).resolves.toBeUndefined();
+  });
+
+  it("creator cannot transition draft to published", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await createCampaign(env, campaignId, "dm-1");
+    await seedCustomItem(env);
+
+    await expect(
+      dbAs(env, "player-1").doc(customItemPath()).update({
+        status: "published",
+        publishedVersionId: versionId,
+        draftVersionId: null,
+        updatedAt: 2,
+        updatedBy: { userId: "player-1", characterId: "char-1", characterName: "Acolyte" },
+      })
+    ).rejects.toThrow();
+  });
+
+  it("creator cannot transition to archived", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await createCampaign(env, campaignId, "dm-1");
+    await seedCustomItem(env, { status: "published", publishedVersionId: versionId, draftVersionId: null });
+
+    await expect(
+      dbAs(env, "player-1").doc(customItemPath()).update({
+        status: "archived",
+        archivedAt: 2,
+        archivedByUserId: "player-1",
+        updatedAt: 2,
+        updatedBy: { userId: "player-1", characterId: "char-1", characterName: "Acolyte" },
+      })
+    ).rejects.toThrow();
+  });
+
   it("non-DM creator may not archive or delete custom items", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, campaignId, "dm-1");
