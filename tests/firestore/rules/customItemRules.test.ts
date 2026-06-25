@@ -291,4 +291,69 @@ describe("Firestore Rules: Campaign Custom Items", () => {
     await expect(playerDb.doc(versionPath()).delete()).rejects.toThrow();
     await expect(playerDb.doc(customItemPath()).delete()).rejects.toThrow();
   });
+
+  it("DM can restore an archived item that was previously published", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await createCampaign(env, campaignId, "dm-1");
+    await seedCustomItem(env, {
+      status: "archived",
+      publishedVersionId: versionId,
+      archivedAt: 1,
+      archivedByUserId: "dm-1",
+    });
+
+    const dmDb = dbAs(env, "dm-1");
+    await expect(
+      dmDb.doc(customItemPath()).update({ status: "published", archivedAt: null, archivedByUserId: null })
+    ).resolves.not.toThrow();
+  });
+
+  it("non-DM cannot restore an archived item", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await createCampaign(env, campaignId, "dm-1");
+    await seedCustomItem(env, {
+      status: "archived",
+      archivedAt: 1,
+      archivedByUserId: "dm-1",
+    });
+
+    const playerDb = dbAs(env, "player-1");
+    await expect(
+      playerDb.doc(customItemPath()).update({ status: "draft", archivedAt: null, archivedByUserId: null })
+    ).rejects.toThrow();
+  });
+
+  it("DM can permanently delete an archived item", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await createCampaign(env, campaignId, "dm-1");
+    await seedCustomItem(env, {
+      status: "archived",
+      archivedAt: 1,
+      archivedByUserId: "dm-1",
+    });
+
+    const dmDb = dbAs(env, "dm-1");
+    await expect(dmDb.doc(customItemPath()).delete()).resolves.not.toThrow();
+  });
+
+  it("DM cannot permanently delete a draft item", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await createCampaign(env, campaignId, "dm-1");
+    await seedCustomItem(env);
+
+    const dmDb = dbAs(env, "dm-1");
+    await expect(dmDb.doc(customItemPath()).delete()).rejects.toThrow();
+  });
+
+  it("DM cannot permanently delete a published item", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await createCampaign(env, campaignId, "dm-1");
+    await seedCustomItem(env, {
+      status: "published",
+      publishedVersionId: versionId,
+    });
+
+    const dmDb = dbAs(env, "dm-1");
+    await expect(dmDb.doc(customItemPath()).delete()).rejects.toThrow();
+  });
 });

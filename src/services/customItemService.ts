@@ -255,6 +255,44 @@ export async function archiveCustomItem({
   });
 }
 
+export async function restoreCustomItem({
+  campaignId,
+  customItemId,
+  actorUserId,
+}: CustomItemActorArgs): Promise<void> {
+  const itemSnap = await getDoc(customItemDocRef(campaignId, customItemId));
+  if (!itemSnap.exists()) throw new Error("Custom item not found.");
+  const item = itemSnap.data() as CampaignCustomItem;
+  if (item.status !== "archived") throw new Error("Only archived items can be restored.");
+  await updateDoc(customItemDocRef(campaignId, customItemId), {
+    status: item.publishedVersionId ? "published" : "draft",
+    archivedAt: null,
+    archivedByUserId: null,
+    updatedAt: serverTimestamp(),
+    updatedBy: { userId: actorUserId },
+  });
+}
+
+export async function permanentlyDeleteCustomItem({
+  campaignId,
+  customItemId,
+}: {
+  campaignId: string;
+  customItemId: string;
+}): Promise<void> {
+  const itemRef = customItemDocRef(campaignId, customItemId);
+  const itemSnap = await getDoc(itemRef);
+  if (!itemSnap.exists()) throw new Error("Custom item not found.");
+  if ((itemSnap.data() as CampaignCustomItem).status !== "archived")
+    throw new Error("Only archived items can be permanently deleted.");
+
+  const versionsSnap = await getDocs(collection(itemRef, "versions"));
+  const batch = writeBatch(db);
+  versionsSnap.docs.forEach((d) => batch.delete(d.ref));
+  batch.delete(itemRef);
+  await batch.commit();
+}
+
 export async function publishAndUpdateAllCopies({
   campaignId,
   customItemId,
@@ -269,46 +307,6 @@ export async function publishAndUpdateAllCopies({
   return updateAllCustomItemCopies({ campaignId, customItemId, actorUserId, versionId });
 }
 
-export async function restoreCustomItem({
-  campaignId,
-  customItemId,
-  actorUserId,
-}: CustomItemActorArgs): Promise<void> {
-  const itemRef = customItemDocRef(campaignId, customItemId);
-  const itemSnap = await getDoc(itemRef);
-  if (!itemSnap.exists()) throw new Error("Custom item not found.");
-
-  const item = itemSnap.data() as CampaignCustomItem;
-  await updateDoc(itemRef, {
-    status: item.publishedVersionId ? "published" : "draft",
-    archivedAt: null,
-    archivedByUserId: null,
-    updatedAt: serverTimestamp(),
-    updatedBy: { userId: actorUserId },
-  });
-}
-
-export async function permanentlyDeleteCustomItem({
-  campaignId,
-  customItemId,
-}: Pick<CustomItemActorArgs, "campaignId" | "customItemId">): Promise<void> {
-  const versionsSnap = await getDocs(customItemVersionsCollectionRef(campaignId, customItemId));
-  let batch = writeBatch(db);
-  let ops = 0;
-
-  for (const versionDoc of versionsSnap.docs) {
-    batch.delete(versionDoc.ref);
-    ops += 1;
-    if (ops >= BATCH_WRITE_LIMIT) {
-      await batch.commit();
-      batch = writeBatch(db);
-      ops = 0;
-    }
-  }
-
-  batch.delete(customItemDocRef(campaignId, customItemId));
-  await batch.commit();
-}
 
 export async function updateAllCustomItemCopies({
   campaignId,

@@ -12,6 +12,7 @@ import { SessionForm } from "./CampaignOverview/SessionForm";
 import { SessionCard } from "./CampaignOverview/SessionCard";
 import { CharacterRow } from "./CampaignOverview/CharacterRow";
 import { DMInbox } from "./CampaignOverview/DMInbox";
+import { CustomItemLibraryAdmin } from "./CampaignOverview/CustomItemLibraryAdmin";
 import { applySessionXp } from "../services/sessionService";
 import { createNewCharacter, importCharacter } from "../services/characterService";
 import { validateCharacterName } from "../utils/validation";
@@ -181,6 +182,14 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
               dmUid={campaign?.dmId ?? ""}
               characters={characters}
             />
+          </div>
+        )}
+
+        {/* CUSTOM ITEM LIBRARY — DM only */}
+        {isDM && (
+          <div>
+            <SectionHeader className="mb-3">Custom Item Library</SectionHeader>
+            <CustomItemLibraryAdmin campaignId={campaignId} userId={effectiveUserId} />
           </div>
         )}
 
