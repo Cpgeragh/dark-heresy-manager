@@ -6,15 +6,32 @@ import { DRUGS_REFERENCE } from "../../../data/reference/drugsReference";
 import { uiActionButtonCompact, uiSection, uiTextBody, uiTextLabel, uiTextMuted } from "../../../ui/editableStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
+import type { CampaignCustomItem } from "../../../types/CustomItems";
 
 export function DrugRow({
   item,
   editable,
+  libraryItem,
+  isDM = false,
+  canEditDefinition = false,
+  busyAction = null,
+  onEditDefinition,
+  onPublish,
+  onArchive,
+  onUpdateAllCopies,
   onUpdateQty,
   onRemove,
 }: {
   item: DrugItem;
   editable: boolean;
+  libraryItem?: CampaignCustomItem<"drug">;
+  isDM?: boolean;
+  canEditDefinition?: boolean;
+  busyAction?: "publish" | "archive" | "updateAll" | null;
+  onEditDefinition?: () => void;
+  onPublish?: () => void;
+  onArchive?: () => void;
+  onUpdateAllCopies?: () => void;
   onUpdateQty: (id: string, qty: number) => void;
   onRemove: (id: string) => void;
 }) {
@@ -27,6 +44,20 @@ export function DrugRow({
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <p className="text-sm lg:text-base font-medium text-slate-200">{item.name}</p>
+          {libraryItem && (
+            <span
+              className={[
+                "shrink-0 rounded border px-1.5 py-0.5 text-[10px] uppercase tracking-wide",
+                libraryItem.status === "published"
+                  ? "border-emerald-400/40 bg-emerald-500/10 text-emerald-300"
+                  : libraryItem.status === "draft"
+                    ? "border-amber-400/40 bg-amber-500/10 text-amber-300"
+                    : "border-slate-500/50 bg-slate-800 text-slate-300",
+              ].join(" ")}
+            >
+              {libraryItem.status}
+            </span>
+          )}
           {hasInfo && (
             <span className="inline-flex items-center -translate-y-[1.4px]">
             <InfoModal
@@ -87,6 +118,45 @@ export function DrugRow({
           source={item.source}
           className="flex flex-wrap gap-1.5 mt-1"
         />
+        {(canEditDefinition || isDM) && libraryItem && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {canEditDefinition && libraryItem.status !== "archived" && (
+              <button type="button" onClick={onEditDefinition} className={uiActionButtonCompact}>
+                Edit Definition
+              </button>
+            )}
+            {isDM && libraryItem.status === "draft" && (
+              <button
+                type="button"
+                onClick={onPublish}
+                disabled={busyAction === "publish"}
+                className={`${uiActionButtonCompact} disabled:opacity-50`}
+              >
+                {busyAction === "publish" ? "Publishing..." : "Publish"}
+              </button>
+            )}
+            {isDM && libraryItem.status !== "archived" && (
+              <button
+                type="button"
+                onClick={onArchive}
+                disabled={busyAction === "archive"}
+                className={`${uiActionButtonCompact} disabled:opacity-50`}
+              >
+                {busyAction === "archive" ? "Archiving..." : "Archive"}
+              </button>
+            )}
+            {isDM && libraryItem.status === "published" && (
+              <button
+                type="button"
+                onClick={onUpdateAllCopies}
+                disabled={busyAction === "updateAll"}
+                className={`${uiActionButtonCompact} disabled:opacity-50`}
+              >
+                {busyAction === "updateAll" ? "Updating..." : "Update All Copies"}
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Quantity controls */}

@@ -86,6 +86,11 @@ export interface MovementBlock {
  * WEAPONS + ARMOUR
  */
 
+export interface CustomLibraryLinkFields {
+  customLibraryId?: string;
+  customLibraryVersionId?: string;
+}
+
 /**
  * A single ammo type carried for a ranged weapon.
  * A weapon can carry multiple types simultaneously (e.g. standard + specialist).
@@ -100,7 +105,7 @@ export interface WeaponAmmoEntry {
   loaded: boolean; // true = currently chambered
 }
 
-export interface RangedWeapon {
+export interface RangedWeapon extends CustomLibraryLinkFields {
   id: string;
   referenceId?: string; // set when created from RANGED_WEAPON_REFERENCE
   name: string;
@@ -128,7 +133,7 @@ export interface RangedWeapon {
   equipped?: boolean; // true = carried on body, shown expanded and pinned to top
 }
 
-export interface MeleeWeapon {
+export interface MeleeWeapon extends CustomLibraryLinkFields {
   id: string;
   referenceId?: string; // set when created from MELEE_WEAPON_REFERENCE
   name: string;
@@ -151,7 +156,7 @@ export interface MeleeWeapon {
 
 export type WeaponCraftsmanship = "Poor" | "Common" | "Good" | "Best";
 
-export interface ShieldItem {
+export interface ShieldItem extends CustomLibraryLinkFields {
   id: string;
   referenceId?: string; // set when created from SHIELD_REFERENCE
   name: string;
@@ -182,7 +187,7 @@ export type ArmourLocationKey = "head" | "body" | "rightArm" | "leftArm" | "righ
 
 export type ArmourCraftsmanship = "Poor" | "Common" | "Good" | "Best";
 
-export interface WornArmourPiece {
+export interface WornArmourPiece extends CustomLibraryLinkFields {
   id: string;
   referenceId?: string; // links back to ArmourRef.id
   name: string;
@@ -212,7 +217,7 @@ export interface WornArmourPiece {
  */
 export type CyberneticCraftsmanship = "Poor" | "Common" | "Good";
 
-export interface CyberneticItem {
+export interface CyberneticItem extends CustomLibraryLinkFields {
   id: string;
   referenceId?: string; // links back to CyberneticRef.id
   name: string;
@@ -228,7 +233,7 @@ export interface CyberneticItem {
 /**
  * GEAR
  */
-export interface GearItem {
+export interface GearItem extends CustomLibraryLinkFields {
   id: string;
   referenceId?: string; // links back to GearRef.id
   name: string;
@@ -242,7 +247,7 @@ export interface GearItem {
 /**
  * ARCHEOTECH
  */
-export interface ArcheotechItem {
+export interface ArcheotechItem extends CustomLibraryLinkFields {
   id: string;
   referenceId?: string; // links back to ArcheotechRef.id
   name: string;
@@ -261,7 +266,7 @@ export interface ArcheotechItem {
 /**
  * DRUGS
  */
-export interface DrugItem {
+export interface DrugItem extends CustomLibraryLinkFields {
   id: string;
   referenceId?: string; // links back to DrugRef.id
   name: string;
@@ -276,7 +281,7 @@ export interface DrugItem {
 /**
  * CONSUMABLES
  */
-export interface ConsumableItem {
+export interface ConsumableItem extends CustomLibraryLinkFields {
   id: string;
   referenceId?: string; // links back to ConsumableRef.id
   name: string;

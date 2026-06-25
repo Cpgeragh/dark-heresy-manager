@@ -127,6 +127,156 @@ service cloud.firestore {
            );
 
       // ============================
+      // CAMPAIGN CUSTOM ITEM LIBRARY
+      // ============================
+      match /customItems/{customItemId} {
+
+        function dmOwnsCampaign() {
+          let camp = get(/databases/$(database)/documents/campaigns/$(campaignId));
+          return camp != null && dmOwnsOrLinked(camp.data.dmId);
+        }
+
+        function hasCreator(data) {
+          return ("creator" in data) &&
+                 ("userId" in data.creator) &&
+                 data.creator.userId is string;
+        }
+
+        function userOwnsCreator(data) {
+          return hasCreator(data) && playerOwnsOrLinked(data.creator.userId);
+        }
+
+        function canReadCustomItem(data) {
+          return request.auth != null &&
+                 (
+                   data.status == "published" ||
+                   dmOwnsCampaign() ||
+                   userOwnsCreator(data)
+                 );
+        }
+
+        function creatorEditKeysOnly() {
+          return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            "name",
+            "data",
+            "draftVersionId",
+            "latestVersionId",
+            "latestVersionNumber",
+            "updatedAt",
+            "updatedBy"
+          ]);
+        }
+
+        allow read, list:
+          if canReadCustomItem(resource.data);
+
+        allow create:
+          if request.auth != null &&
+             request.resource.data.status == "draft" &&
+             request.resource.data.category in [
+               "gear",
+               "consumable",
+               "drug",
+               "cybernetic",
+               "weapon",
+               "armour",
+               "archeotech"
+             ] &&
+             userOwnsCreator(request.resource.data) &&
+             request.resource.data.publishedVersionId == null &&
+             request.resource.data.draftVersionId is string &&
+             request.resource.data.latestVersionId == request.resource.data.draftVersionId;
+
+        allow update:
+          if dmOwnsCampaign() ||
+             (
+               userOwnsCreator(resource.data) &&
+               resource.data.status != "archived" &&
+               request.resource.data.status == resource.data.status &&
+               request.resource.data.creator == resource.data.creator &&
+               request.resource.data.campaignId == resource.data.campaignId &&
+               request.resource.data.category == resource.data.category &&
+               request.resource.data.publishedVersionId == resource.data.publishedVersionId &&
+               creatorEditKeysOnly()
+             );
+
+        allow delete:
+          if dmOwnsCampaign();
+
+        match /versions/{versionId} {
+
+          function dmOwnsCampaign() {
+            let camp = get(/databases/$(database)/documents/campaigns/$(campaignId));
+            return camp != null && dmOwnsOrLinked(camp.data.dmId);
+          }
+
+          function parentItem() {
+            return get(/databases/$(database)/documents/campaigns/$(campaignId)/customItems/$(customItemId));
+          }
+
+          function parentItemAfter() {
+            return getAfter(/databases/$(database)/documents/campaigns/$(campaignId)/customItems/$(customItemId));
+          }
+
+          function parentHasCreator(parent) {
+            return parent.data.creator.userId is string;
+          }
+
+          function userOwnsParentCreator(parent) {
+            return parentHasCreator(parent) && playerOwnsOrLinked(parent.data.creator.userId);
+          }
+
+          function canReadParentVersion() {
+            let parent = parentItem();
+            return request.auth != null &&
+                   parent != null &&
+                   (
+                     parent.data.status == "published" ||
+                     dmOwnsCampaign() ||
+                     userOwnsParentCreator(parent)
+                   );
+          }
+
+          function canCreateDraftVersion() {
+            let parent = parentItemAfter();
+            return request.auth != null &&
+                   parent != null &&
+                   request.resource.data.status == "draft" &&
+                   request.resource.data.customItemId == customItemId &&
+                   request.resource.data.campaignId == campaignId &&
+                   request.resource.data.category == parent.data.category &&
+                   userOwnsParentCreator(parent);
+          }
+
+          function creatorVersionEditKeysOnly() {
+            return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+              "data",
+              "updatedAt",
+              "updatedBy"
+            ]);
+          }
+
+          allow read, list:
+            if canReadParentVersion();
+
+          allow create:
+            if dmOwnsCampaign() || canCreateDraftVersion();
+
+          allow update:
+            if dmOwnsCampaign() ||
+               (
+                 resource.data.status == "draft" &&
+                 request.resource.data.status == "draft" &&
+                 userOwnsParentCreator(parentItem()) &&
+                 creatorVersionEditKeysOnly()
+               );
+
+          allow delete:
+            if dmOwnsCampaign();
+        }
+      }
+
+      // ============================
       // CHARACTERS
       // ============================
       match /characters/{characterId} {

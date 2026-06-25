@@ -1,7 +1,11 @@
-// src/pages/characterSheet/GearTab/CustomItemForm.tsx
+// src/pages/characterSheet/CyberneticsTab/CustomImplantForm.tsx
 
 import { useState } from "react";
-import type { GearItem } from "../../../types/Character";
+import type {
+  ArmourLocationKey,
+  CyberneticCraftsmanship,
+  CyberneticItem,
+} from "../../../types/Character";
 import {
   editableInputClass,
   editableTextareaClass,
@@ -9,60 +13,96 @@ import {
   uiSectionHeader,
 } from "../../../ui/editableStyles";
 import { Button } from "../../../ui/Button";
-import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import { PickerModal } from "../../../ui/PickerModal";
 import { sourceColour } from "../../../ui/sourceStyles";
-import { CUSTOM_AVAILABILITY_OPTIONS } from "../weapons/weaponShared";
+import { CRAFTSMANSHIP_ORDER, CRAFTSMANSHIP_STYLE } from "./cyberneticsConstants";
 
 interface Props {
-  initialItem?: Partial<GearItem>;
+  initialItem?: Partial<CyberneticItem>;
   title?: string;
   submitLabel?: string;
-  onAdd: (item: GearItem) => void | Promise<void>;
+  includeLocation?: boolean;
+  onAdd: (item: CyberneticItem) => void | Promise<void>;
   onCancel: () => void;
 }
 
-const CUSTOM_GEAR_ORIGIN_OPTIONS = ["Custom", "2nd Ed"] as const;
+const CUSTOM_IMPLANT_ORIGIN_OPTIONS = ["Custom", "2nd Ed"] as const;
 
-export function CustomItemForm({
+const CUSTOM_IMPLANT_AVAILABILITY_OPTIONS = [
+  "Abundant",
+  "Plentiful",
+  "Common",
+  "Average",
+  "Uncommon",
+  "Scarce",
+  "Rare",
+  "Very Rare",
+  "Extremely Rare",
+  "Near Unique",
+  "Unique",
+  "Issued Only",
+  "Adeptus Mechanicus Only",
+] as const;
+
+const LOCATION_OPTIONS: Array<{ label: string; value?: ArmourLocationKey[] }> = [
+  { label: "Not specified" },
+  { label: "Head", value: ["head"] },
+  { label: "Body", value: ["body"] },
+  { label: "Left Arm", value: ["leftArm"] },
+  { label: "Right Arm", value: ["rightArm"] },
+  { label: "Both Arms", value: ["leftArm", "rightArm"] },
+  { label: "Left Leg", value: ["leftLeg"] },
+  { label: "Right Leg", value: ["rightLeg"] },
+  { label: "Both Legs", value: ["leftLeg", "rightLeg"] },
+];
+
+export function CustomImplantForm({
   initialItem,
-  title = "Custom Item",
+  title = "Custom Cybernetic",
   submitLabel = "Add",
+  includeLocation = true,
   onAdd,
   onCancel,
 }: Props) {
   const [name, setName] = useState(initialItem?.name ?? "");
-  const [origin, setOrigin] = useState<"" | (typeof CUSTOM_GEAR_ORIGIN_OPTIONS)[number]>(
+  const [craftsmanship, setCraftsmanship] = useState<CyberneticCraftsmanship | "">(
+    initialItem?.craftsmanship ?? ""
+  );
+  const [origin, setOrigin] = useState<"" | (typeof CUSTOM_IMPLANT_ORIGIN_OPTIONS)[number]>(
     initialItem?.source === "Custom" || initialItem?.source === "2nd Ed" ? initialItem.source : ""
   );
   const [availability, setAvailability] = useState(initialItem?.availability ?? "");
-  const [weight, setWeight] = useState(initialItem?.weight ?? "");
   const [value, setValue] = useState(initialItem?.value ?? "");
-  const [description, setDescription] = useState(initialItem?.description ?? "");
+  const [locationIndex, setLocationIndex] = useState(
+    String(findLocationOptionIndex(initialItem?.bodyLocation))
+  );
+  const [notes, setNotes] = useState(initialItem?.notes ?? "");
   const [saving, setSaving] = useState(false);
 
+  const selectedLocation = LOCATION_OPTIONS[Number(locationIndex)]?.value;
   const canAdd =
     Boolean(name.trim()) &&
+    Boolean(craftsmanship) &&
     Boolean(origin) &&
     Boolean(availability) &&
-    Boolean(weight.trim()) &&
     Boolean(value);
 
-  const addItem = async () => {
-    if (!canAdd || !origin) return;
+  const addImplant = async () => {
+    if (!canAdd || !craftsmanship || !origin) return;
     setSaving(true);
     try {
       await onAdd({
         id: initialItem?.id ?? crypto.randomUUID(),
         name: name.trim(),
-        weight: formatWeightInput(weight),
+        craftsmanship,
         value: formatMoneyInput(value),
         availability,
         source: origin,
-        description: description.trim() || undefined,
+        notes: notes.trim() || undefined,
         customLibraryId: initialItem?.customLibraryId,
         customLibraryVersionId: initialItem?.customLibraryVersionId,
+        ...(includeLocation && selectedLocation ? { bodyLocation: selectedLocation } : {}),
       });
     } finally {
       setSaving(false);
@@ -86,7 +126,7 @@ export function CustomItemForm({
             </p>
           )}
           <div className="flex gap-2">
-            <Button className="flex-1" onClick={addItem} disabled={!canAdd || saving}>
+            <Button className="flex-1" onClick={addImplant} disabled={!canAdd || saving}>
               {saving ? "Saving..." : submitLabel}
             </Button>
             <button
@@ -110,9 +150,31 @@ export function CustomItemForm({
               <input
                 value={name}
                 onChange={(event) => setName(event.target.value)}
-                placeholder="Item name..."
+                placeholder="Cybernetic name..."
                 className={editableInputClass(true) + " mt-0.5"}
               />
+            </div>
+            <div className="col-span-2">
+              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                Craftsmanship <span className="text-red-500">*</span>
+              </label>
+              <div className="mt-0.5 grid grid-cols-3 gap-1.5">
+                {CRAFTSMANSHIP_ORDER.map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => setCraftsmanship(option)}
+                    className={[
+                      "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
+                      craftsmanship === option
+                        ? `${CRAFTSMANSHIP_STYLE[option]} font-semibold`
+                        : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
+                    ].join(" ")}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -120,7 +182,7 @@ export function CustomItemForm({
         <p className={uiSectionHeader}>Origin</p>
         <div className={uiSection + " space-y-3"}>
           <div className="grid grid-cols-2 gap-1.5">
-            {CUSTOM_GEAR_ORIGIN_OPTIONS.map((option) => (
+            {CUSTOM_IMPLANT_ORIGIN_OPTIONS.map((option) => (
               <button
                 key={option}
                 type="button"
@@ -143,18 +205,6 @@ export function CustomItemForm({
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
-                Weight <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                inputMode="decimal"
-                value={weight}
-                onChange={(event) => setWeight(sanitizeWeightInput(event.target.value))}
-                className={editableInputClass(true) + " mt-0.5"}
-              />
-            </div>
-            <div>
-              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
                 Cost <span className="text-red-500">*</span>
               </label>
               <input
@@ -165,7 +215,7 @@ export function CustomItemForm({
                 className={editableInputClass(true) + " mt-0.5"}
               />
             </div>
-            <div className="col-span-2">
+            <div>
               <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
                 Availability <span className="text-red-500">*</span>
               </label>
@@ -175,13 +225,31 @@ export function CustomItemForm({
                 className={editableInputClass(true) + " mt-0.5"}
               >
                 <option value="">Choose availability</option>
-                {CUSTOM_AVAILABILITY_OPTIONS.map((option) => (
+                {CUSTOM_IMPLANT_AVAILABILITY_OPTIONS.map((option) => (
                   <option key={option} value={option}>
                     {option}
                   </option>
                 ))}
               </select>
             </div>
+            {includeLocation && (
+              <div className="col-span-2">
+                <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                  Installation
+                </label>
+                <select
+                  value={locationIndex}
+                  onChange={(event) => setLocationIndex(event.target.value)}
+                  className={editableInputClass(true) + " mt-0.5"}
+                >
+                  {LOCATION_OPTIONS.map((option, index) => (
+                    <option key={option.label} value={String(index)}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
         </div>
 
@@ -193,9 +261,9 @@ export function CustomItemForm({
                 Rules
               </label>
               <textarea
-                value={description}
-                onChange={(event) => setDescription(event.target.value)}
-                placeholder="Notes, properties, weight, craftsmanship..."
+                value={notes}
+                onChange={(event) => setNotes(event.target.value)}
+                placeholder="Implant rules, effects, drawbacks..."
                 rows={3}
                 className={editableTextareaClass(true) + " mt-0.5"}
               />
@@ -204,5 +272,16 @@ export function CustomItemForm({
         </div>
       </div>
     </PickerModal>
+  );
+}
+
+function findLocationOptionIndex(location?: ArmourLocationKey[]) {
+  if (!location?.length) return 0;
+  return Math.max(
+    0,
+    LOCATION_OPTIONS.findIndex((option) =>
+      option.value?.length === location.length &&
+      option.value.every((value, index) => value === location[index])
+    )
   );
 }

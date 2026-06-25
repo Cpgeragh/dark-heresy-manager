@@ -11,6 +11,8 @@ export const CRAFTSMANSHIP_STYLE: Record<CyberneticCraftsmanship, string> = {
 };
 
 export const LOCATION_DISPLAY: Partial<Record<ArmourLocationKey, string>> = {
+  head: "Head",
+  body: "Body",
   leftArm: "Left Arm",
   rightArm: "Right Arm",
   leftLeg: "Left Leg",
