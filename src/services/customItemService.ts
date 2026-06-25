@@ -147,28 +147,36 @@ export async function saveDraftCustomItem<TCategory extends CustomItemCategory>(
     if (item.status === "archived") throw new Error("Archived custom items cannot be edited.");
 
     const timestamp = serverTimestamp();
+    const isExistingDraft = !!item.draftVersionId;
     const draftVersionId = item.draftVersionId ?? doc(customItemVersionsCollectionRef(campaignId, customItemId)).id;
     const draftVersionRef = customItemVersionDocRef(campaignId, customItemId, draftVersionId);
-    const versionNumber = item.draftVersionId ? item.latestVersionNumber : item.latestVersionNumber + 1;
+    const versionNumber = isExistingDraft ? item.latestVersionNumber : item.latestVersionNumber + 1;
     const name = data.name.trim();
 
-    const version: CampaignCustomItemVersion<TCategory> = {
-      id: draftVersionId,
-      campaignId,
-      customItemId,
-      category: item.category,
-      versionNumber,
-      status: "draft",
-      data,
-      createdAt: item.draftVersionId ? item.createdAt : timestamp,
-      updatedAt: timestamp,
-      createdBy: item.draftVersionId ? item.createdBy : editor,
-      updatedBy: editor,
-      publishedAt: null,
-      publishedByUserId: null,
-    };
-
-    transaction.set(draftVersionRef, stripUndefined(version), { merge: true });
+    if (isExistingDraft) {
+      transaction.update(draftVersionRef, {
+        data: stripUndefined(data) as CampaignCustomItemVersion<TCategory>["data"],
+        updatedAt: timestamp,
+        updatedBy: editor,
+      });
+    } else {
+      const version: CampaignCustomItemVersion<TCategory> = {
+        id: draftVersionId,
+        campaignId,
+        customItemId,
+        category: item.category,
+        versionNumber,
+        status: "draft",
+        data,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+        createdBy: editor,
+        updatedBy: editor,
+        publishedAt: null,
+        publishedByUserId: null,
+      };
+      transaction.set(draftVersionRef, stripUndefined(version));
+    }
     transaction.update(itemRef, {
       name,
       data: stripUndefined(data),
