@@ -54,11 +54,11 @@ export function useCampaignCustomItems({
       mode === "admin"
         ? [category ? query(baseRef, where("category", "==", category)) : baseRef]
         : [
+            // Fetches all published items regardless of category; filtered client-side below.
+            // Fine at campaign scale (<100 items). If it grows, add where("category","==",category)
+            // here and a compound (status + category) index in firestore.indexes.json.
             query(baseRef, where("status", "==", "published")),
             ...(userId ? [query(baseRef, where("creator.userId", "==", userId))] : []),
-            ...(characterId
-              ? [query(baseRef, where("creator.characterId", "==", characterId))]
-              : []),
           ];
 
     const snapshotsByQuery = new Map<number, CampaignCustomItem[]>();
@@ -98,7 +98,7 @@ export function useCampaignCustomItems({
     return () => {
       unsubscribes.forEach((unsubscribe) => unsubscribe());
     };
-  }, [campaignId, category, mode, userId, characterId]);
+  }, [campaignId, category, mode, userId]);
 
   const visibleItems = useMemo(
     () =>
@@ -107,11 +107,10 @@ export function useCampaignCustomItems({
           item,
           mode,
           userId,
-          characterId,
           includeArchived,
         })
       ),
-    [items, mode, userId, characterId, includeArchived]
+    [items, mode, userId, includeArchived]
   );
 
   return { items: visibleItems, loading, error };
@@ -121,13 +120,11 @@ function isVisibleCustomItem({
   item,
   mode,
   userId,
-  characterId,
   includeArchived,
 }: {
   item: CampaignCustomItem;
   mode: CustomItemsSubscriptionMode;
   userId?: string | null;
-  characterId?: string | null;
   includeArchived: boolean;
 }) {
   if (!includeArchived && item.status === "archived") return false;
@@ -135,11 +132,7 @@ function isVisibleCustomItem({
   if (item.status === "published") return true;
   if (item.status !== "draft") return false;
 
-  const creator = item.creator;
-  return (
-    (!!userId && creator.userId === userId) ||
-    (!!characterId && creator.characterId === characterId)
-  );
+  return !!userId && item.creator.userId === userId;
 }
 
 function sortCustomItems(items: CampaignCustomItem[]) {

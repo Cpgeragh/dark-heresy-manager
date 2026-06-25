@@ -23,9 +23,11 @@ import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
 import {
   archiveCustomItem,
   createDraftCustomItem,
+  inferCustomItemStatus,
+  publishAndUpdateAllCopies,
   publishCustomItem,
+  removeAllCustomItemCopies,
   saveDraftCustomItem,
-  updateAllCustomItemCopies,
 } from "../../../services/customItemService";
 import { useToast } from "../../../components/Toast";
 
@@ -88,7 +90,7 @@ export function GearTab({
   const touchStartX = useRef<number | null>(null);
   const toast = useToast();
 
-  const { items: campaignCustomItems } = useCampaignCustomItems({
+  const { items: campaignCustomItems, loading: gearLoading } = useCampaignCustomItems({
     campaignId,
     category: "gear",
     mode: isDM ? "admin" : "picker",
@@ -106,7 +108,7 @@ export function GearTab({
     [campaignCustomGear]
   );
 
-  const { items: campaignCustomConsumableItems } = useCampaignCustomItems({
+  const { items: campaignCustomConsumableItems, loading: consumableLoading } = useCampaignCustomItems({
     campaignId,
     category: "consumable",
     mode: isDM ? "admin" : "picker",
@@ -430,12 +432,9 @@ export function GearTab({
       if (!userId) return;
       setBusyLibraryAction({ itemId: libraryItem.id, action: "archive" });
       try {
-        await archiveCustomItem({
-          campaignId,
-          customItemId: libraryItem.id,
-          actorUserId: userId,
-        });
-        toast.success("Custom gear archived.");
+        await archiveCustomItem({ campaignId, customItemId: libraryItem.id, actorUserId: userId });
+        await removeAllCustomItemCopies({ campaignId, customItemId: libraryItem.id });
+        toast.success("Custom gear archived and removed from all characters.");
       } catch (err) {
         console.error("Failed to archive custom gear:", err);
         toast.error("Failed to archive custom gear.");
@@ -451,11 +450,10 @@ export function GearTab({
       if (!userId) return;
       setBusyLibraryAction({ itemId: libraryItem.id, action: "updateAll" });
       try {
-        const updatedCopies = await updateAllCustomItemCopies({
+        const updatedCopies = await publishAndUpdateAllCopies({
           campaignId,
           customItemId: libraryItem.id,
           actorUserId: userId,
-          versionId: libraryItem.publishedVersionId ?? libraryItem.latestVersionId,
         });
         toast.success(`Updated ${updatedCopies} gear ${updatedCopies === 1 ? "copy" : "copies"}.`);
       } catch (err) {
@@ -495,12 +493,9 @@ export function GearTab({
       if (!userId) return;
       setBusyLibraryAction({ itemId: libraryItem.id, action: "archive" });
       try {
-        await archiveCustomItem({
-          campaignId,
-          customItemId: libraryItem.id,
-          actorUserId: userId,
-        });
-        toast.success("Custom consumable archived.");
+        await archiveCustomItem({ campaignId, customItemId: libraryItem.id, actorUserId: userId });
+        await removeAllCustomItemCopies({ campaignId, customItemId: libraryItem.id });
+        toast.success("Custom consumable archived and removed from all characters.");
       } catch (err) {
         console.error("Failed to archive custom consumable:", err);
         toast.error("Failed to archive custom consumable.");
@@ -516,11 +511,10 @@ export function GearTab({
       if (!userId) return;
       setBusyLibraryAction({ itemId: libraryItem.id, action: "updateAll" });
       try {
-        const updatedCopies = await updateAllCustomItemCopies({
+        const updatedCopies = await publishAndUpdateAllCopies({
           campaignId,
           customItemId: libraryItem.id,
           actorUserId: userId,
-          versionId: libraryItem.publishedVersionId ?? libraryItem.latestVersionId,
         });
         toast.success(
           `Updated ${updatedCopies} consumable ${updatedCopies === 1 ? "copy" : "copies"}.`
@@ -573,6 +567,8 @@ export function GearTab({
         ? `transition-all duration-150 ease-out motion-reduce:transition-none ${transitionClass}`
         : "hidden lg:block",
     ].join(" ");
+
+  if (gearLoading || consumableLoading) return null;
 
   return (
     <div className="space-y-6" onTouchStart={handleGearTouchStart} onTouchEnd={handleGearTouchEnd}>
@@ -643,7 +639,10 @@ export function GearTab({
               const canEditDefinition =
                 !!libraryItem &&
                 editable &&
-                (isDM || (!!userId && libraryItem.creator.userId === userId));
+                (
+                  (!!userId && libraryItem.creator.userId === userId) ||
+                  (isDM && (characterId === libraryItem.creator.characterId || userId === libraryItem.creator.userId))
+                );
               const rowBusyAction =
                 busyLibraryAction && libraryItem && busyLibraryAction.itemId === libraryItem.id
                   ? busyLibraryAction.action
@@ -655,7 +654,7 @@ export function GearTab({
                   item={item}
                   editable={editable}
                   libraryItem={libraryItem}
-                  isDM={isDM && editable}
+                  isDM={isDM && editable && !!libraryItem && (characterId === libraryItem.creator.characterId || userId === libraryItem.creator.userId)}
                   canEditDefinition={canEditDefinition}
                   busyAction={rowBusyAction}
                   onEditDefinition={() =>
@@ -707,7 +706,10 @@ export function GearTab({
               const canEditDefinition =
                 !!libraryItem &&
                 editable &&
-                (isDM || (!!userId && libraryItem.creator.userId === userId));
+                (
+                  (!!userId && libraryItem.creator.userId === userId) ||
+                  (isDM && (characterId === libraryItem.creator.characterId || userId === libraryItem.creator.userId))
+                );
               const rowBusyAction =
                 busyLibraryAction && libraryItem && busyLibraryAction.itemId === libraryItem.id
                   ? busyLibraryAction.action
@@ -719,7 +721,7 @@ export function GearTab({
                   item={item}
                   editable={editable}
                   libraryItem={libraryItem}
-                  isDM={isDM && editable}
+                  isDM={isDM && editable && !!libraryItem && (characterId === libraryItem.creator.characterId || userId === libraryItem.creator.userId)}
                   canEditDefinition={canEditDefinition}
                   busyAction={rowBusyAction}
                   onEditDefinition={() =>
@@ -741,7 +743,10 @@ export function GearTab({
       {showConsumablePicker && (
         <ConsumablePicker
           editable={editable}
-          customItems={campaignCustomConsumables.filter((item) => item.status !== "archived")}
+          customItems={campaignCustomConsumables.filter((item) =>
+            item.status !== "archived" &&
+            (item.status === "published" || item.creator.userId === userId || item.creator.characterId === characterId)
+          )}
           onSelect={addConsumableFromRef}
           onSelectCustomItem={addConsumableFromLibrary}
           onCustom={() => {
@@ -763,7 +768,10 @@ export function GearTab({
       {showGearPicker && (
         <GearPicker
           editable={editable}
-          customItems={campaignCustomGear.filter((item) => item.status !== "archived")}
+          customItems={campaignCustomGear.filter((item) =>
+            item.status !== "archived" &&
+            (item.status === "published" || item.creator.userId === userId || item.creator.characterId === characterId)
+          )}
           onSelect={addFromRef}
           onSelectCustomItem={addCustomFromLibrary}
           onCustom={() => {
@@ -900,7 +908,7 @@ function buildFallbackGearLibraryItem({
     id: item.customLibraryId ?? "",
     campaignId,
     category: "gear",
-    status: "draft",
+    status: inferCustomItemStatus(item),
     name: item.name,
     creator,
     createdAt: new Date(),
@@ -941,7 +949,7 @@ function buildFallbackConsumableLibraryItem({
     id: item.customLibraryId ?? "",
     campaignId,
     category: "consumable",
-    status: "draft",
+    status: inferCustomItemStatus(item),
     name: item.name,
     creator,
     createdAt: new Date(),

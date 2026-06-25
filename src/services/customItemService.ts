@@ -19,6 +19,7 @@ import type {
   CustomItemCategory,
   CustomItemCreator,
   CustomItemDataByCategory,
+  CustomItemStatus,
   CustomWeaponData,
 } from "../types/CustomItems";
 import { stripUndefined } from "../utils/stripUndefined";
@@ -183,7 +184,7 @@ export async function saveDraftCustomItem<TCategory extends CustomItemCategory>(
       draftVersionId,
       latestVersionId: draftVersionId,
       latestVersionNumber: versionNumber,
-      status: item.publishedVersionId ? item.status : "draft",
+      status: "draft",
       updatedAt: timestamp,
       updatedBy: editor,
     });
@@ -252,6 +253,20 @@ export async function archiveCustomItem({
     updatedAt: serverTimestamp(),
     updatedBy: { userId: actorUserId },
   });
+}
+
+export async function publishAndUpdateAllCopies({
+  campaignId,
+  customItemId,
+  actorUserId,
+}: CustomItemActorArgs): Promise<number> {
+  const itemSnap = await getDoc(customItemDocRef(campaignId, customItemId));
+  if (!itemSnap.exists()) throw new Error("Custom item not found.");
+  const item = itemSnap.data() as CampaignCustomItem;
+  const versionId = item.draftVersionId ?? item.publishedVersionId ?? item.latestVersionId;
+  if (!versionId) throw new Error("Custom item has no version to publish.");
+  await publishCustomItem({ campaignId, customItemId, actorUserId, versionId });
+  return updateAllCustomItemCopies({ campaignId, customItemId, actorUserId, versionId });
 }
 
 export async function restoreCustomItem({
@@ -425,6 +440,64 @@ function updateLinkedArray<TItem extends { customLibraryId?: string; customLibra
 
   if (updatedCopies === 0) return null;
   return { [field]: next, updatedCopies } as { updatedCopies: number } & Partial<Character>;
+}
+
+export async function removeAllCustomItemCopies({
+  campaignId,
+  customItemId,
+}: Pick<CustomItemActorArgs, "campaignId" | "customItemId">): Promise<number> {
+  const charactersSnap = await getDocs(collection(db, "campaigns", campaignId, "characters"));
+  let batch = writeBatch(db);
+  let ops = 0;
+  let removedCopies = 0;
+
+  for (const characterDoc of charactersSnap.docs) {
+    const character = { id: characterDoc.id, ...characterDoc.data() } as Character;
+    const update = buildCharacterCopyRemoval(character, customItemId);
+    if (!update) continue;
+    const { removedCopies: count, ...fields } = update;
+    batch.update(characterDoc.ref, fields);
+    ops += 1;
+    removedCopies += count;
+    if (ops >= BATCH_WRITE_LIMIT) {
+      await batch.commit();
+      batch = writeBatch(db);
+      ops = 0;
+    }
+  }
+
+  if (ops > 0) await batch.commit();
+  return removedCopies;
+}
+
+export function buildCharacterCopyRemoval(
+  character: Character,
+  customItemId: string
+): ({ removedCopies: number } & Partial<Character>) | null {
+  const fields = [
+    "gear", "consumables", "drugs", "cybernetics", "archeotech",
+    "rangedWeapons", "meleeWeapons", "grenades", "armour", "shields",
+  ] as const;
+
+  let removedCopies = 0;
+  const update: Record<string, unknown> = {};
+
+  for (const field of fields) {
+    const items = character[field] as Array<{ customLibraryId?: string }> | undefined;
+    if (!items?.length) continue;
+    const filtered = items.filter((item) => item.customLibraryId !== customItemId);
+    if (filtered.length < items.length) {
+      removedCopies += items.length - filtered.length;
+      update[field] = filtered;
+    }
+  }
+
+  if (removedCopies === 0) return null;
+  return { ...update, removedCopies } as { removedCopies: number } & Partial<Character>;
+}
+
+export function inferCustomItemStatus(item: { customLibraryVersionId?: string }): CustomItemStatus {
+  return item.customLibraryVersionId ? "published" : "draft";
 }
 
 function stripKindFields<TData extends object>(data: TData): object {

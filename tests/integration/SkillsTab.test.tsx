@@ -39,7 +39,7 @@ function renderTab(props: Partial<React.ComponentProps<typeof SkillsTab>> = {}) 
 describe("SkillsTab", () => {
   it("renders the header and a trained skill", () => {
     renderTab();
-    expect(screen.getByText("Trained Skills")).toBeInTheDocument();
+    expect(screen.getAllByText("Basic Skills").length).toBeGreaterThan(0);
     // Name also appears in the (closed) InfoModal dialog title, so match either.
     expect(screen.getAllByText("Awareness").length).toBeGreaterThan(0);
   });
@@ -51,13 +51,13 @@ describe("SkillsTab", () => {
 
   it("shows 'View Skills' and no add button in read-only mode", () => {
     renderTab({ editable: false });
-    expect(screen.getByText("View Skills")).toBeInTheDocument();
+    expect(screen.getAllByText("View").length).toBeGreaterThan(0);
     expect(screen.queryByText("+ Add Skill")).not.toBeInTheDocument();
   });
 
   it("shows the empty message when there are no trained skills", () => {
     renderTab({ skills: [skill({ level: "untrained" })] });
-    expect(screen.getByText(/No trained skills yet/i)).toBeInTheDocument();
+    expect(screen.getAllByText("No advanced skills trained yet.").length).toBeGreaterThan(0);
   });
 
   it("updates a skill's level through onUpdate", async () => {

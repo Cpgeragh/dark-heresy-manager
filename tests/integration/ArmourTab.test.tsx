@@ -3,7 +3,12 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
+vi.mock("../../src/hooks/useCampaignCustomItems", () => ({
+  useCampaignCustomItems: () => ({ items: [], loading: false, error: null }),
+}));
+
 import { ArmourTab } from "../../src/pages/characterSheet/ArmourTab";
+import { ToastProvider } from "../../src/components/Toast";
 import type { WornArmourPiece, CyberneticItem } from "../../src/types/Character";
 
 function piece(over: Partial<WornArmourPiece> = {}): WornArmourPiece {
@@ -13,14 +18,20 @@ function piece(over: Partial<WornArmourPiece> = {}): WornArmourPiece {
 function renderTab(props: Partial<React.ComponentProps<typeof ArmourTab>> = {}) {
   const onUpdate = vi.fn();
   render(
-    <ArmourTab
-      armour={[piece()]}
-      toughnessBonus={4}
-      editable={true}
-      onUpdate={onUpdate}
-      cybernetics={[] as CyberneticItem[]}
-      {...props}
-    />
+    <ToastProvider>
+      <ArmourTab
+        campaignId="test-campaign"
+        characterId="test-char"
+        userId="test-user"
+        isDM={false}
+        armour={[piece()]}
+        toughnessBonus={4}
+        editable={true}
+        onUpdate={onUpdate}
+        cybernetics={[] as CyberneticItem[]}
+        {...props}
+      />
+    </ToastProvider>
   );
   return { onUpdate };
 }

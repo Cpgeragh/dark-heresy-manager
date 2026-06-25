@@ -3,7 +3,12 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
+vi.mock("../../src/hooks/useCampaignCustomItems", () => ({
+  useCampaignCustomItems: () => ({ items: [], loading: false, error: null }),
+}));
+
 import { WeaponsTab } from "../../src/pages/characterSheet/WeaponsTab";
+import { ToastProvider } from "../../src/components/Toast";
 import type {
   RangedWeapon,
   MeleeWeapon,
@@ -17,22 +22,28 @@ const melee: MeleeWeapon = { id: "m1", name: "Chainsword", damage: "1d10+2", pen
 function renderTab(props: Partial<React.ComponentProps<typeof WeaponsTab>> = {}) {
   const noop = vi.fn();
   render(
-    <WeaponsTab
-      rangedWeapons={[ranged]}
-      meleeWeapons={[melee]}
-      grenades={[]}
-      editable={true}
-      strengthBonus={4}
-      onUpdateRanged={noop}
-      onUpdateMelee={noop}
-      onUpdateGrenades={noop}
-      shields={[]}
-      onUpdateShields={noop}
-      cybernetics={[] as CyberneticItem[]}
-      archeotech={[] as ArcheotechItem[]}
-      onUpdateArcheotech={noop}
-      {...props}
-    />
+    <ToastProvider>
+      <WeaponsTab
+        campaignId="test-campaign"
+        characterId="test-char"
+        userId="test-user"
+        isDM={false}
+        rangedWeapons={[ranged]}
+        meleeWeapons={[melee]}
+        grenades={[]}
+        editable={true}
+        strengthBonus={4}
+        onUpdateRanged={noop}
+        onUpdateMelee={noop}
+        onUpdateGrenades={noop}
+        shields={[]}
+        onUpdateShields={noop}
+        cybernetics={[] as CyberneticItem[]}
+        archeotech={[] as ArcheotechItem[]}
+        onUpdateArcheotech={noop}
+        {...props}
+      />
+    </ToastProvider>
   );
   return { noop };
 }

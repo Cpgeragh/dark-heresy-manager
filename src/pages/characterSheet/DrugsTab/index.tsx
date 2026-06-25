@@ -13,9 +13,11 @@ import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
 import {
   archiveCustomItem,
   createDraftCustomItem,
+  inferCustomItemStatus,
+  publishAndUpdateAllCopies,
   publishCustomItem,
+  removeAllCustomItemCopies,
   saveDraftCustomItem,
-  updateAllCustomItemCopies,
 } from "../../../services/customItemService";
 import { useToast } from "../../../components/Toast";
 
@@ -57,7 +59,7 @@ export function DrugsTab({
   } | null>(null);
   const toast = useToast();
 
-  const { items: campaignCustomDrugItems } = useCampaignCustomItems({
+  const { items: campaignCustomDrugItems, loading: drugsLoading } = useCampaignCustomItems({
     campaignId,
     category: "drug",
     mode: isDM ? "admin" : "picker",
@@ -241,7 +243,8 @@ export function DrugsTab({
           customItemId: libraryItem.id,
           actorUserId: userId,
         });
-        toast.success("Custom drug archived.");
+        await removeAllCustomItemCopies({ campaignId, customItemId: libraryItem.id });
+        toast.success("Custom drug archived and removed from all characters.");
       } catch (err) {
         console.error("Failed to archive custom drug:", err);
         toast.error("Failed to archive custom drug.");
@@ -257,11 +260,10 @@ export function DrugsTab({
       if (!userId) return;
       setBusyLibraryAction({ itemId: libraryItem.id, action: "updateAll" });
       try {
-        const updatedCopies = await updateAllCustomItemCopies({
+        const updatedCopies = await publishAndUpdateAllCopies({
           campaignId,
           customItemId: libraryItem.id,
           actorUserId: userId,
-          versionId: libraryItem.publishedVersionId ?? libraryItem.latestVersionId,
         });
         toast.success(`Updated ${updatedCopies} drug ${updatedCopies === 1 ? "copy" : "copies"}.`);
       } catch (err) {
@@ -321,6 +323,8 @@ export function DrugsTab({
       />
     );
   };
+
+  if (drugsLoading) return null;
 
   return (
     <div className="space-y-6">
@@ -459,7 +463,7 @@ function buildFallbackDrugLibraryItem({
     id: item.customLibraryId ?? "",
     campaignId,
     category: "drug",
-    status: "draft",
+    status: inferCustomItemStatus(item),
     name: item.name,
     creator,
     createdAt: new Date(),

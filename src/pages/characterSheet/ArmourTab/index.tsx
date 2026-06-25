@@ -22,9 +22,11 @@ import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
 import {
   archiveCustomItem,
   createDraftCustomItem,
+  inferCustomItemStatus,
+  publishAndUpdateAllCopies,
   publishCustomItem,
+  removeAllCustomItemCopies,
   saveDraftCustomItem,
-  updateAllCustomItemCopies,
 } from "../../../services/customItemService";
 import { useToast } from "../../../components/Toast";
 
@@ -157,7 +159,7 @@ export function ArmourTab({
   } | null>(null);
   const toast = useToast();
 
-  const { items: campaignCustomArmourItems } = useCampaignCustomItems({
+  const { items: campaignCustomArmourItems, loading: armourLoading } = useCampaignCustomItems({
     campaignId,
     category: "armour",
     mode: isDM ? "admin" : "picker",
@@ -379,7 +381,8 @@ export function ArmourTab({
           customItemId: libraryItem.id,
           actorUserId: userId,
         });
-        toast.success("Custom armour archived.");
+        await removeAllCustomItemCopies({ campaignId, customItemId: libraryItem.id });
+        toast.success("Custom armour archived and removed from all characters.");
       } catch (err) {
         console.error("Failed to archive custom armour:", err);
         toast.error("Failed to archive custom armour.");
@@ -395,11 +398,10 @@ export function ArmourTab({
       if (!userId) return;
       setBusyLibraryAction({ itemId: libraryItem.id, action: "updateAll" });
       try {
-        const updatedCopies = await updateAllCustomItemCopies({
+        const updatedCopies = await publishAndUpdateAllCopies({
           campaignId,
           customItemId: libraryItem.id,
           actorUserId: userId,
-          versionId: libraryItem.publishedVersionId ?? libraryItem.latestVersionId,
         });
         toast.success(`Updated ${updatedCopies} armour ${updatedCopies === 1 ? "copy" : "copies"}.`);
       } catch (err) {
@@ -523,6 +525,8 @@ export function ArmourTab({
       updateAllArmourCopies,
     ]
   );
+
+  if (armourLoading) return null;
 
   return (
     <div className="space-y-6">
@@ -759,7 +763,7 @@ function buildFallbackArmourLibraryItem({
     id: piece.customLibraryId ?? "",
     campaignId,
     category: "armour",
-    status: "draft",
+    status: inferCustomItemStatus(piece),
     name: piece.name,
     creator,
     createdAt: new Date(),

@@ -19,9 +19,11 @@ import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
 import {
   archiveCustomItem,
   createDraftCustomItem,
+  inferCustomItemStatus,
+  publishAndUpdateAllCopies,
   publishCustomItem,
+  removeAllCustomItemCopies,
   saveDraftCustomItem,
-  updateAllCustomItemCopies,
 } from "../../../services/customItemService";
 import { useToast } from "../../../components/Toast";
 
@@ -69,7 +71,7 @@ export function CyberneticsTab({
   } | null>(null);
   const toast = useToast();
 
-  const { items: campaignCustomCyberneticItems } = useCampaignCustomItems({
+  const { items: campaignCustomCyberneticItems, loading: cyberneticsLoading } = useCampaignCustomItems({
     campaignId,
     category: "cybernetic",
     mode: isDM ? "admin" : "picker",
@@ -287,7 +289,8 @@ export function CyberneticsTab({
           customItemId: libraryItem.id,
           actorUserId: userId,
         });
-        toast.success("Custom cybernetic archived.");
+        await removeAllCustomItemCopies({ campaignId, customItemId: libraryItem.id });
+        toast.success("Custom cybernetic archived and removed from all characters.");
       } catch (err) {
         console.error("Failed to archive custom cybernetic:", err);
         toast.error("Failed to archive custom cybernetic.");
@@ -303,11 +306,10 @@ export function CyberneticsTab({
       if (!userId) return;
       setBusyLibraryAction({ itemId: libraryItem.id, action: "updateAll" });
       try {
-        const updatedCopies = await updateAllCustomItemCopies({
+        const updatedCopies = await publishAndUpdateAllCopies({
           campaignId,
           customItemId: libraryItem.id,
           actorUserId: userId,
-          versionId: libraryItem.publishedVersionId ?? libraryItem.latestVersionId,
         });
         toast.success(
           `Updated ${updatedCopies} cybernetic ${updatedCopies === 1 ? "copy" : "copies"}.`
@@ -369,6 +371,8 @@ export function CyberneticsTab({
       />
     );
   };
+
+  if (cyberneticsLoading) return null;
 
   return (
     <div className="space-y-6">
@@ -513,7 +517,7 @@ function buildFallbackCyberneticLibraryItem({
     id: item.customLibraryId ?? "",
     campaignId,
     category: "cybernetic",
-    status: "draft",
+    status: inferCustomItemStatus(item),
     name: item.name,
     creator,
     createdAt: new Date(),

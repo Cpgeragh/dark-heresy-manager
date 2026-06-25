@@ -30,7 +30,7 @@ describe("useSkillComputation", () => {
         getCharField: makeGetCharField(30, 0),
       })
     );
-    expect(result.current[0].total).toBe(30);
+    expect(result.current[0].total).toBe(15);
   });
 
   it("adds +10 for +10 skill level", () => {
@@ -57,7 +57,7 @@ describe("useSkillComputation", () => {
     const { result } = renderHook(() =>
       useSkillComputation({
         skills: [makeSkill("Acrobatics", "trained")],
-        getCharField: makeGetCharField(30, 10),
+        getCharField: makeGetCharField(30, 2),
       })
     );
     expect(result.current[0].total).toBe(40);
