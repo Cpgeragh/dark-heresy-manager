@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import type { ArmourCraftsmanship } from "../../../types/Character";
 import { ARMOUR_REFERENCE, type ArmourRef } from "../../../data/reference/armourReference";
+import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { PickerModal } from "../../../ui/PickerModal";
 import { Button } from "../../../ui/Button";
 import { locationLabel } from "./armourHelpers";
@@ -33,18 +34,33 @@ function craftsmanshipDescription(craftsmanship: ArmourCraftsmanship): string {
 
 interface Props {
   editable?: boolean;
+  customItems?: CampaignCustomItem<"armour">[];
   onSelect: (ref: ArmourRef, craftsmanship: ArmourCraftsmanship) => void;
+  onSelectCustomItem?: (item: CampaignCustomItem<"armour">) => void;
   onCustom: () => void;
   onClose: () => void;
 }
 
-/** Inline reference picker modal — regular armour only (no force fields) */
-export function ArmourPicker({ editable = true, onSelect, onCustom, onClose }: Props) {
+export function ArmourPicker({
+  editable = true,
+  customItems = [],
+  onSelect,
+  onSelectCustomItem,
+  onCustom,
+  onClose,
+}: Props) {
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<ArmourRef | null>(null);
   const [craftsmanship, setCraftsmanship] = useState<ArmourCraftsmanship>("Common");
+  const normalisedQuery = query.toLowerCase();
+  const filteredCustom = customItems
+    .filter((item) => {
+      if (item.data.armourKind !== "worn" || item.data.isForceField) return false;
+      return item.name.toLowerCase().includes(normalisedQuery);
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
   const filtered = ARMOUR_REFERENCE.filter(
-    (r) => !r.isForceField && r.name.toLowerCase().includes(query.toLowerCase())
+    (r) => !r.isForceField && r.name.toLowerCase().includes(normalisedQuery)
   ).sort((a, b) => a.name.localeCompare(b.name));
 
   function resetPicker() {
@@ -57,7 +73,9 @@ export function ArmourPicker({ editable = true, onSelect, onCustom, onClose }: P
     const d = craftDialogRef.current;
     if (!d) return;
     d.showModal();
-    return () => { if (d.open) d.close(); };
+    return () => {
+      if (d.open) d.close();
+    };
   }, [selected]);
 
   if (selected) {
@@ -65,12 +83,16 @@ export function ArmourPicker({ editable = true, onSelect, onCustom, onClose }: P
       <dialog
         ref={craftDialogRef}
         onClose={resetPicker}
-        onClick={(e) => { if (e.target === craftDialogRef.current) resetPicker(); }}
+        onClick={(e) => {
+          if (e.target === craftDialogRef.current) resetPicker();
+        }}
         className="m-auto w-[calc(100%-2rem)] max-w-md lg:max-w-lg bg-slate-900 border border-slate-500 rounded-xl shadow-2xl p-0 backdrop:bg-black/50 backdrop:backdrop-blur-sm"
       >
         <div className="flex items-center justify-between px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
           <h3 className="text-sm lg:text-base font-semibold text-slate-200">{selected.name}</h3>
-          <button onClick={resetPicker} className="text-slate-400 hover:text-slate-200 text-lg leading-none">{"\u00D7"}</button>
+          <button onClick={resetPicker} className="text-slate-400 hover:text-slate-200 text-lg leading-none">
+            {"\u00D7"}
+          </button>
         </div>
 
         <div className="px-4 lg:px-5 py-4 lg:py-5 space-y-4">
@@ -115,11 +137,11 @@ export function ArmourPicker({ editable = true, onSelect, onCustom, onClose }: P
   return (
     <PickerModal
       title={editable ? "Add Armour" : "View Armour"}
-      placeholder="Search armour…"
+      placeholder="Search armour..."
       query={query}
       onQueryChange={setQuery}
       onClose={onClose}
-      isEmpty={filtered.length === 0}
+      isEmpty={filtered.length === 0 && filteredCustom.length === 0}
       footer={
         editable ? (
           <button
@@ -131,6 +153,38 @@ export function ArmourPicker({ editable = true, onSelect, onCustom, onClose }: P
         ) : undefined
       }
     >
+      {filteredCustom.map((item) => {
+        const data = item.data;
+        if (data.armourKind !== "worn") return null;
+        return (
+          <button
+            key={item.id}
+            onClick={editable ? () => onSelectCustomItem?.(item) : undefined}
+            className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
+          >
+            <span
+              className={`text-sm lg:text-base font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}
+            >
+              {item.name}
+            </span>
+            <div className="flex items-center gap-2 text-xs lg:text-sm text-slate-500 mt-0.5 flex-wrap font-code">
+              <span>
+                AP {data.ap}
+                {Object.keys(data.apOverrides ?? {}).length > 0 ? "*" : ""}
+              </span>
+              <span>{locationLabel(data.locations)}</span>
+              {item.status === "draft" && (
+                <span className="font-sans rounded border border-amber-400/40 bg-amber-500/10 px-1.5 py-0.5 text-amber-300">
+                  Draft
+                </span>
+              )}
+              <span className="font-sans rounded border border-fuchsia-500/50 bg-fuchsia-500/10 px-1.5 py-0.5 text-fuchsia-300">
+                Custom
+              </span>
+            </div>
+          </button>
+        );
+      })}
       {filtered.map((ref) => (
         <button
           key={ref.id}

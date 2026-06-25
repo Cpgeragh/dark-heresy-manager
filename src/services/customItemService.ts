@@ -344,9 +344,31 @@ export function buildCharacterCopyUpdate(
 ): ({ updatedCopies: number } & Partial<Character>) | null {
   if (category === "weapon") {
     const weaponData = data as CustomWeaponData;
-    return weaponData.weaponKind === "ranged"
-      ? updateLinkedArray("rangedWeapons", character.rangedWeapons, customItemId, customLibraryVersionId, stripKindFields(weaponData))
-      : updateLinkedArray("meleeWeapons", character.meleeWeapons, customItemId, customLibraryVersionId, stripKindFields(weaponData));
+    if (weaponData.weaponKind === "ranged") {
+      return updateLinkedArray(
+        "rangedWeapons",
+        character.rangedWeapons,
+        customItemId,
+        customLibraryVersionId,
+        stripKindFields(weaponData)
+      );
+    }
+    if (weaponData.weaponKind === "melee") {
+      return updateLinkedArray(
+        "meleeWeapons",
+        character.meleeWeapons,
+        customItemId,
+        customLibraryVersionId,
+        stripKindFields(weaponData)
+      );
+    }
+    return updateLinkedArray(
+      "grenades",
+      character.grenades,
+      customItemId,
+      customLibraryVersionId,
+      stripKindFields(weaponData)
+    );
   }
 
   if (category === "armour") {

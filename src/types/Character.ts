@@ -296,7 +296,7 @@ export interface ConsumableItem extends CustomLibraryLinkFields {
 /**
  * GRENADES
  */
-export interface GrenadeItem {
+export interface GrenadeItem extends CustomLibraryLinkFields {
   id: string;
   referenceId?: string; // links back to GrenadeRef.id
   name: string;

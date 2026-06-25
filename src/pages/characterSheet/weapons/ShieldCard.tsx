@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react";
 import type { ShieldItem } from "../../../types/Character";
+import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { SHIELD_REFERENCE, type ShieldRef } from "../../../data/reference/weaponReference";
 import {
   editableInputClass,
@@ -43,19 +44,28 @@ const CUSTOM_SHIELD_ORIGIN_OPTIONS = ["Custom", "2nd Ed"] as const;
 
 export function ShieldPicker({
   editable = true,
+  customLibraryItems = [],
   onSelect,
+  onSelectCustom,
   onCustom,
   onClose,
 }: {
   editable?: boolean;
+  customLibraryItems?: CampaignCustomItem<"armour">[];
   onSelect: (ref: ShieldRef) => void;
+  onSelectCustom?: (item: CampaignCustomItem<"armour">) => void;
   onCustom?: () => void;
   onClose: () => void;
 }) {
   const [query, setQuery] = useState("");
+  const normalizedQuery = query.toLowerCase();
   const filtered = SHIELD_REFERENCE.filter((r) =>
-    r.name.toLowerCase().includes(query.toLowerCase())
+    r.name.toLowerCase().includes(normalizedQuery)
   ).sort((a, b) => a.name.localeCompare(b.name));
+  const filteredCustomLibraryItems = customLibraryItems
+    .filter((item) => item.data.armourKind === "shield")
+    .filter((item) => item.name.toLowerCase().includes(normalizedQuery))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <PickerModal
@@ -64,7 +74,7 @@ export function ShieldPicker({
       query={query}
       onQueryChange={setQuery}
       onClose={onClose}
-      isEmpty={filtered.length === 0}
+      isEmpty={filtered.length === 0 && filteredCustomLibraryItems.length === 0}
       footer={
         editable && onCustom ? (
           <button
@@ -76,6 +86,65 @@ export function ShieldPicker({
         ) : undefined
       }
     >
+      {filteredCustomLibraryItems.map((item) => {
+        const data = item.data;
+        if (data.armourKind !== "shield") return null;
+        return (
+          <div
+            key={`custom-${item.id}`}
+            role="button"
+            tabIndex={editable ? 0 : -1}
+            onClick={editable && onSelectCustom ? () => onSelectCustom(item) : undefined}
+            className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
+          >
+            <div className="flex items-center gap-1.5">
+              <span
+                className={`text-sm lg:text-base font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}
+              >
+                {item.name}
+              </span>
+              <span
+                className={[
+                  "shrink-0 rounded border px-1.5 py-0.5 text-[10px] uppercase tracking-wide",
+                  item.status === "published"
+                    ? "border-emerald-400/40 bg-emerald-500/10 text-emerald-300"
+                    : item.status === "draft"
+                      ? "border-amber-400/40 bg-amber-500/10 text-amber-300"
+                      : "border-slate-500/50 bg-slate-800 text-slate-300",
+                ].join(" ")}
+              >
+                {item.status}
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-1.5 mt-1">
+              <ItemMetaChips weight={data.weight} value={data.value} availability={data.availability} source={data.source} />
+            </div>
+            <div className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted} mt-0.5 flex-wrap font-code`}>
+              <span className="text-cyan-400">AP {data.ap}</span>
+              <span>{data.locations}</span>
+              <span>{data.damage}</span>
+              <span>Pen {data.pen}</span>
+            </div>
+            {data.specialRules && data.specialRules !== "—" && (
+              <div className="flex items-center gap-1.5 mt-1">
+                <span className={uiTextLabel}>Qualities</span>
+                <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>{data.specialRules}</span>
+                <span className="inline-flex items-center -translate-y-[1.4px]">
+                  <InfoModal title={`${data.name} Qualities`} content={<SpecialRulesContent rules={data.specialRules} />} />
+                </span>
+              </div>
+            )}
+            {data.notes && (
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className={uiTextLabel}>Rules</span>
+                <span className="inline-flex items-center -translate-y-[1.4px]">
+                  <InfoModal title={data.name} content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{data.notes}</p>} />
+                </span>
+              </div>
+            )}
+          </div>
+        );
+      })}
       {filtered.map((ref) => (
         <div
           key={ref.id}
@@ -123,26 +192,62 @@ export function ShieldPicker({
 
 // ─── Shield Card ──────────────────────────────────────────────────────────────
 
+function isCustomShieldOrigin(
+  value: string | undefined
+): value is (typeof CUSTOM_SHIELD_ORIGIN_OPTIONS)[number] {
+  return CUSTOM_SHIELD_ORIGIN_OPTIONS.includes(value as (typeof CUSTOM_SHIELD_ORIGIN_OPTIONS)[number]);
+}
+
+function parseInitialShieldDamage(damage: string | undefined): {
+  base: string;
+  plus: string;
+  type: (typeof DAMAGE_TYPE_OPTIONS)[number]["value"];
+} {
+  const match = damage?.trim().match(/^(\d+d\d+)(?:\+(\d+))?\s+([IREX])$/i);
+  if (!match) return { base: "1d10", plus: "0", type: "I" };
+
+  return {
+    base: match[1],
+    plus: match[2] ?? "0",
+    type: match[3].toUpperCase() as (typeof DAMAGE_TYPE_OPTIONS)[number]["value"],
+  };
+}
+
 export function CustomShieldForm({
+  title = "Custom Shield",
+  submitLabel = "Add",
+  initialShield,
   onAdd,
   onCancel,
 }: {
+  title?: string;
+  submitLabel?: string;
+  initialShield?: ShieldItem;
   onAdd: (item: ShieldItem) => void;
   onCancel: () => void;
 }) {
-  const [name, setName] = useState("");
-  const [origin, setOrigin] = useState<"" | (typeof CUSTOM_SHIELD_ORIGIN_OPTIONS)[number]>("");
-  const [availability, setAvailability] = useState("");
-  const [ap, setAp] = useState("");
-  const [locations, setLocations] = useState("");
-  const [damageBase, setDamageBase] = useState("1d10");
-  const [damagePlus, setDamagePlus] = useState("0");
-  const [damageType, setDamageType] = useState<(typeof DAMAGE_TYPE_OPTIONS)[number]["value"]>("I");
-  const [pen, setPen] = useState("0");
-  const [weight, setWeight] = useState("");
-  const [value, setValue] = useState("");
-  const [selectedQualities, setSelectedQualities] = useState<string[]>([]);
-  const [notes, setNotes] = useState("");
+  const initialDamage = parseInitialShieldDamage(initialShield?.damage);
+  const [name, setName] = useState(initialShield?.name ?? "");
+  const [origin, setOrigin] = useState<"" | (typeof CUSTOM_SHIELD_ORIGIN_OPTIONS)[number]>(
+    isCustomShieldOrigin(initialShield?.source) ? initialShield.source : ""
+  );
+  const [availability, setAvailability] = useState(initialShield?.availability ?? "");
+  const [ap, setAp] = useState(initialShield?.ap !== undefined ? String(initialShield.ap) : "");
+  const [locations, setLocations] = useState(initialShield?.locations ?? "");
+  const [damageBase, setDamageBase] = useState(initialDamage.base);
+  const [damagePlus, setDamagePlus] = useState(initialDamage.plus);
+  const [damageType, setDamageType] = useState<(typeof DAMAGE_TYPE_OPTIONS)[number]["value"]>(
+    initialDamage.type
+  );
+  const [pen, setPen] = useState(initialShield?.pen ?? "0");
+  const [weight, setWeight] = useState(initialShield?.weight ?? "");
+  const [value, setValue] = useState(initialShield?.value ?? "");
+  const [selectedQualities, setSelectedQualities] = useState<string[]>(
+    initialShield?.specialRules && initialShield.specialRules !== "—"
+      ? initialShield.specialRules.split(",").map((rule) => rule.trim()).filter(Boolean)
+      : []
+  );
+  const [notes, setNotes] = useState(initialShield?.notes ?? "");
 
   const canAdd =
     Boolean(name.trim()) &&
@@ -159,7 +264,7 @@ export function CustomShieldForm({
   const addShield = () => {
     if (!canAdd || !origin) return;
     onAdd({
-      id: crypto.randomUUID(),
+      id: initialShield?.id ?? crypto.randomUUID(),
       custom: true,
       name: name.trim(),
       ap: Number(ap),
@@ -172,12 +277,15 @@ export function CustomShieldForm({
       value: formatMoneyInput(value),
       availability,
       source: origin,
+      equipped: initialShield?.equipped,
+      customLibraryId: initialShield?.customLibraryId,
+      customLibraryVersionId: initialShield?.customLibraryVersionId,
     });
   };
 
   return (
     <PickerModal
-      title="Custom Shield"
+      title={title}
       query=""
       onQueryChange={() => {}}
       onClose={onCancel}
@@ -191,7 +299,7 @@ export function CustomShieldForm({
           )}
           <div className="flex gap-2">
             <Button className="flex-1" onClick={addShield} disabled={!canAdd}>
-              Add
+              {submitLabel}
             </Button>
             <button
               onClick={onCancel}
@@ -320,6 +428,14 @@ export function CustomShieldForm({
 export function ShieldCard({
   item,
   editable,
+  libraryItem,
+  isDM = false,
+  canEditDefinition = false,
+  busyAction = null,
+  onEditDefinition,
+  onPublish,
+  onArchive,
+  onUpdateAllCopies,
   onRemove,
   isEquipped = false,
   onToggleEquip,
@@ -327,6 +443,14 @@ export function ShieldCard({
 }: {
   item: ShieldItem;
   editable: boolean;
+  libraryItem?: CampaignCustomItem<"armour">;
+  isDM?: boolean;
+  canEditDefinition?: boolean;
+  busyAction?: "publish" | "archive" | "updateAll" | null;
+  onEditDefinition?: () => void;
+  onPublish?: () => void;
+  onArchive?: () => void;
+  onUpdateAllCopies?: () => void;
   onRemove: () => void;
   isEquipped?: boolean;
   onToggleEquip?: () => void;
@@ -348,7 +472,23 @@ export function ShieldCard({
       {/* Header — always visible */}
       <div className="flex items-start justify-between gap-2">
         <button className="flex-1 min-w-0 text-left" onClick={() => setExpanded((e) => !e)}>
-          <p className="text-sm lg:text-base font-semibold text-slate-200">{item.name}</p>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <p className="text-sm lg:text-base font-semibold text-slate-200">{item.name}</p>
+            {libraryItem && (
+              <span
+                className={[
+                  "shrink-0 rounded border px-1.5 py-0.5 text-[10px] uppercase tracking-wide",
+                  libraryItem.status === "published"
+                    ? "border-emerald-400/40 bg-emerald-500/10 text-emerald-300"
+                    : libraryItem.status === "draft"
+                      ? "border-amber-400/40 bg-amber-500/10 text-amber-300"
+                      : "border-slate-500/50 bg-slate-800 text-slate-300",
+                ].join(" ")}
+              >
+                {libraryItem.status}
+              </span>
+            )}
+          </div>
           <p className={`text-xs lg:text-sm ${uiTextMuted}`}>
             Shield{item.locations ? ` · ${item.locations}` : ""}
           </p>
@@ -390,6 +530,46 @@ export function ShieldCard({
 
       {expanded && (
         <>
+          {(canEditDefinition || isDM) && libraryItem && (
+            <div className="flex flex-wrap gap-2">
+              {canEditDefinition && libraryItem.status !== "archived" && (
+                <button type="button" onClick={onEditDefinition} className={uiActionButtonCompact}>
+                  Edit Definition
+                </button>
+              )}
+              {isDM && libraryItem.status === "draft" && (
+                <button
+                  type="button"
+                  onClick={onPublish}
+                  disabled={busyAction === "publish"}
+                  className={`${uiActionButtonCompact} disabled:opacity-50`}
+                >
+                  {busyAction === "publish" ? "Publishing..." : "Publish"}
+                </button>
+              )}
+              {isDM && libraryItem.status !== "archived" && (
+                <button
+                  type="button"
+                  onClick={onArchive}
+                  disabled={busyAction === "archive"}
+                  className={`${uiActionButtonCompact} disabled:opacity-50`}
+                >
+                  {busyAction === "archive" ? "Archiving..." : "Archive"}
+                </button>
+              )}
+              {isDM && libraryItem.status === "published" && (
+                <button
+                  type="button"
+                  onClick={onUpdateAllCopies}
+                  disabled={busyAction === "updateAll"}
+                  className={`${uiActionButtonCompact} disabled:opacity-50`}
+                >
+                  {busyAction === "updateAll" ? "Updating..." : "Update All Copies"}
+                </button>
+              )}
+            </div>
+          )}
+
           {/* Stats — AP chip in cyan to distinguish from weapon damage */}
           <div className="flex flex-wrap gap-1.5">
             <div className="flex flex-col items-center bg-slate-800/60 rounded px-2 lg:px-3 py-1 lg:py-1.5 min-w-[52px] lg:min-w-[64px]">

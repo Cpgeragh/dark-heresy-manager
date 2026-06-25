@@ -4,22 +4,59 @@ import type { WornArmourPiece } from "../../../types/Character";
 import { uiActionButtonCompact, uiSection } from "../../../ui/editableStyles";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
+import type { CampaignCustomItem } from "../../../types/CustomItems";
 
 interface Props {
   piece: WornArmourPiece;
   editable: boolean;
+  libraryItem?: CampaignCustomItem<"armour">;
+  isDM?: boolean;
+  canEditDefinition?: boolean;
+  busyAction?: "publish" | "archive" | "updateAll" | null;
+  onEditDefinition?: () => void;
+  onPublish?: () => void;
+  onArchive?: () => void;
+  onUpdateAllCopies?: () => void;
   onToggle: (id: string) => void;
   onRemove: (id: string) => void;
   onInfo: (piece: WornArmourPiece) => void;
 }
 
-export function ForceFieldRow({ piece, editable, onToggle, onRemove, onInfo }: Props) {
+export function ForceFieldRow({
+  piece,
+  editable,
+  libraryItem,
+  isDM = false,
+  canEditDefinition = false,
+  busyAction = null,
+  onEditDefinition,
+  onPublish,
+  onArchive,
+  onUpdateAllCopies,
+  onToggle,
+  onRemove,
+  onInfo,
+}: Props) {
   const active = piece.worn;
   return (
     <div className={[uiSection, "flex items-center gap-3", !active ? "opacity-60" : ""].join(" ")}>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
           <span className="text-sm lg:text-base font-medium text-slate-200 truncate">{piece.name}</span>
+          {libraryItem && (
+            <span
+              className={[
+                "shrink-0 rounded border px-1.5 py-0.5 text-[10px] uppercase tracking-wide",
+                libraryItem.status === "published"
+                  ? "border-emerald-400/40 bg-emerald-500/10 text-emerald-300"
+                  : libraryItem.status === "draft"
+                    ? "border-amber-400/40 bg-amber-500/10 text-amber-300"
+                    : "border-slate-500/50 bg-slate-800 text-slate-300",
+              ].join(" ")}
+            >
+              {libraryItem.status}
+            </span>
+          )}
           <span className="inline-flex items-center -translate-y-[1.4px]">
             <button
               onClick={() => onInfo(piece)}
@@ -57,6 +94,45 @@ export function ForceFieldRow({ piece, editable, onToggle, onRemove, onInfo }: P
             source={piece.source}
           />
         </div>
+        {(canEditDefinition || isDM) && libraryItem && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {canEditDefinition && libraryItem.status !== "archived" && (
+              <button type="button" onClick={onEditDefinition} className={uiActionButtonCompact}>
+                Edit Definition
+              </button>
+            )}
+            {isDM && libraryItem.status === "draft" && (
+              <button
+                type="button"
+                onClick={onPublish}
+                disabled={busyAction === "publish"}
+                className={`${uiActionButtonCompact} disabled:opacity-50`}
+              >
+                {busyAction === "publish" ? "Publishing..." : "Publish"}
+              </button>
+            )}
+            {isDM && libraryItem.status !== "archived" && (
+              <button
+                type="button"
+                onClick={onArchive}
+                disabled={busyAction === "archive"}
+                className={`${uiActionButtonCompact} disabled:opacity-50`}
+              >
+                {busyAction === "archive" ? "Archiving..." : "Archive"}
+              </button>
+            )}
+            {isDM && libraryItem.status === "published" && (
+              <button
+                type="button"
+                onClick={onUpdateAllCopies}
+                disabled={busyAction === "updateAll"}
+                className={`${uiActionButtonCompact} disabled:opacity-50`}
+              >
+                {busyAction === "updateAll" ? "Updating..." : "Update All Copies"}
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {editable && (
