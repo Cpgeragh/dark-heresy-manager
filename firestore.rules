@@ -203,7 +203,7 @@ service cloud.firestore {
              );
 
         allow delete:
-          if dmOwnsCampaign();
+          if dmOwnsCampaign() && resource.data.status == "archived";
 
         match /versions/{versionId} {
 
