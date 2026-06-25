@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react";
 import type { GrenadeItem } from "../../../types/Character";
+import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { GRENADE_REFERENCE, type GrenadeRef } from "../../../data/reference/weaponReference";
 import {
   editableInputClass,
@@ -94,20 +95,29 @@ export const EXPLOSIVE_MISHAPS_CONTENT = (
 export function GrenadePicker({
   editable = true,
   strengthBonus,
+  customLibraryItems = [],
   onSelect,
+  onSelectCustom,
   onCustom,
   onClose,
 }: {
   editable?: boolean;
   strengthBonus: number;
+  customLibraryItems?: CampaignCustomItem<"weapon">[];
   onSelect: (ref: GrenadeRef) => void;
+  onSelectCustom?: (item: CampaignCustomItem<"weapon">) => void;
   onCustom?: () => void;
   onClose: () => void;
 }) {
   const [query, setQuery] = useState("");
+  const normalizedQuery = query.toLowerCase();
   const filtered = GRENADE_REFERENCE.filter((r) =>
-    r.name.toLowerCase().includes(query.toLowerCase())
+    r.name.toLowerCase().includes(normalizedQuery)
   ).sort((a, b) => a.name.localeCompare(b.name));
+  const filteredCustomLibraryItems = customLibraryItems
+    .filter((item) => item.data.weaponKind === "grenade")
+    .filter((item) => item.name.toLowerCase().includes(normalizedQuery))
+    .sort((a, b) => a.name.localeCompare(b.name));
   const thrownRange = `${Math.max(0, strengthBonus) * 3}m`;
 
   return (
@@ -117,7 +127,7 @@ export function GrenadePicker({
       query={query}
       onQueryChange={setQuery}
       onClose={onClose}
-      isEmpty={filtered.length === 0}
+      isEmpty={filtered.length === 0 && filteredCustomLibraryItems.length === 0}
       footer={
         editable && onCustom ? (
           <button
@@ -134,6 +144,65 @@ export function GrenadePicker({
         </p>
       }
     >
+      {filteredCustomLibraryItems.map((item) => {
+        const data = item.data;
+        if (data.weaponKind !== "grenade") return null;
+        return (
+          <div
+            key={`custom-${item.id}`}
+            role="button"
+            tabIndex={editable ? 0 : -1}
+            onClick={editable && onSelectCustom ? () => onSelectCustom(item) : undefined}
+            className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
+          >
+            <div className="flex items-center gap-1.5">
+              <span
+                className={`text-sm lg:text-base font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}
+              >
+                {item.name}
+              </span>
+              <span
+                className={[
+                  "shrink-0 rounded border px-1.5 py-0.5 text-[10px] uppercase tracking-wide",
+                  item.status === "published"
+                    ? "border-emerald-400/40 bg-emerald-500/10 text-emerald-300"
+                    : item.status === "draft"
+                      ? "border-amber-400/40 bg-amber-500/10 text-amber-300"
+                      : "border-slate-500/50 bg-slate-800 text-slate-300",
+                ].join(" ")}
+              >
+                {item.status}
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-1.5 mt-1">
+              <ItemMetaChips weight={data.weight} value={data.value} availability={data.availability} source={data.source} />
+            </div>
+            <div className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted} mt-0.5 flex-wrap font-code`}>
+              <span>{data.type ?? "Grenade"}</span>
+              <span>Range {thrownRange}</span>
+              <span className={uiTextMuted}>{data.damage !== "—" ? data.damage : "No damage"}</span>
+              <span className={uiTextMuted}>Pen {data.pen}</span>
+            </div>
+            {data.specialRules && data.specialRules !== "—" && (
+              <div className="flex items-center gap-1.5 mt-1">
+                <span className={uiTextLabel}>Qualities</span>
+                <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>{data.specialRules}</span>
+                <span className="inline-flex items-center -translate-y-[1.4px]">
+                  <InfoModal title={`${data.name} Qualities`} content={<SpecialRulesContent rules={data.specialRules} />} />
+                </span>
+              </div>
+            )}
+            {data.description && (
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className={uiTextLabel}>Rules</span>
+                <span className="inline-flex items-center -translate-y-[1.4px]">
+                  <InfoModal title={data.name} content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{data.description}</p>} />
+                </span>
+              </div>
+            )}
+          </div>
+        );
+      })}
       {filtered.map((ref) => (
         <div
           key={ref.id}
@@ -181,27 +250,80 @@ export function GrenadePicker({
 
 // ─── Grenade Card ─────────────────────────────────────────────────────────────
 
+function isCustomGrenadeType(
+  value: string | undefined
+): value is (typeof CUSTOM_GRENADE_TYPE_OPTIONS)[number] {
+  return CUSTOM_GRENADE_TYPE_OPTIONS.includes(value as (typeof CUSTOM_GRENADE_TYPE_OPTIONS)[number]);
+}
+
+function isCustomGrenadeOrigin(
+  value: string | undefined
+): value is (typeof CUSTOM_GRENADE_ORIGIN_OPTIONS)[number] {
+  return CUSTOM_GRENADE_ORIGIN_OPTIONS.includes(value as (typeof CUSTOM_GRENADE_ORIGIN_OPTIONS)[number]);
+}
+
+function parseInitialGrenadeDamage(damage: string | undefined): {
+  mode: "damage" | "special" | "none";
+  base: string;
+  plus: string;
+  type: (typeof DAMAGE_TYPE_OPTIONS)[number]["value"];
+} {
+  if (!damage || damage === "—") {
+    return { mode: "none", base: "1d10", plus: "0", type: "X" };
+  }
+  if (damage === "Special") {
+    return { mode: "special", base: "1d10", plus: "0", type: "X" };
+  }
+
+  const match = damage.trim().match(/^(\d+d\d+)(?:\+(\d+))?\s+([IREX])$/i);
+  if (!match) return { mode: "damage", base: "1d10", plus: "0", type: "X" };
+
+  return {
+    mode: "damage",
+    base: match[1],
+    plus: match[2] ?? "0",
+    type: match[3].toUpperCase() as (typeof DAMAGE_TYPE_OPTIONS)[number]["value"],
+  };
+}
+
 export function CustomGrenadeForm({
+  title = "Custom Grenade or Mine",
+  submitLabel = "Add",
+  initialGrenade,
   onAdd,
   onCancel,
 }: {
+  title?: string;
+  submitLabel?: string;
+  initialGrenade?: GrenadeItem;
   onAdd: (item: GrenadeItem) => void;
   onCancel: () => void;
 }) {
-  const [name, setName] = useState("");
-  const [type, setType] = useState<"" | (typeof CUSTOM_GRENADE_TYPE_OPTIONS)[number]>("");
-  const [origin, setOrigin] = useState<"" | (typeof CUSTOM_GRENADE_ORIGIN_OPTIONS)[number]>("");
-  const [availability, setAvailability] = useState("");
-  const [damageMode, setDamageMode] = useState<"damage" | "special" | "none">("damage");
-  const [damageBase, setDamageBase] = useState("1d10");
-  const [damagePlus, setDamagePlus] = useState("0");
-  const [damageType, setDamageType] = useState<(typeof DAMAGE_TYPE_OPTIONS)[number]["value"]>("X");
-  const [pen, setPen] = useState("0");
-  const [quantity, setQuantity] = useState("");
-  const [weight, setWeight] = useState("");
-  const [value, setValue] = useState("");
-  const [selectedQualities, setSelectedQualities] = useState<string[]>([]);
-  const [description, setDescription] = useState("");
+  const initialDamage = parseInitialGrenadeDamage(initialGrenade?.damage);
+  const [name, setName] = useState(initialGrenade?.name ?? "");
+  const [type, setType] = useState<"" | (typeof CUSTOM_GRENADE_TYPE_OPTIONS)[number]>(
+    isCustomGrenadeType(initialGrenade?.type) ? initialGrenade.type : ""
+  );
+  const [origin, setOrigin] = useState<"" | (typeof CUSTOM_GRENADE_ORIGIN_OPTIONS)[number]>(
+    isCustomGrenadeOrigin(initialGrenade?.source) ? initialGrenade.source : ""
+  );
+  const [availability, setAvailability] = useState(initialGrenade?.availability ?? "");
+  const [damageMode, setDamageMode] = useState<"damage" | "special" | "none">(initialDamage.mode);
+  const [damageBase, setDamageBase] = useState(initialDamage.base);
+  const [damagePlus, setDamagePlus] = useState(initialDamage.plus);
+  const [damageType, setDamageType] = useState<(typeof DAMAGE_TYPE_OPTIONS)[number]["value"]>(
+    initialDamage.type
+  );
+  const [pen, setPen] = useState(initialGrenade?.pen ?? "0");
+  const [quantity, setQuantity] = useState(initialGrenade?.quantity ? String(initialGrenade.quantity) : "");
+  const [weight, setWeight] = useState(initialGrenade?.weight ?? "");
+  const [value, setValue] = useState(initialGrenade?.value ?? "");
+  const [selectedQualities, setSelectedQualities] = useState<string[]>(
+    initialGrenade?.specialRules && initialGrenade.specialRules !== "—"
+      ? initialGrenade.specialRules.split(",").map((rule) => rule.trim()).filter(Boolean)
+      : []
+  );
+  const [description, setDescription] = useState(initialGrenade?.description ?? "");
 
   const damage =
     damageMode === "none"
@@ -224,7 +346,7 @@ export function CustomGrenadeForm({
   const addGrenade = () => {
     if (!canAdd || !type || !origin) return;
     onAdd({
-      id: crypto.randomUUID(),
+      id: initialGrenade?.id ?? crypto.randomUUID(),
       custom: true,
       name: name.trim(),
       quantity: Number(quantity),
@@ -238,12 +360,15 @@ export function CustomGrenadeForm({
       availability,
       source: origin,
       description: description.trim() || undefined,
+      equipped: initialGrenade?.equipped,
+      customLibraryId: initialGrenade?.customLibraryId,
+      customLibraryVersionId: initialGrenade?.customLibraryVersionId,
     });
   };
 
   return (
     <PickerModal
-      title="Custom Grenade or Mine"
+      title={title}
       query=""
       onQueryChange={() => {}}
       onClose={onCancel}
@@ -257,7 +382,7 @@ export function CustomGrenadeForm({
           )}
           <div className="flex gap-2">
             <Button className="flex-1" onClick={addGrenade} disabled={!canAdd}>
-              Add
+              {submitLabel}
             </Button>
             <button
               onClick={onCancel}
@@ -406,6 +531,14 @@ export function GrenadeCard({
   item,
   editable,
   strengthBonus,
+  libraryItem,
+  isDM = false,
+  canEditDefinition = false,
+  busyAction = null,
+  onEditDefinition,
+  onPublish,
+  onArchive,
+  onUpdateAllCopies,
   onRemove,
   onUpdateQty,
   isEquipped = false,
@@ -416,6 +549,14 @@ export function GrenadeCard({
   item: GrenadeItem;
   editable: boolean;
   strengthBonus: number;
+  libraryItem?: CampaignCustomItem<"weapon">;
+  isDM?: boolean;
+  canEditDefinition?: boolean;
+  busyAction?: "publish" | "archive" | "updateAll" | null;
+  onEditDefinition?: () => void;
+  onPublish?: () => void;
+  onArchive?: () => void;
+  onUpdateAllCopies?: () => void;
   onRemove: () => void;
   onUpdateQty: (qty: number) => void;
   isEquipped?: boolean;
@@ -464,7 +605,23 @@ export function GrenadeCard({
       {/* Header — always visible */}
       <div className="flex items-start justify-between gap-2">
         <button className="flex-1 min-w-0 text-left" onClick={() => setExpanded((e) => !e)}>
-          <p className="text-sm lg:text-base font-semibold text-slate-200 truncate">{item.name}</p>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <p className="text-sm lg:text-base font-semibold text-slate-200 truncate">{item.name}</p>
+            {libraryItem && (
+              <span
+                className={[
+                  "shrink-0 rounded border px-1.5 py-0.5 text-[10px] uppercase tracking-wide",
+                  libraryItem.status === "published"
+                    ? "border-emerald-400/40 bg-emerald-500/10 text-emerald-300"
+                    : libraryItem.status === "draft"
+                      ? "border-amber-400/40 bg-amber-500/10 text-amber-300"
+                      : "border-slate-500/50 bg-slate-800 text-slate-300",
+                ].join(" ")}
+              >
+                {libraryItem.status}
+              </span>
+            )}
+          </div>
           <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
             <Chip size="sm" className="border-amber-500/60 bg-amber-500/10 text-amber-300">
               Thrown
@@ -513,6 +670,46 @@ export function GrenadeCard({
 
       {expanded && (
         <>
+          {(canEditDefinition || isDM) && libraryItem && (
+            <div className="flex flex-wrap gap-2">
+              {canEditDefinition && libraryItem.status !== "archived" && (
+                <button type="button" onClick={onEditDefinition} className={uiActionButtonCompact}>
+                  Edit Definition
+                </button>
+              )}
+              {isDM && libraryItem.status === "draft" && (
+                <button
+                  type="button"
+                  onClick={onPublish}
+                  disabled={busyAction === "publish"}
+                  className={`${uiActionButtonCompact} disabled:opacity-50`}
+                >
+                  {busyAction === "publish" ? "Publishing..." : "Publish"}
+                </button>
+              )}
+              {isDM && libraryItem.status !== "archived" && (
+                <button
+                  type="button"
+                  onClick={onArchive}
+                  disabled={busyAction === "archive"}
+                  className={`${uiActionButtonCompact} disabled:opacity-50`}
+                >
+                  {busyAction === "archive" ? "Archiving..." : "Archive"}
+                </button>
+              )}
+              {isDM && libraryItem.status === "published" && (
+                <button
+                  type="button"
+                  onClick={onUpdateAllCopies}
+                  disabled={busyAction === "updateAll"}
+                  className={`${uiActionButtonCompact} disabled:opacity-50`}
+                >
+                  {busyAction === "updateAll" ? "Updating..." : "Update All Copies"}
+                </button>
+              )}
+            </div>
+          )}
+
           {/* Stat chips */}
           <div className="flex flex-wrap gap-1.5">
             <StatChip label="Range" value={thrownRange} />

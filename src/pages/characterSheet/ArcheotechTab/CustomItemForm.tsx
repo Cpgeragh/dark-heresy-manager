@@ -9,18 +9,28 @@ import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import { ITEM_TYPES, AVAILABILITY_OPTIONS, type ItemType } from "./archeotechConstants";
 
 interface Props {
-  onAdd: (item: ArcheotechItem) => void;
+  initialItem?: Partial<ArcheotechItem>;
+  title?: string;
+  submitLabel?: string;
+  onAdd: (item: ArcheotechItem) => void | Promise<void>;
   onCancel: () => void;
 }
 
-export function CustomItemForm({ onAdd, onCancel }: Props) {
-  const [name, setName] = useState("");
-  const [type, setType] = useState<ItemType | "">("");
-  const [description, setDescription] = useState("");
-  const [notes, setNotes] = useState("");
-  const [weight, setWeight] = useState("");
-  const [value, setValue] = useState("");
-  const [availability, setRarity] = useState("");
+export function CustomItemForm({
+  initialItem,
+  title = "Custom Archeotech Item",
+  submitLabel = "Add Item",
+  onAdd,
+  onCancel,
+}: Props) {
+  const [name, setName] = useState(initialItem?.name ?? "");
+  const [type, setType] = useState<ItemType | "">((initialItem?.type as ItemType | undefined) ?? "");
+  const [description, setDescription] = useState(initialItem?.description ?? "");
+  const [notes, setNotes] = useState(initialItem?.notes ?? "");
+  const [weight, setWeight] = useState(initialItem?.weight ?? "");
+  const [value, setValue] = useState(initialItem?.value ?? "");
+  const [availability, setRarity] = useState(initialItem?.availability ?? "");
+  const [saving, setSaving] = useState(false);
 
   const formattedWeight = formatWeightInput(weight);
   const formattedValue = formatMoneyInput(value);
@@ -34,24 +44,32 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
     setValue(sanitizeMoneyInput(value));
   }
 
-  function handleAdd() {
+  async function handleAdd() {
     if (!canAdd) return;
-    onAdd({
-      id: crypto.randomUUID(),
-      name: name.trim(),
-      type: type || undefined,
-      description: description.trim() || undefined,
-      notes: notes.trim() || undefined,
-      weight: formattedWeight,
-      value: formattedValue,
-      availability: availability || undefined,
-    });
+    setSaving(true);
+    try {
+      await onAdd({
+        id: initialItem?.id ?? crypto.randomUUID(),
+        name: name.trim(),
+        type: type || undefined,
+        description: description.trim() || undefined,
+        notes: notes.trim() || undefined,
+        weight: formattedWeight,
+        value: formattedValue,
+        availability: availability || undefined,
+        customLibraryId: initialItem?.customLibraryId,
+        customLibraryVersionId: initialItem?.customLibraryVersionId,
+        equipped: initialItem?.equipped,
+      });
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
     <div className="border border-red-700/30 bg-slate-900/60 rounded-lg p-4 lg:p-5 space-y-3">
       <p className="text-xs lg:text-sm font-semibold text-red-500 uppercase tracking-wide">
-        Custom Archeotech Item
+        {title}
       </p>
 
       {/* Name */}
@@ -167,8 +185,8 @@ export function CustomItemForm({ onAdd, onCancel }: Props) {
 
       {/* Buttons */}
       <div className="flex gap-2 pt-1">
-        <Button className="flex-1" onClick={handleAdd} disabled={!canAdd}>
-          Add Item
+        <Button className="flex-1" onClick={handleAdd} disabled={!canAdd || saving}>
+          {saving ? "Saving..." : submitLabel}
         </Button>
         <button
           onClick={onCancel}

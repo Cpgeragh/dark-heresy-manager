@@ -6,11 +6,20 @@ import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { InfoModal } from "../../../components/InfoModal";
 import { locationLabel } from "./armourHelpers";
+import type { CampaignCustomItem } from "../../../types/CustomItems";
 
 interface Props {
   piece: WornArmourPiece;
   editable: boolean;
   worn: boolean;
+  libraryItem?: CampaignCustomItem<"armour">;
+  isDM?: boolean;
+  canEditDefinition?: boolean;
+  busyAction?: "publish" | "archive" | "updateAll" | null;
+  onEditDefinition?: () => void;
+  onPublish?: () => void;
+  onArchive?: () => void;
+  onUpdateAllCopies?: () => void;
   onToggle: (id: string) => void;
   onRemove: (id: string) => void;
   onInfo: (piece: WornArmourPiece) => void;
@@ -30,7 +39,22 @@ function armourCraftsmanshipInfo(craftsmanship: NonNullable<WornArmourPiece["cra
   }
 }
 
-export function PieceRow({ piece, editable, worn, onToggle, onRemove, onInfo }: Props) {
+export function PieceRow({
+  piece,
+  editable,
+  worn,
+  libraryItem,
+  isDM = false,
+  canEditDefinition = false,
+  busyAction = null,
+  onEditDefinition,
+  onPublish,
+  onArchive,
+  onUpdateAllCopies,
+  onToggle,
+  onRemove,
+  onInfo,
+}: Props) {
   const apDesc =
     Object.keys(piece.apOverrides ?? {}).length > 0 ? `AP ${piece.ap}*` : `AP ${piece.ap}`;
   const craftsmanship = piece.craftsmanship ?? "Common";
@@ -40,6 +64,20 @@ export function PieceRow({ piece, editable, worn, onToggle, onRemove, onInfo }: 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
           <span className="text-sm lg:text-base font-medium text-slate-200 truncate">{piece.name}</span>
+          {libraryItem && (
+            <span
+              className={[
+                "shrink-0 rounded border px-1.5 py-0.5 text-[10px] uppercase tracking-wide",
+                libraryItem.status === "published"
+                  ? "border-emerald-400/40 bg-emerald-500/10 text-emerald-300"
+                  : libraryItem.status === "draft"
+                    ? "border-amber-400/40 bg-amber-500/10 text-amber-300"
+                    : "border-slate-500/50 bg-slate-800 text-slate-300",
+              ].join(" ")}
+            >
+              {libraryItem.status}
+            </span>
+          )}
           <span className="inline-flex items-center -translate-y-[1.4px]">
             <button
               onClick={() => onInfo(piece)}
@@ -87,6 +125,45 @@ export function PieceRow({ piece, editable, worn, onToggle, onRemove, onInfo }: 
             content={armourCraftsmanshipInfo(craftsmanship)}
           />
         </div>
+        {(canEditDefinition || isDM) && libraryItem && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {canEditDefinition && libraryItem.status !== "archived" && (
+              <button type="button" onClick={onEditDefinition} className={uiActionButtonCompact}>
+                Edit Definition
+              </button>
+            )}
+            {isDM && libraryItem.status === "draft" && (
+              <button
+                type="button"
+                onClick={onPublish}
+                disabled={busyAction === "publish"}
+                className={`${uiActionButtonCompact} disabled:opacity-50`}
+              >
+                {busyAction === "publish" ? "Publishing..." : "Publish"}
+              </button>
+            )}
+            {isDM && libraryItem.status !== "archived" && (
+              <button
+                type="button"
+                onClick={onArchive}
+                disabled={busyAction === "archive"}
+                className={`${uiActionButtonCompact} disabled:opacity-50`}
+              >
+                {busyAction === "archive" ? "Archiving..." : "Archive"}
+              </button>
+            )}
+            {isDM && libraryItem.status === "published" && (
+              <button
+                type="button"
+                onClick={onUpdateAllCopies}
+                disabled={busyAction === "updateAll"}
+                className={`${uiActionButtonCompact} disabled:opacity-50`}
+              >
+                {busyAction === "updateAll" ? "Updating..." : "Update All Copies"}
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {editable && (

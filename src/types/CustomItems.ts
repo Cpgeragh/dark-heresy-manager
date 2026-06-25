@@ -7,6 +7,7 @@ import type {
   CyberneticItem,
   DrugItem,
   GearItem,
+  GrenadeItem,
   MeleeWeapon,
   RangedWeapon,
   ShieldItem,
@@ -84,7 +85,23 @@ export type CustomMeleeWeaponData = Omit<
   weaponKind: "melee";
 };
 
-export type CustomWeaponData = CustomRangedWeaponData | CustomMeleeWeaponData;
+export type CustomGrenadeData = Omit<
+  GrenadeItem,
+  | "id"
+  | "referenceId"
+  | "customLibraryId"
+  | "customLibraryVersionId"
+  | "equipped"
+  | "quantity"
+  | "custom"
+> & {
+  weaponKind: "grenade";
+};
+
+export type CustomWeaponData =
+  | CustomRangedWeaponData
+  | CustomMeleeWeaponData
+  | CustomGrenadeData;
 
 export type CustomArmourData =
   | (Omit<

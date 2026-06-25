@@ -12,15 +12,25 @@ import { Button } from "../../../ui/Button";
 import { InfoModal } from "../../../components/InfoModal";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
+import type { CampaignCustomItem } from "../../../types/CustomItems";
 
 interface Props {
   editable?: boolean;
+  customItems?: CampaignCustomItem<"archeotech">[];
   onSelect: (ref: ArcheotechRef, gmValue?: string, gmRarity?: string) => void;
+  onSelectCustomItem?: (item: CampaignCustomItem<"archeotech">) => void;
   onCustom: () => void;
   onClose: () => void;
 }
 
-export function ArcheotechPickerModal({ editable = true, onSelect, onCustom, onClose }: Props) {
+export function ArcheotechPickerModal({
+  editable = true,
+  customItems = [],
+  onSelect,
+  onSelectCustomItem,
+  onCustom,
+  onClose,
+}: Props) {
   const [query, setQuery] = useState("");
   const [pending, setPending] = useState<ArcheotechRef | null>(null);
   const [gmCost, setGmCost] = useState("");
@@ -37,6 +47,18 @@ export function ArcheotechPickerModal({ editable = true, onSelect, onCustom, onC
       )
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [query]);
+  const filteredCustom = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+    return customItems
+      .filter((item) => item.status !== "archived")
+      .filter(
+        (item) =>
+          !normalizedQuery ||
+          item.name.toLowerCase().includes(normalizedQuery) ||
+          item.data.type?.toLowerCase().includes(normalizedQuery)
+      )
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [customItems, query]);
 
   const isUnknownMeta = (value?: string) => {
     const normalized = value?.trim().toLowerCase();
@@ -72,7 +94,7 @@ export function ArcheotechPickerModal({ editable = true, onSelect, onCustom, onC
       onQueryChange={setQuery}
       onClose={pending ? () => setPending(null) : onClose}
       closeLabel={pending ? "←" : "×"}
-      isEmpty={!pending && filtered.length === 0}
+      isEmpty={!pending && filtered.length === 0 && filteredCustom.length === 0}
       hideSearch={!!pending}
       filterRow={
         !pending && editable ? (
@@ -142,7 +164,49 @@ export function ArcheotechPickerModal({ editable = true, onSelect, onCustom, onC
         </div>
       ) : (
         // ── Step 1: Search list ──────────────────────────────────────────────
-        filtered.map((ref) => (
+        <>
+        {filteredCustom.map((item) => (
+          <div
+            key={`custom-${item.id}`}
+            role="button"
+            tabIndex={editable ? 0 : -1}
+            onClick={editable && onSelectCustomItem ? () => onSelectCustomItem(item) : undefined}
+            className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
+          >
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span
+                className={`text-sm lg:text-base font-medium text-slate-200 truncate ${editable ? "group-hover:text-white" : ""}`}
+              >
+                {item.name}
+              </span>
+              {item.status === "draft" && (
+                <span className="shrink-0 rounded border border-amber-400/40 bg-amber-500/10 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-amber-300">
+                  Draft
+                </span>
+              )}
+              {item.data.description && (
+                <span className="inline-flex items-center -translate-y-[1.4px]" onClick={(e) => e.stopPropagation()}>
+                  <InfoModal
+                    title={item.name}
+                    content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{item.data.description}</p>}
+                  />
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-2 text-xs lg:text-sm mt-0.5 flex-wrap">
+              {item.data.type && <span className={uiTextMuted}>{item.data.type}</span>}
+              <ItemMetaChips
+                bare
+                weight={item.data.weight}
+                value={item.data.value}
+                availability={item.data.availability}
+                source={item.data.source}
+              />
+            </div>
+          </div>
+        ))}
+
+        {filtered.map((ref) => (
           <button
             key={ref.id}
             onClick={editable ? () => handleRowClick(ref) : undefined}
@@ -177,7 +241,8 @@ export function ArcheotechPickerModal({ editable = true, onSelect, onCustom, onC
               )}
             </div>
           </button>
-        ))
+        ))}
+        </>
       )}
     </PickerModal>
   );

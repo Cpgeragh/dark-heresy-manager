@@ -474,6 +474,11 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
 
           {activeTab === "weapons" && (
             <WeaponsTab
+              campaignId={path.campaignId}
+              characterId={character.id}
+              userId={effectiveUserId}
+              characterName={character.header.characterName}
+              isDM={isDM}
               rangedWeapons={character.rangedWeapons}
               meleeWeapons={character.meleeWeapons}
               grenades={character.grenades ?? []}
@@ -492,6 +497,11 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
 
           {activeTab === "armour" && (
             <ArmourTab
+              campaignId={path.campaignId}
+              characterId={character.id}
+              userId={effectiveUserId}
+              characterName={character.header.characterName}
+              isDM={isDM}
               armour={character.armour}
               toughnessBonus={Math.floor(getCharTotal("t") / CHARACTERISTIC_BONUS_DIVISOR)}
               editable={allowedToEdit}
@@ -582,6 +592,11 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
 
           {activeTab === "archeotech" && (
             <ArcheotechTab
+              campaignId={path.campaignId}
+              characterId={character.id}
+              userId={effectiveUserId}
+              characterName={character.header.characterName}
+              isDM={isDM}
               archeotech={character.archeotech ?? []}
               editable={allowedToEdit}
               onUpdate={handleUpdateArcheotech}

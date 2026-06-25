@@ -2,7 +2,7 @@
 // Orchestration layer: state management and layout for all weapon categories.
 // Card components, pickers and helpers live in ./weapons/.
 
-import { useState, useCallback, useRef, Fragment } from "react";
+import { useState, useCallback, useRef, Fragment, useMemo } from "react";
 import type { TouchEvent } from "react";
 import type {
   RangedWeapon,
@@ -14,6 +14,12 @@ import type {
   ArcheotechItem,
   WeaponCraftsmanship,
 } from "../../types/Character";
+import type {
+  CampaignCustomItem,
+  CustomArmourData,
+  CustomGrenadeData,
+  CustomWeaponData,
+} from "../../types/CustomItems";
 import { CYBERNETICS_REFERENCE } from "../../data/reference/cyberneticsReference";
 import { ARCHEOTECH_REFERENCE } from "../../data/reference/archeotechReference";
 import {
@@ -41,10 +47,24 @@ import {
 } from "../../utils/weaponUtils";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { uiTextPlaceholder } from "../../ui/editableStyles";
+import { useCampaignCustomItems } from "../../hooks/useCampaignCustomItems";
+import {
+  archiveCustomItem,
+  createDraftCustomItem,
+  publishCustomItem,
+  saveDraftCustomItem,
+  updateAllCustomItemCopies,
+} from "../../services/customItemService";
+import { useToast } from "../../components/Toast";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface WeaponsTabProps {
+  campaignId: string;
+  characterId: string;
+  userId: string | null;
+  characterName?: string;
+  isDM: boolean;
   rangedWeapons: RangedWeapon[];
   meleeWeapons: MeleeWeapon[];
   grenades: GrenadeItem[];
@@ -59,6 +79,18 @@ interface WeaponsTabProps {
   archeotech?: ArcheotechItem[];
   onUpdateArcheotech?: (next: ArcheotechItem[]) => void;
 }
+
+type EditingWeaponDefinition =
+  | { kind: "ranged"; weapon: RangedWeapon; libraryItem: CampaignCustomItem<"weapon"> }
+  | { kind: "melee"; weapon: MeleeWeapon; libraryItem: CampaignCustomItem<"weapon"> }
+  | { kind: "grenade"; weapon: GrenadeItem; libraryItem: CampaignCustomItem<"weapon"> };
+
+type EditingShieldDefinition = {
+  shield: ShieldItem;
+  libraryItem: CampaignCustomItem<"armour">;
+};
+
+type WeaponLibraryAction = "publish" | "archive" | "updateAll";
 
 type PickerTarget = "ranged" | "melee" | "integrated" | "grenades" | "shields" | null;
 type WeaponMobileSection = NonNullable<PickerTarget>;
@@ -116,6 +148,11 @@ function getMeleeSlots(weapon: MeleeWeapon): number {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export function WeaponsTab({
+  campaignId,
+  characterId,
+  userId,
+  characterName,
+  isDM,
   rangedWeapons,
   meleeWeapons,
   grenades,
@@ -141,7 +178,57 @@ export function WeaponsTab({
   const [weaponSectionTransition, setWeaponSectionTransition] = useState<"idle" | "sliding">(
     "idle"
   );
+  const [editingWeaponDefinition, setEditingWeaponDefinition] =
+    useState<EditingWeaponDefinition | null>(null);
+  const [editingShieldDefinition, setEditingShieldDefinition] =
+    useState<EditingShieldDefinition | null>(null);
+  const [busyLibraryAction, setBusyLibraryAction] = useState<{
+    itemId: string;
+    action: WeaponLibraryAction;
+  } | null>(null);
   const touchStartX = useRef<number | null>(null);
+  const toast = useToast();
+
+  const { items: campaignCustomWeaponItems } = useCampaignCustomItems({
+    campaignId,
+    category: "weapon",
+    mode: isDM ? "admin" : "picker",
+    userId,
+    characterId,
+    includeArchived: isDM,
+  });
+  const campaignCustomWeapons = useMemo(
+    () => campaignCustomWeaponItems as CampaignCustomItem<"weapon">[],
+    [campaignCustomWeaponItems]
+  );
+  const campaignCustomWeaponsById = useMemo(
+    () => new Map(campaignCustomWeapons.map((item) => [item.id, item])),
+    [campaignCustomWeapons]
+  );
+  const campaignCustomGrenades = useMemo(
+    () => campaignCustomWeapons.filter((item) => item.data.weaponKind === "grenade"),
+    [campaignCustomWeapons]
+  );
+  const { items: campaignCustomArmourItems } = useCampaignCustomItems({
+    campaignId,
+    category: "armour",
+    mode: isDM ? "admin" : "picker",
+    userId,
+    characterId,
+    includeArchived: isDM,
+  });
+  const campaignCustomArmour = useMemo(
+    () => campaignCustomArmourItems as CampaignCustomItem<"armour">[],
+    [campaignCustomArmourItems]
+  );
+  const campaignCustomArmourById = useMemo(
+    () => new Map(campaignCustomArmour.map((item) => [item.id, item])),
+    [campaignCustomArmour]
+  );
+  const campaignCustomShields = useMemo(
+    () => campaignCustomArmour.filter((item) => item.data.armourKind === "shield"),
+    [campaignCustomArmour]
+  );
 
   // ── Archeotech weapons ─────────────────────────────────────────────────────
   const archeotechGrenadeItems = (archeotech ?? []).filter((a) => a.type === "Grenade");
@@ -284,12 +371,34 @@ export function WeaponsTab({
   );
 
   const addCustomGrenade = useCallback(
-    (item: GrenadeItem) => {
+    async (item: GrenadeItem) => {
       if (!editable) return;
-      onUpdateGrenades([...grenades, item]);
-      setShowCustomGrenade(false);
+      if (!userId) {
+        toast.error("You must be signed in to create campaign custom grenades.");
+        return;
+      }
+
+      try {
+        const data = toCustomGrenadeData(item);
+        const { customItemId, versionId } = await createDraftCustomItem({
+          campaignId,
+          category: "weapon",
+          creator: { userId, characterId, characterName },
+          data,
+        });
+
+        onUpdateGrenades([
+          ...grenades,
+          buildGrenadeSnapshot(item.id, item, data, customItemId, versionId),
+        ]);
+        setShowCustomGrenade(false);
+        toast.success("Custom grenade saved as a campaign draft.");
+      } catch (err) {
+        console.error("Failed to create custom grenade:", err);
+        toast.error("Failed to save custom grenade.");
+      }
     },
-    [editable, grenades, onUpdateGrenades]
+    [campaignId, characterId, characterName, editable, grenades, onUpdateGrenades, toast, userId]
   );
 
   const removeGrenade = useCallback(
@@ -344,27 +453,71 @@ export function WeaponsTab({
   );
 
   const addCustomRanged = useCallback(
-    (weapon: RangedWeapon) => {
+    async (weapon: RangedWeapon) => {
       if (!editable) return;
-      onUpdateRanged([
-        ...rangedWeapons,
-        { ...weapon, craftsmanship: weapon.craftsmanship ?? "Common" },
-      ]);
-      setShowCustomRanged(false);
+      if (!userId) {
+        toast.error("You must be signed in to create campaign custom weapons.");
+        return;
+      }
+
+      try {
+        const nextWeapon = { ...weapon, craftsmanship: weapon.craftsmanship ?? "Common" };
+        const data = toCustomRangedWeaponData(nextWeapon);
+        const { customItemId, versionId } = await createDraftCustomItem({
+          campaignId,
+          category: "weapon",
+          creator: { userId, characterId, characterName },
+          data,
+        });
+
+        onUpdateRanged([
+          ...rangedWeapons,
+          buildRangedWeaponSnapshot(nextWeapon.id, nextWeapon, data, customItemId, versionId),
+        ]);
+        setShowCustomRanged(false);
+        toast.success("Custom ranged weapon saved as a campaign draft.");
+      } catch (err) {
+        console.error("Failed to create custom ranged weapon:", err);
+        toast.error("Failed to save custom ranged weapon.");
+      }
     },
-    [editable, rangedWeapons, onUpdateRanged]
+    [campaignId, characterId, characterName, editable, onUpdateRanged, rangedWeapons, toast, userId]
   );
 
   const addCustomIntegratedRanged = useCallback(
-    (weapon: RangedWeapon) => {
+    async (weapon: RangedWeapon) => {
       if (!editable) return;
-      onUpdateRanged([
-        ...rangedWeapons,
-        { ...weapon, integrated: true, craftsmanship: weapon.craftsmanship ?? "Common" },
-      ]);
-      setShowCustomIntegratedRanged(false);
+      if (!userId) {
+        toast.error("You must be signed in to create campaign custom weapons.");
+        return;
+      }
+
+      try {
+        const nextWeapon = {
+          ...weapon,
+          integrated: true,
+          craftsmanship: weapon.craftsmanship ?? "Common",
+        };
+        const data = toCustomRangedWeaponData(nextWeapon);
+        const { customItemId, versionId } = await createDraftCustomItem({
+          campaignId,
+          category: "weapon",
+          creator: { userId, characterId, characterName },
+          data,
+        });
+
+        onUpdateRanged([
+          ...rangedWeapons,
+          buildRangedWeaponSnapshot(nextWeapon.id, nextWeapon, data, customItemId, versionId),
+        ]);
+        setShowCustomIntegratedRanged(false);
+        toast.success("Custom integrated ranged weapon saved as a campaign draft.");
+      } catch (err) {
+        console.error("Failed to create custom integrated ranged weapon:", err);
+        toast.error("Failed to save custom integrated ranged weapon.");
+      }
     },
-    [editable, rangedWeapons, onUpdateRanged]
+    [campaignId, characterId, characterName, editable, onUpdateRanged, rangedWeapons, toast, userId]
   );
 
   const removeRanged = useCallback(
@@ -457,27 +610,404 @@ export function WeaponsTab({
   );
 
   const addCustomMelee = useCallback(
-    (weapon: MeleeWeapon) => {
+    async (weapon: MeleeWeapon) => {
       if (!editable) return;
-      onUpdateMelee([
-        ...meleeWeapons,
-        { ...weapon, craftsmanship: weapon.craftsmanship ?? "Common" },
-      ]);
-      setShowCustomMelee(false);
+      if (!userId) {
+        toast.error("You must be signed in to create campaign custom weapons.");
+        return;
+      }
+
+      try {
+        const nextWeapon = { ...weapon, craftsmanship: weapon.craftsmanship ?? "Common" };
+        const data = toCustomMeleeWeaponData(nextWeapon);
+        const { customItemId, versionId } = await createDraftCustomItem({
+          campaignId,
+          category: "weapon",
+          creator: { userId, characterId, characterName },
+          data,
+        });
+
+        onUpdateMelee([
+          ...meleeWeapons,
+          buildMeleeWeaponSnapshot(nextWeapon.id, nextWeapon, data, customItemId, versionId),
+        ]);
+        setShowCustomMelee(false);
+        toast.success("Custom melee weapon saved as a campaign draft.");
+      } catch (err) {
+        console.error("Failed to create custom melee weapon:", err);
+        toast.error("Failed to save custom melee weapon.");
+      }
     },
-    [editable, meleeWeapons, onUpdateMelee]
+    [campaignId, characterId, characterName, editable, meleeWeapons, onUpdateMelee, toast, userId]
   );
 
   const addCustomIntegratedMelee = useCallback(
-    (weapon: MeleeWeapon) => {
+    async (weapon: MeleeWeapon) => {
       if (!editable) return;
+      if (!userId) {
+        toast.error("You must be signed in to create campaign custom weapons.");
+        return;
+      }
+
+      try {
+        const nextWeapon = {
+          ...weapon,
+          integrated: true,
+          craftsmanship: weapon.craftsmanship ?? "Common",
+        };
+        const data = toCustomMeleeWeaponData(nextWeapon);
+        const { customItemId, versionId } = await createDraftCustomItem({
+          campaignId,
+          category: "weapon",
+          creator: { userId, characterId, characterName },
+          data,
+        });
+
+        onUpdateMelee([
+          ...meleeWeapons,
+          buildMeleeWeaponSnapshot(nextWeapon.id, nextWeapon, data, customItemId, versionId),
+        ]);
+        setShowCustomIntegratedMelee(false);
+        toast.success("Custom integrated melee weapon saved as a campaign draft.");
+      } catch (err) {
+        console.error("Failed to create custom integrated melee weapon:", err);
+        toast.error("Failed to save custom integrated melee weapon.");
+      }
+    },
+    [campaignId, characterId, characterName, editable, meleeWeapons, onUpdateMelee, toast, userId]
+  );
+
+  const addWeaponFromLibrary = useCallback(
+    (libraryItem: CampaignCustomItem<"weapon">) => {
+      if (!editable) return;
+
+      const versionId =
+        libraryItem.status === "published"
+          ? libraryItem.publishedVersionId
+          : libraryItem.draftVersionId ?? libraryItem.latestVersionId;
+
+      if (!versionId) {
+        toast.error("This custom weapon has no usable version.");
+        return;
+      }
+
+      if (libraryItem.data.weaponKind === "ranged") {
+        onUpdateRanged([
+          ...rangedWeapons,
+          buildRangedWeaponSnapshot(
+            crypto.randomUUID(),
+            {},
+            libraryItem.data,
+            libraryItem.id,
+            versionId
+          ),
+        ]);
+        setPicker(null);
+        return;
+      }
+
+      if (libraryItem.data.weaponKind === "grenade") {
+        onUpdateGrenades([
+          ...grenades,
+          buildGrenadeSnapshot(crypto.randomUUID(), {}, libraryItem.data, libraryItem.id, versionId),
+        ]);
+        setPicker(null);
+        return;
+      }
+
       onUpdateMelee([
         ...meleeWeapons,
-        { ...weapon, integrated: true, craftsmanship: weapon.craftsmanship ?? "Common" },
+        buildMeleeWeaponSnapshot(crypto.randomUUID(), {}, libraryItem.data, libraryItem.id, versionId),
       ]);
-      setShowCustomIntegratedMelee(false);
+      setPicker(null);
     },
-    [editable, meleeWeapons, onUpdateMelee]
+    [editable, grenades, meleeWeapons, onUpdateGrenades, onUpdateMelee, onUpdateRanged, rangedWeapons, toast]
+  );
+
+  const addShieldFromLibrary = useCallback(
+    (libraryItem: CampaignCustomItem<"armour">) => {
+      if (!editable || !onUpdateShields) return;
+
+      const versionId =
+        libraryItem.status === "published"
+          ? libraryItem.publishedVersionId
+          : libraryItem.draftVersionId ?? libraryItem.latestVersionId;
+
+      if (!versionId) {
+        toast.error("This custom shield has no usable version.");
+        return;
+      }
+
+      if (libraryItem.data.armourKind !== "shield") return;
+
+      onUpdateShields([
+        ...(shields ?? []),
+        buildShieldSnapshot(crypto.randomUUID(), {}, libraryItem.data, libraryItem.id, versionId),
+      ]);
+      setPicker(null);
+    },
+    [editable, onUpdateShields, shields, toast]
+  );
+
+  const saveEditedWeaponDefinition = useCallback(
+    async (weapon: RangedWeapon | MeleeWeapon | GrenadeItem) => {
+      if (!editingWeaponDefinition || !userId) return;
+
+      try {
+        const data =
+          editingWeaponDefinition.kind === "ranged"
+            ? toCustomRangedWeaponData(weapon as RangedWeapon)
+            : editingWeaponDefinition.kind === "melee"
+              ? toCustomMeleeWeaponData(weapon as MeleeWeapon)
+              : toCustomGrenadeData(weapon as GrenadeItem);
+        const versionId = await saveDraftCustomItem({
+          campaignId,
+          customItemId: editingWeaponDefinition.libraryItem.id,
+          editor: { userId, characterId, characterName },
+          data,
+        });
+
+        if (editingWeaponDefinition.kind === "ranged" && data.weaponKind === "ranged") {
+          onUpdateRanged(
+            rangedWeapons.map((rangedWeapon) =>
+              rangedWeapon.id === editingWeaponDefinition.weapon.id
+                ? buildRangedWeaponSnapshot(
+                    rangedWeapon.id,
+                    rangedWeapon,
+                    data,
+                    editingWeaponDefinition.libraryItem.id,
+                    versionId
+                  )
+                : rangedWeapon
+            )
+          );
+        } else if (editingWeaponDefinition.kind === "melee" && data.weaponKind === "melee") {
+          onUpdateMelee(
+            meleeWeapons.map((meleeWeapon) =>
+              meleeWeapon.id === editingWeaponDefinition.weapon.id
+                ? buildMeleeWeaponSnapshot(
+                    meleeWeapon.id,
+                    meleeWeapon,
+                    data,
+                    editingWeaponDefinition.libraryItem.id,
+                    versionId
+                  )
+                : meleeWeapon
+            )
+          );
+        } else if (editingWeaponDefinition.kind === "grenade" && data.weaponKind === "grenade") {
+          onUpdateGrenades(
+            grenades.map((grenade) =>
+              grenade.id === editingWeaponDefinition.weapon.id
+                ? buildGrenadeSnapshot(
+                    grenade.id,
+                    grenade,
+                    data,
+                    editingWeaponDefinition.libraryItem.id,
+                    versionId
+                  )
+                : grenade
+            )
+          );
+        }
+
+        setEditingWeaponDefinition(null);
+        toast.success("Custom weapon draft updated.");
+      } catch (err) {
+        console.error("Failed to update custom weapon definition:", err);
+        toast.error("Failed to update custom weapon definition.");
+      }
+    },
+    [
+      campaignId,
+      characterId,
+      characterName,
+      editingWeaponDefinition,
+      grenades,
+      meleeWeapons,
+      onUpdateGrenades,
+      onUpdateMelee,
+      onUpdateRanged,
+      rangedWeapons,
+      toast,
+      userId,
+    ]
+  );
+
+  const saveEditedShieldDefinition = useCallback(
+    async (shield: ShieldItem) => {
+      if (!editingShieldDefinition || !userId || !onUpdateShields) return;
+
+      try {
+        const data = toCustomShieldData(shield);
+        const versionId = await saveDraftCustomItem({
+          campaignId,
+          customItemId: editingShieldDefinition.libraryItem.id,
+          editor: { userId, characterId, characterName },
+          data,
+        });
+
+        onUpdateShields(
+          (shields ?? []).map((currentShield) =>
+            currentShield.id === editingShieldDefinition.shield.id
+              ? buildShieldSnapshot(
+                  currentShield.id,
+                  currentShield,
+                  data,
+                  editingShieldDefinition.libraryItem.id,
+                  versionId
+                )
+              : currentShield
+          )
+        );
+
+        setEditingShieldDefinition(null);
+        toast.success("Custom shield draft updated.");
+      } catch (err) {
+        console.error("Failed to update custom shield definition:", err);
+        toast.error("Failed to update custom shield definition.");
+      }
+    },
+    [
+      campaignId,
+      characterId,
+      characterName,
+      editingShieldDefinition,
+      onUpdateShields,
+      shields,
+      toast,
+      userId,
+    ]
+  );
+
+  const publishWeaponDefinition = useCallback(
+    async (libraryItem: CampaignCustomItem<"weapon">) => {
+      if (!userId) return;
+      setBusyLibraryAction({ itemId: libraryItem.id, action: "publish" });
+      try {
+        await publishCustomItem({
+          campaignId,
+          customItemId: libraryItem.id,
+          actorUserId: userId,
+          versionId: libraryItem.draftVersionId ?? libraryItem.latestVersionId,
+        });
+        toast.success("Custom weapon published.");
+      } catch (err) {
+        console.error("Failed to publish custom weapon:", err);
+        toast.error("Failed to publish custom weapon.");
+      } finally {
+        setBusyLibraryAction(null);
+      }
+    },
+    [campaignId, toast, userId]
+  );
+
+  const archiveWeaponDefinition = useCallback(
+    async (libraryItem: CampaignCustomItem<"weapon">) => {
+      if (!userId) return;
+      setBusyLibraryAction({ itemId: libraryItem.id, action: "archive" });
+      try {
+        await archiveCustomItem({
+          campaignId,
+          customItemId: libraryItem.id,
+          actorUserId: userId,
+        });
+        toast.success("Custom weapon archived.");
+      } catch (err) {
+        console.error("Failed to archive custom weapon:", err);
+        toast.error("Failed to archive custom weapon.");
+      } finally {
+        setBusyLibraryAction(null);
+      }
+    },
+    [campaignId, toast, userId]
+  );
+
+  const updateAllWeaponCopies = useCallback(
+    async (libraryItem: CampaignCustomItem<"weapon">) => {
+      if (!userId) return;
+      setBusyLibraryAction({ itemId: libraryItem.id, action: "updateAll" });
+      try {
+        const updatedCopies = await updateAllCustomItemCopies({
+          campaignId,
+          customItemId: libraryItem.id,
+          actorUserId: userId,
+          versionId: libraryItem.publishedVersionId ?? libraryItem.latestVersionId,
+        });
+        toast.success(`Updated ${updatedCopies} weapon ${updatedCopies === 1 ? "copy" : "copies"}.`);
+      } catch (err) {
+        console.error("Failed to update custom weapon copies:", err);
+        toast.error("Failed to update custom weapon copies.");
+      } finally {
+        setBusyLibraryAction(null);
+      }
+    },
+    [campaignId, toast, userId]
+  );
+
+  const publishShieldDefinition = useCallback(
+    async (libraryItem: CampaignCustomItem<"armour">) => {
+      if (!userId) return;
+      setBusyLibraryAction({ itemId: libraryItem.id, action: "publish" });
+      try {
+        await publishCustomItem({
+          campaignId,
+          customItemId: libraryItem.id,
+          actorUserId: userId,
+          versionId: libraryItem.draftVersionId ?? libraryItem.latestVersionId,
+        });
+        toast.success("Custom shield published.");
+      } catch (err) {
+        console.error("Failed to publish custom shield:", err);
+        toast.error("Failed to publish custom shield.");
+      } finally {
+        setBusyLibraryAction(null);
+      }
+    },
+    [campaignId, toast, userId]
+  );
+
+  const archiveShieldDefinition = useCallback(
+    async (libraryItem: CampaignCustomItem<"armour">) => {
+      if (!userId) return;
+      setBusyLibraryAction({ itemId: libraryItem.id, action: "archive" });
+      try {
+        await archiveCustomItem({
+          campaignId,
+          customItemId: libraryItem.id,
+          actorUserId: userId,
+        });
+        toast.success("Custom shield archived.");
+      } catch (err) {
+        console.error("Failed to archive custom shield:", err);
+        toast.error("Failed to archive custom shield.");
+      } finally {
+        setBusyLibraryAction(null);
+      }
+    },
+    [campaignId, toast, userId]
+  );
+
+  const updateAllShieldCopies = useCallback(
+    async (libraryItem: CampaignCustomItem<"armour">) => {
+      if (!userId) return;
+      setBusyLibraryAction({ itemId: libraryItem.id, action: "updateAll" });
+      try {
+        const updatedCopies = await updateAllCustomItemCopies({
+          campaignId,
+          customItemId: libraryItem.id,
+          actorUserId: userId,
+          versionId: libraryItem.publishedVersionId ?? libraryItem.latestVersionId,
+        });
+        toast.success(`Updated ${updatedCopies} shield ${updatedCopies === 1 ? "copy" : "copies"}.`);
+      } catch (err) {
+        console.error("Failed to update custom shield copies:", err);
+        toast.error("Failed to update custom shield copies.");
+      } finally {
+        setBusyLibraryAction(null);
+      }
+    },
+    [campaignId, toast, userId]
   );
 
   const removeMelee = useCallback(
@@ -558,12 +1088,43 @@ export function WeaponsTab({
   );
 
   const addCustomShield = useCallback(
-    (item: ShieldItem) => {
+    async (item: ShieldItem) => {
       if (!editable || !onUpdateShields) return;
-      onUpdateShields([...(shields ?? []), item]);
-      setShowCustomShield(false);
+      if (!userId) {
+        toast.error("You must be signed in to create campaign custom shields.");
+        return;
+      }
+
+      try {
+        const data = toCustomShieldData(item);
+        const { customItemId, versionId } = await createDraftCustomItem({
+          campaignId,
+          category: "armour",
+          creator: { userId, characterId, characterName },
+          data,
+        });
+
+        onUpdateShields([
+          ...(shields ?? []),
+          buildShieldSnapshot(item.id, item, data, customItemId, versionId),
+        ]);
+        setShowCustomShield(false);
+        toast.success("Custom shield saved as a campaign draft.");
+      } catch (err) {
+        console.error("Failed to create custom shield:", err);
+        toast.error("Failed to save custom shield.");
+      }
     },
-    [editable, shields, onUpdateShields]
+    [
+      campaignId,
+      characterId,
+      characterName,
+      editable,
+      onUpdateShields,
+      shields,
+      toast,
+      userId,
+    ]
   );
 
   const removeShield = useCallback(
@@ -676,6 +1237,183 @@ export function WeaponsTab({
     activeWeaponSection === "ranged" || activeWeaponSection === "melee" ? "" : "hidden lg:grid",
   ].join(" ");
 
+  const getLibraryItemForWeapon = useCallback(
+    (weapon: RangedWeapon | MeleeWeapon, kind: "ranged" | "melee") => {
+      const linkedLibraryItem = weapon.customLibraryId
+        ? campaignCustomWeaponsById.get(weapon.customLibraryId)
+        : undefined;
+      return (
+        linkedLibraryItem ??
+        (weapon.customLibraryId
+          ? buildFallbackWeaponLibraryItem({
+              campaignId,
+              weapon,
+              kind,
+              userId,
+              characterId,
+              characterName,
+            })
+          : undefined)
+      );
+    },
+    [campaignCustomWeaponsById, campaignId, characterId, characterName, userId]
+  );
+
+  const getWeaponLibraryProps = useCallback(
+    (weapon: RangedWeapon | MeleeWeapon, kind: "ranged" | "melee") => {
+      const libraryItem = getLibraryItemForWeapon(weapon, kind);
+      const canEditDefinition =
+        !!libraryItem &&
+        editable &&
+        (isDM || (!!userId && libraryItem.creator.userId === userId));
+      const rowBusyAction =
+        busyLibraryAction && libraryItem && busyLibraryAction.itemId === libraryItem.id
+          ? busyLibraryAction.action
+          : null;
+
+      return {
+        libraryItem,
+        isDM: isDM && editable,
+        canEditDefinition,
+        busyAction: rowBusyAction,
+        onEditDefinition: () =>
+          libraryItem &&
+          setEditingWeaponDefinition(
+            kind === "ranged"
+              ? { kind, weapon: weapon as RangedWeapon, libraryItem }
+              : { kind, weapon: weapon as MeleeWeapon, libraryItem }
+          ),
+        onPublish: () => libraryItem && publishWeaponDefinition(libraryItem),
+        onArchive: () => libraryItem && archiveWeaponDefinition(libraryItem),
+        onUpdateAllCopies: () => libraryItem && updateAllWeaponCopies(libraryItem),
+      };
+    },
+    [
+      archiveWeaponDefinition,
+      busyLibraryAction,
+      editable,
+      getLibraryItemForWeapon,
+      isDM,
+      publishWeaponDefinition,
+      updateAllWeaponCopies,
+      userId,
+    ]
+  );
+
+  const getLibraryItemForGrenade = useCallback(
+    (grenade: GrenadeItem) => {
+      const linkedLibraryItem = grenade.customLibraryId
+        ? campaignCustomWeaponsById.get(grenade.customLibraryId)
+        : undefined;
+      return (
+        linkedLibraryItem ??
+        (grenade.customLibraryId
+          ? buildFallbackGrenadeLibraryItem({
+              campaignId,
+              grenade,
+              userId,
+              characterId,
+              characterName,
+            })
+          : undefined)
+      );
+    },
+    [campaignCustomWeaponsById, campaignId, characterId, characterName, userId]
+  );
+
+  const getGrenadeLibraryProps = useCallback(
+    (grenade: GrenadeItem) => {
+      const libraryItem = getLibraryItemForGrenade(grenade);
+      const canEditDefinition =
+        !!libraryItem &&
+        editable &&
+        (isDM || (!!userId && libraryItem.creator.userId === userId));
+      const rowBusyAction =
+        busyLibraryAction && libraryItem && busyLibraryAction.itemId === libraryItem.id
+          ? busyLibraryAction.action
+          : null;
+
+      return {
+        libraryItem,
+        isDM: isDM && editable,
+        canEditDefinition,
+        busyAction: rowBusyAction,
+        onEditDefinition: () =>
+          libraryItem && setEditingWeaponDefinition({ kind: "grenade", weapon: grenade, libraryItem }),
+        onPublish: () => libraryItem && publishWeaponDefinition(libraryItem),
+        onArchive: () => libraryItem && archiveWeaponDefinition(libraryItem),
+        onUpdateAllCopies: () => libraryItem && updateAllWeaponCopies(libraryItem),
+      };
+    },
+    [
+      archiveWeaponDefinition,
+      busyLibraryAction,
+      editable,
+      getLibraryItemForGrenade,
+      isDM,
+      publishWeaponDefinition,
+      updateAllWeaponCopies,
+      userId,
+    ]
+  );
+
+  const getLibraryItemForShield = useCallback(
+    (shield: ShieldItem) => {
+      const linkedLibraryItem = shield.customLibraryId
+        ? campaignCustomArmourById.get(shield.customLibraryId)
+        : undefined;
+      return (
+        linkedLibraryItem ??
+        (shield.customLibraryId
+          ? buildFallbackShieldLibraryItem({
+              campaignId,
+              shield,
+              userId,
+              characterId,
+              characterName,
+            })
+          : undefined)
+      );
+    },
+    [campaignCustomArmourById, campaignId, characterId, characterName, userId]
+  );
+
+  const getShieldLibraryProps = useCallback(
+    (shield: ShieldItem) => {
+      const libraryItem = getLibraryItemForShield(shield);
+      const canEditDefinition =
+        !!libraryItem &&
+        editable &&
+        (isDM || (!!userId && libraryItem.creator.userId === userId));
+      const rowBusyAction =
+        busyLibraryAction && libraryItem && busyLibraryAction.itemId === libraryItem.id
+          ? busyLibraryAction.action
+          : null;
+
+      return {
+        libraryItem,
+        isDM: isDM && editable,
+        canEditDefinition,
+        busyAction: rowBusyAction,
+        onEditDefinition: () =>
+          libraryItem && setEditingShieldDefinition({ shield, libraryItem }),
+        onPublish: () => libraryItem && publishShieldDefinition(libraryItem),
+        onArchive: () => libraryItem && archiveShieldDefinition(libraryItem),
+        onUpdateAllCopies: () => libraryItem && updateAllShieldCopies(libraryItem),
+      };
+    },
+    [
+      archiveShieldDefinition,
+      busyLibraryAction,
+      editable,
+      getLibraryItemForShield,
+      isDM,
+      publishShieldDefinition,
+      updateAllShieldCopies,
+      userId,
+    ]
+  );
+
   return (
     <div
       className="space-y-8"
@@ -758,6 +1496,7 @@ export function WeaponsTab({
                 key={entry.weapon.id}
                 weapon={entry.weapon}
                 editable={editable}
+                {...getWeaponLibraryProps(entry.weapon, "ranged")}
                 onRemove={() => removeRanged(entry.index)}
                 onAddUpgrade={(upgradeId) => addUpgradeToRanged(entry.weapon.id, upgradeId)}
                 onRemoveUpgrade={(upgradeId) =>
@@ -828,6 +1567,7 @@ export function WeaponsTab({
                 weapon={entry.weapon}
                 editable={editable}
                 strengthBonus={strengthBonus}
+                {...getWeaponLibraryProps(entry.weapon, "melee")}
                 onRemove={() => removeMelee(entry.index)}
                 onAddUpgrade={(upgradeId) => addUpgradeToMelee(entry.weapon.id, upgradeId)}
                 onRemoveUpgrade={(upgradeId) =>
@@ -887,6 +1627,7 @@ export function WeaponsTab({
                   item={item}
                   editable={editable}
                   strengthBonus={strengthBonus}
+                  {...getGrenadeLibraryProps(item)}
                   onRemove={() => removeGrenade(item.id)}
                   onUpdateQty={(qty) => updateGrenadeQty(item.id, qty)}
                   isEquipped={isEquipped}
@@ -933,6 +1674,7 @@ export function WeaponsTab({
                 key={weapon.id}
                 weapon={weapon}
                 editable={editable}
+                {...getWeaponLibraryProps(weapon, "ranged")}
                 onRemove={() => removeRanged(index)}
                 onAddUpgrade={(upgradeId) => addUpgradeToRanged(weapon.id, upgradeId)}
                 onRemoveUpgrade={(upgradeId) => removeUpgradeFromRanged(weapon.id, upgradeId)}
@@ -951,6 +1693,7 @@ export function WeaponsTab({
                 weapon={weapon}
                 editable={editable}
                 strengthBonus={strengthBonus}
+                {...getWeaponLibraryProps(weapon, "melee")}
                 onRemove={() => removeMelee(index)}
                 onAddUpgrade={(upgradeId) => addUpgradeToMelee(weapon.id, upgradeId)}
                 onRemoveUpgrade={(upgradeId) => removeUpgradeFromMelee(weapon.id, upgradeId)}
@@ -991,6 +1734,7 @@ export function WeaponsTab({
                 key={item.id}
                 item={item}
                 editable={editable}
+                {...getShieldLibraryProps(item)}
                 onRemove={() => removeShield(item.id)}
                 isEquipped={item.equipped ?? false}
                 onToggleEquip={() => toggleEquipShield(item.id)}
@@ -1004,7 +1748,9 @@ export function WeaponsTab({
       {picker === "ranged" && (
         <RangedPicker
           editable={editable}
+          customItems={campaignCustomWeapons.filter((item) => item.status !== "archived")}
           onSelect={addFromRangedRef}
+          onSelectCustomItem={addWeaponFromLibrary}
           references={NORMAL_RANGED_REFS}
           onCustom={() => {
             setPicker(null);
@@ -1016,7 +1762,9 @@ export function WeaponsTab({
       {picker === "melee" && (
         <MeleePicker
           editable={editable}
+          customItems={campaignCustomWeapons.filter((item) => item.status !== "archived")}
           onSelect={addFromMeleeRef}
+          onSelectCustomItem={addWeaponFromLibrary}
           references={NORMAL_MELEE_REFS}
           onCustom={() => {
             setPicker(null);
@@ -1045,7 +1793,9 @@ export function WeaponsTab({
         <GrenadePicker
           editable={editable}
           strengthBonus={strengthBonus}
+          customLibraryItems={campaignCustomGrenades}
           onSelect={addFromGrenadeRef}
+          onSelectCustom={addWeaponFromLibrary}
           onCustom={() => {
             setPicker(null);
             setShowCustomGrenade(true);
@@ -1056,7 +1806,9 @@ export function WeaponsTab({
       {picker === "shields" && (
         <ShieldPicker
           editable={editable}
+          customLibraryItems={campaignCustomShields}
           onSelect={addFromShieldRef}
+          onSelectCustom={addShieldFromLibrary}
           onCustom={() => {
             setPicker(null);
             setShowCustomShield(true);
@@ -1092,6 +1844,379 @@ export function WeaponsTab({
           onCancel={() => setShowCustomShield(false)}
         />
       )}
+      {editingWeaponDefinition?.kind === "ranged" && (
+        <CustomRangedForm
+          title="Edit Custom Ranged Weapon"
+          submitLabel="Save Draft"
+          initialWeapon={{
+            id: editingWeaponDefinition.weapon.id,
+            ...stripWeaponKind(editingWeaponDefinition.libraryItem.data),
+            ammoEntries: editingWeaponDefinition.weapon.ammoEntries,
+            upgrades: editingWeaponDefinition.weapon.upgrades,
+            quantity: editingWeaponDefinition.weapon.quantity,
+            equipped: editingWeaponDefinition.weapon.equipped,
+            customLibraryId: editingWeaponDefinition.libraryItem.id,
+            customLibraryVersionId:
+              editingWeaponDefinition.libraryItem.draftVersionId ??
+              editingWeaponDefinition.libraryItem.latestVersionId,
+          }}
+          onAdd={saveEditedWeaponDefinition}
+          onCancel={() => setEditingWeaponDefinition(null)}
+        />
+      )}
+      {editingWeaponDefinition?.kind === "melee" && (
+        <CustomMeleeForm
+          title="Edit Custom Melee Weapon"
+          submitLabel="Save Draft"
+          initialWeapon={{
+            id: editingWeaponDefinition.weapon.id,
+            ...stripWeaponKind(editingWeaponDefinition.libraryItem.data),
+            upgrades: editingWeaponDefinition.weapon.upgrades,
+            quantity: editingWeaponDefinition.weapon.quantity,
+            equipped: editingWeaponDefinition.weapon.equipped,
+            customLibraryId: editingWeaponDefinition.libraryItem.id,
+            customLibraryVersionId:
+              editingWeaponDefinition.libraryItem.draftVersionId ??
+              editingWeaponDefinition.libraryItem.latestVersionId,
+          }}
+          onAdd={saveEditedWeaponDefinition}
+          onCancel={() => setEditingWeaponDefinition(null)}
+        />
+      )}
+      {editingWeaponDefinition?.kind === "grenade" && (
+        <CustomGrenadeForm
+          title="Edit Custom Grenade or Mine"
+          submitLabel="Save Draft"
+          initialGrenade={{
+            id: editingWeaponDefinition.weapon.id,
+            ...stripWeaponKind(editingWeaponDefinition.libraryItem.data),
+            quantity: editingWeaponDefinition.weapon.quantity,
+            equipped: editingWeaponDefinition.weapon.equipped,
+            customLibraryId: editingWeaponDefinition.libraryItem.id,
+            customLibraryVersionId:
+              editingWeaponDefinition.libraryItem.draftVersionId ??
+              editingWeaponDefinition.libraryItem.latestVersionId,
+          }}
+          onAdd={saveEditedWeaponDefinition}
+          onCancel={() => setEditingWeaponDefinition(null)}
+        />
+      )}
+      {editingShieldDefinition?.libraryItem.data.armourKind === "shield" && (
+        <CustomShieldForm
+          title="Edit Custom Shield"
+          submitLabel="Save Draft"
+          initialShield={{
+            id: editingShieldDefinition.shield.id,
+            ...stripArmourKind(editingShieldDefinition.libraryItem.data),
+            equipped: editingShieldDefinition.shield.equipped,
+            customLibraryId: editingShieldDefinition.libraryItem.id,
+            customLibraryVersionId:
+              editingShieldDefinition.libraryItem.draftVersionId ??
+              editingShieldDefinition.libraryItem.latestVersionId,
+          }}
+          onAdd={saveEditedShieldDefinition}
+          onCancel={() => setEditingShieldDefinition(null)}
+        />
+      )}
     </div>
   );
+}
+
+type CustomRangedWeaponData = Extract<CustomWeaponData, { weaponKind: "ranged" }>;
+type CustomMeleeWeaponData = Extract<CustomWeaponData, { weaponKind: "melee" }>;
+type CustomShieldData = Extract<CustomArmourData, { armourKind: "shield" }>;
+
+function toCustomRangedWeaponData(weapon: RangedWeapon): CustomRangedWeaponData {
+  const {
+    id: _id,
+    referenceId: _referenceId,
+    customLibraryId: _customLibraryId,
+    customLibraryVersionId: _customLibraryVersionId,
+    ammoEntries: _ammoEntries,
+    equipped: _equipped,
+    quantity: _quantity,
+    upgrades: _upgrades,
+    ...data
+  } = weapon;
+
+  return {
+    ...data,
+    weaponKind: "ranged",
+  };
+}
+
+function toCustomMeleeWeaponData(weapon: MeleeWeapon): CustomMeleeWeaponData {
+  const {
+    id: _id,
+    referenceId: _referenceId,
+    customLibraryId: _customLibraryId,
+    customLibraryVersionId: _customLibraryVersionId,
+    equipped: _equipped,
+    quantity: _quantity,
+    upgrades: _upgrades,
+    ...data
+  } = weapon;
+
+  return {
+    ...data,
+    weaponKind: "melee",
+  };
+}
+
+function toCustomGrenadeData(grenade: GrenadeItem): CustomGrenadeData {
+  const {
+    id: _id,
+    referenceId: _referenceId,
+    customLibraryId: _customLibraryId,
+    customLibraryVersionId: _customLibraryVersionId,
+    equipped: _equipped,
+    quantity: _quantity,
+    custom: _custom,
+    ...data
+  } = grenade;
+
+  return {
+    ...data,
+    weaponKind: "grenade",
+  };
+}
+
+function toCustomShieldData(shield: ShieldItem): CustomShieldData {
+  const {
+    id: _id,
+    referenceId: _referenceId,
+    customLibraryId: _customLibraryId,
+    customLibraryVersionId: _customLibraryVersionId,
+    equipped: _equipped,
+    ...data
+  } = shield;
+
+  return {
+    ...data,
+    armourKind: "shield",
+  };
+}
+
+function stripWeaponKind<TData extends CustomWeaponData>(data: TData): Omit<TData, "weaponKind"> {
+  const { weaponKind: _weaponKind, ...weaponData } = data;
+  return weaponData;
+}
+
+function stripArmourKind<TData extends CustomArmourData>(data: TData): Omit<TData, "armourKind"> {
+  const { armourKind: _armourKind, ...armourData } = data;
+  return armourData;
+}
+
+function buildRangedWeaponSnapshot(
+  id: string,
+  copyFields: Partial<RangedWeapon>,
+  data: CustomRangedWeaponData,
+  customLibraryId: string,
+  customLibraryVersionId: string
+): RangedWeapon {
+  const { weaponKind: _weaponKind, ...weaponData } = data;
+  const quantity =
+    copyFields.quantity ??
+    (weaponData.class?.toLowerCase().includes("thrown") ? 1 : undefined);
+
+  return {
+    id,
+    ...weaponData,
+    customLibraryId,
+    customLibraryVersionId,
+    ...(copyFields.ammoEntries ? { ammoEntries: copyFields.ammoEntries } : {}),
+    ...(copyFields.upgrades ? { upgrades: copyFields.upgrades } : {}),
+    ...(quantity !== undefined ? { quantity } : {}),
+    ...(copyFields.equipped !== undefined ? { equipped: copyFields.equipped } : {}),
+  };
+}
+
+function buildMeleeWeaponSnapshot(
+  id: string,
+  copyFields: Partial<MeleeWeapon>,
+  data: CustomMeleeWeaponData,
+  customLibraryId: string,
+  customLibraryVersionId: string
+): MeleeWeapon {
+  const { weaponKind: _weaponKind, ...weaponData } = data;
+  const quantity =
+    copyFields.quantity ??
+    (weaponData.class?.toLowerCase().includes("thrown") ? 1 : undefined);
+
+  return {
+    id,
+    ...weaponData,
+    customLibraryId,
+    customLibraryVersionId,
+    ...(copyFields.upgrades ? { upgrades: copyFields.upgrades } : {}),
+    ...(quantity !== undefined ? { quantity } : {}),
+    ...(copyFields.equipped !== undefined ? { equipped: copyFields.equipped } : {}),
+  };
+}
+
+function buildGrenadeSnapshot(
+  id: string,
+  copyFields: Partial<GrenadeItem>,
+  data: CustomGrenadeData,
+  customLibraryId: string,
+  customLibraryVersionId: string
+): GrenadeItem {
+  const { weaponKind: _weaponKind, ...grenadeData } = data;
+
+  return {
+    id,
+    ...grenadeData,
+    custom: true,
+    quantity: copyFields.quantity ?? 1,
+    customLibraryId,
+    customLibraryVersionId,
+    ...(copyFields.equipped !== undefined ? { equipped: copyFields.equipped } : {}),
+  };
+}
+
+function buildShieldSnapshot(
+  id: string,
+  copyFields: Partial<ShieldItem>,
+  data: CustomShieldData,
+  customLibraryId: string,
+  customLibraryVersionId: string
+): ShieldItem {
+  const { armourKind: _armourKind, ...shieldData } = data;
+
+  return {
+    id,
+    ...shieldData,
+    custom: true,
+    customLibraryId,
+    customLibraryVersionId,
+    ...(copyFields.equipped !== undefined ? { equipped: copyFields.equipped } : {}),
+  };
+}
+
+function buildFallbackWeaponLibraryItem({
+  campaignId,
+  weapon,
+  kind,
+  userId,
+  characterId,
+  characterName,
+}: {
+  campaignId: string;
+  weapon: RangedWeapon | MeleeWeapon;
+  kind: "ranged" | "melee";
+  userId: string | null;
+  characterId: string;
+  characterName?: string;
+}): CampaignCustomItem<"weapon"> {
+  const data =
+    kind === "ranged"
+      ? toCustomRangedWeaponData(weapon as RangedWeapon)
+      : toCustomMeleeWeaponData(weapon as MeleeWeapon);
+  const creator = {
+    userId: userId ?? "",
+    characterId,
+    characterName,
+  };
+
+  return {
+    id: weapon.customLibraryId ?? "",
+    campaignId,
+    category: "weapon",
+    status: "draft",
+    name: weapon.name,
+    creator,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    createdBy: creator,
+    updatedBy: creator,
+    publishedVersionId: null,
+    draftVersionId: weapon.customLibraryVersionId ?? null,
+    latestVersionId: weapon.customLibraryVersionId ?? "",
+    latestVersionNumber: 1,
+    archivedAt: null,
+    archivedByUserId: null,
+    data,
+  };
+}
+
+function buildFallbackGrenadeLibraryItem({
+  campaignId,
+  grenade,
+  userId,
+  characterId,
+  characterName,
+}: {
+  campaignId: string;
+  grenade: GrenadeItem;
+  userId: string | null;
+  characterId: string;
+  characterName?: string;
+}): CampaignCustomItem<"weapon"> {
+  const data = toCustomGrenadeData(grenade);
+  const creator = {
+    userId: userId ?? "",
+    characterId,
+    characterName,
+  };
+
+  return {
+    id: grenade.customLibraryId ?? "",
+    campaignId,
+    category: "weapon",
+    status: "draft",
+    name: grenade.name,
+    creator,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    createdBy: creator,
+    updatedBy: creator,
+    publishedVersionId: null,
+    draftVersionId: grenade.customLibraryVersionId ?? null,
+    latestVersionId: grenade.customLibraryVersionId ?? "",
+    latestVersionNumber: 1,
+    archivedAt: null,
+    archivedByUserId: null,
+    data,
+  };
+}
+
+function buildFallbackShieldLibraryItem({
+  campaignId,
+  shield,
+  userId,
+  characterId,
+  characterName,
+}: {
+  campaignId: string;
+  shield: ShieldItem;
+  userId: string | null;
+  characterId: string;
+  characterName?: string;
+}): CampaignCustomItem<"armour"> {
+  const data = toCustomShieldData(shield);
+  const creator = {
+    userId: userId ?? "",
+    characterId,
+    characterName,
+  };
+
+  return {
+    id: shield.customLibraryId ?? "",
+    campaignId,
+    category: "armour",
+    status: "draft",
+    name: shield.name,
+    creator,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    createdBy: creator,
+    updatedBy: creator,
+    publishedVersionId: null,
+    draftVersionId: shield.customLibraryVersionId ?? null,
+    latestVersionId: shield.customLibraryVersionId ?? "",
+    latestVersionNumber: 1,
+    archivedAt: null,
+    archivedByUserId: null,
+    data,
+  };
 }

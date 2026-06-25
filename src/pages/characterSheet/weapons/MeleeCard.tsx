@@ -7,6 +7,7 @@ import {
   MELEE_WEAPON_REFERENCE,
   type MeleeWeaponRef,
 } from "../../../data/reference/weaponReference";
+import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
 import { WEAPON_UPGRADE_REFERENCE } from "../../../data/reference/weaponUpgradeReference";
 import {
@@ -72,6 +73,29 @@ function meleeCraftsmanshipDescription(craftsmanship: WeaponCraftsmanship): stri
   }
 }
 
+function splitWeaponQualities(value?: string): string[] {
+  if (!value || value === "-" || value === "â€”") return [];
+  return value
+    .split(",")
+    .map((quality) => quality.trim())
+    .filter(Boolean);
+}
+
+function parseWeaponDamage(
+  value: string | undefined,
+  fallbackType: (typeof DAMAGE_TYPE_OPTIONS)[number]["value"]
+) {
+  const match = value?.trim().match(/^(\d+d\d+)(?:\+(\d+))?\s*([IREX])?$/i);
+  return {
+    base: match?.[1] ?? "1d10",
+    plus: match?.[2] ?? "0",
+    type:
+      (match?.[3]?.toUpperCase() as
+        | (typeof DAMAGE_TYPE_OPTIONS)[number]["value"]
+        | undefined) ?? fallbackType,
+  };
+}
+
 function hasMultipleMeleeProfiles(damage?: string): boolean {
   return !!damage && /\bLow:\s|\bHigh:\s|;/.test(damage);
 }
@@ -84,7 +108,9 @@ function displayMeleeDamage(damage: string): string {
 
 export function MeleePicker({
   editable = true,
+  customItems = [],
   onSelect,
+  onSelectCustomItem,
   onCustom,
   onClose,
   references = MELEE_WEAPON_REFERENCE,
@@ -93,7 +119,9 @@ export function MeleePicker({
   showCustom = true,
 }: {
   editable?: boolean;
+  customItems?: CampaignCustomItem<"weapon">[];
   onSelect: (ref: MeleeWeaponRef, craftsmanship: WeaponCraftsmanship) => void;
+  onSelectCustomItem?: (item: CampaignCustomItem<"weapon">) => void;
   onCustom: () => void;
   onClose: () => void;
   references?: MeleeWeaponRef[];
@@ -104,8 +132,13 @@ export function MeleePicker({
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<MeleeWeaponRef | null>(null);
   const [craftsmanship, setCraftsmanship] = useState<WeaponCraftsmanship>("Common");
+  const normalisedQuery = query.toLowerCase();
   const filtered = references
-    .filter((r) => r.name.toLowerCase().includes(query.toLowerCase()))
+    .filter((r) => r.name.toLowerCase().includes(normalisedQuery))
+    .sort((a, b) => a.name.localeCompare(b.name));
+  const filteredCustom = customItems
+    .filter((item) => item.data.weaponKind === "melee")
+    .filter((item) => item.name.toLowerCase().includes(normalisedQuery))
     .sort((a, b) => a.name.localeCompare(b.name));
   const modalTitle = editable ? title : title.replace(/^Add\b/, "View");
 
@@ -166,7 +199,7 @@ export function MeleePicker({
       query={query}
       onQueryChange={setQuery}
       onClose={onClose}
-      isEmpty={filtered.length === 0}
+      isEmpty={filtered.length === 0 && filteredCustom.length === 0}
       footer={
         editable && showCustom ? (
           <button
@@ -178,6 +211,41 @@ export function MeleePicker({
         ) : undefined
       }
     >
+      {filteredCustom.map((item) => {
+        const data = item.data;
+        if (data.weaponKind !== "melee") return null;
+        return (
+          <div
+            key={item.id}
+            role="button"
+            tabIndex={editable ? 0 : -1}
+            onClick={editable ? () => onSelectCustomItem?.(item) : undefined}
+            className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
+          >
+            <span
+              className={`text-sm lg:text-base font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}
+            >
+              {item.name}
+            </span>
+            <div className="flex flex-wrap gap-1.5 mt-1">
+              <ItemMetaChips weight={data.weight} value={data.value} availability={data.availability} source={data.source} />
+              {item.status === "draft" && (
+                <span className="rounded border border-amber-400/40 bg-amber-500/10 px-1.5 py-0.5 text-xs lg:text-sm text-amber-300">
+                  Draft
+                </span>
+              )}
+              <span className="rounded border border-fuchsia-500/50 bg-fuchsia-500/10 px-1.5 py-0.5 text-xs lg:text-sm text-fuchsia-300">
+                Custom
+              </span>
+            </div>
+            <div className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted} mt-0.5 flex-wrap font-code`}>
+              {data.class && <span>{data.class}</span>}
+              {data.damage && <span>{data.damage}</span>}
+              {data.pen && <span>Pen {data.pen}</span>}
+            </div>
+          </div>
+        );
+      })}
       {filtered.map((ref) => (
         <div
           key={ref.id}
@@ -228,26 +296,42 @@ export function CustomMeleeForm({
   onAdd,
   onCancel,
   title = "Custom Melee Weapon",
+  submitLabel = "Add",
   integrated = false,
+  initialWeapon,
 }: {
-  onAdd: (w: MeleeWeapon) => void;
+  onAdd: (w: MeleeWeapon) => void | Promise<void>;
   onCancel: () => void;
   title?: string;
+  submitLabel?: string;
   integrated?: boolean;
+  initialWeapon?: Partial<MeleeWeapon>;
 }) {
-  const [name, setName] = useState("");
-  const [weaponClass, setWeaponClass] = useState("");
-  const [craftsmanship, setCraftsmanship] = useState<"" | WeaponCraftsmanship>("");
-  const [origin, setOrigin] = useState<"" | (typeof CUSTOM_WEAPON_ORIGIN_OPTIONS)[number]>("");
-  const [damageBase, setDamageBase] = useState("1d10");
-  const [damagePlus, setDamagePlus] = useState("0");
-  const [damageType, setDamageType] = useState<(typeof DAMAGE_TYPE_OPTIONS)[number]["value"]>("R");
-  const [pen, setPen] = useState("");
-  const [weight, setWeight] = useState("");
-  const [value, setValue] = useState("");
-  const [availability, setAvailability] = useState("");
-  const [selectedQualities, setSelectedQualities] = useState<string[]>([]);
-  const [description, setDescription] = useState("");
+  const parsedDamage = parseWeaponDamage(initialWeapon?.damage, "R");
+  const [name, setName] = useState(initialWeapon?.name ?? "");
+  const [weaponClass, setWeaponClass] = useState(initialWeapon?.class ?? "");
+  const [craftsmanship, setCraftsmanship] = useState<"" | WeaponCraftsmanship>(
+    initialWeapon?.craftsmanship ?? ""
+  );
+  const [origin, setOrigin] = useState<"" | (typeof CUSTOM_WEAPON_ORIGIN_OPTIONS)[number]>(
+    (CUSTOM_WEAPON_ORIGIN_OPTIONS as readonly string[]).includes(initialWeapon?.source ?? "")
+      ? (initialWeapon?.source as (typeof CUSTOM_WEAPON_ORIGIN_OPTIONS)[number])
+      : ""
+  );
+  const [damageBase, setDamageBase] = useState(parsedDamage.base);
+  const [damagePlus, setDamagePlus] = useState(parsedDamage.plus);
+  const [damageType, setDamageType] = useState<(typeof DAMAGE_TYPE_OPTIONS)[number]["value"]>(
+    parsedDamage.type
+  );
+  const [pen, setPen] = useState(initialWeapon?.pen ?? "");
+  const [weight, setWeight] = useState(initialWeapon?.weight ?? "");
+  const [value, setValue] = useState(initialWeapon?.value ?? "");
+  const [availability, setAvailability] = useState(initialWeapon?.availability ?? "");
+  const [selectedQualities, setSelectedQualities] = useState<string[]>(
+    splitWeaponQualities(initialWeapon?.specialRules)
+  );
+  const [description, setDescription] = useState(initialWeapon?.description ?? "");
+  const [saving, setSaving] = useState(false);
 
   const canAdd =
     Boolean(name.trim()) &&
@@ -261,25 +345,33 @@ export function CustomMeleeForm({
     Boolean(value) &&
     Boolean(availability);
 
-  const addWeapon = () => {
+  const addWeapon = async () => {
     if (!canAdd || !craftsmanship || !origin) return;
-    onAdd({
-      id: crypto.randomUUID(),
-      custom: true,
-      name: name.trim(),
-      class: weaponClass,
-      craftsmanship,
-      source: origin,
-      damage: formatDamageInput(damageBase, damagePlus, damageType),
-      pen,
-      weight: formatWeightInput(weight),
-      value: formatMoneyInput(value),
-      availability,
-      specialRules: selectedQualities.length > 0 ? selectedQualities.join(", ") : undefined,
-      description: description.trim() || undefined,
-      integrated,
-      quantity: weaponClass.toLowerCase().includes("thrown") ? 1 : undefined,
-    });
+    setSaving(true);
+    try {
+      await onAdd({
+        id: initialWeapon?.id ?? crypto.randomUUID(),
+        custom: true,
+        name: name.trim(),
+        class: weaponClass,
+        craftsmanship,
+        source: origin,
+        damage: formatDamageInput(damageBase, damagePlus, damageType),
+        pen,
+        weight: formatWeightInput(weight),
+        value: formatMoneyInput(value),
+        availability,
+        specialRules: selectedQualities.length > 0 ? selectedQualities.join(", ") : undefined,
+        description: description.trim() || undefined,
+        integrated: initialWeapon?.integrated ?? integrated,
+        quantity: initialWeapon?.quantity ?? (weaponClass.toLowerCase().includes("thrown") ? 1 : undefined),
+        customLibraryId: initialWeapon?.customLibraryId,
+        customLibraryVersionId: initialWeapon?.customLibraryVersionId,
+        equipped: initialWeapon?.equipped,
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -297,8 +389,8 @@ export function CustomMeleeForm({
             <p className="text-xs lg:text-sm text-slate-300"><span className="text-red-500">*</span> Required</p>
           )}
           <div className="flex gap-2">
-            <Button className="flex-1" onClick={addWeapon} disabled={!canAdd}>
-              Add
+            <Button className="flex-1" onClick={addWeapon} disabled={!canAdd || saving}>
+              {saving ? "Saving..." : submitLabel}
             </Button>
             <button
               onClick={onCancel}
@@ -517,6 +609,14 @@ export function MeleeCard({
   weapon,
   editable,
   strengthBonus,
+  libraryItem,
+  isDM = false,
+  canEditDefinition = false,
+  busyAction = null,
+  onEditDefinition,
+  onPublish,
+  onArchive,
+  onUpdateAllCopies,
   onRemove,
   onAddUpgrade,
   onRemoveUpgrade,
@@ -530,6 +630,14 @@ export function MeleeCard({
   weapon: MeleeWeapon;
   editable: boolean;
   strengthBonus: number;
+  libraryItem?: CampaignCustomItem<"weapon">;
+  isDM?: boolean;
+  canEditDefinition?: boolean;
+  busyAction?: "publish" | "archive" | "updateAll" | null;
+  onEditDefinition?: () => void;
+  onPublish?: () => void;
+  onArchive?: () => void;
+  onUpdateAllCopies?: () => void;
   onRemove: () => void;
   onAddUpgrade: (upgradeId: string) => void;
   onRemoveUpgrade: (upgradeId: string) => void;
@@ -590,7 +698,23 @@ export function MeleeCard({
           onClick={() => !forceExpanded && setExpanded((e) => !e)}
           disabled={forceExpanded}
         >
-          <p className="text-sm lg:text-base font-semibold text-slate-200">{weapon.name}</p>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <p className="text-sm lg:text-base font-semibold text-slate-200">{weapon.name}</p>
+            {libraryItem && (
+              <span
+                className={[
+                  "shrink-0 rounded border px-1.5 py-0.5 text-[10px] uppercase tracking-wide",
+                  libraryItem.status === "published"
+                    ? "border-emerald-400/40 bg-emerald-500/10 text-emerald-300"
+                    : libraryItem.status === "draft"
+                      ? "border-amber-400/40 bg-amber-500/10 text-amber-300"
+                      : "border-slate-500/50 bg-slate-800 text-slate-300",
+                ].join(" ")}
+              >
+                {libraryItem.status}
+              </span>
+            )}
+          </div>
           {weapon.class && <p className={`text-xs lg:text-sm ${uiTextMuted}`}>{weapon.class}</p>}
         </button>
         <div className="flex items-center gap-2 shrink-0">
@@ -632,6 +756,46 @@ export function MeleeCard({
 
       {(expanded || forceExpanded) && (
         <>
+          {(canEditDefinition || isDM) && libraryItem && (
+            <div className="flex flex-wrap gap-2">
+              {canEditDefinition && libraryItem.status !== "archived" && (
+                <button type="button" onClick={onEditDefinition} className={uiActionButtonCompact}>
+                  Edit Definition
+                </button>
+              )}
+              {isDM && libraryItem.status === "draft" && (
+                <button
+                  type="button"
+                  onClick={onPublish}
+                  disabled={busyAction === "publish"}
+                  className={`${uiActionButtonCompact} disabled:opacity-50`}
+                >
+                  {busyAction === "publish" ? "Publishing..." : "Publish"}
+                </button>
+              )}
+              {isDM && libraryItem.status !== "archived" && (
+                <button
+                  type="button"
+                  onClick={onArchive}
+                  disabled={busyAction === "archive"}
+                  className={`${uiActionButtonCompact} disabled:opacity-50`}
+                >
+                  {busyAction === "archive" ? "Archiving..." : "Archive"}
+                </button>
+              )}
+              {isDM && libraryItem.status === "published" && (
+                <button
+                  type="button"
+                  onClick={onUpdateAllCopies}
+                  disabled={busyAction === "updateAll"}
+                  className={`${uiActionButtonCompact} disabled:opacity-50`}
+                >
+                  {busyAction === "updateAll" ? "Updating..." : "Update All Copies"}
+                </button>
+              )}
+            </div>
+          )}
+
           <div className="flex flex-wrap gap-1.5">
             {weapon.damage && <StatChip label="Damage" value={displayMeleeDamage(weapon.damage)} />}
             {weapon.damage && !hasMultipleProfiles && <DamageTypeChip damage={weapon.damage} />}

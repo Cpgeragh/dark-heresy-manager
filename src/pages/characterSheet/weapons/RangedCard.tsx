@@ -13,6 +13,7 @@ import {
   RANGED_WEAPON_REFERENCE,
   type RangedWeaponRef,
 } from "../../../data/reference/weaponReference";
+import type { CampaignCustomItem } from "../../../types/CustomItems";
 import {
   AMMO_REFERENCE,
   RECHARGING_POWER_PACKS_TEXT,
@@ -209,9 +210,60 @@ function rangedCraftsmanshipDescription(craftsmanship: WeaponCraftsmanship): str
 
 // ─── Ranged Picker ────────────────────────────────────────────────────────────
 
+function splitWeaponQualities(value?: string): string[] {
+  if (!value || value === "-" || value === "â€”") return [];
+  return value
+    .split(",")
+    .map((quality) => quality.trim())
+    .filter(Boolean);
+}
+
+function stripMeters(value?: string): string {
+  return value?.replace(/\s*m$/i, "").trim() ?? "";
+}
+
+function parseWeaponDamage(
+  value: string | undefined,
+  fallbackType: (typeof DAMAGE_TYPE_OPTIONS)[number]["value"]
+) {
+  const match = value?.trim().match(/^(\d+d\d+)(?:\+(\d+))?\s*([IREX])?$/i);
+  return {
+    base: match?.[1] ?? "1d10",
+    plus: match?.[2] ?? "0",
+    type:
+      (match?.[3]?.toUpperCase() as
+        | (typeof DAMAGE_TYPE_OPTIONS)[number]["value"]
+        | undefined) ?? fallbackType,
+  };
+}
+
+function parseRofInput(value?: string) {
+  const [single = "S", semi = "", full = ""] = (value ?? "S/-/-").split("/");
+  return {
+    singleShot: single.trim().toUpperCase() === "S",
+    semiAuto: semi.trim().replace(/[^\d]/g, ""),
+    fullAuto: full.trim().replace(/[^\d]/g, ""),
+  };
+}
+
+function parseReloadInput(value?: string) {
+  if (!value) return { amount: "", type: "" };
+  if (value === "Special" || value === "â€”" || value === "-") {
+    return { amount: "", type: value === "-" ? "â€”" : value };
+  }
+
+  const match = value.match(/^(\d+)\s+(.+)$/);
+  return {
+    amount: match?.[1] ?? "",
+    type: match?.[2] ?? value,
+  };
+}
+
 export function RangedPicker({
   editable = true,
+  customItems = [],
   onSelect,
+  onSelectCustomItem,
   onCustom,
   onClose,
   references = RANGED_WEAPON_REFERENCE,
@@ -220,7 +272,9 @@ export function RangedPicker({
   showCustom = true,
 }: {
   editable?: boolean;
+  customItems?: CampaignCustomItem<"weapon">[];
   onSelect: (ref: RangedWeaponRef, craftsmanship: WeaponCraftsmanship) => void;
+  onSelectCustomItem?: (item: CampaignCustomItem<"weapon">) => void;
   onCustom: () => void;
   onClose: () => void;
   references?: RangedWeaponRef[];
@@ -233,6 +287,7 @@ export function RangedPicker({
   const [craftsmanship, setCraftsmanship] = useState<WeaponCraftsmanship>("Common");
   const [classFilter, setClassFilter] = useState<string | null>(null);
   const [familyFilter, setFamilyFilter] = useState<string | null>(null);
+  const normalisedQuery = query.toLowerCase();
   const families = Array.from(
     new Map(
       references
@@ -242,9 +297,21 @@ export function RangedPicker({
     ).values()
   );
   const filtered = references
-    .filter((r) => r.name.toLowerCase().includes(query.toLowerCase()))
+    .filter((r) => r.name.toLowerCase().includes(normalisedQuery))
     .filter((r) => !classFilter || r.class.includes(classFilter))
     .filter((r) => !familyFilter || ammoFamilyChip(r.ammoType)?.label === familyFilter)
+    .sort((a, b) => a.name.localeCompare(b.name));
+  const filteredCustom = customItems
+    .filter((item) => item.data.weaponKind === "ranged")
+    .filter((item) => item.name.toLowerCase().includes(normalisedQuery))
+    .filter((item) => {
+      if (item.data.weaponKind !== "ranged") return false;
+      return !classFilter || item.data.class?.includes(classFilter);
+    })
+    .filter((item) => {
+      if (item.data.weaponKind !== "ranged") return false;
+      return !familyFilter || ammoFamilyChip(item.data.ammoType)?.label === familyFilter;
+    })
     .sort((a, b) => a.name.localeCompare(b.name));
   const modalTitle = editable ? title : title.replace(/^Add\b/, "View");
 
@@ -305,7 +372,7 @@ export function RangedPicker({
       query={query}
       onQueryChange={setQuery}
       onClose={onClose}
-      isEmpty={filtered.length === 0}
+      isEmpty={filtered.length === 0 && filteredCustom.length === 0}
       filterRow={
         <div className="flex gap-2 w-full">
           <select
@@ -341,6 +408,50 @@ export function RangedPicker({
         ) : undefined
       }
     >
+      {filteredCustom.map((item) => {
+        const data = item.data;
+        if (data.weaponKind !== "ranged") return null;
+        return (
+          <div
+            key={item.id}
+            role="button"
+            tabIndex={editable ? 0 : -1}
+            onClick={editable ? () => onSelectCustomItem?.(item) : undefined}
+            className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
+          >
+            <span
+              className={`text-sm lg:text-base font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}
+            >
+              {item.name}
+            </span>
+            <div className="flex flex-wrap gap-1.5 mt-1">
+              {(() => { const c = weaponClassChip(data.class); return c ? (
+                <Chip size="sm" className={c.active}>{c.label}</Chip>
+              ) : null; })()}
+              {(() => { const f = ammoFamilyChip(data.ammoType); return f ? (
+                <Chip size="sm" className={f.className}>{f.label}</Chip>
+              ) : null; })()}
+              {item.status === "draft" && (
+                <Chip size="sm" className="border-amber-400/40 bg-amber-500/10 text-amber-300">
+                  Draft
+                </Chip>
+              )}
+              <Chip size="sm" className="border-fuchsia-500/50 bg-fuchsia-500/10 text-fuchsia-300">
+                Custom
+              </Chip>
+              <ItemMetaChips weight={data.weight} value={data.value} availability={data.availability} source={data.source} />
+            </div>
+            <div className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted} mt-0.5 flex-wrap font-code`}>
+              {data.range && <span>{data.range}</span>}
+              {data.rof && <span>{data.rof}</span>}
+              {data.damage && <span>{data.damage}</span>}
+              {data.pen && <span>Pen {data.pen}</span>}
+              {data.clip && <span>Clip {data.clip}</span>}
+              {data.ammoType && <span>{data.ammoType}</span>}
+            </div>
+          </div>
+        );
+      })}
       {filtered.map((ref) => (
         <div
           key={ref.id}
@@ -400,35 +511,55 @@ export function CustomRangedForm({
   onAdd,
   onCancel,
   title = "Custom Ranged Weapon",
+  submitLabel = "Add",
   integrated = false,
+  initialWeapon,
 }: {
-  onAdd: (w: RangedWeapon) => void;
+  onAdd: (w: RangedWeapon) => void | Promise<void>;
   onCancel: () => void;
   title?: string;
+  submitLabel?: string;
   integrated?: boolean;
+  initialWeapon?: Partial<RangedWeapon>;
 }) {
-  const [name, setName] = useState("");
-  const [weaponClass, setWeaponClass] = useState("");
-  const [craftsmanship, setCraftsmanship] = useState<"" | WeaponCraftsmanship>("");
-  const [origin, setOrigin] = useState<"" | (typeof CUSTOM_WEAPON_ORIGIN_OPTIONS)[number]>("");
-  const [rangeMeters, setRangeMeters] = useState("");
-  const [ammoType, setAmmoType] = useState("");
-  const [singleShot, setSingleShot] = useState(true);
-  const [semiAuto, setSemiAuto] = useState("");
-  const [fullAuto, setFullAuto] = useState("");
-  const [damageBase, setDamageBase] = useState("1d10");
-  const [damagePlus, setDamagePlus] = useState("0");
-  const [damageType, setDamageType] = useState<(typeof DAMAGE_TYPE_OPTIONS)[number]["value"]>("I");
-  const [pen, setPen] = useState("");
-  const [clip, setClip] = useState("");
-  const [reloadAmount, setReloadAmount] = useState("");
-  const [reloadType, setReloadType] = useState("");
-  const [ammoTracking, setAmmoTracking] = useState<"" | AmmoTrackingMode>("");
-  const [weight, setWeight] = useState("");
-  const [value, setValue] = useState("");
-  const [availability, setAvailability] = useState("");
-  const [selectedQualities, setSelectedQualities] = useState<string[]>([]);
-  const [description, setDescription] = useState("");
+  const parsedDamage = parseWeaponDamage(initialWeapon?.damage, "I");
+  const parsedReload = parseReloadInput(initialWeapon?.rld);
+  const parsedRof = parseRofInput(initialWeapon?.rof);
+  const [name, setName] = useState(initialWeapon?.name ?? "");
+  const [weaponClass, setWeaponClass] = useState(initialWeapon?.class ?? "");
+  const [craftsmanship, setCraftsmanship] = useState<"" | WeaponCraftsmanship>(
+    initialWeapon?.craftsmanship ?? ""
+  );
+  const [origin, setOrigin] = useState<"" | (typeof CUSTOM_WEAPON_ORIGIN_OPTIONS)[number]>(
+    (CUSTOM_WEAPON_ORIGIN_OPTIONS as readonly string[]).includes(initialWeapon?.source ?? "")
+      ? (initialWeapon?.source as (typeof CUSTOM_WEAPON_ORIGIN_OPTIONS)[number])
+      : ""
+  );
+  const [rangeMeters, setRangeMeters] = useState(stripMeters(initialWeapon?.range));
+  const [ammoType, setAmmoType] = useState(initialWeapon?.ammoType ?? "");
+  const [singleShot, setSingleShot] = useState(parsedRof.singleShot);
+  const [semiAuto, setSemiAuto] = useState(parsedRof.semiAuto);
+  const [fullAuto, setFullAuto] = useState(parsedRof.fullAuto);
+  const [damageBase, setDamageBase] = useState(parsedDamage.base);
+  const [damagePlus, setDamagePlus] = useState(parsedDamage.plus);
+  const [damageType, setDamageType] = useState<(typeof DAMAGE_TYPE_OPTIONS)[number]["value"]>(
+    parsedDamage.type
+  );
+  const [pen, setPen] = useState(initialWeapon?.pen ?? "");
+  const [clip, setClip] = useState(initialWeapon?.clip ?? "");
+  const [reloadAmount, setReloadAmount] = useState(parsedReload.amount);
+  const [reloadType, setReloadType] = useState(parsedReload.type);
+  const [ammoTracking, setAmmoTracking] = useState<"" | AmmoTrackingMode>(
+    initialWeapon?.ammoTracking ?? ""
+  );
+  const [weight, setWeight] = useState(initialWeapon?.weight ?? "");
+  const [value, setValue] = useState(initialWeapon?.value ?? "");
+  const [availability, setAvailability] = useState(initialWeapon?.availability ?? "");
+  const [selectedQualities, setSelectedQualities] = useState<string[]>(
+    splitWeaponQualities(initialWeapon?.specialRules)
+  );
+  const [description, setDescription] = useState(initialWeapon?.description ?? "");
+  const [saving, setSaving] = useState(false);
 
   const rof = `${singleShot ? "S" : "–"}/${semiAuto || "–"}/${fullAuto || "–"}`;
   const rld =
@@ -455,31 +586,39 @@ export function CustomRangedForm({
     Boolean(value) &&
     Boolean(availability);
 
-  const addWeapon = () => {
+  const addWeapon = async () => {
     if (!canAdd || !ammoTracking || !craftsmanship || !origin) return;
-    onAdd({
-      id: crypto.randomUUID(),
-      custom: true,
-      name: name.trim(),
-      class: weaponClass,
-      craftsmanship,
-      source: origin,
-      range: `${rangeMeters}m`,
-      ammoType,
-      rof,
-      damage: formatDamageInput(damageBase, damagePlus, damageType),
-      pen,
-      clip,
-      rld,
-      ammoTracking,
-      weight: formatWeightInput(weight),
-      value: formatMoneyInput(value),
-      availability,
-      specialRules: selectedQualities.length > 0 ? selectedQualities.join(", ") : undefined,
-      description: description.trim() || undefined,
-      integrated,
-      quantity: weaponClass.toLowerCase().includes("thrown") ? 1 : undefined,
-    });
+    setSaving(true);
+    try {
+      await onAdd({
+        id: initialWeapon?.id ?? crypto.randomUUID(),
+        custom: true,
+        name: name.trim(),
+        class: weaponClass,
+        craftsmanship,
+        source: origin,
+        range: `${rangeMeters}m`,
+        ammoType,
+        rof,
+        damage: formatDamageInput(damageBase, damagePlus, damageType),
+        pen,
+        clip,
+        rld,
+        ammoTracking,
+        weight: formatWeightInput(weight),
+        value: formatMoneyInput(value),
+        availability,
+        specialRules: selectedQualities.length > 0 ? selectedQualities.join(", ") : undefined,
+        description: description.trim() || undefined,
+        integrated: initialWeapon?.integrated ?? integrated,
+        quantity: initialWeapon?.quantity ?? (weaponClass.toLowerCase().includes("thrown") ? 1 : undefined),
+        customLibraryId: initialWeapon?.customLibraryId,
+        customLibraryVersionId: initialWeapon?.customLibraryVersionId,
+        equipped: initialWeapon?.equipped,
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -497,8 +636,8 @@ export function CustomRangedForm({
             <p className="text-xs lg:text-sm text-slate-300"><span className="text-red-500">*</span> Required</p>
           )}
           <div className="flex gap-2">
-            <Button className="flex-1" onClick={addWeapon} disabled={!canAdd}>
-              Add
+            <Button className="flex-1" onClick={addWeapon} disabled={!canAdd || saving}>
+              {saving ? "Saving..." : submitLabel}
             </Button>
             <button
               onClick={onCancel}
@@ -1129,6 +1268,14 @@ function formatWeight(kg: number): string {
 export function RangedCard({
   weapon,
   editable,
+  libraryItem,
+  isDM = false,
+  canEditDefinition = false,
+  busyAction = null,
+  onEditDefinition,
+  onPublish,
+  onArchive,
+  onUpdateAllCopies,
   onRemove,
   onAddUpgrade,
   onRemoveUpgrade,
@@ -1145,6 +1292,14 @@ export function RangedCard({
 }: {
   weapon: RangedWeapon;
   editable: boolean;
+  libraryItem?: CampaignCustomItem<"weapon">;
+  isDM?: boolean;
+  canEditDefinition?: boolean;
+  busyAction?: "publish" | "archive" | "updateAll" | null;
+  onEditDefinition?: () => void;
+  onPublish?: () => void;
+  onArchive?: () => void;
+  onUpdateAllCopies?: () => void;
   onRemove: () => void;
   onAddUpgrade: (upgradeId: string) => void;
   onRemoveUpgrade: (upgradeId: string) => void;
@@ -1270,7 +1425,23 @@ export function RangedCard({
           onClick={() => !forceExpanded && setExpanded((e) => !e)}
           disabled={forceExpanded}
         >
-          <p className="text-sm lg:text-base font-semibold text-slate-200">{weapon.name}</p>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <p className="text-sm lg:text-base font-semibold text-slate-200">{weapon.name}</p>
+            {libraryItem && (
+              <span
+                className={[
+                  "shrink-0 rounded border px-1.5 py-0.5 text-[10px] uppercase tracking-wide",
+                  libraryItem.status === "published"
+                    ? "border-emerald-400/40 bg-emerald-500/10 text-emerald-300"
+                    : libraryItem.status === "draft"
+                      ? "border-amber-400/40 bg-amber-500/10 text-amber-300"
+                      : "border-slate-500/50 bg-slate-800 text-slate-300",
+                ].join(" ")}
+              >
+                {libraryItem.status}
+              </span>
+            )}
+          </div>
           {(weapon.class || ammoFamily) && (
             <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
               {(() => { const c = weaponClassChip(weapon.class); return c ? (
@@ -1323,6 +1494,46 @@ export function RangedCard({
 
       {(expanded || forceExpanded) && (
         <>
+          {(canEditDefinition || isDM) && libraryItem && (
+            <div className="flex flex-wrap gap-2">
+              {canEditDefinition && libraryItem.status !== "archived" && (
+                <button type="button" onClick={onEditDefinition} className={uiActionButtonCompact}>
+                  Edit Definition
+                </button>
+              )}
+              {isDM && libraryItem.status === "draft" && (
+                <button
+                  type="button"
+                  onClick={onPublish}
+                  disabled={busyAction === "publish"}
+                  className={`${uiActionButtonCompact} disabled:opacity-50`}
+                >
+                  {busyAction === "publish" ? "Publishing..." : "Publish"}
+                </button>
+              )}
+              {isDM && libraryItem.status !== "archived" && (
+                <button
+                  type="button"
+                  onClick={onArchive}
+                  disabled={busyAction === "archive"}
+                  className={`${uiActionButtonCompact} disabled:opacity-50`}
+                >
+                  {busyAction === "archive" ? "Archiving..." : "Archive"}
+                </button>
+              )}
+              {isDM && libraryItem.status === "published" && (
+                <button
+                  type="button"
+                  onClick={onUpdateAllCopies}
+                  disabled={busyAction === "updateAll"}
+                  className={`${uiActionButtonCompact} disabled:opacity-50`}
+                >
+                  {busyAction === "updateAll" ? "Updating..." : "Update All Copies"}
+                </button>
+              )}
+            </div>
+          )}
+
           {/* Stats grid */}
           <div className="flex flex-wrap gap-1.5">
             {effective.range && <StatChip label="Range" value={effective.range} />}

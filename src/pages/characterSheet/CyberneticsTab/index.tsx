@@ -59,6 +59,8 @@ export function CyberneticsTab({
 }: CyberneticsTabProps) {
   const [showPicker, setShowPicker] = useState(false);
   const [showCustomForm, setShowCustomForm] = useState(false);
+  const [installingCustomCybernetic, setInstallingCustomCybernetic] =
+    useState<CampaignCustomItem<"cybernetic"> | null>(null);
   const [editingCyberneticDefinition, setEditingCyberneticDefinition] =
     useState<EditingCyberneticDefinition | null>(null);
   const [busyLibraryAction, setBusyLibraryAction] = useState<{
@@ -162,10 +164,20 @@ export function CyberneticsTab({
     [campaignId, characterId, characterName, cybernetics, editable, onUpdate, toast, userId]
   );
 
-  const addCyberneticFromLibrary = useCallback(
-    async (libraryItem: CampaignCustomItem<"cybernetic">) => {
+  const beginInstallCyberneticFromLibrary = useCallback(
+    (libraryItem: CampaignCustomItem<"cybernetic">) => {
       if (!editable) return;
+      setShowPicker(false);
+      setInstallingCustomCybernetic(libraryItem);
+    },
+    [editable]
+  );
 
+  const finishInstallCyberneticFromLibrary = useCallback(
+    async (item: CyberneticItem) => {
+      if (!editable || !installingCustomCybernetic) return;
+
+      const libraryItem = installingCustomCybernetic;
       const versionId =
         libraryItem.status === "published"
           ? libraryItem.publishedVersionId
@@ -179,16 +191,16 @@ export function CyberneticsTab({
       await onUpdate([
         ...cybernetics,
         buildCyberneticSnapshot(
-          crypto.randomUUID(),
-          undefined,
+          item.id,
+          item.bodyLocation,
           libraryItem.data,
           libraryItem.id,
           versionId
         ),
       ]);
-      setShowPicker(false);
+      setInstallingCustomCybernetic(null);
     },
-    [cybernetics, editable, onUpdate, toast]
+    [cybernetics, editable, installingCustomCybernetic, onUpdate, toast]
   );
 
   const saveEditedCyberneticDefinition = useCallback(
@@ -393,7 +405,7 @@ export function CyberneticsTab({
           editable={editable}
           customItems={campaignCustomCybernetics.filter((item) => item.status !== "archived")}
           onSelect={install}
-          onSelectCustomItem={addCyberneticFromLibrary}
+          onSelectCustomItem={beginInstallCyberneticFromLibrary}
           onCustom={() => {
             setShowPicker(false);
             setShowCustomForm(true);
@@ -406,6 +418,23 @@ export function CyberneticsTab({
         <CustomImplantForm
           onAdd={addCustomImplant}
           onCancel={() => setShowCustomForm(false)}
+        />
+      )}
+
+      {installingCustomCybernetic && (
+        <CustomImplantForm
+          title="Install Custom Cybernetic"
+          submitLabel="Install"
+          initialItem={{
+            ...installingCustomCybernetic.data,
+            customLibraryId: installingCustomCybernetic.id,
+            customLibraryVersionId:
+              installingCustomCybernetic.publishedVersionId ??
+              installingCustomCybernetic.draftVersionId ??
+              installingCustomCybernetic.latestVersionId,
+          }}
+          onAdd={finishInstallCyberneticFromLibrary}
+          onCancel={() => setInstallingCustomCybernetic(null)}
         />
       )}
 
