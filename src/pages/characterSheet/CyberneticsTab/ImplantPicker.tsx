@@ -20,9 +20,11 @@ import {
   craftsmanshipDescription,
   defaultCraftsmanship,
 } from "./cyberneticsHelpers";
+import type { CampaignCustomItem } from "../../../types/CustomItems";
 
 interface Props {
   editable?: boolean;
+  customItems?: CampaignCustomItem<"cybernetic">[];
   onSelect: (
     ref: CyberneticRef,
     craftsmanship: CyberneticCraftsmanship,
@@ -30,6 +32,8 @@ interface Props {
     gmValue?: string,
     gmRarity?: string
   ) => void;
+  onSelectCustomItem?: (item: CampaignCustomItem<"cybernetic">) => void;
+  onCustom?: () => void;
   onClose: () => void;
 }
 
@@ -54,7 +58,14 @@ function isVariableMeta(value?: string | null) {
   return !normalized || normalized === "\u2014" || normalized === "variable" || normalized === "varies";
 }
 
-export function ImplantPicker({ editable = true, onSelect, onClose }: Props) {
+export function ImplantPicker({
+  editable = true,
+  customItems = [],
+  onSelect,
+  onSelectCustomItem,
+  onCustom,
+  onClose,
+}: Props) {
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<CyberneticRef | null>(null);
   const [pendingCost, setPendingCost] = useState<CyberneticRef | null>(null);
@@ -65,9 +76,14 @@ export function ImplantPicker({ editable = true, onSelect, onClose }: Props) {
   const [assignedValue, setAssignedValue] = useState<string | undefined>();
   const [assignedRarity, setAssignedRarity] = useState<string | undefined>();
 
+  const normalizedQuery = query.toLowerCase();
   const filtered = CYBERNETICS_REFERENCE.filter((r) =>
-    r.name.toLowerCase().includes(query.toLowerCase())
+    r.name.toLowerCase().includes(normalizedQuery)
   ).sort((a, b) => a.name.localeCompare(b.name));
+  const filteredCustom = customItems
+    .filter((item) => item.status !== "archived")
+    .filter((item) => item.name.toLowerCase().includes(normalizedQuery))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   const step = pendingCost ? "cost"
     : (selected && selected.requiresLocation && !location) ? "location"
@@ -333,8 +349,60 @@ export function ImplantPicker({ editable = true, onSelect, onClose }: Props) {
       query={query}
       onQueryChange={setQuery}
       onClose={onClose}
-      isEmpty={filtered.length === 0}
+      isEmpty={filtered.length === 0 && filteredCustom.length === 0}
+      footer={
+        editable && onCustom ? (
+          <button
+            onClick={onCustom}
+            className="w-full text-sm lg:text-base text-red-500 hover:text-red-400 text-center py-1 lg:py-1.5"
+          >
+            + Add custom cybernetic
+          </button>
+        ) : undefined
+      }
     >
+      {filteredCustom.map((item) => (
+        <div
+          key={`custom-${item.id}`}
+          role="button"
+          tabIndex={editable ? 0 : -1}
+          onClick={editable && onSelectCustomItem ? () => onSelectCustomItem(item) : undefined}
+          className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${
+            editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"
+          }`}
+        >
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className={`text-sm lg:text-base font-medium text-slate-200 truncate ${editable ? "group-hover:text-white" : ""}`}>
+              {item.name}
+            </span>
+            {item.status === "draft" && (
+              <span className="shrink-0 rounded border border-amber-400/40 bg-amber-500/10 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-amber-300">
+                Draft
+              </span>
+            )}
+            {item.data.notes && (
+              <span className="inline-flex items-center -translate-y-[1.4px]" onClick={(e) => e.stopPropagation()}>
+                <InfoModal
+                  title={item.name}
+                  content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{item.data.notes}</p>}
+                />
+              </span>
+            )}
+          </div>
+          <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs lg:text-sm">
+            <ItemMetaChips
+              bare
+              value={item.data.value}
+              availability={item.data.availability}
+              source={item.data.source}
+            />
+            <Chip className={CRAFTSMANSHIP_STYLE[item.data.craftsmanship]}>
+              {item.data.craftsmanship}
+            </Chip>
+          </div>
+        </div>
+      ))}
+
       {filtered.map((ref) => (
         <div
           key={ref.id}
@@ -345,28 +413,26 @@ export function ImplantPicker({ editable = true, onSelect, onClose }: Props) {
             editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"
           }`}
         >
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-1.5 flex-1 min-w-0">
-              <span className={`text-sm lg:text-base font-medium text-slate-200 truncate ${editable ? "group-hover:text-white" : ""}`}>
-                {ref.name}
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className={`text-sm lg:text-base font-medium text-slate-200 truncate ${editable ? "group-hover:text-white" : ""}`}>
+              {ref.name}
+            </span>
+            {(ref.notes || ref.poor || ref.common || ref.good) && (
+              <span className="inline-flex items-center -translate-y-[1.4px]" onClick={(e) => e.stopPropagation()}>
+                <InfoModal title={ref.name} content={implantInfo(ref)} />
               </span>
-              {(ref.notes || ref.poor || ref.common || ref.good) && (
-                <span className="inline-flex items-center -translate-y-[1.4px]" onClick={(e) => e.stopPropagation()}>
-                  <InfoModal title={ref.name} content={implantInfo(ref)} />
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-2 shrink-0 text-xs lg:text-sm">
-              <ItemMetaChips
-                bare
-                value={isVariableMeta(ref.value) ? undefined : ref.value}
-                availability={isVariableMeta(ref.availability) ? undefined : ref.availability}
-                source={ref.source}
-              />
-              {(isVariableMeta(ref.value) || isVariableMeta(ref.availability)) && (
-                <span className="text-amber-400/70 italic">Cost assigned on add</span>
-              )}
-            </div>
+            )}
+          </div>
+          <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs lg:text-sm">
+            <ItemMetaChips
+              bare
+              value={isVariableMeta(ref.value) ? undefined : ref.value}
+              availability={isVariableMeta(ref.availability) ? undefined : ref.availability}
+              source={ref.source}
+            />
+            {(isVariableMeta(ref.value) || isVariableMeta(ref.availability)) && (
+              <span className="text-amber-400/70 italic">Cost assigned on add</span>
+            )}
           </div>
         </div>
       ))}

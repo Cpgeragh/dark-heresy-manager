@@ -16,22 +16,38 @@ import { sourceColour } from "../../../ui/sourceStyles";
 import { CUSTOM_AVAILABILITY_OPTIONS, sanitizePositiveIntegerInput } from "../weapons/weaponShared";
 
 interface Props {
-  onAdd: (item: DrugItem) => void;
+  initialItem?: Partial<DrugItem>;
+  title?: string;
+  submitLabel?: string;
+  includeQuantity?: boolean;
+  onAdd: (item: DrugItem) => void | Promise<void>;
   onCancel: () => void;
 }
 
 const CUSTOM_DRUG_ORIGIN_OPTIONS = ["Custom", "2nd Ed"] as const;
 
-export function CustomDrugForm({ onAdd, onCancel }: Props) {
-  const [name, setName] = useState("");
-  const [quantity, setQuantity] = useState("");
-  const [origin, setOrigin] = useState<"" | (typeof CUSTOM_DRUG_ORIGIN_OPTIONS)[number]>("");
-  const [availability, setAvailability] = useState("");
-  const [weight, setWeight] = useState("");
-  const [value, setValue] = useState("");
-  const [notes, setNotes] = useState("");
+export function CustomDrugForm({
+  initialItem,
+  title = "Custom Drug",
+  submitLabel = "Add",
+  includeQuantity = true,
+  onAdd,
+  onCancel,
+}: Props) {
+  const [name, setName] = useState(initialItem?.name ?? "");
+  const [quantity, setQuantity] = useState(
+    initialItem?.quantity ? String(initialItem.quantity) : ""
+  );
+  const [origin, setOrigin] = useState<"" | (typeof CUSTOM_DRUG_ORIGIN_OPTIONS)[number]>(
+    initialItem?.source === "Custom" || initialItem?.source === "2nd Ed" ? initialItem.source : ""
+  );
+  const [availability, setAvailability] = useState(initialItem?.availability ?? "");
+  const [weight, setWeight] = useState(initialItem?.weight ?? "");
+  const [value, setValue] = useState(initialItem?.value ?? "");
+  const [notes, setNotes] = useState(initialItem?.notes ?? "");
+  const [saving, setSaving] = useState(false);
   const quantityNumber = Number(quantity);
-  const quantityValid = Number.isInteger(quantityNumber) && quantityNumber >= 1;
+  const quantityValid = !includeQuantity || (Number.isInteger(quantityNumber) && quantityNumber >= 1);
 
   const canAdd =
     Boolean(name.trim()) &&
@@ -41,23 +57,30 @@ export function CustomDrugForm({ onAdd, onCancel }: Props) {
     Boolean(weight.trim()) &&
     Boolean(value);
 
-  const addDrug = () => {
+  const addDrug = async () => {
     if (!canAdd || !origin) return;
-    onAdd({
-      id: crypto.randomUUID(),
-      name: name.trim(),
-      quantity: quantityNumber,
-      weight: formatWeightInput(weight),
-      value: formatMoneyInput(value),
-      availability,
-      source: origin,
-      notes: notes.trim() || undefined,
-    });
+    setSaving(true);
+    try {
+      await onAdd({
+        id: initialItem?.id ?? crypto.randomUUID(),
+        name: name.trim(),
+        quantity: includeQuantity ? quantityNumber : initialItem?.quantity ?? 1,
+        weight: formatWeightInput(weight),
+        value: formatMoneyInput(value),
+        availability,
+        source: origin,
+        notes: notes.trim() || undefined,
+        customLibraryId: initialItem?.customLibraryId,
+        customLibraryVersionId: initialItem?.customLibraryVersionId,
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
     <PickerModal
-      title="Custom Drug"
+      title={title}
       query=""
       onQueryChange={() => {}}
       onClose={onCancel}
@@ -72,8 +95,8 @@ export function CustomDrugForm({ onAdd, onCancel }: Props) {
             </p>
           )}
           <div className="flex gap-2">
-            <Button className="flex-1" onClick={addDrug} disabled={!canAdd}>
-              Add
+            <Button className="flex-1" onClick={addDrug} disabled={!canAdd || saving}>
+              {saving ? "Saving..." : submitLabel}
             </Button>
             <button
               onClick={onCancel}
@@ -100,19 +123,21 @@ export function CustomDrugForm({ onAdd, onCancel }: Props) {
                 className={editableInputClass(true) + " mt-0.5"}
               />
             </div>
-            <div>
-              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
-                Quantity <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={quantity}
-                onChange={(event) => setQuantity(sanitizePositiveIntegerInput(event.target.value))}
-                placeholder="1+"
-                className={editableInputClass(true) + " mt-0.5"}
-              />
-            </div>
+            {includeQuantity && (
+              <div>
+                <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                  Quantity <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={quantity}
+                  onChange={(event) => setQuantity(sanitizePositiveIntegerInput(event.target.value))}
+                  placeholder="1+"
+                  className={editableInputClass(true) + " mt-0.5"}
+                />
+              </div>
+            )}
           </div>
         </div>
 

@@ -8,10 +8,13 @@ import { PickerModal } from "../../../ui/PickerModal";
 import { Button } from "../../../ui/Button";
 import { editableInputClass, uiTextBody } from "../../../ui/editableStyles";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
+import type { CampaignCustomItem } from "../../../types/CustomItems";
 
 interface Props {
   editable?: boolean;
+  customItems?: CampaignCustomItem<"gear">[];
   onSelect: (ref: GearRef, gmValue?: string, gmRarity?: string) => void;
+  onSelectCustomItem?: (item: CampaignCustomItem<"gear">) => void;
   onCustom: () => void;
   onClose: () => void;
 }
@@ -37,18 +40,31 @@ function isVariableMeta(value?: string | null) {
   return !normalized || normalized === "\u2014" || normalized === "variable" || normalized === "varies";
 }
 
-export function GearPicker({ editable = true, onSelect, onCustom, onClose }: Props) {
+export function GearPicker({
+  editable = true,
+  customItems = [],
+  onSelect,
+  onSelectCustomItem,
+  onCustom,
+  onClose,
+}: Props) {
   const [query, setQuery] = useState("");
   const [pending, setPending] = useState<GearRef | null>(null);
   const [gmCost, setGmCost] = useState("");
   const [gmRarity, setGmRarity] = useState("");
+  const normalizedQuery = query.toLowerCase();
   const filtered = GEAR_REFERENCE.filter((r) =>
-    r.name.toLowerCase().includes(query.toLowerCase())
+    r.name.toLowerCase().includes(normalizedQuery)
   ).sort((a, b) => a.name.localeCompare(b.name));
+  const filteredCustom = customItems
+    .filter((item) => item.status !== "archived")
+    .filter((item) => item.name.toLowerCase().includes(normalizedQuery))
+    .sort((a, b) => a.name.localeCompare(b.name));
   const pendingNeedsRarity = pending ? isVariableMeta(pending.availability) : false;
   const costNum = Number(gmCost);
   const costValid = gmCost.trim() !== "" && Number.isInteger(costNum) && costNum >= 0;
   const canConfirm = costValid && (!pendingNeedsRarity || gmRarity !== "");
+  const isEmpty = !pending && filtered.length === 0 && filteredCustom.length === 0;
 
   function handleSelect(ref: GearRef) {
     if (!editable) return;
@@ -75,7 +91,7 @@ export function GearPicker({ editable = true, onSelect, onCustom, onClose }: Pro
       onClose={pending ? () => setPending(null) : onClose}
       closeLabel={pending ? "←" : "×"}
       hideSearch={!!pending}
-      isEmpty={!pending && filtered.length === 0}
+      isEmpty={isEmpty}
       footer={
         !pending && editable ? (
           <button
@@ -144,7 +160,46 @@ export function GearPicker({ editable = true, onSelect, onCustom, onClose }: Pro
           </div>
         </div>
       ) : (
-        filtered.map((ref) => (
+        <>
+        {filteredCustom.map((item) => (
+          <div
+            key={`custom-${item.id}`}
+            role="button"
+            tabIndex={editable ? 0 : -1}
+            onClick={editable && onSelectCustomItem ? () => onSelectCustomItem(item) : undefined}
+            className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
+          >
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className={`text-sm lg:text-base font-medium text-slate-200 truncate ${editable ? "group-hover:text-white" : ""}`}>
+                {item.name}
+              </span>
+              {item.status === "draft" && (
+                <span className="shrink-0 rounded border border-amber-400/40 bg-amber-500/10 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-amber-300">
+                  Draft
+                </span>
+              )}
+              {item.data.description && (
+                <span className="inline-flex items-center -translate-y-[1.4px]" onClick={(e) => e.stopPropagation()}>
+                  <InfoModal
+                    title={item.name}
+                    content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{item.data.description}</p>}
+                  />
+                </span>
+              )}
+            </div>
+            <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs lg:text-sm">
+              <ItemMetaChips
+                bare
+                weight={item.data.weight}
+                value={item.data.value}
+                availability={item.data.availability}
+                source={item.data.source}
+              />
+            </div>
+          </div>
+        ))}
+
+        {filtered.map((ref) => (
         <div
           key={ref.id}
           role="button"
@@ -178,7 +233,8 @@ export function GearPicker({ editable = true, onSelect, onCustom, onClose }: Pro
             )}
           </div>
         </div>
-        ))
+        ))}
+        </>
       )}
     </PickerModal>
   );

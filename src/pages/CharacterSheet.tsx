@@ -502,6 +502,11 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
 
           {activeTab === "cybernetics" && (
             <CyberneticsTab
+              campaignId={path.campaignId}
+              characterId={character.id}
+              userId={effectiveUserId}
+              characterName={character.header.characterName}
+              isDM={isDM}
               cybernetics={character.cybernetics ?? []}
               editable={allowedToEdit}
               onUpdate={handleUpdateCybernetics}
@@ -519,6 +524,11 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
 
           {activeTab === "gear" && (
             <GearTab
+              campaignId={path.campaignId}
+              characterId={character.id}
+              userId={effectiveUserId}
+              characterName={character.header.characterName}
+              isDM={isDM}
               gear={character.gear}
               consumables={character.consumables ?? []}
               editable={allowedToEdit}
@@ -529,6 +539,11 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
 
           {activeTab === "drugs" && (
             <DrugsTab
+              campaignId={path.campaignId}
+              characterId={character.id}
+              userId={effectiveUserId}
+              characterName={character.header.characterName}
+              isDM={isDM}
               drugs={character.drugs ?? []}
               editable={allowedToEdit}
               onUpdate={handleUpdateDrugs}

@@ -1,31 +1,88 @@
 // src/pages/characterSheet/CyberneticsTab/index.tsx
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import type {
   CyberneticItem,
   CyberneticCraftsmanship,
   ArmourLocationKey,
 } from "../../../types/Character";
 import type { CyberneticRef } from "../../../data/reference/cyberneticsReference";
+import type { CampaignCustomItem, CustomCyberneticData } from "../../../types/CustomItems";
 import { ImplantPicker } from "./ImplantPicker";
 import { ImplantRow } from "./ImplantRow";
+import { CustomImplantForm } from "./CustomImplantForm";
 import { nextAvailableCraftsmanship } from "./cyberneticsHelpers";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { CYBERNETICS_REFERENCE } from "../../../data/reference/cyberneticsReference";
 import { uiTextPlaceholder } from "../../../ui/editableStyles";
+import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
+import {
+  archiveCustomItem,
+  createDraftCustomItem,
+  publishCustomItem,
+  saveDraftCustomItem,
+  updateAllCustomItemCopies,
+} from "../../../services/customItemService";
+import { useToast } from "../../../components/Toast";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface CyberneticsTabProps {
+  campaignId: string;
+  characterId: string;
+  userId: string | null;
+  characterName?: string;
+  isDM: boolean;
   cybernetics: CyberneticItem[];
   editable: boolean;
-  onUpdate: (next: CyberneticItem[]) => void;
+  onUpdate: (next: CyberneticItem[]) => void | Promise<void>;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function CyberneticsTab({ cybernetics, editable, onUpdate }: CyberneticsTabProps) {
+interface EditingCyberneticDefinition {
+  item: CyberneticItem;
+  libraryItem: CampaignCustomItem<"cybernetic">;
+}
+
+type CyberneticLibraryAction = "publish" | "archive" | "updateAll";
+
+export function CyberneticsTab({
+  campaignId,
+  characterId,
+  userId,
+  characterName,
+  isDM,
+  cybernetics,
+  editable,
+  onUpdate,
+}: CyberneticsTabProps) {
   const [showPicker, setShowPicker] = useState(false);
+  const [showCustomForm, setShowCustomForm] = useState(false);
+  const [editingCyberneticDefinition, setEditingCyberneticDefinition] =
+    useState<EditingCyberneticDefinition | null>(null);
+  const [busyLibraryAction, setBusyLibraryAction] = useState<{
+    itemId: string;
+    action: CyberneticLibraryAction;
+  } | null>(null);
+  const toast = useToast();
+
+  const { items: campaignCustomCyberneticItems } = useCampaignCustomItems({
+    campaignId,
+    category: "cybernetic",
+    mode: isDM ? "admin" : "picker",
+    userId,
+    characterId,
+    includeArchived: isDM,
+  });
+  const campaignCustomCybernetics = useMemo(
+    () => campaignCustomCyberneticItems as CampaignCustomItem<"cybernetic">[],
+    [campaignCustomCyberneticItems]
+  );
+  const campaignCustomCyberneticsById = useMemo(
+    () => new Map(campaignCustomCybernetics.map((item) => [item.id, item])),
+    [campaignCustomCybernetics]
+  );
 
   const install = useCallback(
     (
@@ -68,6 +125,116 @@ export function CyberneticsTab({ cybernetics, editable, onUpdate }: CyberneticsT
     [editable, cybernetics, onUpdate]
   );
 
+  const addCustomImplant = useCallback(
+    async (item: CyberneticItem) => {
+      if (!editable) return;
+      if (!userId) {
+        toast.error("You must be signed in to create campaign custom cybernetics.");
+        return;
+      }
+
+      try {
+        const data = toCustomCyberneticData(item);
+        const { customItemId, versionId } = await createDraftCustomItem({
+          campaignId,
+          category: "cybernetic",
+          creator: { userId, characterId, characterName },
+          data,
+        });
+
+        await onUpdate([
+          ...cybernetics,
+          buildCyberneticSnapshot(
+            item.id,
+            item.bodyLocation,
+            data,
+            customItemId,
+            versionId
+          ),
+        ]);
+        setShowCustomForm(false);
+        toast.success("Custom cybernetic saved as a campaign draft.");
+      } catch (err) {
+        console.error("Failed to create custom cybernetic:", err);
+        toast.error("Failed to save custom cybernetic.");
+      }
+    },
+    [campaignId, characterId, characterName, cybernetics, editable, onUpdate, toast, userId]
+  );
+
+  const addCyberneticFromLibrary = useCallback(
+    async (libraryItem: CampaignCustomItem<"cybernetic">) => {
+      if (!editable) return;
+
+      const versionId =
+        libraryItem.status === "published"
+          ? libraryItem.publishedVersionId
+          : libraryItem.draftVersionId ?? libraryItem.latestVersionId;
+
+      if (!versionId) {
+        toast.error("This custom cybernetic has no usable version.");
+        return;
+      }
+
+      await onUpdate([
+        ...cybernetics,
+        buildCyberneticSnapshot(
+          crypto.randomUUID(),
+          undefined,
+          libraryItem.data,
+          libraryItem.id,
+          versionId
+        ),
+      ]);
+      setShowPicker(false);
+    },
+    [cybernetics, editable, onUpdate, toast]
+  );
+
+  const saveEditedCyberneticDefinition = useCallback(
+    async (item: CyberneticItem) => {
+      if (!editingCyberneticDefinition || !userId) return;
+
+      try {
+        const data = toCustomCyberneticData(item);
+        const versionId = await saveDraftCustomItem({
+          campaignId,
+          customItemId: editingCyberneticDefinition.libraryItem.id,
+          editor: { userId, characterId, characterName },
+          data,
+        });
+        const updatedCybernetics = cybernetics.map((cybernetic) =>
+          cybernetic.id === editingCyberneticDefinition.item.id
+            ? buildCyberneticSnapshot(
+                cybernetic.id,
+                cybernetic.bodyLocation,
+                data,
+                editingCyberneticDefinition.libraryItem.id,
+                versionId
+              )
+            : cybernetic
+        );
+
+        await onUpdate(updatedCybernetics);
+        setEditingCyberneticDefinition(null);
+        toast.success("Custom cybernetic draft updated.");
+      } catch (err) {
+        console.error("Failed to update custom cybernetic definition:", err);
+        toast.error("Failed to update custom cybernetic definition.");
+      }
+    },
+    [
+      campaignId,
+      characterId,
+      characterName,
+      cybernetics,
+      editingCyberneticDefinition,
+      onUpdate,
+      toast,
+      userId,
+    ]
+  );
+
   const removeImplant = useCallback(
     (id: string) => {
       if (!editable) return;
@@ -76,16 +243,126 @@ export function CyberneticsTab({ cybernetics, editable, onUpdate }: CyberneticsT
     [editable, cybernetics, onUpdate]
   );
 
+  const publishCyberneticDefinition = useCallback(
+    async (libraryItem: CampaignCustomItem<"cybernetic">) => {
+      if (!userId) return;
+      setBusyLibraryAction({ itemId: libraryItem.id, action: "publish" });
+      try {
+        await publishCustomItem({
+          campaignId,
+          customItemId: libraryItem.id,
+          actorUserId: userId,
+          versionId: libraryItem.draftVersionId ?? libraryItem.latestVersionId,
+        });
+        toast.success("Custom cybernetic published.");
+      } catch (err) {
+        console.error("Failed to publish custom cybernetic:", err);
+        toast.error("Failed to publish custom cybernetic.");
+      } finally {
+        setBusyLibraryAction(null);
+      }
+    },
+    [campaignId, toast, userId]
+  );
+
+  const archiveCyberneticDefinition = useCallback(
+    async (libraryItem: CampaignCustomItem<"cybernetic">) => {
+      if (!userId) return;
+      setBusyLibraryAction({ itemId: libraryItem.id, action: "archive" });
+      try {
+        await archiveCustomItem({
+          campaignId,
+          customItemId: libraryItem.id,
+          actorUserId: userId,
+        });
+        toast.success("Custom cybernetic archived.");
+      } catch (err) {
+        console.error("Failed to archive custom cybernetic:", err);
+        toast.error("Failed to archive custom cybernetic.");
+      } finally {
+        setBusyLibraryAction(null);
+      }
+    },
+    [campaignId, toast, userId]
+  );
+
+  const updateAllCyberneticCopies = useCallback(
+    async (libraryItem: CampaignCustomItem<"cybernetic">) => {
+      if (!userId) return;
+      setBusyLibraryAction({ itemId: libraryItem.id, action: "updateAll" });
+      try {
+        const updatedCopies = await updateAllCustomItemCopies({
+          campaignId,
+          customItemId: libraryItem.id,
+          actorUserId: userId,
+          versionId: libraryItem.publishedVersionId ?? libraryItem.latestVersionId,
+        });
+        toast.success(
+          `Updated ${updatedCopies} cybernetic ${updatedCopies === 1 ? "copy" : "copies"}.`
+        );
+      } catch (err) {
+        console.error("Failed to update custom cybernetic copies:", err);
+        toast.error("Failed to update custom cybernetic copies.");
+      } finally {
+        setBusyLibraryAction(null);
+      }
+    },
+    [campaignId, toast, userId]
+  );
+
   const cyberneticColumns = [
     cybernetics.filter((_, index) => index % 2 === 0),
     cybernetics.filter((_, index) => index % 2 === 1),
   ];
 
+  const renderImplantRow = (item: CyberneticItem) => {
+    const linkedLibraryItem = item.customLibraryId
+      ? campaignCustomCyberneticsById.get(item.customLibraryId)
+      : undefined;
+    const libraryItem =
+      linkedLibraryItem ??
+      (item.customLibraryId
+        ? buildFallbackCyberneticLibraryItem({
+            campaignId,
+            item,
+            userId,
+            characterId,
+            characterName,
+          })
+        : undefined);
+    const canEditDefinition =
+      !!libraryItem &&
+      editable &&
+      (isDM || (!!userId && libraryItem.creator.userId === userId));
+    const rowBusyAction =
+      busyLibraryAction && libraryItem && busyLibraryAction.itemId === libraryItem.id
+        ? busyLibraryAction.action
+        : null;
+
+    return (
+      <ImplantRow
+        key={item.id}
+        item={item}
+        editable={editable}
+        libraryItem={libraryItem}
+        isDM={isDM && editable}
+        canEditDefinition={canEditDefinition}
+        busyAction={rowBusyAction}
+        onEditDefinition={() => libraryItem && setEditingCyberneticDefinition({ item, libraryItem })}
+        onPublish={() => libraryItem && publishCyberneticDefinition(libraryItem)}
+        onArchive={() => libraryItem && archiveCyberneticDefinition(libraryItem)}
+        onUpdateAllCopies={() => libraryItem && updateAllCyberneticCopies(libraryItem)}
+        onCycleQuality={cycleQuality}
+        onRemove={removeImplant}
+      />
+    );
+  };
+
   return (
     <div className="space-y-6">
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <SectionHeader>Installed Implants ({cybernetics.length})</SectionHeader>
+          <SectionHeader>Installed Implants</SectionHeader>
           <button
             onClick={() => setShowPicker(true)}
             className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
@@ -99,29 +376,13 @@ export function CyberneticsTab({ cybernetics, editable, onUpdate }: CyberneticsT
         )}
 
         <div className="space-y-3 sm:hidden">
-          {cybernetics.map((item) => (
-            <ImplantRow
-              key={item.id}
-              item={item}
-              editable={editable}
-              onCycleQuality={cycleQuality}
-              onRemove={removeImplant}
-            />
-          ))}
+          {cybernetics.map(renderImplantRow)}
         </div>
 
         <div className="hidden sm:grid sm:grid-cols-2 sm:gap-3 sm:items-start">
           {cyberneticColumns.map((column, index) => (
             <div key={index} className="space-y-3">
-              {column.map((item) => (
-                <ImplantRow
-                  key={item.id}
-                  item={item}
-                  editable={editable}
-                  onCycleQuality={cycleQuality}
-                  onRemove={removeImplant}
-                />
-              ))}
+              {column.map(renderImplantRow)}
             </div>
           ))}
         </div>
@@ -130,10 +391,112 @@ export function CyberneticsTab({ cybernetics, editable, onUpdate }: CyberneticsT
       {showPicker && (
         <ImplantPicker
           editable={editable}
+          customItems={campaignCustomCybernetics.filter((item) => item.status !== "archived")}
           onSelect={install}
+          onSelectCustomItem={addCyberneticFromLibrary}
+          onCustom={() => {
+            setShowPicker(false);
+            setShowCustomForm(true);
+          }}
           onClose={() => setShowPicker(false)}
+        />
+      )}
+
+      {showCustomForm && (
+        <CustomImplantForm
+          onAdd={addCustomImplant}
+          onCancel={() => setShowCustomForm(false)}
+        />
+      )}
+
+      {editingCyberneticDefinition && (
+        <CustomImplantForm
+          title="Edit Custom Cybernetic"
+          submitLabel="Save Draft"
+          includeLocation={false}
+          initialItem={{
+            id: editingCyberneticDefinition.item.id,
+            bodyLocation: editingCyberneticDefinition.item.bodyLocation,
+            ...editingCyberneticDefinition.libraryItem.data,
+            customLibraryId: editingCyberneticDefinition.libraryItem.id,
+            customLibraryVersionId:
+              editingCyberneticDefinition.libraryItem.draftVersionId ??
+              editingCyberneticDefinition.libraryItem.latestVersionId,
+          }}
+          onAdd={saveEditedCyberneticDefinition}
+          onCancel={() => setEditingCyberneticDefinition(null)}
         />
       )}
     </div>
   );
+}
+
+function toCustomCyberneticData(item: CyberneticItem): CustomCyberneticData {
+  const {
+    id: _id,
+    referenceId: _referenceId,
+    customLibraryId: _customLibraryId,
+    customLibraryVersionId: _customLibraryVersionId,
+    bodyLocation: _bodyLocation,
+    ...data
+  } = item;
+
+  return data;
+}
+
+function buildCyberneticSnapshot(
+  id: string,
+  bodyLocation: ArmourLocationKey[] | undefined,
+  data: CustomCyberneticData,
+  customLibraryId: string,
+  customLibraryVersionId: string
+): CyberneticItem {
+  return {
+    id,
+    ...data,
+    customLibraryId,
+    customLibraryVersionId,
+    ...(bodyLocation ? { bodyLocation } : {}),
+  };
+}
+
+function buildFallbackCyberneticLibraryItem({
+  campaignId,
+  item,
+  userId,
+  characterId,
+  characterName,
+}: {
+  campaignId: string;
+  item: CyberneticItem;
+  userId: string | null;
+  characterId: string;
+  characterName?: string;
+}): CampaignCustomItem<"cybernetic"> {
+  const data = toCustomCyberneticData(item);
+  const creator = {
+    userId: userId ?? "",
+    characterId,
+    characterName,
+  };
+
+  return {
+    id: item.customLibraryId ?? "",
+    campaignId,
+    category: "cybernetic",
+    status: "draft",
+    name: item.name,
+    creator,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    createdBy: creator,
+    updatedBy: creator,
+    publishedVersionId: null,
+    draftVersionId: item.customLibraryVersionId ?? null,
+    latestVersionId: item.customLibraryVersionId ?? "",
+    latestVersionNumber: 1,
+    archivedAt: null,
+    archivedByUserId: null,
+    data,
+  };
 }
