@@ -338,6 +338,7 @@ export function ArcheotechTab({
           {...sharedAdminProps}
           isEquipped={item.equipped ?? false}
           onToggleEquip={item.type !== "Integrated Weapon" ? () => toggleEquip(item.id) : undefined}
+          highlightAsArcheotech={false}
         />
       );
 

@@ -9,6 +9,7 @@ import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import {
   uiActionButtonCompact,
+  uiSection,
   uiTextBody,
   uiTextLabel,
   uiTextMuted,
@@ -42,6 +43,7 @@ export function ArcheotechWeaponCard({
   isEquipped = false,
   onToggleEquip,
   slotsDisabled = false,
+  highlightAsArcheotech = true,
 }: {
   item: ArcheotechItem;
   strengthBonus?: number;
@@ -58,6 +60,7 @@ export function ArcheotechWeaponCard({
   isEquipped?: boolean;
   onToggleEquip?: () => void;
   slotsDisabled?: boolean;
+  highlightAsArcheotech?: boolean;
 }) {
   const [expanded, setExpanded] = useState(isEquipped);
   useEffect(() => {
@@ -88,16 +91,22 @@ export function ArcheotechWeaponCard({
   const hasWeaponStats = !!(damage || weaponClass);
   const showMishaps = item.type === "Grenade";
 
+  const containerClass = highlightAsArcheotech
+    ? "border border-amber-700/40 bg-amber-900/10 rounded-lg p-3 lg:p-4 space-y-3"
+    : `${uiSection} space-y-3`;
+
   return (
-    <div className="border border-amber-700/40 bg-amber-900/10 rounded-lg p-3 lg:p-4 space-y-3">
+    <div className={containerClass}>
       {/* Header — always visible */}
       <div className="flex items-start justify-between gap-2">
         <button className="flex-1 min-w-0 text-left" onClick={() => setExpanded((e) => !e)}>
           <div className="flex items-center gap-2 flex-wrap">
             <p className="text-sm lg:text-base font-semibold text-slate-200">{item.name}</p>
-            <Chip size="sm" className="border-amber-700/50 bg-amber-500/10 text-amber-400 uppercase tracking-wide shrink-0">
-              Archeotech
-            </Chip>
+            {highlightAsArcheotech && (
+              <Chip size="sm" className="border-amber-700/50 bg-amber-500/10 text-amber-400 uppercase tracking-wide shrink-0">
+                Archeotech
+              </Chip>
+            )}
           </div>
           {weaponClass && <p className={`text-xs lg:text-sm ${uiTextMuted}`}>{weaponClass}</p>}
         </button>

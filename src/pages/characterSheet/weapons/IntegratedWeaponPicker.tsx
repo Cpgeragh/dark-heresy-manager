@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import type { RangedWeaponRef, MeleeWeaponRef } from "../../../data/reference/weaponReference";
 import type { WeaponCraftsmanship } from "../../../types/Character";
 import { Button } from "../../../ui/Button";
@@ -58,7 +58,7 @@ export function IntegratedWeaponPicker({
       <PickerModal
         title={selected.ref.name}
         titleClassName="text-slate-200"
-        closeLabel="\u2190"
+        closeLabel="←"
         query=""
         onQueryChange={() => {}}
         onClose={resetPicker}

@@ -1,4 +1,4 @@
-// src/pages/characterSheet/weapons/MeleeCard.tsx
+﻿// src/pages/characterSheet/weapons/MeleeCard.tsx
 // MeleePicker, CustomMeleeForm, MeleeCard — co-located for navigability.
 
 import { useState, useEffect } from "react";
@@ -154,7 +154,7 @@ export function MeleePicker({
       <PickerModal
         title={selected.name}
         titleClassName="text-slate-200"
-        closeLabel="\u2190"
+        closeLabel="←"
         query=""
         onQueryChange={() => {}}
         onClose={resetPicker}

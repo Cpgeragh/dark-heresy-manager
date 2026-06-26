@@ -1,4 +1,4 @@
-// src/pages/characterSheet/weapons/RangedCard.tsx
+﻿// src/pages/characterSheet/weapons/RangedCard.tsx
 // RangedPicker, CustomRangedForm, RangedCard — co-located for navigability.
 
 import { useState, useEffect } from "react";
@@ -326,7 +326,7 @@ export function RangedPicker({
       <PickerModal
         title={selected.name}
         titleClassName="text-slate-200"
-        closeLabel="\u2190"
+        closeLabel="←"
         query=""
         onQueryChange={() => {}}
         onClose={resetPicker}
