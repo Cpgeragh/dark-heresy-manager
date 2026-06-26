@@ -1,0 +1,53 @@
+// src/pages/characterSheet/CyberneticsTab/ArcheotechImplantRow.tsx
+
+import type { ArcheotechItem } from "../../../types/Character";
+import { Chip } from "../../../ui/Chip";
+import { uiActionButtonCompact, uiTextLabel, uiTextMuted } from "../../../ui/editableStyles";
+import { CRAFTSMANSHIP_STYLE, LOCATION_DISPLAY } from "./cyberneticsConstants";
+
+interface Props {
+  item: ArcheotechItem;
+  editable: boolean;
+  onRemove: () => void;
+}
+
+export function ArcheotechImplantRow({ item, editable, onRemove }: Props) {
+  const locations = item.bodyLocation ?? [];
+
+  return (
+    <div className="border border-amber-700/40 bg-amber-900/10 rounded-lg p-3 lg:p-4 flex items-start gap-3">
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-sm lg:text-base font-semibold text-slate-200">{item.name}</span>
+          <Chip
+            size="sm"
+            className="border-amber-700/50 bg-amber-500/10 text-amber-400 uppercase tracking-wide shrink-0"
+          >
+            Archeotech
+          </Chip>
+        </div>
+        <div className="flex flex-wrap items-center gap-1.5 mt-1">
+          {locations.length > 0 && (
+            <Chip className={`border-slate-700 bg-slate-800/40 ${uiTextMuted}`}>
+              {locations.map((l) => LOCATION_DISPLAY[l] ?? l).join(" & ")}
+            </Chip>
+          )}
+          {item.craftsmanship && (
+            <>
+              <span className={uiTextLabel}>Quality</span>
+              <Chip className={`${CRAFTSMANSHIP_STYLE[item.craftsmanship]} shrink-0`}>
+                {item.craftsmanship}
+              </Chip>
+            </>
+          )}
+        </div>
+      </div>
+
+      {editable && (
+        <button onClick={onRemove} className={`${uiActionButtonCompact} shrink-0`}>
+          Remove
+        </button>
+      )}
+    </div>
+  );
+}

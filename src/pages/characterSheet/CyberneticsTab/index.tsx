@@ -12,6 +12,7 @@ import type {
 import type { CyberneticRef } from "../../../data/reference/cyberneticsReference";
 import type { RangedWeaponRef, MeleeWeaponRef } from "../../../data/reference/weaponReference";
 import type { CampaignCustomItem, CustomCyberneticData, CustomWeaponData } from "../../../types/CustomItems";
+import type { ArcheotechItem } from "../../../types/Character";
 import { ImplantPicker } from "./ImplantPicker";
 import { ImplantRow } from "./ImplantRow";
 import { CustomImplantForm } from "./CustomImplantForm";
@@ -34,6 +35,8 @@ import { IntegratedWeaponPicker } from "../weapons/IntegratedWeaponPicker";
 import { RangedCard, CustomRangedForm } from "../weapons/RangedCard";
 import { MeleeCard, CustomMeleeForm } from "../weapons/MeleeCard";
 import { IndependentCardGrid } from "../weapons/IndependentCardGrid";
+import { ArcheotechWeaponCard } from "../weapons/ArcheotechWeaponCard";
+import { ArcheotechImplantRow } from "./ArcheotechImplantRow";
 import {
   isIntegratedRangedWeapon,
   isIntegratedMeleeWeapon,
@@ -57,6 +60,8 @@ interface CyberneticsTabProps {
   onUpdate: (next: CyberneticItem[]) => void | Promise<void>;
   onUpdateRanged: (next: RangedWeapon[]) => void | Promise<void>;
   onUpdateMelee: (next: MeleeWeapon[]) => void | Promise<void>;
+  archeotech?: ArcheotechItem[];
+  onUpdateArcheotech?: (next: ArcheotechItem[]) => void | Promise<void>;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -82,6 +87,8 @@ export function CyberneticsTab({
   onUpdate,
   onUpdateRanged,
   onUpdateMelee,
+  archeotech,
+  onUpdateArcheotech,
 }: CyberneticsTabProps) {
   const [showPicker, setShowPicker] = useState(false);
   const [showCustomForm, setShowCustomForm] = useState(false);
@@ -293,6 +300,34 @@ export function CyberneticsTab({
   const integratedMelee = useMemo(
     () => meleeWeapons.filter(isIntegratedMeleeWeapon).sort((a, b) => a.name.localeCompare(b.name)),
     [meleeWeapons]
+  );
+  const archeotechCyberneticItems = useMemo(
+    () => (archeotech ?? []).filter((a) => a.type === "Cybernetic")
+      .sort((a, b) => a.name.localeCompare(b.name)),
+    [archeotech]
+  );
+  const archeotechIntegratedItems = useMemo(
+    () => (archeotech ?? []).filter((a) => a.type === "Integrated Weapon")
+      .sort((a, b) => a.name.localeCompare(b.name)),
+    [archeotech]
+  );
+
+  const toggleEquipArcheotech = useCallback(
+    (id: string) => {
+      if (!editable || !onUpdateArcheotech) return;
+      onUpdateArcheotech(
+        (archeotech ?? []).map((a) => (a.id === id ? { ...a, equipped: !a.equipped } : a))
+      );
+    },
+    [editable, archeotech, onUpdateArcheotech]
+  );
+
+  const removeArcheotech = useCallback(
+    (id: string) => {
+      if (!editable || !onUpdateArcheotech) return;
+      onUpdateArcheotech((archeotech ?? []).filter((a) => a.id !== id));
+    },
+    [editable, archeotech, onUpdateArcheotech]
   );
 
   const addIntegratedFromRangedRef = useCallback(
@@ -569,7 +604,7 @@ export function CyberneticsTab({
           </button>
         </div>
 
-        {integratedRanged.length === 0 && integratedMelee.length === 0 && (
+        {integratedRanged.length === 0 && integratedMelee.length === 0 && archeotechIntegratedItems.length === 0 && (
           <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No integrated weapons installed.</p>
         )}
 
@@ -615,6 +650,16 @@ export function CyberneticsTab({
                 }
               />
             )),
+            ...archeotechIntegratedItems.map((item) => (
+              <ArcheotechWeaponCard
+                key={item.id}
+                item={item}
+                editable={editable}
+                isEquipped={item.equipped ?? false}
+                onToggleEquip={() => toggleEquipArcheotech(item.id)}
+                onRemove={() => removeArcheotech(item.id)}
+              />
+            )),
           ]}
         />
       </section>
@@ -631,7 +676,7 @@ export function CyberneticsTab({
           </button>
         </div>
 
-        {cybernetics.length === 0 && (
+        {cybernetics.length === 0 && archeotechCyberneticItems.length === 0 && (
           <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No cybernetics installed.</p>
         )}
 
@@ -646,6 +691,14 @@ export function CyberneticsTab({
             </div>
           ))}
         </div>
+        {archeotechCyberneticItems.map((item) => (
+          <ArcheotechImplantRow
+            key={item.id}
+            item={item}
+            editable={editable}
+            onRemove={() => removeArcheotech(item.id)}
+          />
+        ))}
       </section>
 
       {showIntegratedPicker && (
