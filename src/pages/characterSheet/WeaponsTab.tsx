@@ -227,13 +227,23 @@ export function WeaponsTab({
   const archeotechGrenadeItems = (archeotech ?? []).filter((a) => a.type === "Grenade");
   const archeotechMineItems = (archeotech ?? []).filter((a) => a.type === "Mine");
   const archeotechWeaponItems = (archeotech ?? []).filter((a) => a.type === "Weapon");
+  const archeotechIntegratedWeaponItems = (archeotech ?? []).filter((a) => a.type === "Integrated Weapon");
+  const archeotechShieldItems = (archeotech ?? []).filter((a) => a.type === "Shield");
   const archeotechRangedItems = archeotechWeaponItems.filter((a) => {
     const ref = ARCHEOTECH_REFERENCE.find((r) => r.id === a.referenceId);
-    return ref?.weaponClass !== "Melee";
+    return (a.weaponClass ?? ref?.weaponClass) !== "Melee";
   });
   const archeotechMeleeWeaponItems = archeotechWeaponItems.filter((a) => {
     const ref = ARCHEOTECH_REFERENCE.find((r) => r.id === a.referenceId);
-    return ref?.weaponClass === "Melee";
+    return (a.weaponClass ?? ref?.weaponClass) === "Melee";
+  });
+  const archeotechIntegratedRangedItems = archeotechIntegratedWeaponItems.filter((a) => {
+    const ref = ARCHEOTECH_REFERENCE.find((r) => r.id === a.referenceId);
+    return (a.weaponClass ?? ref?.weaponClass) !== "Melee" && a.equipped;
+  });
+  const archeotechIntegratedMeleeItems = archeotechIntegratedWeaponItems.filter((a) => {
+    const ref = ARCHEOTECH_REFERENCE.find((r) => r.id === a.referenceId);
+    return (a.weaponClass ?? ref?.weaponClass) === "Melee" && a.equipped;
   });
 
   // ── Cybernetic weapons ─────────────────────────────────────────────────────
@@ -281,6 +291,11 @@ export function WeaponsTab({
       item,
       name: item.name,
     })),
+    ...archeotechIntegratedRangedItems.map((item) => ({
+      kind: "archeotech" as const,
+      item,
+      name: item.name,
+    })),
     ...equippedIntegratedRanged.map(({ weapon, index }) => ({
       kind: "integrated" as const,
       weapon,
@@ -303,6 +318,11 @@ export function WeaponsTab({
       name: weapon.name,
     })),
     ...archeotechMeleeWeaponItems.map((item) => ({
+      kind: "archeotech" as const,
+      item,
+      name: item.name,
+    })),
+    ...archeotechIntegratedMeleeItems.map((item) => ({
       kind: "archeotech" as const,
       item,
       name: item.name,
@@ -340,6 +360,8 @@ export function WeaponsTab({
       .reduce((sum, { weapon }) => sum + getMeleeSlots(weapon), 0) +
     archeotechRangedItems.filter((a) => a.equipped).length +
     archeotechMeleeWeaponItems.filter((a) => a.equipped).length +
+    archeotechIntegratedWeaponItems.filter((a) => a.equipped).length +
+    archeotechShieldItems.filter((a) => a.equipped).length +
     equippedIntegratedRanged.reduce((sum, { weapon }) => sum + getRangedSlots(weapon), 0) +
     equippedIntegratedMelee.reduce((sum, { weapon }) => sum + getMeleeSlots(weapon), 0) +
     (shields ?? []).filter((s) => s.equipped).length;
@@ -1423,8 +1445,11 @@ export function WeaponsTab({
                   strengthBonus={strengthBonus}
                   editable={editable}
                   isEquipped={entry.item.equipped ?? false}
-                  onToggleEquip={() => toggleEquipArcheotech(entry.item.id)}
-                  slotsDisabled={!entry.item.equipped && slotsRemaining < 1}
+                  onToggleEquip={entry.item.type !== "Integrated Weapon"
+                    ? () => toggleEquipArcheotech(entry.item.id)
+                    : undefined}
+                  slotsDisabled={entry.item.type !== "Integrated Weapon"
+                    && !entry.item.equipped && slotsRemaining < 1}
                 />
               );
             if (entry.kind === "integrated")
@@ -1513,8 +1538,11 @@ export function WeaponsTab({
                   strengthBonus={strengthBonus}
                   editable={editable}
                   isEquipped={entry.item.equipped ?? false}
-                  onToggleEquip={() => toggleEquipArcheotech(entry.item.id)}
-                  slotsDisabled={!entry.item.equipped && slotsRemaining < 1}
+                  onToggleEquip={entry.item.type !== "Integrated Weapon"
+                    ? () => toggleEquipArcheotech(entry.item.id)
+                    : undefined}
+                  slotsDisabled={entry.item.type !== "Integrated Weapon"
+                    && !entry.item.equipped && slotsRemaining < 1}
                 />
               );
             if (entry.kind === "integrated")
