@@ -37,6 +37,7 @@ interface Props {
   submitLabel?: string;
   onAdd: (item: ArcheotechItem) => void | Promise<void>;
   onCancel: () => void;
+  onBack?: () => void;
 }
 
 export function CustomItemForm({
@@ -45,6 +46,7 @@ export function CustomItemForm({
   submitLabel = "Add Item",
   onAdd,
   onCancel,
+  onBack,
 }: Props) {
   const startType = (initialItem?.type as ItemType | undefined) ?? null;
   const [phase, setPhase] = useState<"select" | "details">(startType ? "details" : "select");
@@ -172,7 +174,8 @@ export function CustomItemForm({
         title={title}
         query=""
         onQueryChange={() => {}}
-        onClose={onCancel}
+        closeLabel="←"
+        onClose={onBack ?? onCancel}
         isEmpty={false}
         hideSearch
         maxHeight="max-h-[92vh]"

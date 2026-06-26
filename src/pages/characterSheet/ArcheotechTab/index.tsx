@@ -354,7 +354,11 @@ export function ArcheotechTab({
         </div>
 
         {showCustomForm && (
-          <CustomItemForm onAdd={addCustom} onCancel={() => setShowCustomForm(false)} />
+          <CustomItemForm
+            onAdd={addCustom}
+            onCancel={() => setShowCustomForm(false)}
+            onBack={() => { setShowCustomForm(false); setShowPicker(true); }}
+          />
         )}
 
         {editingArcheotechDefinition && (

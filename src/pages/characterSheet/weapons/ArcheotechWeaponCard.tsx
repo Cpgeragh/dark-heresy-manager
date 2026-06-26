@@ -3,15 +3,18 @@
 
 import { useState, useEffect } from "react";
 import type { ArcheotechItem } from "../../../types/Character";
+import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { ARCHEOTECH_REFERENCE } from "../../../data/reference/archeotechReference";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import {
+  uiActionButtonCompact,
   uiTextBody,
   uiTextLabel,
   uiTextMuted,
   uiTextPlaceholder,
 } from "../../../ui/editableStyles";
+import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 import { InfoModal } from "../../../components/InfoModal";
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
 import {
@@ -27,6 +30,15 @@ export function ArcheotechWeaponCard({
   item,
   strengthBonus,
   editable = false,
+  libraryItem,
+  isDM = false,
+  canEditDefinition = false,
+  busyAction = null,
+  onEditDefinition,
+  onPublish,
+  onArchive,
+  onUpdateAllCopies,
+  onRemove,
   isEquipped = false,
   onToggleEquip,
   slotsDisabled = false,
@@ -34,6 +46,15 @@ export function ArcheotechWeaponCard({
   item: ArcheotechItem;
   strengthBonus?: number;
   editable?: boolean;
+  libraryItem?: CampaignCustomItem<"archeotech">;
+  isDM?: boolean;
+  canEditDefinition?: boolean;
+  busyAction?: "publish" | "archive" | "updateAll" | null;
+  onEditDefinition?: () => void;
+  onPublish?: () => void;
+  onArchive?: () => void;
+  onUpdateAllCopies?: () => void;
+  onRemove?: () => void;
   isEquipped?: boolean;
   onToggleEquip?: () => void;
   slotsDisabled?: boolean;
@@ -44,12 +65,19 @@ export function ArcheotechWeaponCard({
   }, [isEquipped]);
 
   const ref = ARCHEOTECH_REFERENCE.find((r) => r.id === item.referenceId);
-  const specialRules = ref?.specialRules;
-  const description = item.description ?? ref?.description;
-  const weight = item.weight ?? ref?.weight;
-  const value = item.value ?? ref?.value;
+  const specialRules = item.specialRules ?? ref?.specialRules;
+  const description  = item.description  ?? ref?.description;
+  const weight       = item.weight       ?? ref?.weight;
+  const value        = item.value        ?? ref?.value;
   const availability = item.availability ?? ref?.availability;
-  const source = item.source ?? ref?.source;
+  const source       = item.source       ?? ref?.source;
+  const weaponClass  = item.weaponClass  ?? ref?.weaponClass;
+  const damage       = item.damage       ?? ref?.damage;
+  const range        = item.range        ?? ref?.range;
+  const rof          = item.rof          ?? ref?.rof;
+  const pen          = item.pen          ?? ref?.pen;
+  const clip         = item.clip         ?? ref?.clip;
+  const rld          = item.rld          ?? ref?.rld;
 
   const hasRules = !!specialRules?.trim();
   const ruleNamesInLookup = (specialRules ?? "")
@@ -57,7 +85,7 @@ export function ArcheotechWeaponCard({
     .map((r) => r.trim().replace(/\s*\(.*?\)/, ""))
     .filter((name) => Boolean(name) && Boolean(WEAPON_SPECIAL_RULES[name]));
 
-  const hasWeaponStats = !!(ref?.damage || ref?.weaponClass);
+  const hasWeaponStats = !!(damage || weaponClass);
   const showMishaps = item.type === "Grenade";
 
   return (
@@ -71,7 +99,7 @@ export function ArcheotechWeaponCard({
               Archeotech
             </Chip>
           </div>
-          {ref?.weaponClass && <p className={`text-xs lg:text-sm ${uiTextMuted}`}>{ref.weaponClass}</p>}
+          {weaponClass && <p className={`text-xs lg:text-sm ${uiTextMuted}`}>{weaponClass}</p>}
         </button>
         <div className="flex items-center gap-2 shrink-0">
           {onToggleEquip && (
@@ -81,6 +109,11 @@ export function ArcheotechWeaponCard({
               editable={editable}
               onChange={onToggleEquip}
             />
+          )}
+          {editable && onRemove && (
+            <button onClick={onRemove} className={`${uiActionButtonCompact} shrink-0`}>
+              Remove
+            </button>
           )}
           <button
             onClick={() => setExpanded((e) => !e)}
@@ -108,22 +141,22 @@ export function ArcheotechWeaponCard({
           {/* Stat chips — only for items with structured weapon data */}
           {hasWeaponStats && (
             <div className="flex flex-wrap gap-1.5">
-              {ref?.range && <StatChip label="Range" value={ref.range} />}
-              {ref?.rof && <StatChip label="RoF" value={ref.rof} />}
-              {ref?.damage && (
-                <StatChip label="Damage" value={ref.damage.replace(/\s*[IREX]$/i, "").trim()} />
+              {range && <StatChip label="Range" value={range} />}
+              {rof && <StatChip label="RoF" value={rof} />}
+              {damage && (
+                <StatChip label="Damage" value={damage.replace(/\s*[IREX]$/i, "").trim()} />
               )}
-              {ref?.damage && <DamageTypeChip damage={ref.damage} />}
-              {ref?.pen && <StatChip label="Pen" value={ref.pen} />}
-              {ref?.clip && <StatChip label="Clip" value={ref.clip} />}
-              {ref?.rld && <StatChip label="Reload" value={ref.rld} />}
-              {ref?.weaponClass === "Melee" && strengthBonus !== undefined && (
+              {damage && <DamageTypeChip damage={damage} />}
+              {pen && <StatChip label="Pen" value={pen} />}
+              {clip && <StatChip label="Clip" value={clip} />}
+              {rld && <StatChip label="Reload" value={rld} />}
+              {weaponClass === "Melee" && strengthBonus !== undefined && (
                 <>
                   <StatChip label="SB" value={`+${strengthBonus}`} />
-                  {ref?.damage && (
+                  {damage && (
                     <StatChip
                       label="Total"
-                      value={computeMeleeTotalDamage(ref.damage, strengthBonus)}
+                      value={computeMeleeTotalDamage(damage, strengthBonus)}
                     />
                   )}
                 </>
@@ -167,6 +200,19 @@ export function ArcheotechWeaponCard({
               </div>
             )}
           </div>
+
+          {libraryItem && (
+            <CustomItemActionButtons
+              libraryItem={libraryItem}
+              isDM={isDM}
+              canEditDefinition={canEditDefinition}
+              busyAction={busyAction}
+              onEditDefinition={onEditDefinition}
+              onPublish={onPublish}
+              onArchive={onArchive}
+              onUpdateAllCopies={onUpdateAllCopies}
+            />
+          )}
 
           {/* Weight / Value / Availability / Source */}
           <ItemMetaChips
