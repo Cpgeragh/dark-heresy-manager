@@ -6,6 +6,7 @@ import type { ArcheotechRef } from "../../../data/reference/archeotechReference"
 import type { CampaignCustomItem, CustomArcheotechData } from "../../../types/CustomItems";
 import { ArcheotechPickerModal } from "./ArcheotechPickerModal";
 import { ItemCard } from "./ItemCard";
+import { ArcheotechWeaponCard } from "../weapons/ArcheotechWeaponCard";
 import { CustomItemForm } from "./CustomItemForm";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { uiTextPlaceholder } from "../../../ui/editableStyles";
@@ -207,6 +208,14 @@ export function ArcheotechTab({
     [editable, archeotech, onUpdate]
   );
 
+  const toggleEquip = useCallback(
+    (id: string) => {
+      if (!editable) return;
+      onUpdate(archeotech.map((a) => (a.id === id ? { ...a, equipped: !a.equipped } : a)));
+    },
+    [editable, archeotech, onUpdate]
+  );
+
   const publishArcheotechDefinition = useCallback(
     async (libraryItem: CampaignCustomItem<"archeotech">) => {
       if (!userId) return;
@@ -274,9 +283,13 @@ export function ArcheotechTab({
     [campaignId, toast, userId]
   );
 
+  const sortedArcheotech = useMemo(
+    () => [...archeotech].sort((a, b) => a.name.localeCompare(b.name)),
+    [archeotech]
+  );
   const archeotechColumns = [
-    archeotech.filter((_, index) => index % 2 === 0),
-    archeotech.filter((_, index) => index % 2 === 1),
+    sortedArcheotech.filter((_, index) => index % 2 === 0),
+    sortedArcheotech.filter((_, index) => index % 2 === 1),
   ];
 
   const renderItemCard = (item: ArcheotechItem) => {
@@ -303,20 +316,36 @@ export function ArcheotechTab({
         ? busyLibraryAction.action
         : null;
 
+    const sharedAdminProps = {
+      editable,
+      libraryItem,
+      isDM: isDM && editable,
+      canEditDefinition,
+      busyAction: rowBusyAction,
+      onEditDefinition: () => libraryItem && setEditingArcheotechDefinition({ item, libraryItem }),
+      onPublish: () => libraryItem && publishArcheotechDefinition(libraryItem),
+      onArchive: () => libraryItem && archiveArcheotechDefinition(libraryItem),
+      onUpdateAllCopies: () => libraryItem && updateAllArcheotechCopies(libraryItem),
+      onRemove: () => removeItem(item.id),
+    };
+
+    const isWeaponType = ["Weapon", "Integrated Weapon", "Grenade", "Mine"].includes(item.type ?? "");
+    if (isWeaponType)
+      return (
+        <ArcheotechWeaponCard
+          key={item.id}
+          item={item}
+          {...sharedAdminProps}
+          isEquipped={item.equipped ?? false}
+          onToggleEquip={item.type !== "Integrated Weapon" ? () => toggleEquip(item.id) : undefined}
+        />
+      );
+
     return (
       <ItemCard
         key={item.id}
         item={item}
-        editable={editable}
-        libraryItem={libraryItem}
-        isDM={isDM && editable}
-        canEditDefinition={canEditDefinition}
-        busyAction={rowBusyAction}
-        onEditDefinition={() => libraryItem && setEditingArcheotechDefinition({ item, libraryItem })}
-        onPublish={() => libraryItem && publishArcheotechDefinition(libraryItem)}
-        onArchive={() => libraryItem && archiveArcheotechDefinition(libraryItem)}
-        onUpdateAllCopies={() => libraryItem && updateAllArcheotechCopies(libraryItem)}
-        onRemove={() => removeItem(item.id)}
+        {...sharedAdminProps}
       />
     );
   };
@@ -342,7 +371,7 @@ export function ArcheotechTab({
         )}
 
         <div className="space-y-3 sm:hidden">
-          {archeotech.map(renderItemCard)}
+          {sortedArcheotech.map(renderItemCard)}
         </div>
 
         <div className="hidden sm:grid sm:grid-cols-2 sm:gap-3 sm:items-start">
