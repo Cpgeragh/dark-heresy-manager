@@ -23,6 +23,7 @@ import {
   uiTextPlaceholder,
 } from "../../../ui/editableStyles";
 import { Button } from "../../../ui/Button";
+import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
 import { QuantityControl } from "../../../ui/QuantityControl";
@@ -627,6 +628,7 @@ export function MeleeCard({
   onToggleEquip,
   slotsDisabled = false,
   forceExpanded = false,
+  integrated = false,
 }: {
   weapon: MeleeWeapon;
   editable: boolean;
@@ -648,6 +650,7 @@ export function MeleeCard({
   onToggleEquip?: () => void;
   slotsDisabled?: boolean;
   forceExpanded?: boolean;
+  integrated?: boolean;
 }) {
   const [expanded, setExpanded] = useState(isEquipped);
   useEffect(() => {
@@ -715,6 +718,11 @@ export function MeleeCard({
                 {libraryItem.status}
               </span>
             )}
+            {integrated && (
+              <Chip size="sm" className="border-violet-500/60 bg-violet-500/10 text-violet-300">
+                Integrated
+              </Chip>
+            )}
           </div>
           {weapon.class && <p className={`text-xs lg:text-sm ${uiTextMuted}`}>{weapon.class}</p>}
         </button>
@@ -747,7 +755,7 @@ export function MeleeCard({
               </svg>
             </button>
           )}
-          {editable && (expanded || forceExpanded) && (
+          {editable && (expanded || forceExpanded) && !integrated && (
             <button onClick={onRemove} className={`${uiActionButtonCompact} shrink-0`}>
               Remove
             </button>

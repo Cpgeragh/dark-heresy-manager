@@ -31,7 +31,6 @@ export function useCampaignCustomItems({
   category,
   mode,
   userId,
-  characterId,
   includeArchived = mode === "admin",
 }: UseCampaignCustomItemsArgs): UseCampaignCustomItemsResult {
   const [items, setItems] = useState<CampaignCustomItem[]>([]);

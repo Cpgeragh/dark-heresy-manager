@@ -81,15 +81,20 @@ export function meleeDamageForCraftsmanship(damage: string, craftsmanship: Weapo
 type ComparableEntry =
   | { kind: "regular"; weapon: { equipped?: boolean }; name: string }
   | { kind: "cybernetic"; name: string }
-  | { kind: "archeotech"; item: { equipped?: boolean }; name: string };
+  | { kind: "archeotech"; item: { equipped?: boolean }; name: string }
+  | { kind: "integrated"; weapon: { equipped?: boolean }; name: string };
 
 export function compareWeaponEntries(a: ComparableEntry, b: ComparableEntry): number {
   if (a.kind === "cybernetic" && b.kind !== "cybernetic") return -1;
   if (b.kind === "cybernetic" && a.kind !== "cybernetic") return 1;
   const aEq =
-    a.kind === "regular" ? (a.weapon.equipped ? 0 : 1) : a.kind === "archeotech" ? (a.item.equipped ? 0 : 1) : 0;
+    a.kind === "regular" || a.kind === "integrated" ? (a.weapon.equipped ? 0 : 1)
+    : a.kind === "archeotech" ? (a.item.equipped ? 0 : 1)
+    : 0;
   const bEq =
-    b.kind === "regular" ? (b.weapon.equipped ? 0 : 1) : b.kind === "archeotech" ? (b.item.equipped ? 0 : 1) : 0;
+    b.kind === "regular" || b.kind === "integrated" ? (b.weapon.equipped ? 0 : 1)
+    : b.kind === "archeotech" ? (b.item.equipped ? 0 : 1)
+    : 0;
   if (aEq !== bEq) return aEq - bEq;
   return a.name.localeCompare(b.name);
 }

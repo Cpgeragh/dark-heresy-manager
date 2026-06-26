@@ -5,9 +5,13 @@ import type {
   CyberneticItem,
   CyberneticCraftsmanship,
   ArmourLocationKey,
+  RangedWeapon,
+  MeleeWeapon,
+  WeaponCraftsmanship,
 } from "../../../types/Character";
 import type { CyberneticRef } from "../../../data/reference/cyberneticsReference";
-import type { CampaignCustomItem, CustomCyberneticData } from "../../../types/CustomItems";
+import type { RangedWeaponRef, MeleeWeaponRef } from "../../../data/reference/weaponReference";
+import type { CampaignCustomItem, CustomCyberneticData, CustomWeaponData } from "../../../types/CustomItems";
 import { ImplantPicker } from "./ImplantPicker";
 import { ImplantRow } from "./ImplantRow";
 import { CustomImplantForm } from "./CustomImplantForm";
@@ -26,6 +30,16 @@ import {
   saveDraftCustomItem,
 } from "../../../services/customItemService";
 import { useToast } from "../../../components/Toast";
+import { IntegratedWeaponPicker } from "../weapons/IntegratedWeaponPicker";
+import { RangedCard, CustomRangedForm } from "../weapons/RangedCard";
+import { MeleeCard, CustomMeleeForm } from "../weapons/MeleeCard";
+import { IndependentCardGrid } from "../weapons/IndependentCardGrid";
+import {
+  isIntegratedRangedWeapon,
+  isIntegratedMeleeWeapon,
+  rangedRulesForCraftsmanship,
+  meleeDamageForCraftsmanship,
+} from "../../../utils/weaponUtils";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -36,8 +50,13 @@ interface CyberneticsTabProps {
   characterName?: string;
   isDM: boolean;
   cybernetics: CyberneticItem[];
+  rangedWeapons: RangedWeapon[];
+  meleeWeapons: MeleeWeapon[];
+  strengthBonus?: number;
   editable: boolean;
   onUpdate: (next: CyberneticItem[]) => void | Promise<void>;
+  onUpdateRanged: (next: RangedWeapon[]) => void | Promise<void>;
+  onUpdateMelee: (next: MeleeWeapon[]) => void | Promise<void>;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -56,11 +75,19 @@ export function CyberneticsTab({
   characterName,
   isDM,
   cybernetics,
+  rangedWeapons,
+  meleeWeapons,
+  strengthBonus = 0,
   editable,
   onUpdate,
+  onUpdateRanged,
+  onUpdateMelee,
 }: CyberneticsTabProps) {
   const [showPicker, setShowPicker] = useState(false);
   const [showCustomForm, setShowCustomForm] = useState(false);
+  const [showIntegratedPicker, setShowIntegratedPicker] = useState(false);
+  const [showCustomIntegratedRanged, setShowCustomIntegratedRanged] = useState(false);
+  const [showCustomIntegratedMelee, setShowCustomIntegratedMelee] = useState(false);
   const [installingCustomCybernetic, setInstallingCustomCybernetic] =
     useState<CampaignCustomItem<"cybernetic"> | null>(null);
   const [editingCyberneticDefinition, setEditingCyberneticDefinition] =
@@ -257,6 +284,160 @@ export function CyberneticsTab({
     [editable, cybernetics, onUpdate]
   );
 
+  // ── Integrated weapons ─────────────────────────────────────────────────────
+
+  const integratedRanged = useMemo(
+    () => rangedWeapons.filter(isIntegratedRangedWeapon).sort((a, b) => a.name.localeCompare(b.name)),
+    [rangedWeapons]
+  );
+  const integratedMelee = useMemo(
+    () => meleeWeapons.filter(isIntegratedMeleeWeapon).sort((a, b) => a.name.localeCompare(b.name)),
+    [meleeWeapons]
+  );
+
+  const addIntegratedFromRangedRef = useCallback(
+    (ref: RangedWeaponRef, craftsmanship: WeaponCraftsmanship = "Common") => {
+      if (!editable) return;
+      const specialRules = rangedRulesForCraftsmanship(ref.specialRules, craftsmanship);
+      onUpdateRanged([
+        ...rangedWeapons,
+        {
+          id: crypto.randomUUID(),
+          referenceId: ref.id,
+          name: ref.name,
+          class: ref.class,
+          range: ref.range,
+          rof: ref.rof,
+          damage: ref.damage,
+          pen: String(ref.pen),
+          clip: String(ref.clip),
+          rld: ref.reload,
+          specialRules,
+          weight: ref.weight,
+          value: ref.value,
+          availability: ref.availability,
+          source: ref.source,
+          craftsmanship,
+          ammoTracking: ref.ammoTracking,
+          integrated: true,
+        },
+      ]);
+      setShowIntegratedPicker(false);
+    },
+    [editable, rangedWeapons, onUpdateRanged]
+  );
+
+  const addIntegratedFromMeleeRef = useCallback(
+    (ref: MeleeWeaponRef, craftsmanship: WeaponCraftsmanship = "Common") => {
+      if (!editable) return;
+      const damage = meleeDamageForCraftsmanship(ref.damage, craftsmanship);
+      onUpdateMelee([
+        ...meleeWeapons,
+        {
+          id: crypto.randomUUID(),
+          referenceId: ref.id,
+          name: ref.name,
+          class: ref.twoHanded ? `${ref.class} (Two-Handed)` : ref.class,
+          damage,
+          pen: String(ref.pen),
+          specialRules: ref.specialRules,
+          weight: ref.weight,
+          value: ref.value,
+          availability: ref.availability,
+          source: ref.source,
+          craftsmanship,
+          integrated: true,
+        },
+      ]);
+      setShowIntegratedPicker(false);
+    },
+    [editable, meleeWeapons, onUpdateMelee]
+  );
+
+  const addCustomIntegratedRanged = useCallback(
+    async (weapon: RangedWeapon) => {
+      if (!editable || !userId) return;
+      try {
+        const nextWeapon = { ...weapon, craftsmanship: weapon.craftsmanship ?? "Common" };
+        const data = toCustomRangedWeaponData(nextWeapon);
+        const { customItemId, versionId } = await createDraftCustomItem({
+          campaignId,
+          category: "weapon",
+          creator: { userId, characterId, characterName },
+          data,
+        });
+        onUpdateRanged([
+          ...rangedWeapons,
+          buildRangedWeaponSnapshot(nextWeapon.id, nextWeapon, data, customItemId, versionId),
+        ]);
+        setShowCustomIntegratedRanged(false);
+        toast.success("Custom integrated ranged weapon saved as a campaign draft.");
+      } catch (err) {
+        console.error("Failed to create custom integrated ranged weapon:", err);
+        toast.error("Failed to save custom integrated ranged weapon.");
+      }
+    },
+    [campaignId, characterId, characterName, editable, onUpdateRanged, rangedWeapons, toast, userId]
+  );
+
+  const addCustomIntegratedMelee = useCallback(
+    async (weapon: MeleeWeapon) => {
+      if (!editable || !userId) return;
+      try {
+        const nextWeapon = { ...weapon, craftsmanship: weapon.craftsmanship ?? "Common" };
+        const data = toCustomMeleeWeaponData(nextWeapon);
+        const { customItemId, versionId } = await createDraftCustomItem({
+          campaignId,
+          category: "weapon",
+          creator: { userId, characterId, characterName },
+          data,
+        });
+        onUpdateMelee([
+          ...meleeWeapons,
+          buildMeleeWeaponSnapshot(nextWeapon.id, nextWeapon, data, customItemId, versionId),
+        ]);
+        setShowCustomIntegratedMelee(false);
+        toast.success("Custom integrated melee weapon saved as a campaign draft.");
+      } catch (err) {
+        console.error("Failed to create custom integrated melee weapon:", err);
+        toast.error("Failed to save custom integrated melee weapon.");
+      }
+    },
+    [campaignId, characterId, characterName, editable, onUpdateMelee, meleeWeapons, toast, userId]
+  );
+
+  const removeIntegratedRanged = useCallback(
+    (id: string) => {
+      if (!editable) return;
+      onUpdateRanged(rangedWeapons.filter((w) => w.id !== id));
+    },
+    [editable, rangedWeapons, onUpdateRanged]
+  );
+
+  const removeIntegratedMelee = useCallback(
+    (id: string) => {
+      if (!editable) return;
+      onUpdateMelee(meleeWeapons.filter((w) => w.id !== id));
+    },
+    [editable, meleeWeapons, onUpdateMelee]
+  );
+
+  const toggleEquipIntegratedRanged = useCallback(
+    (id: string) => {
+      if (!editable) return;
+      onUpdateRanged(rangedWeapons.map((w) => (w.id === id ? { ...w, equipped: !w.equipped } : w)));
+    },
+    [editable, rangedWeapons, onUpdateRanged]
+  );
+
+  const toggleEquipIntegratedMelee = useCallback(
+    (id: string) => {
+      if (!editable) return;
+      onUpdateMelee(meleeWeapons.map((w) => (w.id === id ? { ...w, equipped: !w.equipped } : w)));
+    },
+    [editable, meleeWeapons, onUpdateMelee]
+  );
+
   const publishCyberneticDefinition = useCallback(
     async (libraryItem: CampaignCustomItem<"cybernetic">) => {
       if (!userId) return;
@@ -376,6 +557,69 @@ export function CyberneticsTab({
 
   return (
     <div className="space-y-6">
+      {/* ── INTEGRATED WEAPONS ────────────────────────────────────────────── */}
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <SectionHeader>Integrated Weapons</SectionHeader>
+          <button
+            onClick={() => setShowIntegratedPicker(true)}
+            className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
+          >
+            {editable ? "+ Add" : "View"}
+          </button>
+        </div>
+
+        {integratedRanged.length === 0 && integratedMelee.length === 0 && (
+          <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No integrated weapons installed.</p>
+        )}
+
+        <IndependentCardGrid
+          items={[
+            ...integratedRanged.map((weapon) => (
+              <RangedCard
+                key={weapon.id}
+                weapon={weapon}
+                editable={editable}
+                integrated
+                allowUpgrades={false}
+                forceExpanded
+                isEquipped={weapon.equipped ?? false}
+                onToggleEquip={() => toggleEquipIntegratedRanged(weapon.id)}
+                onRemove={() => removeIntegratedRanged(weapon.id)}
+                onAddUpgrade={() => {}}
+                onRemoveUpgrade={() => {}}
+                onUpdateAmmoEntries={(entries) =>
+                  onUpdateRanged(rangedWeapons.map((w) => (w.id === weapon.id ? { ...w, ammoEntries: entries } : w)))
+                }
+                onUpdateQuantity={(qty) =>
+                  onUpdateRanged(rangedWeapons.map((w) => (w.id === weapon.id ? { ...w, quantity: qty } : w)))
+                }
+              />
+            )),
+            ...integratedMelee.map((weapon) => (
+              <MeleeCard
+                key={weapon.id}
+                weapon={weapon}
+                editable={editable}
+                strengthBonus={strengthBonus}
+                integrated
+                allowUpgrades={false}
+                forceExpanded
+                isEquipped={weapon.equipped ?? false}
+                onToggleEquip={() => toggleEquipIntegratedMelee(weapon.id)}
+                onRemove={() => removeIntegratedMelee(weapon.id)}
+                onAddUpgrade={() => {}}
+                onRemoveUpgrade={() => {}}
+                onUpdateQuantity={(qty) =>
+                  onUpdateMelee(meleeWeapons.map((w) => (w.id === weapon.id ? { ...w, quantity: qty } : w)))
+                }
+              />
+            )),
+          ]}
+        />
+      </section>
+
+      {/* ── INSTALLED IMPLANTS ────────────────────────────────────────────── */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <SectionHeader>Installed Implants</SectionHeader>
@@ -403,6 +647,35 @@ export function CyberneticsTab({
           ))}
         </div>
       </section>
+
+      {showIntegratedPicker && (
+        <IntegratedWeaponPicker
+          editable={editable}
+          onSelectRanged={addIntegratedFromRangedRef}
+          onSelectMelee={addIntegratedFromMeleeRef}
+          onCustomRanged={editable ? () => { setShowIntegratedPicker(false); setShowCustomIntegratedRanged(true); } : undefined}
+          onCustomMelee={editable ? () => { setShowIntegratedPicker(false); setShowCustomIntegratedMelee(true); } : undefined}
+          onClose={() => setShowIntegratedPicker(false)}
+        />
+      )}
+
+      {showCustomIntegratedRanged && (
+        <CustomRangedForm
+          title="Custom Integrated Ranged Weapon"
+          integrated
+          onAdd={addCustomIntegratedRanged}
+          onCancel={() => setShowCustomIntegratedRanged(false)}
+        />
+      )}
+
+      {showCustomIntegratedMelee && (
+        <CustomMeleeForm
+          title="Custom Integrated Melee Weapon"
+          integrated
+          onAdd={addCustomIntegratedMelee}
+          onCancel={() => setShowCustomIntegratedMelee(false)}
+        />
+      )}
 
       {showPicker && (
         <ImplantPicker
@@ -462,6 +735,83 @@ export function CyberneticsTab({
       )}
     </div>
   );
+}
+
+type CustomRangedWeaponData = Extract<CustomWeaponData, { weaponKind: "ranged" }>;
+type CustomMeleeWeaponData = Extract<CustomWeaponData, { weaponKind: "melee" }>;
+
+function toCustomRangedWeaponData(weapon: RangedWeapon): CustomRangedWeaponData {
+  const {
+    id: _id,
+    referenceId: _referenceId,
+    customLibraryId: _customLibraryId,
+    customLibraryVersionId: _customLibraryVersionId,
+    ammoEntries: _ammoEntries,
+    equipped: _equipped,
+    quantity: _quantity,
+    upgrades: _upgrades,
+    ...data
+  } = weapon;
+  return { ...data, weaponKind: "ranged" };
+}
+
+function toCustomMeleeWeaponData(weapon: MeleeWeapon): CustomMeleeWeaponData {
+  const {
+    id: _id,
+    referenceId: _referenceId,
+    customLibraryId: _customLibraryId,
+    customLibraryVersionId: _customLibraryVersionId,
+    equipped: _equipped,
+    quantity: _quantity,
+    upgrades: _upgrades,
+    ...data
+  } = weapon;
+  return { ...data, weaponKind: "melee" };
+}
+
+function buildRangedWeaponSnapshot(
+  id: string,
+  copyFields: Partial<RangedWeapon>,
+  data: CustomRangedWeaponData,
+  customLibraryId: string,
+  customLibraryVersionId: string
+): RangedWeapon {
+  const { weaponKind: _weaponKind, ...weaponData } = data;
+  const quantity =
+    copyFields.quantity ??
+    (weaponData.class?.toLowerCase().includes("thrown") ? 1 : undefined);
+  return {
+    id,
+    ...weaponData,
+    customLibraryId,
+    customLibraryVersionId,
+    ...(copyFields.ammoEntries ? { ammoEntries: copyFields.ammoEntries } : {}),
+    ...(copyFields.upgrades ? { upgrades: copyFields.upgrades } : {}),
+    ...(quantity !== undefined ? { quantity } : {}),
+    ...(copyFields.equipped !== undefined ? { equipped: copyFields.equipped } : {}),
+  };
+}
+
+function buildMeleeWeaponSnapshot(
+  id: string,
+  copyFields: Partial<MeleeWeapon>,
+  data: CustomMeleeWeaponData,
+  customLibraryId: string,
+  customLibraryVersionId: string
+): MeleeWeapon {
+  const { weaponKind: _weaponKind, ...weaponData } = data;
+  const quantity =
+    copyFields.quantity ??
+    (weaponData.class?.toLowerCase().includes("thrown") ? 1 : undefined);
+  return {
+    id,
+    ...weaponData,
+    customLibraryId,
+    customLibraryVersionId,
+    ...(copyFields.upgrades ? { upgrades: copyFields.upgrades } : {}),
+    ...(quantity !== undefined ? { quantity } : {}),
+    ...(copyFields.equipped !== undefined ? { equipped: copyFields.equipped } : {}),
+  };
 }
 
 function toCustomCyberneticData(item: CyberneticItem): CustomCyberneticData {

@@ -35,7 +35,6 @@ import { ShieldCard, ShieldPicker, CustomShieldForm } from "./weapons/ShieldCard
 import { CyberneticWeaponCard } from "./weapons/CyberneticWeaponCard";
 import { ArcheotechWeaponCard } from "./weapons/ArcheotechWeaponCard";
 import { IndependentCardGrid } from "./weapons/IndependentCardGrid";
-import { IntegratedWeaponPicker } from "./weapons/IntegratedWeaponPicker";
 import {
   isIntegratedRangedWeapon,
   isIntegratedMeleeWeapon,
@@ -94,7 +93,7 @@ type EditingShieldDefinition = {
 
 type WeaponLibraryAction = "publish" | "archive" | "updateAll";
 
-type PickerTarget = "ranged" | "melee" | "integrated" | "grenades" | "shields" | null;
+type PickerTarget = "ranged" | "melee" | "grenades" | "shields" | null;
 type WeaponMobileSection = NonNullable<PickerTarget>;
 
 const MOBILE_WEAPON_SECTIONS: {
@@ -120,12 +119,6 @@ const MOBILE_WEAPON_SECTIONS: {
     label: "Gren.",
     ariaLabel: "Grenades and mines",
     activeClass: "border-orange-400 bg-orange-600/80 text-white shadow-sm shadow-orange-950/50",
-  },
-  {
-    id: "integrated",
-    label: "Built-in",
-    ariaLabel: "Integrated weapons",
-    activeClass: "border-violet-400 bg-violet-600/80 text-white shadow-sm shadow-violet-950/50",
   },
   {
     id: "shields",
@@ -172,8 +165,6 @@ export function WeaponsTab({
   const [picker, setPicker] = useState<PickerTarget>(null);
   const [showCustomRanged, setShowCustomRanged] = useState(false);
   const [showCustomMelee, setShowCustomMelee] = useState(false);
-  const [showCustomIntegratedRanged, setShowCustomIntegratedRanged] = useState(false);
-  const [showCustomIntegratedMelee, setShowCustomIntegratedMelee] = useState(false);
   const [showCustomGrenade, setShowCustomGrenade] = useState(false);
   const [showCustomShield, setShowCustomShield] = useState(false);
   const [activeWeaponSection, setActiveWeaponSection] = useState<WeaponMobileSection>("ranged");
@@ -261,16 +252,15 @@ export function WeaponsTab({
   const normalRangedWeapons = rangedWeapons
     .map((weapon, index) => ({ weapon, index }))
     .filter(({ weapon }) => !isIntegratedRangedWeapon(weapon));
-  const integratedRangedWeapons = rangedWeapons
+  const equippedIntegratedRanged = rangedWeapons
     .map((weapon, index) => ({ weapon, index }))
-    .filter(({ weapon }) => isIntegratedRangedWeapon(weapon));
+    .filter(({ weapon }) => isIntegratedRangedWeapon(weapon) && weapon.equipped);
   const normalMeleeWeapons = meleeWeapons
     .map((weapon, index) => ({ weapon, index }))
     .filter(({ weapon }) => !isIntegratedMeleeWeapon(weapon));
-  const integratedMeleeWeapons = meleeWeapons
+  const equippedIntegratedMelee = meleeWeapons
     .map((weapon, index) => ({ weapon, index }))
-    .filter(({ weapon }) => isIntegratedMeleeWeapon(weapon));
-  const integratedWeaponCount = integratedRangedWeapons.length + integratedMeleeWeapons.length;
+    .filter(({ weapon }) => isIntegratedMeleeWeapon(weapon) && weapon.equipped);
 
   // ── Unified sorted lists ───────────────────────────────────────────────────
   const allRangedEntries = [
@@ -291,6 +281,12 @@ export function WeaponsTab({
       item,
       name: item.name,
     })),
+    ...equippedIntegratedRanged.map(({ weapon, index }) => ({
+      kind: "integrated" as const,
+      weapon,
+      index,
+      name: weapon.name,
+    })),
   ].sort(compareWeaponEntries);
 
   const allMeleeEntries = [
@@ -310,6 +306,12 @@ export function WeaponsTab({
       kind: "archeotech" as const,
       item,
       name: item.name,
+    })),
+    ...equippedIntegratedMelee.map(({ weapon, index }) => ({
+      kind: "integrated" as const,
+      weapon,
+      index,
+      name: weapon.name,
     })),
   ].sort(compareWeaponEntries);
 
@@ -338,6 +340,8 @@ export function WeaponsTab({
       .reduce((sum, { weapon }) => sum + getMeleeSlots(weapon), 0) +
     archeotechRangedItems.filter((a) => a.equipped).length +
     archeotechMeleeWeaponItems.filter((a) => a.equipped).length +
+    equippedIntegratedRanged.reduce((sum, { weapon }) => sum + getRangedSlots(weapon), 0) +
+    equippedIntegratedMelee.reduce((sum, { weapon }) => sum + getMeleeSlots(weapon), 0) +
     (shields ?? []).filter((s) => s.equipped).length;
   const slotsRemaining = MAX_WEAPON_SLOTS - equippedWeaponSlots;
   const equippedGrenadeTypes =
@@ -486,42 +490,6 @@ export function WeaponsTab({
     [campaignId, characterId, characterName, editable, onUpdateRanged, rangedWeapons, toast, userId]
   );
 
-  const addCustomIntegratedRanged = useCallback(
-    async (weapon: RangedWeapon) => {
-      if (!editable) return;
-      if (!userId) {
-        toast.error("You must be signed in to create campaign custom weapons.");
-        return;
-      }
-
-      try {
-        const nextWeapon = {
-          ...weapon,
-          integrated: true,
-          craftsmanship: weapon.craftsmanship ?? "Common",
-        };
-        const data = toCustomRangedWeaponData(nextWeapon);
-        const { customItemId, versionId } = await createDraftCustomItem({
-          campaignId,
-          category: "weapon",
-          creator: { userId, characterId, characterName },
-          data,
-        });
-
-        onUpdateRanged([
-          ...rangedWeapons,
-          buildRangedWeaponSnapshot(nextWeapon.id, nextWeapon, data, customItemId, versionId),
-        ]);
-        setShowCustomIntegratedRanged(false);
-        toast.success("Custom integrated ranged weapon saved as a campaign draft.");
-      } catch (err) {
-        console.error("Failed to create custom integrated ranged weapon:", err);
-        toast.error("Failed to save custom integrated ranged weapon.");
-      }
-    },
-    [campaignId, characterId, characterName, editable, onUpdateRanged, rangedWeapons, toast, userId]
-  );
-
   const removeRanged = useCallback(
     (index: number) => {
       if (!editable) return;
@@ -638,42 +606,6 @@ export function WeaponsTab({
       } catch (err) {
         console.error("Failed to create custom melee weapon:", err);
         toast.error("Failed to save custom melee weapon.");
-      }
-    },
-    [campaignId, characterId, characterName, editable, meleeWeapons, onUpdateMelee, toast, userId]
-  );
-
-  const addCustomIntegratedMelee = useCallback(
-    async (weapon: MeleeWeapon) => {
-      if (!editable) return;
-      if (!userId) {
-        toast.error("You must be signed in to create campaign custom weapons.");
-        return;
-      }
-
-      try {
-        const nextWeapon = {
-          ...weapon,
-          integrated: true,
-          craftsmanship: weapon.craftsmanship ?? "Common",
-        };
-        const data = toCustomMeleeWeaponData(nextWeapon);
-        const { customItemId, versionId } = await createDraftCustomItem({
-          campaignId,
-          category: "weapon",
-          creator: { userId, characterId, characterName },
-          data,
-        });
-
-        onUpdateMelee([
-          ...meleeWeapons,
-          buildMeleeWeaponSnapshot(nextWeapon.id, nextWeapon, data, customItemId, versionId),
-        ]);
-        setShowCustomIntegratedMelee(false);
-        toast.success("Custom integrated melee weapon saved as a campaign draft.");
-      } catch (err) {
-        console.error("Failed to create custom integrated melee weapon:", err);
-        toast.error("Failed to save custom integrated melee weapon.");
       }
     },
     [campaignId, characterId, characterName, editable, meleeWeapons, onUpdateMelee, toast, userId]
@@ -1426,7 +1358,7 @@ export function WeaponsTab({
     >
       <div className="lg:hidden">
         <div
-          className="grid grid-cols-5 gap-1 rounded-lg border border-slate-600 bg-slate-950/70 p-1"
+          className="grid grid-cols-4 gap-1 rounded-lg border border-slate-600 bg-slate-950/70 p-1"
           role="tablist"
           aria-label="Weapon sections"
         >
@@ -1493,6 +1425,26 @@ export function WeaponsTab({
                   isEquipped={entry.item.equipped ?? false}
                   onToggleEquip={() => toggleEquipArcheotech(entry.item.id)}
                   slotsDisabled={!entry.item.equipped && slotsRemaining < 1}
+                />
+              );
+            if (entry.kind === "integrated")
+              return (
+                <RangedCard
+                  key={entry.weapon.id}
+                  weapon={entry.weapon}
+                  editable={editable}
+                  integrated
+                  allowUpgrades={false}
+                  forceExpanded
+                  isEquipped
+                  onRemove={() => {}}
+                  onAddUpgrade={() => {}}
+                  onRemoveUpgrade={() => {}}
+                  onUpdateAmmoEntries={(entries) => updateRangedAmmoEntries(entry.weapon.id, entries)}
+                  onUpdateQuantity={(qty) => updateRangedQuantity(entry.weapon.id, qty)}
+                  grenades={grenades}
+                  onUpdateGrenades={onUpdateGrenades}
+                  archeotechGrenades={archeotechGrenadeItems}
                 />
               );
             return (
@@ -1563,6 +1515,23 @@ export function WeaponsTab({
                   isEquipped={entry.item.equipped ?? false}
                   onToggleEquip={() => toggleEquipArcheotech(entry.item.id)}
                   slotsDisabled={!entry.item.equipped && slotsRemaining < 1}
+                />
+              );
+            if (entry.kind === "integrated")
+              return (
+                <MeleeCard
+                  key={entry.weapon.id}
+                  weapon={entry.weapon}
+                  editable={editable}
+                  strengthBonus={strengthBonus}
+                  integrated
+                  allowUpgrades={false}
+                  forceExpanded
+                  isEquipped
+                  onRemove={() => {}}
+                  onAddUpgrade={() => {}}
+                  onRemoveUpgrade={() => {}}
+                  onUpdateQuantity={(qty) => updateMeleeQuantity(entry.weapon.id, qty)}
                 />
               );
             return (
@@ -1654,62 +1623,6 @@ export function WeaponsTab({
         />
       </section>
 
-      {/* ── INTEGRATED WEAPONS ───────────────────────────────────────────── */}
-      <section className={visibleWeaponSectionClass("integrated")}>
-        <div className="flex items-center justify-between">
-          <SectionHeader>Integrated Weapons</SectionHeader>
-          <button
-            onClick={() => setPicker("integrated")}
-            className="text-sm lg:text-base px-2 py-0.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
-          >
-            {editable ? "+ Add" : "View"}
-          </button>
-        </div>
-
-        {integratedWeaponCount === 0 && (
-          <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No integrated weapons installed.</p>
-        )}
-
-        <IndependentCardGrid
-          breakpoint="lg"
-          items={[
-            ...integratedRangedWeapons.map(({ weapon, index }) => (
-              <RangedCard
-                key={weapon.id}
-                weapon={weapon}
-                editable={editable}
-                {...getWeaponLibraryProps(weapon, "ranged")}
-                onRemove={() => removeRanged(index)}
-                onAddUpgrade={(upgradeId) => addUpgradeToRanged(weapon.id, upgradeId)}
-                onRemoveUpgrade={(upgradeId) => removeUpgradeFromRanged(weapon.id, upgradeId)}
-                onUpdateAmmoEntries={(entries) => updateRangedAmmoEntries(weapon.id, entries)}
-                onUpdateQuantity={(qty) => updateRangedQuantity(weapon.id, qty)}
-                grenades={grenades}
-                onUpdateGrenades={onUpdateGrenades}
-                archeotechGrenades={archeotechGrenadeItems}
-                allowUpgrades={false}
-                forceExpanded
-              />
-            )),
-            ...integratedMeleeWeapons.map(({ weapon, index }) => (
-              <MeleeCard
-                key={weapon.id}
-                weapon={weapon}
-                editable={editable}
-                strengthBonus={strengthBonus}
-                {...getWeaponLibraryProps(weapon, "melee")}
-                onRemove={() => removeMelee(index)}
-                onAddUpgrade={(upgradeId) => addUpgradeToMelee(weapon.id, upgradeId)}
-                onRemoveUpgrade={(upgradeId) => removeUpgradeFromMelee(weapon.id, upgradeId)}
-                onUpdateQuantity={(qty) => updateMeleeQuantity(weapon.id, qty)}
-                allowUpgrades={false}
-                forceExpanded
-              />
-            )),
-          ]}
-        />
-      </section>
-
       {/* ── SHIELDS ──────────────────────────────────────────────────────── */}
       <section className={visibleWeaponSectionClass("shields")}>
         <div className="flex items-center justify-between">
@@ -1777,22 +1690,6 @@ export function WeaponsTab({
           onClose={() => setPicker(null)}
         />
       )}
-      {picker === "integrated" && (
-        <IntegratedWeaponPicker
-          editable={editable}
-          onSelectRanged={addFromRangedRef}
-          onSelectMelee={addFromMeleeRef}
-          onCustomRanged={() => {
-            setPicker(null);
-            setShowCustomIntegratedRanged(true);
-          }}
-          onCustomMelee={() => {
-            setPicker(null);
-            setShowCustomIntegratedMelee(true);
-          }}
-          onClose={() => setPicker(null)}
-        />
-      )}
       {picker === "grenades" && (
         <GrenadePicker
           editable={editable}
@@ -1818,22 +1715,6 @@ export function WeaponsTab({
             setShowCustomShield(true);
           }}
           onClose={() => setPicker(null)}
-        />
-      )}
-      {showCustomIntegratedRanged && (
-        <CustomRangedForm
-          title="Custom Integrated Ranged Weapon"
-          integrated
-          onAdd={addCustomIntegratedRanged}
-          onCancel={() => setShowCustomIntegratedRanged(false)}
-        />
-      )}
-      {showCustomIntegratedMelee && (
-        <CustomMeleeForm
-          title="Custom Integrated Melee Weapon"
-          integrated
-          onAdd={addCustomIntegratedMelee}
-          onCancel={() => setShowCustomIntegratedMelee(false)}
         />
       )}
       {showCustomGrenade && (
