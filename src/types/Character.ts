@@ -251,16 +251,32 @@ export interface ArcheotechItem extends CustomLibraryLinkFields {
   id: string;
   referenceId?: string; // links back to ArcheotechRef.id
   name: string;
-  /** Broad category: "Weapon", "Device", "Tool", "Other" */
   type?: string;
   description?: string;
-  /** Player-added notes separate from the rules description */
   notes?: string;
   weight?: string;
   value?: string;
   availability?: string;
   source?: string;
-  equipped?: boolean; // true = counts toward slot budget, shown expanded and pinned to top
+  equipped?: boolean;
+  // Weapon / Integrated Weapon / Grenade / Mine
+  weaponClass?: "Ranged" | "Melee";
+  damage?: string;
+  range?: string;
+  rof?: string;
+  pen?: string;
+  clip?: string;
+  rld?: string;
+  specialRules?: string;
+  // Armour
+  ap?: number;
+  locations?: ArmourLocationKey[];
+  stacks?: boolean;
+  // Cybernetic
+  craftsmanship?: CyberneticCraftsmanship;
+  bodyLocation?: ArmourLocationKey[];
+  // Force Field
+  protectionRating?: number;
 }
 
 /**
