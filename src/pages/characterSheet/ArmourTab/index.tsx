@@ -18,6 +18,7 @@ import { CustomPieceForm } from "./CustomPieceForm";
 import { ForceFieldRow } from "./ForceFieldRow";
 import { PieceRow } from "./PieceRow";
 import { ArcheotechArmourRow } from "./ArcheotechArmourRow";
+import { ArcheotechForceFieldRow } from "./ArcheotechForceFieldRow";
 import { uiSection, uiTextLabel, uiTextMuted, uiTextPlaceholder } from "../../../ui/editableStyles";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
@@ -428,6 +429,7 @@ export function ArmourTab({
   const archeotechArmourItems = (archeotech ?? []).filter((a) => a.type === "Armour");
   const archeotechArmourWorn = archeotechArmourItems.filter((a) => a.equipped);
   const archeotechArmourStowed = archeotechArmourItems.filter((a) => !a.equipped);
+  const archeotechForceFieldItems = (archeotech ?? []).filter((a) => a.type === "Force Field");
 
   const toggleEquipArcheotech = useCallback(
     (id: string) => {
@@ -678,7 +680,7 @@ export function ArmourTab({
 
       <section className="space-y-2">
         <div className="flex items-center justify-between">
-          <SectionHeader>Force Fields ({forceFields.length})</SectionHeader>
+          <SectionHeader>Force Fields ({forceFields.length + archeotechForceFieldItems.length})</SectionHeader>
           <button
             onClick={() => setShowFieldPicker(true)}
             className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
@@ -686,12 +688,21 @@ export function ArmourTab({
             {editable ? "+ Add" : "View"}
           </button>
         </div>
-        {forceFields.length === 0 && (
+        {forceFields.length === 0 && archeotechForceFieldItems.length === 0 && (
           <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No force field equipped.</p>
         )}
         {forceFields.length > 0 && (
           <ForceFieldGrid pieces={forceFields} renderPiece={renderForceFieldRow} />
         )}
+        {archeotechForceFieldItems.map((item) => (
+          <ArcheotechForceFieldRow
+            key={item.id}
+            item={item}
+            editable={editable}
+            onToggleEquip={() => toggleEquipArcheotech(item.id)}
+            onRemove={() => removeArcheotech(item.id)}
+          />
+        ))}
       </section>
 
       {editable && showCustomForm && (

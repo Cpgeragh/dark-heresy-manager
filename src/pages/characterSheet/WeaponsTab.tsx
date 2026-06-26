@@ -32,6 +32,7 @@ import { RangedCard, RangedPicker, CustomRangedForm } from "./weapons/RangedCard
 import { MeleeCard, MeleePicker, CustomMeleeForm } from "./weapons/MeleeCard";
 import { GrenadeCard, GrenadePicker, CustomGrenadeForm } from "./weapons/GrenadeCard";
 import { ShieldCard, ShieldPicker, CustomShieldForm } from "./weapons/ShieldCard";
+import { ArcheotechShieldRow } from "./weapons/ArcheotechShieldRow";
 import { CyberneticWeaponCard } from "./weapons/CyberneticWeaponCard";
 import { ArcheotechWeaponCard } from "./weapons/ArcheotechWeaponCard";
 import { IndependentCardGrid } from "./weapons/IndependentCardGrid";
@@ -1663,7 +1664,7 @@ export function WeaponsTab({
           </button>
         </div>
 
-        {(shields ?? []).length === 0 && (
+        {(shields ?? []).length === 0 && archeotechShieldItems.length === 0 && (
           <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No shields carried.</p>
         )}
 
@@ -1684,6 +1685,25 @@ export function WeaponsTab({
                 isEquipped={item.equipped ?? false}
                 onToggleEquip={() => toggleEquipShield(item.id)}
                 slotsDisabled={!item.equipped && slotsRemaining < 1}
+              />
+            ))}
+        />
+        <IndependentCardGrid
+          items={[...archeotechShieldItems]
+            .sort((a, b) => {
+              if (a.equipped && !b.equipped) return -1;
+              if (!a.equipped && b.equipped) return 1;
+              return a.name.localeCompare(b.name);
+            })
+            .map((item) => (
+              <ArcheotechShieldRow
+                key={item.id}
+                item={item}
+                editable={editable}
+                isEquipped={item.equipped ?? false}
+                onToggleEquip={() => toggleEquipArcheotech(item.id)}
+                slotsDisabled={!item.equipped && slotsRemaining < 1}
+                onRemove={() => removeArcheotech(item.id)}
               />
             ))}
         />
