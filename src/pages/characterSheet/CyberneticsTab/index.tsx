@@ -565,7 +565,7 @@ export function CyberneticsTab({
             onClick={() => setShowIntegratedPicker(true)}
             className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
           >
-            {editable ? "+ Add" : "View"}
+            {editable ? "+ Install" : "View"}
           </button>
         </div>
 
