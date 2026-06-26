@@ -5,6 +5,7 @@ import type {
   WornArmourPiece,
   CyberneticItem,
   ArmourCraftsmanship,
+  ArcheotechItem,
 } from "../../../types/Character";
 import type { ArmourRef } from "../../../data/reference/armourReference";
 import type { CampaignCustomItem, CustomArmourData } from "../../../types/CustomItems";
@@ -16,6 +17,7 @@ import { PieceNotesModal } from "./PieceNotesModal";
 import { CustomPieceForm } from "./CustomPieceForm";
 import { ForceFieldRow } from "./ForceFieldRow";
 import { PieceRow } from "./PieceRow";
+import { ArcheotechArmourRow } from "./ArcheotechArmourRow";
 import { uiSection, uiTextLabel, uiTextMuted, uiTextPlaceholder } from "../../../ui/editableStyles";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
@@ -41,6 +43,8 @@ interface ArmourTabProps {
   editable: boolean;
   onUpdate: (next: WornArmourPiece[]) => void | Promise<void>;
   cybernetics?: CyberneticItem[];
+  archeotech?: ArcheotechItem[];
+  onUpdateArcheotech?: (next: ArcheotechItem[]) => void | Promise<void>;
 }
 
 interface EditingArmourDefinition {
@@ -145,6 +149,8 @@ export function ArmourTab({
   editable,
   onUpdate,
   cybernetics = [],
+  archeotech,
+  onUpdateArcheotech,
 }: ArmourTabProps) {
   const [showPicker, setShowPicker] = useState(false);
   const [showFieldPicker, setShowFieldPicker] = useState(false);
@@ -419,6 +425,28 @@ export function ArmourTab({
   const worn = regularArmour.filter((p) => p.worn);
   const stowed = regularArmour.filter((p) => !p.worn);
 
+  const archeotechArmourItems = (archeotech ?? []).filter((a) => a.type === "Armour");
+  const archeotechArmourWorn = archeotechArmourItems.filter((a) => a.equipped);
+  const archeotechArmourStowed = archeotechArmourItems.filter((a) => !a.equipped);
+
+  const toggleEquipArcheotech = useCallback(
+    (id: string) => {
+      if (!editable || !onUpdateArcheotech) return;
+      onUpdateArcheotech(
+        (archeotech ?? []).map((a) => (a.id === id ? { ...a, equipped: !a.equipped } : a))
+      );
+    },
+    [editable, archeotech, onUpdateArcheotech]
+  );
+
+  const removeArcheotech = useCallback(
+    (id: string) => {
+      if (!editable || !onUpdateArcheotech) return;
+      onUpdateArcheotech((archeotech ?? []).filter((a) => a.id !== id));
+    },
+    [editable, archeotech, onUpdateArcheotech]
+  );
+
   const getLibraryItemForPiece = useCallback(
     (piece: WornArmourPiece) => {
       const linkedLibraryItem = piece.customLibraryId
@@ -546,7 +574,14 @@ export function ArmourTab({
               </thead>
               <tbody className="divide-y divide-slate-800">
                 {LOCATION_ORDER.map((loc) => {
-                  const ap = wornApAt(regularArmour, loc);
+                  const regularAp = wornApAt(regularArmour, loc);
+                  const nonStackingArcheotechAp = archeotechArmourWorn
+                    .filter((a) => !a.stacks && (a.locations ?? []).includes(loc))
+                    .reduce((max, a) => Math.max(max, a.ap ?? 0), 0);
+                  const stackingAp = archeotechArmourWorn
+                    .filter((a) => a.stacks && (a.locations ?? []).includes(loc))
+                    .reduce((sum, a) => sum + (a.ap ?? 0), 0);
+                  const ap = Math.max(regularAp, nonStackingArcheotechAp) + stackingAp;
                   const bionic = bionicBonusAt(loc, cybernetics);
                   const total = ap + toughnessBonus + bionic;
                   return (
@@ -579,7 +614,7 @@ export function ArmourTab({
 
       <section className="space-y-2">
         <div className="flex items-center justify-between">
-          <SectionHeader>Worn ({worn.length})</SectionHeader>
+          <SectionHeader>Worn ({worn.length + archeotechArmourWorn.length})</SectionHeader>
           {!showCustomForm && (
             <button
               onClick={() => {
@@ -592,15 +627,26 @@ export function ArmourTab({
             </button>
           )}
         </div>
-        {worn.length === 0 && <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No armour worn.</p>}
+        {worn.length === 0 && archeotechArmourWorn.length === 0 && (
+          <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No armour worn.</p>
+        )}
         {worn.length > 0 && (
           <ArmourPieceGrid pieces={worn} renderPiece={(piece) => renderArmourRow(piece, true)} />
         )}
+        {archeotechArmourWorn.map((item) => (
+          <ArcheotechArmourRow
+            key={item.id}
+            item={item}
+            editable={editable}
+            onToggleEquip={() => toggleEquipArcheotech(item.id)}
+            onRemove={() => removeArcheotech(item.id)}
+          />
+        ))}
       </section>
 
       <section className="space-y-2">
         <div className="flex items-center justify-between">
-          <SectionHeader>Stowed ({stowed.length})</SectionHeader>
+          <SectionHeader>Stowed ({stowed.length + archeotechArmourStowed.length})</SectionHeader>
           {!showCustomForm && (
             <button
               onClick={() => {
@@ -613,10 +659,21 @@ export function ArmourTab({
             </button>
           )}
         </div>
-        {stowed.length === 0 && <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No armour stowed.</p>}
+        {stowed.length === 0 && archeotechArmourStowed.length === 0 && (
+          <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No armour stowed.</p>
+        )}
         {stowed.length > 0 && (
           <ArmourPieceGrid pieces={stowed} renderPiece={(piece) => renderArmourRow(piece, false)} />
         )}
+        {archeotechArmourStowed.map((item) => (
+          <ArcheotechArmourRow
+            key={item.id}
+            item={item}
+            editable={editable}
+            onToggleEquip={() => toggleEquipArcheotech(item.id)}
+            onRemove={() => removeArcheotech(item.id)}
+          />
+        ))}
       </section>
 
       <section className="space-y-2">
