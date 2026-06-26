@@ -507,6 +507,8 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
               editable={allowedToEdit}
               onUpdate={handleUpdateArmour}
               cybernetics={character.cybernetics ?? []}
+              archeotech={character.archeotech ?? []}
+              onUpdateArcheotech={handleUpdateArcheotech}
             />
           )}
 
@@ -525,6 +527,8 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
               onUpdate={handleUpdateCybernetics}
               onUpdateRanged={handleUpdateRangedWeapons}
               onUpdateMelee={handleUpdateMeleeWeapons}
+              archeotech={character.archeotech ?? []}
+              onUpdateArcheotech={handleUpdateArcheotech}
             />
           )}
 
