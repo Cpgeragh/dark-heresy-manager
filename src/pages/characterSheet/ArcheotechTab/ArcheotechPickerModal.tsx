@@ -96,13 +96,13 @@ export function ArcheotechPickerModal({
       closeLabel={pending ? "←" : "×"}
       isEmpty={!pending && filtered.length === 0 && filteredCustom.length === 0}
       hideSearch={!!pending}
-      filterRow={
+      footer={
         !pending && editable ? (
           <button
             onClick={onCustom}
-            className="w-full text-xs lg:text-sm px-3 lg:px-4 py-1.5 lg:py-2 rounded border border-red-700/50 bg-red-700/10 text-red-500 hover:bg-red-700/20 transition text-center"
+            className="w-full text-sm lg:text-base text-red-500 hover:text-red-400 text-center py-1 lg:py-1.5"
           >
-            + Custom Item
+            + Add custom item
           </button>
         ) : undefined
       }

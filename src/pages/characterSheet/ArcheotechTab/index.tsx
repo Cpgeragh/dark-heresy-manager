@@ -329,17 +329,15 @@ export function ArcheotechTab({
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <SectionHeader>Inventory ({archeotech.length})</SectionHeader>
-          {!showCustomForm && (
-            <button
-              onClick={() => setShowPicker(true)}
-              className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
-            >
-              {editable ? "+ Add" : "View"}
-            </button>
-          )}
+          <button
+            onClick={() => setShowPicker(true)}
+            className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
+          >
+            {editable ? "+ Add" : "View"}
+          </button>
         </div>
 
-        {archeotech.length === 0 && !showCustomForm && (
+        {archeotech.length === 0 && (
           <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No archeotech recorded.</p>
         )}
 

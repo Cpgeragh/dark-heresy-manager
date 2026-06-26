@@ -1290,6 +1290,7 @@ export function RangedCard({
   onToggleEquip,
   slotsDisabled = false,
   forceExpanded = false,
+  integrated = false,
 }: {
   weapon: RangedWeapon;
   editable: boolean;
@@ -1314,6 +1315,7 @@ export function RangedCard({
   onToggleEquip?: () => void;
   slotsDisabled?: boolean;
   forceExpanded?: boolean;
+  integrated?: boolean;
 }) {
   const [expanded, setExpanded] = useState(isEquipped);
   useEffect(() => {
@@ -1442,6 +1444,11 @@ export function RangedCard({
                 {libraryItem.status}
               </span>
             )}
+            {integrated && (
+              <Chip size="sm" className="border-violet-500/60 bg-violet-500/10 text-violet-300">
+                Integrated
+              </Chip>
+            )}
           </div>
           {(weapon.class || ammoFamily) && (
             <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
@@ -1485,7 +1492,7 @@ export function RangedCard({
               </svg>
             </button>
           )}
-          {editable && (expanded || forceExpanded) && (
+          {editable && (expanded || forceExpanded) && !integrated && (
             <button onClick={onRemove} className={`${uiActionButtonCompact} shrink-0`}>
               Remove
             </button>

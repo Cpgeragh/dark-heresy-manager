@@ -518,8 +518,13 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
               characterName={character.header.characterName}
               isDM={isDM}
               cybernetics={character.cybernetics ?? []}
+              rangedWeapons={character.rangedWeapons}
+              meleeWeapons={character.meleeWeapons}
+              strengthBonus={Math.floor(getCharTotal("s") / CHARACTERISTIC_BONUS_DIVISOR)}
               editable={allowedToEdit}
               onUpdate={handleUpdateCybernetics}
+              onUpdateRanged={handleUpdateRangedWeapons}
+              onUpdateMelee={handleUpdateMeleeWeapons}
             />
           )}
 
