@@ -10,7 +10,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        code: ['RobotoMonoZero', 'Roboto', 'ui-sans-serif', 'sans-serif'],
+        code: ["'IM Fell English'", 'Georgia', 'serif'],
       cinzel: ["'Cinzel'", 'serif'],
       },
     },

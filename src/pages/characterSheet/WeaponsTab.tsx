@@ -1092,6 +1092,14 @@ export function WeaponsTab({
     [editable, shields, onUpdateShields]
   );
 
+  const removeArcheotech = useCallback(
+    (id: string) => {
+      if (!editable || !onUpdateArcheotech) return;
+      onUpdateArcheotech((archeotech ?? []).filter((a) => a.id !== id));
+    },
+    [editable, archeotech, onUpdateArcheotech]
+  );
+
   // ── Equip toggle handlers ──────────────────────────────────────────────────
 
   const toggleEquipRanged = useCallback(

@@ -162,11 +162,19 @@ export function WeaponQualitySelector({
 
 // ─── Stat Chip ────────────────────────────────────────────────────────────────
 
-export function StatChip({ label, value }: { label: string; value: string }) {
+export function StatChip({ label, value, size = "md" }: { label: string; value: string | number; size?: "sm" | "md" }) {
+  if (size === "sm") {
+    return (
+      <div className="flex flex-col items-center bg-slate-800/60 rounded border border-slate-700 px-1.5 py-0.5 min-w-[32px] lg:min-w-[38px]">
+        <span className={uiTextLabel}>{label}</span>
+        <span className="text-xs font-code text-slate-200 mt-0.5">{value || "—"}</span>
+      </div>
+    );
+  }
   return (
-    <div className="flex flex-col items-center bg-slate-800/60 rounded px-2 lg:px-3 py-1 lg:py-1.5 min-w-[52px] lg:min-w-[64px]">
+    <div className="flex flex-col items-center bg-slate-800/60 rounded border border-slate-700 px-2 py-0.5 min-w-[36px] lg:min-w-[44px]">
       <span className={uiTextLabel}>{label}</span>
-      <span className="text-sm lg:text-base font-code text-slate-200 mt-0.5">{value || "—"}</span>
+      <span className="text-xs lg:text-sm font-code text-slate-200 mt-0.5">{value || "—"}</span>
     </div>
   );
 }
@@ -195,9 +203,9 @@ export function DamageTypeChip({ damage }: { damage: string }) {
   const damageType = parseDamageType(damage);
   if (!damageType) return null;
   return (
-    <div className="flex flex-col items-center bg-slate-800/60 rounded px-2 lg:px-3 py-1 lg:py-1.5 min-w-[52px] lg:min-w-[64px]">
+    <div className="flex flex-col items-center bg-slate-800/60 rounded border border-slate-700 px-2 py-0.5 min-w-[36px] lg:min-w-[44px]">
       <span className={uiTextLabel}>Type</span>
-      <span className={`text-sm lg:text-base font-semibold mt-0.5 ${damageType.colour}`}>
+      <span className={`text-xs lg:text-sm font-code mt-0.5 ${damageType.colour}`}>
         {damageType.label}
       </span>
     </div>
@@ -328,28 +336,15 @@ export function UpgradeCard({
     <div className="bg-slate-800/60 rounded border border-slate-500 px-2 lg:px-3 py-1.5 lg:py-2">
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs lg:text-sm font-medium text-slate-300">{upgrade.name}</span>
-        <div className="flex items-center gap-1.5 shrink-0">
-          <span className="inline-flex items-center -translate-y-[1.4px]">
-            <InfoModal
-              title={upgrade.name}
-              content={
-                <div className="space-y-2">
-                  <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{upgrade.description}</p>
-                  <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>{upgrade.applicableTo}</p>
-                </div>
-              }
-            />
-          </span>
-          {editable && (
-            <button
-              onClick={() => onRemove(upgrade.id)}
-              className={`${uiActionButtonCompact} shrink-0`}
-              title={`Remove ${upgrade.name}`}
-            >
-              Remove
-            </button>
-          )}
-        </div>
+        {editable && (
+          <button
+            onClick={() => onRemove(upgrade.id)}
+            className={`${uiActionButtonCompact} shrink-0`}
+            title={`Remove ${upgrade.name}`}
+          >
+            Remove
+          </button>
+        )}
       </div>
       <div className="flex flex-wrap gap-1 mt-1">
         <Chip size="sm" className="border-slate-700 bg-slate-900/40 text-slate-300">
@@ -357,6 +352,20 @@ export function UpgradeCard({
           <span className="leading-none">{displayedWeightModifier}</span>
         </Chip>
         <ItemMetaChips value={upgrade.value} availability={upgrade.availability} source={upgrade.source} size="sm" bare />
+      </div>
+      <div className="flex items-center gap-1.5 mt-1">
+        <span className={uiTextLabel}>Rules</span>
+        <span className="inline-flex items-center -translate-y-[1.4px]">
+          <InfoModal
+            title={upgrade.name}
+            content={
+              <div className="space-y-2">
+                <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{upgrade.description}</p>
+                <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>{upgrade.applicableTo}</p>
+              </div>
+            }
+          />
+        </span>
       </div>
     </div>
   );

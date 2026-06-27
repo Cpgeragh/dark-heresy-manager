@@ -3,7 +3,7 @@
 // Feeds into the reference-lookup UI on the Armour tab.
 
 import { SkillSource } from "../../types/SkillSource";
-import type { ArmourLocationKey } from "../../types/Character";
+import type { ArmourLocationKey, ArmourQuality } from "../../types/Character";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -17,7 +17,8 @@ export interface ArmourRef {
   ap: number;
   /** Per-location AP override when a piece is asymmetric (e.g. 5 everywhere but 4 on head) */
   apOverrides?: Partial<Record<ArmourLocationKey, number>>;
-  /** Any special rules, properties, or notes for the armour. */
+  qualities?: ArmourQuality[];
+  /** Unique per-piece rules not covered by a quality tag. */
   notes?: string;
   weight: string;
   value: string;
@@ -36,17 +37,12 @@ const LEGS: ArmourLocationKey[] = ["rightLeg", "leftLeg"];
 
 // ─── Armour Reference ────────────────────────────────────────────────────────
 
-const PRIMITIVE_NOTE =
-  "Primitive. Only provides full AP against weapons that also have the Primitive quality. " +
-  "Against all other attacks, AP is halved (round up).";
-
-const FLAK_NOTE =
-  "Counts as AP 5 against any hit from a weapon with the Blast quality, " +
-  "provided the wearer was not at the point where the blast originated.";
-
-const MESH_NOTE =
-  "Mesh. Formed from thousands of thermoplas cells linked together. " +
-  "Becomes momentarily rigid to spread and dissipate impacts and heat energy.";
+const PRIMITIVE: ArmourQuality[] = ["Primitive"];
+const FLAK: ArmourQuality[] = ["Flak"];
+const MESH: ArmourQuality[] = ["Mesh"];
+const POWERED: ArmourQuality[] = ["Powered"];
+const SANCTIFIED: ArmourQuality[] = ["Sanctified"];
+const OVERLOAD: ArmourQuality[] = ["Overload"];
 
 export const ARMOUR_REFERENCE: ArmourRef[] = [
   // ── Core Rulebook — Primitive Armour ─────────────────────────────────────
@@ -56,7 +52,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.CR,
     locations: ARMS_BODY_LEGS,
     ap: 1,
-    notes: PRIMITIVE_NOTE,
+    qualities: PRIMITIVE,
     weight: "5 kg",
     value: "25 Thrones",
     availability: "Average",
@@ -67,7 +63,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.CR,
     locations: ARMS_BODY_LEGS,
     ap: 2,
-    notes: PRIMITIVE_NOTE,
+    qualities: PRIMITIVE,
     weight: "7 kg",
     value: "100 Thrones",
     availability: "Common",
@@ -78,7 +74,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.CR,
     locations: ["body"],
     ap: 2,
-    notes: PRIMITIVE_NOTE,
+    qualities: PRIMITIVE,
     weight: "2 kg",
     value: "10 Thrones",
     availability: "Common",
@@ -89,7 +85,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.CR,
     locations: ["body"],
     ap: 2,
-    notes: PRIMITIVE_NOTE,
+    qualities: PRIMITIVE,
     weight: "10 kg",
     value: "5 Thrones",
     availability: "Average",
@@ -100,7 +96,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.CR,
     locations: ["body"],
     ap: 3,
-    notes: PRIMITIVE_NOTE,
+    qualities: PRIMITIVE,
     weight: "14 kg",
     value: "60 Thrones",
     availability: "Common",
@@ -111,7 +107,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.CR,
     locations: ARMS_BODY_LEGS,
     ap: 3,
-    notes: PRIMITIVE_NOTE,
+    qualities: PRIMITIVE,
     weight: "18 kg",
     value: "50 Thrones",
     availability: "Average",
@@ -122,7 +118,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.CR,
     locations: ALL,
     ap: 5,
-    notes: PRIMITIVE_NOTE,
+    qualities: PRIMITIVE,
     weight: "30 kg",
     value: "120 Thrones",
     availability: "Scarce",
@@ -133,7 +129,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.CR,
     locations: ["body"],
     ap: 6,
-    notes: PRIMITIVE_NOTE,
+    qualities: PRIMITIVE,
     weight: "22 kg",
     value: "5,000 Thrones",
     availability: "Very Rare",
@@ -146,7 +142,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.CR,
     locations: ["head"],
     ap: 2,
-    notes: FLAK_NOTE,
+    qualities: FLAK,
     weight: "2 kg",
     value: "25 Thrones",
     availability: "Average",
@@ -157,7 +153,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.CR,
     locations: ARMS,
     ap: 2,
-    notes: FLAK_NOTE,
+    qualities: FLAK,
     weight: "1 kg",
     value: "50 Thrones",
     availability: "Average",
@@ -168,7 +164,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.CR,
     locations: ARMS_BODY_LEGS,
     ap: 2,
-    notes: FLAK_NOTE,
+    qualities: FLAK,
     weight: "4 kg",
     value: "80 Thrones",
     availability: "Scarce",
@@ -179,7 +175,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.CR,
     locations: ["body"],
     ap: 3,
-    notes: FLAK_NOTE,
+    qualities: FLAK,
     weight: "5 kg",
     value: "50 Thrones",
     availability: "Average",
@@ -190,7 +186,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.CR,
     locations: ARMS_BODY_LEGS,
     ap: 3,
-    notes: FLAK_NOTE,
+    qualities: FLAK,
     weight: "6 kg",
     value: "100 Thrones",
     availability: "Average",
@@ -201,7 +197,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.CR,
     locations: ["body"],
     ap: 3,
-    notes: FLAK_NOTE,
+    qualities: FLAK,
     weight: "8 kg",
     value: "80 Thrones",
     availability: "Scarce",
@@ -212,7 +208,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.CR,
     locations: ALL,
     ap: 4,
-    notes: FLAK_NOTE,
+    qualities: FLAK,
     weight: "11 kg",
     value: "300 Thrones",
     availability: "Scarce",
@@ -225,7 +221,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.CR,
     locations: ["head"],
     ap: 3,
-    notes: MESH_NOTE,
+    qualities: MESH,
     weight: "0.5 kg",
     value: "100 Thrones",
     availability: "Rare",
@@ -236,7 +232,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.CR,
     locations: ARMS,
     ap: 3,
-    notes: MESH_NOTE,
+    qualities: MESH,
     weight: "0.5 kg",
     value: "120 Thrones",
     availability: "Rare",
@@ -247,7 +243,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.CR,
     locations: ARMS_BODY_LEGS,
     ap: 4,
-    notes: MESH_NOTE,
+    qualities: MESH,
     weight: "2 kg",
     value: "375 Thrones",
     availability: "Rare",
@@ -258,7 +254,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.CR,
     locations: ["body"],
     ap: 4,
-    notes: MESH_NOTE,
+    qualities: MESH,
     weight: "1 kg",
     value: "150 Thrones",
     availability: "Rare",
@@ -269,7 +265,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.CR,
     locations: ["body", "rightArm", "leftArm"],
     ap: 4,
-    notes: MESH_NOTE,
+    qualities: MESH,
     weight: "1.5 kg",
     value: "350 Thrones",
     availability: "Very Rare",
@@ -355,9 +351,8 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.CR,
     locations: ALL,
     ap: 7,
-    notes:
-      "+20 Strength. Increases wearer's size by one step. " +
-      "Requires a constant power supply; a standard non-military supply lasts 1d5 hours before needing replacement or recharging.",
+    qualities: POWERED,
+    notes: "+20 Strength. Increases wearer's size by one step.",
     weight: "40 kg",
     value: "8,500 Thrones",
     availability: "Very Rare",
@@ -368,9 +363,8 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.CR,
     locations: ALL,
     ap: 8,
-    notes:
-      "+20 Strength. Increases wearer's size by one step. " +
-      "Requires a constant power supply; a standard non-military supply lasts 1d5 hours before needing replacement or recharging.",
+    qualities: POWERED,
+    notes: "+20 Strength. Increases wearer's size by one step.",
     weight: "65 kg",
     value: "15,000 Thrones",
     availability: "Very Rare",
@@ -477,10 +471,9 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.BoM,
     locations: ["body"],
     ap: 2,
+    qualities: SANCTIFIED,
     notes:
       "+10 on Tests to resist any direct psychic attack or manipulation. " +
-      "Provides full Armour Points against attacks of psychic force or warp energy that deal damage directly, " +
-      "and against attacks made with the Warp Weapon quality. " +
       "Can be worn under other armour, but prolonged wear causes irritation: after more than Toughness Bonus " +
       "hours in such a combination, the wearer must pass a Toughness Test or gain 1 Level of Fatigue.",
     weight: "4 kg",
@@ -538,10 +531,9 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.BoM,
     locations: ALL,
     ap: 6,
+    qualities: SANCTIFIED,
     notes:
       "+10 on Tests to resist any direct psychic attack or manipulation. " +
-      "Provides full Armour Points against attacks of psychic force or warp energy that deal damage directly, " +
-      "and against attacks made with the Warp Weapon quality. " +
       "Gauntlet strikes count as Holy. " +
       "All supernatural creatures within 20 metres take a –10 penalty to Willpower Tests.",
     weight: "18 kg",
@@ -554,9 +546,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.BoM,
     locations: ["body", "rightArm", "leftArm"],
     ap: 4,
-    notes:
-      "Sanctified. Provides full Armour Points against attacks of psychic force or warp energy " +
-      "that deal damage directly, and against attacks made with the Warp Weapon quality.",
+    qualities: SANCTIFIED,
     weight: "15 kg",
     value: "750 Thrones",
     availability: "Rare",
@@ -581,6 +571,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     locations: ALL,
     ap: 7,
     apOverrides: { body: 8 },
+    qualities: POWERED,
     notes:
       "AP 7 all locations (AP 8 on Body). +10 Strength. " +
       "Integrated targeter (+5 BS), re-breather, and comm-link. " +
@@ -615,6 +606,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.DH,
     locations: ALL,
     ap: 9,
+    qualities: POWERED,
     notes:
       "Best Craftsmanship. Inscribed with pentagrammatic wards — any Daemon striking the wearer " +
       "with its natural weapons takes 1d5 damage ignoring Armour and Toughness Bonus. " +
@@ -629,6 +621,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     source: SkillSource.DH,
     locations: ALL,
     ap: 12,
+    qualities: POWERED,
     notes:
       "Auto-Stabilised; Heavy and Mounted weapons may be fired one-handed. +30 Strength (not +20). " +
       "Integrated sensorium (as auspex). Built-in Refraction Field (PR 35, does not overload normally). " +
@@ -649,13 +642,10 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     protectionRating: 30,
     locations: [],
     ap: 0,
+    qualities: OVERLOAD,
     notes:
-      "Protection Rating 30. Protects body and arms only — head and legs are unprotected. " +
-      "Does not function against area attacks, although it may help against some Flame weapons if the GM wishes. " +
-      "A character may only benefit from one field at a time. When attacked, roll d100; if the result is less than " +
-      "or equal to the field's Protection Rating, the attack is nullified. Fields may overload: Poor overloads on " +
-      "01-15, Common on 01-10, Good on 01-05, and Best on 1. An overloaded field ceases to function until recharged " +
-      "or repaired with the Luminen Charge Talent or a Very Hard (-30) Tech-Use Test.",
+      "Protects body and arms only — head and legs are unprotected. " +
+      "Does not function against area attacks, although it may help against some Flame weapons if the GM wishes.",
     weight: "0.3 kg",
     value: "5,000 Thrones",
     availability: "Rare",
@@ -668,13 +658,10 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     protectionRating: 30,
     locations: [],
     ap: 0,
+    qualities: OVERLOAD,
     notes:
-      "Protection Rating 30. Common refractor field often found among Officers of the Brontian Longknives. " +
-      "Acolytes and Throne Agents in service of the Calixis Ordo Malleus treat availability as Rare instead of Very Rare " +
-      "and reduce the purchase cost by 25%. A character may only benefit from one field at a time. When attacked, roll d100; " +
-      "if the result is less than or equal to the field's Protection Rating, the attack is nullified. Fields may overload: " +
-      "Poor overloads on 01-15, Common on 01-10, Good on 01-05, and Best on 1. An overloaded field ceases to function until " +
-      "recharged or repaired with the Luminen Charge Talent or a Very Hard (-30) Tech-Use Test.",
+      "Common refractor field found among Officers of the Brontian Longknives. " +
+      "Acolytes and Throne Agents of the Calixis Ordo Malleus treat availability as Rare and reduce purchase cost by 25%.",
     weight: "0.4 kg",
     value: "15,000 Thrones",
     availability: "Very Rare",
@@ -687,12 +674,10 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     protectionRating: 70,
     locations: [],
     ap: 0,
+    qualities: OVERLOAD,
     notes:
-      "Protection Rating 70. Functions only against psychic attacks, including friendly psychic powers originating more than 5m away. " +
-      "Any creature with the Daemonic trait that passes or remains within 5m suffers 1d10 damage ignoring Armour and Toughness Bonus. " +
-      "A character may only benefit from one field at a time. When attacked, roll d100; if the result is less than or equal to the field's " +
-      "Protection Rating, the attack is nullified. Fields may overload: Poor overloads on 01-15, Common on 01-10, Good on 01-05, and Best on 1. " +
-      "An overloaded field ceases to function until recharged or repaired with the Luminen Charge Talent or a Very Hard (-30) Tech-Use Test.",
+      "Functions only against psychic attacks, including friendly psychic powers originating more than 5m away. " +
+      "Any creature with the Daemonic trait within 5m suffers 1d10 damage ignoring Armour and Toughness Bonus.",
     weight: "0.5 kg",
     value: "50,000 Thrones",
     availability: "Near Unique",
@@ -723,10 +708,10 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     locations: ALL,
     ap: 10,
     apOverrides: { head: 6, body: 14 },
+    qualities: POWERED,
     notes:
       "AP 6 Head, AP 10 Arms and Legs, AP 14 Body. Adds +30 Strength and increases size by one step. " +
-      "Requires a constant power supply from onboard generators and engines, usually solid fuel, and must be refuelled every 1d5 hours. " +
-      "Without power, the armour cannot move. Far too bulky to be worn by a human.",
+      "Must be refuelled every 1d5 hours. Without power, the armour cannot move. Far too bulky to be worn by a human.",
     weight: "60 kg",
     value: "—",
     availability: "—",

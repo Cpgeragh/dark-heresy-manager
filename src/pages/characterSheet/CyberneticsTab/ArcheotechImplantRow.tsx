@@ -2,35 +2,41 @@
 
 import type { ArcheotechItem } from "../../../types/Character";
 import { Chip } from "../../../ui/Chip";
-import { uiActionButtonCompact, uiTextLabel, uiTextMuted } from "../../../ui/editableStyles";
+import { uiActionButtonCompact, uiSection, uiTextLabel } from "../../../ui/editableStyles";
+import { ItemMetaChips } from "../../../ui/ItemMetaChips";
+import { StatChip } from "../weapons/weaponShared";
 import { CRAFTSMANSHIP_STYLE, LOCATION_DISPLAY } from "./cyberneticsConstants";
 
 interface Props {
   item: ArcheotechItem;
   editable: boolean;
   onRemove: () => void;
+  highlightAsArcheotech?: boolean;
 }
 
-export function ArcheotechImplantRow({ item, editable, onRemove }: Props) {
+export function ArcheotechImplantRow({ item, editable, onRemove, highlightAsArcheotech = true }: Props) {
   const locations = item.bodyLocation ?? [];
 
+  const containerClass = highlightAsArcheotech
+    ? "border border-amber-700/40 bg-amber-900/10 rounded-lg p-3 lg:p-4"
+    : uiSection;
+
   return (
-    <div className="border border-amber-700/40 bg-amber-900/10 rounded-lg p-3 lg:p-4 flex items-start gap-3">
+    <div className={`${containerClass} flex items-start gap-3`}>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-sm lg:text-base font-semibold text-slate-200">{item.name}</span>
-          <Chip
-            size="sm"
-            className="border-amber-700/50 bg-amber-500/10 text-amber-400 uppercase tracking-wide shrink-0"
-          >
-            Archeotech
-          </Chip>
+          {highlightAsArcheotech && (
+            <Chip
+              className="border-amber-700/50 bg-amber-500/10 text-amber-400 shrink-0"
+            >
+              Archeotech
+            </Chip>
+          )}
         </div>
         <div className="flex flex-wrap items-center gap-1.5 mt-1">
           {locations.length > 0 && (
-            <Chip className={`border-slate-700 bg-slate-800/40 ${uiTextMuted}`}>
-              {locations.map((l) => LOCATION_DISPLAY[l] ?? l).join(" & ")}
-            </Chip>
+            <StatChip label="Location" value={locations.map((l) => LOCATION_DISPLAY[l] ?? l).join(" & ")} />
           )}
           {item.craftsmanship && (
             <>
@@ -41,6 +47,12 @@ export function ArcheotechImplantRow({ item, editable, onRemove }: Props) {
             </>
           )}
         </div>
+        <ItemMetaChips
+          weight={item.weight}
+          value={item.value}
+          availability={item.availability}
+          className="flex flex-wrap gap-1.5 mt-1"
+        />
       </div>
 
       {editable && (

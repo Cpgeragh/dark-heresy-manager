@@ -1,17 +1,20 @@
 // src/pages/characterSheet/ArmourTab/ArmourPicker.tsx
 
-import { useState, useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
+import { useState } from "react";
 import type { ArmourCraftsmanship } from "../../../types/Character";
 import { ARMOUR_REFERENCE, type ArmourRef } from "../../../data/reference/armourReference";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { PickerModal } from "../../../ui/PickerModal";
 import { Button } from "../../../ui/Button";
+import { Chip } from "../../../ui/Chip";
+import { ItemMetaChips } from "../../../ui/ItemMetaChips";
+import { uiTextMuted, uiTextBody } from "../../../ui/editableStyles";
+import { StatChip } from "../weapons/weaponShared";
 import { locationLabel } from "./armourHelpers";
 
 const ARMOUR_CRAFTSMANSHIP_OPTIONS: ArmourCraftsmanship[] = ["Poor", "Common", "Good", "Best"];
 
-const ARMOUR_CRAFTSMANSHIP_STYLE: Record<ArmourCraftsmanship, string> = {
+export const ARMOUR_CRAFTSMANSHIP_STYLE: Record<ArmourCraftsmanship, string> = {
   Poor: "border-red-500/70 bg-red-500/15 text-red-300",
   Common: "border-slate-500 bg-slate-800 text-slate-200",
   Good: "border-emerald-500/70 bg-emerald-500/15 text-emerald-300",
@@ -68,36 +71,26 @@ export function ArmourPicker({
     setCraftsmanship("Common");
   }
 
-  const craftDialogRef = useRef<HTMLDialogElement | null>(null);
-  useEffect(() => {
-    const d = craftDialogRef.current;
-    if (!d) return;
-    d.showModal();
-    return () => {
-      if (d.open) d.close();
-    };
-  }, [selected]);
-
   if (selected) {
-    return createPortal(
-      <dialog
-        ref={craftDialogRef}
+    return (
+      <PickerModal
+        title={selected.name}
+        titleClassName="text-slate-200"
+        closeLabel="←"
+        query=""
+        onQueryChange={() => {}}
         onClose={resetPicker}
-        onClick={(e) => {
-          if (e.target === craftDialogRef.current) resetPicker();
-        }}
-        className="m-auto w-[calc(100%-2rem)] max-w-md lg:max-w-lg bg-slate-900 border border-slate-500 rounded-xl shadow-2xl p-0 backdrop:bg-black/50 backdrop:backdrop-blur-sm"
+        isEmpty={false}
+        hideSearch
+        footer={
+          <Button className="w-full" onClick={() => onSelect(selected, craftsmanship)}>
+            Add Armour
+          </Button>
+        }
       >
-        <div className="flex items-center justify-between px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
-          <h3 className="text-sm lg:text-base font-semibold text-slate-200">{selected.name}</h3>
-          <button onClick={resetPicker} className="text-slate-400 hover:text-slate-200 text-lg leading-none">
-            {"\u00D7"}
-          </button>
-        </div>
-
         <div className="px-4 lg:px-5 py-4 lg:py-5 space-y-4">
           <div>
-            <p className="text-xs lg:text-sm text-slate-400 mb-2">Select armour quality:</p>
+            <p className={`text-xs lg:text-sm ${uiTextMuted} mb-2`}>Select armour craftsmanship:</p>
             <div className="flex gap-2">
               {ARMOUR_CRAFTSMANSHIP_OPTIONS.map((q) => (
                 <button
@@ -115,22 +108,11 @@ export function ArmourPicker({
               ))}
             </div>
           </div>
-
-          <div className="text-xs lg:text-sm text-slate-400 bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed">
+          <div className={`text-xs lg:text-sm ${uiTextBody} bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed`}>
             {craftsmanshipDescription(craftsmanship)}
           </div>
         </div>
-
-        <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700 flex gap-2">
-          <button onClick={resetPicker} className="px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100">
-            Back
-          </button>
-          <Button className="flex-1" onClick={() => onSelect(selected, craftsmanship)}>
-            Add Armour
-          </Button>
-        </div>
-      </dialog>,
-      document.body
+      </PickerModal>
     );
   }
 
@@ -157,54 +139,50 @@ export function ArmourPicker({
         const data = item.data;
         if (data.armourKind !== "worn") return null;
         return (
-          <button
+          <div
             key={item.id}
+            role="button"
+            tabIndex={editable ? 0 : -1}
             onClick={editable ? () => onSelectCustomItem?.(item) : undefined}
             className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
           >
-            <span
-              className={`text-sm lg:text-base font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}
-            >
+            <span className={`text-sm lg:text-base font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}>
               {item.name}
             </span>
-            <div className="flex items-center gap-2 text-xs lg:text-sm text-slate-500 mt-0.5 flex-wrap font-code">
-              <span>
-                AP {data.ap}
-                {Object.keys(data.apOverrides ?? {}).length > 0 ? "*" : ""}
-              </span>
-              <span>{locationLabel(data.locations)}</span>
-              {item.status === "draft" && (
-                <span className="font-sans rounded border border-amber-400/40 bg-amber-500/10 px-1.5 py-0.5 text-amber-300">
-                  Draft
-                </span>
-              )}
-              <span className="font-sans rounded border border-fuchsia-500/50 bg-fuchsia-500/10 px-1.5 py-0.5 text-fuchsia-300">
-                Custom
-              </span>
+            <div className="flex flex-wrap gap-1.5 mt-1">
+              <StatChip size="sm" label="AP" value={`${data.ap}${Object.keys(data.apOverrides ?? {}).length > 0 ? "*" : ""}`} />
+              <StatChip size="sm" label="Location" value={locationLabel(data.locations)} />
             </div>
-          </button>
+            <div className="flex flex-wrap gap-1.5 mt-1">
+              {item.status === "draft" && (
+                <Chip size="sm" className="border-amber-400/40 bg-amber-500/10 text-amber-300">Draft</Chip>
+              )}
+              <Chip size="sm" className="border-fuchsia-500/50 bg-fuchsia-500/10 text-fuchsia-300">Custom</Chip>
+              <ItemMetaChips weight={data.weight} value={data.value} availability={data.availability} source={data.source} />
+            </div>
+
+          </div>
         );
       })}
       {filtered.map((ref) => (
-        <button
+        <div
           key={ref.id}
+          role="button"
+          tabIndex={editable ? 0 : -1}
           onClick={editable ? () => setSelected(ref) : undefined}
           className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
-          <span
-            className={`text-sm lg:text-base font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}
-          >
+          <span className={`text-sm lg:text-base font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}>
             {ref.name}
           </span>
-          <div className="flex items-center gap-2 text-xs lg:text-sm text-slate-500 mt-0.5 flex-wrap font-code">
-            <span>
-              AP {ref.ap}
-              {Object.keys(ref.apOverrides ?? {}).length > 0 ? "*" : ""}
-            </span>
-            <span>{locationLabel(ref.locations)}</span>
-            {ref.notes && <span className="font-sans not-italic">{ref.notes}</span>}
+          <div className="flex flex-wrap gap-1.5 mt-1">
+            <StatChip size="sm" label="AP" value={`${ref.ap}${Object.keys(ref.apOverrides ?? {}).length > 0 ? "*" : ""}`} />
+            <StatChip size="sm" label="Location" value={locationLabel(ref.locations)} />
           </div>
-        </button>
+          <div className="flex flex-wrap gap-1.5 mt-1">
+            <ItemMetaChips weight={ref.weight} value={ref.value} availability={ref.availability} source={ref.source} />
+          </div>
+        </div>
       ))}
     </PickerModal>
   );

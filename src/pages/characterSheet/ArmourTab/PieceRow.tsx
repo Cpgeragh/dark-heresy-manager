@@ -1,11 +1,11 @@
-// src/pages/characterSheet/ArmourTab/PieceRow.tsx
-
 import type { WornArmourPiece } from "../../../types/Character";
-import { uiActionButtonCompact, uiSection, uiTextLabel, uiTextMuted } from "../../../ui/editableStyles";
-import { Chip } from "../../../ui/Chip";
+import { uiActionButtonCompact, uiSection, uiTextLabel, uiTextMuted, uiTextPlaceholder } from "../../../ui/editableStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
+import { StatChip } from "../weapons/weaponShared";
 import { InfoModal } from "../../../components/InfoModal";
 import { locationLabel } from "./armourHelpers";
+import { ARMOUR_REFERENCE } from "../../../data/reference/armourReference";
+import { ARMOUR_SPECIAL_RULES } from "../../../data/reference/armourSpecialRules";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 
@@ -23,7 +23,6 @@ interface Props {
   onUpdateAllCopies?: () => void;
   onToggle: (id: string) => void;
   onRemove: (id: string) => void;
-  onInfo: (piece: WornArmourPiece) => void;
 }
 
 function armourCraftsmanshipInfo(craftsmanship: NonNullable<WornArmourPiece["craftsmanship"]>) {
@@ -40,6 +39,23 @@ function armourCraftsmanshipInfo(craftsmanship: NonNullable<WornArmourPiece["cra
   }
 }
 
+function ArmourQualitiesContent({ qualities }: { qualities: string[] }) {
+  return (
+    <div className="space-y-4">
+      {qualities.map((name) => {
+        const desc = ARMOUR_SPECIAL_RULES[name];
+        if (!desc) return null;
+        return (
+          <div key={name}>
+            <p className="text-sm lg:text-base font-semibold text-amber-300">{name}</p>
+            <p className={`text-sm lg:text-base ${uiTextMuted} mt-1 leading-relaxed`}>{desc}</p>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export function PieceRow({
   piece,
   editable,
@@ -54,11 +70,14 @@ export function PieceRow({
   onUpdateAllCopies,
   onToggle,
   onRemove,
-  onInfo,
 }: Props) {
   const apDesc =
-    Object.keys(piece.apOverrides ?? {}).length > 0 ? `AP ${piece.ap}*` : `AP ${piece.ap}`;
+    Object.keys(piece.apOverrides ?? {}).length > 0 ? `${piece.ap}*` : String(piece.ap);
   const craftsmanship = piece.craftsmanship ?? "Common";
+
+  const ref = ARMOUR_REFERENCE.find((r) => r.id === piece.referenceId);
+  const qualities = piece.qualities ?? ref?.qualities ?? [];
+  const notes = piece.notes ?? ref?.notes;
 
   return (
     <div className={[uiSection, "flex items-center gap-3", !worn ? "opacity-60" : ""].join(" ")}>
@@ -79,37 +98,12 @@ export function PieceRow({
               {libraryItem.status}
             </span>
           )}
-          <span className="inline-flex items-center -translate-y-[1.4px]">
-            <button
-              onClick={() => onInfo(piece)}
-              title="View rules"
-              className="inline-flex h-[13.5px] w-[18px] shrink-0 my-auto items-center justify-center rounded bg-slate-700 border border-slate-600 text-slate-300 leading-none hover:bg-slate-600"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-                className="w-2.5 h-2.5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"
-                />
-              </svg>
-            </button>
-          </span>
         </div>
+
         <div className="mt-1 space-y-1">
           <div className="flex flex-wrap gap-1.5">
-            <Chip className="border-slate-700 bg-slate-800/40 text-slate-300">
-              {locationLabel(piece.locations)}
-            </Chip>
-            <span className="text-xs lg:text-sm rounded border border-slate-700 bg-slate-800/40 px-1.5 lg:px-2 py-0.5 font-code text-slate-200">
-              {apDesc}
-            </span>
+            <StatChip label="Location" value={locationLabel(piece.locations)} />
+            <StatChip label="AP" value={apDesc} />
           </div>
           <ItemMetaChips
             weight={piece.weight}
@@ -118,6 +112,33 @@ export function PieceRow({
             source={piece.source}
           />
         </div>
+
+        <div className="flex items-center gap-1.5 mt-1">
+          <span className={uiTextLabel}>Qualities</span>
+          <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>
+            {qualities.length > 0 ? qualities.join(", ") : "-"}
+          </span>
+          {qualities.length > 0 && (
+            <span className="inline-flex items-center -translate-y-[1.4px]">
+              <InfoModal
+                title={`${piece.name} Qualities`}
+                content={<ArmourQualitiesContent qualities={qualities} />}
+              />
+            </span>
+          )}
+        </div>
+
+        <div className="flex items-center gap-1.5 mt-1">
+          <span className={uiTextLabel}>Rules</span>
+          {notes ? (
+            <span className="inline-flex items-center -translate-y-[1.4px]">
+              <InfoModal title={`${piece.name} Rules`} content={notes} />
+            </span>
+          ) : (
+            <span className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>-</span>
+          )}
+        </div>
+
         <div className="flex items-center gap-1.5 mt-1">
           <span className={uiTextLabel}>Craftsmanship</span>
           <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>{craftsmanship}</span>
@@ -126,6 +147,7 @@ export function PieceRow({
             content={armourCraftsmanshipInfo(craftsmanship)}
           />
         </div>
+
         {libraryItem && (
           <CustomItemActionButtons
             libraryItem={libraryItem}
