@@ -176,13 +176,12 @@ export function GrenadePicker({
               </span>
             </div>
             <div className="flex flex-wrap gap-1.5 mt-1">
-              <ItemMetaChips weight={data.weight} value={data.value} availability={data.availability} source={data.source} />
+              <StatChip size="sm" label="Range" value={thrownRange} />
+              {data.damage && data.damage !== "—" && <StatChip size="sm" label="Dmg" value={data.damage} />}
+              {data.pen && <StatChip size="sm" label="Pen" value={data.pen} />}
             </div>
-            <div className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted} mt-0.5 flex-wrap font-code`}>
-              <span>{data.type ?? "Grenade"}</span>
-              <span>Range {thrownRange}</span>
-              <span className={uiTextMuted}>{data.damage !== "—" ? data.damage : "No damage"}</span>
-              <span className={uiTextMuted}>Pen {data.pen}</span>
+            <div className="flex flex-wrap gap-1.5 mt-1">
+              <ItemMetaChips weight={data.weight} value={data.value} availability={data.availability} source={data.source} />
             </div>
             {data.specialRules && data.specialRules !== "—" && (
               <div className="flex items-center gap-1.5 mt-1">
@@ -218,13 +217,12 @@ export function GrenadePicker({
             {ref.name}
           </span>
           <div className="flex flex-wrap gap-1.5 mt-1">
-            <ItemMetaChips weight={ref.weight} value={ref.value} availability={ref.availability} source={ref.source} />
+            <StatChip size="sm" label="Range" value={thrownRange} />
+            {ref.damage !== "—" && <StatChip size="sm" label="Dmg" value={ref.damage} />}
+            <StatChip size="sm" label="Pen" value={ref.pen} />
           </div>
-          <div className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted} mt-0.5 flex-wrap font-code`}>
-            <span>{ref.type ?? "Grenade"}</span>
-            <span>Range {thrownRange}</span>
-            <span className={uiTextMuted}>{ref.damage !== "—" ? ref.damage : "No damage"}</span>
-            <span className={uiTextMuted}>Pen {ref.pen}</span>
+          <div className="flex flex-wrap gap-1.5 mt-1">
+            <ItemMetaChips weight={ref.weight} value={ref.value} availability={ref.availability} source={ref.source} />
           </div>
           {ref.specialRules && ref.specialRules !== "—" && (
             <div className="flex items-center gap-1.5 mt-1">

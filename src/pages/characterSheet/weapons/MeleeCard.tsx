@@ -230,20 +230,15 @@ export function MeleePicker({
               {item.name}
             </span>
             <div className="flex flex-wrap gap-1.5 mt-1">
+              {data.damage && <StatChip size="sm" label="Dmg" value={data.damage} />}
+              {data.pen && <StatChip size="sm" label="Pen" value={data.pen} />}
+            </div>
+            <div className="flex flex-wrap gap-1.5 mt-1">
               <ItemMetaChips weight={data.weight} value={data.value} availability={data.availability} source={data.source} />
               {item.status === "draft" && (
-                <span className="rounded border border-amber-400/40 bg-amber-500/10 px-1.5 py-0.5 text-xs lg:text-sm text-amber-300">
-                  Draft
-                </span>
+                <Chip size="sm" className="border-amber-400/40 bg-amber-500/10 text-amber-300">Draft</Chip>
               )}
-              <span className="rounded border border-fuchsia-500/50 bg-fuchsia-500/10 px-1.5 py-0.5 text-xs lg:text-sm text-fuchsia-300">
-                Custom
-              </span>
-            </div>
-            <div className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted} mt-0.5 flex-wrap font-code`}>
-              {data.class && <span>{data.class}</span>}
-              {data.damage && <span>{data.damage}</span>}
-              {data.pen && <span>Pen {data.pen}</span>}
+              <Chip size="sm" className="border-fuchsia-500/50 bg-fuchsia-500/10 text-fuchsia-300">Custom</Chip>
             </div>
           </div>
         );
@@ -262,12 +257,11 @@ export function MeleePicker({
             {ref.name}
           </span>
           <div className="flex flex-wrap gap-1.5 mt-1">
-            <ItemMetaChips weight={ref.weight} value={ref.value} availability={ref.availability} source={ref.source} />
+            <StatChip size="sm" label="Dmg" value={ref.damage} />
+            <StatChip size="sm" label="Pen" value={ref.pen} />
           </div>
-          <div className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted} mt-0.5 flex-wrap font-code`}>
-            <span>{ref.twoHanded ? "Two-Handed" : ref.class}</span>
-            <span>{ref.damage}</span>
-            <span>Pen {ref.pen}</span>
+          <div className="flex flex-wrap gap-1.5 mt-1">
+            <ItemMetaChips weight={ref.weight} value={ref.value} availability={ref.availability} source={ref.source} />
           </div>
           {ref.specialRules && ref.specialRules !== "—" && (
             <div className="flex items-center gap-1.5 mt-1">

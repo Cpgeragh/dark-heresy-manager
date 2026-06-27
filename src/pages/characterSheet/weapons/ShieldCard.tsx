@@ -118,13 +118,13 @@ export function ShieldPicker({
               </span>
             </div>
             <div className="flex flex-wrap gap-1.5 mt-1">
-              <ItemMetaChips weight={data.weight} value={data.value} availability={data.availability} source={data.source} />
+              <StatChip size="sm" label="AP" value={String(data.ap)} />
+              {data.locations && <StatChip size="sm" label="Location" value={data.locations} />}
+              {data.damage && <StatChip size="sm" label="Dmg" value={data.damage} />}
+              {data.pen && <StatChip size="sm" label="Pen" value={data.pen} />}
             </div>
-            <div className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted} mt-0.5 flex-wrap font-code`}>
-              <span className="text-cyan-400">AP {data.ap}</span>
-              <span>{data.locations}</span>
-              <span>{data.damage}</span>
-              <span>Pen {data.pen}</span>
+            <div className="flex flex-wrap gap-1.5 mt-1">
+              <ItemMetaChips weight={data.weight} value={data.value} availability={data.availability} source={data.source} />
             </div>
             {data.specialRules && data.specialRules !== "—" && (
               <div className="flex items-center gap-1.5 mt-1">
@@ -160,13 +160,13 @@ export function ShieldPicker({
             {ref.name}
           </span>
           <div className="flex flex-wrap gap-1.5 mt-1">
-            <ItemMetaChips weight={ref.weight} value={ref.value} availability={ref.availability} source={ref.source} />
+            <StatChip size="sm" label="AP" value={String(ref.ap)} />
+            {ref.locations && <StatChip size="sm" label="Location" value={ref.locations} />}
+            {ref.damage && <StatChip size="sm" label="Dmg" value={ref.damage} />}
+            {ref.pen && <StatChip size="sm" label="Pen" value={ref.pen} />}
           </div>
-          <div className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted} mt-0.5 flex-wrap font-code`}>
-            <span className="text-cyan-400">AP {ref.ap}</span>
-            <span>{ref.locations}</span>
-            <span>{ref.damage}</span>
-            <span>Pen {ref.pen}</span>
+          <div className="flex flex-wrap gap-1.5 mt-1">
+            <ItemMetaChips weight={ref.weight} value={ref.value} availability={ref.availability} source={ref.source} />
           </div>
           {ref.specialRules && ref.specialRules !== "—" && (
             <div className="flex items-center gap-1.5 mt-1">

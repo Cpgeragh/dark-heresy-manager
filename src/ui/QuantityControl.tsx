@@ -13,10 +13,15 @@ interface Props {
    *  "md" → w-6/h-6 buttons, text-sm button text, text-base display (drugs)       [default]
    *  "lg" → w-6/h-6 buttons, text-sm button text, text-lg display   (ammo/grenades)
    */
-  size?: "sm" | "md" | "lg";
+  size?: "xs" | "sm" | "md" | "lg";
 }
 
 const SIZE = {
+  xs: {
+    btn: "w-5 h-5 text-xs",
+    display: "text-xs min-w-[1.25rem]",
+    input: "h-5 w-8 text-xs",
+  },
   sm: {
     btn: "w-7 h-7 sm:w-5 sm:h-5 lg:w-7 lg:h-7 text-sm sm:text-xs lg:text-sm",
     display: "text-sm lg:text-base min-w-[2rem]",

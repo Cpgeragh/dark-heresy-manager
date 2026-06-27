@@ -6,6 +6,9 @@ import { ARCHEOTECH_REFERENCE } from "../../../data/reference/archeotechReferenc
 import { uiActionButtonCompact, uiSection, uiTextBody, uiTextLabel, uiTextMuted } from "../../../ui/editableStyles";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
+import { StatChip } from "../weapons/weaponShared";
+import { locationLabel } from "../ArmourTab/armourHelpers";
+import { LOCATION_DISPLAY, CRAFTSMANSHIP_STYLE } from "../CyberneticsTab/cyberneticsConstants";
 import { InfoModal } from "../../../components/InfoModal";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
@@ -108,6 +111,39 @@ export function ItemCard({
               )}
               {item.notes?.trim() && (
                 <p className="text-xs lg:text-sm text-amber-300/70 italic leading-relaxed">{item.notes}</p>
+              )}
+            </div>
+          )}
+
+          {/* Type-specific stat chips */}
+          {item.type === "Armour" && (
+            <div className="mt-1 flex flex-wrap gap-1.5">
+              {(item.locations ?? []).length > 0 && <StatChip label="Location" value={locationLabel(item.locations!)} />}
+              {item.ap !== undefined && <StatChip label="AP" value={String(item.ap)} />}
+              {item.stacks && <Chip className="border-sky-700/50 bg-sky-500/10 text-sky-400">Stacks</Chip>}
+            </div>
+          )}
+          {item.type === "Force Field" && item.protectionRating !== undefined && (
+            <div className="mt-1">
+              <StatChip label="PR" value={String(item.protectionRating)} />
+            </div>
+          )}
+          {item.type === "Shield" && (
+            <div className="mt-1 flex flex-wrap gap-1.5">
+              {(item.locations ?? []).length > 0 && <StatChip label="Location" value={locationLabel(item.locations!)} />}
+              {item.ap !== undefined && <StatChip label="AP" value={String(item.ap)} />}
+            </div>
+          )}
+          {item.type === "Cybernetic" && (
+            <div className="mt-1 flex flex-wrap items-center gap-1.5">
+              {(item.bodyLocation ?? []).length > 0 && (
+                <StatChip label="Location" value={item.bodyLocation!.map((l) => LOCATION_DISPLAY[l] ?? l).join(" & ")} />
+              )}
+              {item.craftsmanship && (
+                <>
+                  <span className={uiTextLabel}>Quality</span>
+                  <Chip className={`${CRAFTSMANSHIP_STYLE[item.craftsmanship as keyof typeof CRAFTSMANSHIP_STYLE]} shrink-0`}>{item.craftsmanship}</Chip>
+                </>
               )}
             </div>
           )}

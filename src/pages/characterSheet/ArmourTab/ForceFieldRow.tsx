@@ -1,9 +1,10 @@
-// src/pages/characterSheet/ArmourTab/ForceFieldRow.tsx
-
 import type { WornArmourPiece } from "../../../types/Character";
-import { uiActionButtonCompact, uiSection } from "../../../ui/editableStyles";
-import { Chip } from "../../../ui/Chip";
+import { uiActionButtonCompact, uiSection, uiTextLabel, uiTextMuted, uiTextPlaceholder } from "../../../ui/editableStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
+import { StatChip } from "../weapons/weaponShared";
+import { InfoModal } from "../../../components/InfoModal";
+import { ARMOUR_REFERENCE } from "../../../data/reference/armourReference";
+import { ARMOUR_SPECIAL_RULES } from "../../../data/reference/armourSpecialRules";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 
@@ -20,7 +21,37 @@ interface Props {
   onUpdateAllCopies?: () => void;
   onToggle: (id: string) => void;
   onRemove: (id: string) => void;
-  onInfo: (piece: WornArmourPiece) => void;
+}
+
+function forceFieldCraftsmanshipInfo(craftsmanship: NonNullable<WornArmourPiece["craftsmanship"]>) {
+  switch (craftsmanship) {
+    case "Poor":
+      return "Poorly constructed field generator. Overloads on a roll of 01–15.";
+    case "Good":
+      return "Well constructed field generator. Overloads on a roll of 01–05.";
+    case "Best":
+      return "Finest available field generator. Overloads only on a roll of 1.";
+    case "Common":
+    default:
+      return "Standard field generator. Overloads on a roll of 01–10.";
+  }
+}
+
+function ForceFieldQualitiesContent({ qualities }: { qualities: string[] }) {
+  return (
+    <div className="space-y-4">
+      {qualities.map((name) => {
+        const desc = ARMOUR_SPECIAL_RULES[name];
+        if (!desc) return null;
+        return (
+          <div key={name}>
+            <p className="text-sm lg:text-base font-semibold text-amber-300">{name}</p>
+            <p className={`text-sm lg:text-base ${uiTextMuted} mt-1 leading-relaxed`}>{desc}</p>
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
 export function ForceFieldRow({
@@ -36,9 +67,13 @@ export function ForceFieldRow({
   onUpdateAllCopies,
   onToggle,
   onRemove,
-  onInfo,
 }: Props) {
   const active = piece.worn;
+  const ref = ARMOUR_REFERENCE.find((r) => r.id === piece.referenceId);
+  const qualities = piece.qualities ?? ref?.qualities ?? [];
+  const notes = piece.notes ?? ref?.notes;
+  const craftsmanship = piece.craftsmanship ?? "Common";
+
   return (
     <div className={[uiSection, "flex items-center gap-3", !active ? "opacity-60" : ""].join(" ")}>
       <div className="flex-1 min-w-0">
@@ -58,43 +93,57 @@ export function ForceFieldRow({
               {libraryItem.status}
             </span>
           )}
-          <span className="inline-flex items-center -translate-y-[1.4px]">
-            <button
-              onClick={() => onInfo(piece)}
-              title="View rules"
-              className="inline-flex h-[13.5px] w-[18px] shrink-0 my-auto items-center justify-center rounded bg-slate-700 border border-slate-600 text-slate-300 leading-none hover:bg-slate-600"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-                className="w-2.5 h-2.5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"
-                />
-              </svg>
-            </button>
-          </span>
         </div>
-        <div className="flex flex-wrap gap-1.5 mt-1">
+
+        <div className="mt-1 flex flex-wrap gap-1.5">
           {piece.protectionRating !== undefined && (
-            <Chip className="border-slate-700 bg-slate-800/40 font-code text-slate-200">
-              PR {piece.protectionRating}
-            </Chip>
+            <StatChip label="PR" value={String(piece.protectionRating)} />
           )}
-          <ItemMetaChips
-            bare
-            weight={piece.weight}
-            value={piece.value}
-            availability={piece.availability}
-            source={piece.source}
+        </div>
+
+        <ItemMetaChips
+          weight={piece.weight}
+          value={piece.value}
+          availability={piece.availability}
+          source={piece.source}
+          className="flex flex-wrap gap-1.5 mt-1"
+        />
+
+        <div className="flex items-center gap-1.5 mt-1">
+          <span className={uiTextLabel}>Qualities</span>
+          <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>
+            {qualities.length > 0 ? qualities.join(", ") : "-"}
+          </span>
+          {qualities.length > 0 && (
+            <span className="inline-flex items-center -translate-y-[1.4px]">
+              <InfoModal
+                title={`${piece.name} Qualities`}
+                content={<ForceFieldQualitiesContent qualities={qualities} />}
+              />
+            </span>
+          )}
+        </div>
+
+        <div className="flex items-center gap-1.5 mt-1">
+          <span className={uiTextLabel}>Rules</span>
+          {notes ? (
+            <span className="inline-flex items-center -translate-y-[1.4px]">
+              <InfoModal title={`${piece.name} Rules`} content={notes} />
+            </span>
+          ) : (
+            <span className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>-</span>
+          )}
+        </div>
+
+        <div className="flex items-center gap-1.5 mt-1">
+          <span className={uiTextLabel}>Craftsmanship</span>
+          <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>{craftsmanship}</span>
+          <InfoModal
+            title={`${craftsmanship} Force Field`}
+            content={forceFieldCraftsmanshipInfo(craftsmanship)}
           />
         </div>
+
         {libraryItem && (
           <CustomItemActionButtons
             libraryItem={libraryItem}

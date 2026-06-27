@@ -187,6 +187,8 @@ export type ArmourLocationKey = "head" | "body" | "rightArm" | "leftArm" | "righ
 
 export type ArmourCraftsmanship = "Poor" | "Common" | "Good" | "Best";
 
+export type ArmourQuality = "Primitive" | "Flak" | "Mesh" | "Sanctified" | "Powered" | "Overload";
+
 export interface WornArmourPiece extends CustomLibraryLinkFields {
   id: string;
   referenceId?: string; // links back to ArmourRef.id
@@ -205,6 +207,7 @@ export interface WornArmourPiece extends CustomLibraryLinkFields {
   availability?: string;
   source?: string;
   craftsmanship?: ArmourCraftsmanship;
+  qualities?: ArmourQuality[];
   custom?: boolean; // true when created via "Add Custom"
   /** true for force fields — no locations or AP, tracked separately in the Armour tab */
   isForceField?: boolean;

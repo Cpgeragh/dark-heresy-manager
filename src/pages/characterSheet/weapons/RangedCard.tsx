@@ -426,6 +426,13 @@ export function RangedPicker({
               {item.name}
             </span>
             <div className="flex flex-wrap gap-1.5 mt-1">
+              {data.range && <StatChip size="sm" label="Range" value={data.range} />}
+              {data.rof && <StatChip size="sm" label="ROF" value={data.rof} />}
+              {data.damage && <StatChip size="sm" label="Dmg" value={data.damage} />}
+              {data.pen && <StatChip size="sm" label="Pen" value={data.pen} />}
+              {data.clip && <StatChip size="sm" label="Clip" value={data.clip} />}
+            </div>
+            <div className="flex flex-wrap gap-1.5 mt-1">
               {(() => { const c = weaponClassChip(data.class); return c ? (
                 <Chip size="sm" className={c.active}>{c.label}</Chip>
               ) : null; })()}
@@ -441,14 +448,6 @@ export function RangedPicker({
                 Custom
               </Chip>
               <ItemMetaChips weight={data.weight} value={data.value} availability={data.availability} source={data.source} />
-            </div>
-            <div className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted} mt-0.5 flex-wrap font-code`}>
-              {data.range && <span>{data.range}</span>}
-              {data.rof && <span>{data.rof}</span>}
-              {data.damage && <span>{data.damage}</span>}
-              {data.pen && <span>Pen {data.pen}</span>}
-              {data.clip && <span>Clip {data.clip}</span>}
-              {data.ammoType && <span>{data.ammoType}</span>}
             </div>
           </div>
         );
@@ -467,6 +466,13 @@ export function RangedPicker({
             {ref.name}
           </span>
           <div className="flex flex-wrap gap-1.5 mt-1">
+            <StatChip size="sm" label="Range" value={ref.range} />
+            <StatChip size="sm" label="ROF" value={ref.rof} />
+            <StatChip size="sm" label="Dmg" value={ref.damage} />
+            <StatChip size="sm" label="Pen" value={ref.pen} />
+            <StatChip size="sm" label="Clip" value={ref.clip} />
+          </div>
+          <div className="flex flex-wrap gap-1.5 mt-1">
             {(() => { const c = weaponClassChip(ref.class); return c ? (
               <Chip size="sm" className={c.active}>{c.label}</Chip>
             ) : null; })()}
@@ -474,14 +480,6 @@ export function RangedPicker({
               <Chip size="sm" className={f.className}>{f.label}</Chip>
             ) : null; })()}
             <ItemMetaChips weight={ref.weight} value={ref.value} availability={ref.availability} source={ref.source} />
-          </div>
-          <div className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted} mt-0.5 flex-wrap font-code`}>
-            <span>{ref.range}</span>
-            <span>{ref.rof}</span>
-            <span>{ref.damage}</span>
-            <span>Pen {ref.pen}</span>
-            <span>Clip {ref.clip}</span>
-            {ref.ammoType && <span>{ref.ammoType}</span>}
           </div>
           {ref.specialRules && ref.specialRules !== "—" && (
             <div className="flex items-center gap-1.5 mt-1">
@@ -1037,28 +1035,6 @@ function AmmoEntryRow({
             }`}
           />
           <span className="text-xs lg:text-sm text-slate-200 truncate">{displayName}</span>
-          {hasAmmoInfo && (
-            <span className="inline-flex items-center -translate-y-[1.4px]">
-              <InfoModal
-                title={displayName}
-                content={
-                  <div className="space-y-2">
-                    {ammoRef?.description && (
-                      <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ammoRef.description}</p>
-                    )}
-                    {isChargePack && (
-                      <div className="space-y-1">
-                        <p className="text-sm lg:text-base font-semibold text-slate-100">Recharging Power Packs</p>
-                        <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                          {RECHARGING_POWER_PACKS_TEXT}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                }
-              />
-            </span>
-          )}
           {entry.loaded && (
             <span className="text-[10px] lg:text-xs text-green-500 uppercase tracking-wide shrink-0">
               Loaded
@@ -1091,41 +1067,61 @@ function AmmoEntryRow({
         </div>
       )}
 
+      {hasAmmoInfo && (
+        <div className="flex items-center gap-1.5">
+          <span className={uiTextLabel}>Rules</span>
+          <span className="inline-flex items-center -translate-y-[1.4px]">
+            <InfoModal
+              title={displayName}
+              content={
+                <div className="space-y-2">
+                  {ammoRef?.description && (
+                    <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ammoRef.description}</p>
+                  )}
+                  {isChargePack && (
+                    <div className="space-y-1">
+                      <p className="text-sm lg:text-base font-semibold text-slate-100">Recharging Power Packs</p>
+                      <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
+                        {RECHARGING_POWER_PACKS_TEXT}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              }
+            />
+          </span>
+        </div>
+      )}
+
       {/* Count */}
       <div className="flex items-center gap-4">
         {ammoTracking === "loose" ? (
           <div className="flex items-center gap-1.5">
-            <span className={`w-16 lg:w-[4.5rem] ${uiTextLabel}`}>
-              Rounds
-            </span>
+            <span className={uiTextLabel}>Rounds</span>
             <QuantityControl
               quantity={looseRoundCount}
               editable={editable}
-              size="sm"
+              size="xs"
               onUpdate={onSetLooseRounds}
             />
           </div>
         ) : (
           <div className="flex flex-col items-start gap-1.5">
             <div className="flex items-center gap-1.5">
-              <span className={`w-16 lg:w-[4.5rem] ${uiTextLabel}`}>
-                Clips
-              </span>
+              <span className={uiTextLabel}>Clips</span>
               <QuantityControl
                 quantity={entry.clips}
                 editable={editable}
-                size="sm"
+                size="xs"
                 onUpdate={onUpdateClips}
               />
             </div>
             <div className="flex items-center gap-1.5">
-              <span className={`w-16 lg:w-[4.5rem] ${uiTextLabel}`}>
-                Rounds
-              </span>
+              <span className={uiTextLabel}>Rounds</span>
               <QuantityControl
                 quantity={entry.rounds}
                 editable={editable}
-                size="sm"
+                size="xs"
                 onUpdate={onUpdateRounds}
               />
             </div>

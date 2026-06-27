@@ -13,7 +13,6 @@ import type { CampaignCustomItem, CustomArmourData } from "../../../types/Custom
 import { wornApAt, bionicBonusAt, LOCATION_LABELS, LOCATION_ORDER } from "./armourHelpers";
 import { ArmourPicker } from "./ArmourPicker";
 import { ForceFieldPicker } from "./ForceFieldPicker";
-import { PieceNotesModal } from "./PieceNotesModal";
 import { CustomPieceForm } from "./CustomPieceForm";
 import { ForceFieldRow } from "./ForceFieldRow";
 import { PieceRow } from "./PieceRow";
@@ -156,7 +155,6 @@ export function ArmourTab({
   const [showPicker, setShowPicker] = useState(false);
   const [showFieldPicker, setShowFieldPicker] = useState(false);
   const [showCustomForm, setShowCustomForm] = useState(false);
-  const [infoTarget, setInfoTarget] = useState<WornArmourPiece | null>(null);
   const [pickerMode, setPickerMode] = useState<"worn" | "stowed">("worn");
   const [editingArmourDefinition, setEditingArmourDefinition] =
     useState<EditingArmourDefinition | null>(null);
@@ -212,7 +210,7 @@ export function ArmourTab({
         ...(crafted.apOverrides ? { apOverrides: crafted.apOverrides } : {}),
         ...(ref.isForceField ? { isForceField: true } : {}),
         ...(ref.protectionRating !== undefined ? { protectionRating: ref.protectionRating } : {}),
-        ...(!ref.isForceField ? { craftsmanship } : {}),
+        craftsmanship,
         worn: true,
         weight: crafted.weight,
         value: ref.value,
@@ -499,7 +497,6 @@ export function ArmourTab({
           onUpdateAllCopies={() => libraryItem && updateAllArmourCopies(libraryItem)}
           onToggle={toggleWorn}
           onRemove={removePiece}
-          onInfo={setInfoTarget}
         />
       );
     },
@@ -539,7 +536,6 @@ export function ArmourTab({
           onUpdateAllCopies={() => libraryItem && updateAllArmourCopies(libraryItem)}
           onToggle={toggleForceField}
           onRemove={removePiece}
-          onInfo={setInfoTarget}
         />
       );
     },
@@ -616,18 +612,16 @@ export function ArmourTab({
 
       <section className="space-y-2">
         <div className="flex items-center justify-between">
-          <SectionHeader>Worn ({worn.length + archeotechArmourWorn.length})</SectionHeader>
-          {!showCustomForm && (
-            <button
-              onClick={() => {
-                setPickerMode("worn");
-                setShowPicker(true);
-              }}
-              className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
-            >
-              {editable ? "+ Equip" : "View"}
-            </button>
-          )}
+          <SectionHeader>Worn</SectionHeader>
+          <button
+            onClick={() => {
+              setPickerMode("worn");
+              setShowPicker(true);
+            }}
+            className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
+          >
+            {editable ? "+ Equip" : "View"}
+          </button>
         </div>
         {worn.length === 0 && archeotechArmourWorn.length === 0 && (
           <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No armour worn.</p>
@@ -635,31 +629,33 @@ export function ArmourTab({
         {worn.length > 0 && (
           <ArmourPieceGrid pieces={worn} renderPiece={(piece) => renderArmourRow(piece, true)} />
         )}
-        {archeotechArmourWorn.map((item) => (
-          <ArcheotechArmourRow
-            key={item.id}
-            item={item}
-            editable={editable}
-            onToggleEquip={() => toggleEquipArcheotech(item.id)}
-            onRemove={() => removeArcheotech(item.id)}
-          />
-        ))}
+        {archeotechArmourWorn.length > 0 && (
+          <div className="space-y-2 sm:grid sm:grid-cols-2 sm:gap-2 sm:space-y-0 sm:items-start">
+            {archeotechArmourWorn.map((item) => (
+              <ArcheotechArmourRow
+                key={item.id}
+                item={item}
+                editable={editable}
+                onToggleEquip={() => toggleEquipArcheotech(item.id)}
+                onRemove={() => removeArcheotech(item.id)}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="space-y-2">
         <div className="flex items-center justify-between">
-          <SectionHeader>Stowed ({stowed.length + archeotechArmourStowed.length})</SectionHeader>
-          {!showCustomForm && (
-            <button
-              onClick={() => {
-                setPickerMode("stowed");
-                setShowPicker(true);
-              }}
-              className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
-            >
-              {editable ? "+ Stow" : "View"}
-            </button>
-          )}
+          <SectionHeader>Stowed</SectionHeader>
+          <button
+            onClick={() => {
+              setPickerMode("stowed");
+              setShowPicker(true);
+            }}
+            className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
+          >
+            {editable ? "+ Stow" : "View"}
+          </button>
         </div>
         {stowed.length === 0 && archeotechArmourStowed.length === 0 && (
           <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No armour stowed.</p>
@@ -667,20 +663,24 @@ export function ArmourTab({
         {stowed.length > 0 && (
           <ArmourPieceGrid pieces={stowed} renderPiece={(piece) => renderArmourRow(piece, false)} />
         )}
-        {archeotechArmourStowed.map((item) => (
-          <ArcheotechArmourRow
-            key={item.id}
-            item={item}
-            editable={editable}
-            onToggleEquip={() => toggleEquipArcheotech(item.id)}
-            onRemove={() => removeArcheotech(item.id)}
-          />
-        ))}
+        {archeotechArmourStowed.length > 0 && (
+          <div className="space-y-2 sm:grid sm:grid-cols-2 sm:gap-2 sm:space-y-0 sm:items-start">
+            {archeotechArmourStowed.map((item) => (
+              <ArcheotechArmourRow
+                key={item.id}
+                item={item}
+                editable={editable}
+                onToggleEquip={() => toggleEquipArcheotech(item.id)}
+                onRemove={() => removeArcheotech(item.id)}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="space-y-2">
         <div className="flex items-center justify-between">
-          <SectionHeader>Force Fields ({forceFields.length + archeotechForceFieldItems.length})</SectionHeader>
+          <SectionHeader>Force Fields</SectionHeader>
           <button
             onClick={() => setShowFieldPicker(true)}
             className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
@@ -706,29 +706,25 @@ export function ArmourTab({
       </section>
 
       {editable && showCustomForm && (
-        <section>
-          <CustomPieceForm onAdd={addCustomPiece} onCancel={() => setShowCustomForm(false)} />
-        </section>
+        <CustomPieceForm onAdd={addCustomPiece} onCancel={() => setShowCustomForm(false)} />
       )}
 
       {editingArmourDefinition && (
-        <section>
-          <CustomPieceForm
-            title="Edit Custom Armour"
-            submitLabel="Save Draft"
-            initialPiece={{
-              id: editingArmourDefinition.piece.id,
-              worn: editingArmourDefinition.piece.worn,
-              ...stripArmourKind(editingArmourDefinition.libraryItem.data),
-              customLibraryId: editingArmourDefinition.libraryItem.id,
-              customLibraryVersionId:
-                editingArmourDefinition.libraryItem.draftVersionId ??
-                editingArmourDefinition.libraryItem.latestVersionId,
-            }}
-            onAdd={saveEditedArmourDefinition}
-            onCancel={() => setEditingArmourDefinition(null)}
-          />
-        </section>
+        <CustomPieceForm
+          title="Edit Custom Armour"
+          submitLabel="Save Draft"
+          initialPiece={{
+            id: editingArmourDefinition.piece.id,
+            worn: editingArmourDefinition.piece.worn,
+            ...stripArmourKind(editingArmourDefinition.libraryItem.data),
+            customLibraryId: editingArmourDefinition.libraryItem.id,
+            customLibraryVersionId:
+              editingArmourDefinition.libraryItem.draftVersionId ??
+              editingArmourDefinition.libraryItem.latestVersionId,
+          }}
+          onAdd={saveEditedArmourDefinition}
+          onCancel={() => setEditingArmourDefinition(null)}
+        />
       )}
 
       {showPicker && (
@@ -748,15 +744,14 @@ export function ArmourTab({
         <ForceFieldPicker
           editable={editable}
           customItems={campaignCustomArmour.filter((item) => item.status !== "archived")}
-          onSelect={(ref) => {
-            fromReference(ref);
+          onSelect={(ref, craftsmanship) => {
+            fromReference(ref, craftsmanship);
             setShowFieldPicker(false);
           }}
           onSelectCustomItem={(item) => addArmourFromLibrary(item, true)}
           onClose={() => setShowFieldPicker(false)}
         />
       )}
-      {infoTarget && <PieceNotesModal piece={infoTarget} onClose={() => setInfoTarget(null)} />}
     </div>
   );
 }
