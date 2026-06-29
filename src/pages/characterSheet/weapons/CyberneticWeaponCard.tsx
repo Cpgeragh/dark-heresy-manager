@@ -6,6 +6,7 @@ import { InfoModal } from "../../../components/InfoModal";
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
 import { Chip } from "../../../ui/Chip";
 import { uiTextLabel, uiTextMuted, uiTextPlaceholder } from "../../../ui/editableStyles";
+import { colourCyanDark } from "../../../ui/colourTokens";
 import {
   StatChip,
   DamageTypeChip,
@@ -33,7 +34,7 @@ export function CyberneticWeaponCard({
       <div>
         <div className="flex items-center gap-2">
           <p className="text-sm lg:text-base font-semibold text-slate-200">{weapon.name}</p>
-          <Chip size="sm" className="border-cyan-700/50 bg-cyan-500/10 text-cyan-400 uppercase tracking-wide">
+          <Chip size="sm" className={`${colourCyanDark} uppercase tracking-wide`}>
             Cybernetic
           </Chip>
         </div>

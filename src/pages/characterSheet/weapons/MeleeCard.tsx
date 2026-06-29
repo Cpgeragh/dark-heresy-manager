@@ -14,7 +14,6 @@ import { WEAPON_UPGRADE_REFERENCE } from "../../../data/reference/weaponUpgradeR
 import {
   editableInputClass,
   editableTextareaClass,
-  uiActionButtonCompact,
   uiSection,
   uiSectionHeader,
   uiTextBody,
@@ -22,6 +21,8 @@ import {
   uiTextMuted,
   uiTextPlaceholder,
 } from "../../../ui/editableStyles";
+import { uiActionButtonCompact } from "../../../ui/buttonStyles";
+import { colourAmberFaint, colourFuchsia, colourViolet } from "../../../ui/colourTokens";
 import { Button } from "../../../ui/Button";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
@@ -236,9 +237,9 @@ export function MeleePicker({
             <div className="flex flex-wrap gap-1.5 mt-1">
               <ItemMetaChips weight={data.weight} value={data.value} availability={data.availability} source={data.source} />
               {item.status === "draft" && (
-                <Chip size="sm" className="border-amber-400/40 bg-amber-500/10 text-amber-300">Draft</Chip>
+                <Chip size="sm" className={colourAmberFaint}>Draft</Chip>
               )}
-              <Chip size="sm" className="border-fuchsia-500/50 bg-fuchsia-500/10 text-fuchsia-300">Custom</Chip>
+              <Chip size="sm" className={colourFuchsia}>Custom</Chip>
             </div>
           </div>
         );
@@ -713,7 +714,7 @@ export function MeleeCard({
               </span>
             )}
             {integrated && (
-              <Chip size="sm" className="border-violet-500/60 bg-violet-500/10 text-violet-300">
+              <Chip size="sm" className={colourViolet}>
                 Integrated
               </Chip>
             )}

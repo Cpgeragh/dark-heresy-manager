@@ -4,8 +4,9 @@ import { InfoModal } from "../../../components/InfoModal";
 import { Chip } from "../../../ui/Chip";
 import { sourceColour } from "../../../ui/sourceStyles";
 import type { PsychicPower } from "../../../types/Character";
-import { psychicDisciplineColour } from "../psychicStyles";
-import { uiActionButtonCompact, uiTextBody, uiTextPlaceholder, uiTextSubtle } from "../../../ui/editableStyles";
+import { disciplineColours } from "../psychicStyles";
+import { uiTextBody, uiTextPlaceholder, uiTextSubtle } from "../../../ui/editableStyles";
+import { uiActionButtonCompact } from "../../../ui/buttonStyles";
 
 interface PowerCardProps {
   power: PsychicPower;
@@ -29,7 +30,7 @@ function PowerStats({ power }: { power: PsychicPower }) {
         </Chip>
       )}
       {power.discipline && (
-        <Chip className={psychicDisciplineColour(power.discipline)}>
+        <Chip className={disciplineColours[power.discipline] ?? disciplineColours.default}>
           {power.discipline}
         </Chip>
       )}

@@ -6,6 +6,7 @@ import { CHAR_LABEL, type SkillWithComputed } from "./skillsConstants";
 import { charColour } from "../../../ui/sourceStyles";
 import { Chip } from "../../../ui/Chip";
 import { SkillRow } from "./SkillRow";
+import { colourPurple } from "../../../ui/colourTokens";
 
 interface SkillGroupRowProps {
   category: string;
@@ -39,7 +40,7 @@ export function SkillGroupRow({
           {CHAR_LABEL[skills[0].characteristic]}
         </Chip>
         {skills[0].advanced && (
-          <Chip size="sm" className="shrink-0 bg-purple-700/40 border-purple-500 text-purple-300">
+          <Chip size="sm" className={`shrink-0 ${colourPurple}`}>
             Advanced
           </Chip>
         )}

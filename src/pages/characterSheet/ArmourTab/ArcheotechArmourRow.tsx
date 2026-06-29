@@ -2,7 +2,9 @@
 
 import type { ArcheotechItem } from "../../../types/Character";
 import { Chip } from "../../../ui/Chip";
-import { uiActionButtonCompact, uiSection } from "../../../ui/editableStyles";
+import { uiSection } from "../../../ui/editableStyles";
+import { uiActionButtonCompact } from "../../../ui/buttonStyles";
+import { colourArcheotech, colourStacks } from "../../../ui/colourTokens";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { StatChip } from "../weapons/weaponShared";
 import { locationLabel } from "./armourHelpers";
@@ -39,12 +41,12 @@ export function ArcheotechArmourRow({ item, editable, onToggleEquip, onRemove, h
           {locations.length > 0 && <StatChip label="Location" value={locationLabel(locations)} />}
           {item.ap !== undefined && <StatChip label="AP" value={String(item.ap)} />}
           {item.stacks && (
-            <Chip className="border-sky-700/50 bg-sky-500/10 text-sky-400">Stacks</Chip>
+            <Chip className={colourStacks}>Stacks</Chip>
           )}
         </div>
         <div className="flex flex-wrap gap-1.5 mt-1">
           {highlightAsArcheotech && (
-            <Chip className="border-amber-700/50 bg-amber-500/10 text-amber-400 shrink-0">
+            <Chip className={`${colourArcheotech} shrink-0`}>
               Archeotech
             </Chip>
           )}

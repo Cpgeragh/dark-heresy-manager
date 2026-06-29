@@ -14,6 +14,7 @@ import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import { PickerModal } from "../../../ui/PickerModal";
 import { ITEM_TYPES, AVAILABILITY_OPTIONS, type ItemType } from "./archeotechConstants";
+import { colourSky, colourRose } from "../../../ui/colourTokens";
 import { LOCATION_LABELS, LOCATION_ORDER } from "../ArmourTab/armourHelpers";
 
 const TYPE_DESCRIPTIONS: Record<ItemType, string> = {
@@ -316,8 +317,8 @@ export function CustomItemForm({
                           "flex-1 py-1.5 rounded border text-sm lg:text-base font-medium transition",
                           weaponClass === cls
                             ? cls === "Ranged"
-                              ? "border-sky-500/60 bg-sky-500/10 text-sky-300"
-                              : "border-rose-500/60 bg-rose-500/10 text-rose-300"
+                              ? colourSky
+                              : colourRose
                             : "border-slate-700 bg-slate-800 text-slate-400 hover:border-slate-500",
                         ].join(" ")}
                       >

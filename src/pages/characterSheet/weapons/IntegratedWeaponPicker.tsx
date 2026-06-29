@@ -7,6 +7,7 @@ import { InfoModal } from "../../../components/InfoModal";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
 import { uiTextBody, uiTextLabel, uiTextMuted } from "../../../ui/editableStyles";
+import { colourViolet, colourSky, colourRose } from "../../../ui/colourTokens";
 import { INTEGRATED_RANGED_REFS, INTEGRATED_MELEE_REFS } from "../../../utils/weaponUtils";
 import { SpecialRulesContent } from "./weaponShared";
 
@@ -150,10 +151,10 @@ export function IntegratedWeaponPicker({
             {ref.name}
           </span>
           <div className="flex flex-wrap gap-1.5 mt-1">
-            <Chip size="sm" className="border-violet-500/60 bg-violet-500/10 text-violet-300">
+            <Chip size="sm" className={colourViolet}>
               Integrated
             </Chip>
-            <Chip size="sm" className="border-sky-500/60 bg-sky-500/10 text-sky-300">
+            <Chip size="sm" className={colourSky}>
               Ranged
             </Chip>
             <ItemMetaChips weight={ref.weight} value={ref.value} availability={ref.availability} source={ref.source} />
@@ -199,10 +200,10 @@ export function IntegratedWeaponPicker({
             {ref.name}
           </span>
           <div className="flex flex-wrap gap-1.5 mt-1">
-            <Chip size="sm" className="border-violet-500/60 bg-violet-500/10 text-violet-300">
+            <Chip size="sm" className={colourViolet}>
               Integrated
             </Chip>
-            <Chip size="sm" className="border-rose-500/60 bg-rose-500/10 text-rose-300">
+            <Chip size="sm" className={colourRose}>
               Melee
             </Chip>
             <ItemMetaChips weight={ref.weight} value={ref.value} availability={ref.availability} source={ref.source} />

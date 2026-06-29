@@ -8,7 +8,8 @@ import { Chip } from "../../../ui/Chip";
 import { InfoModal } from "../../../components/InfoModal";
 import { SKILL_DESCRIPTIONS } from "../../../data/skillDescriptions";
 import { Stepper } from "../../../components/Stepper";
-import { uiActionButtonCompact } from "../../../ui/editableStyles";
+import { uiActionButtonCompact } from "../../../ui/buttonStyles";
+import { colourPurple, colourTeal } from "../../../ui/colourTokens";
 
 interface SkillRowProps {
   skill: SkillWithComputed;
@@ -89,7 +90,7 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc, previewMode
             <Chip size="sm" className={`bg-slate-800 font-code shrink-0 ${charColour(skill.characteristic)}`}>
               {CHAR_LABEL[skill.characteristic]}
             </Chip>
-            <Chip size="sm" className={`shrink-0 ${skill.advanced ? "bg-purple-700/40 border-purple-500 text-purple-300" : "bg-teal-900/40 border-teal-700/50 text-teal-300"}`}>
+            <Chip size="sm" className={`shrink-0 ${skill.advanced ? colourPurple : colourTeal}`}>
               {skill.advanced ? "Advanced" : "Basic"}
             </Chip>
             <Chip size="sm" className={`shrink-0 ${levelBadgeClass}`}>
@@ -111,7 +112,7 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc, previewMode
           <Chip className={`bg-slate-800 font-code shrink-0 ${charColour(skill.characteristic)}`}>
             {CHAR_LABEL[skill.characteristic]}
           </Chip>
-          <Chip className={`shrink-0 ${skill.advanced ? "bg-purple-700/40 border-purple-500 text-purple-300" : "bg-teal-900/40 border-teal-700/50 text-teal-300"}`}>
+          <Chip className={`shrink-0 ${skill.advanced ? colourPurple : colourTeal}`}>
             {skill.advanced ? "Advanced" : "Basic"}
           </Chip>
           <Chip className={`shrink-0 ${levelBadgeClass}`}>

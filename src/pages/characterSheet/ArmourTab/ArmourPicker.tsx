@@ -9,6 +9,7 @@ import { Button } from "../../../ui/Button";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { uiTextMuted, uiTextBody } from "../../../ui/editableStyles";
+import { colourAmberFaint, colourFuchsia } from "../../../ui/colourTokens";
 import { StatChip } from "../weapons/weaponShared";
 import { locationLabel } from "./armourHelpers";
 
@@ -155,9 +156,9 @@ export function ArmourPicker({
             </div>
             <div className="flex flex-wrap gap-1.5 mt-1">
               {item.status === "draft" && (
-                <Chip size="sm" className="border-amber-400/40 bg-amber-500/10 text-amber-300">Draft</Chip>
+                <Chip size="sm" className={colourAmberFaint}>Draft</Chip>
               )}
-              <Chip size="sm" className="border-fuchsia-500/50 bg-fuchsia-500/10 text-fuchsia-300">Custom</Chip>
+              <Chip size="sm" className={colourFuchsia}>Custom</Chip>
               <ItemMetaChips weight={data.weight} value={data.value} availability={data.availability} source={data.source} />
             </div>
 

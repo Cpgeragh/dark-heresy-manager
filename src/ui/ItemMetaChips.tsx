@@ -5,6 +5,7 @@ import { Chip } from "./Chip";
 import { formatMoneyForDisplay } from "./moneyFormat";
 import { availabilityColour, sourceColour } from "./sourceStyles";
 import { formatWeightForDisplay } from "./weightFormat";
+import { colourMeta, colourValue } from "./colourTokens";
 
 interface Props {
   weight?: string | null;
@@ -44,18 +45,18 @@ export function ItemMetaChips({
   const chips = (
     <>
       {displayedWeight && (
-        <Chip size={size} className="border-slate-700 bg-slate-900/40 text-slate-300">
+        <Chip size={size} className={colourMeta}>
           <span className="leading-none">{"\u2696"}</span>
           <span className="leading-none">{displayedWeight}</span>
         </Chip>
       )}
       {displayedValue && (
-        <Chip size={size} className="border-slate-700 bg-slate-900/40 text-amber-400/80">
+        <Chip size={size} className={colourValue}>
           {displayedValue}
         </Chip>
       )}
       {purchaseAmount && (
-        <Chip size={size} className="border-slate-700 bg-slate-900/40 text-slate-300">
+        <Chip size={size} className={colourMeta}>
           per {purchaseAmount}
         </Chip>
       )}

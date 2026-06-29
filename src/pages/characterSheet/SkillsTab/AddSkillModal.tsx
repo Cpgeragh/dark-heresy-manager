@@ -8,6 +8,7 @@ import { SKILL_DESCRIPTIONS } from "../../../data/skillDescriptions";
 import { Chip } from "../../../ui/Chip";
 import { PickerModal } from "../../../ui/PickerModal";
 import { SkillRow } from "./SkillRow";
+import { colourPurple, colourTeal } from "../../../ui/colourTokens";
 
 interface AddSkillModalProps {
   isOpen: boolean;
@@ -147,7 +148,7 @@ export function AddSkillModal({
                 {CHAR_LABEL[item.skills[0].characteristic]}
               </Chip>
               {item.skills[0].advanced && (
-                <Chip size="sm" className="shrink-0 bg-purple-700/40 border-purple-500 text-purple-300">
+                <Chip size="sm" className={`shrink-0 ${colourPurple}`}>
                   Advanced
                 </Chip>
               )}
@@ -233,11 +234,7 @@ function SkillPickerRow({
       </Chip>
       <Chip
         size="sm"
-        className={`shrink-0 ${
-          skill.advanced
-            ? "bg-purple-700/40 border-purple-500 text-purple-300"
-            : "bg-teal-900/40 border-teal-700/50 text-teal-300"
-        }`}
+        className={`shrink-0 ${skill.advanced ? colourPurple : colourTeal}`}
       >
         {skill.advanced ? "Advanced" : "Basic"}
       </Chip>

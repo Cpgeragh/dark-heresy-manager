@@ -26,7 +26,6 @@ import { WEAPON_UPGRADE_REFERENCE } from "../../../data/reference/weaponUpgradeR
 import {
   editableInputClass,
   editableTextareaClass,
-  uiActionButtonCompact,
   uiSection,
   uiSectionHeader,
   uiTextBody,
@@ -34,6 +33,16 @@ import {
   uiTextMuted,
   uiTextPlaceholder,
 } from "../../../ui/editableStyles";
+import { uiActionButtonCompact } from "../../../ui/buttonStyles";
+import {
+  colourAmberFaint,
+  colourArcheotech,
+  colourCyan,
+  colourFuchsia,
+  colourSky,
+  colourTealLight,
+  colourViolet,
+} from "../../../ui/colourTokens";
 import { Button } from "../../../ui/Button";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
@@ -129,11 +138,11 @@ const CUSTOM_AMMO_FAMILY_OPTIONS = [
 type AmmoTrackingMode = NonNullable<RangedWeapon["ammoTracking"]>;
 
 const WEAPON_CLASS_STYLES: Record<string, { active: string; inactive: string }> = {
-  Pistol: { active: "border-sky-500/60 bg-sky-500/10 text-sky-300", inactive: "border-sky-500/30 bg-sky-500/5 text-sky-400/50" },
-  Basic:  { active: "border-teal-500/60 bg-teal-500/10 text-teal-300", inactive: "border-teal-500/30 bg-teal-500/5 text-teal-400/50" },
-  Heavy:  { active: "border-violet-500/60 bg-violet-500/10 text-violet-300", inactive: "border-violet-500/30 bg-violet-500/5 text-violet-400/50" },
-  Thrown: { active: "border-amber-500/60 bg-amber-500/10 text-amber-300", inactive: "border-amber-500/30 bg-amber-500/5 text-amber-400/50" },
-  Exotic: { active: "border-fuchsia-500/60 bg-fuchsia-500/10 text-fuchsia-300", inactive: "border-fuchsia-500/30 bg-fuchsia-500/5 text-fuchsia-400/50" },
+  Pistol: { active: colourSky, inactive: "border-sky-500/30 bg-sky-500/5 text-sky-400/50" },
+  Basic:  { active: colourTealLight, inactive: "border-teal-500/30 bg-teal-500/5 text-teal-400/50" },
+  Heavy:  { active: colourViolet, inactive: "border-violet-500/30 bg-violet-500/5 text-violet-400/50" },
+  Thrown: { active: colourAmberFaint, inactive: "border-amber-500/30 bg-amber-500/5 text-amber-400/50" },
+  Exotic: { active: colourFuchsia, inactive: "border-fuchsia-500/30 bg-fuchsia-500/5 text-fuchsia-400/50" },
 };
 
 function weaponClassChip(cls?: string): { label: string; active: string; inactive: string } | undefined {
@@ -152,7 +161,7 @@ function ammoFamilyChip(ammoType?: string): { label: string; className: string }
     return { label: "Las", className: "border-red-500/60 bg-red-500/10 text-red-300" };
   }
   if (normalized === "bolt" || normalized.includes("bolt")) {
-    return { label: "Bolt", className: "border-amber-500/60 bg-amber-500/10 text-amber-300" };
+    return { label: "Bolt", className: colourAmberFaint };
   }
   if (normalized === "solid projectile" || normalized.includes("bullet")) {
     return {
@@ -167,10 +176,10 @@ function ammoFamilyChip(ammoType?: string): { label: string; className: string }
     return { label: "Flame", className: "border-orange-500/60 bg-orange-500/10 text-orange-300" };
   }
   if (normalized === "melta" || normalized.includes("melta")) {
-    return { label: "Melta", className: "border-violet-500/60 bg-violet-500/10 text-violet-300" };
+    return { label: "Melta", className: colourViolet };
   }
   if (normalized === "plasma" || normalized.includes("plasma")) {
-    return { label: "Plasma", className: "border-sky-500/60 bg-sky-500/10 text-sky-300" };
+    return { label: "Plasma", className: colourSky };
   }
   if (normalized === "launcher" || normalized.includes("grenade")) {
     return { label: "Launcher", className: "border-yellow-500/60 bg-yellow-500/10 text-yellow-300" };
@@ -179,13 +188,13 @@ function ammoFamilyChip(ammoType?: string): { label: string; className: string }
     return { label: "Primitive", className: "border-stone-500/70 bg-stone-700/30 text-stone-300" };
   }
   if (normalized === "shuriken" || normalized.includes("shuriken")) {
-    return { label: "Shuriken", className: "border-fuchsia-500/60 bg-fuchsia-500/10 text-fuchsia-300" };
+    return { label: "Shuriken", className: colourFuchsia };
   }
   if (normalized === "power cell" || normalized.includes("power cell")) {
-    return { label: "Power Cell", className: "border-cyan-500/60 bg-cyan-500/10 text-cyan-300" };
+    return { label: "Power Cell", className: colourCyan };
   }
   if (normalized === "exotic" || normalized.includes("exotic")) {
-    return { label: "Exotic", className: "border-teal-500/60 bg-teal-500/10 text-teal-300" };
+    return { label: "Exotic", className: colourTealLight };
   }
   return { label: ammoType, className: "border-slate-500/70 bg-slate-700/40 text-slate-300" };
 }
@@ -440,11 +449,11 @@ export function RangedPicker({
                 <Chip size="sm" className={f.className}>{f.label}</Chip>
               ) : null; })()}
               {item.status === "draft" && (
-                <Chip size="sm" className="border-amber-400/40 bg-amber-500/10 text-amber-300">
+                <Chip size="sm" className={colourAmberFaint}>
                   Draft
                 </Chip>
               )}
-              <Chip size="sm" className="border-fuchsia-500/50 bg-fuchsia-500/10 text-fuchsia-300">
+              <Chip size="sm" className={colourFuchsia}>
                 Custom
               </Chip>
               <ItemMetaChips weight={data.weight} value={data.value} availability={data.availability} source={data.source} />
@@ -1441,7 +1450,7 @@ export function RangedCard({
               </span>
             )}
             {integrated && (
-              <Chip size="sm" className="border-violet-500/60 bg-violet-500/10 text-violet-300">
+              <Chip size="sm" className={colourViolet}>
                 Integrated
               </Chip>
             )}
@@ -1630,7 +1639,7 @@ export function RangedCard({
                       className="rounded bg-amber-900/20 border border-amber-700/30 px-2.5 lg:px-3 py-2 lg:py-2.5 flex items-center justify-between gap-2"
                     >
                       <span className="text-xs lg:text-sm text-slate-200 truncate">{g.name}</span>
-                      <Chip size="sm" className="border-amber-700/50 bg-amber-500/10 text-amber-400">
+                      <Chip size="sm" className={colourArcheotech}>
                         Archeotech
                       </Chip>
                     </div>

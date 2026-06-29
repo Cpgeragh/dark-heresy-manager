@@ -3,7 +3,9 @@
 import { useState } from "react";
 import type { ArcheotechItem } from "../../../types/Character";
 import { ARCHEOTECH_REFERENCE } from "../../../data/reference/archeotechReference";
-import { uiActionButtonCompact, uiSection, uiTextBody, uiTextLabel, uiTextMuted } from "../../../ui/editableStyles";
+import { uiSection, uiTextBody, uiTextLabel, uiTextMuted } from "../../../ui/editableStyles";
+import { uiActionButtonCompact } from "../../../ui/buttonStyles";
+import { colourStacks } from "../../../ui/colourTokens";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { StatChip } from "../weapons/weaponShared";
@@ -120,7 +122,7 @@ export function ItemCard({
             <div className="mt-1 flex flex-wrap gap-1.5">
               {(item.locations ?? []).length > 0 && <StatChip label="Location" value={locationLabel(item.locations!)} />}
               {item.ap !== undefined && <StatChip label="AP" value={String(item.ap)} />}
-              {item.stacks && <Chip className="border-sky-700/50 bg-sky-500/10 text-sky-400">Stacks</Chip>}
+              {item.stacks && <Chip className={colourStacks}>Stacks</Chip>}
             </div>
           )}
           {item.type === "Force Field" && item.protectionRating !== undefined && (

@@ -18,7 +18,8 @@ import { PickerModal } from "../../ui/PickerModal";
 import { InfoModal } from "../../components/InfoModal";
 import { TALENT_DESCRIPTIONS } from "../../data/talentDescriptions";
 import { sourceColour } from "../../ui/sourceStyles";
-import { powerGroupActiveColour, psychicDisciplineColour, psyRatingGlow } from "./psychicStyles";
+import { disciplineColours, psyRatingGlow } from "./psychicStyles";
+import { colourActiveSky, colourActiveRose } from "../../ui/colourTokens";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -95,7 +96,7 @@ function PowerPicker({
             discipline === d
               ? d === "All"
                 ? "border-slate-400 bg-slate-700 text-slate-100"
-                : psychicDisciplineColour(d)
+                : disciplineColours[d] ?? disciplineColours.default
               : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
           ].join(" ")}
         >
@@ -142,7 +143,7 @@ function PowerPicker({
             <Chip className={`bg-slate-800/40 font-code ${sourceColour(ref.source)}`}>
               {ref.source}
             </Chip>
-            <Chip className={psychicDisciplineColour(ref.discipline)}>
+            <Chip className={disciplineColours[ref.discipline] ?? disciplineColours.default}>
               {ref.discipline}
             </Chip>
             <span className="font-code">PT {ref.threshold}</span>
@@ -294,7 +295,7 @@ function CustomPowerForm({
             Discipline <span className="text-red-400">*</span>
           </label>
           {target === "minor" ? (
-            <Chip className={`w-fit ${psychicDisciplineColour("Minor")}`}>
+            <Chip className={`w-fit ${disciplineColours.Minor}`}>
               Minor
             </Chip>
           ) : (
@@ -307,7 +308,7 @@ function CustomPowerForm({
                   className={[
                     "text-xs lg:text-sm px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border transition",
                     discipline === d
-                      ? `${psychicDisciplineColour(d)} font-semibold`
+                      ? `${disciplineColours[d] ?? disciplineColours.default} font-semibold`
                       : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
                   ].join(" ")}
                 >
@@ -710,7 +711,7 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
                   className={[
                     "px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm transition",
                     active
-                      ? `${psychicDisciplineColour(d)} font-semibold`
+                      ? `${disciplineColours[d] ?? disciplineColours.default} font-semibold`
                       : editable
                         ? "border-slate-500 text-slate-100 hover:bg-slate-800"
                         : "border-slate-700 text-slate-500 opacity-60 cursor-not-allowed",
@@ -747,7 +748,7 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
                 className={[
                   "rounded-md px-3 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm font-semibold transition border",
                   active
-                    ? powerGroupActiveColour(group)
+                    ? (group === "minor" ? colourActiveSky : colourActiveRose)
                     : "border-transparent text-slate-400 hover:bg-slate-800 hover:text-slate-200",
                 ].join(" ")}
               >

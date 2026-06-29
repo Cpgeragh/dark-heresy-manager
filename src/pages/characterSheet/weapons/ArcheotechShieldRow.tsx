@@ -2,7 +2,9 @@
 
 import type { ArcheotechItem } from "../../../types/Character";
 import { Chip } from "../../../ui/Chip";
-import { uiActionButtonCompact, uiSection } from "../../../ui/editableStyles";
+import { uiSection } from "../../../ui/editableStyles";
+import { uiActionButtonCompact } from "../../../ui/buttonStyles";
+import { colourArcheotech } from "../../../ui/colourTokens";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { EquipToggle, StatChip } from "./weaponShared";
 import { locationLabel } from "../ArmourTab/armourHelpers";
@@ -38,9 +40,7 @@ export function ArcheotechShieldRow({
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-sm lg:text-base font-semibold text-slate-200">{item.name}</span>
           {highlightAsArcheotech && (
-            <Chip
-              className="border-amber-700/50 bg-amber-500/10 text-amber-400 shrink-0"
-            >
+            <Chip className={`${colourArcheotech} shrink-0`}>
               Archeotech
             </Chip>
           )}
