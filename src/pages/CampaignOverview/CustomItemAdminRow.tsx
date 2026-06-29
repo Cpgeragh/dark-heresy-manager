@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import type { CampaignCustomItem, CustomItemCategory, CustomItemStatus } from "../../types/CustomItems";
-import { uiSection, uiActionButtonCompact } from "../../ui/editableStyles";
+import { uiSection } from "../../ui/editableStyles";
+import { uiActionButtonCompact } from "../../ui/buttonStyles";
 import { ConfirmInline } from "../../ui/ConfirmInline";
 import { useToast } from "../../components/Toast";
 import {

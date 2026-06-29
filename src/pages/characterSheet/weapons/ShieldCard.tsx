@@ -9,7 +9,6 @@ import { SHIELD_REFERENCE, type ShieldRef } from "../../../data/reference/weapon
 import {
   editableInputClass,
   editableTextareaClass,
-  uiActionButtonCompact,
   uiSection,
   uiSectionHeader,
   uiTextBody,
@@ -17,6 +16,7 @@ import {
   uiTextMuted,
   uiTextPlaceholder,
 } from "../../../ui/editableStyles";
+import { uiActionButtonCompact } from "../../../ui/buttonStyles";
 import { Button } from "../../../ui/Button";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";

@@ -4,11 +4,11 @@ import { useState, useCallback, useMemo } from "react";
 import type { ExperienceBlock, RankAdvances } from "../../types/Character";
 import {
   uiSection,
-  uiActionButtonCompact,
   readOnlyBadgeClass,
   uiTextMuted,
   uiTextPlaceholder,
 } from "../../ui/editableStyles";
+import { uiActionButtonCompact } from "../../ui/buttonStyles";
 import { Button } from "../../ui/Button";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { useXpProposals } from "../../hooks/useXpProposals";
