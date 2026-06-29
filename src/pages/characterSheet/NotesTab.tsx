@@ -19,7 +19,7 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
 
   return (
     <div className="space-y-3">
-      {!editable && <span className={readOnlyBadgeClass()}>Read-only</span>}
+      {!editable && <span className={readOnlyBadgeClass}>Read-only</span>}
 
       {!editable ? (
         <div className={uiSection}>
