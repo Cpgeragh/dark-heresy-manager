@@ -133,7 +133,7 @@ export function ExperienceTab({
     <div className="space-y-6">
       {!isDM && (
         <div>
-          <span className={readOnlyBadgeClass()}>Read-only</span>
+          <span className={readOnlyBadgeClass}>Read-only</span>
         </div>
       )}
 

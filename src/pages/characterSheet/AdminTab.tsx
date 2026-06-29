@@ -88,7 +88,7 @@ export function AdminTab({
       <section className={uiSection}>
         <div className="flex items-center justify-between mb-2">
           <h3 className="font-semibold text-red-300">Ownership</h3>
-          <span className={readOnlyBadgeClass()}>DM authority</span>
+          <span className={readOnlyBadgeClass}>DM authority</span>
         </div>
 
         <div className="space-y-1 text-sm lg:text-base">
@@ -183,7 +183,7 @@ export function AdminTab({
       <section className={uiSection}>
         <div className="flex items-center justify-between mb-2">
           <h3 className="font-semibold">Claim History</h3>
-          <span className={readOnlyBadgeClass()}>Immutable</span>
+          <span className={readOnlyBadgeClass}>Immutable</span>
         </div>
 
         {claimLog.length === 0 && (

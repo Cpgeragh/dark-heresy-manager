@@ -1,6 +1,7 @@
 // src/ui/editableStyles.ts
 
 import { chipClassName } from "./Chip";
+import { colourInactive } from "./colourTokens";
 
 /**
  * Shared UI styles and tokens.
@@ -66,16 +67,6 @@ export const uiSectionHeader =
 /** Standard section card — bright border, semi-transparent background. */
 export const uiSection = "rounded-lg border border-slate-500 bg-slate-900/60 p-3 lg:p-4";
 
-/** Shared red outline action button styles. */
-const uiActionButtonBase =
-  "inline-flex items-center justify-center gap-1 rounded border border-red-500 text-red-500 font-semibold leading-none whitespace-nowrap hover:bg-red-500/10 transition";
-
-export const uiActionButton =
-  `${uiActionButtonBase} text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5`;
-
-export const uiActionButtonCompact =
-  `${uiActionButtonBase} text-xs lg:text-sm px-2 py-0.5`;
-
 export const uiCell = "rounded border border-slate-500 bg-slate-950/60";
 
 /** Label inside a compact stat cell (tight column grids: Quick View, bonuses, movement). */
@@ -106,8 +97,18 @@ export const uiTextPlaceholder = "text-slate-500 italic";
 /** Tiny uppercase label text used beside values. */
 export const uiTextLabel = "text-[10px] lg:text-xs text-sky-300/85 uppercase tracking-wide";
 
+export const uiTextError = "text-red-400 text-sm lg:text-base";
+export const uiTextGMNote = "text-amber-400/70 italic";
+
+// ─── Form tokens ──────────────────────────────────────────────────────────────
+
+export const uiFormLabel = "text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100";
+export const uiFormLabelSecondary = "block text-xs lg:text-sm text-slate-400 mb-1";
+export const uiInfoModalWrapper = "inline-flex items-center -translate-y-[1.4px]";
+export const uiSubheading = "text-xs lg:text-sm font-semibold text-slate-100 uppercase tracking-wide";
+export const uiItemName = "text-sm lg:text-base font-medium text-slate-200";
+export const uiCardTitle = "text-sm lg:text-base font-semibold text-slate-200";
+
 // ──────────────────────────────────────────────────────────────────────────────
 
-export function readOnlyBadgeClass() {
-  return chipClassName({ className: "border-slate-600 bg-slate-800/40 text-slate-300" });
-}
+export const readOnlyBadgeClass = chipClassName({ className: colourInactive });
