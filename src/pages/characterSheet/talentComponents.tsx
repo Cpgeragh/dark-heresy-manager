@@ -10,11 +10,11 @@ import { TRAIT_LIST } from "../../data/traitData";
 import type { SkillSource } from "../../types/SkillSource";
 import {
   editableInputClass,
-  uiActionButtonCompact,
   uiSection,
   uiTextMuted,
   uiTextPlaceholder,
 } from "../../ui/editableStyles";
+import { uiActionButtonCompact } from "../../ui/buttonStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { Button } from "../../ui/Button";
 import { Chip } from "../../ui/Chip";

@@ -1,7 +1,8 @@
 // src/pages/characterSheet/GearTab/ConsumableRow.tsx
 
 import type { ConsumableItem } from "../../../types/Character";
-import { uiActionButtonCompact, uiSection, uiTextBody, uiTextLabel } from "../../../ui/editableStyles";
+import { uiSection, uiTextBody, uiTextLabel } from "../../../ui/editableStyles";
+import { uiActionButtonCompact } from "../../../ui/buttonStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import { InfoModal } from "../../../components/InfoModal";

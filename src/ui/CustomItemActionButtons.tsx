@@ -1,7 +1,7 @@
 // src/ui/CustomItemActionButtons.tsx
 
 import type { CampaignCustomItem } from "../types/CustomItems";
-import { uiActionButtonCompact } from "./editableStyles";
+import { uiActionButtonCompact } from "./buttonStyles";
 
 interface Props {
   libraryItem: CampaignCustomItem;
