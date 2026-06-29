@@ -14,8 +14,12 @@ export const colourInactive = "border-slate-600 bg-slate-800/40 text-slate-300";
 export const colourSky = "border-sky-500/50 bg-sky-500/10 text-sky-300";
 export const colourRose = "border-rose-500/50 bg-rose-500/10 text-rose-300";
 export const colourCyan = "border-cyan-500/50 bg-cyan-500/10 text-cyan-300";
+// Darker border, brighter text — used for the cybernetic weapon chip in CyberneticWeaponCard.
+export const colourCyanDark = "border-cyan-700/50 bg-cyan-500/10 text-cyan-400";
 export const colourPurple = "bg-purple-700/40 border-purple-500 text-purple-300";
 export const colourTeal = "bg-teal-900/40 border-teal-700/50 text-teal-300";
+// Lighter variant — used for weapon class and ammo-type chips (Basic weapon class, Exotic ammo).
+export const colourTealLight = "border-teal-500/50 bg-teal-500/10 text-teal-300";
 export const colourOrange = "border-orange-500/50 bg-orange-500/10 text-orange-300";
 export const colourActiveSky = "border-sky-400 bg-sky-600/80 text-white shadow-sm shadow-sky-950/50";
 export const colourActiveRose = "border-rose-400 bg-rose-600/80 text-white shadow-sm shadow-rose-950/50";

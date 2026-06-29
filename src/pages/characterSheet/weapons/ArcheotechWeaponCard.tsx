@@ -8,13 +8,14 @@ import { ARCHEOTECH_REFERENCE } from "../../../data/reference/archeotechReferenc
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import {
-  uiActionButtonCompact,
   uiSection,
   uiTextBody,
   uiTextLabel,
   uiTextMuted,
   uiTextPlaceholder,
 } from "../../../ui/editableStyles";
+import { uiActionButtonCompact } from "../../../ui/buttonStyles";
+import { colourArcheotech } from "../../../ui/colourTokens";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 import { InfoModal } from "../../../components/InfoModal";
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
@@ -103,7 +104,7 @@ export function ArcheotechWeaponCard({
           <div className="flex items-center gap-2 flex-wrap">
             <p className="text-sm lg:text-base font-semibold text-slate-200">{item.name}</p>
             {highlightAsArcheotech && (
-              <Chip size="sm" className="border-amber-700/50 bg-amber-500/10 text-amber-400 uppercase tracking-wide shrink-0">
+              <Chip size="sm" className={`${colourArcheotech} uppercase tracking-wide shrink-0`}>
                 Archeotech
               </Chip>
             )}

@@ -11,11 +11,12 @@ import type { WeaponUpgradeRef } from "../../../data/reference/weaponUpgradeRefe
 import { PickerModal } from "../../../ui/PickerModal";
 import { formatWeightForDisplay } from "../../../ui/weightFormat";
 import {
-  uiActionButtonCompact,
   uiTextBody,
   uiTextLabel,
   uiTextPlaceholder,
 } from "../../../ui/editableStyles";
+import { uiActionButtonCompact } from "../../../ui/buttonStyles";
+import { colourEmerald, colourMeta } from "../../../ui/colourTokens";
 
 export const WEAPON_QUALITY_OPTIONS = Object.keys(WEAPON_SPECIAL_RULES).sort((a, b) =>
   a.localeCompare(b)
@@ -240,7 +241,7 @@ export function EquipToggle({
 }) {
   if (!editable) {
     return equipped ? (
-      <Chip size="sm" className="border-emerald-500/60 bg-emerald-500/10 text-emerald-300 uppercase tracking-wide shrink-0">
+      <Chip size="sm" className={`${colourEmerald} uppercase tracking-wide shrink-0`}>
         {labels.equipped}
       </Chip>
     ) : null;
@@ -347,7 +348,7 @@ export function UpgradeCard({
         )}
       </div>
       <div className="flex flex-wrap gap-1 mt-1">
-        <Chip size="sm" className="border-slate-700 bg-slate-900/40 text-slate-300">
+        <Chip size="sm" className={colourMeta}>
           <span className="leading-none">{"\u2696"}</span>
           <span className="leading-none">{displayedWeightModifier}</span>
         </Chip>
@@ -415,7 +416,7 @@ export function UpgradePicker({
               {upgrade.name}
             </span>
             <div className="flex items-center gap-1.5 text-xs lg:text-sm shrink-0">
-              <Chip className="border-slate-700 bg-slate-900/40 text-slate-300">
+              <Chip className={colourMeta}>
                 <span className="leading-none">{"\u2696"}</span>
                 <span className="leading-none">{formatWeightModifier(upgrade.weightModifier)}</span>
               </Chip>

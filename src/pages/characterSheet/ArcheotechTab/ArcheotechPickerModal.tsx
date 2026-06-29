@@ -6,6 +6,7 @@ import {
   type ArcheotechRef,
 } from "../../../data/reference/archeotechReference";
 import { editableInputClass, uiTextBody, uiTextMuted } from "../../../ui/editableStyles";
+import { colourAmberFaint } from "../../../ui/colourTokens";
 import { AVAILABILITY_OPTIONS } from "./archeotechConstants";
 import { PickerModal } from "../../../ui/PickerModal";
 import { Button } from "../../../ui/Button";
@@ -180,7 +181,7 @@ export function ArcheotechPickerModal({
                 {item.name}
               </span>
               {item.status === "draft" && (
-                <span className="shrink-0 rounded border border-amber-400/40 bg-amber-500/10 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-amber-300">
+                <span className={`shrink-0 rounded border px-1.5 py-0.5 text-[10px] uppercase tracking-wide ${colourAmberFaint}`}>
                   Draft
                 </span>
               )}

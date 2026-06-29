@@ -9,7 +9,6 @@ import { GRENADE_REFERENCE, type GrenadeRef } from "../../../data/reference/weap
 import {
   editableInputClass,
   editableTextareaClass,
-  uiActionButtonCompact,
   uiSection,
   uiSectionHeader,
   uiTextBody,
@@ -18,6 +17,8 @@ import {
   uiTextPlaceholder,
   uiTextSubtle,
 } from "../../../ui/editableStyles";
+import { uiActionButtonCompact } from "../../../ui/buttonStyles";
+import { colourAmberFaint, colourEmerald } from "../../../ui/colourTokens";
 import { Button } from "../../../ui/Button";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
@@ -622,11 +623,11 @@ export function GrenadeCard({
             )}
           </div>
           <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
-            <Chip size="sm" className="border-amber-500/60 bg-amber-500/10 text-amber-300">
+            <Chip size="sm" className={colourAmberFaint}>
               Thrown
             </Chip>
             {isEquipped && (
-              <Chip size="sm" className="border-emerald-500/60 bg-emerald-500/10 text-emerald-300">
+              <Chip size="sm" className={colourEmerald}>
                 {equippedCount} ready
               </Chip>
             )}

@@ -18,7 +18,7 @@ import { CustomItemForm } from "./CustomItemForm";
 import { CustomConsumableForm } from "./CustomConsumableForm";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { uiTextPlaceholder } from "../../../ui/editableStyles";
-import { powerGroupActiveColour } from "../psychicStyles";
+import { colourActiveSky, colourActiveRose } from "../../../ui/colourTokens";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
 import {
   archiveCustomItem,
@@ -590,7 +590,7 @@ export function GearTab({
                 className={[
                   "rounded-md px-3 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm font-semibold transition border",
                   active
-                    ? powerGroupActiveColour(section === "items" ? "minor" : "major")
+                    ? (section === "items" ? colourActiveSky : colourActiveRose)
                     : "border-transparent text-slate-400 hover:bg-slate-800 hover:text-slate-200",
                 ].join(" ")}
               >
