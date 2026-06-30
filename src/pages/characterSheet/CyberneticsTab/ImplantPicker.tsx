@@ -13,7 +13,7 @@ import { InfoModal } from "../../../components/InfoModal";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { editableInputClass, uiTextBody, uiTextLabel, uiTextMuted } from "../../../ui/editableStyles";
-import { colourAmberFaint } from "../../../ui/colourTokens";
+import { StatusBadge } from "../../../ui/StatusBadge";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import { CRAFTSMANSHIP_STYLE, LOCATION_DISPLAY } from "./cyberneticsConstants";
 import {
@@ -376,11 +376,7 @@ export function ImplantPicker({
             <span className={`text-sm lg:text-base font-medium text-slate-200 truncate ${editable ? "group-hover:text-white" : ""}`}>
               {item.name}
             </span>
-            {item.status === "draft" && (
-              <span className={`shrink-0 rounded border px-1.5 py-0.5 text-[10px] uppercase tracking-wide ${colourAmberFaint}`}>
-                Draft
-              </span>
-            )}
+            <StatusBadge status={item.status} />
             {item.data.notes && (
               <span className="inline-flex items-center -translate-y-[1.4px]" onClick={(e) => e.stopPropagation()}>
                 <InfoModal
