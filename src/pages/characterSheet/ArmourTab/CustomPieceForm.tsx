@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { ArmourCraftsmanship, ArmourLocationKey, ArmourQuality, WornArmourPiece } from "../../../types/Character";
-import { editableInputClass, uiSection, uiSectionHeader } from "../../../ui/editableStyles";
+import { editableInputClass, uiSection, uiSectionHeader, uiFormLabel } from "../../../ui/editableStyles";
+import { uiPickerBackButton } from "../../../ui/buttonStyles";
 import { Button } from "../../../ui/Button";
 import { PickerModal } from "../../../ui/PickerModal";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
@@ -121,7 +122,7 @@ export function CustomPieceForm({
             </Button>
             <button
               onClick={onCancel}
-              className="px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100"
+              className={uiPickerBackButton}
             >
               Cancel
             </button>
@@ -133,7 +134,7 @@ export function CustomPieceForm({
         <p className={uiSectionHeader}>Identity</p>
         <div className={uiSection + " space-y-3"}>
           <div>
-            <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+            <label className={uiFormLabel}>
               Name <span className="text-red-500">*</span>
             </label>
             <input
@@ -149,7 +150,7 @@ export function CustomPieceForm({
         <p className={uiSectionHeader}>Craftsmanship</p>
         <div className={uiSection + " space-y-3"}>
           <div className="space-y-1">
-            <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+            <label className={uiFormLabel}>
               Craftsmanship <span className="text-red-500">*</span>
             </label>
             <div className="grid grid-cols-4 gap-1.5">
@@ -175,7 +176,7 @@ export function CustomPieceForm({
         <p className={uiSectionHeader}>Stats</p>
         <div className={uiSection + " space-y-3"}>
           <div className="space-y-1">
-            <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+            <label className={uiFormLabel}>
               Locations <span className="text-red-500">*</span>
             </label>
             <div className="grid grid-cols-3 gap-1.5">
@@ -197,7 +198,7 @@ export function CustomPieceForm({
             </div>
           </div>
           <div className="space-y-1">
-            <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+            <label className={uiFormLabel}>
               Qualities
             </label>
             <div className="grid grid-cols-3 gap-1.5">
@@ -220,7 +221,7 @@ export function CustomPieceForm({
           </div>
 
           <div>
-            <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+            <label className={uiFormLabel}>
               AP <span className="text-red-500">*</span>
             </label>
             <input
@@ -238,7 +239,7 @@ export function CustomPieceForm({
         <div className={uiSection + " space-y-3"}>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+              <label className={uiFormLabel}>
                 Weight <span className="text-red-500">*</span>
               </label>
               <input
@@ -250,7 +251,7 @@ export function CustomPieceForm({
               />
             </div>
             <div>
-              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+              <label className={uiFormLabel}>
                 Cost <span className="text-red-500">*</span>
               </label>
               <input
@@ -262,7 +263,7 @@ export function CustomPieceForm({
               />
             </div>
             <div className="col-span-2">
-              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+              <label className={uiFormLabel}>
                 Availability <span className="text-red-500">*</span>
               </label>
               <select

@@ -13,7 +13,7 @@ export const uiIconButton =
   "w-7 h-7 lg:w-8 lg:h-8 flex items-center justify-center rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 text-slate-300 text-lg lg:text-xl leading-none transition";
 
 export const uiPickerBackButton =
-  "px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100";
+  "px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100 transition";
 
 export const uiDismissButton =
   "text-slate-400 hover:text-slate-200 text-lg leading-none";

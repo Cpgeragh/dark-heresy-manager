@@ -5,7 +5,7 @@ import { InfoModal } from "../../../components/InfoModal";
 import { CONSUMABLES_REFERENCE, type ConsumableRef } from "../../../data/reference/consumablesReference";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
-import { uiTextBody } from "../../../ui/editableStyles";
+import { uiTextBody, uiItemName, uiInfoModalWrapper } from "../../../ui/editableStyles";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { StatusBadge } from "../../../ui/StatusBadge";
 
@@ -64,12 +64,12 @@ export function ConsumablePicker({
           className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
           <div className="flex items-center gap-1.5 min-w-0">
-            <span className={`text-sm lg:text-base font-medium text-slate-200 truncate ${editable ? "group-hover:text-white" : ""}`}>
+            <span className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}>
               {item.name}
             </span>
             <StatusBadge status={item.status} />
             {item.data.description && (
-              <span className="inline-flex items-center -translate-y-[1.4px]" onClick={(e) => e.stopPropagation()}>
+              <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
                 <InfoModal
                   title={item.name}
                   content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{item.data.description}</p>}
@@ -96,11 +96,11 @@ export function ConsumablePicker({
           className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
           <div className="flex items-center gap-1.5 min-w-0">
-            <span className={`text-sm lg:text-base font-medium text-slate-200 truncate ${editable ? "group-hover:text-white" : ""}`}>
+            <span className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}>
               {ref.name}
             </span>
             {ref.description && (
-              <span className="inline-flex items-center -translate-y-[1.4px]" onClick={(e) => e.stopPropagation()}>
+              <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
                 <InfoModal
                   title={ref.name}
                   content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ref.description}</p>}

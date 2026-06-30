@@ -6,7 +6,8 @@ import { GEAR_REFERENCE, type GearRef } from "../../../data/reference/gearRefere
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
 import { Button } from "../../../ui/Button";
-import { editableInputClass, uiTextBody } from "../../../ui/editableStyles";
+import { editableInputClass, uiTextBody, uiFormLabel, uiInfoModalWrapper, uiItemName, uiTextGMNote } from "../../../ui/editableStyles";
+import { uiPickerBackButton } from "../../../ui/buttonStyles";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { StatusBadge } from "../../../ui/StatusBadge";
@@ -112,7 +113,7 @@ export function GearPicker({
           </p>
 
           <div className="space-y-1">
-            <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+            <label className={uiFormLabel}>
               Cost (Thrones) <span className="text-red-400">*</span>
             </label>
             <input
@@ -130,7 +131,7 @@ export function GearPicker({
 
           {pendingNeedsRarity && (
             <div className="space-y-1">
-              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+              <label className={uiFormLabel}>
                 Rarity <span className="text-red-400">*</span>
               </label>
               <select
@@ -151,7 +152,7 @@ export function GearPicker({
           <div className="flex gap-2 pt-1">
             <button
               onClick={() => setPending(null)}
-              className="px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100 transition"
+              className={uiPickerBackButton}
             >
               Back
             </button>
@@ -171,12 +172,12 @@ export function GearPicker({
             className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
           >
             <div className="flex items-center gap-1.5 min-w-0">
-              <span className={`text-sm lg:text-base font-medium text-slate-200 truncate ${editable ? "group-hover:text-white" : ""}`}>
+              <span className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}>
                 {item.name}
               </span>
               <StatusBadge status={item.status} />
               {item.data.description && (
-                <span className="inline-flex items-center -translate-y-[1.4px]" onClick={(e) => e.stopPropagation()}>
+                <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
                   <InfoModal
                     title={item.name}
                     content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{item.data.description}</p>}
@@ -226,7 +227,7 @@ export function GearPicker({
               source={ref.source}
             />
             {isVariableMeta(ref.value) && (
-              <span className="text-amber-400/70 italic">Cost assigned on add</span>
+              <span className={uiTextGMNote}>Cost assigned on add</span>
             )}
           </div>
         </div>

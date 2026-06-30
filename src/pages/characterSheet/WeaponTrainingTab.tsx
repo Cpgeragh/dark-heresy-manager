@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import type { WeaponTrainingBlock, WeaponTrainingTalentId } from "../../types/Character";
 import { WEAPON_TRAINING_GROUPS } from "../../data/weaponTrainingData";
 import { Chip } from "../../ui/Chip";
-import { uiTextPlaceholder } from "../../ui/editableStyles";
+import { uiFormLabel, uiTextPlaceholder } from "../../ui/editableStyles";
 
 interface WeaponTrainingTabProps {
   weaponTraining: WeaponTrainingBlock;
@@ -63,7 +63,7 @@ export function WeaponTrainingTab({ weaponTraining, editable, onUpdate }: Weapon
     <div className="space-y-6 text-center">
       {WEAPON_TRAINING_GROUPS.map((group) => (
         <div key={group.label}>
-          <p className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100 mb-1.5">
+          <p className={`${uiFormLabel} mb-1.5`}>
             {group.label}
           </p>
           <div className="flex flex-wrap justify-center gap-1.5">
@@ -92,7 +92,7 @@ export function WeaponTrainingTab({ weaponTraining, editable, onUpdate }: Weapon
       ))}
 
       <div>
-        <p className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100 mb-1.5">
+        <p className={`${uiFormLabel} mb-1.5`}>
           <span className="relative">
             Exotic Weapon Training
             {editable && (

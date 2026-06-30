@@ -5,7 +5,7 @@ import { Chip } from "../../../ui/Chip";
 import { sourceColour } from "../../../ui/sourceStyles";
 import type { PsychicPower } from "../../../types/Character";
 import { disciplineColours } from "../psychicStyles";
-import { uiTextBody, uiTextPlaceholder, uiTextSubtle } from "../../../ui/editableStyles";
+import { uiTextBody, uiTextPlaceholder, uiTextSubtle, uiInfoModalWrapper } from "../../../ui/editableStyles";
 import { uiActionButtonCompact } from "../../../ui/buttonStyles";
 
 interface PowerCardProps {
@@ -76,7 +76,7 @@ export function PowerCard({ power, editable, onRemove, onEdit }: PowerCardProps)
           <p className="font-medium text-slate-100">
             {power.name || <span className={uiTextPlaceholder}>Unnamed power</span>}
           </p>
-          <span className="inline-flex items-center -translate-y-[1.4px]">
+          <span className={uiInfoModalWrapper}>
             <InfoModal title={power.name || "Psychic Power"} content={modalContent} hideTitle />
           </span>
         </div>

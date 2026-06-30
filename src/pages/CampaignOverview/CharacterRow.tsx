@@ -7,6 +7,7 @@ import { useClaimLogs } from "../../hooks/useClaimLogs";
 import { useToast } from "../../components/Toast";
 import { cloneCharacter, deleteCharacter } from "../../services/characterService";
 import { uiSection } from "../../ui/editableStyles";
+import { uiIconButton } from "../../ui/buttonStyles";
 import { Button } from "../../ui/Button";
 import { ConfirmInline } from "../../ui/ConfirmInline";
 import type { ClaimLogAction } from "../../utils/claimLog";
@@ -141,7 +142,7 @@ export function CharacterRow({
                 <p className="text-sm lg:text-base font-semibold text-slate-100 text-center flex-1">History</p>
                 <button
                   onClick={() => setShowHistory(false)}
-                  className="w-7 h-7 lg:w-8 lg:h-8 flex items-center justify-center rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 text-slate-300 text-lg lg:text-xl leading-none transition"
+                  className={uiIconButton}
                 >
                   ×
                 </button>

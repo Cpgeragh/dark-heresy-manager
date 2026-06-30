@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { useToast } from "../../components/Toast";
 import { createSession } from "../../services/sessionService";
+import { uiFormLabelSecondary } from "../../ui/editableStyles";
 
 interface Character {
   id: string;
@@ -64,7 +65,7 @@ export function SessionForm({ campaignId, characters, onClose }: Props) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs lg:text-sm text-slate-400 mb-1">Date</label>
+          <label className={uiFormLabelSecondary}>Date</label>
           <input
             type="date"
             value={date}
@@ -73,7 +74,7 @@ export function SessionForm({ campaignId, characters, onClose }: Props) {
           />
         </div>
         <div>
-          <label className="block text-xs lg:text-sm text-slate-400 mb-1">XP Awarded</label>
+          <label className={uiFormLabelSecondary}>XP Awarded</label>
           <input
             type="number"
             min={0}
@@ -85,7 +86,7 @@ export function SessionForm({ campaignId, characters, onClose }: Props) {
       </div>
 
       <div>
-        <label className="block text-xs lg:text-sm text-slate-400 mb-1">Summary</label>
+        <label className={uiFormLabelSecondary}>Summary</label>
         <textarea
           value={summary}
           onChange={(e) => setSummary(e.target.value)}
@@ -95,7 +96,7 @@ export function SessionForm({ campaignId, characters, onClose }: Props) {
       </div>
 
       <div>
-        <label className="block text-xs lg:text-sm text-slate-400 mb-1">DM Notes (private)</label>
+        <label className={uiFormLabelSecondary}>DM Notes (private)</label>
         <textarea
           value={dmNotes}
           onChange={(e) => setDmNotes(e.target.value)}

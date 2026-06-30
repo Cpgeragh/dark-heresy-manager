@@ -28,7 +28,8 @@ import {
 } from "../services/campaignService";
 import { archiveCampaign, restoreCampaign } from "../utils/campaignActions";
 import type { CampaignWithId, CharacterListItem } from "../types/Firestore";
-import { uiSection, editableInputClass } from "../ui/editableStyles";
+import { uiSection, editableInputClass, uiTextError, uiCardTitle } from "../ui/editableStyles";
+import { uiIconButton } from "../ui/buttonStyles";
 import { Button } from "../ui/Button";
 import { PageShell } from "../ui/PageShell";
 import { Panel } from "../ui/Panel";
@@ -402,10 +403,10 @@ function QrModal({ title, url, onClose }: { title: string; url: string; onClose:
       <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
         <div className="bg-slate-900 border border-slate-700 rounded-xl p-5 lg:p-6 flex flex-col gap-4 pointer-events-auto max-w-xs lg:max-w-sm w-full mx-4">
           <div className="flex items-center justify-between">
-            <span className="text-sm lg:text-base font-semibold text-slate-200">{title}</span>
+            <span className={uiCardTitle}>{title}</span>
             <button
               onClick={onClose}
-              className="w-7 h-7 lg:w-8 lg:h-8 flex items-center justify-center rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 text-slate-300 text-lg lg:text-xl leading-none transition"
+              className={uiIconButton}
             >
               ×
             </button>
@@ -498,13 +499,13 @@ function ClaimCharacterSection({ effectiveUserId }: { effectiveUserId: string })
         <ClaimForm code={code} onCodeChange={setCode} onSubmit={handleLookup} loading={loading} />
 
         {error && (
-          <p className="text-red-400 text-sm lg:text-base border border-red-600 bg-red-900/20 p-2 lg:p-3 rounded">
+          <p className={`${uiTextError} border border-red-600 bg-red-900/20 p-2 lg:p-3 rounded`}>
             {error}
           </p>
         )}
 
         {claimError && (
-          <p className="text-red-400 text-sm lg:text-base border border-red-600 bg-red-900/20 p-2 lg:p-3 rounded">
+          <p className={`${uiTextError} border border-red-600 bg-red-900/20 p-2 lg:p-3 rounded`}>
             {claimError}
           </p>
         )}

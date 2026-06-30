@@ -12,7 +12,8 @@ import { Button } from "../../../ui/Button";
 import { InfoModal } from "../../../components/InfoModal";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
-import { editableInputClass, uiTextBody, uiTextLabel, uiTextMuted } from "../../../ui/editableStyles";
+import { editableInputClass, uiTextBody, uiTextLabel, uiTextMuted, uiFormLabel, uiInfoModalWrapper, uiItemName, uiCardTitle, uiTextGMNote } from "../../../ui/editableStyles";
+import { uiPickerBackButton, uiDismissButton } from "../../../ui/buttonStyles";
 import { StatusBadge } from "../../../ui/StatusBadge";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import { CRAFTSMANSHIP_STYLE, LOCATION_DISPLAY } from "./cyberneticsConstants";
@@ -164,8 +165,8 @@ export function ImplantPicker({
         className="m-auto w-[calc(100%-2rem)] max-w-md lg:max-w-lg bg-slate-900 border border-slate-500 rounded-xl shadow-2xl p-0 backdrop:bg-black/50 backdrop:backdrop-blur-sm"
       >
         <div className="flex items-center justify-between px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
-          <h3 className="text-sm lg:text-base font-semibold text-slate-200">Assigned Cost</h3>
-          <button onClick={resetPicker} className="text-slate-400 hover:text-slate-200 text-lg leading-none">×</button>
+          <h3 className={uiCardTitle}>Assigned Cost</h3>
+          <button onClick={resetPicker} className={uiDismissButton}>×</button>
         </div>
 
         <div className="px-4 lg:px-5 py-4 lg:py-5 space-y-4">
@@ -175,7 +176,7 @@ export function ImplantPicker({
           </p>
 
           <div className="space-y-1">
-            <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+            <label className={uiFormLabel}>
               Cost (Thrones) <span className="text-red-400">*</span>
             </label>
             <input
@@ -193,7 +194,7 @@ export function ImplantPicker({
 
           {pendingNeedsRarity && (
             <div className="space-y-1">
-              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+              <label className={uiFormLabel}>
                 Rarity <span className="text-red-400">*</span>
               </label>
               <select
@@ -211,7 +212,7 @@ export function ImplantPicker({
         </div>
 
         <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700 flex gap-2">
-          <button onClick={resetPicker} className="px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100">
+          <button onClick={resetPicker} className={uiPickerBackButton}>
             Back
           </button>
           <Button className="flex-1" onClick={confirmCost} disabled={!canConfirmCost}>
@@ -246,8 +247,8 @@ export function ImplantPicker({
         className="m-auto w-[calc(100%-2rem)] max-w-md lg:max-w-lg bg-slate-900 border border-slate-500 rounded-xl shadow-2xl p-0 backdrop:bg-black/50 backdrop:backdrop-blur-sm"
       >
         <div className="flex items-center justify-between px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
-          <h3 className="text-sm lg:text-base font-semibold text-slate-200">{selected.name}</h3>
-          <button onClick={resetPicker} className="text-slate-400 hover:text-slate-200 text-lg leading-none">×</button>
+          <h3 className={uiCardTitle}>{selected.name}</h3>
+          <button onClick={resetPicker} className={uiDismissButton}>×</button>
         </div>
 
         <div className="px-4 lg:px-5 py-4 lg:py-5 space-y-3">
@@ -266,7 +267,7 @@ export function ImplantPicker({
         </div>
 
         <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700">
-          <button onClick={resetPicker} className="px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100">
+          <button onClick={resetPicker} className={uiPickerBackButton}>
             Back
           </button>
         </div>
@@ -286,8 +287,8 @@ export function ImplantPicker({
         className="m-auto w-[calc(100%-2rem)] max-w-md lg:max-w-lg bg-slate-900 border border-slate-500 rounded-xl shadow-2xl p-0 backdrop:bg-black/50 backdrop:backdrop-blur-sm"
       >
         <div className="flex items-center justify-between px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
-          <h3 className="text-sm lg:text-base font-semibold text-slate-200">{selected.name}</h3>
-          <button onClick={resetPicker} className="text-slate-400 hover:text-slate-200 text-lg leading-none">×</button>
+          <h3 className={uiCardTitle}>{selected.name}</h3>
+          <button onClick={resetPicker} className={uiDismissButton}>×</button>
         </div>
 
         <div className="px-4 lg:px-5 py-4 lg:py-5 space-y-4">
@@ -326,7 +327,7 @@ export function ImplantPicker({
         </div>
 
         <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700 flex gap-2">
-          <button onClick={resetPicker} className="px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100">
+          <button onClick={resetPicker} className={uiPickerBackButton}>
             Back
           </button>
           <Button
@@ -373,12 +374,12 @@ export function ImplantPicker({
           }`}
         >
           <div className="flex items-center gap-1.5 min-w-0">
-            <span className={`text-sm lg:text-base font-medium text-slate-200 truncate ${editable ? "group-hover:text-white" : ""}`}>
+            <span className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}>
               {item.name}
             </span>
             <StatusBadge status={item.status} />
             {item.data.notes && (
-              <span className="inline-flex items-center -translate-y-[1.4px]" onClick={(e) => e.stopPropagation()}>
+              <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
                 <InfoModal
                   title={item.name}
                   content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{item.data.notes}</p>}
@@ -411,11 +412,11 @@ export function ImplantPicker({
           }`}
         >
           <div className="flex items-center gap-1.5 min-w-0">
-            <span className={`text-sm lg:text-base font-medium text-slate-200 truncate ${editable ? "group-hover:text-white" : ""}`}>
+            <span className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}>
               {ref.name}
             </span>
             {(ref.notes || ref.poor || ref.common || ref.good) && (
-              <span className="inline-flex items-center -translate-y-[1.4px]" onClick={(e) => e.stopPropagation()}>
+              <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
                 <InfoModal title={ref.name} content={implantInfo(ref)} />
               </span>
             )}
@@ -428,7 +429,7 @@ export function ImplantPicker({
               source={ref.source}
             />
             {(isVariableMeta(ref.value) || isVariableMeta(ref.availability)) && (
-              <span className="text-amber-400/70 italic">Cost assigned on add</span>
+              <span className={uiTextGMNote}>Cost assigned on add</span>
             )}
           </div>
         </div>

@@ -13,8 +13,10 @@ import {
   uiTextLabel,
   uiTextMuted,
   uiTextPlaceholder,
+  uiCardTitle,
+  uiInfoModalWrapper,
 } from "../../../ui/editableStyles";
-import { uiActionButtonCompact } from "../../../ui/buttonStyles";
+import { uiActionButtonCompact, uiExpandButton } from "../../../ui/buttonStyles";
 import { colourArcheotech } from "../../../ui/colourTokens";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 import { InfoModal } from "../../../components/InfoModal";
@@ -100,9 +102,9 @@ export function ArcheotechWeaponCard({
     <div className={containerClass}>
       {/* Header — always visible */}
       <div className="flex items-start justify-between gap-2">
-        <button className="flex-1 min-w-0 text-left" onClick={() => setExpanded((e) => !e)}>
+        <button className={uiExpandButton} onClick={() => setExpanded((e) => !e)}>
           <div className="flex items-center gap-2 flex-wrap">
-            <p className="text-sm lg:text-base font-semibold text-slate-200">{item.name}</p>
+            <p className={uiCardTitle}>{item.name}</p>
             {highlightAsArcheotech && (
               <Chip size="sm" className={`${colourArcheotech} uppercase tracking-wide shrink-0`}>
                 Archeotech
@@ -180,7 +182,7 @@ export function ArcheotechWeaponCard({
               <span className={uiTextLabel}>Qualities</span>
               <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>{hasRules ? specialRules : "-"}</span>
               {ruleNamesInLookup.length > 0 && (
-                <span className="inline-flex items-center -translate-y-[1.4px]">
+                <span className={uiInfoModalWrapper}>
                   <InfoModal
                     title={`${item.name} Qualities`}
                     content={<SpecialRulesContent rules={specialRules ?? ""} />}
@@ -191,7 +193,7 @@ export function ArcheotechWeaponCard({
             <div className="flex items-center gap-1.5">
               <span className={uiTextLabel}>Rules</span>
               {description ? (
-                <span className="inline-flex items-center -translate-y-[1.4px]">
+                <span className={uiInfoModalWrapper}>
                   <InfoModal
                     title={`${item.name} Rules`}
                     content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{description}</p>}
@@ -204,7 +206,7 @@ export function ArcheotechWeaponCard({
             {showMishaps && (
               <div className="flex items-center gap-1.5">
                 <span className={uiTextLabel}>Mishaps</span>
-                <span className="inline-flex items-center -translate-y-[1.4px]">
+                <span className={uiInfoModalWrapper}>
                   <InfoModal title="Explosive Mishaps" content={EXPLOSIVE_MISHAPS_CONTENT} />
                 </span>
               </div>

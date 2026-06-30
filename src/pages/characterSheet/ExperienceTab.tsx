@@ -7,6 +7,7 @@ import {
   readOnlyBadgeClass,
   uiTextMuted,
   uiTextPlaceholder,
+  uiFormLabel,
 } from "../../ui/editableStyles";
 import { uiActionButtonCompact } from "../../ui/buttonStyles";
 import { Button } from "../../ui/Button";
@@ -143,7 +144,7 @@ export function ExperienceTab({
         <div className={uiSection + " text-center"}>
           {isDM ? (
             <label className="flex flex-col gap-0.5">
-              <span className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+              <span className={uiFormLabel}>
                 Total XP
               </span>
               <input
@@ -225,7 +226,7 @@ export function ExperienceTab({
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <div>
-                <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                <label className={uiFormLabel}>
                   Rank
                 </label>
                 <select
@@ -245,7 +246,7 @@ export function ExperienceTab({
               </div>
 
               <div className="col-span-2 sm:col-span-2">
-                <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                <label className={uiFormLabel}>
                   Advance Name
                 </label>
                 <input
@@ -258,7 +259,7 @@ export function ExperienceTab({
               </div>
 
               <div>
-                <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                <label className={uiFormLabel}>
                   XP Cost
                 </label>
                 <input
@@ -272,7 +273,7 @@ export function ExperienceTab({
             </div>
 
             <div>
-              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+              <label className={uiFormLabel}>
                 Notes (optional)
               </label>
               <input

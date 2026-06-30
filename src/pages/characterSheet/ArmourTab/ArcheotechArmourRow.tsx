@@ -2,7 +2,7 @@
 
 import type { ArcheotechItem } from "../../../types/Character";
 import { Chip } from "../../../ui/Chip";
-import { uiSection } from "../../../ui/editableStyles";
+import { uiSection, uiCardTitle } from "../../../ui/editableStyles";
 import { uiActionButtonCompact } from "../../../ui/buttonStyles";
 import { colourArcheotech, colourStacks } from "../../../ui/colourTokens";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
@@ -35,7 +35,7 @@ export function ArcheotechArmourRow({ item, editable, onToggleEquip, onRemove, h
     >
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-sm lg:text-base font-semibold text-slate-200">{item.name}</span>
+          <span className={uiCardTitle}>{item.name}</span>
         </div>
         <div className="mt-1 flex flex-wrap gap-1.5">
           {locations.length > 0 && <StatChip label="Location" value={locationLabel(locations)} />}

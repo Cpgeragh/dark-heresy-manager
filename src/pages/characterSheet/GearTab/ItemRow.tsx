@@ -2,7 +2,7 @@
 
 import type { GearItem } from "../../../types/Character";
 import { GEAR_REFERENCE } from "../../../data/reference/gearReference";
-import { uiSection } from "../../../ui/editableStyles";
+import { uiSection, uiItemName, uiInfoModalWrapper } from "../../../ui/editableStyles";
 import { uiActionButtonCompact } from "../../../ui/buttonStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { InfoModal } from "../../../components/InfoModal";
@@ -50,12 +50,12 @@ export function ItemRow({
       <div className="flex items-start gap-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <p className="text-sm lg:text-base font-medium text-slate-200">{item.name}</p>
+            <p className={uiItemName}>{item.name}</p>
             {libraryItem && (
               <StatusBadge status={libraryItem.status} />
             )}
             {hasDesc && (
-              <span className="inline-flex items-center -translate-y-[1.4px]">
+              <span className={uiInfoModalWrapper}>
                 <InfoModal
                   title={item.name}
                   content={

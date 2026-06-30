@@ -5,7 +5,7 @@ import { InfoModal } from "../../../components/InfoModal";
 import { DRUGS_REFERENCE, type DrugRef } from "../../../data/reference/drugsReference";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
-import { uiTextBody, uiTextLabel, uiTextMuted } from "../../../ui/editableStyles";
+import { uiTextBody, uiTextLabel, uiTextMuted, uiItemName, uiInfoModalWrapper } from "../../../ui/editableStyles";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { StatusBadge } from "../../../ui/StatusBadge";
 
@@ -101,13 +101,13 @@ export function DrugPicker({
           }`}
         >
           <div className="flex items-center gap-1.5 min-w-0">
-            <span className="text-sm lg:text-base font-medium text-slate-200 group-hover:text-white truncate">
+            <span className={`${uiItemName} group-hover:text-white truncate`}>
               {item.name}
             </span>
             <StatusBadge status={item.status} />
             {item.data.notes && (
               <span
-                className="inline-flex items-center -translate-y-[1.4px]"
+                className={uiInfoModalWrapper}
                 onClick={(e) => e.stopPropagation()}
               >
                 <InfoModal
@@ -143,12 +143,12 @@ export function DrugPicker({
             }`}
           >
             <div className="flex items-center gap-1.5 min-w-0">
-              <span className="text-sm lg:text-base font-medium text-slate-200 group-hover:text-white truncate">
+              <span className={`${uiItemName} group-hover:text-white truncate`}>
                 {ref.name}
               </span>
               {hasInfo && (
                 <span
-                  className="inline-flex items-center -translate-y-[1.4px]"
+                  className={uiInfoModalWrapper}
                   onClick={(e) => e.stopPropagation()}
                 >
                   <InfoModal title={ref.name} content={drugInfoContent(ref)} />

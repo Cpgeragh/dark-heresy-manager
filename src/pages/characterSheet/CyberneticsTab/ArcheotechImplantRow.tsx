@@ -2,7 +2,7 @@
 
 import type { ArcheotechItem } from "../../../types/Character";
 import { Chip } from "../../../ui/Chip";
-import { uiSection, uiTextLabel } from "../../../ui/editableStyles";
+import { uiSection, uiTextLabel, uiCardTitle } from "../../../ui/editableStyles";
 import { uiActionButtonCompact } from "../../../ui/buttonStyles";
 import { colourArcheotech } from "../../../ui/colourTokens";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
@@ -27,7 +27,7 @@ export function ArcheotechImplantRow({ item, editable, onRemove, highlightAsArch
     <div className={`${containerClass} flex items-start gap-3`}>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-sm lg:text-base font-semibold text-slate-200">{item.name}</span>
+          <span className={uiCardTitle}>{item.name}</span>
           {highlightAsArcheotech && (
             <Chip className={`${colourArcheotech} shrink-0`}>
               Archeotech

@@ -13,6 +13,7 @@ import {
   uiSection,
   uiTextMuted,
   uiTextPlaceholder,
+  uiInfoModalWrapper,
 } from "../../ui/editableStyles";
 import { uiActionButtonCompact } from "../../ui/buttonStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
@@ -220,7 +221,7 @@ export function TalentPickerModal({
                 </span>
                 {(TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]) && (
                   <span
-                    className="inline-flex items-center -translate-y-[1.4px]"
+                    className={uiInfoModalWrapper}
                     onClick={(e) => e.stopPropagation()}
                   >
                     <InfoModal
@@ -282,7 +283,7 @@ export function EntryCard({ entry, editable, onRemove }: EntryCardProps) {
             </Chip>
           ))}
           {description && (
-            <span className="inline-flex items-center -translate-y-[1.4px]">
+            <span className={uiInfoModalWrapper}>
               <InfoModal title={entry.name} content={description} />
             </span>
           )}

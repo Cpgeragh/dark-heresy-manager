@@ -9,6 +9,7 @@ import { InfoModal } from "../../../components/InfoModal";
 import { SKILL_DESCRIPTIONS } from "../../../data/skillDescriptions";
 import { Stepper } from "../../../components/Stepper";
 import { uiActionButtonCompact } from "../../../ui/buttonStyles";
+import { uiInfoModalWrapper } from "../../../ui/editableStyles";
 import { colourPurple, colourTeal } from "../../../ui/colourTokens";
 
 interface SkillRowProps {
@@ -64,7 +65,7 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc, previewMode
             <div className="flex items-center gap-1.5 flex-1 min-w-0">
               <span className="text-sm font-semibold text-slate-100 truncate">{skill.name}</span>
               {SKILL_DESCRIPTIONS[skill.name] && (
-                <span className="inline-flex items-center -translate-y-[1.4px]" onClick={(e) => e.stopPropagation()}>
+                <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
                   <InfoModal title={skill.name} content={SKILL_DESCRIPTIONS[skill.name]} />
                 </span>
               )}
@@ -104,7 +105,7 @@ export function SkillRow({ skill, editable, updateLevel, updateMisc, previewMode
           <div className="flex items-center gap-1.5 flex-1 min-w-0">
             <span className="text-base font-semibold text-slate-100 truncate">{skill.name}</span>
             {SKILL_DESCRIPTIONS[skill.name] && (
-              <span className="inline-flex items-center -translate-y-[1.4px]" onClick={(e) => e.stopPropagation()}>
+              <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
                 <InfoModal title={skill.name} content={SKILL_DESCRIPTIONS[skill.name]} />
               </span>
             )}

@@ -1,7 +1,7 @@
 // src/components/ManageModal.tsx
 
 import { useState, useCallback } from "react";
-import { uiSection, uiSectionHeader } from "../ui/editableStyles";
+import { uiSection, uiSectionHeader, uiSubheading } from "../ui/editableStyles";
 import { COPY_FEEDBACK_DURATION } from "../constants/ui";
 
 interface ManageModalProps {
@@ -64,7 +64,7 @@ export function ManageModal({
         {/* Recovery Code */}
         {recoveryCode && (
           <section className={uiSection + " space-y-2"}>
-            <p className="text-xs lg:text-sm font-semibold text-slate-100 uppercase tracking-wide">
+            <p className={uiSubheading}>
               Recovery Code
             </p>
             <div className="flex items-center gap-2">
@@ -85,7 +85,7 @@ export function ManageModal({
         {/* Export */}
         {canExport && (
           <section className={uiSection + " space-y-2"}>
-            <p className="text-xs lg:text-sm font-semibold text-slate-100 uppercase tracking-wide">
+            <p className={uiSubheading}>
               Character Data
             </p>
             <button
@@ -103,7 +103,7 @@ export function ManageModal({
         {/* Release */}
         {canPlayerRelease && (
           <section className={uiSection + " space-y-2"}>
-            <p className="text-xs lg:text-sm font-semibold text-slate-100 uppercase tracking-wide">
+            <p className={uiSubheading}>
               Release Character
             </p>
             <p className="text-xs lg:text-sm text-slate-400">Unlinks this character from your account.</p>

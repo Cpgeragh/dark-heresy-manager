@@ -5,6 +5,7 @@
 import { useState } from "react";
 import { saveFirstName } from "../services/profileService";
 import { Button } from "../ui/Button";
+import { uiTextError } from "../ui/editableStyles";
 
 interface Props {
   effectiveUserId: string;
@@ -60,7 +61,7 @@ export default function NameGate({ effectiveUserId }: Props) {
           {busy ? "Saving…" : "Continue"}
         </Button>
 
-        {error && <p className="mt-4 text-red-400 text-sm lg:text-base text-center">{error}</p>}
+        {error && <p className={`mt-4 ${uiTextError} text-center`}>{error}</p>}
       </div>
     </div>
   );

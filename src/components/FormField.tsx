@@ -1,6 +1,7 @@
 // src/components/FormField.tsx
 
 import { useCallback } from "react";
+import { uiFormLabel } from "../ui/editableStyles";
 
 interface FormFieldProps {
   label: string;
@@ -53,7 +54,7 @@ export function FormField({
 
   return (
     <label htmlFor={inputId} className={`flex flex-col gap-0.5 ${className}`}>
-      <span className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">{label}</span>
+      <span className={uiFormLabel}>{label}</span>
 
       {type === "textarea" ? (
         <textarea

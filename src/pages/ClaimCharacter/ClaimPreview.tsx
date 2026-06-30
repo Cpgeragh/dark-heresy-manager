@@ -3,6 +3,7 @@
 import { useCallback } from "react";
 import type { OwnershipState } from "./hooks/useRecoveryLookup";
 import type { CharacterDocument, CampaignDocument } from "../../types/Firestore";
+import { uiTextError } from "../../ui/editableStyles";
 
 interface ClaimPreviewProps {
   character: CharacterDocument & { id: string };
@@ -24,14 +25,14 @@ export function ClaimPreview({ character, campaign, ownership, onClaim }: ClaimP
 
       case "claimed-by-other":
         return (
-          <p className="text-red-400 text-sm lg:text-base">
+          <p className={uiTextError}>
             This character is already claimed by another player.
           </p>
         );
 
       case "locked":
         return (
-          <p className="text-red-400 text-sm lg:text-base">This character is claimed and locked by the DM.</p>
+          <p className={uiTextError}>This character is claimed and locked by the DM.</p>
         );
     }
   }

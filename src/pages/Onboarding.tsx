@@ -11,7 +11,7 @@ import { db } from "../firebase";
 import { rotateRecoveryCode, reclaimIdentity, getRecoveryCode } from "../services/identityService";
 import { formatRecoveryCodeInput } from "../utils/recoveryCode";
 import { saveFirstName } from "../services/profileService";
-import { uiSectionHeader } from "../ui/editableStyles";
+import { uiSectionHeader, uiTextError } from "../ui/editableStyles";
 import { Button } from "../ui/Button";
 
 type Step = "welcome" | "show-code" | "reclaim";
@@ -151,7 +151,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
                 {busy ? "Setting up…" : "Get Started"}
               </Button>
 
-              {error && <p className="text-red-400 text-sm lg:text-base text-center">{error}</p>}
+              {error && <p className={`${uiTextError} text-center`}>{error}</p>}
 
               <button
                 onClick={() => { setError(null); goToStep("reclaim"); }}
@@ -206,7 +206,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
                 {busy ? "Reclaiming…" : "Reclaim Identity"}
               </Button>
 
-              {error && <p className="text-red-400 text-sm lg:text-base text-center">{error}</p>}
+              {error && <p className={`${uiTextError} text-center`}>{error}</p>}
             </div>
           </div>
         )}
