@@ -1,7 +1,7 @@
 // src/pages/CampaignOverview/CustomItemAdminRow.tsx
 
 import { useState } from "react";
-import type { CampaignCustomItem, CustomItemCategory, CustomItemStatus } from "../../types/CustomItems";
+import type { CampaignCustomItem, CustomItemCategory } from "../../types/CustomItems";
 import { uiSection } from "../../ui/editableStyles";
 import { uiActionButtonCompact } from "../../ui/buttonStyles";
 import { ConfirmInline } from "../../ui/ConfirmInline";
@@ -14,6 +14,7 @@ import {
   removeAllCustomItemCopies,
   restoreCustomItem,
 } from "../../services/customItemService";
+import { StatusBadge } from "../../ui/StatusBadge";
 
 const CATEGORY_LABELS: Record<CustomItemCategory, string> = {
   gear: "Gear",
@@ -24,20 +25,6 @@ const CATEGORY_LABELS: Record<CustomItemCategory, string> = {
   armour: "Armour",
   archeotech: "Archeotech",
 };
-
-function StatusBadge({ status }: { status: CustomItemStatus }) {
-  const cls =
-    status === "published"
-      ? "border-emerald-400/40 bg-emerald-500/10 text-emerald-300"
-      : status === "draft"
-        ? "border-amber-400/40 bg-amber-500/10 text-amber-300"
-        : "border-slate-500/50 bg-slate-800 text-slate-300";
-  return (
-    <span className={`shrink-0 rounded border px-1.5 py-0.5 text-[10px] uppercase tracking-wide ${cls}`}>
-      {status}
-    </span>
-  );
-}
 
 type BusyAction = "publish" | "archive" | "updateAll" | "restore" | "delete";
 

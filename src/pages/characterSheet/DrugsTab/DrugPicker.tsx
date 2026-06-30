@@ -7,6 +7,7 @@ import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
 import { uiTextBody, uiTextLabel, uiTextMuted } from "../../../ui/editableStyles";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
+import { StatusBadge } from "../../../ui/StatusBadge";
 
 function drugInfoContent(ref: DrugRef) {
   return (
@@ -103,11 +104,7 @@ export function DrugPicker({
             <span className="text-sm lg:text-base font-medium text-slate-200 group-hover:text-white truncate">
               {item.name}
             </span>
-            {item.status === "draft" && (
-              <span className="shrink-0 rounded border border-amber-400/40 bg-amber-500/10 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-amber-300">
-                Draft
-              </span>
-            )}
+            <StatusBadge status={item.status} />
             {item.data.notes && (
               <span
                 className="inline-flex items-center -translate-y-[1.4px]"

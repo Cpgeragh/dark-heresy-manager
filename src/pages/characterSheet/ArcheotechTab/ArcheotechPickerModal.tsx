@@ -6,7 +6,7 @@ import {
   type ArcheotechRef,
 } from "../../../data/reference/archeotechReference";
 import { editableInputClass, uiTextBody, uiTextMuted } from "../../../ui/editableStyles";
-import { colourAmberFaint } from "../../../ui/colourTokens";
+import { StatusBadge } from "../../../ui/StatusBadge";
 import { AVAILABILITY_OPTIONS } from "./archeotechConstants";
 import { PickerModal } from "../../../ui/PickerModal";
 import { Button } from "../../../ui/Button";
@@ -180,11 +180,7 @@ export function ArcheotechPickerModal({
               >
                 {item.name}
               </span>
-              {item.status === "draft" && (
-                <span className={`shrink-0 rounded border px-1.5 py-0.5 text-[10px] uppercase tracking-wide ${colourAmberFaint}`}>
-                  Draft
-                </span>
-              )}
+              <StatusBadge status={item.status} />
               {item.data.description && (
                 <span className="inline-flex items-center -translate-y-[1.4px]" onClick={(e) => e.stopPropagation()}>
                   <InfoModal

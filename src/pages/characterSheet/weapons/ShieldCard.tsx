@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import type { ShieldItem } from "../../../types/Character";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
+import { StatusBadge } from "../../../ui/StatusBadge";
 import { SHIELD_REFERENCE, type ShieldRef } from "../../../data/reference/weaponReference";
 import {
   editableInputClass,
@@ -104,18 +105,7 @@ export function ShieldPicker({
               >
                 {item.name}
               </span>
-              <span
-                className={[
-                  "shrink-0 rounded border px-1.5 py-0.5 text-[10px] uppercase tracking-wide",
-                  item.status === "published"
-                    ? "border-emerald-400/40 bg-emerald-500/10 text-emerald-300"
-                    : item.status === "draft"
-                      ? "border-amber-400/40 bg-amber-500/10 text-amber-300"
-                      : "border-slate-500/50 bg-slate-800 text-slate-300",
-                ].join(" ")}
-              >
-                {item.status}
-              </span>
+              <StatusBadge status={item.status} />
             </div>
             <div className="flex flex-wrap gap-1.5 mt-1">
               <StatChip size="sm" label="AP" value={String(data.ap)} />
@@ -476,18 +466,7 @@ export function ShieldCard({
           <div className="flex flex-wrap items-center gap-1.5">
             <p className="text-sm lg:text-base font-semibold text-slate-200">{item.name}</p>
             {libraryItem && (
-              <span
-                className={[
-                  "shrink-0 rounded border px-1.5 py-0.5 text-[10px] uppercase tracking-wide",
-                  libraryItem.status === "published"
-                    ? "border-emerald-400/40 bg-emerald-500/10 text-emerald-300"
-                    : libraryItem.status === "draft"
-                      ? "border-amber-400/40 bg-amber-500/10 text-amber-300"
-                      : "border-slate-500/50 bg-slate-800 text-slate-300",
-                ].join(" ")}
-              >
-                {libraryItem.status}
-              </span>
+              <StatusBadge status={libraryItem.status} />
             )}
           </div>
           <p className={`text-xs lg:text-sm ${uiTextMuted}`}>

@@ -9,6 +9,7 @@ import { Button } from "../../../ui/Button";
 import { editableInputClass, uiTextBody } from "../../../ui/editableStyles";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
+import { StatusBadge } from "../../../ui/StatusBadge";
 
 interface Props {
   editable?: boolean;
@@ -173,11 +174,7 @@ export function GearPicker({
               <span className={`text-sm lg:text-base font-medium text-slate-200 truncate ${editable ? "group-hover:text-white" : ""}`}>
                 {item.name}
               </span>
-              {item.status === "draft" && (
-                <span className="shrink-0 rounded border border-amber-400/40 bg-amber-500/10 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-amber-300">
-                  Draft
-                </span>
-              )}
+              <StatusBadge status={item.status} />
               {item.data.description && (
                 <span className="inline-flex items-center -translate-y-[1.4px]" onClick={(e) => e.stopPropagation()}>
                   <InfoModal
