@@ -5,7 +5,8 @@ import {
   ARCHEOTECH_REFERENCE,
   type ArcheotechRef,
 } from "../../../data/reference/archeotechReference";
-import { editableInputClass, uiTextBody, uiTextMuted } from "../../../ui/editableStyles";
+import { editableInputClass, uiTextBody, uiTextMuted, uiFormLabel, uiInfoModalWrapper, uiItemName, uiTextGMNote } from "../../../ui/editableStyles";
+import { uiPickerBackButton } from "../../../ui/buttonStyles";
 import { StatusBadge } from "../../../ui/StatusBadge";
 import { AVAILABILITY_OPTIONS } from "./archeotechConstants";
 import { PickerModal } from "../../../ui/PickerModal";
@@ -117,7 +118,7 @@ export function ArcheotechPickerModal({
           </p>
 
           <div className="space-y-1">
-            <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+            <label className={uiFormLabel}>
               Cost (Thrones) <span className="text-red-400">*</span>
             </label>
             <input
@@ -134,7 +135,7 @@ export function ArcheotechPickerModal({
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+            <label className={uiFormLabel}>
               Rarity <span className="text-red-400">*</span>
             </label>
             <select
@@ -154,7 +155,7 @@ export function ArcheotechPickerModal({
           <div className="flex gap-2 pt-1">
             <button
               onClick={() => setPending(null)}
-              className="px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100 transition"
+              className={uiPickerBackButton}
             >
               Back
             </button>
@@ -176,13 +177,13 @@ export function ArcheotechPickerModal({
           >
             <div className="flex items-center gap-1.5 min-w-0">
               <span
-                className={`text-sm lg:text-base font-medium text-slate-200 truncate ${editable ? "group-hover:text-white" : ""}`}
+                className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}
               >
                 {item.name}
               </span>
               <StatusBadge status={item.status} />
               {item.data.description && (
-                <span className="inline-flex items-center -translate-y-[1.4px]" onClick={(e) => e.stopPropagation()}>
+                <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
                   <InfoModal
                     title={item.name}
                     content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{item.data.description}</p>}
@@ -211,12 +212,12 @@ export function ArcheotechPickerModal({
           >
             <div className="flex items-center gap-1.5 min-w-0">
               <span
-                className={`text-sm lg:text-base font-medium text-slate-200 truncate ${editable ? "group-hover:text-white" : ""}`}
+                className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}
               >
                 {ref.name}
               </span>
               {ref.description && (
-                <span className="inline-flex items-center -translate-y-[1.4px]" onClick={(e) => e.stopPropagation()}>
+                <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
                   <InfoModal
                     title={ref.name}
                     content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ref.description}</p>}
@@ -234,7 +235,7 @@ export function ArcheotechPickerModal({
                 source={ref.source}
               />
               {needsGmInput(ref) && (
-                <span className="text-amber-400/70 italic">GM determines cost &amp; availability</span>
+                <span className={uiTextGMNote}>GM determines cost &amp; availability</span>
               )}
             </div>
           </button>

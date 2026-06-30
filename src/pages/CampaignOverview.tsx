@@ -18,7 +18,7 @@ import { createNewCharacter, importCharacter } from "../services/characterServic
 import { validateCharacterName } from "../utils/validation";
 import { useToast } from "../components/Toast";
 import { IMPORTANT_TOAST_DURATION } from "../constants/ui";
-import { editableInputClass } from "../ui/editableStyles";
+import { editableInputClass, uiSubheading } from "../ui/editableStyles";
 import { Button } from "../ui/Button";
 import { PageShell } from "../ui/PageShell";
 import { Panel } from "../ui/Panel";
@@ -90,7 +90,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
     }
     setKebabContent(
       <div className="space-y-2">
-        <p className="text-xs lg:text-sm font-semibold text-slate-100 uppercase tracking-wide">Character Data</p>
+        <p className={uiSubheading}>Character Data</p>
         <label className="block px-2 lg:px-3 py-1 lg:py-1.5 text-xs lg:text-sm rounded bg-slate-700 border border-slate-500 text-slate-100 hover:bg-slate-600 cursor-pointer">
           Import JSON
           <input type="file" accept=".json" className="hidden" onChange={handleImport} />

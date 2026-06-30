@@ -18,6 +18,7 @@ import {
   uiCell,
   uiCellLabel,
   uiCellValueSm,
+  uiInfoModalWrapper,
 } from "../../ui/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
 
@@ -138,7 +139,7 @@ export function CharacteristicsTab({
       <div>
         <div className="flex items-center gap-2 mb-2">
           <SectionHeader>Movement</SectionHeader>
-          <span className="inline-flex items-center -translate-y-[1.4px]">
+          <span className={uiInfoModalWrapper}>
             <InfoModal
               title="Movement"
               content={

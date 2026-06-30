@@ -17,8 +17,13 @@ import {
   uiTextMuted,
   uiTextPlaceholder,
   uiTextSubtle,
+  uiFormLabel,
+  uiInfoModalWrapper,
+  uiItemName,
+  uiCardTitle,
+  uiExpandButton,
 } from "../../../ui/editableStyles";
-import { uiActionButtonCompact } from "../../../ui/buttonStyles";
+import { uiActionButtonCompact, uiPickerBackButton } from "../../../ui/buttonStyles";
 import { colourAmberFaint, colourEmerald } from "../../../ui/colourTokens";
 import { Button } from "../../../ui/Button";
 import { Chip } from "../../../ui/Chip";
@@ -160,7 +165,7 @@ export function GrenadePicker({
           >
             <div className="flex items-center gap-1.5">
               <span
-                className={`text-sm lg:text-base font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}
+                className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}
               >
                 {item.name}
               </span>
@@ -178,7 +183,7 @@ export function GrenadePicker({
               <div className="flex items-center gap-1.5 mt-1">
                 <span className={uiTextLabel}>Qualities</span>
                 <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>{data.specialRules}</span>
-                <span className="inline-flex items-center -translate-y-[1.4px]">
+                <span className={uiInfoModalWrapper}>
                   <InfoModal title={`${data.name} Qualities`} content={<SpecialRulesContent rules={data.specialRules} />} />
                 </span>
               </div>
@@ -186,7 +191,7 @@ export function GrenadePicker({
             {data.description && (
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className={uiTextLabel}>Rules</span>
-                <span className="inline-flex items-center -translate-y-[1.4px]">
+                <span className={uiInfoModalWrapper}>
                   <InfoModal title={data.name} content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{data.description}</p>} />
                 </span>
               </div>
@@ -203,7 +208,7 @@ export function GrenadePicker({
           className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
           <span
-            className={`text-sm lg:text-base font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}
+            className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}
           >
             {ref.name}
           </span>
@@ -219,7 +224,7 @@ export function GrenadePicker({
             <div className="flex items-center gap-1.5 mt-1">
               <span className={uiTextLabel}>Qualities</span>
               <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>{ref.specialRules}</span>
-              <span className="inline-flex items-center -translate-y-[1.4px]">
+              <span className={uiInfoModalWrapper}>
                 <InfoModal title={`${ref.name} Qualities`} content={<SpecialRulesContent rules={ref.specialRules} />} />
               </span>
             </div>
@@ -227,7 +232,7 @@ export function GrenadePicker({
           {ref.description && (
             <div className="flex items-center gap-1.5 mt-0.5">
               <span className={uiTextLabel}>Rules</span>
-              <span className="inline-flex items-center -translate-y-[1.4px]">
+              <span className={uiInfoModalWrapper}>
                 <InfoModal title={ref.name} content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ref.description}</p>} />
               </span>
             </div>
@@ -376,7 +381,7 @@ export function CustomGrenadeForm({
             </Button>
             <button
               onClick={onCancel}
-              className="px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100"
+              className={uiPickerBackButton}
             >
               Cancel
             </button>
@@ -389,13 +394,13 @@ export function CustomGrenadeForm({
         <div className={uiSection + " space-y-3"}>
           <div className="grid grid-cols-2 gap-2">
             <div className="col-span-2">
-              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+              <label className={uiFormLabel}>
                 Name <span className="text-red-500">*</span>
               </label>
               <input value={name} onChange={(event) => setName(event.target.value)} className={editableInputClass(true) + " mt-0.5"} />
             </div>
             <div>
-              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+              <label className={uiFormLabel}>
                 Type <span className="text-red-500">*</span>
               </label>
               <select value={type} onChange={(event) => setType(event.target.value as typeof type)} className={editableInputClass(true) + " mt-0.5"}>
@@ -404,7 +409,7 @@ export function CustomGrenadeForm({
               </select>
             </div>
             <div>
-              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+              <label className={uiFormLabel}>
                 Quantity <span className="text-red-500">*</span>
               </label>
               <input type="text" inputMode="numeric" value={quantity} onChange={(event) => setQuantity(sanitizePositiveIntegerInput(event.target.value))} placeholder="1+" className={editableInputClass(true) + " mt-0.5"} />
@@ -453,7 +458,7 @@ export function CustomGrenadeForm({
           </div>
           {damageMode === "damage" && (
             <div>
-              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+              <label className={uiFormLabel}>
                 Damage <span className="text-red-500">*</span>
               </label>
               <div className="grid grid-cols-3 gap-2 mt-0.5">
@@ -466,7 +471,7 @@ export function CustomGrenadeForm({
             </div>
           )}
           <div>
-            <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+            <label className={uiFormLabel}>
               Pen <span className="text-red-500">*</span>
             </label>
             <input type="text" inputMode="numeric" value={pen} onChange={(event) => setPen(sanitizeNonNegativeIntegerInput(event.target.value))} className={editableInputClass(true) + " mt-0.5"} />
@@ -477,19 +482,19 @@ export function CustomGrenadeForm({
         <div className={uiSection + " space-y-3"}>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+              <label className={uiFormLabel}>
                 Weight <span className="text-red-500">*</span>
               </label>
               <input type="text" inputMode="decimal" value={weight} onChange={(event) => setWeight(sanitizeWeightInput(event.target.value))} className={editableInputClass(true) + " mt-0.5"} />
             </div>
             <div>
-              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+              <label className={uiFormLabel}>
                 Cost <span className="text-red-500">*</span>
               </label>
               <input type="text" inputMode="numeric" value={value} onChange={(event) => setValue(sanitizeMoneyInput(event.target.value))} className={editableInputClass(true) + " mt-0.5"} />
             </div>
             <div className="col-span-2">
-              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+              <label className={uiFormLabel}>
                 Availability <span className="text-red-500">*</span>
               </label>
               <select value={availability} onChange={(event) => setAvailability(event.target.value)} className={editableInputClass(true) + " mt-0.5"}>
@@ -505,7 +510,7 @@ export function CustomGrenadeForm({
           <div className="grid grid-cols-2 gap-2">
             <WeaponQualitySelector selected={selectedQualities} onChange={setSelectedQualities} />
             <div className="col-span-2">
-              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+              <label className={uiFormLabel}>
                 Rules
               </label>
               <textarea value={description} onChange={(event) => setDescription(event.target.value)} rows={3} className={editableTextareaClass(true) + " mt-0.5"} />
@@ -594,9 +599,9 @@ export function GrenadeCard({
     <div className={uiSection + " space-y-2"}>
       {/* Header — always visible */}
       <div className="flex items-start justify-between gap-2">
-        <button className="flex-1 min-w-0 text-left" onClick={() => setExpanded((e) => !e)}>
+        <button className={uiExpandButton} onClick={() => setExpanded((e) => !e)}>
           <div className="flex flex-wrap items-center gap-1.5">
-            <p className="text-sm lg:text-base font-semibold text-slate-200 truncate">{item.name}</p>
+            <p className={`${uiCardTitle} truncate`}>{item.name}</p>
             {libraryItem && (
               <StatusBadge status={libraryItem.status} />
             )}
@@ -692,7 +697,7 @@ export function GrenadeCard({
                 {hasRules ? item.specialRules : "-"}
               </span>
               {ruleNamesInLookup.length > 0 && (
-                <span className="inline-flex items-center -translate-y-[1.4px]">
+                <span className={uiInfoModalWrapper}>
                   <InfoModal
                     title={`${item.name} Qualities`}
                     content={<SpecialRulesContent rules={item.specialRules ?? ""} />}
@@ -703,7 +708,7 @@ export function GrenadeCard({
             <div className="flex items-center gap-1.5">
               <span className={uiTextLabel}>Rules</span>
               {hasInfo ? (
-                <span className="inline-flex items-center -translate-y-[1.4px]">
+                <span className={uiInfoModalWrapper}>
                   <InfoModal
                     title={`${item.name} Rules`}
                     content={
@@ -718,7 +723,7 @@ export function GrenadeCard({
             {showMishaps && (
               <div className="flex items-center gap-1.5">
                 <span className={uiTextLabel}>Mishaps</span>
-                <span className="inline-flex items-center -translate-y-[1.4px]">
+                <span className={uiInfoModalWrapper}>
                   <InfoModal title="Explosive Mishaps" content={EXPLOSIVE_MISHAPS_CONTENT} />
                 </span>
               </div>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import type { TabId } from "../pages/characterSheet/types";
+import { uiDismissButton } from "../ui/buttonStyles";
 
 // ================================================================
 // NAVIGATION STRUCTURE
@@ -170,7 +171,7 @@ export function SectionDrawer({
           <button
             onClick={close}
             aria-label="Close navigation"
-            className="text-slate-400 hover:text-slate-200 text-lg leading-none transition"
+            className={`${uiDismissButton} transition`}
           >
             ✕
           </button>

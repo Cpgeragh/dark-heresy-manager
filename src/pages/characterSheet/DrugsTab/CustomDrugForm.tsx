@@ -7,7 +7,9 @@ import {
   editableTextareaClass,
   uiSection,
   uiSectionHeader,
+  uiFormLabel,
 } from "../../../ui/editableStyles";
+import { uiPickerBackButton } from "../../../ui/buttonStyles";
 import { Button } from "../../../ui/Button";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
@@ -100,7 +102,7 @@ export function CustomDrugForm({
             </Button>
             <button
               onClick={onCancel}
-              className="px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100"
+              className={uiPickerBackButton}
             >
               Cancel
             </button>
@@ -113,7 +115,7 @@ export function CustomDrugForm({
         <div className={uiSection + " space-y-3"}>
           <div className="grid grid-cols-2 gap-2">
             <div className="col-span-2">
-              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+              <label className={uiFormLabel}>
                 Name <span className="text-red-500">*</span>
               </label>
               <input
@@ -125,7 +127,7 @@ export function CustomDrugForm({
             </div>
             {includeQuantity && (
               <div>
-                <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                <label className={uiFormLabel}>
                   Quantity <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -166,7 +168,7 @@ export function CustomDrugForm({
         <div className={uiSection + " space-y-3"}>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+              <label className={uiFormLabel}>
                 Weight <span className="text-red-500">*</span>
               </label>
               <input
@@ -178,7 +180,7 @@ export function CustomDrugForm({
               />
             </div>
             <div>
-              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+              <label className={uiFormLabel}>
                 Cost <span className="text-red-500">*</span>
               </label>
               <input
@@ -190,7 +192,7 @@ export function CustomDrugForm({
               />
             </div>
             <div className="col-span-2">
-              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+              <label className={uiFormLabel}>
                 Availability <span className="text-red-500">*</span>
               </label>
               <select
@@ -213,7 +215,7 @@ export function CustomDrugForm({
         <div className={uiSection + " space-y-3"}>
           <div className="grid grid-cols-2 gap-2">
             <div className="col-span-2">
-              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+              <label className={uiFormLabel}>
                 Rules
               </label>
               <textarea

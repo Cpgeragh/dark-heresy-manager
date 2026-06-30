@@ -9,6 +9,7 @@ import { Chip } from "../../../ui/Chip";
 import { PickerModal } from "../../../ui/PickerModal";
 import { SkillRow } from "./SkillRow";
 import { colourPurple, colourTeal } from "../../../ui/colourTokens";
+import { uiInfoModalWrapper } from "../../../ui/editableStyles";
 
 interface AddSkillModalProps {
   isOpen: boolean;
@@ -222,7 +223,7 @@ function SkillPickerRow({
         <span className="text-sm lg:text-base text-slate-100 truncate">{displayName}</span>
         {SKILL_DESCRIPTIONS[skill.name] && (
           <span
-            className="inline-flex items-center -translate-y-[1.4px]"
+            className={uiInfoModalWrapper}
             onClick={(e) => e.stopPropagation()}
           >
             <InfoModal title={skill.name} content={SKILL_DESCRIPTIONS[skill.name]} />

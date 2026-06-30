@@ -3,7 +3,7 @@
 import type { DrugItem } from "../../../types/Character";
 import { InfoModal } from "../../../components/InfoModal";
 import { DRUGS_REFERENCE } from "../../../data/reference/drugsReference";
-import { uiSection, uiTextBody, uiTextLabel, uiTextMuted } from "../../../ui/editableStyles";
+import { uiSection, uiTextBody, uiTextLabel, uiTextMuted, uiItemName, uiInfoModalWrapper } from "../../../ui/editableStyles";
 import { uiActionButtonCompact } from "../../../ui/buttonStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
@@ -46,12 +46,12 @@ export function DrugRow({
       {/* Name + duration + chips */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <p className="text-sm lg:text-base font-medium text-slate-200">{item.name}</p>
+          <p className={uiItemName}>{item.name}</p>
           {libraryItem && (
             <StatusBadge status={libraryItem.status} />
           )}
           {hasInfo && (
-            <span className="inline-flex items-center -translate-y-[1.4px]">
+            <span className={uiInfoModalWrapper}>
             <InfoModal
               title={item.name}
               content={

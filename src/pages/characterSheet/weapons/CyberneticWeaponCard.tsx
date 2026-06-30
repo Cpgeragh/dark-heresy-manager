@@ -5,7 +5,7 @@ import type { CyberneticWeapon } from "../../../data/reference/cyberneticsRefere
 import { InfoModal } from "../../../components/InfoModal";
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
 import { Chip } from "../../../ui/Chip";
-import { uiTextLabel, uiTextMuted, uiTextPlaceholder } from "../../../ui/editableStyles";
+import { uiTextLabel, uiTextMuted, uiTextPlaceholder, uiCardTitle, uiInfoModalWrapper } from "../../../ui/editableStyles";
 import { colourCyanDark } from "../../../ui/colourTokens";
 import {
   StatChip,
@@ -33,7 +33,7 @@ export function CyberneticWeaponCard({
     <div className="border border-cyan-700/40 bg-cyan-900/10 rounded-lg p-3 lg:p-4 space-y-3">
       <div>
         <div className="flex items-center gap-2">
-          <p className="text-sm lg:text-base font-semibold text-slate-200">{weapon.name}</p>
+          <p className={uiCardTitle}>{weapon.name}</p>
           <Chip size="sm" className={`${colourCyanDark} uppercase tracking-wide`}>
             Cybernetic
           </Chip>
@@ -76,7 +76,7 @@ export function CyberneticWeaponCard({
             {hasRules ? weapon.specialRules : "-"}
           </span>
           {ruleNamesInLookup.length > 0 && (
-            <span className="inline-flex items-center -translate-y-[1.4px]">
+            <span className={uiInfoModalWrapper}>
               <InfoModal
                 title={`${weapon.name} Qualities`}
                 content={<SpecialRulesContent rules={weapon.specialRules ?? ""} />}

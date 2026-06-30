@@ -8,7 +8,7 @@ import { PickerModal } from "../../../ui/PickerModal";
 import { Button } from "../../../ui/Button";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
-import { uiTextMuted, uiTextBody } from "../../../ui/editableStyles";
+import { uiTextMuted, uiTextBody, uiItemName } from "../../../ui/editableStyles";
 import { colourAmberFaint, colourFuchsia } from "../../../ui/colourTokens";
 import { StatChip } from "../weapons/weaponShared";
 import { ARMOUR_CRAFTSMANSHIP_STYLE } from "./ArmourPicker";
@@ -128,7 +128,7 @@ export function ForceFieldPicker({
             onClick={editable ? () => onSelectCustomItem?.(item) : undefined}
             className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
           >
-            <span className={`text-sm lg:text-base font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}>
+            <span className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}>
               {item.name}
             </span>
             <div className="flex flex-wrap gap-1.5 mt-1">
@@ -152,7 +152,7 @@ export function ForceFieldPicker({
           onClick={editable ? () => setSelected(ref) : undefined}
           className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
-          <span className={`text-sm lg:text-base font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}>
+          <span className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}>
             {ref.name}
           </span>
           <div className="flex flex-wrap gap-1.5 mt-1">

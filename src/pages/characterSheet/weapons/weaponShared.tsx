@@ -14,6 +14,9 @@ import {
   uiTextBody,
   uiTextLabel,
   uiTextPlaceholder,
+  uiFormLabel,
+  uiInfoModalWrapper,
+  uiItemName,
 } from "../../../ui/editableStyles";
 import { uiActionButtonCompact } from "../../../ui/buttonStyles";
 import { colourEmerald, colourMeta } from "../../../ui/colourTokens";
@@ -96,7 +99,7 @@ export function WeaponQualitySelector({
 
   return (
     <div className="col-span-2 space-y-2">
-      <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+      <label className={uiFormLabel}>
         Qualities
       </label>
       <div className="flex gap-2">
@@ -356,7 +359,7 @@ export function UpgradeCard({
       </div>
       <div className="flex items-center gap-1.5 mt-1">
         <span className={uiTextLabel}>Rules</span>
-        <span className="inline-flex items-center -translate-y-[1.4px]">
+        <span className={uiInfoModalWrapper}>
           <InfoModal
             title={upgrade.name}
             content={
@@ -412,7 +415,7 @@ export function UpgradePicker({
           }`}
         >
           <div className="flex items-center justify-between gap-2 mb-1">
-            <span className="text-sm lg:text-base font-medium text-slate-200 group-hover:text-white">
+            <span className={`${uiItemName} group-hover:text-white`}>
               {upgrade.name}
             </span>
             <div className="flex items-center gap-1.5 text-xs lg:text-sm shrink-0">

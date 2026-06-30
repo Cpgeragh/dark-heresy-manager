@@ -9,7 +9,7 @@ import {
   type PsychicPowerRef,
   type PsychicDiscipline,
 } from "../../data/reference/psychicReference";
-import { editableInputClass, editableTextareaClass, uiSection } from "../../ui/editableStyles";
+import { editableInputClass, editableTextareaClass, uiSection, uiFormLabel, uiItemName, uiInfoModalWrapper } from "../../ui/editableStyles";
 import { Button } from "../../ui/Button";
 import { Chip } from "../../ui/Chip";
 import { SectionHeader } from "../../ui/SectionHeader";
@@ -20,6 +20,7 @@ import { TALENT_DESCRIPTIONS } from "../../data/talentDescriptions";
 import { sourceColour } from "../../ui/sourceStyles";
 import { disciplineColours, psyRatingGlow } from "./psychicStyles";
 import { colourActiveSky, colourActiveRose } from "../../ui/colourTokens";
+import { uiPickerBackButton } from "../../ui/buttonStyles";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -121,12 +122,12 @@ function PowerPicker({
           className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
           <div className="flex items-center gap-1.5">
-            <span className="text-sm lg:text-base font-medium text-slate-200 group-hover:text-white">
+            <span className={`${uiItemName} group-hover:text-white`}>
               {ref.name}
             </span>
             {ref.description && (
               <span
-                className="inline-flex items-center -translate-y-[1.4px] shrink-0"
+                className={`${uiInfoModalWrapper} shrink-0`}
                 onClick={(e) => e.stopPropagation()}
               >
                 <InfoModal
@@ -274,7 +275,7 @@ function CustomPowerForm({
     >
       <div className="p-4 lg:p-5 space-y-4">
         <div className="space-y-1">
-          <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+          <label className={uiFormLabel}>
             Name <span className="text-red-400">*</span>
           </label>
           <input
@@ -291,7 +292,7 @@ function CustomPowerForm({
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+          <label className={uiFormLabel}>
             Discipline <span className="text-red-400">*</span>
           </label>
           {target === "minor" ? (
@@ -321,7 +322,7 @@ function CustomPowerForm({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="space-y-1">
-            <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+            <label className={uiFormLabel}>
               PT <span className="text-red-400">*</span>
             </label>
             <input
@@ -335,7 +336,7 @@ function CustomPowerForm({
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+            <label className={uiFormLabel}>
               Action <span className="text-red-400">*</span>
             </label>
             <div className="grid grid-cols-2 gap-1.5">
@@ -359,7 +360,7 @@ function CustomPowerForm({
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+          <label className={uiFormLabel}>
             Range <span className="text-red-400">*</span>
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
@@ -407,7 +408,7 @@ function CustomPowerForm({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="space-y-1">
-            <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+            <label className={uiFormLabel}>
               Sustained <span className="text-red-400">*</span>
             </label>
             <div className="grid grid-cols-2 gap-1.5">
@@ -430,7 +431,7 @@ function CustomPowerForm({
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+            <label className={uiFormLabel}>
               Origin <span className="text-red-400">*</span>
             </label>
             <div className="grid grid-cols-2 gap-1.5">
@@ -454,7 +455,7 @@ function CustomPowerForm({
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+          <label className={uiFormLabel}>
             Description <span className="text-slate-600">(optional)</span>
           </label>
           <textarea
@@ -473,7 +474,7 @@ function CustomPowerForm({
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100 transition"
+            className={uiPickerBackButton}
           >
             Cancel
           </button>
@@ -667,7 +668,7 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
       <div className={uiSection + " flex flex-col items-center space-y-3"}>
         {/* Psy Rating — derived from highest Psy Rating talent */}
         <div className="inline-flex flex-col items-center gap-2">
-          <span className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+          <span className={uiFormLabel}>
             Psy Rating
           </span>
           <div className="relative inline-flex">
@@ -696,7 +697,7 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
 
         {/* Disciplines — toggle chips, one per major discipline */}
         <div>
-          <p className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100 mb-1.5 text-center">
+          <p className={`${uiFormLabel} mb-1.5 text-center`}>
             Disciplines
           </p>
           <div className="flex flex-wrap gap-1.5 justify-center">

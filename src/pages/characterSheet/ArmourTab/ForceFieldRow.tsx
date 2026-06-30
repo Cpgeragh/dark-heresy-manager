@@ -1,5 +1,5 @@
 import type { WornArmourPiece } from "../../../types/Character";
-import { uiSection, uiTextLabel, uiTextMuted, uiTextPlaceholder } from "../../../ui/editableStyles";
+import { uiSection, uiTextLabel, uiTextMuted, uiTextPlaceholder, uiItemName, uiInfoModalWrapper } from "../../../ui/editableStyles";
 import { uiActionButtonCompact } from "../../../ui/buttonStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { StatChip } from "../weapons/weaponShared";
@@ -80,7 +80,7 @@ export function ForceFieldRow({
     <div className={[uiSection, "flex items-center gap-3", !active ? "opacity-60" : ""].join(" ")}>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
-          <span className="text-sm lg:text-base font-medium text-slate-200 truncate">{piece.name}</span>
+          <span className={`${uiItemName} truncate`}>{piece.name}</span>
           {libraryItem && (
             <StatusBadge status={libraryItem.status} />
           )}
@@ -106,7 +106,7 @@ export function ForceFieldRow({
             {qualities.length > 0 ? qualities.join(", ") : "-"}
           </span>
           {qualities.length > 0 && (
-            <span className="inline-flex items-center -translate-y-[1.4px]">
+            <span className={uiInfoModalWrapper}>
               <InfoModal
                 title={`${piece.name} Qualities`}
                 content={<ForceFieldQualitiesContent qualities={qualities} />}
@@ -118,7 +118,7 @@ export function ForceFieldRow({
         <div className="flex items-center gap-1.5 mt-1">
           <span className={uiTextLabel}>Rules</span>
           {notes ? (
-            <span className="inline-flex items-center -translate-y-[1.4px]">
+            <span className={uiInfoModalWrapper}>
               <InfoModal title={`${piece.name} Rules`} content={notes} />
             </span>
           ) : (

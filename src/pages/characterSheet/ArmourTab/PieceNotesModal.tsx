@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import type { WornArmourPiece } from "../../../types/Character";
 import { ARMOUR_REFERENCE } from "../../../data/reference/armourReference";
-import { uiTextBody, uiTextPlaceholder } from "../../../ui/editableStyles";
+import { uiTextBody, uiTextPlaceholder, uiCardTitle } from "../../../ui/editableStyles";
 
 interface Props {
   piece: WornArmourPiece;
@@ -32,7 +32,7 @@ export function PieceNotesModal({ piece, onClose }: Props) {
       className="m-auto w-[calc(100%-2rem)] max-w-md lg:max-w-lg bg-slate-900 border border-slate-500 rounded-xl shadow-2xl p-0 backdrop:bg-black/50 backdrop:backdrop-blur-sm"
     >
       <div className="flex items-center justify-between px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
-        <h3 className="text-sm lg:text-base font-semibold text-slate-200">{piece.name}</h3>
+        <h3 className={uiCardTitle}>{piece.name}</h3>
         <button
           onClick={onClose}
           className="text-slate-400 hover:text-slate-200 text-lg lg:text-xl leading-none"

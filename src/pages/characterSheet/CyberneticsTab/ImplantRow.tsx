@@ -3,7 +3,7 @@
 import type { CyberneticItem } from "../../../types/Character";
 import { CYBERNETICS_REFERENCE } from "../../../data/reference/cyberneticsReference";
 import { Chip } from "../../../ui/Chip";
-import { uiSection, uiTextBody, uiTextLabel, uiTextMuted } from "../../../ui/editableStyles";
+import { uiSection, uiTextBody, uiTextLabel, uiTextMuted, uiItemName, uiInfoModalWrapper } from "../../../ui/editableStyles";
 import { uiActionButtonCompact } from "../../../ui/buttonStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { CRAFTSMANSHIP_STYLE, LOCATION_DISPLAY } from "./cyberneticsConstants";
@@ -57,11 +57,11 @@ export function ImplantRow({
       {/* Name + craftsmanship description */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5 min-w-0">
-          <p className="text-sm lg:text-base font-medium text-slate-200 truncate">{item.name}</p>
+          <p className={`${uiItemName} truncate`}>{item.name}</p>
           {libraryItem && (
             <StatusBadge status={libraryItem.status} />
           )}
-          <span className="inline-flex items-center -translate-y-[1.4px]">
+          <span className={uiInfoModalWrapper}>
             <InfoModal
               title={item.name}
               content={
@@ -120,7 +120,7 @@ export function ImplantRow({
           >
             {displayedCraftsmanship}
           </Chip>
-          <span className="inline-flex items-center -translate-y-[1.4px]">
+          <span className={uiInfoModalWrapper}>
             <InfoModal
               title={`${displayedCraftsmanship} ${item.name}`}
               content={qualityDescription}

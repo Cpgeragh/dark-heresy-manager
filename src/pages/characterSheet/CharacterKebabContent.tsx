@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { COPY_FEEDBACK_DURATION } from "../../constants/ui";
+import { uiSubheading } from "../../ui/editableStyles";
 
 interface Props {
   recoveryCode?: string;
@@ -38,7 +39,7 @@ export function CharacterKebabContent({
       {/* Recovery Code */}
       {recoveryCode && (
         <div className="space-y-2">
-          <p className="text-xs lg:text-sm font-semibold text-slate-100 uppercase tracking-wide">
+          <p className={uiSubheading}>
             Recovery Code
           </p>
           <div className="flex items-center gap-2">
@@ -58,7 +59,7 @@ export function CharacterKebabContent({
       {/* Export */}
       {canExport && (
         <div className="space-y-2">
-          <p className="text-xs lg:text-sm font-semibold text-slate-100 uppercase tracking-wide">
+          <p className={uiSubheading}>
             Character Data
           </p>
           <button
@@ -73,7 +74,7 @@ export function CharacterKebabContent({
       {/* Release */}
       {canPlayerRelease && (
         <div className="space-y-2">
-          <p className="text-xs lg:text-sm font-semibold text-slate-100 uppercase tracking-wide">
+          <p className={uiSubheading}>
             Release Character
           </p>
           <p className="text-xs lg:text-sm text-slate-400">Unlinks this character from your account.</p>

@@ -6,7 +6,7 @@ import type { User } from "firebase/auth";
 import { getRecoveryCode, rotateRecoveryCode } from "../services/identityService";
 import { useLinkDevice } from "../hooks/useLinkDevice";
 import { useToast } from "../components/Toast";
-import { uiSection } from "../ui/editableStyles";
+import { uiSection, uiTextError } from "../ui/editableStyles";
 import { Button } from "../ui/Button";
 import { PageShell } from "../ui/PageShell";
 import { Panel } from "../ui/Panel";
@@ -192,7 +192,7 @@ export default function Settings({ user: _user, effectiveUserId, isLinked, unlin
                   placeholder="Paste recovery code here"
                   className="w-full px-3 lg:px-4 py-2 lg:py-2.5 rounded-lg bg-slate-800 border border-slate-600 text-slate-100 text-sm lg:text-base placeholder:text-slate-500 focus:outline-none focus:border-amber-500"
                 />
-                {linkError && <p className="text-red-400 text-sm lg:text-base">{linkError}</p>}
+                {linkError && <p className={uiTextError}>{linkError}</p>}
                 <Button onClick={handleLinkDevice} disabled={linking || !linkCode.trim()}>
                   {linking ? "Linking…" : "Link This Device"}
                 </Button>

@@ -21,8 +21,13 @@ import {
   uiTextLabel,
   uiTextMuted,
   uiTextPlaceholder,
+  uiFormLabel,
+  uiInfoModalWrapper,
+  uiItemName,
+  uiCardTitle,
+  uiExpandButton,
 } from "../../../ui/editableStyles";
-import { uiActionButtonCompact } from "../../../ui/buttonStyles";
+import { uiActionButtonCompact, uiPickerBackButton } from "../../../ui/buttonStyles";
 import { colourAmberFaint, colourFuchsia, colourViolet } from "../../../ui/colourTokens";
 import { Button } from "../../../ui/Button";
 import { Chip } from "../../../ui/Chip";
@@ -227,7 +232,7 @@ export function MeleePicker({
             className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
           >
             <span
-              className={`text-sm lg:text-base font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}
+              className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}
             >
               {item.name}
             </span>
@@ -254,7 +259,7 @@ export function MeleePicker({
           className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
           <span
-            className={`text-sm lg:text-base font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}
+            className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}
           >
             {ref.name}
           </span>
@@ -269,7 +274,7 @@ export function MeleePicker({
             <div className="flex items-center gap-1.5 mt-1">
               <span className={uiTextLabel}>Qualities</span>
               <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>{ref.specialRules}</span>
-              <span className="inline-flex items-center -translate-y-[1.4px]">
+              <span className={uiInfoModalWrapper}>
                 <InfoModal title={`${ref.name} Qualities`} content={<SpecialRulesContent rules={ref.specialRules} />} />
               </span>
             </div>
@@ -277,7 +282,7 @@ export function MeleePicker({
           {ref.description && (
             <div className="flex items-center gap-1.5 mt-0.5">
               <span className={uiTextLabel}>Rules</span>
-              <span className="inline-flex items-center -translate-y-[1.4px]">
+              <span className={uiInfoModalWrapper}>
                 <InfoModal title={ref.name} content={<SpecialRulesContent rules="" description={ref.description} />} />
               </span>
             </div>
@@ -392,7 +397,7 @@ export function CustomMeleeForm({
             </Button>
             <button
               onClick={onCancel}
-              className="px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100"
+              className={uiPickerBackButton}
             >
               Cancel
             </button>
@@ -405,7 +410,7 @@ export function CustomMeleeForm({
         <div className={uiSection + " space-y-3"}>
           <div className="grid grid-cols-2 gap-2">
             <div className="col-span-2">
-              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+              <label className={uiFormLabel}>
                 Name <span className="text-red-500">*</span>
               </label>
               <input
@@ -417,7 +422,7 @@ export function CustomMeleeForm({
             </div>
 
             <div className="col-span-2">
-              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+              <label className={uiFormLabel}>
                 Class <span className="text-red-500">*</span>
               </label>
               <select
@@ -439,7 +444,7 @@ export function CustomMeleeForm({
         <p className={uiSectionHeader}>Craftsmanship & Origin</p>
         <div className={uiSection + " space-y-3"}>
           <div className="space-y-1">
-            <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+            <label className={uiFormLabel}>
               Craftsmanship <span className="text-red-500">*</span>
             </label>
             <div className="grid grid-cols-4 gap-1.5">
@@ -461,7 +466,7 @@ export function CustomMeleeForm({
             </div>
           </div>
           <div className="space-y-1">
-            <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+            <label className={uiFormLabel}>
               Origin <span className="text-red-500">*</span>
             </label>
             <div className="grid grid-cols-2 gap-1.5">
@@ -488,7 +493,7 @@ export function CustomMeleeForm({
         <div className={uiSection + " space-y-3"}>
           <div className="grid grid-cols-2 gap-2">
             <div className="col-span-2">
-              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+              <label className={uiFormLabel}>
                 Damage <span className="text-red-500">*</span>
               </label>
               <div className="grid grid-cols-3 gap-2 mt-0.5">
@@ -524,7 +529,7 @@ export function CustomMeleeForm({
             </div>
 
             <div className="col-span-2">
-              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+              <label className={uiFormLabel}>
                 Pen <span className="text-red-500">*</span>
               </label>
               <input
@@ -542,7 +547,7 @@ export function CustomMeleeForm({
         <div className={uiSection + " space-y-3"}>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+              <label className={uiFormLabel}>
                 Weight <span className="text-red-500">*</span>
               </label>
               <input
@@ -555,7 +560,7 @@ export function CustomMeleeForm({
             </div>
 
             <div>
-              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+              <label className={uiFormLabel}>
                 Cost <span className="text-red-500">*</span>
               </label>
               <input
@@ -567,7 +572,7 @@ export function CustomMeleeForm({
               />
             </div>
             <div className="col-span-2">
-              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+              <label className={uiFormLabel}>
                 Availability <span className="text-red-500">*</span>
               </label>
               <select value={availability} onChange={(event) => setAvailability(event.target.value)} className={editableInputClass(true) + " mt-0.5"}>
@@ -584,7 +589,7 @@ export function CustomMeleeForm({
             <WeaponQualitySelector selected={selectedQualities} onChange={setSelectedQualities} />
 
             <div className="col-span-2">
-              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+              <label className={uiFormLabel}>
                 Rules
               </label>
               <textarea
@@ -694,12 +699,12 @@ export function MeleeCard({
       {/* Header — always visible */}
       <div className="flex items-start justify-between gap-2">
         <button
-          className="flex-1 min-w-0 text-left"
+          className={uiExpandButton}
           onClick={() => !forceExpanded && setExpanded((e) => !e)}
           disabled={forceExpanded}
         >
           <div className="flex flex-wrap items-center gap-1.5">
-            <p className="text-sm lg:text-base font-semibold text-slate-200">{weapon.name}</p>
+            <p className={uiCardTitle}>{weapon.name}</p>
             {libraryItem && (
               <StatusBadge status={libraryItem.status} />
             )}
@@ -784,7 +789,7 @@ export function MeleeCard({
                 {hasQualities ? rulesText : "-"}
               </span>
               {hasQualityModal && (
-                <span className="inline-flex items-center -translate-y-[1.4px]">
+                <span className={uiInfoModalWrapper}>
                   <InfoModal
                     title={`${weapon.name} Qualities`}
                     content={<SpecialRulesContent rules={effective.specialRules ?? ""} />}
@@ -795,7 +800,7 @@ export function MeleeCard({
             <div className="flex items-center gap-1.5">
               <span className={uiTextLabel}>Rules</span>
               {hasItemRules ? (
-                <span className="inline-flex items-center -translate-y-[1.4px]">
+                <span className={uiInfoModalWrapper}>
                   <InfoModal
                     title={`${weapon.name} Rules`}
                     content={<SpecialRulesContent rules="" description={rulesDescription} />}
@@ -810,7 +815,7 @@ export function MeleeCard({
                 Craftsmanship
               </span>
               <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>{craftsmanship}</span>
-              <span className="inline-flex items-center -translate-y-[1.4px]">
+              <span className={uiInfoModalWrapper}>
                 <InfoModal
                   title={`${craftsmanship} Weapon`}
                   content={meleeCraftsmanshipDescription(craftsmanship)}

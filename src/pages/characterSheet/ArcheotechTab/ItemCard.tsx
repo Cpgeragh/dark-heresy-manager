@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { ArcheotechItem } from "../../../types/Character";
 import { ARCHEOTECH_REFERENCE } from "../../../data/reference/archeotechReference";
-import { uiSection, uiTextBody, uiTextLabel, uiTextMuted } from "../../../ui/editableStyles";
+import { uiSection, uiTextBody, uiTextLabel, uiTextMuted, uiItemName, uiInfoModalWrapper } from "../../../ui/editableStyles";
 import { uiActionButtonCompact } from "../../../ui/buttonStyles";
 import { colourStacks } from "../../../ui/colourTokens";
 import { Chip } from "../../../ui/Chip";
@@ -63,7 +63,7 @@ export function ItemCard({
         <div className="flex-1 min-w-0">
           {/* Title row */}
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm lg:text-base font-medium text-slate-200">{item.name}</span>
+            <span className={uiItemName}>{item.name}</span>
             {libraryItem && (
               <StatusBadge status={libraryItem.status} />
             )}
@@ -81,7 +81,7 @@ export function ItemCard({
               </button>
             )}
             {description && !hasBody && (
-              <span className="inline-flex items-center -translate-y-[1.4px]">
+              <span className={uiInfoModalWrapper}>
                 <InfoModal title={item.name} content={description} />
               </span>
             )}

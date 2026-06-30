@@ -6,7 +6,7 @@ import { Chip } from "../../../ui/Chip";
 import { InfoModal } from "../../../components/InfoModal";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
-import { uiTextBody, uiTextLabel, uiTextMuted } from "../../../ui/editableStyles";
+import { uiTextBody, uiTextLabel, uiTextMuted, uiItemName, uiInfoModalWrapper } from "../../../ui/editableStyles";
 import { colourViolet, colourSky, colourRose } from "../../../ui/colourTokens";
 import { INTEGRATED_RANGED_REFS, INTEGRATED_MELEE_REFS } from "../../../utils/weaponUtils";
 import { SpecialRulesContent } from "./weaponShared";
@@ -146,7 +146,7 @@ export function IntegratedWeaponPicker({
           className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
           <span
-            className={`text-sm lg:text-base font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}
+            className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}
           >
             {ref.name}
           </span>
@@ -171,7 +171,7 @@ export function IntegratedWeaponPicker({
             <div className="flex items-center gap-1.5 mt-1">
               <span className={uiTextLabel}>Qualities</span>
               <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>{ref.specialRules}</span>
-              <span className="inline-flex items-center -translate-y-[1.4px]">
+              <span className={uiInfoModalWrapper}>
                 <InfoModal title={`${ref.name} Qualities`} content={<SpecialRulesContent rules={ref.specialRules} />} />
               </span>
             </div>
@@ -179,7 +179,7 @@ export function IntegratedWeaponPicker({
           {ref.description && (
             <div className="flex items-center gap-1.5 mt-0.5">
               <span className={uiTextLabel}>Rules</span>
-              <span className="inline-flex items-center -translate-y-[1.4px]">
+              <span className={uiInfoModalWrapper}>
                 <InfoModal title={ref.name} content={<SpecialRulesContent rules="" description={ref.description} />} />
               </span>
             </div>
@@ -195,7 +195,7 @@ export function IntegratedWeaponPicker({
           className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
           <span
-            className={`text-sm lg:text-base font-medium text-slate-200 ${editable ? "group-hover:text-white" : ""}`}
+            className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}
           >
             {ref.name}
           </span>
@@ -217,7 +217,7 @@ export function IntegratedWeaponPicker({
             <div className="flex items-center gap-1.5 mt-1">
               <span className={uiTextLabel}>Qualities</span>
               <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>{ref.specialRules}</span>
-              <span className="inline-flex items-center -translate-y-[1.4px]">
+              <span className={uiInfoModalWrapper}>
                 <InfoModal title={`${ref.name} Qualities`} content={<SpecialRulesContent rules={ref.specialRules} />} />
               </span>
             </div>
@@ -225,7 +225,7 @@ export function IntegratedWeaponPicker({
           {ref.description && (
             <div className="flex items-center gap-1.5 mt-0.5">
               <span className={uiTextLabel}>Rules</span>
-              <span className="inline-flex items-center -translate-y-[1.4px]">
+              <span className={uiInfoModalWrapper}>
                 <InfoModal title={ref.name} content={<SpecialRulesContent rules="" description={ref.description} />} />
               </span>
             </div>

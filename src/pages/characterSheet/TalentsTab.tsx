@@ -7,7 +7,7 @@ import type {
   TalentEntry,
 } from "../../types/Character";
 import { TALENT_LIST } from "../../data/talentData";
-import { uiSection, uiTextPlaceholder } from "../../ui/editableStyles";
+import { uiSection, uiTextPlaceholder, uiFormLabel } from "../../ui/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { EntryCard, EntrySection, TalentPickerModal } from "./talentComponents";
 
@@ -73,7 +73,7 @@ function FaithTalentSection({
             .sort((a, b) => a.name.localeCompare(b.name));
           return (
             <div key={group}>
-              <p className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100 mb-1.5">
+              <p className={`${uiFormLabel} mb-1.5`}>
                 {FAITH_GROUP_LABELS[group]}
               </p>
               {groupEntries.length === 0 && <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>None.</p>}

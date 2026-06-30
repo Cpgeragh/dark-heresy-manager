@@ -8,7 +8,9 @@ import {
   uiSection,
   uiSectionHeader,
   uiTextMuted,
+  uiFormLabel,
 } from "../../../ui/editableStyles";
+import { uiPickerBackButton } from "../../../ui/buttonStyles";
 import { Button } from "../../../ui/Button";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
@@ -228,7 +230,7 @@ export function CustomItemForm({
             </Button>
             <button
               onClick={onCancel}
-              className="px-4 lg:px-5 py-1.5 lg:py-2 rounded border border-slate-500 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100"
+              className={uiPickerBackButton}
             >
               Cancel
             </button>
@@ -241,7 +243,7 @@ export function CustomItemForm({
         <p className={uiSectionHeader}>Identity</p>
         <div className={uiSection + " space-y-3"}>
           <div>
-            <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+            <label className={uiFormLabel}>
               Name <span className="text-red-500">*</span>
             </label>
             <input
@@ -255,7 +257,7 @@ export function CustomItemForm({
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+              <label className={uiFormLabel}>
                 Weight
               </label>
               <input
@@ -268,7 +270,7 @@ export function CustomItemForm({
               />
             </div>
             <div>
-              <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+              <label className={uiFormLabel}>
                 Value
               </label>
               <input
@@ -282,7 +284,7 @@ export function CustomItemForm({
             </div>
           </div>
           <div>
-            <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+            <label className={uiFormLabel}>
               Rarity <span className="text-slate-600">(optional)</span>
             </label>
             <select
@@ -305,7 +307,7 @@ export function CustomItemForm({
             <div className={uiSection + " space-y-3"}>
               {isWeaponType && (
                 <div>
-                  <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                  <label className={uiFormLabel}>
                     Class
                   </label>
                   <div className="flex gap-2 mt-0.5">
@@ -330,7 +332,7 @@ export function CustomItemForm({
               )}
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                  <label className={uiFormLabel}>
                     Damage
                   </label>
                   <input
@@ -342,7 +344,7 @@ export function CustomItemForm({
                   />
                 </div>
                 <div>
-                  <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                  <label className={uiFormLabel}>
                     Pen
                   </label>
                   <input
@@ -358,7 +360,7 @@ export function CustomItemForm({
                 <>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                      <label className={uiFormLabel}>
                         Range
                       </label>
                       <input
@@ -370,7 +372,7 @@ export function CustomItemForm({
                       />
                     </div>
                     <div>
-                      <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                      <label className={uiFormLabel}>
                         RoF
                       </label>
                       <input
@@ -384,7 +386,7 @@ export function CustomItemForm({
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                      <label className={uiFormLabel}>
                         Clip
                       </label>
                       <input
@@ -396,7 +398,7 @@ export function CustomItemForm({
                       />
                     </div>
                     <div>
-                      <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                      <label className={uiFormLabel}>
                         Rld
                       </label>
                       <input
@@ -411,7 +413,7 @@ export function CustomItemForm({
                 </>
               )}
               <div>
-                <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                <label className={uiFormLabel}>
                   Special Rules <span className="text-slate-600">(optional)</span>
                 </label>
                 <input
@@ -432,7 +434,7 @@ export function CustomItemForm({
             <p className={uiSectionHeader}>Stats</p>
             <div className={uiSection + " space-y-3"}>
               <div>
-                <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                <label className={uiFormLabel}>
                   AP
                 </label>
                 <input
@@ -445,7 +447,7 @@ export function CustomItemForm({
                 />
               </div>
               <div>
-                <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100 block mb-1.5">
+                <label className={`${uiFormLabel} block mb-1.5`}>
                   Locations
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -490,7 +492,7 @@ export function CustomItemForm({
             <p className={uiSectionHeader}>Stats</p>
             <div className={uiSection + " space-y-3"}>
               <div>
-                <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                <label className={uiFormLabel}>
                   AP
                 </label>
                 <input
@@ -504,7 +506,7 @@ export function CustomItemForm({
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                  <label className={uiFormLabel}>
                     Damage
                   </label>
                   <input
@@ -516,7 +518,7 @@ export function CustomItemForm({
                   />
                 </div>
                 <div>
-                  <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                  <label className={uiFormLabel}>
                     Pen
                   </label>
                   <input
@@ -529,7 +531,7 @@ export function CustomItemForm({
                 </div>
               </div>
               <div>
-                <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                <label className={uiFormLabel}>
                   Special Rules <span className="text-slate-600">(optional)</span>
                 </label>
                 <input
@@ -550,7 +552,7 @@ export function CustomItemForm({
             <p className={uiSectionHeader}>Stats</p>
             <div className={uiSection + " space-y-3"}>
               <div>
-                <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                <label className={uiFormLabel}>
                   Craftsmanship <span className="text-slate-600">(optional)</span>
                 </label>
                 <select
@@ -565,7 +567,7 @@ export function CustomItemForm({
                 </select>
               </div>
               <div>
-                <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100 block mb-1.5">
+                <label className={`${uiFormLabel} block mb-1.5`}>
                   Body Location <span className="text-slate-600">(optional)</span>
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -595,7 +597,7 @@ export function CustomItemForm({
             <p className={uiSectionHeader}>Stats</p>
             <div className={uiSection + " space-y-3"}>
               <div>
-                <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+                <label className={uiFormLabel}>
                   Protection Rating
                 </label>
                 <input
@@ -615,7 +617,7 @@ export function CustomItemForm({
         <p className={uiSectionHeader}>Rules</p>
         <div className={uiSection + " space-y-3"}>
           <div>
-            <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+            <label className={uiFormLabel}>
               Description / Rules <span className="text-slate-600">(optional)</span>
             </label>
             <textarea
@@ -627,7 +629,7 @@ export function CustomItemForm({
             />
           </div>
           <div>
-            <label className="text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100">
+            <label className={uiFormLabel}>
               Notes <span className="text-slate-600">(optional)</span>
             </label>
             <textarea

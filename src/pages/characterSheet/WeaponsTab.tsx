@@ -47,6 +47,7 @@ import {
 } from "../../utils/weaponUtils";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { uiTextPlaceholder } from "../../ui/editableStyles";
+import { uiTabButtonBaseCompact } from "../../ui/buttonStyles";
 import { useCampaignCustomItems } from "../../hooks/useCampaignCustomItems";
 import {
   archiveCustomItem,
@@ -1404,7 +1405,7 @@ export function WeaponsTab({
                 aria-label={section.ariaLabel}
                 onClick={() => showWeaponSection(section.id)}
                 className={[
-                  "rounded-md px-1 py-1.5 text-[11px] font-semibold transition border",
+                  uiTabButtonBaseCompact,
                   active
                     ? section.activeClass
                     : "border-transparent text-slate-400 hover:bg-slate-800 hover:text-slate-200",
