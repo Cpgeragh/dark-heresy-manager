@@ -80,7 +80,7 @@ export function createEmptyCharacterData(params: {
 
     insanity: {
       points: 0,
-      disorders: "",
+      disorders: [],
     },
 
     corruption: {

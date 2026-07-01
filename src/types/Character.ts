@@ -65,9 +65,22 @@ export interface FateBlock {
   current: number;
 }
 
+export type InsanityDisorderSeverity = "Minor" | "Severe" | "Acute";
+
+export interface InsanityDisorderEntry {
+  id: string;
+  referenceId?: string;
+  type: string;
+  name: string;
+  severity: InsanityDisorderSeverity;
+  notes?: string;
+  custom?: boolean;
+}
+
 export interface InsanityBlock {
   points: number;
-  disorders: string;
+  disorders: string | InsanityDisorderEntry[];
+  disorderNotes?: string;
 }
 
 export interface CorruptionBlock {

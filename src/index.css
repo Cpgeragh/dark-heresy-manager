@@ -39,6 +39,11 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+::selection {
+  background-color: rgb(185 28 28 / 0.4);
+  color: inherit;
+}
+
 body {
   margin: 0;
   min-width: 320px;
