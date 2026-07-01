@@ -1,6 +1,6 @@
 // src/pages/characterSheet/VitalsTab.tsx
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { Stepper } from "../../components/Stepper";
 import type {
   Character,
@@ -17,6 +17,7 @@ import {
 import { SectionHeader } from "../../ui/SectionHeader";
 import { FormField } from "../../components/FormField";
 import { WOUNDS_CRITICAL_THRESHOLD, FATE_CRITICAL_THRESHOLD } from "../../constants/gameRules";
+import { InsanityPanel } from "../../features/insanity/InsanityPanel";
 
 interface VitalsTabProps {
   character: Character;
@@ -39,8 +40,10 @@ export function VitalsTab({
   onUpdateCorruption,
 }: VitalsTabProps) {
   const { wounds, fate } = character;
-  const insanity = character.insanity ?? { points: 0, disorders: "" };
   const corruption = character.corruption ?? { points: 0, malignancies: "" };
+
+  const [woundsTotalDraft, setWoundsTotalDraft] = useState<string | null>(null);
+  const [fateTotalDraft, setFateTotalDraft] = useState<string | null>(null);
 
   const handleCurrentWoundsChange = useCallback(
     (v: number) => onUpdateWounds({ ...wounds, current: v }),
@@ -55,8 +58,18 @@ export function VitalsTab({
     [wounds, onUpdateWounds]
   );
   const handleWoundsTotalChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) =>
-      onUpdateWounds({ ...wounds, total: Math.max(0, Number(e.target.value)) }),
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const raw = e.target.value;
+      if (raw === "") {
+        setWoundsTotalDraft(raw);
+        return;
+      }
+      const n = parseInt(raw, 10);
+      if (!isNaN(n) && n >= 1) {
+        setWoundsTotalDraft(null);
+        onUpdateWounds({ ...wounds, total: n });
+      }
+    },
     [wounds, onUpdateWounds]
   );
 
@@ -65,18 +78,19 @@ export function VitalsTab({
     [fate, onUpdateFate]
   );
   const handleFateTotalChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) =>
-      onUpdateFate({ ...fate, total: Math.max(0, Number(e.target.value)) }),
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const raw = e.target.value;
+      if (raw === "") {
+        setFateTotalDraft(raw);
+        return;
+      }
+      const n = parseInt(raw, 10);
+      if (!isNaN(n) && n >= 0) {
+        setFateTotalDraft(null);
+        onUpdateFate({ ...fate, total: n });
+      }
+    },
     [fate, onUpdateFate]
-  );
-
-  const handleInsanityPointsChange = useCallback(
-    (v: number) => onUpdateInsanity({ ...insanity, points: v }),
-    [insanity, onUpdateInsanity]
-  );
-  const handleInsanityDisordersChange = useCallback(
-    (v: string) => onUpdateInsanity({ ...insanity, disorders: v }),
-    [insanity, onUpdateInsanity]
   );
 
   const handleCorruptionPointsChange = useCallback(
@@ -88,21 +102,16 @@ export function VitalsTab({
     [corruption, onUpdateCorruption]
   );
 
-  // ------------------------------
-  // Danger state helpers
-  // ------------------------------
   function dangerClass(value: number, criticalThreshold: number): string {
     return value <= criticalThreshold ? "text-red-400 font-semibold" : "";
   }
 
   return (
     <div className="space-y-6 text-slate-100">
-      {/* COMBAT STATUS */}
       <div>
         <SectionHeader className="mb-2">Combat Status</SectionHeader>
         <section className={uiSection}>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            {/* Total Wounds */}
             <div className={uiCell + " text-center p-2 lg:p-3 flex flex-col"}>
               <div className="text-xs lg:text-base text-slate-100 mb-2">Total Wounds</div>
               <div className="flex-1 flex items-center justify-center">
@@ -111,8 +120,11 @@ export function VitalsTab({
                     type="text"
                     inputMode="numeric"
                     className={totalInputClass}
-                    value={wounds.total}
+                    value={woundsTotalDraft ?? (Number.isFinite(wounds.total) && wounds.total >= 1 ? String(wounds.total) : "")}
                     onChange={handleWoundsTotalChange}
+                    onBlur={() => setWoundsTotalDraft(null)}
+                    onFocus={(e) => e.target.select()}
+                    placeholder="1+"
                     aria-label="Total wounds"
                   />
                 ) : (
@@ -121,7 +133,6 @@ export function VitalsTab({
               </div>
             </div>
 
-            {/* Current Wounds */}
             <div className={uiCell + " text-center p-2 lg:p-3 flex flex-col"}>
               <div className="text-xs lg:text-base text-slate-100 mb-2">Current Wounds</div>
               <div className="flex-1 flex items-center justify-center">
@@ -134,7 +145,6 @@ export function VitalsTab({
               </div>
             </div>
 
-            {/* Critical Damage */}
             <div className={uiCell + " text-center p-2 lg:p-3 flex flex-col"}>
               <div className="text-xs lg:text-base text-slate-100 mb-2">Critical Damage</div>
               <div className="flex-1 flex items-center justify-center">
@@ -146,7 +156,6 @@ export function VitalsTab({
               </div>
             </div>
 
-            {/* Fatigue */}
             <div className={uiCell + " text-center p-2 lg:p-3 flex flex-col"}>
               <div className="text-xs lg:text-base text-slate-100 mb-2">Fatigue</div>
               <div className="flex-1 flex items-center justify-center">
@@ -161,12 +170,10 @@ export function VitalsTab({
         </section>
       </div>
 
-      {/* FATE */}
       <div>
         <SectionHeader className="mb-2">Fate Points</SectionHeader>
         <section className={uiSection}>
           <div className="grid grid-cols-2 gap-3">
-            {/* Total */}
             <div className={uiCell + " text-center p-2 lg:p-3 flex flex-col"}>
               <div className="text-xs lg:text-base text-slate-100 mb-2">Total</div>
               <div className="flex-1 flex items-center justify-center">
@@ -175,8 +182,11 @@ export function VitalsTab({
                     type="text"
                     inputMode="numeric"
                     className={totalInputClass}
-                    value={fate.total}
+                    value={fateTotalDraft ?? String(fate.total)}
                     onChange={handleFateTotalChange}
+                    onBlur={() => setFateTotalDraft(null)}
+                    onFocus={(e) => e.target.select()}
+                    placeholder="0+"
                     aria-label="Total fate points"
                   />
                 ) : (
@@ -185,7 +195,6 @@ export function VitalsTab({
               </div>
             </div>
 
-            {/* Current */}
             <div className={uiCell + " text-center p-2 lg:p-3 flex flex-col"}>
               <div className="text-xs lg:text-base text-slate-100 mb-2">Current</div>
               <div className="flex-1 flex items-center justify-center">
@@ -201,33 +210,14 @@ export function VitalsTab({
         </section>
       </div>
 
-      {/* INSANITY & CORRUPTION */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* INSANITY */}
-        <div>
-          <SectionHeader className="mb-2">Insanity</SectionHeader>
-          <section className={uiSection + " space-y-3"}>
-            <div className="flex items-center gap-3">
-              <span className="text-xs lg:text-sm text-slate-100 uppercase tracking-wide">Points</span>
-              <Stepper
-                value={insanity.points}
-                editable={editable}
-                onChange={handleInsanityPointsChange}
-              />
-            </div>
-            <FormField
-              label="Disorders"
-              value={insanity.disorders}
-              onChange={handleInsanityDisordersChange}
-              editable={editable}
-              type="textarea"
-              rows={2}
-              placeholder="List any disorders…"
-            />
-          </section>
-        </div>
+        <InsanityPanel
+          insanity={character.insanity}
+          editable={editable}
+          onUpdate={onUpdateInsanity}
+          sectionClassName={uiSection}
+        />
 
-        {/* CORRUPTION */}
         <div>
           <SectionHeader className="mb-2">Corruption</SectionHeader>
           <section className={uiSection + " space-y-3"}>
@@ -246,7 +236,7 @@ export function VitalsTab({
               editable={editable}
               type="textarea"
               rows={2}
-              placeholder="List any malignancies…"
+              placeholder="List any malignancies..."
             />
           </section>
         </div>

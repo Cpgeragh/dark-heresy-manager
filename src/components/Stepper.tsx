@@ -34,7 +34,7 @@ export function Stepper({ value, min = 0, editable, onChange, dangerClassName }:
 
   const handleClick = useCallback(() => {
     if (!editable) return;
-    setDraft(value === 0 ? "" : String(value));
+    setDraft(String(value));
     setEditing(true);
   }, [editable, value]);
 
@@ -56,7 +56,7 @@ export function Stepper({ value, min = 0, editable, onChange, dangerClassName }:
     [editable, min, value, onChange]
   );
 
-  const btnClass = `flex items-center justify-center h-7 w-7 sm:h-8 sm:w-8 lg:h-10 lg:w-10 rounded text-base lg:text-xl leading-none text-slate-300 transition select-none ${
+  const btnClass = `flex items-center justify-center pt-0.5 h-7 w-7 sm:h-8 sm:w-8 lg:h-10 lg:w-10 rounded text-base lg:text-xl leading-none text-slate-300 transition select-none ${
     editable
       ? "bg-slate-700 hover:bg-slate-600"
       : "bg-slate-700 opacity-50 cursor-not-allowed"
@@ -75,23 +75,23 @@ export function Stepper({ value, min = 0, editable, onChange, dangerClassName }:
 
       {editing ? (
         <input
-          type="number"
-          min={min}
-          step={1}
+          type="text"
+          inputMode="numeric"
           autoFocus
+          onFocus={(e) => e.target.select()}
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
-          className="h-10 sm:h-8 lg:h-10 w-14 lg:w-16 text-center bg-slate-700 border border-slate-500 rounded-lg text-base lg:text-lg font-code text-slate-100 px-1 focus:outline-none focus:border-red-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          className="h-7 sm:h-8 lg:h-10 w-7 sm:w-8 lg:w-10 text-center bg-slate-700 border border-slate-500 rounded-lg text-base lg:text-lg font-code text-slate-100 focus:outline-none focus:border-red-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
         />
       ) : (
         <span
           onClick={handleClick}
           title={editable ? "Click to edit" : undefined}
-          className={`min-w-[2.5ch] text-center text-xl lg:text-2xl font-semibold font-code select-none ${
+          className={`w-7 sm:w-8 lg:w-10 text-center text-xl lg:text-2xl font-semibold font-code select-none ${
             dangerClassName || "text-slate-100"
-          } ${editable ? "cursor-pointer hover:opacity-80" : ""}`}
+          } ${editable ? "cursor-pointer border border-slate-500 rounded flex items-center justify-center h-7 w-7 sm:h-8 sm:w-8 lg:h-10 lg:w-10 bg-slate-900 hover:border-slate-400 transition-colors" : ""}`}
         >
           {value}
         </span>
