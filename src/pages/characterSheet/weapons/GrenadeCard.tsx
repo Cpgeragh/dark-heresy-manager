@@ -21,9 +21,8 @@ import {
   uiInfoModalWrapper,
   uiItemName,
   uiCardTitle,
-  uiExpandButton,
 } from "../../../ui/editableStyles";
-import { uiActionButtonCompact, uiPickerBackButton } from "../../../ui/buttonStyles";
+import { uiActionButtonCompact, uiPickerBackButton, uiExpandButton } from "../../../ui/buttonStyles";
 import { colourAmberFaint, colourEmerald } from "../../../ui/colourTokens";
 import { Button } from "../../../ui/Button";
 import { Chip } from "../../../ui/Chip";
