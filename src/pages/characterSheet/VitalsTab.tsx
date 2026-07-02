@@ -15,9 +15,9 @@ import {
   uiCellValue,
 } from "../../ui/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
-import { FormField } from "../../components/FormField";
 import { WOUNDS_CRITICAL_THRESHOLD, FATE_CRITICAL_THRESHOLD } from "../../constants/gameRules";
 import { InsanityPanel } from "../../features/insanity/InsanityPanel";
+import { CorruptionPanel } from "../../features/corruption/CorruptionPanel";
 
 interface VitalsTabProps {
   character: Character;
@@ -40,7 +40,6 @@ export function VitalsTab({
   onUpdateCorruption,
 }: VitalsTabProps) {
   const { wounds, fate } = character;
-  const corruption = character.corruption ?? { points: 0, malignancies: "" };
 
   const [woundsTotalDraft, setWoundsTotalDraft] = useState<string | null>(null);
   const [fateTotalDraft, setFateTotalDraft] = useState<string | null>(null);
@@ -91,15 +90,6 @@ export function VitalsTab({
       }
     },
     [fate, onUpdateFate]
-  );
-
-  const handleCorruptionPointsChange = useCallback(
-    (v: number) => onUpdateCorruption({ ...corruption, points: v }),
-    [corruption, onUpdateCorruption]
-  );
-  const handleMalignanciesChange = useCallback(
-    (v: string) => onUpdateCorruption({ ...corruption, malignancies: v }),
-    [corruption, onUpdateCorruption]
   );
 
   function dangerClass(value: number, criticalThreshold: number): string {
@@ -218,28 +208,12 @@ export function VitalsTab({
           sectionClassName={uiSection}
         />
 
-        <div>
-          <SectionHeader className="mb-2">Corruption</SectionHeader>
-          <section className={uiSection + " space-y-3"}>
-            <div className="flex items-center gap-3">
-              <span className="text-xs lg:text-sm text-slate-100 uppercase tracking-wide">Points</span>
-              <Stepper
-                value={corruption.points}
-                editable={editable}
-                onChange={handleCorruptionPointsChange}
-              />
-            </div>
-            <FormField
-              label="Malignancies"
-              value={corruption.malignancies}
-              onChange={handleMalignanciesChange}
-              editable={editable}
-              type="textarea"
-              rows={2}
-              placeholder="List any malignancies..."
-            />
-          </section>
-        </div>
+        <CorruptionPanel
+          corruption={character.corruption}
+          editable={editable}
+          onUpdate={onUpdateCorruption}
+          sectionClassName={uiSection}
+        />
       </div>
     </div>
   );

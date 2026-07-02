@@ -100,7 +100,11 @@ export function InsanityDisorderPicker({
                     notes: notes.trim() || undefined,
                     custom: true,
                   });
-                  onClose();
+                  setCustomMode(false);
+                  setCustomType(customDisorderTypes[0]);
+                  setSeverity("Minor");
+                  setCustomName("");
+                  setNotes("");
                 }}
                 disabled={!canAddCustom}
                 className={`${uiActionButton} flex-1 disabled:cursor-not-allowed disabled:opacity-50`}
@@ -192,7 +196,7 @@ export function InsanityDisorderPicker({
                 name: selected.name,
                 severity: activeSeverity,
               });
-              onClose();
+              setSelected(null);
             }}
           >
             Add Disorder
@@ -285,13 +289,13 @@ export function InsanityDisorderPicker({
             <span onClick={(event) => event.stopPropagation()} className={uiInfoModalWrapper}>
               <InfoModal
                 title={ref.name}
-                hideTitle
                 content={
                   <DisorderInfoContent
                     type={ref.type}
                     name={ref.name}
                     description={ref.description}
                     typeDescription={ref.typeDescription}
+                    hideName
                   />
                 }
               />
