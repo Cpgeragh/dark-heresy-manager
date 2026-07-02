@@ -5,11 +5,12 @@ import { Stepper } from "../../components/Stepper";
 import type { CorruptionBlock, CorruptionMalignancyEntry } from "../../types/Character";
 import { Chip } from "../../ui/Chip";
 import { uiActionButtonCompact } from "../../ui/buttonStyles";
-import { colourInactive, colourRose } from "../../ui/colourTokens";
+import { colourAmberFaint, colourInactive, colourRose } from "../../ui/colourTokens";
 import {
   uiCell,
   uiFormLabel,
   uiInfoModalWrapper,
+  uiTextLabel,
   uiTextMuted,
   uiTextPlaceholder,
 } from "../../ui/editableStyles";
@@ -95,7 +96,7 @@ function CorruptionStatusChips({ points }: { points: number }) {
         )}
       </div>
       {next && !entry.terminal && (
-        <p className="text-[10px] lg:text-xs text-slate-500">
+        <p className={`text-[10px] lg:text-xs ${uiTextMuted}`}>
           {next.min - safePoints} points until {next.degree}
         </p>
       )}
@@ -118,15 +119,19 @@ function MalignancyRow({
     name: ref?.name ?? malignancy.name,
     effect: ref?.effect ?? malignancy.effect,
   };
-  const description = malignancy.notes || display.effect;
 
   return (
     <div className={`${uiCell} px-2 py-2 lg:px-3`}>
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-sm font-medium text-slate-200 lg:text-base">{display.name}</span>
-            {display.roll && <Chip size="sm" className={colourInactive}>{display.roll}</Chip>}
+          <span className="text-sm font-medium text-slate-200 lg:text-base">{display.name}</span>
+          {display.roll && (
+            <div className="mt-1 flex flex-wrap gap-1.5">
+              <Chip size="sm" className={colourAmberFaint}>{display.roll}</Chip>
+            </div>
+          )}
+          <div className="mt-1 flex items-center gap-1.5">
+            <span className={uiTextLabel}>Rules</span>
             <span className={uiInfoModalWrapper}>
               <InfoModal
                 title={display.name}
@@ -134,7 +139,6 @@ function MalignancyRow({
               />
             </span>
           </div>
-          {description && <p className={`mt-1 line-clamp-2 text-xs lg:text-sm ${uiTextMuted}`}>{description}</p>}
         </div>
         {editable && (
           <button type="button" onClick={onRemove} className={`${uiActionButtonCompact} shrink-0`}>

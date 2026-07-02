@@ -33,6 +33,7 @@ export const CATEGORIES: {
     tabs: [
       { id: "background", label: "Background" },
       { id: "stats", label: "Characteristics" },
+      { id: "insanityCorruption", label: "Insanity & Corruption" },
       { id: "notes", label: "Notes" },
       { id: "xp", label: "XP" },
     ],

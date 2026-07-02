@@ -10,6 +10,7 @@ import { useCharacterSheet } from "./characterSheet/useCharacterSheet";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 
 import { VitalsTab } from "./characterSheet/VitalsTab";
+import { InsanityCorruptionTab } from "./characterSheet/InsanityCorruptionTab";
 import { CharacteristicsTab } from "./characterSheet/CharacteristicsTab";
 import { SkillsTab } from "./characterSheet/SkillsTab";
 import { TalentsTab } from "./characterSheet/TalentsTab";
@@ -338,6 +339,7 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
 
   const TAB_TITLES: Record<TabId, string> = {
     vitals: "Vitals",
+    insanityCorruption: "Insanity & Corruption",
     stats: "Characteristics",
     skills: "Skills",
     talents: "Talents",
@@ -425,6 +427,14 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
               editable={allowedToEdit}
               onUpdateWounds={handleUpdateWounds}
               onUpdateFate={handleUpdateFate}
+            />
+          )}
+
+          {activeTab === "insanityCorruption" && (
+            <InsanityCorruptionTab
+              insanity={character.insanity}
+              corruption={character.corruption}
+              editable={allowedToEdit}
               onUpdateInsanity={handleUpdateInsanity}
               onUpdateCorruption={handleUpdateCorruption}
             />
