@@ -8,11 +8,6 @@ export interface CorruptionTrackEntry {
   terminal?: boolean;
 }
 
-export interface MoralThreatEntry {
-  title: string;
-  description: string;
-}
-
 export interface CorruptionMalignancyRef {
   id: string;
   roll: string;
@@ -36,48 +31,11 @@ export const CORRUPTION_TRACK: CorruptionTrackEntry[] = [
 ];
 
 export const CORRUPTION_RULE_TEXT = {
-  points:
-    "All Acolytes sooner or later gain Corruption Points (CP). Corruption Points operate almost exactly like Insanity Points, except that they are gained through exposure to the warp, dark rituals, cursed artefacts and Daemonic influence. The more Corruption Points a character has, the more afflicted he becomes; this is reflected in the rules below by the risk of Malignancies and Mutation as shown on Table 8-7: The Corruption Track.",
-  commonCitizen:
-    "The rules for Corruption presented here are for use with Player Characters; Acolytes are men and women of destiny and purpose, exactly the sort of people that the Ruinous Powers seek to slowly corrupt and toy with. For most, the touch of Chaos brings summary destruction, madness, mutation and death.",
   malignancyTest:
     "For every 10 Corruption Points a character gains, he must Test Willpower to see if his corruption has manifested as literal damage to his body and soul. This roll is modified depending on the number of CPs the character already possesses as noted on Table 8-7: The Corruption Track. If the Test is failed, the character's corruption of spirit is given form. These metaphysical and psychosomatic scars are called Malignancies, and are randomly rolled on Table 8-8: Malignancies. If a player rolls a result that he has previously suffered for failing a previous Malignancy Test, he must roll again.",
   mutation:
     "A character's Corruption Points total is also used to determine the warping effects of Chaos upon his body. As his Corruption builds, his flesh may revolt, twisted by the Dark Gods. Of course, such is the insidious nature of Chaos that it is constantly hunting for weakness in mind and body, testing a character's defences until it can find a way into his soul. For every 30 Corruption Points a character gains, he must make a Test against two Characteristics of his choice or suffer a random Minor Mutation (see Chapter XII: Aliens, Heretics & Antagonists). He may not Test against the same Characteristics twice to resist mutation. A player should make a note on his Character Sheet of which Characteristics he has already Tested to resist mutation.",
 };
-
-export const MORAL_THREATS: MoralThreatEntry[] = [
-  {
-    title: "Warp Shock",
-    description:
-      "If a character suffers Insanity Points resulting from a failed Fear Test involving entities from the warp, the number of Corruption Points inflicted on him are equal to the being's Fear Rating score (i.e. Frightening 2 equals 2 CP).",
-  },
-  {
-    title: "Rending the Veil",
-    description:
-      "Characters caught in a full-blown intrusion of the warp into corporeal reality gain Corruption Points from the experience. Just how many depends on what occurs and the severity of the breach. This might be anywhere from a single point to several d10s in value.",
-  },
-  {
-    title: "Sorcery",
-    description:
-      "The practice of sorcery, witnessing dread rituals and invoking Daemons are all causes of Corruption, regardless of the reason. Normally minor rituals cause 1d10 Corruption Points and major ceremonies can cause many more.",
-  },
-  {
-    title: "Blasphemous Lore",
-    description:
-      "Knowledge itself can corrupt, and the study of certain tomes, pict-logs and even some debased artwork can cause Corruption in the viewer.",
-  },
-  {
-    title: "Dark Deeds",
-    description:
-      "Evil acts done in the furtherance of a malignancy, or in pursuit of forbidden lore, or done to appease a Daemon always cause Corruption Points.",
-  },
-  {
-    title: "Vile Persuasion",
-    description:
-      "Many Daemons and cult leaders are masters of insidious temptation and of sowing the seeds of doubt in a faithful heart. Their words and arguments can corrupt where force alone would fail.",
-  },
-];
 
 export const CORRUPTION_MALIGNANCIES: CorruptionMalignancyRef[] = [
   {

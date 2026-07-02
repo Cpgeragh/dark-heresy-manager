@@ -6,17 +6,17 @@ import { Button } from "../../ui/Button";
 import { Chip } from "../../ui/Chip";
 import { PickerModal } from "../../ui/PickerModal";
 import { uiActionButton, uiPickerBackButton } from "../../ui/buttonStyles";
-import { editableInputClass, uiFormLabel, uiInfoModalWrapper, uiItemName, uiTextBody, uiTextMuted } from "../../ui/editableStyles";
+import { editableInputClass, uiFormLabel, uiInfoModalWrapper, uiItemName, uiTextBody, uiTextLabel } from "../../ui/editableStyles";
 import { DisorderInfoContent } from "./InsanityReferenceModals";
 import { INSANITY_DISORDER_REFERENCE, INSANITY_SEVERITIES, type InsanityDisorderRef } from "./insanityReference";
-import { inactiveChipClass, severityChipClass } from "./insanityUi";
+import { disorderTypeChipClass, inactiveChipClass, severityChipClass } from "./insanityUi";
 
 function createDisorderId(): string {
   return globalThis.crypto?.randomUUID?.() ?? `disorder-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
 const customDisorderTypes = [
-  ...Array.from(new Set(INSANITY_DISORDER_REFERENCE.map((ref) => ref.type))),
+  ...Array.from(new Set(INSANITY_DISORDER_REFERENCE.map((ref) => ref.type))).sort(),
   "Other",
 ];
 
@@ -47,7 +47,7 @@ export function InsanityDisorderPicker({
 
   const typeOptions = [
     "All",
-    ...Array.from(new Set(INSANITY_DISORDER_REFERENCE.map((ref) => ref.type))),
+    ...Array.from(new Set(INSANITY_DISORDER_REFERENCE.map((ref) => ref.type))).sort(),
   ];
   const filtered = INSANITY_DISORDER_REFERENCE.filter((ref) => {
     const searchable = `${ref.type} ${ref.name}`.toLowerCase();
@@ -56,7 +56,7 @@ export function InsanityDisorderPicker({
       (typeFilter === "All" || ref.type === typeFilter) &&
       searchable.includes(query.trim().toLowerCase())
     );
-  });
+  }).sort((a, b) => a.name.localeCompare(b.name));
 
   const activeSeverity = selected?.severityOptions.includes(severity)
     ? severity
@@ -284,8 +284,15 @@ export function InsanityDisorderPicker({
           }}
           className="group w-full px-4 py-3 text-left transition hover:bg-slate-800 lg:px-5 lg:py-4"
         >
-          <div className="flex items-center gap-1.5">
-            <span className={`${uiItemName} group-hover:text-white`}>{ref.name}</span>
+          <span className={`${uiItemName} group-hover:text-white`}>{ref.name}</span>
+          <div className="mt-1 flex flex-wrap gap-1.5">
+            <Chip size="sm" className={disorderTypeChipClass(ref.type)}>{ref.type}</Chip>
+            {ref.severityOptions.map((option) => (
+              <Chip key={option} size="sm" className={severityChipClass[option]}>{option}</Chip>
+            ))}
+          </div>
+          <div className="mt-1 flex items-center gap-1.5">
+            <span className={uiTextLabel}>Rules</span>
             <span onClick={(event) => event.stopPropagation()} className={uiInfoModalWrapper}>
               <InfoModal
                 title={ref.name}
@@ -301,13 +308,6 @@ export function InsanityDisorderPicker({
               />
             </span>
           </div>
-          <div className="mt-1 flex flex-wrap gap-1.5">
-            <Chip size="sm" className={inactiveChipClass}>{ref.type}</Chip>
-            {ref.severityOptions.map((option) => (
-              <Chip key={option} size="sm" className={severityChipClass[option]}>{option}</Chip>
-            ))}
-          </div>
-          <p className={`mt-1 line-clamp-2 text-xs lg:text-sm ${uiTextMuted}`}>{ref.description}</p>
         </button>
       ))}
     </PickerModal>

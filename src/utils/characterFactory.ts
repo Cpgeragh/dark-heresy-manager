@@ -81,6 +81,7 @@ export function createEmptyCharacterData(params: {
     insanity: {
       points: 0,
       disorders: [],
+      currentTrauma: [],
     },
 
     corruption: {

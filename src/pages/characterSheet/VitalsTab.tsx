@@ -6,8 +6,6 @@ import type {
   Character,
   WoundsBlock,
   FateBlock,
-  InsanityBlock,
-  CorruptionBlock,
 } from "../../types/Character";
 import {
   uiSection,
@@ -16,16 +14,12 @@ import {
 } from "../../ui/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { WOUNDS_CRITICAL_THRESHOLD, FATE_CRITICAL_THRESHOLD } from "../../constants/gameRules";
-import { InsanityPanel } from "../../features/insanity/InsanityPanel";
-import { CorruptionPanel } from "../../features/corruption/CorruptionPanel";
 
 interface VitalsTabProps {
   character: Character;
   editable: boolean;
   onUpdateWounds: (next: WoundsBlock) => void;
   onUpdateFate: (next: FateBlock) => void;
-  onUpdateInsanity: (next: InsanityBlock) => void;
-  onUpdateCorruption: (next: CorruptionBlock) => void;
 }
 
 const totalInputClass =
@@ -36,8 +30,6 @@ export function VitalsTab({
   editable,
   onUpdateWounds,
   onUpdateFate,
-  onUpdateInsanity,
-  onUpdateCorruption,
 }: VitalsTabProps) {
   const { wounds, fate } = character;
 
@@ -198,22 +190,6 @@ export function VitalsTab({
             </div>
           </div>
         </section>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <InsanityPanel
-          insanity={character.insanity}
-          editable={editable}
-          onUpdate={onUpdateInsanity}
-          sectionClassName={uiSection}
-        />
-
-        <CorruptionPanel
-          corruption={character.corruption}
-          editable={editable}
-          onUpdate={onUpdateCorruption}
-          sectionClassName={uiSection}
-        />
       </div>
     </div>
   );

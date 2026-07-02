@@ -1,32 +1,21 @@
 import { useState } from "react";
 import { FormField } from "../../components/FormField";
 import { InfoModal } from "../../components/InfoModal";
-import type { CorruptionMalignancyEntry } from "../../types/Character";
-import { Chip } from "../../ui/Chip";
+import type { InsanityTraumaEntry } from "../../types/Character";
 import { PickerModal } from "../../ui/PickerModal";
 import { uiActionButton, uiPickerBackButton } from "../../ui/buttonStyles";
-import {
-  colourAmberFaint,
-} from "../../ui/colourTokens";
-import {
-  editableInputClass,
-  uiFormLabel,
-  uiInfoModalWrapper,
-  uiItemName,
-  uiTextLabel,
-} from "../../ui/editableStyles";
-import { MalignancyInfoContent } from "./CorruptionReferenceModals";
-import { CORRUPTION_MALIGNANCIES, type CorruptionMalignancyRef } from "./corruptionReference";
+import { editableInputClass, uiFormLabel, uiInfoModalWrapper, uiItemName, uiTextLabel } from "../../ui/editableStyles";
+import { MENTAL_TRAUMAS, type MentalTraumaEntry } from "./insanityReference";
 
-function createMalignancyId(): string {
-  return globalThis.crypto?.randomUUID?.() ?? `malignancy-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+function createTraumaId(): string {
+  return globalThis.crypto?.randomUUID?.() ?? `trauma-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-export function CorruptionMalignancyPicker({
+export function InsanityTraumaPicker({
   onAdd,
   onClose,
 }: {
-  onAdd: (entry: CorruptionMalignancyEntry) => void;
+  onAdd: (entry: InsanityTraumaEntry) => void;
   onClose: () => void;
 }) {
   const [query, setQuery] = useState("");
@@ -34,18 +23,17 @@ export function CorruptionMalignancyPicker({
   const [customName, setCustomName] = useState("");
   const [customDetails, setCustomDetails] = useState("");
 
-  const filtered = CORRUPTION_MALIGNANCIES.filter((ref) => {
-    const searchable = `${ref.roll} ${ref.name} ${ref.effect}`.toLowerCase();
+  const filtered = MENTAL_TRAUMAS.filter((ref) => {
+    const searchable = `${ref.roll} ${ref.effect}`.toLowerCase();
     return searchable.includes(query.trim().toLowerCase());
   });
   const canAddCustom = Boolean(customName.trim());
 
-  function addReferenceMalignancy(ref: CorruptionMalignancyRef) {
+  function addReferenceTrauma(ref: MentalTraumaEntry) {
     onAdd({
-      id: createMalignancyId(),
-      referenceId: ref.id,
+      id: createTraumaId(),
+      referenceId: ref.roll,
       roll: ref.roll,
-      name: ref.name,
       effect: ref.effect,
     });
   }
@@ -53,11 +41,11 @@ export function CorruptionMalignancyPicker({
   if (customMode) {
     return (
       <PickerModal
-        title="Custom Malignancy"
+        title="Custom Trauma"
         query=""
         onQueryChange={() => undefined}
         onClose={() => setCustomMode(false)}
-        closeLabel="<"
+        closeLabel="←"
         hideSearch
         isEmpty={false}
         footer={
@@ -74,7 +62,7 @@ export function CorruptionMalignancyPicker({
                 onClick={() => {
                   if (!canAddCustom) return;
                   onAdd({
-                    id: createMalignancyId(),
+                    id: createTraumaId(),
                     name: customName.trim(),
                     effect: customDetails.trim() || undefined,
                     custom: true,
@@ -86,7 +74,7 @@ export function CorruptionMalignancyPicker({
                 disabled={!canAddCustom}
                 className={`${uiActionButton} flex-1 disabled:cursor-not-allowed disabled:opacity-50`}
               >
-                Add Malignancy
+                Add Trauma
               </button>
             </div>
           </div>
@@ -101,7 +89,7 @@ export function CorruptionMalignancyPicker({
               type="text"
               value={customName}
               onChange={(event) => setCustomName(event.target.value)}
-              placeholder="Name the malignancy..."
+              placeholder="Name the trauma..."
               className={editableInputClass(true) + " mt-0.5"}
             />
           </div>
@@ -122,8 +110,8 @@ export function CorruptionMalignancyPicker({
 
   return (
     <PickerModal
-      title="Add Malignancy"
-      placeholder="Search malignancies..."
+      title="Add Trauma"
+      placeholder="Search mental traumas..."
       query={query}
       onQueryChange={setQuery}
       onClose={onClose}
@@ -138,27 +126,24 @@ export function CorruptionMalignancyPicker({
           }}
           className="w-full py-1 text-center text-sm text-red-500 hover:text-red-400 lg:py-1.5 lg:text-base"
         >
-          + Add custom malignancy
+          + Add custom trauma
         </button>
       }
     >
       {filtered.map((ref) => (
         <button
-          key={ref.id}
+          key={ref.roll}
           type="button"
-          onClick={() => addReferenceMalignancy(ref)}
+          onClick={() => addReferenceTrauma(ref)}
           className="group w-full px-4 py-3 text-left transition hover:bg-slate-800 lg:px-5 lg:py-4"
         >
-          <span className={`${uiItemName} group-hover:text-white`}>{ref.name}</span>
-          <div className="mt-1 flex flex-wrap gap-1.5">
-            <Chip size="sm" className={colourAmberFaint}>{ref.roll}</Chip>
-          </div>
+          <span className={`${uiItemName} group-hover:text-white`}>{ref.roll}</span>
           <div className="mt-1 flex items-center gap-1.5">
             <span className={uiTextLabel}>Rules</span>
             <span onClick={(event) => event.stopPropagation()} className={uiInfoModalWrapper}>
               <InfoModal
-                title={ref.name}
-                content={<MalignancyInfoContent malignancy={ref} hideName />}
+                title={`Trauma ${ref.roll}`}
+                content={<p className="text-sm leading-relaxed text-slate-300 lg:text-base">{ref.effect}</p>}
               />
             </span>
           </div>

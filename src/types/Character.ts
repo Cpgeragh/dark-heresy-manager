@@ -77,10 +77,21 @@ export interface InsanityDisorderEntry {
   custom?: boolean;
 }
 
+export interface InsanityTraumaEntry {
+  id: string;
+  referenceId?: string;
+  roll?: string;
+  name?: string;
+  effect?: string;
+  notes?: string;
+  custom?: boolean;
+}
+
 export interface InsanityBlock {
   points: number;
   disorders: string | InsanityDisorderEntry[];
   disorderNotes?: string;
+  currentTrauma?: InsanityTraumaEntry[];
 }
 
 export interface CorruptionMalignancyEntry {

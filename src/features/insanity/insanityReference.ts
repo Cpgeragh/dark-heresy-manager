@@ -54,9 +54,7 @@ export const MENTAL_TRAUMAS: MentalTraumaEntry[] = [
 ];
 
 export const INSANITY_RULE_TEXT = {
-  degrees: "A character is classified as having a certain degree of madness depending on how many Insanity Points they have. This classification gives a player a broad idea of the state of a character's mind and how close to the edge he has become. A character's degree of madness also determines the modifier that will apply to Tests taken to avoid Mental Trauma.",
   trauma: "Mental Trauma represents the relatively short-term damage to a character's state of mind that he suffers after experiencing a horrific or supernatural event. Each time the character gains 10 Insanity Points he must make a Trauma Test. This is a Willpower Test, modified by how many Insanity Points the character has accrued in total. If the Test is failed, roll d100 and add 10 for every degree of failure, then compare the result to the Mental Traumas table.",
-  disorders: "Mental disorders reflect the permanent, long-term effects on a character's mind of exposure to things horrific and unnatural. A new disorder, or a more severe version of an existing disorder, is automatically gained each time the character has enough Insanity Points to increase his degree of madness by one stage. A character must have the preceding severity of a disorder for it to get worse, except for The Flesh is Weak, which has no Minor version.",
   recovery: "With the GM's permission, a character may use xp to remove Insanity Points. It costs 100 xp to remove a single Insanity Point. A character may never go down a degree of madness and so will never lose their disorders. Buying back Insanity Points should be represented as time and effort spent by the character in game.",
 };
 
@@ -113,7 +111,18 @@ export function getNextInsanityTrackEntry(points: number): InsanityTrackEntry | 
   return INSANITY_TRACK.find((entry) => entry.min > safePoints);
 }
 
+export function getNextInsanityDegreeEntry(points: number): InsanityTrackEntry | undefined {
+  const safePoints = Math.max(0, Math.floor(points || 0));
+  const currentDegree = getInsanityTrackEntry(safePoints).degree;
+  return INSANITY_TRACK.find((entry) => entry.min > safePoints && entry.degree !== currentDegree);
+}
+
 export function getInsanityDisorderRef(referenceId?: string): InsanityDisorderRef | undefined {
   if (!referenceId) return undefined;
   return INSANITY_DISORDER_REFERENCE.find((disorder) => disorder.id === referenceId);
+}
+
+export function getMentalTraumaRef(roll?: string): MentalTraumaEntry | undefined {
+  if (!roll) return undefined;
+  return MENTAL_TRAUMAS.find((entry) => entry.roll === roll);
 }
