@@ -83,9 +83,20 @@ export interface InsanityBlock {
   disorderNotes?: string;
 }
 
+export interface CorruptionMalignancyEntry {
+  id: string;
+  referenceId?: string;
+  roll?: string;
+  name: string;
+  effect?: string;
+  notes?: string;
+  custom?: boolean;
+}
+
 export interface CorruptionBlock {
   points: number;
-  malignancies: string;
+  malignancies: string | CorruptionMalignancyEntry[];
+  malignancyNotes?: string;
 }
 
 export interface MovementBlock {

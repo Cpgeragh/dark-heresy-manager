@@ -85,7 +85,7 @@ export function createEmptyCharacterData(params: {
 
     corruption: {
       points: 0,
-      malignancies: "",
+      malignancies: [],
     },
 
     movement: {
