@@ -16,3 +16,22 @@ export const CHARACTERISTIC_LABELS: Record<CharacteristicModifier["characteristi
   wp: "Willpower",
   fel: "Fellowship",
 };
+
+export interface RollDisplayEntry {
+  characteristic: CharacteristicModifier["characteristic"];
+  label: string;
+  value: number | undefined;
+}
+
+export function getRollDisplayEntries(
+  modifiers: CharacteristicModifier[] | undefined,
+  rolledModifiers: Record<string, number> | undefined
+): RollDisplayEntry[] {
+  return (modifiers ?? [])
+    .filter((modifier) => modifier.kind === "roll1d10")
+    .map((modifier) => ({
+      characteristic: modifier.characteristic,
+      label: CHARACTERISTIC_LABELS[modifier.characteristic],
+      value: rolledModifiers?.[modifier.characteristic],
+    }));
+}

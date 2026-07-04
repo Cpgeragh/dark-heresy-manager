@@ -8,7 +8,14 @@ import { useSwipeableTabs } from "../../hooks/useSwipeableTabs";
 import type { CorruptionBlock, CorruptionMalignancyEntry, CorruptionMutationEntry } from "../../types/Character";
 import { Chip } from "../../ui/Chip";
 import { uiActionButtonCompact } from "../../ui/buttonStyles";
-import { colourActiveEmerald, colourActiveOrange, colourActiveSky, colourAmberFaint } from "../../ui/colourTokens";
+import {
+  colourActiveEmerald,
+  colourActiveOrange,
+  colourActiveSky,
+  colourAmberFaint,
+  colourRose,
+  colourSky,
+} from "../../ui/colourTokens";
 import {
   uiFormLabel,
   uiInfoModalWrapper,
@@ -18,10 +25,12 @@ import {
   uiTextPlaceholder,
 } from "../../ui/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
+import { getRollDisplayEntries } from "./characteristicModifiers";
 import { CorruptionMalignancyPicker } from "./CorruptionMalignancyPicker";
 import { MalignancyInfoContent } from "./CorruptionReferenceModals";
 import { MutationPicker } from "./MutationPicker";
 import { mutationDisplayName, MutationRow } from "./MutationRow";
+import { RollEditor } from "./RollEditor";
 import {
   CORRUPTION_RULE_TEXT,
   getCorruptionMalignancyRef,
@@ -228,17 +237,21 @@ function MalignancyRow({
   malignancy,
   editable,
   onRemove,
+  onUpdateRolls,
 }: {
   malignancy: CorruptionMalignancyEntry;
   editable: boolean;
   onRemove: () => void;
+  onUpdateRolls: (rolledModifiers: Record<string, number>) => void;
 }) {
+  const [isEditingRolls, setIsEditingRolls] = useState(false);
   const ref = getCorruptionMalignancyRef(malignancy.referenceId);
   const display = {
     roll: ref?.roll ?? malignancy.roll,
     name: ref?.name ?? malignancy.name,
     effect: ref?.effect ?? malignancy.effect,
   };
+  const rollEntries = getRollDisplayEntries(ref?.modifiers, malignancy.rolledModifiers);
 
   return (
     <div className={uiSection}>
@@ -248,6 +261,15 @@ function MalignancyRow({
           {display.roll && (
             <div className="mt-1 flex flex-wrap gap-1.5">
               <Chip size="sm" className={colourAmberFaint}>{display.roll}</Chip>
+            </div>
+          )}
+          {rollEntries.length > 0 && (
+            <div className="mt-1 flex flex-wrap gap-1.5">
+              {rollEntries.map((entry) => (
+                <Chip key={entry.characteristic} size="sm" className={entry.value === undefined ? colourRose : colourSky}>
+                  {entry.label}: {entry.value ?? "not recorded"}
+                </Chip>
+              ))}
             </div>
           )}
           <div className="mt-1 flex items-center gap-1.5">
@@ -261,11 +283,30 @@ function MalignancyRow({
           </div>
         </div>
         {editable && (
-          <button type="button" onClick={onRemove} className={`${uiActionButtonCompact} shrink-0`}>
-            Remove
-          </button>
+          <div className="flex shrink-0 gap-1.5">
+            {rollEntries.length > 0 && (
+              <button type="button" onClick={() => setIsEditingRolls(true)} className={uiActionButtonCompact}>
+                Edit Rolls
+              </button>
+            )}
+            <button type="button" onClick={onRemove} className={uiActionButtonCompact}>
+              Remove
+            </button>
+          </div>
         )}
       </div>
+      {isEditingRolls && (
+        <RollEditor
+          title={display.name}
+          modifiers={ref?.modifiers ?? []}
+          initialRolledModifiers={malignancy.rolledModifiers}
+          onSave={(rolledModifiers) => {
+            onUpdateRolls(rolledModifiers);
+            setIsEditingRolls(false);
+          }}
+          onCancel={() => setIsEditingRolls(false)}
+        />
+      )}
     </div>
   );
 }
@@ -275,12 +316,14 @@ function MalignanciesList({
   legacyMalignancies,
   editable,
   onRemove,
+  onUpdateRolls,
   onLegacyChange,
 }: {
   malignancies: CorruptionMalignancyEntry[];
   legacyMalignancies: string;
   editable: boolean;
   onRemove: (id: string) => void;
+  onUpdateRolls: (id: string, rolledModifiers: Record<string, number>) => void;
   onLegacyChange: (notes: string) => void;
 }) {
   if (malignancies.length > 0) {
@@ -294,6 +337,7 @@ function MalignanciesList({
               malignancy={malignancy}
               editable={editable}
               onRemove={() => onRemove(malignancy.id)}
+              onUpdateRolls={(rolledModifiers) => onUpdateRolls(malignancy.id, rolledModifiers)}
             />
           ))}
         {legacyMalignancies.trim() && (
@@ -332,11 +376,13 @@ function MutationsList({
   mutations,
   editable,
   onRemove,
+  onUpdateRolls,
   emptyLabel,
 }: {
   mutations: CorruptionMutationEntry[];
   editable: boolean;
   onRemove: (id: string) => void;
+  onUpdateRolls: (id: string, rolledModifiers: Record<string, number>) => void;
   emptyLabel: string;
 }) {
   if (mutations.length === 0) {
@@ -347,7 +393,13 @@ function MutationsList({
       {[...mutations]
         .sort((a, b) => mutationDisplayName(a).localeCompare(mutationDisplayName(b)))
         .map((mutation) => (
-          <MutationRow key={mutation.id} mutation={mutation} editable={editable} onRemove={() => onRemove(mutation.id)} />
+          <MutationRow
+            key={mutation.id}
+            mutation={mutation}
+            editable={editable}
+            onRemove={() => onRemove(mutation.id)}
+            onUpdateRolls={(rolledModifiers) => onUpdateRolls(mutation.id, rolledModifiers)}
+          />
         ))}
     </div>
   );
@@ -415,6 +467,17 @@ export function CorruptionPanel({ corruption, editable, onUpdate, sectionClassNa
     [value, structuredMalignancies, onUpdate]
   );
 
+  const handleUpdateMalignancyRolls = useCallback(
+    (id: string, rolledModifiers: Record<string, number>) =>
+      onUpdate({
+        ...value,
+        malignancies: structuredMalignancies.map((entry) =>
+          entry.id === id ? { ...entry, rolledModifiers } : entry
+        ),
+      }),
+    [value, structuredMalignancies, onUpdate]
+  );
+
   const handleAddMinorMutation = useCallback(
     (entry: CorruptionMutationEntry) => onUpdate({ ...value, minorMutations: [...minorMutations, entry] }),
     [value, minorMutations, onUpdate]
@@ -425,6 +488,15 @@ export function CorruptionPanel({ corruption, editable, onUpdate, sectionClassNa
     [value, minorMutations, onUpdate]
   );
 
+  const handleUpdateMinorMutationRolls = useCallback(
+    (id: string, rolledModifiers: Record<string, number>) =>
+      onUpdate({
+        ...value,
+        minorMutations: minorMutations.map((entry) => (entry.id === id ? { ...entry, rolledModifiers } : entry)),
+      }),
+    [value, minorMutations, onUpdate]
+  );
+
   const handleAddMajorMutation = useCallback(
     (entry: CorruptionMutationEntry) => onUpdate({ ...value, majorMutations: [...majorMutations, entry] }),
     [value, majorMutations, onUpdate]
@@ -432,6 +504,15 @@ export function CorruptionPanel({ corruption, editable, onUpdate, sectionClassNa
 
   const handleRemoveMajorMutation = useCallback(
     (id: string) => onUpdate({ ...value, majorMutations: majorMutations.filter((entry) => entry.id !== id) }),
+    [value, majorMutations, onUpdate]
+  );
+
+  const handleUpdateMajorMutationRolls = useCallback(
+    (id: string, rolledModifiers: Record<string, number>) =>
+      onUpdate({
+        ...value,
+        majorMutations: majorMutations.map((entry) => (entry.id === id ? { ...entry, rolledModifiers } : entry)),
+      }),
     [value, majorMutations, onUpdate]
   );
 
@@ -457,6 +538,7 @@ export function CorruptionPanel({ corruption, editable, onUpdate, sectionClassNa
             legacyMalignancies={legacyMalignancies}
             editable={editable}
             onRemove={handleRemoveMalignancy}
+            onUpdateRolls={handleUpdateMalignancyRolls}
             onLegacyChange={handleLegacyMalignanciesChange}
           />
         </>
@@ -470,6 +552,7 @@ export function CorruptionPanel({ corruption, editable, onUpdate, sectionClassNa
             mutations={minorMutations}
             editable={editable}
             onRemove={handleRemoveMinorMutation}
+            onUpdateRolls={handleUpdateMinorMutationRolls}
             emptyLabel="No minor mutations recorded."
           />
         </>
@@ -482,6 +565,7 @@ export function CorruptionPanel({ corruption, editable, onUpdate, sectionClassNa
           mutations={majorMutations}
           editable={editable}
           onRemove={handleRemoveMajorMutation}
+          onUpdateRolls={handleUpdateMajorMutationRolls}
           emptyLabel="No major mutations recorded."
         />
       </>
