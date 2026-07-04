@@ -233,7 +233,7 @@ function malignancyDisplayName(malignancy: CorruptionMalignancyEntry): string {
   return getCorruptionMalignancyRef(malignancy.referenceId)?.name ?? malignancy.name ?? "";
 }
 
-function MalignancyRow({
+export function MalignancyRow({
   malignancy,
   editable,
   onRemove,

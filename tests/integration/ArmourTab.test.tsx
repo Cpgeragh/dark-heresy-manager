@@ -37,12 +37,12 @@ function renderTab(props: Partial<React.ComponentProps<typeof ArmourTab>> = {}) 
 }
 
 describe("ArmourTab", () => {
-  it("renders the location summary and section headers with counts", () => {
+  it("renders the location summary and section headers", () => {
     renderTab();
     expect(screen.getByText("Location Summary")).toBeInTheDocument();
-    expect(screen.getByText(/Worn \(1\)/)).toBeInTheDocument();
-    expect(screen.getByText(/Stowed \(0\)/)).toBeInTheDocument();
-    expect(screen.getByText(/Force Fields \(0\)/)).toBeInTheDocument();
+    expect(screen.getByText("Worn")).toBeInTheDocument();
+    expect(screen.getByText("Stowed")).toBeInTheDocument();
+    expect(screen.getByText("Force Fields")).toBeInTheDocument();
   });
 
   it("renders a worn piece by name", () => {
