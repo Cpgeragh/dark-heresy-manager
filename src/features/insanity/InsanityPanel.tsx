@@ -1,9 +1,10 @@
 // src/features/insanity/InsanityPanel.tsx
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { FormField } from "../../components/FormField";
 import { InfoModal } from "../../components/InfoModal";
 import { Stepper } from "../../components/Stepper";
+import { useSwipeableTabs } from "../../hooks/useSwipeableTabs";
 import type {
   InsanityBlock,
   InsanityDisorderEntry,
@@ -53,6 +54,7 @@ interface InsanityPanelProps {
 }
 
 type EntryGroup = "trauma" | "disorders";
+const ENTRY_GROUPS = ["trauma", "disorders"] as const satisfies readonly EntryGroup[];
 
 function severityDescription(severity: InsanityDisorderSeverity): string {
   return INSANITY_SEVERITIES.find((entry) => entry.severity === severity)?.description ?? "";
@@ -60,6 +62,13 @@ function severityDescription(severity: InsanityDisorderSeverity): string {
 
 function InsanityTimeline({ points }: { points: number }) {
   const progressPct = Math.min(100, (points / INSANITY_TIMELINE_TOTAL_WIDTH) * 100);
+
+  const breakpoints: number[] = [];
+  let cumulative = 0;
+  for (let i = 0; i < INSANITY_TIMELINE_SEGMENTS.length - 1; i++) {
+    cumulative += INSANITY_TIMELINE_SEGMENTS[i].width;
+    breakpoints.push(cumulative);
+  }
 
   return (
     <div className="w-full">
@@ -94,6 +103,15 @@ function InsanityTimeline({ points }: { points: number }) {
       </div>
       <div className="relative h-4 mt-1.5 text-xs lg:text-sm font-semibold text-slate-200">
         <span className="absolute left-0 -translate-x-1/2">0</span>
+        {breakpoints.map((value) => (
+          <span
+            key={value}
+            className="absolute -translate-x-1/2 text-[10px] lg:text-xs font-normal text-slate-300"
+            style={{ left: `${(value / INSANITY_TIMELINE_TOTAL_WIDTH) * 100}%` }}
+          >
+            {value}
+          </span>
+        ))}
         <span className="absolute left-full -translate-x-1/2">100</span>
       </div>
     </div>
@@ -110,8 +128,18 @@ function InsanityStatusChips({ points }: { points: number }) {
     <div className="w-full max-w-md space-y-3">
       <InsanityTimeline points={safePoints} />
 
-      <div className="flex justify-center">
+      <div className="flex justify-center items-center gap-1.5">
         <Chip size="lg" className={insanityDegreeChipClass(entry)}>{entry.degree}</Chip>
+        <span className={uiInfoModalWrapper}>
+          <InfoModal
+            title="Degree of Madness"
+            content={
+              <p className="text-sm leading-relaxed text-slate-300 lg:text-base">
+                {INSANITY_RULE_TEXT.degree}
+              </p>
+            }
+          />
+        </span>
       </div>
 
       {entry.terminal ? (
@@ -126,9 +154,21 @@ function InsanityStatusChips({ points }: { points: number }) {
               <Chip size="sm" className={insanityDegreeChipClass(entry)}>
                 Trauma Modifier: {entry.traumaModifier}
               </Chip>
-              <Chip size="sm" className={insanityDisorderLevelChipClass(entry)}>
-                Disorder Level: {insanityDisorderLevelLabel(entry)}
-              </Chip>
+              <span className="inline-flex items-center gap-1">
+                <Chip size="sm" className={insanityDisorderLevelChipClass(entry)}>
+                  Disorder Level: {insanityDisorderLevelLabel(entry)}
+                </Chip>
+                <span className={uiInfoModalWrapper}>
+                  <InfoModal
+                    title="Gaining Disorders"
+                    content={
+                      <p className="text-sm leading-relaxed text-slate-300 lg:text-base">
+                        {INSANITY_RULE_TEXT.disorders}
+                      </p>
+                    }
+                  />
+                </span>
+              </span>
             </div>
           </div>
           <div className="flex flex-col items-center space-y-1.5 border-l border-slate-500 pl-3">
@@ -136,7 +176,17 @@ function InsanityStatusChips({ points }: { points: number }) {
             <div className="flex flex-col items-center gap-1">
               {next && (
                 <p className="text-xs lg:text-sm text-slate-300 text-center">
-                  <span className="font-code text-sm lg:text-base font-bold text-amber-400">{next.min - safePoints}</span> pt{next.min - safePoints === 1 ? "" : "s"} until Trauma Test
+                  <span className="font-code text-sm lg:text-base font-bold text-amber-400">{next.min - safePoints}</span> pt{next.min - safePoints === 1 ? "" : "s"} until Trauma Test{" "}
+                  <span onClick={(event) => event.stopPropagation()} className={uiInfoModalWrapper}>
+                    <InfoModal
+                      title="Mental Trauma"
+                      content={
+                        <p className="text-sm leading-relaxed text-slate-300 lg:text-base">
+                          {INSANITY_RULE_TEXT.trauma}
+                        </p>
+                      }
+                    />
+                  </span>
                 </p>
               )}
               {nextDegree && (
@@ -407,8 +457,6 @@ export function InsanityPanel({ insanity, editable, onUpdate, sectionClassName }
   const [activeGroup, setActiveGroup] = useState<EntryGroup>(() =>
     structuredTrauma.length === 0 && structuredDisorders.length > 0 ? "disorders" : "trauma"
   );
-  const [groupTransition, setGroupTransition] = useState<"idle" | "sliding">("idle");
-  const swipeContainerRef = useRef<HTMLDivElement>(null);
 
   const handlePointsChange = useCallback(
     (points: number) => onUpdate({ ...value, points }),
@@ -459,79 +507,10 @@ export function InsanityPanel({ insanity, editable, onUpdate, sectionClassName }
     [value, structuredTrauma, onUpdate]
   );
 
-  const switchGroup = useCallback((group?: EntryGroup) => {
-    setActiveGroup((current) => {
-      const next = group ?? (current === "trauma" ? "disorders" : "trauma");
-      if (next === current) return current;
-      setGroupTransition("sliding");
-      window.setTimeout(() => setGroupTransition("idle"), 180);
-      return next;
-    });
-  }, []);
-  useEffect(() => {
-    const element = swipeContainerRef.current;
-    if (!element) return;
-
-    let startX = NaN;
-    let startY = 0;
-    let isHorizontal: boolean | null = null;
-
-    const onTouchStart = (event: globalThis.TouchEvent) => {
-      const target = event.target as HTMLElement;
-      if (target.closest("button, a, [role='button']")) {
-        startX = NaN;
-        isHorizontal = null;
-        return;
-      }
-      const touch = event.touches[0];
-      if (!touch) return;
-      const rect = element.getBoundingClientRect();
-      if (touch.clientY < rect.top || touch.clientY > rect.bottom) {
-        startX = NaN;
-        return;
-      }
-      startX = touch.clientX;
-      startY = touch.clientY;
-      isHorizontal = null;
-    };
-
-    const onTouchMove = (event: globalThis.TouchEvent) => {
-      if (isNaN(startX)) return;
-      const touch = event.touches[0];
-      if (!touch) return;
-      const deltaX = touch.clientX - startX;
-      const deltaY = touch.clientY - startY;
-      if (isHorizontal === null) {
-        if (Math.abs(deltaX) < 10 && Math.abs(deltaY) < 10) return;
-        isHorizontal = Math.abs(deltaX) > Math.abs(deltaY);
-      }
-      if (isHorizontal) event.preventDefault();
-    };
-
-    const onTouchEnd = (event: globalThis.TouchEvent) => {
-      const wasHorizontal = isHorizontal;
-      const start = startX;
-      startX = NaN;
-      isHorizontal = null;
-      if (isNaN(start) || !wasHorizontal) return;
-      const touch = event.changedTouches[0];
-      if (!touch) return;
-      if (Math.abs(touch.clientX - start) < 50) return;
-      switchGroup();
-    };
-
-    document.addEventListener("touchstart", onTouchStart, { passive: true });
-    document.addEventListener("touchmove", onTouchMove, { passive: false });
-    document.addEventListener("touchend", onTouchEnd, { passive: true });
-    return () => {
-      document.removeEventListener("touchstart", onTouchStart);
-      document.removeEventListener("touchmove", onTouchMove);
-      document.removeEventListener("touchend", onTouchEnd);
-    };
-  }, [switchGroup]);
+  const { containerRef, transition, switchTo } = useSwipeableTabs(ENTRY_GROUPS, activeGroup, setActiveGroup);
 
   const transitionClass =
-    groupTransition === "sliding"
+    transition === "sliding"
       ? activeGroup === "trauma"
         ? "opacity-0 -translate-x-3"
         : "opacity-0 translate-x-3"
@@ -555,7 +534,7 @@ export function InsanityPanel({ insanity, editable, onUpdate, sectionClassName }
 
       {/* Mobile — tab switcher between Temporary Trauma and Disorders */}
       <div
-        ref={swipeContainerRef}
+        ref={containerRef}
         className="lg:hidden space-y-4"
       >
         <div
@@ -563,7 +542,7 @@ export function InsanityPanel({ insanity, editable, onUpdate, sectionClassName }
           role="tablist"
           aria-label="Insanity entry groups"
         >
-          {(["trauma", "disorders"] as const).map((group) => {
+          {ENTRY_GROUPS.map((group) => {
             const active = activeGroup === group;
             return (
               <button
@@ -571,7 +550,7 @@ export function InsanityPanel({ insanity, editable, onUpdate, sectionClassName }
                 type="button"
                 role="tab"
                 aria-selected={active}
-                onClick={() => switchGroup(group)}
+                onClick={() => switchTo(group)}
                 className={[
                   "rounded-md px-3 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm font-semibold transition border",
                   active

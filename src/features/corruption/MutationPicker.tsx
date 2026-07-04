@@ -1,13 +1,11 @@
 import { useState } from "react";
 import { FormField } from "../../components/FormField";
 import { InfoModal } from "../../components/InfoModal";
-import type { CorruptionMalignancyEntry } from "../../types/Character";
+import type { CorruptionMutationEntry } from "../../types/Character";
 import { Chip } from "../../ui/Chip";
 import { PickerModal } from "../../ui/PickerModal";
 import { uiActionButton, uiPickerBackButton } from "../../ui/buttonStyles";
-import {
-  colourAmberFaint,
-} from "../../ui/colourTokens";
+import { colourAmberFaint } from "../../ui/colourTokens";
 import {
   editableInputClass,
   uiFormLabel,
@@ -15,20 +13,24 @@ import {
   uiItemName,
   uiTextLabel,
 } from "../../ui/editableStyles";
-import { MalignancyInfoContent } from "./CorruptionReferenceModals";
-import { CORRUPTION_MALIGNANCIES, type CorruptionMalignancyRef } from "./corruptionReference";
+import { MutationInfoContent } from "./CorruptionReferenceModals";
+import { MAJOR_MUTATIONS, MINOR_MUTATIONS, type MutationRef } from "./mutationsReference";
 
-function createMalignancyId(): string {
-  return globalThis.crypto?.randomUUID?.() ?? `malignancy-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+export type MutationTier = "minor" | "major";
+
+function createMutationId(): string {
+  return globalThis.crypto?.randomUUID?.() ?? `mutation-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-export function CorruptionMalignancyPicker({
+export function MutationPicker({
+  tier,
   existingReferenceIds,
   onAdd,
   onClose,
 }: {
+  tier: MutationTier;
   existingReferenceIds: Set<string>;
-  onAdd: (entry: CorruptionMalignancyEntry) => void;
+  onAdd: (entry: CorruptionMutationEntry) => void;
   onClose: () => void;
 }) {
   const [query, setQuery] = useState("");
@@ -36,15 +38,20 @@ export function CorruptionMalignancyPicker({
   const [customName, setCustomName] = useState("");
   const [customDetails, setCustomDetails] = useState("");
 
-  const filtered = CORRUPTION_MALIGNANCIES.filter((ref) => {
-    const searchable = `${ref.roll} ${ref.name} ${ref.effect}`.toLowerCase();
-    return !existingReferenceIds.has(ref.id) && searchable.includes(query.trim().toLowerCase());
-  }).sort((a, b) => a.name.localeCompare(b.name));
+  const title = tier === "minor" ? "Minor Mutation" : "Major Mutation";
+  const source = tier === "minor" ? MINOR_MUTATIONS : MAJOR_MUTATIONS;
+
+  const filtered = source
+    .filter((ref) => {
+      const searchable = `${ref.roll} ${ref.name} ${ref.effect}`.toLowerCase();
+      return !existingReferenceIds.has(ref.id) && searchable.includes(query.trim().toLowerCase());
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
   const canAddCustom = Boolean(customName.trim());
 
-  function addReferenceMalignancy(ref: CorruptionMalignancyRef) {
+  function addReferenceMutation(ref: MutationRef) {
     onAdd({
-      id: createMalignancyId(),
+      id: createMutationId(),
       referenceId: ref.id,
       roll: ref.roll,
       name: ref.name,
@@ -55,7 +62,7 @@ export function CorruptionMalignancyPicker({
   if (customMode) {
     return (
       <PickerModal
-        title="Custom Malignancy"
+        title={`Custom ${title}`}
         query=""
         onQueryChange={() => undefined}
         onClose={() => setCustomMode(false)}
@@ -76,7 +83,7 @@ export function CorruptionMalignancyPicker({
                 onClick={() => {
                   if (!canAddCustom) return;
                   onAdd({
-                    id: createMalignancyId(),
+                    id: createMutationId(),
                     name: customName.trim(),
                     effect: customDetails.trim() || undefined,
                     custom: true,
@@ -88,7 +95,7 @@ export function CorruptionMalignancyPicker({
                 disabled={!canAddCustom}
                 className={`${uiActionButton} flex-1 disabled:cursor-not-allowed disabled:opacity-50`}
               >
-                Add Malignancy
+                Add {title}
               </button>
             </div>
           </div>
@@ -103,7 +110,7 @@ export function CorruptionMalignancyPicker({
               type="text"
               value={customName}
               onChange={(event) => setCustomName(event.target.value)}
-              placeholder="Name the malignancy..."
+              placeholder="Name the mutation..."
               className={editableInputClass(true) + " mt-0.5"}
             />
           </div>
@@ -124,8 +131,8 @@ export function CorruptionMalignancyPicker({
 
   return (
     <PickerModal
-      title="Add Malignancy"
-      placeholder="Search malignancies..."
+      title={`Add ${title}`}
+      placeholder={`Search ${title.toLowerCase()}s...`}
       query={query}
       onQueryChange={setQuery}
       onClose={onClose}
@@ -140,32 +147,45 @@ export function CorruptionMalignancyPicker({
           }}
           className="w-full py-1 text-center text-sm text-red-500 hover:text-red-400 lg:py-1.5 lg:text-base"
         >
-          + Add custom malignancy
+          + Add custom {title.toLowerCase()}
         </button>
       }
     >
-      {filtered.map((ref) => (
-        <button
-          key={ref.id}
-          type="button"
-          onClick={() => addReferenceMalignancy(ref)}
-          className="group w-full px-4 py-3 text-left transition hover:bg-slate-800 lg:px-5 lg:py-4"
-        >
-          <span className={`${uiItemName} group-hover:text-white`}>{ref.name}</span>
-          <div className="mt-1 flex flex-wrap gap-1.5">
-            <Chip size="sm" className={colourAmberFaint}>{ref.roll}</Chip>
+      {filtered.map((ref) =>
+        // "roll-major" is a table redirect (roll again on Major Mutations), not a real mutation to hold.
+        ref.id === "roll-major" ? (
+          <div key={ref.id} className="w-full px-4 py-3 text-left lg:px-5 lg:py-4">
+            <span className={uiItemName}>{ref.name}</span>
+            <div className="mt-1 flex flex-wrap gap-1.5">
+              <Chip size="sm" className={colourAmberFaint}>{ref.roll}</Chip>
+            </div>
+            <div className="mt-1 flex items-center gap-1.5">
+              <span className={uiTextLabel}>Rules</span>
+              <span className={uiInfoModalWrapper}>
+                <InfoModal title={ref.name} content={<MutationInfoContent mutation={ref} hideName />} />
+              </span>
+            </div>
           </div>
-          <div className="mt-1 flex items-center gap-1.5">
-            <span className={uiTextLabel}>Rules</span>
-            <span onClick={(event) => event.stopPropagation()} className={uiInfoModalWrapper}>
-              <InfoModal
-                title={ref.name}
-                content={<MalignancyInfoContent malignancy={ref} hideName />}
-              />
-            </span>
-          </div>
-        </button>
-      ))}
+        ) : (
+          <button
+            key={ref.id}
+            type="button"
+            onClick={() => addReferenceMutation(ref)}
+            className="group w-full px-4 py-3 text-left transition hover:bg-slate-800 lg:px-5 lg:py-4"
+          >
+            <span className={`${uiItemName} group-hover:text-white`}>{ref.name}</span>
+            <div className="mt-1 flex flex-wrap gap-1.5">
+              <Chip size="sm" className={colourAmberFaint}>{ref.roll}</Chip>
+            </div>
+            <div className="mt-1 flex items-center gap-1.5">
+              <span className={uiTextLabel}>Rules</span>
+              <span onClick={(event) => event.stopPropagation()} className={uiInfoModalWrapper}>
+                <InfoModal title={ref.name} content={<MutationInfoContent mutation={ref} hideName />} />
+              </span>
+            </div>
+          </button>
+        )
+      )}
     </PickerModal>
   );
 }

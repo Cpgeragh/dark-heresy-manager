@@ -104,10 +104,22 @@ export interface CorruptionMalignancyEntry {
   custom?: boolean;
 }
 
+export interface CorruptionMutationEntry {
+  id: string;
+  referenceId?: string;
+  roll?: string;
+  name: string;
+  effect?: string;
+  notes?: string;
+  custom?: boolean;
+}
+
 export interface CorruptionBlock {
   points: number;
   malignancies: string | CorruptionMalignancyEntry[];
   malignancyNotes?: string;
+  minorMutations?: CorruptionMutationEntry[];
+  majorMutations?: CorruptionMutationEntry[];
 }
 
 export interface MovementBlock {

@@ -31,6 +31,8 @@ export const CORRUPTION_TRACK: CorruptionTrackEntry[] = [
 ];
 
 export const CORRUPTION_RULE_TEXT = {
+  degree:
+    "Corruption Points operate almost exactly like Insanity Points, except that they are gained through exposure to the warp, dark rituals, cursed artefacts and Daemonic influence. The more Corruption Points a character has, the more afflicted he becomes; this is reflected in the rules by the risk of Malignancies and Mutation as shown on Table 8-7: The Corruption Track.",
   malignancyTest:
     "For every 10 Corruption Points a character gains, he must Test Willpower to see if his corruption has manifested as literal damage to his body and soul. This roll is modified depending on the number of CPs the character already possesses as noted on Table 8-7: The Corruption Track. If the Test is failed, the character's corruption of spirit is given form. These metaphysical and psychosomatic scars are called Malignancies, and are randomly rolled on Table 8-8: Malignancies. If a player rolls a result that he has previously suffered for failing a previous Malignancy Test, he must roll again.",
   mutation:
@@ -188,6 +190,13 @@ export function getCorruptionTrackEntry(points: number): CorruptionTrackEntry {
 export function getNextCorruptionTrackEntry(points: number): CorruptionTrackEntry | undefined {
   const safePoints = Math.max(0, Math.floor(points || 0));
   return CORRUPTION_TRACK.find((entry) => entry.min > safePoints);
+}
+
+/** Malignancy Tests happen every 10 Corruption Points, independent of the (uneven) degree bands. */
+export function getNextMalignancyTestPoints(points: number): number | undefined {
+  const safePoints = Math.max(0, Math.floor(points || 0));
+  if (getCorruptionTrackEntry(safePoints).terminal) return undefined;
+  return Math.floor(safePoints / 10) * 10 + 10;
 }
 
 export function getCorruptionMalignancyRef(referenceId?: string): CorruptionMalignancyRef | undefined {

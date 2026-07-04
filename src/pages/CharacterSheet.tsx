@@ -341,7 +341,7 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
   const TAB_TITLES: Record<TabId, string> = {
     vitals: "Vitals",
     insanity: "Insanity",
-    corruption: "Corruption",
+    corruption: "Corruption & Mutations",
     stats: "Characteristics",
     skills: "Skills",
     talents: "Talents",
