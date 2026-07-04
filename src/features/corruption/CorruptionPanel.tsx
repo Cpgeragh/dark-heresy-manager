@@ -7,9 +7,10 @@ import { Chip } from "../../ui/Chip";
 import { uiActionButtonCompact } from "../../ui/buttonStyles";
 import { colourAmberFaint, colourInactive, colourRose } from "../../ui/colourTokens";
 import {
-  uiCell,
   uiFormLabel,
   uiInfoModalWrapper,
+  uiItemName,
+  uiSection,
   uiTextLabel,
   uiTextMuted,
   uiTextPlaceholder,
@@ -96,7 +97,7 @@ function CorruptionStatusChips({ points }: { points: number }) {
         )}
       </div>
       {next && !entry.terminal && (
-        <p className={`text-[10px] lg:text-xs ${uiTextMuted}`}>
+        <p className={`text-center text-[10px] lg:text-xs ${uiTextMuted}`}>
           {next.min - safePoints} points until {next.degree}
         </p>
       )}
@@ -121,10 +122,10 @@ function MalignancyRow({
   };
 
   return (
-    <div className={`${uiCell} px-2 py-2 lg:px-3`}>
+    <div className={uiSection}>
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <span className="text-sm font-medium text-slate-200 lg:text-base">{display.name}</span>
+          <span className={uiItemName}>{display.name}</span>
           {display.roll && (
             <div className="mt-1 flex flex-wrap gap-1.5">
               <Chip size="sm" className={colourAmberFaint}>{display.roll}</Chip>
@@ -202,7 +203,7 @@ export function CorruptionPanel({ corruption, editable, onUpdate, sectionClassNa
           <CorruptionStatusChips points={value.points} />
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-2 border-t border-slate-700 pt-3">
           <div className="flex items-center justify-between gap-2">
             <span className={uiFormLabel}>Malignancies</span>
             {editable && (
@@ -249,9 +250,7 @@ export function CorruptionPanel({ corruption, editable, onUpdate, sectionClassNa
               placeholder="List any malignancies..."
             />
           ) : (
-            <div className={`${uiCell} px-2 py-2`}>
-              <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>No malignancies recorded.</p>
-            </div>
+            <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No malignancies recorded.</p>
           )}
         </div>
       </section>

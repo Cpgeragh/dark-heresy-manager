@@ -30,9 +30,11 @@ function customSeverityOptionsFor(type: string): InsanityDisorderSeverity[] {
 }
 
 export function InsanityDisorderPicker({
+  existingReferenceIds,
   onAdd,
   onClose,
 }: {
+  existingReferenceIds: Set<string>;
   onAdd: (entry: InsanityDisorderEntry) => void;
   onClose: () => void;
 }) {
@@ -53,6 +55,7 @@ export function InsanityDisorderPicker({
     const searchable = `${ref.type} ${ref.name}`.toLowerCase();
     return (
       !ref.custom &&
+      !existingReferenceIds.has(ref.id) &&
       (typeFilter === "All" || ref.type === typeFilter) &&
       searchable.includes(query.trim().toLowerCase())
     );
@@ -287,9 +290,6 @@ export function InsanityDisorderPicker({
           <span className={`${uiItemName} group-hover:text-white`}>{ref.name}</span>
           <div className="mt-1 flex flex-wrap gap-1.5">
             <Chip size="sm" className={disorderTypeChipClass(ref.type)}>{ref.type}</Chip>
-            {ref.severityOptions.map((option) => (
-              <Chip key={option} size="sm" className={severityChipClass[option]}>{option}</Chip>
-            ))}
           </div>
           <div className="mt-1 flex items-center gap-1.5">
             <span className={uiTextLabel}>Rules</span>

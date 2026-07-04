@@ -2,8 +2,10 @@ import { useState } from "react";
 import { FormField } from "../../components/FormField";
 import { InfoModal } from "../../components/InfoModal";
 import type { InsanityTraumaEntry } from "../../types/Character";
+import { Chip } from "../../ui/Chip";
 import { PickerModal } from "../../ui/PickerModal";
 import { uiActionButton, uiPickerBackButton } from "../../ui/buttonStyles";
+import { colourAmberFaint } from "../../ui/colourTokens";
 import { editableInputClass, uiFormLabel, uiInfoModalWrapper, uiItemName, uiTextLabel } from "../../ui/editableStyles";
 import { MENTAL_TRAUMAS, type MentalTraumaEntry } from "./insanityReference";
 
@@ -12,9 +14,11 @@ function createTraumaId(): string {
 }
 
 export function InsanityTraumaPicker({
+  existingReferenceIds,
   onAdd,
   onClose,
 }: {
+  existingReferenceIds: Set<string>;
   onAdd: (entry: InsanityTraumaEntry) => void;
   onClose: () => void;
 }) {
@@ -22,20 +26,60 @@ export function InsanityTraumaPicker({
   const [customMode, setCustomMode] = useState(false);
   const [customName, setCustomName] = useState("");
   const [customDetails, setCustomDetails] = useState("");
+  const [selected, setSelected] = useState<MentalTraumaEntry | null>(null);
 
   const filtered = MENTAL_TRAUMAS.filter((ref) => {
-    const searchable = `${ref.roll} ${ref.effect}`.toLowerCase();
-    return searchable.includes(query.trim().toLowerCase());
-  });
+    const searchable = `${ref.roll} ${ref.name} ${ref.effect}`.toLowerCase();
+    return !existingReferenceIds.has(ref.roll) && searchable.includes(query.trim().toLowerCase());
+  }).sort((a, b) => a.name.localeCompare(b.name));
   const canAddCustom = Boolean(customName.trim());
 
-  function addReferenceTrauma(ref: MentalTraumaEntry) {
+  function addReferenceTrauma(ref: MentalTraumaEntry, name: string) {
     onAdd({
       id: createTraumaId(),
       referenceId: ref.roll,
       roll: ref.roll,
+      name,
       effect: ref.effect,
     });
+  }
+
+  function handleSelect(ref: MentalTraumaEntry) {
+    if (ref.options) {
+      setSelected(ref);
+      return;
+    }
+    addReferenceTrauma(ref, ref.name);
+  }
+
+  if (selected) {
+    return (
+      <PickerModal
+        title={selected.name}
+        query=""
+        onQueryChange={() => undefined}
+        onClose={() => setSelected(null)}
+        closeLabel="←"
+        hideSearch
+        isEmpty={false}
+      >
+        <div className="space-y-3 p-4 lg:p-5">
+          <p className={`${uiFormLabel} text-center`}>Choose which effect applies</p>
+          <div className="space-y-2">
+            {selected.options!.map((option) => (
+              <button
+                key={option.label}
+                type="button"
+                onClick={() => addReferenceTrauma(selected, option.name)}
+                className="w-full rounded border border-slate-600 bg-slate-800 px-4 py-3 text-left text-sm text-slate-100 transition hover:border-red-500 hover:bg-slate-700 lg:text-base"
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </PickerModal>
+    );
   }
 
   if (customMode) {
@@ -134,15 +178,18 @@ export function InsanityTraumaPicker({
         <button
           key={ref.roll}
           type="button"
-          onClick={() => addReferenceTrauma(ref)}
+          onClick={() => handleSelect(ref)}
           className="group w-full px-4 py-3 text-left transition hover:bg-slate-800 lg:px-5 lg:py-4"
         >
-          <span className={`${uiItemName} group-hover:text-white`}>{ref.roll}</span>
+          <span className={`${uiItemName} group-hover:text-white`}>{ref.name}</span>
+          <div className="mt-1 flex flex-wrap gap-1.5">
+            <Chip size="sm" className={colourAmberFaint}>{ref.roll}</Chip>
+          </div>
           <div className="mt-1 flex items-center gap-1.5">
             <span className={uiTextLabel}>Rules</span>
             <span onClick={(event) => event.stopPropagation()} className={uiInfoModalWrapper}>
               <InfoModal
-                title={`Trauma ${ref.roll}`}
+                title={ref.name}
                 content={<p className="text-sm leading-relaxed text-slate-300 lg:text-base">{ref.effect}</p>}
               />
             </span>

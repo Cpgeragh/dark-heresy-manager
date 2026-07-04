@@ -13,7 +13,9 @@ export interface InsanityTrackEntry {
 
 export interface MentalTraumaEntry {
   roll: string;
+  name: string;
   effect: string;
+  options?: { label: string; name: string }[];
 }
 
 export interface InsanityDisorderRef {
@@ -41,16 +43,24 @@ export const INSANITY_TRACK: InsanityTrackEntry[] = [
 ];
 
 export const MENTAL_TRAUMAS: MentalTraumaEntry[] = [
-  { roll: "01-40", effect: "The character becomes withdrawn and quiet. The character is at -10 to all Fellowship-based Tests. This lasts for 3d10 hours." },
-  { roll: "41-70", effect: "The character must compulsively perform an action such as fevered praying, frantically cleaning a weapon, reciting verse, and so on, and pays little attention to anything else. All Tests that are based on Intelligence, Fellowship or Perception suffer a -10 penalty. This effect lasts for 3d10 hours." },
-  { roll: "71-100", effect: "The character is constantly fearful, seeing danger everywhere and extremely jumpy. The character gains a +10 bonus to all Perception-based Tests and is at -10 penalty to his Willpower for the next 1d5 days." },
-  { roll: "101-120", effect: "The character suffers from a temporary severe phobia. This effect lasts for 1d5 days." },
-  { roll: "121-130", effect: "The character reacts to the slightest stress or pressure by becoming extremely agitated. When performing any task that involves a Test, the character must first pass a Willpower Test or suffer a -10 modifier to the Test. If the character gets into combat, all Tests during combat automatically suffer a -10 modifier. This effect lasts for 1d5 days." },
-  { roll: "131-140", effect: "The character suffers vivid and extreme nightmares whenever they try to sleep. The next day and for the next 1d10 days the character will be exhausted by lack of sleep and gains a level of Fatigue. This effect lasts for 1d5 days." },
-  { roll: "141-150", effect: "The character is struck dumb and is unable to speak. This lasts for 1d5 days." },
-  { roll: "151-160", effect: "Extremely distressed and unfocused, the character refuses to eat or drink and looks in a terrible state. The character takes a -10 penalty to all Characteristics (no Characteristic can be reduced below 1) for 1d10 days." },
-  { roll: "161-170", effect: "The character temporarily becomes hysterically blind or deaf. This effect lasts for 1d10 days." },
-  { roll: "171+", effect: "The character becomes completely traumatised and virtually unresponsive. He can't initiate actions but may be gently led. This effect lasts for 1d10 days." },
+  { roll: "01-40", name: "Withdrawn and Quiet", effect: "The character becomes withdrawn and quiet. The character is at -10 to all Fellowship-based Tests. This lasts for 3d10 hours." },
+  { roll: "41-70", name: "Compulsive Behaviour", effect: "The character must compulsively perform an action such as fevered praying, frantically cleaning a weapon, reciting verse, and so on, and pays little attention to anything else. All Tests that are based on Intelligence, Fellowship or Perception suffer a -10 penalty. This effect lasts for 3d10 hours." },
+  { roll: "71-100", name: "Fearful and Jumpy", effect: "The character is constantly fearful, seeing danger everywhere and extremely jumpy. The character gains a +10 bonus to all Perception-based Tests and is at -10 penalty to his Willpower for the next 1d5 days." },
+  { roll: "101-120", name: "Temporary Phobia", effect: "The character suffers from a temporary severe phobia. This effect lasts for 1d5 days." },
+  { roll: "121-130", name: "Extremely Agitated", effect: "The character reacts to the slightest stress or pressure by becoming extremely agitated. When performing any task that involves a Test, the character must first pass a Willpower Test or suffer a -10 modifier to the Test. If the character gets into combat, all Tests during combat automatically suffer a -10 modifier. This effect lasts for 1d5 days." },
+  { roll: "131-140", name: "Extreme Nightmares", effect: "The character suffers vivid and extreme nightmares whenever they try to sleep. The next day and for the next 1d10 days the character will be exhausted by lack of sleep and gains a level of Fatigue. This effect lasts for 1d5 days." },
+  { roll: "141-150", name: "Struck Dumb", effect: "The character is struck dumb and is unable to speak. This lasts for 1d5 days." },
+  { roll: "151-160", name: "Refuses to Eat or Drink", effect: "Extremely distressed and unfocused, the character refuses to eat or drink and looks in a terrible state. The character takes a -10 penalty to all Characteristics (no Characteristic can be reduced below 1) for 1d10 days." },
+  {
+    roll: "161-170",
+    name: "Hysterically Blind or Deaf",
+    effect: "The character temporarily becomes hysterically blind or deaf. This effect lasts for 1d10 days.",
+    options: [
+      { label: "Blind", name: "Hysterically Blind" },
+      { label: "Deaf", name: "Hysterically Deaf" },
+    ],
+  },
+  { roll: "171+", name: "Completely Traumatised", effect: "The character becomes completely traumatised and virtually unresponsive. He can't initiate actions but may be gently led. This effect lasts for 1d10 days." },
 ];
 
 export const INSANITY_RULE_TEXT = {

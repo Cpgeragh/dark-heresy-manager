@@ -1,8 +1,9 @@
 import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from "react";
 
-export type ChipSize = "sm" | "md";
+export type ChipSize = "sm" | "md" | "lg";
 
 const SIZE_CLASSES: Record<ChipSize, string> = {
+  lg: "h-8 lg:h-9 text-sm lg:text-base px-3 lg:px-4",
   md: "h-6 text-xs lg:text-sm px-1.5 lg:px-2",
   sm: "h-5 text-[10px] lg:text-xs px-1 lg:px-1.5",
 };

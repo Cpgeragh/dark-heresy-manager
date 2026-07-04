@@ -5,6 +5,7 @@ import { useState, useCallback } from "react";
 interface StepperProps {
   value: number;
   min?: number;
+  max?: number;
   editable: boolean;
   onChange: (value: number) => void;
   /** Extra Tailwind classes applied to the value display (e.g. danger colour). */
@@ -13,23 +14,24 @@ interface StepperProps {
 
 /**
  * A +/- stepper for non-negative integers.
- * - Buttons increment/decrement, clamped to `min` (default 0).
+ * - Buttons increment/decrement, clamped to `min` (default 0) and `max` (if provided).
  * - Clicking the value opens an inline input for manual entry.
  * - Enter or blur commits; Escape cancels.
  * - Invalid/negative input is clamped to `min`.
  */
-export function Stepper({ value, min = 0, editable, onChange, dangerClassName }: StepperProps) {
+export function Stepper({ value, min = 0, max, editable, onChange, dangerClassName }: StepperProps) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
 
   const commit = useCallback(
     (raw: string) => {
       const parsed = parseInt(raw, 10);
-      const next = isNaN(parsed) ? 0 : Math.max(min, Math.round(parsed));
+      const clamped = isNaN(parsed) ? 0 : Math.max(min, Math.round(parsed));
+      const next = max !== undefined ? Math.min(max, clamped) : clamped;
       onChange(next);
       setEditing(false);
     },
-    [min, onChange]
+    [min, max, onChange]
   );
 
   const handleClick = useCallback(() => {
@@ -51,19 +53,25 @@ export function Stepper({ value, min = 0, editable, onChange, dangerClassName }:
   const adjust = useCallback(
     (delta: number) => {
       if (!editable) return;
-      onChange(Math.max(min, value + delta));
+      const next = Math.max(min, value + delta);
+      onChange(max !== undefined ? Math.min(max, next) : next);
     },
-    [editable, min, value, onChange]
+    [editable, min, max, value, onChange]
   );
 
-  const btnClass = `flex items-center justify-center pt-0.5 h-7 w-7 sm:h-8 sm:w-8 lg:h-10 lg:w-10 rounded text-base lg:text-xl leading-none text-slate-300 transition select-none ${
+  const btnClass = `flex items-center justify-center h-full w-7 sm:w-8 lg:w-10 text-lg lg:text-2xl font-bold leading-none pt-0.5 transition select-none ${
     editable
-      ? "bg-slate-700 hover:bg-slate-600"
-      : "bg-slate-700 opacity-50 cursor-not-allowed"
+      ? "bg-black/20 text-slate-200 hover:text-red-400 active:scale-95"
+      : "bg-black/10 text-slate-500 cursor-not-allowed"
   }`;
+  const dividerClass = `h-full w-px ${editable ? "bg-slate-600" : "bg-slate-700"}`;
 
   return (
-    <div className="flex items-center justify-center gap-1">
+    <div
+      className={`inline-flex items-center h-7 sm:h-8 lg:h-10 rounded-full border-2 overflow-hidden shadow-lg shadow-black/40 ${
+        editable ? "border-slate-600 bg-slate-800" : "border-slate-700 bg-slate-800/50"
+      }`}
+    >
       <button
         aria-disabled={!editable}
         onClick={() => adjust(-1)}
@@ -73,6 +81,8 @@ export function Stepper({ value, min = 0, editable, onChange, dangerClassName }:
         −
       </button>
 
+      <div className={dividerClass} />
+
       {editing ? (
         <input
           type="text"
@@ -80,22 +90,28 @@ export function Stepper({ value, min = 0, editable, onChange, dangerClassName }:
           autoFocus
           onFocus={(e) => e.target.select()}
           value={draft}
-          onChange={(e) => setDraft(e.target.value)}
+          onChange={(e) => {
+            const digitsOnly = e.target.value.replace(/\D/g, "");
+            if (max !== undefined && digitsOnly !== "" && parseInt(digitsOnly, 10) > max) return;
+            setDraft(digitsOnly);
+          }}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
-          className="h-7 sm:h-8 lg:h-10 w-7 sm:w-8 lg:w-10 text-center bg-slate-700 border border-slate-500 rounded-lg text-base lg:text-lg font-code text-slate-100 focus:outline-none focus:border-red-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          className="h-full w-7 sm:w-8 lg:w-10 text-center bg-transparent text-base lg:text-lg font-code text-slate-100 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
         />
       ) : (
         <span
           onClick={handleClick}
           title={editable ? "Click to edit" : undefined}
-          className={`w-7 sm:w-8 lg:w-10 text-center text-xl lg:text-2xl font-semibold font-code select-none ${
+          className={`flex items-center justify-center h-full w-7 sm:w-8 lg:w-10 text-center text-xl lg:text-2xl font-semibold font-code select-none transition-colors ${
             dangerClassName || "text-slate-100"
-          } ${editable ? "cursor-pointer border border-slate-500 rounded flex items-center justify-center h-7 w-7 sm:h-8 sm:w-8 lg:h-10 lg:w-10 bg-slate-900 hover:border-slate-400 transition-colors" : ""}`}
+          } ${editable ? "cursor-pointer hover:text-red-400" : ""}`}
         >
           {value}
         </span>
       )}
+
+      <div className={dividerClass} />
 
       <button
         aria-disabled={!editable}

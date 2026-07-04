@@ -10,7 +10,8 @@ import { useCharacterSheet } from "./characterSheet/useCharacterSheet";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 
 import { VitalsTab } from "./characterSheet/VitalsTab";
-import { InsanityCorruptionTab } from "./characterSheet/InsanityCorruptionTab";
+import { InsanityTab } from "./characterSheet/InsanityTab";
+import { CorruptionTab } from "./characterSheet/CorruptionTab";
 import { CharacteristicsTab } from "./characterSheet/CharacteristicsTab";
 import { SkillsTab } from "./characterSheet/SkillsTab";
 import { TalentsTab } from "./characterSheet/TalentsTab";
@@ -339,7 +340,8 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
 
   const TAB_TITLES: Record<TabId, string> = {
     vitals: "Vitals",
-    insanityCorruption: "Insanity & Corruption",
+    insanity: "Insanity",
+    corruption: "Corruption",
     stats: "Characteristics",
     skills: "Skills",
     talents: "Talents",
@@ -430,13 +432,19 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
             />
           )}
 
-          {activeTab === "insanityCorruption" && (
-            <InsanityCorruptionTab
+          {activeTab === "insanity" && (
+            <InsanityTab
               insanity={character.insanity}
+              editable={allowedToEdit}
+              onUpdate={handleUpdateInsanity}
+            />
+          )}
+
+          {activeTab === "corruption" && (
+            <CorruptionTab
               corruption={character.corruption}
               editable={allowedToEdit}
-              onUpdateInsanity={handleUpdateInsanity}
-              onUpdateCorruption={handleUpdateCorruption}
+              onUpdate={handleUpdateCorruption}
             />
           )}
 

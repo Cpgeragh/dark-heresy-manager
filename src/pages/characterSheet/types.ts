@@ -1,6 +1,7 @@
 export type TabId =
   | "vitals"
-  | "insanityCorruption"
+  | "insanity"
+  | "corruption"
   | "stats"
   | "skills"
   | "talents"
