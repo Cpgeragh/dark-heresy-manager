@@ -1,3 +1,5 @@
+import type { CharacteristicModifier } from "./characteristicModifiers";
+
 export interface CorruptionTrackEntry {
   min: number;
   max?: number;
@@ -13,6 +15,7 @@ export interface CorruptionMalignancyRef {
   roll: string;
   name: string;
   effect: string;
+  modifiers?: CharacteristicModifier[];
 }
 
 export const CORRUPTION_TRACK: CorruptionTrackEntry[] = [
@@ -46,6 +49,7 @@ export const CORRUPTION_MALIGNANCIES: CorruptionMalignancyRef[] = [
     name: "Palsy",
     effect:
       "The character suffers from numerous minor tics, shakes and tremors with no medical cause. Reduce his Agility by 1d10.",
+    modifiers: [{ characteristic: "ag", kind: "roll1d10", sign: -1 }],
   },
   {
     id: "dark-hearted",
@@ -53,6 +57,7 @@ export const CORRUPTION_MALIGNANCIES: CorruptionMalignancyRef[] = [
     name: "Dark-hearted",
     effect:
       "The character grows increasingly cruel, callous and vindictive. Reduce his Fellowship by 1d10.",
+    modifiers: [{ characteristic: "fel", kind: "roll1d10", sign: -1 }],
   },
   {
     id: "ill-fortuned",
@@ -81,6 +86,7 @@ export const CORRUPTION_MALIGNANCIES: CorruptionMalignancyRef[] = [
     name: "Morbid",
     effect:
       "The character finds it hard to concentrate as his mind is filled with macabre visions and tortured, gloom-filled trains of thought. The character's Intelligence is reduced by 1d10.",
+    modifiers: [{ characteristic: "int", kind: "roll1d10", sign: -1 }],
   },
   {
     id: "witch-mark",
@@ -116,6 +122,7 @@ export const CORRUPTION_MALIGNANCIES: CorruptionMalignancyRef[] = [
     name: "Wasted Frame",
     effect:
       "The character's pallor becomes corpse-like and his muscles waste away. The character's Strength is reduced by 1d10.",
+    modifiers: [{ characteristic: "s", kind: "roll1d10", sign: -1 }],
   },
   {
     id: "night-terrors",
@@ -129,6 +136,7 @@ export const CORRUPTION_MALIGNANCIES: CorruptionMalignancyRef[] = [
     name: "Poor Health",
     effect:
       "The character constantly suffers petty illnesses and phantom pains, and his wounds never seem to heal fully. The character's Toughness is reduced by 1d10.",
+    modifiers: [{ characteristic: "t", kind: "roll1d10", sign: -1 }],
   },
   {
     id: "distrustful",
@@ -143,6 +151,7 @@ export const CORRUPTION_MALIGNANCIES: CorruptionMalignancyRef[] = [
     name: "Malign Sight",
     effect:
       "The world seems to darken, tarnish and rot if the character looks too long at anything. The character's Perception is reduced by 1d10.",
+    modifiers: [{ characteristic: "per", kind: "roll1d10", sign: -1 }],
   },
   {
     id: "ashen-taste",

@@ -26,6 +26,7 @@ function renderTab(getCharTotal = vi.fn((k: keyof Characteristics) => TOTALS[k])
       getCharField={getCharField}
       getCharTotal={getCharTotal}
       editable={false}
+      corruption={{ points: 0, malignancies: [] }}
       updateCharacteristic={() => {}}
     />
   );

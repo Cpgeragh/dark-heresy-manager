@@ -2,6 +2,7 @@ import { useState } from "react";
 import { FormField } from "../../components/FormField";
 import { InfoModal } from "../../components/InfoModal";
 import type { CorruptionMutationEntry } from "../../types/Character";
+import { Button } from "../../ui/Button";
 import { Chip } from "../../ui/Chip";
 import { PickerModal } from "../../ui/PickerModal";
 import { uiActionButton, uiPickerBackButton } from "../../ui/buttonStyles";
@@ -13,6 +14,7 @@ import {
   uiItemName,
   uiTextLabel,
 } from "../../ui/editableStyles";
+import { CHARACTERISTIC_LABELS, type CharacteristicModifier } from "./characteristicModifiers";
 import { MutationInfoContent } from "./CorruptionReferenceModals";
 import { MAJOR_MUTATIONS, MINOR_MUTATIONS, type MutationRef } from "./mutationsReference";
 
@@ -20,6 +22,10 @@ export type MutationTier = "minor" | "major";
 
 function createMutationId(): string {
   return globalThis.crypto?.randomUUID?.() ?? `mutation-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+function rollModifiersFor(ref: MutationRef): CharacteristicModifier[] {
+  return (ref.modifiers ?? []).filter((modifier) => modifier.kind === "roll1d10");
 }
 
 export function MutationPicker({
@@ -37,6 +43,8 @@ export function MutationPicker({
   const [customMode, setCustomMode] = useState(false);
   const [customName, setCustomName] = useState("");
   const [customDetails, setCustomDetails] = useState("");
+  const [selected, setSelected] = useState<MutationRef | null>(null);
+  const [rolls, setRolls] = useState<Record<string, string>>({});
 
   const title = tier === "minor" ? "Minor Mutation" : "Major Mutation";
   const source = tier === "minor" ? MINOR_MUTATIONS : MAJOR_MUTATIONS;
@@ -129,6 +137,66 @@ export function MutationPicker({
     );
   }
 
+  if (selected) {
+    const rollModifiers = rollModifiersFor(selected);
+    const canAdd = rollModifiers.every((modifier) => {
+      const parsed = Number(rolls[modifier.characteristic]);
+      return Number.isInteger(parsed) && parsed >= 1 && parsed <= 10;
+    });
+
+    return (
+      <PickerModal
+        title={selected.name}
+        query=""
+        onQueryChange={() => undefined}
+        onClose={() => setSelected(null)}
+        closeLabel="<"
+        hideSearch
+        isEmpty={false}
+        footer={
+          <Button
+            className="w-full"
+            disabled={!canAdd}
+            onClick={() => {
+              onAdd({
+                id: createMutationId(),
+                referenceId: selected.id,
+                roll: selected.roll,
+                name: selected.name,
+                effect: selected.effect,
+                rolledModifiers: Object.fromEntries(
+                  rollModifiers.map((modifier) => [modifier.characteristic, Number(rolls[modifier.characteristic])])
+                ),
+              });
+              setSelected(null);
+            }}
+          >
+            Add {title}
+          </Button>
+        }
+      >
+        <div className="space-y-4 p-4 lg:p-5">
+          {rollModifiers.map((modifier) => (
+            <div key={modifier.characteristic}>
+              <label className={uiFormLabel}>
+                {CHARACTERISTIC_LABELS[modifier.characteristic]} roll (1d10) <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                min={1}
+                max={10}
+                value={rolls[modifier.characteristic] ?? ""}
+                onChange={(event) => setRolls((prev) => ({ ...prev, [modifier.characteristic]: event.target.value }))}
+                placeholder="Enter rolled value..."
+                className={editableInputClass(true) + " mt-0.5"}
+              />
+            </div>
+          ))}
+        </div>
+      </PickerModal>
+    );
+  }
+
   return (
     <PickerModal
       title={`Add ${title}`}
@@ -170,7 +238,14 @@ export function MutationPicker({
           <button
             key={ref.id}
             type="button"
-            onClick={() => addReferenceMutation(ref)}
+            onClick={() => {
+              if (rollModifiersFor(ref).length === 0) {
+                addReferenceMutation(ref);
+              } else {
+                setRolls({});
+                setSelected(ref);
+              }
+            }}
             className="group w-full px-4 py-3 text-left transition hover:bg-slate-800 lg:px-5 lg:py-4"
           >
             <span className={`${uiItemName} group-hover:text-white`}>{ref.name}</span>

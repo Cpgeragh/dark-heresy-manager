@@ -453,6 +453,7 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
               getCharField={getCharField}
               getCharTotal={getCharTotal}
               editable={allowedToEdit}
+              corruption={character.corruption}
               updateCharacteristic={updateCharacteristic}
             />
           )}

@@ -102,6 +102,7 @@ export interface CorruptionMalignancyEntry {
   effect?: string;
   notes?: string;
   custom?: boolean;
+  rolledModifiers?: Record<string, number>;
 }
 
 export interface CorruptionMutationEntry {
@@ -112,6 +113,7 @@ export interface CorruptionMutationEntry {
   effect?: string;
   notes?: string;
   custom?: boolean;
+  rolledModifiers?: Record<string, number>;
 }
 
 export interface CorruptionBlock {

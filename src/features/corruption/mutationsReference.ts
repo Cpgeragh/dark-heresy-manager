@@ -1,8 +1,11 @@
+import type { CharacteristicModifier } from "./characteristicModifiers";
+
 export interface MutationRef {
   id: string;
   roll: string;
   name: string;
   effect: string;
+  modifiers?: CharacteristicModifier[];
 }
 
 export const MUTATIONS_RULE_TEXT = {
@@ -31,6 +34,7 @@ export const MINOR_MUTATIONS: MutationRef[] = [
     roll: "31-40",
     name: "Misshapen",
     effect: "The mutant's spine and/or limbs are horribly twisted, giving it a penalty of -1d10 to its Agility.",
+    modifiers: [{ characteristic: "ag", kind: "roll1d10", sign: -1 }],
   },
   {
     id: "feels-no-pain",
@@ -43,6 +47,11 @@ export const MINOR_MUTATIONS: MutationRef[] = [
     roll: "51-60",
     name: "Brute",
     effect: "The mutant is physically powerful with deformed masses of muscle. Apply +10 Strength, +10 Toughness and -10 Agility.",
+    modifiers: [
+      { characteristic: "s", kind: "flat", sign: 1, value: 10 },
+      { characteristic: "t", kind: "flat", sign: 1, value: 10 },
+      { characteristic: "ag", kind: "flat", sign: -1, value: 10 },
+    ],
   },
   {
     id: "nightsider",
@@ -55,18 +64,30 @@ export const MINOR_MUTATIONS: MutationRef[] = [
     roll: "71-80",
     name: "Big Eyes",
     effect: "The mutant's eyes are virtually lidless and watery. Apply +10 Perception and -10 Fellowship.",
+    modifiers: [
+      { characteristic: "per", kind: "flat", sign: 1, value: 10 },
+      { characteristic: "fel", kind: "flat", sign: -1, value: 10 },
+    ],
   },
   {
     id: "malformed-hands",
     roll: "81-85",
     name: "Malformed Hands",
     effect: "Apply -10 to WS and BS and the mutant suffers a -20 penalty to all tasks involving fine physical manipulation.",
+    modifiers: [
+      { characteristic: "ws", kind: "flat", sign: -1, value: 10 },
+      { characteristic: "bs", kind: "flat", sign: -1, value: 10 },
+    ],
   },
   {
     id: "tox-blood",
     roll: "86-89",
     name: "Tox Blood",
     effect: "The mutant's system is saturated with toxic pollutants and poisonous chemicals. As a result it has a +10 resistance to toxins and poisons, however it suffers a -1d10 penalty to its Intelligence and Fellowship.",
+    modifiers: [
+      { characteristic: "int", kind: "roll1d10", sign: -1 },
+      { characteristic: "fel", kind: "roll1d10", sign: -1 },
+    ],
   },
   {
     id: "wyrdling",
@@ -94,12 +115,22 @@ export const MAJOR_MUTATIONS: MutationRef[] = [
     roll: "26-35",
     name: "Aberration",
     effect: "The mutant has become a weird hybrid of man and animal (or reptile, insect, etc.) Apply +10 Strength, +10 Agility, -1d10 Intelligence, -10 Fellowship and the Sprint talent.",
+    modifiers: [
+      { characteristic: "s", kind: "flat", sign: 1, value: 10 },
+      { characteristic: "ag", kind: "flat", sign: 1, value: 10 },
+      { characteristic: "int", kind: "roll1d10", sign: -1 },
+      { characteristic: "fel", kind: "flat", sign: -1, value: 10 },
+    ],
   },
   {
     id: "degenerate-mind",
     roll: "36-40",
     name: "Degenerate Mind",
     effect: "The mutant's mind is warped and inhuman. Apply -1d10 Intelligence, +10 Fellowship, roll 1d10 and apply the following Talents or Trait: 1-3: Frenzy, 4-7: Fearless, 8-0: From Beyond.",
+    modifiers: [
+      { characteristic: "int", kind: "roll1d10", sign: -1 },
+      { characteristic: "fel", kind: "flat", sign: 1, value: 10 },
+    ],
   },
   {
     id: "ravaged-body",
@@ -118,6 +149,7 @@ export const MAJOR_MUTATIONS: MutationRef[] = [
     roll: "61-65",
     name: "Necrophage",
     effect: "The mutant gains +10 Toughness and the Regeneration trait, but must sustain itself on copious quantities of raw meat or starve.",
+    modifiers: [{ characteristic: "t", kind: "flat", sign: 1, value: 10 }],
   },
   {
     id: "corrupted-flesh",
@@ -130,6 +162,10 @@ export const MAJOR_MUTATIONS: MutationRef[] = [
     roll: "71-75",
     name: "Vile Alacrity",
     effect: "The mutant is constantly juddering and shaking unnaturally and can move almost faster than sight. It gains the Unnatural Agility (x2) trait and the Sprint talent, with a penalty of -10 to Weapon Skill and Ballistic Skill.",
+    modifiers: [
+      { characteristic: "ws", kind: "flat", sign: -1, value: 10 },
+      { characteristic: "bs", kind: "flat", sign: -1, value: 10 },
+    ],
   },
   {
     id: "hideous-strength",
@@ -160,6 +196,7 @@ export const MAJOR_MUTATIONS: MutationRef[] = [
     roll: "93-94",
     name: "Malleable",
     effect: "The mutant possesses a sickeningly liquid flexibility and is able to distend and flatten its body. Apply +10 Agility and +20 to Climb Tests, and Grappling attacks. They may also fit through spaces only one-quarter its usual body dimensions.",
+    modifiers: [{ characteristic: "ag", kind: "flat", sign: 1, value: 10 }],
   },
   {
     id: "winged",

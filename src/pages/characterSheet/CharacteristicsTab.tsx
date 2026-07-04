@@ -2,7 +2,8 @@
 
 import { useCallback } from "react";
 import type { CharField } from "../../utils/characterFactory";
-import type { Characteristics } from "../../types/Character";
+import type { Characteristics, CorruptionBlock } from "../../types/Character";
+import { getCharacteristicModifierTotals } from "../../features/corruption/characteristicModifierTotals";
 import CharacteristicField from "../../components/CharacteristicField";
 import { InfoModal } from "../../components/InfoModal";
 import {
@@ -29,6 +30,7 @@ interface StatBlockProps {
   label: string;
   statKey: keyof Characteristics;
   editable: boolean;
+  adjustment: number;
   getCharField: (statKey: keyof Characteristics) => CharField;
   updateCharacteristic: (statKey: keyof Characteristics, value: CharField) => void;
 }
@@ -37,11 +39,13 @@ function StatBlock({
   label,
   statKey,
   editable,
+  adjustment,
   getCharField,
   updateCharacteristic,
 }: StatBlockProps) {
   const value = getCharField(statKey);
   const statTotal = calculateCharacteristicTotal(value.base, value.advances);
+  const effectiveTotal = statTotal + adjustment;
 
   const handleChange = useCallback(
     (v: CharField) => {
@@ -55,7 +59,14 @@ function StatBlock({
       {/* Header */}
       <div className="flex items-baseline justify-between">
         <span className="text-sm lg:text-base text-slate-100">{label}</span>
-        <span className="text-xl lg:text-2xl font-semibold font-code text-slate-100">{statTotal}</span>
+        <span className="text-xl lg:text-2xl font-semibold font-code text-slate-100">
+          {effectiveTotal}
+          {adjustment !== 0 && (
+            <span className={`ml-1 text-xs lg:text-sm font-code ${adjustment > 0 ? "text-emerald-400" : "text-red-400"}`}>
+              ({adjustment > 0 ? "+" : ""}{adjustment})
+            </span>
+          )}
+        </span>
       </div>
 
       {/* Base / Advances */}
@@ -70,6 +81,7 @@ interface CharacteristicsTabProps {
   getCharField: (statKey: keyof Characteristics) => CharField;
   getCharTotal: (statKey: keyof Characteristics) => number;
   editable: boolean;
+  corruption: CorruptionBlock;
   updateCharacteristic: (statKey: keyof Characteristics, value: CharField) => void;
 }
 
@@ -77,8 +89,10 @@ export function CharacteristicsTab({
   getCharField,
   getCharTotal,
   editable,
+  corruption,
   updateCharacteristic,
 }: CharacteristicsTabProps) {
+  const modifierTotals = getCharacteristicModifierTotals(corruption);
   const SB = Math.floor(getCharTotal("s") / CHARACTERISTIC_BONUS_DIVISOR);
   const TB = Math.floor(getCharTotal("t") / CHARACTERISTIC_BONUS_DIVISOR);
   const AB = Math.floor(getCharTotal("ag") / CHARACTERISTIC_BONUS_DIVISOR);
@@ -175,6 +189,7 @@ export function CharacteristicsTab({
           label="Weapon Skill (WS)"
           statKey="ws"
           editable={editable}
+          adjustment={modifierTotals.ws ?? 0}
           getCharField={getCharField}
           updateCharacteristic={updateCharacteristic}
         />
@@ -182,6 +197,7 @@ export function CharacteristicsTab({
           label="Ballistic Skill (BS)"
           statKey="bs"
           editable={editable}
+          adjustment={modifierTotals.bs ?? 0}
           getCharField={getCharField}
           updateCharacteristic={updateCharacteristic}
         />
@@ -189,6 +205,7 @@ export function CharacteristicsTab({
           label="Strength (S)"
           statKey="s"
           editable={editable}
+          adjustment={modifierTotals.s ?? 0}
           getCharField={getCharField}
           updateCharacteristic={updateCharacteristic}
         />
@@ -196,6 +213,7 @@ export function CharacteristicsTab({
           label="Toughness (T)"
           statKey="t"
           editable={editable}
+          adjustment={modifierTotals.t ?? 0}
           getCharField={getCharField}
           updateCharacteristic={updateCharacteristic}
         />
@@ -203,6 +221,7 @@ export function CharacteristicsTab({
           label="Agility (Ag)"
           statKey="ag"
           editable={editable}
+          adjustment={modifierTotals.ag ?? 0}
           getCharField={getCharField}
           updateCharacteristic={updateCharacteristic}
         />
@@ -210,6 +229,7 @@ export function CharacteristicsTab({
           label="Intelligence (Int)"
           statKey="int"
           editable={editable}
+          adjustment={modifierTotals.int ?? 0}
           getCharField={getCharField}
           updateCharacteristic={updateCharacteristic}
         />
@@ -217,6 +237,7 @@ export function CharacteristicsTab({
           label="Perception (Per)"
           statKey="per"
           editable={editable}
+          adjustment={modifierTotals.per ?? 0}
           getCharField={getCharField}
           updateCharacteristic={updateCharacteristic}
         />
@@ -224,6 +245,7 @@ export function CharacteristicsTab({
           label="Willpower (WP)"
           statKey="wp"
           editable={editable}
+          adjustment={modifierTotals.wp ?? 0}
           getCharField={getCharField}
           updateCharacteristic={updateCharacteristic}
         />
@@ -231,6 +253,7 @@ export function CharacteristicsTab({
           label="Fellowship (Fel)"
           statKey="fel"
           editable={editable}
+          adjustment={modifierTotals.fel ?? 0}
           getCharField={getCharField}
           updateCharacteristic={updateCharacteristic}
         />
