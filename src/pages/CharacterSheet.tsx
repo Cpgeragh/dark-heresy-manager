@@ -427,6 +427,7 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
             <VitalsTab
               character={character}
               editable={allowedToEdit}
+              toughnessBonus={Math.floor(getCharTotal("t") / CHARACTERISTIC_BONUS_DIVISOR)}
               onUpdateWounds={handleUpdateWounds}
               onUpdateFate={handleUpdateFate}
             />

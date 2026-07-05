@@ -90,6 +90,7 @@ export function Stepper({ value, min = 0, max, editable, onChange, dangerClassNa
           autoFocus
           onFocus={(e) => e.target.select()}
           value={draft}
+          size={Math.max(2, draft.length)}
           onChange={(e) => {
             const digitsOnly = e.target.value.replace(/\D/g, "");
             if (max !== undefined && digitsOnly !== "" && parseInt(digitsOnly, 10) > max) return;
@@ -97,13 +98,13 @@ export function Stepper({ value, min = 0, max, editable, onChange, dangerClassNa
           }}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
-          className="h-full w-7 sm:w-8 lg:w-10 text-center bg-transparent text-base lg:text-lg font-code text-slate-100 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          className="h-full px-1 text-center bg-transparent text-base lg:text-lg font-code text-slate-100 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
         />
       ) : (
         <span
           onClick={handleClick}
           title={editable ? "Click to edit" : undefined}
-          className={`flex items-center justify-center h-full w-7 sm:w-8 lg:w-10 text-center text-xl lg:text-2xl font-semibold font-code select-none transition-colors ${
+          className={`flex items-center justify-center h-full min-w-7 sm:min-w-8 lg:min-w-10 px-1.5 text-center text-xl lg:text-2xl font-semibold font-code select-none transition-colors ${
             dangerClassName || "text-slate-100"
           } ${editable ? "cursor-pointer hover:text-red-400" : ""}`}
         >

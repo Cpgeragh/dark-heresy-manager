@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { Stepper } from "../../components/Stepper";
+import { InfoModal } from "../../components/InfoModal";
 import type {
   Character,
   WoundsBlock,
@@ -11,13 +12,22 @@ import {
   uiSection,
   uiCell,
   uiCellValue,
+  uiInfoModalWrapper,
 } from "../../ui/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { WOUNDS_CRITICAL_THRESHOLD, FATE_CRITICAL_THRESHOLD } from "../../constants/gameRules";
 
+const VITALS_RULE_TEXT = {
+  criticalDamage:
+    "Any Damage taken in excess of a character's Wounds counts as Critical Damage. When this occurs, immediately consult the table that corresponds with the location (arm, body, etc.) and the type of attack (Energy, Explosive, Impact or Rending). The Critical Damage total determines the severity of the injury to the location. Should the character survive, the Critical Damage still remains. If the same character takes Damage again, the Critical Damage is added to the existing Damage and the cumulative Damage total is used to determine the new Critical Effect.",
+  fatigue:
+    "Not all Damage is lethal in Dark Heresy. Exhaustion, combat trauma or swapping licks with bare fists can all leave a character battered, but more or less intact. Fatigue measures the amount of non-lethal Damage a character can take over the course of game play. Characters gain Fatigue from certain types of attacks, Grappling, forced marching and other Actions which push them beyond safe limits. A character can take a number of levels of Fatigue equal to his Toughness Bonus, so a character with a four Toughness Bonus can take four levels of Fatigue. Should a character take a number of levels of Fatigue in excess of his Toughness Bonus, he collapses, unconscious for 10-TB minutes. Characters suffering from Fatigue are at a -10 penalty to all Tests.",
+};
+
 interface VitalsTabProps {
   character: Character;
   editable: boolean;
+  toughnessBonus: number;
   onUpdateWounds: (next: WoundsBlock) => void;
   onUpdateFate: (next: FateBlock) => void;
 }
@@ -28,6 +38,7 @@ const totalInputClass =
 export function VitalsTab({
   character,
   editable,
+  toughnessBonus,
   onUpdateWounds,
   onUpdateFate,
 }: VitalsTabProps) {
@@ -88,6 +99,10 @@ export function VitalsTab({
     return value <= criticalThreshold ? "text-red-400 font-semibold" : "";
   }
 
+  function dangerClassAbove(value: number, threshold: number): string {
+    return value > threshold ? "text-red-400 font-semibold" : "";
+  }
+
   return (
     <div className="space-y-6 text-slate-100">
       <div>
@@ -120,6 +135,7 @@ export function VitalsTab({
               <div className="flex-1 flex items-center justify-center">
                 <Stepper
                   value={wounds.current}
+                  max={wounds.total}
                   editable={editable}
                   onChange={handleCurrentWoundsChange}
                   dangerClassName={dangerClass(wounds.current, WOUNDS_CRITICAL_THRESHOLD)}
@@ -128,7 +144,19 @@ export function VitalsTab({
             </div>
 
             <div className={uiCell + " text-center p-2 lg:p-3 flex flex-col"}>
-              <div className="text-xs lg:text-base text-slate-100 mb-2">Critical Damage</div>
+              <div className="flex items-center justify-center gap-1 mb-2">
+                <span className="text-xs lg:text-base text-slate-100">Critical Damage</span>
+                <span className={uiInfoModalWrapper}>
+                  <InfoModal
+                    title="Critical Damage"
+                    content={
+                      <p className="text-sm leading-relaxed text-slate-300 lg:text-base">
+                        {VITALS_RULE_TEXT.criticalDamage}
+                      </p>
+                    }
+                  />
+                </span>
+              </div>
               <div className="flex-1 flex items-center justify-center">
                 <Stepper
                   value={wounds.criticalDamage}
@@ -139,21 +167,61 @@ export function VitalsTab({
             </div>
 
             <div className={uiCell + " text-center p-2 lg:p-3 flex flex-col"}>
-              <div className="text-xs lg:text-base text-slate-100 mb-2">Fatigue</div>
+              <div className="flex items-center justify-center gap-1 mb-2">
+                <span className="text-xs lg:text-base text-slate-100">Fatigue</span>
+                <span className={uiInfoModalWrapper}>
+                  <InfoModal
+                    title="Fatigue"
+                    content={
+                      <p className="text-sm leading-relaxed text-slate-300 lg:text-base">
+                        {VITALS_RULE_TEXT.fatigue}
+                      </p>
+                    }
+                  />
+                </span>
+              </div>
               <div className="flex-1 flex items-center justify-center">
                 <Stepper
                   value={wounds.fatigue}
                   editable={editable}
                   onChange={handleFatigueChange}
+                  dangerClassName={dangerClassAbove(wounds.fatigue, toughnessBonus)}
                 />
               </div>
+              {wounds.fatigue > toughnessBonus && (
+                <div className="text-xs text-red-400 font-semibold mt-1">Unconscious</div>
+              )}
             </div>
           </div>
         </section>
       </div>
 
       <div>
-        <SectionHeader className="mb-2">Fate Points</SectionHeader>
+        <div className="flex items-center gap-1.5 mb-2">
+          <SectionHeader>Fate Points</SectionHeader>
+          <span className={uiInfoModalWrapper}>
+            <InfoModal
+              title="Using Fate Points"
+              content={
+                <div className="space-y-2">
+                  <p className="text-sm leading-relaxed text-slate-300 lg:text-base">
+                    Fate Points allow you to turn luck to your advantage, hitting with that bolter shot when you would have otherwise missed, or cracking the security code on a door just in time to make a hasty escape. Using these twists of fate, you can take a few more risks, which makes the game faster and far more exciting than would otherwise be the case.
+                  </p>
+                  <p className="text-sm leading-relaxed text-slate-300 lg:text-base">
+                    That said, you have a limited pool of Fate Points and whenever you spend a Fate Point, you reduce your pool by one, so choose wisely. Fate Points are restored at the start of the next gaming session. Spending a Fate Point allows a character to do one of the following things:
+                  </p>
+                  <ul className="list-disc list-inside text-sm leading-relaxed text-slate-300 lg:text-base space-y-1">
+                    <li>Re-roll any one failed Test. The results of the re-roll are final.</li>
+                    <li>Count as having rolled a 10 for their Initiative.</li>
+                    <li>Add an extra degree of success to a Test.</li>
+                    <li>Instantly recover 1d5 Wounds.</li>
+                    <li>Recover from being Stunned.</li>
+                  </ul>
+                </div>
+              }
+            />
+          </span>
+        </div>
         <section className={uiSection}>
           <div className="grid grid-cols-2 gap-3">
             <div className={uiCell + " text-center p-2 lg:p-3 flex flex-col"}>
@@ -182,6 +250,7 @@ export function VitalsTab({
               <div className="flex-1 flex items-center justify-center">
                 <Stepper
                   value={fate.current}
+                  max={fate.total}
                   editable={editable}
                   onChange={handleCurrentFateChange}
                   dangerClassName={dangerClass(fate.current, FATE_CRITICAL_THRESHOLD)}
