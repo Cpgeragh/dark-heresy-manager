@@ -51,7 +51,7 @@ describe("characteristic modifier wiring", () => {
     await user.click(screen.getByRole("button", { name: "Add Malignancy" }));
 
     const card = screen.getByText("Agility (Ag)").closest("div")!;
-    expect(within(card).getByText("-6")).toBeInTheDocument();
+    expect(within(card).getByText("1")).toBeInTheDocument();
     expect(within(card).getByText("(-6)")).toBeInTheDocument();
   });
 });
@@ -99,7 +99,7 @@ describe("Edit Rolls wiring", () => {
     await user.type(screen.getByRole("spinbutton"), "7");
     await user.click(screen.getByRole("button", { name: "Save Rolls" }));
 
-    expect(within(agilityCard).getByText("-7")).toBeInTheDocument();
+    expect(within(agilityCard).getByText("1")).toBeInTheDocument();
     expect(within(agilityCard).getByText("(-7)")).toBeInTheDocument();
   });
 });

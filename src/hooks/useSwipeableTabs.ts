@@ -9,10 +9,10 @@ type TransitionState = "idle" | "sliding";
  * Claims the gesture properly via `preventDefault` once a drag is recognised
  * as horizontal, instead of only comparing touch start/end position — that
  * matters because otherwise the browser/OS's own edge-swipe navigation
- * competes for the same touch the whole time and can win. Also ignores
- * touches that start on a button/link, and only reacts within the
- * container's own vertical bounds so it doesn't steal touches meant for
- * page chrome above or below it.
+ * competes for the same touch the whole time and can win. Reacts to touches
+ * starting anywhere in the container, including on top of buttons/links/
+ * inputs, and only reacts within the container's own vertical bounds so it
+ * doesn't steal touches meant for page chrome above or below it.
  */
 export function useSwipeableTabs<T extends string>(
   groups: readonly T[],
@@ -41,12 +41,6 @@ export function useSwipeableTabs<T extends string>(
     let isHorizontal: boolean | null = null;
 
     const onTouchStart = (event: TouchEvent) => {
-      const target = event.target as HTMLElement;
-      if (target.closest("button, a, [role='button']")) {
-        startX = NaN;
-        isHorizontal = null;
-        return;
-      }
       const touch = event.touches[0];
       if (!touch) return;
       const rect = element.getBoundingClientRect();

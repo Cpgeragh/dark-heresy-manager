@@ -1,5 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { getCharacteristicModifierTotals } from "../../src/features/corruption/characteristicModifierTotals";
+import {
+  getCharacteristicModifierTotals,
+  getCharacteristicModifierSources,
+} from "../../src/features/corruption/characteristicModifierTotals";
 import type { CorruptionBlock, CorruptionMalignancyEntry, CorruptionMutationEntry } from "../../src/types/Character";
 
 function malignancy(referenceId: string, extra: Partial<CorruptionMalignancyEntry> = {}): CorruptionMalignancyEntry {
@@ -90,5 +93,64 @@ describe("getCharacteristicModifierTotals", () => {
       majorMutations: [mutation("aberration", { rolledModifiers: { int: 4 } })],
     };
     expect(getCharacteristicModifierTotals(corruption)).toEqual({ s: 10, ag: 10, int: -4, fel: -10 });
+  });
+});
+
+describe("getCharacteristicModifierSources", () => {
+  it("returns nothing for an empty corruption block", () => {
+    expect(getCharacteristicModifierSources({ points: 0, malignancies: [] }, "ag")).toEqual([]);
+  });
+
+  it("returns a single source for a malignancy affecting the requested characteristic", () => {
+    const corruption: CorruptionBlock = {
+      points: 0,
+      malignancies: [malignancy("palsy", { rolledModifiers: { ag: 6 } })],
+    };
+    expect(getCharacteristicModifierSources(corruption, "ag")).toEqual([
+      { name: "Palsy", type: "Malignancy", amount: -6 },
+    ]);
+  });
+
+  it("labels minor and major mutations correctly", () => {
+    const corruption: CorruptionBlock = {
+      points: 0,
+      malignancies: [],
+      minorMutations: [mutation("brute")],
+      majorMutations: [mutation("necrophage")],
+    };
+    expect(getCharacteristicModifierSources(corruption, "s")).toEqual([
+      { name: "Brute", type: "Minor Mutation", amount: 10 },
+    ]);
+    expect(getCharacteristicModifierSources(corruption, "t")).toEqual([
+      { name: "Brute", type: "Minor Mutation", amount: 10 },
+      { name: "Necrophage", type: "Major Mutation", amount: 10 },
+    ]);
+  });
+
+  it("returns nothing for a characteristic with no active modifiers, even when others are active", () => {
+    const corruption: CorruptionBlock = {
+      points: 0,
+      malignancies: [malignancy("palsy", { rolledModifiers: { ag: 6 } })],
+    };
+    expect(getCharacteristicModifierSources(corruption, "wp")).toEqual([]);
+  });
+
+  it("uses the reference name, not whatever name is stored on the entry", () => {
+    const corruption: CorruptionBlock = {
+      points: 0,
+      malignancies: [malignancy("palsy", { name: "some-stale-stored-name", rolledModifiers: { ag: 6 } })],
+    };
+    expect(getCharacteristicModifierSources(corruption, "ag")).toEqual([
+      { name: "Palsy", type: "Malignancy", amount: -6 },
+    ]);
+  });
+
+  it("ignores legacy string malignancies and custom entries", () => {
+    const corruption: CorruptionBlock = {
+      points: 0,
+      malignancies: "some old free text",
+      minorMutations: [{ id: "custom-1", name: "Homemade Affliction", custom: true }],
+    };
+    expect(getCharacteristicModifierSources(corruption, "ag")).toEqual([]);
   });
 });

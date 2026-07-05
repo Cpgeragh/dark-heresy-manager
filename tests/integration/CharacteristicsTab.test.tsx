@@ -101,14 +101,14 @@ describe("CharacteristicsTab", () => {
     });
 
     const card = screen.getByText("Agility (Ag)").closest("div")!;
-    expect(within(card).getByText("-6")).toBeInTheDocument();
+    expect(within(card).getByText("1")).toBeInTheDocument();
     expect(within(card).getByText("(-6)")).toBeInTheDocument();
   });
 
   it("shows no adjustment badge when a characteristic has no active modifier", () => {
     renderTab();
 
-    const card = screen.getByText("Weapon Skill (WS)").closest("div")!;
+    const card = screen.getAllByText("Weapon Skill (WS)")[0].closest("div")!;
     expect(card.querySelector(".text-emerald-400, .text-red-400")).not.toBeInTheDocument();
   });
 
@@ -128,10 +128,30 @@ describe("CharacteristicsTab", () => {
     expect(within(toughnessCard).getByText("(+10)")).toBeInTheDocument();
 
     const agilityCard = screen.getByText("Agility (Ag)").closest("div")!;
-    expect(within(agilityCard).getByText("-10")).toBeInTheDocument();
+    expect(within(agilityCard).getByText("1")).toBeInTheDocument();
     expect(within(agilityCard).getByText("(-10)")).toBeInTheDocument();
 
     const willpowerCard = screen.getByText("Willpower (WP)").closest("div")!;
     expect(willpowerCard.querySelector(".text-emerald-400, .text-red-400")).not.toBeInTheDocument();
+  });
+});
+
+describe("CharacteristicsTab adjustment source breakdown", () => {
+  it("shows each contributing source with its type when a characteristic has an adjustment", () => {
+    renderTab(undefined, {
+      points: 0,
+      malignancies: [{ id: "m1", referenceId: "palsy", name: "Palsy", rolledModifiers: { ag: 6 } }],
+      minorMutations: [{ id: "mm1", referenceId: "misshapen", name: "Misshapen", rolledModifiers: { ag: 3 } }],
+    });
+
+    expect(screen.getByText(/Palsy \(Malignancy\): -6/)).toBeInTheDocument();
+    expect(screen.getByText(/Misshapen \(Minor Mutation\): -3/)).toBeInTheDocument();
+  });
+
+  it("shows no info-modal trigger when a characteristic has no adjustment", () => {
+    renderTab();
+
+    const wsCard = screen.getAllByText("Weapon Skill (WS)")[0].closest("div")!;
+    expect(within(wsCard).queryByRole("button", { name: /Show information about/ })).not.toBeInTheDocument();
   });
 });

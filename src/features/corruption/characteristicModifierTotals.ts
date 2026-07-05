@@ -32,3 +32,48 @@ export function getCharacteristicModifierTotals(corruption: CorruptionBlock): Ch
 
   return totals;
 }
+
+export interface CharacteristicModifierSource {
+  name: string;
+  type: "Malignancy" | "Minor Mutation" | "Major Mutation";
+  amount: number;
+}
+
+export function getCharacteristicModifierSources(
+  corruption: CorruptionBlock,
+  characteristic: CharacteristicModifier["characteristic"]
+): CharacteristicModifierSource[] {
+  const sources: CharacteristicModifierSource[] = [];
+
+  function checkEntry(
+    name: string,
+    type: CharacteristicModifierSource["type"],
+    modifiers: CharacteristicModifier[] | undefined,
+    rolledModifiers: Record<string, number> | undefined
+  ) {
+    for (const modifier of modifiers ?? []) {
+      if (modifier.characteristic !== characteristic) continue;
+      const amount =
+        modifier.kind === "flat"
+          ? modifier.sign * (modifier.value ?? 0)
+          : modifier.sign * (rolledModifiers?.[characteristic] ?? 0);
+      sources.push({ name, type, amount });
+    }
+  }
+
+  const malignancies = Array.isArray(corruption.malignancies) ? corruption.malignancies : [];
+  for (const entry of malignancies) {
+    const ref = getCorruptionMalignancyRef(entry.referenceId);
+    checkEntry(ref?.name ?? entry.name, "Malignancy", ref?.modifiers, entry.rolledModifiers);
+  }
+  for (const entry of corruption.minorMutations ?? []) {
+    const ref = getMutationRef(entry.referenceId);
+    checkEntry(ref?.name ?? entry.name, "Minor Mutation", ref?.modifiers, entry.rolledModifiers);
+  }
+  for (const entry of corruption.majorMutations ?? []) {
+    const ref = getMutationRef(entry.referenceId);
+    checkEntry(ref?.name ?? entry.name, "Major Mutation", ref?.modifiers, entry.rolledModifiers);
+  }
+
+  return sources;
+}
