@@ -71,7 +71,7 @@ export function useCharacterSheet({
   // ================================================================
   // HELPERS
   // ================================================================
-  const { getCharField, getCharTotal } = useCharacterHelpers({ character });
+  const { getCharField, getCharTotal, getEffectiveCharTotal, getCharBonus } = useCharacterHelpers({ character });
 
   // ================================================================
   // PUBLIC API
@@ -95,6 +95,8 @@ export function useCharacterSheet({
     // Helpers
     getCharField,
     getCharTotal,
+    getEffectiveCharTotal,
+    getCharBonus,
 
     // Mutations
     updateField: mutations.updateField,

@@ -6,11 +6,12 @@ import type {
   CyberneticItem,
   ArmourCraftsmanship,
   ArcheotechItem,
+  TalentEntry,
 } from "../../../types/Character";
 import type { ArmourRef } from "../../../data/reference/armourReference";
 import type { CampaignCustomItem, CustomArmourData } from "../../../types/CustomItems";
 
-import { wornApAt, bionicBonusAt, LOCATION_LABELS, LOCATION_ORDER } from "./armourHelpers";
+import { wornApAt, bionicBonusAt, naturalArmourBonus, LOCATION_LABELS, LOCATION_ORDER } from "./armourHelpers";
 import { ArmourPicker } from "./ArmourPicker";
 import { ForceFieldPicker } from "./ForceFieldPicker";
 import { CustomPieceForm } from "./CustomPieceForm";
@@ -18,8 +19,9 @@ import { ForceFieldRow } from "./ForceFieldRow";
 import { PieceRow } from "./PieceRow";
 import { ArcheotechArmourRow } from "./ArcheotechArmourRow";
 import { ArcheotechForceFieldRow } from "./ArcheotechForceFieldRow";
-import { uiSection, uiTextLabel, uiTextMuted, uiTextPlaceholder } from "../../../ui/editableStyles";
+import { uiSection, uiTextLabel, uiTextPlaceholder, uiInfoModalWrapper } from "../../../ui/editableStyles";
 import { SectionHeader } from "../../../ui/SectionHeader";
+import { InfoModal } from "../../../components/InfoModal";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
 import {
   archiveCustomItem,
@@ -45,6 +47,7 @@ interface ArmourTabProps {
   cybernetics?: CyberneticItem[];
   archeotech?: ArcheotechItem[];
   onUpdateArcheotech?: (next: ArcheotechItem[]) => void | Promise<void>;
+  traits?: TalentEntry[];
 }
 
 interface EditingArmourDefinition {
@@ -151,6 +154,7 @@ export function ArmourTab({
   cybernetics = [],
   archeotech,
   onUpdateArcheotech,
+  traits = [],
 }: ArmourTabProps) {
   const [showPicker, setShowPicker] = useState(false);
   const [showFieldPicker, setShowFieldPicker] = useState(false);
@@ -554,19 +558,42 @@ export function ArmourTab({
 
   if (armourLoading) return null;
 
+  const naturalBonus = naturalArmourBonus(traits);
+  const bionicLocations = LOCATION_ORDER.filter((loc) => bionicBonusAt(loc, cybernetics) > 0);
+  const hasMisc = naturalBonus > 0 || bionicLocations.length > 0;
+
   return (
     <div className="space-y-6">
       <section>
         <SectionHeader className="mb-2">Location Summary</SectionHeader>
         <div className={uiSection}>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm lg:text-base border-collapse">
+            <table className="w-full lg:table-fixed text-sm lg:text-base border-collapse">
               <thead>
                 <tr className={uiTextLabel}>
-                  <th className="text-left py-1.5 pr-4 font-medium">Location</th>
-                  <th className="text-center py-1.5 px-3 font-medium">AP</th>
+                  <th className="lg:w-32 text-left py-1.5 pr-4 font-medium">Location</th>
                   <th className="text-center py-1.5 px-3 font-medium">TB</th>
-                  <th className="text-center py-1.5 px-3 font-medium">Bionic</th>
+                  <th className="text-center py-1.5 px-3 font-medium">AP</th>
+                  <th className="text-center py-1.5 px-3 font-medium">
+                    <span className="inline-flex items-center gap-1">
+                      Misc
+                      {hasMisc && (
+                        <span className={uiInfoModalWrapper}>
+                          <InfoModal
+                            title="Misc Bonuses"
+                            content={
+                              <>
+                                {naturalBonus > 0 && <p>Natural Armour: +{naturalBonus} to all locations.</p>}
+                                {bionicLocations.length > 0 && (
+                                  <p>Bionic: +2 at {bionicLocations.map((l) => LOCATION_LABELS[l]).join(", ")}.</p>
+                                )}
+                              </>
+                            }
+                          />
+                        </span>
+                      )}
+                    </span>
+                  </th>
                   <th className="text-center py-1.5 px-3 font-medium">Total</th>
                 </tr>
               </thead>
@@ -581,20 +608,21 @@ export function ArmourTab({
                     .reduce((sum, a) => sum + (a.ap ?? 0), 0);
                   const ap = Math.max(regularAp, nonStackingArcheotechAp) + stackingAp;
                   const bionic = bionicBonusAt(loc, cybernetics);
-                  const total = ap + toughnessBonus + bionic;
+                  const misc = bionic + naturalBonus;
+                  const total = ap + toughnessBonus + misc;
                   return (
                     <tr key={loc} className="hover:bg-slate-800/40 transition">
                       <td className="py-2 pr-4 text-slate-100">{LOCATION_LABELS[loc]}</td>
-                      <td className="py-2 px-3 text-center font-code text-slate-200">{ap}</td>
-                      <td className={`py-2 px-3 text-center font-code ${uiTextMuted}`}>
+                      <td className="py-2 px-3 text-center font-code text-white">
                         {toughnessBonus}
                       </td>
+                      <td className="py-2 px-3 text-center font-code text-white">+{ap}</td>
                       <td
-                        className={`py-2 px-3 text-center font-code ${bionic > 0 ? "text-cyan-400" : "text-slate-700"}`}
+                        className={`py-2 px-3 text-center font-code ${misc > 0 ? "text-white" : "text-slate-700"}`}
                       >
-                        {bionic > 0 ? `+${bionic}` : "-"}
+                        {misc > 0 ? `+${misc}` : "-"}
                       </td>
-                      <td className="py-2 px-3 text-center font-code font-semibold text-amber-300">
+                      <td className="py-2 px-3 text-center font-code font-semibold text-emerald-400">
                         {total}
                       </td>
                     </tr>
@@ -603,10 +631,6 @@ export function ArmourTab({
               </tbody>
             </table>
           </div>
-          <p className={`text-xs lg:text-sm ${uiTextMuted} mt-2`}>
-            Total = Armour Points (worn only) + Toughness Bonus + Bionic (+2 per installed bionic
-            limb)
-          </p>
         </div>
       </section>
 

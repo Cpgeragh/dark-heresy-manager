@@ -122,7 +122,8 @@ const SETTLE_DURATION_MS = 220;
 
 interface CharacteristicsTabProps {
   getCharField: (statKey: keyof Characteristics) => CharField;
-  getCharTotal: (statKey: keyof Characteristics) => number;
+  getEffectiveCharTotal: (statKey: keyof Characteristics) => number;
+  getCharBonus: (statKey: keyof Characteristics) => number;
   editable: boolean;
   corruption: CorruptionBlock;
   updateCharacteristic: (statKey: keyof Characteristics, value: CharField) => void;
@@ -130,7 +131,8 @@ interface CharacteristicsTabProps {
 
 export function CharacteristicsTab({
   getCharField,
-  getCharTotal,
+  getEffectiveCharTotal,
+  getCharBonus,
   editable,
   corruption,
   updateCharacteristic,
@@ -287,17 +289,13 @@ export function CharacteristicsTab({
 
   useEffect(() => cancelSettleAnimation, [cancelSettleAnimation]);
 
-  function effectiveTotal(rawTotal: number, key: keyof Characteristics): number {
-    return Math.max(1, rawTotal + (modifierTotals[key] ?? 0));
-  }
-
-  const SB = Math.floor(effectiveTotal(getCharTotal("s"), "s") / CHARACTERISTIC_BONUS_DIVISOR);
-  const TB = Math.floor(effectiveTotal(getCharTotal("t"), "t") / CHARACTERISTIC_BONUS_DIVISOR);
-  const AB = Math.floor(effectiveTotal(getCharTotal("ag"), "ag") / CHARACTERISTIC_BONUS_DIVISOR);
-  const IB = Math.floor(effectiveTotal(getCharTotal("int"), "int") / CHARACTERISTIC_BONUS_DIVISOR);
-  const PB = Math.floor(effectiveTotal(getCharTotal("per"), "per") / CHARACTERISTIC_BONUS_DIVISOR);
-  const WPB = Math.floor(effectiveTotal(getCharTotal("wp"), "wp") / CHARACTERISTIC_BONUS_DIVISOR);
-  const FB = Math.floor(effectiveTotal(getCharTotal("fel"), "fel") / CHARACTERISTIC_BONUS_DIVISOR);
+  const SB = getCharBonus("s");
+  const TB = getCharBonus("t");
+  const AB = getCharBonus("ag");
+  const IB = getCharBonus("int");
+  const PB = getCharBonus("per");
+  const WPB = getCharBonus("wp");
+  const FB = getCharBonus("fel");
 
   return (
     <div className="space-y-6 text-slate-100">
@@ -320,7 +318,7 @@ export function CharacteristicsTab({
           ).map(({ label, key }) => (
             <div key={key} className={`${uiCell} text-center py-1 lg:py-1.5 px-0.5 lg:px-1`}>
               <div className={uiCellLabel}>{label}</div>
-              <div className={uiCellValueSm}>{effectiveTotal(getCharTotal(key), key)}</div>
+              <div className={uiCellValueSm}>{getEffectiveCharTotal(key)}</div>
             </div>
           ))}
         </div>

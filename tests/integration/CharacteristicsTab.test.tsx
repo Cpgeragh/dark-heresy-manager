@@ -4,6 +4,8 @@ import { render, screen, within } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
 import { CharacteristicsTab } from "../../src/pages/characterSheet/CharacteristicsTab";
+import { getCharacteristicModifierTotals } from "../../src/features/corruption/characteristicModifierTotals";
+import { CHARACTERISTIC_BONUS_DIVISOR } from "../../src/constants/gameRules";
 import type { CharField } from "../../src/utils/characterFactory";
 import type { Characteristics, CorruptionBlock } from "../../src/types/Character";
 
@@ -20,14 +22,25 @@ function getCharField(_key: keyof Characteristics): CharField {
   return BLANK_FIELD;
 }
 
+// Mirrors the real useCharacterHelpers.getEffectiveCharTotal/getCharBonus formulas,
+// so tests exercise the same adjustment math production code uses, driven by `corruption`.
 function renderTab(
   getCharTotal = vi.fn((k: keyof Characteristics) => TOTALS[k]),
   corruption: CorruptionBlock = { points: 0, malignancies: [] }
 ) {
+  const modifierTotals = getCharacteristicModifierTotals(corruption);
+  const getEffectiveCharTotal = vi.fn((k: keyof Characteristics) =>
+    Math.max(1, getCharTotal(k) + (modifierTotals[k] ?? 0))
+  );
+  const getCharBonus = vi.fn((k: keyof Characteristics) =>
+    Math.floor(getEffectiveCharTotal(k) / CHARACTERISTIC_BONUS_DIVISOR)
+  );
+
   return render(
     <CharacteristicsTab
       getCharField={getCharField}
-      getCharTotal={getCharTotal}
+      getEffectiveCharTotal={getEffectiveCharTotal}
+      getCharBonus={getCharBonus}
       editable={false}
       corruption={corruption}
       updateCharacteristic={() => {}}
@@ -45,13 +58,27 @@ describe("CharacteristicsTab", () => {
     }
   });
 
-  it("calls getCharTotal for each characteristic — not a local reimplementation", () => {
-    const spy = vi.fn((k: keyof Characteristics) => TOTALS[k]);
-    renderTab(spy);
+  it("uses the passed-in getEffectiveCharTotal/getCharBonus for each characteristic — not a local reimplementation", () => {
+    const effectiveSpy = vi.fn((k: keyof Characteristics) => TOTALS[k]);
+    const bonusSpy = vi.fn((k: keyof Characteristics) => Math.floor(TOTALS[k] / CHARACTERISTIC_BONUS_DIVISOR));
+    render(
+      <CharacteristicsTab
+        getCharField={getCharField}
+        getEffectiveCharTotal={effectiveSpy}
+        getCharBonus={bonusSpy}
+        editable={false}
+        corruption={{ points: 0, malignancies: [] }}
+        updateCharacteristic={() => {}}
+      />
+    );
 
-    const keys: (keyof Characteristics)[] = ["ws", "bs", "s", "t", "ag", "int", "per", "wp", "fel"];
-    for (const key of keys) {
-      expect(spy).toHaveBeenCalledWith(key);
+    const allKeys: (keyof Characteristics)[] = ["ws", "bs", "s", "t", "ag", "int", "per", "wp", "fel"];
+    for (const key of allKeys) {
+      expect(effectiveSpy).toHaveBeenCalledWith(key);
+    }
+    const bonusKeys: (keyof Characteristics)[] = ["s", "t", "ag", "int", "per", "wp", "fel"];
+    for (const key of bonusKeys) {
+      expect(bonusSpy).toHaveBeenCalledWith(key);
     }
   });
 

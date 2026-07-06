@@ -56,6 +56,16 @@ describe("ArmourTab", () => {
     expect(screen.getAllByText("4").length).toBeGreaterThanOrEqual(6);
   });
 
+  it("adds the Natural Armour trait's AP to every location's total", () => {
+    renderTab({
+      armour: [],
+      toughnessBonus: 0,
+      traits: [{ uid: "t1", talentId: "natural-armour", name: "Natural Armour (3)", specialisation: "3" }],
+    });
+    // Total column: ap(0) + toughnessBonus(0) + bionic(0) + naturalArmourBonus(3) = 3, for all six locations.
+    expect(screen.getAllByText("3").length).toBeGreaterThanOrEqual(6);
+  });
+
   it("shows equip/stow add affordances when editable", () => {
     renderTab();
     expect(screen.getByText("+ Equip")).toBeInTheDocument();

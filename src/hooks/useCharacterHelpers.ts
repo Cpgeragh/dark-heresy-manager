@@ -4,6 +4,9 @@ import { useCallback } from "react";
 import type { Character, Characteristics } from "../types/Character";
 import type { CharField } from "../utils/characterFactory";
 import { calculateCharacteristicTotal } from "../utils/stats";
+import { getCharacteristicModifierTotals } from "../features/corruption/characteristicModifierTotals";
+import { CHARACTERISTIC_LABELS } from "../features/corruption/characteristicModifiers";
+import { CHARACTERISTIC_BONUS_DIVISOR } from "../constants/gameRules";
 
 interface UseCharacterHelpersProps {
   character: Character | null;
@@ -26,8 +29,32 @@ export function useCharacterHelpers({ character }: UseCharacterHelpersProps) {
     [getCharField]
   );
 
+  const getEffectiveCharTotal = useCallback(
+    (statKey: keyof Characteristics): number => {
+      const rawTotal = getCharTotal(statKey);
+      if (!character) return rawTotal;
+      const modifierTotals = getCharacteristicModifierTotals(character.corruption);
+      return Math.max(1, rawTotal + (modifierTotals[statKey] ?? 0));
+    },
+    [character, getCharTotal]
+  );
+
+  const getCharBonus = useCallback(
+    (statKey: keyof Characteristics): number => {
+      const baseBonus = Math.floor(getEffectiveCharTotal(statKey) / CHARACTERISTIC_BONUS_DIVISOR);
+      const traits = character?.talentsAndTraits.traits ?? [];
+      const unnaturalCount = traits.filter(
+        (t) => t.talentId === "unnatural-characteristic" && t.specialisation === CHARACTERISTIC_LABELS[statKey]
+      ).length;
+      return baseBonus * (1 + unnaturalCount);
+    },
+    [getEffectiveCharTotal, character]
+  );
+
   return {
     getCharField,
     getCharTotal,
+    getEffectiveCharTotal,
+    getCharBonus,
   };
 }

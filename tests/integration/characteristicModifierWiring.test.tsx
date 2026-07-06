@@ -7,7 +7,9 @@ import "@testing-library/jest-dom";
 import { CharacteristicsTab } from "../../src/pages/characterSheet/CharacteristicsTab";
 import { CorruptionMalignancyPicker } from "../../src/features/corruption/CorruptionMalignancyPicker";
 import { MutationRow } from "../../src/features/corruption/MutationRow";
-import type { CorruptionBlock, CorruptionMalignancyEntry } from "../../src/types/Character";
+import { getCharacteristicModifierTotals } from "../../src/features/corruption/characteristicModifierTotals";
+import { CHARACTERISTIC_BONUS_DIVISOR } from "../../src/constants/gameRules";
+import type { Characteristics, CorruptionBlock, CorruptionMalignancyEntry } from "../../src/types/Character";
 
 function Wiring() {
   const [corruption, setCorruption] = useState<CorruptionBlock>({ points: 0, malignancies: [] });
@@ -17,6 +19,13 @@ function Wiring() {
       .map((m) => m.referenceId)
       .filter((id): id is string => Boolean(id))
   );
+
+  // Recomputed each render from current `corruption` state, mirroring the real
+  // useCharacterHelpers.getEffectiveCharTotal/getCharBonus formulas.
+  const modifierTotals = getCharacteristicModifierTotals(corruption);
+  const getEffectiveCharTotal = (k: keyof Characteristics) => Math.max(1, 0 + (modifierTotals[k] ?? 0));
+  const getCharBonus = (k: keyof Characteristics) =>
+    Math.floor(getEffectiveCharTotal(k) / CHARACTERISTIC_BONUS_DIVISOR);
 
   return (
     <>
@@ -32,7 +41,8 @@ function Wiring() {
       />
       <CharacteristicsTab
         getCharField={() => ({ base: 0, advances: 0 })}
-        getCharTotal={() => 0}
+        getEffectiveCharTotal={getEffectiveCharTotal}
+        getCharBonus={getCharBonus}
         editable={false}
         corruption={corruption}
         updateCharacteristic={() => {}}
@@ -63,6 +73,11 @@ function EditRollsWiring() {
     minorMutations: [{ id: "m1", referenceId: "misshapen", name: "Misshapen" }],
   });
 
+  const modifierTotals = getCharacteristicModifierTotals(corruption);
+  const getEffectiveCharTotal = (k: keyof Characteristics) => Math.max(1, 0 + (modifierTotals[k] ?? 0));
+  const getCharBonus = (k: keyof Characteristics) =>
+    Math.floor(getEffectiveCharTotal(k) / CHARACTERISTIC_BONUS_DIVISOR);
+
   return (
     <>
       <MutationRow
@@ -78,7 +93,8 @@ function EditRollsWiring() {
       />
       <CharacteristicsTab
         getCharField={() => ({ base: 0, advances: 0 })}
-        getCharTotal={() => 0}
+        getEffectiveCharTotal={getEffectiveCharTotal}
+        getCharBonus={getCharBonus}
         editable={false}
         corruption={corruption}
         updateCharacteristic={() => {}}

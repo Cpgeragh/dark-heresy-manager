@@ -1,7 +1,7 @@
 // src/pages/characterSheet/ArmourTab/armourHelpers.ts
 // Constants and pure helper functions for the Armour tab.
 
-import type { ArmourLocationKey, CyberneticItem, WornArmourPiece } from "../../../types/Character";
+import type { ArmourLocationKey, CyberneticItem, TalentEntry, WornArmourPiece } from "../../../types/Character";
 
 export const LOCATION_LABELS: Record<ArmourLocationKey, string> = {
   head: "Head",
@@ -30,6 +30,13 @@ export function pieceApAt(piece: WornArmourPiece, loc: ArmourLocationKey): numbe
 /** +2 TB bonus for each bionic limb installed at this location */
 export function bionicBonusAt(loc: ArmourLocationKey, cybernetics: CyberneticItem[]): number {
   return cybernetics.some((c) => c.bodyLocation?.includes(loc)) ? 2 : 0;
+}
+
+/** Flat AP from the Natural Armour trait (its specialisation stores the AP value), applies to all locations */
+export function naturalArmourBonus(traits: TalentEntry[]): number {
+  const entry = traits.find((t) => t.talentId === "natural-armour");
+  const value = entry ? Number(entry.specialisation) : 0;
+  return Number.isFinite(value) ? value : 0;
 }
 
 /** Total worn AP for a given location — highest value wins, pieces do not stack */

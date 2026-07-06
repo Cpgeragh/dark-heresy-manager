@@ -4,7 +4,6 @@ import { useState, useCallback, useEffect, useMemo } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useHeaderExtensionSetters } from "../context/HeaderExtensionContext";
 import { CharacterKebabContent } from "./characterSheet/CharacterKebabContent";
-import { CHARACTERISTIC_BONUS_DIVISOR } from "../constants/gameRules";
 
 import { useCharacterSheet } from "./characterSheet/useCharacterSheet";
 import { ErrorBoundary } from "../components/ErrorBoundary";
@@ -80,7 +79,8 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
     toggleDmReadOnly,
 
     getCharField,
-    getCharTotal,
+    getEffectiveCharTotal,
+    getCharBonus,
     updateCharacteristic,
     updateField,
     releaseCharacter,
@@ -427,7 +427,7 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
             <VitalsTab
               character={character}
               editable={allowedToEdit}
-              toughnessBonus={Math.floor(getCharTotal("t") / CHARACTERISTIC_BONUS_DIVISOR)}
+              toughnessBonus={getCharBonus("t")}
               onUpdateWounds={handleUpdateWounds}
               onUpdateFate={handleUpdateFate}
             />
@@ -452,7 +452,8 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
           {activeTab === "stats" && (
             <CharacteristicsTab
               getCharField={getCharField}
-              getCharTotal={getCharTotal}
+              getEffectiveCharTotal={getEffectiveCharTotal}
+              getCharBonus={getCharBonus}
               editable={allowedToEdit}
               corruption={character.corruption}
               updateCharacteristic={updateCharacteristic}
@@ -504,7 +505,7 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
               meleeWeapons={character.meleeWeapons}
               grenades={character.grenades ?? []}
               editable={allowedToEdit}
-              strengthBonus={Math.floor(getCharTotal("s") / CHARACTERISTIC_BONUS_DIVISOR)}
+              strengthBonus={getCharBonus("s")}
               onUpdateRanged={handleUpdateRangedWeapons}
               onUpdateMelee={handleUpdateMeleeWeapons}
               onUpdateGrenades={handleUpdateGrenades}
@@ -524,12 +525,13 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
               characterName={character.header.characterName}
               isDM={isDM}
               armour={character.armour}
-              toughnessBonus={Math.floor(getCharTotal("t") / CHARACTERISTIC_BONUS_DIVISOR)}
+              toughnessBonus={getCharBonus("t")}
               editable={allowedToEdit}
               onUpdate={handleUpdateArmour}
               cybernetics={character.cybernetics ?? []}
               archeotech={character.archeotech ?? []}
               onUpdateArcheotech={handleUpdateArcheotech}
+              traits={character.talentsAndTraits.traits}
             />
           )}
 
@@ -543,7 +545,7 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
               cybernetics={character.cybernetics ?? []}
               rangedWeapons={character.rangedWeapons}
               meleeWeapons={character.meleeWeapons}
-              strengthBonus={Math.floor(getCharTotal("s") / CHARACTERISTIC_BONUS_DIVISOR)}
+              strengthBonus={getCharBonus("s")}
               editable={allowedToEdit}
               onUpdate={handleUpdateCybernetics}
               onUpdateRanged={handleUpdateRangedWeapons}
