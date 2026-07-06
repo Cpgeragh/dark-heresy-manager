@@ -13,7 +13,6 @@ interface SkillGroupRowProps {
   skills: SkillWithComputed[];
   editable: boolean;
   updateLevel: (id: string, level: SkillAdvanceLevel) => void;
-  updateMisc: (id: string, value: number) => void;
 }
 
 export function SkillGroupRow({
@@ -21,7 +20,6 @@ export function SkillGroupRow({
   skills,
   editable,
   updateLevel,
-  updateMisc,
 }: SkillGroupRowProps) {
   const [expanded, setExpanded] = useState(false);
   const toggle = useCallback(() => setExpanded((p) => !p), []);
@@ -65,7 +63,6 @@ export function SkillGroupRow({
               skill={skill}
               editable={editable}
               updateLevel={updateLevel}
-              updateMisc={updateMisc}
             />
           ))}
         </div>

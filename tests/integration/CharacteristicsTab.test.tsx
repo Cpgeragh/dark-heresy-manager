@@ -155,3 +155,15 @@ describe("CharacteristicsTab adjustment source breakdown", () => {
     expect(within(wsCard).queryByRole("button", { name: /Show information about/ })).not.toBeInTheDocument();
   });
 });
+
+describe("CharacteristicsTab mobile peek carousel", () => {
+  it("wraps to Fellowship on one side and Ballistic Skill on the other for the default Weapon Skill view", () => {
+    renderTab();
+
+    const felPeek = screen.getAllByText("Fellowship (Fel)").find((el) => el.closest('[aria-hidden="true"]'));
+    expect(felPeek).toBeInTheDocument();
+
+    const bsPeek = screen.getAllByText("Ballistic Skill (BS)").find((el) => el.closest('[aria-hidden="true"]'));
+    expect(bsPeek).toBeInTheDocument();
+  });
+});

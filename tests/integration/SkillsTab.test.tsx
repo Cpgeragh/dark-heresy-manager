@@ -30,6 +30,7 @@ function renderTab(props: Partial<React.ComponentProps<typeof SkillsTab>> = {}) 
       editable={true}
       onUpdate={onUpdate}
       getCharField={getCharField}
+      corruption={{ points: 0, malignancies: [] }}
       {...props}
     />
   );

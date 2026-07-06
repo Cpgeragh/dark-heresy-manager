@@ -1,6 +1,6 @@
 // src/pages/characterSheet/CharacteristicsTab.tsx
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { CharField } from "../../utils/characterFactory";
 import type { Characteristics, CorruptionBlock } from "../../types/Character";
 import {
@@ -8,7 +8,6 @@ import {
   getCharacteristicModifierSources,
   type CharacteristicModifierSource,
 } from "../../features/corruption/characteristicModifierTotals";
-import { useSwipeableTabs } from "../../hooks/useSwipeableTabs";
 import CharacteristicField from "../../components/CharacteristicField";
 import { InfoModal } from "../../components/InfoModal";
 import {
@@ -116,6 +115,11 @@ const STAT_LABELS: Record<keyof Characteristics, string> = {
   fel: "Fellowship (Fel)",
 };
 
+const PEEK_PX = 32;
+const GAP_PX = 12;
+const COMMIT_FRACTION = 0.25;
+const SETTLE_DURATION_MS = 220;
+
 interface CharacteristicsTabProps {
   getCharField: (statKey: keyof Characteristics) => CharField;
   getCharTotal: (statKey: keyof Characteristics) => number;
@@ -132,17 +136,156 @@ export function CharacteristicsTab({
   updateCharacteristic,
 }: CharacteristicsTabProps) {
   const modifierTotals = getCharacteristicModifierTotals(corruption);
-  const [activeStat, setActiveStatRaw] = useState<keyof Characteristics>("ws");
-  const [slideDirection, setSlideDirection] = useState<1 | -1>(1);
-  const setActiveStat = useCallback((next: keyof Characteristics) => {
-    setActiveStatRaw((current) => {
-      if (next === current) return current;
-      const isForward = STAT_KEYS.indexOf(next) === (STAT_KEYS.indexOf(current) + 1) % STAT_KEYS.length;
-      setSlideDirection(isForward ? 1 : -1);
-      return next;
+  const [activeStat, setActiveStat] = useState<keyof Characteristics>("ws");
+  const [containerWidth, setContainerWidth] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const touchRef = useRef<{ startX: number; startY: number; isHorizontal: boolean | null } | null>(null);
+  const dragOffsetRef = useRef(0);
+  const animationRef = useRef<number | null>(null);
+  const pendingCompleteRef = useRef<(() => void) | null>(null);
+
+  const activeIndex = STAT_KEYS.indexOf(activeStat);
+  const prevStat = STAT_KEYS[(activeIndex - 1 + STAT_KEYS.length) % STAT_KEYS.length];
+  const nextStat = STAT_KEYS[(activeIndex + 1) % STAT_KEYS.length];
+
+  useEffect(() => {
+    const element = containerRef.current;
+    if (!element) return;
+    const observer = new ResizeObserver((entries) => {
+      const width = entries[0]?.contentRect.width;
+      if (width) setContainerWidth(width);
     });
+    observer.observe(element);
+    return () => observer.disconnect();
   }, []);
-  const { containerRef, transition } = useSwipeableTabs(STAT_KEYS, activeStat, setActiveStat);
+
+  const slideWidth = Math.max(0, containerWidth - 2 * PEEK_PX);
+  const restingOffset = PEEK_PX - slideWidth - GAP_PX;
+
+  const applyTransform = useCallback(
+    (offset: number) => {
+      dragOffsetRef.current = offset;
+      const track = trackRef.current;
+      if (track) track.style.transform = `translateX(${restingOffset + offset}px)`;
+    },
+    [restingOffset]
+  );
+
+  useLayoutEffect(() => {
+    applyTransform(0);
+  }, [activeStat, applyTransform]);
+
+  const cancelSettleAnimation = useCallback(() => {
+    if (animationRef.current !== null) {
+      cancelAnimationFrame(animationRef.current);
+      animationRef.current = null;
+    }
+    pendingCompleteRef.current = null;
+  }, []);
+
+  const finishPendingCommit = useCallback(() => {
+    if (animationRef.current !== null) {
+      cancelAnimationFrame(animationRef.current);
+      animationRef.current = null;
+    }
+    const complete = pendingCompleteRef.current;
+    pendingCompleteRef.current = null;
+    complete?.();
+  }, []);
+
+  const animateTo = useCallback(
+    (target: number, onComplete?: () => void) => {
+      finishPendingCommit();
+      const start = dragOffsetRef.current;
+      const distance = target - start;
+      if (distance === 0) {
+        onComplete?.();
+        return;
+      }
+      pendingCompleteRef.current = onComplete ?? null;
+      const startTime = performance.now();
+      const step = (now: number) => {
+        const elapsed = now - startTime;
+        const t = Math.min(1, elapsed / SETTLE_DURATION_MS);
+        const eased = 1 - Math.pow(1 - t, 3);
+        applyTransform(start + distance * eased);
+        if (t < 1) {
+          animationRef.current = requestAnimationFrame(step);
+        } else {
+          animationRef.current = null;
+          const complete = pendingCompleteRef.current;
+          pendingCompleteRef.current = null;
+          complete?.();
+        }
+      };
+      animationRef.current = requestAnimationFrame(step);
+    },
+    [applyTransform, finishPendingCommit]
+  );
+
+  useEffect(() => {
+    const element = containerRef.current;
+    if (!element || slideWidth === 0) return;
+
+    const onTouchStart = (event: TouchEvent) => {
+      const touch = event.touches[0];
+      if (!touch) return;
+      const rect = element.getBoundingClientRect();
+      if (touch.clientY < rect.top || touch.clientY > rect.bottom) return;
+      finishPendingCommit();
+      touchRef.current = { startX: touch.clientX, startY: touch.clientY, isHorizontal: null };
+    };
+
+    const onTouchMove = (event: TouchEvent) => {
+      const state = touchRef.current;
+      if (!state) return;
+      const touch = event.touches[0];
+      if (!touch) return;
+      const deltaX = touch.clientX - state.startX;
+      const deltaY = touch.clientY - state.startY;
+      if (state.isHorizontal === null) {
+        if (Math.abs(deltaX) < 6 && Math.abs(deltaY) < 6) return;
+        state.isHorizontal = Math.abs(deltaX) > Math.abs(deltaY);
+      }
+      if (state.isHorizontal) {
+        event.preventDefault();
+        applyTransform(deltaX);
+      }
+    };
+
+    const onTouchEnd = () => {
+      const state = touchRef.current;
+      touchRef.current = null;
+      if (!state?.isHorizontal) {
+        animateTo(0);
+        return;
+      }
+      const current = dragOffsetRef.current;
+      if (Math.abs(current) > slideWidth * COMMIT_FRACTION) {
+        const direction = current < 0 ? 1 : -1;
+        animateTo(Math.sign(current) * (slideWidth + GAP_PX), () => {
+          setActiveStat((currentStat) => {
+            const currentIndex = STAT_KEYS.indexOf(currentStat);
+            return STAT_KEYS[(currentIndex + direction + STAT_KEYS.length) % STAT_KEYS.length];
+          });
+        });
+      } else {
+        animateTo(0);
+      }
+    };
+
+    document.addEventListener("touchstart", onTouchStart, { passive: true });
+    document.addEventListener("touchmove", onTouchMove, { passive: false });
+    document.addEventListener("touchend", onTouchEnd, { passive: true });
+    return () => {
+      document.removeEventListener("touchstart", onTouchStart);
+      document.removeEventListener("touchmove", onTouchMove);
+      document.removeEventListener("touchend", onTouchEnd);
+    };
+  }, [slideWidth, applyTransform, animateTo, finishPendingCommit]);
+
+  useEffect(() => cancelSettleAnimation, [cancelSettleAnimation]);
 
   function effectiveTotal(rawTotal: number, key: keyof Characteristics): number {
     return Math.max(1, rawTotal + (modifierTotals[key] ?? 0));
@@ -249,39 +392,53 @@ export function CharacteristicsTab({
       </div>
 
       {/* Main stats — mobile swiper */}
-      <div ref={containerRef} className="lg:hidden">
-        <section
-          key={activeStat}
-          className={`relative px-5 transition-all duration-150 ease-out motion-reduce:transition-none ${
-            transition === "sliding"
-              ? slideDirection === 1
-                ? "opacity-0 translate-x-3"
-                : "opacity-0 -translate-x-3"
-              : "opacity-100 translate-x-0"
-          }`}
-        >
-          <span
+      <div ref={containerRef} className="lg:hidden overflow-x-hidden py-3">
+        <div ref={trackRef} className="flex" style={{ transform: `translateX(${restingOffset}px)` }}>
+          <div
             aria-hidden="true"
-            className="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 text-2xl font-bold leading-none text-slate-500"
+            className="pointer-events-none opacity-50"
+            style={{ flex: `0 0 ${slideWidth}px`, minWidth: 0, marginRight: GAP_PX }}
           >
-            ‹
-          </span>
-          <StatBlock
-            label={STAT_LABELS[activeStat]}
-            statKey={activeStat}
-            editable={editable}
-            adjustment={modifierTotals[activeStat] ?? 0}
-            sources={getCharacteristicModifierSources(corruption, activeStat)}
-            getCharField={getCharField}
-            updateCharacteristic={updateCharacteristic}
-          />
-          <span
+            <StatBlock
+              key={prevStat}
+              label={STAT_LABELS[prevStat]}
+              statKey={prevStat}
+              editable={false}
+              adjustment={modifierTotals[prevStat] ?? 0}
+              sources={getCharacteristicModifierSources(corruption, prevStat)}
+              getCharField={getCharField}
+              updateCharacteristic={updateCharacteristic}
+            />
+          </div>
+          <div className="rounded-lg shadow-[0_0_10px_1px_rgba(203,213,225,0.25)]" style={{ flex: `0 0 ${slideWidth}px`, minWidth: 0, marginRight: GAP_PX }}>
+            <StatBlock
+              key={activeStat}
+              label={STAT_LABELS[activeStat]}
+              statKey={activeStat}
+              editable={editable}
+              adjustment={modifierTotals[activeStat] ?? 0}
+              sources={getCharacteristicModifierSources(corruption, activeStat)}
+              getCharField={getCharField}
+              updateCharacteristic={updateCharacteristic}
+            />
+          </div>
+          <div
             aria-hidden="true"
-            className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-2xl font-bold leading-none text-slate-500"
+            className="pointer-events-none opacity-50"
+            style={{ flex: `0 0 ${slideWidth}px`, minWidth: 0 }}
           >
-            ›
-          </span>
-        </section>
+            <StatBlock
+              key={nextStat}
+              label={STAT_LABELS[nextStat]}
+              statKey={nextStat}
+              editable={false}
+              adjustment={modifierTotals[nextStat] ?? 0}
+              sources={getCharacteristicModifierSources(corruption, nextStat)}
+              getCharField={getCharField}
+              updateCharacteristic={updateCharacteristic}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Main stats — desktop grid */}

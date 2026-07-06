@@ -2,9 +2,10 @@
 
 import { useState, useCallback, useMemo, useRef } from "react";
 import type { TouchEvent } from "react";
-import type { Characteristics, SkillEntry } from "../../../types/Character";
+import type { Characteristics, CorruptionBlock, SkillEntry } from "../../../types/Character";
 import type { CharField } from "../../../utils/characterFactory";
 import { useSkillComputation } from "../../../hooks/useSkillComputation";
+import { getCharacteristicModifierTotals } from "../../../features/corruption/characteristicModifierTotals";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { uiSection, uiTextPlaceholder } from "../../../ui/editableStyles";
 import { SkillRow } from "./SkillRow";
@@ -17,6 +18,7 @@ interface SkillsTabProps {
   editable: boolean;
   onUpdate: (next: SkillEntry[]) => void;
   getCharField: (statKey: keyof Characteristics) => CharField;
+  corruption: CorruptionBlock;
 }
 
 type DisplayItem =
@@ -25,14 +27,15 @@ type DisplayItem =
 
 type SkillsView = "basic" | "advanced";
 
-export function SkillsTab({ skills, editable, onUpdate, getCharField }: SkillsTabProps) {
+export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption }: SkillsTabProps) {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isUntrainedBasicOpen, setIsUntrainedBasicOpen] = useState(false);
   const [activeView, setActiveView] = useState<SkillsView>("basic");
   const [viewTransition, setViewTransition] = useState<"idle" | "sliding">("idle");
   const touchStartX = useRef<number | null>(null);
 
-  const computedSkills = useSkillComputation({ skills, getCharField });
+  const modifierTotals = getCharacteristicModifierTotals(corruption);
+  const computedSkills = useSkillComputation({ skills, getCharField, modifierTotals });
 
   const trainedSkills = useMemo(
     () =>
@@ -135,12 +138,6 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField }: SkillsTa
     [skills, onUpdate]
   );
 
-  const updateMisc = useCallback(
-    (id: string, value: number) =>
-      onUpdate(skills.map((s) => (s.id === id ? { ...s, miscModifier: value } : s))),
-    [skills, onUpdate]
-  );
-
   const handleAdd = useCallback(
     (id: string) => onUpdate(skills.map((s) => (s.id === id ? { ...s, level: "trained" } : s))),
     [skills, onUpdate]
@@ -154,7 +151,6 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField }: SkillsTa
           skill={item.skill}
           editable={editable}
           updateLevel={updateLevel}
-          updateMisc={updateMisc}
         />
       ) : (
         <SkillGroupRow
@@ -163,7 +159,6 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField }: SkillsTa
           skills={item.skills}
           editable={editable}
           updateLevel={updateLevel}
-          updateMisc={updateMisc}
         />
       )
     );
@@ -278,10 +273,10 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField }: SkillsTa
         onClose={() => setIsAddOpen(false)}
         untrainedSkills={untrainedSkills}
         onAdd={handleAdd}
+        hideLevelChip
       />
       <AddSkillModal
         title="Untrained Basic Skills"
-        previewMode
         isOpen={isUntrainedBasicOpen}
         editable={editable}
         onClose={() => setIsUntrainedBasicOpen(false)}

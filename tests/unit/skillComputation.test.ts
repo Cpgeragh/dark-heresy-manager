@@ -63,26 +63,6 @@ describe("useSkillComputation", () => {
     expect(result.current[0].total).toBe(40);
   });
 
-  it("applies miscModifier", () => {
-    const { result } = renderHook(() =>
-      useSkillComputation({
-        skills: [makeSkill("Acrobatics", "trained", { miscModifier: 5 })],
-        getCharField: makeGetCharField(30, 0),
-      })
-    );
-    expect(result.current[0].total).toBe(35);
-  });
-
-  it("computes half value as floor(total / 2)", () => {
-    const { result } = renderHook(() =>
-      useSkillComputation({
-        skills: [makeSkill("Acrobatics", "trained")],
-        getCharField: makeGetCharField(31, 0),
-      })
-    );
-    expect(result.current[0].half).toBe(15);
-  });
-
   it("handles multiple skills independently", () => {
     const { result } = renderHook(() =>
       useSkillComputation({
@@ -95,5 +75,49 @@ describe("useSkillComputation", () => {
     );
     expect(result.current[0].total).toBe(25);
     expect(result.current[1].total).toBe(35);
+  });
+
+  it("applies a positive characteristic modifier to the total", () => {
+    const { result } = renderHook(() =>
+      useSkillComputation({
+        skills: [makeSkill("Acrobatics", "trained")],
+        getCharField: makeGetCharField(30, 0),
+        modifierTotals: { ag: 5 },
+      })
+    );
+    expect(result.current[0].total).toBe(35);
+  });
+
+  it("applies a negative characteristic modifier to the total", () => {
+    const { result } = renderHook(() =>
+      useSkillComputation({
+        skills: [makeSkill("Acrobatics", "untrained")],
+        getCharField: makeGetCharField(30, 0),
+        modifierTotals: { ag: -10 },
+      })
+    );
+    expect(result.current[0].total).toBe(10);
+  });
+
+  it("floors the modified characteristic at 1, never negative", () => {
+    const { result } = renderHook(() =>
+      useSkillComputation({
+        skills: [makeSkill("Acrobatics", "trained")],
+        getCharField: makeGetCharField(5, 0),
+        modifierTotals: { ag: -50 },
+      })
+    );
+    expect(result.current[0].total).toBe(1);
+  });
+
+  it("applies modifier to an untrained advanced skill (no halving)", () => {
+    const { result } = renderHook(() =>
+      useSkillComputation({
+        skills: [makeSkill("Logic", "untrained", { advanced: true })],
+        getCharField: makeGetCharField(30, 0),
+        modifierTotals: { ag: 8 },
+      })
+    );
+    expect(result.current[0].total).toBe(38);
   });
 });

@@ -73,13 +73,6 @@ describe("normaliseSkills", () => {
     expect(result[0].level).toBe("+10");
   });
 
-  it("preserves the saved miscModifier", () => {
-    const saved = [{ ...MOCK_DEFAULT_SKILLS[1], miscModifier: 5 }];
-    const result = normaliseSkills(saved);
-    const athletics = result.find((s) => s.id === "athletics");
-    expect(athletics?.miscModifier).toBe(5);
-  });
-
   it("preserves the saved notes", () => {
     const saved = [{ ...MOCK_DEFAULT_SKILLS[0], notes: "Trained under Arbites" }];
     const result = normaliseSkills(saved);

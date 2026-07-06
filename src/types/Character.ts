@@ -43,9 +43,6 @@ export interface SkillEntry {
   // NEW — which book this skill originates from
   source: SkillSource;
 
-  // Optional bonus modifier
-  miscModifier?: number;
-
   // User-entered notes
   notes?: string;
 }

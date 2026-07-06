@@ -28,4 +28,5 @@ export const colourActiveSky = "border-sky-400 bg-sky-600/80 text-white shadow-s
 export const colourActiveRose = "border-rose-400 bg-rose-600/80 text-white shadow-sm shadow-rose-950/50";
 export const colourActiveOrange = "border-orange-400 bg-orange-600/80 text-white shadow-sm shadow-orange-950/50";
 export const colourActiveEmerald = "border-emerald-400 bg-emerald-600/80 text-white shadow-sm shadow-emerald-950/50";
+export const colourActiveAmber = "border-amber-400 bg-amber-600/80 text-white shadow-sm shadow-amber-950/50";
 export const colourActiveRed = "bg-red-500/20 text-red-400 border-red-500";

@@ -1,24 +1,22 @@
 // src/pages/characterSheet/SkillsTab/AddSkillModal.tsx
 
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { CHAR_LABEL, type SkillWithComputed } from "./skillsConstants";
 import { charColour } from "../../../ui/sourceStyles";
-import { InfoModal } from "../../../components/InfoModal";
-import { SKILL_DESCRIPTIONS } from "../../../data/skillDescriptions";
 import { Chip } from "../../../ui/Chip";
 import { PickerModal } from "../../../ui/PickerModal";
 import { SkillRow } from "./SkillRow";
-import { colourPurple, colourTeal } from "../../../ui/colourTokens";
-import { uiInfoModalWrapper } from "../../../ui/editableStyles";
+import { colourPurple } from "../../../ui/colourTokens";
+import { uiItemName } from "../../../ui/editableStyles";
 
 interface AddSkillModalProps {
   isOpen: boolean;
   title?: string;
   editable?: boolean;
-  previewMode?: boolean;
   onClose: () => void;
   untrainedSkills: SkillWithComputed[];
   onAdd: (id: string) => void;
+  hideLevelChip?: boolean;
 }
 
 type ListItem =
@@ -29,13 +27,13 @@ export function AddSkillModal({
   isOpen,
   title,
   editable = true,
-  previewMode = false,
   onClose,
   untrainedSkills,
   onAdd,
+  hideLevelChip = false,
 }: AddSkillModalProps) {
   const [search, setSearch] = useState("");
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const [openCategory, setOpenCategory] = useState<string | null>(null);
   const modalTitle = title ?? (editable ? "Add Skill" : "View Skills");
 
   const listItems = useMemo((): ListItem[] => {
@@ -71,29 +69,41 @@ export function AddSkillModal({
     });
   }, [untrainedSkills, search]);
 
-  useEffect(() => {
-    if (search) {
-      setExpandedGroups(
-        new Set(
-          listItems
-            .filter((i): i is Extract<ListItem, { type: "group" }> => i.type === "group")
-            .map((i) => i.category)
-        )
-      );
-    } else {
-      setExpandedGroups(new Set());
-    }
-  }, [search, listItems]);
-
-  const toggleGroup = useCallback((category: string) => {
-    setExpandedGroups((prev) => {
-      const next = new Set(prev);
-      next.has(category) ? next.delete(category) : next.add(category);
-      return next;
-    });
-  }, []);
-
   if (!isOpen) return null;
+
+  if (openCategory) {
+    const group = listItems.find(
+      (i): i is Extract<ListItem, { type: "group" }> => i.type === "group" && i.category === openCategory
+    );
+    const skills = group?.skills ?? [];
+
+    return (
+      <PickerModal
+        title={openCategory}
+        titleClassName="text-red-500"
+        placeholder=""
+        query=""
+        onQueryChange={() => {}}
+        onClose={() => setOpenCategory(null)}
+        closeLabel="←"
+        hideSearch
+        isEmpty={skills.length === 0}
+      >
+        {skills.map((skill) => (
+          <SkillRow
+            key={skill.id}
+            skill={skill}
+            editable={false}
+            previewMode
+            updateLevel={() => {}}
+            onSelect={editable ? onAdd : undefined}
+            indented
+            hideLevelChip={hideLevelChip}
+          />
+        ))}
+      </PickerModal>
+    );
+  }
 
   return (
     <PickerModal
@@ -108,137 +118,47 @@ export function AddSkillModal({
     >
       {listItems.map((item) => {
         if (item.type === "skill") {
-          return previewMode ? (
+          return (
             <SkillRow
               key={item.skill.id}
               skill={item.skill}
               editable={false}
               previewMode
               updateLevel={() => {}}
-              updateMisc={() => {}}
               onSelect={editable ? onAdd : undefined}
-            />
-          ) : (
-            <SkillPickerRow
-              key={item.skill.id}
-              skill={item.skill}
-              editable={editable}
-              onAdd={onAdd}
+              hideLevelChip={hideLevelChip}
             />
           );
         }
 
-        const isExpanded = expandedGroups.has(item.category);
         return (
-          <div key={item.category}>
+          <div key={item.category} className="rounded border border-slate-500 bg-slate-800/60 overflow-hidden">
             <button
-              onClick={(e) => {
-                const wasExpanded = expandedGroups.has(item.category);
-                toggleGroup(item.category);
-                if (!wasExpanded) {
-                  const btn = e.currentTarget;
-                  setTimeout(() => btn.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
-                }
-              }}
-              className="w-full flex items-center gap-3 px-4 lg:px-5 py-3 lg:py-4 text-left hover:bg-slate-800 transition"
+              onClick={() => setOpenCategory(item.category)}
+              className="w-full flex items-center gap-3 px-4 lg:px-5 py-3 lg:py-4 text-left hover:bg-slate-700/40 transition group"
             >
-              <span className="text-sm lg:text-base font-semibold text-slate-100 flex-1 min-w-0 truncate">
-                {item.category}
-              </span>
-              <Chip size="sm" className={`bg-slate-800 font-code shrink-0 ${charColour(item.skills[0].characteristic)}`}>
-                {CHAR_LABEL[item.skills[0].characteristic]}
-              </Chip>
-              {item.skills[0].advanced && (
-                <Chip size="sm" className={`shrink-0 ${colourPurple}`}>
-                  Advanced
-                </Chip>
-              )}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                className={`w-4 h-4 text-slate-400 shrink-0 transition-transform ${isExpanded ? "" : "-rotate-90"}`}
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                  clipRule="evenodd"
-                />
+              <div className="flex-1 min-w-0 space-y-1.5">
+                <span className={`${uiItemName} truncate block group-hover:text-white`}>
+                  {item.category}
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <Chip size="sm" className={`bg-slate-800 font-code shrink-0 ${charColour(item.skills[0].characteristic)}`}>
+                    {CHAR_LABEL[item.skills[0].characteristic]}
+                  </Chip>
+                  {item.skills[0].advanced && (
+                    <Chip size="sm" className={`shrink-0 ${colourPurple}`}>
+                      Advanced
+                    </Chip>
+                  )}
+                </div>
+              </div>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-slate-300 shrink-0 -rotate-90">
+                <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
               </svg>
             </button>
-            {isExpanded && (
-              <div className="border-t border-slate-700/50 bg-slate-900/40">
-                {item.skills.map((skill) => previewMode ? (
-                  <SkillRow
-                    key={skill.id}
-                    skill={skill}
-                    editable={false}
-                    previewMode
-                    updateLevel={() => {}}
-                    updateMisc={() => {}}
-                    onSelect={editable ? onAdd : undefined}
-                  />
-                ) : (
-                  <SkillPickerRow
-                    key={skill.id}
-                    skill={skill}
-                    editable={editable}
-                    onAdd={onAdd}
-                    indented
-                  />
-                ))}
-              </div>
-            )}
           </div>
         );
       })}
     </PickerModal>
-  );
-}
-
-function SkillPickerRow({
-  skill,
-  editable,
-  onAdd,
-  indented = false,
-}: {
-  skill: SkillWithComputed;
-  editable: boolean;
-  onAdd: (id: string) => void;
-  indented?: boolean;
-}) {
-  const displayName = indented
-    ? skill.name.slice(skill.category.length).trim().replace(/^\(|\)$/g, "").trim() ||
-      skill.name
-    : skill.name;
-
-  return (
-    <button
-      onClick={editable ? () => onAdd(skill.id) : undefined}
-      className={`w-full flex items-center gap-3 py-3 lg:py-4 text-left transition border-b border-slate-700/30 last:border-b-0 ${
-        indented ? "pl-7 lg:pl-9 pr-4 lg:pr-5" : "px-4 lg:px-5"
-      } ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
-    >
-      <div className="flex items-center gap-1.5 flex-1 min-w-0">
-        <span className="text-sm lg:text-base text-slate-100 truncate">{displayName}</span>
-        {SKILL_DESCRIPTIONS[skill.name] && (
-          <span
-            className={uiInfoModalWrapper}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <InfoModal title={skill.name} content={SKILL_DESCRIPTIONS[skill.name]} />
-          </span>
-        )}
-      </div>
-      <Chip size="sm" className={`bg-slate-800 font-code shrink-0 ${charColour(skill.characteristic)}`}>
-        {CHAR_LABEL[skill.characteristic]}
-      </Chip>
-      <Chip
-        size="sm"
-        className={`shrink-0 ${skill.advanced ? colourPurple : colourTeal}`}
-      >
-        {skill.advanced ? "Advanced" : "Basic"}
-      </Chip>
-    </button>
   );
 }

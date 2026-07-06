@@ -5,7 +5,7 @@ import type { SkillEntry } from "../types/Character";
 
 /**
  * Merges a character's saved skills with the current DEFAULT_SKILLS list.
- * Preserves the player's trained level, miscModifier, and notes for each skill,
+ * Preserves the player's trained level and notes for each skill,
  * while picking up any metadata changes (name, characteristic, category, source)
  * and any new skills added to DEFAULT_SKILLS.
  */
@@ -21,7 +21,6 @@ export function normaliseSkills(raw: unknown): SkillEntry[] {
     return {
       ...skill,
       level: saved.level ?? skill.level,
-      miscModifier: saved.miscModifier,
       notes: saved.notes,
     };
   });
@@ -49,7 +48,6 @@ export function skillsNeedNormalisation(raw: unknown, normalised = normaliseSkil
       saved.category !== skill.category ||
       saved.advanced !== skill.advanced ||
       saved.source !== skill.source ||
-      saved.miscModifier !== skill.miscModifier ||
       saved.notes !== skill.notes
     );
   });

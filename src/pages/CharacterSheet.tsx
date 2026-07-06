@@ -465,6 +465,7 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
               editable={allowedToEdit}
               onUpdate={handleUpdateSkills}
               getCharField={getCharField}
+              corruption={character.corruption}
             />
           )}
 

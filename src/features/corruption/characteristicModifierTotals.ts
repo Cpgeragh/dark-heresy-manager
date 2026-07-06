@@ -3,7 +3,7 @@ import type { CharacteristicModifier } from "./characteristicModifiers";
 import { getCorruptionMalignancyRef } from "./corruptionReference";
 import { getMutationRef } from "./mutationsReference";
 
-type CharacteristicTotals = Partial<Record<CharacteristicModifier["characteristic"], number>>;
+export type CharacteristicTotals = Partial<Record<CharacteristicModifier["characteristic"], number>>;
 
 function applyModifiers(
   totals: CharacteristicTotals,
