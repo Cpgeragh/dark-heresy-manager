@@ -4,14 +4,30 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import type { WeaponTrainingBlock, WeaponTrainingTalentId } from "../../types/Character";
 import { WEAPON_TRAINING_GROUPS } from "../../data/weaponTrainingData";
-import { Chip } from "../../ui/Chip";
-import { uiFormLabel, uiTextPlaceholder } from "../../ui/editableStyles";
+import { editableInputClass, uiFormLabel, uiTextPlaceholder } from "../../ui/editableStyles";
+import { uiDismissButton } from "../../ui/buttonStyles";
+import {
+  colourActiveOutlineTeal,
+  colourActiveOutlineViolet,
+  colourActiveOutlineOrange,
+  colourActiveOutlineSky,
+  colourActiveOutlineAmber,
+  colourOutlineFuchsia,
+} from "../../ui/colourTokens";
 
 interface WeaponTrainingTabProps {
   weaponTraining: WeaponTrainingBlock;
   editable: boolean;
   onUpdate: (next: WeaponTrainingBlock) => void;
 }
+
+const GROUP_ACTIVE_STYLE: Record<string, string> = {
+  "Basic Weapon Training": colourActiveOutlineTeal,
+  "Heavy Weapon Training": colourActiveOutlineViolet,
+  "Melee Weapon Training": colourActiveOutlineOrange,
+  "Pistol Training": colourActiveOutlineSky,
+  "Thrown Weapon Training": colourActiveOutlineAmber,
+};
 
 export function WeaponTrainingTab({ weaponTraining, editable, onUpdate }: WeaponTrainingTabProps) {
   const [newExotic, setNewExotic] = useState("");
@@ -77,7 +93,7 @@ export function WeaponTrainingTab({ weaponTraining, editable, onUpdate }: Weapon
                   aria-pressed={active}
                   className={`px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm transition ${
                     active
-                      ? "border-orange-400 text-orange-400 font-semibold hover:bg-orange-400/10"
+                      ? GROUP_ACTIVE_STYLE[group.label]
                       : editable
                         ? "border-slate-500 text-slate-100 hover:bg-slate-800"
                         : "border-slate-700 text-slate-500 opacity-60 cursor-not-allowed"
@@ -112,21 +128,21 @@ export function WeaponTrainingTab({ weaponTraining, editable, onUpdate }: Weapon
 
         <div className="flex flex-wrap justify-center gap-1.5 max-w-xl mx-auto">
           {weaponTraining.exoticWeapons.map((weapon, index) => (
-            <Chip
+            <span
               key={index}
-              className="border-orange-400 text-orange-400 hover:bg-orange-400/10"
+              className={`inline-flex items-center gap-1 px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm ${colourOutlineFuchsia}`}
             >
               {weapon}
               {editable && (
                 <button
                   onClick={() => handleRemoveExotic(index)}
                   aria-label={`Remove ${weapon}`}
-                  className="ml-1 hover:text-red-200 transition"
+                  className={uiDismissButton}
                 >
-                  ✕
+                  ×
                 </button>
               )}
-            </Chip>
+            </span>
           ))}
         </div>
       </div>
@@ -141,7 +157,7 @@ export function WeaponTrainingTab({ weaponTraining, editable, onUpdate }: Weapon
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="font-semibold text-slate-100">Add Exotic Weapon</span>
-              <button onClick={closeModal} className="text-slate-400 hover:text-slate-200 transition">✕</button>
+              <button onClick={closeModal} className={uiDismissButton}>×</button>
             </div>
             <input
               autoFocus
@@ -153,7 +169,7 @@ export function WeaponTrainingTab({ weaponTraining, editable, onUpdate }: Weapon
                 if (e.key === "Escape") closeModal();
               }}
               placeholder="e.g. Needle Pistol"
-              className="w-full px-3 py-2 rounded border border-slate-600 bg-slate-800 text-sm text-slate-200 placeholder-slate-500"
+              className={editableInputClass(true)}
             />
             <button
               onClick={() => { handleAddExotic(); setShowExoticModal(false); }}

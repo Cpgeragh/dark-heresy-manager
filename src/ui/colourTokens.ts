@@ -30,3 +30,13 @@ export const colourActiveOrange = "border-orange-400 bg-orange-600/80 text-white
 export const colourActiveEmerald = "border-emerald-400 bg-emerald-600/80 text-white shadow-sm shadow-emerald-950/50";
 export const colourActiveAmber = "border-amber-400 bg-amber-600/80 text-white shadow-sm shadow-amber-950/50";
 export const colourActiveRed = "bg-red-500/20 text-red-400 border-red-500";
+// Lighter "outlined" active/pressed style — border+text only, hover tint, no solid fill.
+// Distinct from colourActiveXxx above (solid bg-600/80 fill + white text).
+export const colourActiveOutlineTeal = "border-teal-400 text-teal-400 font-semibold hover:bg-teal-400/10";
+export const colourActiveOutlineViolet = "border-violet-400 text-violet-400 font-semibold hover:bg-violet-400/10";
+export const colourActiveOutlineOrange = "border-orange-400 text-orange-400 font-semibold hover:bg-orange-400/10";
+export const colourActiveOutlineSky = "border-sky-400 text-sky-400 font-semibold hover:bg-sky-400/10";
+export const colourActiveOutlineAmber = "border-amber-400 text-amber-400 font-semibold hover:bg-amber-400/10";
+export const colourActiveOutlineFuchsia = "border-fuchsia-400 text-fuchsia-400 font-semibold hover:bg-fuchsia-400/10";
+// Same style, no hover — for static/non-interactive display (e.g. a chip that isn't itself clickable).
+export const colourOutlineFuchsia = "border-fuchsia-400 text-fuchsia-400 font-semibold";
