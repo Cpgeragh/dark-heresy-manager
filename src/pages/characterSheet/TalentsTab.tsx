@@ -1,7 +1,6 @@
 // src/pages/characterSheet/TalentsTab.tsx
 
-import { useCallback, useMemo, useRef, useState } from "react";
-import type { TouchEvent } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type {
   TalentsAndTraitsBlock,
   TalentEntry,
@@ -10,6 +9,7 @@ import { TALENT_LIST } from "../../data/talentData";
 import { uiSection, uiTextPlaceholder, uiFormLabel } from "../../ui/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { EntryCard, EntrySection, TalentPickerModal } from "./talentComponents";
+import { useSwipeableTabs } from "../../hooks/useSwipeableTabs";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -28,6 +28,7 @@ const FAITH_GROUP_LABELS: Record<string, string> = {
 };
 
 const FAITH_GROUP_ORDER = ["mercy", "sign", "wrath"] as const;
+const VIEW_GROUPS = ["talents", "faith"] as const;
 
 const REGULAR_TALENT_LIST = TALENT_LIST.filter((t) => !t.faithGroup);
 const FAITH_TALENT_LIST = TALENT_LIST.filter((t) => !!t.faithGroup);
@@ -132,32 +133,9 @@ export function TalentsTab({
   );
 
 const [activeView, setActiveView] = useState<"talents" | "faith">("talents");
-  const [viewTransition, setViewTransition] = useState<"idle" | "sliding">("idle");
-  const touchStartX = useRef<number | null>(null);
+  const { containerRef, transition, switchTo } = useSwipeableTabs(VIEW_GROUPS, activeView, setActiveView);
 
-  const switchView = useCallback((view?: "talents" | "faith") => {
-    setActiveView((current) => {
-      const next = view ?? (current === "talents" ? "faith" : "talents");
-      if (next === current) return current;
-      setViewTransition("sliding");
-      window.setTimeout(() => setViewTransition("idle"), 180);
-      return next;
-    });
-  }, []);
-
-  const handleTouchStart = useCallback((e: TouchEvent<HTMLDivElement>) => {
-    touchStartX.current = e.touches[0]?.clientX ?? null;
-  }, []);
-
-  const handleTouchEnd = useCallback((e: TouchEvent<HTMLDivElement>) => {
-    const startX = touchStartX.current;
-    const endX = e.changedTouches[0]?.clientX;
-    touchStartX.current = null;
-    if (startX === null || endX === undefined || Math.abs(endX - startX) < 50) return;
-    switchView();
-  }, [switchView]);
-
-  const transitionClass = viewTransition === "sliding"
+  const transitionClass = transition === "sliding"
     ? activeView === "talents" ? "opacity-0 -translate-x-3" : "opacity-0 translate-x-3"
     : "opacity-100";
 
@@ -167,7 +145,7 @@ const [activeView, setActiveView] = useState<"talents" | "faith">("talents");
   return (
     <div className="space-y-8">
       {/* MOBILE: swipe tabs */}
-      <div className="lg:hidden">
+      <div ref={containerRef} className="lg:hidden">
         {showFaith ? (
           <>
             <div
@@ -183,7 +161,7 @@ const [activeView, setActiveView] = useState<"talents" | "faith">("talents");
                     type="button"
                     role="tab"
                     aria-selected={active}
-                    onClick={() => switchView(view)}
+                    onClick={() => switchTo(view)}
                     className={[
                       "rounded-md px-3 py-1.5 text-xs font-semibold transition border",
                       active
@@ -202,8 +180,6 @@ const [activeView, setActiveView] = useState<"talents" | "faith">("talents");
               key={activeView}
               className={`transition-all duration-150 ease-out motion-reduce:transition-none ${transitionClass}`}
               role="tabpanel"
-              onTouchStart={handleTouchStart}
-              onTouchEnd={handleTouchEnd}
             >
               {activeView === "talents" ? (
                 <EntrySection
@@ -248,6 +224,7 @@ const [activeView, setActiveView] = useState<"talents" | "faith">("talents");
           editable={editable}
           onAdd={handleAddTalent}
           onRemove={handleRemoveTalent}
+          columns={showFaith ? 1 : 2}
         />
         {showFaith && (
           <FaithTalentSection

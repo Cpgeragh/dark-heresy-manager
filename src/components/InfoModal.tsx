@@ -59,12 +59,13 @@ export function InfoModal({ title, content, hideTitle = false }: InfoModalProps)
           className="w-[90vw] max-w-sm lg:max-w-2xl max-h-[70vh] lg:max-h-[85vh] overflow-y-auto rounded-lg bg-slate-800 border border-slate-600 shadow-xl p-0 text-slate-200 backdrop:bg-black/50 backdrop:backdrop-blur-sm whitespace-normal"
         >
           {!hideTitle && (
-            <div className="flex items-center justify-between px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700 sticky top-0 bg-slate-800">
-              <h3 className="text-sm lg:text-base font-semibold">{title}</h3>
+            <div className="grid grid-cols-[2rem_1fr_2rem] items-center px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700 sticky top-0 bg-slate-800">
+              <span aria-hidden />
+              <h3 className="text-center text-sm lg:text-base font-cinzel font-semibold text-red-500">{title}</h3>
               <button
                 onClick={() => setOpen(false)}
                 aria-label="Close"
-                className="text-slate-400 hover:text-slate-200 text-base lg:text-lg leading-none ml-4"
+                className="justify-self-end text-slate-400 hover:text-slate-200 text-base lg:text-lg leading-none"
               >
                 {"\u00D7"}
               </button>

@@ -14,6 +14,8 @@ import {
   uiTextMuted,
   uiTextPlaceholder,
   uiInfoModalWrapper,
+  uiItemName,
+  uiTextLabel,
 } from "../../ui/editableStyles";
 import { uiActionButtonCompact } from "../../ui/buttonStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
@@ -212,10 +214,10 @@ export function TalentPickerModal({
               isSelected ? "bg-slate-800 ring-1 ring-inset ring-red-500/40" : ""
             }`}
           >
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-1.5 flex-1 min-w-0">
+            <div className="flex-1 min-w-0 space-y-1.5">
+              <div className="flex items-center gap-1.5">
                 <span
-                  className={`text-sm font-medium text-slate-200 truncate ${editable ? "group-hover:text-white" : ""}`}
+                  className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}
                 >
                   {item.name}
                 </span>
@@ -231,7 +233,7 @@ export function TalentPickerModal({
                   </span>
                 )}
               </div>
-              <div className="flex gap-1 shrink-0">
+              <div className="flex items-center gap-1.5">
                 {sources.map((src) => (
                   <Chip
                     key={src}
@@ -243,8 +245,9 @@ export function TalentPickerModal({
               </div>
             </div>
             {row.prerequisites && (
-              <div className={`text-xs lg:text-sm ${uiTextMuted} mt-0.5`}>
-                Prerequisites: {row.prerequisites}
+              <div className="text-xs lg:text-sm mt-1.5">
+                <span className={uiTextLabel}>Prerequisites: </span>
+                <span className="text-slate-300 font-medium">{row.prerequisites}</span>
               </div>
             )}
           </div>
@@ -271,9 +274,16 @@ export function EntryCard({ entry, editable, onRemove }: EntryCardProps) {
 
   return (
     <div className="flex items-start justify-between gap-2 rounded border border-slate-500 bg-slate-900/60 px-3 lg:px-4 py-2 lg:py-3 text-sm lg:text-base">
-      <div className="space-y-0.5 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="font-medium text-slate-100 break-words">{entry.name}</span>
+      <div className="min-w-0 space-y-1.5">
+        <div className="flex items-center gap-1.5">
+          <span className={`${uiItemName} break-words`}>{entry.name}</span>
+          {description && (
+            <span className={uiInfoModalWrapper}>
+              <InfoModal title={entry.name} content={description} />
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-1.5">
           {refSources.map((src) => (
             <Chip
               key={src}
@@ -282,11 +292,6 @@ export function EntryCard({ entry, editable, onRemove }: EntryCardProps) {
               {src}
             </Chip>
           ))}
-          {description && (
-            <span className={uiInfoModalWrapper}>
-              <InfoModal title={entry.name} content={description} />
-            </span>
-          )}
         </div>
       </div>
       {editable && (
