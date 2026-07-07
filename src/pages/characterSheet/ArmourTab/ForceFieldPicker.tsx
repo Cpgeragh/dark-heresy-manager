@@ -11,23 +11,11 @@ import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { uiTextMuted, uiTextBody, uiItemName } from "../../../ui/editableStyles";
 import { colourAmberFaint, colourFuchsia } from "../../../ui/colourTokens";
 import { StatChip } from "../weapons/weaponShared";
-import { ARMOUR_CRAFTSMANSHIP_STYLE } from "./ArmourPicker";
-
-const ARMOUR_CRAFTSMANSHIP_OPTIONS: ArmourCraftsmanship[] = ["Poor", "Common", "Good", "Best"];
-
-function craftsmanshipDescription(craftsmanship: ArmourCraftsmanship): string {
-  switch (craftsmanship) {
-    case "Poor":
-      return "Poorly constructed field generator. Overloads on a roll of 01–15.";
-    case "Good":
-      return "Well constructed field generator. Overloads on a roll of 01–05.";
-    case "Best":
-      return "Finest available field generator. Overloads only on a roll of 1.";
-    case "Common":
-    default:
-      return "Standard field generator. Overloads on a roll of 01–10.";
-  }
-}
+import {
+  ARMOUR_CRAFTSMANSHIP_OPTIONS,
+  ARMOUR_CRAFTSMANSHIP_STYLE,
+  forceFieldCraftsmanshipDescription,
+} from "./armourHelpers";
 
 interface Props {
   editable?: boolean;
@@ -101,7 +89,7 @@ export function ForceFieldPicker({
             </div>
           </div>
           <div className={`text-xs lg:text-sm ${uiTextBody} bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed`}>
-            {craftsmanshipDescription(craftsmanship)}
+            {forceFieldCraftsmanshipDescription(craftsmanship)}
           </div>
         </div>
       </PickerModal>

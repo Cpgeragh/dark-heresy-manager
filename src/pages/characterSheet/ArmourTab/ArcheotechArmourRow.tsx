@@ -2,11 +2,12 @@
 
 import type { ArcheotechItem } from "../../../types/Character";
 import { Chip } from "../../../ui/Chip";
-import { uiSection, uiCardTitle } from "../../../ui/editableStyles";
+import { uiSection, uiCardTitle, uiTextLabel, uiTextPlaceholder, uiInfoModalWrapper } from "../../../ui/editableStyles";
 import { uiActionButtonCompact } from "../../../ui/buttonStyles";
 import { colourArcheotech, colourStacks } from "../../../ui/colourTokens";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { StatChip } from "../weapons/weaponShared";
+import { InfoModal } from "../../../components/InfoModal";
 import { locationLabel } from "./armourHelpers";
 
 interface Props {
@@ -50,6 +51,16 @@ export function ArcheotechArmourRow({ item, editable, onToggleEquip, onRemove, h
               Archeotech
             </Chip>
           )}
+          <div className="flex items-center gap-1.5 mt-1">
+            <span className={uiTextLabel}>Rules</span>
+            {item.description ? (
+              <span className={uiInfoModalWrapper}>
+                <InfoModal title={`${item.name} Rules`} content={item.description} />
+              </span>
+            ) : (
+              <span className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>-</span>
+            )}
+          </div>
           <ItemMetaChips
             weight={item.weight}
             value={item.value}

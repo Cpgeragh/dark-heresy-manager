@@ -1,7 +1,7 @@
 // src/pages/characterSheet/ArmourTab/armourHelpers.ts
 // Constants and pure helper functions for the Armour tab.
 
-import type { ArmourLocationKey, CyberneticItem, TalentEntry, WornArmourPiece } from "../../../types/Character";
+import type { ArmourCraftsmanship, ArmourLocationKey, CyberneticItem, TalentEntry, WornArmourPiece } from "../../../types/Character";
 
 export const LOCATION_LABELS: Record<ArmourLocationKey, string> = {
   head: "Head",
@@ -52,4 +52,43 @@ export function wornApAt(pieces: WornArmourPiece[], loc: ArmourLocationKey): num
 export function locationLabel(locations: ArmourLocationKey[]): string {
   if (locations.length === 6) return "All";
   return locations.map((l) => LOCATION_LABELS[l]).join(", ");
+}
+
+export const ARMOUR_CRAFTSMANSHIP_OPTIONS: ArmourCraftsmanship[] = ["Poor", "Common", "Good", "Best"];
+
+export const ARMOUR_CRAFTSMANSHIP_STYLE: Record<ArmourCraftsmanship, string> = {
+  Poor: "border-red-500/70 bg-red-500/15 text-red-300",
+  Common: "border-slate-500 bg-slate-800 text-slate-200",
+  Good: "border-emerald-500/70 bg-emerald-500/15 text-emerald-300",
+  Best: "border-amber-400 bg-amber-500/20 text-amber-300",
+};
+
+/** Rules text for a worn-armour craftsmanship grade */
+export function armourCraftsmanshipDescription(craftsmanship: ArmourCraftsmanship): string {
+  switch (craftsmanship) {
+    case "Poor":
+      return "Badly fitted, designed or damaged armour. Characters wearing Poor armour take a -10 penalty to all Agility Tests.";
+    case "Good":
+      return "Well constructed and better fitting armour. Against the first attack in any round, the armour increases its AP by 1.";
+    case "Best":
+      return "Finely wrought and perfectly fitted armour. Best armour weighs half the normal amount and increases its AP by 1.";
+    case "Common":
+    default:
+      return "Common craftsmanship armour has no additional modifier.";
+  }
+}
+
+/** Rules text for a force-field craftsmanship grade */
+export function forceFieldCraftsmanshipDescription(craftsmanship: ArmourCraftsmanship): string {
+  switch (craftsmanship) {
+    case "Poor":
+      return "Poorly constructed field generator. Overloads on a roll of 01–15.";
+    case "Good":
+      return "Well constructed field generator. Overloads on a roll of 01–05.";
+    case "Best":
+      return "Finest available field generator. Overloads only on a roll of 1.";
+    case "Common":
+    default:
+      return "Standard field generator. Overloads on a roll of 01–10.";
+  }
 }

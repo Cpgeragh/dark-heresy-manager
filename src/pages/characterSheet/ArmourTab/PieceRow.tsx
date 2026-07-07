@@ -4,7 +4,7 @@ import { uiActionButtonCompact } from "../../../ui/buttonStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { StatChip } from "../weapons/weaponShared";
 import { InfoModal } from "../../../components/InfoModal";
-import { locationLabel } from "./armourHelpers";
+import { locationLabel, armourCraftsmanshipDescription } from "./armourHelpers";
 import { ARMOUR_REFERENCE } from "../../../data/reference/armourReference";
 import { ARMOUR_SPECIAL_RULES } from "../../../data/reference/armourSpecialRules";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
@@ -25,20 +25,6 @@ interface Props {
   onUpdateAllCopies?: () => void;
   onToggle: (id: string) => void;
   onRemove: (id: string) => void;
-}
-
-function armourCraftsmanshipInfo(craftsmanship: NonNullable<WornArmourPiece["craftsmanship"]>) {
-  switch (craftsmanship) {
-    case "Poor":
-      return "Badly fitted, designed or damaged armour. Characters wearing Poor armour take a -10 penalty to all Agility Tests.";
-    case "Good":
-      return "Well constructed and better fitting armour. Against the first attack in any round, the armour increases its AP by 1.";
-    case "Best":
-      return "Finely wrought and perfectly fitted armour. Best armour weighs half the normal amount and increases its AP by 1.";
-    case "Common":
-    default:
-      return "Common craftsmanship armour has no additional modifier.";
-  }
 }
 
 function ArmourQualitiesContent({ qualities }: { qualities: string[] }) {
@@ -135,7 +121,7 @@ export function PieceRow({
           <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>{craftsmanship}</span>
           <InfoModal
             title={`${craftsmanship} Armour`}
-            content={armourCraftsmanshipInfo(craftsmanship)}
+            content={armourCraftsmanshipDescription(craftsmanship)}
           />
         </div>
 

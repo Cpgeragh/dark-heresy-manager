@@ -9,6 +9,7 @@ import { ARMOUR_SPECIAL_RULES } from "../../../data/reference/armourSpecialRules
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/StatusBadge";
+import { forceFieldCraftsmanshipDescription } from "./armourHelpers";
 
 interface Props {
   piece: WornArmourPiece;
@@ -23,20 +24,6 @@ interface Props {
   onUpdateAllCopies?: () => void;
   onToggle: (id: string) => void;
   onRemove: (id: string) => void;
-}
-
-function forceFieldCraftsmanshipInfo(craftsmanship: NonNullable<WornArmourPiece["craftsmanship"]>) {
-  switch (craftsmanship) {
-    case "Poor":
-      return "Poorly constructed field generator. Overloads on a roll of 01–15.";
-    case "Good":
-      return "Well constructed field generator. Overloads on a roll of 01–05.";
-    case "Best":
-      return "Finest available field generator. Overloads only on a roll of 1.";
-    case "Common":
-    default:
-      return "Standard field generator. Overloads on a roll of 01–10.";
-  }
 }
 
 function ForceFieldQualitiesContent({ qualities }: { qualities: string[] }) {
@@ -131,7 +118,7 @@ export function ForceFieldRow({
           <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>{craftsmanship}</span>
           <InfoModal
             title={`${craftsmanship} Force Field`}
-            content={forceFieldCraftsmanshipInfo(craftsmanship)}
+            content={forceFieldCraftsmanshipDescription(craftsmanship)}
           />
         </div>
 

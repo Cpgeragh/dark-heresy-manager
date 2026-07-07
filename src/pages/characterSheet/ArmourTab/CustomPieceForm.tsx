@@ -1,22 +1,15 @@
 import { useState } from "react";
 import type { ArmourCraftsmanship, ArmourLocationKey, ArmourQuality, WornArmourPiece } from "../../../types/Character";
-import { editableInputClass, uiSection, uiSectionHeader, uiFormLabel } from "../../../ui/editableStyles";
+import { editableInputClass, editableTextareaClass, uiSection, uiSectionHeader, uiFormLabel } from "../../../ui/editableStyles";
 import { uiPickerBackButton } from "../../../ui/buttonStyles";
 import { Button } from "../../../ui/Button";
 import { PickerModal } from "../../../ui/PickerModal";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import { CUSTOM_AVAILABILITY_OPTIONS, sanitizeNonNegativeIntegerInput } from "../weapons/weaponShared";
-import { LOCATION_LABELS } from "./armourHelpers";
+import { LOCATION_LABELS, ARMOUR_CRAFTSMANSHIP_OPTIONS, ARMOUR_CRAFTSMANSHIP_STYLE } from "./armourHelpers";
 
-const ARMOUR_CRAFTSMANSHIP_OPTIONS: ArmourCraftsmanship[] = ["Poor", "Common", "Good", "Best"];
 const ARMOUR_QUALITY_OPTIONS: ArmourQuality[] = ["Primitive", "Flak", "Mesh", "Sanctified", "Powered"];
-const ARMOUR_CRAFTSMANSHIP_STYLE: Record<ArmourCraftsmanship, string> = {
-  Poor: "border-red-500/70 bg-red-500/15 text-red-300",
-  Common: "border-slate-500 bg-slate-800 text-slate-200",
-  Good: "border-emerald-500/70 bg-emerald-500/15 text-emerald-300",
-  Best: "border-amber-400 bg-amber-500/20 text-amber-300",
-};
 
 interface Props {
   initialPiece?: Partial<WornArmourPiece>;
@@ -47,6 +40,7 @@ export function CustomPieceForm({
   const [selectedQualities, setSelectedQualities] = useState<Set<ArmourQuality>>(
     new Set(initialPiece?.qualities ?? [])
   );
+  const [notes, setNotes] = useState(initialPiece?.notes ?? "");
   const [saving, setSaving] = useState(false);
 
   const canAdd =
@@ -88,6 +82,7 @@ export function CustomPieceForm({
       value: formatMoneyInput(value),
       availability,
       qualities: selectedQualities.size > 0 ? [...selectedQualities] : undefined,
+      notes: notes.trim() || undefined,
       custom: true,
       customLibraryId: initialPiece?.customLibraryId,
       customLibraryVersionId: initialPiece?.customLibraryVersionId,
@@ -231,6 +226,22 @@ export function CustomPieceForm({
               onChange={(e) => setAp(sanitizeNonNegativeIntegerInput(e.target.value))}
               placeholder="0"
               className={editableInputClass(true) + " mt-0.5 w-24 font-code"}
+            />
+          </div>
+        </div>
+
+        <p className={uiSectionHeader}>Rules</p>
+        <div className={uiSection + " space-y-3"}>
+          <div>
+            <label className={uiFormLabel}>
+              Rules <span className="text-slate-600">(optional)</span>
+            </label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Special rules or effects…"
+              rows={3}
+              className={editableTextareaClass(true) + " mt-0.5"}
             />
           </div>
         </div>

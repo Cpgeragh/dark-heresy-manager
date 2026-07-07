@@ -11,30 +11,12 @@ import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { uiTextMuted, uiTextBody, uiItemName } from "../../../ui/editableStyles";
 import { colourAmberFaint, colourFuchsia } from "../../../ui/colourTokens";
 import { StatChip } from "../weapons/weaponShared";
-import { locationLabel } from "./armourHelpers";
-
-const ARMOUR_CRAFTSMANSHIP_OPTIONS: ArmourCraftsmanship[] = ["Poor", "Common", "Good", "Best"];
-
-export const ARMOUR_CRAFTSMANSHIP_STYLE: Record<ArmourCraftsmanship, string> = {
-  Poor: "border-red-500/70 bg-red-500/15 text-red-300",
-  Common: "border-slate-500 bg-slate-800 text-slate-200",
-  Good: "border-emerald-500/70 bg-emerald-500/15 text-emerald-300",
-  Best: "border-amber-400 bg-amber-500/20 text-amber-300",
-};
-
-function craftsmanshipDescription(craftsmanship: ArmourCraftsmanship): string {
-  switch (craftsmanship) {
-    case "Poor":
-      return "Badly fitted, designed or damaged armour. Characters wearing Poor armour take a -10 penalty to all Agility Tests.";
-    case "Good":
-      return "Well constructed and better fitting armour. Against the first attack in any round, the armour increases its AP by 1.";
-    case "Best":
-      return "Finely wrought and perfectly fitted armour. Best armour weighs half the normal amount and increases its AP by 1.";
-    case "Common":
-    default:
-      return "Standard armour craftsmanship. No additional modifier.";
-  }
-}
+import {
+  locationLabel,
+  ARMOUR_CRAFTSMANSHIP_OPTIONS,
+  ARMOUR_CRAFTSMANSHIP_STYLE,
+  armourCraftsmanshipDescription,
+} from "./armourHelpers";
 
 interface Props {
   editable?: boolean;
@@ -110,7 +92,7 @@ export function ArmourPicker({
             </div>
           </div>
           <div className={`text-xs lg:text-sm ${uiTextBody} bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed`}>
-            {craftsmanshipDescription(craftsmanship)}
+            {armourCraftsmanshipDescription(craftsmanship)}
           </div>
         </div>
       </PickerModal>
