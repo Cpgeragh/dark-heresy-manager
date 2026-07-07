@@ -34,7 +34,9 @@ import { CustomRangedForm } from "./weapons/CustomRangedForm";
 import { MeleeCard } from "./weapons/MeleeCard";
 import { MeleePicker } from "./weapons/MeleePicker";
 import { CustomMeleeForm } from "./weapons/CustomMeleeForm";
-import { GrenadeCard, GrenadePicker, CustomGrenadeForm } from "./weapons/GrenadeCard";
+import { GrenadeCard } from "./weapons/GrenadeCard";
+import { GrenadePicker } from "./weapons/GrenadePicker";
+import { CustomGrenadeForm } from "./weapons/CustomGrenadeForm";
 import { ShieldCard, ShieldPicker, CustomShieldForm } from "./weapons/ShieldCard";
 import { ArcheotechShieldRow } from "./weapons/ArcheotechShieldRow";
 import { CyberneticWeaponCard } from "./weapons/CyberneticWeaponCard";
@@ -122,8 +124,8 @@ const MOBILE_WEAPON_SECTIONS: {
   },
   {
     id: "grenades",
-    label: "Gren.",
-    ariaLabel: "Grenades and mines",
+    label: "Expl.",
+    ariaLabel: "Explosives",
     activeClass: "border-orange-400 bg-orange-600/80 text-white shadow-sm shadow-orange-950/50",
   },
   {
@@ -1607,7 +1609,7 @@ export function WeaponsTab({
       {/* ── GRENADES & MINES ─────────────────────────────────────────────── */}
       <section className={visibleWeaponSectionClass("grenades")}>
         <div className="flex items-center justify-between">
-          <SectionHeader>Grenades & Mines</SectionHeader>
+          <SectionHeader>Explosives</SectionHeader>
           <button
             onClick={() => setPicker("grenades")}
             className="text-sm lg:text-base px-2 py-0.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
