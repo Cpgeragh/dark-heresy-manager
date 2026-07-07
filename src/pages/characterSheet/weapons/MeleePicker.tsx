@@ -20,7 +20,7 @@ import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
 import { InfoModal } from "../../../components/InfoModal";
-import { StatChip, SpecialRulesContent } from "./weaponShared";
+import { StatChip, DamageTypeChip, SpecialRulesContent } from "./weaponShared";
 import {
   WEAPON_CRAFTSMANSHIP_OPTIONS,
   WEAPON_CRAFTSMANSHIP_STYLE,
@@ -61,7 +61,7 @@ export function MeleePicker({
     .filter((item) => item.data.weaponKind === "melee")
     .filter((item) => item.name.toLowerCase().includes(normalisedQuery))
     .sort((a, b) => a.name.localeCompare(b.name));
-  const modalTitle = editable ? title : title.replace(/^Add\b/, "View");
+  const modalTitle = editable ? title : `${title.replace(/^Add /, "View ")}s`;
 
   function resetPicker() {
     setSelected(null);
@@ -150,6 +150,7 @@ export function MeleePicker({
             </span>
             <div className="flex flex-wrap gap-1.5 mt-1">
               {data.damage && <StatChip size="sm" label="Dmg" value={data.damage} />}
+              {data.damage && <DamageTypeChip size="sm" damage={data.damage} />}
               {data.pen && <StatChip size="sm" label="Pen" value={data.pen} />}
             </div>
             <div className="flex flex-wrap gap-1.5 mt-1">
@@ -177,6 +178,7 @@ export function MeleePicker({
           </span>
           <div className="flex flex-wrap gap-1.5 mt-1">
             <StatChip size="sm" label="Dmg" value={ref.damage} />
+            <DamageTypeChip size="sm" damage={ref.damage} />
             <StatChip size="sm" label="Pen" value={ref.pen} />
           </div>
           <div className="flex flex-wrap gap-1.5 mt-1">

@@ -1,9 +1,9 @@
-// src/pages/characterSheet/weapons/GrenadePicker.tsx
+// src/pages/characterSheet/weapons/ShieldPicker.tsx
 
 import { useState } from "react";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { StatusBadge } from "../../../ui/StatusBadge";
-import { GRENADE_REFERENCE, type GrenadeRef } from "../../../data/reference/weaponReference";
+import { SHIELD_REFERENCE, type ShieldRef } from "../../../data/reference/weaponReference";
 import {
   uiTextBody,
   uiTextLabel,
@@ -14,14 +14,10 @@ import {
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
 import { InfoModal } from "../../../components/InfoModal";
-import { Chip } from "../../../ui/Chip";
-import { colourCyan, colourViolet, colourTealLight } from "../../../ui/colourTokens";
 import { StatChip, DamageTypeChip, SpecialRulesContent } from "./weaponShared";
-import { weaponClassChip } from "./weaponHelpers";
 
-export function GrenadePicker({
+export function ShieldPicker({
   editable = true,
-  strengthBonus,
   customLibraryItems = [],
   onSelect,
   onSelectCustom,
@@ -29,28 +25,26 @@ export function GrenadePicker({
   onClose,
 }: {
   editable?: boolean;
-  strengthBonus: number;
-  customLibraryItems?: CampaignCustomItem<"weapon">[];
-  onSelect: (ref: GrenadeRef) => void;
-  onSelectCustom?: (item: CampaignCustomItem<"weapon">) => void;
+  customLibraryItems?: CampaignCustomItem<"armour">[];
+  onSelect: (ref: ShieldRef) => void;
+  onSelectCustom?: (item: CampaignCustomItem<"armour">) => void;
   onCustom?: () => void;
   onClose: () => void;
 }) {
   const [query, setQuery] = useState("");
   const normalizedQuery = query.toLowerCase();
-  const filtered = GRENADE_REFERENCE.filter((r) =>
+  const filtered = SHIELD_REFERENCE.filter((r) =>
     r.name.toLowerCase().includes(normalizedQuery)
   ).sort((a, b) => a.name.localeCompare(b.name));
   const filteredCustomLibraryItems = customLibraryItems
-    .filter((item) => item.data.weaponKind === "grenade")
+    .filter((item) => item.data.armourKind === "shield")
     .filter((item) => item.name.toLowerCase().includes(normalizedQuery))
     .sort((a, b) => a.name.localeCompare(b.name));
-  const thrownRange = `${Math.max(0, strengthBonus) * 3}m`;
 
   return (
     <PickerModal
-      title={editable ? "Add Explosive" : "View Explosives"}
-      placeholder="Search grenades…"
+      title={editable ? "Add Shield" : "View Shields"}
+      placeholder="Search shields…"
       query={query}
       onQueryChange={setQuery}
       onClose={onClose}
@@ -61,14 +55,14 @@ export function GrenadePicker({
             onClick={onCustom}
             className="w-full text-sm lg:text-base text-red-500 hover:text-red-400 text-center py-1 lg:py-1.5"
           >
-            + Add custom grenade or mine
+            + Add custom shield
           </button>
         ) : undefined
       }
     >
       {filteredCustomLibraryItems.map((item) => {
         const data = item.data;
-        if (data.weaponKind !== "grenade") return null;
+        if (data.armourKind !== "shield") return null;
         return (
           <div
             key={`custom-${item.id}`}
@@ -86,16 +80,9 @@ export function GrenadePicker({
               <StatusBadge status={item.status} />
             </div>
             <div className="flex flex-wrap gap-1.5 mt-1">
-              <Chip size="sm" className={data.type === "Mine" ? colourViolet : colourCyan}>
-                {data.type === "Mine" ? "Mine" : "Grenade"}
-              </Chip>
-              {(() => { const c = weaponClassChip(data.class); return c ? (
-                <Chip size="sm" className={c.label === "Exotic" ? colourTealLight : c.active}>{c.label}</Chip>
-              ) : null; })()}
-            </div>
-            <div className="flex flex-wrap gap-1.5 mt-1">
-              {data.type !== "Mine" && <StatChip size="sm" label="Range" value={thrownRange} />}
-              {data.damage && data.damage !== "—" && <StatChip size="sm" label="Dmg" value={data.damage} />}
+              <StatChip size="sm" label="AP" value={String(data.ap)} />
+              {data.locations && <StatChip size="sm" label="Location" value={data.locations} />}
+              {data.damage && <StatChip size="sm" label="Dmg" value={data.damage} />}
               {data.damage && <DamageTypeChip size="sm" damage={data.damage} />}
               {data.pen && <StatChip size="sm" label="Pen" value={data.pen} />}
             </div>
@@ -111,11 +98,11 @@ export function GrenadePicker({
                 </span>
               </div>
             )}
-            {data.description && (
+            {data.notes && (
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className={uiTextLabel}>Rules</span>
                 <span className={uiInfoModalWrapper}>
-                  <InfoModal title={data.name} content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{data.description}</p>} />
+                  <InfoModal title={data.name} content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{data.notes}</p>} />
                 </span>
               </div>
             )}
@@ -136,18 +123,11 @@ export function GrenadePicker({
             {ref.name}
           </span>
           <div className="flex flex-wrap gap-1.5 mt-1">
-            <Chip size="sm" className={ref.type === "Mine" ? colourViolet : colourCyan}>
-              {ref.type === "Mine" ? "Mine" : "Grenade"}
-            </Chip>
-            {(() => { const c = weaponClassChip(ref.class); return c ? (
-              <Chip size="sm" className={c.label === "Exotic" ? colourTealLight : c.active}>{c.label}</Chip>
-            ) : null; })()}
-          </div>
-          <div className="flex flex-wrap gap-1.5 mt-1">
-            {ref.type !== "Mine" && <StatChip size="sm" label="Range" value={thrownRange} />}
-            {ref.damage !== "—" && <StatChip size="sm" label="Dmg" value={ref.damage} />}
-            <DamageTypeChip size="sm" damage={ref.damage} />
-            <StatChip size="sm" label="Pen" value={ref.pen} />
+            <StatChip size="sm" label="AP" value={String(ref.ap)} />
+            {ref.locations && <StatChip size="sm" label="Location" value={ref.locations} />}
+            {ref.damage && <StatChip size="sm" label="Dmg" value={ref.damage} />}
+            {ref.damage && <DamageTypeChip size="sm" damage={ref.damage} />}
+            <StatChip size="sm" label="Pen" value={String(ref.pen)} />
           </div>
           <div className="flex flex-wrap gap-1.5 mt-1">
             <ItemMetaChips weight={ref.weight} value={ref.value} availability={ref.availability} source={ref.source} />
@@ -161,11 +141,11 @@ export function GrenadePicker({
               </span>
             </div>
           )}
-          {ref.description && (
+          {ref.notes && (
             <div className="flex items-center gap-1.5 mt-0.5">
               <span className={uiTextLabel}>Rules</span>
               <span className={uiInfoModalWrapper}>
-                <InfoModal title={ref.name} content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ref.description}</p>} />
+                <InfoModal title={ref.name} content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ref.notes}</p>} />
               </span>
             </div>
           )}

@@ -203,9 +203,19 @@ export function parseDamageType(
   }
 }
 
-export function DamageTypeChip({ damage }: { damage: string }) {
+export function DamageTypeChip({ damage, size = "md" }: { damage: string; size?: "sm" | "md" }) {
   const damageType = parseDamageType(damage);
   if (!damageType) return null;
+  if (size === "sm") {
+    return (
+      <div className="flex flex-col items-center bg-slate-800/60 rounded border border-slate-700 px-1.5 py-0.5 min-w-[32px] lg:min-w-[38px]">
+        <span className={uiTextLabel}>Type</span>
+        <span className={`text-xs font-code mt-0.5 ${damageType.colour}`}>
+          {damageType.label}
+        </span>
+      </div>
+    );
+  }
   return (
     <div className="flex flex-col items-center bg-slate-800/60 rounded border border-slate-700 px-2 py-0.5 min-w-[36px] lg:min-w-[44px]">
       <span className={uiTextLabel}>Type</span>

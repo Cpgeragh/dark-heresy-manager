@@ -111,7 +111,7 @@ describe("GrenadePicker", () => {
   it("shows a View title in read-only mode and does not call onSelect on click", async () => {
     const user = userEvent.setup();
     const { onSelect } = renderPicker({ editable: false });
-    expect(screen.getByText("View Explosive")).toBeInTheDocument();
+    expect(screen.getByText("View Explosives")).toBeInTheDocument();
     await user.click(row(GRENADE_NAME));
     expect(onSelect).not.toHaveBeenCalled();
   });

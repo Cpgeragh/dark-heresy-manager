@@ -227,7 +227,7 @@ describe("RangedPicker", () => {
 
   it("shows a View title and hides the custom-weapon button in read-only mode", () => {
     renderPicker({ editable: false });
-    expect(screen.getByText("View Ranged Weapon")).toBeInTheDocument();
+    expect(screen.getByText("View Ranged Weapons")).toBeInTheDocument();
     expect(screen.queryByText("+ Add custom weapon")).not.toBeInTheDocument();
   });
 

@@ -169,7 +169,7 @@ describe("MeleePicker", () => {
 
   it("shows a View title and hides the custom-weapon button in read-only mode", () => {
     renderPicker({ editable: false });
-    expect(screen.getByText("View Melee Weapon")).toBeInTheDocument();
+    expect(screen.getByText("View Melee Weapons")).toBeInTheDocument();
     expect(screen.queryByText("+ Add custom weapon")).not.toBeInTheDocument();
   });
 

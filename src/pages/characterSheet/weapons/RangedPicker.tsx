@@ -20,7 +20,7 @@ import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
 import { InfoModal } from "../../../components/InfoModal";
-import { StatChip, SpecialRulesContent } from "./weaponShared";
+import { StatChip, DamageTypeChip, SpecialRulesContent } from "./weaponShared";
 import {
   WEAPON_CRAFTSMANSHIP_OPTIONS,
   WEAPON_CRAFTSMANSHIP_STYLE,
@@ -83,7 +83,7 @@ export function RangedPicker({
       return !familyFilter || ammoFamilyChip(item.data.ammoType)?.label === familyFilter;
     })
     .sort((a, b) => a.name.localeCompare(b.name));
-  const modalTitle = editable ? title : title.replace(/^Add\b/, "View");
+  const modalTitle = editable ? title : `${title.replace(/^Add /, "View ")}s`;
 
   function resetPicker() {
     setSelected(null);
@@ -198,6 +198,7 @@ export function RangedPicker({
               {data.range && <StatChip size="sm" label="Range" value={data.range} />}
               {data.rof && <StatChip size="sm" label="ROF" value={data.rof} />}
               {data.damage && <StatChip size="sm" label="Dmg" value={data.damage} />}
+              {data.damage && <DamageTypeChip size="sm" damage={data.damage} />}
               {data.pen && <StatChip size="sm" label="Pen" value={data.pen} />}
               {data.clip && <StatChip size="sm" label="Clip" value={data.clip} />}
             </div>
@@ -238,6 +239,7 @@ export function RangedPicker({
             <StatChip size="sm" label="Range" value={ref.range} />
             <StatChip size="sm" label="ROF" value={ref.rof} />
             <StatChip size="sm" label="Dmg" value={ref.damage} />
+            <DamageTypeChip size="sm" damage={ref.damage} />
             <StatChip size="sm" label="Pen" value={ref.pen} />
             <StatChip size="sm" label="Clip" value={ref.clip} />
           </div>
