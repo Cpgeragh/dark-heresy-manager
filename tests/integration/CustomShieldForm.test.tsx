@@ -67,6 +67,19 @@ describe("CustomShieldForm", () => {
     );
   });
 
+  it("adds and removes a quality via the Qualities selector", async () => {
+    const user = userEvent.setup();
+    renderForm();
+    const addButtons = screen.getAllByRole("button", { name: "Add" });
+    const qualityAddButton = addButtons.find((b) => b !== submitButton())!;
+    await user.click(qualityAddButton); // adds "Accurate", the first available option
+    expect(screen.getByText("Accurate")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Remove Accurate" }));
+    // Removing returns it to the dropdown's available options, so the text
+    // itself still exists — check the chip's dismiss button is gone instead.
+    expect(screen.queryByRole("button", { name: "Remove Accurate" })).not.toBeInTheDocument();
+  });
+
   it("parses an existing shield's damage for editing", () => {
     renderForm({ initialShield: { id: "s1", name: "Old Shield", ap: 3, damage: "2d10+2 E" } });
     const textboxes = screen.getAllByRole("textbox");

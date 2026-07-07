@@ -7,18 +7,15 @@ import { InfoModal } from "../../../components/InfoModal";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
 import { uiTextBody, uiTextLabel, uiTextMuted, uiItemName, uiInfoModalWrapper } from "../../../ui/editableStyles";
-import { colourViolet, colourSky, colourRose } from "../../../ui/colourTokens";
+import { colourViolet, colourSky, colourOrange } from "../../../ui/colourTokens";
 import { INTEGRATED_RANGED_REFS, INTEGRATED_MELEE_REFS } from "../../../utils/weaponUtils";
 import { SpecialRulesContent } from "./weaponShared";
-
-const WEAPON_CRAFTSMANSHIP_OPTIONS: WeaponCraftsmanship[] = ["Poor", "Common", "Good", "Best"];
-
-const WEAPON_CRAFTSMANSHIP_STYLE: Record<WeaponCraftsmanship, string> = {
-  Poor: "border-red-500/70 bg-red-500/15 text-red-300",
-  Common: "border-slate-500 bg-slate-800 text-slate-200",
-  Good: "border-emerald-500/70 bg-emerald-500/15 text-emerald-300",
-  Best: "border-amber-400 bg-amber-500/20 text-amber-300",
-};
+import {
+  WEAPON_CRAFTSMANSHIP_OPTIONS,
+  WEAPON_CRAFTSMANSHIP_STYLE,
+  rangedCraftsmanshipDescription,
+  meleeCraftsmanshipDescription,
+} from "./weaponHelpers";
 
 type SelectedIntegrated =
   | { kind: "ranged"; ref: RangedWeaponRef }
@@ -99,7 +96,9 @@ export function IntegratedWeaponPicker({
             </div>
           </div>
           <div className={`text-xs lg:text-sm ${uiTextBody} bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed`}>
-            Integrated weapons use the same craftsmanship choices as the matching ranged or melee weapon.
+            {selected.kind === "ranged"
+              ? rangedCraftsmanshipDescription(craftsmanship)
+              : meleeCraftsmanshipDescription(craftsmanship)}
           </div>
         </div>
       </PickerModal>
@@ -203,7 +202,7 @@ export function IntegratedWeaponPicker({
             <Chip size="sm" className={colourViolet}>
               Integrated
             </Chip>
-            <Chip size="sm" className={colourRose}>
+            <Chip size="sm" className={colourOrange}>
               Melee
             </Chip>
             <ItemMetaChips weight={ref.weight} value={ref.value} availability={ref.availability} source={ref.source} />

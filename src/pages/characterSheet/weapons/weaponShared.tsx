@@ -18,7 +18,7 @@ import {
   uiInfoModalWrapper,
   uiItemName,
 } from "../../../ui/editableStyles";
-import { uiActionButtonCompact } from "../../../ui/buttonStyles";
+import { uiActionButtonCompact, uiDismissButton } from "../../../ui/buttonStyles";
 import { colourEmerald, colourEmeraldPlain, colourMeta } from "../../../ui/colourTokens";
 
 export const WEAPON_QUALITY_OPTIONS = Object.keys(WEAPON_SPECIAL_RULES).sort((a, b) =>
@@ -148,14 +148,16 @@ export function WeaponQualitySelector({
       {selected.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {selected.map((quality) => (
-            <Chip
-              key={quality}
-              as="button"
-              type="button"
-              onClick={() => onChange(selected.filter((item) => item !== quality))}
-              className="border-slate-600 bg-slate-800/80 text-slate-200 transition hover:border-red-500 hover:text-red-400"
-            >
-              {quality} <span aria-hidden="true" className="text-slate-500">×</span>
+            <Chip key={quality} className="border-slate-600 bg-slate-800/80 text-slate-200">
+              {quality}
+              <button
+                type="button"
+                onClick={() => onChange(selected.filter((item) => item !== quality))}
+                aria-label={`Remove ${quality}`}
+                className={uiDismissButton}
+              >
+                ×
+              </button>
             </Chip>
           ))}
         </div>
