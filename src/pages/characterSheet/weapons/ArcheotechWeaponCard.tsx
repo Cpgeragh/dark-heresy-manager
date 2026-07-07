@@ -17,7 +17,7 @@ import {
   uiInfoModalWrapper,
 } from "../../../ui/editableStyles";
 import { uiActionButtonCompact, uiExpandButton } from "../../../ui/buttonStyles";
-import { colourArcheotech } from "../../../ui/colourTokens";
+import { colourArcheotech, colourOrange } from "../../../ui/colourTokens";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 import { InfoModal } from "../../../components/InfoModal";
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
@@ -28,6 +28,7 @@ import {
   computeMeleeTotalDamage,
   EquipToggle,
 } from "./weaponShared";
+import { weaponClassChip } from "./weaponHelpers";
 import { EXPLOSIVE_MISHAPS_CONTENT } from "./GrenadeCard";
 
 export function ArcheotechWeaponCard({
@@ -105,13 +106,23 @@ export function ArcheotechWeaponCard({
         <button className={uiExpandButton} onClick={() => setExpanded((e) => !e)}>
           <div className="flex items-center gap-2 flex-wrap">
             <p className={uiCardTitle}>{item.name}</p>
-            {highlightAsArcheotech && (
-              <Chip size="sm" className={`${colourArcheotech} uppercase tracking-wide shrink-0`}>
-                Archeotech
-              </Chip>
-            )}
           </div>
-          {weaponClass && <p className={`text-xs lg:text-sm ${uiTextMuted}`}>{weaponClass}</p>}
+          {(highlightAsArcheotech || weaponClass) && (
+            <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+              {highlightAsArcheotech && (
+                <Chip size="sm" className={`${colourArcheotech} shrink-0`}>
+                  Archeotech
+                </Chip>
+              )}
+              {weaponClass === "Melee" ? (
+                <Chip size="sm" className={colourOrange}>Melee</Chip>
+              ) : weaponClass ? (
+                (() => { const c = weaponClassChip(weaponClass); return c ? (
+                  <Chip size="sm" className={c.active}>{c.label}</Chip>
+                ) : null; })()
+              ) : null}
+            </div>
+          )}
         </button>
         <div className="flex items-center gap-2 shrink-0">
           {onToggleEquip && (

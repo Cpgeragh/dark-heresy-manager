@@ -1452,6 +1452,7 @@ export function WeaponsTab({
                   key={entry.cybernetic.id}
                   cyberneticName={entry.cybernetic.name}
                   weapon={entry.weapon}
+                  craftsmanship={entry.cybernetic.craftsmanship}
                   strengthBonus={strengthBonus}
                 />
               );
@@ -1545,6 +1546,7 @@ export function WeaponsTab({
                   key={entry.cybernetic.id}
                   cyberneticName={entry.cybernetic.name}
                   weapon={entry.weapon}
+                  craftsmanship={entry.cybernetic.craftsmanship}
                   strengthBonus={strengthBonus}
                 />
               );
