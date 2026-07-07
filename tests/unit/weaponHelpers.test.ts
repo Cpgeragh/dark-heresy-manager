@@ -174,6 +174,11 @@ describe("effectiveWeaponWeight", () => {
   it("stacks multiple upgrade modifiers", () => {
     expect(effectiveWeaponWeight("4 kg", [upgrade("cr-compact"), upgrade("cr-exterminator")])).toBe("3 kg");
   });
+
+  it("accepts a plain ASCII 'x' in place of the × sign", () => {
+    const asciiX = { ...upgrade("cr-compact"), weightModifier: "x1/2" };
+    expect(effectiveWeaponWeight("4 kg", [asciiX])).toBe("2 kg");
+  });
 });
 
 // ============================================================

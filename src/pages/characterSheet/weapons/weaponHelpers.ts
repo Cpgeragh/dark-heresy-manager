@@ -11,6 +11,7 @@ import {
   colourAmberFaint,
   colourCyan,
   colourFuchsia,
+  colourLime,
   colourOrange,
   colourSky,
   colourTealLight,
@@ -85,7 +86,7 @@ function parseWeightModifier(modifier: string): { multiplier: number; flatKg: nu
     return { multiplier: 1, flatKg: 0 };
   }
 
-  const multiplier = trimmed.match(/^(?:×|x|Ã—)\s*(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)$/i);
+  const multiplier = trimmed.match(/^(?:×|x)\s*(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)$/i);
   if (multiplier) {
     const numerator = Number(multiplier[1]);
     const denominator = Number(multiplier[2]);
@@ -268,13 +269,15 @@ const WEAPON_CLASS_STYLES: Record<string, { active: string; inactive: string }> 
   Exotic: { active: colourFuchsia, inactive: "border-fuchsia-500/30 bg-fuchsia-500/5 text-fuchsia-400/50" },
 };
 
+const slateFallbackStyle = "border-slate-500/70 bg-slate-700/40 text-slate-300";
+
 export function weaponClassChip(cls?: string): { label: string; active: string; inactive: string } | undefined {
   if (!cls) return undefined;
   const n = cls.toLowerCase();
   for (const [key, style] of Object.entries(WEAPON_CLASS_STYLES)) {
     if (n.includes(key.toLowerCase())) return { label: key, ...style };
   }
-  return { label: cls, active: "border-slate-500/60 bg-slate-700/40 text-slate-300", inactive: "border-slate-500/30 bg-slate-700/20 text-slate-400/50" };
+  return { label: cls, active: slateFallbackStyle, inactive: "border-slate-500/30 bg-slate-700/20 text-slate-400/50" };
 }
 
 export function ammoFamilyChip(ammoType?: string): { label: string; className: string } | undefined {
@@ -289,14 +292,14 @@ export function ammoFamilyChip(ammoType?: string): { label: string; className: s
   if (normalized === "solid projectile" || normalized.includes("bullet")) {
     return {
       label: "Solid Projectile",
-      className: "border-slate-500/70 bg-slate-700/40 text-slate-300",
+      className: slateFallbackStyle,
     };
   }
   if (normalized === "shell" || normalized.includes("shell") || normalized === "shot") {
-    return { label: "Shell", className: "border-lime-500/60 bg-lime-500/10 text-lime-300" };
+    return { label: "Shell", className: colourLime };
   }
   if (normalized === "flame" || normalized.includes("fuel")) {
-    return { label: "Flame", className: "border-orange-500/60 bg-orange-500/10 text-orange-300" };
+    return { label: "Flame", className: colourOrange };
   }
   if (normalized === "melta" || normalized.includes("melta")) {
     return { label: "Melta", className: colourViolet };
@@ -319,7 +322,7 @@ export function ammoFamilyChip(ammoType?: string): { label: string; className: s
   if (normalized === "exotic" || normalized.includes("exotic")) {
     return { label: "Exotic", className: colourTealLight };
   }
-  return { label: ammoType, className: "border-slate-500/70 bg-slate-700/40 text-slate-300" };
+  return { label: ammoType, className: slateFallbackStyle };
 }
 
 // ─── Custom Ammo Families ──────────────────────────────────────────────────
