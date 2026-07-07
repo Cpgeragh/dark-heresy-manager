@@ -1,4 +1,4 @@
-const EMPTY_WEIGHT_VALUES = new Set(["", "-", "—", "â€”", "n/a", "na", "none", "variable", "varies"]);
+const EMPTY_WEIGHT_VALUES = new Set(["", "-", "—", "n/a", "na", "none", "variable", "varies"]);
 
 export const WEIGHT_NUMBER_INPUT_RE = /^$|^\d+(?:\.\d*)?$/;
 

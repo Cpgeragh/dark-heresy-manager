@@ -1,0 +1,559 @@
+// src/pages/characterSheet/weapons/CustomRangedForm.tsx
+
+import { useState } from "react";
+import type { RangedWeapon, WeaponCraftsmanship } from "../../../types/Character";
+import {
+  editableInputClass,
+  editableTextareaClass,
+  uiSection,
+  uiSectionHeader,
+  uiFormLabel,
+} from "../../../ui/editableStyles";
+import { uiPickerBackButton } from "../../../ui/buttonStyles";
+import { Button } from "../../../ui/Button";
+import { PickerModal } from "../../../ui/PickerModal";
+import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
+import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
+import { sourceColour } from "../../../ui/sourceStyles";
+import {
+  DAMAGE_TYPE_OPTIONS,
+  CUSTOM_AVAILABILITY_OPTIONS,
+  WeaponQualitySelector,
+  formatDamageInput,
+  isValidDiceInput,
+  sanitizeDiceInput,
+  sanitizeNonNegativeIntegerInput,
+  sanitizePositiveIntegerInput,
+} from "./weaponShared";
+import {
+  WEAPON_CRAFTSMANSHIP_OPTIONS,
+  WEAPON_CRAFTSMANSHIP_STYLE,
+  CUSTOM_AMMO_FAMILY_OPTIONS,
+  type AmmoTrackingMode,
+} from "./weaponHelpers";
+
+const CUSTOM_RANGED_CLASS_OPTIONS = ["Pistol", "Basic", "Heavy", "Thrown", "Exotic"] as const;
+const RELOAD_TYPE_OPTIONS = ["Half", "Full", "Round", "Special", "—"] as const;
+const CUSTOM_WEAPON_ORIGIN_OPTIONS = ["Custom", "2nd Ed"] as const;
+
+function splitWeaponQualities(value?: string): string[] {
+  if (!value || value === "-") return [];
+  return value
+    .split(",")
+    .map((quality) => quality.trim())
+    .filter(Boolean);
+}
+
+function stripMeters(value?: string): string {
+  return value?.replace(/\s*m$/i, "").trim() ?? "";
+}
+
+function parseWeaponDamage(
+  value: string | undefined,
+  fallbackType: (typeof DAMAGE_TYPE_OPTIONS)[number]["value"]
+) {
+  const match = value?.trim().match(/^(\d+d\d+)(?:\+(\d+))?\s*([IREX])?$/i);
+  return {
+    base: match?.[1] ?? "1d10",
+    plus: match?.[2] ?? "0",
+    type:
+      (match?.[3]?.toUpperCase() as
+        | (typeof DAMAGE_TYPE_OPTIONS)[number]["value"]
+        | undefined) ?? fallbackType,
+  };
+}
+
+function parseRofInput(value?: string) {
+  const [single = "S", semi = "", full = ""] = (value ?? "S/-/-").split("/");
+  return {
+    singleShot: single.trim().toUpperCase() === "S",
+    semiAuto: semi.trim().replace(/[^\d]/g, ""),
+    fullAuto: full.trim().replace(/[^\d]/g, ""),
+  };
+}
+
+function parseReloadInput(value?: string) {
+  if (!value) return { amount: "", type: "" };
+  if (value === "Special" || value === "-") {
+    return { amount: "", type: value === "-" ? "—" : value };
+  }
+
+  const match = value.match(/^(\d+)\s+(.+)$/);
+  return {
+    amount: match?.[1] ?? "",
+    type: match?.[2] ?? value,
+  };
+}
+
+export function CustomRangedForm({
+  onAdd,
+  onCancel,
+  title = "Custom Ranged Weapon",
+  submitLabel = "Add",
+  integrated = false,
+  initialWeapon,
+}: {
+  onAdd: (w: RangedWeapon) => void | Promise<void>;
+  onCancel: () => void;
+  title?: string;
+  submitLabel?: string;
+  integrated?: boolean;
+  initialWeapon?: Partial<RangedWeapon>;
+}) {
+  const parsedDamage = parseWeaponDamage(initialWeapon?.damage, "I");
+  const parsedReload = parseReloadInput(initialWeapon?.rld);
+  const parsedRof = parseRofInput(initialWeapon?.rof);
+  const [name, setName] = useState(initialWeapon?.name ?? "");
+  const [weaponClass, setWeaponClass] = useState(initialWeapon?.class ?? "");
+  const [craftsmanship, setCraftsmanship] = useState<"" | WeaponCraftsmanship>(
+    initialWeapon?.craftsmanship ?? ""
+  );
+  const [origin, setOrigin] = useState<"" | (typeof CUSTOM_WEAPON_ORIGIN_OPTIONS)[number]>(
+    (CUSTOM_WEAPON_ORIGIN_OPTIONS as readonly string[]).includes(initialWeapon?.source ?? "")
+      ? (initialWeapon?.source as (typeof CUSTOM_WEAPON_ORIGIN_OPTIONS)[number])
+      : ""
+  );
+  const [rangeMeters, setRangeMeters] = useState(stripMeters(initialWeapon?.range));
+  const [ammoType, setAmmoType] = useState(initialWeapon?.ammoType ?? "");
+  const [singleShot, setSingleShot] = useState(parsedRof.singleShot);
+  const [semiAuto, setSemiAuto] = useState(parsedRof.semiAuto);
+  const [fullAuto, setFullAuto] = useState(parsedRof.fullAuto);
+  const [damageBase, setDamageBase] = useState(parsedDamage.base);
+  const [damagePlus, setDamagePlus] = useState(parsedDamage.plus);
+  const [damageType, setDamageType] = useState<(typeof DAMAGE_TYPE_OPTIONS)[number]["value"]>(
+    parsedDamage.type
+  );
+  const [pen, setPen] = useState(initialWeapon?.pen ?? "");
+  const [clip, setClip] = useState(initialWeapon?.clip ?? "");
+  const [reloadAmount, setReloadAmount] = useState(parsedReload.amount);
+  const [reloadType, setReloadType] = useState(parsedReload.type);
+  const [ammoTracking, setAmmoTracking] = useState<"" | AmmoTrackingMode>(
+    initialWeapon?.ammoTracking ?? ""
+  );
+  const [weight, setWeight] = useState(initialWeapon?.weight ?? "");
+  const [value, setValue] = useState(initialWeapon?.value ?? "");
+  const [availability, setAvailability] = useState(initialWeapon?.availability ?? "");
+  const [selectedQualities, setSelectedQualities] = useState<string[]>(
+    splitWeaponQualities(initialWeapon?.specialRules)
+  );
+  const [description, setDescription] = useState(initialWeapon?.description ?? "");
+  const [saving, setSaving] = useState(false);
+
+  const rof = `${singleShot ? "S" : "–"}/${semiAuto || "–"}/${fullAuto || "–"}`;
+  const rld =
+    reloadType === "Special" || reloadType === "—"
+      ? reloadType
+      : reloadAmount
+        ? `${reloadAmount} ${reloadType}`
+        : reloadType;
+  const canAdd =
+    Boolean(name.trim()) &&
+    Boolean(weaponClass) &&
+    Boolean(craftsmanship) &&
+    Boolean(origin) &&
+    Boolean(rangeMeters) &&
+    Boolean(ammoType) &&
+    (singleShot || Boolean(semiAuto) || Boolean(fullAuto)) &&
+    isValidDiceInput(damageBase) &&
+    Boolean(damagePlus) &&
+    Boolean(pen) &&
+    Boolean(clip) &&
+    Boolean(reloadType) &&
+    Boolean(ammoTracking) &&
+    Boolean(weight.trim()) &&
+    Boolean(value) &&
+    Boolean(availability);
+
+  const addWeapon = async () => {
+    if (!canAdd || !ammoTracking || !craftsmanship || !origin) return;
+    setSaving(true);
+    try {
+      await onAdd({
+        id: initialWeapon?.id ?? crypto.randomUUID(),
+        custom: true,
+        name: name.trim(),
+        class: weaponClass,
+        craftsmanship,
+        source: origin,
+        range: `${rangeMeters}m`,
+        ammoType,
+        rof,
+        damage: formatDamageInput(damageBase, damagePlus, damageType),
+        pen,
+        clip,
+        rld,
+        ammoTracking,
+        weight: formatWeightInput(weight),
+        value: formatMoneyInput(value),
+        availability,
+        specialRules: selectedQualities.length > 0 ? selectedQualities.join(", ") : undefined,
+        description: description.trim() || undefined,
+        integrated: initialWeapon?.integrated ?? integrated,
+        quantity: initialWeapon?.quantity ?? (weaponClass.toLowerCase().includes("thrown") ? 1 : undefined),
+        customLibraryId: initialWeapon?.customLibraryId,
+        customLibraryVersionId: initialWeapon?.customLibraryVersionId,
+        equipped: initialWeapon?.equipped,
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <PickerModal
+      title={title}
+      query=""
+      onQueryChange={() => {}}
+      onClose={onCancel}
+      isEmpty={false}
+      hideSearch
+      maxHeight="max-h-[92vh]"
+      footer={
+        <div className="space-y-2">
+          {!canAdd && (
+            <p className="text-xs lg:text-sm text-slate-300"><span className="text-red-500">*</span> Required</p>
+          )}
+          <div className="flex gap-2">
+            <Button className="flex-1" onClick={addWeapon} disabled={!canAdd || saving}>
+              {saving ? "Saving..." : submitLabel}
+            </Button>
+            <button
+              onClick={onCancel}
+              className={uiPickerBackButton}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      }
+    >
+      <div className="p-4 lg:p-5 space-y-4">
+        <p className={uiSectionHeader}>Identity</p>
+        <div className={uiSection + " space-y-3"}>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="col-span-2">
+              <label className={uiFormLabel}>
+                Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                className={editableInputClass(true) + " mt-0.5"}
+              />
+            </div>
+
+            <div className="col-span-2">
+              <label className={uiFormLabel}>
+                Class <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={weaponClass}
+                onChange={(event) => setWeaponClass(event.target.value)}
+                className={editableInputClass(true) + " mt-0.5"}
+              >
+                <option value="">Choose class</option>
+                {CUSTOM_RANGED_CLASS_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <p className={uiSectionHeader}>Craftsmanship & Origin</p>
+        <div className={uiSection + " space-y-3"}>
+          <div className="space-y-1">
+            <label className={uiFormLabel}>
+              Craftsmanship <span className="text-red-500">*</span>
+            </label>
+            <div className="grid grid-cols-4 gap-1.5">
+              {WEAPON_CRAFTSMANSHIP_OPTIONS.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => setCraftsmanship(option)}
+                  className={[
+                    "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
+                    craftsmanship === option
+                      ? WEAPON_CRAFTSMANSHIP_STYLE[option]
+                      : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
+                  ].join(" ")}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="space-y-1">
+            <label className={uiFormLabel}>
+              Origin <span className="text-red-500">*</span>
+            </label>
+            <div className="grid grid-cols-2 gap-1.5">
+              {CUSTOM_WEAPON_ORIGIN_OPTIONS.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => setOrigin(option)}
+                  className={[
+                    "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
+                    origin === option
+                      ? `${sourceColour(option)} bg-slate-800/70 font-semibold`
+                      : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
+                  ].join(" ")}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <p className={uiSectionHeader}>Combat</p>
+        <div className={uiSection + " space-y-3"}>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className={uiFormLabel}>
+                Range (m) <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={rangeMeters}
+                onChange={(event) => setRangeMeters(sanitizePositiveIntegerInput(event.target.value))}
+                className={editableInputClass(true) + " mt-0.5"}
+              />
+            </div>
+
+            <div>
+              <label className={uiFormLabel}>
+                Ammo Family <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={ammoType}
+                onChange={(event) => setAmmoType(event.target.value)}
+                className={editableInputClass(true) + " mt-0.5"}
+              >
+                <option value="">Choose ammo family</option>
+                {CUSTOM_AMMO_FAMILY_OPTIONS.map((option) => (
+                  <option key={option.ammoType} value={option.ammoType}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="col-span-2">
+              <label className={uiFormLabel}>
+                Rate of Fire <span className="text-red-500">*</span>
+              </label>
+              <div className="grid grid-cols-3 gap-2 mt-0.5">
+                <button
+                  type="button"
+                  onClick={() => setSingleShot((value) => !value)}
+                  aria-pressed={singleShot}
+                  className={[
+                    "rounded border px-2 py-1 text-sm lg:text-base font-medium transition",
+                    singleShot
+                      ? "border-slate-400 bg-slate-700/70 text-slate-100"
+                      : "border-slate-600 bg-slate-900 text-slate-400 hover:border-slate-500 hover:text-slate-300",
+                  ].join(" ")}
+                >
+                  Single
+                </button>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={semiAuto}
+                  onChange={(event) => setSemiAuto(sanitizePositiveIntegerInput(event.target.value))}
+                  placeholder="Semi"
+                  className={editableInputClass(true)}
+                />
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={fullAuto}
+                  onChange={(event) => setFullAuto(sanitizePositiveIntegerInput(event.target.value))}
+                  placeholder="Full"
+                  className={editableInputClass(true)}
+                />
+              </div>
+            </div>
+
+            <div className="col-span-2">
+              <label className={uiFormLabel}>
+                Damage <span className="text-red-500">*</span>
+              </label>
+              <div className="grid grid-cols-3 gap-2 mt-0.5">
+                <input
+                  type="text"
+                  value={damageBase}
+                  onChange={(event) => setDamageBase(sanitizeDiceInput(event.target.value))}
+                  placeholder="1d10"
+                  className={editableInputClass(true)}
+                />
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={damagePlus}
+                  onChange={(event) => setDamagePlus(sanitizeNonNegativeIntegerInput(event.target.value))}
+                  placeholder="Plus"
+                  className={editableInputClass(true)}
+                />
+                <select
+                  value={damageType}
+                  onChange={(event) =>
+                    setDamageType(event.target.value as (typeof DAMAGE_TYPE_OPTIONS)[number]["value"])
+                  }
+                  className={editableInputClass(true)}
+                >
+                  {DAMAGE_TYPE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className={uiFormLabel}>
+                Pen <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={pen}
+                onChange={(event) => setPen(sanitizeNonNegativeIntegerInput(event.target.value))}
+                className={editableInputClass(true) + " mt-0.5"}
+              />
+            </div>
+
+            <div>
+              <label className={uiFormLabel}>
+                Clip <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={clip}
+                onChange={(event) => setClip(sanitizeNonNegativeIntegerInput(event.target.value))}
+                className={editableInputClass(true) + " mt-0.5"}
+              />
+            </div>
+
+            <div className="col-span-2">
+              <label className={uiFormLabel}>
+                Reload <span className="text-red-500">*</span>
+              </label>
+              <div className="grid grid-cols-2 gap-2 mt-0.5">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={reloadAmount}
+                  onChange={(event) => setReloadAmount(sanitizePositiveIntegerInput(event.target.value))}
+                  placeholder="Amount"
+                  disabled={reloadType === "Special" || reloadType === "—"}
+                  className={editableInputClass(reloadType !== "Special" && reloadType !== "—")}
+                />
+                <select
+                  value={reloadType}
+                  onChange={(event) => {
+                    setReloadType(event.target.value);
+                    if (event.target.value === "Special" || event.target.value === "—") {
+                      setReloadAmount("");
+                    }
+                  }}
+                  className={editableInputClass(true)}
+                >
+                  <option value="">Choose reload</option>
+                  {RELOAD_TYPE_OPTIONS.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="col-span-2">
+              <label className={uiFormLabel}>
+                Ammo Tracking <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={ammoTracking}
+                onChange={(event) => setAmmoTracking(event.target.value as "" | AmmoTrackingMode)}
+                className={editableInputClass(true) + " mt-0.5"}
+              >
+                <option value="">Choose tracking</option>
+                <option value="clip">Clips + rounds</option>
+                <option value="loose">Rounds only</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <p className={uiSectionHeader}>Details</p>
+        <div className={uiSection + " space-y-3"}>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className={uiFormLabel}>
+                Weight <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                inputMode="decimal"
+                value={weight}
+                onChange={(event) => setWeight(sanitizeWeightInput(event.target.value))}
+                className={editableInputClass(true) + " mt-0.5"}
+              />
+            </div>
+
+            <div>
+              <label className={uiFormLabel}>
+                Cost <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={value}
+                onChange={(event) => setValue(sanitizeMoneyInput(event.target.value))}
+                className={editableInputClass(true) + " mt-0.5"}
+              />
+            </div>
+            <div className="col-span-2">
+              <label className={uiFormLabel}>
+                Availability <span className="text-red-500">*</span>
+              </label>
+              <select value={availability} onChange={(event) => setAvailability(event.target.value)} className={editableInputClass(true) + " mt-0.5"}>
+                <option value="">Choose availability</option>
+                {CUSTOM_AVAILABILITY_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <p className={uiSectionHeader}>Rules</p>
+        <div className={uiSection + " space-y-3"}>
+          <div className="grid grid-cols-2 gap-2">
+            <WeaponQualitySelector selected={selectedQualities} onChange={setSelectedQualities} />
+
+            <div className="col-span-2">
+              <label className={uiFormLabel}>
+                Rules
+              </label>
+              <textarea
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+                rows={3}
+                className={editableTextareaClass(true) + " mt-0.5"}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </PickerModal>
+  );
+}

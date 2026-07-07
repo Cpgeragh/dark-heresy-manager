@@ -28,8 +28,12 @@ import {
   type GrenadeRef,
   type ShieldRef,
 } from "../../data/reference/weaponReference";
-import { RangedCard, RangedPicker, CustomRangedForm } from "./weapons/RangedCard";
-import { MeleeCard, MeleePicker, CustomMeleeForm } from "./weapons/MeleeCard";
+import { RangedCard } from "./weapons/RangedCard";
+import { RangedPicker } from "./weapons/RangedPicker";
+import { CustomRangedForm } from "./weapons/CustomRangedForm";
+import { MeleeCard } from "./weapons/MeleeCard";
+import { MeleePicker } from "./weapons/MeleePicker";
+import { CustomMeleeForm } from "./weapons/CustomMeleeForm";
 import { GrenadeCard, GrenadePicker, CustomGrenadeForm } from "./weapons/GrenadeCard";
 import { ShieldCard, ShieldPicker, CustomShieldForm } from "./weapons/ShieldCard";
 import { ArcheotechShieldRow } from "./weapons/ArcheotechShieldRow";

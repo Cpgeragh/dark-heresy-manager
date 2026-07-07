@@ -1,41 +1,27 @@
-﻿// src/pages/characterSheet/weapons/MeleeCard.tsx
-// MeleePicker, CustomMeleeForm, MeleeCard — co-located for navigability.
+// src/pages/characterSheet/weapons/MeleeCard.tsx
+// MeleeCard — see MeleePicker.tsx and CustomMeleeForm.tsx for the weapon picker and custom-weapon form.
 
 import { useState, useEffect } from "react";
-import type { MeleeWeapon, WeaponCraftsmanship } from "../../../types/Character";
-import {
-  MELEE_WEAPON_REFERENCE,
-  type MeleeWeaponRef,
-} from "../../../data/reference/weaponReference";
+import type { MeleeWeapon } from "../../../types/Character";
+import { MELEE_WEAPON_REFERENCE } from "../../../data/reference/weaponReference";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/StatusBadge";
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
 import { WEAPON_UPGRADE_REFERENCE } from "../../../data/reference/weaponUpgradeReference";
 import {
-  editableInputClass,
-  editableTextareaClass,
   uiSection,
-  uiSectionHeader,
-  uiTextBody,
   uiTextLabel,
   uiTextMuted,
   uiTextPlaceholder,
-  uiFormLabel,
   uiInfoModalWrapper,
-  uiItemName,
   uiCardTitle,
 } from "../../../ui/editableStyles";
-import { uiActionButtonCompact, uiPickerBackButton, uiExpandButton } from "../../../ui/buttonStyles";
-import { colourAmberFaint, colourFuchsia, colourViolet } from "../../../ui/colourTokens";
-import { Button } from "../../../ui/Button";
+import { uiActionButtonCompact, uiExpandButton } from "../../../ui/buttonStyles";
+import { colourViolet } from "../../../ui/colourTokens";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
-import { PickerModal } from "../../../ui/PickerModal";
 import { QuantityControl } from "../../../ui/QuantityControl";
-import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
-import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
-import { sourceColour } from "../../../ui/sourceStyles";
 import { InfoModal } from "../../../components/InfoModal";
 import {
   StatChip,
@@ -45,64 +31,8 @@ import {
   UpgradePicker,
   UpgradeCard,
   EquipToggle,
-  WeaponQualitySelector,
-  DAMAGE_TYPE_OPTIONS,
-  CUSTOM_AVAILABILITY_OPTIONS,
-  formatDamageInput,
-  isValidDiceInput,
-  sanitizeDiceInput,
-  sanitizeNonNegativeIntegerInput,
 } from "./weaponShared";
-import { effectiveMeleeStats, getCompatibleUpgrades } from "./weaponHelpers";
-
-const WEAPON_CRAFTSMANSHIP_OPTIONS: WeaponCraftsmanship[] = ["Poor", "Common", "Good", "Best"];
-
-const WEAPON_CRAFTSMANSHIP_STYLE: Record<WeaponCraftsmanship, string> = {
-  Poor: "border-red-500/70 bg-red-500/15 text-red-300",
-  Common: "border-slate-500 bg-slate-800 text-slate-200",
-  Good: "border-emerald-500/70 bg-emerald-500/15 text-emerald-300",
-  Best: "border-amber-400 bg-amber-500/20 text-amber-300",
-};
-
-const CUSTOM_MELEE_CLASS_OPTIONS = ["Melee", "Melee (Two-Handed)", "Melee / Thrown"] as const;
-const CUSTOM_WEAPON_ORIGIN_OPTIONS = ["Custom", "2nd Ed"] as const;
-
-function meleeCraftsmanshipDescription(craftsmanship: WeaponCraftsmanship): string {
-  switch (craftsmanship) {
-    case "Poor":
-      return "Poor melee weapons incur a -10 penalty to Tests made to attack.";
-    case "Good":
-      return "Good melee weapons add a +5 bonus to Tests made to attack.";
-    case "Best":
-      return "Best melee weapons add a +10 bonus to Tests made to attack and add 1 to the Damage they inflict.";
-    case "Common":
-    default:
-      return "Common craftsmanship melee weapons have no additional modifier.";
-  }
-}
-
-function splitWeaponQualities(value?: string): string[] {
-  if (!value || value === "-" || value === "â€”") return [];
-  return value
-    .split(",")
-    .map((quality) => quality.trim())
-    .filter(Boolean);
-}
-
-function parseWeaponDamage(
-  value: string | undefined,
-  fallbackType: (typeof DAMAGE_TYPE_OPTIONS)[number]["value"]
-) {
-  const match = value?.trim().match(/^(\d+d\d+)(?:\+(\d+))?\s*([IREX])?$/i);
-  return {
-    base: match?.[1] ?? "1d10",
-    plus: match?.[2] ?? "0",
-    type:
-      (match?.[3]?.toUpperCase() as
-        | (typeof DAMAGE_TYPE_OPTIONS)[number]["value"]
-        | undefined) ?? fallbackType,
-  };
-}
+import { effectiveMeleeStats, getCompatibleUpgrades, meleeClassChips, meleeCraftsmanshipDescription } from "./weaponHelpers";
 
 function hasMultipleMeleeProfiles(damage?: string): boolean {
   return !!damage && /\bLow:\s|\bHigh:\s|;/.test(damage);
@@ -110,499 +40,6 @@ function hasMultipleMeleeProfiles(damage?: string): boolean {
 
 function displayMeleeDamage(damage: string): string {
   return hasMultipleMeleeProfiles(damage) ? damage : damage.replace(/\s*[IREX]$/i, "").trim();
-}
-
-// ─── Melee Picker ─────────────────────────────────────────────────────────────
-
-export function MeleePicker({
-  editable = true,
-  customItems = [],
-  onSelect,
-  onSelectCustomItem,
-  onCustom,
-  onClose,
-  references = MELEE_WEAPON_REFERENCE,
-  title = "Add Melee Weapon",
-  placeholder = "Search weapons…",
-  showCustom = true,
-}: {
-  editable?: boolean;
-  customItems?: CampaignCustomItem<"weapon">[];
-  onSelect: (ref: MeleeWeaponRef, craftsmanship: WeaponCraftsmanship) => void;
-  onSelectCustomItem?: (item: CampaignCustomItem<"weapon">) => void;
-  onCustom: () => void;
-  onClose: () => void;
-  references?: MeleeWeaponRef[];
-  title?: string;
-  placeholder?: string;
-  showCustom?: boolean;
-}) {
-  const [query, setQuery] = useState("");
-  const [selected, setSelected] = useState<MeleeWeaponRef | null>(null);
-  const [craftsmanship, setCraftsmanship] = useState<WeaponCraftsmanship>("Common");
-  const normalisedQuery = query.toLowerCase();
-  const filtered = references
-    .filter((r) => r.name.toLowerCase().includes(normalisedQuery))
-    .sort((a, b) => a.name.localeCompare(b.name));
-  const filteredCustom = customItems
-    .filter((item) => item.data.weaponKind === "melee")
-    .filter((item) => item.name.toLowerCase().includes(normalisedQuery))
-    .sort((a, b) => a.name.localeCompare(b.name));
-  const modalTitle = editable ? title : title.replace(/^Add\b/, "View");
-
-  function resetPicker() {
-    setSelected(null);
-    setCraftsmanship("Common");
-  }
-
-  if (selected) {
-    return (
-      <PickerModal
-        title={selected.name}
-        titleClassName="text-slate-200"
-        closeLabel="←"
-        query=""
-        onQueryChange={() => {}}
-        onClose={resetPicker}
-        isEmpty={false}
-        hideSearch
-        footer={
-          <Button className="w-full" onClick={() => onSelect(selected, craftsmanship)}>
-            Add Weapon
-          </Button>
-        }
-      >
-        <div className="px-4 lg:px-5 py-4 lg:py-5 space-y-4">
-          <div>
-            <p className={`text-xs lg:text-sm ${uiTextMuted} mb-2`}>Select weapon craftsmanship:</p>
-            <div className="flex gap-2">
-              {WEAPON_CRAFTSMANSHIP_OPTIONS.map((q) => (
-                <button
-                  key={q}
-                  onClick={() => setCraftsmanship(q)}
-                  className={[
-                    "flex-1 py-1.5 lg:py-2 rounded border text-sm lg:text-base font-medium transition",
-                    craftsmanship === q
-                      ? WEAPON_CRAFTSMANSHIP_STYLE[q]
-                      : "border-slate-700 bg-slate-800 text-slate-400 hover:border-slate-500",
-                  ].join(" ")}
-                >
-                  {q}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className={`text-xs lg:text-sm ${uiTextBody} bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed`}>
-            {meleeCraftsmanshipDescription(craftsmanship)}
-          </div>
-        </div>
-      </PickerModal>
-    );
-  }
-
-  return (
-    <PickerModal
-      title={modalTitle}
-      placeholder={placeholder}
-      query={query}
-      onQueryChange={setQuery}
-      onClose={onClose}
-      isEmpty={filtered.length === 0 && filteredCustom.length === 0}
-      footer={
-        editable && showCustom ? (
-          <button
-            onClick={onCustom}
-            className="w-full text-sm lg:text-base text-red-500 hover:text-red-400 text-center py-1 lg:py-1.5"
-          >
-            + Add custom weapon
-          </button>
-        ) : undefined
-      }
-    >
-      {filteredCustom.map((item) => {
-        const data = item.data;
-        if (data.weaponKind !== "melee") return null;
-        return (
-          <div
-            key={item.id}
-            role="button"
-            tabIndex={editable ? 0 : -1}
-            onClick={editable ? () => onSelectCustomItem?.(item) : undefined}
-            className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
-          >
-            <span
-              className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}
-            >
-              {item.name}
-            </span>
-            <div className="flex flex-wrap gap-1.5 mt-1">
-              {data.damage && <StatChip size="sm" label="Dmg" value={data.damage} />}
-              {data.pen && <StatChip size="sm" label="Pen" value={data.pen} />}
-            </div>
-            <div className="flex flex-wrap gap-1.5 mt-1">
-              <ItemMetaChips weight={data.weight} value={data.value} availability={data.availability} source={data.source} />
-              {item.status === "draft" && (
-                <Chip size="sm" className={colourAmberFaint}>Draft</Chip>
-              )}
-              <Chip size="sm" className={colourFuchsia}>Custom</Chip>
-            </div>
-          </div>
-        );
-      })}
-      {filtered.map((ref) => (
-        <div
-          key={ref.id}
-          role="button"
-          tabIndex={editable ? 0 : -1}
-          onClick={editable ? () => setSelected(ref) : undefined}
-          className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
-        >
-          <span
-            className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}
-          >
-            {ref.name}
-          </span>
-          <div className="flex flex-wrap gap-1.5 mt-1">
-            <StatChip size="sm" label="Dmg" value={ref.damage} />
-            <StatChip size="sm" label="Pen" value={ref.pen} />
-          </div>
-          <div className="flex flex-wrap gap-1.5 mt-1">
-            <ItemMetaChips weight={ref.weight} value={ref.value} availability={ref.availability} source={ref.source} />
-          </div>
-          {ref.specialRules && ref.specialRules !== "—" && (
-            <div className="flex items-center gap-1.5 mt-1">
-              <span className={uiTextLabel}>Qualities</span>
-              <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>{ref.specialRules}</span>
-              <span className={uiInfoModalWrapper}>
-                <InfoModal title={`${ref.name} Qualities`} content={<SpecialRulesContent rules={ref.specialRules} />} />
-              </span>
-            </div>
-          )}
-          {ref.description && (
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <span className={uiTextLabel}>Rules</span>
-              <span className={uiInfoModalWrapper}>
-                <InfoModal title={ref.name} content={<SpecialRulesContent rules="" description={ref.description} />} />
-              </span>
-            </div>
-          )}
-        </div>
-      ))}
-    </PickerModal>
-  );
-}
-
-// ─── Custom Melee Form ────────────────────────────────────────────────────────
-
-export function CustomMeleeForm({
-  onAdd,
-  onCancel,
-  title = "Custom Melee Weapon",
-  submitLabel = "Add",
-  integrated = false,
-  initialWeapon,
-}: {
-  onAdd: (w: MeleeWeapon) => void | Promise<void>;
-  onCancel: () => void;
-  title?: string;
-  submitLabel?: string;
-  integrated?: boolean;
-  initialWeapon?: Partial<MeleeWeapon>;
-}) {
-  const parsedDamage = parseWeaponDamage(initialWeapon?.damage, "R");
-  const [name, setName] = useState(initialWeapon?.name ?? "");
-  const [weaponClass, setWeaponClass] = useState(initialWeapon?.class ?? "");
-  const [craftsmanship, setCraftsmanship] = useState<"" | WeaponCraftsmanship>(
-    initialWeapon?.craftsmanship ?? ""
-  );
-  const [origin, setOrigin] = useState<"" | (typeof CUSTOM_WEAPON_ORIGIN_OPTIONS)[number]>(
-    (CUSTOM_WEAPON_ORIGIN_OPTIONS as readonly string[]).includes(initialWeapon?.source ?? "")
-      ? (initialWeapon?.source as (typeof CUSTOM_WEAPON_ORIGIN_OPTIONS)[number])
-      : ""
-  );
-  const [damageBase, setDamageBase] = useState(parsedDamage.base);
-  const [damagePlus, setDamagePlus] = useState(parsedDamage.plus);
-  const [damageType, setDamageType] = useState<(typeof DAMAGE_TYPE_OPTIONS)[number]["value"]>(
-    parsedDamage.type
-  );
-  const [pen, setPen] = useState(initialWeapon?.pen ?? "");
-  const [weight, setWeight] = useState(initialWeapon?.weight ?? "");
-  const [value, setValue] = useState(initialWeapon?.value ?? "");
-  const [availability, setAvailability] = useState(initialWeapon?.availability ?? "");
-  const [selectedQualities, setSelectedQualities] = useState<string[]>(
-    splitWeaponQualities(initialWeapon?.specialRules)
-  );
-  const [description, setDescription] = useState(initialWeapon?.description ?? "");
-  const [saving, setSaving] = useState(false);
-
-  const canAdd =
-    Boolean(name.trim()) &&
-    Boolean(weaponClass) &&
-    Boolean(craftsmanship) &&
-    Boolean(origin) &&
-    isValidDiceInput(damageBase) &&
-    Boolean(damagePlus) &&
-    Boolean(pen) &&
-    Boolean(weight.trim()) &&
-    Boolean(value) &&
-    Boolean(availability);
-
-  const addWeapon = async () => {
-    if (!canAdd || !craftsmanship || !origin) return;
-    setSaving(true);
-    try {
-      await onAdd({
-        id: initialWeapon?.id ?? crypto.randomUUID(),
-        custom: true,
-        name: name.trim(),
-        class: weaponClass,
-        craftsmanship,
-        source: origin,
-        damage: formatDamageInput(damageBase, damagePlus, damageType),
-        pen,
-        weight: formatWeightInput(weight),
-        value: formatMoneyInput(value),
-        availability,
-        specialRules: selectedQualities.length > 0 ? selectedQualities.join(", ") : undefined,
-        description: description.trim() || undefined,
-        integrated: initialWeapon?.integrated ?? integrated,
-        quantity: initialWeapon?.quantity ?? (weaponClass.toLowerCase().includes("thrown") ? 1 : undefined),
-        customLibraryId: initialWeapon?.customLibraryId,
-        customLibraryVersionId: initialWeapon?.customLibraryVersionId,
-        equipped: initialWeapon?.equipped,
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <PickerModal
-      title={title}
-      query=""
-      onQueryChange={() => {}}
-      onClose={onCancel}
-      isEmpty={false}
-      hideSearch
-      maxHeight="max-h-[92vh]"
-      footer={
-        <div className="space-y-2">
-          {!canAdd && (
-            <p className="text-xs lg:text-sm text-slate-300"><span className="text-red-500">*</span> Required</p>
-          )}
-          <div className="flex gap-2">
-            <Button className="flex-1" onClick={addWeapon} disabled={!canAdd || saving}>
-              {saving ? "Saving..." : submitLabel}
-            </Button>
-            <button
-              onClick={onCancel}
-              className={uiPickerBackButton}
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      }
-    >
-      <div className="p-4 lg:p-5 space-y-4">
-        <p className={uiSectionHeader}>Identity</p>
-        <div className={uiSection + " space-y-3"}>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="col-span-2">
-              <label className={uiFormLabel}>
-                Name <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                className={editableInputClass(true) + " mt-0.5"}
-              />
-            </div>
-
-            <div className="col-span-2">
-              <label className={uiFormLabel}>
-                Class <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={weaponClass}
-                onChange={(event) => setWeaponClass(event.target.value)}
-                className={editableInputClass(true) + " mt-0.5"}
-              >
-                <option value="">Choose class</option>
-                {CUSTOM_MELEE_CLASS_OPTIONS.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <p className={uiSectionHeader}>Craftsmanship & Origin</p>
-        <div className={uiSection + " space-y-3"}>
-          <div className="space-y-1">
-            <label className={uiFormLabel}>
-              Craftsmanship <span className="text-red-500">*</span>
-            </label>
-            <div className="grid grid-cols-4 gap-1.5">
-              {WEAPON_CRAFTSMANSHIP_OPTIONS.map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => setCraftsmanship(option)}
-                  className={[
-                    "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
-                    craftsmanship === option
-                      ? WEAPON_CRAFTSMANSHIP_STYLE[option]
-                      : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
-                  ].join(" ")}
-                >
-                  {option}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="space-y-1">
-            <label className={uiFormLabel}>
-              Origin <span className="text-red-500">*</span>
-            </label>
-            <div className="grid grid-cols-2 gap-1.5">
-              {CUSTOM_WEAPON_ORIGIN_OPTIONS.map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => setOrigin(option)}
-                  className={[
-                    "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
-                    origin === option
-                      ? `${sourceColour(option)} bg-slate-800/70 font-semibold`
-                      : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
-                  ].join(" ")}
-                >
-                  {option}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <p className={uiSectionHeader}>Combat</p>
-        <div className={uiSection + " space-y-3"}>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="col-span-2">
-              <label className={uiFormLabel}>
-                Damage <span className="text-red-500">*</span>
-              </label>
-              <div className="grid grid-cols-3 gap-2 mt-0.5">
-                <input
-                  type="text"
-                  value={damageBase}
-                  onChange={(event) => setDamageBase(sanitizeDiceInput(event.target.value))}
-                  placeholder="1d10"
-                  className={editableInputClass(true)}
-                />
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={damagePlus}
-                  onChange={(event) => setDamagePlus(sanitizeNonNegativeIntegerInput(event.target.value))}
-                  placeholder="Plus"
-                  className={editableInputClass(true)}
-                />
-                <select
-                  value={damageType}
-                  onChange={(event) =>
-                    setDamageType(event.target.value as (typeof DAMAGE_TYPE_OPTIONS)[number]["value"])
-                  }
-                  className={editableInputClass(true)}
-                >
-                  {DAMAGE_TYPE_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="col-span-2">
-              <label className={uiFormLabel}>
-                Pen <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={pen}
-                onChange={(event) => setPen(sanitizeNonNegativeIntegerInput(event.target.value))}
-                className={editableInputClass(true) + " mt-0.5"}
-              />
-            </div>
-          </div>
-        </div>
-
-        <p className={uiSectionHeader}>Details</p>
-        <div className={uiSection + " space-y-3"}>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className={uiFormLabel}>
-                Weight <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                inputMode="decimal"
-                value={weight}
-                onChange={(event) => setWeight(sanitizeWeightInput(event.target.value))}
-                className={editableInputClass(true) + " mt-0.5"}
-              />
-            </div>
-
-            <div>
-              <label className={uiFormLabel}>
-                Cost <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={value}
-                onChange={(event) => setValue(sanitizeMoneyInput(event.target.value))}
-                className={editableInputClass(true) + " mt-0.5"}
-              />
-            </div>
-            <div className="col-span-2">
-              <label className={uiFormLabel}>
-                Availability <span className="text-red-500">*</span>
-              </label>
-              <select value={availability} onChange={(event) => setAvailability(event.target.value)} className={editableInputClass(true) + " mt-0.5"}>
-                <option value="">Choose availability</option>
-                {CUSTOM_AVAILABILITY_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <p className={uiSectionHeader}>Rules</p>
-        <div className={uiSection + " space-y-3"}>
-          <div className="grid grid-cols-2 gap-2">
-            <WeaponQualitySelector selected={selectedQualities} onChange={setSelectedQualities} />
-
-            <div className="col-span-2">
-              <label className={uiFormLabel}>
-                Rules
-              </label>
-              <textarea
-                value={description}
-                onChange={(event) => setDescription(event.target.value)}
-                rows={3}
-                className={editableTextareaClass(true) + " mt-0.5"}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </PickerModal>
-  );
 }
 
 // ─── Melee Card ───────────────────────────────────────────────────────────────
@@ -677,18 +114,22 @@ export function MeleeCard({
       ? addableCompatible
       : viewableCompatible
     : [];
-  const rulesText = effective.specialRules?.trim() ?? "";
+  const baseRulesText = effective.specialRules?.trim() ?? "";
+  const rulesText = weaponRef?.twoHanded
+    ? [baseRulesText, "Two-Handed"].filter((part) => part && part !== "—" && part !== "-").join(", ")
+    : baseRulesText;
   const ruleNamesInLookup = (effective.specialRules ?? "")
     .split(",")
     .map((r) => r.trim().replace(/\s*\(.*?\)/, ""))
     .filter((name) => Boolean(name) && Boolean(WEAPON_SPECIAL_RULES[name]));
   const hasQualities = Boolean(
-    rulesText && rulesText !== "—" && rulesText !== "-" && rulesText !== "â€”"
+    rulesText && rulesText !== "—" && rulesText !== "-"
   );
   const rulesDescription = weaponRef?.description ?? weapon.description;
   const hasQualityModal = ruleNamesInLookup.length > 0;
   const hasItemRules = !!rulesDescription;
   const craftsmanship = weapon.craftsmanship ?? "Common";
+  const classChips = meleeClassChips(weapon.class);
   const isThrown =
     weapon.class?.toLowerCase().includes("thrown") ||
     weaponRef?.class.toLowerCase().includes("thrown");
@@ -713,7 +154,15 @@ export function MeleeCard({
               </Chip>
             )}
           </div>
-          {weapon.class && <p className={`text-xs lg:text-sm ${uiTextMuted}`}>{weapon.class}</p>}
+          {classChips.length > 0 && (
+            <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+              {classChips.map((chip) => (
+                <Chip key={chip.label} size="sm" className={chip.className}>
+                  {chip.label}
+                </Chip>
+              ))}
+            </div>
+          )}
         </button>
         <div className="flex items-center gap-2 shrink-0">
           {onToggleEquip && (
@@ -854,7 +303,7 @@ export function MeleeCard({
                 {(editable ? visibleCompatible.length > 0 : upgradeRefs.length > 0 || visibleCompatible.length > 0) && (
                   <button
                     onClick={() => setShowUpgradePicker(true)}
-                    className="text-xs lg:text-sm text-red-500 hover:text-red-400"
+                    className={uiActionButtonCompact}
                   >
                     {editable ? "+ Add" : "View"}
                   </button>

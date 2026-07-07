@@ -436,7 +436,7 @@ export function UpgradePicker({
 
 function formatWeightModifier(value?: string | null): string {
   const trimmed = value?.trim() ?? "";
-  if (!trimmed || trimmed === "-" || trimmed === "—" || trimmed === "â€”" || trimmed === "0") {
+  if (!trimmed || trimmed === "-" || trimmed === "—" || trimmed === "0") {
     return "0 kg";
   }
   if (/^[+-]?\d+(?:\.\d+)?\s*(?:kg)?$/i.test(trimmed)) {

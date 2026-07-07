@@ -1,12 +1,21 @@
 // src/pages/characterSheet/weapons/weaponHelpers.ts
 // Pure stat-calculation helpers (no React, no JSX).
 
-import type { RangedWeapon, MeleeWeapon } from "../../../types/Character";
+import type { RangedWeapon, MeleeWeapon, WeaponCraftsmanship } from "../../../types/Character";
 import type { AmmoRef } from "../../../data/reference/ammoReference";
 import {
   WEAPON_UPGRADE_REFERENCE,
   type WeaponUpgradeRef,
 } from "../../../data/reference/weaponUpgradeReference";
+import {
+  colourAmberFaint,
+  colourCyan,
+  colourFuchsia,
+  colourOrange,
+  colourSky,
+  colourTealLight,
+  colourViolet,
+} from "../../../ui/colourTokens";
 
 // ─── Upgrade Stat Modifiers ────────────────────────────────────────────────
 
@@ -38,7 +47,7 @@ export function modifyPen(pen: string, delta: number): string {
 
 export function addSpecialRule(rules: string, toAdd: string): string {
   const cleaned = rules.trim();
-  if (!cleaned || cleaned === "-" || cleaned === "—" || cleaned === "â€”") return toAdd;
+  if (!cleaned || cleaned === "-" || cleaned === "—") return toAdd;
   const existing = cleaned.split(",").map((r) => r.trim().toLowerCase());
   if (existing.includes(toAdd.toLowerCase())) return cleaned;
   return `${cleaned}, ${toAdd}`;
@@ -72,7 +81,7 @@ function parseKg(value?: string): number {
 
 function parseWeightModifier(modifier: string): { multiplier: number; flatKg: number } {
   const trimmed = modifier.trim();
-  if (!trimmed || trimmed === "-" || trimmed === "—" || trimmed === "â€”" || trimmed === "0") {
+  if (!trimmed || trimmed === "-" || trimmed === "—" || trimmed === "0") {
     return { multiplier: 1, flatKg: 0 };
   }
 
@@ -220,4 +229,185 @@ export function getCompatibleUpgrades(
         return false;
     }
   });
+}
+
+// ─── Craftsmanship ─────────────────────────────────────────────────────────
+
+export const WEAPON_CRAFTSMANSHIP_OPTIONS: WeaponCraftsmanship[] = ["Poor", "Common", "Good", "Best"];
+
+export const WEAPON_CRAFTSMANSHIP_STYLE: Record<WeaponCraftsmanship, string> = {
+  Poor: "border-red-500/70 bg-red-500/15 text-red-300",
+  Common: "border-slate-500 bg-slate-800 text-slate-200",
+  Good: "border-emerald-500/70 bg-emerald-500/15 text-emerald-300",
+  Best: "border-amber-400 bg-amber-500/20 text-amber-300",
+};
+
+export function rangedCraftsmanshipDescription(craftsmanship: WeaponCraftsmanship): string {
+  switch (craftsmanship) {
+    case "Poor":
+      return "Poor ranged weapons are more prone to malfunction. A Poor ranged weapon has the Unreliable quality. If it already has this quality, it jams on any failed roll to hit.";
+    case "Good":
+      return "Good ranged weapons are more reliable. A Good ranged weapon has the Reliable quality. If it already has this quality, there is no further effect beyond fine workmanship.";
+    case "Best":
+      return "Best ranged weapons never suffer from jamming or overheating. If a roll would result in either, count it as a miss instead.";
+    case "Common":
+    default:
+      return "Common craftsmanship ranged weapons have no additional modifier.";
+  }
+}
+
+// ─── Weapon Class & Ammo Family Display ───────────────────────────────────
+
+export type AmmoTrackingMode = NonNullable<RangedWeapon["ammoTracking"]>;
+
+const WEAPON_CLASS_STYLES: Record<string, { active: string; inactive: string }> = {
+  Pistol: { active: colourSky, inactive: "border-sky-500/30 bg-sky-500/5 text-sky-400/50" },
+  Basic:  { active: colourTealLight, inactive: "border-teal-500/30 bg-teal-500/5 text-teal-400/50" },
+  Heavy:  { active: colourViolet, inactive: "border-violet-500/30 bg-violet-500/5 text-violet-400/50" },
+  Thrown: { active: colourAmberFaint, inactive: "border-amber-500/30 bg-amber-500/5 text-amber-400/50" },
+  Exotic: { active: colourFuchsia, inactive: "border-fuchsia-500/30 bg-fuchsia-500/5 text-fuchsia-400/50" },
+};
+
+export function weaponClassChip(cls?: string): { label: string; active: string; inactive: string } | undefined {
+  if (!cls) return undefined;
+  const n = cls.toLowerCase();
+  for (const [key, style] of Object.entries(WEAPON_CLASS_STYLES)) {
+    if (n.includes(key.toLowerCase())) return { label: key, ...style };
+  }
+  return { label: cls, active: "border-slate-500/60 bg-slate-700/40 text-slate-300", inactive: "border-slate-500/30 bg-slate-700/20 text-slate-400/50" };
+}
+
+export function ammoFamilyChip(ammoType?: string): { label: string; className: string } | undefined {
+  if (!ammoType) return undefined;
+  const normalized = ammoType.toLowerCase();
+  if (normalized === "las" || normalized.includes("charge pack")) {
+    return { label: "Las", className: "border-red-500/60 bg-red-500/10 text-red-300" };
+  }
+  if (normalized === "bolt" || normalized.includes("bolt")) {
+    return { label: "Bolt", className: colourAmberFaint };
+  }
+  if (normalized === "solid projectile" || normalized.includes("bullet")) {
+    return {
+      label: "Solid Projectile",
+      className: "border-slate-500/70 bg-slate-700/40 text-slate-300",
+    };
+  }
+  if (normalized === "shell" || normalized.includes("shell") || normalized === "shot") {
+    return { label: "Shell", className: "border-lime-500/60 bg-lime-500/10 text-lime-300" };
+  }
+  if (normalized === "flame" || normalized.includes("fuel")) {
+    return { label: "Flame", className: "border-orange-500/60 bg-orange-500/10 text-orange-300" };
+  }
+  if (normalized === "melta" || normalized.includes("melta")) {
+    return { label: "Melta", className: colourViolet };
+  }
+  if (normalized === "plasma" || normalized.includes("plasma")) {
+    return { label: "Plasma", className: colourSky };
+  }
+  if (normalized === "launcher" || normalized.includes("grenade")) {
+    return { label: "Launcher", className: "border-yellow-500/60 bg-yellow-500/10 text-yellow-300" };
+  }
+  if (normalized === "primitive" || normalized.includes("arrow") || normalized.includes("quarrel")) {
+    return { label: "Primitive", className: "border-stone-500/70 bg-stone-700/30 text-stone-300" };
+  }
+  if (normalized === "shuriken" || normalized.includes("shuriken")) {
+    return { label: "Shuriken", className: colourFuchsia };
+  }
+  if (normalized === "power cell" || normalized.includes("power cell")) {
+    return { label: "Power Cell", className: colourCyan };
+  }
+  if (normalized === "exotic" || normalized.includes("exotic")) {
+    return { label: "Exotic", className: colourTealLight };
+  }
+  return { label: ammoType, className: "border-slate-500/70 bg-slate-700/40 text-slate-300" };
+}
+
+// ─── Custom Ammo Families ──────────────────────────────────────────────────
+
+export const CUSTOM_AMMO_FAMILY_OPTIONS = [
+  {
+    label: "Las",
+    ammoType: "Las",
+    compatibleAmmoIds: [
+      "cr-charge-pack-pistol",
+      "cr-charge-pack-basic",
+      "cr-charge-pack-heavy",
+      "cr-hot-shot-charge",
+    ],
+  },
+  {
+    label: "Bolt",
+    ammoType: "Bolt",
+    compatibleAmmoIds: ["cr-bolt-shells", "cr-inferno-shells", "dh-psybolt-ammunition"],
+  },
+  {
+    label: "Solid Projectile",
+    ammoType: "Solid Projectile",
+    compatibleAmmoIds: ["cr-bullets", "cr-dumdum-bullets", "cr-man-stopper-bullets"],
+  },
+  {
+    label: "Shell",
+    ammoType: "Shell",
+    compatibleAmmoIds: ["cr-shells", "cr-inferno-shells", "dh-cryptus-shotgun-shells"],
+  },
+  {
+    label: "Flame",
+    ammoType: "Flame",
+    compatibleAmmoIds: ["cr-fuel-pistol", "cr-fuel-basic", "dh-psyflame-ammunition"],
+  },
+  {
+    label: "Melta",
+    ammoType: "Melta",
+    compatibleAmmoIds: ["cr-melta-canister-pistol", "cr-melta-canister-basic"],
+  },
+  {
+    label: "Plasma",
+    ammoType: "Plasma",
+    compatibleAmmoIds: ["cr-plasma-flask-pistol", "cr-plasma-flask-basic"],
+  },
+  { label: "Launcher", ammoType: "Launcher", compatibleAmmoIds: [] },
+  {
+    label: "Primitive",
+    ammoType: "Primitive",
+    compatibleAmmoIds: ["cr-arrows-quarrels", "cr-shot", "lw-purity-round"],
+  },
+  { label: "Shuriken", ammoType: "Shuriken", compatibleAmmoIds: ["ca-shuriken-clip"] },
+  { label: "Power Cell", ammoType: "Power Cell", compatibleAmmoIds: ["dh-synapse-power-cell"] },
+  { label: "Exotic", ammoType: "Exotic", compatibleAmmoIds: ["cr-exotic"] },
+] as const;
+
+export function compatibleAmmoIdsForAmmoType(ammoType?: string): readonly string[] | undefined {
+  return CUSTOM_AMMO_FAMILY_OPTIONS.find((option) => option.ammoType === ammoType)
+    ?.compatibleAmmoIds;
+}
+
+// ─── Melee Craftsmanship ────────────────────────────────────────────────────
+
+export function meleeCraftsmanshipDescription(craftsmanship: WeaponCraftsmanship): string {
+  switch (craftsmanship) {
+    case "Poor":
+      return "Poor melee weapons incur a -10 penalty to Tests made to attack.";
+    case "Good":
+      return "Good melee weapons add a +5 bonus to Tests made to attack.";
+    case "Best":
+      return "Best melee weapons add a +10 bonus to Tests made to attack and add 1 to the Damage they inflict.";
+    case "Common":
+    default:
+      return "Common craftsmanship melee weapons have no additional modifier.";
+  }
+}
+
+// ─── Melee Class Chips ──────────────────────────────────────────────────────
+
+export function meleeClassChips(cls?: string): { label: string; className: string }[] {
+  if (!cls) return [];
+  const normalized = cls.toLowerCase();
+  const chips: { label: string; className: string }[] = [];
+  if (normalized.includes("melee")) {
+    chips.push({ label: "Melee", className: colourOrange });
+  }
+  if (normalized.includes("thrown")) {
+    chips.push({ label: "Thrown", className: colourAmberFaint });
+  }
+  return chips;
 }

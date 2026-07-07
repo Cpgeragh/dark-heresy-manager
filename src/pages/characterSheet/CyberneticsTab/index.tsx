@@ -32,8 +32,10 @@ import {
 } from "../../../services/customItemService";
 import { useToast } from "../../../components/Toast";
 import { IntegratedWeaponPicker } from "../weapons/IntegratedWeaponPicker";
-import { RangedCard, CustomRangedForm } from "../weapons/RangedCard";
-import { MeleeCard, CustomMeleeForm } from "../weapons/MeleeCard";
+import { RangedCard } from "../weapons/RangedCard";
+import { CustomRangedForm } from "../weapons/CustomRangedForm";
+import { MeleeCard } from "../weapons/MeleeCard";
+import { CustomMeleeForm } from "../weapons/CustomMeleeForm";
 import { IndependentCardGrid } from "../weapons/IndependentCardGrid";
 import { ArcheotechWeaponCard } from "../weapons/ArcheotechWeaponCard";
 import { ArcheotechImplantRow } from "./ArcheotechImplantRow";

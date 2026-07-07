@@ -2,8 +2,6 @@ const EMPTY_MONEY_VALUES = new Set([
   "",
   "-",
   "—",
-  "â€”",
-  "Ã¢â‚¬â€",
   "n/a",
   "na",
   "none",
