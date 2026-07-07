@@ -19,7 +19,7 @@ import {
   uiItemName,
 } from "../../../ui/editableStyles";
 import { uiActionButtonCompact } from "../../../ui/buttonStyles";
-import { colourEmerald, colourMeta } from "../../../ui/colourTokens";
+import { colourEmerald, colourEmeraldPlain, colourMeta } from "../../../ui/colourTokens";
 
 export const WEAPON_QUALITY_OPTIONS = Object.keys(WEAPON_SPECIAL_RULES).sort((a, b) =>
   a.localeCompare(b)
@@ -261,7 +261,7 @@ export function EquipToggle({
       <div
         className={`w-3.5 h-3.5 rounded border flex items-center justify-center transition ${
           equipped
-            ? "border-green-600 bg-green-500/20"
+            ? colourEmerald
             : "border-slate-600 group-hover:border-slate-400"
         }`}
       >
@@ -273,7 +273,7 @@ export function EquipToggle({
             className="w-2 h-2"
           >
             <path
-              stroke="#4ade80"
+              stroke="currentColor"
               strokeWidth={1.8}
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -284,7 +284,7 @@ export function EquipToggle({
       </div>
       <span
         className={`text-[10px] lg:text-xs uppercase tracking-wide ${
-          equipped ? "text-green-400" : "text-slate-500 group-hover:text-slate-300"
+          equipped ? colourEmeraldPlain : "text-slate-500 group-hover:text-slate-300"
         }`}
       >
         {equipped ? labels.equipped : labels.unequipped}

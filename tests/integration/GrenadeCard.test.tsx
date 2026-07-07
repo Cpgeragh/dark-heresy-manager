@@ -12,6 +12,7 @@ const baseItem: GrenadeItem = {
   name: "Custom Frag",
   quantity: 5,
   type: "Grenade",
+  class: "Thrown",
   damage: "2d10 X",
   pen: "0",
   weight: "0.5 kg",
@@ -38,14 +39,17 @@ function renderCard(props: Partial<React.ComponentProps<typeof GrenadeCard>> = {
 }
 
 describe("GrenadeCard header label", () => {
-  it("shows a Thrown label for a grenade", () => {
+  it("shows a Grenade type chip and a Thrown class chip for a grenade", () => {
     renderCard();
+    expect(screen.getByText("Grenade")).toBeInTheDocument();
     expect(screen.getByText("Thrown")).toBeInTheDocument();
   });
 
-  it("shows a Mine label (not Thrown) for a mine", () => {
-    renderCard({ item: { ...baseItem, type: "Mine" } });
+  it("shows a Mine type chip and an Exotic class chip (not Grenade/Thrown) for a mine", () => {
+    renderCard({ item: { ...baseItem, type: "Mine", class: "Exotic" } });
     expect(screen.getByText("Mine")).toBeInTheDocument();
+    expect(screen.getByText("Exotic")).toBeInTheDocument();
+    expect(screen.queryByText("Grenade")).not.toBeInTheDocument();
     expect(screen.queryByText("Thrown")).not.toBeInTheDocument();
   });
 });
@@ -66,6 +70,7 @@ describe("GrenadeCard stowed variant", () => {
   it("shows the stowed overflow card instead of the regular one", () => {
     renderCard({ isStowedCard: true });
     expect(screen.getByText("Stowed · 5 remaining")).toBeInTheDocument();
+    expect(screen.queryByText("Grenade")).not.toBeInTheDocument();
     expect(screen.queryByText("Thrown")).not.toBeInTheDocument();
   });
 });

@@ -14,7 +14,10 @@ import {
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
 import { InfoModal } from "../../../components/InfoModal";
+import { Chip } from "../../../ui/Chip";
+import { colourCyan, colourViolet, colourTealLight } from "../../../ui/colourTokens";
 import { StatChip, SpecialRulesContent } from "./weaponShared";
+import { weaponClassChip } from "./weaponHelpers";
 
 export function GrenadePicker({
   editable = true,
@@ -83,6 +86,14 @@ export function GrenadePicker({
               <StatusBadge status={item.status} />
             </div>
             <div className="flex flex-wrap gap-1.5 mt-1">
+              <Chip size="sm" className={data.type === "Mine" ? colourViolet : colourCyan}>
+                {data.type === "Mine" ? "Mine" : "Grenade"}
+              </Chip>
+              {(() => { const c = weaponClassChip(data.class); return c ? (
+                <Chip size="sm" className={c.label === "Exotic" ? colourTealLight : c.active}>{c.label}</Chip>
+              ) : null; })()}
+            </div>
+            <div className="flex flex-wrap gap-1.5 mt-1">
               {data.type !== "Mine" && <StatChip size="sm" label="Range" value={thrownRange} />}
               {data.damage && data.damage !== "—" && <StatChip size="sm" label="Dmg" value={data.damage} />}
               {data.pen && <StatChip size="sm" label="Pen" value={data.pen} />}
@@ -123,6 +134,14 @@ export function GrenadePicker({
           >
             {ref.name}
           </span>
+          <div className="flex flex-wrap gap-1.5 mt-1">
+            <Chip size="sm" className={ref.type === "Mine" ? colourViolet : colourCyan}>
+              {ref.type === "Mine" ? "Mine" : "Grenade"}
+            </Chip>
+            {(() => { const c = weaponClassChip(ref.class); return c ? (
+              <Chip size="sm" className={c.label === "Exotic" ? colourTealLight : c.active}>{c.label}</Chip>
+            ) : null; })()}
+          </div>
           <div className="flex flex-wrap gap-1.5 mt-1">
             {ref.type !== "Mine" && <StatChip size="sm" label="Range" value={thrownRange} />}
             {ref.damage !== "—" && <StatChip size="sm" label="Dmg" value={ref.damage} />}

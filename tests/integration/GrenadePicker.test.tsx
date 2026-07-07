@@ -93,6 +93,14 @@ describe("GrenadePicker", () => {
     expect(within(row(MINE_NAME)).queryByText("Range")).not.toBeInTheDocument();
   });
 
+  it("shows Grenade/Thrown chips for a grenade and Mine/Exotic chips for a mine", () => {
+    renderPicker();
+    expect(within(row(GRENADE_NAME)).getByText("Grenade")).toBeInTheDocument();
+    expect(within(row(GRENADE_NAME)).getByText("Thrown")).toBeInTheDocument();
+    expect(within(row(MINE_NAME)).getByText("Mine")).toBeInTheDocument();
+    expect(within(row(MINE_NAME)).getByText("Exotic")).toBeInTheDocument();
+  });
+
   it("calls onSelect with the chosen ref when a grenade is clicked", async () => {
     const user = userEvent.setup();
     const { onSelect } = renderPicker();

@@ -18,13 +18,14 @@ import {
   uiCardTitle,
 } from "../../../ui/editableStyles";
 import { uiActionButtonCompact, uiExpandButton } from "../../../ui/buttonStyles";
-import { colourAmberFaint, colourEmerald } from "../../../ui/colourTokens";
+import { colourEmerald, colourCyan, colourViolet, colourTealLight } from "../../../ui/colourTokens";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import { InfoModal } from "../../../components/InfoModal";
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
 import { StatChip, DamageTypeChip, SpecialRulesContent, EquipToggle } from "./weaponShared";
+import { weaponClassChip } from "./weaponHelpers";
 
 export const EXPLOSIVE_MISHAPS_CONTENT = (
   <div className="space-y-3">
@@ -156,9 +157,12 @@ export function GrenadeCard({
             )}
           </div>
           <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
-            <Chip size="sm" className={colourAmberFaint}>
-              {item.type === "Mine" ? "Mine" : "Thrown"}
+            <Chip size="sm" className={item.type === "Mine" ? colourViolet : colourCyan}>
+              {item.type === "Mine" ? "Mine" : "Grenade"}
             </Chip>
+            {(() => { const c = weaponClassChip(item.class); return c ? (
+              <Chip size="sm" className={c.label === "Exotic" ? colourTealLight : c.active}>{c.label}</Chip>
+            ) : null; })()}
             {isEquipped && (
               <Chip size="sm" className={colourEmerald}>
                 {equippedCount} ready

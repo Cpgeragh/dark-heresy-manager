@@ -8,6 +8,7 @@ export const colourStacks = "border-sky-700/50 bg-sky-500/10 text-sky-400";
 export const colourArcheotech = "border-amber-700/50 bg-amber-500/10 text-amber-400";
 export const colourViolet = "border-violet-500/50 bg-violet-500/10 text-violet-300";
 export const colourEmerald = "border-emerald-500/50 bg-emerald-500/10 text-emerald-300";
+export const colourEmeraldPlain = "text-emerald-300";
 export const colourLime = "border-lime-500/50 bg-lime-500/10 text-lime-300";
 export const colourBlue = "border-blue-500/50 bg-blue-500/10 text-blue-300";
 export const colourPink = "border-pink-500/50 bg-pink-500/10 text-pink-300";
