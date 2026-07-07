@@ -1,6 +1,7 @@
 // tests/integration/CyberneticWeaponCard.test.tsx
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
 import { CyberneticWeaponCard } from "../../src/pages/characterSheet/weapons/CyberneticWeaponCard";
@@ -26,6 +27,14 @@ function renderCard(weapon: CyberneticWeapon, craftsmanship: WeaponCraftsmanship
     />
   );
 }
+
+describe("CyberneticWeaponCard origin", () => {
+  it("shows the implant name under a labeled Gained From row", () => {
+    renderCard({ type: "ranged", name: "Laspistol (Compact)", class: "Pistol", damage: "1d10+1 E", pen: "0" });
+    expect(screen.getByText("Gained From")).toBeInTheDocument();
+    expect(screen.getByText("Test Mechadendrite")).toBeInTheDocument();
+  });
+});
 
 describe("CyberneticWeaponCard weapon-class chip", () => {
   it("shows an orange Melee chip for a melee cybernetic weapon", () => {
@@ -80,5 +89,23 @@ describe("CyberneticWeaponCard craftsmanship effect", () => {
   it("leaves melee damage unchanged for Poor/Common/Good", () => {
     renderCard({ type: "melee", name: "Motive Claw", class: "Melee", damage: "1d10+2 R", pen: "2" }, "Good");
     expect(screen.getByText("1d10+2")).toBeInTheDocument();
+  });
+});
+
+describe("CyberneticWeaponCard expand/collapse", () => {
+  it("starts expanded and hides the stats/qualities section when collapsed", async () => {
+    const user = userEvent.setup();
+    renderCard({ type: "ranged", name: "Laspistol (Compact)", class: "Pistol", damage: "1d10+1 E", pen: "0" });
+    expect(screen.getByText("Damage")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Collapse" }));
+    expect(screen.queryByText("Damage")).not.toBeInTheDocument();
+  });
+
+  it("shows the section again when expanded a second time", async () => {
+    const user = userEvent.setup();
+    renderCard({ type: "ranged", name: "Laspistol (Compact)", class: "Pistol", damage: "1d10+1 E", pen: "0" });
+    await user.click(screen.getByRole("button", { name: "Collapse" }));
+    await user.click(screen.getByRole("button", { name: "Expand" }));
+    expect(screen.getByText("Damage")).toBeInTheDocument();
   });
 });
