@@ -9,7 +9,7 @@ import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules
 import { Chip } from "../../../ui/Chip";
 import { uiTextLabel, uiTextMuted, uiTextPlaceholder, uiCardTitle, uiInfoModalWrapper } from "../../../ui/editableStyles";
 import { uiExpandButton } from "../../../ui/buttonStyles";
-import { colourCyanDark, colourOrange } from "../../../ui/colourTokens";
+import { colourPink, colourOrange } from "../../../ui/colourTokens";
 import {
   StatChip,
   DamageTypeChip,
@@ -46,14 +46,14 @@ export function CyberneticWeaponCard({
   const [expanded, setExpanded] = useState(true);
 
   return (
-    <div className="border border-cyan-700/40 bg-cyan-900/10 rounded-lg p-3 lg:p-4 space-y-3">
+    <div className="border border-pink-500/60 bg-pink-900/10 rounded-lg p-3 lg:p-4 space-y-3">
       <div className="flex items-start justify-between gap-2">
         <button className={uiExpandButton} onClick={() => setExpanded((e) => !e)}>
           <div className="flex items-center gap-2">
             <p className={uiCardTitle}>{weapon.name}</p>
           </div>
           <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
-            <Chip size="sm" className={colourCyanDark}>
+            <Chip size="sm" className={colourPink}>
               Cybernetic
             </Chip>
             {weapon.class === "Melee" ? (

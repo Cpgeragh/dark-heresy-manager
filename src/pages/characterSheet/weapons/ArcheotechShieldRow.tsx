@@ -37,7 +37,7 @@ export function ArcheotechShieldRow({
   const locations = item.locations ?? [];
 
   const containerClass = highlightAsArcheotech
-    ? "border border-amber-700/40 bg-amber-900/10 rounded-lg p-3 lg:p-4"
+    ? "border border-amber-500/60 bg-amber-900/10 rounded-lg p-3 lg:p-4"
     : uiSection;
 
   return (

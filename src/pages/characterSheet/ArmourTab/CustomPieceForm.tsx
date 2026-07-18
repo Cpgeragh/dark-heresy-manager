@@ -1,20 +1,31 @@
 import { useState } from "react";
 import type { ArmourCraftsmanship, ArmourLocationKey, ArmourQuality, WornArmourPiece } from "../../../types/Character";
-import { editableInputClass, editableTextareaClass, uiSection, uiSectionHeader, uiFormLabel } from "../../../ui/editableStyles";
+import { editableInputClass, editableTextareaClass, uiSection, uiSectionHeader, uiFormLabel, uiInfoModalWrapper } from "../../../ui/editableStyles";
 import { uiPickerBackButton } from "../../../ui/buttonStyles";
 import { Button } from "../../../ui/Button";
 import { PickerModal } from "../../../ui/PickerModal";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
+import { sourceColour } from "../../../ui/sourceStyles";
+import { Chip } from "../../../ui/Chip";
+import { colourAmberFaint } from "../../../ui/colourTokens";
+import { InfoModal } from "../../../components/InfoModal";
+import { ARMOUR_SPECIAL_RULES } from "../../../data/reference/armourSpecialRules";
 import { CUSTOM_AVAILABILITY_OPTIONS, sanitizeNonNegativeIntegerInput } from "../weapons/weaponShared";
 import { LOCATION_LABELS, ARMOUR_CRAFTSMANSHIP_OPTIONS, ARMOUR_CRAFTSMANSHIP_STYLE } from "./armourHelpers";
 
-const ARMOUR_QUALITY_OPTIONS: ArmourQuality[] = ["Primitive", "Flak", "Mesh", "Sanctified", "Powered"];
+const WORN_ARMOUR_QUALITY_OPTIONS: ArmourQuality[] = ["Primitive", "Flak", "Mesh", "Sanctified", "Powered"];
+const CUSTOM_ARMOUR_ORIGIN_OPTIONS = ["Custom", "2nd Ed"] as const;
+
+function isCustomArmourOrigin(value: string | undefined): value is (typeof CUSTOM_ARMOUR_ORIGIN_OPTIONS)[number] {
+  return CUSTOM_ARMOUR_ORIGIN_OPTIONS.includes(value as (typeof CUSTOM_ARMOUR_ORIGIN_OPTIONS)[number]);
+}
 
 interface Props {
   initialPiece?: Partial<WornArmourPiece>;
   title?: string;
   submitLabel?: string;
+  forceField?: boolean;
   onAdd: (piece: WornArmourPiece) => void | Promise<void>;
   onCancel: () => void;
 }
@@ -23,10 +34,14 @@ export function CustomPieceForm({
   initialPiece,
   title = "Custom Piece",
   submitLabel = "Add",
+  forceField = false,
   onAdd,
   onCancel,
 }: Props) {
   const [name, setName] = useState(initialPiece?.name ?? "");
+  const [origin, setOrigin] = useState<"" | (typeof CUSTOM_ARMOUR_ORIGIN_OPTIONS)[number]>(
+    isCustomArmourOrigin(initialPiece?.source) ? initialPiece.source : ""
+  );
   const [craftsmanship, setCraftsmanship] = useState<ArmourCraftsmanship>(
     initialPiece?.craftsmanship ?? "Common"
   );
@@ -41,12 +56,15 @@ export function CustomPieceForm({
     new Set(initialPiece?.qualities ?? [])
   );
   const [notes, setNotes] = useState(initialPiece?.notes ?? "");
+  const [protectionRating, setProtectionRating] = useState(
+    initialPiece?.protectionRating !== undefined ? String(initialPiece.protectionRating) : ""
+  );
   const [saving, setSaving] = useState(false);
 
   const canAdd =
     Boolean(name.trim()) &&
-    selectedLocs.size > 0 &&
-    ap.trim() !== "" &&
+    Boolean(origin) &&
+    (forceField ? protectionRating.trim() !== "" : selectedLocs.size > 0 && ap.trim() !== "") &&
     Boolean(weight.trim()) &&
     Boolean(value.trim()) &&
     Boolean(availability);
@@ -70,20 +88,22 @@ export function CustomPieceForm({
   }
 
   async function handleAdd() {
-    if (!canAdd) return;
+    if (!canAdd || !origin) return;
     const piece: WornArmourPiece = {
       id: initialPiece?.id ?? crypto.randomUUID(),
       name: name.trim(),
-      locations: [...selectedLocs],
-      ap: Number(ap) || 0,
+      locations: forceField ? [] : [...selectedLocs],
+      ap: forceField ? 0 : Number(ap) || 0,
       worn: initialPiece?.worn ?? true,
       craftsmanship,
       weight: formatWeightInput(weight),
       value: formatMoneyInput(value),
       availability,
-      qualities: selectedQualities.size > 0 ? [...selectedQualities] : undefined,
+      source: origin,
+      qualities: forceField ? ["Overload"] : selectedQualities.size > 0 ? [...selectedQualities] : undefined,
       notes: notes.trim() || undefined,
       custom: true,
+      ...(forceField ? { isForceField: true, protectionRating: Number(protectionRating) || 0 } : {}),
       customLibraryId: initialPiece?.customLibraryId,
       customLibraryVersionId: initialPiece?.customLibraryVersionId,
     };
@@ -136,9 +156,30 @@ export function CustomPieceForm({
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Flak Jacket"
+              placeholder={forceField ? "e.g. Refraction Field" : "e.g. Flak Jacket"}
               className={editableInputClass(true) + " mt-0.5"}
             />
+          </div>
+        </div>
+
+        <p className={uiSectionHeader}>Origin</p>
+        <div className={uiSection + " space-y-3"}>
+          <div className="grid grid-cols-2 gap-1.5">
+            {CUSTOM_ARMOUR_ORIGIN_OPTIONS.map((option) => (
+              <button
+                key={option}
+                type="button"
+                onClick={() => setOrigin(option)}
+                className={[
+                  "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
+                  origin === option
+                    ? `${sourceColour(option)} bg-slate-800/70 font-semibold`
+                    : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
+                ].join(" ")}
+              >
+                {option}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -170,80 +211,60 @@ export function CustomPieceForm({
 
         <p className={uiSectionHeader}>Stats</p>
         <div className={uiSection + " space-y-3"}>
-          <div className="space-y-1">
-            <label className={uiFormLabel}>
-              Locations <span className="text-red-500">*</span>
-            </label>
-            <div className="grid grid-cols-3 gap-1.5">
-              {(["leftArm", "head", "rightArm", "leftLeg", "body", "rightLeg"] as ArmourLocationKey[]).map((loc) => (
-                <button
-                  key={loc}
-                  type="button"
-                  onClick={() => toggleLoc(loc)}
-                  className={[
-                    "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
-                    selectedLocs.has(loc)
-                      ? "border-red-600 bg-red-600/20 text-red-400"
-                      : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
-                  ].join(" ")}
-                >
-                  {LOCATION_LABELS[loc]}
-                </button>
-              ))}
+          {!forceField && (
+            <div className="space-y-1">
+              <label className={uiFormLabel}>
+                Locations <span className="text-red-500">*</span>
+              </label>
+              <div className="grid grid-cols-3 gap-1.5">
+                {(["leftArm", "head", "rightArm", "leftLeg", "body", "rightLeg"] as ArmourLocationKey[]).map((loc) => (
+                  <button
+                    key={loc}
+                    type="button"
+                    onClick={() => toggleLoc(loc)}
+                    className={[
+                      "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
+                      selectedLocs.has(loc)
+                        ? "border-red-600 bg-red-600/20 text-red-400"
+                        : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
+                    ].join(" ")}
+                  >
+                    {LOCATION_LABELS[loc]}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
-          <div className="space-y-1">
-            <label className={uiFormLabel}>
-              Qualities
-            </label>
-            <div className="grid grid-cols-3 gap-1.5">
-              {ARMOUR_QUALITY_OPTIONS.map((q) => (
-                <button
-                  key={q}
-                  type="button"
-                  onClick={() => toggleQuality(q)}
-                  className={[
-                    "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
-                    selectedQualities.has(q)
-                      ? "border-amber-600 bg-amber-600/20 text-amber-400"
-                      : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
-                  ].join(" ")}
-                >
-                  {q}
-                </button>
-              ))}
+          )}
+
+          {forceField ? (
+            <div>
+              <label className={uiFormLabel}>
+                Protection Rating <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={protectionRating}
+                onChange={(e) => setProtectionRating(sanitizeNonNegativeIntegerInput(e.target.value))}
+                placeholder="0"
+                className={editableInputClass(true) + " mt-0.5 w-24 font-code"}
+              />
             </div>
-          </div>
-
-          <div>
-            <label className={uiFormLabel}>
-              AP <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              inputMode="numeric"
-              value={ap}
-              onChange={(e) => setAp(sanitizeNonNegativeIntegerInput(e.target.value))}
-              placeholder="0"
-              className={editableInputClass(true) + " mt-0.5 w-24 font-code"}
-            />
-          </div>
-        </div>
-
-        <p className={uiSectionHeader}>Rules</p>
-        <div className={uiSection + " space-y-3"}>
-          <div>
-            <label className={uiFormLabel}>
-              Rules <span className="text-slate-600">(optional)</span>
-            </label>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Special rules or effects…"
-              rows={3}
-              className={editableTextareaClass(true) + " mt-0.5"}
-            />
-          </div>
+          ) : (
+            <div>
+              <label className={uiFormLabel}>
+                AP <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={ap}
+                onChange={(e) => setAp(sanitizeNonNegativeIntegerInput(e.target.value))}
+                placeholder="0"
+                className={editableInputClass(true) + " mt-0.5 w-24 font-code"}
+              />
+            </div>
+          )}
         </div>
 
         <p className={uiSectionHeader}>Details</p>
@@ -288,6 +309,53 @@ export function CustomPieceForm({
                 ))}
               </select>
             </div>
+          </div>
+        </div>
+
+        <p className={uiSectionHeader}>Rules and Qualities</p>
+        <div className={uiSection + " space-y-3"}>
+          <div className="space-y-1">
+            <label className={`${uiFormLabel} block mb-1.5`}>
+              Qualities
+            </label>
+            {forceField ? (
+              <div className="flex items-center gap-1.5">
+                <Chip className={`w-fit ${colourAmberFaint}`}>Overload</Chip>
+                <span className={uiInfoModalWrapper}>
+                  <InfoModal title="Overload" content={ARMOUR_SPECIAL_RULES.Overload} />
+                </span>
+              </div>
+            ) : (
+              <div className="grid grid-cols-3 gap-1.5">
+                {WORN_ARMOUR_QUALITY_OPTIONS.map((q) => (
+                  <button
+                    key={q}
+                    type="button"
+                    onClick={() => toggleQuality(q)}
+                    className={[
+                      "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
+                      selectedQualities.has(q)
+                        ? "border-amber-600 bg-amber-600/20 text-amber-400"
+                        : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
+                    ].join(" ")}
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <div>
+            <label className={uiFormLabel}>
+              Rules
+            </label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Special rules or effects…"
+              rows={3}
+              className={editableTextareaClass(true) + " mt-0.5"}
+            />
           </div>
         </div>
       </div>

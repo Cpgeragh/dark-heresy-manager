@@ -340,7 +340,7 @@ export function CustomMeleeForm({
           </div>
         </div>
 
-        <p className={uiSectionHeader}>Rules</p>
+        <p className={uiSectionHeader}>Rules and Qualities</p>
         <div className={uiSection + " space-y-3"}>
           <div className="grid grid-cols-2 gap-2">
             <WeaponQualitySelector selected={selectedQualities} onChange={setSelectedQualities} />

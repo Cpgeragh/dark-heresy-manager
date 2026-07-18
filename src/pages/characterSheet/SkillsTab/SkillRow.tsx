@@ -50,7 +50,7 @@ export function SkillRow({ skill, editable, updateLevel, previewMode = false, on
   );
 
   return (
-    <div className="rounded border border-slate-500 bg-slate-800/60 overflow-hidden">
+    <div className="rounded-lg border border-slate-500 bg-slate-900/60 overflow-hidden">
       {/* COLLAPSED ROW */}
       <button
         onClick={onSelect ? () => onSelect(skill.id) : previewMode ? undefined : handleToggle}

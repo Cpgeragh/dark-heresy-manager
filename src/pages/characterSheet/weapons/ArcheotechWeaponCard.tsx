@@ -96,7 +96,7 @@ export function ArcheotechWeaponCard({
   const showMishaps = item.type === "Grenade";
 
   const containerClass = highlightAsArcheotech
-    ? "border border-amber-700/40 bg-amber-900/10 rounded-lg p-3 lg:p-4 space-y-3"
+    ? "border border-amber-500/60 bg-amber-900/10 rounded-lg p-3 lg:p-4 space-y-3"
     : `${uiSection} space-y-3`;
 
   return (

@@ -159,6 +159,7 @@ export function ArmourTab({
   const [showPicker, setShowPicker] = useState(false);
   const [showFieldPicker, setShowFieldPicker] = useState(false);
   const [showCustomForm, setShowCustomForm] = useState(false);
+  const [customFormForceField, setCustomFormForceField] = useState(false);
   const [pickerMode, setPickerMode] = useState<"worn" | "stowed">("worn");
   const [editingArmourDefinition, setEditingArmourDefinition] =
     useState<EditingArmourDefinition | null>(null);
@@ -244,7 +245,13 @@ export function ArmourTab({
 
         await onUpdate([
           ...armour,
-          buildArmourSnapshot(piece.id, pickerMode === "worn", data, customItemId, versionId),
+          buildArmourSnapshot(
+            piece.id,
+            piece.isForceField ? piece.worn : pickerMode === "worn",
+            data,
+            customItemId,
+            versionId
+          ),
         ]);
         setShowCustomForm(false);
         toast.success("Custom armour saved as a campaign draft.");
@@ -730,7 +737,12 @@ export function ArmourTab({
       </section>
 
       {editable && showCustomForm && (
-        <CustomPieceForm onAdd={addCustomPiece} onCancel={() => setShowCustomForm(false)} />
+        <CustomPieceForm
+          title={customFormForceField ? "Custom Force Field" : "Custom Piece"}
+          forceField={customFormForceField}
+          onAdd={addCustomPiece}
+          onCancel={() => setShowCustomForm(false)}
+        />
       )}
 
       {editingArmourDefinition && (
@@ -759,6 +771,7 @@ export function ArmourTab({
           onSelectCustomItem={(item) => addArmourFromLibrary(item)}
           onCustom={() => {
             setShowPicker(false);
+            setCustomFormForceField(false);
             setShowCustomForm(true);
           }}
           onClose={() => setShowPicker(false)}
@@ -773,6 +786,11 @@ export function ArmourTab({
             setShowFieldPicker(false);
           }}
           onSelectCustomItem={(item) => addArmourFromLibrary(item, true)}
+          onCustom={() => {
+            setShowFieldPicker(false);
+            setCustomFormForceField(true);
+            setShowCustomForm(true);
+          }}
           onClose={() => setShowFieldPicker(false)}
         />
       )}

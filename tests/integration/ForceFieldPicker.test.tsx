@@ -49,18 +49,34 @@ function makeCustomItem(overrides: Partial<CampaignCustomItem<"armour">> = {}): 
 function renderPicker(props: Partial<React.ComponentProps<typeof ForceFieldPicker>> = {}) {
   const onSelect = vi.fn();
   const onSelectCustomItem = vi.fn();
+  const onCustom = vi.fn();
   const onClose = vi.fn();
   render(
     <ForceFieldPicker
       editable={true}
       onSelect={onSelect}
       onSelectCustomItem={onSelectCustomItem}
+      onCustom={onCustom}
       onClose={onClose}
       {...props}
     />
   );
-  return { onSelect, onSelectCustomItem, onClose };
+  return { onSelect, onSelectCustomItem, onCustom, onClose };
 }
+
+describe("ForceFieldPicker custom creation", () => {
+  it("calls onCustom when '+ Add custom field' is clicked", async () => {
+    const user = userEvent.setup();
+    const { onCustom } = renderPicker();
+    await user.click(screen.getByText("+ Add custom field"));
+    expect(onCustom).toHaveBeenCalled();
+  });
+
+  it("hides the custom-field button in read-only mode", () => {
+    renderPicker({ editable: false });
+    expect(screen.queryByText("+ Add custom field")).not.toBeInTheDocument();
+  });
+});
 
 describe("ForceFieldPicker list", () => {
   it("renders force fields from reference data", () => {

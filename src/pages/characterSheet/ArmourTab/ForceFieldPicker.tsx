@@ -22,6 +22,7 @@ interface Props {
   customItems?: CampaignCustomItem<"armour">[];
   onSelect: (ref: ArmourRef, craftsmanship: ArmourCraftsmanship) => void;
   onSelectCustomItem?: (item: CampaignCustomItem<"armour">) => void;
+  onCustom?: () => void;
   onClose: () => void;
 }
 
@@ -30,6 +31,7 @@ export function ForceFieldPicker({
   customItems = [],
   onSelect,
   onSelectCustomItem,
+  onCustom,
   onClose,
 }: Props) {
   const [query, setQuery] = useState("");
@@ -104,6 +106,16 @@ export function ForceFieldPicker({
       onQueryChange={setQuery}
       onClose={onClose}
       isEmpty={filtered.length === 0 && filteredCustom.length === 0}
+      footer={
+        editable ? (
+          <button
+            onClick={onCustom}
+            className="w-full text-sm lg:text-base text-red-500 hover:text-red-400 text-center py-1 lg:py-1.5"
+          >
+            + Add custom field
+          </button>
+        ) : undefined
+      }
     >
       {filteredCustom.map((item) => {
         const data = item.data;

@@ -25,7 +25,7 @@ export function SkillGroupRow({
   const toggle = useCallback(() => setExpanded((p) => !p), []);
 
   return (
-    <div className="rounded border border-slate-600 bg-slate-800/40 overflow-hidden">
+    <div className="rounded-lg border border-slate-500 bg-slate-900/60 overflow-hidden">
       <button
         onClick={toggle}
         aria-expanded={expanded}
