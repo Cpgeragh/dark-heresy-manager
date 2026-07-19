@@ -12,8 +12,8 @@ const FIELD_B = "Jokaerian Field";
 const WORN_ARMOUR = "Flak Jacket";
 
 function row(name: string): HTMLElement {
-  const match = screen.getByText(name).closest('[role="button"]');
-  if (!match) throw new Error(`No role="button" row found for: ${name}`);
+  const match = screen.getByText(name).closest("button");
+  if (!match) throw new Error(`No button row found for: ${name}`);
   return match as HTMLElement;
 }
 

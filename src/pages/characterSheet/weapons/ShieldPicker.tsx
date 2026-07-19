@@ -64,10 +64,10 @@ export function ShieldPicker({
         const data = item.data;
         if (data.armourKind !== "shield") return null;
         return (
-          <div
+          <button
             key={`custom-${item.id}`}
-            role="button"
-            tabIndex={editable ? 0 : -1}
+            type="button"
+            tabIndex={editable ? undefined : -1}
             onClick={editable && onSelectCustom ? () => onSelectCustom(item) : undefined}
             className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
           >
@@ -94,7 +94,7 @@ export function ShieldPicker({
                 <span className={uiTextLabel}>Qualities</span>
                 <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>{data.specialRules}</span>
                 <span className={uiInfoModalWrapper}>
-                  <InfoModal title={`${data.name} Qualities`} content={<SpecialRulesContent rules={data.specialRules} />} />
+                  <InfoModal title={`${data.name} Qualities`} content={<SpecialRulesContent rules={data.specialRules} />} as="span" />
                 </span>
               </div>
             )}
@@ -102,18 +102,18 @@ export function ShieldPicker({
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className={uiTextLabel}>Rules</span>
                 <span className={uiInfoModalWrapper}>
-                  <InfoModal title={data.name} content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{data.notes}</p>} />
+                  <InfoModal title={data.name} content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{data.notes}</p>} as="span" />
                 </span>
               </div>
             )}
-          </div>
+          </button>
         );
       })}
       {filtered.map((ref) => (
-        <div
+        <button
           key={ref.id}
-          role="button"
-          tabIndex={editable ? 0 : -1}
+          type="button"
+          tabIndex={editable ? undefined : -1}
           onClick={editable ? () => onSelect(ref) : undefined}
           className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
@@ -137,7 +137,7 @@ export function ShieldPicker({
               <span className={uiTextLabel}>Qualities</span>
               <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>{ref.specialRules}</span>
               <span className={uiInfoModalWrapper}>
-                <InfoModal title={`${ref.name} Qualities`} content={<SpecialRulesContent rules={ref.specialRules} />} />
+                <InfoModal title={`${ref.name} Qualities`} content={<SpecialRulesContent rules={ref.specialRules} />} as="span" />
               </span>
             </div>
           )}
@@ -145,11 +145,11 @@ export function ShieldPicker({
             <div className="flex items-center gap-1.5 mt-0.5">
               <span className={uiTextLabel}>Rules</span>
               <span className={uiInfoModalWrapper}>
-                <InfoModal title={ref.name} content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ref.notes}</p>} />
+                <InfoModal title={ref.name} content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ref.notes}</p>} as="span" />
               </span>
             </div>
           )}
-        </div>
+        </button>
       ))}
     </PickerModal>
   );

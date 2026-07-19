@@ -20,9 +20,9 @@ const MINE_NAME = "Empyrian Brain Mines";
 function row(name: string): HTMLElement {
   const match = screen
     .getAllByText(name)
-    .map((el) => el.closest('[role="button"]'))
+    .map((el) => el.closest("button"))
     .find((el): el is HTMLElement => el !== null);
-  if (!match) throw new Error(`No role="button" row found for: ${name}`);
+  if (!match) throw new Error(`No button row found for: ${name}`);
   return match;
 }
 

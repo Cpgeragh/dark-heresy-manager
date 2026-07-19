@@ -364,10 +364,10 @@ export function ImplantPicker({
       }
     >
       {filteredCustom.map((item) => (
-        <div
+        <button
           key={`custom-${item.id}`}
-          role="button"
-          tabIndex={editable ? 0 : -1}
+          type="button"
+          tabIndex={editable ? undefined : -1}
           onClick={editable && onSelectCustomItem ? () => onSelectCustomItem(item) : undefined}
           className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${
             editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"
@@ -383,6 +383,7 @@ export function ImplantPicker({
                 <InfoModal
                   title={item.name}
                   content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{item.data.notes}</p>}
+                  as="span"
                 />
               </span>
             )}
@@ -398,14 +399,14 @@ export function ImplantPicker({
               {item.data.craftsmanship}
             </Chip>
           </div>
-        </div>
+        </button>
       ))}
 
       {filtered.map((ref) => (
-        <div
+        <button
           key={ref.id}
-          role="button"
-          tabIndex={editable ? 0 : -1}
+          type="button"
+          tabIndex={editable ? undefined : -1}
           onClick={editable ? () => selectImplant(ref) : undefined}
           className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${
             editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"
@@ -417,7 +418,7 @@ export function ImplantPicker({
             </span>
             {(ref.notes || ref.poor || ref.common || ref.good) && (
               <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
-                <InfoModal title={ref.name} content={implantInfo(ref)} />
+                <InfoModal title={ref.name} content={implantInfo(ref)} as="span" />
               </span>
             )}
           </div>
@@ -432,7 +433,7 @@ export function ImplantPicker({
               <span className={uiTextGMNote}>Cost assigned on add</span>
             )}
           </div>
-        </div>
+        </button>
       ))}
     </PickerModal>
   );

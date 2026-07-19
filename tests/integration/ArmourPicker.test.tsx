@@ -12,8 +12,8 @@ const ARMOUR_B = "Carapace Helm";
 const FORCE_FIELD = "Refraction Bracer";
 
 function row(name: string): HTMLElement {
-  const match = screen.getByText(name).closest('[role="button"]');
-  if (!match) throw new Error(`No role="button" row found for: ${name}`);
+  const match = screen.getByText(name).closest("button");
+  if (!match) throw new Error(`No button row found for: ${name}`);
   return match as HTMLElement;
 }
 

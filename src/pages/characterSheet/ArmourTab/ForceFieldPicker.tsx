@@ -121,10 +121,10 @@ export function ForceFieldPicker({
         const data = item.data;
         if (data.armourKind !== "worn") return null;
         return (
-          <div
+          <button
             key={item.id}
-            role="button"
-            tabIndex={editable ? 0 : -1}
+            type="button"
+            tabIndex={editable ? undefined : -1}
             onClick={editable ? () => onSelectCustomItem?.(item) : undefined}
             className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
           >
@@ -141,14 +141,14 @@ export function ForceFieldPicker({
               <Chip size="sm" className={colourFuchsia}>Custom</Chip>
               <ItemMetaChips weight={data.weight} value={data.value} availability={data.availability} source={data.source} />
             </div>
-          </div>
+          </button>
         );
       })}
       {filtered.map((ref) => (
-        <div
+        <button
           key={ref.id}
-          role="button"
-          tabIndex={editable ? 0 : -1}
+          type="button"
+          tabIndex={editable ? undefined : -1}
           onClick={editable ? () => setSelected(ref) : undefined}
           className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
         >
@@ -161,7 +161,7 @@ export function ForceFieldPicker({
           <div className="flex flex-wrap gap-1.5 mt-1">
             <ItemMetaChips weight={ref.weight} value={ref.value} availability={ref.availability} source={ref.source} />
           </div>
-        </div>
+        </button>
       ))}
     </PickerModal>
   );
