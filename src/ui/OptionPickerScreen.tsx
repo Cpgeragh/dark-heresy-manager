@@ -3,6 +3,8 @@
 import { PickerModal } from "./PickerModal";
 import { uiItemName } from "./editableStyles";
 
+export type PickerOption = string | { value: string; label: string };
+
 export function OptionPickerScreen({
   title,
   options,
@@ -11,9 +13,9 @@ export function OptionPickerScreen({
   onClose,
 }: {
   title: string;
-  options: readonly string[];
+  options: readonly PickerOption[];
   selected?: string;
-  onSelect: (option: string) => void;
+  onSelect: (value: string) => void;
   onClose: () => void;
 }) {
   return (
@@ -26,18 +28,22 @@ export function OptionPickerScreen({
       isEmpty={false}
       hideSearch
     >
-      {options.map((option) => (
-        <button
-          key={option}
-          type="button"
-          onClick={() => onSelect(option)}
-          className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${
-            option === selected ? "bg-slate-800" : "hover:bg-slate-800"
-          }`}
-        >
-          <span className={`${uiItemName} group-hover:text-white`}>{option}</span>
-        </button>
-      ))}
+      {options.map((option) => {
+        const value = typeof option === "string" ? option : option.value;
+        const label = typeof option === "string" ? option : option.label;
+        return (
+          <button
+            key={value}
+            type="button"
+            onClick={() => onSelect(value)}
+            className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${
+              value === selected ? "bg-slate-800" : "hover:bg-slate-800"
+            }`}
+          >
+            <span className={`${uiItemName} group-hover:text-white`}>{label}</span>
+          </button>
+        );
+      })}
     </PickerModal>
   );
 }

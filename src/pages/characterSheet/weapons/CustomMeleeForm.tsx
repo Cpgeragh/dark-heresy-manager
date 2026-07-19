@@ -12,6 +12,7 @@ import {
 import { uiPickerBackButton } from "../../../ui/buttonStyles";
 import { Button } from "../../../ui/Button";
 import { PickerModal } from "../../../ui/PickerModal";
+import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import { sourceColour } from "../../../ui/sourceStyles";
@@ -92,6 +93,9 @@ export function CustomMeleeForm({
   );
   const [description, setDescription] = useState(initialWeapon?.description ?? "");
   const [saving, setSaving] = useState(false);
+  const [showClassPicker, setShowClassPicker] = useState(false);
+  const [showDamageTypePicker, setShowDamageTypePicker] = useState(false);
+  const [showAvailabilityPicker, setShowAvailabilityPicker] = useState(false);
 
   const canAdd =
     Boolean(name.trim()) &&
@@ -133,6 +137,49 @@ export function CustomMeleeForm({
       setSaving(false);
     }
   };
+
+  if (showClassPicker) {
+    return (
+      <OptionPickerScreen
+        title="Class"
+        options={CUSTOM_MELEE_CLASS_OPTIONS}
+        selected={weaponClass}
+        onSelect={(value) => {
+          setWeaponClass(value);
+          setShowClassPicker(false);
+        }}
+        onClose={() => setShowClassPicker(false)}
+      />
+    );
+  }
+  if (showDamageTypePicker) {
+    return (
+      <OptionPickerScreen
+        title="Damage Type"
+        options={DAMAGE_TYPE_OPTIONS}
+        selected={damageType}
+        onSelect={(value) => {
+          setDamageType(value as (typeof DAMAGE_TYPE_OPTIONS)[number]["value"]);
+          setShowDamageTypePicker(false);
+        }}
+        onClose={() => setShowDamageTypePicker(false)}
+      />
+    );
+  }
+  if (showAvailabilityPicker) {
+    return (
+      <OptionPickerScreen
+        title="Availability"
+        options={CUSTOM_AVAILABILITY_OPTIONS}
+        selected={availability}
+        onSelect={(value) => {
+          setAvailability(value);
+          setShowAvailabilityPicker(false);
+        }}
+        onClose={() => setShowAvailabilityPicker(false)}
+      />
+    );
+  }
 
   return (
     <PickerModal
@@ -182,18 +229,14 @@ export function CustomMeleeForm({
               <label className={uiFormLabel}>
                 Class <span className="text-red-500">*</span>
               </label>
-              <select
-                value={weaponClass}
-                onChange={(event) => setWeaponClass(event.target.value)}
-                className={editableInputClass(true) + " mt-0.5"}
+              <button
+                type="button"
+                onClick={() => setShowClassPicker(true)}
+                className={editableInputClass(true) + " mt-0.5 text-left flex items-center justify-between"}
               >
-                <option value="">Choose class</option>
-                {CUSTOM_MELEE_CLASS_OPTIONS.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
+                <span className={weaponClass ? "" : "text-slate-500"}>{weaponClass || "Choose class"}</span>
+                <span className="text-slate-500">›</span>
+              </button>
             </div>
           </div>
         </div>
@@ -269,19 +312,14 @@ export function CustomMeleeForm({
                   placeholder="Plus"
                   className={editableInputClass(true)}
                 />
-                <select
-                  value={damageType}
-                  onChange={(event) =>
-                    setDamageType(event.target.value as (typeof DAMAGE_TYPE_OPTIONS)[number]["value"])
-                  }
-                  className={editableInputClass(true)}
+                <button
+                  type="button"
+                  onClick={() => setShowDamageTypePicker(true)}
+                  className={editableInputClass(true) + " text-left flex items-center justify-between"}
                 >
-                  {DAMAGE_TYPE_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                  <span>{DAMAGE_TYPE_OPTIONS.find((o) => o.value === damageType)?.label ?? damageType}</span>
+                  <span className="text-slate-500">›</span>
+                </button>
               </div>
             </div>
 
@@ -332,10 +370,14 @@ export function CustomMeleeForm({
               <label className={uiFormLabel}>
                 Availability <span className="text-red-500">*</span>
               </label>
-              <select value={availability} onChange={(event) => setAvailability(event.target.value)} className={editableInputClass(true) + " mt-0.5"}>
-                <option value="">Choose availability</option>
-                {CUSTOM_AVAILABILITY_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
-              </select>
+              <button
+                type="button"
+                onClick={() => setShowAvailabilityPicker(true)}
+                className={editableInputClass(true) + " mt-0.5 text-left flex items-center justify-between"}
+              >
+                <span className={availability ? "" : "text-slate-500"}>{availability || "Choose availability"}</span>
+                <span className="text-slate-500">›</span>
+              </button>
             </div>
           </div>
         </div>

@@ -12,6 +12,7 @@ import {
 import { uiPickerBackButton } from "../../../ui/buttonStyles";
 import { Button } from "../../../ui/Button";
 import { PickerModal } from "../../../ui/PickerModal";
+import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
 import { sourceColour } from "../../../ui/sourceStyles";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
@@ -83,6 +84,8 @@ export function CustomShieldForm({
       : []
   );
   const [notes, setNotes] = useState(initialShield?.notes ?? "");
+  const [showDamageTypePicker, setShowDamageTypePicker] = useState(false);
+  const [showAvailabilityPicker, setShowAvailabilityPicker] = useState(false);
 
   const canAdd =
     Boolean(name.trim()) &&
@@ -117,6 +120,35 @@ export function CustomShieldForm({
       customLibraryVersionId: initialShield?.customLibraryVersionId,
     });
   };
+
+  if (showDamageTypePicker) {
+    return (
+      <OptionPickerScreen
+        title="Damage Type"
+        options={DAMAGE_TYPE_OPTIONS}
+        selected={damageType}
+        onSelect={(value) => {
+          setDamageType(value as (typeof DAMAGE_TYPE_OPTIONS)[number]["value"]);
+          setShowDamageTypePicker(false);
+        }}
+        onClose={() => setShowDamageTypePicker(false)}
+      />
+    );
+  }
+  if (showAvailabilityPicker) {
+    return (
+      <OptionPickerScreen
+        title="Availability"
+        options={CUSTOM_AVAILABILITY_OPTIONS}
+        selected={availability}
+        onSelect={(value) => {
+          setAvailability(value);
+          setShowAvailabilityPicker(false);
+        }}
+        onClose={() => setShowAvailabilityPicker(false)}
+      />
+    );
+  }
 
   return (
     <PickerModal
@@ -208,9 +240,14 @@ export function CustomShieldForm({
               <div className="grid grid-cols-3 gap-2 mt-0.5">
                 <input value={damageBase} onChange={(event) => setDamageBase(sanitizeDiceInput(event.target.value))} className={editableInputClass(true)} />
                 <input type="text" inputMode="numeric" value={damagePlus} onChange={(event) => setDamagePlus(sanitizeNonNegativeIntegerInput(event.target.value))} className={editableInputClass(true)} />
-                <select value={damageType} onChange={(event) => setDamageType(event.target.value as typeof damageType)} className={editableInputClass(true)}>
-                  {DAMAGE_TYPE_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-                </select>
+                <button
+                  type="button"
+                  onClick={() => setShowDamageTypePicker(true)}
+                  className={editableInputClass(true) + " text-left flex items-center justify-between"}
+                >
+                  <span>{DAMAGE_TYPE_OPTIONS.find((o) => o.value === damageType)?.label ?? damageType}</span>
+                  <span className="text-slate-500">›</span>
+                </button>
               </div>
             </div>
           </div>
@@ -235,10 +272,14 @@ export function CustomShieldForm({
               <label className={uiFormLabel}>
                 Availability <span className="text-red-500">*</span>
               </label>
-              <select value={availability} onChange={(event) => setAvailability(event.target.value)} className={editableInputClass(true) + " mt-0.5"}>
-                <option value="">Choose availability</option>
-                {CUSTOM_AVAILABILITY_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
-              </select>
+              <button
+                type="button"
+                onClick={() => setShowAvailabilityPicker(true)}
+                className={editableInputClass(true) + " mt-0.5 text-left flex items-center justify-between"}
+              >
+                <span className={availability ? "" : "text-slate-500"}>{availability || "Choose availability"}</span>
+                <span className="text-slate-500">›</span>
+              </button>
             </div>
           </div>
         </div>

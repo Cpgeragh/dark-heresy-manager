@@ -33,7 +33,6 @@ describe("CustomShieldForm", () => {
     const { onAdd } = renderForm();
 
     const textboxes = () => screen.getAllByRole("textbox");
-    const comboboxes = () => screen.getAllByRole("combobox");
 
     await user.type(textboxes()[0], "Custom Buckler"); // Name
     await user.type(textboxes()[1], "Arm"); // Locations
@@ -42,10 +41,12 @@ describe("CustomShieldForm", () => {
     // Pen (index 3) defaults to "0", already valid
     // Damage base (index 4) defaults to "1d10", already valid
     // Damage plus (index 5) defaults to "0", already valid
-    await user.selectOptions(comboboxes()[0], "R"); // Damage type
+    await user.click(screen.getByText("Impact")); // Damage type (defaults to Impact)
+    await user.click(screen.getByText("Rending"));
     await user.type(textboxes()[6], "2"); // Weight
     await user.type(textboxes()[7], "30"); // Cost
-    await user.selectOptions(comboboxes()[1], "Scarce"); // Availability
+    await user.click(screen.getByText("Choose availability")); // Availability
+    await user.click(screen.getByText("Scarce"));
 
     expect(submitButton()).toBeEnabled();
     await user.click(submitButton());
@@ -86,7 +87,7 @@ describe("CustomShieldForm", () => {
     // Damage base (index 4) and damage plus (index 5) reflect the parsed values.
     expect(textboxes[4]).toHaveValue("2d10");
     expect(textboxes[5]).toHaveValue("2");
-    expect(screen.getAllByRole("combobox")[0]).toHaveValue("E");
+    expect(screen.getByText("Energy")).toBeInTheDocument();
   });
 
   it("calls onCancel when Cancel is clicked", async () => {

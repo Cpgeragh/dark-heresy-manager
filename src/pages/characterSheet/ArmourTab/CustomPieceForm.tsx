@@ -4,6 +4,7 @@ import { editableInputClass, editableTextareaClass, uiSection, uiSectionHeader, 
 import { uiPickerBackButton } from "../../../ui/buttonStyles";
 import { Button } from "../../../ui/Button";
 import { PickerModal } from "../../../ui/PickerModal";
+import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import { sourceColour } from "../../../ui/sourceStyles";
@@ -60,6 +61,7 @@ export function CustomPieceForm({
     initialPiece?.protectionRating !== undefined ? String(initialPiece.protectionRating) : ""
   );
   const [saving, setSaving] = useState(false);
+  const [showAvailabilityPicker, setShowAvailabilityPicker] = useState(false);
 
   const canAdd =
     Boolean(name.trim()) &&
@@ -113,6 +115,21 @@ export function CustomPieceForm({
     } finally {
       setSaving(false);
     }
+  }
+
+  if (showAvailabilityPicker) {
+    return (
+      <OptionPickerScreen
+        title="Availability"
+        options={CUSTOM_AVAILABILITY_OPTIONS}
+        selected={availability}
+        onSelect={(value) => {
+          setAvailability(value);
+          setShowAvailabilityPicker(false);
+        }}
+        onClose={() => setShowAvailabilityPicker(false)}
+      />
+    );
   }
 
   return (
@@ -298,16 +315,14 @@ export function CustomPieceForm({
               <label className={uiFormLabel}>
                 Availability <span className="text-red-500">*</span>
               </label>
-              <select
-                value={availability}
-                onChange={(e) => setAvailability(e.target.value)}
-                className={editableInputClass(true) + " mt-0.5"}
+              <button
+                type="button"
+                onClick={() => setShowAvailabilityPicker(true)}
+                className={editableInputClass(true) + " mt-0.5 text-left flex items-center justify-between"}
               >
-                <option value="">Choose availability</option>
-                {CUSTOM_AVAILABILITY_OPTIONS.map((option) => (
-                  <option key={option} value={option}>{option}</option>
-                ))}
-              </select>
+                <span className={availability ? "" : "text-slate-500"}>{availability || "Choose availability"}</span>
+                <span className="text-slate-500">›</span>
+              </button>
             </div>
           </div>
         </div>

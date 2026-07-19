@@ -25,7 +25,8 @@ async function fillRequiredFields(user: ReturnType<typeof userEvent.setup>, forc
   }
   await user.type(textboxes()[2], "5"); // Weight
   await user.type(textboxes()[3], "80"); // Cost
-  await user.selectOptions(screen.getByRole("combobox"), "Average"); // Availability
+  await user.click(screen.getByText("Choose availability")); // Availability
+  await user.click(screen.getByText("Average"));
 }
 
 describe("CustomPieceForm validation", () => {
@@ -51,7 +52,8 @@ describe("CustomPieceForm validation", () => {
     await user.type(textboxes()[1], "3");
     await user.type(textboxes()[2], "5");
     await user.type(textboxes()[3], "80");
-    await user.selectOptions(screen.getByRole("combobox"), "Average");
+    await user.click(screen.getByText("Choose availability"));
+    await user.click(screen.getByText("Average"));
     expect(screen.getByRole("button", { name: "Add" })).toBeDisabled();
   });
 });

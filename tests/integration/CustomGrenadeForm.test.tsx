@@ -33,17 +33,18 @@ describe("CustomGrenadeForm", () => {
     const { onAdd } = renderForm();
 
     const textboxes = () => screen.getAllByRole("textbox");
-    const comboboxes = () => screen.getAllByRole("combobox");
 
     await user.type(textboxes()[0], "Custom Grenade"); // Name
-    await user.selectOptions(comboboxes()[0], "Grenade"); // Type
+    await user.click(screen.getByText("Choose type")); // Type
+    await user.click(screen.getByText("Grenade"));
     await user.type(textboxes()[1], "3"); // Quantity
     await user.click(screen.getByRole("button", { name: "Custom" })); // Origin
     // damageMode stays at its default "none"
     await user.type(textboxes()[2], "0"); // Pen
     await user.type(textboxes()[3], "0.5"); // Weight
     await user.type(textboxes()[4], "10"); // Cost
-    await user.selectOptions(comboboxes()[1], "Common"); // Availability
+    await user.click(screen.getByText("Choose availability")); // Availability
+    await user.click(screen.getByText("Common"));
 
     expect(submitButton()).toBeEnabled();
     await user.click(submitButton());
@@ -71,16 +72,17 @@ describe("CustomGrenadeForm", () => {
     const { onAdd } = renderForm();
 
     const textboxes = () => screen.getAllByRole("textbox");
-    const comboboxes = () => screen.getAllByRole("combobox");
 
     await user.type(textboxes()[0], "Custom Mine");
-    await user.selectOptions(comboboxes()[0], "Mine");
+    await user.click(screen.getByText("Choose type"));
+    await user.click(screen.getByText("Mine"));
     await user.type(textboxes()[1], "1");
     await user.click(screen.getByRole("button", { name: "Custom" }));
     await user.type(textboxes()[2], "0");
     await user.type(textboxes()[3], "1");
     await user.type(textboxes()[4], "50");
-    await user.selectOptions(comboboxes()[1], "Rare");
+    await user.click(screen.getByText("Choose availability"));
+    await user.click(screen.getByText("Rare"));
     await user.click(submitButton());
 
     expect(onAdd).toHaveBeenCalledWith(expect.objectContaining({ type: "Mine", class: "Mine" }));
@@ -91,17 +93,18 @@ describe("CustomGrenadeForm", () => {
     const { onAdd } = renderForm();
 
     const textboxes = () => screen.getAllByRole("textbox");
-    const comboboxes = () => screen.getAllByRole("combobox");
 
     await user.type(textboxes()[0], "Weird Device");
-    await user.selectOptions(comboboxes()[0], "Grenade");
+    await user.click(screen.getByText("Choose type"));
+    await user.click(screen.getByText("Grenade"));
     await user.type(textboxes()[1], "1");
     await user.click(screen.getByRole("button", { name: "Custom" }));
     await user.click(screen.getByRole("button", { name: "special" }));
     await user.type(textboxes()[2], "0");
     await user.type(textboxes()[3], "1");
     await user.type(textboxes()[4], "20");
-    await user.selectOptions(comboboxes()[1], "Rare");
+    await user.click(screen.getByText("Choose availability"));
+    await user.click(screen.getByText("Rare"));
     await user.click(submitButton());
 
     expect(onAdd).toHaveBeenCalledWith(expect.objectContaining({ damage: "Special" }));
@@ -112,7 +115,8 @@ describe("CustomGrenadeForm", () => {
     const { onAdd } = renderForm();
 
     await user.type(screen.getAllByRole("textbox")[0], "Timed Charge"); // Name
-    await user.selectOptions(screen.getAllByRole("combobox")[0], "Grenade"); // Type
+    await user.click(screen.getByText("Choose type")); // Type
+    await user.click(screen.getByText("Grenade"));
     await user.type(screen.getAllByRole("textbox")[1], "2"); // Quantity
     await user.click(screen.getByRole("button", { name: "Custom" })); // Origin
     await user.click(screen.getByRole("button", { name: "damage" })); // switch to numeric damage mode
@@ -125,11 +129,13 @@ describe("CustomGrenadeForm", () => {
     await user.type(screen.getAllByRole("textbox")[2], "2d10");
     await user.clear(screen.getAllByRole("textbox")[3]);
     await user.type(screen.getAllByRole("textbox")[3], "3");
-    await user.selectOptions(screen.getAllByRole("combobox")[1], "X"); // damage type
+    await user.click(screen.getByText("Explosive")); // damage type (already defaults to Explosive/X)
+    await user.click(screen.getByText("Explosive"));
     await user.type(screen.getAllByRole("textbox")[4], "2"); // Pen
     await user.type(screen.getAllByRole("textbox")[5], "0.5"); // Weight
     await user.type(screen.getAllByRole("textbox")[6], "15"); // Cost
-    await user.selectOptions(screen.getAllByRole("combobox")[2], "Common"); // Availability
+    await user.click(screen.getByText("Choose availability")); // Availability
+    await user.click(screen.getByText("Common"));
     await user.click(submitButton());
 
     expect(onAdd).toHaveBeenCalledWith(expect.objectContaining({ damage: "2d10+3 X" }));

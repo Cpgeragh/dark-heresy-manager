@@ -18,11 +18,6 @@ function textboxAt(index: number): HTMLElement {
   return screen.getAllByRole("textbox")[index];
 }
 
-// Selects in DOM order: Class(0), Damage type(1), Availability(2), Qualities(3).
-function comboboxAt(index: number): HTMLElement {
-  return screen.getAllByRole("combobox")[index];
-}
-
 // The submit button shares its default "Add" label with the Qualities selector's
 // own "Add" button, so it can't be located by accessible name alone.
 function submitButton(): HTMLElement {
@@ -43,13 +38,15 @@ describe("CustomMeleeForm", () => {
     const { onAdd } = renderForm();
 
     await user.type(textboxAt(0), "Custom Axe"); // Name
-    await user.selectOptions(comboboxAt(0), "Melee"); // Class
+    await user.click(screen.getByText("Choose class")); // Class
+    await user.click(screen.getByText("Melee"));
     await user.click(screen.getByRole("button", { name: "Good" })); // Craftsmanship
     await user.click(screen.getByRole("button", { name: "Custom" })); // Origin
     await user.type(textboxAt(3), "2"); // Pen
     await user.type(textboxAt(4), "3"); // Weight
     await user.type(textboxAt(5), "50"); // Cost
-    await user.selectOptions(comboboxAt(2), "Common"); // Availability
+    await user.click(screen.getByText("Choose availability")); // Availability
+    await user.click(screen.getByText("Common"));
 
     expect(submitButton()).toBeEnabled();
     await user.click(submitButton());
@@ -78,13 +75,15 @@ describe("CustomMeleeForm", () => {
     const { onAdd } = renderForm();
 
     await user.type(textboxAt(0), "Custom Knife");
-    await user.selectOptions(comboboxAt(0), "Melee / Thrown");
+    await user.click(screen.getByText("Choose class"));
+    await user.click(screen.getByText("Melee / Thrown"));
     await user.click(screen.getByRole("button", { name: "Common" }));
     await user.click(screen.getByRole("button", { name: "Custom" }));
     await user.type(textboxAt(3), "0");
     await user.type(textboxAt(4), "0.5");
     await user.type(textboxAt(5), "10");
-    await user.selectOptions(comboboxAt(2), "Common");
+    await user.click(screen.getByText("Choose availability"));
+    await user.click(screen.getByText("Common"));
     await user.click(submitButton());
 
     expect(onAdd).toHaveBeenCalledWith(expect.objectContaining({ quantity: 1 }));

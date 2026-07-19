@@ -12,6 +12,7 @@ import {
 import { uiPickerBackButton } from "../../../ui/buttonStyles";
 import { Button } from "../../../ui/Button";
 import { PickerModal } from "../../../ui/PickerModal";
+import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import { sourceColour } from "../../../ui/sourceStyles";
@@ -138,6 +139,12 @@ export function CustomRangedForm({
   );
   const [description, setDescription] = useState(initialWeapon?.description ?? "");
   const [saving, setSaving] = useState(false);
+  const [showClassPicker, setShowClassPicker] = useState(false);
+  const [showAmmoFamilyPicker, setShowAmmoFamilyPicker] = useState(false);
+  const [showDamageTypePicker, setShowDamageTypePicker] = useState(false);
+  const [showReloadTypePicker, setShowReloadTypePicker] = useState(false);
+  const [showAmmoTrackingPicker, setShowAmmoTrackingPicker] = useState(false);
+  const [showAvailabilityPicker, setShowAvailabilityPicker] = useState(false);
 
   const rof = `${singleShot ? "S" : "–"}/${semiAuto || "–"}/${fullAuto || "–"}`;
   const rld =
@@ -199,6 +206,97 @@ export function CustomRangedForm({
     }
   };
 
+  if (showClassPicker) {
+    return (
+      <OptionPickerScreen
+        title="Class"
+        options={CUSTOM_RANGED_CLASS_OPTIONS}
+        selected={weaponClass}
+        onSelect={(value) => {
+          setWeaponClass(value);
+          setShowClassPicker(false);
+        }}
+        onClose={() => setShowClassPicker(false)}
+      />
+    );
+  }
+  if (showAmmoFamilyPicker) {
+    return (
+      <OptionPickerScreen
+        title="Ammo Family"
+        options={CUSTOM_AMMO_FAMILY_OPTIONS.map((option) => ({ value: option.ammoType, label: option.label }))}
+        selected={ammoType}
+        onSelect={(value) => {
+          setAmmoType(value);
+          setShowAmmoFamilyPicker(false);
+        }}
+        onClose={() => setShowAmmoFamilyPicker(false)}
+      />
+    );
+  }
+  if (showDamageTypePicker) {
+    return (
+      <OptionPickerScreen
+        title="Damage Type"
+        options={DAMAGE_TYPE_OPTIONS}
+        selected={damageType}
+        onSelect={(value) => {
+          setDamageType(value as (typeof DAMAGE_TYPE_OPTIONS)[number]["value"]);
+          setShowDamageTypePicker(false);
+        }}
+        onClose={() => setShowDamageTypePicker(false)}
+      />
+    );
+  }
+  if (showReloadTypePicker) {
+    return (
+      <OptionPickerScreen
+        title="Reload"
+        options={RELOAD_TYPE_OPTIONS}
+        selected={reloadType}
+        onSelect={(value) => {
+          setReloadType(value);
+          if (value === "Special" || value === "—") {
+            setReloadAmount("");
+          }
+          setShowReloadTypePicker(false);
+        }}
+        onClose={() => setShowReloadTypePicker(false)}
+      />
+    );
+  }
+  if (showAmmoTrackingPicker) {
+    return (
+      <OptionPickerScreen
+        title="Ammo Tracking"
+        options={[
+          { value: "clip", label: "Clips + rounds" },
+          { value: "loose", label: "Rounds only" },
+        ]}
+        selected={ammoTracking}
+        onSelect={(value) => {
+          setAmmoTracking(value as AmmoTrackingMode);
+          setShowAmmoTrackingPicker(false);
+        }}
+        onClose={() => setShowAmmoTrackingPicker(false)}
+      />
+    );
+  }
+  if (showAvailabilityPicker) {
+    return (
+      <OptionPickerScreen
+        title="Availability"
+        options={CUSTOM_AVAILABILITY_OPTIONS}
+        selected={availability}
+        onSelect={(value) => {
+          setAvailability(value);
+          setShowAvailabilityPicker(false);
+        }}
+        onClose={() => setShowAvailabilityPicker(false)}
+      />
+    );
+  }
+
   return (
     <PickerModal
       title={title}
@@ -247,18 +345,14 @@ export function CustomRangedForm({
               <label className={uiFormLabel}>
                 Class <span className="text-red-500">*</span>
               </label>
-              <select
-                value={weaponClass}
-                onChange={(event) => setWeaponClass(event.target.value)}
-                className={editableInputClass(true) + " mt-0.5"}
+              <button
+                type="button"
+                onClick={() => setShowClassPicker(true)}
+                className={editableInputClass(true) + " mt-0.5 text-left flex items-center justify-between"}
               >
-                <option value="">Choose class</option>
-                {CUSTOM_RANGED_CLASS_OPTIONS.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
+                <span className={weaponClass ? "" : "text-slate-500"}>{weaponClass || "Choose class"}</span>
+                <span className="text-slate-500">›</span>
+              </button>
             </div>
           </div>
         </div>
@@ -331,18 +425,16 @@ export function CustomRangedForm({
               <label className={uiFormLabel}>
                 Ammo Family <span className="text-red-500">*</span>
               </label>
-              <select
-                value={ammoType}
-                onChange={(event) => setAmmoType(event.target.value)}
-                className={editableInputClass(true) + " mt-0.5"}
+              <button
+                type="button"
+                onClick={() => setShowAmmoFamilyPicker(true)}
+                className={editableInputClass(true) + " mt-0.5 text-left flex items-center justify-between"}
               >
-                <option value="">Choose ammo family</option>
-                {CUSTOM_AMMO_FAMILY_OPTIONS.map((option) => (
-                  <option key={option.ammoType} value={option.ammoType}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+                <span className={ammoType ? "" : "text-slate-500"}>
+                  {CUSTOM_AMMO_FAMILY_OPTIONS.find((o) => o.ammoType === ammoType)?.label ?? "Choose ammo family"}
+                </span>
+                <span className="text-slate-500">›</span>
+              </button>
             </div>
 
             <div className="col-span-2">
@@ -402,19 +494,14 @@ export function CustomRangedForm({
                   placeholder="Plus"
                   className={editableInputClass(true)}
                 />
-                <select
-                  value={damageType}
-                  onChange={(event) =>
-                    setDamageType(event.target.value as (typeof DAMAGE_TYPE_OPTIONS)[number]["value"])
-                  }
-                  className={editableInputClass(true)}
+                <button
+                  type="button"
+                  onClick={() => setShowDamageTypePicker(true)}
+                  className={editableInputClass(true) + " text-left flex items-center justify-between"}
                 >
-                  {DAMAGE_TYPE_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                  <span>{DAMAGE_TYPE_OPTIONS.find((o) => o.value === damageType)?.label ?? damageType}</span>
+                  <span className="text-slate-500">›</span>
+                </button>
               </div>
             </div>
 
@@ -458,23 +545,14 @@ export function CustomRangedForm({
                   disabled={reloadType === "Special" || reloadType === "—"}
                   className={editableInputClass(reloadType !== "Special" && reloadType !== "—")}
                 />
-                <select
-                  value={reloadType}
-                  onChange={(event) => {
-                    setReloadType(event.target.value);
-                    if (event.target.value === "Special" || event.target.value === "—") {
-                      setReloadAmount("");
-                    }
-                  }}
-                  className={editableInputClass(true)}
+                <button
+                  type="button"
+                  onClick={() => setShowReloadTypePicker(true)}
+                  className={editableInputClass(true) + " text-left flex items-center justify-between"}
                 >
-                  <option value="">Choose reload</option>
-                  {RELOAD_TYPE_OPTIONS.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
+                  <span className={reloadType ? "" : "text-slate-500"}>{reloadType || "Choose reload"}</span>
+                  <span className="text-slate-500">›</span>
+                </button>
               </div>
             </div>
 
@@ -482,15 +560,16 @@ export function CustomRangedForm({
               <label className={uiFormLabel}>
                 Ammo Tracking <span className="text-red-500">*</span>
               </label>
-              <select
-                value={ammoTracking}
-                onChange={(event) => setAmmoTracking(event.target.value as "" | AmmoTrackingMode)}
-                className={editableInputClass(true) + " mt-0.5"}
+              <button
+                type="button"
+                onClick={() => setShowAmmoTrackingPicker(true)}
+                className={editableInputClass(true) + " mt-0.5 text-left flex items-center justify-between"}
               >
-                <option value="">Choose tracking</option>
-                <option value="clip">Clips + rounds</option>
-                <option value="loose">Rounds only</option>
-              </select>
+                <span className={ammoTracking ? "" : "text-slate-500"}>
+                  {ammoTracking === "clip" ? "Clips + rounds" : ammoTracking === "loose" ? "Rounds only" : "Choose tracking"}
+                </span>
+                <span className="text-slate-500">›</span>
+              </button>
             </div>
           </div>
         </div>
@@ -527,10 +606,14 @@ export function CustomRangedForm({
               <label className={uiFormLabel}>
                 Availability <span className="text-red-500">*</span>
               </label>
-              <select value={availability} onChange={(event) => setAvailability(event.target.value)} className={editableInputClass(true) + " mt-0.5"}>
-                <option value="">Choose availability</option>
-                {CUSTOM_AVAILABILITY_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
-              </select>
+              <button
+                type="button"
+                onClick={() => setShowAvailabilityPicker(true)}
+                className={editableInputClass(true) + " mt-0.5 text-left flex items-center justify-between"}
+              >
+                <span className={availability ? "" : "text-slate-500"}>{availability || "Choose availability"}</span>
+                <span className="text-slate-500">›</span>
+              </button>
             </div>
           </div>
         </div>
