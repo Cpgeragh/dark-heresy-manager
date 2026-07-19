@@ -1,0 +1,54 @@
+// tests/integration/OptionPickerScreen.test.tsx
+import { describe, it, expect, vi } from "vitest";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import "@testing-library/jest-dom";
+
+import { OptionPickerScreen } from "../../src/ui/OptionPickerScreen";
+
+const OPTIONS = ["Common", "Rare", "Very Rare"] as const;
+
+function setup(selected?: string) {
+  const onSelect = vi.fn();
+  const onClose = vi.fn();
+  render(
+    <OptionPickerScreen
+      title="Availability"
+      options={OPTIONS}
+      selected={selected}
+      onSelect={onSelect}
+      onClose={onClose}
+    />
+  );
+  return { onSelect, onClose };
+}
+
+describe("OptionPickerScreen", () => {
+  it("renders the title and every option", () => {
+    setup();
+    expect(screen.getByText("Availability")).toBeInTheDocument();
+    for (const option of OPTIONS) {
+      expect(screen.getByText(option)).toBeInTheDocument();
+    }
+  });
+
+  it("calls onSelect with the clicked option", async () => {
+    const user = userEvent.setup();
+    const { onSelect } = setup();
+    await user.click(screen.getByText("Rare"));
+    expect(onSelect).toHaveBeenCalledWith("Rare");
+  });
+
+  it("calls onClose when the back button is clicked", async () => {
+    const user = userEvent.setup();
+    const { onClose } = setup();
+    await user.click(screen.getByRole("button", { name: "Close" }));
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("highlights the currently selected option", () => {
+    setup("Rare");
+    const rareButton = screen.getByText("Rare").closest("button")!;
+    expect(rareButton.className).toContain("bg-slate-800");
+  });
+});
