@@ -26,6 +26,7 @@ import { TALENT_DESCRIPTIONS } from "../../data/talentDescriptions";
 import { TRAIT_DESCRIPTIONS } from "../../data/traitDescriptions";
 import { sourceColour } from "../../ui/sourceStyles";
 import { PickerModal } from "../../ui/PickerModal";
+import { OptionPickerScreen } from "../../ui/OptionPickerScreen";
 import { TrashIcon } from "../../ui/TrashIcon";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -56,6 +57,7 @@ export function TalentPickerModal({
   const [query, setQuery] = useState("");
   const [picked, setPicked] = useState<AnyListItem | null>(null);
   const [specialisation, setSpecialisation] = useState("");
+  const [showSpecialisationPicker, setShowSpecialisationPicker] = useState(false);
   const modalTitle = editable ? title : title.replace(/^Add\b/, "View");
 
   const filtered = useMemo(() => {
@@ -121,18 +123,16 @@ export function TalentPickerModal({
         </p>
 
         {specialisationOptions ? (
-          <select
-            value={specialisation}
-            onChange={(e) => setSpecialisation(e.target.value)}
-            className={editableInputClass(true)}
+          <button
+            type="button"
+            onClick={() => setShowSpecialisationPicker(true)}
+            className={editableInputClass(true) + " text-left flex items-center justify-between"}
           >
-            <option value="">{talentData.specialisationLabel ?? "Specialisation"}…</option>
-            {specialisationOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
+            <span className={specialisation ? "" : "text-slate-500"}>
+              {specialisation || `${talentData.specialisationLabel ?? "Specialisation"}…`}
+            </span>
+            <span className="text-slate-500">›</span>
+          </button>
         ) : isNumeric ? (
           <>
             <input
@@ -172,6 +172,21 @@ export function TalentPickerModal({
         </Button>
       </div>
     ) : undefined;
+
+  if (showSpecialisationPicker && talentData?.specialisationOptions) {
+    return (
+      <OptionPickerScreen
+        title={talentData.specialisationLabel ?? "Specialisation"}
+        options={talentData.specialisationOptions}
+        selected={specialisation}
+        onSelect={(value) => {
+          setSpecialisation(value);
+          setShowSpecialisationPicker(false);
+        }}
+        onClose={() => setShowSpecialisationPicker(false)}
+      />
+    );
+  }
 
   return (
     <PickerModal

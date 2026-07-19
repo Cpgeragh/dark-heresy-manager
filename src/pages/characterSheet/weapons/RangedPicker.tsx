@@ -19,6 +19,7 @@ import { Button } from "../../../ui/Button";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
+import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
 import { InfoModal } from "../../../components/InfoModal";
 import { StatChip, DamageTypeChip, SpecialRulesContent } from "./weaponShared";
 import {
@@ -57,6 +58,8 @@ export function RangedPicker({
   const [craftsmanship, setCraftsmanship] = useState<WeaponCraftsmanship>("Common");
   const [classFilter, setClassFilter] = useState<string | null>(null);
   const [familyFilter, setFamilyFilter] = useState<string | null>(null);
+  const [showClassFilterPicker, setShowClassFilterPicker] = useState(false);
+  const [showFamilyFilterPicker, setShowFamilyFilterPicker] = useState(false);
   const normalisedQuery = query.toLowerCase();
   const families = Array.from(
     new Map(
@@ -88,6 +91,35 @@ export function RangedPicker({
   function resetPicker() {
     setSelected(null);
     setCraftsmanship("Common");
+  }
+
+  if (showClassFilterPicker) {
+    return (
+      <OptionPickerScreen
+        title="Class"
+        options={["All Classes", "Pistol", "Basic", "Heavy", "Thrown", "Exotic"]}
+        selected={classFilter ?? "All Classes"}
+        onSelect={(value) => {
+          setClassFilter(value === "All Classes" ? null : value);
+          setShowClassFilterPicker(false);
+        }}
+        onClose={() => setShowClassFilterPicker(false)}
+      />
+    );
+  }
+  if (showFamilyFilterPicker) {
+    return (
+      <OptionPickerScreen
+        title="Ammo Type"
+        options={["All Types", ...families.map((f) => f.label)]}
+        selected={familyFilter ?? "All Types"}
+        onSelect={(value) => {
+          setFamilyFilter(value === "All Types" ? null : value);
+          setShowFamilyFilterPicker(false);
+        }}
+        onClose={() => setShowFamilyFilterPicker(false)}
+      />
+    );
   }
 
   if (selected) {
@@ -145,26 +177,22 @@ export function RangedPicker({
       isEmpty={filtered.length === 0 && filteredCustom.length === 0}
       filterRow={
         <div className="flex gap-2 w-full">
-          <select
-            value={classFilter ?? ""}
-            onChange={(e) => setClassFilter(e.target.value || null)}
-            className="flex-1 rounded border border-slate-500 bg-slate-900 px-2 py-1 text-xs lg:text-sm text-slate-200 focus:outline-none focus:border-red-500"
+          <button
+            type="button"
+            onClick={() => setShowClassFilterPicker(true)}
+            className="flex-1 rounded border border-slate-500 bg-slate-900 px-2 py-1 text-xs lg:text-sm text-slate-200 text-left flex items-center justify-between"
           >
-            <option value="">All Classes</option>
-            {(["Pistol", "Basic", "Heavy", "Thrown", "Exotic"] as const).map((cls) => (
-              <option key={cls} value={cls}>{cls}</option>
-            ))}
-          </select>
-          <select
-            value={familyFilter ?? ""}
-            onChange={(e) => setFamilyFilter(e.target.value || null)}
-            className="flex-1 rounded border border-slate-500 bg-slate-900 px-2 py-1 text-xs lg:text-sm text-slate-200 focus:outline-none focus:border-red-500"
+            <span>{classFilter ?? "All Classes"}</span>
+            <span className="text-slate-500">›</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowFamilyFilterPicker(true)}
+            className="flex-1 rounded border border-slate-500 bg-slate-900 px-2 py-1 text-xs lg:text-sm text-slate-200 text-left flex items-center justify-between"
           >
-            <option value="">All Types</option>
-            {families.map((f) => (
-              <option key={f.label} value={f.label}>{f.label}</option>
-            ))}
-          </select>
+            <span>{familyFilter ?? "All Types"}</span>
+            <span className="text-slate-500">›</span>
+          </button>
         </div>
       }
       footer={

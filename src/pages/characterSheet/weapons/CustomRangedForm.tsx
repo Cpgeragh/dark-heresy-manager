@@ -20,6 +20,7 @@ import {
   DAMAGE_TYPE_OPTIONS,
   CUSTOM_AVAILABILITY_OPTIONS,
   WeaponQualitySelector,
+  useWeaponQualityPicker,
   formatDamageInput,
   isValidDiceInput,
   sanitizeDiceInput,
@@ -145,6 +146,7 @@ export function CustomRangedForm({
   const [showReloadTypePicker, setShowReloadTypePicker] = useState(false);
   const [showAmmoTrackingPicker, setShowAmmoTrackingPicker] = useState(false);
   const [showAvailabilityPicker, setShowAvailabilityPicker] = useState(false);
+  const qualityPicker = useWeaponQualityPicker(selectedQualities, setSelectedQualities);
 
   const rof = `${singleShot ? "S" : "–"}/${semiAuto || "–"}/${fullAuto || "–"}`;
   const rld =
@@ -206,6 +208,16 @@ export function CustomRangedForm({
     }
   };
 
+  if (qualityPicker.showPicker) {
+    return (
+      <OptionPickerScreen
+        title="Add Quality"
+        options={qualityPicker.available}
+        onSelect={qualityPicker.pickQuality}
+        onClose={qualityPicker.closePicker}
+      />
+    );
+  }
   if (showClassPicker) {
     return (
       <OptionPickerScreen
@@ -621,7 +633,17 @@ export function CustomRangedForm({
         <p className={uiSectionHeader}>Rules and Qualities</p>
         <div className={uiSection + " space-y-3"}>
           <div className="grid grid-cols-2 gap-2">
-            <WeaponQualitySelector selected={selectedQualities} onChange={setSelectedQualities} />
+            <WeaponQualitySelector
+              selected={selectedQualities}
+              pendingQuality={qualityPicker.pendingQuality}
+              needsParameter={qualityPicker.needsParameter}
+              parameterValue={qualityPicker.parameterValue}
+              canConfirm={qualityPicker.canConfirm}
+              onParameterValueChange={qualityPicker.setParameterValue}
+              onOpenPicker={qualityPicker.openPicker}
+              onConfirmPending={qualityPicker.confirmPending}
+              onRemove={(q) => setSelectedQualities(selectedQualities.filter((s) => s !== q))}
+            />
 
             <div className="col-span-2">
               <label className={uiFormLabel}>

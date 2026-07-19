@@ -20,6 +20,7 @@ import {
   DAMAGE_TYPE_OPTIONS,
   CUSTOM_AVAILABILITY_OPTIONS,
   WeaponQualitySelector,
+  useWeaponQualityPicker,
   formatDamageInput,
   isValidDiceInput,
   sanitizeDiceInput,
@@ -96,6 +97,7 @@ export function CustomMeleeForm({
   const [showClassPicker, setShowClassPicker] = useState(false);
   const [showDamageTypePicker, setShowDamageTypePicker] = useState(false);
   const [showAvailabilityPicker, setShowAvailabilityPicker] = useState(false);
+  const qualityPicker = useWeaponQualityPicker(selectedQualities, setSelectedQualities);
 
   const canAdd =
     Boolean(name.trim()) &&
@@ -138,6 +140,16 @@ export function CustomMeleeForm({
     }
   };
 
+  if (qualityPicker.showPicker) {
+    return (
+      <OptionPickerScreen
+        title="Add Quality"
+        options={qualityPicker.available}
+        onSelect={qualityPicker.pickQuality}
+        onClose={qualityPicker.closePicker}
+      />
+    );
+  }
   if (showClassPicker) {
     return (
       <OptionPickerScreen
@@ -385,7 +397,17 @@ export function CustomMeleeForm({
         <p className={uiSectionHeader}>Rules and Qualities</p>
         <div className={uiSection + " space-y-3"}>
           <div className="grid grid-cols-2 gap-2">
-            <WeaponQualitySelector selected={selectedQualities} onChange={setSelectedQualities} />
+            <WeaponQualitySelector
+              selected={selectedQualities}
+              pendingQuality={qualityPicker.pendingQuality}
+              needsParameter={qualityPicker.needsParameter}
+              parameterValue={qualityPicker.parameterValue}
+              canConfirm={qualityPicker.canConfirm}
+              onParameterValueChange={qualityPicker.setParameterValue}
+              onOpenPicker={qualityPicker.openPicker}
+              onConfirmPending={qualityPicker.confirmPending}
+              onRemove={(q) => setSelectedQualities(selectedQualities.filter((s) => s !== q))}
+            />
 
             <div className="col-span-2">
               <label className={uiFormLabel}>

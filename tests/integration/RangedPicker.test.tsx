@@ -133,8 +133,8 @@ describe("RangedPicker", () => {
   it("filters the list by weapon class", async () => {
     const user = userEvent.setup();
     renderPicker();
-    const [classSelect] = screen.getAllByRole("combobox");
-    await user.selectOptions(classSelect, "Pistol");
+    await user.click(screen.getByText("All Classes"));
+    await user.click(screen.getByText("Pistol"));
     expect(screen.getByText("Autopistol")).toBeInTheDocument();
     expect(screen.queryByText("Lasgun")).not.toBeInTheDocument();
     expect(screen.queryByText("Heavy Bolter")).not.toBeInTheDocument();
@@ -143,8 +143,8 @@ describe("RangedPicker", () => {
   it("filters the list by ammo family", async () => {
     const user = userEvent.setup();
     renderPicker();
-    const [, familySelect] = screen.getAllByRole("combobox");
-    await user.selectOptions(familySelect, "Bolt");
+    await user.click(screen.getByText("All Types"));
+    await user.click(screen.getByText("Bolt"));
     expect(screen.getByText("Heavy Bolter")).toBeInTheDocument();
     expect(screen.queryByText("Lasgun")).not.toBeInTheDocument();
     expect(screen.queryByText("Autopistol")).not.toBeInTheDocument();

@@ -71,9 +71,11 @@ describe("CustomShieldForm", () => {
   it("adds and removes a quality via the Qualities selector", async () => {
     const user = userEvent.setup();
     renderForm();
+    await user.click(screen.getByText("Choose quality…"));
+    await user.click(screen.getByText("Accurate"));
     const addButtons = screen.getAllByRole("button", { name: "Add" });
     const qualityAddButton = addButtons.find((b) => b !== submitButton())!;
-    await user.click(qualityAddButton); // adds "Accurate", the first available option
+    await user.click(qualityAddButton);
     expect(screen.getByText("Accurate")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Remove Accurate" }));
     // Removing returns it to the dropdown's available options, so the text

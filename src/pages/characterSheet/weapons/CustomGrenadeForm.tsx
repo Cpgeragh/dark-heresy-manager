@@ -18,6 +18,7 @@ import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import {
   WeaponQualitySelector,
+  useWeaponQualityPicker,
   DAMAGE_TYPE_OPTIONS,
   CUSTOM_AVAILABILITY_OPTIONS,
   formatDamageInput,
@@ -107,6 +108,7 @@ export function CustomGrenadeForm({
   const [showTypePicker, setShowTypePicker] = useState(false);
   const [showDamageTypePicker, setShowDamageTypePicker] = useState(false);
   const [showAvailabilityPicker, setShowAvailabilityPicker] = useState(false);
+  const qualityPicker = useWeaponQualityPicker(selectedQualities, setSelectedQualities);
 
   const damage =
     damageMode === "none"
@@ -149,6 +151,16 @@ export function CustomGrenadeForm({
     });
   };
 
+  if (qualityPicker.showPicker) {
+    return (
+      <OptionPickerScreen
+        title="Add Quality"
+        options={qualityPicker.available}
+        onSelect={qualityPicker.pickQuality}
+        onClose={qualityPicker.closePicker}
+      />
+    );
+  }
   if (showTypePicker) {
     return (
       <OptionPickerScreen
@@ -352,7 +364,17 @@ export function CustomGrenadeForm({
         <p className={uiSectionHeader}>Rules and Qualities</p>
         <div className={uiSection + " space-y-3"}>
           <div className="grid grid-cols-2 gap-2">
-            <WeaponQualitySelector selected={selectedQualities} onChange={setSelectedQualities} />
+            <WeaponQualitySelector
+              selected={selectedQualities}
+              pendingQuality={qualityPicker.pendingQuality}
+              needsParameter={qualityPicker.needsParameter}
+              parameterValue={qualityPicker.parameterValue}
+              canConfirm={qualityPicker.canConfirm}
+              onParameterValueChange={qualityPicker.setParameterValue}
+              onOpenPicker={qualityPicker.openPicker}
+              onConfirmPending={qualityPicker.confirmPending}
+              onRemove={(q) => setSelectedQualities(selectedQualities.filter((s) => s !== q))}
+            />
             <div className="col-span-2">
               <label className={uiFormLabel}>
                 Rules

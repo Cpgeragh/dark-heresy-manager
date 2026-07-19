@@ -78,14 +78,9 @@ export function formatDamageInput(baseDice: string, plusValue: string, type: str
   return `${baseDice}${plusPart} ${type}`.trim();
 }
 
-export function WeaponQualitySelector({
-  selected,
-  onChange,
-}: {
-  selected: string[];
-  onChange: (next: string[]) => void;
-}) {
-  const [pending, setPending] = useState("");
+export function useWeaponQualityPicker(selected: string[], onChange: (next: string[]) => void) {
+  const [showPicker, setShowPicker] = useState(false);
+  const [pendingQuality, setPendingQuality] = useState<string | null>(null);
   const [parameterValue, setParameterValue] = useState("");
   const available = useMemo(
     () => {
@@ -94,36 +89,75 @@ export function WeaponQualitySelector({
     },
     [selected]
   );
-  const pendingQuality = pending && available.includes(pending) ? pending : available[0] ?? "";
-  const needsParameter = PARAMETERIZED_WEAPON_QUALITIES.has(pendingQuality);
-  const canAdd = Boolean(pendingQuality && (!needsParameter || parameterValue));
+  const needsParameter = pendingQuality ? PARAMETERIZED_WEAPON_QUALITIES.has(pendingQuality) : false;
+  const canConfirm = Boolean(pendingQuality) && (!needsParameter || parameterValue !== "");
 
+  return {
+    showPicker,
+    available,
+    pendingQuality,
+    needsParameter,
+    parameterValue,
+    canConfirm,
+    setParameterValue,
+    openPicker: () => setShowPicker(true),
+    closePicker: () => setShowPicker(false),
+    pickQuality: (quality: string) => {
+      setPendingQuality(quality);
+      setParameterValue("");
+      setShowPicker(false);
+    },
+    confirmPending: () => {
+      if (!pendingQuality || !canConfirm) return;
+      const nextQuality = needsParameter ? `${pendingQuality} (${parameterValue})` : pendingQuality;
+      onChange([...selected, nextQuality]);
+      setPendingQuality(null);
+      setParameterValue("");
+    },
+  };
+}
+
+export function WeaponQualitySelector({
+  selected,
+  pendingQuality,
+  needsParameter,
+  parameterValue,
+  canConfirm,
+  onParameterValueChange,
+  onOpenPicker,
+  onConfirmPending,
+  onRemove,
+}: {
+  selected: string[];
+  pendingQuality: string | null;
+  needsParameter: boolean;
+  parameterValue: string;
+  canConfirm: boolean;
+  onParameterValueChange: (value: string) => void;
+  onOpenPicker: () => void;
+  onConfirmPending: () => void;
+  onRemove: (quality: string) => void;
+}) {
   return (
     <div className="col-span-2 space-y-2">
       <label className={uiFormLabel}>
         Qualities
       </label>
       <div className="flex gap-2">
-        <select
-          value={pendingQuality}
-          onChange={(event) => {
-            setPending(event.target.value);
-            setParameterValue("");
-          }}
-          className="w-full rounded border border-slate-500 bg-slate-900 px-2 py-1 text-sm lg:text-base text-slate-200 focus:outline-none focus:border-red-500"
+        <button
+          type="button"
+          onClick={onOpenPicker}
+          className="w-full rounded border border-slate-500 bg-slate-900 px-2 py-1 text-sm lg:text-base text-slate-200 text-left flex items-center justify-between"
         >
-          {available.map((quality) => (
-            <option key={quality} value={quality}>
-              {quality}
-            </option>
-          ))}
-        </select>
+          <span className={pendingQuality ? "" : "text-slate-500"}>{pendingQuality ?? "Choose quality…"}</span>
+          <span className="text-slate-500">›</span>
+        </button>
         {needsParameter && (
           <input
             type="text"
             inputMode="numeric"
             value={parameterValue}
-            onChange={(event) => setParameterValue(sanitizePositiveIntegerInput(event.target.value))}
+            onChange={(event) => onParameterValueChange(sanitizePositiveIntegerInput(event.target.value))}
             aria-label={`${pendingQuality} value`}
             placeholder="Value"
             className="w-20 rounded border border-slate-500 bg-slate-900 px-2 py-1 text-sm lg:text-base text-slate-200 focus:outline-none focus:border-red-500"
@@ -131,16 +165,8 @@ export function WeaponQualitySelector({
         )}
         <button
           type="button"
-          onClick={() => {
-            if (!canAdd) return;
-            const nextQuality = needsParameter
-              ? `${pendingQuality} (${parameterValue})`
-              : pendingQuality;
-            onChange([...selected, nextQuality]);
-            setPending("");
-            setParameterValue("");
-          }}
-          disabled={!canAdd}
+          onClick={onConfirmPending}
+          disabled={!canConfirm}
           className="px-3 lg:px-4 py-1 rounded border border-slate-500 bg-slate-800 text-sm lg:text-base text-slate-100 transition hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Add
@@ -153,7 +179,7 @@ export function WeaponQualitySelector({
               {quality}
               <button
                 type="button"
-                onClick={() => onChange(selected.filter((item) => item !== quality))}
+                onClick={() => onRemove(quality)}
                 aria-label={`Remove ${quality}`}
                 className={uiDismissButton}
               >
