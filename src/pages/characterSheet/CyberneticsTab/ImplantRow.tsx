@@ -4,7 +4,7 @@ import type { CyberneticItem } from "../../../types/Character";
 import { CYBERNETICS_REFERENCE } from "../../../data/reference/cyberneticsReference";
 import { Chip } from "../../../ui/Chip";
 import { uiSection, uiTextBody, uiTextLabel, uiTextMuted, uiItemName, uiInfoModalWrapper } from "../../../ui/editableStyles";
-import { uiActionButtonCompact } from "../../../ui/buttonStyles";
+import { uiIconRemoveButton } from "../../../ui/buttonStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { CRAFTSMANSHIP_STYLE, LOCATION_DISPLAY } from "./cyberneticsConstants";
 import { availableCraftsmanship, craftsmanshipDescription } from "./cyberneticsHelpers";
@@ -12,6 +12,7 @@ import { InfoModal } from "../../../components/InfoModal";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/StatusBadge";
+import { TrashIcon } from "../../../ui/TrashIcon";
 
 interface Props {
   item: CyberneticItem;
@@ -149,11 +150,8 @@ export function ImplantRow({
       {/* Craftsmanship badge — clickable when editable */}
       {/* Remove */}
       {editable && (
-        <button
-          onClick={() => onRemove(item.id)}
-          className={`${uiActionButtonCompact} shrink-0`}
-        >
-          Remove
+        <button onClick={() => onRemove(item.id)} aria-label="Remove" className={uiIconRemoveButton}>
+          <TrashIcon className="w-4 h-4" />
         </button>
       )}
     </div>

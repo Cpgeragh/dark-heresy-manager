@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { ArcheotechItem } from "../../../types/Character";
 import { ARCHEOTECH_REFERENCE } from "../../../data/reference/archeotechReference";
 import { uiSection, uiTextBody, uiTextLabel, uiTextMuted, uiItemName, uiInfoModalWrapper } from "../../../ui/editableStyles";
-import { uiActionButtonCompact } from "../../../ui/buttonStyles";
+import { uiIconRemoveButton } from "../../../ui/buttonStyles";
 import { colourStacks } from "../../../ui/colourTokens";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
@@ -15,6 +15,7 @@ import { InfoModal } from "../../../components/InfoModal";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/StatusBadge";
+import { TrashIcon } from "../../../ui/TrashIcon";
 
 interface Props {
   item: ArcheotechItem;
@@ -163,11 +164,8 @@ export function ItemCard({
         </div>
 
         {editable && (
-          <button
-            onClick={onRemove}
-            className={`${uiActionButtonCompact} shrink-0 mt-0.5`}
-          >
-            Remove
+          <button onClick={onRemove} aria-label="Remove" className={`${uiIconRemoveButton} mt-0.5`}>
+            <TrashIcon className="w-4 h-4" />
           </button>
         )}
       </div>

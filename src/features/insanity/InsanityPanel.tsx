@@ -12,7 +12,7 @@ import type {
   InsanityTraumaEntry,
 } from "../../types/Character";
 import { Chip } from "../../ui/Chip";
-import { uiActionButtonCompact } from "../../ui/buttonStyles";
+import { uiActionButtonCompact, uiIconRemoveButton } from "../../ui/buttonStyles";
 import { colourActiveRose, colourActiveSky, colourAmberFaint } from "../../ui/colourTokens";
 import {
   uiFormLabel,
@@ -23,6 +23,7 @@ import {
   uiTextPlaceholder,
 } from "../../ui/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
+import { TrashIcon } from "../../ui/TrashIcon";
 import { InsanityDisorderPicker } from "./InsanityDisorderPicker";
 import { DisorderInfoContent } from "./InsanityReferenceModals";
 import { InsanityTraumaPicker } from "./InsanityTraumaPicker";
@@ -254,8 +255,8 @@ function DisorderRow({
           </div>
         </div>
         {editable && (
-          <button type="button" onClick={onRemove} className={`${uiActionButtonCompact} shrink-0`}>
-            Remove
+          <button type="button" onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
+            <TrashIcon className="w-4 h-4" />
           </button>
         )}
       </div>
@@ -302,8 +303,8 @@ function TraumaRow({
           </div>
         </div>
         {editable && (
-          <button type="button" onClick={onRemove} className={`${uiActionButtonCompact} shrink-0`}>
-            Remove
+          <button type="button" onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
+            <TrashIcon className="w-4 h-4" />
           </button>
         )}
       </div>

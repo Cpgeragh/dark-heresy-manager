@@ -2,13 +2,14 @@ import { useState } from "react";
 import { InfoModal } from "../../components/InfoModal";
 import type { CorruptionMutationEntry } from "../../types/Character";
 import { Chip } from "../../ui/Chip";
-import { uiActionButtonCompact } from "../../ui/buttonStyles";
+import { uiActionButtonCompact, uiIconRemoveButton } from "../../ui/buttonStyles";
 import { colourAmberFaint, colourRose, colourSky } from "../../ui/colourTokens";
 import { uiInfoModalWrapper, uiItemName, uiSection, uiTextLabel } from "../../ui/editableStyles";
 import { getRollDisplayEntries } from "./characteristicModifiers";
 import { MutationInfoContent } from "./CorruptionReferenceModals";
 import { getMutationRef } from "./mutationsReference";
 import { RollEditor } from "./RollEditor";
+import { TrashIcon } from "../../ui/TrashIcon";
 
 export function mutationDisplayName(mutation: CorruptionMutationEntry): string {
   return getMutationRef(mutation.referenceId)?.name ?? mutation.name ?? "";
@@ -70,8 +71,8 @@ export function MutationRow({
                 Edit Rolls
               </button>
             )}
-            <button type="button" onClick={onRemove} className={uiActionButtonCompact}>
-              Remove
+            <button type="button" onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
+              <TrashIcon className="w-4 h-4" />
             </button>
           </div>
         )}

@@ -21,6 +21,9 @@ export const uiDismissButton =
 export const uiExpandButton =
   "flex-1 min-w-0 text-left";
 
+export const uiIconRemoveButton =
+  "inline-flex items-center justify-center rounded border border-red-500 text-red-500 hover:bg-red-500/10 transition p-1 shrink-0";
+
 export const uiTabButtonBase =
   "rounded-md px-3 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm font-semibold transition border";
 

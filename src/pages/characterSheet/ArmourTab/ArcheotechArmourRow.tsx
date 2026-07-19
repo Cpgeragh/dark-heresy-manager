@@ -3,12 +3,13 @@
 import type { ArcheotechItem } from "../../../types/Character";
 import { Chip } from "../../../ui/Chip";
 import { uiSection, uiCardTitle, uiTextLabel, uiTextPlaceholder, uiInfoModalWrapper } from "../../../ui/editableStyles";
-import { uiActionButtonCompact } from "../../../ui/buttonStyles";
+import { uiIconRemoveButton } from "../../../ui/buttonStyles";
 import { colourArcheotech, colourStacks } from "../../../ui/colourTokens";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { StatChip } from "../weapons/weaponShared";
 import { InfoModal } from "../../../components/InfoModal";
 import { locationLabel } from "./armourHelpers";
+import { TrashIcon } from "../../../ui/TrashIcon";
 
 interface Props {
   item: ArcheotechItem;
@@ -30,7 +31,7 @@ export function ArcheotechArmourRow({ item, editable, onToggleEquip, onRemove, h
     <div
       className={[
         containerClass,
-        "flex items-center gap-3",
+        "flex items-start gap-3",
         !isEquipped ? "opacity-60" : "",
       ].join(" ")}
     >
@@ -79,8 +80,8 @@ export function ArcheotechArmourRow({ item, editable, onToggleEquip, onRemove, h
       )}
 
       {editable && (
-        <button onClick={onRemove} className={`${uiActionButtonCompact} shrink-0`}>
-          Remove
+        <button onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
+          <TrashIcon className="w-4 h-4" />
         </button>
       )}
     </div>

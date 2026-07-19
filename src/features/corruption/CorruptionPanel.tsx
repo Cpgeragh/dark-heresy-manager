@@ -7,7 +7,7 @@ import { Stepper } from "../../components/Stepper";
 import { useSwipeableTabs } from "../../hooks/useSwipeableTabs";
 import type { CorruptionBlock, CorruptionMalignancyEntry, CorruptionMutationEntry } from "../../types/Character";
 import { Chip } from "../../ui/Chip";
-import { uiActionButtonCompact } from "../../ui/buttonStyles";
+import { uiActionButtonCompact, uiIconRemoveButton } from "../../ui/buttonStyles";
 import {
   colourActiveEmerald,
   colourActiveOrange,
@@ -31,6 +31,7 @@ import { MalignancyInfoContent } from "./CorruptionReferenceModals";
 import { MutationPicker } from "./MutationPicker";
 import { mutationDisplayName, MutationRow } from "./MutationRow";
 import { RollEditor } from "./RollEditor";
+import { TrashIcon } from "../../ui/TrashIcon";
 import {
   CORRUPTION_RULE_TEXT,
   getCorruptionMalignancyRef,
@@ -289,8 +290,8 @@ export function MalignancyRow({
                 Edit Rolls
               </button>
             )}
-            <button type="button" onClick={onRemove} className={uiActionButtonCompact}>
-              Remove
+            <button type="button" onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
+              <TrashIcon className="w-4 h-4" />
             </button>
           </div>
         )}

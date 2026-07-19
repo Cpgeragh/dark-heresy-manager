@@ -2,13 +2,14 @@
 
 import type { ConsumableItem } from "../../../types/Character";
 import { uiSection, uiTextBody, uiTextLabel, uiItemName, uiInfoModalWrapper } from "../../../ui/editableStyles";
-import { uiActionButtonCompact } from "../../../ui/buttonStyles";
+import { uiIconRemoveButton } from "../../../ui/buttonStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import { InfoModal } from "../../../components/InfoModal";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/StatusBadge";
+import { TrashIcon } from "../../../ui/TrashIcon";
 
 interface Props {
   item: ConsumableItem;
@@ -93,11 +94,8 @@ export function ConsumableRow({
         </div>
 
         {editable && (
-          <button
-            onClick={() => onRemove(item.id)}
-            className={`${uiActionButtonCompact} shrink-0`}
-          >
-            Remove
+          <button onClick={() => onRemove(item.id)} aria-label="Remove" className={uiIconRemoveButton}>
+            <TrashIcon className="w-4 h-4" />
           </button>
         )}
       </div>

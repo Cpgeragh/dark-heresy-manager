@@ -15,13 +15,14 @@ import {
   uiInfoModalWrapper,
   uiCardTitle,
 } from "../../../ui/editableStyles";
-import { uiActionButtonCompact, uiExpandButton } from "../../../ui/buttonStyles";
+import { uiExpandButton, uiIconRemoveButton } from "../../../ui/buttonStyles";
 import { Chip } from "../../../ui/Chip";
 import { colourLime } from "../../../ui/colourTokens";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { InfoModal } from "../../../components/InfoModal";
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
 import { StatChip, DamageTypeChip, SpecialRulesContent, EquipToggle } from "./weaponShared";
+import { TrashIcon } from "../../../ui/TrashIcon";
 
 export function ShieldCard({
   item,
@@ -107,16 +108,19 @@ export function ShieldCard({
               />
             </svg>
           </button>
-          {editable && expanded && (
-            <button onClick={onRemove} className={`${uiActionButtonCompact} shrink-0`}>
-              Remove
-            </button>
-          )}
         </div>
       </div>
 
       {expanded && (
         <>
+          {editable && (
+            <div className="flex justify-end">
+              <button onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
+                <TrashIcon className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
           {libraryItem && (
             <CustomItemActionButtons
               className="flex flex-wrap gap-2"

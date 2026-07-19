@@ -1,6 +1,6 @@
 import type { WornArmourPiece } from "../../../types/Character";
 import { uiSection, uiTextLabel, uiTextMuted, uiTextPlaceholder, uiItemName, uiInfoModalWrapper } from "../../../ui/editableStyles";
-import { uiActionButtonCompact } from "../../../ui/buttonStyles";
+import { uiIconRemoveButton } from "../../../ui/buttonStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { StatChip } from "../weapons/weaponShared";
 import { InfoModal } from "../../../components/InfoModal";
@@ -10,6 +10,7 @@ import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/StatusBadge";
 import { forceFieldCraftsmanshipDescription } from "./armourHelpers";
+import { TrashIcon } from "../../../ui/TrashIcon";
 
 interface Props {
   piece: WornArmourPiece;
@@ -64,7 +65,7 @@ export function ForceFieldRow({
   const craftsmanship = piece.craftsmanship ?? "Common";
 
   return (
-    <div className={[uiSection, "flex items-center gap-3", !active ? "opacity-60" : ""].join(" ")}>
+    <div className={[uiSection, "flex items-start gap-3", !active ? "opacity-60" : ""].join(" ")}>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
           <span className={`${uiItemName} truncate`}>{piece.name}</span>
@@ -146,11 +147,8 @@ export function ForceFieldRow({
       )}
 
       {editable && (
-        <button
-          onClick={() => onRemove(piece.id)}
-          className={`${uiActionButtonCompact} shrink-0`}
-        >
-          Remove
+        <button onClick={() => onRemove(piece.id)} aria-label="Remove" className={uiIconRemoveButton}>
+          <TrashIcon className="w-4 h-4" />
         </button>
       )}
     </div>

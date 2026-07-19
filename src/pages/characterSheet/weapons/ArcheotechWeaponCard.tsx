@@ -16,7 +16,7 @@ import {
   uiCardTitle,
   uiInfoModalWrapper,
 } from "../../../ui/editableStyles";
-import { uiActionButtonCompact, uiExpandButton } from "../../../ui/buttonStyles";
+import { uiExpandButton, uiIconRemoveButton } from "../../../ui/buttonStyles";
 import { colourArcheotech, colourOrange } from "../../../ui/colourTokens";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 import { InfoModal } from "../../../components/InfoModal";
@@ -30,6 +30,7 @@ import {
 } from "./weaponShared";
 import { weaponClassChip } from "./weaponHelpers";
 import { EXPLOSIVE_MISHAPS_CONTENT } from "./GrenadeCard";
+import { TrashIcon } from "../../../ui/TrashIcon";
 
 export function ArcheotechWeaponCard({
   item,
@@ -133,11 +134,6 @@ export function ArcheotechWeaponCard({
               onChange={onToggleEquip}
             />
           )}
-          {editable && onRemove && (
-            <button onClick={onRemove} className={`${uiActionButtonCompact} shrink-0`}>
-              Remove
-            </button>
-          )}
           <button
             onClick={() => setExpanded((e) => !e)}
             className="text-slate-400 hover:text-slate-200 transition"
@@ -161,6 +157,14 @@ export function ArcheotechWeaponCard({
 
       {expanded && (
         <>
+          {editable && onRemove && (
+            <div className="flex justify-end">
+              <button onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
+                <TrashIcon className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
           {/* Stat chips — only for items with structured weapon data */}
           {hasWeaponStats && (
             <div className="flex flex-wrap gap-1.5">

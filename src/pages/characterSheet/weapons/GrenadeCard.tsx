@@ -17,7 +17,7 @@ import {
   uiInfoModalWrapper,
   uiCardTitle,
 } from "../../../ui/editableStyles";
-import { uiActionButtonCompact, uiExpandButton } from "../../../ui/buttonStyles";
+import { uiExpandButton, uiIconRemoveButton } from "../../../ui/buttonStyles";
 import { colourEmerald, colourCyan, colourViolet, colourTealLight } from "../../../ui/colourTokens";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
@@ -26,6 +26,7 @@ import { InfoModal } from "../../../components/InfoModal";
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
 import { StatChip, DamageTypeChip, SpecialRulesContent, EquipToggle } from "./weaponShared";
 import { weaponClassChip } from "./weaponHelpers";
+import { TrashIcon } from "../../../ui/TrashIcon";
 
 export const EXPLOSIVE_MISHAPS_CONTENT = (
   <div className="space-y-3">
@@ -197,16 +198,19 @@ export function GrenadeCard({
               />
             </svg>
           </button>
-          {editable && expanded && (
-            <button onClick={onRemove} className={`${uiActionButtonCompact} shrink-0`}>
-              Remove
-            </button>
-          )}
         </div>
       </div>
 
       {expanded && (
         <>
+          {editable && (
+            <div className="flex justify-end">
+              <button onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
+                <TrashIcon className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
           {libraryItem && (
             <CustomItemActionButtons
               className="flex flex-wrap gap-2"

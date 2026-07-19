@@ -17,7 +17,7 @@ import {
   uiItemName,
   uiTextLabel,
 } from "../../ui/editableStyles";
-import { uiActionButtonCompact } from "../../ui/buttonStyles";
+import { uiIconRemoveButton } from "../../ui/buttonStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { Button } from "../../ui/Button";
 import { Chip } from "../../ui/Chip";
@@ -26,6 +26,7 @@ import { TALENT_DESCRIPTIONS } from "../../data/talentDescriptions";
 import { TRAIT_DESCRIPTIONS } from "../../data/traitDescriptions";
 import { sourceColour } from "../../ui/sourceStyles";
 import { PickerModal } from "../../ui/PickerModal";
+import { TrashIcon } from "../../ui/TrashIcon";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -298,9 +299,9 @@ export function EntryCard({ entry, editable, onRemove }: EntryCardProps) {
         <button
           onClick={() => onRemove(entry.uid)}
           aria-label={`Remove ${entry.name}`}
-          className={`${uiActionButtonCompact} shrink-0 mt-0.5`}
+          className={`${uiIconRemoveButton} mt-0.5`}
         >
-          Remove
+          <TrashIcon className="w-4 h-4" />
         </button>
       )}
     </div>

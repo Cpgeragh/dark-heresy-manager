@@ -30,7 +30,7 @@ import {
   uiItemName,
   uiCardTitle,
 } from "../../../ui/editableStyles";
-import { uiActionButtonCompact, uiExpandButton } from "../../../ui/buttonStyles";
+import { uiActionButtonCompact, uiExpandButton, uiIconRemoveButton } from "../../../ui/buttonStyles";
 import { colourArcheotech, colourViolet } from "../../../ui/colourTokens";
 import { Button } from "../../../ui/Button";
 import { Chip } from "../../../ui/Chip";
@@ -39,6 +39,7 @@ import { PickerModal } from "../../../ui/PickerModal";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import { formatWeightForDisplay } from "../../../ui/weightFormat";
 import { InfoModal } from "../../../components/InfoModal";
+import { TrashIcon } from "../../../ui/TrashIcon";
 import {
   StatChip,
   DamageTypeChip,
@@ -556,16 +557,19 @@ export function RangedCard({
               </svg>
             </button>
           )}
-          {editable && (expanded || forceExpanded) && !integrated && (
-            <button onClick={onRemove} className={`${uiActionButtonCompact} shrink-0`}>
-              Remove
-            </button>
-          )}
         </div>
       </div>
 
       {(expanded || forceExpanded) && (
         <>
+          {editable && !integrated && (
+            <div className="flex justify-end">
+              <button onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
+                <TrashIcon className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
           {libraryItem && (
             <CustomItemActionButtons
               className="flex flex-wrap gap-2"

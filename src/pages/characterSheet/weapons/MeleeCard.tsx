@@ -17,12 +17,13 @@ import {
   uiInfoModalWrapper,
   uiCardTitle,
 } from "../../../ui/editableStyles";
-import { uiActionButtonCompact, uiExpandButton } from "../../../ui/buttonStyles";
+import { uiActionButtonCompact, uiExpandButton, uiIconRemoveButton } from "../../../ui/buttonStyles";
 import { colourViolet } from "../../../ui/colourTokens";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import { InfoModal } from "../../../components/InfoModal";
+import { TrashIcon } from "../../../ui/TrashIcon";
 import {
   StatChip,
   DamageTypeChip,
@@ -193,16 +194,19 @@ export function MeleeCard({
               </svg>
             </button>
           )}
-          {editable && (expanded || forceExpanded) && !integrated && (
-            <button onClick={onRemove} className={`${uiActionButtonCompact} shrink-0`}>
-              Remove
-            </button>
-          )}
         </div>
       </div>
 
       {(expanded || forceExpanded) && (
         <>
+          {editable && !integrated && (
+            <div className="flex justify-end">
+              <button onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
+                <TrashIcon className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
           {libraryItem && (
             <CustomItemActionButtons
               className="flex flex-wrap gap-2"

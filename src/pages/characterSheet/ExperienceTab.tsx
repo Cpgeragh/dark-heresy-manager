@@ -9,12 +9,13 @@ import {
   uiTextPlaceholder,
   uiFormLabel,
 } from "../../ui/editableStyles";
-import { uiActionButtonCompact } from "../../ui/buttonStyles";
+import { uiIconRemoveButton } from "../../ui/buttonStyles";
 import { Button } from "../../ui/Button";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { useXpProposals } from "../../hooks/useXpProposals";
 import { proposeXpSpend } from "../../services/xpService";
 import { useToast } from "../../components/Toast/ToastContext";
+import { TrashIcon } from "../../ui/TrashIcon";
 
 // All valid rank values in display order.
 const RANK_OPTIONS: RankAdvances["rank"][] = [1, 2, 3, 4, 5, 6, 7, 8, "elite"];
@@ -203,9 +204,10 @@ export function ExperienceTab({
                         {isDM && (
                           <button
                             onClick={() => handleRemoveAdvance(rankBlock.rank, adv.id)}
-                            className={uiActionButtonCompact}
+                            aria-label="Remove"
+                            className={uiIconRemoveButton}
                           >
-                            Remove
+                            <TrashIcon className="w-4 h-4" />
                           </button>
                         )}
                       </div>

@@ -4,12 +4,13 @@ import type { DrugItem } from "../../../types/Character";
 import { InfoModal } from "../../../components/InfoModal";
 import { DRUGS_REFERENCE } from "../../../data/reference/drugsReference";
 import { uiSection, uiTextBody, uiTextLabel, uiTextMuted, uiItemName, uiInfoModalWrapper } from "../../../ui/editableStyles";
-import { uiActionButtonCompact } from "../../../ui/buttonStyles";
+import { uiIconRemoveButton } from "../../../ui/buttonStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/StatusBadge";
+import { TrashIcon } from "../../../ui/TrashIcon";
 
 export function DrugRow({
   item,
@@ -42,7 +43,7 @@ export function DrugRow({
   const hasInfo = !!(ref?.effect || ref?.sideEffect || ref?.notes || item.notes);
 
   return (
-    <div className={[uiSection, "flex items-center gap-3"].join(" ")}>
+    <div className={[uiSection, "flex items-start gap-3"].join(" ")}>
       {/* Name + duration + chips */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
@@ -133,11 +134,8 @@ export function DrugRow({
 
       {/* Remove */}
       {editable && (
-        <button
-          onClick={() => onRemove(item.id)}
-          className={`${uiActionButtonCompact} shrink-0`}
-        >
-          Remove
+        <button onClick={() => onRemove(item.id)} aria-label="Remove" className={uiIconRemoveButton}>
+          <TrashIcon className="w-4 h-4" />
         </button>
       )}
     </div>

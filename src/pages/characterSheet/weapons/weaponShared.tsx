@@ -10,6 +10,7 @@ import { InfoModal } from "../../../components/InfoModal";
 import type { WeaponUpgradeRef } from "../../../data/reference/weaponUpgradeReference";
 import { PickerModal } from "../../../ui/PickerModal";
 import { formatWeightForDisplay } from "../../../ui/weightFormat";
+import { TrashIcon } from "../../../ui/TrashIcon";
 import {
   uiTextBody,
   uiTextLabel,
@@ -18,7 +19,7 @@ import {
   uiInfoModalWrapper,
   uiItemName,
 } from "../../../ui/editableStyles";
-import { uiActionButtonCompact, uiDismissButton } from "../../../ui/buttonStyles";
+import { uiIconRemoveButton, uiDismissButton } from "../../../ui/buttonStyles";
 import { colourEmerald, colourEmeraldPlain, colourMeta } from "../../../ui/colourTokens";
 
 export const WEAPON_QUALITY_OPTIONS = Object.keys(WEAPON_SPECIAL_RULES).sort((a, b) =>
@@ -355,10 +356,10 @@ export function UpgradeCard({
         {editable && (
           <button
             onClick={() => onRemove(upgrade.id)}
-            className={`${uiActionButtonCompact} shrink-0`}
-            title={`Remove ${upgrade.name}`}
+            className={uiIconRemoveButton}
+            aria-label={`Remove ${upgrade.name}`}
           >
-            Remove
+            <TrashIcon className="w-4 h-4" />
           </button>
         )}
       </div>
