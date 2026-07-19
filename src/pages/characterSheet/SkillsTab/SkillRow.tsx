@@ -7,8 +7,9 @@ import { charColour } from "../../../ui/sourceStyles";
 import { Chip } from "../../../ui/Chip";
 import { InfoModal } from "../../../components/InfoModal";
 import { SKILL_DESCRIPTIONS } from "../../../data/skillDescriptions";
-import { uiActionButtonCompact } from "../../../ui/buttonStyles";
+import { uiIconRemoveButton } from "../../../ui/buttonStyles";
 import { uiInfoModalWrapper, uiItemName } from "../../../ui/editableStyles";
+import { TrashIcon } from "../../../ui/TrashIcon";
 import { colourPurple, colourTeal } from "../../../ui/colourTokens";
 
 interface SkillRowProps {
@@ -153,10 +154,10 @@ export function SkillRow({ skill, editable, updateLevel, previewMode = false, on
                 <div className="flex justify-end">
                   <button
                     onClick={handleRemove}
-                    className={`${uiActionButtonCompact} focus:outline-none`}
+                    className={`${uiIconRemoveButton} focus:outline-none`}
                     aria-label={`Remove ${skill.name}`}
                   >
-                    Remove
+                    <TrashIcon className="w-4 h-4" />
                   </button>
                 </div>
               )}

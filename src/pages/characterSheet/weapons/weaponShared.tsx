@@ -263,9 +263,19 @@ export function EquipToggle({
     ) : null;
   }
   return (
-    <button
-      onClick={!disabled || equipped ? onChange : undefined}
-      disabled={disabled && !equipped}
+    <span
+      role="button"
+      tabIndex={0}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (!disabled || equipped) onChange();
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          if (!disabled || equipped) onChange();
+        }
+      }}
       title={equipped ? "Click to stow" : disabled ? "Slots full" : "Click to equip"}
       className={`flex items-center gap-1 shrink-0 group transition ${
         disabled && !equipped ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
@@ -302,7 +312,7 @@ export function EquipToggle({
       >
         {equipped ? labels.equipped : labels.unequipped}
       </span>
-    </button>
+    </span>
   );
 }
 
