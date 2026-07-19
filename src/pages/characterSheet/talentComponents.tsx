@@ -192,13 +192,10 @@ export function TalentPickerModal({
         const sources = normaliseSources(item.source as SkillSource | SkillSource[]);
         const isSelected = picked?.id === item.id;
         return (
-          <div
+          <button
             key={item.id}
-            role="button"
-            tabIndex={editable ? 0 : -1}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") e.currentTarget.click();
-            }}
+            type="button"
+            tabIndex={editable ? undefined : -1}
             onClick={
               editable
                 ? () => {
@@ -230,6 +227,7 @@ export function TalentPickerModal({
                     <InfoModal
                       title={item.name}
                       content={TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]}
+                      as="span"
                     />
                   </span>
                 )}
@@ -251,7 +249,7 @@ export function TalentPickerModal({
                 <span className="text-slate-300 font-medium">{row.prerequisites}</span>
               </div>
             )}
-          </div>
+          </button>
         );
       })}
     </PickerModal>
