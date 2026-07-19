@@ -10,6 +10,7 @@ import { SKILL_DESCRIPTIONS } from "../../../data/skillDescriptions";
 import { uiIconRemoveButton } from "../../../ui/buttonStyles";
 import { uiInfoModalWrapper, uiItemName } from "../../../ui/editableStyles";
 import { TrashIcon } from "../../../ui/TrashIcon";
+import { ExpandChevron } from "../../../ui/ExpandChevron";
 import { colourPurple, colourTeal } from "../../../ui/colourTokens";
 
 interface SkillRowProps {
@@ -54,7 +55,7 @@ export function SkillRow({ skill, editable, updateLevel, previewMode = false, on
     <div className="rounded-lg border border-slate-500 bg-slate-900/60 overflow-hidden">
       {/* COLLAPSED ROW */}
       <button
-        onClick={onSelect ? () => onSelect(skill.id) : previewMode ? undefined : handleToggle}
+        onClick={onSelect ? () => onSelect(skill.id) : handleToggle}
         aria-expanded={expanded}
         className="w-full px-3 lg:px-4 py-2.5 lg:py-3 text-left hover:bg-slate-700/40 transition group"
       >
@@ -65,7 +66,7 @@ export function SkillRow({ skill, editable, updateLevel, previewMode = false, on
               <span className={`${uiItemName} truncate ${onSelect ? "group-hover:text-white" : ""}`}>{displayName}</span>
               {SKILL_DESCRIPTIONS[skill.name] && (
                 <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
-                  <InfoModal title={skill.name} content={SKILL_DESCRIPTIONS[skill.name]} />
+                  <InfoModal title={skill.name} content={SKILL_DESCRIPTIONS[skill.name]} as="span" />
                 </span>
               )}
             </div>
@@ -86,19 +87,20 @@ export function SkillRow({ skill, editable, updateLevel, previewMode = false, on
           <span className="font-code font-extrabold shrink-0 text-white text-xl">
             {skill.total ?? "--"}<span className="text-sm font-normal text-slate-300 ml-1">pts</span>
           </span>
-          {!previewMode && (onSelect ? (
-            <span onClick={(e) => { e.stopPropagation(); handleToggle(); }} className="p-1 -m-1">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                className={`w-4 h-4 text-slate-400 shrink-0 transition-transform ${expanded ? "" : "-rotate-90"}`}>
-                <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
-              </svg>
+          {onSelect ? (
+            <span
+              role="button"
+              tabIndex={0}
+              aria-label={expanded ? "Collapse skill details" : "Expand skill details"}
+              onClick={(e) => { e.stopPropagation(); handleToggle(); }}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); handleToggle(); } }}
+              className="p-1 -m-1"
+            >
+              <ExpandChevron expanded={expanded} />
             </span>
           ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-              className={`w-4 h-4 text-slate-400 shrink-0 transition-transform ${expanded ? "" : "-rotate-90"}`}>
-              <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
-            </svg>
-          ))}
+            <ExpandChevron expanded={expanded} />
+          )}
         </div>
 
         {/* Desktop: name+chips in a left column, total in its own centered column, chevron last */}
@@ -108,7 +110,7 @@ export function SkillRow({ skill, editable, updateLevel, previewMode = false, on
               <span className={`${uiItemName} truncate ${onSelect ? "group-hover:text-white" : ""}`}>{displayName}</span>
               {SKILL_DESCRIPTIONS[skill.name] && (
                 <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
-                  <InfoModal title={skill.name} content={SKILL_DESCRIPTIONS[skill.name]} />
+                  <InfoModal title={skill.name} content={SKILL_DESCRIPTIONS[skill.name]} as="span" />
                 </span>
               )}
             </div>
@@ -129,24 +131,25 @@ export function SkillRow({ skill, editable, updateLevel, previewMode = false, on
           <span className="font-code font-extrabold shrink-0 text-white text-2xl">
             {skill.total ?? "--"}<span className="text-sm font-normal text-slate-300 ml-1">pts</span>
           </span>
-          {!previewMode && (onSelect ? (
-            <span onClick={(e) => { e.stopPropagation(); handleToggle(); }} className="p-1 -m-1">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                className={`w-4 h-4 text-slate-400 shrink-0 transition-transform ${expanded ? "" : "-rotate-90"}`}>
-                <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
-              </svg>
+          {onSelect ? (
+            <span
+              role="button"
+              tabIndex={0}
+              aria-label={expanded ? "Collapse skill details" : "Expand skill details"}
+              onClick={(e) => { e.stopPropagation(); handleToggle(); }}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); handleToggle(); } }}
+              className="p-1 -m-1"
+            >
+              <ExpandChevron expanded={expanded} />
             </span>
           ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-              className={`w-4 h-4 text-slate-400 shrink-0 transition-transform ${expanded ? "" : "-rotate-90"}`}>
-              <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
-            </svg>
-          ))}
+            <ExpandChevron expanded={expanded} />
+          )}
         </div>
       </button>
 
       {/* EXPANDED BODY */}
-      {expanded && !previewMode && (
+      {expanded && (
         <div className="px-3 lg:px-4 pb-3 lg:pb-4 pt-2 lg:pt-3 border-t border-slate-600 space-y-3">
           {/* Level buttons */}
           <div className="space-y-2">
