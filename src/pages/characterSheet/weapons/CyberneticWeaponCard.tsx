@@ -18,6 +18,7 @@ import {
 } from "./weaponShared";
 import { weaponClassChip, rangedCraftsmanshipDescription, meleeCraftsmanshipDescription } from "./weaponHelpers";
 import { rangedRulesForCraftsmanship, meleeDamageForCraftsmanship } from "../../../utils/weaponUtils";
+import { ExpandChevron } from "../../../ui/ExpandChevron";
 
 export function CyberneticWeaponCard({
   cyberneticName,
@@ -47,8 +48,12 @@ export function CyberneticWeaponCard({
 
   return (
     <div className="border border-pink-500/60 bg-pink-900/10 rounded-lg p-3 lg:p-4 space-y-3">
-      <div className="flex items-start justify-between gap-2">
-        <button className={uiExpandButton} onClick={() => setExpanded((e) => !e)}>
+      <button
+        className="w-full flex items-stretch justify-between gap-2"
+        onClick={() => setExpanded((e) => !e)}
+        aria-expanded={expanded}
+      >
+        <div className={uiExpandButton}>
           <div className="flex items-center gap-2">
             <p className={uiCardTitle}>{weapon.name}</p>
           </div>
@@ -64,26 +69,9 @@ export function CyberneticWeaponCard({
               ) : null; })()
             ) : null}
           </div>
-        </button>
-        <button
-          onClick={() => setExpanded((e) => !e)}
-          className="text-slate-400 hover:text-slate-200 transition shrink-0"
-          aria-label={expanded ? "Collapse" : "Expand"}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            className={`w-4 h-4 transition-transform ${expanded ? "" : "-rotate-90"}`}
-          >
-            <path
-              fillRule="evenodd"
-              d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </button>
-      </div>
+        </div>
+        <ExpandChevron expanded={expanded} />
+      </button>
 
       {expanded && (
       <>

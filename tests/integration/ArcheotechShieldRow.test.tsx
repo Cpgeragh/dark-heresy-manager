@@ -38,7 +38,7 @@ describe("ArcheotechShieldRow expand/collapse", () => {
     const user = userEvent.setup();
     renderRow({ isEquipped: true });
     expect(screen.getByText("AP")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Collapse" }));
+    await user.click(screen.getByRole("button", { name: /Archeotech Buckler/ }));
     expect(screen.queryByText("AP")).not.toBeInTheDocument();
   });
 
@@ -50,7 +50,7 @@ describe("ArcheotechShieldRow expand/collapse", () => {
   it("shows stats again when expanded a second time", async () => {
     const user = userEvent.setup();
     renderRow({ isEquipped: false });
-    await user.click(screen.getByRole("button", { name: "Expand" }));
+    await user.click(screen.getByRole("button", { name: /Archeotech Buckler/ }));
     expect(screen.getByText("AP")).toBeInTheDocument();
   });
 });

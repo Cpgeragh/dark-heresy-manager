@@ -16,6 +16,7 @@ import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/StatusBadge";
 import { TrashIcon } from "../../../ui/TrashIcon";
+import { ExpandChevron } from "../../../ui/ExpandChevron";
 
 interface Props {
   item: ArcheotechItem;
@@ -63,30 +64,43 @@ export function ItemCard({
       <div className="flex items-start gap-2">
         <div className="flex-1 min-w-0">
           {/* Title row */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className={uiItemName}>{item.name}</span>
-            {libraryItem && (
-              <StatusBadge status={libraryItem.status} />
-            )}
-            {item.type && (
-              <Chip className={`border-slate-700 bg-slate-800/40 ${uiTextMuted}`}>
-                {item.type}
-              </Chip>
-            )}
-            {hasBody && (
-              <button
-                onClick={() => setExpanded((v) => !v)}
-                className="text-slate-500 hover:text-slate-300 text-xs lg:text-sm transition"
-              >
-                {expanded ? "▲" : "▼"}
-              </button>
-            )}
-            {description && !hasBody && (
-              <span className={uiInfoModalWrapper}>
-                <InfoModal title={item.name} content={description} />
-              </span>
-            )}
-          </div>
+          {hasBody ? (
+            <button
+              className="w-full flex items-start justify-between gap-2 text-left"
+              onClick={() => setExpanded((v) => !v)}
+              aria-expanded={expanded}
+            >
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className={uiItemName}>{item.name}</span>
+                {libraryItem && (
+                  <StatusBadge status={libraryItem.status} />
+                )}
+                {item.type && (
+                  <Chip className={`border-slate-700 bg-slate-800/40 ${uiTextMuted}`}>
+                    {item.type}
+                  </Chip>
+                )}
+              </div>
+              <ExpandChevron expanded={expanded} />
+            </button>
+          ) : (
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className={uiItemName}>{item.name}</span>
+              {libraryItem && (
+                <StatusBadge status={libraryItem.status} />
+              )}
+              {item.type && (
+                <Chip className={`border-slate-700 bg-slate-800/40 ${uiTextMuted}`}>
+                  {item.type}
+                </Chip>
+              )}
+              {description && (
+                <span className={uiInfoModalWrapper}>
+                  <InfoModal title={item.name} content={description} />
+                </span>
+              )}
+            </div>
+          )}
 
           {/* Expanded body */}
           {expanded && (

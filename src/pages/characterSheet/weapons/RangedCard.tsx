@@ -40,6 +40,7 @@ import { QuantityControl } from "../../../ui/QuantityControl";
 import { formatWeightForDisplay } from "../../../ui/weightFormat";
 import { InfoModal } from "../../../components/InfoModal";
 import { TrashIcon } from "../../../ui/TrashIcon";
+import { ExpandChevron } from "../../../ui/ExpandChevron";
 import {
   StatChip,
   DamageTypeChip,
@@ -498,12 +499,12 @@ export function RangedCard({
   return (
     <div className={uiSection + " space-y-3"}>
       {/* Header — always visible */}
-      <div className="flex items-start justify-between gap-2">
-        <button
-          className={uiExpandButton}
-          onClick={() => !forceExpanded && setExpanded((e) => !e)}
-          disabled={forceExpanded}
-        >
+      <button
+        className="w-full flex items-stretch justify-between gap-2"
+        onClick={() => !forceExpanded && setExpanded((e) => !e)}
+        aria-expanded={expanded}
+      >
+        <div className={uiExpandButton}>
           <div className="flex flex-wrap items-center gap-1.5">
             <p className={uiCardTitle}>{weapon.name}</p>
             {libraryItem && (
@@ -527,7 +528,7 @@ export function RangedCard({
               )}
             </div>
           )}
-        </button>
+        </div>
         <div className="flex items-center gap-2 shrink-0">
           {onToggleEquip && (
             <EquipToggle
@@ -537,28 +538,9 @@ export function RangedCard({
               onChange={onToggleEquip}
             />
           )}
-          {!forceExpanded && (
-            <button
-              onClick={() => setExpanded((e) => !e)}
-              className="text-slate-400 hover:text-slate-200 transition"
-              aria-label={expanded ? "Collapse" : "Expand"}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                className={`w-4 h-4 transition-transform ${expanded ? "" : "-rotate-90"}`}
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
-          )}
+          {!forceExpanded && <ExpandChevron expanded={expanded} />}
         </div>
-      </div>
+      </button>
 
       {(expanded || forceExpanded) && (
         <>

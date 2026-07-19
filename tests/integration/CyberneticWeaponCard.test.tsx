@@ -97,15 +97,16 @@ describe("CyberneticWeaponCard expand/collapse", () => {
     const user = userEvent.setup();
     renderCard({ type: "ranged", name: "Laspistol (Compact)", class: "Pistol", damage: "1d10+1 E", pen: "0" });
     expect(screen.getByText("Damage")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Collapse" }));
+    await user.click(screen.getByRole("button", { name: /Laspistol \(Compact\)/ }));
     expect(screen.queryByText("Damage")).not.toBeInTheDocument();
   });
 
   it("shows the section again when expanded a second time", async () => {
     const user = userEvent.setup();
     renderCard({ type: "ranged", name: "Laspistol (Compact)", class: "Pistol", damage: "1d10+1 E", pen: "0" });
-    await user.click(screen.getByRole("button", { name: "Collapse" }));
-    await user.click(screen.getByRole("button", { name: "Expand" }));
+    const header = screen.getByRole("button", { name: /Laspistol \(Compact\)/ });
+    await user.click(header);
+    await user.click(header);
     expect(screen.getByText("Damage")).toBeInTheDocument();
   });
 });
