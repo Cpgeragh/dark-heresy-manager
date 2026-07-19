@@ -159,13 +159,13 @@ describe("WeaponsTab", () => {
 
 // Real reference rows have their own Rules InfoModal titled with the bare
 // item name, always mounted (closed) into the DOM — filter for whichever
-// match has a role="button" row as an ancestor.
+// match has a button row as an ancestor.
 function row(name: string): HTMLElement {
   const match = screen
     .getAllByText(name)
-    .map((el) => el.closest('[role="button"]'))
+    .map((el) => el.closest("button"))
     .find((el): el is HTMLElement => el !== null);
-  if (!match) throw new Error(`No role="button" row found for: ${name}`);
+  if (!match) throw new Error(`No button row found for: ${name}`);
   return match;
 }
 

@@ -191,6 +191,7 @@ export function InsanityTraumaPicker({
               <InfoModal
                 title={ref.name}
                 content={<p className="text-sm leading-relaxed text-slate-300 lg:text-base">{ref.effect}</p>}
+                as="span"
               />
             </span>
           </div>

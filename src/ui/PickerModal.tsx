@@ -109,9 +109,17 @@ export function PickerModal({
     viewport.width < window.innerWidth || viewport.height < window.innerHeight;
   const modalMaxHeight = Math.max(0, viewport.height - 32);
 
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, []);
+
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/70 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/70 backdrop-blur-sm p-4"
       style={
         useVisibleViewport
           ? {

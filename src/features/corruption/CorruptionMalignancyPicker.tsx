@@ -236,6 +236,7 @@ export function CorruptionMalignancyPicker({
               <InfoModal
                 title={ref.name}
                 content={<MalignancyInfoContent malignancy={ref} hideName />}
+                as="span"
               />
             </span>
           </div>

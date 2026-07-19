@@ -10,8 +10,8 @@ import type { CampaignCustomItem } from "../../src/types/CustomItems";
 // Real reference entries (ShieldPicker has no override prop, it always reads
 // SHIELD_REFERENCE directly). Both have notes, so each has its own Rules
 // InfoModal titled with the bare item name, which always mounts (closed) into
-// the DOM outside any row — filter for whichever match has a role="button"
-// row as an ancestor.
+// the DOM outside any row — filter for whichever match has a button row
+// as an ancestor.
 const SHIELD_A = "Synford-Pattern \"Lockshield\"";
 const SHIELD_B = "Enforcer Riot Shield";
 

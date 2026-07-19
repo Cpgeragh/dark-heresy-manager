@@ -9,7 +9,7 @@ import { INTEGRATED_RANGED_REFS, INTEGRATED_MELEE_REFS } from "../../src/utils/w
 
 // Real weapons with a description have their own Rules InfoModal titled with
 // the bare item name, always mounted (closed) into the DOM — filter for
-// whichever match has a role="button" row as an ancestor.
+// whichever match has a button row as an ancestor.
 function row(name: string): HTMLElement {
   const match = screen
     .getAllByText(name)

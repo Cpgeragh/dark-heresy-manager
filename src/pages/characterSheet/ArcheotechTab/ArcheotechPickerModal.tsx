@@ -168,10 +168,10 @@ export function ArcheotechPickerModal({
         // ── Step 1: Search list ──────────────────────────────────────────────
         <>
         {filteredCustom.map((item) => (
-          <div
+          <button
             key={`custom-${item.id}`}
-            role="button"
-            tabIndex={editable ? 0 : -1}
+            type="button"
+            tabIndex={editable ? undefined : -1}
             onClick={editable && onSelectCustomItem ? () => onSelectCustomItem(item) : undefined}
             className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
           >
@@ -187,6 +187,7 @@ export function ArcheotechPickerModal({
                   <InfoModal
                     title={item.name}
                     content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{item.data.description}</p>}
+                    as="span"
                   />
                 </span>
               )}
@@ -201,12 +202,14 @@ export function ArcheotechPickerModal({
                 source={item.data.source}
               />
             </div>
-          </div>
+          </button>
         ))}
 
         {filtered.map((ref) => (
           <button
             key={ref.id}
+            type="button"
+            tabIndex={editable ? undefined : -1}
             onClick={editable ? () => handleRowClick(ref) : undefined}
             className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
           >
@@ -221,6 +224,7 @@ export function ArcheotechPickerModal({
                   <InfoModal
                     title={ref.name}
                     content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ref.description}</p>}
+                    as="span"
                   />
                 </span>
               )}

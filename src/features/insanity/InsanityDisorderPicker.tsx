@@ -305,6 +305,7 @@ export function InsanityDisorderPicker({
                     hideName
                   />
                 }
+                as="span"
               />
             </span>
           </div>
