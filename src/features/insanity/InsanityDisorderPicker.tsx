@@ -5,6 +5,7 @@ import { InfoModal } from "../../components/InfoModal";
 import { Button } from "../../ui/Button";
 import { Chip } from "../../ui/Chip";
 import { PickerModal } from "../../ui/PickerModal";
+import { OptionPickerScreen } from "../../ui/OptionPickerScreen";
 import { uiActionButton, uiPickerBackButton } from "../../ui/buttonStyles";
 import { editableInputClass, uiFormLabel, uiInfoModalWrapper, uiItemName, uiTextBody, uiTextLabel } from "../../ui/editableStyles";
 import { DisorderInfoContent } from "./InsanityReferenceModals";
@@ -46,6 +47,8 @@ export function InsanityDisorderPicker({
   const [severity, setSeverity] = useState<InsanityDisorderSeverity>("Minor");
   const [customName, setCustomName] = useState("");
   const [notes, setNotes] = useState("");
+  const [showTypePicker, setShowTypePicker] = useState(false);
+  const [showTypeFilterPicker, setShowTypeFilterPicker] = useState(false);
 
   const typeOptions = [
     "All",
@@ -71,6 +74,35 @@ export function InsanityDisorderPicker({
   const activeSeverityDescription =
     INSANITY_SEVERITIES.find((entry) => entry.severity === activeSeverity)?.description ?? "";
   const canAddCustom = Boolean(customName.trim());
+
+  if (showTypePicker) {
+    return (
+      <OptionPickerScreen
+        title="Type"
+        options={customDisorderTypes}
+        selected={customType}
+        onSelect={(value) => {
+          setCustomType(value);
+          setShowTypePicker(false);
+        }}
+        onClose={() => setShowTypePicker(false)}
+      />
+    );
+  }
+  if (showTypeFilterPicker) {
+    return (
+      <OptionPickerScreen
+        title="Disorder Type"
+        options={typeOptions.map((type) => (type === "All" ? "All Disorder Types" : type))}
+        selected={typeFilter === "All" ? "All Disorder Types" : typeFilter}
+        onSelect={(value) => {
+          setTypeFilter(value === "All Disorder Types" ? "All" : value);
+          setShowTypeFilterPicker(false);
+        }}
+        onClose={() => setShowTypeFilterPicker(false)}
+      />
+    );
+  }
 
   if (customMode) {
     return (
@@ -121,17 +153,14 @@ export function InsanityDisorderPicker({
         <div className="space-y-4 p-4 lg:p-5">
           <div>
             <p className={uiFormLabel}>Type <span className="text-red-500">*</span></p>
-            <select
-              value={customType}
-              onChange={(event) => setCustomType(event.target.value)}
-              className="mt-1 w-full rounded border border-slate-500 bg-slate-900 px-2 py-1.5 text-sm lg:text-base text-slate-200 focus:outline-none focus:border-red-500"
+            <button
+              type="button"
+              onClick={() => setShowTypePicker(true)}
+              className="mt-1 w-full rounded border border-slate-500 bg-slate-900 px-2 py-1.5 text-sm lg:text-base text-slate-200 text-left flex items-center justify-between"
             >
-              {customDisorderTypes.map((type) => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
-              ))}
-            </select>
+              <span>{customType}</span>
+              <span className="text-slate-500">›</span>
+            </button>
           </div>
 
           <div>
@@ -246,17 +275,14 @@ export function InsanityDisorderPicker({
       onClose={onClose}
       isEmpty={filtered.length === 0}
       filterRow={
-        <select
-          value={typeFilter}
-          onChange={(event) => setTypeFilter(event.target.value)}
-          className="w-full rounded border border-slate-500 bg-slate-900 px-2 py-1 text-xs lg:text-sm text-slate-200 focus:outline-none focus:border-red-500"
+        <button
+          type="button"
+          onClick={() => setShowTypeFilterPicker(true)}
+          className="w-full rounded border border-slate-500 bg-slate-900 px-2 py-1 text-xs lg:text-sm text-slate-200 text-left flex items-center justify-between"
         >
-          {typeOptions.map((type) => (
-            <option key={type} value={type}>
-              {type === "All" ? "All Disorder Types" : type}
-            </option>
-          ))}
-        </select>
+          <span>{typeFilter === "All" ? "All Disorder Types" : typeFilter}</span>
+          <span className="text-slate-500">›</span>
+        </button>
       }
       footer={
         <button

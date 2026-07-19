@@ -55,4 +55,28 @@ describe("InsanityDisorderPicker", () => {
 
     expect(screen.queryByText("Fear of the Dead", { selector: "span" })).not.toBeInTheDocument();
   });
+
+  it("filters the list by disorder type", async () => {
+    const user = userEvent.setup();
+    setup();
+
+    expect(screen.getByText("Fear of the Dead", { selector: "span" })).toBeInTheDocument();
+    await user.click(screen.getByText("All Disorder Types"));
+    await user.click(screen.getByText("Phobia"));
+    expect(screen.getByText("Fear of the Dead", { selector: "span" })).toBeInTheDocument();
+  });
+
+  it("picks a Type for a custom disorder via the Type picker", async () => {
+    const user = userEvent.setup();
+    const { onAdd } = setup();
+
+    await user.click(screen.getByText("+ Add custom disorder"));
+    // Type defaults to "Delusion", the alphabetically-first real disorder type.
+    await user.click(screen.getByText("Delusion"));
+    await user.click(screen.getByText("Phobia"));
+    await user.type(screen.getByPlaceholderText("Name the disorder…"), "Custom Fear");
+    await user.click(screen.getByRole("button", { name: "Add Disorder" }));
+
+    expect(onAdd).toHaveBeenCalledWith(expect.objectContaining({ type: "Phobia", name: "Custom Fear" }));
+  });
 });

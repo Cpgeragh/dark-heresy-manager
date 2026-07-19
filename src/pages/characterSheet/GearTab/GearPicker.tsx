@@ -5,6 +5,7 @@ import { InfoModal } from "../../../components/InfoModal";
 import { GEAR_REFERENCE, type GearRef } from "../../../data/reference/gearReference";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
+import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
 import { Button } from "../../../ui/Button";
 import { editableInputClass, uiTextBody, uiFormLabel, uiInfoModalWrapper, uiItemName, uiTextGMNote } from "../../../ui/editableStyles";
 import { uiPickerBackButton } from "../../../ui/buttonStyles";
@@ -54,6 +55,7 @@ export function GearPicker({
   const [pending, setPending] = useState<GearRef | null>(null);
   const [gmCost, setGmCost] = useState("");
   const [gmRarity, setGmRarity] = useState("");
+  const [showRarityPicker, setShowRarityPicker] = useState(false);
   const normalizedQuery = query.toLowerCase();
   const filtered = GEAR_REFERENCE.filter((r) =>
     r.name.toLowerCase().includes(normalizedQuery)
@@ -82,6 +84,21 @@ export function GearPicker({
   function handleConfirm() {
     if (!pending || !canConfirm) return;
     onSelect(pending, formatMoneyInput(gmCost), pendingNeedsRarity ? gmRarity : undefined);
+  }
+
+  if (showRarityPicker) {
+    return (
+      <OptionPickerScreen
+        title="Rarity"
+        options={AVAILABILITY_OPTIONS}
+        selected={gmRarity}
+        onSelect={(value) => {
+          setGmRarity(value);
+          setShowRarityPicker(false);
+        }}
+        onClose={() => setShowRarityPicker(false)}
+      />
+    );
   }
 
   return (
@@ -134,18 +151,14 @@ export function GearPicker({
               <label className={uiFormLabel}>
                 Rarity <span className="text-red-400">*</span>
               </label>
-              <select
-                value={gmRarity}
-                onChange={(e) => setGmRarity(e.target.value)}
-                className={editableInputClass(true) + " appearance-none"}
+              <button
+                type="button"
+                onClick={() => setShowRarityPicker(true)}
+                className={editableInputClass(true) + " appearance-none text-left flex items-center justify-between"}
               >
-                <option value="">— Select availability —</option>
-                {AVAILABILITY_OPTIONS.map((r) => (
-                  <option key={r} value={r}>
-                    {r}
-                  </option>
-                ))}
-              </select>
+                <span className={gmRarity ? "" : "text-slate-500"}>{gmRarity || "— Select availability —"}</span>
+                <span className="text-slate-500">›</span>
+              </button>
             </div>
           )}
 
