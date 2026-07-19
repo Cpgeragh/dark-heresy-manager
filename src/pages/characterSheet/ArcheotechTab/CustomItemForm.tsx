@@ -15,6 +15,7 @@ import { Button } from "../../../ui/Button";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import { PickerModal } from "../../../ui/PickerModal";
+import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
 import { ITEM_TYPES, AVAILABILITY_OPTIONS, type ItemType } from "./archeotechConstants";
 import { colourSky, colourRose } from "../../../ui/colourTokens";
 import { LOCATION_LABELS, LOCATION_ORDER } from "../ArmourTab/armourHelpers";
@@ -90,6 +91,8 @@ export function CustomItemForm({
   );
 
   const [saving, setSaving] = useState(false);
+  const [showAvailabilityPicker, setShowAvailabilityPicker] = useState(false);
+  const [showCraftsmanshipPicker, setShowCraftsmanshipPicker] = useState(false);
 
   const canAdd = name.trim().length > 0;
 
@@ -206,6 +209,30 @@ export function CustomItemForm({
   const isGrenadeType = selectedType === "Grenade" || selectedType === "Mine";
   const showRangedStats = isWeaponType && weaponClass === "Ranged";
 
+  if (showAvailabilityPicker) {
+    return (
+      <OptionPickerScreen
+        title="Rarity"
+        options={[...AVAILABILITY_OPTIONS]}
+        selected={availability}
+        onSelect={(value) => { setAvailability(value); setShowAvailabilityPicker(false); }}
+        onClose={() => setShowAvailabilityPicker(false)}
+      />
+    );
+  }
+
+  if (showCraftsmanshipPicker) {
+    return (
+      <OptionPickerScreen
+        title="Craftsmanship"
+        options={[...CYBERNETIC_CRAFTSMANSHIP_OPTIONS]}
+        selected={craftsmanship}
+        onSelect={(value) => { setCraftsmanship(value as CyberneticCraftsmanship); setShowCraftsmanshipPicker(false); }}
+        onClose={() => setShowCraftsmanshipPicker(false)}
+      />
+    );
+  }
+
   return (
     <PickerModal
       title={selectedType ?? title}
@@ -287,16 +314,14 @@ export function CustomItemForm({
             <label className={uiFormLabel}>
               Rarity <span className="text-slate-600">(optional)</span>
             </label>
-            <select
-              value={availability}
-              onChange={(e) => setAvailability(e.target.value)}
-              className={editableInputClass(true) + " mt-0.5 appearance-none"}
+            <button
+              type="button"
+              onClick={() => setShowAvailabilityPicker(true)}
+              className={editableInputClass(true) + " mt-0.5 appearance-none text-left flex items-center justify-between"}
             >
-              <option value="">— Select availability —</option>
-              {AVAILABILITY_OPTIONS.map((r) => (
-                <option key={r} value={r}>{r}</option>
-              ))}
-            </select>
+              <span className={availability ? "" : "text-slate-500"}>{availability || "— Select availability —"}</span>
+              <span className="text-slate-500">›</span>
+            </button>
           </div>
         </div>
 
@@ -555,16 +580,14 @@ export function CustomItemForm({
                 <label className={uiFormLabel}>
                   Craftsmanship <span className="text-slate-600">(optional)</span>
                 </label>
-                <select
-                  value={craftsmanship}
-                  onChange={(e) => setCraftsmanship(e.target.value as CyberneticCraftsmanship | "")}
-                  className={editableInputClass(true) + " mt-0.5 appearance-none"}
+                <button
+                  type="button"
+                  onClick={() => setShowCraftsmanshipPicker(true)}
+                  className={editableInputClass(true) + " mt-0.5 appearance-none text-left flex items-center justify-between"}
                 >
-                  <option value="">— Select —</option>
-                  {CYBERNETIC_CRAFTSMANSHIP_OPTIONS.map((c) => (
-                    <option key={c} value={c}>{c}</option>
-                  ))}
-                </select>
+                  <span className={craftsmanship ? "" : "text-slate-500"}>{craftsmanship || "— Select —"}</span>
+                  <span className="text-slate-500">›</span>
+                </button>
               </div>
               <div>
                 <label className={`${uiFormLabel} block mb-1.5`}>

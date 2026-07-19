@@ -17,6 +17,7 @@ import { uiPickerBackButton } from "../../../ui/buttonStyles";
 import { Button } from "../../../ui/Button";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import { PickerModal } from "../../../ui/PickerModal";
+import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
 import { sourceColour } from "../../../ui/sourceStyles";
 import { CRAFTSMANSHIP_ORDER, CRAFTSMANSHIP_STYLE } from "./cyberneticsConstants";
 
@@ -81,6 +82,8 @@ export function CustomImplantForm({
   );
   const [notes, setNotes] = useState(initialItem?.notes ?? "");
   const [saving, setSaving] = useState(false);
+  const [showAvailabilityPicker, setShowAvailabilityPicker] = useState(false);
+  const [showLocationPicker, setShowLocationPicker] = useState(false);
 
   const selectedLocation = LOCATION_OPTIONS[Number(locationIndex)]?.value;
   const canAdd =
@@ -110,6 +113,30 @@ export function CustomImplantForm({
       setSaving(false);
     }
   };
+
+  if (showAvailabilityPicker) {
+    return (
+      <OptionPickerScreen
+        title="Availability"
+        options={[...CUSTOM_IMPLANT_AVAILABILITY_OPTIONS]}
+        selected={availability}
+        onSelect={(value) => { setAvailability(value); setShowAvailabilityPicker(false); }}
+        onClose={() => setShowAvailabilityPicker(false)}
+      />
+    );
+  }
+
+  if (showLocationPicker) {
+    return (
+      <OptionPickerScreen
+        title="Installation"
+        options={LOCATION_OPTIONS.map((option, index) => ({ value: String(index), label: option.label }))}
+        selected={locationIndex}
+        onSelect={(value) => { setLocationIndex(value); setShowLocationPicker(false); }}
+        onClose={() => setShowLocationPicker(false)}
+      />
+    );
+  }
 
   return (
     <PickerModal
@@ -221,35 +248,28 @@ export function CustomImplantForm({
               <label className={uiFormLabel}>
                 Availability <span className="text-red-500">*</span>
               </label>
-              <select
-                value={availability}
-                onChange={(event) => setAvailability(event.target.value)}
-                className={editableInputClass(true) + " mt-0.5"}
+              <button
+                type="button"
+                onClick={() => setShowAvailabilityPicker(true)}
+                className={editableInputClass(true) + " mt-0.5 text-left flex items-center justify-between"}
               >
-                <option value="">Choose availability</option>
-                {CUSTOM_IMPLANT_AVAILABILITY_OPTIONS.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
+                <span className={availability ? "" : "text-slate-500"}>{availability || "Choose availability"}</span>
+                <span className="text-slate-500">›</span>
+              </button>
             </div>
             {includeLocation && (
               <div className="col-span-2">
                 <label className={uiFormLabel}>
                   Installation
                 </label>
-                <select
-                  value={locationIndex}
-                  onChange={(event) => setLocationIndex(event.target.value)}
-                  className={editableInputClass(true) + " mt-0.5"}
+                <button
+                  type="button"
+                  onClick={() => setShowLocationPicker(true)}
+                  className={editableInputClass(true) + " mt-0.5 text-left flex items-center justify-between"}
                 >
-                  {LOCATION_OPTIONS.map((option, index) => (
-                    <option key={option.label} value={String(index)}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                  <span>{LOCATION_OPTIONS[Number(locationIndex)]?.label}</span>
+                  <span className="text-slate-500">›</span>
+                </button>
               </div>
             )}
           </div>

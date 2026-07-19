@@ -12,6 +12,7 @@ import {
 import { uiIconRemoveButton } from "../../ui/buttonStyles";
 import { Button } from "../../ui/Button";
 import { SectionHeader } from "../../ui/SectionHeader";
+import { OptionPickerScreen } from "../../ui/OptionPickerScreen";
 import { useXpProposals } from "../../hooks/useXpProposals";
 import { proposeXpSpend } from "../../services/xpService";
 import { useToast } from "../../components/Toast/ToastContext";
@@ -57,6 +58,7 @@ export function ExperienceTab({
   const [newName, setNewName] = useState("");
   const [newCost, setNewCost] = useState(0);
   const [newNotes, setNewNotes] = useState("");
+  const [showRankPicker, setShowRankPicker] = useState(false);
 
   const pendingProposals = useMemo(
     () => proposals.filter((p) => p.status === "pending"),
@@ -231,23 +233,14 @@ export function ExperienceTab({
                 <label className={uiFormLabel}>
                   Rank
                 </label>
-                <div className="mt-0.5 grid grid-cols-3 gap-1.5">
-                  {RANK_OPTIONS.map((r) => (
-                    <button
-                      key={String(r)}
-                      type="button"
-                      onClick={() => setNewRank(r)}
-                      className={[
-                        "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
-                        newRank === r
-                          ? "border-red-600 bg-red-600/20 text-red-400"
-                          : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
-                      ].join(" ")}
-                    >
-                      {r === "elite" ? "Elite" : `Rank ${r}`}
-                    </button>
-                  ))}
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowRankPicker(true)}
+                  className="mt-0.5 w-full px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-800 border border-slate-500 rounded text-sm lg:text-base text-slate-100 text-left flex items-center justify-between"
+                >
+                  <span>{newRank === "elite" ? "Elite" : `Rank ${newRank}`}</span>
+                  <span className="text-slate-500">›</span>
+                </button>
               </div>
 
               <div className="col-span-2 sm:col-span-2">
@@ -376,6 +369,19 @@ export function ExperienceTab({
             </div>
           )}
         </section>
+      )}
+
+      {showRankPicker && (
+        <OptionPickerScreen
+          title="Rank"
+          options={RANK_OPTIONS.map((r) => ({ value: String(r), label: r === "elite" ? "Elite" : `Rank ${r}` }))}
+          selected={String(newRank)}
+          onSelect={(value) => {
+            setNewRank(value === "elite" ? "elite" : (Number(value) as RankAdvances["rank"]));
+            setShowRankPicker(false);
+          }}
+          onClose={() => setShowRankPicker(false)}
+        />
       )}
     </div>
   );

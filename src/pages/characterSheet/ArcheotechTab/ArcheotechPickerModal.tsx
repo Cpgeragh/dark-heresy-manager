@@ -10,6 +10,7 @@ import { uiPickerBackButton } from "../../../ui/buttonStyles";
 import { StatusBadge } from "../../../ui/StatusBadge";
 import { AVAILABILITY_OPTIONS } from "./archeotechConstants";
 import { PickerModal } from "../../../ui/PickerModal";
+import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
 import { Button } from "../../../ui/Button";
 import { InfoModal } from "../../../components/InfoModal";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
@@ -37,6 +38,7 @@ export function ArcheotechPickerModal({
   const [pending, setPending] = useState<ArcheotechRef | null>(null);
   const [gmCost, setGmCost] = useState("");
   const [gmRarity, setGmRarity] = useState("");
+  const [showRarityPicker, setShowRarityPicker] = useState(false);
 
   const filtered = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -86,6 +88,18 @@ export function ArcheotechPickerModal({
   function handleConfirm() {
     if (!pending || !canConfirm) return;
     onSelect(pending, formatMoneyInput(gmCost), gmRarity);
+  }
+
+  if (pending && showRarityPicker) {
+    return (
+      <OptionPickerScreen
+        title="Rarity"
+        options={[...AVAILABILITY_OPTIONS]}
+        selected={gmRarity}
+        onSelect={(value) => { setGmRarity(value); setShowRarityPicker(false); }}
+        onClose={() => setShowRarityPicker(false)}
+      />
+    );
   }
 
   return (
@@ -138,18 +152,14 @@ export function ArcheotechPickerModal({
             <label className={uiFormLabel}>
               Rarity <span className="text-red-400">*</span>
             </label>
-            <select
-              value={gmRarity}
-              onChange={(e) => setGmRarity(e.target.value)}
-              className={editableInputClass(true) + " appearance-none"}
+            <button
+              type="button"
+              onClick={() => setShowRarityPicker(true)}
+              className={editableInputClass(true) + " appearance-none text-left flex items-center justify-between"}
             >
-              <option value="">— Select availability —</option>
-              {AVAILABILITY_OPTIONS.map((r) => (
-                <option key={r} value={r}>
-                  {r}
-                </option>
-              ))}
-            </select>
+              <span className={gmRarity ? "" : "text-slate-500"}>{gmRarity || "— Select availability —"}</span>
+              <span className="text-slate-500">›</span>
+            </button>
           </div>
 
           <div className="flex gap-2 pt-1">

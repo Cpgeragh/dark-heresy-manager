@@ -8,6 +8,7 @@ import {
   type CyberneticRef,
 } from "../../../data/reference/cyberneticsReference";
 import { PickerModal } from "../../../ui/PickerModal";
+import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
 import { Button } from "../../../ui/Button";
 import { InfoModal } from "../../../components/InfoModal";
 import { Chip } from "../../../ui/Chip";
@@ -77,6 +78,7 @@ export function ImplantPicker({
   const [gmRarity, setGmRarity] = useState("");
   const [assignedValue, setAssignedValue] = useState<string | undefined>();
   const [assignedRarity, setAssignedRarity] = useState<string | undefined>();
+  const [showRarityPicker, setShowRarityPicker] = useState(false);
 
   const normalizedQuery = query.toLowerCase();
   const filtered = CYBERNETICS_REFERENCE.filter((r) =>
@@ -109,6 +111,7 @@ export function ImplantPicker({
     setGmRarity("");
     setAssignedValue(undefined);
     setAssignedRarity(undefined);
+    setShowRarityPicker(false);
   };
   const selectImplant = (ref: CyberneticRef) => {
     if (!editable) return;
@@ -157,6 +160,17 @@ export function ImplantPicker({
   );
 
   if (pendingCost) {
+    if (showRarityPicker) {
+      return (
+        <OptionPickerScreen
+          title="Rarity"
+          options={[...AVAILABILITY_OPTIONS]}
+          selected={gmRarity}
+          onSelect={(value) => { setGmRarity(value); setShowRarityPicker(false); }}
+          onClose={() => setShowRarityPicker(false)}
+        />
+      );
+    }
     return createPortal(
       <dialog
         ref={dialogRef}
@@ -197,16 +211,14 @@ export function ImplantPicker({
               <label className={uiFormLabel}>
                 Rarity <span className="text-red-400">*</span>
               </label>
-              <select
-                value={gmRarity}
-                onChange={(e) => setGmRarity(e.target.value)}
-                className={editableInputClass(true) + " appearance-none"}
+              <button
+                type="button"
+                onClick={() => setShowRarityPicker(true)}
+                className={editableInputClass(true) + " appearance-none text-left flex items-center justify-between"}
               >
-                <option value="">— Select availability —</option>
-                {AVAILABILITY_OPTIONS.map((r) => (
-                  <option key={r} value={r}>{r}</option>
-                ))}
-              </select>
+                <span className={gmRarity ? "" : "text-slate-500"}>{gmRarity || "— Select availability —"}</span>
+                <span className="text-slate-500">›</span>
+              </button>
             </div>
           )}
         </div>

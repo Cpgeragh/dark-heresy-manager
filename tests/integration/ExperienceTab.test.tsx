@@ -49,11 +49,12 @@ describe("ExperienceTab DM add-advance form", () => {
     );
   });
 
-  it("switches rank via the Rank button grid before adding an advance", async () => {
+  it("switches rank via the Rank picker before adding an advance", async () => {
     const user = userEvent.setup();
     const { onUpdate } = renderTab();
 
-    await user.click(screen.getByRole("button", { name: "Rank 3" }));
+    await user.click(screen.getByRole("button", { name: /Rank 1/ }));
+    await user.click(screen.getByText("Rank 3"));
     await user.type(screen.getByPlaceholderText("e.g. +10 Weapon Skill"), "New Skill");
     const costInput = screen.getByDisplayValue("0");
     await user.clear(costInput);
@@ -67,11 +68,11 @@ describe("ExperienceTab DM add-advance form", () => {
     );
   });
 
-  it("selects Elite rank via the button grid", async () => {
+  it("selects Elite rank via the Rank picker", async () => {
     const user = userEvent.setup();
     renderTab();
-    const eliteButton = screen.getByRole("button", { name: "Elite" });
-    await user.click(eliteButton);
-    expect(eliteButton.className).toContain("border-red-600");
+    await user.click(screen.getByRole("button", { name: /Rank 1/ }));
+    await user.click(screen.getByText("Elite"));
+    expect(screen.getByRole("button", { name: /Elite/ })).toBeInTheDocument();
   });
 });

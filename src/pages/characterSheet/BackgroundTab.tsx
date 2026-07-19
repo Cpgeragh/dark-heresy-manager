@@ -1,11 +1,12 @@
 // src/pages/characterSheet/BackgroundTab.tsx
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import type { CharacterHeader, TalentsAndTraitsBlock } from "../../types/Character";
 import { FormField } from "../../components/FormField";
 import { editableInputClass, uiSection, uiTextBody } from "../../ui/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { HOMEWORLD_LIST } from "../../data/homeworldData";
+import { OptionPickerScreen } from "../../ui/OptionPickerScreen";
 
 interface BackgroundTabProps {
   header: CharacterHeader;
@@ -25,6 +26,8 @@ export function BackgroundTab({
   onUpdateHeader,
   onUpdateTalents,
 }: BackgroundTabProps) {
+  const [showHomeworldPicker, setShowHomeworldPicker] = useState(false);
+
   const selectedHomeworld = HOMEWORLD_LIST.find((hw) => hw.id === talents.homeworld);
 
   // ── Header field helpers ───────────────────────────────────────────────────
@@ -54,12 +57,12 @@ export function BackgroundTab({
   );
 
   // ── Talent / homeworld helpers ─────────────────────────────────────────────
-  const handleHomeworldChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      if (!editable) return;
-      onUpdateTalents({ ...talents, homeworld: e.target.value });
+  const handleHomeworldSelect = useCallback(
+    (value: string) => {
+      onUpdateTalents({ ...talents, homeworld: value });
+      setShowHomeworldPicker(false);
     },
-    [editable, talents, onUpdateTalents]
+    [talents, onUpdateTalents]
   );
 
   const handleBackgroundNotes = useCallback(
@@ -152,21 +155,17 @@ export function BackgroundTab({
         <SectionHeader className="mb-3">Homeworld</SectionHeader>
         <section className={uiSection + " space-y-3"}>
           <div className="flex flex-col gap-1">
-            <select
+            <button
+              type="button"
               disabled={!editable}
-              value={talents.homeworld}
-              onChange={handleHomeworldChange}
-              className={editableInputClass(editable) + " appearance-none"}
+              onClick={editable ? () => setShowHomeworldPicker(true) : undefined}
+              className={editableInputClass(editable) + " appearance-none text-left flex items-center justify-between"}
             >
-              <option value="">— Select homeworld —</option>
-              {[...HOMEWORLD_LIST]
-                .sort((a, b) => a.name.localeCompare(b.name))
-                .map((hw) => (
-                  <option key={hw.id} value={hw.id}>
-                    {hw.name} ({hw.source})
-                  </option>
-                ))}
-            </select>
+              <span className={selectedHomeworld ? "" : "text-slate-500"}>
+                {selectedHomeworld ? `${selectedHomeworld.name} (${selectedHomeworld.source})` : "— Select homeworld —"}
+              </span>
+              {editable && <span className="text-slate-500">›</span>}
+            </button>
             {selectedHomeworld && (
               <p className={`text-xs lg:text-sm ${uiTextBody} italic px-1 mt-1`}>
                 {selectedHomeworld.description}
@@ -185,6 +184,18 @@ export function BackgroundTab({
           />
         </section>
       </div>
+
+      {showHomeworldPicker && (
+        <OptionPickerScreen
+          title="Homeworld"
+          options={[...HOMEWORLD_LIST]
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .map((hw) => ({ value: hw.id, label: `${hw.name} (${hw.source})` }))}
+          selected={talents.homeworld}
+          onSelect={handleHomeworldSelect}
+          onClose={() => setShowHomeworldPicker(false)}
+        />
+      )}
     </div>
   );
 }
