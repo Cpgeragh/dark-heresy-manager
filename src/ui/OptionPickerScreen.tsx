@@ -1,6 +1,7 @@
 // src/ui/OptionPickerScreen.tsx
 
 import { PickerModal } from "./PickerModal";
+import { ArrowLeft } from "./PickerArrows";
 import { uiItemName } from "./editableStyles";
 
 export type PickerOption = string | { value: string; label: string };
@@ -21,7 +22,8 @@ export function OptionPickerScreen({
   return (
     <PickerModal
       title={title}
-      closeLabel="←"
+      closeLabel={<ArrowLeft />}
+      closeAriaLabel="Back"
       query=""
       onQueryChange={() => {}}
       onClose={onClose}

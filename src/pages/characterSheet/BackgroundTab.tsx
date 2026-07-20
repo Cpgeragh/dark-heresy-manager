@@ -7,6 +7,7 @@ import { editableInputClass, uiSection, uiTextBody } from "../../ui/editableStyl
 import { SectionHeader } from "../../ui/SectionHeader";
 import { HOMEWORLD_LIST } from "../../data/homeworldData";
 import { OptionPickerScreen } from "../../ui/OptionPickerScreen";
+import { ArrowRight } from "../../ui/PickerArrows";
 
 interface BackgroundTabProps {
   header: CharacterHeader;
@@ -164,7 +165,7 @@ export function BackgroundTab({
               <span className={selectedHomeworld ? "" : "text-slate-500"}>
                 {selectedHomeworld ? `${selectedHomeworld.name} (${selectedHomeworld.source})` : "— Select homeworld —"}
               </span>
-              {editable && <span className="text-slate-500">›</span>}
+              {editable && <ArrowRight />}
             </button>
             {selectedHomeworld && (
               <p className={`text-xs lg:text-sm ${uiTextBody} italic px-1 mt-1`}>

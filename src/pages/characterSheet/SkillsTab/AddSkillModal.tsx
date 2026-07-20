@@ -5,6 +5,7 @@ import { CHAR_LABEL, type SkillWithComputed } from "./skillsConstants";
 import { charColour } from "../../../ui/sourceStyles";
 import { Chip } from "../../../ui/Chip";
 import { PickerModal } from "../../../ui/PickerModal";
+import { ArrowRight, ArrowLeft } from "../../../ui/PickerArrows";
 import { SkillRow } from "./SkillRow";
 import { colourPurple } from "../../../ui/colourTokens";
 import { uiItemName } from "../../../ui/editableStyles";
@@ -85,7 +86,8 @@ export function AddSkillModal({
         query=""
         onQueryChange={() => {}}
         onClose={() => setOpenCategory(null)}
-        closeLabel="←"
+        closeLabel={<ArrowLeft />}
+        closeAriaLabel="Back"
         hideSearch
         isEmpty={skills.length === 0}
       >
@@ -152,9 +154,7 @@ export function AddSkillModal({
                   )}
                 </div>
               </div>
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-slate-300 shrink-0 -rotate-90">
-                <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
-              </svg>
+              <ArrowRight />
             </button>
           </div>
         );

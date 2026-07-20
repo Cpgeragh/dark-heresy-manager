@@ -13,6 +13,7 @@ import { uiPickerBackButton } from "../../../ui/buttonStyles";
 import { Button } from "../../../ui/Button";
 import { PickerModal } from "../../../ui/PickerModal";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
+import { ArrowRight } from "../../../ui/PickerArrows";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import { sourceColour } from "../../../ui/sourceStyles";
@@ -247,7 +248,7 @@ export function CustomMeleeForm({
                 className={editableInputClass(true) + " mt-0.5 text-left flex items-center justify-between"}
               >
                 <span className={weaponClass ? "" : "text-slate-500"}>{weaponClass || "Choose class"}</span>
-                <span className="text-slate-500">›</span>
+                <ArrowRight />
               </button>
             </div>
           </div>
@@ -330,7 +331,7 @@ export function CustomMeleeForm({
                   className={editableInputClass(true) + " text-left flex items-center justify-between"}
                 >
                   <span>{DAMAGE_TYPE_OPTIONS.find((o) => o.value === damageType)?.label ?? damageType}</span>
-                  <span className="text-slate-500">›</span>
+                  <ArrowRight />
                 </button>
               </div>
             </div>
@@ -388,7 +389,7 @@ export function CustomMeleeForm({
                 className={editableInputClass(true) + " mt-0.5 text-left flex items-center justify-between"}
               >
                 <span className={availability ? "" : "text-slate-500"}>{availability || "Choose availability"}</span>
-                <span className="text-slate-500">›</span>
+                <ArrowRight />
               </button>
             </div>
           </div>

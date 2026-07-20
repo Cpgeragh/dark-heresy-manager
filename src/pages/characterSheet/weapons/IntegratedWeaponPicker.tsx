@@ -6,6 +6,7 @@ import { Chip } from "../../../ui/Chip";
 import { InfoModal } from "../../../components/InfoModal";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
+import { ArrowLeft } from "../../../ui/PickerArrows";
 import { uiTextBody, uiTextLabel, uiTextMuted, uiItemName, uiInfoModalWrapper } from "../../../ui/editableStyles";
 import { colourViolet, colourSky, colourOrange } from "../../../ui/colourTokens";
 import { INTEGRATED_RANGED_REFS, INTEGRATED_MELEE_REFS } from "../../../utils/weaponUtils";
@@ -56,7 +57,8 @@ export function IntegratedWeaponPicker({
       <PickerModal
         title={selected.ref.name}
         titleClassName="text-slate-200"
-        closeLabel="←"
+        closeLabel={<ArrowLeft />}
+        closeAriaLabel="Back"
         query=""
         onQueryChange={() => {}}
         onClose={resetPicker}

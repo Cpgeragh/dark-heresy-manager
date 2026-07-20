@@ -5,6 +5,7 @@ import type { ArmourCraftsmanship } from "../../../types/Character";
 import { ARMOUR_REFERENCE, type ArmourRef } from "../../../data/reference/armourReference";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { PickerModal } from "../../../ui/PickerModal";
+import { ArrowLeft } from "../../../ui/PickerArrows";
 import { Button } from "../../../ui/Button";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
@@ -58,7 +59,8 @@ export function ForceFieldPicker({
       <PickerModal
         title={selected.name}
         titleClassName="text-slate-200"
-        closeLabel="←"
+        closeLabel={<ArrowLeft />}
+        closeAriaLabel="Back"
         query=""
         onQueryChange={() => {}}
         onClose={resetPicker}

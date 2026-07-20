@@ -16,6 +16,7 @@ import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import { PickerModal } from "../../../ui/PickerModal";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
+import { ArrowRight, ArrowLeft } from "../../../ui/PickerArrows";
 import { ITEM_TYPES, AVAILABILITY_OPTIONS, type ItemType } from "./archeotechConstants";
 import { colourSky, colourRose } from "../../../ui/colourTokens";
 import { LOCATION_LABELS, LOCATION_ORDER } from "../ArmourTab/armourHelpers";
@@ -180,7 +181,8 @@ export function CustomItemForm({
         title={title}
         query=""
         onQueryChange={() => {}}
-        closeLabel="←"
+        closeLabel={<ArrowLeft />}
+        closeAriaLabel="Back"
         onClose={onBack ?? onCancel}
         isEmpty={false}
         hideSearch
@@ -237,7 +239,8 @@ export function CustomItemForm({
     <PickerModal
       title={selectedType ?? title}
       titleClassName="text-slate-200"
-      closeLabel={startType ? undefined : "←"}
+      closeLabel={startType ? undefined : <ArrowLeft />}
+      closeAriaLabel={startType ? "Close" : "Back"}
       query=""
       onQueryChange={() => {}}
       onClose={startType ? onCancel : () => setPhase("select")}
@@ -320,7 +323,7 @@ export function CustomItemForm({
               className={editableInputClass(true) + " mt-0.5 appearance-none text-left flex items-center justify-between"}
             >
               <span className={availability ? "" : "text-slate-500"}>{availability || "— Select availability —"}</span>
-              <span className="text-slate-500">›</span>
+              <ArrowRight />
             </button>
           </div>
         </div>
@@ -586,7 +589,7 @@ export function CustomItemForm({
                   className={editableInputClass(true) + " mt-0.5 appearance-none text-left flex items-center justify-between"}
                 >
                   <span className={craftsmanship ? "" : "text-slate-500"}>{craftsmanship || "— Select —"}</span>
-                  <span className="text-slate-500">›</span>
+                  <ArrowRight />
                 </button>
               </div>
               <div>

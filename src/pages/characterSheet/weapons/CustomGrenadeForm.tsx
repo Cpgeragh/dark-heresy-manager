@@ -13,6 +13,7 @@ import { uiPickerBackButton } from "../../../ui/buttonStyles";
 import { Button } from "../../../ui/Button";
 import { PickerModal } from "../../../ui/PickerModal";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
+import { ArrowRight } from "../../../ui/PickerArrows";
 import { sourceColour } from "../../../ui/sourceStyles";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
@@ -252,7 +253,7 @@ export function CustomGrenadeForm({
                 className={editableInputClass(true) + " mt-0.5 text-left flex items-center justify-between"}
               >
                 <span className={type ? "" : "text-slate-500"}>{type || "Choose type"}</span>
-                <span className="text-slate-500">›</span>
+                <ArrowRight />
               </button>
             </div>
             <div>
@@ -317,7 +318,7 @@ export function CustomGrenadeForm({
                   className={editableInputClass(true) + " text-left flex items-center justify-between"}
                 >
                   <span>{DAMAGE_TYPE_OPTIONS.find((o) => o.value === damageType)?.label ?? damageType}</span>
-                  <span className="text-slate-500">›</span>
+                  <ArrowRight />
                 </button>
               </div>
             </div>
@@ -355,7 +356,7 @@ export function CustomGrenadeForm({
                 className={editableInputClass(true) + " mt-0.5 text-left flex items-center justify-between"}
               >
                 <span className={availability ? "" : "text-slate-500"}>{availability || "Choose availability"}</span>
-                <span className="text-slate-500">›</span>
+                <ArrowRight />
               </button>
             </div>
           </div>

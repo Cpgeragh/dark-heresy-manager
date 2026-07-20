@@ -15,6 +15,7 @@ import { Chip } from "../../ui/Chip";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { PowerCard } from "./components/PowerCard";
 import { PickerModal } from "../../ui/PickerModal";
+import { ArrowLeft } from "../../ui/PickerArrows";
 import { InfoModal } from "../../components/InfoModal";
 import { TALENT_DESCRIPTIONS } from "../../data/talentDescriptions";
 import { sourceColour } from "../../ui/sourceStyles";
@@ -269,7 +270,8 @@ function CustomPowerForm({
       query=""
       onQueryChange={() => undefined}
       onClose={initialPower ? onCancel : onBack}
-      closeLabel={initialPower ? undefined : "←"}
+      closeLabel={initialPower ? undefined : <ArrowLeft />}
+      closeAriaLabel={initialPower ? "Close" : "Back"}
       hideSearch
       isEmpty={false}
     >

@@ -27,6 +27,7 @@ import { TRAIT_DESCRIPTIONS } from "../../data/traitDescriptions";
 import { sourceColour } from "../../ui/sourceStyles";
 import { PickerModal } from "../../ui/PickerModal";
 import { OptionPickerScreen } from "../../ui/OptionPickerScreen";
+import { ArrowRight } from "../../ui/PickerArrows";
 import { TrashIcon } from "../../ui/TrashIcon";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -131,7 +132,7 @@ export function TalentPickerModal({
             <span className={specialisation ? "" : "text-slate-500"}>
               {specialisation || `${talentData.specialisationLabel ?? "Specialisation"}…`}
             </span>
-            <span className="text-slate-500">›</span>
+            <ArrowRight />
           </button>
         ) : isNumeric ? (
           <>

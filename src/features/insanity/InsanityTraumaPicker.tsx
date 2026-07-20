@@ -4,6 +4,7 @@ import { InfoModal } from "../../components/InfoModal";
 import type { InsanityTraumaEntry } from "../../types/Character";
 import { Chip } from "../../ui/Chip";
 import { PickerModal } from "../../ui/PickerModal";
+import { ArrowLeft } from "../../ui/PickerArrows";
 import { uiActionButton, uiPickerBackButton } from "../../ui/buttonStyles";
 import { colourAmberFaint } from "../../ui/colourTokens";
 import { editableInputClass, uiFormLabel, uiInfoModalWrapper, uiItemName, uiTextLabel } from "../../ui/editableStyles";
@@ -59,7 +60,8 @@ export function InsanityTraumaPicker({
         query=""
         onQueryChange={() => undefined}
         onClose={() => setSelected(null)}
-        closeLabel="←"
+        closeLabel={<ArrowLeft />}
+        closeAriaLabel="Back"
         hideSearch
         isEmpty={false}
       >
@@ -89,7 +91,8 @@ export function InsanityTraumaPicker({
         query=""
         onQueryChange={() => undefined}
         onClose={() => setCustomMode(false)}
-        closeLabel="←"
+        closeLabel={<ArrowLeft />}
+        closeAriaLabel="Back"
         hideSearch
         isEmpty={false}
         footer={

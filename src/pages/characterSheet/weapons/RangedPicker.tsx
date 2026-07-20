@@ -19,6 +19,7 @@ import { Button } from "../../../ui/Button";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
+import { ArrowRight, ArrowLeft } from "../../../ui/PickerArrows";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
 import { InfoModal } from "../../../components/InfoModal";
 import { StatChip, DamageTypeChip, SpecialRulesContent } from "./weaponShared";
@@ -127,7 +128,8 @@ export function RangedPicker({
       <PickerModal
         title={selected.name}
         titleClassName="text-slate-200"
-        closeLabel="←"
+        closeLabel={<ArrowLeft />}
+        closeAriaLabel="Back"
         query=""
         onQueryChange={() => {}}
         onClose={resetPicker}
@@ -183,7 +185,7 @@ export function RangedPicker({
             className="flex-1 rounded border border-slate-500 bg-slate-900 px-2 py-1 text-xs lg:text-sm text-slate-200 text-left flex items-center justify-between"
           >
             <span>{classFilter ?? "All Classes"}</span>
-            <span className="text-slate-500">›</span>
+            <ArrowRight />
           </button>
           <button
             type="button"
@@ -191,7 +193,7 @@ export function RangedPicker({
             className="flex-1 rounded border border-slate-500 bg-slate-900 px-2 py-1 text-xs lg:text-sm text-slate-200 text-left flex items-center justify-between"
           >
             <span>{familyFilter ?? "All Types"}</span>
-            <span className="text-slate-500">›</span>
+            <ArrowRight />
           </button>
         </div>
       }

@@ -9,6 +9,7 @@ import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { InfoModal } from "../../../components/InfoModal";
 import type { WeaponUpgradeRef } from "../../../data/reference/weaponUpgradeReference";
 import { PickerModal } from "../../../ui/PickerModal";
+import { ArrowRight } from "../../../ui/PickerArrows";
 import { formatWeightForDisplay } from "../../../ui/weightFormat";
 import { TrashIcon } from "../../../ui/TrashIcon";
 import {
@@ -150,7 +151,7 @@ export function WeaponQualitySelector({
           className="w-full rounded border border-slate-500 bg-slate-900 px-2 py-1 text-sm lg:text-base text-slate-200 text-left flex items-center justify-between"
         >
           <span className={pendingQuality ? "" : "text-slate-500"}>{pendingQuality ?? "Choose quality…"}</span>
-          <span className="text-slate-500">›</span>
+          <ArrowRight />
         </button>
         {needsParameter && (
           <input

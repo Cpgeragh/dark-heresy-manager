@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import type { TabId } from "../pages/characterSheet/types";
 import { uiDismissButton } from "../ui/buttonStyles";
+import { ArrowLeft, ArrowRight } from "../ui/PickerArrows";
 
 // ================================================================
 // NAVIGATION STRUCTURE
@@ -195,7 +196,7 @@ export function SectionDrawer({
                     className="w-full flex items-center justify-between px-4 py-3 text-sm text-slate-200 hover:bg-slate-800 transition text-left"
                   >
                     <span>{cat.label}</span>
-                    <span className="text-slate-400 text-xs">›</span>
+                    <ArrowRight />
                   </button>
                 </li>
               ))}
@@ -215,7 +216,7 @@ export function SectionDrawer({
                   onClick={goBack}
                   className="flex items-center gap-2 px-4 py-3 w-full text-sm hover:bg-slate-800 transition border-b border-slate-700"
                 >
-                  <span className="text-slate-400">‹</span>
+                  <ArrowLeft />
                   <span className="font-semibold text-slate-200">{activeCategory.label}</span>
                 </button>
 

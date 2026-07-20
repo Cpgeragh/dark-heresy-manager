@@ -18,6 +18,7 @@ import { Button } from "../../../ui/Button";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import { PickerModal } from "../../../ui/PickerModal";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
+import { ArrowRight } from "../../../ui/PickerArrows";
 import { sourceColour } from "../../../ui/sourceStyles";
 import { CRAFTSMANSHIP_ORDER, CRAFTSMANSHIP_STYLE } from "./cyberneticsConstants";
 
@@ -254,7 +255,7 @@ export function CustomImplantForm({
                 className={editableInputClass(true) + " mt-0.5 text-left flex items-center justify-between"}
               >
                 <span className={availability ? "" : "text-slate-500"}>{availability || "Choose availability"}</span>
-                <span className="text-slate-500">›</span>
+                <ArrowRight />
               </button>
             </div>
             {includeLocation && (
@@ -268,7 +269,7 @@ export function CustomImplantForm({
                   className={editableInputClass(true) + " mt-0.5 text-left flex items-center justify-between"}
                 >
                   <span>{LOCATION_OPTIONS[Number(locationIndex)]?.label}</span>
-                  <span className="text-slate-500">›</span>
+                  <ArrowRight />
                 </button>
               </div>
             )}

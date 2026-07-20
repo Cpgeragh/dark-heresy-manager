@@ -11,6 +11,7 @@ import { StatusBadge } from "../../../ui/StatusBadge";
 import { AVAILABILITY_OPTIONS } from "./archeotechConstants";
 import { PickerModal } from "../../../ui/PickerModal";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
+import { ArrowLeft, ArrowRight } from "../../../ui/PickerArrows";
 import { Button } from "../../../ui/Button";
 import { InfoModal } from "../../../components/InfoModal";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
@@ -109,7 +110,8 @@ export function ArcheotechPickerModal({
       query={query}
       onQueryChange={setQuery}
       onClose={pending ? () => setPending(null) : onClose}
-      closeLabel={pending ? "←" : "×"}
+      closeLabel={pending ? <ArrowLeft /> : "×"}
+      closeAriaLabel={pending ? "Back" : "Close"}
       isEmpty={!pending && filtered.length === 0 && filteredCustom.length === 0}
       hideSearch={!!pending}
       footer={
@@ -158,7 +160,7 @@ export function ArcheotechPickerModal({
               className={editableInputClass(true) + " appearance-none text-left flex items-center justify-between"}
             >
               <span className={gmRarity ? "" : "text-slate-500"}>{gmRarity || "— Select availability —"}</span>
-              <span className="text-slate-500">›</span>
+              <ArrowRight />
             </button>
           </div>
 

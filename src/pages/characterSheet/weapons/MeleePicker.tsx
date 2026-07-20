@@ -19,6 +19,7 @@ import { Button } from "../../../ui/Button";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
+import { ArrowLeft } from "../../../ui/PickerArrows";
 import { InfoModal } from "../../../components/InfoModal";
 import { StatChip, DamageTypeChip, SpecialRulesContent } from "./weaponShared";
 import {
@@ -73,7 +74,8 @@ export function MeleePicker({
       <PickerModal
         title={selected.name}
         titleClassName="text-slate-200"
-        closeLabel="←"
+        closeLabel={<ArrowLeft />}
+        closeAriaLabel="Back"
         query=""
         onQueryChange={() => {}}
         onClose={resetPicker}

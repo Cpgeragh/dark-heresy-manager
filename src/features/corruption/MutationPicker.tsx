@@ -5,6 +5,7 @@ import type { CorruptionMutationEntry } from "../../types/Character";
 import { Button } from "../../ui/Button";
 import { Chip } from "../../ui/Chip";
 import { PickerModal } from "../../ui/PickerModal";
+import { ArrowLeft } from "../../ui/PickerArrows";
 import { uiActionButton, uiPickerBackButton } from "../../ui/buttonStyles";
 import { colourAmberFaint } from "../../ui/colourTokens";
 import {
@@ -74,7 +75,8 @@ export function MutationPicker({
         query=""
         onQueryChange={() => undefined}
         onClose={() => setCustomMode(false)}
-        closeLabel="<"
+        closeLabel={<ArrowLeft />}
+        closeAriaLabel="Back"
         hideSearch
         isEmpty={false}
         footer={
@@ -150,7 +152,8 @@ export function MutationPicker({
         query=""
         onQueryChange={() => undefined}
         onClose={() => setSelected(null)}
-        closeLabel="<"
+        closeLabel={<ArrowLeft />}
+        closeAriaLabel="Back"
         hideSearch
         isEmpty={false}
         footer={

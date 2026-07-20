@@ -6,6 +6,7 @@ import { Button } from "../../ui/Button";
 import { Chip } from "../../ui/Chip";
 import { PickerModal } from "../../ui/PickerModal";
 import { OptionPickerScreen } from "../../ui/OptionPickerScreen";
+import { ArrowRight, ArrowLeft } from "../../ui/PickerArrows";
 import { uiActionButton, uiPickerBackButton } from "../../ui/buttonStyles";
 import { editableInputClass, uiFormLabel, uiInfoModalWrapper, uiItemName, uiTextBody, uiTextLabel } from "../../ui/editableStyles";
 import { DisorderInfoContent } from "./InsanityReferenceModals";
@@ -111,7 +112,8 @@ export function InsanityDisorderPicker({
         query=""
         onQueryChange={() => undefined}
         onClose={() => setCustomMode(false)}
-        closeLabel="←"
+        closeLabel={<ArrowLeft />}
+        closeAriaLabel="Back"
         hideSearch
         isEmpty={false}
         footer={
@@ -159,7 +161,7 @@ export function InsanityDisorderPicker({
               className="mt-1 w-full rounded border border-slate-500 bg-slate-900 px-2 py-1.5 text-sm lg:text-base text-slate-200 text-left flex items-center justify-between"
             >
               <span>{customType}</span>
-              <span className="text-slate-500">›</span>
+              <ArrowRight />
             </button>
           </div>
 
@@ -214,7 +216,8 @@ export function InsanityDisorderPicker({
         query=""
         onQueryChange={() => undefined}
         onClose={() => setSelected(null)}
-        closeLabel="←"
+        closeLabel={<ArrowLeft />}
+        closeAriaLabel="Back"
         hideSearch
         isEmpty={false}
         footer={
@@ -281,7 +284,7 @@ export function InsanityDisorderPicker({
           className="w-full rounded border border-slate-500 bg-slate-900 px-2 py-1 text-xs lg:text-sm text-slate-200 text-left flex items-center justify-between"
         >
           <span>{typeFilter === "All" ? "All Disorder Types" : typeFilter}</span>
-          <span className="text-slate-500">›</span>
+          <ArrowRight />
         </button>
       }
       footer={

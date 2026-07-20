@@ -9,6 +9,7 @@ import {
 } from "../../../data/reference/cyberneticsReference";
 import { PickerModal } from "../../../ui/PickerModal";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
+import { ArrowRight } from "../../../ui/PickerArrows";
 import { Button } from "../../../ui/Button";
 import { InfoModal } from "../../../components/InfoModal";
 import { Chip } from "../../../ui/Chip";
@@ -217,7 +218,7 @@ export function ImplantPicker({
                 className={editableInputClass(true) + " appearance-none text-left flex items-center justify-between"}
               >
                 <span className={gmRarity ? "" : "text-slate-500"}>{gmRarity || "— Select availability —"}</span>
-                <span className="text-slate-500">›</span>
+                <ArrowRight />
               </button>
             </div>
           )}

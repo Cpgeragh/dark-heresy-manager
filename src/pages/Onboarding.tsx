@@ -13,6 +13,7 @@ import { formatRecoveryCodeInput } from "../utils/recoveryCode";
 import { saveFirstName } from "../services/profileService";
 import { uiSectionHeader, uiTextError } from "../ui/editableStyles";
 import { Button } from "../ui/Button";
+import { ArrowLeft, ArrowRight } from "../ui/PickerArrows";
 
 type Step = "welcome" | "show-code" | "reclaim";
 
@@ -155,9 +156,10 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
 
               <button
                 onClick={() => { setError(null); goToStep("reclaim"); }}
-                className="w-full text-sm lg:text-base text-slate-300 hover:text-slate-100 transition text-center"
+                className="w-full text-sm lg:text-base text-slate-300 hover:text-slate-100 transition flex items-center justify-center gap-2"
               >
-                Returning user? Reclaim your identity →
+                <span>Returning user? Reclaim your identity</span>
+                <ArrowRight />
               </button>
             </div>
           </div>
@@ -169,9 +171,10 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
             <div className="relative flex items-center justify-center">
               <button
                 onClick={() => { setError(null); goToStep("welcome"); }}
-                className="absolute left-0 text-sm lg:text-base text-slate-400 hover:text-slate-200 transition"
+                className="absolute left-0 text-sm lg:text-base text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5"
               >
-                ← Back
+                <ArrowLeft />
+                <span>Back</span>
               </button>
               <h1 className="text-lg lg:text-xl font-semibold text-slate-100 text-center">Returning User</h1>
             </div>
@@ -217,9 +220,10 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
             <div className="relative flex items-center justify-center">
               <button
                 onClick={() => goToStep("welcome")}
-                className="absolute left-0 text-sm lg:text-base text-slate-400 hover:text-slate-200 transition"
+                className="absolute left-0 text-sm lg:text-base text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5"
               >
-                ← Back
+                <ArrowLeft />
+                <span>Back</span>
               </button>
               <h1 className="text-lg lg:text-xl font-semibold text-slate-100 text-center">Data Recovery Code</h1>
             </div>

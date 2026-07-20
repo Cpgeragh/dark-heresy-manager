@@ -5,6 +5,7 @@ import { uiPickerBackButton } from "../../../ui/buttonStyles";
 import { Button } from "../../../ui/Button";
 import { PickerModal } from "../../../ui/PickerModal";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
+import { ArrowRight } from "../../../ui/PickerArrows";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import { sourceColour } from "../../../ui/sourceStyles";
@@ -321,7 +322,7 @@ export function CustomPieceForm({
                 className={editableInputClass(true) + " mt-0.5 text-left flex items-center justify-between"}
               >
                 <span className={availability ? "" : "text-slate-500"}>{availability || "Choose availability"}</span>
-                <span className="text-slate-500">›</span>
+                <ArrowRight />
               </button>
             </div>
           </div>

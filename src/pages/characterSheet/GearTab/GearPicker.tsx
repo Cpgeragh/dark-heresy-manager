@@ -6,6 +6,7 @@ import { GEAR_REFERENCE, type GearRef } from "../../../data/reference/gearRefere
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal } from "../../../ui/PickerModal";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
+import { ArrowLeft, ArrowRight } from "../../../ui/PickerArrows";
 import { Button } from "../../../ui/Button";
 import { editableInputClass, uiTextBody, uiFormLabel, uiInfoModalWrapper, uiItemName, uiTextGMNote } from "../../../ui/editableStyles";
 import { uiPickerBackButton } from "../../../ui/buttonStyles";
@@ -108,7 +109,8 @@ export function GearPicker({
       query={query}
       onQueryChange={setQuery}
       onClose={pending ? () => setPending(null) : onClose}
-      closeLabel={pending ? "←" : "×"}
+      closeLabel={pending ? <ArrowLeft /> : "×"}
+      closeAriaLabel={pending ? "Back" : "Close"}
       hideSearch={!!pending}
       isEmpty={isEmpty}
       footer={
@@ -157,7 +159,7 @@ export function GearPicker({
                 className={editableInputClass(true) + " appearance-none text-left flex items-center justify-between"}
               >
                 <span className={gmRarity ? "" : "text-slate-500"}>{gmRarity || "— Select availability —"}</span>
-                <span className="text-slate-500">›</span>
+                <ArrowRight />
               </button>
             </div>
           )}

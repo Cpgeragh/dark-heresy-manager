@@ -13,6 +13,7 @@ import { uiIconRemoveButton } from "../../ui/buttonStyles";
 import { Button } from "../../ui/Button";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { OptionPickerScreen } from "../../ui/OptionPickerScreen";
+import { ArrowRight } from "../../ui/PickerArrows";
 import { useXpProposals } from "../../hooks/useXpProposals";
 import { proposeXpSpend } from "../../services/xpService";
 import { useToast } from "../../components/Toast/ToastContext";
@@ -239,7 +240,7 @@ export function ExperienceTab({
                   className="mt-0.5 w-full px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-800 border border-slate-500 rounded text-sm lg:text-base text-slate-100 text-left flex items-center justify-between"
                 >
                   <span>{newRank === "elite" ? "Elite" : `Rank ${newRank}`}</span>
-                  <span className="text-slate-500">›</span>
+                  <ArrowRight />
                 </button>
               </div>
 

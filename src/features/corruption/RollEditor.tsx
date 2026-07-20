@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "../../ui/Button";
 import { PickerModal } from "../../ui/PickerModal";
+import { ArrowLeft } from "../../ui/PickerArrows";
 import { editableInputClass, uiFormLabel } from "../../ui/editableStyles";
 import { CHARACTERISTIC_LABELS, type CharacteristicModifier } from "./characteristicModifiers";
 
@@ -38,7 +39,8 @@ export function RollEditor({
       query=""
       onQueryChange={() => undefined}
       onClose={onCancel}
-      closeLabel="<"
+      closeLabel={<ArrowLeft />}
+      closeAriaLabel="Back"
       hideSearch
       isEmpty={false}
       footer={

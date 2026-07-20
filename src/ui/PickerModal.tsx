@@ -59,9 +59,11 @@ interface Props {
   emptyMessage?: string;
   /**
    * Label for the close/back button. Defaults to "×".
-   * Pass "←" for a two-step modal's back button.
+   * Pass an <ArrowLeft /> for a two-step modal's back button.
    */
-  closeLabel?: string;
+  closeLabel?: ReactNode;
+  /** Accessible label for the close/back button. Defaults to "Close". */
+  closeAriaLabel?: string;
   /**
    * When true the search input row is hidden.
    * Use for a second "form" step that replaces the search list.
@@ -98,6 +100,7 @@ export function PickerModal({
   emptyMessage = "No matches.",
   titleClassName,
   closeLabel = "×",
+  closeAriaLabel = "Close",
   hideSearch = false,
   filterRow,
   footer,
@@ -145,7 +148,7 @@ export function PickerModal({
           <h3 className={`text-center text-sm lg:text-base font-cinzel font-bold ${titleClassName ?? "text-red-500"}`}>{title}</h3>
           <button
             onClick={onClose}
-            aria-label="Close"
+            aria-label={closeAriaLabel}
             className="justify-self-end text-slate-400 hover:text-slate-200 text-lg lg:text-xl leading-none"
           >
             {closeLabel}
