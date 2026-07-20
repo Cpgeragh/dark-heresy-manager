@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import type { ArcheotechItem } from "../../../types/Character";
 import { Chip } from "../../../ui/Chip";
-import { uiSection, uiCardTitle } from "../../../ui/editableStyles";
+import { uiSectionShell, uiCardTitle } from "../../../ui/editableStyles";
 import { uiExpandButton, uiIconRemoveButton } from "../../../ui/buttonStyles";
 import { colourArcheotech, colourLime } from "../../../ui/colourTokens";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
@@ -39,13 +39,13 @@ export function ArcheotechShieldRow({
   const locations = item.locations ?? [];
 
   const containerClass = highlightAsArcheotech
-    ? "border border-amber-500/60 bg-amber-900/10 rounded-lg p-3 lg:p-4"
-    : uiSection;
+    ? "border border-amber-500/60 bg-amber-900/10 rounded-lg overflow-hidden"
+    : `${uiSectionShell} overflow-hidden`;
 
   return (
     <div className={containerClass}>
       <button
-        className="w-full flex items-stretch gap-2"
+        className="w-full flex items-stretch gap-2 p-3 lg:p-4"
         onClick={() => setExpanded((e) => !e)}
         aria-expanded={expanded}
       >
@@ -76,7 +76,7 @@ export function ArcheotechShieldRow({
       </button>
 
       {expanded && (
-        <>
+        <div className="px-3 pb-3 lg:px-4 lg:pb-4">
           {editable && (
             <div className="flex justify-end mt-2">
               <button onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
@@ -94,7 +94,7 @@ export function ArcheotechShieldRow({
             availability={item.availability}
             className="flex flex-wrap gap-1.5 mt-1"
           />
-        </>
+        </div>
       )}
     </div>
   );

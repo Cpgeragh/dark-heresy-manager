@@ -64,8 +64,11 @@ export function editableTextareaClass(isEditable: boolean) {
 export const uiSectionHeader =
   "border-l-2 border-red-700 pl-2 text-xs lg:text-sm font-cinzel font-semibold uppercase tracking-widest text-red-500";
 
-/** Standard section card — bright border, semi-transparent background. */
-export const uiSection = "rounded-lg border border-slate-500 bg-slate-900/60 p-3 lg:p-4";
+/** Standard card shell — bright border and semi-transparent background, without padding. */
+export const uiSectionShell = "rounded-lg border border-slate-500 bg-slate-900/60";
+
+/** Standard padded section card. */
+export const uiSection = `${uiSectionShell} p-3 lg:p-4`;
 
 export const uiCell = "rounded border border-slate-500 bg-slate-950/60";
 

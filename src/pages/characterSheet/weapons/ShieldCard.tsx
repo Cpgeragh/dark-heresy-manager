@@ -7,7 +7,7 @@ import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/StatusBadge";
 import {
-  uiSection,
+  uiSectionShell,
   uiTextBody,
   uiTextLabel,
   uiTextMuted,
@@ -68,10 +68,10 @@ export function ShieldCard({
     .filter((name) => Boolean(name) && Boolean(WEAPON_SPECIAL_RULES[name]));
 
   return (
-    <div className={uiSection + " space-y-3"}>
+    <div className={uiSectionShell + " overflow-hidden"}>
       {/* Header — always visible */}
       <button
-        className="w-full flex items-stretch justify-between gap-2"
+        className="w-full flex items-stretch justify-between gap-2 p-3 lg:p-4"
         onClick={() => setExpanded((e) => !e)}
         aria-expanded={expanded}
       >
@@ -100,7 +100,7 @@ export function ShieldCard({
       </button>
 
       {expanded && (
-        <>
+        <div className="px-3 pb-3 lg:px-4 lg:pb-4 space-y-3">
           {editable && (
             <div className="flex justify-end">
               <button onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
@@ -173,7 +173,7 @@ export function ShieldCard({
             source={item.source}
             className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1"
           />
-        </>
+        </div>
       )}
     </div>
   );

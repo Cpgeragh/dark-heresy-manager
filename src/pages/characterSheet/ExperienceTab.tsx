@@ -199,7 +199,7 @@ export function ExperienceTab({
               <h4 className="text-sm lg:text-base font-semibold text-slate-100 mb-2">Rank {rankBlock.rank}</h4>
               <ul className="space-y-2">
                 {rankBlock.advances.map((adv) => (
-                  <li key={adv.id} className="rounded border border-slate-500 bg-slate-900/60 p-3">
+                  <li key={adv.id} className={uiSection}>
                     <div className="flex items-baseline justify-between gap-4">
                     <div className="font-code text-sm lg:text-base text-slate-100">{adv.name}</div>
                       <div className="flex items-center gap-2 shrink-0">
@@ -225,7 +225,7 @@ export function ExperienceTab({
 
         {/* ADD ADVANCE FORM — DM only */}
         {isDM && (
-          <div className="border border-slate-500 rounded-lg p-4 space-y-3 bg-slate-800/60">
+          <div className={uiSection + " space-y-3"}>
             <p className="text-xs lg:text-sm font-semibold text-red-500 uppercase tracking-wide">
               Add Advance
             </p>

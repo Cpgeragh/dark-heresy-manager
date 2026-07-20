@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { useToast } from "../../components/Toast";
 import { createSession } from "../../services/sessionService";
-import { uiFormLabelSecondary } from "../../ui/editableStyles";
+import { uiFormLabelSecondary, uiSection } from "../../ui/editableStyles";
 
 interface Character {
   id: string;
@@ -60,7 +60,7 @@ export function SessionForm({ campaignId, characters, onClose }: Props) {
   }, [campaignId, date, summary, dmNotes, xpAwarded, attendees, toast, onClose]);
 
   return (
-    <div className="rounded-lg border border-slate-500 bg-slate-900/60 p-3 lg:p-4 space-y-4">
+    <div className={uiSection + " space-y-4"}>
       <h3 className="border-l-2 border-red-700 pl-2 text-xs lg:text-sm font-semibold uppercase tracking-widest text-red-500">New Session</h3>
 
       <div className="grid grid-cols-2 gap-4">

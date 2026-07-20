@@ -5,7 +5,7 @@ import type { Timestamp } from "firebase/firestore";
 import type { SessionDocument } from "../../types/Firestore";
 import { useToast } from "../../components/Toast";
 import { ConfirmInline } from "../../ui/ConfirmInline";
-import { uiFormLabelSecondary } from "../../ui/editableStyles";
+import { uiFormLabelSecondary, uiSection } from "../../ui/editableStyles";
 
 interface Character {
   id: string;
@@ -212,7 +212,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
   }
 
   return (
-    <div className="rounded-lg border border-slate-500 bg-slate-900/60 p-3 lg:p-4 space-y-2">
+    <div className={uiSection + " space-y-2"}>
       <div className="flex items-center justify-between">
         <span className="font-semibold lg:text-lg">{dateStr}</span>
         <div className="flex items-center gap-2">

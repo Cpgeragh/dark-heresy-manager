@@ -47,9 +47,9 @@ export function CyberneticWeaponCard({
   const [expanded, setExpanded] = useState(true);
 
   return (
-    <div className="border border-pink-500/60 bg-pink-900/10 rounded-lg p-3 lg:p-4 space-y-3">
+    <div className="border border-pink-500/60 bg-pink-900/10 rounded-lg overflow-hidden">
       <button
-        className="w-full flex items-stretch justify-between gap-2"
+        className="w-full flex items-stretch justify-between gap-2 p-3 lg:p-4"
         onClick={() => setExpanded((e) => !e)}
         aria-expanded={expanded}
       >
@@ -74,7 +74,7 @@ export function CyberneticWeaponCard({
       </button>
 
       {expanded && (
-      <>
+      <div className="px-3 pb-3 lg:px-4 lg:pb-4 space-y-3">
       <div className="flex flex-wrap gap-1.5">
         {weapon.type === "ranged" && weapon.range && (
           <StatChip label="Range" value={weapon.range} />
@@ -138,7 +138,7 @@ export function CyberneticWeaponCard({
           </span>
         </div>
       </div>
-      </>
+      </div>
       )}
     </div>
   );

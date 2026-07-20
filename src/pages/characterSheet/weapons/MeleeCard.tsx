@@ -10,7 +10,7 @@ import { StatusBadge } from "../../../ui/StatusBadge";
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
 import { WEAPON_UPGRADE_REFERENCE } from "../../../data/reference/weaponUpgradeReference";
 import {
-  uiSection,
+  uiSectionShell,
   uiTextLabel,
   uiTextMuted,
   uiTextPlaceholder,
@@ -137,10 +137,10 @@ export function MeleeCard({
     weaponRef?.class.toLowerCase().includes("thrown");
 
   return (
-    <div className={uiSection + " space-y-3"}>
+    <div className={uiSectionShell + " overflow-hidden"}>
       {/* Header — always visible */}
       <button
-        className="w-full flex items-stretch justify-between gap-2"
+        className="w-full flex items-stretch justify-between gap-2 p-3 lg:p-4"
         onClick={() => !forceExpanded && setExpanded((e) => !e)}
         aria-expanded={expanded}
       >
@@ -180,7 +180,7 @@ export function MeleeCard({
       </button>
 
       {(expanded || forceExpanded) && (
-        <>
+        <div className="px-3 pb-3 lg:px-4 lg:pb-4 space-y-3">
           {editable && !integrated && (
             <div className="flex justify-end">
               <button onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
@@ -323,7 +323,7 @@ export function MeleeCard({
               onClose={() => setShowUpgradePicker(false)}
             />
           )}
-        </>
+        </div>
       )}
     </div>
   );

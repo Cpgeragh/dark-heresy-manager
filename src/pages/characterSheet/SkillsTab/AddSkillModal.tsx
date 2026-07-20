@@ -8,7 +8,7 @@ import { PickerModal } from "../../../ui/PickerModal";
 import { ArrowRight, ArrowLeft } from "../../../ui/PickerArrows";
 import { SkillRow } from "./SkillRow";
 import { colourPurple } from "../../../ui/colourTokens";
-import { uiItemName } from "../../../ui/editableStyles";
+import { uiItemName, uiSectionShell } from "../../../ui/editableStyles";
 
 interface AddSkillModalProps {
   isOpen: boolean;
@@ -134,7 +134,7 @@ export function AddSkillModal({
         }
 
         return (
-          <div key={item.category} className="rounded border border-slate-500 bg-slate-800/60 overflow-hidden">
+          <div key={item.category} className={uiSectionShell + " overflow-hidden"}>
             <button
               onClick={() => setOpenCategory(item.category)}
               className="w-full flex items-center gap-3 px-4 lg:px-5 py-3 lg:py-4 text-left hover:bg-slate-700/40 transition group"

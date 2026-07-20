@@ -5,7 +5,7 @@ import { Chip } from "../../../ui/Chip";
 import { sourceColour } from "../../../ui/sourceStyles";
 import type { PsychicPower } from "../../../types/Character";
 import { disciplineColours } from "../psychicStyles";
-import { uiTextBody, uiTextPlaceholder, uiTextSubtle, uiInfoModalWrapper } from "../../../ui/editableStyles";
+import { uiSection, uiTextBody, uiTextPlaceholder, uiTextSubtle, uiInfoModalWrapper } from "../../../ui/editableStyles";
 import { uiIconRemoveButton } from "../../../ui/buttonStyles";
 import { TrashIcon } from "../../../ui/TrashIcon";
 
@@ -71,7 +71,7 @@ export function PowerCard({ power, editable, onRemove, onEdit }: PowerCardProps)
   );
 
   return (
-    <div className="flex items-start justify-between gap-2 rounded border border-slate-500 bg-slate-900/60 px-3 lg:px-4 py-2 lg:py-3 text-sm lg:text-base">
+    <div className={uiSection + " flex items-start justify-between gap-2 text-sm lg:text-base"}>
       <div className="space-y-1 min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
           <p className="font-medium text-slate-100">

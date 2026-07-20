@@ -21,7 +21,7 @@ import {
 } from "../../../data/reference/ammoReference";
 import { WEAPON_UPGRADE_REFERENCE } from "../../../data/reference/weaponUpgradeReference";
 import {
-  uiSection,
+  uiSectionShell,
   uiTextBody,
   uiTextLabel,
   uiTextMuted,
@@ -497,10 +497,10 @@ export function RangedCard({
   }
 
   return (
-    <div className={uiSection + " space-y-3"}>
+    <div className={uiSectionShell + " overflow-hidden"}>
       {/* Header — always visible */}
       <button
-        className="w-full flex items-stretch justify-between gap-2"
+        className="w-full flex items-stretch justify-between gap-2 p-3 lg:p-4"
         onClick={() => !forceExpanded && setExpanded((e) => !e)}
         aria-expanded={expanded}
       >
@@ -543,7 +543,7 @@ export function RangedCard({
       </button>
 
       {(expanded || forceExpanded) && (
-        <>
+        <div className="px-3 pb-3 lg:px-4 lg:pb-4 space-y-3">
           {editable && !integrated && (
             <div className="flex justify-end">
               <button onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
@@ -783,7 +783,7 @@ export function RangedCard({
               onClose={() => setShowAmmoPicker(false)}
             />
           )}
-        </>
+        </div>
       )}
     </div>
   );

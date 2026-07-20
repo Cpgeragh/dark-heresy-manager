@@ -288,7 +288,7 @@ export function EntryCard({ entry, editable, onRemove }: EntryCardProps) {
   const refSources = refData ? normaliseSources(refData.source) : [];
 
   return (
-    <div className="flex items-start justify-between gap-2 rounded border border-slate-500 bg-slate-900/60 px-3 lg:px-4 py-2 lg:py-3 text-sm lg:text-base">
+    <div className={uiSection + " flex items-start justify-between gap-2 text-sm lg:text-base"}>
       <div className="min-w-0 space-y-1.5">
         <div className="flex items-center gap-1.5">
           <span className={`${uiItemName} break-words`}>{entry.name}</span>

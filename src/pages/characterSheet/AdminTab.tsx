@@ -200,7 +200,7 @@ export function AdminTab({
             return (
               <li
                 key={entry.id ?? i}
-                className="rounded border border-slate-500 bg-slate-900/60 p-2 lg:p-3 text-xs lg:text-sm"
+                className={uiSection + " text-xs lg:text-sm"}
               >
                 <div className="font-code text-slate-200">
                   {entry.action} @ {when}

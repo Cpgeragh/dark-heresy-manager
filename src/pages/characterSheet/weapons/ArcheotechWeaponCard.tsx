@@ -8,7 +8,7 @@ import { ARCHEOTECH_REFERENCE } from "../../../data/reference/archeotechReferenc
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import {
-  uiSection,
+  uiSectionShell,
   uiTextBody,
   uiTextLabel,
   uiTextMuted,
@@ -98,14 +98,14 @@ export function ArcheotechWeaponCard({
   const showMishaps = item.type === "Grenade";
 
   const containerClass = highlightAsArcheotech
-    ? "border border-amber-500/60 bg-amber-900/10 rounded-lg p-3 lg:p-4 space-y-3"
-    : `${uiSection} space-y-3`;
+    ? "border border-amber-500/60 bg-amber-900/10 rounded-lg overflow-hidden"
+    : `${uiSectionShell} overflow-hidden`;
 
   return (
     <div className={containerClass}>
       {/* Header — always visible */}
       <button
-        className="w-full flex items-stretch justify-between gap-2"
+        className="w-full flex items-stretch justify-between gap-2 p-3 lg:p-4"
         onClick={() => setExpanded((e) => !e)}
         aria-expanded={expanded}
       >
@@ -144,7 +144,7 @@ export function ArcheotechWeaponCard({
       </button>
 
       {expanded && (
-        <>
+        <div className="px-3 pb-3 lg:px-4 lg:pb-4 space-y-3">
           {editable && onRemove && (
             <div className="flex justify-end">
               <button onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
@@ -237,7 +237,7 @@ export function ArcheotechWeaponCard({
             source={source}
             className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1"
           />
-        </>
+        </div>
       )}
     </div>
   );

@@ -8,6 +8,7 @@ import { Chip } from "../../../ui/Chip";
 import { SkillRow } from "./SkillRow";
 import { colourPurple } from "../../../ui/colourTokens";
 import { ExpandChevron } from "../../../ui/ExpandChevron";
+import { uiSectionShell } from "../../../ui/editableStyles";
 
 interface SkillGroupRowProps {
   category: string;
@@ -26,7 +27,7 @@ export function SkillGroupRow({
   const toggle = useCallback(() => setExpanded((p) => !p), []);
 
   return (
-    <div className="rounded-lg border border-slate-500 bg-slate-900/60 overflow-hidden">
+    <div className={uiSectionShell + " overflow-hidden"}>
       <button
         onClick={toggle}
         aria-expanded={expanded}

@@ -9,6 +9,7 @@ import { StatusBadge } from "../../../ui/StatusBadge";
 import { GRENADE_REFERENCE } from "../../../data/reference/weaponReference";
 import {
   uiSection,
+  uiSectionShell,
   uiTextBody,
   uiTextLabel,
   uiTextMuted,
@@ -148,10 +149,10 @@ export function GrenadeCard({
   const thrownRange = `${Math.max(0, strengthBonus) * 3}m`;
 
   return (
-    <div className={uiSection + " space-y-2"}>
+    <div className={uiSectionShell + " overflow-hidden"}>
       {/* Header — always visible */}
       <button
-        className="w-full flex items-stretch justify-between gap-2"
+        className="w-full flex items-stretch justify-between gap-2 p-3 lg:p-4"
         onClick={() => setExpanded((e) => !e)}
         aria-expanded={expanded}
       >
@@ -190,7 +191,7 @@ export function GrenadeCard({
       </button>
 
       {expanded && (
-        <>
+        <div className="px-3 pb-3 lg:px-4 lg:pb-4 space-y-2">
           {editable && (
             <div className="flex justify-end">
               <button onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
@@ -297,7 +298,7 @@ export function GrenadeCard({
             source={item.source}
             className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-1"
           />
-        </>
+        </div>
       )}
     </div>
   );

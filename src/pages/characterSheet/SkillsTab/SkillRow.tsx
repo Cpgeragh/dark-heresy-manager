@@ -8,7 +8,7 @@ import { Chip } from "../../../ui/Chip";
 import { InfoModal } from "../../../components/InfoModal";
 import { SKILL_DESCRIPTIONS } from "../../../data/skillDescriptions";
 import { uiIconRemoveButton } from "../../../ui/buttonStyles";
-import { uiInfoModalWrapper, uiItemName } from "../../../ui/editableStyles";
+import { uiInfoModalWrapper, uiItemName, uiSectionShell } from "../../../ui/editableStyles";
 import { TrashIcon } from "../../../ui/TrashIcon";
 import { ExpandChevron } from "../../../ui/ExpandChevron";
 import { colourPurple, colourTeal } from "../../../ui/colourTokens";
@@ -52,7 +52,7 @@ export function SkillRow({ skill, editable, updateLevel, previewMode = false, on
   );
 
   return (
-    <div className="rounded-lg border border-slate-500 bg-slate-900/60 overflow-hidden">
+    <div className={uiSectionShell + " overflow-hidden"}>
       {/* COLLAPSED ROW */}
       <button
         onClick={onSelect ? () => onSelect(skill.id) : handleToggle}

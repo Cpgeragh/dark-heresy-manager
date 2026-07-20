@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { ArcheotechItem } from "../../../types/Character";
 import { ARCHEOTECH_REFERENCE } from "../../../data/reference/archeotechReference";
-import { uiSection, uiTextBody, uiTextLabel, uiTextMuted, uiItemName, uiInfoModalWrapper } from "../../../ui/editableStyles";
+import { uiSection, uiSectionShell, uiTextBody, uiTextLabel, uiTextMuted, uiItemName, uiInfoModalWrapper } from "../../../ui/editableStyles";
 import { uiIconRemoveButton } from "../../../ui/buttonStyles";
 import { colourStacks } from "../../../ui/colourTokens";
 import { Chip } from "../../../ui/Chip";
@@ -60,13 +60,13 @@ export function ItemCard({
   const source = item.source ?? ref?.source;
 
   return (
-    <div className={uiSection}>
-      <div className="flex items-start gap-2">
+    <div className={hasBody ? uiSectionShell + " overflow-hidden" : uiSection}>
+      <div className={hasBody ? "" : "flex items-start gap-2"}>
         <div className="flex-1 min-w-0">
           {/* Title row */}
           {hasBody ? (
             <button
-              className="w-full flex items-start justify-between gap-2 text-left"
+              className="w-full flex items-start justify-between gap-2 p-3 lg:p-4 text-left"
               onClick={() => setExpanded((v) => !v)}
               aria-expanded={expanded}
             >
@@ -102,82 +102,92 @@ export function ItemCard({
             </div>
           )}
 
-          {/* Expanded body */}
-          {expanded && (
-            <div className="mt-2 space-y-1.5">
-              {specialRules && (
-                <p className={`text-xs lg:text-sm ${uiTextMuted}`}>
-                  <span className={`${uiTextLabel} mr-1`}>
-                    Special
-                  </span>
-                  {specialRules}
-                </p>
-              )}
-              {description && (
-                <p className={`text-xs lg:text-sm ${uiTextBody} leading-relaxed`}>{description}</p>
-              )}
-              {item.notes?.trim() && (
-                <p className="text-xs lg:text-sm text-amber-300/70 italic leading-relaxed">{item.notes}</p>
-              )}
-            </div>
-          )}
+          <div className={hasBody ? "px-3 pb-3 lg:px-4 lg:pb-4" : ""}>
+            {editable && hasBody && (
+              <div className="flex justify-end">
+                <button onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
+                  <TrashIcon className="w-4 h-4" />
+                </button>
+              </div>
+            )}
 
-          {/* Type-specific stat chips */}
-          {item.type === "Armour" && (
-            <div className="mt-1 flex flex-wrap gap-1.5">
-              {(item.locations ?? []).length > 0 && <StatChip label="Location" value={locationLabel(item.locations!)} />}
-              {item.ap !== undefined && <StatChip label="AP" value={String(item.ap)} />}
-              {item.stacks && <Chip className={colourStacks}>Stacks</Chip>}
-            </div>
-          )}
-          {item.type === "Force Field" && item.protectionRating !== undefined && (
-            <div className="mt-1">
-              <StatChip label="PR" value={String(item.protectionRating)} />
-            </div>
-          )}
-          {item.type === "Shield" && (
-            <div className="mt-1 flex flex-wrap gap-1.5">
-              {(item.locations ?? []).length > 0 && <StatChip label="Location" value={locationLabel(item.locations!)} />}
-              {item.ap !== undefined && <StatChip label="AP" value={String(item.ap)} />}
-            </div>
-          )}
-          {item.type === "Cybernetic" && (
-            <div className="mt-1 flex flex-wrap items-center gap-1.5">
-              {(item.bodyLocation ?? []).length > 0 && (
-                <StatChip label="Location" value={item.bodyLocation!.map((l) => LOCATION_DISPLAY[l] ?? l).join(" & ")} />
-              )}
-              {item.craftsmanship && (
-                <>
-                  <span className={uiTextLabel}>Quality</span>
-                  <Chip className={`${CRAFTSMANSHIP_STYLE[item.craftsmanship as keyof typeof CRAFTSMANSHIP_STYLE]} shrink-0`}>{item.craftsmanship}</Chip>
-                </>
-              )}
-            </div>
-          )}
+            {/* Expanded body */}
+            {expanded && (
+              <div className="space-y-1.5">
+                {specialRules && (
+                  <p className={`text-xs lg:text-sm ${uiTextMuted}`}>
+                    <span className={`${uiTextLabel} mr-1`}>
+                      Special
+                    </span>
+                    {specialRules}
+                  </p>
+                )}
+                {description && (
+                  <p className={`text-xs lg:text-sm ${uiTextBody} leading-relaxed`}>{description}</p>
+                )}
+                {item.notes?.trim() && (
+                  <p className="text-xs lg:text-sm text-amber-300/70 italic leading-relaxed">{item.notes}</p>
+                )}
+              </div>
+            )}
 
-          {/* Chips */}
-          <ItemMetaChips
-            weight={weight}
-            value={value}
-            availability={availability}
-            source={source}
-            className="flex flex-wrap gap-1.5 mt-1.5"
-          />
-          {libraryItem && (
-            <CustomItemActionButtons
-              libraryItem={libraryItem}
-              isDM={isDM}
-              canEditDefinition={canEditDefinition}
-              busyAction={busyAction}
-              onEditDefinition={onEditDefinition}
-              onPublish={onPublish}
-              onArchive={onArchive}
-              onUpdateAllCopies={onUpdateAllCopies}
+            {/* Type-specific stat chips */}
+            {item.type === "Armour" && (
+              <div className="mt-1 flex flex-wrap gap-1.5">
+                {(item.locations ?? []).length > 0 && <StatChip label="Location" value={locationLabel(item.locations!)} />}
+                {item.ap !== undefined && <StatChip label="AP" value={String(item.ap)} />}
+                {item.stacks && <Chip className={colourStacks}>Stacks</Chip>}
+              </div>
+            )}
+            {item.type === "Force Field" && item.protectionRating !== undefined && (
+              <div className="mt-1">
+                <StatChip label="PR" value={String(item.protectionRating)} />
+              </div>
+            )}
+            {item.type === "Shield" && (
+              <div className="mt-1 flex flex-wrap gap-1.5">
+                {(item.locations ?? []).length > 0 && <StatChip label="Location" value={locationLabel(item.locations!)} />}
+                {item.ap !== undefined && <StatChip label="AP" value={String(item.ap)} />}
+              </div>
+            )}
+            {item.type === "Cybernetic" && (
+              <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                {(item.bodyLocation ?? []).length > 0 && (
+                  <StatChip label="Location" value={item.bodyLocation!.map((l) => LOCATION_DISPLAY[l] ?? l).join(" & ")} />
+                )}
+                {item.craftsmanship && (
+                  <>
+                    <span className={uiTextLabel}>Quality</span>
+                    <Chip className={`${CRAFTSMANSHIP_STYLE[item.craftsmanship as keyof typeof CRAFTSMANSHIP_STYLE]} shrink-0`}>{item.craftsmanship}</Chip>
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* Chips */}
+            <ItemMetaChips
+              weight={weight}
+              value={value}
+              availability={availability}
+              source={source}
+              className="flex flex-wrap gap-1.5 mt-1.5"
             />
-          )}
+            {libraryItem && (
+              <CustomItemActionButtons
+                libraryItem={libraryItem}
+                isDM={isDM}
+                canEditDefinition={canEditDefinition}
+                busyAction={busyAction}
+                onEditDefinition={onEditDefinition}
+                onPublish={onPublish}
+                onArchive={onArchive}
+                onUpdateAllCopies={onUpdateAllCopies}
+              />
+            )}
+          </div>
         </div>
 
-        {editable && (
+        {editable && !hasBody && (
           <button onClick={onRemove} aria-label="Remove" className={`${uiIconRemoveButton} mt-0.5`}>
             <TrashIcon className="w-4 h-4" />
           </button>
