@@ -1,6 +1,6 @@
 // src/ui/OptionPickerScreen.tsx
 
-import { PickerModal } from "./PickerModal";
+import { PickerModal, PickerRow } from "./PickerModal";
 import { ArrowLeft } from "./PickerArrows";
 import { uiItemName } from "./editableStyles";
 
@@ -34,16 +34,13 @@ export function OptionPickerScreen({
         const value = typeof option === "string" ? option : option.value;
         const label = typeof option === "string" ? option : option.label;
         return (
-          <button
+          <PickerRow
             key={value}
-            type="button"
             onClick={() => onSelect(value)}
-            className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${
-              value === selected ? "bg-slate-800" : "hover:bg-slate-800"
-            }`}
+            selected={value === selected}
           >
             <span className={`${uiItemName} group-hover:text-white`}>{label}</span>
-          </button>
+          </PickerRow>
         );
       })}
     </PickerModal>

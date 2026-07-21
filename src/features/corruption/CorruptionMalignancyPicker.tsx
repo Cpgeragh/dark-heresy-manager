@@ -4,7 +4,7 @@ import { InfoModal } from "../../components/InfoModal";
 import type { CorruptionMalignancyEntry } from "../../types/Character";
 import { Button } from "../../ui/Button";
 import { Chip } from "../../ui/Chip";
-import { PickerModal } from "../../ui/PickerModal";
+import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../ui/PickerModal";
 import { ArrowLeft } from "../../ui/PickerArrows";
 import { uiActionButton, uiPickerBackButton } from "../../ui/buttonStyles";
 import {
@@ -104,7 +104,7 @@ export function CorruptionMalignancyPicker({
           </div>
         }
       >
-        <div className="space-y-4 p-4 lg:p-5">
+        <PickerBody>
           <div>
             <label className={uiFormLabel}>
               Name <span className="text-red-500">*</span>
@@ -127,7 +127,7 @@ export function CorruptionMalignancyPicker({
             rows={3}
             placeholder="Optional details..."
           />
-        </div>
+        </PickerBody>
       </PickerModal>
     );
   }
@@ -171,7 +171,7 @@ export function CorruptionMalignancyPicker({
           </Button>
         }
       >
-        <div className="space-y-4 p-4 lg:p-5">
+        <PickerBody>
           {rollModifiers.map((modifier) => (
             <div key={modifier.characteristic}>
               <label className={uiFormLabel}>
@@ -188,7 +188,7 @@ export function CorruptionMalignancyPicker({
               />
             </div>
           ))}
-        </div>
+        </PickerBody>
       </PickerModal>
     );
   }
@@ -202,23 +202,20 @@ export function CorruptionMalignancyPicker({
       onClose={onClose}
       isEmpty={filtered.length === 0}
       footer={
-        <button
-          type="button"
+        <PickerCustomAction
           onClick={() => {
             setCustomMode(true);
             setCustomName("");
             setCustomDetails("");
           }}
-          className="w-full py-1 text-center text-sm text-red-500 hover:text-red-400 lg:py-1.5 lg:text-base"
         >
           + Add custom malignancy
-        </button>
+        </PickerCustomAction>
       }
     >
       {filtered.map((ref) => (
-        <button
+        <PickerRow
           key={ref.id}
-          type="button"
           onClick={() => {
             if (rollModifiersFor(ref).length === 0) {
               addReferenceMalignancy(ref);
@@ -227,7 +224,6 @@ export function CorruptionMalignancyPicker({
               setSelected(ref);
             }
           }}
-          className="group w-full px-4 py-3 text-left transition hover:bg-slate-800 lg:px-5 lg:py-4"
         >
           <span className={`${uiItemName} group-hover:text-white`}>{ref.name}</span>
           <div className="mt-1 flex flex-wrap gap-1.5">
@@ -243,7 +239,7 @@ export function CorruptionMalignancyPicker({
               />
             </span>
           </div>
-        </button>
+        </PickerRow>
       ))}
     </PickerModal>
   );

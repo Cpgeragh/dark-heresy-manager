@@ -11,7 +11,7 @@ import {
 } from "../../../ui/editableStyles";
 import { uiPickerBackButton } from "../../../ui/buttonStyles";
 import { Button } from "../../../ui/Button";
-import { PickerModal } from "../../../ui/PickerModal";
+import { PickerBody, PickerModal } from "../../../ui/PickerModal";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
 import { ArrowRight } from "../../../ui/PickerArrows";
 import { sourceColour } from "../../../ui/sourceStyles";
@@ -233,7 +233,7 @@ export function CustomGrenadeForm({
         </div>
       }
     >
-      <div className="p-4 lg:p-5 space-y-4">
+      <PickerBody>
         <p className={uiSectionHeader}>Identity</p>
         <div className={uiSection + " space-y-3"}>
           <div className="grid grid-cols-2 gap-2">
@@ -384,7 +384,7 @@ export function CustomGrenadeForm({
             </div>
           </div>
         </div>
-      </div>
+      </PickerBody>
     </PickerModal>
   );
 }

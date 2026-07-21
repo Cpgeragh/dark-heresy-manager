@@ -4,7 +4,7 @@ import { FormField } from "../../components/FormField";
 import { InfoModal } from "../../components/InfoModal";
 import { Button } from "../../ui/Button";
 import { Chip } from "../../ui/Chip";
-import { PickerModal } from "../../ui/PickerModal";
+import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../ui/PickerModal";
 import { OptionPickerScreen } from "../../ui/OptionPickerScreen";
 import { ArrowRight, ArrowLeft } from "../../ui/PickerArrows";
 import { uiActionButton, uiPickerBackButton } from "../../ui/buttonStyles";
@@ -152,7 +152,7 @@ export function InsanityDisorderPicker({
           </div>
         }
       >
-        <div className="space-y-4 p-4 lg:p-5">
+        <PickerBody>
           <div>
             <p className={uiFormLabel}>Type <span className="text-red-500">*</span></p>
             <button
@@ -204,7 +204,7 @@ export function InsanityDisorderPicker({
             rows={3}
             placeholder="Optional details…"
           />
-        </div>
+        </PickerBody>
       </PickerModal>
     );
   }
@@ -238,7 +238,7 @@ export function InsanityDisorderPicker({
           </Button>
         }
       >
-        <div className="px-4 lg:px-5 py-4 lg:py-5 space-y-4">
+        <PickerBody>
           <div>
             <p className={`${uiFormLabel} mb-2 text-center normal-case !text-[15px] lg:!text-base`}>Choose Severity</p>
             <div className="flex gap-2">
@@ -264,7 +264,7 @@ export function InsanityDisorderPicker({
               {activeSeverityDescription}
             </div>
           )}
-        </div>
+        </PickerBody>
       </PickerModal>
     );
   }
@@ -288,8 +288,7 @@ export function InsanityDisorderPicker({
         </button>
       }
       footer={
-        <button
-          type="button"
+        <PickerCustomAction
           onClick={() => {
             setCustomMode(true);
             setSelected(null);
@@ -298,23 +297,20 @@ export function InsanityDisorderPicker({
             setCustomName("");
             setNotes("");
           }}
-          className="w-full text-sm lg:text-base text-red-500 hover:text-red-400 text-center py-1 lg:py-1.5"
         >
           + Add custom disorder
-        </button>
+        </PickerCustomAction>
       }
     >
       {filtered.map((ref) => (
-        <button
+        <PickerRow
           key={ref.id}
-          type="button"
           onClick={() => {
             setSelected(ref);
             setSeverity(ref.severityOptions[0]);
             setCustomName("");
             setNotes("");
           }}
-          className="group w-full px-4 py-3 text-left transition hover:bg-slate-800 lg:px-5 lg:py-4"
         >
           <span className={`${uiItemName} group-hover:text-white`}>{ref.name}</span>
           <div className="mt-1 flex flex-wrap gap-1.5">
@@ -338,7 +334,7 @@ export function InsanityDisorderPicker({
               />
             </span>
           </div>
-        </button>
+        </PickerRow>
       ))}
     </PickerModal>
   );

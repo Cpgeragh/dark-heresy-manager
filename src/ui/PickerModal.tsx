@@ -3,8 +3,75 @@
 
 import { createPortal } from "react-dom";
 import { useEffect, useState } from "react";
-import type { ReactNode } from "react";
+import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from "react";
 import { editableInputClass } from "./editableStyles";
+
+export function PickerBody({
+  className = "",
+  ...props
+}: HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      className={`p-4 lg:p-5 space-y-4 ${className}`.trim()}
+      {...props}
+    />
+  );
+}
+
+export type PickerRowProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+  interactive?: boolean;
+  selected?: boolean;
+};
+
+export function PickerRow({
+  children,
+  className = "",
+  disabled = false,
+  interactive = true,
+  onClick,
+  selected = false,
+  tabIndex,
+  type = "button",
+  ...props
+}: PickerRowProps) {
+  const respondsToInput = interactive && !disabled;
+
+  return (
+    <button
+      type={type}
+      disabled={disabled}
+      onClick={respondsToInput ? onClick : undefined}
+      tabIndex={respondsToInput ? tabIndex : -1}
+      className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition ${
+        respondsToInput ? "group" : ""
+      } ${selected ? "bg-slate-800" : respondsToInput ? "hover:bg-slate-800" : ""} ${
+        respondsToInput ? "cursor-pointer" : disabled ? "" : "cursor-default"
+      } disabled:opacity-40 disabled:cursor-not-allowed ${className}`.trim()}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+}
+
+export type PickerCustomActionProps = ButtonHTMLAttributes<HTMLButtonElement>;
+
+export function PickerCustomAction({
+  children,
+  className = "",
+  type = "button",
+  ...props
+}: PickerCustomActionProps) {
+  return (
+    <button
+      type={type}
+      className={`w-full text-sm lg:text-base text-red-500 hover:text-red-400 text-center py-1 lg:py-1.5 transition ${className}`.trim()}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+}
 
 function getViewportState() {
   return {
@@ -81,6 +148,8 @@ interface Props {
   footer?: ReactNode;
   /** Override the container max-height. Defaults to "max-h-[85vh]". */
   maxHeight?: string;
+  /** Override the container max-width. Defaults to the wider picker-list width. */
+  maxWidth?: string;
   /** The list rows. */
   children: ReactNode;
 }
@@ -105,6 +174,7 @@ export function PickerModal({
   filterRow,
   footer,
   maxHeight = "max-h-[85vh]",
+  maxWidth = "max-w-lg lg:max-w-2xl",
   children,
 }: Props) {
   const viewport = useVisualViewport();
@@ -138,7 +208,7 @@ export function PickerModal({
       onClick={onClose}
     >
       <div
-        className={`w-full min-h-0 max-w-lg lg:max-w-2xl bg-slate-900 border border-slate-700 rounded-xl shadow-2xl flex flex-col overflow-hidden ${maxHeight}`}
+        className={`w-full min-h-0 ${maxWidth} bg-slate-900 border border-slate-500 rounded-xl shadow-2xl flex flex-col overflow-hidden ${maxHeight}`}
         style={{ maxHeight: useVisibleViewport ? modalMaxHeight : undefined }}
         onClick={(e) => e.stopPropagation()}
       >

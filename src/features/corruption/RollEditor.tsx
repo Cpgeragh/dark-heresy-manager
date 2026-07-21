@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "../../ui/Button";
-import { PickerModal } from "../../ui/PickerModal";
+import { PickerBody, PickerModal } from "../../ui/PickerModal";
 import { ArrowLeft } from "../../ui/PickerArrows";
 import { editableInputClass, uiFormLabel } from "../../ui/editableStyles";
 import { CHARACTERISTIC_LABELS, type CharacteristicModifier } from "./characteristicModifiers";
@@ -59,7 +59,7 @@ export function RollEditor({
         </Button>
       }
     >
-      <div className="space-y-4 p-4 lg:p-5">
+      <PickerBody>
         {rollModifiers.map((modifier) => (
           <div key={modifier.characteristic}>
             <label className={uiFormLabel}>
@@ -76,7 +76,7 @@ export function RollEditor({
             />
           </div>
         ))}
-      </div>
+      </PickerBody>
     </PickerModal>
   );
 }

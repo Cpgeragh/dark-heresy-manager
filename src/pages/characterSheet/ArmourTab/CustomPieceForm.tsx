@@ -3,7 +3,7 @@ import type { ArmourCraftsmanship, ArmourLocationKey, ArmourQuality, WornArmourP
 import { editableInputClass, editableTextareaClass, uiSection, uiSectionHeader, uiFormLabel, uiInfoModalWrapper } from "../../../ui/editableStyles";
 import { uiPickerBackButton } from "../../../ui/buttonStyles";
 import { Button } from "../../../ui/Button";
-import { PickerModal } from "../../../ui/PickerModal";
+import { PickerBody, PickerModal } from "../../../ui/PickerModal";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
 import { ArrowRight } from "../../../ui/PickerArrows";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
@@ -163,7 +163,7 @@ export function CustomPieceForm({
         </div>
       }
     >
-      <div className="p-4 lg:p-5 space-y-4">
+      <PickerBody>
         <p className={uiSectionHeader}>Identity</p>
         <div className={uiSection + " space-y-3"}>
           <div>
@@ -374,7 +374,7 @@ export function CustomPieceForm({
             />
           </div>
         </div>
-      </div>
+      </PickerBody>
     </PickerModal>
   );
 }

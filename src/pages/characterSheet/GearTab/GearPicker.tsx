@@ -4,7 +4,7 @@ import { useState } from "react";
 import { InfoModal } from "../../../components/InfoModal";
 import { GEAR_REFERENCE, type GearRef } from "../../../data/reference/gearReference";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
-import { PickerModal } from "../../../ui/PickerModal";
+import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../../ui/PickerModal";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
 import { ArrowLeft, ArrowRight } from "../../../ui/PickerArrows";
 import { Button } from "../../../ui/Button";
@@ -115,17 +115,16 @@ export function GearPicker({
       isEmpty={isEmpty}
       footer={
         !pending && editable ? (
-          <button
+          <PickerCustomAction
             onClick={onCustom}
-            className="w-full text-sm lg:text-base text-red-500 hover:text-red-400 text-center py-1 lg:py-1.5"
           >
             + Add custom item
-          </button>
+          </PickerCustomAction>
         ) : undefined
       }
     >
       {pending ? (
-        <div className="p-4 lg:p-5 space-y-4">
+        <PickerBody>
           <p className={`text-sm lg:text-base ${uiTextBody}`}>
             <span className="font-medium text-slate-200">{pending.name}</span> has a variable or
             unlisted cost. Enter the value assigned for this item.
@@ -175,16 +174,14 @@ export function GearPicker({
               Add to Inventory
             </Button>
           </div>
-        </div>
+        </PickerBody>
       ) : (
         <>
         {filteredCustom.map((item) => (
-          <button
+          <PickerRow
             key={`custom-${item.id}`}
-            type="button"
-            tabIndex={editable ? undefined : -1}
-            onClick={editable && onSelectCustomItem ? () => onSelectCustomItem(item) : undefined}
-            className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
+            interactive={editable}
+            onClick={() => onSelectCustomItem?.(item)}
           >
             <div className="flex items-center gap-1.5 min-w-0">
               <span className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}>
@@ -210,16 +207,14 @@ export function GearPicker({
                 source={item.data.source}
               />
             </div>
-          </button>
+          </PickerRow>
         ))}
 
         {filtered.map((ref) => (
-        <button
+        <PickerRow
           key={ref.id}
-          type="button"
-          tabIndex={editable ? undefined : -1}
-          onClick={editable ? () => handleSelect(ref) : undefined}
-          className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
+          interactive={editable}
+          onClick={() => handleSelect(ref)}
         >
           <div className="flex items-center gap-1.5 min-w-0">
             <span className={`text-sm lg:text-base font-medium text-slate-200 truncate ${editable ? "group-hover:text-white" : ""}`}>
@@ -247,7 +242,7 @@ export function GearPicker({
               <span className={uiTextGMNote}>Cost assigned on add</span>
             )}
           </div>
-        </button>
+        </PickerRow>
         ))}
         </>
       )}

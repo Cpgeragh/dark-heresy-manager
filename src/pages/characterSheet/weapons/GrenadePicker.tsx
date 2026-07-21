@@ -12,7 +12,7 @@ import {
   uiItemName,
 } from "../../../ui/editableStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
-import { PickerModal } from "../../../ui/PickerModal";
+import { PickerCustomAction, PickerModal, PickerRow } from "../../../ui/PickerModal";
 import { InfoModal } from "../../../components/InfoModal";
 import { Chip } from "../../../ui/Chip";
 import { colourCyan, colourViolet, colourTealLight } from "../../../ui/colourTokens";
@@ -57,12 +57,11 @@ export function GrenadePicker({
       isEmpty={filtered.length === 0 && filteredCustomLibraryItems.length === 0}
       footer={
         editable && onCustom ? (
-          <button
+          <PickerCustomAction
             onClick={onCustom}
-            className="w-full text-sm lg:text-base text-red-500 hover:text-red-400 text-center py-1 lg:py-1.5"
           >
             + Add custom grenade or mine
-          </button>
+          </PickerCustomAction>
         ) : undefined
       }
     >
@@ -70,12 +69,10 @@ export function GrenadePicker({
         const data = item.data;
         if (data.weaponKind !== "grenade") return null;
         return (
-          <button
+          <PickerRow
             key={`custom-${item.id}`}
-            type="button"
-            tabIndex={editable ? undefined : -1}
-            onClick={editable && onSelectCustom ? () => onSelectCustom(item) : undefined}
-            className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
+            interactive={editable}
+            onClick={() => onSelectCustom?.(item)}
           >
             <div className="flex items-center gap-1.5">
               <span
@@ -119,16 +116,14 @@ export function GrenadePicker({
                 </span>
               </div>
             )}
-          </button>
+          </PickerRow>
         );
       })}
       {filtered.map((ref) => (
-        <button
+        <PickerRow
           key={ref.id}
-          type="button"
-          tabIndex={editable ? undefined : -1}
-          onClick={editable ? () => onSelect(ref) : undefined}
-          className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
+          interactive={editable}
+          onClick={() => onSelect(ref)}
         >
           <span
             className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}
@@ -169,7 +164,7 @@ export function GrenadePicker({
               </span>
             </div>
           )}
-        </button>
+        </PickerRow>
       ))}
     </PickerModal>
   );

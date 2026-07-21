@@ -12,7 +12,7 @@ import {
   uiItemName,
 } from "../../../ui/editableStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
-import { PickerModal } from "../../../ui/PickerModal";
+import { PickerCustomAction, PickerModal, PickerRow } from "../../../ui/PickerModal";
 import { InfoModal } from "../../../components/InfoModal";
 import { StatChip, DamageTypeChip, SpecialRulesContent } from "./weaponShared";
 
@@ -51,12 +51,11 @@ export function ShieldPicker({
       isEmpty={filtered.length === 0 && filteredCustomLibraryItems.length === 0}
       footer={
         editable && onCustom ? (
-          <button
+          <PickerCustomAction
             onClick={onCustom}
-            className="w-full text-sm lg:text-base text-red-500 hover:text-red-400 text-center py-1 lg:py-1.5"
           >
             + Add custom shield
-          </button>
+          </PickerCustomAction>
         ) : undefined
       }
     >
@@ -64,12 +63,10 @@ export function ShieldPicker({
         const data = item.data;
         if (data.armourKind !== "shield") return null;
         return (
-          <button
+          <PickerRow
             key={`custom-${item.id}`}
-            type="button"
-            tabIndex={editable ? undefined : -1}
-            onClick={editable && onSelectCustom ? () => onSelectCustom(item) : undefined}
-            className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
+            interactive={editable}
+            onClick={() => onSelectCustom?.(item)}
           >
             <div className="flex items-center gap-1.5">
               <span
@@ -106,16 +103,14 @@ export function ShieldPicker({
                 </span>
               </div>
             )}
-          </button>
+          </PickerRow>
         );
       })}
       {filtered.map((ref) => (
-        <button
+        <PickerRow
           key={ref.id}
-          type="button"
-          tabIndex={editable ? undefined : -1}
-          onClick={editable ? () => onSelect(ref) : undefined}
-          className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
+          interactive={editable}
+          onClick={() => onSelect(ref)}
         >
           <span
             className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}
@@ -149,7 +144,7 @@ export function ShieldPicker({
               </span>
             </div>
           )}
-        </button>
+        </PickerRow>
       ))}
     </PickerModal>
   );

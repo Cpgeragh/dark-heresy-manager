@@ -7,7 +7,7 @@ import {
   CYBERNETICS_REFERENCE,
   type CyberneticRef,
 } from "../../../data/reference/cyberneticsReference";
-import { PickerModal } from "../../../ui/PickerModal";
+import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../../ui/PickerModal";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
 import { ArrowRight } from "../../../ui/PickerArrows";
 import { Button } from "../../../ui/Button";
@@ -184,7 +184,7 @@ export function ImplantPicker({
           <button onClick={resetPicker} className={uiDismissButton}>×</button>
         </div>
 
-        <div className="px-4 lg:px-5 py-4 lg:py-5 space-y-4">
+        <PickerBody>
           <p className={`text-sm lg:text-base ${uiTextBody}`}>
             <span className="font-medium text-slate-200">{pendingCost.name}</span> has no listed
             cost or availability. Enter the values assigned for this implant.
@@ -222,7 +222,7 @@ export function ImplantPicker({
               </button>
             </div>
           )}
-        </div>
+        </PickerBody>
 
         <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700 flex gap-2">
           <button onClick={resetPicker} className={uiPickerBackButton}>
@@ -304,7 +304,7 @@ export function ImplantPicker({
           <button onClick={resetPicker} className={uiDismissButton}>×</button>
         </div>
 
-        <div className="px-4 lg:px-5 py-4 lg:py-5 space-y-4">
+        <PickerBody>
           {location && (
             <div className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted}`}>
               <span>Installing on:</span>
@@ -337,7 +337,7 @@ export function ImplantPicker({
           <div className={`text-xs lg:text-sm ${uiTextBody} bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed`}>
             {craftsmanshipDescription(selected, craftsmanship)}
           </div>
-        </div>
+        </PickerBody>
 
         <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700 flex gap-2">
           <button onClick={resetPicker} className={uiPickerBackButton}>
@@ -367,24 +367,19 @@ export function ImplantPicker({
       isEmpty={filtered.length === 0 && filteredCustom.length === 0}
       footer={
         editable && onCustom ? (
-          <button
+          <PickerCustomAction
             onClick={onCustom}
-            className="w-full text-sm lg:text-base text-red-500 hover:text-red-400 text-center py-1 lg:py-1.5"
           >
             + Add custom cybernetic
-          </button>
+          </PickerCustomAction>
         ) : undefined
       }
     >
       {filteredCustom.map((item) => (
-        <button
+        <PickerRow
           key={`custom-${item.id}`}
-          type="button"
-          tabIndex={editable ? undefined : -1}
-          onClick={editable && onSelectCustomItem ? () => onSelectCustomItem(item) : undefined}
-          className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${
-            editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"
-          }`}
+          interactive={editable}
+          onClick={() => onSelectCustomItem?.(item)}
         >
           <div className="flex items-center gap-1.5 min-w-0">
             <span className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}>
@@ -412,18 +407,14 @@ export function ImplantPicker({
               {item.data.craftsmanship}
             </Chip>
           </div>
-        </button>
+        </PickerRow>
       ))}
 
       {filtered.map((ref) => (
-        <button
+        <PickerRow
           key={ref.id}
-          type="button"
-          tabIndex={editable ? undefined : -1}
-          onClick={editable ? () => selectImplant(ref) : undefined}
-          className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${
-            editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"
-          }`}
+          interactive={editable}
+          onClick={() => selectImplant(ref)}
         >
           <div className="flex items-center gap-1.5 min-w-0">
             <span className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}>
@@ -446,7 +437,7 @@ export function ImplantPicker({
               <span className={uiTextGMNote}>Cost assigned on add</span>
             )}
           </div>
-        </button>
+        </PickerRow>
       ))}
     </PickerModal>
   );

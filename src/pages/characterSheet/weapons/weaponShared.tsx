@@ -8,7 +8,7 @@ import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { InfoModal } from "../../../components/InfoModal";
 import type { WeaponUpgradeRef } from "../../../data/reference/weaponUpgradeReference";
-import { PickerModal } from "../../../ui/PickerModal";
+import { PickerModal, PickerRow } from "../../../ui/PickerModal";
 import { ArrowRight } from "../../../ui/PickerArrows";
 import { formatWeightForDisplay } from "../../../ui/weightFormat";
 import { TrashIcon } from "../../../ui/TrashIcon";
@@ -457,12 +457,10 @@ export function UpgradePicker({
       }
     >
       {compatibleUpgrades.map((upgrade) => (
-        <button
+        <PickerRow
           key={upgrade.id}
-          onClick={editable ? () => onSelect(upgrade.id) : undefined}
-          className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${
-            editable ? "hover:bg-slate-800" : "cursor-default"
-          }`}
+          interactive={editable}
+          onClick={() => onSelect(upgrade.id)}
         >
           <div className="flex items-center justify-between gap-2 mb-1">
             <span className={`${uiItemName} group-hover:text-white`}>
@@ -478,7 +476,7 @@ export function UpgradePicker({
           </div>
           <p className={`text-xs lg:text-sm ${uiTextBody} leading-relaxed`}>{upgrade.description}</p>
           <p className={`text-xs lg:text-sm ${uiTextPlaceholder} mt-1`}>{upgrade.applicableTo}</p>
-        </button>
+        </PickerRow>
       ))}
     </PickerModal>
   );

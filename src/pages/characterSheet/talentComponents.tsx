@@ -11,7 +11,6 @@ import type { SkillSource } from "../../types/SkillSource";
 import {
   editableInputClass,
   uiSection,
-  uiTextMuted,
   uiTextPlaceholder,
   uiInfoModalWrapper,
   uiItemName,
@@ -25,9 +24,9 @@ import { InfoModal } from "../../components/InfoModal";
 import { TALENT_DESCRIPTIONS } from "../../data/talentDescriptions";
 import { TRAIT_DESCRIPTIONS } from "../../data/traitDescriptions";
 import { sourceColour } from "../../ui/sourceStyles";
-import { PickerModal } from "../../ui/PickerModal";
+import { PickerBody, PickerModal, PickerRow } from "../../ui/PickerModal";
 import { OptionPickerScreen } from "../../ui/OptionPickerScreen";
-import { ArrowRight } from "../../ui/PickerArrows";
+import { ArrowLeft, ArrowRight } from "../../ui/PickerArrows";
 import { TrashIcon } from "../../ui/TrashIcon";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -116,13 +115,9 @@ export function TalentPickerModal({
     setSpecialisation("");
   };
 
-  const specialisationFooter =
+  const specialisationForm =
     editable && picked && talentData?.hasSpecialisation ? (
       <div className="space-y-2">
-        <p className={`text-xs ${uiTextMuted}`}>
-          Adding: <span className="text-slate-200 font-medium">{picked.name}</span>
-        </p>
-
         {specialisationOptions ? (
           <button
             type="button"
@@ -163,7 +158,9 @@ export function TalentPickerModal({
             onKeyDown={(e) => {
               if (e.key === "Enter" && canAdd) handleSpecAdd();
             }}
-            placeholder={talentData.specialisationLabel ?? "Specialisation…"}
+            placeholder={`Enter ${(
+              talentData.specialisationLabel ?? "specialisation"
+            ).toLowerCase()}…`}
             className={editableInputClass(true)}
           />
         )}
@@ -189,6 +186,27 @@ export function TalentPickerModal({
     );
   }
 
+  if (picked && talentData?.hasSpecialisation) {
+    return (
+      <PickerModal
+        title={talentData.specialisationLabel ?? "Specialisation"}
+        closeLabel={<ArrowLeft />}
+        closeAriaLabel="Back"
+        query=""
+        onQueryChange={() => {}}
+        onClose={() => {
+          setPicked(null);
+          setSpecialisation("");
+        }}
+        isEmpty={false}
+        hideSearch
+        maxWidth="max-w-lg"
+      >
+        <PickerBody>{specialisationForm}</PickerBody>
+      </PickerModal>
+    );
+  }
+
   return (
     <PickerModal
       title={modalTitle}
@@ -201,32 +219,22 @@ export function TalentPickerModal({
       }}
       onClose={onClose}
       isEmpty={filtered.length === 0}
-      footer={specialisationFooter}
     >
       {filtered.map((item) => {
         const row = item as TalentData;
         const sources = normaliseSources(item.source as SkillSource | SkillSource[]);
-        const isSelected = picked?.id === item.id;
         return (
-          <button
+          <PickerRow
             key={item.id}
-            type="button"
-            tabIndex={editable ? undefined : -1}
-            onClick={
-              editable
-                ? () => {
-                    if ((item as TalentData).hasSpecialisation) {
-                      setPicked(item);
-                      setSpecialisation("");
-                    } else {
-                      addImmediate(item);
-                    }
-                  }
-                : undefined
-            }
-            className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"} ${
-              isSelected ? "bg-slate-800 ring-1 ring-inset ring-red-500/40" : ""
-            }`}
+            interactive={editable}
+            onClick={() => {
+              if ((item as TalentData).hasSpecialisation) {
+                setPicked(item);
+                setSpecialisation("");
+              } else {
+                addImmediate(item);
+              }
+            }}
           >
             <div className="flex-1 min-w-0 space-y-1.5">
               <div className="flex items-center gap-1.5">
@@ -265,7 +273,7 @@ export function TalentPickerModal({
                 <span className="text-slate-300 font-medium">{row.prerequisites}</span>
               </div>
             )}
-          </button>
+          </PickerRow>
         );
       })}
     </PickerModal>

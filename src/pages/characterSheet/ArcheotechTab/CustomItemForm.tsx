@@ -14,7 +14,7 @@ import { uiPickerBackButton } from "../../../ui/buttonStyles";
 import { Button } from "../../../ui/Button";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
-import { PickerModal } from "../../../ui/PickerModal";
+import { PickerBody, PickerModal, PickerRow } from "../../../ui/PickerModal";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
 import { ArrowRight, ArrowLeft } from "../../../ui/PickerArrows";
 import { ITEM_TYPES, AVAILABILITY_OPTIONS, type ItemType } from "./archeotechConstants";
@@ -189,17 +189,16 @@ export function CustomItemForm({
         maxHeight="max-h-[92vh]"
       >
         {ITEM_TYPES.map((t) => (
-          <button
+          <PickerRow
             key={t}
             onClick={() => {
               setSelectedType(t);
               setPhase("details");
             }}
-            className="w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group hover:bg-slate-800 cursor-pointer"
           >
             <p className="text-sm lg:text-base font-medium text-slate-200 group-hover:text-white">{t}</p>
             <p className={`text-xs lg:text-sm ${uiTextMuted} mt-0.5`}>{TYPE_DESCRIPTIONS[t]}</p>
-          </button>
+          </PickerRow>
         ))}
       </PickerModal>
     );
@@ -268,7 +267,7 @@ export function CustomItemForm({
         </div>
       }
     >
-      <div className="p-4 lg:p-5 space-y-4">
+      <PickerBody>
         {/* Identity */}
         <p className={uiSectionHeader}>Identity</p>
         <div className={uiSection + " space-y-3"}>
@@ -667,7 +666,7 @@ export function CustomItemForm({
             />
           </div>
         </div>
-      </div>
+      </PickerBody>
     </PickerModal>
   );
 }

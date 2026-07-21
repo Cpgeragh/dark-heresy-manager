@@ -4,7 +4,7 @@ import { useState } from "react";
 import { InfoModal } from "../../../components/InfoModal";
 import { DRUGS_REFERENCE, type DrugRef } from "../../../data/reference/drugsReference";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
-import { PickerModal } from "../../../ui/PickerModal";
+import { PickerCustomAction, PickerModal, PickerRow } from "../../../ui/PickerModal";
 import { uiTextBody, uiTextLabel, uiTextMuted, uiItemName, uiInfoModalWrapper } from "../../../ui/editableStyles";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { StatusBadge } from "../../../ui/StatusBadge";
@@ -81,24 +81,19 @@ export function DrugPicker({
       isEmpty={filtered.length === 0 && filteredCustom.length === 0}
       footer={
         editable && onCustom ? (
-          <button
+          <PickerCustomAction
             onClick={onCustom}
-            className="w-full text-sm lg:text-base text-red-500 hover:text-red-400 text-center py-1 lg:py-1.5"
           >
             + Add custom drug
-          </button>
+          </PickerCustomAction>
         ) : undefined
       }
     >
       {filteredCustom.map((item) => (
-        <button
+        <PickerRow
           key={`custom-${item.id}`}
-          type="button"
-          tabIndex={editable ? undefined : -1}
-          onClick={editable && onSelectCustomItem ? () => onSelectCustomItem(item) : undefined}
-          className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${
-            editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"
-          }`}
+          interactive={editable}
+          onClick={() => onSelectCustomItem?.(item)}
         >
           <div className="flex items-center gap-1.5 min-w-0">
             <span className={`${uiItemName} group-hover:text-white truncate`}>
@@ -127,21 +122,17 @@ export function DrugPicker({
               source={item.data.source}
             />
           </div>
-        </button>
+        </PickerRow>
       ))}
 
       {filtered.map((ref) => {
         const hasInfo = !!(ref.duration || ref.effect || ref.sideEffect || ref.notes);
 
         return (
-          <button
+          <PickerRow
             key={ref.id}
-            type="button"
-            tabIndex={editable ? undefined : -1}
-            onClick={editable ? () => onSelect(ref) : undefined}
-            className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${
-              editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"
-            }`}
+            interactive={editable}
+            onClick={() => onSelect(ref)}
           >
             <div className="flex items-center gap-1.5 min-w-0">
               <span className={`${uiItemName} group-hover:text-white truncate`}>
@@ -168,7 +159,7 @@ export function DrugPicker({
             {ref.duration && (
               <p className={`text-xs lg:text-sm ${uiTextMuted} mt-0.5`}>Duration: {ref.duration}</p>
             )}
-          </button>
+          </PickerRow>
         );
       })}
     </PickerModal>

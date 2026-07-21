@@ -18,7 +18,7 @@ import { colourAmberFaint, colourFuchsia } from "../../../ui/colourTokens";
 import { Button } from "../../../ui/Button";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
-import { PickerModal } from "../../../ui/PickerModal";
+import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../../ui/PickerModal";
 import { ArrowRight, ArrowLeft } from "../../../ui/PickerArrows";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
 import { InfoModal } from "../../../components/InfoModal";
@@ -141,7 +141,7 @@ export function RangedPicker({
           </Button>
         }
       >
-        <div className="px-4 lg:px-5 py-4 lg:py-5 space-y-4">
+        <PickerBody>
           <div>
             <p className={`text-xs lg:text-sm ${uiTextMuted} mb-2`}>Select weapon craftsmanship:</p>
             <div className="flex gap-2">
@@ -164,7 +164,7 @@ export function RangedPicker({
           <div className={`text-xs lg:text-sm ${uiTextBody} bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed`}>
             {rangedCraftsmanshipDescription(craftsmanship)}
           </div>
-        </div>
+        </PickerBody>
       </PickerModal>
     );
   }
@@ -199,12 +199,11 @@ export function RangedPicker({
       }
       footer={
         editable && showCustom ? (
-          <button
+          <PickerCustomAction
             onClick={onCustom}
-            className="w-full text-sm lg:text-base text-red-500 hover:text-red-400 text-center py-1 lg:py-1.5"
           >
             + Add custom weapon
-          </button>
+          </PickerCustomAction>
         ) : undefined
       }
     >
@@ -212,12 +211,10 @@ export function RangedPicker({
         const data = item.data;
         if (data.weaponKind !== "ranged") return null;
         return (
-          <button
+          <PickerRow
             key={item.id}
-            type="button"
-            tabIndex={editable ? undefined : -1}
-            onClick={editable ? () => onSelectCustomItem?.(item) : undefined}
-            className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
+            interactive={editable}
+            onClick={() => onSelectCustomItem?.(item)}
           >
             <span
               className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}
@@ -249,16 +246,14 @@ export function RangedPicker({
               </Chip>
               <ItemMetaChips weight={data.weight} value={data.value} availability={data.availability} source={data.source} />
             </div>
-          </button>
+          </PickerRow>
         );
       })}
       {filtered.map((ref) => (
-        <button
+        <PickerRow
           key={ref.id}
-          type="button"
-          tabIndex={editable ? undefined : -1}
-          onClick={editable ? () => setSelected(ref) : undefined}
-          className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
+          interactive={editable}
+          onClick={() => setSelected(ref)}
         >
           <span
             className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}
@@ -299,7 +294,7 @@ export function RangedPicker({
               </span>
             </div>
           )}
-        </button>
+        </PickerRow>
       ))}
     </PickerModal>
   );

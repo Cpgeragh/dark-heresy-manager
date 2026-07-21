@@ -5,7 +5,7 @@ import { Button } from "../../../ui/Button";
 import { Chip } from "../../../ui/Chip";
 import { InfoModal } from "../../../components/InfoModal";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
-import { PickerModal } from "../../../ui/PickerModal";
+import { PickerBody, PickerModal, PickerRow } from "../../../ui/PickerModal";
 import { ArrowLeft } from "../../../ui/PickerArrows";
 import { uiTextBody, uiTextLabel, uiTextMuted, uiItemName, uiInfoModalWrapper } from "../../../ui/editableStyles";
 import { colourViolet, colourSky, colourOrange } from "../../../ui/colourTokens";
@@ -77,7 +77,7 @@ export function IntegratedWeaponPicker({
           </Button>
         }
       >
-        <div className="px-4 lg:px-5 py-4 lg:py-5 space-y-4">
+        <PickerBody>
           <div>
             <p className={`text-xs lg:text-sm ${uiTextMuted} mb-2`}>Select weapon craftsmanship:</p>
             <div className="flex gap-2">
@@ -102,7 +102,7 @@ export function IntegratedWeaponPicker({
               ? rangedCraftsmanshipDescription(craftsmanship)
               : meleeCraftsmanshipDescription(craftsmanship)}
           </div>
-        </div>
+        </PickerBody>
       </PickerModal>
     );
   }
@@ -139,12 +139,10 @@ export function IntegratedWeaponPicker({
       }
     >
       {ranged.map((ref) => (
-        <button
+        <PickerRow
           key={ref.id}
-          type="button"
-          tabIndex={editable ? undefined : -1}
-          onClick={editable ? () => setSelected({ kind: "ranged", ref }) : undefined}
-          className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
+          interactive={editable}
+          onClick={() => setSelected({ kind: "ranged", ref })}
         >
           <span
             className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}
@@ -185,15 +183,13 @@ export function IntegratedWeaponPicker({
               </span>
             </div>
           )}
-        </button>
+        </PickerRow>
       ))}
       {melee.map((ref) => (
-        <button
+        <PickerRow
           key={ref.id}
-          type="button"
-          tabIndex={editable ? undefined : -1}
-          onClick={editable ? () => setSelected({ kind: "melee", ref }) : undefined}
-          className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
+          interactive={editable}
+          onClick={() => setSelected({ kind: "melee", ref })}
         >
           <span
             className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}
@@ -231,7 +227,7 @@ export function IntegratedWeaponPicker({
               </span>
             </div>
           )}
-        </button>
+        </PickerRow>
       ))}
     </PickerModal>
   );

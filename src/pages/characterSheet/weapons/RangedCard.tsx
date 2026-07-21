@@ -35,7 +35,7 @@ import { colourArcheotech, colourViolet } from "../../../ui/colourTokens";
 import { Button } from "../../../ui/Button";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
-import { PickerModal } from "../../../ui/PickerModal";
+import { PickerModal, PickerRow } from "../../../ui/PickerModal";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import { formatWeightForDisplay } from "../../../ui/weightFormat";
 import { InfoModal } from "../../../components/InfoModal";
@@ -276,20 +276,14 @@ function AmmoPicker({
       }
     >
       {options.map((ammo) => (
-        <button
+        <PickerRow
           key={ammo.id}
-          onClick={
-            editable
-              ? () => {
-                  onSelect(formatAmmoName(ammo.name), ammo.id);
-                  onClose();
-                }
-              : undefined
-          }
+          interactive={editable}
+          onClick={() => {
+            onSelect(formatAmmoName(ammo.name), ammo.id);
+            onClose();
+          }}
           disabled={editable && existingNames.has(formatAmmoName(ammo.name))}
-          className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${
-            editable ? "hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed" : "cursor-default"
-          }`}
         >
           <div className="flex items-center justify-between gap-2">
             <span className={`${uiItemName} group-hover:text-white`}>
@@ -302,7 +296,7 @@ function AmmoPicker({
           {ammo.description && (
             <p className={`text-xs lg:text-sm ${uiTextMuted} mt-0.5 line-clamp-2`}>{ammo.description}</p>
           )}
-        </button>
+        </PickerRow>
       ))}
     </PickerModal>
   );

@@ -14,7 +14,7 @@ import { Button } from "../../ui/Button";
 import { Chip } from "../../ui/Chip";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { PowerCard } from "./components/PowerCard";
-import { PickerModal } from "../../ui/PickerModal";
+import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../ui/PickerModal";
 import { ArrowLeft } from "../../ui/PickerArrows";
 import { InfoModal } from "../../components/InfoModal";
 import { TALENT_DESCRIPTIONS } from "../../data/talentDescriptions";
@@ -107,20 +107,19 @@ function PowerPicker({
       ))}
       footer={
         editable ? (
-          <button
+          <PickerCustomAction
             onClick={onCustom}
-            className="w-full text-sm lg:text-base text-red-500 hover:text-red-400 text-center py-1 lg:py-1.5 transition"
           >
             {minorOnly ? "+ Custom minor power" : "+ Custom major power"}
-          </button>
+          </PickerCustomAction>
         ) : undefined
       }
     >
       {filtered.map((ref) => (
-        <button
+        <PickerRow
           key={ref.id}
-          onClick={editable ? () => onSelect(ref) : undefined}
-          className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
+          interactive={editable}
+          onClick={() => onSelect(ref)}
         >
           <div className="flex items-center gap-1.5">
             <span className={`${uiItemName} group-hover:text-white`}>
@@ -132,6 +131,7 @@ function PowerPicker({
                 onClick={(e) => e.stopPropagation()}
               >
                 <InfoModal
+                  as="span"
                   title={ref.name}
                   content={
                     <p className="text-sm lg:text-base text-slate-300 leading-relaxed">{ref.description}</p>
@@ -153,7 +153,7 @@ function PowerPicker({
             <span>{ref.range}</span>
             {ref.sustained && <span className="text-amber-500/80">Sustained</span>}
           </div>
-        </button>
+        </PickerRow>
       ))}
     </PickerModal>
   );
@@ -275,7 +275,7 @@ function CustomPowerForm({
       hideSearch
       isEmpty={false}
     >
-      <div className="p-4 lg:p-5 space-y-4">
+      <PickerBody>
         <div className="space-y-1">
           <label className={uiFormLabel}>
             Name <span className="text-red-400">*</span>
@@ -481,7 +481,7 @@ function CustomPowerForm({
             Cancel
           </button>
         </div>
-      </div>
+      </PickerBody>
     </PickerModal>
   );
 }

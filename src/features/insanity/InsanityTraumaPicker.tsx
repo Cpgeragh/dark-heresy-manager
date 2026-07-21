@@ -3,7 +3,7 @@ import { FormField } from "../../components/FormField";
 import { InfoModal } from "../../components/InfoModal";
 import type { InsanityTraumaEntry } from "../../types/Character";
 import { Chip } from "../../ui/Chip";
-import { PickerModal } from "../../ui/PickerModal";
+import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../ui/PickerModal";
 import { ArrowLeft } from "../../ui/PickerArrows";
 import { uiActionButton, uiPickerBackButton } from "../../ui/buttonStyles";
 import { colourAmberFaint } from "../../ui/colourTokens";
@@ -127,7 +127,7 @@ export function InsanityTraumaPicker({
           </div>
         }
       >
-        <div className="space-y-4 p-4 lg:p-5">
+        <PickerBody>
           <div>
             <label className={uiFormLabel}>
               Name <span className="text-red-500">*</span>
@@ -150,7 +150,7 @@ export function InsanityTraumaPicker({
             rows={3}
             placeholder="Optional details..."
           />
-        </div>
+        </PickerBody>
       </PickerModal>
     );
   }
@@ -164,25 +164,21 @@ export function InsanityTraumaPicker({
       onClose={onClose}
       isEmpty={filtered.length === 0}
       footer={
-        <button
-          type="button"
+        <PickerCustomAction
           onClick={() => {
             setCustomMode(true);
             setCustomName("");
             setCustomDetails("");
           }}
-          className="w-full py-1 text-center text-sm text-red-500 hover:text-red-400 lg:py-1.5 lg:text-base"
         >
           + Add custom trauma
-        </button>
+        </PickerCustomAction>
       }
     >
       {filtered.map((ref) => (
-        <button
+        <PickerRow
           key={ref.roll}
-          type="button"
           onClick={() => handleSelect(ref)}
-          className="group w-full px-4 py-3 text-left transition hover:bg-slate-800 lg:px-5 lg:py-4"
         >
           <span className={`${uiItemName} group-hover:text-white`}>{ref.name}</span>
           <div className="mt-1 flex flex-wrap gap-1.5">
@@ -198,7 +194,7 @@ export function InsanityTraumaPicker({
               />
             </span>
           </div>
-        </button>
+        </PickerRow>
       ))}
     </PickerModal>
   );

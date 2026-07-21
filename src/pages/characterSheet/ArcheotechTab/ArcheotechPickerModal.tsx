@@ -9,7 +9,7 @@ import { editableInputClass, uiTextBody, uiTextMuted, uiFormLabel, uiInfoModalWr
 import { uiPickerBackButton } from "../../../ui/buttonStyles";
 import { StatusBadge } from "../../../ui/StatusBadge";
 import { AVAILABILITY_OPTIONS } from "./archeotechConstants";
-import { PickerModal } from "../../../ui/PickerModal";
+import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../../ui/PickerModal";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
 import { ArrowLeft, ArrowRight } from "../../../ui/PickerArrows";
 import { Button } from "../../../ui/Button";
@@ -116,18 +116,17 @@ export function ArcheotechPickerModal({
       hideSearch={!!pending}
       footer={
         !pending && editable ? (
-          <button
+          <PickerCustomAction
             onClick={onCustom}
-            className="w-full text-sm lg:text-base text-red-500 hover:text-red-400 text-center py-1 lg:py-1.5"
           >
             + Add custom item
-          </button>
+          </PickerCustomAction>
         ) : undefined
       }
     >
       {pending ? (
         // ── Step 2: GM form ──────────────────────────────────────────────────
-        <div className="p-4 lg:p-5 space-y-4">
+        <PickerBody>
           <p className={`text-sm lg:text-base ${uiTextBody}`}>
             <span className="font-medium text-slate-200">{pending.name}</span> has no standard cost
             or availability. Enter the values the GM has assigned.
@@ -175,17 +174,15 @@ export function ArcheotechPickerModal({
               Add to Inventory
             </Button>
           </div>
-        </div>
+        </PickerBody>
       ) : (
         // ── Step 1: Search list ──────────────────────────────────────────────
         <>
         {filteredCustom.map((item) => (
-          <button
+          <PickerRow
             key={`custom-${item.id}`}
-            type="button"
-            tabIndex={editable ? undefined : -1}
-            onClick={editable && onSelectCustomItem ? () => onSelectCustomItem(item) : undefined}
-            className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
+            interactive={editable}
+            onClick={() => onSelectCustomItem?.(item)}
           >
             <div className="flex items-center gap-1.5 min-w-0">
               <span
@@ -214,16 +211,14 @@ export function ArcheotechPickerModal({
                 source={item.data.source}
               />
             </div>
-          </button>
+          </PickerRow>
         ))}
 
         {filtered.map((ref) => (
-          <button
+          <PickerRow
             key={ref.id}
-            type="button"
-            tabIndex={editable ? undefined : -1}
-            onClick={editable ? () => handleRowClick(ref) : undefined}
-            className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition group ${editable ? "hover:bg-slate-800 cursor-pointer" : "cursor-default"}`}
+            interactive={editable}
+            onClick={() => handleRowClick(ref)}
           >
             <div className="flex items-center gap-1.5 min-w-0">
               <span
@@ -254,7 +249,7 @@ export function ArcheotechPickerModal({
                 <span className={uiTextGMNote}>GM determines cost &amp; availability</span>
               )}
             </div>
-          </button>
+          </PickerRow>
         ))}
         </>
       )}
