@@ -6,6 +6,7 @@ import type { SessionDocument } from "../../types/Firestore";
 import { useToast } from "../../components/Toast";
 import { Button } from "../../ui/Button";
 import { ConfirmInline } from "../../ui/ConfirmInline";
+import { SectionHeader } from "../../ui/SectionHeader";
 import {
   editableInputClass,
   editableTextareaClass,
@@ -133,7 +134,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
   if (mode === "edit") {
     return (
       <div className="border border-red-700/40 rounded p-4 lg:p-5 bg-slate-900/60 space-y-4">
-        <h3 className="text-sm lg:text-base font-semibold text-red-500">Edit Session</h3>
+        <SectionHeader as="h3">Edit Session</SectionHeader>
 
         <div className="grid grid-cols-2 gap-4">
           <div>

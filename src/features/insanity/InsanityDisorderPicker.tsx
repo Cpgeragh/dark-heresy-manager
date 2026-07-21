@@ -328,7 +328,6 @@ export function InsanityDisorderPicker({
                     name={ref.name}
                     description={ref.description}
                     typeDescription={ref.typeDescription}
-                    hideName
                   />
                 }
                 as="span"

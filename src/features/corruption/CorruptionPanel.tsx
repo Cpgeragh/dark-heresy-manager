@@ -291,7 +291,7 @@ export function MalignancyRow({
             <span className={uiInfoModalWrapper}>
               <InfoModal
                 title={display.name}
-                content={<MalignancyInfoContent malignancy={display} notes={malignancy.notes} hideName />}
+                content={<MalignancyInfoContent malignancy={display} notes={malignancy.notes} />}
               />
             </span>
           </div>

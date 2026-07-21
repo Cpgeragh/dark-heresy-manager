@@ -14,6 +14,7 @@ import { saveFirstName } from "../services/profileService";
 import { uiSectionHeader, uiTextError } from "../ui/editableStyles";
 import { Button } from "../ui/Button";
 import { ArrowLeft, ArrowRight } from "../ui/PickerArrows";
+import { Panel } from "../ui/Panel";
 
 type Step = "welcome" | "show-code" | "reclaim";
 
@@ -121,7 +122,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
           <div className="space-y-6 text-slate-100">
             <h1 className="text-lg lg:text-xl font-semibold text-slate-100 text-center">Welcome</h1>
 
-            <div className="border border-slate-700 bg-slate-900/40 p-4 lg:p-5 rounded-lg space-y-4">
+            <Panel spacing="compact">
               <p className="text-slate-300 text-sm lg:text-base">
                 Enter your first name, then tap Get Started to set up your account and receive a
                 recovery code.
@@ -161,7 +162,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
                 <span>Returning user? Reclaim your identity</span>
                 <ArrowRight />
               </button>
-            </div>
+            </Panel>
           </div>
         )}
 
@@ -179,7 +180,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
               <h1 className="text-lg lg:text-xl font-semibold text-slate-100 text-center">Returning User</h1>
             </div>
 
-            <div className="border border-slate-700 bg-slate-900/40 p-4 lg:p-5 rounded-lg space-y-4">
+            <Panel spacing="compact">
               <p className="text-slate-300 text-sm lg:text-base">
                 Enter the recovery code you saved when you first set up the app.
               </p>
@@ -210,7 +211,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
               </Button>
 
               {error && <p className={`${uiTextError} text-center`}>{error}</p>}
-            </div>
+            </Panel>
           </div>
         )}
 
@@ -228,7 +229,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
               <h1 className="text-lg lg:text-xl font-semibold text-slate-100 text-center">Data Recovery Code</h1>
             </div>
 
-            <div className="border border-slate-700 bg-slate-900/40 p-4 lg:p-5 rounded-lg space-y-4">
+            <Panel spacing="compact">
               <p className="text-slate-300 text-sm lg:text-base text-center">
                 If you ever lose access to this device, use this code to reclaim your campaigns
                 and characters.
@@ -286,7 +287,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
               >
                 I've saved my code
               </Button>
-            </div>
+            </Panel>
           </div>
         )}
 

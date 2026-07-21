@@ -9,11 +9,9 @@ function RuleParagraph({ children }: { children: React.ReactNode }) {
 export function MalignancyInfoContent({
   malignancy,
   notes,
-  hideName = false,
 }: {
-  malignancy: Pick<CorruptionMalignancyRef, "name"> & Partial<Pick<CorruptionMalignancyRef, "roll" | "effect">>;
+  malignancy: Partial<Pick<CorruptionMalignancyRef, "roll" | "effect">>;
   notes?: string;
-  hideName?: boolean;
 }) {
   return (
     <div className="space-y-3">
@@ -22,12 +20,7 @@ export function MalignancyInfoContent({
           <p className="text-sm lg:text-base font-semibold text-amber-300">{malignancy.roll}</p>
         </div>
       )}
-      {(!hideName || malignancy.effect) && (
-        <div>
-          {!hideName && <p className="text-sm lg:text-base font-semibold text-slate-200">{malignancy.name}</p>}
-          {malignancy.effect && <RuleParagraph>{malignancy.effect}</RuleParagraph>}
-        </div>
-      )}
+      {malignancy.effect && <RuleParagraph>{malignancy.effect}</RuleParagraph>}
       {notes && (
         <div>
           <p className={uiTextLabel}>Notes</p>
@@ -41,11 +34,9 @@ export function MalignancyInfoContent({
 export function MutationInfoContent({
   mutation,
   notes,
-  hideName = false,
 }: {
-  mutation: Pick<MutationRef, "name"> & Partial<Pick<MutationRef, "roll" | "effect">>;
+  mutation: Partial<Pick<MutationRef, "roll" | "effect">>;
   notes?: string;
-  hideName?: boolean;
 }) {
   return (
     <div className="space-y-3">
@@ -54,12 +45,7 @@ export function MutationInfoContent({
           <p className="text-sm lg:text-base font-semibold text-amber-300">{mutation.roll}</p>
         </div>
       )}
-      {(!hideName || mutation.effect) && (
-        <div>
-          {!hideName && <p className="text-sm lg:text-base font-semibold text-slate-200">{mutation.name}</p>}
-          {mutation.effect && <RuleParagraph>{mutation.effect}</RuleParagraph>}
-        </div>
-      )}
+      {mutation.effect && <RuleParagraph>{mutation.effect}</RuleParagraph>}
       {notes && (
         <div>
           <p className={uiTextLabel}>Notes</p>

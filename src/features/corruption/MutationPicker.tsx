@@ -241,7 +241,7 @@ export function MutationPicker({
           <div className="mt-1 flex items-center gap-1.5">
             <span className={uiTextLabel}>Rules</span>
             <span onClick={(event) => event.stopPropagation()} className={uiInfoModalWrapper}>
-              <InfoModal title={ref.name} content={<MutationInfoContent mutation={ref} hideName />} as="span" />
+              <InfoModal title={ref.name} content={<MutationInfoContent mutation={ref} />} as="span" />
             </span>
           </div>
         </PickerRow>

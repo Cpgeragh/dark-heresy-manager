@@ -235,7 +235,7 @@ export function CorruptionMalignancyPicker({
             <span onClick={(event) => event.stopPropagation()} className={uiInfoModalWrapper}>
               <InfoModal
                 title={ref.name}
-                content={<MalignancyInfoContent malignancy={ref} hideName />}
+                content={<MalignancyInfoContent malignancy={ref} />}
                 as="span"
               />
             </span>

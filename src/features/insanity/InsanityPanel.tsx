@@ -267,7 +267,6 @@ function DisorderRow({
                     description={ref?.description ?? disorder.notes ?? "Custom disorder."}
                     typeDescription={ref?.typeDescription}
                     notes={disorder.notes}
-                    hideName
                   />
                 }
               />

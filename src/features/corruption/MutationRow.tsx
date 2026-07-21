@@ -60,7 +60,7 @@ export function MutationRow({
             <span className={uiInfoModalWrapper}>
               <InfoModal
                 title={display.name}
-                content={<MutationInfoContent mutation={display} notes={mutation.notes} hideName />}
+                content={<MutationInfoContent mutation={display} notes={mutation.notes} />}
               />
             </span>
           </div>
