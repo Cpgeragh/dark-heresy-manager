@@ -2,6 +2,7 @@
 
 import { useCallback } from "react";
 import { uiFormLabel } from "../ui/editableStyles";
+import { fieldControlClass } from "../ui/fieldStyles";
 
 interface FormFieldProps {
   label: string;
@@ -31,17 +32,11 @@ export function FormField({
   onBlur, // NEW
 }: FormFieldProps) {
   const hasError = !!error && editable;
-
-  const baseInputClass = `
-    px-2 lg:px-3 py-1 lg:py-1.5 rounded border text-sm lg:text-base
-    ${
-      editable
-        ? hasError
-          ? "bg-slate-800 border-red-500 text-slate-100 focus:border-red-400 focus:outline-none"
-          : "bg-slate-800 border-slate-500 text-slate-100 focus:border-red-500 focus:outline-none"
-        : "bg-slate-900 border-slate-500 text-slate-100 cursor-not-allowed"
-    }
-  `.trim();
+  const controlClass = fieldControlClass({
+    editable,
+    invalid: hasError,
+    resize: type === "textarea" ? "vertical" : undefined,
+  });
 
   const inputId = `field-${label.toLowerCase().replace(/\s+/g, "-")}`;
 
@@ -70,7 +65,7 @@ export function FormField({
             error ? `${inputId}-error` : description ? `${inputId}-desc` : undefined
           }
           aria-invalid={hasError}
-          className={baseInputClass + " resize-y"}
+          className={controlClass}
         />
       ) : (
         <input
@@ -86,7 +81,7 @@ export function FormField({
             error ? `${inputId}-error` : description ? `${inputId}-desc` : undefined
           }
           aria-invalid={hasError}
-          className={baseInputClass}
+          className={controlClass}
         />
       )}
 

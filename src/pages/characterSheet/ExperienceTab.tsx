@@ -3,6 +3,7 @@
 import { useState, useCallback, useMemo } from "react";
 import type { ExperienceBlock, RankAdvances } from "../../types/Character";
 import {
+  editableInputClass,
   uiSection,
   readOnlyBadgeClass,
   uiTextMuted,
@@ -156,7 +157,7 @@ export function ExperienceTab({
                 min={0}
                 value={experience.total}
                 onChange={handleTotalChange}
-                className="mt-2 w-full px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-800 border border-slate-500 rounded text-center text-xl lg:text-2xl font-semibold font-code text-slate-100 focus:border-red-500 focus:outline-none"
+                className={editableInputClass(true) + " mt-2 text-center text-xl lg:text-2xl font-semibold font-code"}
                 aria-label="Total XP"
               />
             </label>
@@ -237,7 +238,7 @@ export function ExperienceTab({
                 <button
                   type="button"
                   onClick={() => setShowRankPicker(true)}
-                  className="mt-0.5 w-full px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-800 border border-slate-500 rounded text-sm lg:text-base text-slate-100 text-left flex items-center justify-between"
+                  className={editableInputClass(true) + " mt-0.5 text-left flex items-center justify-between"}
                 >
                   <span>{newRank === "elite" ? "Elite" : `Rank ${newRank}`}</span>
                   <ArrowRight />
@@ -253,7 +254,7 @@ export function ExperienceTab({
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
                   placeholder="e.g. +10 Weapon Skill"
-                  className="mt-0.5 w-full px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-800 border border-slate-500 rounded text-sm lg:text-base text-slate-100 focus:border-red-500 focus:outline-none"
+                  className={editableInputClass(true) + " mt-0.5"}
                 />
               </div>
 
@@ -266,7 +267,7 @@ export function ExperienceTab({
                   min={0}
                   value={newCost}
                   onChange={(e) => setNewCost(Math.max(0, Number(e.target.value)))}
-                  className="mt-0.5 w-full px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-800 border border-slate-500 rounded text-sm lg:text-base text-slate-100 focus:border-red-500 focus:outline-none"
+                  className={editableInputClass(true) + " mt-0.5"}
                 />
               </div>
             </div>
@@ -280,7 +281,7 @@ export function ExperienceTab({
                 value={newNotes}
                 onChange={(e) => setNewNotes(e.target.value)}
                 placeholder="e.g. Approved session 3"
-                className="mt-0.5 w-full px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-800 border border-slate-500 rounded text-sm lg:text-base text-slate-100 focus:border-red-500 focus:outline-none"
+                className={editableInputClass(true) + " mt-0.5"}
               />
             </div>
 
@@ -301,17 +302,19 @@ export function ExperienceTab({
               placeholder="What are you buying?"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="flex-1 min-w-0 px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-800 border border-slate-500 rounded text-sm lg:text-base"
+              className={editableInputClass(true) + " flex-1 min-w-0"}
             />
             <div className="flex gap-2">
-              <input
-                type="number"
-                min={0}
-                placeholder="Cost"
-                value={xpCost}
-                onChange={(e) => setXpCost(Math.max(0, Number(e.target.value)))}
-                className="w-24 lg:w-32 px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-800 border border-slate-500 rounded text-sm lg:text-base"
-              />
+              <div className="w-24 lg:w-32 shrink-0">
+                <input
+                  type="number"
+                  min={0}
+                  placeholder="Cost"
+                  value={xpCost}
+                  onChange={(e) => setXpCost(Math.max(0, Number(e.target.value)))}
+                  className={editableInputClass(true)}
+                />
+              </div>
               <Button
                 onClick={handlePropose}
                 disabled={submitting || !description.trim() || xpCost <= 0}

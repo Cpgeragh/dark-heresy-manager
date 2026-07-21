@@ -2,6 +2,7 @@
 
 import { chipClassName } from "./Chip";
 import { colourInactive } from "./colourTokens";
+import { fieldControlClass, type FieldResize } from "./fieldStyles";
 
 /**
  * Shared UI styles and tokens.
@@ -16,45 +17,14 @@ import { colourInactive } from "./colourTokens";
  */
 
 export function editableInputClass(isEditable: boolean) {
-  return [
-    "w-full rounded border px-2 py-1 text-sm lg:text-base transition",
-    isEditable
-      ? [
-          "bg-slate-900",
-          "border-slate-500",
-          "text-slate-200",
-          "focus:outline-none",
-          "focus:border-red-500",
-        ].join(" ")
-      : [
-          "bg-slate-800",
-          "border-slate-500",
-          "text-slate-400",
-          "opacity-70",
-          "cursor-not-allowed",
-        ].join(" "),
-  ].join(" ");
+  return fieldControlClass({ editable: isEditable });
 }
 
-export function editableTextareaClass(isEditable: boolean) {
-  return [
-    "w-full rounded border px-2 py-1 text-sm lg:text-base transition resize-y",
-    isEditable
-      ? [
-          "bg-slate-900",
-          "border-slate-500",
-          "text-slate-200",
-          "focus:outline-none",
-          "focus:border-red-500",
-        ].join(" ")
-      : [
-          "bg-slate-800",
-          "border-slate-500",
-          "text-slate-400",
-          "opacity-70",
-          "cursor-not-allowed",
-        ].join(" "),
-  ].join(" ");
+export function editableTextareaClass(
+  isEditable: boolean,
+  resize: FieldResize = "vertical"
+) {
+  return fieldControlClass({ editable: isEditable, resize });
 }
 
 // ─── Shared UI tokens ─────────────────────────────────────────────────────────

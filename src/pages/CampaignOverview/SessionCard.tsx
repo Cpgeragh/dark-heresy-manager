@@ -6,7 +6,12 @@ import type { SessionDocument } from "../../types/Firestore";
 import { useToast } from "../../components/Toast";
 import { Button } from "../../ui/Button";
 import { ConfirmInline } from "../../ui/ConfirmInline";
-import { uiFormLabelSecondary, uiSection } from "../../ui/editableStyles";
+import {
+  editableInputClass,
+  editableTextareaClass,
+  uiFormLabelSecondary,
+  uiSection,
+} from "../../ui/editableStyles";
 
 interface Character {
   id: string;
@@ -137,7 +142,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-800 border border-slate-600 rounded text-sm lg:text-base"
+              className={editableInputClass(true)}
             />
           </div>
           <div>
@@ -147,7 +152,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
               min={0}
               value={xpAwarded}
               onChange={(e) => setXpAwarded(Math.max(0, Number(e.target.value)))}
-              className="w-full px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-800 border border-slate-600 rounded text-sm lg:text-base"
+              className={editableInputClass(true)}
             />
           </div>
         </div>
@@ -158,7 +163,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
             value={summary}
             onChange={(e) => setSummary(e.target.value)}
             rows={3}
-            className="w-full px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-800 border border-slate-600 rounded text-sm lg:text-base resize-none"
+            className={editableTextareaClass(true, "none")}
           />
         </div>
 
@@ -168,7 +173,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
             value={dmNotes}
             onChange={(e) => setDmNotes(e.target.value)}
             rows={2}
-            className="w-full px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-800 border border-slate-600 rounded text-sm lg:text-base resize-none"
+            className={editableTextareaClass(true, "none")}
           />
         </div>
 
