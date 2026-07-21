@@ -5,17 +5,16 @@ import type { GrenadeItem } from "../../../types/Character";
 import {
   editableInputClass,
   editableTextareaClass,
-  uiSection,
-  uiSectionHeader,
   uiFormLabel,
 } from "../../../ui/editableStyles";
-import { Button } from "../../../ui/Button";
-import { PickerBody, PickerModal } from "../../../ui/PickerModal";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
-import { ArrowRight } from "../../../ui/PickerArrows";
-import { sourceColour } from "../../../ui/sourceStyles";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
+import { CustomFormSection } from "../../../ui/CustomFormSection";
+import { CustomFormShell } from "../../../ui/CustomFormShell";
+import { OriginSelector, type CustomItemOrigin } from "../../../ui/OriginSelector";
+import { PickerField } from "../../../ui/PickerField";
+import { RequiredFormLabel } from "../../../ui/RequiredFormLabel";
 import {
   WeaponQualitySelector,
   useWeaponQualityPicker,
@@ -28,19 +27,12 @@ import {
   sanitizePositiveIntegerInput,
 } from "./weaponShared";
 
-const CUSTOM_GRENADE_ORIGIN_OPTIONS = ["Custom", "2nd Ed"] as const;
 const CUSTOM_GRENADE_TYPE_OPTIONS = ["Grenade", "Mine"] as const;
 
 function isCustomGrenadeType(
   value: string | undefined
 ): value is (typeof CUSTOM_GRENADE_TYPE_OPTIONS)[number] {
   return CUSTOM_GRENADE_TYPE_OPTIONS.includes(value as (typeof CUSTOM_GRENADE_TYPE_OPTIONS)[number]);
-}
-
-function isCustomGrenadeOrigin(
-  value: string | undefined
-): value is (typeof CUSTOM_GRENADE_ORIGIN_OPTIONS)[number] {
-  return CUSTOM_GRENADE_ORIGIN_OPTIONS.includes(value as (typeof CUSTOM_GRENADE_ORIGIN_OPTIONS)[number]);
 }
 
 function parseInitialGrenadeDamage(damage: string | undefined): {
@@ -86,8 +78,10 @@ export function CustomGrenadeForm({
   const [type, setType] = useState<"" | (typeof CUSTOM_GRENADE_TYPE_OPTIONS)[number]>(
     isCustomGrenadeType(initialGrenade?.type) ? initialGrenade.type : ""
   );
-  const [origin, setOrigin] = useState<"" | (typeof CUSTOM_GRENADE_ORIGIN_OPTIONS)[number]>(
-    isCustomGrenadeOrigin(initialGrenade?.source) ? initialGrenade.source : ""
+  const [origin, setOrigin] = useState<"" | CustomItemOrigin>(
+    initialGrenade?.source === "Custom" || initialGrenade?.source === "2nd Ed"
+      ? initialGrenade.source
+      : ""
   );
   const [availability, setAvailability] = useState(initialGrenade?.availability ?? "");
   const [damageMode, setDamageMode] = useState<"damage" | "special" | "none">(initialDamage.mode);
@@ -206,94 +200,51 @@ export function CustomGrenadeForm({
   }
 
   return (
-    <PickerModal
+    <CustomFormShell
       title={title}
       scrollPositionRef={formScrollPositionRef}
-      query=""
-      onQueryChange={() => {}}
       onClose={onCancel}
-      isEmpty={false}
-      hideSearch
-      maxHeight="max-h-[92vh]"
-      footer={
-        <div className="space-y-2">
-          {!canAdd && (
-            <p className="text-xs lg:text-sm text-slate-300"><span className="text-red-500">*</span> Required</p>
-          )}
-          <div className="flex gap-2">
-            <Button className="flex-1" onClick={addGrenade} disabled={!canAdd}>
-              {submitLabel}
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={onCancel}
-            >
-              Cancel
-            </Button>
-          </div>
-        </div>
-      }
+      canSubmit={canAdd}
+      submitLabel={submitLabel}
+      onSubmit={addGrenade}
     >
-      <PickerBody>
-        <p className={uiSectionHeader}>Identity</p>
-        <div className={uiSection + " space-y-3"}>
+      <CustomFormSection title="Identity">
           <div className="grid grid-cols-2 gap-2">
             <div className="col-span-2">
-              <label className={uiFormLabel}>
-                Name <span className="text-red-500">*</span>
-              </label>
-              <input value={name} onChange={(event) => setName(event.target.value)} className={editableInputClass(true) + " mt-0.5"} />
+              <RequiredFormLabel htmlFor="custom-grenade-name">Name</RequiredFormLabel>
+              <input id="custom-grenade-name" required value={name} onChange={(event) => setName(event.target.value)} className={editableInputClass(true) + " mt-0.5"} />
             </div>
-            <div>
-              <label className={uiFormLabel}>
-                Type <span className="text-red-500">*</span>
-              </label>
-              <button
-                type="button"
+            <PickerField
+                id="custom-grenade-type"
+                label="Type"
+                value={type}
+                placeholder="Choose type"
+                required
                 onClick={() => setShowTypePicker(true)}
-                className={editableInputClass(true) + " mt-0.5 text-left flex items-center justify-between"}
-              >
-                <span className={type ? "" : "text-slate-500"}>{type || "Choose type"}</span>
-                <ArrowRight />
-              </button>
-            </div>
+              />
             <div>
-              <label className={uiFormLabel}>
-                Quantity <span className="text-red-500">*</span>
-              </label>
-              <input type="text" inputMode="numeric" value={quantity} onChange={(event) => setQuantity(sanitizePositiveIntegerInput(event.target.value))} placeholder="1+" className={editableInputClass(true) + " mt-0.5"} />
+              <RequiredFormLabel htmlFor="custom-grenade-quantity">Quantity</RequiredFormLabel>
+              <input id="custom-grenade-quantity" required type="text" inputMode="numeric" value={quantity} onChange={(event) => setQuantity(sanitizePositiveIntegerInput(event.target.value))} placeholder="1+" className={editableInputClass(true) + " mt-0.5"} />
             </div>
           </div>
-        </div>
+      </CustomFormSection>
 
-        <p className={uiSectionHeader}>Origin</p>
-        <div className={uiSection + " space-y-3"}>
-          <div className="grid grid-cols-2 gap-1.5">
-            {CUSTOM_GRENADE_ORIGIN_OPTIONS.map((option) => (
-              <button
-                key={option}
-                type="button"
-                onClick={() => setOrigin(option)}
-                className={[
-                  "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
-                  origin === option
-                    ? `${sourceColour(option)} bg-slate-800/70 font-semibold`
-                    : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
-                ].join(" ")}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-        </div>
+      <CustomFormSection title="Origin">
+          <OriginSelector
+            name="custom-grenade-origin"
+            value={origin}
+            onChange={setOrigin}
+            hideLabel
+          />
+      </CustomFormSection>
 
-        <p className={uiSectionHeader}>Combat</p>
-        <div className={uiSection + " space-y-3"}>
-          <div className="grid grid-cols-3 gap-1.5">
+      <CustomFormSection title="Combat">
+          <div className="grid grid-cols-3 gap-1.5" role="group" aria-label="Damage mode">
             {(["damage", "special", "none"] as const).map((option) => (
               <button
                 key={option}
                 type="button"
+                aria-pressed={damageMode === option}
                 onClick={() => setDamageMode(option)}
                 className={`rounded border px-2 py-1 text-xs lg:text-sm capitalize transition ${
                   damageMode === option
@@ -306,65 +257,51 @@ export function CustomGrenadeForm({
             ))}
           </div>
           {damageMode === "damage" && (
-            <div>
-              <label className={uiFormLabel}>
-                Damage <span className="text-red-500">*</span>
-              </label>
+            <fieldset aria-required="true">
+              <RequiredFormLabel as="legend">Damage</RequiredFormLabel>
               <div className="grid grid-cols-3 gap-2 mt-0.5">
-                <input value={damageBase} onChange={(event) => setDamageBase(sanitizeDiceInput(event.target.value))} className={editableInputClass(true)} />
-                <input type="text" inputMode="numeric" value={damagePlus} onChange={(event) => setDamagePlus(sanitizeNonNegativeIntegerInput(event.target.value))} className={editableInputClass(true)} />
-                <button
-                  type="button"
+                <input aria-label="Damage dice" required value={damageBase} onChange={(event) => setDamageBase(sanitizeDiceInput(event.target.value))} className={editableInputClass(true)} />
+                <input aria-label="Damage bonus" required type="text" inputMode="numeric" value={damagePlus} onChange={(event) => setDamagePlus(sanitizeNonNegativeIntegerInput(event.target.value))} className={editableInputClass(true)} />
+                <PickerField
+                  id="custom-grenade-damage-type"
+                  ariaLabel="Damage type"
+                  value={DAMAGE_TYPE_OPTIONS.find((o) => o.value === damageType)?.label ?? damageType}
+                  placeholder="Choose damage type"
+                  required
                   onClick={() => setShowDamageTypePicker(true)}
-                  className={editableInputClass(true) + " text-left flex items-center justify-between"}
-                >
-                  <span>{DAMAGE_TYPE_OPTIONS.find((o) => o.value === damageType)?.label ?? damageType}</span>
-                  <ArrowRight />
-                </button>
+                />
               </div>
-            </div>
+            </fieldset>
           )}
           <div>
-            <label className={uiFormLabel}>
-              Pen <span className="text-red-500">*</span>
-            </label>
-            <input type="text" inputMode="numeric" value={pen} onChange={(event) => setPen(sanitizeNonNegativeIntegerInput(event.target.value))} className={editableInputClass(true) + " mt-0.5"} />
+            <RequiredFormLabel htmlFor="custom-grenade-pen">Pen</RequiredFormLabel>
+            <input id="custom-grenade-pen" required type="text" inputMode="numeric" value={pen} onChange={(event) => setPen(sanitizeNonNegativeIntegerInput(event.target.value))} className={editableInputClass(true) + " mt-0.5"} />
           </div>
-        </div>
+      </CustomFormSection>
 
-        <p className={uiSectionHeader}>Details</p>
-        <div className={uiSection + " space-y-3"}>
+      <CustomFormSection title="Details">
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className={uiFormLabel}>
-                Weight <span className="text-red-500">*</span>
-              </label>
-              <input type="text" inputMode="decimal" value={weight} onChange={(event) => setWeight(sanitizeWeightInput(event.target.value))} className={editableInputClass(true) + " mt-0.5"} />
+              <RequiredFormLabel htmlFor="custom-grenade-weight">Weight</RequiredFormLabel>
+              <input id="custom-grenade-weight" required type="text" inputMode="decimal" value={weight} onChange={(event) => setWeight(sanitizeWeightInput(event.target.value))} className={editableInputClass(true) + " mt-0.5"} />
             </div>
             <div>
-              <label className={uiFormLabel}>
-                Cost <span className="text-red-500">*</span>
-              </label>
-              <input type="text" inputMode="numeric" value={value} onChange={(event) => setValue(sanitizeMoneyInput(event.target.value))} className={editableInputClass(true) + " mt-0.5"} />
+              <RequiredFormLabel htmlFor="custom-grenade-cost">Cost</RequiredFormLabel>
+              <input id="custom-grenade-cost" required type="text" inputMode="numeric" value={value} onChange={(event) => setValue(sanitizeMoneyInput(event.target.value))} className={editableInputClass(true) + " mt-0.5"} />
             </div>
-            <div className="col-span-2">
-              <label className={uiFormLabel}>
-                Availability <span className="text-red-500">*</span>
-              </label>
-              <button
-                type="button"
+            <PickerField
+                id="custom-grenade-availability"
+                label="Availability"
+                value={availability}
+                placeholder="Choose availability"
+                required
                 onClick={() => setShowAvailabilityPicker(true)}
-                className={editableInputClass(true) + " mt-0.5 text-left flex items-center justify-between"}
-              >
-                <span className={availability ? "" : "text-slate-500"}>{availability || "Choose availability"}</span>
-                <ArrowRight />
-              </button>
-            </div>
+                className="col-span-2"
+              />
           </div>
-        </div>
+      </CustomFormSection>
 
-        <p className={uiSectionHeader}>Rules and Qualities</p>
-        <div className={uiSection + " space-y-3"}>
+      <CustomFormSection title="Rules and Qualities">
           <div className="grid grid-cols-2 gap-2">
             <WeaponQualitySelector
               selected={selectedQualities}
@@ -378,14 +315,11 @@ export function CustomGrenadeForm({
               onRemove={(q) => setSelectedQualities(selectedQualities.filter((s) => s !== q))}
             />
             <div className="col-span-2">
-              <label className={uiFormLabel}>
-                Rules
-              </label>
-              <textarea value={description} onChange={(event) => setDescription(event.target.value)} rows={3} className={editableTextareaClass(true) + " mt-0.5"} />
+              <label htmlFor="custom-grenade-rules" className={uiFormLabel}>Rules</label>
+              <textarea id="custom-grenade-rules" value={description} onChange={(event) => setDescription(event.target.value)} rows={3} className={editableTextareaClass(true) + " mt-0.5"} />
             </div>
           </div>
-        </div>
-      </PickerBody>
-    </PickerModal>
+      </CustomFormSection>
+    </CustomFormShell>
   );
 }

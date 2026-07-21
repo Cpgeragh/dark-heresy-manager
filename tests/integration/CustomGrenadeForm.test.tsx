@@ -38,7 +38,7 @@ describe("CustomGrenadeForm", () => {
     await user.click(screen.getByText("Choose type")); // Type
     await user.click(screen.getByText("Grenade"));
     await user.type(textboxes()[1], "3"); // Quantity
-    await user.click(screen.getByRole("button", { name: "Custom" })); // Origin
+    await user.click(screen.getByRole("radio", { name: "Custom" })); // Origin
     // damageMode stays at its default "none"
     await user.type(textboxes()[2], "0"); // Pen
     await user.type(textboxes()[3], "0.5"); // Weight
@@ -77,7 +77,7 @@ describe("CustomGrenadeForm", () => {
     await user.click(screen.getByText("Choose type"));
     await user.click(screen.getByText("Mine"));
     await user.type(textboxes()[1], "1");
-    await user.click(screen.getByRole("button", { name: "Custom" }));
+    await user.click(screen.getByRole("radio", { name: "Custom" }));
     await user.type(textboxes()[2], "0");
     await user.type(textboxes()[3], "1");
     await user.type(textboxes()[4], "50");
@@ -98,7 +98,7 @@ describe("CustomGrenadeForm", () => {
     await user.click(screen.getByText("Choose type"));
     await user.click(screen.getByText("Grenade"));
     await user.type(textboxes()[1], "1");
-    await user.click(screen.getByRole("button", { name: "Custom" }));
+    await user.click(screen.getByRole("radio", { name: "Custom" }));
     await user.click(screen.getByRole("button", { name: "special" }));
     await user.type(textboxes()[2], "0");
     await user.type(textboxes()[3], "1");
@@ -118,7 +118,7 @@ describe("CustomGrenadeForm", () => {
     await user.click(screen.getByText("Choose type")); // Type
     await user.click(screen.getByText("Grenade"));
     await user.type(screen.getAllByRole("textbox")[1], "2"); // Quantity
-    await user.click(screen.getByRole("button", { name: "Custom" })); // Origin
+    await user.click(screen.getByRole("radio", { name: "Custom" })); // Origin
     await user.click(screen.getByRole("button", { name: "damage" })); // switch to numeric damage mode
 
     // Field layout shifts once the damage-mode inputs appear: Name(0), Quantity(1),

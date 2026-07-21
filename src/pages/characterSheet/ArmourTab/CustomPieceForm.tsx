@@ -1,27 +1,23 @@
 import { useRef, useState } from "react";
 import type { ArmourCraftsmanship, ArmourLocationKey, ArmourQuality, WornArmourPiece } from "../../../types/Character";
-import { editableInputClass, editableTextareaClass, uiSection, uiSectionHeader, uiFormLabel, uiInfoModalWrapper } from "../../../ui/editableStyles";
-import { Button } from "../../../ui/Button";
-import { PickerBody, PickerModal } from "../../../ui/PickerModal";
+import { editableInputClass, editableTextareaClass, uiFormLabel, uiInfoModalWrapper } from "../../../ui/editableStyles";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
-import { ArrowRight } from "../../../ui/PickerArrows";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
-import { sourceColour } from "../../../ui/sourceStyles";
 import { Chip } from "../../../ui/Chip";
 import { colourAmberFaint } from "../../../ui/colourTokens";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/craftsmanship";
+import { CustomFormSection } from "../../../ui/CustomFormSection";
+import { CustomFormShell } from "../../../ui/CustomFormShell";
+import { OriginSelector, type CustomItemOrigin } from "../../../ui/OriginSelector";
+import { PickerField } from "../../../ui/PickerField";
+import { RequiredFormLabel } from "../../../ui/RequiredFormLabel";
 import { InfoModal } from "../../../components/InfoModal";
 import { ARMOUR_SPECIAL_RULES } from "../../../data/reference/armourSpecialRules";
 import { CUSTOM_AVAILABILITY_OPTIONS, sanitizeNonNegativeIntegerInput } from "../weapons/weaponShared";
 import { LOCATION_LABELS } from "./armourHelpers";
 
 const WORN_ARMOUR_QUALITY_OPTIONS: ArmourQuality[] = ["Primitive", "Flak", "Mesh", "Sanctified", "Powered"];
-const CUSTOM_ARMOUR_ORIGIN_OPTIONS = ["Custom", "2nd Ed"] as const;
-
-function isCustomArmourOrigin(value: string | undefined): value is (typeof CUSTOM_ARMOUR_ORIGIN_OPTIONS)[number] {
-  return CUSTOM_ARMOUR_ORIGIN_OPTIONS.includes(value as (typeof CUSTOM_ARMOUR_ORIGIN_OPTIONS)[number]);
-}
 
 interface Props {
   initialPiece?: Partial<WornArmourPiece>;
@@ -42,8 +38,8 @@ export function CustomPieceForm({
 }: Props) {
   const formScrollPositionRef = useRef(0);
   const [name, setName] = useState(initialPiece?.name ?? "");
-  const [origin, setOrigin] = useState<"" | (typeof CUSTOM_ARMOUR_ORIGIN_OPTIONS)[number]>(
-    isCustomArmourOrigin(initialPiece?.source) ? initialPiece.source : ""
+  const [origin, setOrigin] = useState<"" | CustomItemOrigin>(
+    initialPiece?.source === "Custom" || initialPiece?.source === "2nd Ed" ? initialPiece.source : ""
   );
   const [craftsmanship, setCraftsmanship] = useState<ArmourCraftsmanship>(
     initialPiece?.craftsmanship ?? "Common"
@@ -135,65 +131,53 @@ export function CustomPieceForm({
   }
 
   return (
-    <PickerModal
+    <CustomFormShell
       title={title}
       scrollPositionRef={formScrollPositionRef}
-      query=""
-      onQueryChange={() => {}}
       onClose={onCancel}
-      isEmpty={false}
-      hideSearch
-      maxHeight="max-h-[92vh]"
-      footer={
-        <div className="space-y-2">
-          {!canAdd && (
-            <p className="text-xs lg:text-sm text-slate-300">
-              <span className="text-red-500">*</span> Required
-            </p>
-          )}
-          <div className="flex gap-2">
-            <Button className="flex-1" onClick={handleAdd} disabled={!canAdd || saving}>
-              {saving ? "Saving..." : submitLabel}
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={onCancel}
-            >
-              Cancel
-            </Button>
-          </div>
-        </div>
-      }
+      canSubmit={canAdd}
+      submitLabel={submitLabel}
+      onSubmit={handleAdd}
+      saving={saving}
     >
-      <PickerBody>
-        <p className={uiSectionHeader}>Identity</p>
-        <div className={uiSection + " space-y-3"}>
-          <div>
-            <label className={uiFormLabel}>
-              Name <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={forceField ? "e.g. Refraction Field" : "e.g. Flak Jacket"}
-              className={editableInputClass(true) + " mt-0.5"}
-            />
-          </div>
+      <CustomFormSection title="Identity">
+        <div>
+          <RequiredFormLabel htmlFor="custom-armour-name">Name</RequiredFormLabel>
+          <input
+            id="custom-armour-name"
+            required
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder={forceField ? "e.g. Refraction Field" : "e.g. Flak Jacket"}
+            className={editableInputClass(true) + " mt-0.5"}
+          />
         </div>
+      </CustomFormSection>
 
-        <p className={uiSectionHeader}>Origin</p>
-        <div className={uiSection + " space-y-3"}>
-          <div className="grid grid-cols-2 gap-1.5">
-            {CUSTOM_ARMOUR_ORIGIN_OPTIONS.map((option) => (
+      <CustomFormSection title="Origin">
+        <OriginSelector
+          name="custom-armour-origin"
+          value={origin}
+          onChange={setOrigin}
+          hideLabel
+        />
+      </CustomFormSection>
+
+      <CustomFormSection title="Craftsmanship">
+        <fieldset aria-required="true" className="space-y-1">
+          <RequiredFormLabel as="legend">Craftsmanship</RequiredFormLabel>
+          <div className="grid grid-cols-4 gap-1.5">
+            {CRAFTSMANSHIP_OPTIONS.map((option) => (
               <button
                 key={option}
                 type="button"
-                onClick={() => setOrigin(option)}
+                aria-pressed={craftsmanship === option}
+                onClick={() => setCraftsmanship(option)}
                 className={[
                   "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
-                  origin === option
-                    ? `${sourceColour(option)} bg-slate-800/70 font-semibold`
+                  craftsmanship === option
+                    ? CRAFTSMANSHIP_STYLE[option]
                     : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
                 ].join(" ")}
               >
@@ -201,141 +185,114 @@ export function CustomPieceForm({
               </button>
             ))}
           </div>
-        </div>
+        </fieldset>
+      </CustomFormSection>
 
-        <p className={uiSectionHeader}>Craftsmanship</p>
-        <div className={uiSection + " space-y-3"}>
-          <div className="space-y-1">
-            <label className={uiFormLabel}>
-              Craftsmanship <span className="text-red-500">*</span>
-            </label>
-            <div className="grid grid-cols-4 gap-1.5">
-              {CRAFTSMANSHIP_OPTIONS.map((option) => (
+      <CustomFormSection title="Stats">
+        {!forceField && (
+          <fieldset aria-required="true" className="space-y-1">
+            <RequiredFormLabel as="legend">Locations</RequiredFormLabel>
+            <div className="grid grid-cols-3 gap-1.5">
+              {(["leftArm", "head", "rightArm", "leftLeg", "body", "rightLeg"] as ArmourLocationKey[]).map((loc) => (
                 <button
-                  key={option}
+                  key={loc}
                   type="button"
-                  onClick={() => setCraftsmanship(option)}
+                  aria-pressed={selectedLocs.has(loc)}
+                  onClick={() => toggleLoc(loc)}
                   className={[
                     "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
-                    craftsmanship === option
-                      ? CRAFTSMANSHIP_STYLE[option]
+                    selectedLocs.has(loc)
+                      ? "border-red-600 bg-red-600/20 text-red-400"
                       : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
                   ].join(" ")}
                 >
-                  {option}
+                  {LOCATION_LABELS[loc]}
                 </button>
               ))}
             </div>
+          </fieldset>
+        )}
+
+        {forceField ? (
+          <div>
+            <RequiredFormLabel htmlFor="custom-armour-protection-rating">
+              Protection Rating
+            </RequiredFormLabel>
+            <input
+              id="custom-armour-protection-rating"
+              required
+              type="text"
+              inputMode="numeric"
+              value={protectionRating}
+              onChange={(e) => setProtectionRating(sanitizeNonNegativeIntegerInput(e.target.value))}
+              placeholder="0"
+              className={editableInputClass(true) + " mt-0.5 w-24 font-code"}
+            />
           </div>
-        </div>
-
-        <p className={uiSectionHeader}>Stats</p>
-        <div className={uiSection + " space-y-3"}>
-          {!forceField && (
-            <div className="space-y-1">
-              <label className={uiFormLabel}>
-                Locations <span className="text-red-500">*</span>
-              </label>
-              <div className="grid grid-cols-3 gap-1.5">
-                {(["leftArm", "head", "rightArm", "leftLeg", "body", "rightLeg"] as ArmourLocationKey[]).map((loc) => (
-                  <button
-                    key={loc}
-                    type="button"
-                    onClick={() => toggleLoc(loc)}
-                    className={[
-                      "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
-                      selectedLocs.has(loc)
-                        ? "border-red-600 bg-red-600/20 text-red-400"
-                        : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
-                    ].join(" ")}
-                  >
-                    {LOCATION_LABELS[loc]}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {forceField ? (
-            <div>
-              <label className={uiFormLabel}>
-                Protection Rating <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={protectionRating}
-                onChange={(e) => setProtectionRating(sanitizeNonNegativeIntegerInput(e.target.value))}
-                placeholder="0"
-                className={editableInputClass(true) + " mt-0.5 w-24 font-code"}
-              />
-            </div>
-          ) : (
-            <div>
-              <label className={uiFormLabel}>
-                AP <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={ap}
-                onChange={(e) => setAp(sanitizeNonNegativeIntegerInput(e.target.value))}
-                placeholder="0"
-                className={editableInputClass(true) + " mt-0.5 w-24 font-code"}
-              />
-            </div>
-          )}
-        </div>
-
-        <p className={uiSectionHeader}>Details</p>
-        <div className={uiSection + " space-y-3"}>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className={uiFormLabel}>
-                Weight <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                inputMode="decimal"
-                value={weight}
-                onChange={(e) => setWeight(sanitizeWeightInput(e.target.value))}
-                className={editableInputClass(true) + " mt-0.5"}
-              />
-            </div>
-            <div>
-              <label className={uiFormLabel}>
-                Cost <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={value}
-                onChange={(e) => setValue(sanitizeMoneyInput(e.target.value))}
-                className={editableInputClass(true) + " mt-0.5"}
-              />
-            </div>
-            <div className="col-span-2">
-              <label className={uiFormLabel}>
-                Availability <span className="text-red-500">*</span>
-              </label>
-              <button
-                type="button"
-                onClick={() => setShowAvailabilityPicker(true)}
-                className={editableInputClass(true) + " mt-0.5 text-left flex items-center justify-between"}
-              >
-                <span className={availability ? "" : "text-slate-500"}>{availability || "Choose availability"}</span>
-                <ArrowRight />
-              </button>
-            </div>
+        ) : (
+          <div>
+            <RequiredFormLabel htmlFor="custom-armour-ap">AP</RequiredFormLabel>
+            <input
+              id="custom-armour-ap"
+              required
+              type="text"
+              inputMode="numeric"
+              value={ap}
+              onChange={(e) => setAp(sanitizeNonNegativeIntegerInput(e.target.value))}
+              placeholder="0"
+              className={editableInputClass(true) + " mt-0.5 w-24 font-code"}
+            />
           </div>
-        </div>
+        )}
+      </CustomFormSection>
 
-        <p className={uiSectionHeader}>Rules and Qualities</p>
-        <div className={uiSection + " space-y-3"}>
-          <div className="space-y-1">
-            <label className={`${uiFormLabel} block mb-1.5`}>
+      <CustomFormSection title="Details">
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <RequiredFormLabel htmlFor="custom-armour-weight">Weight</RequiredFormLabel>
+            <input
+              id="custom-armour-weight"
+              required
+              type="text"
+              inputMode="decimal"
+              value={weight}
+              onChange={(e) => setWeight(sanitizeWeightInput(e.target.value))}
+              className={editableInputClass(true) + " mt-0.5"}
+            />
+          </div>
+          <div>
+            <RequiredFormLabel htmlFor="custom-armour-cost">Cost</RequiredFormLabel>
+            <input
+              id="custom-armour-cost"
+              required
+              type="text"
+              inputMode="numeric"
+              value={value}
+              onChange={(e) => setValue(sanitizeMoneyInput(e.target.value))}
+              className={editableInputClass(true) + " mt-0.5"}
+            />
+          </div>
+          <PickerField
+            id="custom-armour-availability"
+            label="Availability"
+            value={availability}
+            placeholder="Choose availability"
+            required
+            onClick={() => setShowAvailabilityPicker(true)}
+            className="col-span-2"
+          />
+        </div>
+      </CustomFormSection>
+
+      <CustomFormSection title="Rules and Qualities">
+          <div
+            className="space-y-1"
+            role={forceField ? undefined : "group"}
+            aria-labelledby={forceField ? undefined : "custom-armour-qualities-label"}
+          >
+            <p id="custom-armour-qualities-label" className={`${uiFormLabel} block mb-1.5`}>
               Qualities
-            </label>
+            </p>
             {forceField ? (
               <div className="flex items-center gap-1.5">
                 <Chip className={`w-fit ${colourAmberFaint}`}>Overload</Chip>
@@ -349,6 +306,7 @@ export function CustomPieceForm({
                   <button
                     key={q}
                     type="button"
+                    aria-pressed={selectedQualities.has(q)}
                     onClick={() => toggleQuality(q)}
                     className={[
                       "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
@@ -364,10 +322,9 @@ export function CustomPieceForm({
             )}
           </div>
           <div>
-            <label className={uiFormLabel}>
-              Rules
-            </label>
+            <label htmlFor="custom-armour-rules" className={uiFormLabel}>Rules</label>
             <textarea
+              id="custom-armour-rules"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Special rules or effects…"
@@ -375,8 +332,7 @@ export function CustomPieceForm({
               className={editableTextareaClass(true) + " mt-0.5"}
             />
           </div>
-        </div>
-      </PickerBody>
-    </PickerModal>
+      </CustomFormSection>
+    </CustomFormShell>
   );
 }

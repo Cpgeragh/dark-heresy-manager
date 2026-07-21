@@ -5,21 +5,22 @@ import type { ArcheotechItem, ArmourLocationKey, CyberneticCraftsmanship } from 
 import {
   editableInputClass,
   editableTextareaClass,
-  uiSection,
-  uiSectionHeader,
   uiTextMuted,
   uiFormLabel,
 } from "../../../ui/editableStyles";
-import { Button } from "../../../ui/Button";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
-import { PickerBody, PickerModal, PickerRow } from "../../../ui/PickerModal";
+import { PickerModal, PickerRow } from "../../../ui/PickerModal";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
-import { ArrowRight, ArrowLeft } from "../../../ui/PickerArrows";
+import { ArrowLeft } from "../../../ui/PickerArrows";
 import { ITEM_TYPES, AVAILABILITY_OPTIONS, type ItemType } from "./archeotechConstants";
 import { colourSky, colourRose } from "../../../ui/colourTokens";
 import { CYBERNETIC_CRAFTSMANSHIP_OPTIONS } from "../../../ui/craftsmanship";
 import { LOCATION_LABELS, LOCATION_ORDER } from "../ArmourTab/armourHelpers";
+import { CustomFormSection } from "../../../ui/CustomFormSection";
+import { CustomFormShell } from "../../../ui/CustomFormShell";
+import { PickerField } from "../../../ui/PickerField";
+import { RequiredFormLabel } from "../../../ui/RequiredFormLabel";
 
 const TYPE_DESCRIPTIONS: Record<ItemType, string> = {
   Weapon: "Ranged or melee weapon",
@@ -234,48 +235,27 @@ export function CustomItemForm({
   }
 
   return (
-    <PickerModal
-      title={selectedType ?? title}
+    <CustomFormShell
+      title={startType ? title : selectedType ?? title}
       scrollPositionRef={formScrollPositionRef}
       titleClassName="text-slate-200"
       closeLabel={startType ? undefined : <ArrowLeft />}
       closeAriaLabel={startType ? "Close" : "Back"}
-      query=""
-      onQueryChange={() => {}}
       onClose={startType ? onCancel : () => setPhase("select")}
-      isEmpty={false}
-      hideSearch
+      onCancel={onCancel}
+      canSubmit={canAdd}
+      submitLabel={submitLabel}
+      onSubmit={handleAdd}
+      saving={saving}
       maxHeight="max-h-[92vh]"
-      footer={
-        <div className="space-y-2">
-          {!canAdd && (
-            <p className="text-xs lg:text-sm text-slate-300">
-              <span className="text-red-500">*</span> Required
-            </p>
-          )}
-          <div className="flex gap-2">
-            <Button className="flex-1" onClick={handleAdd} disabled={!canAdd || saving}>
-              {saving ? "Saving..." : submitLabel}
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={onCancel}
-            >
-              Cancel
-            </Button>
-          </div>
-        </div>
-      }
     >
-      <PickerBody>
-        {/* Identity */}
-        <p className={uiSectionHeader}>Identity</p>
-        <div className={uiSection + " space-y-3"}>
+      <>
+        <CustomFormSection title="Identity">
           <div>
-            <label className={uiFormLabel}>
-              Name <span className="text-red-500">*</span>
-            </label>
+            <RequiredFormLabel htmlFor="custom-archeotech-name">Name</RequiredFormLabel>
             <input
+              id="custom-archeotech-name"
+              required
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -286,10 +266,9 @@ export function CustomItemForm({
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className={uiFormLabel}>
-                Weight
-              </label>
+              <label htmlFor="custom-archeotech-weight" className={uiFormLabel}>Weight</label>
               <input
+                id="custom-archeotech-weight"
                 type="text"
                 inputMode="decimal"
                 value={weight}
@@ -299,10 +278,9 @@ export function CustomItemForm({
               />
             </div>
             <div>
-              <label className={uiFormLabel}>
-                Value
-              </label>
+              <label htmlFor="custom-archeotech-value" className={uiFormLabel}>Value</label>
               <input
+                id="custom-archeotech-value"
                 type="text"
                 inputMode="numeric"
                 value={value}
@@ -312,35 +290,28 @@ export function CustomItemForm({
               />
             </div>
           </div>
-          <div>
-            <label className={uiFormLabel}>
-              Rarity <span className="text-slate-600">(optional)</span>
-            </label>
-            <button
-              type="button"
-              onClick={() => setShowAvailabilityPicker(true)}
-              className={editableInputClass(true) + " mt-0.5 appearance-none text-left flex items-center justify-between"}
-            >
-              <span className={availability ? "" : "text-slate-500"}>{availability || "— Select availability —"}</span>
-              <ArrowRight />
-            </button>
-          </div>
-        </div>
+          <PickerField
+            id="custom-archeotech-rarity"
+            label="Rarity"
+            supportingText="(optional)"
+            value={availability}
+            placeholder="Select availability"
+            onClick={() => setShowAvailabilityPicker(true)}
+          />
+        </CustomFormSection>
 
         {/* Weapon / Integrated Weapon / Grenade / Mine stats */}
         {(isWeaponType || isGrenadeType) && (
-          <>
-            <p className={uiSectionHeader}>Stats</p>
-            <div className={uiSection + " space-y-3"}>
+          <CustomFormSection title="Stats">
               {isWeaponType && (
-                <div>
-                  <label className={uiFormLabel}>
-                    Class
-                  </label>
+                <fieldset>
+                  <legend className={uiFormLabel}>Class</legend>
                   <div className="flex gap-2 mt-0.5">
                     {(["Ranged", "Melee"] as const).map((cls) => (
-                      <button type="button"
+                      <button
+                        type="button"
                         key={cls}
+                        aria-pressed={weaponClass === cls}
                         onClick={() => setWeaponClass(weaponClass === cls ? "" : cls)}
                         className={[
                           "flex-1 py-1.5 rounded border text-sm lg:text-base font-medium transition",
@@ -355,14 +326,13 @@ export function CustomItemForm({
                       </button>
                     ))}
                   </div>
-                </div>
+                </fieldset>
               )}
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className={uiFormLabel}>
-                    Damage
-                  </label>
+                  <label htmlFor="custom-archeotech-damage" className={uiFormLabel}>Damage</label>
                   <input
+                    id="custom-archeotech-damage"
                     type="text"
                     value={damage}
                     onChange={(e) => setDamage(e.target.value)}
@@ -371,10 +341,9 @@ export function CustomItemForm({
                   />
                 </div>
                 <div>
-                  <label className={uiFormLabel}>
-                    Pen
-                  </label>
+                  <label htmlFor="custom-archeotech-pen" className={uiFormLabel}>Pen</label>
                   <input
+                    id="custom-archeotech-pen"
                     type="text"
                     value={pen}
                     onChange={(e) => setPen(e.target.value)}
@@ -387,10 +356,9 @@ export function CustomItemForm({
                 <>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className={uiFormLabel}>
-                        Range
-                      </label>
+                      <label htmlFor="custom-archeotech-range" className={uiFormLabel}>Range</label>
                       <input
+                        id="custom-archeotech-range"
                         type="text"
                         value={range}
                         onChange={(e) => setRange(e.target.value)}
@@ -399,10 +367,9 @@ export function CustomItemForm({
                       />
                     </div>
                     <div>
-                      <label className={uiFormLabel}>
-                        RoF
-                      </label>
+                      <label htmlFor="custom-archeotech-rof" className={uiFormLabel}>RoF</label>
                       <input
+                        id="custom-archeotech-rof"
                         type="text"
                         value={rof}
                         onChange={(e) => setRof(e.target.value)}
@@ -413,10 +380,9 @@ export function CustomItemForm({
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className={uiFormLabel}>
-                        Clip
-                      </label>
+                      <label htmlFor="custom-archeotech-clip" className={uiFormLabel}>Clip</label>
                       <input
+                        id="custom-archeotech-clip"
                         type="text"
                         value={clip}
                         onChange={(e) => setClip(e.target.value)}
@@ -425,10 +391,9 @@ export function CustomItemForm({
                       />
                     </div>
                     <div>
-                      <label className={uiFormLabel}>
-                        Rld
-                      </label>
+                      <label htmlFor="custom-archeotech-reload" className={uiFormLabel}>Rld</label>
                       <input
+                        id="custom-archeotech-reload"
                         type="text"
                         value={rld}
                         onChange={(e) => setRld(e.target.value)}
@@ -440,10 +405,11 @@ export function CustomItemForm({
                 </>
               )}
               <div>
-                <label className={uiFormLabel}>
+                <label htmlFor="custom-archeotech-special-rules" className={uiFormLabel}>
                   Special Rules <span className="text-slate-600">(optional)</span>
                 </label>
                 <input
+                  id="custom-archeotech-special-rules"
                   type="text"
                   value={specialRules}
                   onChange={(e) => setSpecialRules(e.target.value)}
@@ -451,20 +417,16 @@ export function CustomItemForm({
                   className={editableInputClass(true) + " mt-0.5"}
                 />
               </div>
-            </div>
-          </>
+          </CustomFormSection>
         )}
 
         {/* Armour stats */}
         {selectedType === "Armour" && (
-          <>
-            <p className={uiSectionHeader}>Stats</p>
-            <div className={uiSection + " space-y-3"}>
+          <CustomFormSection title="Stats">
               <div>
-                <label className={uiFormLabel}>
-                  AP
-                </label>
+                <label htmlFor="custom-archeotech-armour-ap" className={uiFormLabel}>AP</label>
                 <input
+                  id="custom-archeotech-armour-ap"
                   type="text"
                   inputMode="numeric"
                   value={ap}
@@ -473,14 +435,14 @@ export function CustomItemForm({
                   className={editableInputClass(true) + " mt-0.5"}
                 />
               </div>
-              <div>
-                <label className={`${uiFormLabel} block mb-1.5`}>
-                  Locations
-                </label>
+              <fieldset>
+                <legend className={`${uiFormLabel} block mb-1.5`}>Locations</legend>
                 <div className="flex flex-wrap gap-2">
                   {LOCATION_ORDER.map((loc) => (
-                    <button type="button"
+                    <button
+                      type="button"
                       key={loc}
+                      aria-pressed={locations.includes(loc)}
                       onClick={() => toggleLocation(loc)}
                       className={[
                         "px-2.5 py-1 rounded border text-xs lg:text-sm font-medium transition",
@@ -493,15 +455,17 @@ export function CustomItemForm({
                     </button>
                   ))}
                 </div>
-              </div>
+              </fieldset>
               <div className="flex items-center gap-2">
-                <button type="button"
+                <button
+                  type="button"
                   onClick={() => setStacks(!stacks)}
                   className={[
                     "w-4 h-4 rounded border flex items-center justify-center transition shrink-0",
                     stacks ? "border-red-500 bg-red-500/20" : "border-slate-600 bg-slate-800",
                   ].join(" ")}
                   aria-label="Stacks with worn armour"
+                  aria-pressed={stacks}
                 >
                   {stacks && <span className="text-red-400 text-[10px] leading-none">✓</span>}
                 </button>
@@ -509,20 +473,16 @@ export function CustomItemForm({
                   Stacks with worn armour <span className={uiTextMuted}>(default: take higher value)</span>
                 </span>
               </div>
-            </div>
-          </>
+          </CustomFormSection>
         )}
 
         {/* Shield stats */}
         {selectedType === "Shield" && (
-          <>
-            <p className={uiSectionHeader}>Stats</p>
-            <div className={uiSection + " space-y-3"}>
+          <CustomFormSection title="Stats">
               <div>
-                <label className={uiFormLabel}>
-                  AP
-                </label>
+                <label htmlFor="custom-archeotech-shield-ap" className={uiFormLabel}>AP</label>
                 <input
+                  id="custom-archeotech-shield-ap"
                   type="text"
                   inputMode="numeric"
                   value={ap}
@@ -533,10 +493,9 @@ export function CustomItemForm({
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className={uiFormLabel}>
-                    Damage
-                  </label>
+                  <label htmlFor="custom-archeotech-shield-damage" className={uiFormLabel}>Damage</label>
                   <input
+                    id="custom-archeotech-shield-damage"
                     type="text"
                     value={damage}
                     onChange={(e) => setDamage(e.target.value)}
@@ -545,10 +504,9 @@ export function CustomItemForm({
                   />
                 </div>
                 <div>
-                  <label className={uiFormLabel}>
-                    Pen
-                  </label>
+                  <label htmlFor="custom-archeotech-shield-pen" className={uiFormLabel}>Pen</label>
                   <input
+                    id="custom-archeotech-shield-pen"
                     type="text"
                     value={pen}
                     onChange={(e) => setPen(e.target.value)}
@@ -558,10 +516,11 @@ export function CustomItemForm({
                 </div>
               </div>
               <div>
-                <label className={uiFormLabel}>
+                <label htmlFor="custom-archeotech-shield-special-rules" className={uiFormLabel}>
                   Special Rules <span className="text-slate-600">(optional)</span>
                 </label>
                 <input
+                  id="custom-archeotech-shield-special-rules"
                   type="text"
                   value={specialRules}
                   onChange={(e) => setSpecialRules(e.target.value)}
@@ -569,36 +528,30 @@ export function CustomItemForm({
                   className={editableInputClass(true) + " mt-0.5"}
                 />
               </div>
-            </div>
-          </>
+          </CustomFormSection>
         )}
 
         {/* Cybernetic stats */}
         {selectedType === "Cybernetic" && (
-          <>
-            <p className={uiSectionHeader}>Stats</p>
-            <div className={uiSection + " space-y-3"}>
-              <div>
-                <label className={uiFormLabel}>
-                  Craftsmanship <span className="text-slate-600">(optional)</span>
-                </label>
-                <button
-                  type="button"
-                  onClick={() => setShowCraftsmanshipPicker(true)}
-                  className={editableInputClass(true) + " mt-0.5 appearance-none text-left flex items-center justify-between"}
-                >
-                  <span className={craftsmanship ? "" : "text-slate-500"}>{craftsmanship || "— Select —"}</span>
-                  <ArrowRight />
-                </button>
-              </div>
-              <div>
-                <label className={`${uiFormLabel} block mb-1.5`}>
+          <CustomFormSection title="Stats">
+              <PickerField
+                id="custom-archeotech-craftsmanship"
+                label="Craftsmanship"
+                supportingText="(optional)"
+                value={craftsmanship}
+                placeholder="Select craftsmanship"
+                onClick={() => setShowCraftsmanshipPicker(true)}
+              />
+              <fieldset>
+                <legend className={`${uiFormLabel} block mb-1.5`}>
                   Body Location <span className="text-slate-600">(optional)</span>
-                </label>
+                </legend>
                 <div className="flex flex-wrap gap-2">
                   {LOCATION_ORDER.map((loc) => (
-                    <button type="button"
+                    <button
+                      type="button"
                       key={loc}
+                      aria-pressed={bodyLocation.includes(loc)}
                       onClick={() => toggleBodyLocation(loc)}
                       className={[
                         "px-2.5 py-1 rounded border text-xs lg:text-sm font-medium transition",
@@ -611,21 +564,17 @@ export function CustomItemForm({
                     </button>
                   ))}
                 </div>
-              </div>
-            </div>
-          </>
+              </fieldset>
+          </CustomFormSection>
         )}
 
         {/* Force Field stats */}
         {selectedType === "Force Field" && (
-          <>
-            <p className={uiSectionHeader}>Stats</p>
-            <div className={uiSection + " space-y-3"}>
+          <CustomFormSection title="Stats">
               <div>
-                <label className={uiFormLabel}>
-                  Protection Rating
-                </label>
+                <label htmlFor="custom-archeotech-protection-rating" className={uiFormLabel}>Protection Rating</label>
                 <input
+                  id="custom-archeotech-protection-rating"
                   type="text"
                   inputMode="numeric"
                   value={protectionRating}
@@ -634,18 +583,16 @@ export function CustomItemForm({
                   className={editableInputClass(true) + " mt-0.5"}
                 />
               </div>
-            </div>
-          </>
+          </CustomFormSection>
         )}
 
-        {/* Rules */}
-        <p className={uiSectionHeader}>Rules</p>
-        <div className={uiSection + " space-y-3"}>
+        <CustomFormSection title="Rules">
           <div>
-            <label className={uiFormLabel}>
+            <label htmlFor="custom-archeotech-description" className={uiFormLabel}>
               Description / Rules <span className="text-slate-600">(optional)</span>
             </label>
             <textarea
+              id="custom-archeotech-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Rules text, special properties…"
@@ -654,10 +601,11 @@ export function CustomItemForm({
             />
           </div>
           <div>
-            <label className={uiFormLabel}>
+            <label htmlFor="custom-archeotech-notes" className={uiFormLabel}>
               Notes <span className="text-slate-600">(optional)</span>
             </label>
             <textarea
+              id="custom-archeotech-notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Personal notes, where it was found…"
@@ -665,8 +613,8 @@ export function CustomItemForm({
               className={editableTextareaClass(true) + " mt-0.5"}
             />
           </div>
-        </div>
-      </PickerBody>
-    </PickerModal>
+        </CustomFormSection>
+      </>
+    </CustomFormShell>
   );
 }

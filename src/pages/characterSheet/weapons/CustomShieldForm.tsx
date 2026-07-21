@@ -5,17 +5,16 @@ import type { ShieldItem } from "../../../types/Character";
 import {
   editableInputClass,
   editableTextareaClass,
-  uiSection,
-  uiSectionHeader,
   uiFormLabel,
 } from "../../../ui/editableStyles";
-import { Button } from "../../../ui/Button";
-import { PickerBody, PickerModal } from "../../../ui/PickerModal";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
-import { ArrowRight } from "../../../ui/PickerArrows";
-import { sourceColour } from "../../../ui/sourceStyles";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
+import { CustomFormSection } from "../../../ui/CustomFormSection";
+import { CustomFormShell } from "../../../ui/CustomFormShell";
+import { OriginSelector, type CustomItemOrigin } from "../../../ui/OriginSelector";
+import { PickerField } from "../../../ui/PickerField";
+import { RequiredFormLabel } from "../../../ui/RequiredFormLabel";
 import {
   WeaponQualitySelector,
   useWeaponQualityPicker,
@@ -26,14 +25,6 @@ import {
   sanitizeDiceInput,
   sanitizeNonNegativeIntegerInput,
 } from "./weaponShared";
-
-const CUSTOM_SHIELD_ORIGIN_OPTIONS = ["Custom", "2nd Ed"] as const;
-
-function isCustomShieldOrigin(
-  value: string | undefined
-): value is (typeof CUSTOM_SHIELD_ORIGIN_OPTIONS)[number] {
-  return CUSTOM_SHIELD_ORIGIN_OPTIONS.includes(value as (typeof CUSTOM_SHIELD_ORIGIN_OPTIONS)[number]);
-}
 
 function parseInitialShieldDamage(damage: string | undefined): {
   base: string;
@@ -66,8 +57,10 @@ export function CustomShieldForm({
   const formScrollPositionRef = useRef(0);
   const initialDamage = parseInitialShieldDamage(initialShield?.damage);
   const [name, setName] = useState(initialShield?.name ?? "");
-  const [origin, setOrigin] = useState<"" | (typeof CUSTOM_SHIELD_ORIGIN_OPTIONS)[number]>(
-    isCustomShieldOrigin(initialShield?.source) ? initialShield.source : ""
+  const [origin, setOrigin] = useState<"" | CustomItemOrigin>(
+    initialShield?.source === "Custom" || initialShield?.source === "2nd Ed"
+      ? initialShield.source
+      : ""
   );
   const [availability, setAvailability] = useState(initialShield?.availability ?? "");
   const [ap, setAp] = useState(initialShield?.ap !== undefined ? String(initialShield.ap) : "");
@@ -164,142 +157,87 @@ export function CustomShieldForm({
   }
 
   return (
-    <PickerModal
+    <CustomFormShell
       title={title}
       scrollPositionRef={formScrollPositionRef}
-      query=""
-      onQueryChange={() => {}}
       onClose={onCancel}
-      isEmpty={false}
-      hideSearch
-      maxHeight="max-h-[92vh]"
-      footer={
-        <div className="space-y-2">
-          {!canAdd && (
-            <p className="text-xs lg:text-sm text-slate-300"><span className="text-red-500">*</span> Required</p>
-          )}
-          <div className="flex gap-2">
-            <Button className="flex-1" onClick={addShield} disabled={!canAdd}>
-              {submitLabel}
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={onCancel}
-            >
-              Cancel
-            </Button>
-          </div>
-        </div>
-      }
+      canSubmit={canAdd}
+      submitLabel={submitLabel}
+      onSubmit={addShield}
     >
-      <PickerBody>
-        <p className={uiSectionHeader}>Identity</p>
-        <div className={uiSection + " space-y-3"}>
+      <CustomFormSection title="Identity">
           <div className="grid grid-cols-2 gap-2">
             <div className="col-span-2">
-              <label className={uiFormLabel}>
-                Name <span className="text-red-500">*</span>
-              </label>
-              <input value={name} onChange={(event) => setName(event.target.value)} className={editableInputClass(true) + " mt-0.5"} />
+              <RequiredFormLabel htmlFor="custom-shield-name">Name</RequiredFormLabel>
+              <input id="custom-shield-name" required value={name} onChange={(event) => setName(event.target.value)} className={editableInputClass(true) + " mt-0.5"} />
             </div>
             <div className="col-span-2">
-              <label className={uiFormLabel}>
-                Locations <span className="text-red-500">*</span>
-              </label>
-              <input value={locations} onChange={(event) => setLocations(event.target.value)} placeholder="Arm & Body" className={editableInputClass(true) + " mt-0.5"} />
+              <RequiredFormLabel htmlFor="custom-shield-locations">Locations</RequiredFormLabel>
+              <input id="custom-shield-locations" required value={locations} onChange={(event) => setLocations(event.target.value)} placeholder="Arm & Body" className={editableInputClass(true) + " mt-0.5"} />
             </div>
           </div>
-        </div>
+      </CustomFormSection>
 
-        <p className={uiSectionHeader}>Origin</p>
-        <div className={uiSection + " space-y-3"}>
-          <div className="grid grid-cols-2 gap-1.5">
-            {CUSTOM_SHIELD_ORIGIN_OPTIONS.map((option) => (
-              <button
-                key={option}
-                type="button"
-                onClick={() => setOrigin(option)}
-                className={[
-                  "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
-                  origin === option
-                    ? `${sourceColour(option)} bg-slate-800/70 font-semibold`
-                    : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
-                ].join(" ")}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-        </div>
+      <CustomFormSection title="Origin">
+          <OriginSelector
+            name="custom-shield-origin"
+            value={origin}
+            onChange={setOrigin}
+            hideLabel
+          />
+      </CustomFormSection>
 
-        <p className={uiSectionHeader}>Combat</p>
-        <div className={uiSection + " space-y-3"}>
+      <CustomFormSection title="Combat">
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className={uiFormLabel}>
-                AP <span className="text-red-500">*</span>
-              </label>
-              <input type="text" inputMode="numeric" value={ap} onChange={(event) => setAp(sanitizeNonNegativeIntegerInput(event.target.value))} className={editableInputClass(true) + " mt-0.5"} />
+              <RequiredFormLabel htmlFor="custom-shield-ap">AP</RequiredFormLabel>
+              <input id="custom-shield-ap" required type="text" inputMode="numeric" value={ap} onChange={(event) => setAp(sanitizeNonNegativeIntegerInput(event.target.value))} className={editableInputClass(true) + " mt-0.5"} />
             </div>
             <div>
-              <label className={uiFormLabel}>
-                Pen <span className="text-red-500">*</span>
-              </label>
-              <input type="text" inputMode="numeric" value={pen} onChange={(event) => setPen(sanitizeNonNegativeIntegerInput(event.target.value))} className={editableInputClass(true) + " mt-0.5"} />
+              <RequiredFormLabel htmlFor="custom-shield-pen">Pen</RequiredFormLabel>
+              <input id="custom-shield-pen" required type="text" inputMode="numeric" value={pen} onChange={(event) => setPen(sanitizeNonNegativeIntegerInput(event.target.value))} className={editableInputClass(true) + " mt-0.5"} />
             </div>
-            <div className="col-span-2">
-              <label className={uiFormLabel}>
-                Bash Damage <span className="text-red-500">*</span>
-              </label>
+            <fieldset aria-required="true" className="col-span-2">
+              <RequiredFormLabel as="legend">Bash Damage</RequiredFormLabel>
               <div className="grid grid-cols-3 gap-2 mt-0.5">
-                <input value={damageBase} onChange={(event) => setDamageBase(sanitizeDiceInput(event.target.value))} className={editableInputClass(true)} />
-                <input type="text" inputMode="numeric" value={damagePlus} onChange={(event) => setDamagePlus(sanitizeNonNegativeIntegerInput(event.target.value))} className={editableInputClass(true)} />
-                <button
-                  type="button"
+                <input aria-label="Bash damage dice" required value={damageBase} onChange={(event) => setDamageBase(sanitizeDiceInput(event.target.value))} className={editableInputClass(true)} />
+                <input aria-label="Bash damage bonus" required type="text" inputMode="numeric" value={damagePlus} onChange={(event) => setDamagePlus(sanitizeNonNegativeIntegerInput(event.target.value))} className={editableInputClass(true)} />
+                <PickerField
+                  id="custom-shield-damage-type"
+                  ariaLabel="Bash damage type"
+                  value={DAMAGE_TYPE_OPTIONS.find((o) => o.value === damageType)?.label ?? damageType}
+                  placeholder="Choose damage type"
+                  required
                   onClick={() => setShowDamageTypePicker(true)}
-                  className={editableInputClass(true) + " text-left flex items-center justify-between"}
-                >
-                  <span>{DAMAGE_TYPE_OPTIONS.find((o) => o.value === damageType)?.label ?? damageType}</span>
-                  <ArrowRight />
-                </button>
+                />
               </div>
-            </div>
+            </fieldset>
           </div>
-        </div>
+      </CustomFormSection>
 
-        <p className={uiSectionHeader}>Details</p>
-        <div className={uiSection + " space-y-3"}>
+      <CustomFormSection title="Details">
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className={uiFormLabel}>
-                Weight <span className="text-red-500">*</span>
-              </label>
-              <input type="text" inputMode="decimal" value={weight} onChange={(event) => setWeight(sanitizeWeightInput(event.target.value))} className={editableInputClass(true) + " mt-0.5"} />
+              <RequiredFormLabel htmlFor="custom-shield-weight">Weight</RequiredFormLabel>
+              <input id="custom-shield-weight" required type="text" inputMode="decimal" value={weight} onChange={(event) => setWeight(sanitizeWeightInput(event.target.value))} className={editableInputClass(true) + " mt-0.5"} />
             </div>
             <div>
-              <label className={uiFormLabel}>
-                Cost <span className="text-red-500">*</span>
-              </label>
-              <input type="text" inputMode="numeric" value={value} onChange={(event) => setValue(sanitizeMoneyInput(event.target.value))} className={editableInputClass(true) + " mt-0.5"} />
+              <RequiredFormLabel htmlFor="custom-shield-cost">Cost</RequiredFormLabel>
+              <input id="custom-shield-cost" required type="text" inputMode="numeric" value={value} onChange={(event) => setValue(sanitizeMoneyInput(event.target.value))} className={editableInputClass(true) + " mt-0.5"} />
             </div>
-            <div className="col-span-2">
-              <label className={uiFormLabel}>
-                Availability <span className="text-red-500">*</span>
-              </label>
-              <button
-                type="button"
+            <PickerField
+                id="custom-shield-availability"
+                label="Availability"
+                value={availability}
+                placeholder="Choose availability"
+                required
                 onClick={() => setShowAvailabilityPicker(true)}
-                className={editableInputClass(true) + " mt-0.5 text-left flex items-center justify-between"}
-              >
-                <span className={availability ? "" : "text-slate-500"}>{availability || "Choose availability"}</span>
-                <ArrowRight />
-              </button>
-            </div>
+                className="col-span-2"
+              />
           </div>
-        </div>
+      </CustomFormSection>
 
-        <p className={uiSectionHeader}>Rules and Qualities</p>
-        <div className={uiSection + " space-y-3"}>
+      <CustomFormSection title="Rules and Qualities">
           <div className="grid grid-cols-2 gap-2">
             <WeaponQualitySelector
               selected={selectedQualities}
@@ -313,14 +251,11 @@ export function CustomShieldForm({
               onRemove={(q) => setSelectedQualities(selectedQualities.filter((s) => s !== q))}
             />
             <div className="col-span-2">
-              <label className={uiFormLabel}>
-                Rules
-              </label>
-              <textarea value={notes} onChange={(event) => setNotes(event.target.value)} rows={3} className={editableTextareaClass(true) + " mt-0.5"} />
+              <label htmlFor="custom-shield-rules" className={uiFormLabel}>Rules</label>
+              <textarea id="custom-shield-rules" value={notes} onChange={(event) => setNotes(event.target.value)} rows={3} className={editableTextareaClass(true) + " mt-0.5"} />
             </div>
           </div>
-        </div>
-      </PickerBody>
-    </PickerModal>
+      </CustomFormSection>
+    </CustomFormShell>
   );
 }

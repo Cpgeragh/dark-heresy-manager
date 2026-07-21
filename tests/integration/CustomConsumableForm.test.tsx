@@ -26,7 +26,7 @@ describe("CustomConsumableForm", () => {
 
     await user.type(screen.getByPlaceholderText("Consumable name..."), "Stimm Patch");
     await user.type(screen.getByPlaceholderText("1+"), "3");
-    await user.click(screen.getByRole("button", { name: "Custom" }));
+    await user.click(screen.getByRole("radio", { name: "Custom" }));
     const textboxes = screen.getAllByRole("textbox");
     await user.type(textboxes[2], "0.1"); // Weight
     await user.type(textboxes[3], "15"); // Cost

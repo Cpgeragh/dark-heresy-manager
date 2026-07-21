@@ -41,7 +41,7 @@ describe("CustomMeleeForm", () => {
     await user.click(screen.getByText("Choose class")); // Class
     await user.click(screen.getByText("Melee"));
     await user.click(screen.getByRole("button", { name: "Good" })); // Craftsmanship
-    await user.click(screen.getByRole("button", { name: "Custom" })); // Origin
+    await user.click(screen.getByRole("radio", { name: "Custom" })); // Origin
     await user.type(textboxAt(3), "2"); // Pen
     await user.type(textboxAt(4), "3"); // Weight
     await user.type(textboxAt(5), "50"); // Cost
@@ -78,7 +78,7 @@ describe("CustomMeleeForm", () => {
     await user.click(screen.getByText("Choose class"));
     await user.click(screen.getByText("Melee / Thrown"));
     await user.click(screen.getByRole("button", { name: "Common" }));
-    await user.click(screen.getByRole("button", { name: "Custom" }));
+    await user.click(screen.getByRole("radio", { name: "Custom" }));
     await user.type(textboxAt(3), "0");
     await user.type(textboxAt(4), "0.5");
     await user.type(textboxAt(5), "10");

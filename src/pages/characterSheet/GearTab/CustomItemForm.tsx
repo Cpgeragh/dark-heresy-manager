@@ -5,17 +5,16 @@ import type { GearItem } from "../../../types/Character";
 import {
   editableInputClass,
   editableTextareaClass,
-  uiSection,
-  uiSectionHeader,
   uiFormLabel,
 } from "../../../ui/editableStyles";
-import { Button } from "../../../ui/Button";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
-import { PickerBody, PickerModal } from "../../../ui/PickerModal";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
-import { ArrowRight } from "../../../ui/PickerArrows";
-import { sourceColour } from "../../../ui/sourceStyles";
+import { CustomFormSection } from "../../../ui/CustomFormSection";
+import { CustomFormShell } from "../../../ui/CustomFormShell";
+import { OriginSelector, type CustomItemOrigin } from "../../../ui/OriginSelector";
+import { PickerField } from "../../../ui/PickerField";
+import { RequiredFormLabel } from "../../../ui/RequiredFormLabel";
 import { CUSTOM_AVAILABILITY_OPTIONS } from "../weapons/weaponShared";
 
 interface Props {
@@ -26,8 +25,6 @@ interface Props {
   onCancel: () => void;
 }
 
-const CUSTOM_GEAR_ORIGIN_OPTIONS = ["Custom", "2nd Ed"] as const;
-
 export function CustomItemForm({
   initialItem,
   title = "Custom Item",
@@ -37,7 +34,7 @@ export function CustomItemForm({
 }: Props) {
   const formScrollPositionRef = useRef(0);
   const [name, setName] = useState(initialItem?.name ?? "");
-  const [origin, setOrigin] = useState<"" | (typeof CUSTOM_GEAR_ORIGIN_OPTIONS)[number]>(
+  const [origin, setOrigin] = useState<"" | CustomItemOrigin>(
     initialItem?.source === "Custom" || initialItem?.source === "2nd Ed" ? initialItem.source : ""
   );
   const [availability, setAvailability] = useState(initialItem?.availability ?? "");
@@ -90,45 +87,22 @@ export function CustomItemForm({
   }
 
   return (
-    <PickerModal
+    <CustomFormShell
       title={title}
       scrollPositionRef={formScrollPositionRef}
-      query=""
-      onQueryChange={() => {}}
       onClose={onCancel}
-      isEmpty={false}
-      hideSearch
-      maxHeight="max-h-[92vh]"
-      footer={
-        <div className="space-y-2">
-          {!canAdd && (
-            <p className="text-xs lg:text-sm text-slate-300">
-              <span className="text-red-500">*</span> Required
-            </p>
-          )}
-          <div className="flex gap-2">
-            <Button className="flex-1" onClick={addItem} disabled={!canAdd || saving}>
-              {saving ? "Saving..." : submitLabel}
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={onCancel}
-            >
-              Cancel
-            </Button>
-          </div>
-        </div>
-      }
+      canSubmit={canAdd}
+      submitLabel={submitLabel}
+      onSubmit={addItem}
+      saving={saving}
     >
-      <PickerBody>
-        <p className={uiSectionHeader}>Identity</p>
-        <div className={uiSection + " space-y-3"}>
+      <CustomFormSection title="Identity">
           <div className="grid grid-cols-2 gap-2">
             <div className="col-span-2">
-              <label className={uiFormLabel}>
-                Name <span className="text-red-500">*</span>
-              </label>
+              <RequiredFormLabel htmlFor="custom-gear-name">Name</RequiredFormLabel>
               <input
+                id="custom-gear-name"
+                required
                 value={name}
                 onChange={(event) => setName(event.target.value)}
                 placeholder="Item name..."
@@ -136,37 +110,24 @@ export function CustomItemForm({
               />
             </div>
           </div>
-        </div>
+      </CustomFormSection>
 
-        <p className={uiSectionHeader}>Origin</p>
-        <div className={uiSection + " space-y-3"}>
-          <div className="grid grid-cols-2 gap-1.5">
-            {CUSTOM_GEAR_ORIGIN_OPTIONS.map((option) => (
-              <button
-                key={option}
-                type="button"
-                onClick={() => setOrigin(option)}
-                className={[
-                  "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
-                  origin === option
-                    ? `${sourceColour(option)} bg-slate-800/70 font-semibold`
-                    : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
-                ].join(" ")}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-        </div>
+      <CustomFormSection title="Origin">
+        <OriginSelector
+          name="custom-gear-origin"
+          value={origin}
+          onChange={setOrigin}
+          hideLabel
+        />
+      </CustomFormSection>
 
-        <p className={uiSectionHeader}>Details</p>
-        <div className={uiSection + " space-y-3"}>
+      <CustomFormSection title="Details">
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className={uiFormLabel}>
-                Weight <span className="text-red-500">*</span>
-              </label>
+              <RequiredFormLabel htmlFor="custom-gear-weight">Weight</RequiredFormLabel>
               <input
+                id="custom-gear-weight"
+                required
                 type="text"
                 inputMode="decimal"
                 value={weight}
@@ -175,10 +136,10 @@ export function CustomItemForm({
               />
             </div>
             <div>
-              <label className={uiFormLabel}>
-                Cost <span className="text-red-500">*</span>
-              </label>
+              <RequiredFormLabel htmlFor="custom-gear-cost">Cost</RequiredFormLabel>
               <input
+                id="custom-gear-cost"
+                required
                 type="text"
                 inputMode="numeric"
                 value={value}
@@ -186,30 +147,24 @@ export function CustomItemForm({
                 className={editableInputClass(true) + " mt-0.5"}
               />
             </div>
-            <div className="col-span-2">
-              <label className={uiFormLabel}>
-                Availability <span className="text-red-500">*</span>
-              </label>
-              <button
-                type="button"
-                onClick={() => setShowAvailabilityPicker(true)}
-                className={editableInputClass(true) + " mt-0.5 text-left flex items-center justify-between"}
-              >
-                <span className={availability ? "" : "text-slate-500"}>{availability || "Choose availability"}</span>
-                <ArrowRight />
-              </button>
-            </div>
+            <PickerField
+              id="custom-gear-availability"
+              label="Availability"
+              value={availability}
+              placeholder="Choose availability"
+              required
+              onClick={() => setShowAvailabilityPicker(true)}
+              className="col-span-2"
+            />
           </div>
-        </div>
+      </CustomFormSection>
 
-        <p className={uiSectionHeader}>Rules</p>
-        <div className={uiSection + " space-y-3"}>
+      <CustomFormSection title="Rules">
           <div className="grid grid-cols-2 gap-2">
             <div className="col-span-2">
-              <label className={uiFormLabel}>
-                Rules
-              </label>
+              <label htmlFor="custom-gear-rules" className={uiFormLabel}>Rules</label>
               <textarea
+                id="custom-gear-rules"
                 value={description}
                 onChange={(event) => setDescription(event.target.value)}
                 placeholder="Notes, properties, weight, craftsmanship..."
@@ -218,8 +173,7 @@ export function CustomItemForm({
               />
             </div>
           </div>
-        </div>
-      </PickerBody>
-    </PickerModal>
+      </CustomFormSection>
+    </CustomFormShell>
   );
 }

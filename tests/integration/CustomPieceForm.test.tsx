@@ -16,7 +16,7 @@ function renderForm(props: Partial<React.ComponentProps<typeof CustomPieceForm>>
 async function fillRequiredFields(user: ReturnType<typeof userEvent.setup>, forceField = false) {
   const textboxes = () => screen.getAllByRole("textbox");
   await user.type(textboxes()[0], forceField ? "Test Field" : "Test Armour"); // Name
-  await user.click(screen.getByRole("button", { name: "Custom" })); // Origin
+  await user.click(screen.getByRole("radio", { name: "Custom" })); // Origin
   if (forceField) {
     await user.type(textboxes()[1], "40"); // Protection Rating
   } else {

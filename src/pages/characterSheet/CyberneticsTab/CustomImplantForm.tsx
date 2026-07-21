@@ -9,17 +9,16 @@ import type {
 import {
   editableInputClass,
   editableTextareaClass,
-  uiSection,
-  uiSectionHeader,
   uiFormLabel,
 } from "../../../ui/editableStyles";
-import { Button } from "../../../ui/Button";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
-import { PickerBody, PickerModal } from "../../../ui/PickerModal";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
-import { ArrowRight } from "../../../ui/PickerArrows";
-import { sourceColour } from "../../../ui/sourceStyles";
 import { CRAFTSMANSHIP_STYLE, CYBERNETIC_CRAFTSMANSHIP_OPTIONS } from "../../../ui/craftsmanship";
+import { CustomFormSection } from "../../../ui/CustomFormSection";
+import { CustomFormShell } from "../../../ui/CustomFormShell";
+import { OriginSelector, type CustomItemOrigin } from "../../../ui/OriginSelector";
+import { PickerField } from "../../../ui/PickerField";
+import { RequiredFormLabel } from "../../../ui/RequiredFormLabel";
 
 interface Props {
   initialItem?: Partial<CyberneticItem>;
@@ -29,8 +28,6 @@ interface Props {
   onAdd: (item: CyberneticItem) => void | Promise<void>;
   onCancel: () => void;
 }
-
-const CUSTOM_IMPLANT_ORIGIN_OPTIONS = ["Custom", "2nd Ed"] as const;
 
 const CUSTOM_IMPLANT_AVAILABILITY_OPTIONS = [
   "Abundant",
@@ -73,7 +70,7 @@ export function CustomImplantForm({
   const [craftsmanship, setCraftsmanship] = useState<CyberneticCraftsmanship | "">(
     initialItem?.craftsmanship ?? ""
   );
-  const [origin, setOrigin] = useState<"" | (typeof CUSTOM_IMPLANT_ORIGIN_OPTIONS)[number]>(
+  const [origin, setOrigin] = useState<"" | CustomItemOrigin>(
     initialItem?.source === "Custom" || initialItem?.source === "2nd Ed" ? initialItem.source : ""
   );
   const [availability, setAvailability] = useState(initialItem?.availability ?? "");
@@ -140,162 +137,112 @@ export function CustomImplantForm({
   }
 
   return (
-    <PickerModal
+    <CustomFormShell
       title={title}
       scrollPositionRef={formScrollPositionRef}
-      query=""
-      onQueryChange={() => {}}
       onClose={onCancel}
-      isEmpty={false}
-      hideSearch
-      maxHeight="max-h-[92vh]"
-      footer={
-        <div className="space-y-2">
-          {!canAdd && (
-            <p className="text-xs lg:text-sm text-slate-300">
-              <span className="text-red-500">*</span> Required
-            </p>
-          )}
-          <div className="flex gap-2">
-            <Button className="flex-1" onClick={addImplant} disabled={!canAdd || saving}>
-              {saving ? "Saving..." : submitLabel}
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={onCancel}
-            >
-              Cancel
-            </Button>
-          </div>
-        </div>
-      }
+      canSubmit={canAdd}
+      submitLabel={submitLabel}
+      onSubmit={addImplant}
+      saving={saving}
     >
-      <PickerBody>
-        <p className={uiSectionHeader}>Identity</p>
-        <div className={uiSection + " space-y-3"}>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="col-span-2">
-              <label className={uiFormLabel}>
-                Name <span className="text-red-500">*</span>
-              </label>
-              <input
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                placeholder="Cybernetic name..."
-                className={editableInputClass(true) + " mt-0.5"}
-              />
-            </div>
-            <div className="col-span-2">
-              <label className={uiFormLabel}>
-                Craftsmanship <span className="text-red-500">*</span>
-              </label>
-              <div className="mt-0.5 grid grid-cols-3 gap-1.5">
-                {CYBERNETIC_CRAFTSMANSHIP_OPTIONS.map((option) => (
-                  <button
-                    key={option}
-                    type="button"
-                    onClick={() => setCraftsmanship(option)}
-                    className={[
-                      "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
-                      craftsmanship === option
-                        ? `${CRAFTSMANSHIP_STYLE[option]} font-semibold`
-                        : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
-                    ].join(" ")}
-                  >
-                    {option}
-                  </button>
-                ))}
-              </div>
-            </div>
+      <CustomFormSection title="Identity">
+        <div className="grid grid-cols-2 gap-2">
+          <div className="col-span-2">
+            <RequiredFormLabel htmlFor="custom-cybernetic-name">Name</RequiredFormLabel>
+            <input
+              id="custom-cybernetic-name"
+              required
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              placeholder="Cybernetic name..."
+              className={editableInputClass(true) + " mt-0.5"}
+            />
           </div>
-        </div>
-
-        <p className={uiSectionHeader}>Origin</p>
-        <div className={uiSection + " space-y-3"}>
-          <div className="grid grid-cols-2 gap-1.5">
-            {CUSTOM_IMPLANT_ORIGIN_OPTIONS.map((option) => (
-              <button
-                key={option}
-                type="button"
-                onClick={() => setOrigin(option)}
-                className={[
-                  "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
-                  origin === option
-                    ? `${sourceColour(option)} bg-slate-800/70 font-semibold`
-                    : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
-                ].join(" ")}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <p className={uiSectionHeader}>Details</p>
-        <div className={uiSection + " space-y-3"}>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className={uiFormLabel}>
-                Cost <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={value}
-                onChange={(event) => setValue(sanitizeMoneyInput(event.target.value))}
-                className={editableInputClass(true) + " mt-0.5"}
-              />
-            </div>
-            <div>
-              <label className={uiFormLabel}>
-                Availability <span className="text-red-500">*</span>
-              </label>
-              <button
-                type="button"
-                onClick={() => setShowAvailabilityPicker(true)}
-                className={editableInputClass(true) + " mt-0.5 text-left flex items-center justify-between"}
-              >
-                <span className={availability ? "" : "text-slate-500"}>{availability || "Choose availability"}</span>
-                <ArrowRight />
-              </button>
-            </div>
-            {includeLocation && (
-              <div className="col-span-2">
-                <label className={uiFormLabel}>
-                  Installation
-                </label>
+          <fieldset aria-required="true" className="col-span-2">
+            <RequiredFormLabel as="legend">Craftsmanship</RequiredFormLabel>
+            <div className="mt-0.5 grid grid-cols-3 gap-1.5">
+              {CYBERNETIC_CRAFTSMANSHIP_OPTIONS.map((option) => (
                 <button
+                  key={option}
                   type="button"
-                  onClick={() => setShowLocationPicker(true)}
-                  className={editableInputClass(true) + " mt-0.5 text-left flex items-center justify-between"}
+                  aria-pressed={craftsmanship === option}
+                  onClick={() => setCraftsmanship(option)}
+                  className={[
+                    "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
+                    craftsmanship === option
+                      ? `${CRAFTSMANSHIP_STYLE[option]} font-semibold`
+                      : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
+                  ].join(" ")}
                 >
-                  <span>{LOCATION_OPTIONS[Number(locationIndex)]?.label}</span>
-                  <ArrowRight />
+                  {option}
                 </button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <p className={uiSectionHeader}>Rules</p>
-        <div className={uiSection + " space-y-3"}>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="col-span-2">
-              <label className={uiFormLabel}>
-                Rules
-              </label>
-              <textarea
-                value={notes}
-                onChange={(event) => setNotes(event.target.value)}
-                placeholder="Implant rules, effects, drawbacks..."
-                rows={3}
-                className={editableTextareaClass(true) + " mt-0.5"}
-              />
+              ))}
             </div>
+          </fieldset>
+        </div>
+      </CustomFormSection>
+
+      <CustomFormSection title="Origin">
+        <OriginSelector
+          name="custom-cybernetic-origin"
+          value={origin}
+          onChange={setOrigin}
+          hideLabel
+        />
+      </CustomFormSection>
+
+      <CustomFormSection title="Details">
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <RequiredFormLabel htmlFor="custom-cybernetic-cost">Cost</RequiredFormLabel>
+            <input
+              id="custom-cybernetic-cost"
+              required
+              type="text"
+              inputMode="numeric"
+              value={value}
+              onChange={(event) => setValue(sanitizeMoneyInput(event.target.value))}
+              className={editableInputClass(true) + " mt-0.5"}
+            />
+          </div>
+          <PickerField
+            id="custom-cybernetic-availability"
+            label="Availability"
+            value={availability}
+            placeholder="Choose availability"
+            required
+            onClick={() => setShowAvailabilityPicker(true)}
+          />
+          {includeLocation && (
+            <PickerField
+              id="custom-cybernetic-installation"
+              label="Installation"
+              value={LOCATION_OPTIONS[Number(locationIndex)]?.label}
+              placeholder="Not specified"
+              onClick={() => setShowLocationPicker(true)}
+              className="col-span-2"
+            />
+          )}
+        </div>
+      </CustomFormSection>
+
+      <CustomFormSection title="Rules">
+        <div className="grid grid-cols-2 gap-2">
+          <div className="col-span-2">
+            <label htmlFor="custom-cybernetic-rules" className={uiFormLabel}>Rules</label>
+            <textarea
+              id="custom-cybernetic-rules"
+              value={notes}
+              onChange={(event) => setNotes(event.target.value)}
+              placeholder="Implant rules, effects, drawbacks..."
+              rows={3}
+              className={editableTextareaClass(true) + " mt-0.5"}
+            />
           </div>
         </div>
-      </PickerBody>
-    </PickerModal>
+      </CustomFormSection>
+    </CustomFormShell>
   );
 }
 

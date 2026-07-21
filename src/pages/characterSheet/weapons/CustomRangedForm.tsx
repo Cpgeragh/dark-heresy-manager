@@ -5,18 +5,17 @@ import type { RangedWeapon, WeaponCraftsmanship } from "../../../types/Character
 import {
   editableInputClass,
   editableTextareaClass,
-  uiSection,
-  uiSectionHeader,
   uiFormLabel,
 } from "../../../ui/editableStyles";
-import { Button } from "../../../ui/Button";
-import { PickerBody, PickerModal } from "../../../ui/PickerModal";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
-import { ArrowRight } from "../../../ui/PickerArrows";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
-import { sourceColour } from "../../../ui/sourceStyles";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/craftsmanship";
+import { CustomFormSection } from "../../../ui/CustomFormSection";
+import { CustomFormShell } from "../../../ui/CustomFormShell";
+import { OriginSelector, type CustomItemOrigin } from "../../../ui/OriginSelector";
+import { PickerField } from "../../../ui/PickerField";
+import { RequiredFormLabel } from "../../../ui/RequiredFormLabel";
 import {
   DAMAGE_TYPE_OPTIONS,
   CUSTOM_AVAILABILITY_OPTIONS,
@@ -35,7 +34,6 @@ import {
 
 const CUSTOM_RANGED_CLASS_OPTIONS = ["Pistol", "Basic", "Heavy", "Thrown", "Exotic"] as const;
 const RELOAD_TYPE_OPTIONS = ["Half", "Full", "Round", "Special", "—"] as const;
-const CUSTOM_WEAPON_ORIGIN_OPTIONS = ["Custom", "2nd Ed"] as const;
 
 function splitWeaponQualities(value?: string): string[] {
   if (!value || value === "-") return [];
@@ -110,9 +108,9 @@ export function CustomRangedForm({
   const [craftsmanship, setCraftsmanship] = useState<"" | WeaponCraftsmanship>(
     initialWeapon?.craftsmanship ?? ""
   );
-  const [origin, setOrigin] = useState<"" | (typeof CUSTOM_WEAPON_ORIGIN_OPTIONS)[number]>(
-    (CUSTOM_WEAPON_ORIGIN_OPTIONS as readonly string[]).includes(initialWeapon?.source ?? "")
-      ? (initialWeapon?.source as (typeof CUSTOM_WEAPON_ORIGIN_OPTIONS)[number])
+  const [origin, setOrigin] = useState<"" | CustomItemOrigin>(
+    initialWeapon?.source === "Custom" || initialWeapon?.source === "2nd Ed"
+      ? initialWeapon.source
       : ""
   );
   const [rangeMeters, setRangeMeters] = useState(stripMeters(initialWeapon?.range));
@@ -310,122 +308,76 @@ export function CustomRangedForm({
   }
 
   return (
-    <PickerModal
+    <CustomFormShell
       title={title}
       scrollPositionRef={formScrollPositionRef}
-      query=""
-      onQueryChange={() => {}}
       onClose={onCancel}
-      isEmpty={false}
-      hideSearch
-      maxHeight="max-h-[92vh]"
-      footer={
-        <div className="space-y-2">
-          {!canAdd && (
-            <p className="text-xs lg:text-sm text-slate-300"><span className="text-red-500">*</span> Required</p>
-          )}
-          <div className="flex gap-2">
-            <Button className="flex-1" onClick={addWeapon} disabled={!canAdd || saving}>
-              {saving ? "Saving..." : submitLabel}
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={onCancel}
-            >
-              Cancel
-            </Button>
-          </div>
-        </div>
-      }
+      canSubmit={canAdd}
+      submitLabel={submitLabel}
+      onSubmit={addWeapon}
+      saving={saving}
     >
-      <PickerBody>
-        <p className={uiSectionHeader}>Identity</p>
-        <div className={uiSection + " space-y-3"}>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="col-span-2">
-              <label className={uiFormLabel}>
-                Name <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                className={editableInputClass(true) + " mt-0.5"}
-              />
-            </div>
+      <CustomFormSection title="Identity">
+        <div className="grid grid-cols-2 gap-2">
+          <div className="col-span-2">
+            <RequiredFormLabel htmlFor="custom-ranged-name">Name</RequiredFormLabel>
+            <input
+              id="custom-ranged-name"
+              required
+              type="text"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              className={editableInputClass(true) + " mt-0.5"}
+            />
+          </div>
+          <PickerField
+            id="custom-ranged-class"
+            label="Class"
+            value={weaponClass}
+            placeholder="Choose class"
+            required
+            onClick={() => setShowClassPicker(true)}
+            className="col-span-2"
+          />
+        </div>
+      </CustomFormSection>
 
-            <div className="col-span-2">
-              <label className={uiFormLabel}>
-                Class <span className="text-red-500">*</span>
-              </label>
+      <CustomFormSection title="Craftsmanship & Origin">
+        <fieldset aria-required="true" className="space-y-1">
+          <RequiredFormLabel as="legend">Craftsmanship</RequiredFormLabel>
+          <div className="grid grid-cols-4 gap-1.5">
+            {CRAFTSMANSHIP_OPTIONS.map((option) => (
               <button
+                key={option}
                 type="button"
-                onClick={() => setShowClassPicker(true)}
-                className={editableInputClass(true) + " mt-0.5 text-left flex items-center justify-between"}
+                aria-pressed={craftsmanship === option}
+                onClick={() => setCraftsmanship(option)}
+                className={[
+                  "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
+                  craftsmanship === option
+                    ? CRAFTSMANSHIP_STYLE[option]
+                    : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
+                ].join(" ")}
               >
-                <span className={weaponClass ? "" : "text-slate-500"}>{weaponClass || "Choose class"}</span>
-                <ArrowRight />
+                {option}
               </button>
-            </div>
+            ))}
           </div>
-        </div>
+        </fieldset>
+        <OriginSelector
+          name="custom-ranged-origin"
+          value={origin}
+          onChange={setOrigin}
+        />
+      </CustomFormSection>
 
-        <p className={uiSectionHeader}>Craftsmanship & Origin</p>
-        <div className={uiSection + " space-y-3"}>
-          <div className="space-y-1">
-            <label className={uiFormLabel}>
-              Craftsmanship <span className="text-red-500">*</span>
-            </label>
-            <div className="grid grid-cols-4 gap-1.5">
-              {CRAFTSMANSHIP_OPTIONS.map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => setCraftsmanship(option)}
-                  className={[
-                    "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
-                    craftsmanship === option
-                      ? CRAFTSMANSHIP_STYLE[option]
-                      : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
-                  ].join(" ")}
-                >
-                  {option}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="space-y-1">
-            <label className={uiFormLabel}>
-              Origin <span className="text-red-500">*</span>
-            </label>
-            <div className="grid grid-cols-2 gap-1.5">
-              {CUSTOM_WEAPON_ORIGIN_OPTIONS.map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => setOrigin(option)}
-                  className={[
-                    "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
-                    origin === option
-                      ? `${sourceColour(option)} bg-slate-800/70 font-semibold`
-                      : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
-                  ].join(" ")}
-                >
-                  {option}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <p className={uiSectionHeader}>Combat</p>
-        <div className={uiSection + " space-y-3"}>
+      <CustomFormSection title="Combat">
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className={uiFormLabel}>
-                Range (m) <span className="text-red-500">*</span>
-              </label>
+              <RequiredFormLabel htmlFor="custom-ranged-range">Range (m)</RequiredFormLabel>
               <input
+                id="custom-ranged-range"
+                required
                 type="text"
                 inputMode="numeric"
                 value={rangeMeters}
@@ -434,26 +386,17 @@ export function CustomRangedForm({
               />
             </div>
 
-            <div>
-              <label className={uiFormLabel}>
-                Ammo Family <span className="text-red-500">*</span>
-              </label>
-              <button
-                type="button"
-                onClick={() => setShowAmmoFamilyPicker(true)}
-                className={editableInputClass(true) + " mt-0.5 text-left flex items-center justify-between"}
-              >
-                <span className={ammoType ? "" : "text-slate-500"}>
-                  {CUSTOM_AMMO_FAMILY_OPTIONS.find((o) => o.ammoType === ammoType)?.label ?? "Choose ammo family"}
-                </span>
-                <ArrowRight />
-              </button>
-            </div>
+            <PickerField
+              id="custom-ranged-ammo-family"
+              label="Ammo Family"
+              value={CUSTOM_AMMO_FAMILY_OPTIONS.find((o) => o.ammoType === ammoType)?.label}
+              placeholder="Choose ammo family"
+              required
+              onClick={() => setShowAmmoFamilyPicker(true)}
+            />
 
-            <div className="col-span-2">
-              <label className={uiFormLabel}>
-                Rate of Fire <span className="text-red-500">*</span>
-              </label>
+            <fieldset aria-required="true" className="col-span-2">
+              <RequiredFormLabel as="legend">Rate of Fire</RequiredFormLabel>
               <div className="grid grid-cols-3 gap-2 mt-0.5">
                 <button
                   type="button"
@@ -469,6 +412,7 @@ export function CustomRangedForm({
                   Single
                 </button>
                 <input
+                  aria-label="Semi-auto rate"
                   type="text"
                   inputMode="numeric"
                   value={semiAuto}
@@ -477,6 +421,7 @@ export function CustomRangedForm({
                   className={editableInputClass(true)}
                 />
                 <input
+                  aria-label="Full-auto rate"
                   type="text"
                   inputMode="numeric"
                   value={fullAuto}
@@ -485,14 +430,14 @@ export function CustomRangedForm({
                   className={editableInputClass(true)}
                 />
               </div>
-            </div>
+            </fieldset>
 
-            <div className="col-span-2">
-              <label className={uiFormLabel}>
-                Damage <span className="text-red-500">*</span>
-              </label>
+            <fieldset aria-required="true" className="col-span-2">
+              <RequiredFormLabel as="legend">Damage</RequiredFormLabel>
               <div className="grid grid-cols-3 gap-2 mt-0.5">
                 <input
+                  aria-label="Damage dice"
+                  required
                   type="text"
                   value={damageBase}
                   onChange={(event) => setDamageBase(sanitizeDiceInput(event.target.value))}
@@ -500,6 +445,8 @@ export function CustomRangedForm({
                   className={editableInputClass(true)}
                 />
                 <input
+                  aria-label="Damage bonus"
+                  required
                   type="text"
                   inputMode="numeric"
                   value={damagePlus}
@@ -507,22 +454,22 @@ export function CustomRangedForm({
                   placeholder="Plus"
                   className={editableInputClass(true)}
                 />
-                <button
-                  type="button"
+                <PickerField
+                  id="custom-ranged-damage-type"
+                  ariaLabel="Damage type"
+                  value={DAMAGE_TYPE_OPTIONS.find((o) => o.value === damageType)?.label ?? damageType}
+                  placeholder="Choose damage type"
+                  required
                   onClick={() => setShowDamageTypePicker(true)}
-                  className={editableInputClass(true) + " text-left flex items-center justify-between"}
-                >
-                  <span>{DAMAGE_TYPE_OPTIONS.find((o) => o.value === damageType)?.label ?? damageType}</span>
-                  <ArrowRight />
-                </button>
+                />
               </div>
-            </div>
+            </fieldset>
 
             <div>
-              <label className={uiFormLabel}>
-                Pen <span className="text-red-500">*</span>
-              </label>
+              <RequiredFormLabel htmlFor="custom-ranged-pen">Pen</RequiredFormLabel>
               <input
+                id="custom-ranged-pen"
+                required
                 type="text"
                 inputMode="numeric"
                 value={pen}
@@ -532,10 +479,10 @@ export function CustomRangedForm({
             </div>
 
             <div>
-              <label className={uiFormLabel}>
-                Clip <span className="text-red-500">*</span>
-              </label>
+              <RequiredFormLabel htmlFor="custom-ranged-clip">Clip</RequiredFormLabel>
               <input
+                id="custom-ranged-clip"
+                required
                 type="text"
                 inputMode="numeric"
                 value={clip}
@@ -544,12 +491,11 @@ export function CustomRangedForm({
               />
             </div>
 
-            <div className="col-span-2">
-              <label className={uiFormLabel}>
-                Reload <span className="text-red-500">*</span>
-              </label>
+            <fieldset aria-required="true" className="col-span-2">
+              <RequiredFormLabel as="legend">Reload</RequiredFormLabel>
               <div className="grid grid-cols-2 gap-2 mt-0.5">
                 <input
+                  aria-label="Reload amount"
                   type="text"
                   inputMode="numeric"
                   value={reloadAmount}
@@ -558,43 +504,36 @@ export function CustomRangedForm({
                   disabled={reloadType === "Special" || reloadType === "—"}
                   className={editableInputClass(reloadType !== "Special" && reloadType !== "—")}
                 />
-                <button
-                  type="button"
+                <PickerField
+                  id="custom-ranged-reload-type"
+                  ariaLabel="Reload type"
+                  value={reloadType}
+                  placeholder="Choose reload"
+                  required
                   onClick={() => setShowReloadTypePicker(true)}
-                  className={editableInputClass(true) + " text-left flex items-center justify-between"}
-                >
-                  <span className={reloadType ? "" : "text-slate-500"}>{reloadType || "Choose reload"}</span>
-                  <ArrowRight />
-                </button>
+                />
               </div>
-            </div>
+            </fieldset>
 
-            <div className="col-span-2">
-              <label className={uiFormLabel}>
-                Ammo Tracking <span className="text-red-500">*</span>
-              </label>
-              <button
-                type="button"
+            <PickerField
+                id="custom-ranged-ammo-tracking"
+                label="Ammo Tracking"
+                value={ammoTracking === "clip" ? "Clips + rounds" : ammoTracking === "loose" ? "Rounds only" : ""}
+                placeholder="Choose tracking"
+                required
                 onClick={() => setShowAmmoTrackingPicker(true)}
-                className={editableInputClass(true) + " mt-0.5 text-left flex items-center justify-between"}
-              >
-                <span className={ammoTracking ? "" : "text-slate-500"}>
-                  {ammoTracking === "clip" ? "Clips + rounds" : ammoTracking === "loose" ? "Rounds only" : "Choose tracking"}
-                </span>
-                <ArrowRight />
-              </button>
-            </div>
+                className="col-span-2"
+              />
           </div>
-        </div>
+      </CustomFormSection>
 
-        <p className={uiSectionHeader}>Details</p>
-        <div className={uiSection + " space-y-3"}>
+      <CustomFormSection title="Details">
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className={uiFormLabel}>
-                Weight <span className="text-red-500">*</span>
-              </label>
+              <RequiredFormLabel htmlFor="custom-ranged-weight">Weight</RequiredFormLabel>
               <input
+                id="custom-ranged-weight"
+                required
                 type="text"
                 inputMode="decimal"
                 value={weight}
@@ -604,10 +543,10 @@ export function CustomRangedForm({
             </div>
 
             <div>
-              <label className={uiFormLabel}>
-                Cost <span className="text-red-500">*</span>
-              </label>
+              <RequiredFormLabel htmlFor="custom-ranged-cost">Cost</RequiredFormLabel>
               <input
+                id="custom-ranged-cost"
+                required
                 type="text"
                 inputMode="numeric"
                 value={value}
@@ -615,24 +554,19 @@ export function CustomRangedForm({
                 className={editableInputClass(true) + " mt-0.5"}
               />
             </div>
-            <div className="col-span-2">
-              <label className={uiFormLabel}>
-                Availability <span className="text-red-500">*</span>
-              </label>
-              <button
-                type="button"
-                onClick={() => setShowAvailabilityPicker(true)}
-                className={editableInputClass(true) + " mt-0.5 text-left flex items-center justify-between"}
-              >
-                <span className={availability ? "" : "text-slate-500"}>{availability || "Choose availability"}</span>
-                <ArrowRight />
-              </button>
-            </div>
+            <PickerField
+              id="custom-ranged-availability"
+              label="Availability"
+              value={availability}
+              placeholder="Choose availability"
+              required
+              onClick={() => setShowAvailabilityPicker(true)}
+              className="col-span-2"
+            />
           </div>
-        </div>
+      </CustomFormSection>
 
-        <p className={uiSectionHeader}>Rules and Qualities</p>
-        <div className={uiSection + " space-y-3"}>
+      <CustomFormSection title="Rules and Qualities">
           <div className="grid grid-cols-2 gap-2">
             <WeaponQualitySelector
               selected={selectedQualities}
@@ -647,10 +581,9 @@ export function CustomRangedForm({
             />
 
             <div className="col-span-2">
-              <label className={uiFormLabel}>
-                Rules
-              </label>
+              <label htmlFor="custom-ranged-rules" className={uiFormLabel}>Rules</label>
               <textarea
+                id="custom-ranged-rules"
                 value={description}
                 onChange={(event) => setDescription(event.target.value)}
                 rows={3}
@@ -658,8 +591,7 @@ export function CustomRangedForm({
               />
             </div>
           </div>
-        </div>
-      </PickerBody>
-    </PickerModal>
+      </CustomFormSection>
+    </CustomFormShell>
   );
 }

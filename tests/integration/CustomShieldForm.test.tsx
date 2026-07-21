@@ -36,7 +36,7 @@ describe("CustomShieldForm", () => {
 
     await user.type(textboxes()[0], "Custom Buckler"); // Name
     await user.type(textboxes()[1], "Arm"); // Locations
-    await user.click(screen.getByRole("button", { name: "Custom" })); // Origin
+    await user.click(screen.getByRole("radio", { name: "Custom" })); // Origin
     await user.type(textboxes()[2], "2"); // AP
     // Pen (index 3) defaults to "0", already valid
     // Damage base (index 4) defaults to "1d10", already valid

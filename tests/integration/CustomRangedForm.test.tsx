@@ -47,7 +47,7 @@ describe("CustomRangedForm", () => {
     await user.type(textboxAt(0), "Custom Blaster"); // Name
     await pick(user, "Choose class", "Pistol"); // Class
     await user.click(screen.getByRole("button", { name: "Good" })); // Craftsmanship
-    await user.click(screen.getByRole("button", { name: "Custom" })); // Origin
+    await user.click(screen.getByRole("radio", { name: "Custom" })); // Origin
     await user.type(textboxAt(1), "40"); // Range
     await pick(user, "Choose ammo family", "Las"); // Ammo Family
     await user.type(textboxAt(6), "2"); // Pen

@@ -25,7 +25,7 @@ describe("CustomItemForm", () => {
     const { onAdd } = renderForm();
 
     await user.type(screen.getByPlaceholderText("Item name..."), "Grappling Hook");
-    await user.click(screen.getByRole("button", { name: "Custom" }));
+    await user.click(screen.getByRole("radio", { name: "Custom" }));
     const textboxes = screen.getAllByRole("textbox");
     await user.type(textboxes[1], "1"); // Weight
     await user.type(textboxes[2], "20"); // Cost

@@ -26,7 +26,7 @@ describe("CustomImplantForm", () => {
 
     await user.type(screen.getByPlaceholderText("Cybernetic name..."), "Auto-Sanguine");
     await user.click(screen.getByRole("button", { name: "Good" })); // Craftsmanship
-    await user.click(screen.getByRole("button", { name: "Custom" })); // Origin
+    await user.click(screen.getByRole("radio", { name: "Custom" })); // Origin
     const textboxes = screen.getAllByRole("textbox");
     await user.type(textboxes[1], "500"); // Cost
     await user.click(screen.getByText("Choose availability"));

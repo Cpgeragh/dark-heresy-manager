@@ -37,7 +37,7 @@ describe("ArcheotechTab CustomItemForm", () => {
 
     await user.click(screen.getByText("Device"));
     await user.type(screen.getByPlaceholderText("Item name…"), "Strange Orb");
-    await user.click(screen.getByText("— Select availability —"));
+    await user.click(screen.getByRole("button", { name: /Rarity/ }));
     await user.click(screen.getByText("Scarce"));
 
     await user.click(screen.getByRole("button", { name: "Add Item" }));
@@ -63,7 +63,7 @@ describe("ArcheotechTab CustomItemForm", () => {
     const { onAdd } = renderForm({ initialItem: { type: "Cybernetic" } });
 
     await user.type(screen.getByPlaceholderText("Item name…"), "Auto-Sanguine");
-    await user.click(screen.getByText("— Select —"));
+    await user.click(screen.getByRole("button", { name: /Craftsmanship/ }));
     await user.click(screen.getByText("Good"));
 
     await user.click(screen.getByRole("button", { name: "Add Item" }));
