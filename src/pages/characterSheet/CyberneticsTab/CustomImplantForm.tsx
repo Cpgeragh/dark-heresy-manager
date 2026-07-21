@@ -19,7 +19,7 @@ import { PickerBody, PickerModal } from "../../../ui/PickerModal";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
 import { ArrowRight } from "../../../ui/PickerArrows";
 import { sourceColour } from "../../../ui/sourceStyles";
-import { CRAFTSMANSHIP_ORDER, CRAFTSMANSHIP_STYLE } from "./cyberneticsConstants";
+import { CRAFTSMANSHIP_STYLE, CYBERNETIC_CRAFTSMANSHIP_OPTIONS } from "../../../ui/craftsmanship";
 
 interface Props {
   initialItem?: Partial<CyberneticItem>;
@@ -188,7 +188,7 @@ export function CustomImplantForm({
                 Craftsmanship <span className="text-red-500">*</span>
               </label>
               <div className="mt-0.5 grid grid-cols-3 gap-1.5">
-                {CRAFTSMANSHIP_ORDER.map((option) => (
+                {CYBERNETIC_CRAFTSMANSHIP_OPTIONS.map((option) => (
                   <button
                     key={option}
                     type="button"

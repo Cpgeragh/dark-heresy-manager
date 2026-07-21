@@ -10,10 +10,11 @@ import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import { sourceColour } from "../../../ui/sourceStyles";
 import { Chip } from "../../../ui/Chip";
 import { colourAmberFaint } from "../../../ui/colourTokens";
+import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/craftsmanship";
 import { InfoModal } from "../../../components/InfoModal";
 import { ARMOUR_SPECIAL_RULES } from "../../../data/reference/armourSpecialRules";
 import { CUSTOM_AVAILABILITY_OPTIONS, sanitizeNonNegativeIntegerInput } from "../weapons/weaponShared";
-import { LOCATION_LABELS, ARMOUR_CRAFTSMANSHIP_OPTIONS, ARMOUR_CRAFTSMANSHIP_STYLE } from "./armourHelpers";
+import { LOCATION_LABELS } from "./armourHelpers";
 
 const WORN_ARMOUR_QUALITY_OPTIONS: ArmourQuality[] = ["Primitive", "Flak", "Mesh", "Sanctified", "Powered"];
 const CUSTOM_ARMOUR_ORIGIN_OPTIONS = ["Custom", "2nd Ed"] as const;
@@ -207,7 +208,7 @@ export function CustomPieceForm({
               Craftsmanship <span className="text-red-500">*</span>
             </label>
             <div className="grid grid-cols-4 gap-1.5">
-              {ARMOUR_CRAFTSMANSHIP_OPTIONS.map((option) => (
+              {CRAFTSMANSHIP_OPTIONS.map((option) => (
                 <button
                   key={option}
                   type="button"
@@ -215,7 +216,7 @@ export function CustomPieceForm({
                   className={[
                     "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
                     craftsmanship === option
-                      ? ARMOUR_CRAFTSMANSHIP_STYLE[option]
+                      ? CRAFTSMANSHIP_STYLE[option]
                       : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
                   ].join(" ")}
                 >

@@ -9,11 +9,10 @@ import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../..
 import { ArrowLeft } from "../../../ui/PickerArrows";
 import { uiTextBody, uiTextLabel, uiTextMuted, uiItemName, uiInfoModalWrapper } from "../../../ui/editableStyles";
 import { colourViolet, colourSky, colourOrange } from "../../../ui/colourTokens";
+import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/craftsmanship";
 import { INTEGRATED_RANGED_REFS, INTEGRATED_MELEE_REFS } from "../../../utils/weaponUtils";
 import { SpecialRulesContent } from "./weaponShared";
 import {
-  WEAPON_CRAFTSMANSHIP_OPTIONS,
-  WEAPON_CRAFTSMANSHIP_STYLE,
   rangedCraftsmanshipDescription,
   meleeCraftsmanshipDescription,
 } from "./weaponHelpers";
@@ -81,14 +80,14 @@ export function IntegratedWeaponPicker({
           <div>
             <p className={`text-xs lg:text-sm ${uiTextMuted} mb-2`}>Select weapon craftsmanship:</p>
             <div className="flex gap-2">
-              {WEAPON_CRAFTSMANSHIP_OPTIONS.map((option) => (
+              {CRAFTSMANSHIP_OPTIONS.map((option) => (
                 <button
                   key={option}
                   onClick={() => setCraftsmanship(option)}
                   className={[
                     "flex-1 py-1.5 lg:py-2 rounded border text-sm lg:text-base font-medium transition",
                     craftsmanship === option
-                      ? WEAPON_CRAFTSMANSHIP_STYLE[option]
+                      ? CRAFTSMANSHIP_STYLE[option]
                       : "border-slate-700 bg-slate-800 text-slate-400 hover:border-slate-500",
                   ].join(" ")}
                 >

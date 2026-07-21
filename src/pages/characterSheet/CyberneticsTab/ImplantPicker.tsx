@@ -19,7 +19,8 @@ import { editableInputClass, uiTextBody, uiTextLabel, uiTextMuted, uiFormLabel, 
 import { uiPickerBackButton } from "../../../ui/buttonStyles";
 import { StatusBadge } from "../../../ui/StatusBadge";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
-import { CRAFTSMANSHIP_STYLE, LOCATION_DISPLAY } from "./cyberneticsConstants";
+import { CRAFTSMANSHIP_STYLE } from "../../../ui/craftsmanship";
+import { LOCATION_DISPLAY } from "./cyberneticsConstants";
 import {
   availableCraftsmanship,
   craftsmanshipDescription,

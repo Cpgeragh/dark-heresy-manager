@@ -200,7 +200,8 @@ export interface MeleeWeapon extends CustomLibraryLinkFields {
   equipped?: boolean; // true = carried on body, shown expanded and pinned to top
 }
 
-export type WeaponCraftsmanship = "Poor" | "Common" | "Good" | "Best";
+export type StandardCraftsmanship = "Poor" | "Common" | "Good" | "Best";
+export type WeaponCraftsmanship = StandardCraftsmanship;
 
 export interface ShieldItem extends CustomLibraryLinkFields {
   id: string;
@@ -231,7 +232,7 @@ export interface ShieldItem extends CustomLibraryLinkFields {
  */
 export type ArmourLocationKey = "head" | "body" | "rightArm" | "leftArm" | "rightLeg" | "leftLeg";
 
-export type ArmourCraftsmanship = "Poor" | "Common" | "Good" | "Best";
+export type ArmourCraftsmanship = StandardCraftsmanship;
 
 export type ArmourQuality = "Primitive" | "Flak" | "Mesh" | "Sanctified" | "Powered" | "Overload";
 
@@ -264,7 +265,7 @@ export interface WornArmourPiece extends CustomLibraryLinkFields {
 /**
  * CYBERNETICS
  */
-export type CyberneticCraftsmanship = "Poor" | "Common" | "Good";
+export type CyberneticCraftsmanship = Exclude<StandardCraftsmanship, "Best">;
 
 export interface CyberneticItem extends CustomLibraryLinkFields {
   id: string;

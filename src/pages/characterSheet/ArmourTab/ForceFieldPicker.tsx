@@ -11,10 +11,9 @@ import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { uiTextMuted, uiTextBody, uiItemName } from "../../../ui/editableStyles";
 import { colourAmberFaint, colourFuchsia } from "../../../ui/colourTokens";
+import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/craftsmanship";
 import { StatChip } from "../weapons/weaponShared";
 import {
-  ARMOUR_CRAFTSMANSHIP_OPTIONS,
-  ARMOUR_CRAFTSMANSHIP_STYLE,
   forceFieldCraftsmanshipDescription,
 } from "./armourHelpers";
 
@@ -76,14 +75,14 @@ export function ForceFieldPicker({
           <div>
             <p className={`text-xs lg:text-sm ${uiTextMuted} mb-2`}>Select field craftsmanship:</p>
             <div className="flex gap-2">
-              {ARMOUR_CRAFTSMANSHIP_OPTIONS.map((q) => (
+              {CRAFTSMANSHIP_OPTIONS.map((q) => (
                 <button
                   key={q}
                   onClick={() => setCraftsmanship(q)}
                   className={[
                     "flex-1 py-1.5 lg:py-2 rounded border text-sm lg:text-base font-medium transition",
                     craftsmanship === q
-                      ? ARMOUR_CRAFTSMANSHIP_STYLE[q]
+                      ? CRAFTSMANSHIP_STYLE[q]
                       : "border-slate-700 bg-slate-800 text-slate-400 hover:border-slate-500",
                   ].join(" ")}
                 >

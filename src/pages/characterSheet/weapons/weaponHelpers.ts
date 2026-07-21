@@ -234,15 +234,6 @@ export function getCompatibleUpgrades(
 
 // ─── Craftsmanship ─────────────────────────────────────────────────────────
 
-export const WEAPON_CRAFTSMANSHIP_OPTIONS: WeaponCraftsmanship[] = ["Poor", "Common", "Good", "Best"];
-
-export const WEAPON_CRAFTSMANSHIP_STYLE: Record<WeaponCraftsmanship, string> = {
-  Poor: "border-red-500/70 bg-red-500/15 text-red-300",
-  Common: "border-slate-500 bg-slate-800 text-slate-200",
-  Good: "border-emerald-500/70 bg-emerald-500/15 text-emerald-300",
-  Best: "border-amber-400 bg-amber-500/20 text-amber-300",
-};
-
 export function rangedCraftsmanshipDescription(craftsmanship: WeaponCraftsmanship): string {
   switch (craftsmanship) {
     case "Poor":

@@ -2,11 +2,11 @@
 
 import type { CyberneticCraftsmanship } from "../../../types/Character";
 import type { CyberneticRef } from "../../../data/reference/cyberneticsReference";
-import { CRAFTSMANSHIP_ORDER } from "./cyberneticsConstants";
+import { CYBERNETIC_CRAFTSMANSHIP_OPTIONS } from "../../../ui/craftsmanship";
 
 export function nextCraftsmanship(current: CyberneticCraftsmanship): CyberneticCraftsmanship {
-  const idx = CRAFTSMANSHIP_ORDER.indexOf(current);
-  return CRAFTSMANSHIP_ORDER[(idx + 1) % CRAFTSMANSHIP_ORDER.length];
+  const idx = CYBERNETIC_CRAFTSMANSHIP_OPTIONS.indexOf(current);
+  return CYBERNETIC_CRAFTSMANSHIP_OPTIONS[(idx + 1) % CYBERNETIC_CRAFTSMANSHIP_OPTIONS.length];
 }
 
 export function availableCraftsmanship(ref?: CyberneticRef): CyberneticCraftsmanship[] {

@@ -54,15 +54,6 @@ export function locationLabel(locations: ArmourLocationKey[]): string {
   return locations.map((l) => LOCATION_LABELS[l]).join(", ");
 }
 
-export const ARMOUR_CRAFTSMANSHIP_OPTIONS: ArmourCraftsmanship[] = ["Poor", "Common", "Good", "Best"];
-
-export const ARMOUR_CRAFTSMANSHIP_STYLE: Record<ArmourCraftsmanship, string> = {
-  Poor: "border-red-500/70 bg-red-500/15 text-red-300",
-  Common: "border-slate-500 bg-slate-800 text-slate-200",
-  Good: "border-emerald-500/70 bg-emerald-500/15 text-emerald-300",
-  Best: "border-amber-400 bg-amber-500/20 text-amber-300",
-};
-
 /** Rules text for a worn-armour craftsmanship grade */
 export function armourCraftsmanshipDescription(craftsmanship: ArmourCraftsmanship): string {
   switch (craftsmanship) {

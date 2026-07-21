@@ -18,6 +18,7 @@ import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
 import { ArrowRight, ArrowLeft } from "../../../ui/PickerArrows";
 import { ITEM_TYPES, AVAILABILITY_OPTIONS, type ItemType } from "./archeotechConstants";
 import { colourSky, colourRose } from "../../../ui/colourTokens";
+import { CYBERNETIC_CRAFTSMANSHIP_OPTIONS } from "../../../ui/craftsmanship";
 import { LOCATION_LABELS, LOCATION_ORDER } from "../ArmourTab/armourHelpers";
 
 const TYPE_DESCRIPTIONS: Record<ItemType, string> = {
@@ -32,8 +33,6 @@ const TYPE_DESCRIPTIONS: Record<ItemType, string> = {
   Device: "Tech device or tool",
   Other: "Miscellaneous item",
 };
-
-const CYBERNETIC_CRAFTSMANSHIP_OPTIONS: CyberneticCraftsmanship[] = ["Poor", "Common", "Good"];
 
 interface Props {
   initialItem?: Partial<ArcheotechItem>;

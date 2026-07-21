@@ -50,6 +50,12 @@ import {
 } from "../../utils/weaponUtils";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { uiTextPlaceholder } from "../../ui/editableStyles";
+import {
+  colourActiveEmerald,
+  colourActiveOrange,
+  colourActiveRose,
+  colourActiveSky,
+} from "../../ui/colourTokens";
 import { useCampaignCustomItems } from "../../hooks/useCampaignCustomItems";
 import { useSwipeableTabs } from "../../hooks/useSwipeableTabs";
 import { SegmentedTabs, type SegmentedTabOption } from "../../ui/SegmentedTabs";
@@ -126,25 +132,25 @@ const MOBILE_WEAPON_SECTIONS = [
     value: "ranged",
     label: "Ranged",
     ariaLabel: "Ranged weapons",
-    activeClassName: "border-sky-400 bg-sky-600/80 text-white shadow-sm shadow-sky-950/50",
+    activeClassName: colourActiveSky,
   },
   {
     value: "melee",
     label: "Melee",
     ariaLabel: "Melee weapons",
-    activeClassName: "border-rose-400 bg-rose-600/80 text-white shadow-sm shadow-rose-950/50",
+    activeClassName: colourActiveRose,
   },
   {
     value: "grenades",
     label: "Expl.",
     ariaLabel: "Explosives",
-    activeClassName: "border-orange-400 bg-orange-600/80 text-white shadow-sm shadow-orange-950/50",
+    activeClassName: colourActiveOrange,
   },
   {
     value: "shields",
     label: "Shields",
     ariaLabel: "Shields",
-    activeClassName: "border-emerald-400 bg-emerald-600/80 text-white shadow-sm shadow-emerald-950/50",
+    activeClassName: colourActiveEmerald,
   },
 ] as const satisfies readonly SegmentedTabOption<WeaponMobileSection>[];
 const MOBILE_WEAPON_SECTION_IDS = MOBILE_WEAPON_SECTIONS.map((section) => section.value);

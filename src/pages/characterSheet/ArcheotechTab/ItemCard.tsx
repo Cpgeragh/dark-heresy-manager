@@ -6,11 +6,12 @@ import { ARCHEOTECH_REFERENCE } from "../../../data/reference/archeotechReferenc
 import { uiSection, uiSectionShell, uiTextBody, uiTextLabel, uiTextMuted, uiItemName, uiInfoModalWrapper } from "../../../ui/editableStyles";
 import { uiIconRemoveButton } from "../../../ui/buttonStyles";
 import { colourStacks } from "../../../ui/colourTokens";
+import { CRAFTSMANSHIP_STYLE } from "../../../ui/craftsmanship";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { StatChip } from "../weapons/weaponShared";
 import { locationLabel } from "../ArmourTab/armourHelpers";
-import { LOCATION_DISPLAY, CRAFTSMANSHIP_STYLE } from "../CyberneticsTab/cyberneticsConstants";
+import { LOCATION_DISPLAY } from "../CyberneticsTab/cyberneticsConstants";
 import { InfoModal } from "../../../components/InfoModal";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
@@ -158,7 +159,7 @@ export function ItemCard({
                 {item.craftsmanship && (
                   <>
                     <span className={uiTextLabel}>Quality</span>
-                    <Chip className={`${CRAFTSMANSHIP_STYLE[item.craftsmanship as keyof typeof CRAFTSMANSHIP_STYLE]} shrink-0`}>{item.craftsmanship}</Chip>
+                    <Chip className={`${CRAFTSMANSHIP_STYLE[item.craftsmanship]} shrink-0`}>{item.craftsmanship}</Chip>
                   </>
                 )}
               </div>

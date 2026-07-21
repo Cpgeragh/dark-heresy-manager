@@ -5,9 +5,10 @@ import { Chip } from "../../../ui/Chip";
 import { uiSection, uiTextLabel, uiCardTitle } from "../../../ui/editableStyles";
 import { uiIconRemoveButton } from "../../../ui/buttonStyles";
 import { colourArcheotech } from "../../../ui/colourTokens";
+import { CRAFTSMANSHIP_STYLE } from "../../../ui/craftsmanship";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { StatChip } from "../weapons/weaponShared";
-import { CRAFTSMANSHIP_STYLE, LOCATION_DISPLAY } from "./cyberneticsConstants";
+import { LOCATION_DISPLAY } from "./cyberneticsConstants";
 import { TrashIcon } from "../../../ui/TrashIcon";
 
 interface Props {

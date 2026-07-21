@@ -16,6 +16,7 @@ import { ArrowRight } from "../../../ui/PickerArrows";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import { sourceColour } from "../../../ui/sourceStyles";
+import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/craftsmanship";
 import {
   DAMAGE_TYPE_OPTIONS,
   CUSTOM_AVAILABILITY_OPTIONS,
@@ -26,7 +27,6 @@ import {
   sanitizeDiceInput,
   sanitizeNonNegativeIntegerInput,
 } from "./weaponShared";
-import { WEAPON_CRAFTSMANSHIP_OPTIONS, WEAPON_CRAFTSMANSHIP_STYLE } from "./weaponHelpers";
 
 const CUSTOM_MELEE_CLASS_OPTIONS = ["Melee", "Melee (Two-Handed)", "Melee / Thrown"] as const;
 const CUSTOM_WEAPON_ORIGIN_OPTIONS = ["Custom", "2nd Ed"] as const;
@@ -260,7 +260,7 @@ export function CustomMeleeForm({
               Craftsmanship <span className="text-red-500">*</span>
             </label>
             <div className="grid grid-cols-4 gap-1.5">
-              {WEAPON_CRAFTSMANSHIP_OPTIONS.map((option) => (
+              {CRAFTSMANSHIP_OPTIONS.map((option) => (
                 <button
                   key={option}
                   type="button"
@@ -268,7 +268,7 @@ export function CustomMeleeForm({
                   className={[
                     "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
                     craftsmanship === option
-                      ? WEAPON_CRAFTSMANSHIP_STYLE[option]
+                      ? CRAFTSMANSHIP_STYLE[option]
                       : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
                   ].join(" ")}
                 >
