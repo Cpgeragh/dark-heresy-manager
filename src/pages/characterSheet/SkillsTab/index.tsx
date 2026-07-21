@@ -1,13 +1,19 @@
 // src/pages/characterSheet/SkillsTab/index.tsx
 
-import { useState, useCallback, useMemo, useRef } from "react";
-import type { TouchEvent } from "react";
+import { useState, useCallback, useMemo } from "react";
 import type { Characteristics, CorruptionBlock, SkillEntry } from "../../../types/Character";
 import type { CharField } from "../../../utils/characterFactory";
 import { useSkillComputation } from "../../../hooks/useSkillComputation";
+import { useSwipeableTabs } from "../../../hooks/useSwipeableTabs";
 import { getCharacteristicModifierTotals } from "../../../features/corruption/characteristicModifierTotals";
 import { Button } from "../../../ui/Button";
 import { SectionHeader } from "../../../ui/SectionHeader";
+import { SegmentedTabs, type SegmentedTabOption } from "../../../ui/SegmentedTabs";
+import {
+  segmentedTabId,
+  segmentedTabPanelId,
+  uiSwipeableTabPanel,
+} from "../../../ui/segmentedTabStyles";
 import { uiSection, uiTextPlaceholder } from "../../../ui/editableStyles";
 import { SkillRow } from "./SkillRow";
 import { SkillGroupRow } from "./SkillGroupRow";
@@ -27,13 +33,30 @@ type DisplayItem =
   | { type: "group"; category: string; skills: SkillWithComputed[] };
 
 type SkillsView = "basic" | "advanced";
+const SKILLS_VIEWS = ["basic", "advanced"] as const satisfies readonly SkillsView[];
+const SKILLS_TABS = [
+  {
+    value: "basic",
+    label: "Basic",
+    activeClassName: "border-violet-400 bg-violet-600/80 text-white shadow-sm shadow-violet-950/50",
+  },
+  {
+    value: "advanced",
+    label: "Advanced",
+    activeClassName: "border-fuchsia-400 bg-fuchsia-600/80 text-white shadow-sm shadow-fuchsia-950/50",
+  },
+] as const satisfies readonly SegmentedTabOption<SkillsView>[];
+const SKILLS_TABS_ID = "skill-type";
 
 export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption }: SkillsTabProps) {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isUntrainedBasicOpen, setIsUntrainedBasicOpen] = useState(false);
   const [activeView, setActiveView] = useState<SkillsView>("basic");
-  const [viewTransition, setViewTransition] = useState<"idle" | "sliding">("idle");
-  const touchStartX = useRef<number | null>(null);
+  const { containerRef, transitionClass, switchTo: switchView } = useSwipeableTabs(
+    SKILLS_VIEWS,
+    activeView,
+    setActiveView
+  );
 
   const modifierTotals = getCharacteristicModifierTotals(corruption);
   const computedSkills = useSkillComputation({ skills, getCharField, modifierTotals });
@@ -101,38 +124,6 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
     [computedSkills]
   );
 
-  const switchView = useCallback((view?: SkillsView) => {
-    setActiveView((current) => {
-      const next = view ?? (current === "basic" ? "advanced" : "basic");
-      if (next === current) return current;
-      setViewTransition("sliding");
-      window.setTimeout(() => setViewTransition("idle"), 180);
-      return next;
-    });
-  }, []);
-
-  const handleTouchStart = useCallback((e: TouchEvent<HTMLDivElement>) => {
-    touchStartX.current = e.touches[0]?.clientX ?? null;
-  }, []);
-
-  const handleTouchEnd = useCallback(
-    (e: TouchEvent<HTMLDivElement>) => {
-      const startX = touchStartX.current;
-      const endX = e.changedTouches[0]?.clientX;
-      touchStartX.current = null;
-      if (startX === null || endX === undefined || Math.abs(endX - startX) < 50) return;
-      switchView();
-    },
-    [switchView]
-  );
-
-  const transitionClass =
-    viewTransition === "sliding"
-      ? activeView === "basic"
-        ? "opacity-0 -translate-x-3"
-        : "opacity-0 translate-x-3"
-      : "opacity-100";
-
   const updateLevel = useCallback(
     (id: string, level: SkillEntry["level"]) =>
       onUpdate(skills.map((s) => (s.id === id ? { ...s, level } : s))),
@@ -171,40 +162,21 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
   return (
     <div className="space-y-4 text-slate-100">
       {/* MOBILE: tab switcher + swipe */}
-      <div className="lg:hidden space-y-4" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-        <div
-          className="grid grid-cols-2 rounded-lg border border-slate-600 bg-slate-950/70 p-1"
-          role="tablist"
-          aria-label="Skill type"
-        >
-          {(["basic", "advanced"] as const).map((view) => {
-            const active = activeView === view;
-            return (
-              <button
-                key={view}
-                type="button"
-                role="tab"
-                aria-selected={active}
-                onClick={() => switchView(view)}
-                className={[
-                  "rounded-md px-3 py-1.5 text-xs font-semibold transition border",
-                  active
-                    ? view === "basic"
-                      ? "border-violet-400 bg-violet-600/80 text-white shadow-sm shadow-violet-950/50"
-                      : "border-fuchsia-400 bg-fuchsia-600/80 text-white shadow-sm shadow-fuchsia-950/50"
-                    : "border-transparent text-slate-400 hover:bg-slate-800 hover:text-slate-200",
-                ].join(" ")}
-              >
-                {view === "basic" ? "Basic" : "Advanced"}
-              </button>
-            );
-          })}
-        </div>
+      <div ref={containerRef} className="lg:hidden space-y-4">
+        <SegmentedTabs
+          id={SKILLS_TABS_ID}
+          ariaLabel="Skill type"
+          options={SKILLS_TABS}
+          value={activeView}
+          onChange={switchView}
+        />
 
         <section
           key={activeView}
+          id={segmentedTabPanelId(SKILLS_TABS_ID, activeView)}
+          aria-labelledby={segmentedTabId(SKILLS_TABS_ID, activeView)}
           role="tabpanel"
-          className={`space-y-4 transition-all duration-150 ease-out motion-reduce:transition-none ${transitionClass}`}
+          className={["space-y-4", uiSwipeableTabPanel, transitionClass].join(" ")}
         >
           <div className="flex items-center justify-between">
             <SectionHeader>{activeView === "basic" ? "Basic Skills" : "Advanced Skills"}</SectionHeader>

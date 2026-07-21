@@ -2,8 +2,7 @@
 // Orchestration layer: state management and layout for all weapon categories.
 // Card components, pickers and helpers live in ./weapons/.
 
-import { useState, useCallback, useRef, Fragment, useMemo } from "react";
-import type { TouchEvent } from "react";
+import { useState, useCallback, Fragment, useMemo } from "react";
 import type {
   RangedWeapon,
   MeleeWeapon,
@@ -51,8 +50,14 @@ import {
 } from "../../utils/weaponUtils";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { uiTextPlaceholder } from "../../ui/editableStyles";
-import { uiTabButtonBaseCompact } from "../../ui/buttonStyles";
 import { useCampaignCustomItems } from "../../hooks/useCampaignCustomItems";
+import { useSwipeableTabs } from "../../hooks/useSwipeableTabs";
+import { SegmentedTabs, type SegmentedTabOption } from "../../ui/SegmentedTabs";
+import {
+  segmentedTabId,
+  segmentedTabPanelId,
+  uiSwipeableTabPanel,
+} from "../../ui/segmentedTabStyles";
 import {
   archiveCustomItem,
   createDraftCustomItem,
@@ -116,37 +121,34 @@ type WeaponLibraryAction = "publish" | "archive" | "updateAll";
 type PickerTarget = "ranged" | "melee" | "grenades" | "shields" | null;
 type WeaponMobileSection = NonNullable<PickerTarget>;
 
-const MOBILE_WEAPON_SECTIONS: {
-  id: WeaponMobileSection;
-  label: string;
-  ariaLabel: string;
-  activeClass: string;
-}[] = [
+const MOBILE_WEAPON_SECTIONS = [
   {
-    id: "ranged",
+    value: "ranged",
     label: "Ranged",
     ariaLabel: "Ranged weapons",
-    activeClass: "border-sky-400 bg-sky-600/80 text-white shadow-sm shadow-sky-950/50",
+    activeClassName: "border-sky-400 bg-sky-600/80 text-white shadow-sm shadow-sky-950/50",
   },
   {
-    id: "melee",
+    value: "melee",
     label: "Melee",
     ariaLabel: "Melee weapons",
-    activeClass: "border-rose-400 bg-rose-600/80 text-white shadow-sm shadow-rose-950/50",
+    activeClassName: "border-rose-400 bg-rose-600/80 text-white shadow-sm shadow-rose-950/50",
   },
   {
-    id: "grenades",
+    value: "grenades",
     label: "Expl.",
     ariaLabel: "Explosives",
-    activeClass: "border-orange-400 bg-orange-600/80 text-white shadow-sm shadow-orange-950/50",
+    activeClassName: "border-orange-400 bg-orange-600/80 text-white shadow-sm shadow-orange-950/50",
   },
   {
-    id: "shields",
+    value: "shields",
     label: "Shields",
     ariaLabel: "Shields",
-    activeClass: "border-emerald-400 bg-emerald-600/80 text-white shadow-sm shadow-emerald-950/50",
+    activeClassName: "border-emerald-400 bg-emerald-600/80 text-white shadow-sm shadow-emerald-950/50",
   },
-];
+] as const satisfies readonly SegmentedTabOption<WeaponMobileSection>[];
+const MOBILE_WEAPON_SECTION_IDS = MOBILE_WEAPON_SECTIONS.map((section) => section.value);
+const WEAPON_TABS_ID = "weapon-sections";
 
 // ─── Slot System ─────────────────────────────────────────────────────────────
 
@@ -188,8 +190,14 @@ export function WeaponsTab({
   const [showCustomGrenade, setShowCustomGrenade] = useState(false);
   const [showCustomShield, setShowCustomShield] = useState(false);
   const [activeWeaponSection, setActiveWeaponSection] = useState<WeaponMobileSection>("ranged");
-  const [weaponSectionTransition, setWeaponSectionTransition] = useState<"idle" | "sliding">(
-    "idle"
+  const {
+    containerRef,
+    transitionClass: mobileSectionTransition,
+    switchTo: showWeaponSection,
+  } = useSwipeableTabs(
+    MOBILE_WEAPON_SECTION_IDS,
+    activeWeaponSection,
+    setActiveWeaponSection
   );
   const [editingWeaponDefinition, setEditingWeaponDefinition] =
     useState<EditingWeaponDefinition | null>(null);
@@ -199,7 +207,6 @@ export function WeaponsTab({
     itemId: string;
     action: WeaponLibraryAction;
   } | null>(null);
-  const touchStartX = useRef<number | null>(null);
   const toast = useToast();
 
   const { items: campaignCustomWeaponItems, loading: weaponsLoading } = useCampaignCustomItems({
@@ -1167,53 +1174,11 @@ export function WeaponsTab({
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
-  const showWeaponSection = useCallback((section: WeaponMobileSection) => {
-    setActiveWeaponSection((current) => {
-      if (section === current) return current;
-      setWeaponSectionTransition("sliding");
-      window.setTimeout(() => setWeaponSectionTransition("idle"), 180);
-      return section;
-    });
-  }, []);
-
-  const shiftWeaponSection = useCallback((offset: -1 | 1) => {
-    setActiveWeaponSection((current) => {
-      const currentIndex = MOBILE_WEAPON_SECTIONS.findIndex((section) => section.id === current);
-      const nextIndex =
-        (currentIndex + offset + MOBILE_WEAPON_SECTIONS.length) % MOBILE_WEAPON_SECTIONS.length;
-      const next = MOBILE_WEAPON_SECTIONS[nextIndex].id;
-      if (next === current) return current;
-      setWeaponSectionTransition("sliding");
-      window.setTimeout(() => setWeaponSectionTransition("idle"), 180);
-      return next;
-    });
-  }, []);
-
-  const handleWeaponTouchStart = useCallback((event: TouchEvent<HTMLDivElement>) => {
-    touchStartX.current = event.touches[0]?.clientX ?? null;
-  }, []);
-
-  const handleWeaponTouchEnd = useCallback(
-    (event: TouchEvent<HTMLDivElement>) => {
-      const startX = touchStartX.current;
-      const endX = event.changedTouches[0]?.clientX;
-      touchStartX.current = null;
-      if (startX === null || endX === undefined) return;
-
-      const deltaX = endX - startX;
-      if (Math.abs(deltaX) < 50) return;
-      shiftWeaponSection(deltaX < 0 ? 1 : -1);
-    },
-    [shiftWeaponSection]
-  );
-
-  const mobileSectionTransition =
-    weaponSectionTransition === "sliding" ? "opacity-0 translate-x-3" : "opacity-100";
   const visibleWeaponSectionClass = (section: WeaponMobileSection) =>
     [
       "space-y-3",
       activeWeaponSection === section
-        ? `min-h-[45vh] lg:min-h-0 transition-all duration-150 ease-out motion-reduce:transition-none ${mobileSectionTransition}`
+        ? `${uiSwipeableTabPanel} ${mobileSectionTransition}`
         : "hidden lg:block",
     ].join(" ");
   const weaponPairClass = [
@@ -1402,43 +1367,27 @@ export function WeaponsTab({
 
   return (
     <div
+      ref={containerRef}
       className="space-y-8"
-      onTouchStart={handleWeaponTouchStart}
-      onTouchEnd={handleWeaponTouchEnd}
     >
       <div className="lg:hidden">
-        <div
-          className="grid grid-cols-4 gap-1 rounded-lg border border-slate-600 bg-slate-950/70 p-1"
-          role="tablist"
-          aria-label="Weapon sections"
-        >
-          {MOBILE_WEAPON_SECTIONS.map((section) => {
-            const active = activeWeaponSection === section.id;
-            return (
-              <button
-                key={section.id}
-                type="button"
-                role="tab"
-                aria-selected={active}
-                aria-label={section.ariaLabel}
-                onClick={() => showWeaponSection(section.id)}
-                className={[
-                  uiTabButtonBaseCompact,
-                  active
-                    ? section.activeClass
-                    : "border-transparent text-slate-400 hover:bg-slate-800 hover:text-slate-200",
-                ].join(" ")}
-              >
-                {section.label}
-              </button>
-            );
-          })}
-        </div>
+        <SegmentedTabs
+          id={WEAPON_TABS_ID}
+          ariaLabel="Weapon sections"
+          options={MOBILE_WEAPON_SECTIONS}
+          value={activeWeaponSection}
+          onChange={showWeaponSection}
+        />
       </div>
 
       <div className={weaponPairClass}>
         {/* ── RANGED ─────────────────────────────────────────────────────── */}
-        <section className={visibleWeaponSectionClass("ranged")}>
+        <section
+          id={segmentedTabPanelId(WEAPON_TABS_ID, "ranged")}
+          aria-labelledby={segmentedTabId(WEAPON_TABS_ID, "ranged")}
+          className={visibleWeaponSectionClass("ranged")}
+          role="tabpanel"
+        >
           <div className="flex items-center justify-between">
             <SectionHeader>Ranged</SectionHeader>
             {!showCustomRanged && (
@@ -1532,7 +1481,12 @@ export function WeaponsTab({
         </section>
 
         {/* ── MELEE ──────────────────────────────────────────────────────── */}
-        <section className={visibleWeaponSectionClass("melee")}>
+        <section
+          id={segmentedTabPanelId(WEAPON_TABS_ID, "melee")}
+          aria-labelledby={segmentedTabId(WEAPON_TABS_ID, "melee")}
+          className={visibleWeaponSectionClass("melee")}
+          role="tabpanel"
+        >
           <div className="flex items-center justify-between">
             <SectionHeader>Melee</SectionHeader>
             {!showCustomMelee && (
@@ -1621,7 +1575,12 @@ export function WeaponsTab({
       </div>
 
       {/* ── GRENADES & MINES ─────────────────────────────────────────────── */}
-      <section className={visibleWeaponSectionClass("grenades")}>
+      <section
+        id={segmentedTabPanelId(WEAPON_TABS_ID, "grenades")}
+        aria-labelledby={segmentedTabId(WEAPON_TABS_ID, "grenades")}
+        className={visibleWeaponSectionClass("grenades")}
+        role="tabpanel"
+      >
         <div className="flex items-center justify-between">
           <SectionHeader>Explosives</SectionHeader>
             <Button
@@ -1682,7 +1641,12 @@ export function WeaponsTab({
       </section>
 
       {/* ── SHIELDS ──────────────────────────────────────────────────────── */}
-      <section className={visibleWeaponSectionClass("shields")}>
+      <section
+        id={segmentedTabPanelId(WEAPON_TABS_ID, "shields")}
+        aria-labelledby={segmentedTabId(WEAPON_TABS_ID, "shields")}
+        className={visibleWeaponSectionClass("shields")}
+        role="tabpanel"
+      >
         <div className="flex items-center justify-between">
           <SectionHeader>Shields</SectionHeader>
         <Button

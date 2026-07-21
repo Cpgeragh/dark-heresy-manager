@@ -11,12 +11,3 @@ export const uiExpandButton =
 
 export const uiIconRemoveButton =
   "inline-flex items-center justify-center rounded border border-red-500 text-red-500 hover:bg-red-500/10 transition p-1 shrink-0";
-
-export const uiTabButtonBase =
-  "rounded-md px-3 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm font-semibold transition border";
-
-export const uiTabButtonBaseCompact =
-  "rounded-md px-1 py-1.5 text-[11px] font-semibold transition border";
-
-export const uiTabButtonInactive =
-  "border-transparent text-slate-400 hover:bg-slate-800 hover:text-slate-200";

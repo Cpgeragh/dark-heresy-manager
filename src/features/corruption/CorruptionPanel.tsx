@@ -26,6 +26,12 @@ import {
   uiTextPlaceholder,
 } from "../../ui/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
+import { SegmentedTabs, type SegmentedTabOption } from "../../ui/SegmentedTabs";
+import {
+  segmentedTabId,
+  segmentedTabPanelId,
+  uiSwipeableTabPanel,
+} from "../../ui/segmentedTabStyles";
 import { getRollDisplayEntries } from "./characteristicModifiers";
 import { CorruptionMalignancyPicker } from "./CorruptionMalignancyPicker";
 import { MalignancyInfoContent } from "./CorruptionReferenceModals";
@@ -69,6 +75,12 @@ const GROUP_ACTIVE_CLASS: Record<EntryGroup, string> = {
   minorMutations: colourActiveEmerald,
   majorMutations: colourActiveOrange,
 };
+const CORRUPTION_TABS = ENTRY_GROUPS.map((group) => ({
+  value: group,
+  label: GROUP_LABELS[group],
+  activeClassName: GROUP_ACTIVE_CLASS[group],
+})) satisfies readonly SegmentedTabOption<EntryGroup>[];
+const CORRUPTION_TABS_ID = "corruption-entry-groups";
 
 function CorruptionTimeline({ points }: { points: number }) {
   const progressPct = Math.min(100, (points / CORRUPTION_TIMELINE_TOTAL_WIDTH) * 100);
@@ -518,17 +530,11 @@ export function CorruptionPanel({ corruption, editable, onUpdate, sectionClassNa
     [value, majorMutations, onUpdate]
   );
 
-  const { containerRef, transition, switchTo } = useSwipeableTabs(ENTRY_GROUPS, activeGroup, setActiveGroup);
-
-  const groupIndex = ENTRY_GROUPS.indexOf(activeGroup);
-  const transitionClass =
-    transition === "sliding"
-      ? groupIndex === 0
-        ? "opacity-0 -translate-x-3"
-        : groupIndex === ENTRY_GROUPS.length - 1
-          ? "opacity-0 translate-x-3"
-          : "opacity-0"
-      : "opacity-100";
+  const { containerRef, transitionClass, switchTo } = useSwipeableTabs(
+    ENTRY_GROUPS,
+    activeGroup,
+    setActiveGroup
+  );
 
   function renderGroup(group: EntryGroup) {
     if (group === "malignancies") {
@@ -592,37 +598,19 @@ export function CorruptionPanel({ corruption, editable, onUpdate, sectionClassNa
 
       {/* Mobile — tab switcher between Malignancies / Minor Mutations / Major Mutations */}
       <div ref={containerRef} className="lg:hidden space-y-4">
-        <div
-          className="grid grid-cols-3 rounded-lg border border-slate-600 bg-slate-950/70 p-1"
-          role="tablist"
-          aria-label="Corruption entry groups"
-        >
-          {ENTRY_GROUPS.map((group) => {
-            const active = activeGroup === group;
-            return (
-              <button
-                key={group}
-                type="button"
-                role="tab"
-                aria-selected={active}
-                onClick={() => switchTo(group)}
-                className={[
-                  "rounded-md px-2 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm font-semibold transition border",
-                  active ? GROUP_ACTIVE_CLASS[group] : "border-transparent text-slate-400 hover:bg-slate-800 hover:text-slate-200",
-                ].join(" ")}
-              >
-                {GROUP_LABELS[group]}
-              </button>
-            );
-          })}
-        </div>
+        <SegmentedTabs
+          id={CORRUPTION_TABS_ID}
+          ariaLabel="Corruption entry groups"
+          options={CORRUPTION_TABS}
+          value={activeGroup}
+          onChange={switchTo}
+        />
 
         <section
           key={activeGroup}
-          className={[
-            "space-y-2 min-h-[45vh] lg:min-h-0 transition-all duration-150 ease-out motion-reduce:transition-none",
-            transitionClass,
-          ].join(" ")}
+          id={segmentedTabPanelId(CORRUPTION_TABS_ID, activeGroup)}
+          aria-labelledby={segmentedTabId(CORRUPTION_TABS_ID, activeGroup)}
+          className={["space-y-2", uiSwipeableTabPanel, transitionClass].join(" ")}
           role="tabpanel"
         >
           {renderGroup(activeGroup)}

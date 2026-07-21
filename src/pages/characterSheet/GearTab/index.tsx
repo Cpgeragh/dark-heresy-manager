@@ -1,7 +1,6 @@
 // src/pages/characterSheet/GearTab/index.tsx
 
-import { useState, useCallback, useMemo, useRef } from "react";
-import type { TouchEvent } from "react";
+import { useState, useCallback, useMemo } from "react";
 import type { GearItem, ConsumableItem } from "../../../types/Character";
 import type { GearRef } from "../../../data/reference/gearReference";
 import type { ConsumableRef } from "../../../data/reference/consumablesReference";
@@ -21,6 +20,13 @@ import { SectionHeader } from "../../../ui/SectionHeader";
 import { uiTextPlaceholder } from "../../../ui/editableStyles";
 import { colourActiveSky, colourActiveRose } from "../../../ui/colourTokens";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
+import { useSwipeableTabs } from "../../../hooks/useSwipeableTabs";
+import { SegmentedTabs, type SegmentedTabOption } from "../../../ui/SegmentedTabs";
+import {
+  segmentedTabId,
+  segmentedTabPanelId,
+  uiSwipeableTabPanel,
+} from "../../../ui/segmentedTabStyles";
 import {
   archiveCustomItem,
   createDraftCustomItem,
@@ -48,6 +54,20 @@ interface GearTabProps {
 }
 
 type GearSection = "items" | "consumables";
+const GEAR_SECTIONS = ["items", "consumables"] as const satisfies readonly GearSection[];
+const GEAR_TABS = [
+  {
+    value: "items",
+    label: "Items",
+    activeClassName: colourActiveSky,
+  },
+  {
+    value: "consumables",
+    label: "Consumables",
+    activeClassName: colourActiveRose,
+  },
+] as const satisfies readonly SegmentedTabOption<GearSection>[];
+const GEAR_TABS_ID = "gear-sections";
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -87,8 +107,11 @@ export function GearTab({
     action: GearLibraryAction;
   } | null>(null);
   const [activeGearSection, setActiveGearSection]         = useState<GearSection>("items");
-  const [gearTransition, setGearTransition]               = useState<"idle" | "sliding">("idle");
-  const touchStartX = useRef<number | null>(null);
+  const { containerRef, transitionClass, switchTo: switchGearSection } = useSwipeableTabs(
+    GEAR_SECTIONS,
+    activeGearSection,
+    setActiveGearSection
+  );
   const toast = useToast();
 
   const { items: campaignCustomItems, loading: gearLoading } = useCampaignCustomItems({
@@ -530,80 +553,35 @@ export function GearTab({
     [campaignId, toast, userId]
   );
 
-  const switchGearSection = useCallback((section?: GearSection) => {
-    setActiveGearSection((current) => {
-      const next = section ?? (current === "items" ? "consumables" : "items");
-      if (next === current) return current;
-      setGearTransition("sliding");
-      window.setTimeout(() => setGearTransition("idle"), 180);
-      return next;
-    });
-  }, []);
-
-  const handleGearTouchStart = useCallback((event: TouchEvent<HTMLDivElement>) => {
-    touchStartX.current = event.touches[0]?.clientX ?? null;
-  }, []);
-
-  const handleGearTouchEnd = useCallback((event: TouchEvent<HTMLDivElement>) => {
-    const startX = touchStartX.current;
-    const endX = event.changedTouches[0]?.clientX;
-    touchStartX.current = null;
-    if (startX === null || endX === undefined) return;
-
-    const deltaX = endX - startX;
-    if (Math.abs(deltaX) < 50) return;
-    switchGearSection();
-  }, [switchGearSection]);
-
-  const transitionClass =
-    gearTransition === "sliding"
-      ? activeGearSection === "items"
-        ? "opacity-0 -translate-x-3"
-        : "opacity-0 translate-x-3"
-      : "opacity-100";
   const visibleGearSectionClass = (section: GearSection) =>
     [
       "space-y-3",
       activeGearSection === section
-        ? `transition-all duration-150 ease-out motion-reduce:transition-none ${transitionClass}`
+        ? `${uiSwipeableTabPanel} ${transitionClass}`
         : "hidden lg:block",
     ].join(" ");
 
   if (gearLoading || consumableLoading) return null;
 
   return (
-    <div className="space-y-6" onTouchStart={handleGearTouchStart} onTouchEnd={handleGearTouchEnd}>
+    <div ref={containerRef} className="space-y-6">
       <div className="lg:hidden">
-        <div
-          className="grid grid-cols-2 rounded-lg border border-slate-600 bg-slate-950/70 p-1"
-          role="tablist"
-          aria-label="Gear sections"
-        >
-          {(["items", "consumables"] as const).map((section) => {
-            const active = activeGearSection === section;
-            return (
-              <button
-                key={section}
-                type="button"
-                role="tab"
-                aria-selected={active}
-                onClick={() => switchGearSection(section)}
-                className={[
-                  "rounded-md px-3 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm font-semibold transition border",
-                  active
-                    ? (section === "items" ? colourActiveSky : colourActiveRose)
-                    : "border-transparent text-slate-400 hover:bg-slate-800 hover:text-slate-200",
-                ].join(" ")}
-              >
-                {section === "items" ? "Items" : "Consumables"}
-              </button>
-            );
-          })}
-        </div>
+        <SegmentedTabs
+          id={GEAR_TABS_ID}
+          ariaLabel="Gear sections"
+          options={GEAR_TABS}
+          value={activeGearSection}
+          onChange={switchGearSection}
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-      <section className={visibleGearSectionClass("items")} role="tabpanel">
+      <section
+        id={segmentedTabPanelId(GEAR_TABS_ID, "items")}
+        aria-labelledby={segmentedTabId(GEAR_TABS_ID, "items")}
+        className={visibleGearSectionClass("items")}
+        role="tabpanel"
+      >
         <div className="flex items-center justify-between">
           <SectionHeader>Items</SectionHeader>
           {!showCustomForm && (
@@ -672,7 +650,12 @@ export function GearTab({
         </div>
       </section>
       {/* CONSUMABLES ──────────────────────────────────────────────────────── */}
-      <section className={visibleGearSectionClass("consumables")} role="tabpanel">
+      <section
+        id={segmentedTabPanelId(GEAR_TABS_ID, "consumables")}
+        aria-labelledby={segmentedTabId(GEAR_TABS_ID, "consumables")}
+        className={visibleGearSectionClass("consumables")}
+        role="tabpanel"
+      >
         <div className="flex items-center justify-between">
           <SectionHeader>Consumables</SectionHeader>
         <Button

@@ -24,6 +24,12 @@ import {
   uiTextPlaceholder,
 } from "../../ui/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
+import { SegmentedTabs, type SegmentedTabOption } from "../../ui/SegmentedTabs";
+import {
+  segmentedTabId,
+  segmentedTabPanelId,
+  uiSwipeableTabPanel,
+} from "../../ui/segmentedTabStyles";
 import { TrashIcon } from "../../ui/TrashIcon";
 import { InsanityDisorderPicker } from "./InsanityDisorderPicker";
 import { DisorderInfoContent } from "./InsanityReferenceModals";
@@ -57,6 +63,19 @@ interface InsanityPanelProps {
 
 type EntryGroup = "trauma" | "disorders";
 const ENTRY_GROUPS = ["trauma", "disorders"] as const satisfies readonly EntryGroup[];
+const INSANITY_TABS = [
+  {
+    value: "trauma",
+    label: "Temporary Trauma",
+    activeClassName: colourActiveSky,
+  },
+  {
+    value: "disorders",
+    label: "Disorders",
+    activeClassName: colourActiveRose,
+  },
+] as const satisfies readonly SegmentedTabOption<EntryGroup>[];
+const INSANITY_TABS_ID = "insanity-entry-groups";
 
 function severityDescription(severity: InsanityDisorderSeverity): string {
   return INSANITY_SEVERITIES.find((entry) => entry.severity === severity)?.description ?? "";
@@ -509,14 +528,11 @@ export function InsanityPanel({ insanity, editable, onUpdate, sectionClassName }
     [value, structuredTrauma, onUpdate]
   );
 
-  const { containerRef, transition, switchTo } = useSwipeableTabs(ENTRY_GROUPS, activeGroup, setActiveGroup);
-
-  const transitionClass =
-    transition === "sliding"
-      ? activeGroup === "trauma"
-        ? "opacity-0 -translate-x-3"
-        : "opacity-0 translate-x-3"
-      : "opacity-100";
+  const { containerRef, transitionClass, switchTo } = useSwipeableTabs(
+    ENTRY_GROUPS,
+    activeGroup,
+    setActiveGroup
+  );
 
   return (
     <div className="space-y-6">
@@ -539,39 +555,19 @@ export function InsanityPanel({ insanity, editable, onUpdate, sectionClassName }
         ref={containerRef}
         className="lg:hidden space-y-4"
       >
-        <div
-          className="grid grid-cols-2 rounded-lg border border-slate-600 bg-slate-950/70 p-1"
-          role="tablist"
-          aria-label="Insanity entry groups"
-        >
-          {ENTRY_GROUPS.map((group) => {
-            const active = activeGroup === group;
-            return (
-              <button
-                key={group}
-                type="button"
-                role="tab"
-                aria-selected={active}
-                onClick={() => switchTo(group)}
-                className={[
-                  "rounded-md px-3 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm font-semibold transition border",
-                  active
-                    ? (group === "trauma" ? colourActiveSky : colourActiveRose)
-                    : "border-transparent text-slate-400 hover:bg-slate-800 hover:text-slate-200",
-                ].join(" ")}
-              >
-                {group === "trauma" ? "Temporary Trauma" : "Disorders"}
-              </button>
-            );
-          })}
-        </div>
+        <SegmentedTabs
+          id={INSANITY_TABS_ID}
+          ariaLabel="Insanity entry groups"
+          options={INSANITY_TABS}
+          value={activeGroup}
+          onChange={switchTo}
+        />
 
         <section
           key={activeGroup}
-          className={[
-            "space-y-2 min-h-[45vh] lg:min-h-0 transition-all duration-150 ease-out motion-reduce:transition-none",
-            transitionClass,
-          ].join(" ")}
+          id={segmentedTabPanelId(INSANITY_TABS_ID, activeGroup)}
+          aria-labelledby={segmentedTabId(INSANITY_TABS_ID, activeGroup)}
+          className={["space-y-2", uiSwipeableTabPanel, transitionClass].join(" ")}
           role="tabpanel"
         >
           {activeGroup === "trauma" ? (

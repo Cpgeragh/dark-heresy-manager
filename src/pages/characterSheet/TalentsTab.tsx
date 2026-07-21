@@ -9,6 +9,12 @@ import { TALENT_LIST } from "../../data/talentData";
 import { Button } from "../../ui/Button";
 import { uiSection, uiTextPlaceholder, uiFormLabel } from "../../ui/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
+import { SegmentedTabs, type SegmentedTabOption } from "../../ui/SegmentedTabs";
+import {
+  segmentedTabId,
+  segmentedTabPanelId,
+  uiSwipeableTabPanel,
+} from "../../ui/segmentedTabStyles";
 import { EntryCard, EntrySection, TalentPickerModal } from "./talentComponents";
 import { useSwipeableTabs } from "../../hooks/useSwipeableTabs";
 
@@ -30,6 +36,20 @@ const FAITH_GROUP_LABELS: Record<string, string> = {
 
 const FAITH_GROUP_ORDER = ["mercy", "sign", "wrath"] as const;
 const VIEW_GROUPS = ["talents", "faith"] as const;
+type ViewGroup = (typeof VIEW_GROUPS)[number];
+const TALENT_TABS = [
+  {
+    value: "talents",
+    label: "Talents",
+    activeClassName: "border-violet-400 bg-violet-600/80 text-white shadow-sm shadow-violet-950/50",
+  },
+  {
+    value: "faith",
+    label: "Faith Talents",
+    activeClassName: "border-fuchsia-400 bg-fuchsia-600/80 text-white shadow-sm shadow-fuchsia-950/50",
+  },
+] as const satisfies readonly SegmentedTabOption<ViewGroup>[];
+const TALENT_TABS_ID = "talent-groups";
 
 const REGULAR_TALENT_LIST = TALENT_LIST.filter((t) => !t.faithGroup);
 const FAITH_TALENT_LIST = TALENT_LIST.filter((t) => !!t.faithGroup);
@@ -133,12 +153,12 @@ export function TalentsTab({
     [talents, onUpdateTalents]
   );
 
-const [activeView, setActiveView] = useState<"talents" | "faith">("talents");
-  const { containerRef, transition, switchTo } = useSwipeableTabs(VIEW_GROUPS, activeView, setActiveView);
-
-  const transitionClass = transition === "sliding"
-    ? activeView === "talents" ? "opacity-0 -translate-x-3" : "opacity-0 translate-x-3"
-    : "opacity-100";
+const [activeView, setActiveView] = useState<ViewGroup>("talents");
+  const { containerRef, transitionClass, switchTo } = useSwipeableTabs(
+    VIEW_GROUPS,
+    activeView,
+    setActiveView
+  );
 
   const hasFaithTalents = talents.talents.some((e) => FAITH_TALENT_IDS.has(e.talentId));
   const showFaith = editable || hasFaithTalents;
@@ -146,40 +166,22 @@ const [activeView, setActiveView] = useState<"talents" | "faith">("talents");
   return (
     <div className="space-y-8">
       {/* MOBILE: swipe tabs */}
-      <div ref={containerRef} className="lg:hidden">
+      <div ref={showFaith ? containerRef : undefined} className="lg:hidden">
         {showFaith ? (
           <>
-            <div
-              className="grid grid-cols-2 rounded-lg border border-slate-600 bg-slate-950/70 p-1 mb-4"
-              role="tablist"
-              aria-label="Talent groups"
-            >
-              {(["talents", "faith"] as const).map((view) => {
-                const active = activeView === view;
-                return (
-                  <button
-                    key={view}
-                    type="button"
-                    role="tab"
-                    aria-selected={active}
-                    onClick={() => switchTo(view)}
-                    className={[
-                      "rounded-md px-3 py-1.5 text-xs font-semibold transition border",
-                      active
-                        ? view === "talents"
-                          ? "border-violet-400 bg-violet-600/80 text-white shadow-sm shadow-violet-950/50"
-                          : "border-fuchsia-400 bg-fuchsia-600/80 text-white shadow-sm shadow-fuchsia-950/50"
-                        : "border-transparent text-slate-400 hover:bg-slate-800 hover:text-slate-200",
-                    ].join(" ")}
-                  >
-                    {view === "talents" ? "Talents" : "Faith Talents"}
-                  </button>
-                );
-              })}
-            </div>
+            <SegmentedTabs
+              id={TALENT_TABS_ID}
+              ariaLabel="Talent groups"
+              options={TALENT_TABS}
+              value={activeView}
+              onChange={switchTo}
+              className="mb-4"
+            />
             <section
               key={activeView}
-              className={`transition-all duration-150 ease-out motion-reduce:transition-none ${transitionClass}`}
+              id={segmentedTabPanelId(TALENT_TABS_ID, activeView)}
+              aria-labelledby={segmentedTabId(TALENT_TABS_ID, activeView)}
+              className={[uiSwipeableTabPanel, transitionClass].join(" ")}
               role="tabpanel"
             >
               {activeView === "talents" ? (

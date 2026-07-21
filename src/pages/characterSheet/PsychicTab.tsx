@@ -1,8 +1,8 @@
 // src/pages/characterSheet/PsychicTab.tsx
 
-import { useState, useCallback, useRef } from "react";
-import type { TouchEvent } from "react";
+import { useState, useCallback } from "react";
 import type { PsychicBlock, PsychicPower } from "../../types/Character";
+import { useSwipeableTabs } from "../../hooks/useSwipeableTabs";
 import {
   PSYCHIC_POWER_REFERENCE,
   PSYCHIC_DISCIPLINES,
@@ -21,6 +21,12 @@ import { TALENT_DESCRIPTIONS } from "../../data/talentDescriptions";
 import { sourceColour } from "../../ui/sourceStyles";
 import { disciplineColours, psyRatingGlow } from "./psychicStyles";
 import { colourActiveSky, colourActiveRose } from "../../ui/colourTokens";
+import { SegmentedTabs, type SegmentedTabOption } from "../../ui/SegmentedTabs";
+import {
+  segmentedTabId,
+  segmentedTabPanelId,
+  uiSwipeableTabPanel,
+} from "../../ui/segmentedTabStyles";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -33,6 +39,20 @@ interface PsychicTabProps {
 
 type PickerTarget = "minor" | "major" | null;
 type PowerGroup = "minor" | "major";
+const POWER_GROUPS = ["minor", "major"] as const satisfies readonly PowerGroup[];
+const PSYCHIC_POWER_TABS = [
+  {
+    value: "minor",
+    label: "Minor",
+    activeClassName: colourActiveSky,
+  },
+  {
+    value: "major",
+    label: "Major",
+    activeClassName: colourActiveRose,
+  },
+] as const satisfies readonly SegmentedTabOption<PowerGroup>[];
+const PSYCHIC_POWER_TABS_ID = "psychic-power-groups";
 type DisciplineFilter = PsychicDiscipline | "All";
 type CustomPowerOrigin = "Custom" | "2nd Ed";
 type CustomRangeMode = "meters" | "km-radius" | "you" | "unlimited";
@@ -521,8 +541,11 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
   const [activePowerGroup, setActivePowerGroup] = useState<PowerGroup>(() =>
     psychic.minorPowers.length === 0 && psychic.majorPowers.length > 0 ? "major" : "minor"
   );
-  const [powerTransition, setPowerTransition] = useState<"idle" | "sliding">("idle");
-  const touchStartX = useRef<number | null>(null);
+  const { containerRef, transitionClass, switchTo: switchPowerGroup } = useSwipeableTabs(
+    POWER_GROUPS,
+    activePowerGroup,
+    setActivePowerGroup
+  );
 
   // ── Field updates ────────────────────────────────────────────────────────
 
@@ -613,29 +636,6 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
     },
     [editable, editingCustomPower, psychic, onUpdate]
   );
-  const switchPowerGroup = useCallback((group?: PowerGroup) => {
-    setActivePowerGroup((current) => {
-      const next = group ?? (current === "minor" ? "major" : "minor");
-      if (next === current) return current;
-      setPowerTransition("sliding");
-      window.setTimeout(() => setPowerTransition("idle"), 180);
-      return next;
-    });
-  }, []);
-  const handlePowerTouchStart = useCallback((event: TouchEvent<HTMLDivElement>) => {
-    touchStartX.current = event.touches[0]?.clientX ?? null;
-  }, []);
-  const handlePowerTouchEnd = useCallback((event: TouchEvent<HTMLDivElement>) => {
-    const startX = touchStartX.current;
-    const endX = event.changedTouches[0]?.clientX;
-    touchStartX.current = null;
-    if (startX === null || endX === undefined) return;
-
-    const deltaX = endX - startX;
-    if (Math.abs(deltaX) < 50) return;
-    switchPowerGroup();
-  }, [switchPowerGroup]);
-
   // ── Render ────────────────────────────────────────────────────────────────
 
   const pickerInitialDiscipline: DisciplineFilter = pickerTarget === "minor" ? "Minor" : "All";
@@ -651,12 +651,6 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
     activePowerGroup === "minor" ? "No minor powers recorded." : "No major powers recorded.";
   const activeAddLabel =
     activePowerGroup === "minor" ? "+ Add Minor Power" : "+ Add Major Power";
-  const transitionClass =
-    powerTransition === "sliding"
-      ? activePowerGroup === "minor"
-        ? "opacity-0 -translate-x-3"
-        : "opacity-0 translate-x-3"
-      : "opacity-100";
   const existingPowerNames = new Set([
     ...psychic.minorPowers.map((p) => p.name),
     ...psychic.majorPowers.map((p) => p.name),
@@ -728,43 +722,22 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
 
       {/* MINOR POWERS ────────────────────────────────────────────────────── */}
       <div
+        ref={containerRef}
         className="lg:hidden space-y-4"
-        onTouchStart={handlePowerTouchStart}
-        onTouchEnd={handlePowerTouchEnd}
       >
-        <div
-          className="grid grid-cols-2 rounded-lg border border-slate-600 bg-slate-950/70 p-1"
-          role="tablist"
-          aria-label="Psychic power groups"
-        >
-          {(["minor", "major"] as const).map((group) => {
-            const active = activePowerGroup === group;
-            return (
-              <button
-                key={group}
-                type="button"
-                role="tab"
-                aria-selected={active}
-                onClick={() => switchPowerGroup(group)}
-                className={[
-                  "rounded-md px-3 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm font-semibold transition border",
-                  active
-                    ? (group === "minor" ? colourActiveSky : colourActiveRose)
-                    : "border-transparent text-slate-400 hover:bg-slate-800 hover:text-slate-200",
-                ].join(" ")}
-              >
-                {group === "minor" ? "Minor" : "Major"}
-              </button>
-            );
-          })}
-        </div>
+        <SegmentedTabs
+          id={PSYCHIC_POWER_TABS_ID}
+          ariaLabel="Psychic power groups"
+          options={PSYCHIC_POWER_TABS}
+          value={activePowerGroup}
+          onChange={switchPowerGroup}
+        />
 
         <section
           key={activePowerGroup}
-          className={[
-            "space-y-4 transition-all duration-150 ease-out motion-reduce:transition-none",
-            transitionClass,
-          ].join(" ")}
+          id={segmentedTabPanelId(PSYCHIC_POWER_TABS_ID, activePowerGroup)}
+          aria-labelledby={segmentedTabId(PSYCHIC_POWER_TABS_ID, activePowerGroup)}
+          className={["space-y-4", uiSwipeableTabPanel, transitionClass].join(" ")}
           role="tabpanel"
         >
           <div className="flex items-center justify-between">

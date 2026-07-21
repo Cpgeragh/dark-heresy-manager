@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 type TransitionState = "idle" | "sliding";
 
@@ -19,8 +19,11 @@ export function useSwipeableTabs<T extends string>(
   activeGroup: T,
   onChange: (next: T) => void
 ) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerElement, setContainerElement] = useState<HTMLDivElement | null>(null);
   const [transition, setTransition] = useState<TransitionState>("idle");
+  const containerRef = useCallback((element: HTMLDivElement | null) => {
+    setContainerElement(element);
+  }, []);
 
   const switchTo = useCallback(
     (next: T) => {
@@ -33,7 +36,7 @@ export function useSwipeableTabs<T extends string>(
   );
 
   useEffect(() => {
-    const element = containerRef.current;
+    const element = containerElement;
     if (!element) return;
 
     let startX = NaN;
@@ -91,7 +94,17 @@ export function useSwipeableTabs<T extends string>(
       document.removeEventListener("touchmove", onTouchMove);
       document.removeEventListener("touchend", onTouchEnd);
     };
-  }, [groups, activeGroup, switchTo]);
+  }, [containerElement, groups, activeGroup, switchTo]);
 
-  return { containerRef, transition, switchTo };
+  const activeIndex = groups.indexOf(activeGroup);
+  const transitionClass =
+    transition === "sliding"
+      ? activeIndex === 0
+        ? "opacity-0 -translate-x-3"
+        : activeIndex === groups.length - 1
+          ? "opacity-0 translate-x-3"
+          : "opacity-0"
+      : "opacity-100";
+
+  return { containerRef, transitionClass, switchTo };
 }
