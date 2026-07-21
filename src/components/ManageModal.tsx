@@ -1,6 +1,7 @@
 // src/components/ManageModal.tsx
 
 import { useState, useCallback } from "react";
+import { Button } from "../ui/Button";
 import { uiSection, uiSectionHeader, uiSubheading } from "../ui/editableStyles";
 import { COPY_FEEDBACK_DURATION } from "../constants/ui";
 
@@ -71,13 +72,15 @@ export function ManageModal({
               <code className="flex-1 px-2 py-1 bg-slate-800 border border-slate-500 rounded text-amber-300 text-sm lg:text-base break-all">
                 {recoveryCode}
               </code>
-              <button
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={copyCode}
                 aria-label="Copy recovery code"
-                className="px-2 py-1 text-xs lg:text-sm rounded bg-slate-700 border border-slate-500 text-slate-100 hover:bg-slate-600 shrink-0"
+                className="shrink-0"
               >
                 {copied ? "Copied" : "Copy"}
-              </button>
+              </Button>
             </div>
           </section>
         )}
@@ -88,15 +91,16 @@ export function ManageModal({
             <p className={uiSubheading}>
               Character Data
             </p>
-            <button
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => {
                 onExport();
                 onClose();
               }}
-              className="px-2 py-1 text-xs lg:text-sm rounded bg-slate-700 border border-slate-500 text-slate-100 hover:bg-slate-600"
             >
               Export JSON
-            </button>
+            </Button>
           </section>
         )}
 
@@ -107,17 +111,13 @@ export function ManageModal({
               Release Character
             </p>
             <p className="text-xs lg:text-sm text-slate-400">Unlinks this character from your account.</p>
-            <button
+            <Button
+              variant="danger"
               onClick={onPlayerRelease}
               disabled={isReleasing}
-              className={`px-3 py-2 rounded border text-sm lg:text-base transition ${
-                isReleasing
-                  ? "bg-red-800 border-red-900 text-red-300 cursor-wait"
-                  : "bg-red-600 border-red-700 text-white hover:bg-red-500"
-              }`}
             >
               {isReleasing ? "Releasing…" : "Release Character"}
-            </button>
+            </Button>
           </section>
         )}
       </div>

@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import type { WeaponTrainingBlock, WeaponTrainingTalentId } from "../../types/Character";
 import { WEAPON_TRAINING_GROUPS } from "../../data/weaponTrainingData";
+import { Button } from "../../ui/Button";
 import { editableInputClass, uiFormLabel, uiTextPlaceholder } from "../../ui/editableStyles";
 import { uiDismissButton } from "../../ui/buttonStyles";
 import {
@@ -112,12 +113,13 @@ export function WeaponTrainingTab({ weaponTraining, editable, onUpdate }: Weapon
           <span className="relative">
             Exotic Weapon Training
             {editable && (
-              <button
+              <Button
+                size="xs"
                 onClick={() => setShowExoticModal(true)}
-                className="absolute left-full ml-2 top-1/2 -translate-y-1/2 -mt-px text-xs px-2 py-0.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition whitespace-nowrap"
+                className="absolute left-full ml-2 top-1/2 -translate-y-1/2 -mt-px"
               >
                 + Add
-              </button>
+              </Button>
             )}
           </span>
         </p>
@@ -171,13 +173,14 @@ export function WeaponTrainingTab({ weaponTraining, editable, onUpdate }: Weapon
               placeholder="e.g. Needle Pistol"
               className={editableInputClass(true)}
             />
-            <button
+            <Button
+              size="sm"
+              fullWidth
               onClick={() => { handleAddExotic(); setShowExoticModal(false); }}
               disabled={!newExotic.trim()}
-              className="w-full text-xs lg:text-sm px-3 py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition disabled:opacity-40"
             >
               + Add Exotic
-            </button>
+            </Button>
           </div>
         </dialog>,
         document.body

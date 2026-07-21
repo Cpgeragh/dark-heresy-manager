@@ -6,6 +6,7 @@ import type { Characteristics, CorruptionBlock, SkillEntry } from "../../../type
 import type { CharField } from "../../../utils/characterFactory";
 import { useSkillComputation } from "../../../hooks/useSkillComputation";
 import { getCharacteristicModifierTotals } from "../../../features/corruption/characteristicModifierTotals";
+import { Button } from "../../../ui/Button";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { uiSection, uiTextPlaceholder } from "../../../ui/editableStyles";
 import { SkillRow } from "./SkillRow";
@@ -208,19 +209,19 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
           <div className="flex items-center justify-between">
             <SectionHeader>{activeView === "basic" ? "Basic Skills" : "Advanced Skills"}</SectionHeader>
             {activeView === "basic" ? (
-              <button
+              <Button
+                size="sm"
                 onClick={() => setIsUntrainedBasicOpen(true)}
-                className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
               >
                 Untrained
-              </button>
+              </Button>
             ) : (
-              <button
+              <Button
+                size="sm"
                 onClick={() => setIsAddOpen(true)}
-                className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
               >
                 {editable ? "+ Add Skill" : "View"}
-              </button>
+              </Button>
             )}
           </div>
           {activeView === "basic" ? (
@@ -240,24 +241,24 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
         <section className={uiSection + " space-y-3"}>
           <div className="flex items-center justify-between">
             <SectionHeader>Basic Skills</SectionHeader>
-            <button
+            <Button
+              size="sm"
               onClick={() => setIsUntrainedBasicOpen(true)}
-              className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
             >
               Untrained
-            </button>
+            </Button>
           </div>
           {renderBasicSection()}
         </section>
         <section className={uiSection + " space-y-3"}>
           <div className="flex items-center justify-between">
             <SectionHeader>Advanced Skills</SectionHeader>
-            <button
+            <Button
+              size="sm"
               onClick={() => setIsAddOpen(true)}
-              className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
             >
               {editable ? "+ Add Skill" : "View"}
-            </button>
+            </Button>
           </div>
           {advancedItems.length === 0 ? (
             <p className={`text-sm ${uiTextPlaceholder}`}>No advanced skills trained yet.</p>

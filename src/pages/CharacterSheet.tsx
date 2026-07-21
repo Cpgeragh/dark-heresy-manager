@@ -7,6 +7,7 @@ import { CharacterKebabContent } from "./characterSheet/CharacterKebabContent";
 
 import { useCharacterSheet } from "./characterSheet/useCharacterSheet";
 import { ErrorBoundary } from "../components/ErrorBoundary";
+import { Button } from "../ui/Button";
 
 import { VitalsTab } from "./characterSheet/VitalsTab";
 import { InsanityTab } from "./characterSheet/InsanityTab";
@@ -414,12 +415,12 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
                   An error occurred while displaying this content.
                 </p>
               </div>
-              <button
+              <Button
+                variant="secondary"
                 onClick={() => handleTabChange("vitals")}
-                className="px-4 lg:px-5 py-2 lg:py-2.5 bg-slate-800 text-slate-200 rounded border border-slate-700 hover:bg-slate-700 transition text-sm lg:text-base"
               >
                 Back to Overview
-              </button>
+              </Button>
             </div>
           }
         >

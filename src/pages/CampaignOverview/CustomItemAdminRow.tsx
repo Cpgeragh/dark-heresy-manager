@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import type { CampaignCustomItem, CustomItemCategory } from "../../types/CustomItems";
+import { Button } from "../../ui/Button";
 import { uiSection } from "../../ui/editableStyles";
-import { uiActionButtonCompact } from "../../ui/buttonStyles";
 import { ConfirmInline } from "../../ui/ConfirmInline";
 import { useToast } from "../../components/Toast";
 import {
@@ -133,44 +133,40 @@ export function CustomItemAdminRow({
         </div>
         <div className="flex flex-wrap items-center gap-2 shrink-0">
           {item.status === "draft" && (
-            <button
-              type="button"
+            <Button
+              size="xs"
               onClick={handlePublish}
               disabled={busy}
-              className={`${uiActionButtonCompact} disabled:opacity-50`}
             >
               {busyAction === "publish" ? "Publishing…" : "Publish"}
-            </button>
+            </Button>
           )}
           {item.status !== "archived" && (
-            <button
-              type="button"
+            <Button
+              size="xs"
               onClick={handleArchive}
               disabled={busy}
-              className={`${uiActionButtonCompact} disabled:opacity-50`}
             >
               {busyAction === "archive" ? "Archiving…" : "Archive"}
-            </button>
+            </Button>
           )}
           {item.status === "published" && !!item.draftVersionId && (
-            <button
-              type="button"
+            <Button
+              size="xs"
               onClick={handleUpdateAll}
               disabled={busy}
-              className={`${uiActionButtonCompact} disabled:opacity-50`}
             >
               {busyAction === "updateAll" ? "Updating…" : "Update All Copies"}
-            </button>
+            </Button>
           )}
           {item.status === "archived" && (
-            <button
-              type="button"
+            <Button
+              size="xs"
               onClick={handleRestore}
               disabled={busy}
-              className={`${uiActionButtonCompact} disabled:opacity-50`}
             >
               {busyAction === "restore" ? "Restoring…" : "Restore"}
-            </button>
+            </Button>
           )}
           {item.status === "archived" && (
             <ConfirmInline

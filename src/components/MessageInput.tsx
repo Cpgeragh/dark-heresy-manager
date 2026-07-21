@@ -1,6 +1,7 @@
 // src/components/MessageInput.tsx
 
 import { useState } from "react";
+import { Button } from "../ui/Button";
 
 export function MessageInput({
   onSend,
@@ -41,13 +42,12 @@ export function MessageInput({
         }}
         disabled={disabled || sending}
       />
-      <button
+      <Button
         onClick={handleSend}
         disabled={disabled || sending || !text.trim()}
-        className="px-3 lg:px-4 py-2 lg:py-2.5 border border-red-500 text-red-500 font-semibold rounded text-sm lg:text-base hover:bg-red-500/10 disabled:opacity-50 transition"
       >
         {sending ? "…" : "Send"}
-      </button>
+      </Button>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 // src/ui/CustomItemActionButtons.tsx
 
 import type { CampaignCustomItem } from "../types/CustomItems";
-import { uiActionButtonCompact } from "./buttonStyles";
+import { Button } from "./Button";
 
 interface Props {
   libraryItem: CampaignCustomItem;
@@ -30,39 +30,36 @@ export function CustomItemActionButtons({
   return (
     <div className={className}>
       {canEditDefinition && libraryItem.status !== "archived" && (
-        <button type="button" onClick={onEditDefinition} className={uiActionButtonCompact}>
+        <Button size="xs" onClick={onEditDefinition}>
           Edit Definition
-        </button>
+        </Button>
       )}
       {isDM && !libraryItem.publishedVersionId && libraryItem.status === "draft" && (
-        <button
-          type="button"
+        <Button
+          size="xs"
           onClick={onPublish}
           disabled={busyAction === "publish"}
-          className={`${uiActionButtonCompact} disabled:opacity-50`}
         >
           {busyAction === "publish" ? "Publishing..." : "Publish"}
-        </button>
+        </Button>
       )}
       {isDM && libraryItem.status !== "archived" && (
-        <button
-          type="button"
+        <Button
+          size="xs"
           onClick={onArchive}
           disabled={busyAction === "archive"}
-          className={`${uiActionButtonCompact} disabled:opacity-50`}
         >
           {busyAction === "archive" ? "Archiving..." : "Archive"}
-        </button>
+        </Button>
       )}
       {isDM && !!libraryItem.publishedVersionId && !!libraryItem.draftVersionId && (
-        <button
-          type="button"
+        <Button
+          size="xs"
           onClick={onUpdateAllCopies}
           disabled={busyAction === "updateAll"}
-          className={`${uiActionButtonCompact} disabled:opacity-50`}
         >
           {busyAction === "updateAll" ? "Updating..." : "Update All Copies"}
-        </button>
+        </Button>
       )}
     </div>
   );

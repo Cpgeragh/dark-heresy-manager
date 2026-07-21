@@ -7,6 +7,7 @@ import type { CampaignCustomItem, CustomDrugData } from "../../../types/CustomIt
 import { DrugPicker } from "./DrugPicker";
 import { DrugRow } from "./DrugRow";
 import { CustomDrugForm } from "./CustomDrugForm";
+import { Button } from "../../../ui/Button";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { uiTextBody, uiTextPlaceholder } from "../../../ui/editableStyles";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
@@ -344,12 +345,12 @@ export function DrugsTab({
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <SectionHeader>Carried</SectionHeader>
-          <button
-            onClick={() => setShowPicker(true)}
-            className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
-          >
-            {editable ? "+ Add" : "View"}
-          </button>
+        <Button
+          size="sm"
+          onClick={() => setShowPicker(true)}
+        >
+          {editable ? "+ Add" : "View"}
+        </Button>
         </div>
 
         {drugs.length === 0 && <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No drugs carried.</p>}

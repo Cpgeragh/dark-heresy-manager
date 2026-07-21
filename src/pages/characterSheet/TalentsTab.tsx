@@ -6,6 +6,7 @@ import type {
   TalentEntry,
 } from "../../types/Character";
 import { TALENT_LIST } from "../../data/talentData";
+import { Button } from "../../ui/Button";
 import { uiSection, uiTextPlaceholder, uiFormLabel } from "../../ui/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { EntryCard, EntrySection, TalentPickerModal } from "./talentComponents";
@@ -59,12 +60,12 @@ function FaithTalentSection({
     <div>
       <div className="mb-3 flex items-center justify-between">
         <SectionHeader>Faith Talents</SectionHeader>
-        <button
-          onClick={() => setShowPicker(true)}
-          className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
-        >
-          {editable ? "+ Add Faith Talent" : "View Faith Talents"}
-        </button>
+      <Button
+        size="sm"
+        onClick={() => setShowPicker(true)}
+      >
+        {editable ? "+ Add Faith Talent" : "View Faith Talents"}
+      </Button>
       </div>
 
       <section className={uiSection + " space-y-4"}>

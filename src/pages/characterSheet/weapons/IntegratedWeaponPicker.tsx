@@ -5,7 +5,7 @@ import { Button } from "../../../ui/Button";
 import { Chip } from "../../../ui/Chip";
 import { InfoModal } from "../../../components/InfoModal";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
-import { PickerBody, PickerModal, PickerRow } from "../../../ui/PickerModal";
+import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../../ui/PickerModal";
 import { ArrowLeft } from "../../../ui/PickerArrows";
 import { uiTextBody, uiTextLabel, uiTextMuted, uiItemName, uiInfoModalWrapper } from "../../../ui/editableStyles";
 import { colourViolet, colourSky, colourOrange } from "../../../ui/colourTokens";
@@ -119,20 +119,14 @@ export function IntegratedWeaponPicker({
         editable && (onCustomRanged || onCustomMelee) ? (
           <div className="grid grid-cols-2 gap-2">
             {onCustomRanged && (
-              <button
-                onClick={onCustomRanged}
-                className="text-sm lg:text-base text-red-500 hover:text-red-400 text-center py-1 lg:py-1.5"
-              >
+              <PickerCustomAction onClick={onCustomRanged}>
                 + Custom ranged
-              </button>
+              </PickerCustomAction>
             )}
             {onCustomMelee && (
-              <button
-                onClick={onCustomMelee}
-                className="text-sm lg:text-base text-red-500 hover:text-red-400 text-center py-1 lg:py-1.5"
-              >
+              <PickerCustomAction onClick={onCustomMelee}>
                 + Custom melee
-              </button>
+              </PickerCustomAction>
             )}
           </div>
         ) : undefined

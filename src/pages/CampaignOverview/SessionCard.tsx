@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import type { Timestamp } from "firebase/firestore";
 import type { SessionDocument } from "../../types/Firestore";
 import { useToast } from "../../components/Toast";
+import { Button } from "../../ui/Button";
 import { ConfirmInline } from "../../ui/ConfirmInline";
 import { uiFormLabelSecondary, uiSection } from "../../ui/editableStyles";
 
@@ -192,20 +193,19 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
         </p>
 
         <div className="flex gap-2">
-          <button
+          <Button
             onClick={handleSave}
             disabled={saving}
-            className="px-3 lg:px-4 py-1.5 lg:py-2 border border-red-500 text-red-500 font-semibold rounded text-sm lg:text-base hover:bg-red-500/10 disabled:opacity-50"
           >
             {saving ? "Saving…" : "Save"}
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="secondary"
             onClick={handleCancelEdit}
             disabled={saving}
-            className="px-3 lg:px-4 py-1.5 lg:py-2 bg-slate-700 text-slate-300 rounded text-sm lg:text-base hover:bg-slate-600"
           >
             Cancel
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -230,21 +230,22 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
                 XP Applied ✓
               </span>
             ) : (
-              <button
-                onClick={handleApplyXp}
-                disabled={applyingXp}
-                className="text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 border border-red-500 text-red-500 font-semibold rounded hover:bg-red-500/10 disabled:opacity-50 transition"
-              >
-                {applyingXp ? "Applying…" : "Apply XP"}
-              </button>
+            <Button
+              size="sm"
+              onClick={handleApplyXp}
+              disabled={applyingXp}
+            >
+              {applyingXp ? "Applying…" : "Apply XP"}
+            </Button>
             ))}
           {isDM && onSave && (
-            <button
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => setMode("edit")}
-              className="text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-700 text-slate-300 rounded hover:bg-slate-600"
             >
               Edit
-            </button>
+            </Button>
           )}
           {isDM && onDelete && (
             <ConfirmInline

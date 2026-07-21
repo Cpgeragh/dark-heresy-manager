@@ -17,8 +17,9 @@ import {
   uiInfoModalWrapper,
   uiCardTitle,
 } from "../../../ui/editableStyles";
-import { uiActionButtonCompact, uiExpandButton, uiIconRemoveButton } from "../../../ui/buttonStyles";
+import { uiExpandButton, uiIconRemoveButton } from "../../../ui/buttonStyles";
 import { colourViolet } from "../../../ui/colourTokens";
+import { Button } from "../../../ui/Button";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
@@ -287,12 +288,12 @@ export function MeleeCard({
                   Upgrades
                 </span>
                 {(editable ? visibleCompatible.length > 0 : upgradeRefs.length > 0 || visibleCompatible.length > 0) && (
-                  <button
+                  <Button
+                    size="xs"
                     onClick={() => setShowUpgradePicker(true)}
-                    className={uiActionButtonCompact}
                   >
                     {editable ? "+ Add" : "View"}
-                  </button>
+                  </Button>
                 )}
               </div>
               {upgradeRefs.length === 0 ? (

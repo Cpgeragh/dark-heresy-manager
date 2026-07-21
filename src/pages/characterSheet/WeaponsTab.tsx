@@ -15,6 +15,7 @@ import type {
   WeaponCraftsmanship,
 } from "../../types/Character";
 import type { CampaignCustomItem } from "../../types/CustomItems";
+import { Button } from "../../ui/Button";
 import { CYBERNETICS_REFERENCE } from "../../data/reference/cyberneticsReference";
 import { ARCHEOTECH_REFERENCE } from "../../data/reference/archeotechReference";
 import {
@@ -1441,12 +1442,12 @@ export function WeaponsTab({
           <div className="flex items-center justify-between">
             <SectionHeader>Ranged</SectionHeader>
             {!showCustomRanged && (
-              <button
-                onClick={() => setPicker("ranged")}
-                className="text-sm lg:text-base px-2 py-0.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
-              >
-                {editable ? "+ Add" : "View"}
-              </button>
+            <Button
+              size="xs"
+              onClick={() => setPicker("ranged")}
+            >
+              {editable ? "+ Add" : "View"}
+            </Button>
             )}
           </div>
 
@@ -1535,12 +1536,12 @@ export function WeaponsTab({
           <div className="flex items-center justify-between">
             <SectionHeader>Melee</SectionHeader>
             {!showCustomMelee && (
-              <button
-                onClick={() => setPicker("melee")}
-                className="text-sm lg:text-base px-2 py-0.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
-              >
-                {editable ? "+ Add" : "View"}
-              </button>
+            <Button
+              size="xs"
+              onClick={() => setPicker("melee")}
+            >
+              {editable ? "+ Add" : "View"}
+            </Button>
             )}
           </div>
 
@@ -1623,12 +1624,12 @@ export function WeaponsTab({
       <section className={visibleWeaponSectionClass("grenades")}>
         <div className="flex items-center justify-between">
           <SectionHeader>Explosives</SectionHeader>
-          <button
-            onClick={() => setPicker("grenades")}
-            className="text-sm lg:text-base px-2 py-0.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
-          >
-            {editable ? "+ Add" : "View"}
-          </button>
+            <Button
+              size="xs"
+              onClick={() => setPicker("grenades")}
+            >
+              {editable ? "+ Add" : "View"}
+            </Button>
         </div>
 
         {allGrenadeEntries.length === 0 && (
@@ -1684,12 +1685,12 @@ export function WeaponsTab({
       <section className={visibleWeaponSectionClass("shields")}>
         <div className="flex items-center justify-between">
           <SectionHeader>Shields</SectionHeader>
-          <button
-            onClick={() => setPicker("shields")}
-            className="text-sm lg:text-base px-2 py-0.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
-          >
-            {editable ? "+ Add" : "View"}
-          </button>
+        <Button
+          size="xs"
+          onClick={() => setPicker("shields")}
+        >
+          {editable ? "+ Add" : "View"}
+        </Button>
         </div>
 
         {(shields ?? []).length === 0 && archeotechShieldItems.length === 0 && (

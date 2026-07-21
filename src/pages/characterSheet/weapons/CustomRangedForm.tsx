@@ -9,7 +9,6 @@ import {
   uiSectionHeader,
   uiFormLabel,
 } from "../../../ui/editableStyles";
-import { uiPickerBackButton } from "../../../ui/buttonStyles";
 import { Button } from "../../../ui/Button";
 import { PickerBody, PickerModal } from "../../../ui/PickerModal";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
@@ -328,12 +327,12 @@ export function CustomRangedForm({
             <Button className="flex-1" onClick={addWeapon} disabled={!canAdd || saving}>
               {saving ? "Saving..." : submitLabel}
             </Button>
-            <button
+            <Button
+              variant="secondary"
               onClick={onCancel}
-              className={uiPickerBackButton}
             >
               Cancel
-            </button>
+            </Button>
           </div>
         </div>
       }

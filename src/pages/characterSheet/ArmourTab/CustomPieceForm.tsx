@@ -1,7 +1,6 @@
 import { useState } from "react";
 import type { ArmourCraftsmanship, ArmourLocationKey, ArmourQuality, WornArmourPiece } from "../../../types/Character";
 import { editableInputClass, editableTextareaClass, uiSection, uiSectionHeader, uiFormLabel, uiInfoModalWrapper } from "../../../ui/editableStyles";
-import { uiPickerBackButton } from "../../../ui/buttonStyles";
 import { Button } from "../../../ui/Button";
 import { PickerBody, PickerModal } from "../../../ui/PickerModal";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
@@ -153,12 +152,12 @@ export function CustomPieceForm({
             <Button className="flex-1" onClick={handleAdd} disabled={!canAdd || saving}>
               {saving ? "Saving..." : submitLabel}
             </Button>
-            <button
+            <Button
+              variant="secondary"
               onClick={onCancel}
-              className={uiPickerBackButton}
             >
               Cancel
-            </button>
+            </Button>
           </div>
         </div>
       }

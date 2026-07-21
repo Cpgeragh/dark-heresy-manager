@@ -2,10 +2,11 @@ import { useState } from "react";
 import { FormField } from "../../components/FormField";
 import { InfoModal } from "../../components/InfoModal";
 import type { InsanityTraumaEntry } from "../../types/Character";
+import { Button } from "../../ui/Button";
 import { Chip } from "../../ui/Chip";
 import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../ui/PickerModal";
 import { ArrowLeft } from "../../ui/PickerArrows";
-import { uiActionButton, uiPickerBackButton } from "../../ui/buttonStyles";
+import { uiPickerBackButton } from "../../ui/buttonStyles";
 import { colourAmberFaint } from "../../ui/colourTokens";
 import { editableInputClass, uiFormLabel, uiInfoModalWrapper, uiItemName, uiTextLabel } from "../../ui/editableStyles";
 import { MENTAL_TRAUMAS, type MentalTraumaEntry } from "./insanityReference";
@@ -104,7 +105,8 @@ export function InsanityTraumaPicker({
               <button type="button" onClick={() => setCustomMode(false)} className={uiPickerBackButton}>
                 Back
               </button>
-              <button
+              <Button
+                size="sm"
                 type="button"
                 onClick={() => {
                   if (!canAddCustom) return;
@@ -119,10 +121,10 @@ export function InsanityTraumaPicker({
                   setCustomMode(false);
                 }}
                 disabled={!canAddCustom}
-                className={`${uiActionButton} flex-1 disabled:cursor-not-allowed disabled:opacity-50`}
+                className="flex-1"
               >
                 Add Trauma
-              </button>
+              </Button>
             </div>
           </div>
         }

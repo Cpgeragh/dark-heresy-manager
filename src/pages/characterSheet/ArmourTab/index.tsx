@@ -19,6 +19,7 @@ import { ForceFieldRow } from "./ForceFieldRow";
 import { PieceRow } from "./PieceRow";
 import { ArcheotechArmourRow } from "./ArcheotechArmourRow";
 import { ArcheotechForceFieldRow } from "./ArcheotechForceFieldRow";
+import { Button } from "../../../ui/Button";
 import { uiSection, uiTextLabel, uiTextPlaceholder, uiInfoModalWrapper } from "../../../ui/editableStyles";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { InfoModal } from "../../../components/InfoModal";
@@ -644,15 +645,15 @@ export function ArmourTab({
       <section className="space-y-2">
         <div className="flex items-center justify-between">
           <SectionHeader>Worn</SectionHeader>
-          <button
+          <Button
+            size="sm"
             onClick={() => {
               setPickerMode("worn");
               setShowPicker(true);
             }}
-            className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
           >
             {editable ? "+ Equip" : "View"}
-          </button>
+          </Button>
         </div>
         {worn.length === 0 && archeotechArmourWorn.length === 0 && (
           <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No armour worn.</p>
@@ -678,15 +679,15 @@ export function ArmourTab({
       <section className="space-y-2">
         <div className="flex items-center justify-between">
           <SectionHeader>Stowed</SectionHeader>
-          <button
+          <Button
+            size="sm"
             onClick={() => {
               setPickerMode("stowed");
               setShowPicker(true);
             }}
-            className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
           >
             {editable ? "+ Stow" : "View"}
-          </button>
+          </Button>
         </div>
         {stowed.length === 0 && archeotechArmourStowed.length === 0 && (
           <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No armour stowed.</p>
@@ -712,12 +713,12 @@ export function ArmourTab({
       <section className="space-y-2">
         <div className="flex items-center justify-between">
           <SectionHeader>Force Fields</SectionHeader>
-          <button
+          <Button
+            size="sm"
             onClick={() => setShowFieldPicker(true)}
-            className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
           >
             {editable ? "+ Add" : "View"}
-          </button>
+          </Button>
         </div>
         {forceFields.length === 0 && archeotechForceFieldItems.length === 0 && (
           <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No force field equipped.</p>

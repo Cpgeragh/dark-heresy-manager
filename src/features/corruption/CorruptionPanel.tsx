@@ -6,8 +6,9 @@ import { InfoModal } from "../../components/InfoModal";
 import { Stepper } from "../../components/Stepper";
 import { useSwipeableTabs } from "../../hooks/useSwipeableTabs";
 import type { CorruptionBlock, CorruptionMalignancyEntry, CorruptionMutationEntry } from "../../types/Character";
+import { Button } from "../../ui/Button";
 import { Chip } from "../../ui/Chip";
-import { uiActionButtonCompact, uiIconRemoveButton } from "../../ui/buttonStyles";
+import { uiIconRemoveButton } from "../../ui/buttonStyles";
 import {
   colourActiveEmerald,
   colourActiveOrange,
@@ -222,9 +223,9 @@ function GroupHeader({ label, editable, onAdd }: { label: string; editable: bool
     <div className="flex items-center justify-between gap-2">
       <SectionHeader>{label}</SectionHeader>
       {editable && (
-        <button type="button" onClick={onAdd} className={uiActionButtonCompact}>
+        <Button size="xs" onClick={onAdd}>
           + Add
-        </button>
+        </Button>
       )}
     </div>
   );
@@ -286,9 +287,9 @@ export function MalignancyRow({
         {editable && (
           <div className="flex shrink-0 gap-1.5">
             {rollEntries.length > 0 && (
-              <button type="button" onClick={() => setIsEditingRolls(true)} className={uiActionButtonCompact}>
+              <Button size="xs" onClick={() => setIsEditingRolls(true)}>
                 Edit Rolls
-              </button>
+              </Button>
             )}
             <button type="button" onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
               <TrashIcon className="w-4 h-4" />

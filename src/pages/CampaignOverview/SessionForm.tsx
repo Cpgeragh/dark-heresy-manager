@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { useToast } from "../../components/Toast";
 import { createSession } from "../../services/sessionService";
+import { Button } from "../../ui/Button";
 import { uiFormLabelSecondary, uiSection } from "../../ui/editableStyles";
 
 interface Character {
@@ -122,20 +123,19 @@ export function SessionForm({ campaignId, characters, onClose }: Props) {
       </div>
 
       <div className="flex gap-2">
-        <button
+        <Button
           onClick={handleSave}
           disabled={saving}
-          className="px-4 lg:px-5 py-2 lg:py-2.5 border border-red-500 text-red-500 font-semibold rounded text-sm lg:text-base hover:bg-red-500/10 disabled:opacity-50"
         >
           {saving ? "Saving…" : "Save Session"}
-        </button>
-        <button
+        </Button>
+        <Button
+          variant="secondary"
           onClick={onClose}
           disabled={saving}
-          className="px-4 lg:px-5 py-2 lg:py-2.5 bg-slate-700 text-slate-300 rounded text-sm lg:text-base hover:bg-slate-600"
         >
           Cancel
-        </button>
+        </Button>
       </div>
     </div>
   );

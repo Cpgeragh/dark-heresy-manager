@@ -4,6 +4,7 @@
 
 import { useMemo, useState } from "react";
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
+import { Button } from "../../../ui/Button";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { InfoModal } from "../../../components/InfoModal";
@@ -164,14 +165,13 @@ export function WeaponQualitySelector({
             className="w-20 rounded border border-slate-500 bg-slate-900 px-2 py-1 text-sm lg:text-base text-slate-200 focus:outline-none focus:border-red-500"
           />
         )}
-        <button
-          type="button"
+        <Button
+          variant="ghost"
           onClick={onConfirmPending}
           disabled={!canConfirm}
-          className="px-3 lg:px-4 py-1 rounded border border-slate-500 bg-slate-800 text-sm lg:text-base text-slate-100 transition hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Add
-        </button>
+        </Button>
       </div>
       {selected.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
@@ -448,12 +448,13 @@ export function UpgradePicker({
       emptyMessage="No compatible upgrades available."
       hideSearch
       footer={
-        <button
+        <Button
+          variant="secondary"
+          fullWidth
           onClick={onClose}
-          className="w-full py-1.5 lg:py-2 rounded bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-100"
         >
           Cancel
-        </button>
+        </Button>
       }
     >
       {compatibleUpgrades.map((upgrade) => (

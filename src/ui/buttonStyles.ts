@@ -1,14 +1,5 @@
 // src/ui/buttonStyles.ts
 
-const uiActionButtonBase =
-  "inline-flex items-center justify-center gap-1 rounded border border-red-500 text-red-500 font-semibold leading-none whitespace-nowrap hover:bg-red-500/10 transition";
-
-export const uiActionButton =
-  `${uiActionButtonBase} text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5`;
-
-export const uiActionButtonCompact =
-  `${uiActionButtonBase} text-xs lg:text-sm px-2 py-0.5`;
-
 export const uiIconButton =
   "w-7 h-7 lg:w-8 lg:h-8 flex items-center justify-center rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 text-slate-300 text-lg lg:text-xl leading-none transition";
 

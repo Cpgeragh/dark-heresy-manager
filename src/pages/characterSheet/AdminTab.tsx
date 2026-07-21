@@ -3,6 +3,7 @@
 import { useCallback } from "react";
 import type { Character } from "../../types/Character";
 import type { ClaimLog } from "../../types/ClaimLog";
+import { Button } from "../../ui/Button";
 import { uiSection, readOnlyBadgeClass } from "../../ui/editableStyles";
 import { useXpProposals } from "../../hooks/useXpProposals";
 import { approveXpProposal, rejectXpProposal } from "../../services/xpService";
@@ -116,29 +117,21 @@ export function AdminTab({
 
         {/* ACTIONS */}
         <div className="flex flex-wrap gap-2 mt-4">
-          <button
+          <Button
+            variant="danger"
             onClick={onDMForceRelease}
             disabled={isDmForceReleasing}
-            className={`px-3 lg:px-4 py-1 lg:py-1.5 text-sm lg:text-base rounded border transition ${
-              isDmForceReleasing
-                ? "bg-red-900 border-red-800 text-red-300 cursor-wait"
-                : "bg-red-700 border-red-500 text-white hover:bg-red-600"
-            }`}
           >
             {isDmForceReleasing ? "Releasing…" : "Force Release Ownership"}
-          </button>
+          </Button>
 
-          <button
+          <Button
+            variant="warning"
             onClick={onDMToggleEdit}
             disabled={isDmTogglingEdit}
-            className={`px-3 lg:px-4 py-1 lg:py-1.5 text-sm lg:text-base rounded border transition ${
-              isDmTogglingEdit
-                ? "bg-yellow-800 border-yellow-700 text-yellow-900 cursor-wait"
-                : "bg-yellow-600 border-yellow-500 text-black hover:bg-yellow-500"
-            }`}
           >
             {isDmTogglingEdit ? "Updating…" : "Toggle Player Edit Permission"}
-          </button>
+          </Button>
         </div>
       </section>
 
@@ -160,18 +153,20 @@ export function AdminTab({
                   <span className="text-slate-400 ml-2">— {p.xpCost} XP</span>
                 </div>
                 <div className="flex gap-2">
-                  <button
+                  <Button
+                    variant="success"
+                    size="sm"
                     onClick={() => handleApprove(p.id, p.xpCost)}
-                    className="px-2 lg:px-3 py-1 lg:py-1.5 text-xs lg:text-sm rounded bg-green-700 text-white hover:bg-green-600"
                   >
                     Approve
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="sm"
                     onClick={() => handleReject(p.id)}
-                    className="px-2 lg:px-3 py-1 lg:py-1.5 text-xs lg:text-sm rounded bg-red-800 text-red-200 hover:bg-red-700"
                   >
                     Reject
-                  </button>
+                  </Button>
                 </div>
               </li>
             ))}

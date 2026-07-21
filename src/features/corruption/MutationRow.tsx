@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { InfoModal } from "../../components/InfoModal";
 import type { CorruptionMutationEntry } from "../../types/Character";
+import { Button } from "../../ui/Button";
 import { Chip } from "../../ui/Chip";
-import { uiActionButtonCompact, uiIconRemoveButton } from "../../ui/buttonStyles";
+import { uiIconRemoveButton } from "../../ui/buttonStyles";
 import { colourAmberFaint, colourRose, colourSky } from "../../ui/colourTokens";
 import { uiInfoModalWrapper, uiItemName, uiSection, uiTextLabel } from "../../ui/editableStyles";
 import { getRollDisplayEntries } from "./characteristicModifiers";
@@ -67,9 +68,9 @@ export function MutationRow({
         {editable && (
           <div className="flex shrink-0 gap-1.5">
             {rollEntries.length > 0 && (
-              <button type="button" onClick={() => setIsEditingRolls(true)} className={uiActionButtonCompact}>
+              <Button size="xs" onClick={() => setIsEditingRolls(true)}>
                 Edit Rolls
-              </button>
+              </Button>
             )}
             <button type="button" onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
               <TrashIcon className="w-4 h-4" />

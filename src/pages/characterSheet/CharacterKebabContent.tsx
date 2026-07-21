@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { COPY_FEEDBACK_DURATION } from "../../constants/ui";
+import { Button } from "../../ui/Button";
 import { uiSubheading } from "../../ui/editableStyles";
 
 interface Props {
@@ -46,12 +47,14 @@ export function CharacterKebabContent({
             <code className="flex-1 px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-800 border border-slate-600 rounded text-amber-300 text-sm lg:text-base break-all">
               {recoveryCode}
             </code>
-            <button
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={copyCode}
-              className="px-2 lg:px-3 py-1 lg:py-1.5 text-xs lg:text-sm rounded bg-slate-700 border border-slate-500 text-slate-100 hover:bg-slate-600 shrink-0"
+              className="shrink-0"
             >
               {copied ? "Copied" : "Copy"}
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -62,12 +65,13 @@ export function CharacterKebabContent({
           <p className={uiSubheading}>
             Character Data
           </p>
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={onExport}
-            className="px-2 lg:px-3 py-1 lg:py-1.5 text-xs lg:text-sm rounded bg-slate-700 border border-slate-500 text-slate-100 hover:bg-slate-600"
           >
             Export JSON
-          </button>
+          </Button>
         </div>
       )}
 
@@ -78,17 +82,13 @@ export function CharacterKebabContent({
             Release Character
           </p>
           <p className="text-xs lg:text-sm text-slate-400">Unlinks this character from your account.</p>
-          <button
+          <Button
+            variant="danger"
             onClick={onPlayerRelease}
             disabled={isReleasing}
-            className={`px-3 lg:px-4 py-2 lg:py-2.5 rounded border text-sm lg:text-base transition ${
-              isReleasing
-                ? "bg-red-800 border-red-900 text-red-300 cursor-wait"
-                : "bg-red-600 border-red-700 text-white hover:bg-red-500"
-            }`}
           >
             {isReleasing ? "Releasing…" : "Release Character"}
-          </button>
+          </Button>
         </div>
       )}
     </div>

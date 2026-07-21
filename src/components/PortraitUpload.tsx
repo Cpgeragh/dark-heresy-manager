@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import Cropper from "react-easy-crop";
 import type { Point, Area } from "react-easy-crop";
 import { uploadPortrait } from "../services/portraitService";
+import { Button } from "../ui/Button";
 import { useToast } from "./Toast";
 import { uiIconButton } from "../ui/buttonStyles";
 
@@ -215,20 +216,21 @@ export function PortraitUpload({
               </div>
 
               <div className="flex gap-2">
-                <button
-                  onClick={handleSave}
-                  disabled={uploading}
-                  className="flex-1 px-4 py-2 border border-red-500 text-red-500 font-semibold rounded text-sm lg:text-base hover:bg-red-500/10 transition disabled:opacity-50"
-                >
-                  {uploading ? "Uploading…" : "Save"}
-                </button>
-                <button
+              <Button
+                className="flex-1"
+                onClick={handleSave}
+                disabled={uploading}
+              >
+                {uploading ? "Uploading…" : "Save"}
+              </Button>
+                <Button
+                  variant="secondary"
+                  className="flex-1"
                   onClick={handleCancel}
                   disabled={uploading}
-                  className="flex-1 px-4 py-2 bg-slate-700 text-slate-300 rounded text-sm lg:text-base hover:bg-slate-600 transition"
                 >
                   Cancel
-                </button>
+                </Button>
               </div>
             </div>
           </div>

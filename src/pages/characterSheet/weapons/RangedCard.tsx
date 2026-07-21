@@ -30,7 +30,7 @@ import {
   uiItemName,
   uiCardTitle,
 } from "../../../ui/editableStyles";
-import { uiActionButtonCompact, uiExpandButton, uiIconRemoveButton } from "../../../ui/buttonStyles";
+import { uiExpandButton, uiIconRemoveButton } from "../../../ui/buttonStyles";
 import { colourArcheotech, colourViolet } from "../../../ui/colourTokens";
 import { Button } from "../../../ui/Button";
 import { Chip } from "../../../ui/Chip";
@@ -123,12 +123,13 @@ function AmmoEntryRow({
           )}
         </div>
         {editable && (
-          <button
+          <Button
+            size="xs"
             onClick={onRemove}
-            className={`${uiActionButtonCompact} shrink-0`}
+            className="shrink-0"
           >
             Remove
-          </button>
+          </Button>
         )}
       </div>
 
@@ -693,12 +694,12 @@ export function RangedCard({
             <div className="border-t border-slate-800 pt-2 space-y-2">
               <div className="flex items-center justify-between">
                 <span className={uiTextLabel}>Ammo</span>
-                <button
+                <Button
+                  size="xs"
                   onClick={() => setShowAmmoPicker(true)}
-                  className={uiActionButtonCompact}
                 >
                   {editable ? "+ Add" : "View"}
-                </button>
+                </Button>
               </div>
 
               {ammoEntries.length === 0 ? (
@@ -731,12 +732,12 @@ export function RangedCard({
               <div className="flex items-center justify-between">
                 <span className={uiTextLabel}>Upgrades</span>
                 {(editable ? visibleCompatible.length > 0 : upgradeRefs.length > 0 || visibleCompatible.length > 0) && (
-                  <button
+                  <Button
+                    size="xs"
                     onClick={() => setShowUpgradePicker(true)}
-                    className={uiActionButtonCompact}
                   >
                     {editable ? "+ Add" : "View"}
-                  </button>
+                  </Button>
                 )}
               </div>
               {upgradeRefs.length === 0 ? (

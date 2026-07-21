@@ -11,8 +11,9 @@ import type {
   InsanityDisorderSeverity,
   InsanityTraumaEntry,
 } from "../../types/Character";
+import { Button } from "../../ui/Button";
 import { Chip } from "../../ui/Chip";
-import { uiActionButtonCompact, uiIconRemoveButton } from "../../ui/buttonStyles";
+import { uiIconRemoveButton } from "../../ui/buttonStyles";
 import { colourActiveRose, colourActiveSky, colourAmberFaint } from "../../ui/colourTokens";
 import {
   uiFormLabel,
@@ -335,9 +336,9 @@ function TraumaHeader({
         </span>
       </span>
       {editable && (
-        <button type="button" onClick={onAdd} className={uiActionButtonCompact}>
+        <Button size="xs" onClick={onAdd}>
           + Add
-        </button>
+        </Button>
       )}
     </div>
   );
@@ -375,9 +376,9 @@ function DisordersHeader({
     <div className="flex items-center justify-between gap-2">
       <SectionHeader>Disorders</SectionHeader>
       {editable && (
-        <button type="button" onClick={onAdd} className={uiActionButtonCompact}>
+        <Button size="xs" onClick={onAdd}>
           + Add
-        </button>
+        </Button>
       )}
     </div>
   );

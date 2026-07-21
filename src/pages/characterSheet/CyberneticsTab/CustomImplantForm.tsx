@@ -13,7 +13,6 @@ import {
   uiSectionHeader,
   uiFormLabel,
 } from "../../../ui/editableStyles";
-import { uiPickerBackButton } from "../../../ui/buttonStyles";
 import { Button } from "../../../ui/Button";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import { PickerBody, PickerModal } from "../../../ui/PickerModal";
@@ -159,12 +158,12 @@ export function CustomImplantForm({
             <Button className="flex-1" onClick={addImplant} disabled={!canAdd || saving}>
               {saving ? "Saving..." : submitLabel}
             </Button>
-            <button
+            <Button
+              variant="secondary"
               onClick={onCancel}
-              className={uiPickerBackButton}
             >
               Cancel
-            </button>
+            </Button>
           </div>
         </div>
       }

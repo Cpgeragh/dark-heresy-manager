@@ -361,12 +361,12 @@ export function EntrySection({
     <div>
       <div className="mb-3 flex items-center justify-between">
         <SectionHeader>{title}</SectionHeader>
-        <button
-          onClick={() => setShowPicker(true)}
-          className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
-        >
-          {editable ? `+ Add ${singular}` : `View ${singular}s`}
-        </button>
+      <Button
+        size="sm"
+        onClick={() => setShowPicker(true)}
+      >
+        {editable ? `+ Add ${singular}` : `View ${singular}s`}
+      </Button>
       </div>
 
       <section className={uiSection + " space-y-2"}>

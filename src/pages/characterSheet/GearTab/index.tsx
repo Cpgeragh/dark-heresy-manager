@@ -16,6 +16,7 @@ import { ItemRow } from "./ItemRow";
 import { GearPicker } from "./GearPicker";
 import { CustomItemForm } from "./CustomItemForm";
 import { CustomConsumableForm } from "./CustomConsumableForm";
+import { Button } from "../../../ui/Button";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { uiTextPlaceholder } from "../../../ui/editableStyles";
 import { colourActiveSky, colourActiveRose } from "../../../ui/colourTokens";
@@ -606,12 +607,12 @@ export function GearTab({
         <div className="flex items-center justify-between">
           <SectionHeader>Items</SectionHeader>
           {!showCustomForm && (
-            <button
-              onClick={() => setShowGearPicker(true)}
-              className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
-            >
-              {editable ? "+ Add" : "View"}
-            </button>
+          <Button
+            size="sm"
+            onClick={() => setShowGearPicker(true)}
+          >
+            {editable ? "+ Add" : "View"}
+          </Button>
           )}
         </div>
 
@@ -674,12 +675,12 @@ export function GearTab({
       <section className={visibleGearSectionClass("consumables")} role="tabpanel">
         <div className="flex items-center justify-between">
           <SectionHeader>Consumables</SectionHeader>
-          <button
-            onClick={() => setShowConsumablePicker(true)}
-            className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
-          >
-            {editable ? "+ Add" : "View"}
-          </button>
+        <Button
+          size="sm"
+          onClick={() => setShowConsumablePicker(true)}
+        >
+          {editable ? "+ Add" : "View"}
+        </Button>
         </div>
 
         {consumables.length === 0 && (

@@ -7,7 +7,7 @@ import { Chip } from "../../ui/Chip";
 import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../ui/PickerModal";
 import { OptionPickerScreen } from "../../ui/OptionPickerScreen";
 import { ArrowRight, ArrowLeft } from "../../ui/PickerArrows";
-import { uiActionButton, uiPickerBackButton } from "../../ui/buttonStyles";
+import { uiPickerBackButton } from "../../ui/buttonStyles";
 import { editableInputClass, uiFormLabel, uiInfoModalWrapper, uiItemName, uiTextBody, uiTextLabel } from "../../ui/editableStyles";
 import { DisorderInfoContent } from "./InsanityReferenceModals";
 import { INSANITY_DISORDER_REFERENCE, INSANITY_SEVERITIES, type InsanityDisorderRef } from "./insanityReference";
@@ -125,7 +125,8 @@ export function InsanityDisorderPicker({
               <button type="button" onClick={() => setCustomMode(false)} className={uiPickerBackButton}>
                 Back
               </button>
-              <button
+              <Button
+                size="sm"
                 type="button"
                 onClick={() => {
                   if (!canAddCustom) return;
@@ -144,10 +145,10 @@ export function InsanityDisorderPicker({
                   setNotes("");
                 }}
                 disabled={!canAddCustom}
-                className={`${uiActionButton} flex-1 disabled:cursor-not-allowed disabled:opacity-50`}
+                className="flex-1"
               >
                 Add Disorder
-              </button>
+              </Button>
             </div>
           </div>
         }

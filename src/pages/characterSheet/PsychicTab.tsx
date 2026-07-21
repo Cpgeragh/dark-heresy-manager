@@ -21,7 +21,6 @@ import { TALENT_DESCRIPTIONS } from "../../data/talentDescriptions";
 import { sourceColour } from "../../ui/sourceStyles";
 import { disciplineColours, psyRatingGlow } from "./psychicStyles";
 import { colourActiveSky, colourActiveRose } from "../../ui/colourTokens";
-import { uiPickerBackButton } from "../../ui/buttonStyles";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -473,13 +472,12 @@ function CustomPowerForm({
           <Button className="flex-1" onClick={handleAdd} disabled={!canAdd}>
             {initialPower ? "Save Power" : "Add Power"}
           </Button>
-          <button
-            type="button"
+          <Button
+            variant="secondary"
             onClick={onCancel}
-            className={uiPickerBackButton}
           >
             Cancel
-          </button>
+          </Button>
         </div>
       </PickerBody>
     </PickerModal>
@@ -771,13 +769,13 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
         >
           <div className="flex items-center justify-between">
             <SectionHeader>{activeTitle}</SectionHeader>
-            <button
+            <Button
+              size="sm"
               onClick={activeOpenPicker}
-              className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
               aria-label={editable ? `Add ${activeTitle.slice(0, -1)}` : `View ${activeTitle}`}
             >
               {editable ? activeAddLabel : "View"}
-            </button>
+            </Button>
           </div>
 
           {activePowers.length === 0 ? (
@@ -797,13 +795,13 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
         <section className={uiSection + " space-y-4"}>
         <div className="flex items-center justify-between">
           <SectionHeader>Minor Powers</SectionHeader>
-          <button
+          <Button
+            size="sm"
             onClick={openPickerForMinor}
-            className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
             aria-label={editable ? "Add Minor Power" : "View Minor Powers"}
           >
             {editable ? "+ Add Minor Power" : "View"}
-          </button>
+          </Button>
         </div>
 
         {psychic.minorPowers.length === 0 ? (
@@ -822,13 +820,13 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
       <section className={uiSection + " space-y-4"}>
         <div className="flex items-center justify-between">
           <SectionHeader>Major Powers</SectionHeader>
-          <button
+          <Button
+            size="sm"
             onClick={openPickerForMajor}
-            className="text-xs lg:text-sm px-3 lg:px-4 py-1 lg:py-1.5 rounded border border-red-500 text-red-500 font-semibold hover:bg-red-500/10 transition"
             aria-label={editable ? "Add Major Power" : "View Major Powers"}
           >
             {editable ? "+ Add Major Power" : "View"}
-          </button>
+          </Button>
         </div>
 
         {psychic.majorPowers.length === 0 ? (

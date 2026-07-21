@@ -9,7 +9,6 @@ import {
   uiSectionHeader,
   uiFormLabel,
 } from "../../../ui/editableStyles";
-import { uiPickerBackButton } from "../../../ui/buttonStyles";
 import { Button } from "../../../ui/Button";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
@@ -118,12 +117,12 @@ export function CustomDrugForm({
             <Button className="flex-1" onClick={addDrug} disabled={!canAdd || saving}>
               {saving ? "Saving..." : submitLabel}
             </Button>
-            <button
+            <Button
+              variant="secondary"
               onClick={onCancel}
-              className={uiPickerBackButton}
             >
               Cancel
-            </button>
+            </Button>
           </div>
         </div>
       }

@@ -3,6 +3,7 @@
 import { useCallback } from "react";
 import type { OwnershipState } from "./hooks/useRecoveryLookup";
 import type { CharacterDocument, CampaignDocument } from "../../types/Firestore";
+import { Button } from "../../ui/Button";
 import { uiTextError } from "../../ui/editableStyles";
 
 interface ClaimPreviewProps {
@@ -61,19 +62,21 @@ export function ClaimPreview({ character, campaign, ownership, onClaim }: ClaimP
       {renderStatus()}
 
       {ownership === "unclaimed" ? (
-        <button
+        <Button
+          variant="success"
+          fullWidth
           onClick={handleClaim}
-          className="w-full px-4 lg:px-5 py-2 lg:py-2.5 rounded font-semibold bg-green-600 text-white hover:bg-green-500 text-sm lg:text-base"
         >
           Claim This Character
-        </button>
+        </Button>
       ) : (
-        <button
+        <Button
+          variant="secondary"
+          fullWidth
           disabled
-          className="w-full px-4 lg:px-5 py-2 lg:py-2.5 rounded font-semibold bg-slate-700 text-slate-400 cursor-not-allowed text-sm lg:text-base"
         >
           Unavailable
-        </button>
+        </Button>
       )}
     </div>
   );
