@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ArmourCraftsmanship, ArmourLocationKey, ArmourQuality, WornArmourPiece } from "../../../types/Character";
 import { editableInputClass, editableTextareaClass, uiSection, uiSectionHeader, uiFormLabel, uiInfoModalWrapper } from "../../../ui/editableStyles";
 import { Button } from "../../../ui/Button";
@@ -40,6 +40,7 @@ export function CustomPieceForm({
   onAdd,
   onCancel,
 }: Props) {
+  const formScrollPositionRef = useRef(0);
   const [name, setName] = useState(initialPiece?.name ?? "");
   const [origin, setOrigin] = useState<"" | (typeof CUSTOM_ARMOUR_ORIGIN_OPTIONS)[number]>(
     isCustomArmourOrigin(initialPiece?.source) ? initialPiece.source : ""
@@ -136,6 +137,7 @@ export function CustomPieceForm({
   return (
     <PickerModal
       title={title}
+      scrollPositionRef={formScrollPositionRef}
       query=""
       onQueryChange={() => {}}
       onClose={onCancel}

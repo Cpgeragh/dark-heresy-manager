@@ -48,7 +48,7 @@ export function CyberneticWeaponCard({
 
   return (
     <div className="border border-pink-500/60 bg-pink-900/10 rounded-lg overflow-hidden">
-      <button
+      <button type="button"
         className="w-full flex items-stretch justify-between gap-2 p-3 lg:p-4"
         onClick={() => setExpanded((e) => !e)}
         aria-expanded={expanded}

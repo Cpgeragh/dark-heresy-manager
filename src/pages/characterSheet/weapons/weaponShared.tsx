@@ -13,6 +13,7 @@ import { PickerModal, PickerRow } from "../../../ui/PickerModal";
 import { ArrowRight } from "../../../ui/PickerArrows";
 import { formatWeightForDisplay } from "../../../ui/weightFormat";
 import { TrashIcon } from "../../../ui/TrashIcon";
+import { CloseIcon } from "../../../ui/CloseButton";
 import {
   uiTextBody,
   uiTextLabel,
@@ -184,7 +185,7 @@ export function WeaponQualitySelector({
                 aria-label={`Remove ${quality}`}
                 className={uiDismissButton}
               >
-                ×
+                <CloseIcon />
               </button>
             </Chip>
           ))}
@@ -293,6 +294,7 @@ export function EquipToggle({
     <span
       role="button"
       tabIndex={0}
+      aria-disabled={disabled && !equipped}
       onClick={(e) => {
         e.stopPropagation();
         if (!disabled || equipped) onChange();
@@ -391,7 +393,7 @@ export function UpgradeCard({
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs lg:text-sm font-medium text-slate-300">{upgrade.name}</span>
         {editable && (
-          <button
+          <button type="button"
             onClick={() => onRemove(upgrade.id)}
             className={uiIconRemoveButton}
             aria-label={`Remove ${upgrade.name}`}

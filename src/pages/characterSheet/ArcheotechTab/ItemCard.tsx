@@ -66,7 +66,7 @@ export function ItemCard({
         <div className="flex-1 min-w-0">
           {/* Title row */}
           {hasBody ? (
-            <button
+            <button type="button"
               className="w-full flex items-start justify-between gap-2 p-3 lg:p-4 text-left"
               onClick={() => setExpanded((v) => !v)}
               aria-expanded={expanded}
@@ -106,7 +106,7 @@ export function ItemCard({
           <div className={hasBody ? "px-3 pb-3 lg:px-4 lg:pb-4" : ""}>
             {editable && hasBody && (
               <div className="flex justify-end">
-                <button onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
+                <button type="button" onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
                   <TrashIcon className="w-4 h-4" />
                 </button>
               </div>
@@ -189,7 +189,7 @@ export function ItemCard({
         </div>
 
         {editable && !hasBody && (
-          <button onClick={onRemove} aria-label="Remove" className={`${uiIconRemoveButton} mt-0.5`}>
+          <button type="button" onClick={onRemove} aria-label="Remove" className={`${uiIconRemoveButton} mt-0.5`}>
             <TrashIcon className="w-4 h-4" />
           </button>
         )}

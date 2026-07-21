@@ -355,7 +355,7 @@ function DmCampaignList({
         {/* Archived */}
         {archivedCampaigns.length > 0 && (
           <div className="mt-4">
-            <button
+            <button type="button"
               onClick={() => setShowArchived((v) => !v)}
               aria-expanded={showArchived}
               className="inline-flex items-center gap-1 text-sm lg:text-base text-slate-500 hover:text-slate-300 transition-colors"

@@ -109,7 +109,7 @@ function PowerPicker({
       onClose={onClose}
       isEmpty={filtered.length === 0}
       filterRow={allFilters.map((d) => (
-        <button
+        <button type="button"
           key={d}
           onClick={() => setDiscipline(d)}
           className={[
@@ -698,7 +698,7 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
             {PSYCHIC_DISCIPLINES.filter((d) => d !== "Minor").map((d) => {
               const active = (psychic.disciplines ?? []).includes(d);
               return (
-                <button
+                <button type="button"
                   key={d}
                   disabled={!editable}
                   onClick={() => handleToggleDiscipline(d)}

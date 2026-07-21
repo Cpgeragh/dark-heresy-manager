@@ -104,7 +104,7 @@ export function ArcheotechWeaponCard({
   return (
     <div className={containerClass}>
       {/* Header — always visible */}
-      <button
+      <button type="button"
         className="w-full flex items-stretch justify-between gap-2 p-3 lg:p-4"
         onClick={() => setExpanded((e) => !e)}
         aria-expanded={expanded}
@@ -147,7 +147,7 @@ export function ArcheotechWeaponCard({
         <div className="px-3 pb-3 lg:px-4 lg:pb-4 space-y-3">
           {editable && onRemove && (
             <div className="flex justify-end">
-              <button onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
+              <button type="button" onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
                 <TrashIcon className="w-4 h-4" />
               </button>
             </div>

@@ -88,7 +88,7 @@ export function ItemRow({
         </div>
 
         {editable && (
-          <button onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
+          <button type="button" onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
             <TrashIcon className="w-4 h-4" />
           </button>
         )}

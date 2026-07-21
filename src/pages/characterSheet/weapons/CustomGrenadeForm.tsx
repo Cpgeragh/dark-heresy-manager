@@ -1,6 +1,6 @@
 // src/pages/characterSheet/weapons/CustomGrenadeForm.tsx
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { GrenadeItem } from "../../../types/Character";
 import {
   editableInputClass,
@@ -80,6 +80,7 @@ export function CustomGrenadeForm({
   onAdd: (item: GrenadeItem) => void;
   onCancel: () => void;
 }) {
+  const formScrollPositionRef = useRef(0);
   const initialDamage = parseInitialGrenadeDamage(initialGrenade?.damage);
   const [name, setName] = useState(initialGrenade?.name ?? "");
   const [type, setType] = useState<"" | (typeof CUSTOM_GRENADE_TYPE_OPTIONS)[number]>(
@@ -207,6 +208,7 @@ export function CustomGrenadeForm({
   return (
     <PickerModal
       title={title}
+      scrollPositionRef={formScrollPositionRef}
       query=""
       onQueryChange={() => {}}
       onClose={onCancel}

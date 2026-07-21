@@ -72,7 +72,7 @@ export function Stepper({ value, min = 0, max, editable, onChange, dangerClassNa
         editable ? "border-slate-600 bg-slate-800" : "border-slate-700 bg-slate-800/50"
       }`}
     >
-      <button
+      <button type="button"
         aria-disabled={!editable}
         onClick={() => adjust(-1)}
         aria-label="Decrease"
@@ -114,7 +114,7 @@ export function Stepper({ value, min = 0, max, editable, onChange, dangerClassNa
 
       <div className={dividerClass} />
 
-      <button
+      <button type="button"
         aria-disabled={!editable}
         onClick={() => adjust(1)}
         aria-label="Increase"

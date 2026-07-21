@@ -318,7 +318,7 @@ export function EntryCard({ entry, editable, onRemove }: EntryCardProps) {
         </div>
       </div>
       {editable && (
-        <button
+        <button type="button"
           onClick={() => onRemove(entry.uid)}
           aria-label={`Remove ${entry.name}`}
           className={`${uiIconRemoveButton} mt-0.5`}

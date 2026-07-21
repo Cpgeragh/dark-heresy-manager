@@ -91,7 +91,7 @@ export function MeleePicker({
             <p className={`text-xs lg:text-sm ${uiTextMuted} mb-2`}>Select weapon craftsmanship:</p>
             <div className="flex gap-2">
               {CRAFTSMANSHIP_OPTIONS.map((q) => (
-                <button
+                <button type="button"
                   key={q}
                   onClick={() => setCraftsmanship(q)}
                   className={[

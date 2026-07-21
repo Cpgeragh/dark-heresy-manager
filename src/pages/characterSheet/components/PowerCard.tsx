@@ -86,7 +86,7 @@ export function PowerCard({ power, editable, onRemove, onEdit }: PowerCardProps)
 
       <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
         {editable && isCustomPower && onEdit && (
-          <button
+          <button type="button"
             onClick={() => onEdit(power)}
             aria-label={`Edit ${power.name || "power"}`}
             className="text-slate-500 hover:text-amber-300 transition text-xs lg:text-sm"
@@ -95,7 +95,7 @@ export function PowerCard({ power, editable, onRemove, onEdit }: PowerCardProps)
           </button>
         )}
         {editable && (
-          <button
+          <button type="button"
             onClick={() => onRemove(power.id)}
             aria-label={`Remove ${power.name || "power"}`}
             className={uiIconRemoveButton}

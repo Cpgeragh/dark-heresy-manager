@@ -155,7 +155,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
 
               {error && <p className={`${uiTextError} text-center`}>{error}</p>}
 
-              <button
+              <button type="button"
                 onClick={() => { setError(null); goToStep("reclaim"); }}
                 className="w-full text-sm lg:text-base text-slate-300 hover:text-slate-100 transition flex items-center justify-center gap-2"
               >
@@ -170,7 +170,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
         {step === "reclaim" && (
           <div className="space-y-6 text-slate-100">
             <div className="relative flex items-center justify-center">
-              <button
+              <button type="button"
                 onClick={() => { setError(null); goToStep("welcome"); }}
                 className="absolute left-0 text-sm lg:text-base text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5"
               >
@@ -219,7 +219,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
         {step === "show-code" && code && (
           <div className="space-y-6 text-slate-100">
             <div className="relative flex items-center justify-center">
-              <button
+              <button type="button"
                 onClick={() => goToStep("welcome")}
                 className="absolute left-0 text-sm lg:text-base text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5"
               >

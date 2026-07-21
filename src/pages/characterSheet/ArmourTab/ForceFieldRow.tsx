@@ -138,7 +138,7 @@ export function ForceFieldRow({
       </div>
 
       {editable && (
-        <button
+        <button type="button"
           onClick={() => onToggle(piece.id)}
           className="text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 transition whitespace-nowrap"
         >
@@ -147,7 +147,7 @@ export function ForceFieldRow({
       )}
 
       {editable && (
-        <button onClick={() => onRemove(piece.id)} aria-label="Remove" className={uiIconRemoveButton}>
+        <button type="button" onClick={() => onRemove(piece.id)} aria-label="Remove" className={uiIconRemoveButton}>
           <TrashIcon className="w-4 h-4" />
         </button>
       )}

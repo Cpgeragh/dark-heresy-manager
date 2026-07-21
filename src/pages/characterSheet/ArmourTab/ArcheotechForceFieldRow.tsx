@@ -66,7 +66,7 @@ export function ArcheotechForceFieldRow({ item, editable, onToggleEquip, onRemov
       </div>
 
       {editable && onToggleEquip && (
-        <button
+        <button type="button"
           onClick={onToggleEquip}
           className="text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 transition whitespace-nowrap"
         >
@@ -75,7 +75,7 @@ export function ArcheotechForceFieldRow({ item, editable, onToggleEquip, onRemov
       )}
 
       {editable && (
-        <button onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
+        <button type="button" onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
           <TrashIcon className="w-4 h-4" />
         </button>
       )}

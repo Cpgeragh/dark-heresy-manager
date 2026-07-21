@@ -65,7 +65,7 @@ export function ToastItem({ toast }: ToastItemProps) {
 
       {/* Actions */}
       <div className="flex-shrink-0 flex gap-1">
-        <button
+        <button type="button"
           onClick={handleCopy}
           className="p-1 hover:bg-white/10 rounded transition text-xs"
           aria-label="Copy message to clipboard"
@@ -74,7 +74,7 @@ export function ToastItem({ toast }: ToastItemProps) {
           <span aria-hidden="true">{copied ? "✓" : "📋"}</span>
         </button>
 
-        <button
+        <button type="button"
           onClick={handleDismiss}
           className="p-1 hover:bg-white/10 rounded transition text-xs"
           aria-label="Dismiss notification"

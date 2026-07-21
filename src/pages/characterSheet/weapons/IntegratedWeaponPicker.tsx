@@ -81,7 +81,7 @@ export function IntegratedWeaponPicker({
             <p className={`text-xs lg:text-sm ${uiTextMuted} mb-2`}>Select weapon craftsmanship:</p>
             <div className="flex gap-2">
               {CRAFTSMANSHIP_OPTIONS.map((option) => (
-                <button
+                <button type="button"
                   key={option}
                   onClick={() => setCraftsmanship(option)}
                   className={[

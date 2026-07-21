@@ -9,7 +9,7 @@ import { ArrowLeft, ArrowRight } from "../ui/PickerArrows";
 // NAVIGATION STRUCTURE
 // ================================================================
 
-export const CATEGORIES: {
+const CATEGORIES: {
   label: string;
   dmOnly?: boolean;
   tabs: { id: TabId; label: string }[];
@@ -140,7 +140,7 @@ export function SectionDrawer({
   return (
     <>
       {/* Trigger — hamburger only */}
-      <button
+      <button type="button"
         onClick={open}
         aria-label="Open section navigation"
         className="px-3 py-2 rounded-lg border border-slate-500 bg-slate-800 text-slate-200 hover:bg-slate-700 transition text-base leading-none"
@@ -165,6 +165,8 @@ export function SectionDrawer({
         role="dialog"
         aria-modal="true"
         aria-label="Section navigation"
+        aria-hidden={!isOpen}
+        inert={!isOpen}
       >
         {/* Drawer header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700 shrink-0">
@@ -188,7 +190,7 @@ export function SectionDrawer({
             <ul className="py-2">
               {visibleCategories.map((cat, index) => (
                 <li key={cat.label}>
-                  <button
+                  <button type="button"
                     onClick={() => openCategory(index)}
                     className="w-full flex items-center justify-between px-4 py-3 text-sm text-slate-200 hover:bg-slate-800 transition text-left"
                   >
@@ -209,7 +211,7 @@ export function SectionDrawer({
             {activeCategory && (
               <>
                 {/* Back button */}
-                <button
+                <button type="button"
                   onClick={goBack}
                   className="flex items-center gap-2 px-4 py-3 w-full text-sm hover:bg-slate-800 transition border-b border-slate-700"
                 >
@@ -221,7 +223,7 @@ export function SectionDrawer({
                 <ul className="py-2">
                   {activeCategory.tabs.map((tab) => (
                     <li key={tab.id}>
-                      <button
+                      <button type="button"
                         onClick={() => selectTab(tab.id)}
                         className={`w-full px-4 py-3 text-sm text-left transition ${
                           activeTab === tab.id

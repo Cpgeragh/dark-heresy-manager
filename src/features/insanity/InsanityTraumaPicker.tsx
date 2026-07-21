@@ -6,6 +6,7 @@ import { Button } from "../../ui/Button";
 import { Chip } from "../../ui/Chip";
 import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../ui/PickerModal";
 import { ArrowLeft } from "../../ui/PickerArrows";
+import { OptionPickerScreen } from "../../ui/OptionPickerScreen";
 import { uiPickerBackButton } from "../../ui/buttonStyles";
 import { colourAmberFaint } from "../../ui/colourTokens";
 import { editableInputClass, uiFormLabel, uiInfoModalWrapper, uiItemName, uiTextLabel } from "../../ui/editableStyles";
@@ -56,32 +57,18 @@ export function InsanityTraumaPicker({
 
   if (selected) {
     return (
-      <PickerModal
+      <OptionPickerScreen
         title={selected.name}
-        query=""
-        onQueryChange={() => undefined}
+        options={selected.options!.map((option) => ({
+          value: option.name,
+          label: option.label,
+        }))}
+        onSelect={(name) => {
+          addReferenceTrauma(selected, name);
+          setSelected(null);
+        }}
         onClose={() => setSelected(null)}
-        closeLabel={<ArrowLeft />}
-        closeAriaLabel="Back"
-        hideSearch
-        isEmpty={false}
-      >
-        <div className="space-y-3 p-4 lg:p-5">
-          <p className={`${uiFormLabel} text-center`}>Choose which effect applies</p>
-          <div className="space-y-2">
-            {selected.options!.map((option) => (
-              <button
-                key={option.label}
-                type="button"
-                onClick={() => addReferenceTrauma(selected, option.name)}
-                className="w-full rounded border border-slate-600 bg-slate-800 px-4 py-3 text-left text-sm text-slate-100 transition hover:border-red-500 hover:bg-slate-700 lg:text-base"
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </PickerModal>
+      />
     );
   }
 

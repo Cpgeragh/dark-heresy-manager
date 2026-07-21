@@ -28,7 +28,7 @@ export function SkillGroupRow({
 
   return (
     <div className={uiSectionShell + " overflow-hidden"}>
-      <button
+      <button type="button"
         onClick={toggle}
         aria-expanded={expanded}
         className="w-full flex items-center gap-3 px-3 lg:px-4 py-2.5 lg:py-3 text-left hover:bg-slate-700/40 transition"

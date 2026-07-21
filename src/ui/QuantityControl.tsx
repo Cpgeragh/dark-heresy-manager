@@ -49,7 +49,7 @@ export function QuantityControl({ quantity, editable, onUpdate, size = "md" }: P
   return (
     <div className="flex items-center gap-1">
       {editable && (
-        <button
+        <button type="button"
           onClick={() => onUpdate(Math.max(0, quantity - 1))}
           className={`${sizeStyles.btn} rounded bg-slate-700 hover:bg-slate-600 text-slate-300 leading-none flex items-center justify-center`}
         >
@@ -83,7 +83,7 @@ export function QuantityControl({ quantity, editable, onUpdate, size = "md" }: P
       )}
 
       {editable && (
-        <button
+        <button type="button"
           onClick={() => onUpdate(quantity + 1)}
           className={`${sizeStyles.btn} rounded bg-slate-700 hover:bg-slate-600 text-slate-300 leading-none flex items-center justify-center`}
         >

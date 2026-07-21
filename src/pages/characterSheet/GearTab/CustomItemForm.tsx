@@ -1,6 +1,6 @@
 // src/pages/characterSheet/GearTab/CustomItemForm.tsx
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { GearItem } from "../../../types/Character";
 import {
   editableInputClass,
@@ -35,6 +35,7 @@ export function CustomItemForm({
   onAdd,
   onCancel,
 }: Props) {
+  const formScrollPositionRef = useRef(0);
   const [name, setName] = useState(initialItem?.name ?? "");
   const [origin, setOrigin] = useState<"" | (typeof CUSTOM_GEAR_ORIGIN_OPTIONS)[number]>(
     initialItem?.source === "Custom" || initialItem?.source === "2nd Ed" ? initialItem.source : ""
@@ -91,6 +92,7 @@ export function CustomItemForm({
   return (
     <PickerModal
       title={title}
+      scrollPositionRef={formScrollPositionRef}
       query=""
       onQueryChange={() => {}}
       onClose={onCancel}

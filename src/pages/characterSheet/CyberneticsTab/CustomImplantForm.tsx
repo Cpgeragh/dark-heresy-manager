@@ -1,6 +1,6 @@
 // src/pages/characterSheet/CyberneticsTab/CustomImplantForm.tsx
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type {
   ArmourLocationKey,
   CyberneticCraftsmanship,
@@ -68,6 +68,7 @@ export function CustomImplantForm({
   onAdd,
   onCancel,
 }: Props) {
+  const formScrollPositionRef = useRef(0);
   const [name, setName] = useState(initialItem?.name ?? "");
   const [craftsmanship, setCraftsmanship] = useState<CyberneticCraftsmanship | "">(
     initialItem?.craftsmanship ?? ""
@@ -141,6 +142,7 @@ export function CustomImplantForm({
   return (
     <PickerModal
       title={title}
+      scrollPositionRef={formScrollPositionRef}
       query=""
       onQueryChange={() => {}}
       onClose={onCancel}

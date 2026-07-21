@@ -1,6 +1,6 @@
 // src/pages/characterSheet/weapons/CustomShieldForm.tsx
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ShieldItem } from "../../../types/Character";
 import {
   editableInputClass,
@@ -63,6 +63,7 @@ export function CustomShieldForm({
   onAdd: (item: ShieldItem) => void;
   onCancel: () => void;
 }) {
+  const formScrollPositionRef = useRef(0);
   const initialDamage = parseInitialShieldDamage(initialShield?.damage);
   const [name, setName] = useState(initialShield?.name ?? "");
   const [origin, setOrigin] = useState<"" | (typeof CUSTOM_SHIELD_ORIGIN_OPTIONS)[number]>(
@@ -165,6 +166,7 @@ export function CustomShieldForm({
   return (
     <PickerModal
       title={title}
+      scrollPositionRef={formScrollPositionRef}
       query=""
       onQueryChange={() => {}}
       onClose={onCancel}

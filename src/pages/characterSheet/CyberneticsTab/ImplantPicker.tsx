@@ -210,7 +210,7 @@ export function ImplantPicker({
         </PickerBody>
 
         <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700 flex gap-2">
-          <button onClick={resetPicker} className={uiPickerBackButton}>
+          <button type="button" onClick={resetPicker} className={uiPickerBackButton}>
             Back
           </button>
           <Button className="flex-1" onClick={confirmCost} disabled={!canConfirmCost}>
@@ -248,7 +248,7 @@ export function ImplantPicker({
           <p className={`text-xs lg:text-sm ${uiTextMuted}`}>Select installation side:</p>
           <div className="flex flex-col gap-2">
             {options.map((opt) => (
-              <button
+              <button type="button"
                 key={opt.label}
                 onClick={() => setLocation(opt.value)}
                 className="py-2 lg:py-2.5 px-3 lg:px-4 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-200 text-left transition"
@@ -260,7 +260,7 @@ export function ImplantPicker({
         </div>
 
         <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700">
-          <button onClick={resetPicker} className={uiPickerBackButton}>
+          <button type="button" onClick={resetPicker} className={uiPickerBackButton}>
             Back
           </button>
         </div>
@@ -293,7 +293,7 @@ export function ImplantPicker({
             <p className={`text-xs lg:text-sm ${uiTextMuted} mb-2`}>Select craftsmanship quality:</p>
             <div className="flex gap-2">
               {qualities.map((q) => (
-                <button
+                <button type="button"
                   key={q}
                   onClick={() => setCraftsmanship(q)}
                   className={[
@@ -315,7 +315,7 @@ export function ImplantPicker({
         </PickerBody>
 
         <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700 flex gap-2">
-          <button onClick={resetPicker} className={uiPickerBackButton}>
+          <button type="button" onClick={resetPicker} className={uiPickerBackButton}>
             Back
           </button>
           <Button

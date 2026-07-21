@@ -1,6 +1,6 @@
 // src/pages/characterSheet/weapons/CustomMeleeForm.tsx
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { MeleeWeapon, WeaponCraftsmanship } from "../../../types/Character";
 import {
   editableInputClass,
@@ -69,6 +69,7 @@ export function CustomMeleeForm({
   integrated?: boolean;
   initialWeapon?: Partial<MeleeWeapon>;
 }) {
+  const formScrollPositionRef = useRef(0);
   const parsedDamage = parseWeaponDamage(initialWeapon?.damage, "R");
   const [name, setName] = useState(initialWeapon?.name ?? "");
   const [weaponClass, setWeaponClass] = useState(initialWeapon?.class ?? "");
@@ -196,6 +197,7 @@ export function CustomMeleeForm({
   return (
     <PickerModal
       title={title}
+      scrollPositionRef={formScrollPositionRef}
       query=""
       onQueryChange={() => {}}
       onClose={onCancel}

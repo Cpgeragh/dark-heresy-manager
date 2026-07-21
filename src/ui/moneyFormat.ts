@@ -9,8 +9,6 @@ const EMPTY_MONEY_VALUES = new Set([
   "varies",
 ]);
 
-export const MONEY_NUMBER_INPUT_RE = /^\d*$/;
-
 function formatInteger(value: number): string {
   if (!Number.isFinite(value) || value < 0) return "0";
   return Math.floor(value).toLocaleString("en-US");

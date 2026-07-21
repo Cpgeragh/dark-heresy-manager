@@ -141,7 +141,7 @@ export function PortraitUpload({
         </div>
 
         {canEdit && (
-          <button
+          <button type="button"
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); fileInputRef.current?.click(); }}
             className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border border-red-500 text-red-500 flex items-center justify-center hover:bg-red-500/10 transition"
             aria-label="Upload portrait"

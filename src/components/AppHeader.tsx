@@ -45,7 +45,7 @@ export function AppHeader({ currentPath, onOpenMessages }: AppHeaderProps) {
           )}
 
           {onOpenMessages && isOnCharacterSheet && (
-            <button
+            <button type="button"
               onClick={onOpenMessages}
               aria-label="Messages"
               className="h-8 w-8 rounded-lg bg-slate-800 border border-slate-600 flex items-center justify-center hover:bg-slate-700 transition"
@@ -107,7 +107,7 @@ export function AppHeader({ currentPath, onOpenMessages }: AppHeaderProps) {
           {/* Kebab menu */}
           {kebabContent && (
             <div className="relative">
-              <button
+              <button type="button"
                 onClick={() => setKebabOpen((v) => !v)}
                 aria-label="Options"
                 className="h-8 w-8 flex items-center justify-center rounded-lg border border-slate-600 bg-slate-800 hover:bg-slate-700 text-slate-300 text-base leading-none"

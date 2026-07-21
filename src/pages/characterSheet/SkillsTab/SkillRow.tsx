@@ -54,9 +54,9 @@ export function SkillRow({ skill, editable, updateLevel, previewMode = false, on
   return (
     <div className={uiSectionShell + " overflow-hidden"}>
       {/* COLLAPSED ROW */}
-      <button
+      <button type="button"
         onClick={onSelect ? () => onSelect(skill.id) : handleToggle}
-        aria-expanded={expanded}
+        aria-expanded={onSelect ? undefined : expanded}
         className="w-full px-3 lg:px-4 py-2.5 lg:py-3 text-left hover:bg-slate-700/40 transition group"
       >
         {/* Mobile: name+chips in a left column, total in its own centered column, chevron last */}
@@ -91,6 +91,7 @@ export function SkillRow({ skill, editable, updateLevel, previewMode = false, on
             <span
               role="button"
               tabIndex={0}
+              aria-expanded={expanded}
               aria-label={expanded ? "Collapse skill details" : "Expand skill details"}
               onClick={(e) => { e.stopPropagation(); handleToggle(); }}
               onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); handleToggle(); } }}
@@ -135,6 +136,7 @@ export function SkillRow({ skill, editable, updateLevel, previewMode = false, on
             <span
               role="button"
               tabIndex={0}
+              aria-expanded={expanded}
               aria-label={expanded ? "Collapse skill details" : "Expand skill details"}
               onClick={(e) => { e.stopPropagation(); handleToggle(); }}
               onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); handleToggle(); } }}
@@ -155,7 +157,7 @@ export function SkillRow({ skill, editable, updateLevel, previewMode = false, on
           <div className="space-y-2">
               {editable && skill.level !== "untrained" && (
                 <div className="flex justify-end">
-                  <button
+                  <button type="button"
                     onClick={handleRemove}
                     className={`${uiIconRemoveButton} focus:outline-none`}
                     aria-label={`Remove ${skill.name}`}
@@ -169,7 +171,7 @@ export function SkillRow({ skill, editable, updateLevel, previewMode = false, on
                   ? (["trained", "+10", "+20"] as const)
                   : (previewMode ? ["untrained", "trained", "+10", "+20"] : ["trained", "+10", "+20"]) as readonly ("untrained" | "trained" | "+10" | "+20")[]
                 ).map((value) => (
-                  <button
+                  <button type="button"
                     key={value}
                     aria-pressed={skill.level === value}
                     aria-label={`Set skill level to ${value}`}

@@ -1,6 +1,6 @@
 // src/pages/characterSheet/weapons/CustomRangedForm.tsx
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { RangedWeapon, WeaponCraftsmanship } from "../../../types/Character";
 import {
   editableInputClass,
@@ -101,6 +101,7 @@ export function CustomRangedForm({
   integrated?: boolean;
   initialWeapon?: Partial<RangedWeapon>;
 }) {
+  const formScrollPositionRef = useRef(0);
   const parsedDamage = parseWeaponDamage(initialWeapon?.damage, "I");
   const parsedReload = parseReloadInput(initialWeapon?.rld);
   const parsedRof = parseRofInput(initialWeapon?.rof);
@@ -311,6 +312,7 @@ export function CustomRangedForm({
   return (
     <PickerModal
       title={title}
+      scrollPositionRef={formScrollPositionRef}
       query=""
       onQueryChange={() => {}}
       onClose={onCancel}

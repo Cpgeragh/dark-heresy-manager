@@ -164,7 +164,7 @@ export function ArcheotechPickerModal({
           </div>
 
           <div className="flex gap-2 pt-1">
-            <button
+            <button type="button"
               onClick={() => setPending(null)}
               className={uiPickerBackButton}
             >

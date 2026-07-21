@@ -18,8 +18,6 @@ export const colourInactive = "border-slate-600 bg-slate-800/40 text-slate-300";
 export const colourSky = "border-sky-500/50 bg-sky-500/10 text-sky-300";
 export const colourRose = "border-rose-500/50 bg-rose-500/10 text-rose-300";
 export const colourCyan = "border-cyan-500/50 bg-cyan-500/10 text-cyan-300";
-// Darker border, brighter text — used for the cybernetic weapon chip in CyberneticWeaponCard.
-export const colourCyanDark = "border-cyan-700/50 bg-cyan-500/10 text-cyan-400";
 export const colourPurple = "bg-purple-700/40 border-purple-500 text-purple-300";
 export const colourTeal = "bg-teal-900/40 border-teal-700/50 text-teal-300";
 // Lighter variant — used for weapon class and ammo-type chips (Basic weapon class, Exotic ammo).
@@ -29,8 +27,6 @@ export const colourActiveSky = "border-sky-400 bg-sky-600/80 text-white shadow-s
 export const colourActiveRose = "border-rose-400 bg-rose-600/80 text-white shadow-sm shadow-rose-950/50";
 export const colourActiveOrange = "border-orange-400 bg-orange-600/80 text-white shadow-sm shadow-orange-950/50";
 export const colourActiveEmerald = "border-emerald-400 bg-emerald-600/80 text-white shadow-sm shadow-emerald-950/50";
-export const colourActiveAmber = "border-amber-400 bg-amber-600/80 text-white shadow-sm shadow-amber-950/50";
-export const colourActiveRed = "bg-red-500/20 text-red-400 border-red-500";
 // Lighter "outlined" active/pressed style — border+text only, hover tint, no solid fill.
 // Distinct from colourActiveXxx above (solid bg-600/80 fill + white text).
 export const colourActiveOutlineTeal = "border-teal-400 text-teal-400 font-semibold hover:bg-teal-400/10";
@@ -38,6 +34,5 @@ export const colourActiveOutlineViolet = "border-violet-400 text-violet-400 font
 export const colourActiveOutlineOrange = "border-orange-400 text-orange-400 font-semibold hover:bg-orange-400/10";
 export const colourActiveOutlineSky = "border-sky-400 text-sky-400 font-semibold hover:bg-sky-400/10";
 export const colourActiveOutlineAmber = "border-amber-400 text-amber-400 font-semibold hover:bg-amber-400/10";
-export const colourActiveOutlineFuchsia = "border-fuchsia-400 text-fuchsia-400 font-semibold hover:bg-fuchsia-400/10";
 // Same style, no hover — for static/non-interactive display (e.g. a chip that isn't itself clickable).
 export const colourOutlineFuchsia = "border-fuchsia-400 text-fuchsia-400 font-semibold";

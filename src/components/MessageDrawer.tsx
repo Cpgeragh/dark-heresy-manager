@@ -75,10 +75,15 @@ export function MessageDrawer({
         className={`fixed top-0 right-0 h-full w-full sm:w-96 z-50 bg-slate-900 border-l border-slate-700 flex flex-col transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="message-drawer-title"
+        aria-hidden={!isOpen}
+        inert={!isOpen}
       >
         {/* Panel header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700 shrink-0">
-          <h2 className="font-semibold text-slate-100">Messages</h2>
+          <h2 id="message-drawer-title" className="font-semibold text-slate-100">Messages</h2>
           <CloseButton
             onClick={onClose}
             ariaLabel="Close messages"

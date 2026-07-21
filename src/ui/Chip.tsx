@@ -42,7 +42,7 @@ export function Chip(props: ChipProps) {
     const { as: _as, size = "md", className, children, ...buttonProps } = props;
     void _as;
     return (
-      <button className={chipClassName({ size, className })} {...buttonProps}>
+      <button type="button" className={chipClassName({ size, className })} {...buttonProps}>
         {children}
       </button>
     );

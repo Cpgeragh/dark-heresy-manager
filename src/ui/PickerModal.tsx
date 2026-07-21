@@ -1,6 +1,7 @@
 // src/ui/PickerModal.tsx
 // Shared reference-picker layout: header, search input, scrollable list, and footer.
 
+import { useLayoutEffect, useRef } from "react";
 import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from "react";
 import { editableInputClass } from "./editableStyles";
 import { ModalHeader } from "./ModalHeader";
@@ -106,6 +107,8 @@ interface Props {
   maxHeight?: string;
   /** Override the container max-width. Defaults to the wider picker-list width. */
   maxWidth?: string;
+  /** Optional form-lifetime scroll position used when a sub-picker temporarily replaces this modal. */
+  scrollPositionRef?: { current: number };
   /** The list rows. */
   children: ReactNode;
 }
@@ -131,8 +134,17 @@ export function PickerModal({
   footer,
   maxHeight = "max-h-[85vh]",
   maxWidth = "max-w-lg lg:max-w-2xl",
+  scrollPositionRef,
   children,
 }: Props) {
+  const listRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (listRef.current && scrollPositionRef) {
+      listRef.current.scrollTop = scrollPositionRef.current;
+    }
+  }, [scrollPositionRef]);
+
   return (
     <ModalShell
       ariaLabel={title}
@@ -175,7 +187,15 @@ export function PickerModal({
       )}
 
       {/* Scrollable list */}
-      <div className="min-h-0 overflow-y-auto flex-1 divide-y divide-slate-800">
+      <div
+        ref={listRef}
+        onScroll={
+          scrollPositionRef
+            ? (event) => { scrollPositionRef.current = event.currentTarget.scrollTop; }
+            : undefined
+        }
+        className="min-h-0 overflow-y-auto flex-1 divide-y divide-slate-800"
+      >
         {isEmpty && <p className="p-4 lg:p-5 text-sm lg:text-base text-slate-500 text-center">{emptyMessage}</p>}
         {children}
       </div>

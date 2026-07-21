@@ -1,6 +1,6 @@
 // src/pages/characterSheet/GearTab/CustomConsumableForm.tsx
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ConsumableItem } from "../../../types/Character";
 import {
   editableInputClass,
@@ -37,6 +37,7 @@ export function CustomConsumableForm({
   onAdd,
   onCancel,
 }: Props) {
+  const formScrollPositionRef = useRef(0);
   const [name, setName] = useState(initialItem?.name ?? "");
   const [quantity, setQuantity] = useState(
     initialItem?.quantity ? String(initialItem.quantity) : ""
@@ -100,6 +101,7 @@ export function CustomConsumableForm({
   return (
     <PickerModal
       title={title}
+      scrollPositionRef={formScrollPositionRef}
       query=""
       onQueryChange={() => {}}
       onClose={onCancel}

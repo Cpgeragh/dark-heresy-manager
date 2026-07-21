@@ -118,7 +118,7 @@ export function DMInbox({
 
         return (
           <div key={thread.characterId}>
-            <button
+            <button type="button"
               onClick={() => toggleThread(thread.characterId)}
               aria-expanded={isExpanded}
               className="w-full flex items-center gap-3 px-3 lg:px-4 py-2 lg:py-2.5 rounded border border-slate-700 bg-slate-900/40 hover:bg-slate-800 transition text-left"

@@ -1,6 +1,6 @@
 // src/pages/characterSheet/ArcheotechTab/CustomItemForm.tsx
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ArcheotechItem, ArmourLocationKey, CyberneticCraftsmanship } from "../../../types/Character";
 import {
   editableInputClass,
@@ -51,6 +51,7 @@ export function CustomItemForm({
   onCancel,
   onBack,
 }: Props) {
+  const formScrollPositionRef = useRef(0);
   const startType = (initialItem?.type as ItemType | undefined) ?? null;
   const [phase, setPhase] = useState<"select" | "details">(startType ? "details" : "select");
   const [selectedType, setSelectedType] = useState<ItemType | null>(startType);
@@ -235,6 +236,7 @@ export function CustomItemForm({
   return (
     <PickerModal
       title={selectedType ?? title}
+      scrollPositionRef={formScrollPositionRef}
       titleClassName="text-slate-200"
       closeLabel={startType ? undefined : <ArrowLeft />}
       closeAriaLabel={startType ? "Close" : "Back"}
@@ -337,7 +339,7 @@ export function CustomItemForm({
                   </label>
                   <div className="flex gap-2 mt-0.5">
                     {(["Ranged", "Melee"] as const).map((cls) => (
-                      <button
+                      <button type="button"
                         key={cls}
                         onClick={() => setWeaponClass(weaponClass === cls ? "" : cls)}
                         className={[
@@ -477,7 +479,7 @@ export function CustomItemForm({
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {LOCATION_ORDER.map((loc) => (
-                    <button
+                    <button type="button"
                       key={loc}
                       onClick={() => toggleLocation(loc)}
                       className={[
@@ -493,7 +495,7 @@ export function CustomItemForm({
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button
+                <button type="button"
                   onClick={() => setStacks(!stacks)}
                   className={[
                     "w-4 h-4 rounded border flex items-center justify-center transition shrink-0",
@@ -595,7 +597,7 @@ export function CustomItemForm({
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {LOCATION_ORDER.map((loc) => (
-                    <button
+                    <button type="button"
                       key={loc}
                       onClick={() => toggleBodyLocation(loc)}
                       className={[

@@ -144,14 +144,14 @@ export function ImplantRow({
       </div>
 
       {/* Info button */}
-      <button onClick={() => undefined} title="View rules" className="hidden">
+      <button type="button" onClick={() => undefined} title="View rules" className="hidden">
         ⓘ
       </button>
 
       {/* Craftsmanship badge — clickable when editable */}
       {/* Remove */}
       {editable && (
-        <button onClick={() => onRemove(item.id)} aria-label="Remove" className={uiIconRemoveButton}>
+        <button type="button" onClick={() => onRemove(item.id)} aria-label="Remove" className={uiIconRemoveButton}>
           <TrashIcon className="w-4 h-4" />
         </button>
       )}

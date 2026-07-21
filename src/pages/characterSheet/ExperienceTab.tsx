@@ -206,7 +206,7 @@ export function ExperienceTab({
                       <div className="flex items-center gap-2 shrink-0">
                         <span className="text-xs lg:text-sm text-slate-400">{adv.cost} XP</span>
                         {isDM && (
-                          <button
+                          <button type="button"
                             onClick={() => handleRemoveAdvance(rankBlock.rank, adv.id)}
                             aria-label="Remove"
                             className={uiIconRemoveButton}
@@ -346,7 +346,7 @@ export function ExperienceTab({
 
           {resolvedProposals.length > 0 && (
             <div className="space-y-2">
-              <button
+              <button type="button"
                 onClick={() => setShowHistory((v) => !v)}
                 className="text-xs lg:text-sm text-slate-400 hover:text-slate-200"
               >

@@ -135,7 +135,7 @@ export function AddSkillModal({
 
         return (
           <div key={item.category} className={uiSectionShell + " overflow-hidden"}>
-            <button
+            <button type="button"
               onClick={() => setOpenCategory(item.category)}
               className="w-full flex items-center gap-3 px-4 lg:px-5 py-3 lg:py-4 text-left hover:bg-slate-700/40 transition group"
             >

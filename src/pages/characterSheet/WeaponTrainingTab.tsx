@@ -8,6 +8,7 @@ import { editableInputClass, uiFormLabel, uiTextPlaceholder } from "../../ui/edi
 import { uiDismissButton } from "../../ui/buttonStyles";
 import { ModalHeader } from "../../ui/ModalHeader";
 import { ModalShell } from "../../ui/ModalShell";
+import { CloseIcon } from "../../ui/CloseButton";
 import {
   colourActiveOutlineTeal,
   colourActiveOutlineViolet,
@@ -80,7 +81,7 @@ export function WeaponTrainingTab({ weaponTraining, editable, onUpdate }: Weapon
             {group.items.map(({ id, display }) => {
               const active = weaponTraining.trained.includes(id as WeaponTrainingTalentId);
               return (
-                <button
+                <button type="button"
                   key={id}
                   disabled={!editable}
                   onClick={() => handleToggleTraining(id as WeaponTrainingTalentId)}
@@ -129,12 +130,12 @@ export function WeaponTrainingTab({ weaponTraining, editable, onUpdate }: Weapon
             >
               {weapon}
               {editable && (
-                <button
+                <button type="button"
                   onClick={() => handleRemoveExotic(index)}
                   aria-label={`Remove ${weapon}`}
                   className={uiDismissButton}
                 >
-                  ×
+                  <CloseIcon />
                 </button>
               )}
             </span>

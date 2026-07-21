@@ -373,7 +373,7 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
         <div className="flex items-center justify-between mb-4 p-2 rounded border border-slate-700 bg-slate-900/60">
           <span className="text-xs lg:text-sm text-slate-400">DM View</span>
 
-          <button
+          <button type="button"
             onClick={toggleDmReadOnly}
             aria-label={dmReadOnly ? "Enable editing mode" : "Disable editing mode"}
             aria-pressed={!dmReadOnly}
@@ -653,7 +653,7 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
       </div>
 
       {showScrollTop && (
-        <button
+        <button type="button"
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           aria-label="Scroll to top"
           className="fixed bottom-6 right-4 z-50 w-9 h-9 rounded bg-slate-800/85 border border-slate-600 flex items-center justify-center text-slate-300 hover:bg-slate-700/90 transition shadow-lg"
