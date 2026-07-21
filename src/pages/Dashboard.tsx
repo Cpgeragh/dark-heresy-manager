@@ -31,6 +31,7 @@ import type { CampaignWithId, CharacterListItem } from "../types/Firestore";
 import { uiSection, editableInputClass, uiTextError, uiCardTitle } from "../ui/editableStyles";
 import { Button } from "../ui/Button";
 import { CloseButton } from "../ui/CloseButton";
+import { ExpandChevron } from "../ui/ExpandChevron";
 import { PageShell } from "../ui/PageShell";
 import { Panel } from "../ui/Panel";
 import { SectionHeader } from "../ui/SectionHeader";
@@ -355,9 +356,11 @@ function DmCampaignList({
           <div className="mt-4">
             <button
               onClick={() => setShowArchived((v) => !v)}
-              className="text-sm lg:text-base text-slate-500 hover:text-slate-300 transition-colors"
+              aria-expanded={showArchived}
+              className="inline-flex items-center gap-1 text-sm lg:text-base text-slate-500 hover:text-slate-300 transition-colors"
             >
-              {showArchived ? "▾" : "▸"} Archived ({archivedCampaigns.length})
+              <ExpandChevron expanded={showArchived} />
+              <span>Archived ({archivedCampaigns.length})</span>
             </button>
 
             {showArchived && (

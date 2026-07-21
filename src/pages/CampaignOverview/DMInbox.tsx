@@ -8,6 +8,7 @@ import { MessageThread } from "../../components/MessageThread";
 import { MessageInput } from "../../components/MessageInput";
 import { useToast } from "../../components/Toast";
 import { ConfirmInline } from "../../ui/ConfirmInline";
+import { ExpandChevron } from "../../ui/ExpandChevron";
 import type { CharacterListItem } from "../../types/Firestore";
 
 // ── Helper ────────────────────────────────────────────────────────────────────
@@ -119,6 +120,7 @@ export function DMInbox({
           <div key={thread.characterId}>
             <button
               onClick={() => toggleThread(thread.characterId)}
+              aria-expanded={isExpanded}
               className="w-full flex items-center gap-3 px-3 lg:px-4 py-2 lg:py-2.5 rounded border border-slate-700 bg-slate-900/40 hover:bg-slate-800 transition text-left"
             >
               <div className="flex-1 min-w-0">
@@ -134,9 +136,7 @@ export function DMInbox({
                   <p className="text-xs lg:text-sm text-slate-500 truncate mt-0.5">{thread.lastMessage}</p>
                 )}
               </div>
-              <span className="text-slate-500 text-xs lg:text-sm shrink-0">
-                {isExpanded ? "▾" : "▸"}
-              </span>
+              <ExpandChevron expanded={isExpanded} />
             </button>
 
             {isExpanded && (
