@@ -6,8 +6,8 @@ import Cropper from "react-easy-crop";
 import type { Point, Area } from "react-easy-crop";
 import { uploadPortrait } from "../services/portraitService";
 import { Button } from "../ui/Button";
+import { CloseButton } from "../ui/CloseButton";
 import { useToast } from "./Toast";
-import { uiIconButton } from "../ui/buttonStyles";
 
 // ── Canvas helper ─────────────────────────────────────────────────────────────
 
@@ -178,12 +178,9 @@ export function PortraitUpload({
                 <p className="text-sm lg:text-base font-semibold text-slate-100 text-center flex-1">
                   Position Portrait
                 </p>
-                <button
+                <CloseButton
                   onClick={handleCancel}
-                  className={uiIconButton}
-                >
-                  ×
-                </button>
+                />
               </div>
 
               {/* Cropper */}

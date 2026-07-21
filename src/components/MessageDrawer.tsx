@@ -7,6 +7,7 @@ import { sendMessage } from "../services/messageService";
 import { MessageThread } from "./MessageThread";
 import { MessageInput } from "./MessageInput";
 import { useToast } from "./Toast";
+import { CloseButton } from "../ui/CloseButton";
 
 // ── PlayerThread ──────────────────────────────────────────────────────────────
 
@@ -78,13 +79,10 @@ export function MessageDrawer({
         {/* Panel header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700 shrink-0">
           <h2 className="font-semibold text-slate-100">Messages</h2>
-          <button
+          <CloseButton
             onClick={onClose}
-            aria-label="Close messages"
-            className="w-7 h-7 flex items-center justify-center rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 text-slate-300 text-lg leading-none transition"
-          >
-            ×
-          </button>
+            ariaLabel="Close messages"
+          />
         </div>
 
         {/* Panel content */}

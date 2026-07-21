@@ -11,11 +11,12 @@ import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../..
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
 import { ArrowRight } from "../../../ui/PickerArrows";
 import { Button } from "../../../ui/Button";
+import { CloseButton } from "../../../ui/CloseButton";
 import { InfoModal } from "../../../components/InfoModal";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { editableInputClass, uiTextBody, uiTextLabel, uiTextMuted, uiFormLabel, uiInfoModalWrapper, uiItemName, uiCardTitle, uiTextGMNote } from "../../../ui/editableStyles";
-import { uiPickerBackButton, uiDismissButton } from "../../../ui/buttonStyles";
+import { uiPickerBackButton } from "../../../ui/buttonStyles";
 import { StatusBadge } from "../../../ui/StatusBadge";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import { CRAFTSMANSHIP_STYLE, LOCATION_DISPLAY } from "./cyberneticsConstants";
@@ -181,7 +182,7 @@ export function ImplantPicker({
       >
         <div className="flex items-center justify-between px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
           <h3 className={uiCardTitle}>Assigned Cost</h3>
-          <button onClick={resetPicker} className={uiDismissButton}>×</button>
+          <CloseButton onClick={resetPicker} />
         </div>
 
         <PickerBody>
@@ -261,7 +262,7 @@ export function ImplantPicker({
       >
         <div className="flex items-center justify-between px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
           <h3 className={uiCardTitle}>{selected.name}</h3>
-          <button onClick={resetPicker} className={uiDismissButton}>×</button>
+          <CloseButton onClick={resetPicker} />
         </div>
 
         <div className="px-4 lg:px-5 py-4 lg:py-5 space-y-3">
@@ -301,7 +302,7 @@ export function ImplantPicker({
       >
         <div className="flex items-center justify-between px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
           <h3 className={uiCardTitle}>{selected.name}</h3>
-          <button onClick={resetPicker} className={uiDismissButton}>×</button>
+          <CloseButton onClick={resetPicker} />
         </div>
 
         <PickerBody>

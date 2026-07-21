@@ -7,8 +7,8 @@ import { useClaimLogs } from "../../hooks/useClaimLogs";
 import { useToast } from "../../components/Toast";
 import { cloneCharacter, deleteCharacter } from "../../services/characterService";
 import { uiSection } from "../../ui/editableStyles";
-import { uiIconButton } from "../../ui/buttonStyles";
 import { Button } from "../../ui/Button";
+import { CloseButton } from "../../ui/CloseButton";
 import { ConfirmInline } from "../../ui/ConfirmInline";
 import type { ClaimLogAction } from "../../utils/claimLog";
 import { PortraitUpload } from "../../components/PortraitUpload";
@@ -140,12 +140,9 @@ export function CharacterRow({
             <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 lg:p-5 flex flex-col gap-3 pointer-events-auto w-80 lg:w-96 max-w-[90vw]">
               <div className="flex justify-between items-center">
                 <p className="text-sm lg:text-base font-semibold text-slate-100 text-center flex-1">History</p>
-                <button
+                <CloseButton
                   onClick={() => setShowHistory(false)}
-                  className={uiIconButton}
-                >
-                  ×
-                </button>
+                />
               </div>
               <div className="space-y-1">
                 {logs.length === 0 ? (

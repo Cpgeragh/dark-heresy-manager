@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import type { WeaponTrainingBlock, WeaponTrainingTalentId } from "../../types/Character";
 import { WEAPON_TRAINING_GROUPS } from "../../data/weaponTrainingData";
 import { Button } from "../../ui/Button";
+import { CloseButton } from "../../ui/CloseButton";
 import { editableInputClass, uiFormLabel, uiTextPlaceholder } from "../../ui/editableStyles";
 import { uiDismissButton } from "../../ui/buttonStyles";
 import {
@@ -159,7 +160,7 @@ export function WeaponTrainingTab({ weaponTraining, editable, onUpdate }: Weapon
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="font-semibold text-slate-100">Add Exotic Weapon</span>
-              <button onClick={closeModal} className={uiDismissButton}>×</button>
+              <CloseButton onClick={closeModal} />
             </div>
             <input
               autoFocus

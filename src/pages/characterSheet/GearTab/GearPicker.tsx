@@ -109,7 +109,7 @@ export function GearPicker({
       query={query}
       onQueryChange={setQuery}
       onClose={pending ? () => setPending(null) : onClose}
-      closeLabel={pending ? <ArrowLeft /> : "×"}
+      closeLabel={pending ? <ArrowLeft /> : undefined}
       closeAriaLabel={pending ? "Back" : "Close"}
       hideSearch={!!pending}
       isEmpty={isEmpty}

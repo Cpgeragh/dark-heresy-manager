@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { useToast, type Toast } from "./ToastContext";
 import { COPY_FEEDBACK_DURATION } from "../../constants/ui";
+import { CloseIcon } from "../../ui/CloseButton";
 
 interface ToastItemProps {
   toast: Toast;
@@ -79,7 +80,7 @@ export function ToastItem({ toast }: ToastItemProps) {
           aria-label="Dismiss notification"
           title="Dismiss"
         >
-          <span aria-hidden="true">✕</span>
+          <CloseIcon />
         </button>
       </div>
     </div>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import type { TabId } from "../pages/characterSheet/types";
-import { uiDismissButton } from "../ui/buttonStyles";
+import { CloseButton } from "../ui/CloseButton";
 import { ArrowLeft, ArrowRight } from "../ui/PickerArrows";
 
 // ================================================================
@@ -171,13 +171,10 @@ export function SectionDrawer({
           <span className="text-sm font-semibold text-slate-200 uppercase tracking-wide">
             Navigate
           </span>
-          <button
+          <CloseButton
             onClick={close}
-            aria-label="Close navigation"
-            className={`${uiDismissButton} transition`}
-          >
-            ✕
-          </button>
+            ariaLabel="Close navigation"
+          />
         </div>
 
         {/* Sliding panels */}

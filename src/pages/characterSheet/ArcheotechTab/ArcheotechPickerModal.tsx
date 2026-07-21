@@ -110,7 +110,7 @@ export function ArcheotechPickerModal({
       query={query}
       onQueryChange={setQuery}
       onClose={pending ? () => setPending(null) : onClose}
-      closeLabel={pending ? <ArrowLeft /> : "×"}
+      closeLabel={pending ? <ArrowLeft /> : undefined}
       closeAriaLabel={pending ? "Back" : "Close"}
       isEmpty={!pending && filtered.length === 0 && filteredCustom.length === 0}
       hideSearch={!!pending}

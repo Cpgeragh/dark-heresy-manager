@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import type { ReactNode } from "react";
+import { CloseButton } from "../ui/CloseButton";
 
 interface InfoModalProps {
   title: string;
@@ -99,24 +100,18 @@ export function InfoModal({ title, content, hideTitle = false, as = "button" }: 
             <div className="grid grid-cols-[2rem_1fr_2rem] items-center px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700 sticky top-0 bg-slate-900">
               <span aria-hidden />
               <h3 className="text-center text-sm lg:text-base font-cinzel font-semibold text-red-500">{title}</h3>
-              <button
+              <CloseButton
                 onClick={() => setOpen(false)}
-                aria-label="Close"
-                className="justify-self-end text-slate-400 hover:text-slate-200 text-base lg:text-lg leading-none"
-              >
-                {"\u00D7"}
-              </button>
+                className="justify-self-end"
+              />
             </div>
           )}
           <div className="px-4 lg:px-5 py-3 lg:py-4 text-sm lg:text-base text-slate-300 space-y-1.5 lg:space-y-2">
             {hideTitle && (
-              <button
+              <CloseButton
                 onClick={() => setOpen(false)}
-                aria-label="Close"
-                className="float-right ml-3 mb-1 text-slate-400 hover:text-slate-200 text-base lg:text-lg leading-none"
-              >
-                {"\u00D7"}
-              </button>
+                className="float-right ml-3 mb-1"
+              />
             )}
             {content}
           </div>

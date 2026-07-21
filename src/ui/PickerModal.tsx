@@ -4,6 +4,7 @@
 import { createPortal } from "react-dom";
 import { useEffect, useState } from "react";
 import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from "react";
+import { CloseButton } from "./CloseButton";
 import { editableInputClass } from "./editableStyles";
 
 export function PickerBody({
@@ -124,10 +125,7 @@ interface Props {
   /** True when the filtered list is empty — renders the empty-state message. */
   isEmpty: boolean;
   emptyMessage?: string;
-  /**
-   * Label for the close/back button. Defaults to "×".
-   * Pass an <ArrowLeft /> for a two-step modal's back button.
-   */
+  /** Content for a non-close header action, such as a two-step modal's back arrow. */
   closeLabel?: ReactNode;
   /** Accessible label for the close/back button. Defaults to "Close". */
   closeAriaLabel?: string;
@@ -168,7 +166,7 @@ export function PickerModal({
   isEmpty,
   emptyMessage = "No matches.",
   titleClassName,
-  closeLabel = "×",
+  closeLabel,
   closeAriaLabel = "Close",
   hideSearch = false,
   filterRow,
@@ -216,13 +214,18 @@ export function PickerModal({
         <div className="grid grid-cols-[2rem_1fr_2rem] items-center px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
           <span aria-hidden />
           <h3 className={`text-center text-sm lg:text-base font-cinzel font-bold ${titleClassName ?? "text-red-500"}`}>{title}</h3>
-          <button
-            onClick={onClose}
-            aria-label={closeAriaLabel}
-            className="justify-self-end text-slate-400 hover:text-slate-200 text-lg lg:text-xl leading-none"
-          >
-            {closeLabel}
-          </button>
+          {closeAriaLabel === "Close" ? (
+            <CloseButton onClick={onClose} className="justify-self-end" />
+          ) : (
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label={closeAriaLabel}
+              className="justify-self-end text-slate-400 hover:text-slate-200 text-lg lg:text-xl leading-none"
+            >
+              {closeLabel}
+            </button>
+          )}
         </div>
 
         {/* Search */}

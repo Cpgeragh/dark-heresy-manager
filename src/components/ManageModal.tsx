@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { Button } from "../ui/Button";
+import { CloseButton } from "../ui/CloseButton";
 import { uiSection, uiSectionHeader, uiSubheading } from "../ui/editableStyles";
 import { COPY_FEEDBACK_DURATION } from "../constants/ui";
 
@@ -53,13 +54,9 @@ export function ManageModal({
         {/* Header */}
         <div className="flex items-center justify-between">
           <span className={uiSectionHeader}>Manage</span>
-          <button
+          <CloseButton
             onClick={onClose}
-            aria-label="Close"
-            className="text-slate-400 hover:text-slate-100 text-lg lg:text-xl leading-none"
-          >
-            ✕
-          </button>
+          />
         </div>
 
         {/* Recovery Code */}
