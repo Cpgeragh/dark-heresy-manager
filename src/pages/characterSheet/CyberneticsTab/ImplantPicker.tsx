@@ -1,7 +1,6 @@
 // src/pages/characterSheet/CyberneticsTab/ImplantPicker.tsx
 
-import { useState, useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
+import { useState } from "react";
 import type { CyberneticCraftsmanship, ArmourLocationKey } from "../../../types/Character";
 import {
   CYBERNETICS_REFERENCE,
@@ -11,11 +10,12 @@ import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../..
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
 import { ArrowRight } from "../../../ui/PickerArrows";
 import { Button } from "../../../ui/Button";
-import { CloseButton } from "../../../ui/CloseButton";
+import { ModalHeader } from "../../../ui/ModalHeader";
+import { ModalShell } from "../../../ui/ModalShell";
 import { InfoModal } from "../../../components/InfoModal";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
-import { editableInputClass, uiTextBody, uiTextLabel, uiTextMuted, uiFormLabel, uiInfoModalWrapper, uiItemName, uiCardTitle, uiTextGMNote } from "../../../ui/editableStyles";
+import { editableInputClass, uiTextBody, uiTextLabel, uiTextMuted, uiFormLabel, uiInfoModalWrapper, uiItemName, uiTextGMNote } from "../../../ui/editableStyles";
 import { uiPickerBackButton } from "../../../ui/buttonStyles";
 import { StatusBadge } from "../../../ui/StatusBadge";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
@@ -91,19 +91,6 @@ export function ImplantPicker({
     .filter((item) => item.name.toLowerCase().includes(normalizedQuery))
     .sort((a, b) => a.name.localeCompare(b.name));
 
-  const step = pendingCost ? "cost"
-    : (selected && selected.requiresLocation && !location) ? "location"
-    : selected ? "craft"
-    : "list";
-
-  const dialogRef = useRef<HTMLDialogElement | null>(null);
-  useEffect(() => {
-    const d = dialogRef.current;
-    if (!d) return;
-    d.showModal();
-    return () => { if (d.open) d.close(); };
-  }, [step]);
-
   const resetPicker = () => {
     setSelected(null);
     setPendingCost(null);
@@ -173,17 +160,13 @@ export function ImplantPicker({
         />
       );
     }
-    return createPortal(
-      <dialog
-        ref={dialogRef}
+    return (
+      <ModalShell
+        ariaLabel="Assigned Cost"
         onClose={resetPicker}
-        onClick={(e) => { if (e.target === dialogRef.current) resetPicker(); }}
-        className="m-auto w-[calc(100%-2rem)] max-w-md lg:max-w-lg bg-slate-900 border border-slate-500 rounded-xl shadow-2xl p-0 backdrop:bg-black/50 backdrop:backdrop-blur-sm"
+        className="max-w-md lg:max-w-lg overflow-y-auto"
       >
-        <div className="flex items-center justify-between px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
-          <h3 className={uiCardTitle}>Assigned Cost</h3>
-          <CloseButton onClick={resetPicker} />
-        </div>
+        <ModalHeader title="Assigned Cost" onClose={resetPicker} />
 
         <PickerBody>
           <p className={`text-sm lg:text-base ${uiTextBody}`}>
@@ -233,8 +216,7 @@ export function ImplantPicker({
             Continue
           </Button>
         </div>
-      </dialog>,
-      document.body
+      </ModalShell>
     );
   }
 
@@ -253,17 +235,13 @@ export function ImplantPicker({
           { label: "Both Legs", value: ["leftLeg", "rightLeg"] },
         ];
 
-    return createPortal(
-      <dialog
-        ref={dialogRef}
+    return (
+      <ModalShell
+        ariaLabel={selected.name}
         onClose={resetPicker}
-        onClick={(e) => { if (e.target === dialogRef.current) resetPicker(); }}
-        className="m-auto w-[calc(100%-2rem)] max-w-md lg:max-w-lg bg-slate-900 border border-slate-500 rounded-xl shadow-2xl p-0 backdrop:bg-black/50 backdrop:backdrop-blur-sm"
+        className="max-w-md lg:max-w-lg overflow-y-auto"
       >
-        <div className="flex items-center justify-between px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
-          <h3 className={uiCardTitle}>{selected.name}</h3>
-          <CloseButton onClick={resetPicker} />
-        </div>
+        <ModalHeader title={selected.name} onClose={resetPicker} />
 
         <div className="px-4 lg:px-5 py-4 lg:py-5 space-y-3">
           <p className={`text-xs lg:text-sm ${uiTextMuted}`}>Select installation side:</p>
@@ -285,25 +263,20 @@ export function ImplantPicker({
             Back
           </button>
         </div>
-      </dialog>,
-      document.body
+      </ModalShell>
     );
   }
 
   // ── Step 3: Craftsmanship picker ──────────────────────────────────────────
   if (selected) {
     const qualities = availableCraftsmanship(selected);
-    return createPortal(
-      <dialog
-        ref={dialogRef}
+    return (
+      <ModalShell
+        ariaLabel={selected.name}
         onClose={resetPicker}
-        onClick={(e) => { if (e.target === dialogRef.current) resetPicker(); }}
-        className="m-auto w-[calc(100%-2rem)] max-w-md lg:max-w-lg bg-slate-900 border border-slate-500 rounded-xl shadow-2xl p-0 backdrop:bg-black/50 backdrop:backdrop-blur-sm"
+        className="max-w-md lg:max-w-lg overflow-y-auto"
       >
-        <div className="flex items-center justify-between px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
-          <h3 className={uiCardTitle}>{selected.name}</h3>
-          <CloseButton onClick={resetPicker} />
-        </div>
+        <ModalHeader title={selected.name} onClose={resetPicker} />
 
         <PickerBody>
           {location && (
@@ -352,8 +325,7 @@ export function ImplantPicker({
             Install
           </Button>
         </div>
-      </dialog>,
-      document.body
+      </ModalShell>
     );
   }
 

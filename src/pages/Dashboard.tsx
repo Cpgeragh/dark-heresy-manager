@@ -28,10 +28,11 @@ import {
 } from "../services/campaignService";
 import { archiveCampaign, restoreCampaign } from "../utils/campaignActions";
 import type { CampaignWithId, CharacterListItem } from "../types/Firestore";
-import { uiSection, editableInputClass, uiTextError, uiCardTitle } from "../ui/editableStyles";
+import { uiSection, editableInputClass, uiTextError } from "../ui/editableStyles";
 import { Button } from "../ui/Button";
-import { CloseButton } from "../ui/CloseButton";
 import { ExpandChevron } from "../ui/ExpandChevron";
+import { ModalHeader } from "../ui/ModalHeader";
+import { ModalShell } from "../ui/ModalShell";
 import { PageShell } from "../ui/PageShell";
 import { Panel } from "../ui/Panel";
 import { SectionHeader } from "../ui/SectionHeader";
@@ -401,23 +402,19 @@ function DmCampaignList({
 
 function QrModal({ title, url, onClose }: { title: string; url: string; onClose: () => void }) {
   return (
-    <>
-      <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
-        <div className="bg-slate-900 border border-slate-700 rounded-xl p-5 lg:p-6 flex flex-col gap-4 pointer-events-auto max-w-xs lg:max-w-sm w-full mx-4">
-          <div className="flex items-center justify-between">
-            <span className={uiCardTitle}>{title}</span>
-            <CloseButton
-              onClick={onClose}
-            />
-          </div>
-          <div className="p-3 bg-white rounded-lg flex justify-center">
-            <QRCodeSVG value={url} size={220} />
-          </div>
-          <p className="text-xs lg:text-sm text-slate-500 break-all text-center">{url}</p>
+    <ModalShell
+      ariaLabel={title}
+      onClose={onClose}
+      className="max-w-xs lg:max-w-sm overflow-y-auto"
+    >
+      <ModalHeader title={title} onClose={onClose} />
+      <div className="p-5 lg:p-6 space-y-4">
+        <div className="p-3 bg-white rounded-lg flex justify-center">
+          <QRCodeSVG value={url} size={220} />
         </div>
+        <p className="text-xs lg:text-sm text-slate-500 break-all text-center">{url}</p>
       </div>
-    </>
+    </ModalShell>
   );
 }
 

@@ -1,13 +1,13 @@
 // src/pages/characterSheet/WeaponTrainingTab.tsx
 
-import { useState, useCallback, useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
+import { useState, useCallback } from "react";
 import type { WeaponTrainingBlock, WeaponTrainingTalentId } from "../../types/Character";
 import { WEAPON_TRAINING_GROUPS } from "../../data/weaponTrainingData";
 import { Button } from "../../ui/Button";
-import { CloseButton } from "../../ui/CloseButton";
 import { editableInputClass, uiFormLabel, uiTextPlaceholder } from "../../ui/editableStyles";
 import { uiDismissButton } from "../../ui/buttonStyles";
+import { ModalHeader } from "../../ui/ModalHeader";
+import { ModalShell } from "../../ui/ModalShell";
 import {
   colourActiveOutlineTeal,
   colourActiveOutlineViolet,
@@ -68,14 +68,6 @@ export function WeaponTrainingTab({ weaponTraining, editable, onUpdate }: Weapon
     setNewExotic("");
     setShowExoticModal(false);
   }, []);
-
-  const dialogRef = useRef<HTMLDialogElement | null>(null);
-  useEffect(() => {
-    const d = dialogRef.current;
-    if (!d) return;
-    d.showModal();
-    return () => { if (d.open) d.close(); };
-  }, [showExoticModal]);
 
   return (
     <div className="space-y-6 text-center">
@@ -150,18 +142,14 @@ export function WeaponTrainingTab({ weaponTraining, editable, onUpdate }: Weapon
         </div>
       </div>
 
-      {showExoticModal && createPortal(
-        <dialog
-          ref={dialogRef}
+      {showExoticModal && (
+        <ModalShell
+          ariaLabel="Add Exotic Weapon"
           onClose={closeModal}
-          onClick={(e) => { if (e.target === dialogRef.current) closeModal(); }}
-          className="m-auto w-[calc(100%-2rem)] max-w-sm bg-slate-900 border border-slate-700 rounded-lg shadow-xl p-5 backdrop:bg-black/50 backdrop:backdrop-blur-sm"
+          className="max-w-sm overflow-y-auto"
         >
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="font-semibold text-slate-100">Add Exotic Weapon</span>
-              <CloseButton onClick={closeModal} />
-            </div>
+          <ModalHeader title="Add Exotic Weapon" onClose={closeModal} />
+          <div className="p-5 space-y-4">
             <input
               autoFocus
               type="text"
@@ -169,7 +157,6 @@ export function WeaponTrainingTab({ weaponTraining, editable, onUpdate }: Weapon
               onChange={(e) => setNewExotic(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && newExotic.trim()) { handleAddExotic(); setShowExoticModal(false); }
-                if (e.key === "Escape") closeModal();
               }}
               placeholder="e.g. Needle Pistol"
               className={editableInputClass(true)}
@@ -183,8 +170,7 @@ export function WeaponTrainingTab({ weaponTraining, editable, onUpdate }: Weapon
               + Add Exotic
             </Button>
           </div>
-        </dialog>,
-        document.body
+        </ModalShell>
       )}
     </div>
   );

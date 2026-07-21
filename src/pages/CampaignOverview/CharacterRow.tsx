@@ -8,8 +8,9 @@ import { useToast } from "../../components/Toast";
 import { cloneCharacter, deleteCharacter } from "../../services/characterService";
 import { uiSection } from "../../ui/editableStyles";
 import { Button } from "../../ui/Button";
-import { CloseButton } from "../../ui/CloseButton";
 import { ConfirmInline } from "../../ui/ConfirmInline";
+import { ModalHeader } from "../../ui/ModalHeader";
+import { ModalShell } from "../../ui/ModalShell";
 import type { ClaimLogAction } from "../../utils/claimLog";
 import { PortraitUpload } from "../../components/PortraitUpload";
 
@@ -131,36 +132,27 @@ export function CharacterRow({
 
       {/* History modal */}
       {showHistory && (
-        <>
-          <div
-            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
-            onClick={() => setShowHistory(false)}
-          />
-          <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
-            <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 lg:p-5 flex flex-col gap-3 pointer-events-auto w-80 lg:w-96 max-w-[90vw]">
-              <div className="flex justify-between items-center">
-                <p className="text-sm lg:text-base font-semibold text-slate-100 text-center flex-1">History</p>
-                <CloseButton
-                  onClick={() => setShowHistory(false)}
-                />
-              </div>
-              <div className="space-y-1">
-                {logs.length === 0 ? (
-                  <p className="text-xs lg:text-sm text-slate-500">No history yet.</p>
-                ) : (
-                  logs.map((log) => (
-                    <p key={log.id} className="text-xs lg:text-sm text-slate-400">
-                      <span className="text-slate-200">{formatAction(log.action)}</span>
-                      {log.timestamp && (
-                        <span className="text-slate-600"> · {formatTimestamp(log.timestamp)}</span>
-                      )}
-                    </p>
-                  ))
-                )}
-              </div>
-            </div>
+        <ModalShell
+          ariaLabel="Character history"
+          onClose={() => setShowHistory(false)}
+          className="max-w-xs lg:max-w-sm overflow-y-auto"
+        >
+          <ModalHeader title="History" onClose={() => setShowHistory(false)} />
+          <div className="p-4 lg:p-5 space-y-1">
+            {logs.length === 0 ? (
+              <p className="text-xs lg:text-sm text-slate-500">No history yet.</p>
+            ) : (
+              logs.map((log) => (
+                <p key={log.id} className="text-xs lg:text-sm text-slate-400">
+                  <span className="text-slate-200">{formatAction(log.action)}</span>
+                  {log.timestamp && (
+                    <span className="text-slate-600"> · {formatTimestamp(log.timestamp)}</span>
+                  )}
+                </p>
+              ))
+            )}
           </div>
-        </>
+        </ModalShell>
       )}
     </>
   );

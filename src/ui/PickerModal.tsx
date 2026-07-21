@@ -1,11 +1,10 @@
 // src/ui/PickerModal.tsx
-// Shared shell for reference-picker modals: backdrop, header, search input, scrollable list.
+// Shared reference-picker layout: header, search input, scrollable list, and footer.
 
-import { createPortal } from "react-dom";
-import { useEffect, useState } from "react";
 import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from "react";
-import { CloseButton } from "./CloseButton";
 import { editableInputClass } from "./editableStyles";
+import { ModalHeader } from "./ModalHeader";
+import { ModalShell } from "./ModalShell";
 
 export function PickerBody({
   className = "",
@@ -74,47 +73,6 @@ export function PickerCustomAction({
   );
 }
 
-function getViewportState() {
-  return {
-    top: 0,
-    left: 0,
-    width: window.innerWidth,
-    height: window.innerHeight,
-  };
-}
-
-function useVisualViewport() {
-  const [viewport, setViewport] = useState(getViewportState);
-
-  useEffect(() => {
-    const visualViewport = window.visualViewport;
-    if (!visualViewport) {
-      const update = () => setViewport(getViewportState());
-      window.addEventListener("resize", update);
-      return () => window.removeEventListener("resize", update);
-    }
-
-    const update = () => {
-      setViewport({
-        top: visualViewport.offsetTop,
-        left: visualViewport.offsetLeft,
-        width: visualViewport.width,
-        height: visualViewport.height,
-      });
-    };
-
-    update();
-    visualViewport.addEventListener("resize", update);
-    visualViewport.addEventListener("scroll", update);
-    return () => {
-      visualViewport.removeEventListener("resize", update);
-      visualViewport.removeEventListener("scroll", update);
-    };
-  }, []);
-
-  return viewport;
-}
-
 interface Props {
   title: string;
   titleClassName?: string;
@@ -175,95 +133,55 @@ export function PickerModal({
   maxWidth = "max-w-lg lg:max-w-2xl",
   children,
 }: Props) {
-  const viewport = useVisualViewport();
-  const useVisibleViewport =
-    viewport.width < window.innerWidth || viewport.height < window.innerHeight;
-  const modalMaxHeight = Math.max(0, viewport.height - 32);
-
-  useEffect(() => {
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, []);
-
-  return createPortal(
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/70 backdrop-blur-sm p-4"
-      style={
-        useVisibleViewport
-          ? {
-              top: viewport.top,
-              left: viewport.left,
-              right: "auto",
-              bottom: "auto",
-              width: viewport.width,
-              height: viewport.height,
-            }
-          : undefined
-      }
-      onClick={onClose}
+  return (
+    <ModalShell
+      ariaLabel={title}
+      onClose={onClose}
+      viewportAware
+      className={`min-h-0 ${maxWidth} flex flex-col overflow-hidden ${maxHeight}`}
     >
-      <div
-        className={`w-full min-h-0 ${maxWidth} bg-slate-900 border border-slate-500 rounded-xl shadow-2xl flex flex-col overflow-hidden ${maxHeight}`}
-        style={{ maxHeight: useVisibleViewport ? modalMaxHeight : undefined }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="grid grid-cols-[2rem_1fr_2rem] items-center px-4 lg:px-5 py-3 lg:py-4 border-b border-slate-700">
-          <span aria-hidden />
-          <h3 className={`text-center text-sm lg:text-base font-cinzel font-bold ${titleClassName ?? "text-red-500"}`}>{title}</h3>
-          {closeAriaLabel === "Close" ? (
-            <CloseButton onClick={onClose} className="justify-self-end" />
-          ) : (
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label={closeAriaLabel}
-              className="justify-self-end text-slate-400 hover:text-slate-200 text-lg lg:text-xl leading-none"
-            >
-              {closeLabel}
-            </button>
-          )}
+      <ModalHeader
+        title={title}
+        titleClassName={titleClassName}
+        onClose={onClose}
+        action={closeAriaLabel === "Close" ? undefined : closeLabel}
+        actionAriaLabel={closeAriaLabel}
+      />
+
+      {/* Search */}
+      {!hideSearch && (
+        <div className="px-4 lg:px-5 py-2 lg:py-3 border-b border-slate-800">
+          <input
+            type="text"
+            placeholder={placeholder}
+            value={query}
+            onChange={(e) => onQueryChange(e.target.value)}
+            inputMode="search"
+            enterKeyHint="search"
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="none"
+            spellCheck={false}
+            className={editableInputClass(true)}
+          />
         </div>
+      )}
 
-        {/* Search */}
-        {!hideSearch && (
-          <div className="px-4 lg:px-5 py-2 lg:py-3 border-b border-slate-800">
-            <input
-              type="text"
-              placeholder={placeholder}
-              value={query}
-              onChange={(e) => onQueryChange(e.target.value)}
-              inputMode="search"
-              enterKeyHint="search"
-              autoComplete="off"
-              autoCorrect="off"
-              autoCapitalize="none"
-              spellCheck={false}
-              className={editableInputClass(true)}
-            />
-          </div>
-        )}
-
-        {/* Optional filter row (e.g. discipline chips) */}
-        {filterRow && (
-          <div className="px-4 lg:px-5 py-2 lg:py-3 border-b border-slate-800 flex flex-wrap gap-1.5 justify-center">
-            {filterRow}
-          </div>
-        )}
-
-        {/* Scrollable list */}
-        <div className="min-h-0 overflow-y-auto flex-1 divide-y divide-slate-800">
-          {isEmpty && <p className="p-4 lg:p-5 text-sm lg:text-base text-slate-500 text-center">{emptyMessage}</p>}
-          {children}
+      {/* Optional filter row (e.g. discipline chips) */}
+      {filterRow && (
+        <div className="px-4 lg:px-5 py-2 lg:py-3 border-b border-slate-800 flex flex-wrap gap-1.5 justify-center">
+          {filterRow}
         </div>
+      )}
 
-        {/* Optional footer (e.g. "+ Add custom" button or specialisation form) */}
-        {footer && <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700">{footer}</div>}
+      {/* Scrollable list */}
+      <div className="min-h-0 overflow-y-auto flex-1 divide-y divide-slate-800">
+        {isEmpty && <p className="p-4 lg:p-5 text-sm lg:text-base text-slate-500 text-center">{emptyMessage}</p>}
+        {children}
       </div>
-    </div>,
-    document.body
+
+      {/* Optional footer (e.g. "+ Add custom" button or specialisation form) */}
+      {footer && <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700">{footer}</div>}
+    </ModalShell>
   );
 }

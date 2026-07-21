@@ -1,12 +1,12 @@
 // src/components/PortraitUpload.tsx
 
 import { useState, useCallback, useRef } from "react";
-import { createPortal } from "react-dom";
 import Cropper from "react-easy-crop";
 import type { Point, Area } from "react-easy-crop";
 import { uploadPortrait } from "../services/portraitService";
 import { Button } from "../ui/Button";
-import { CloseButton } from "../ui/CloseButton";
+import { ModalHeader } from "../ui/ModalHeader";
+import { ModalShell } from "../ui/ModalShell";
 import { useToast } from "./Toast";
 
 // ── Canvas helper ─────────────────────────────────────────────────────────────
@@ -168,51 +168,46 @@ export function PortraitUpload({
         />
       </div>
 
-      {/* Crop modal — rendered in a portal to escape Link event bubbling */}
-      {imageSrc && createPortal(
-        <>
-          <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" />
-          <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
-            <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 lg:p-5 flex flex-col gap-4 pointer-events-auto w-80 lg:w-96 max-w-[90vw]">
-              <div className="flex items-center">
-                <p className="text-sm lg:text-base font-semibold text-slate-100 text-center flex-1">
-                  Position Portrait
-                </p>
-                <CloseButton
-                  onClick={handleCancel}
-                />
-              </div>
+      {imageSrc && (
+        <ModalShell
+          ariaLabel="Position Portrait"
+          onClose={handleCancel}
+          closeOnBackdrop={false}
+          className="max-w-xs lg:max-w-sm overflow-y-auto"
+        >
+          <ModalHeader title="Position Portrait" onClose={handleCancel} />
+          <div className="p-4 lg:p-5 space-y-4">
 
-              {/* Cropper */}
-              <div className="relative h-64 rounded-lg overflow-hidden bg-slate-800">
-                <Cropper
-                  image={imageSrc}
-                  crop={crop}
-                  zoom={zoom}
-                  aspect={1}
-                  cropShape="round"
-                  showGrid={false}
-                  onCropChange={setCrop}
-                  onZoomChange={setZoom}
-                  onCropComplete={onCropComplete}
-                />
-              </div>
+            {/* Cropper */}
+            <div className="relative h-64 rounded-lg overflow-hidden bg-slate-800">
+              <Cropper
+                image={imageSrc}
+                crop={crop}
+                zoom={zoom}
+                aspect={1}
+                cropShape="round"
+                showGrid={false}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={onCropComplete}
+              />
+            </div>
 
-              {/* Zoom slider */}
-              <div className="flex items-center gap-3">
-                <span className="text-xs lg:text-sm text-slate-500">Zoom</span>
-                <input
-                  type="range"
-                  min={1}
-                  max={3}
-                  step={0.01}
-                  value={zoom}
-                  onChange={(e) => setZoom(Number(e.target.value))}
-                  className="flex-1 accent-red-600"
-                />
-              </div>
+            {/* Zoom slider */}
+            <div className="flex items-center gap-3">
+              <span className="text-xs lg:text-sm text-slate-500">Zoom</span>
+              <input
+                type="range"
+                min={1}
+                max={3}
+                step={0.01}
+                value={zoom}
+                onChange={(e) => setZoom(Number(e.target.value))}
+                className="flex-1 accent-red-600"
+              />
+            </div>
 
-              <div className="flex gap-2">
+            <div className="flex gap-2">
               <Button
                 className="flex-1"
                 onClick={handleSave}
@@ -228,11 +223,9 @@ export function PortraitUpload({
                 >
                   Cancel
                 </Button>
-              </div>
             </div>
           </div>
-        </>,
-        document.body
+        </ModalShell>
       )}
     </>
   );
