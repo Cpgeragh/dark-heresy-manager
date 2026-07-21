@@ -9,7 +9,7 @@ import type {
   ArcheotechItem,
 } from "../../../types/Character";
 import { RANGED_WEAPON_REFERENCE } from "../../../data/reference/weaponReference";
-import type { CampaignCustomItem } from "../../../types/CustomItems";
+import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/StatusBadge";
 import {
@@ -366,14 +366,6 @@ export function RangedCard({
 }: {
   weapon: RangedWeapon;
   editable: boolean;
-  libraryItem?: CampaignCustomItem<"weapon">;
-  isDM?: boolean;
-  canEditDefinition?: boolean;
-  busyAction?: "publish" | "archive" | "updateAll" | null;
-  onEditDefinition?: () => void;
-  onPublish?: () => void;
-  onArchive?: () => void;
-  onUpdateAllCopies?: () => void;
   onRemove: () => void;
   onAddUpgrade: (upgradeId: string) => void;
   onRemoveUpgrade: (upgradeId: string) => void;
@@ -388,7 +380,7 @@ export function RangedCard({
   slotsDisabled?: boolean;
   forceExpanded?: boolean;
   integrated?: boolean;
-}) {
+} & CustomItemLibraryActionProps<"weapon">) {
   const [expanded, setExpanded] = useState(isEquipped);
   useEffect(() => {
     setExpanded(isEquipped);

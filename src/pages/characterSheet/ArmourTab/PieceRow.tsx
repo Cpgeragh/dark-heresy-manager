@@ -7,23 +7,15 @@ import { InfoModal } from "../../../components/InfoModal";
 import { locationLabel, armourCraftsmanshipDescription } from "./armourHelpers";
 import { ARMOUR_REFERENCE } from "../../../data/reference/armourReference";
 import { ARMOUR_SPECIAL_RULES } from "../../../data/reference/armourSpecialRules";
-import type { CampaignCustomItem } from "../../../types/CustomItems";
+import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/StatusBadge";
 import { TrashIcon } from "../../../ui/TrashIcon";
 
-interface Props {
+interface Props extends CustomItemLibraryActionProps<"armour"> {
   piece: WornArmourPiece;
   editable: boolean;
   worn: boolean;
-  libraryItem?: CampaignCustomItem<"armour">;
-  isDM?: boolean;
-  canEditDefinition?: boolean;
-  busyAction?: "publish" | "archive" | "updateAll" | null;
-  onEditDefinition?: () => void;
-  onPublish?: () => void;
-  onArchive?: () => void;
-  onUpdateAllCopies?: () => void;
   onToggle: (id: string) => void;
   onRemove: (id: string) => void;
 }

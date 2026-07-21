@@ -13,23 +13,15 @@ import { StatChip } from "../weapons/weaponShared";
 import { locationLabel } from "../ArmourTab/armourHelpers";
 import { LOCATION_DISPLAY } from "../CyberneticsTab/cyberneticsConstants";
 import { InfoModal } from "../../../components/InfoModal";
-import type { CampaignCustomItem } from "../../../types/CustomItems";
+import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/StatusBadge";
 import { TrashIcon } from "../../../ui/TrashIcon";
 import { ExpandChevron } from "../../../ui/ExpandChevron";
 
-interface Props {
+interface Props extends CustomItemLibraryActionProps<"archeotech"> {
   item: ArcheotechItem;
   editable: boolean;
-  libraryItem?: CampaignCustomItem<"archeotech">;
-  isDM?: boolean;
-  canEditDefinition?: boolean;
-  busyAction?: "publish" | "archive" | "updateAll" | null;
-  onEditDefinition?: () => void;
-  onPublish?: () => void;
-  onArchive?: () => void;
-  onUpdateAllCopies?: () => void;
   onRemove: () => void;
 }
 

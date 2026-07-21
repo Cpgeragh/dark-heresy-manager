@@ -7,14 +7,11 @@ import { uiSection } from "../../ui/editableStyles";
 import { ConfirmInline } from "../../ui/ConfirmInline";
 import { useToast } from "../../components/Toast";
 import {
-  archiveCustomItem,
   permanentlyDeleteCustomItem,
-  publishAndUpdateAllCopies,
-  publishCustomItem,
-  removeAllCustomItemCopies,
   restoreCustomItem,
 } from "../../services/customItemService";
 import { StatusBadge } from "../../ui/StatusBadge";
+import { useCustomItemLibraryActions } from "../../hooks/useCustomItemLibraryActions";
 
 const CATEGORY_LABELS: Record<CustomItemCategory, string> = {
   gear: "Gear",
@@ -26,7 +23,7 @@ const CATEGORY_LABELS: Record<CustomItemCategory, string> = {
   archeotech: "Archeotech",
 };
 
-type BusyAction = "publish" | "archive" | "updateAll" | "restore" | "delete";
+type ManagementBusyAction = "restore" | "delete";
 
 export function CustomItemAdminRow({
   item,
@@ -37,61 +34,25 @@ export function CustomItemAdminRow({
   campaignId: string;
   userId: string;
 }) {
-  const [busyAction, setBusyAction] = useState<BusyAction | null>(null);
+  const [managementBusyAction, setManagementBusyAction] =
+    useState<ManagementBusyAction | null>(null);
   const toast = useToast();
+  const {
+    publishDefinition,
+    archiveDefinition,
+    updateAllCopies,
+    getBusyAction,
+  } = useCustomItemLibraryActions<CustomItemCategory>({
+    campaignId,
+    userId,
+    itemLabel: item.name,
+    messageStyle: "namedItem",
+  });
+  const busyAction = getBusyAction(item.id) ?? managementBusyAction;
   const busy = busyAction !== null;
 
-  const handlePublish = async () => {
-    setBusyAction("publish");
-    try {
-      await publishCustomItem({
-        campaignId,
-        customItemId: item.id,
-        actorUserId: userId,
-        versionId: item.draftVersionId ?? item.latestVersionId,
-      });
-      toast.success(`${item.name} published.`);
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to publish item.");
-    } finally {
-      setBusyAction(null);
-    }
-  };
-
-  const handleArchive = async () => {
-    setBusyAction("archive");
-    try {
-      await archiveCustomItem({ campaignId, customItemId: item.id, actorUserId: userId });
-      await removeAllCustomItemCopies({ campaignId, customItemId: item.id });
-      toast.success(`${item.name} archived and removed from all characters.`);
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to archive item.");
-    } finally {
-      setBusyAction(null);
-    }
-  };
-
-  const handleUpdateAll = async () => {
-    setBusyAction("updateAll");
-    try {
-      const count = await publishAndUpdateAllCopies({
-        campaignId,
-        customItemId: item.id,
-        actorUserId: userId,
-      });
-      toast.success(`Updated ${count} ${count === 1 ? "copy" : "copies"}.`);
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to update copies.");
-    } finally {
-      setBusyAction(null);
-    }
-  };
-
   const handleRestore = async () => {
-    setBusyAction("restore");
+    setManagementBusyAction("restore");
     try {
       await restoreCustomItem({ campaignId, customItemId: item.id, actorUserId: userId });
       toast.success(`${item.name} restored.`);
@@ -99,12 +60,12 @@ export function CustomItemAdminRow({
       console.error(err);
       toast.error("Failed to restore item.");
     } finally {
-      setBusyAction(null);
+      setManagementBusyAction(null);
     }
   };
 
   const handleDelete = async () => {
-    setBusyAction("delete");
+    setManagementBusyAction("delete");
     try {
       await permanentlyDeleteCustomItem({ campaignId, customItemId: item.id });
       toast.success(`${item.name} permanently deleted.`);
@@ -112,7 +73,7 @@ export function CustomItemAdminRow({
       console.error(err);
       toast.error("Failed to delete item.");
     } finally {
-      setBusyAction(null);
+      setManagementBusyAction(null);
     }
   };
 
@@ -135,7 +96,7 @@ export function CustomItemAdminRow({
           {item.status === "draft" && (
             <Button
               size="xs"
-              onClick={handlePublish}
+              onClick={() => publishDefinition(item)}
               disabled={busy}
             >
               {busyAction === "publish" ? "Publishing…" : "Publish"}
@@ -144,7 +105,7 @@ export function CustomItemAdminRow({
           {item.status !== "archived" && (
             <Button
               size="xs"
-              onClick={handleArchive}
+              onClick={() => archiveDefinition(item)}
               disabled={busy}
             >
               {busyAction === "archive" ? "Archiving…" : "Archive"}
@@ -153,7 +114,7 @@ export function CustomItemAdminRow({
           {item.status === "published" && !!item.draftVersionId && (
             <Button
               size="xs"
-              onClick={handleUpdateAll}
+              onClick={() => updateAllCopies(item)}
               disabled={busy}
             >
               {busyAction === "updateAll" ? "Updating…" : "Update All Copies"}

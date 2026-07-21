@@ -24,13 +24,10 @@ import { uiSection, uiTextLabel, uiTextPlaceholder, uiInfoModalWrapper } from ".
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { InfoModal } from "../../../components/InfoModal";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
+import { useCustomItemLibraryActions } from "../../../hooks/useCustomItemLibraryActions";
 import {
-  archiveCustomItem,
   createDraftCustomItem,
   inferCustomItemStatus,
-  publishAndUpdateAllCopies,
-  publishCustomItem,
-  removeAllCustomItemCopies,
   saveDraftCustomItem,
 } from "../../../services/customItemService";
 import { useToast } from "../../../components/Toast";
@@ -55,8 +52,6 @@ interface EditingArmourDefinition {
   piece: WornArmourPiece;
   libraryItem: CampaignCustomItem<"armour">;
 }
-
-type ArmourLibraryAction = "publish" | "archive" | "updateAll";
 
 function formatKg(value: number): string {
   return `${Number(value.toFixed(2))} kg`;
@@ -164,11 +159,13 @@ export function ArmourTab({
   const [pickerMode, setPickerMode] = useState<"worn" | "stowed">("worn");
   const [editingArmourDefinition, setEditingArmourDefinition] =
     useState<EditingArmourDefinition | null>(null);
-  const [busyLibraryAction, setBusyLibraryAction] = useState<{
-    itemId: string;
-    action: ArmourLibraryAction;
-  } | null>(null);
   const toast = useToast();
+  const {
+    publishDefinition: publishArmourDefinition,
+    archiveDefinition: archiveArmourDefinition,
+    updateAllCopies: updateAllArmourCopies,
+    getBusyAction,
+  } = useCustomItemLibraryActions<"armour">({ campaignId, userId, itemLabel: "armour" });
 
   const { items: campaignCustomArmourItems, loading: armourLoading } = useCampaignCustomItems({
     campaignId,
@@ -366,71 +363,6 @@ export function ArmourTab({
     [editable, armour, onUpdate]
   );
 
-  const publishArmourDefinition = useCallback(
-    async (libraryItem: CampaignCustomItem<"armour">) => {
-      if (!userId) return;
-      setBusyLibraryAction({ itemId: libraryItem.id, action: "publish" });
-      try {
-        await publishCustomItem({
-          campaignId,
-          customItemId: libraryItem.id,
-          actorUserId: userId,
-          versionId: libraryItem.draftVersionId ?? libraryItem.latestVersionId,
-        });
-        toast.success("Custom armour published.");
-      } catch (err) {
-        console.error("Failed to publish custom armour:", err);
-        toast.error("Failed to publish custom armour.");
-      } finally {
-        setBusyLibraryAction(null);
-      }
-    },
-    [campaignId, toast, userId]
-  );
-
-  const archiveArmourDefinition = useCallback(
-    async (libraryItem: CampaignCustomItem<"armour">) => {
-      if (!userId) return;
-      setBusyLibraryAction({ itemId: libraryItem.id, action: "archive" });
-      try {
-        await archiveCustomItem({
-          campaignId,
-          customItemId: libraryItem.id,
-          actorUserId: userId,
-        });
-        await removeAllCustomItemCopies({ campaignId, customItemId: libraryItem.id });
-        toast.success("Custom armour archived and removed from all characters.");
-      } catch (err) {
-        console.error("Failed to archive custom armour:", err);
-        toast.error("Failed to archive custom armour.");
-      } finally {
-        setBusyLibraryAction(null);
-      }
-    },
-    [campaignId, toast, userId]
-  );
-
-  const updateAllArmourCopies = useCallback(
-    async (libraryItem: CampaignCustomItem<"armour">) => {
-      if (!userId) return;
-      setBusyLibraryAction({ itemId: libraryItem.id, action: "updateAll" });
-      try {
-        const updatedCopies = await publishAndUpdateAllCopies({
-          campaignId,
-          customItemId: libraryItem.id,
-          actorUserId: userId,
-        });
-        toast.success(`Updated ${updatedCopies} armour ${updatedCopies === 1 ? "copy" : "copies"}.`);
-      } catch (err) {
-        console.error("Failed to update custom armour copies:", err);
-        toast.error("Failed to update custom armour copies.");
-      } finally {
-        setBusyLibraryAction(null);
-      }
-    },
-    [campaignId, toast, userId]
-  );
-
   const regularArmour = armour.filter((p) => !p.isForceField);
   const forceFields = armour.filter((p) => p.isForceField);
   const worn = regularArmour.filter((p) => p.worn);
@@ -488,10 +420,7 @@ export function ArmourTab({
         !piece.isForceField &&
         editable &&
         (isDM || (!!userId && libraryItem.creator.userId === userId));
-      const rowBusyAction =
-        busyLibraryAction && libraryItem && busyLibraryAction.itemId === libraryItem.id
-          ? busyLibraryAction.action
-          : null;
+      const rowBusyAction = libraryItem ? getBusyAction(libraryItem.id) : null;
 
       return (
         <PieceRow
@@ -514,8 +443,8 @@ export function ArmourTab({
     },
     [
       archiveArmourDefinition,
-      busyLibraryAction,
       editable,
+      getBusyAction,
       getLibraryItemForPiece,
       isDM,
       publishArmourDefinition,
@@ -529,10 +458,7 @@ export function ArmourTab({
   const renderForceFieldRow = useCallback(
     (piece: WornArmourPiece) => {
       const libraryItem = getLibraryItemForPiece(piece);
-      const rowBusyAction =
-        busyLibraryAction && libraryItem && busyLibraryAction.itemId === libraryItem.id
-          ? busyLibraryAction.action
-          : null;
+      const rowBusyAction = libraryItem ? getBusyAction(libraryItem.id) : null;
 
       return (
         <ForceFieldRow
@@ -553,8 +479,8 @@ export function ArmourTab({
     },
     [
       archiveArmourDefinition,
-      busyLibraryAction,
       editable,
+      getBusyAction,
       getLibraryItemForPiece,
       isDM,
       publishArmourDefinition,

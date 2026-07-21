@@ -10,22 +10,14 @@ import { CRAFTSMANSHIP_STYLE } from "../../../ui/craftsmanship";
 import { LOCATION_DISPLAY } from "./cyberneticsConstants";
 import { availableCraftsmanship, craftsmanshipDescription } from "./cyberneticsHelpers";
 import { InfoModal } from "../../../components/InfoModal";
-import type { CampaignCustomItem } from "../../../types/CustomItems";
+import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/StatusBadge";
 import { TrashIcon } from "../../../ui/TrashIcon";
 
-interface Props {
+interface Props extends CustomItemLibraryActionProps<"cybernetic"> {
   item: CyberneticItem;
   editable: boolean;
-  libraryItem?: CampaignCustomItem<"cybernetic">;
-  isDM?: boolean;
-  canEditDefinition?: boolean;
-  busyAction?: "publish" | "archive" | "updateAll" | null;
-  onEditDefinition?: () => void;
-  onPublish?: () => void;
-  onArchive?: () => void;
-  onUpdateAllCopies?: () => void;
   onCycleQuality: (id: string) => void;
   onRemove: (id: string) => void;
 }

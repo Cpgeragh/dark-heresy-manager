@@ -22,13 +22,10 @@ import { SectionHeader } from "../../../ui/SectionHeader";
 import { CYBERNETICS_REFERENCE } from "../../../data/reference/cyberneticsReference";
 import { uiTextPlaceholder } from "../../../ui/editableStyles";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
+import { useCustomItemLibraryActions } from "../../../hooks/useCustomItemLibraryActions";
 import {
-  archiveCustomItem,
   createDraftCustomItem,
   inferCustomItemStatus,
-  publishAndUpdateAllCopies,
-  publishCustomItem,
-  removeAllCustomItemCopies,
   saveDraftCustomItem,
 } from "../../../services/customItemService";
 import { useToast } from "../../../components/Toast";
@@ -74,8 +71,6 @@ interface EditingCyberneticDefinition {
   libraryItem: CampaignCustomItem<"cybernetic">;
 }
 
-type CyberneticLibraryAction = "publish" | "archive" | "updateAll";
-
 export function CyberneticsTab({
   campaignId,
   characterId,
@@ -102,11 +97,17 @@ export function CyberneticsTab({
     useState<CampaignCustomItem<"cybernetic"> | null>(null);
   const [editingCyberneticDefinition, setEditingCyberneticDefinition] =
     useState<EditingCyberneticDefinition | null>(null);
-  const [busyLibraryAction, setBusyLibraryAction] = useState<{
-    itemId: string;
-    action: CyberneticLibraryAction;
-  } | null>(null);
   const toast = useToast();
+  const {
+    publishDefinition: publishCyberneticDefinition,
+    archiveDefinition: archiveCyberneticDefinition,
+    updateAllCopies: updateAllCyberneticCopies,
+    getBusyAction,
+  } = useCustomItemLibraryActions<"cybernetic">({
+    campaignId,
+    userId,
+    itemLabel: "cybernetic",
+  });
 
   const { items: campaignCustomCyberneticItems, loading: cyberneticsLoading } = useCampaignCustomItems({
     campaignId,
@@ -476,73 +477,6 @@ export function CyberneticsTab({
     [editable, meleeWeapons, onUpdateMelee]
   );
 
-  const publishCyberneticDefinition = useCallback(
-    async (libraryItem: CampaignCustomItem<"cybernetic">) => {
-      if (!userId) return;
-      setBusyLibraryAction({ itemId: libraryItem.id, action: "publish" });
-      try {
-        await publishCustomItem({
-          campaignId,
-          customItemId: libraryItem.id,
-          actorUserId: userId,
-          versionId: libraryItem.draftVersionId ?? libraryItem.latestVersionId,
-        });
-        toast.success("Custom cybernetic published.");
-      } catch (err) {
-        console.error("Failed to publish custom cybernetic:", err);
-        toast.error("Failed to publish custom cybernetic.");
-      } finally {
-        setBusyLibraryAction(null);
-      }
-    },
-    [campaignId, toast, userId]
-  );
-
-  const archiveCyberneticDefinition = useCallback(
-    async (libraryItem: CampaignCustomItem<"cybernetic">) => {
-      if (!userId) return;
-      setBusyLibraryAction({ itemId: libraryItem.id, action: "archive" });
-      try {
-        await archiveCustomItem({
-          campaignId,
-          customItemId: libraryItem.id,
-          actorUserId: userId,
-        });
-        await removeAllCustomItemCopies({ campaignId, customItemId: libraryItem.id });
-        toast.success("Custom cybernetic archived and removed from all characters.");
-      } catch (err) {
-        console.error("Failed to archive custom cybernetic:", err);
-        toast.error("Failed to archive custom cybernetic.");
-      } finally {
-        setBusyLibraryAction(null);
-      }
-    },
-    [campaignId, toast, userId]
-  );
-
-  const updateAllCyberneticCopies = useCallback(
-    async (libraryItem: CampaignCustomItem<"cybernetic">) => {
-      if (!userId) return;
-      setBusyLibraryAction({ itemId: libraryItem.id, action: "updateAll" });
-      try {
-        const updatedCopies = await publishAndUpdateAllCopies({
-          campaignId,
-          customItemId: libraryItem.id,
-          actorUserId: userId,
-        });
-        toast.success(
-          `Updated ${updatedCopies} cybernetic ${updatedCopies === 1 ? "copy" : "copies"}.`
-        );
-      } catch (err) {
-        console.error("Failed to update custom cybernetic copies:", err);
-        toast.error("Failed to update custom cybernetic copies.");
-      } finally {
-        setBusyLibraryAction(null);
-      }
-    },
-    [campaignId, toast, userId]
-  );
-
   const cyberneticColumns = [
     cybernetics.filter((_, index) => index % 2 === 0),
     cybernetics.filter((_, index) => index % 2 === 1),
@@ -567,10 +501,7 @@ export function CyberneticsTab({
       !!libraryItem &&
       editable &&
       (isDM || (!!userId && libraryItem.creator.userId === userId));
-    const rowBusyAction =
-      busyLibraryAction && libraryItem && busyLibraryAction.itemId === libraryItem.id
-        ? busyLibraryAction.action
-        : null;
+    const rowBusyAction = libraryItem ? getBusyAction(libraryItem.id) : null;
 
     return (
       <ImplantRow

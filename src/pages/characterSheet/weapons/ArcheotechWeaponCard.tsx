@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import type { ArcheotechItem } from "../../../types/Character";
-import type { CampaignCustomItem } from "../../../types/CustomItems";
+import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 import { ARCHEOTECH_REFERENCE } from "../../../data/reference/archeotechReference";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
@@ -54,20 +54,12 @@ export function ArcheotechWeaponCard({
   item: ArcheotechItem;
   strengthBonus?: number;
   editable?: boolean;
-  libraryItem?: CampaignCustomItem<"archeotech">;
-  isDM?: boolean;
-  canEditDefinition?: boolean;
-  busyAction?: "publish" | "archive" | "updateAll" | null;
-  onEditDefinition?: () => void;
-  onPublish?: () => void;
-  onArchive?: () => void;
-  onUpdateAllCopies?: () => void;
   onRemove?: () => void;
   isEquipped?: boolean;
   onToggleEquip?: () => void;
   slotsDisabled?: boolean;
   highlightAsArcheotech?: boolean;
-}) {
+} & CustomItemLibraryActionProps<"archeotech">) {
   const [expanded, setExpanded] = useState(isEquipped);
   useEffect(() => {
     setExpanded(isEquipped);

@@ -12,13 +12,10 @@ import { Button } from "../../../ui/Button";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { uiTextPlaceholder } from "../../../ui/editableStyles";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
+import { useCustomItemLibraryActions } from "../../../hooks/useCustomItemLibraryActions";
 import {
-  archiveCustomItem,
   createDraftCustomItem,
   inferCustomItemStatus,
-  publishAndUpdateAllCopies,
-  publishCustomItem,
-  removeAllCustomItemCopies,
   saveDraftCustomItem,
 } from "../../../services/customItemService";
 import { useToast } from "../../../components/Toast";
@@ -43,8 +40,6 @@ interface EditingArcheotechDefinition {
   libraryItem: CampaignCustomItem<"archeotech">;
 }
 
-type ArcheotechLibraryAction = "publish" | "archive" | "updateAll";
-
 export function ArcheotechTab({
   campaignId,
   characterId,
@@ -59,11 +54,17 @@ export function ArcheotechTab({
   const [showCustomForm, setShowCustomForm] = useState(false);
   const [editingArcheotechDefinition, setEditingArcheotechDefinition] =
     useState<EditingArcheotechDefinition | null>(null);
-  const [busyLibraryAction, setBusyLibraryAction] = useState<{
-    itemId: string;
-    action: ArcheotechLibraryAction;
-  } | null>(null);
   const toast = useToast();
+  const {
+    publishDefinition: publishArcheotechDefinition,
+    archiveDefinition: archiveArcheotechDefinition,
+    updateAllCopies: updateAllArcheotechCopies,
+    getBusyAction,
+  } = useCustomItemLibraryActions<"archeotech">({
+    campaignId,
+    userId,
+    itemLabel: "archeotech",
+  });
 
   const { items: campaignCustomArcheotechItems, loading: archeotechLoading } = useCampaignCustomItems({
     campaignId,
@@ -217,73 +218,6 @@ export function ArcheotechTab({
     [editable, archeotech, onUpdate]
   );
 
-  const publishArcheotechDefinition = useCallback(
-    async (libraryItem: CampaignCustomItem<"archeotech">) => {
-      if (!userId) return;
-      setBusyLibraryAction({ itemId: libraryItem.id, action: "publish" });
-      try {
-        await publishCustomItem({
-          campaignId,
-          customItemId: libraryItem.id,
-          actorUserId: userId,
-          versionId: libraryItem.draftVersionId ?? libraryItem.latestVersionId,
-        });
-        toast.success("Custom archeotech published.");
-      } catch (err) {
-        console.error("Failed to publish custom archeotech:", err);
-        toast.error("Failed to publish custom archeotech.");
-      } finally {
-        setBusyLibraryAction(null);
-      }
-    },
-    [campaignId, toast, userId]
-  );
-
-  const archiveArcheotechDefinition = useCallback(
-    async (libraryItem: CampaignCustomItem<"archeotech">) => {
-      if (!userId) return;
-      setBusyLibraryAction({ itemId: libraryItem.id, action: "archive" });
-      try {
-        await archiveCustomItem({
-          campaignId,
-          customItemId: libraryItem.id,
-          actorUserId: userId,
-        });
-        await removeAllCustomItemCopies({ campaignId, customItemId: libraryItem.id });
-        toast.success("Custom archeotech archived and removed from all characters.");
-      } catch (err) {
-        console.error("Failed to archive custom archeotech:", err);
-        toast.error("Failed to archive custom archeotech.");
-      } finally {
-        setBusyLibraryAction(null);
-      }
-    },
-    [campaignId, toast, userId]
-  );
-
-  const updateAllArcheotechCopies = useCallback(
-    async (libraryItem: CampaignCustomItem<"archeotech">) => {
-      if (!userId) return;
-      setBusyLibraryAction({ itemId: libraryItem.id, action: "updateAll" });
-      try {
-        const updatedCopies = await publishAndUpdateAllCopies({
-          campaignId,
-          customItemId: libraryItem.id,
-          actorUserId: userId,
-        });
-        toast.success(
-          `Updated ${updatedCopies} archeotech ${updatedCopies === 1 ? "copy" : "copies"}.`
-        );
-      } catch (err) {
-        console.error("Failed to update custom archeotech copies:", err);
-        toast.error("Failed to update custom archeotech copies.");
-      } finally {
-        setBusyLibraryAction(null);
-      }
-    },
-    [campaignId, toast, userId]
-  );
-
   const sortedArcheotech = useMemo(
     () => [...archeotech].sort((a, b) => a.name.localeCompare(b.name)),
     [archeotech]
@@ -312,10 +246,7 @@ export function ArcheotechTab({
       !!libraryItem &&
       editable &&
       (isDM || (!!userId && libraryItem.creator.userId === userId));
-    const rowBusyAction =
-      busyLibraryAction && libraryItem && busyLibraryAction.itemId === libraryItem.id
-        ? busyLibraryAction.action
-        : null;
+    const rowBusyAction = libraryItem ? getBusyAction(libraryItem.id) : null;
 
     const sharedAdminProps = {
       editable,

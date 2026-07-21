@@ -57,6 +57,7 @@ import {
   colourActiveSky,
 } from "../../ui/colourTokens";
 import { useCampaignCustomItems } from "../../hooks/useCampaignCustomItems";
+import { useCustomItemLibraryActions } from "../../hooks/useCustomItemLibraryActions";
 import { useSwipeableTabs } from "../../hooks/useSwipeableTabs";
 import { SegmentedTabs, type SegmentedTabOption } from "../../ui/SegmentedTabs";
 import {
@@ -65,11 +66,7 @@ import {
   uiSwipeableTabPanel,
 } from "../../ui/segmentedTabStyles";
 import {
-  archiveCustomItem,
   createDraftCustomItem,
-  publishAndUpdateAllCopies,
-  publishCustomItem,
-  removeAllCustomItemCopies,
   saveDraftCustomItem,
 } from "../../services/customItemService";
 import { useToast } from "../../components/Toast";
@@ -121,8 +118,6 @@ type EditingShieldDefinition = {
   shield: ShieldItem;
   libraryItem: CampaignCustomItem<"armour">;
 };
-
-type WeaponLibraryAction = "publish" | "archive" | "updateAll";
 
 type PickerTarget = "ranged" | "melee" | "grenades" | "shields" | null;
 type WeaponMobileSection = NonNullable<PickerTarget>;
@@ -209,11 +204,19 @@ export function WeaponsTab({
     useState<EditingWeaponDefinition | null>(null);
   const [editingShieldDefinition, setEditingShieldDefinition] =
     useState<EditingShieldDefinition | null>(null);
-  const [busyLibraryAction, setBusyLibraryAction] = useState<{
-    itemId: string;
-    action: WeaponLibraryAction;
-  } | null>(null);
   const toast = useToast();
+  const {
+    publishDefinition: publishWeaponDefinition,
+    archiveDefinition: archiveWeaponDefinition,
+    updateAllCopies: updateAllWeaponCopies,
+    getBusyAction: getWeaponBusyAction,
+  } = useCustomItemLibraryActions<"weapon">({ campaignId, userId, itemLabel: "weapon" });
+  const {
+    publishDefinition: publishShieldDefinition,
+    archiveDefinition: archiveShieldDefinition,
+    updateAllCopies: updateAllShieldCopies,
+    getBusyAction: getShieldBusyAction,
+  } = useCustomItemLibraryActions<"armour">({ campaignId, userId, itemLabel: "shield" });
 
   const { items: campaignCustomWeaponItems, loading: weaponsLoading } = useCampaignCustomItems({
     campaignId,
@@ -869,136 +872,6 @@ export function WeaponsTab({
     ]
   );
 
-  const publishWeaponDefinition = useCallback(
-    async (libraryItem: CampaignCustomItem<"weapon">) => {
-      if (!userId) return;
-      setBusyLibraryAction({ itemId: libraryItem.id, action: "publish" });
-      try {
-        await publishCustomItem({
-          campaignId,
-          customItemId: libraryItem.id,
-          actorUserId: userId,
-          versionId: libraryItem.draftVersionId ?? libraryItem.latestVersionId,
-        });
-        toast.success("Custom weapon published.");
-      } catch (err) {
-        console.error("Failed to publish custom weapon:", err);
-        toast.error("Failed to publish custom weapon.");
-      } finally {
-        setBusyLibraryAction(null);
-      }
-    },
-    [campaignId, toast, userId]
-  );
-
-  const archiveWeaponDefinition = useCallback(
-    async (libraryItem: CampaignCustomItem<"weapon">) => {
-      if (!userId) return;
-      setBusyLibraryAction({ itemId: libraryItem.id, action: "archive" });
-      try {
-        await archiveCustomItem({
-          campaignId,
-          customItemId: libraryItem.id,
-          actorUserId: userId,
-        });
-        await removeAllCustomItemCopies({ campaignId, customItemId: libraryItem.id });
-        toast.success("Custom weapon archived and removed from all characters.");
-      } catch (err) {
-        console.error("Failed to archive custom weapon:", err);
-        toast.error("Failed to archive custom weapon.");
-      } finally {
-        setBusyLibraryAction(null);
-      }
-    },
-    [campaignId, toast, userId]
-  );
-
-  const updateAllWeaponCopies = useCallback(
-    async (libraryItem: CampaignCustomItem<"weapon">) => {
-      if (!userId) return;
-      setBusyLibraryAction({ itemId: libraryItem.id, action: "updateAll" });
-      try {
-        const updatedCopies = await publishAndUpdateAllCopies({
-          campaignId,
-          customItemId: libraryItem.id,
-          actorUserId: userId,
-        });
-        toast.success(`Updated ${updatedCopies} weapon ${updatedCopies === 1 ? "copy" : "copies"}.`);
-      } catch (err) {
-        console.error("Failed to update custom weapon copies:", err);
-        toast.error("Failed to update custom weapon copies.");
-      } finally {
-        setBusyLibraryAction(null);
-      }
-    },
-    [campaignId, toast, userId]
-  );
-
-  const publishShieldDefinition = useCallback(
-    async (libraryItem: CampaignCustomItem<"armour">) => {
-      if (!userId) return;
-      setBusyLibraryAction({ itemId: libraryItem.id, action: "publish" });
-      try {
-        await publishCustomItem({
-          campaignId,
-          customItemId: libraryItem.id,
-          actorUserId: userId,
-          versionId: libraryItem.draftVersionId ?? libraryItem.latestVersionId,
-        });
-        toast.success("Custom shield published.");
-      } catch (err) {
-        console.error("Failed to publish custom shield:", err);
-        toast.error("Failed to publish custom shield.");
-      } finally {
-        setBusyLibraryAction(null);
-      }
-    },
-    [campaignId, toast, userId]
-  );
-
-  const archiveShieldDefinition = useCallback(
-    async (libraryItem: CampaignCustomItem<"armour">) => {
-      if (!userId) return;
-      setBusyLibraryAction({ itemId: libraryItem.id, action: "archive" });
-      try {
-        await archiveCustomItem({
-          campaignId,
-          customItemId: libraryItem.id,
-          actorUserId: userId,
-        });
-        await removeAllCustomItemCopies({ campaignId, customItemId: libraryItem.id });
-        toast.success("Custom shield archived and removed from all characters.");
-      } catch (err) {
-        console.error("Failed to archive custom shield:", err);
-        toast.error("Failed to archive custom shield.");
-      } finally {
-        setBusyLibraryAction(null);
-      }
-    },
-    [campaignId, toast, userId]
-  );
-
-  const updateAllShieldCopies = useCallback(
-    async (libraryItem: CampaignCustomItem<"armour">) => {
-      if (!userId) return;
-      setBusyLibraryAction({ itemId: libraryItem.id, action: "updateAll" });
-      try {
-        const updatedCopies = await publishAndUpdateAllCopies({
-          campaignId,
-          customItemId: libraryItem.id,
-          actorUserId: userId,
-        });
-        toast.success(`Updated ${updatedCopies} shield ${updatedCopies === 1 ? "copy" : "copies"}.`);
-      } catch (err) {
-        console.error("Failed to update custom shield copies:", err);
-        toast.error("Failed to update custom shield copies.");
-      } finally {
-        setBusyLibraryAction(null);
-      }
-    },
-    [campaignId, toast, userId]
-  );
-
   const removeMelee = useCallback(
     (index: number) => {
       if (!editable) return;
@@ -1221,10 +1094,7 @@ export function WeaponsTab({
         !!libraryItem &&
         editable &&
         (isDM || (!!userId && libraryItem.creator.userId === userId));
-      const rowBusyAction =
-        busyLibraryAction && libraryItem && busyLibraryAction.itemId === libraryItem.id
-          ? busyLibraryAction.action
-          : null;
+      const rowBusyAction = libraryItem ? getWeaponBusyAction(libraryItem.id) : null;
 
       return {
         libraryItem,
@@ -1245,8 +1115,8 @@ export function WeaponsTab({
     },
     [
       archiveWeaponDefinition,
-      busyLibraryAction,
       editable,
+      getWeaponBusyAction,
       getLibraryItemForWeapon,
       isDM,
       publishWeaponDefinition,
@@ -1283,10 +1153,7 @@ export function WeaponsTab({
         !!libraryItem &&
         editable &&
         (isDM || (!!userId && libraryItem.creator.userId === userId));
-      const rowBusyAction =
-        busyLibraryAction && libraryItem && busyLibraryAction.itemId === libraryItem.id
-          ? busyLibraryAction.action
-          : null;
+      const rowBusyAction = libraryItem ? getWeaponBusyAction(libraryItem.id) : null;
 
       return {
         libraryItem,
@@ -1302,8 +1169,8 @@ export function WeaponsTab({
     },
     [
       archiveWeaponDefinition,
-      busyLibraryAction,
       editable,
+      getWeaponBusyAction,
       getLibraryItemForGrenade,
       isDM,
       publishWeaponDefinition,
@@ -1340,10 +1207,7 @@ export function WeaponsTab({
         !!libraryItem &&
         editable &&
         (isDM || (!!userId && libraryItem.creator.userId === userId));
-      const rowBusyAction =
-        busyLibraryAction && libraryItem && busyLibraryAction.itemId === libraryItem.id
-          ? busyLibraryAction.action
-          : null;
+      const rowBusyAction = libraryItem ? getShieldBusyAction(libraryItem.id) : null;
 
       return {
         libraryItem,
@@ -1359,8 +1223,8 @@ export function WeaponsTab({
     },
     [
       archiveShieldDefinition,
-      busyLibraryAction,
       editable,
+      getShieldBusyAction,
       getLibraryItemForShield,
       isDM,
       publishShieldDefinition,

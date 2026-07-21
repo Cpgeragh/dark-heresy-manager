@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import type { GrenadeItem } from "../../../types/Character";
-import type { CampaignCustomItem } from "../../../types/CustomItems";
+import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/StatusBadge";
 import { GRENADE_REFERENCE } from "../../../data/reference/weaponReference";
@@ -97,21 +97,13 @@ export function GrenadeCard({
   item: GrenadeItem;
   editable: boolean;
   strengthBonus: number;
-  libraryItem?: CampaignCustomItem<"weapon">;
-  isDM?: boolean;
-  canEditDefinition?: boolean;
-  busyAction?: "publish" | "archive" | "updateAll" | null;
-  onEditDefinition?: () => void;
-  onPublish?: () => void;
-  onArchive?: () => void;
-  onUpdateAllCopies?: () => void;
   onRemove: () => void;
   onUpdateQty: (qty: number) => void;
   isEquipped?: boolean;
   onToggleEquip?: () => void;
   canEquipMoreTypes?: boolean;
   isStowedCard?: boolean;
-}) {
+} & CustomItemLibraryActionProps<"weapon">) {
   const [expanded, setExpanded] = useState(!isStowedCard && isEquipped);
   useEffect(() => {
     if (!isStowedCard) setExpanded(isEquipped);

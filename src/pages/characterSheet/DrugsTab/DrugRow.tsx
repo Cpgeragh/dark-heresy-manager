@@ -7,7 +7,7 @@ import { uiSection, uiTextBody, uiTextLabel, uiTextMuted, uiItemName, uiInfoModa
 import { uiIconRemoveButton } from "../../../ui/buttonStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
-import type { CampaignCustomItem } from "../../../types/CustomItems";
+import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/StatusBadge";
 import { TrashIcon } from "../../../ui/TrashIcon";
@@ -28,17 +28,9 @@ export function DrugRow({
 }: {
   item: DrugItem;
   editable: boolean;
-  libraryItem?: CampaignCustomItem<"drug">;
-  isDM?: boolean;
-  canEditDefinition?: boolean;
-  busyAction?: "publish" | "archive" | "updateAll" | null;
-  onEditDefinition?: () => void;
-  onPublish?: () => void;
-  onArchive?: () => void;
-  onUpdateAllCopies?: () => void;
   onUpdateQty: (id: string, qty: number) => void;
   onRemove: (id: string) => void;
-}) {
+} & CustomItemLibraryActionProps<"drug">) {
   const ref = DRUGS_REFERENCE.find((r) => r.id === item.referenceId);
   const hasInfo = !!(ref?.effect || ref?.sideEffect || ref?.notes || item.notes);
 

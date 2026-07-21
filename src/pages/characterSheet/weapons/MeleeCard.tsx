@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import type { MeleeWeapon } from "../../../types/Character";
 import { MELEE_WEAPON_REFERENCE } from "../../../data/reference/weaponReference";
-import type { CampaignCustomItem } from "../../../types/CustomItems";
+import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/StatusBadge";
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
@@ -73,14 +73,6 @@ export function MeleeCard({
   weapon: MeleeWeapon;
   editable: boolean;
   strengthBonus: number;
-  libraryItem?: CampaignCustomItem<"weapon">;
-  isDM?: boolean;
-  canEditDefinition?: boolean;
-  busyAction?: "publish" | "archive" | "updateAll" | null;
-  onEditDefinition?: () => void;
-  onPublish?: () => void;
-  onArchive?: () => void;
-  onUpdateAllCopies?: () => void;
   onRemove: () => void;
   onAddUpgrade: (upgradeId: string) => void;
   onRemoveUpgrade: (upgradeId: string) => void;
@@ -91,7 +83,7 @@ export function MeleeCard({
   slotsDisabled?: boolean;
   forceExpanded?: boolean;
   integrated?: boolean;
-}) {
+} & CustomItemLibraryActionProps<"weapon">) {
   const [expanded, setExpanded] = useState(isEquipped);
   useEffect(() => {
     setExpanded(isEquipped);

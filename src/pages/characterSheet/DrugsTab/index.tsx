@@ -11,13 +11,10 @@ import { Button } from "../../../ui/Button";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { uiTextBody, uiTextPlaceholder } from "../../../ui/editableStyles";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
+import { useCustomItemLibraryActions } from "../../../hooks/useCustomItemLibraryActions";
 import {
-  archiveCustomItem,
   createDraftCustomItem,
   inferCustomItemStatus,
-  publishAndUpdateAllCopies,
-  publishCustomItem,
-  removeAllCustomItemCopies,
   saveDraftCustomItem,
 } from "../../../services/customItemService";
 import { useToast } from "../../../components/Toast";
@@ -38,8 +35,6 @@ interface EditingDrugDefinition {
   libraryItem: CampaignCustomItem<"drug">;
 }
 
-type DrugLibraryAction = "publish" | "archive" | "updateAll";
-
 export function DrugsTab({
   campaignId,
   characterId,
@@ -54,11 +49,13 @@ export function DrugsTab({
   const [showCustomForm, setShowCustomForm] = useState(false);
   const [editingDrugDefinition, setEditingDrugDefinition] =
     useState<EditingDrugDefinition | null>(null);
-  const [busyLibraryAction, setBusyLibraryAction] = useState<{
-    itemId: string;
-    action: DrugLibraryAction;
-  } | null>(null);
   const toast = useToast();
+  const {
+    publishDefinition: publishDrugDefinition,
+    archiveDefinition: archiveDrugDefinition,
+    updateAllCopies: updateAllDrugCopies,
+    getBusyAction,
+  } = useCustomItemLibraryActions<"drug">({ campaignId, userId, itemLabel: "drug" });
 
   const { items: campaignCustomDrugItems, loading: drugsLoading } = useCampaignCustomItems({
     campaignId,
@@ -212,71 +209,6 @@ export function DrugsTab({
     [editable, drugs, onUpdate]
   );
 
-  const publishDrugDefinition = useCallback(
-    async (libraryItem: CampaignCustomItem<"drug">) => {
-      if (!userId) return;
-      setBusyLibraryAction({ itemId: libraryItem.id, action: "publish" });
-      try {
-        await publishCustomItem({
-          campaignId,
-          customItemId: libraryItem.id,
-          actorUserId: userId,
-          versionId: libraryItem.draftVersionId ?? libraryItem.latestVersionId,
-        });
-        toast.success("Custom drug published.");
-      } catch (err) {
-        console.error("Failed to publish custom drug:", err);
-        toast.error("Failed to publish custom drug.");
-      } finally {
-        setBusyLibraryAction(null);
-      }
-    },
-    [campaignId, toast, userId]
-  );
-
-  const archiveDrugDefinition = useCallback(
-    async (libraryItem: CampaignCustomItem<"drug">) => {
-      if (!userId) return;
-      setBusyLibraryAction({ itemId: libraryItem.id, action: "archive" });
-      try {
-        await archiveCustomItem({
-          campaignId,
-          customItemId: libraryItem.id,
-          actorUserId: userId,
-        });
-        await removeAllCustomItemCopies({ campaignId, customItemId: libraryItem.id });
-        toast.success("Custom drug archived and removed from all characters.");
-      } catch (err) {
-        console.error("Failed to archive custom drug:", err);
-        toast.error("Failed to archive custom drug.");
-      } finally {
-        setBusyLibraryAction(null);
-      }
-    },
-    [campaignId, toast, userId]
-  );
-
-  const updateAllDrugCopies = useCallback(
-    async (libraryItem: CampaignCustomItem<"drug">) => {
-      if (!userId) return;
-      setBusyLibraryAction({ itemId: libraryItem.id, action: "updateAll" });
-      try {
-        const updatedCopies = await publishAndUpdateAllCopies({
-          campaignId,
-          customItemId: libraryItem.id,
-          actorUserId: userId,
-        });
-        toast.success(`Updated ${updatedCopies} drug ${updatedCopies === 1 ? "copy" : "copies"}.`);
-      } catch (err) {
-        console.error("Failed to update custom drug copies:", err);
-        toast.error("Failed to update custom drug copies.");
-      } finally {
-        setBusyLibraryAction(null);
-      }
-    },
-    [campaignId, toast, userId]
-  );
-
   const drugColumns = [
     drugs.filter((_, index) => index % 2 === 0),
     drugs.filter((_, index) => index % 2 === 1),
@@ -301,10 +233,7 @@ export function DrugsTab({
       !!libraryItem &&
       editable &&
       (isDM || (!!userId && libraryItem.creator.userId === userId));
-    const rowBusyAction =
-      busyLibraryAction && libraryItem && busyLibraryAction.itemId === libraryItem.id
-        ? busyLibraryAction.action
-        : null;
+    const rowBusyAction = libraryItem ? getBusyAction(libraryItem.id) : null;
 
     return (
       <DrugRow

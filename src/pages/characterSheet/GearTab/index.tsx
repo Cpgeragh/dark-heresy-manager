@@ -20,6 +20,7 @@ import { SectionHeader } from "../../../ui/SectionHeader";
 import { uiTextPlaceholder } from "../../../ui/editableStyles";
 import { colourActiveSky, colourActiveRose } from "../../../ui/colourTokens";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
+import { useCustomItemLibraryActions } from "../../../hooks/useCustomItemLibraryActions";
 import { useSwipeableTabs } from "../../../hooks/useSwipeableTabs";
 import { SegmentedTabs, type SegmentedTabOption } from "../../../ui/SegmentedTabs";
 import {
@@ -28,12 +29,8 @@ import {
   uiSwipeableTabPanel,
 } from "../../../ui/segmentedTabStyles";
 import {
-  archiveCustomItem,
   createDraftCustomItem,
   inferCustomItemStatus,
-  publishAndUpdateAllCopies,
-  publishCustomItem,
-  removeAllCustomItemCopies,
   saveDraftCustomItem,
 } from "../../../services/customItemService";
 import { useToast } from "../../../components/Toast";
@@ -81,8 +78,6 @@ interface EditingConsumableDefinition {
   libraryItem: CampaignCustomItem<"consumable">;
 }
 
-type GearLibraryAction = "publish" | "archive" | "updateAll";
-
 export function GearTab({
   campaignId,
   characterId,
@@ -102,10 +97,6 @@ export function GearTab({
   const [editingGearDefinition, setEditingGearDefinition] = useState<EditingGearDefinition | null>(null);
   const [editingConsumableDefinition, setEditingConsumableDefinition] =
     useState<EditingConsumableDefinition | null>(null);
-  const [busyLibraryAction, setBusyLibraryAction] = useState<{
-    itemId: string;
-    action: GearLibraryAction;
-  } | null>(null);
   const [activeGearSection, setActiveGearSection]         = useState<GearSection>("items");
   const { containerRef, transitionClass, switchTo: switchGearSection } = useSwipeableTabs(
     GEAR_SECTIONS,
@@ -113,6 +104,22 @@ export function GearTab({
     setActiveGearSection
   );
   const toast = useToast();
+  const {
+    publishDefinition: publishGearDefinition,
+    archiveDefinition: archiveGearDefinition,
+    updateAllCopies: updateAllGearCopies,
+    getBusyAction: getGearBusyAction,
+  } = useCustomItemLibraryActions<"gear">({ campaignId, userId, itemLabel: "gear" });
+  const {
+    publishDefinition: publishConsumableDefinition,
+    archiveDefinition: archiveConsumableDefinition,
+    updateAllCopies: updateAllConsumableCopies,
+    getBusyAction: getConsumableBusyAction,
+  } = useCustomItemLibraryActions<"consumable">({
+    campaignId,
+    userId,
+    itemLabel: "consumable",
+  });
 
   const { items: campaignCustomItems, loading: gearLoading } = useCampaignCustomItems({
     campaignId,
@@ -429,130 +436,6 @@ export function GearTab({
     [editable, gear, onUpdate]
   );
 
-  const publishGearDefinition = useCallback(
-    async (libraryItem: CampaignCustomItem<"gear">) => {
-      if (!userId) return;
-      setBusyLibraryAction({ itemId: libraryItem.id, action: "publish" });
-      try {
-        await publishCustomItem({
-          campaignId,
-          customItemId: libraryItem.id,
-          actorUserId: userId,
-          versionId: libraryItem.draftVersionId ?? libraryItem.latestVersionId,
-        });
-        toast.success("Custom gear published.");
-      } catch (err) {
-        console.error("Failed to publish custom gear:", err);
-        toast.error("Failed to publish custom gear.");
-      } finally {
-        setBusyLibraryAction(null);
-      }
-    },
-    [campaignId, toast, userId]
-  );
-
-  const archiveGearDefinition = useCallback(
-    async (libraryItem: CampaignCustomItem<"gear">) => {
-      if (!userId) return;
-      setBusyLibraryAction({ itemId: libraryItem.id, action: "archive" });
-      try {
-        await archiveCustomItem({ campaignId, customItemId: libraryItem.id, actorUserId: userId });
-        await removeAllCustomItemCopies({ campaignId, customItemId: libraryItem.id });
-        toast.success("Custom gear archived and removed from all characters.");
-      } catch (err) {
-        console.error("Failed to archive custom gear:", err);
-        toast.error("Failed to archive custom gear.");
-      } finally {
-        setBusyLibraryAction(null);
-      }
-    },
-    [campaignId, toast, userId]
-  );
-
-  const updateAllGearCopies = useCallback(
-    async (libraryItem: CampaignCustomItem<"gear">) => {
-      if (!userId) return;
-      setBusyLibraryAction({ itemId: libraryItem.id, action: "updateAll" });
-      try {
-        const updatedCopies = await publishAndUpdateAllCopies({
-          campaignId,
-          customItemId: libraryItem.id,
-          actorUserId: userId,
-        });
-        toast.success(`Updated ${updatedCopies} gear ${updatedCopies === 1 ? "copy" : "copies"}.`);
-      } catch (err) {
-        console.error("Failed to update custom gear copies:", err);
-        toast.error("Failed to update custom gear copies.");
-      } finally {
-        setBusyLibraryAction(null);
-      }
-    },
-    [campaignId, toast, userId]
-  );
-
-  const publishConsumableDefinition = useCallback(
-    async (libraryItem: CampaignCustomItem<"consumable">) => {
-      if (!userId) return;
-      setBusyLibraryAction({ itemId: libraryItem.id, action: "publish" });
-      try {
-        await publishCustomItem({
-          campaignId,
-          customItemId: libraryItem.id,
-          actorUserId: userId,
-          versionId: libraryItem.draftVersionId ?? libraryItem.latestVersionId,
-        });
-        toast.success("Custom consumable published.");
-      } catch (err) {
-        console.error("Failed to publish custom consumable:", err);
-        toast.error("Failed to publish custom consumable.");
-      } finally {
-        setBusyLibraryAction(null);
-      }
-    },
-    [campaignId, toast, userId]
-  );
-
-  const archiveConsumableDefinition = useCallback(
-    async (libraryItem: CampaignCustomItem<"consumable">) => {
-      if (!userId) return;
-      setBusyLibraryAction({ itemId: libraryItem.id, action: "archive" });
-      try {
-        await archiveCustomItem({ campaignId, customItemId: libraryItem.id, actorUserId: userId });
-        await removeAllCustomItemCopies({ campaignId, customItemId: libraryItem.id });
-        toast.success("Custom consumable archived and removed from all characters.");
-      } catch (err) {
-        console.error("Failed to archive custom consumable:", err);
-        toast.error("Failed to archive custom consumable.");
-      } finally {
-        setBusyLibraryAction(null);
-      }
-    },
-    [campaignId, toast, userId]
-  );
-
-  const updateAllConsumableCopies = useCallback(
-    async (libraryItem: CampaignCustomItem<"consumable">) => {
-      if (!userId) return;
-      setBusyLibraryAction({ itemId: libraryItem.id, action: "updateAll" });
-      try {
-        const updatedCopies = await publishAndUpdateAllCopies({
-          campaignId,
-          customItemId: libraryItem.id,
-          actorUserId: userId,
-        });
-        toast.success(
-          `Updated ${updatedCopies} consumable ${updatedCopies === 1 ? "copy" : "copies"}.`
-        );
-      } catch (err) {
-        console.error("Failed to update custom consumable copies:", err);
-        toast.error("Failed to update custom consumable copies.");
-      } finally {
-        setBusyLibraryAction(null);
-      }
-    },
-    [campaignId, toast, userId]
-  );
-
   const visibleGearSectionClass = (section: GearSection) =>
     [
       "space-y-3",
@@ -622,10 +505,7 @@ export function GearTab({
                   (!!userId && libraryItem.creator.userId === userId) ||
                   (isDM && (characterId === libraryItem.creator.characterId || userId === libraryItem.creator.userId))
                 );
-              const rowBusyAction =
-                busyLibraryAction && libraryItem && busyLibraryAction.itemId === libraryItem.id
-                  ? busyLibraryAction.action
-                  : null;
+              const rowBusyAction = libraryItem ? getGearBusyAction(libraryItem.id) : null;
 
               return (
                 <ItemRow
@@ -694,10 +574,7 @@ export function GearTab({
                   (!!userId && libraryItem.creator.userId === userId) ||
                   (isDM && (characterId === libraryItem.creator.characterId || userId === libraryItem.creator.userId))
                 );
-              const rowBusyAction =
-                busyLibraryAction && libraryItem && busyLibraryAction.itemId === libraryItem.id
-                  ? busyLibraryAction.action
-                  : null;
+              const rowBusyAction = libraryItem ? getConsumableBusyAction(libraryItem.id) : null;
 
               return (
                 <ConsumableRow

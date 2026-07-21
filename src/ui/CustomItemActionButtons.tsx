@@ -1,18 +1,18 @@
 // src/ui/CustomItemActionButtons.tsx
 
 import type { CampaignCustomItem } from "../types/CustomItems";
+import type {
+  CustomItemLibraryAction,
+  CustomItemLibraryActionCallbacks,
+} from "../types/CustomItemActions";
 import { Button } from "./Button";
 
-interface Props {
+interface Props extends CustomItemLibraryActionCallbacks {
   libraryItem: CampaignCustomItem;
   isDM: boolean;
   canEditDefinition: boolean;
-  busyAction?: "publish" | "archive" | "updateAll" | null;
+  busyAction?: CustomItemLibraryAction | null;
   className?: string;
-  onEditDefinition?: () => void;
-  onPublish?: () => void;
-  onArchive?: () => void;
-  onUpdateAllCopies?: () => void;
 }
 
 export function CustomItemActionButtons({
@@ -27,10 +27,12 @@ export function CustomItemActionButtons({
   onUpdateAllCopies,
 }: Props) {
   if (!canEditDefinition && !isDM) return null;
+  const busy = busyAction !== null;
+
   return (
     <div className={className}>
       {canEditDefinition && libraryItem.status !== "archived" && (
-        <Button size="xs" onClick={onEditDefinition}>
+        <Button size="xs" onClick={onEditDefinition} disabled={busy}>
           Edit Definition
         </Button>
       )}
@@ -38,7 +40,7 @@ export function CustomItemActionButtons({
         <Button
           size="xs"
           onClick={onPublish}
-          disabled={busyAction === "publish"}
+          disabled={busy}
         >
           {busyAction === "publish" ? "Publishing..." : "Publish"}
         </Button>
@@ -47,7 +49,7 @@ export function CustomItemActionButtons({
         <Button
           size="xs"
           onClick={onArchive}
-          disabled={busyAction === "archive"}
+          disabled={busy}
         >
           {busyAction === "archive" ? "Archiving..." : "Archive"}
         </Button>
@@ -56,7 +58,7 @@ export function CustomItemActionButtons({
         <Button
           size="xs"
           onClick={onUpdateAllCopies}
-          disabled={busyAction === "updateAll"}
+          disabled={busy}
         >
           {busyAction === "updateAll" ? "Updating..." : "Update All Copies"}
         </Button>

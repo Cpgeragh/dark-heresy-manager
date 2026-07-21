@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import type { ShieldItem } from "../../../types/Character";
-import type { CampaignCustomItem } from "../../../types/CustomItems";
+import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/StatusBadge";
 import {
@@ -43,19 +43,11 @@ export function ShieldCard({
 }: {
   item: ShieldItem;
   editable: boolean;
-  libraryItem?: CampaignCustomItem<"armour">;
-  isDM?: boolean;
-  canEditDefinition?: boolean;
-  busyAction?: "publish" | "archive" | "updateAll" | null;
-  onEditDefinition?: () => void;
-  onPublish?: () => void;
-  onArchive?: () => void;
-  onUpdateAllCopies?: () => void;
   onRemove: () => void;
   isEquipped?: boolean;
   onToggleEquip?: () => void;
   slotsDisabled?: boolean;
-}) {
+} & CustomItemLibraryActionProps<"armour">) {
   const [expanded, setExpanded] = useState(isEquipped);
   useEffect(() => {
     setExpanded(isEquipped);
