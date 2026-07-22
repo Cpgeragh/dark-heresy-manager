@@ -1,7 +1,15 @@
 // src/services/campaignService.ts
 // Firestore operations for campaign documents.
 
-import { collection, doc, getDocs, setDoc, updateDoc, writeBatch } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDocs,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+  writeBatch,
+} from "firebase/firestore";
 import { db } from "../firebase";
 import type { CampaignDocument } from "../types/Firestore";
 
@@ -29,6 +37,25 @@ export async function createCampaign(name: string, dmId: string): Promise<string
  */
 export async function updateCampaignName(campaignId: string, name: string): Promise<void> {
   await updateDoc(doc(db, "campaigns", campaignId), { name });
+}
+
+/**
+ * Soft-deletes a campaign by stamping archivedAt with the current server time.
+ * Archived campaigns are excluded from active campaign subscriptions.
+ */
+export async function archiveCampaign(campaignId: string): Promise<void> {
+  await updateDoc(doc(db, "campaigns", campaignId), {
+    archivedAt: serverTimestamp(),
+  });
+}
+
+/**
+ * Restores an archived campaign so it reappears in active subscriptions.
+ */
+export async function restoreCampaign(campaignId: string): Promise<void> {
+  await updateDoc(doc(db, "campaigns", campaignId), {
+    archivedAt: null,
+  });
 }
 
 /**

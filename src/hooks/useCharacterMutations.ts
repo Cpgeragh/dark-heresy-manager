@@ -1,14 +1,15 @@
 // src/hooks/useCharacterMutations.ts
 
-import { useState, useCallback, useMemo } from "react";
-import { updateDoc, writeBatch, collection, doc } from "firebase/firestore";
-import { db, auth } from "../firebase";
-import { characterDocRef } from "../firebase/converters";
+import { useState, useCallback } from "react";
 import type { Character, Characteristics } from "../types/Character";
 import type { CharField } from "../utils/characterFactory";
-import { buildClaimLogPayload } from "../utils/claimLog";
 import { stripUndefined } from "../utils/stripUndefined";
-import { forceAssignCharacter, forceReleaseCharacter } from "../services/characterService";
+import {
+  forceAssignCharacter,
+  forceReleaseCharacter,
+  releaseCharacter as releaseCharacterInService,
+  updateCharacter,
+} from "../services/characterService";
 import { useToast } from "../components/Toast";
 
 interface UseCharacterMutationsProps {
@@ -32,12 +33,6 @@ export function useCharacterMutations({
 
   const toast = useToast();
 
-  // Use converter for type safety
-  const charRef = useMemo(
-    () => characterDocRef(campaignId, characterId),
-    [campaignId, characterId]
-  );
-
   // ================================================================
   // UPDATE FIELD (GENERIC)
   // ================================================================
@@ -47,7 +42,9 @@ export function useCharacterMutations({
 
       setIsUpdating(true);
       try {
-        await updateDoc(charRef, { [field]: stripUndefined(value) });
+        await updateCharacter(campaignId, characterId, {
+          [field]: stripUndefined(value),
+        } as Partial<Character>);
       } catch (err) {
         const message = err instanceof Error ? err.message : "Failed to update field";
         toast.error(`Update failed: ${message}`);
@@ -56,7 +53,7 @@ export function useCharacterMutations({
         setIsUpdating(false);
       }
     },
-    [allowedToEdit, character, charRef, toast]
+    [allowedToEdit, character, campaignId, characterId, toast]
   );
 
   // ================================================================
@@ -73,7 +70,7 @@ export function useCharacterMutations({
           [statKey]: value,
         };
 
-        await updateDoc(charRef, { characteristics: updated });
+        await updateCharacter(campaignId, characterId, { characteristics: updated });
       } catch (err) {
         const message = err instanceof Error ? err.message : "Failed to update characteristic";
         toast.error(`Update failed: ${message}`);
@@ -82,33 +79,18 @@ export function useCharacterMutations({
         setIsUpdating(false);
       }
     },
-    [allowedToEdit, character, charRef, toast]
+    [allowedToEdit, character, campaignId, characterId, toast]
   );
 
   // ================================================================
   // RELEASE CHARACTER (PLAYER ACTION)
   // ================================================================
   const releaseCharacter = useCallback(async (): Promise<void> => {
-    const user = auth.currentUser;
-    if (!user || !character) return;
+    if (!character) return;
 
     setIsReleasing(true);
     try {
-      const previousOwner = character.userId;
-
-      const logsRef = collection(
-        db,
-        "campaigns",
-        campaignId,
-        "characters",
-        characterId,
-        "claimLog"
-      );
-
-      const batch = writeBatch(db);
-      batch.update(charRef, { userId: null, isEditableByPlayer: false });
-      batch.set(doc(logsRef), buildClaimLogPayload("release", user.uid, previousOwner, null));
-      await batch.commit();
+      await releaseCharacterInService(campaignId, characterId, character.userId);
 
       toast.success("Character released successfully");
     } catch (err) {
@@ -118,7 +100,7 @@ export function useCharacterMutations({
     } finally {
       setIsReleasing(false);
     }
-  }, [character, charRef, campaignId, characterId, toast]);
+  }, [character, campaignId, characterId, toast]);
 
   // ================================================================
   // DM FORCE RELEASE
@@ -171,7 +153,7 @@ export function useCharacterMutations({
     try {
       const newValue = !character.isEditableByPlayer;
 
-      await updateDoc(charRef, {
+      await updateCharacter(campaignId, characterId, {
         isEditableByPlayer: newValue,
       });
 
@@ -183,7 +165,7 @@ export function useCharacterMutations({
     } finally {
       setIsDmTogglingEdit(false);
     }
-  }, [character, charRef, toast]);
+  }, [character, campaignId, characterId, toast]);
 
   return {
     // Mutations

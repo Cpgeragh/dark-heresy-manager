@@ -12,6 +12,7 @@ import {
 } from "firebase/firestore";
 
 import { db, auth } from "../firebase";
+import { characterDocRef } from "../firebase/converters";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -21,10 +22,6 @@ function proposalsRef(campaignId: string, characterId: string) {
 
 function proposalDocRef(campaignId: string, characterId: string, proposalId: string) {
   return doc(proposalsRef(campaignId, characterId), proposalId);
-}
-
-function characterPlainRef(campaignId: string, characterId: string) {
-  return doc(db, "campaigns", campaignId, "characters", characterId);
 }
 
 // ─── Service Functions ────────────────────────────────────────────────────────
@@ -65,7 +62,7 @@ export async function approveXpProposal(
   batch.update(proposalDocRef(campaignId, characterId, proposalId), {
     status: "approved",
   });
-  batch.update(characterPlainRef(campaignId, characterId), {
+  batch.update(characterDocRef(campaignId, characterId), {
     "experience.spent": increment(xpCost),
   });
   await batch.commit();

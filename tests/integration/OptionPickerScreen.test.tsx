@@ -42,7 +42,7 @@ describe("OptionPickerScreen", () => {
   it("calls onClose when the back button is clicked", async () => {
     const user = userEvent.setup();
     const { onClose } = setup();
-    await user.click(screen.getByRole("button", { name: "Close" }));
+    await user.click(screen.getByRole("button", { name: "Back" }));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 

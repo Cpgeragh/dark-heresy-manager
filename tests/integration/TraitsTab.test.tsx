@@ -1,6 +1,6 @@
 // tests/integration/TraitsTab.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -87,7 +87,8 @@ describe("TraitsTab", () => {
     const addButton = screen.getByRole("button", { name: "Add Spec Trait" });
     expect(addButton).toBeDisabled();
 
-    await user.type(screen.getByPlaceholderText("Sense"), "Something");
+    const specialisationDialog = screen.getByRole("dialog", { name: "Sense" });
+    await user.type(within(specialisationDialog).getByRole("textbox"), "Something");
     expect(addButton).toBeEnabled();
 
     await user.click(addButton);

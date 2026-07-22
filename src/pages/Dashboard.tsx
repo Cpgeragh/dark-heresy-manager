@@ -22,11 +22,12 @@ import { RecoveryBackupBanner } from "../components/RecoveryBackupBanner";
 import { validateCampaignName } from "../utils/validation";
 import { buildRoute } from "../constants/routes";
 import {
+  archiveCampaign,
   createCampaign,
   deleteCampaign,
+  restoreCampaign,
   updateCampaignName,
 } from "../services/campaignService";
-import { archiveCampaign, restoreCampaign } from "../utils/campaignActions";
 import type { CampaignWithId, CharacterListItem } from "../types/Firestore";
 import { uiSection, editableInputClass, uiTextError } from "../ui/editableStyles";
 import { Button } from "../ui/Button";

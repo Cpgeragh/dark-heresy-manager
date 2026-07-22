@@ -1,7 +1,6 @@
 // src/hooks/usePlayerCharacters.ts
 
-import { collection } from "firebase/firestore";
-import { db } from "../firebase";
+import { charactersCollectionRef } from "../firebase/converters";
 import type { CharacterListItem } from "../types/Firestore";
 import { useQuerySubscription } from "./useFirestoreSubscription";
 
@@ -14,14 +13,11 @@ export function usePlayerCharacters(
     loading,
     error,
   } = useQuerySubscription(
-    campaignId ? collection(db, "campaigns", campaignId, "characters") : null,
+    campaignId ? charactersCollectionRef(campaignId) : null,
     campaignId ? `player-characters:${campaignId}:${userId}` : null,
     (snapshot) =>
       snapshot.docs
-        .map((characterDocument) => ({
-          id: characterDocument.id,
-          ...(characterDocument.data() as Omit<CharacterListItem, "id">),
-        }))
+        .map((characterDocument) => characterDocument.data())
         .filter((character) => character.userId === userId)
   );
 

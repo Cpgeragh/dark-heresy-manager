@@ -1,6 +1,7 @@
 // tests/integration/CharacteristicsTab.test.tsx
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
 import { CharacteristicsTab } from "../../src/pages/characterSheet/CharacteristicsTab";
@@ -164,15 +165,27 @@ describe("CharacteristicsTab", () => {
 });
 
 describe("CharacteristicsTab adjustment source breakdown", () => {
-  it("shows each contributing source with its type when a characteristic has an adjustment", () => {
+  it("shows each contributing source with its type when a characteristic has an adjustment", async () => {
+    const user = userEvent.setup();
     renderTab(undefined, {
       points: 0,
       malignancies: [{ id: "m1", referenceId: "palsy", name: "Palsy", rolledModifiers: { ag: 6 } }],
       minorMutations: [{ id: "mm1", referenceId: "misshapen", name: "Misshapen", rolledModifiers: { ag: 3 } }],
     });
 
-    expect(screen.getByText(/Palsy \(Malignancy\): -6/)).toBeInTheDocument();
-    expect(screen.getByText(/Misshapen \(Minor Mutation\): -3/)).toBeInTheDocument();
+    await user.click(
+      screen.getByRole("button", { name: /Show information about Agility.*Adjustments/ })
+    );
+    const dialog = screen.getByRole("dialog", { name: /Agility.*Adjustments/ });
+
+    expect(
+      within(dialog).getByText((_, element) => element?.textContent === "Palsy (Malignancy): -6")
+    ).toBeInTheDocument();
+    expect(
+      within(dialog).getByText(
+        (_, element) => element?.textContent === "Misshapen (Minor Mutation): -3"
+      )
+    ).toBeInTheDocument();
   });
 
   it("shows no info-modal trigger when a characteristic has no adjustment", () => {

@@ -5,9 +5,11 @@
 // account code (works on linked devices via effectiveUserId).
 
 import { useEffect, useState } from "react";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { db } from "../firebase";
 import { getRecoveryCode, rotateRecoveryCode } from "../services/identityService";
+import {
+  markRecoveryCodeBackedUp,
+  needsRecoveryCodeBackup,
+} from "../services/userAccountService";
 import { useToast } from "./Toast";
 import { Button } from "../ui/Button";
 
@@ -22,18 +24,21 @@ export function RecoveryBackupBanner({ ownUid, effectiveUserId }: Props) {
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState(false);
   const toast = useToast();
+  const showError = toast.error;
 
   useEffect(() => {
     let ignore = false;
-    getDoc(doc(db, "users", ownUid))
-      .then((s) => {
-        if (!ignore) setNeedsBackup(s.exists() && s.data().recoveryBackedUp !== true);
+    needsRecoveryCodeBackup(ownUid)
+      .then((needsRecoveryBackup) => {
+        if (!ignore) setNeedsBackup(needsRecoveryBackup);
       })
-      .catch(() => {});
+      .catch(() => {
+        if (!ignore) showError("Couldn't check your recovery backup status.");
+      });
     return () => {
       ignore = true;
     };
-  }, [ownUid]);
+  }, [ownUid, showError]);
 
   if (!needsBackup) return null;
 
@@ -50,7 +55,7 @@ export function RecoveryBackupBanner({ ownUid, effectiveUserId }: Props) {
 
   async function confirm() {
     try {
-      await updateDoc(doc(db, "users", ownUid), { recoveryBackedUp: true });
+      await markRecoveryCodeBackedUp(ownUid);
       setNeedsBackup(false);
       toast.success("Recovery code backed up.");
     } catch {

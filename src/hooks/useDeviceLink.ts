@@ -6,8 +6,9 @@
 // useLinkDevice writes to (or unlink deletes from) userLinks/{myUid} —
 // no page reload required.
 
-import { deleteDoc, doc, type DocumentData } from "firebase/firestore";
+import { doc, type DocumentData } from "firebase/firestore";
 import { db } from "../firebase";
+import { unlinkDevice } from "../services/deviceLinkService";
 import { useDocumentSubscription } from "./useFirestoreSubscription";
 
 interface DeviceLinkState {
@@ -29,7 +30,7 @@ export function useDeviceLink(myUid: string): DeviceLinkState {
   );
 
   async function unlink() {
-    await deleteDoc(doc(db, "userLinks", myUid));
+    await unlinkDevice(myUid);
     // onSnapshot fires and sets primaryUid → null automatically
   }
 

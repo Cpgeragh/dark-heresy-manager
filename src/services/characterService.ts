@@ -3,6 +3,7 @@
 import {
   arrayUnion,
   getDoc,
+  runTransaction,
   setDoc,
   updateDoc,
   addDoc,
@@ -13,7 +14,7 @@ import {
 } from "firebase/firestore";
 
 import { db, auth } from "../firebase";
-import { characterDocRef, charactersCollectionRef } from "../firebase/converters";
+import { campaignDocRef, characterDocRef, charactersCollectionRef } from "../firebase/converters";
 
 import type { Character } from "../types/Character";
 import { buildClaimLogPayload } from "../utils/claimLog";
@@ -109,6 +110,52 @@ export async function createCharacter(
   return stored;
 }
 
+export async function claimCharacter(
+  campaignId: string,
+  characterId: string,
+  ownerId: string
+): Promise<void> {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Not signed in.");
+
+  const charRef = characterDocRef(campaignId, characterId);
+  const campaignRef = campaignDocRef(campaignId);
+  const logsRef = collection(db, "campaigns", campaignId, "characters", characterId, "claimLog");
+
+  await runTransaction(db, async (transaction) => {
+    const charDoc = await transaction.get(charRef);
+
+    if (!charDoc.exists()) {
+      throw new Error("Character does not exist.");
+    }
+
+    if (charDoc.data().userId) {
+      throw new Error("Character is already claimed.");
+    }
+
+    transaction.update(charRef, { userId: ownerId });
+    transaction.update(campaignRef, { memberIds: arrayUnion(ownerId) });
+    transaction.set(doc(logsRef), buildClaimLogPayload("claim", user.uid, null, ownerId));
+  });
+}
+
+export async function releaseCharacter(
+  campaignId: string,
+  characterId: string,
+  previousOwner: string | null
+): Promise<void> {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Not signed in.");
+
+  const charRef = characterDocRef(campaignId, characterId);
+  const logsRef = collection(db, "campaigns", campaignId, "characters", characterId, "claimLog");
+
+  const batch = writeBatch(db);
+  batch.update(charRef, { userId: null, isEditableByPlayer: false });
+  batch.set(doc(logsRef), buildClaimLogPayload("release", user.uid, previousOwner, null));
+  await batch.commit();
+}
+
 export async function forceAssignCharacter(
   campaignId: string,
   characterId: string,
@@ -119,7 +166,7 @@ export async function forceAssignCharacter(
   if (!user) throw new Error("Not signed in.");
 
   const charRef = characterDocRef(campaignId, characterId);
-  const campaignRef = doc(db, "campaigns", campaignId);
+  const campaignRef = campaignDocRef(campaignId);
   const logsRef = collection(db, "campaigns", campaignId, "characters", characterId, "claimLog");
 
   const batch = writeBatch(db);
@@ -154,7 +201,7 @@ export async function deleteCharacter(
   characterId: string,
   recoveryCode: string
 ): Promise<void> {
-  const charRef = doc(db, "campaigns", campaignId, "characters", characterId);
+  const charRef = characterDocRef(campaignId, characterId);
   const recoveryRef = doc(db, "recoveryIndex", recoveryCode);
   const batch = writeBatch(db);
   batch.delete(charRef);
@@ -207,6 +254,8 @@ export async function importCharacter(
 ): Promise<string> {
   const recoveryCode = generateRecoveryCode();
   const importData = { ...data, userId: null, isEditableByPlayer: false, recoveryCode };
+  // Imported JSON is deliberately written through a plain reference because it is
+  // only structurally known after import validation, not as a compile-time Character.
   const charRef = doc(collection(db, "campaigns", campaignId, "characters"));
   const batch = writeBatch(db);
   batch.set(charRef, importData);
@@ -229,10 +278,11 @@ export async function createNewCharacter(campaignId: string, name: string): Prom
     userId: null,
     characterName: name,
   });
-  const charRef = doc(collection(db, "campaigns", campaignId, "characters"));
+  const charRef = doc(charactersCollectionRef(campaignId));
+  const character: Character = { ...characterData, id: charRef.id };
   const recoveryRef = doc(db, "recoveryIndex", recoveryCode);
   const batch = writeBatch(db);
-  batch.set(charRef, characterData);
+  batch.set(charRef, character);
   batch.set(recoveryRef, { campaignId, characterId: charRef.id });
   await batch.commit();
 

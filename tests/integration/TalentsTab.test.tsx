@@ -1,6 +1,6 @@
 // tests/integration/TalentsTab.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -93,7 +93,8 @@ describe("TalentsTab", () => {
     const addButton = screen.getByRole("button", { name: "Add Spec Talent" });
     expect(addButton).toBeDisabled();
 
-    await user.type(screen.getByPlaceholderText("Skill"), "Something");
+    const specialisationDialog = screen.getByRole("dialog", { name: "Skill" });
+    await user.type(within(specialisationDialog).getByRole("textbox"), "Something");
     expect(addButton).toBeEnabled();
 
     await user.click(addButton);

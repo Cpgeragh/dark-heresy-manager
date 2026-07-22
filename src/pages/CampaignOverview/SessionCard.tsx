@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import type { Timestamp } from "firebase/firestore";
 import type { SessionDocument } from "../../types/Firestore";
+import type { SessionUpdateData } from "../../services/sessionService";
 import { useToast } from "../../components/Toast";
 import { Button } from "../../ui/Button";
 import { ConfirmInline } from "../../ui/ConfirmInline";
@@ -20,9 +21,6 @@ interface Character {
 }
 
 type SessionWithId = SessionDocument & { id: string };
-type SessionUpdateData = Partial<
-  Pick<SessionDocument, "date" | "summary" | "dmNotes" | "xpAwarded" | "attendees">
->;
 
 interface Props {
   session: SessionWithId;

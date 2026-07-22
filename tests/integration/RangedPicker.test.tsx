@@ -187,7 +187,7 @@ describe("RangedPicker", () => {
     renderPicker();
     await user.click(screen.getByText("Lasgun"));
     expect(screen.getByRole("button", { name: "Add Weapon" })).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Close" }));
+    await user.click(screen.getByRole("button", { name: "Back" }));
     expect(screen.getByPlaceholderText("Search weapons…")).toBeInTheDocument();
     expect(screen.getByText("Autopistol")).toBeInTheDocument();
   });

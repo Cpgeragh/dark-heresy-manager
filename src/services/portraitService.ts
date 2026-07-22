@@ -1,7 +1,7 @@
 // src/services/portraitService.ts
 
-import { doc, updateDoc } from "firebase/firestore";
-import { db } from "../firebase";
+import { updateDoc } from "firebase/firestore";
+import { characterDocRef } from "../firebase/converters";
 
 function blobToBase64(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -28,7 +28,7 @@ export async function uploadPortrait(
 ): Promise<string> {
   const base64 = await blobToBase64(blob);
 
-  const characterRef = doc(db, "campaigns", campaignId, "characters", characterId);
+  const characterRef = characterDocRef(campaignId, characterId);
   await updateDoc(characterRef, { portraitUrl: base64 });
 
   return base64;

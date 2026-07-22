@@ -1,8 +1,17 @@
 // src/services/sessionService.ts
 // Firestore operations for campaign session documents.
 
-import { collection, doc, increment, serverTimestamp, writeBatch } from "firebase/firestore";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  increment,
+  serverTimestamp,
+  updateDoc,
+  writeBatch,
+} from "firebase/firestore";
 import { db } from "../firebase";
+import type { SessionDocument } from "../types/Firestore";
 
 interface SessionData {
   date: Date;
@@ -11,6 +20,10 @@ interface SessionData {
   xpAwarded: number;
   attendees: string[];
 }
+
+export type SessionUpdateData = Partial<
+  Pick<SessionDocument, "date" | "summary" | "dmNotes" | "xpAwarded" | "attendees">
+>;
 
 /**
  * Creates a new session document and distributes XP to all attendees atomically.
@@ -34,6 +47,23 @@ export async function createSession(campaignId: string, session: SessionData): P
   });
 
   await batch.commit();
+}
+
+/** Updates the editable fields on an existing campaign session. */
+export async function updateSession(
+  campaignId: string,
+  sessionId: string,
+  data: SessionUpdateData
+): Promise<void> {
+  await updateDoc(
+    doc(db, "campaigns", campaignId, "sessions", sessionId),
+    data as Record<string, unknown>
+  );
+}
+
+/** Permanently deletes a campaign session. */
+export async function deleteSession(campaignId: string, sessionId: string): Promise<void> {
+  await deleteDoc(doc(db, "campaigns", campaignId, "sessions", sessionId));
 }
 
 /**

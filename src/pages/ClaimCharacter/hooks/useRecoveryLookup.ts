@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../../../firebase";
-import { characterDocRef } from "../../../firebase/converters";
+import { campaignDocRef, characterDocRef } from "../../../firebase/converters";
 import type { RecoveryIndexDocument, CampaignDocument } from "../../../types/Firestore";
 import type { Character } from "../../../types/Character";
 
@@ -39,7 +39,7 @@ export function useRecoveryLookup() {
 
       const { campaignId, characterId } = indexSnap.data() as RecoveryIndexDocument;
 
-      const campSnap = await getDoc(doc(db, "campaigns", campaignId));
+      const campSnap = await getDoc(campaignDocRef(campaignId));
       const charSnap = await getDoc(characterDocRef(campaignId, characterId));
 
       if (!campSnap.exists() || !charSnap.exists()) {
@@ -50,7 +50,7 @@ export function useRecoveryLookup() {
 
       // characterDocRef uses a converter — fromFirestore injects id, no unsafe cast needed
       const characterData = charSnap.data()!;
-      const campaignData = campSnap.data() as CampaignDocument;
+      const campaignData = campSnap.data();
 
       const currentUser = auth.currentUser;
       const uid = currentUser?.uid ?? null;

@@ -6,9 +6,8 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import type { User } from "firebase/auth";
-import { doc, updateDoc } from "firebase/firestore";
-import { db } from "../firebase";
 import { rotateRecoveryCode, reclaimIdentity, getRecoveryCode } from "../services/identityService";
+import { completeOnboarding } from "../services/userAccountService";
 import { formatRecoveryCodeInput } from "../utils/recoveryCode";
 import { saveFirstName } from "../services/profileService";
 import { uiSectionHeader, uiTextError } from "../ui/editableStyles";
@@ -53,20 +52,29 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
         if (existing) setCode(existing);
         else setSearchParams({}, { replace: true });
       })
-      .catch(() => {});
+      .catch(() => {
+        if (ignore) return;
+        setError("Couldn't load your recovery code. Please try again.");
+        setSearchParams({}, { replace: true });
+      });
     return () => {
       ignore = true;
     };
   }, [step, code, user.uid, setSearchParams]);
 
   async function handleFinish() {
+    setBusy(true);
+    setError(null);
     try {
-      await updateDoc(doc(db, "users", user.uid), { onboarded: true, recoveryBackedUp: true });
+      await completeOnboarding(user.uid);
+      setSearchParams({}, { replace: true });
+      onComplete();
     } catch (err) {
       console.error("Failed to complete onboarding:", err);
+      setError("Couldn't complete onboarding. Please try again.");
+    } finally {
+      setBusy(false);
     }
-    setSearchParams({}, { replace: true });
-    onComplete();
   }
 
   async function handleGetStarted() {
@@ -279,13 +287,15 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
                 </p>
               )}
 
+              {error && <p className={`${uiTextError} text-center`}>{error}</p>}
+
               <Button
                 fullWidth
                 size="lg"
                 onClick={handleFinish}
-                disabled={!savedConfirmed || !copied}
+                disabled={!savedConfirmed || !copied || busy}
               >
-                I've saved my code
+                {busy ? "Saving…" : "I've saved my code"}
               </Button>
             </Panel>
           </div>

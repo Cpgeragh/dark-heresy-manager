@@ -11,6 +11,7 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import { db } from "../firebase";
+import { charactersCollectionRef } from "../firebase/converters";
 import type { Character } from "../types/Character";
 import type {
   CampaignCustomItem,
@@ -324,13 +325,13 @@ export async function updateAllCustomItemCopies({
   if (!versionSnap.exists()) throw new Error("Custom item version not found.");
 
   const version = versionSnap.data() as CampaignCustomItemVersion;
-  const charactersSnap = await getDocs(collection(db, "campaigns", campaignId, "characters"));
+  const charactersSnap = await getDocs(charactersCollectionRef(campaignId));
   let batch = writeBatch(db);
   let ops = 0;
   let updatedCopies = 0;
 
   for (const characterDoc of charactersSnap.docs) {
-    const character = { id: characterDoc.id, ...characterDoc.data() } as Character;
+    const character = characterDoc.data();
     const update = buildCharacterCopyUpdate(
       character,
       item.category,
@@ -444,13 +445,13 @@ export async function removeAllCustomItemCopies({
   campaignId,
   customItemId,
 }: Pick<CustomItemActorArgs, "campaignId" | "customItemId">): Promise<number> {
-  const charactersSnap = await getDocs(collection(db, "campaigns", campaignId, "characters"));
+  const charactersSnap = await getDocs(charactersCollectionRef(campaignId));
   let batch = writeBatch(db);
   let ops = 0;
   let removedCopies = 0;
 
   for (const characterDoc of charactersSnap.docs) {
-    const character = { id: characterDoc.id, ...characterDoc.data() } as Character;
+    const character = characterDoc.data();
     const update = buildCharacterCopyRemoval(character, customItemId);
     if (!update) continue;
     const { removedCopies: count, ...fields } = update;

@@ -55,7 +55,7 @@ describe("PickerModal", () => {
     const { onClose } = setup();
     await user.click(screen.getByTestId("row")); // inside → stopPropagation
     expect(onClose).not.toHaveBeenCalled();
-    await user.click(document.querySelector(".fixed.inset-0")!); // backdrop
+    await user.click(screen.getByRole("dialog", { name: "Add Item" })); // backdrop
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
