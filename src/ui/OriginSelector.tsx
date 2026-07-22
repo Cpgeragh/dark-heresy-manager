@@ -1,9 +1,6 @@
 import { RequiredFormLabel } from "./RequiredFormLabel";
 import { sourceColour } from "./sourceStyles";
-
-const ORIGIN_OPTIONS = ["Custom", "2nd Ed"] as const;
-
-export type CustomItemOrigin = (typeof ORIGIN_OPTIONS)[number];
+import { CUSTOM_ITEM_ORIGIN_OPTIONS, type CustomItemOrigin } from "../constants/customItems";
 
 interface OriginSelectorProps {
   name: string;
@@ -24,15 +21,12 @@ export function OriginSelector({
   className = "",
 }: OriginSelectorProps) {
   return (
-    <fieldset
-      className={`${hideLabel ? "" : "space-y-1"} ${className}`.trim()}
-      disabled={disabled}
-    >
+    <fieldset className={`${hideLabel ? "" : "space-y-1"} ${className}`.trim()} disabled={disabled}>
       <RequiredFormLabel as="legend" className={hideLabel ? "sr-only" : ""}>
         Origin
       </RequiredFormLabel>
       <div className="grid grid-cols-2 gap-1.5">
-        {ORIGIN_OPTIONS.map((option) => {
+        {CUSTOM_ITEM_ORIGIN_OPTIONS.map((option) => {
           const selected = value === option;
 
           return (

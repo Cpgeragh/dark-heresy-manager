@@ -1,6 +1,16 @@
 import { useRef, useState } from "react";
-import type { ArmourCraftsmanship, ArmourLocationKey, ArmourQuality, WornArmourPiece } from "../../../types/Character";
-import { editableInputClass, editableTextareaClass, uiFormLabel, uiInfoModalWrapper } from "../../../ui/editableStyles";
+import type {
+  ArmourCraftsmanship,
+  ArmourLocationKey,
+  ArmourQuality,
+  WornArmourPiece,
+} from "../../../types/Character";
+import {
+  editableInputClass,
+  editableTextareaClass,
+  uiFormLabel,
+  uiInfoModalWrapper,
+} from "../../../ui/editableStyles";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
@@ -9,15 +19,23 @@ import { colourAmberFaint } from "../../../ui/colourTokens";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/craftsmanship";
 import { CustomFormSection } from "../../../ui/CustomFormSection";
 import { CustomFormShell } from "../../../ui/CustomFormShell";
-import { OriginSelector, type CustomItemOrigin } from "../../../ui/OriginSelector";
+import { OriginSelector } from "../../../ui/OriginSelector";
+import type { CustomItemOrigin } from "../../../constants/customItems";
 import { PickerField } from "../../../ui/PickerField";
 import { RequiredFormLabel } from "../../../ui/RequiredFormLabel";
 import { InfoModal } from "../../../components/InfoModal";
 import { ARMOUR_SPECIAL_RULES } from "../../../data/reference/armourSpecialRules";
-import { CUSTOM_AVAILABILITY_OPTIONS, sanitizeNonNegativeIntegerInput } from "../weapons/weaponShared";
-import { LOCATION_LABELS } from "./armourHelpers";
+import { STANDARD_AVAILABILITY_OPTIONS } from "../../../constants/availability";
+import { sanitizeNonNegativeIntegerInput } from "../../../utils/formInput";
+import { ARMOUR_LOCATION_LABELS } from "../../../constants/locations";
 
-const WORN_ARMOUR_QUALITY_OPTIONS: ArmourQuality[] = ["Primitive", "Flak", "Mesh", "Sanctified", "Powered"];
+const WORN_ARMOUR_QUALITY_OPTIONS: ArmourQuality[] = [
+  "Primitive",
+  "Flak",
+  "Mesh",
+  "Sanctified",
+  "Powered",
+];
 
 interface Props {
   initialPiece?: Partial<WornArmourPiece>;
@@ -39,7 +57,9 @@ export function CustomPieceForm({
   const formScrollPositionRef = useRef(0);
   const [name, setName] = useState(initialPiece?.name ?? "");
   const [origin, setOrigin] = useState<"" | CustomItemOrigin>(
-    initialPiece?.source === "Custom" || initialPiece?.source === "2nd Ed" ? initialPiece.source : ""
+    initialPiece?.source === "Custom" || initialPiece?.source === "2nd Ed"
+      ? initialPiece.source
+      : ""
   );
   const [craftsmanship, setCraftsmanship] = useState<ArmourCraftsmanship>(
     initialPiece?.craftsmanship ?? "Common"
@@ -100,10 +120,16 @@ export function CustomPieceForm({
       value: formatMoneyInput(value),
       availability,
       source: origin,
-      qualities: forceField ? ["Overload"] : selectedQualities.size > 0 ? [...selectedQualities] : undefined,
+      qualities: forceField
+        ? ["Overload"]
+        : selectedQualities.size > 0
+          ? [...selectedQualities]
+          : undefined,
       notes: notes.trim() || undefined,
       custom: true,
-      ...(forceField ? { isForceField: true, protectionRating: Number(protectionRating) || 0 } : {}),
+      ...(forceField
+        ? { isForceField: true, protectionRating: Number(protectionRating) || 0 }
+        : {}),
       customLibraryId: initialPiece?.customLibraryId,
       customLibraryVersionId: initialPiece?.customLibraryVersionId,
     };
@@ -119,7 +145,7 @@ export function CustomPieceForm({
     return (
       <OptionPickerScreen
         title="Availability"
-        options={CUSTOM_AVAILABILITY_OPTIONS}
+        options={STANDARD_AVAILABILITY_OPTIONS}
         selected={availability}
         onSelect={(value) => {
           setAvailability(value);
@@ -156,12 +182,7 @@ export function CustomPieceForm({
       </CustomFormSection>
 
       <CustomFormSection title="Origin">
-        <OriginSelector
-          name="custom-armour-origin"
-          value={origin}
-          onChange={setOrigin}
-          hideLabel
-        />
+        <OriginSelector name="custom-armour-origin" value={origin} onChange={setOrigin} hideLabel />
       </CustomFormSection>
 
       <CustomFormSection title="Craftsmanship">
@@ -193,7 +214,16 @@ export function CustomPieceForm({
           <fieldset aria-required="true" className="space-y-1">
             <RequiredFormLabel as="legend">Locations</RequiredFormLabel>
             <div className="grid grid-cols-3 gap-1.5">
-              {(["leftArm", "head", "rightArm", "leftLeg", "body", "rightLeg"] as ArmourLocationKey[]).map((loc) => (
+              {(
+                [
+                  "leftArm",
+                  "head",
+                  "rightArm",
+                  "leftLeg",
+                  "body",
+                  "rightLeg",
+                ] as ArmourLocationKey[]
+              ).map((loc) => (
                 <button
                   key={loc}
                   type="button"
@@ -206,7 +236,7 @@ export function CustomPieceForm({
                       : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
                   ].join(" ")}
                 >
-                  {LOCATION_LABELS[loc]}
+                  {ARMOUR_LOCATION_LABELS[loc]}
                 </button>
               ))}
             </div>
@@ -285,53 +315,55 @@ export function CustomPieceForm({
       </CustomFormSection>
 
       <CustomFormSection title="Rules and Qualities">
-          <div
-            className="space-y-1"
-            role={forceField ? undefined : "group"}
-            aria-labelledby={forceField ? undefined : "custom-armour-qualities-label"}
-          >
-            <p id="custom-armour-qualities-label" className={`${uiFormLabel} block mb-1.5`}>
-              Qualities
-            </p>
-            {forceField ? (
-              <div className="flex items-center gap-1.5">
-                <Chip className={`w-fit ${colourAmberFaint}`}>Overload</Chip>
-                <span className={uiInfoModalWrapper}>
-                  <InfoModal title="Overload" content={ARMOUR_SPECIAL_RULES.Overload} />
-                </span>
-              </div>
-            ) : (
-              <div className="grid grid-cols-3 gap-1.5">
-                {WORN_ARMOUR_QUALITY_OPTIONS.map((q) => (
-                  <button
-                    key={q}
-                    type="button"
-                    aria-pressed={selectedQualities.has(q)}
-                    onClick={() => toggleQuality(q)}
-                    className={[
-                      "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
-                      selectedQualities.has(q)
-                        ? "border-amber-600 bg-amber-600/20 text-amber-400"
-                        : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
-                    ].join(" ")}
-                  >
-                    {q}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-          <div>
-            <label htmlFor="custom-armour-rules" className={uiFormLabel}>Rules</label>
-            <textarea
-              id="custom-armour-rules"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Special rules or effects…"
-              rows={3}
-              className={editableTextareaClass(true) + " mt-0.5"}
-            />
-          </div>
+        <div
+          className="space-y-1"
+          role={forceField ? undefined : "group"}
+          aria-labelledby={forceField ? undefined : "custom-armour-qualities-label"}
+        >
+          <p id="custom-armour-qualities-label" className={`${uiFormLabel} block mb-1.5`}>
+            Qualities
+          </p>
+          {forceField ? (
+            <div className="flex items-center gap-1.5">
+              <Chip className={`w-fit ${colourAmberFaint}`}>Overload</Chip>
+              <span className={uiInfoModalWrapper}>
+                <InfoModal title="Overload" content={ARMOUR_SPECIAL_RULES.Overload} />
+              </span>
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-1.5">
+              {WORN_ARMOUR_QUALITY_OPTIONS.map((q) => (
+                <button
+                  key={q}
+                  type="button"
+                  aria-pressed={selectedQualities.has(q)}
+                  onClick={() => toggleQuality(q)}
+                  className={[
+                    "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
+                    selectedQualities.has(q)
+                      ? "border-amber-600 bg-amber-600/20 text-amber-400"
+                      : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
+                  ].join(" ")}
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        <div>
+          <label htmlFor="custom-armour-rules" className={uiFormLabel}>
+            Rules
+          </label>
+          <textarea
+            id="custom-armour-rules"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Special rules or effects…"
+            rows={3}
+            className={editableTextareaClass(true) + " mt-0.5"}
+          />
+        </div>
       </CustomFormSection>
     </CustomFormShell>
   );

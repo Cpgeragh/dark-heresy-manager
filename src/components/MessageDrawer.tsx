@@ -8,6 +8,7 @@ import { MessageThread } from "./MessageThread";
 import { MessageInput } from "./MessageInput";
 import { useToast } from "./Toast";
 import { CloseButton } from "../ui/CloseButton";
+import { ErrorState } from "../ui/ErrorState";
 
 // ── PlayerThread ──────────────────────────────────────────────────────────────
 
@@ -20,7 +21,7 @@ function PlayerThread({
   characterId: string;
   playerUid: string;
 }) {
-  const { messages, loading } = useThreadMessages(campaignId, characterId);
+  const { messages, loading, error } = useThreadMessages(campaignId, characterId);
   const toast = useToast();
 
   const handleSend = useCallback(
@@ -38,7 +39,13 @@ function PlayerThread({
   return (
     <div className="flex flex-col flex-1 overflow-hidden px-4 pb-4">
       <div className="flex-1 overflow-y-auto">
-        <MessageThread messages={messages} currentUid={playerUid} loading={loading} />
+        {error ? (
+          <ErrorState className="text-center py-10">
+            Unable to load messages. Please try again later.
+          </ErrorState>
+        ) : (
+          <MessageThread messages={messages} currentUid={playerUid} loading={loading} />
+        )}
       </div>
       <MessageInput onSend={handleSend} placeholder="Message your DM…" />
     </div>

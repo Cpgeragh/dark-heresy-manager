@@ -3,7 +3,15 @@
 import { useState } from "react";
 import type { ArcheotechItem } from "../../../types/Character";
 import { ARCHEOTECH_REFERENCE } from "../../../data/reference/archeotechReference";
-import { uiSection, uiSectionShell, uiTextBody, uiTextLabel, uiTextMuted, uiItemName, uiInfoModalWrapper } from "../../../ui/editableStyles";
+import {
+  uiSection,
+  uiSectionShell,
+  uiTextBody,
+  uiTextLabel,
+  uiTextMuted,
+  uiItemName,
+  uiInfoModalWrapper,
+} from "../../../ui/editableStyles";
 import { uiIconRemoveButton } from "../../../ui/buttonStyles";
 import { colourStacks } from "../../../ui/colourTokens";
 import { CRAFTSMANSHIP_STYLE } from "../../../ui/craftsmanship";
@@ -11,7 +19,7 @@ import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { StatChip } from "../weapons/weaponShared";
 import { locationLabel } from "../ArmourTab/armourHelpers";
-import { LOCATION_DISPLAY } from "../CyberneticsTab/cyberneticsConstants";
+import { ARMOUR_LOCATION_LABELS } from "../../../constants/locations";
 import { InfoModal } from "../../../components/InfoModal";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
@@ -58,16 +66,15 @@ export function ItemCard({
         <div className="flex-1 min-w-0">
           {/* Title row */}
           {hasBody ? (
-            <button type="button"
+            <button
+              type="button"
               className="w-full flex items-start justify-between gap-2 p-3 lg:p-4 text-left"
               onClick={() => setExpanded((v) => !v)}
               aria-expanded={expanded}
             >
               <div className="flex items-center gap-2 flex-wrap">
                 <span className={uiItemName}>{item.name}</span>
-                {libraryItem && (
-                  <StatusBadge status={libraryItem.status} />
-                )}
+                {libraryItem && <StatusBadge status={libraryItem.status} />}
                 {item.type && (
                   <Chip className={`border-slate-700 bg-slate-800/40 ${uiTextMuted}`}>
                     {item.type}
@@ -79,9 +86,7 @@ export function ItemCard({
           ) : (
             <div className="flex items-center gap-2 flex-wrap">
               <span className={uiItemName}>{item.name}</span>
-              {libraryItem && (
-                <StatusBadge status={libraryItem.status} />
-              )}
+              {libraryItem && <StatusBadge status={libraryItem.status} />}
               {item.type && (
                 <Chip className={`border-slate-700 bg-slate-800/40 ${uiTextMuted}`}>
                   {item.type}
@@ -98,7 +103,12 @@ export function ItemCard({
           <div className={hasBody ? "px-3 pb-3 lg:px-4 lg:pb-4" : ""}>
             {editable && hasBody && (
               <div className="flex justify-end">
-                <button type="button" onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
+                <button
+                  type="button"
+                  onClick={onRemove}
+                  aria-label="Remove"
+                  className={uiIconRemoveButton}
+                >
                   <TrashIcon className="w-4 h-4" />
                 </button>
               </div>
@@ -109,17 +119,19 @@ export function ItemCard({
               <div className="space-y-1.5">
                 {specialRules && (
                   <p className={`text-xs lg:text-sm ${uiTextMuted}`}>
-                    <span className={`${uiTextLabel} mr-1`}>
-                      Special
-                    </span>
+                    <span className={`${uiTextLabel} mr-1`}>Special</span>
                     {specialRules}
                   </p>
                 )}
                 {description && (
-                  <p className={`text-xs lg:text-sm ${uiTextBody} leading-relaxed`}>{description}</p>
+                  <p className={`text-xs lg:text-sm ${uiTextBody} leading-relaxed`}>
+                    {description}
+                  </p>
                 )}
                 {item.notes?.trim() && (
-                  <p className="text-xs lg:text-sm text-amber-300/70 italic leading-relaxed">{item.notes}</p>
+                  <p className="text-xs lg:text-sm text-amber-300/70 italic leading-relaxed">
+                    {item.notes}
+                  </p>
                 )}
               </div>
             )}
@@ -127,7 +139,9 @@ export function ItemCard({
             {/* Type-specific stat chips */}
             {item.type === "Armour" && (
               <div className="mt-1 flex flex-wrap gap-1.5">
-                {(item.locations ?? []).length > 0 && <StatChip label="Location" value={locationLabel(item.locations!)} />}
+                {(item.locations ?? []).length > 0 && (
+                  <StatChip label="Location" value={locationLabel(item.locations!)} />
+                )}
                 {item.ap !== undefined && <StatChip label="AP" value={String(item.ap)} />}
                 {item.stacks && <Chip className={colourStacks}>Stacks</Chip>}
               </div>
@@ -139,19 +153,28 @@ export function ItemCard({
             )}
             {item.type === "Shield" && (
               <div className="mt-1 flex flex-wrap gap-1.5">
-                {(item.locations ?? []).length > 0 && <StatChip label="Location" value={locationLabel(item.locations!)} />}
+                {(item.locations ?? []).length > 0 && (
+                  <StatChip label="Location" value={locationLabel(item.locations!)} />
+                )}
                 {item.ap !== undefined && <StatChip label="AP" value={String(item.ap)} />}
               </div>
             )}
             {item.type === "Cybernetic" && (
               <div className="mt-1 flex flex-wrap items-center gap-1.5">
                 {(item.bodyLocation ?? []).length > 0 && (
-                  <StatChip label="Location" value={item.bodyLocation!.map((l) => LOCATION_DISPLAY[l] ?? l).join(" & ")} />
+                  <StatChip
+                    label="Location"
+                    value={item
+                      .bodyLocation!.map((location) => ARMOUR_LOCATION_LABELS[location])
+                      .join(" & ")}
+                  />
                 )}
                 {item.craftsmanship && (
                   <>
                     <span className={uiTextLabel}>Quality</span>
-                    <Chip className={`${CRAFTSMANSHIP_STYLE[item.craftsmanship]} shrink-0`}>{item.craftsmanship}</Chip>
+                    <Chip className={`${CRAFTSMANSHIP_STYLE[item.craftsmanship]} shrink-0`}>
+                      {item.craftsmanship}
+                    </Chip>
                   </>
                 )}
               </div>
@@ -181,7 +204,12 @@ export function ItemCard({
         </div>
 
         {editable && !hasBody && (
-          <button type="button" onClick={onRemove} aria-label="Remove" className={`${uiIconRemoveButton} mt-0.5`}>
+          <button
+            type="button"
+            onClick={onRemove}
+            aria-label="Remove"
+            className={`${uiIconRemoveButton} mt-0.5`}
+          >
             <TrashIcon className="w-4 h-4" />
           </button>
         )}

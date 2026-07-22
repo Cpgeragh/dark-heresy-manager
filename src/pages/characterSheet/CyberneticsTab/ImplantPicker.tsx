@@ -15,18 +15,29 @@ import { ModalShell } from "../../../ui/ModalShell";
 import { InfoModal } from "../../../components/InfoModal";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
-import { editableInputClass, uiTextBody, uiTextLabel, uiTextMuted, uiFormLabel, uiInfoModalWrapper, uiItemName, uiTextGMNote } from "../../../ui/editableStyles";
+import {
+  editableInputClass,
+  uiTextBody,
+  uiTextLabel,
+  uiTextMuted,
+  uiFormLabel,
+  uiInfoModalWrapper,
+  uiItemName,
+  uiTextGMNote,
+} from "../../../ui/editableStyles";
 import { uiPickerBackButton } from "../../../ui/buttonStyles";
 import { StatusBadge } from "../../../ui/StatusBadge";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import { CRAFTSMANSHIP_STYLE } from "../../../ui/craftsmanship";
-import { LOCATION_DISPLAY } from "./cyberneticsConstants";
+import { ARMOUR_LOCATION_LABELS } from "../../../constants/locations";
 import {
   availableCraftsmanship,
   craftsmanshipDescription,
   defaultCraftsmanship,
 } from "./cyberneticsHelpers";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
+import { EXTENDED_AVAILABILITY_OPTIONS } from "../../../constants/availability";
+import { isVariableMeta } from "../../../utils/customItemMeta";
 
 interface Props {
   editable?: boolean;
@@ -41,27 +52,6 @@ interface Props {
   onSelectCustomItem?: (item: CampaignCustomItem<"cybernetic">) => void;
   onCustom?: () => void;
   onClose: () => void;
-}
-
-const AVAILABILITY_OPTIONS = [
-  "Abundant",
-  "Plentiful",
-  "Common",
-  "Average",
-  "Uncommon",
-  "Scarce",
-  "Rare",
-  "Very Rare",
-  "Extremely Rare",
-  "Near Unique",
-  "Unique",
-  "Issued Only",
-  "Adeptus Mechanicus Only",
-] as const;
-
-function isVariableMeta(value?: string | null) {
-  const normalized = value?.trim().toLowerCase();
-  return !normalized || normalized === "\u2014" || normalized === "variable" || normalized === "varies";
 }
 
 export function ImplantPicker({
@@ -130,17 +120,13 @@ export function ImplantPicker({
     <div className="space-y-3">
       {ref.notes && (
         <div>
-          <p className={`${uiTextLabel} font-semibold mb-1`}>
-            Item Rules
-          </p>
+          <p className={`${uiTextLabel} font-semibold mb-1`}>Item Rules</p>
           <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ref.notes}</p>
         </div>
       )}
       {availableCraftsmanship(ref).map((quality) => (
         <div key={quality}>
-          <p className={`${uiTextLabel} font-semibold mb-1`}>
-            {quality}
-          </p>
+          <p className={`${uiTextLabel} font-semibold mb-1`}>{quality}</p>
           <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
             {craftsmanshipDescription(ref, quality)}
           </p>
@@ -154,9 +140,12 @@ export function ImplantPicker({
       return (
         <OptionPickerScreen
           title="Rarity"
-          options={[...AVAILABILITY_OPTIONS]}
+          options={EXTENDED_AVAILABILITY_OPTIONS}
           selected={gmRarity}
-          onSelect={(value) => { setGmRarity(value); setShowRarityPicker(false); }}
+          onSelect={(value) => {
+            setGmRarity(value);
+            setShowRarityPicker(false);
+          }}
           onClose={() => setShowRarityPicker(false)}
         />
       );
@@ -188,7 +177,9 @@ export function ImplantPicker({
               className={editableInputClass(true)}
             />
             {gmCost.trim() !== "" && !costValid && (
-              <p className="text-xs lg:text-sm text-red-400">Must be a whole number of 0 or more.</p>
+              <p className="text-xs lg:text-sm text-red-400">
+                Must be a whole number of 0 or more.
+              </p>
             )}
           </div>
 
@@ -200,9 +191,14 @@ export function ImplantPicker({
               <button
                 type="button"
                 onClick={() => setShowRarityPicker(true)}
-                className={editableInputClass(true) + " appearance-none text-left flex items-center justify-between"}
+                className={
+                  editableInputClass(true) +
+                  " appearance-none text-left flex items-center justify-between"
+                }
               >
-                <span className={gmRarity ? "" : "text-slate-500"}>{gmRarity || "— Select availability —"}</span>
+                <span className={gmRarity ? "" : "text-slate-500"}>
+                  {gmRarity || "— Select availability —"}
+                </span>
                 <ArrowRight />
               </button>
             </div>
@@ -248,7 +244,8 @@ export function ImplantPicker({
           <p className={`text-xs lg:text-sm ${uiTextMuted}`}>Select installation side:</p>
           <div className="flex flex-col gap-2">
             {options.map((opt) => (
-              <button type="button"
+              <button
+                type="button"
                 key={opt.label}
                 onClick={() => setLocation(opt.value)}
                 className="py-2 lg:py-2.5 px-3 lg:px-4 rounded border border-slate-600 bg-slate-800 hover:bg-slate-700 text-sm lg:text-base text-slate-200 text-left transition"
@@ -284,16 +281,19 @@ export function ImplantPicker({
             <div className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted}`}>
               <span>Installing on:</span>
               <Chip className="border-slate-600 bg-slate-800 text-slate-300">
-                {location.map((l) => LOCATION_DISPLAY[l]).join(" & ")}
+                {location.map((item) => ARMOUR_LOCATION_LABELS[item]).join(" & ")}
               </Chip>
             </div>
           )}
 
           <div>
-            <p className={`text-xs lg:text-sm ${uiTextMuted} mb-2`}>Select craftsmanship quality:</p>
+            <p className={`text-xs lg:text-sm ${uiTextMuted} mb-2`}>
+              Select craftsmanship quality:
+            </p>
             <div className="flex gap-2">
               {qualities.map((q) => (
-                <button type="button"
+                <button
+                  type="button"
                   key={q}
                   onClick={() => setCraftsmanship(q)}
                   className={[
@@ -309,7 +309,9 @@ export function ImplantPicker({
             </div>
           </div>
 
-          <div className={`text-xs lg:text-sm ${uiTextBody} bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed`}>
+          <div
+            className={`text-xs lg:text-sm ${uiTextBody} bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed`}
+          >
             {craftsmanshipDescription(selected, craftsmanship)}
           </div>
         </PickerBody>
@@ -320,7 +322,15 @@ export function ImplantPicker({
           </button>
           <Button
             className="flex-1"
-            onClick={() => onSelect(selected, craftsmanship, location ?? undefined, assignedValue, assignedRarity)}
+            onClick={() =>
+              onSelect(
+                selected,
+                craftsmanship,
+                location ?? undefined,
+                assignedValue,
+                assignedRarity
+              )
+            }
             disabled={!editable}
           >
             Install
@@ -341,11 +351,7 @@ export function ImplantPicker({
       isEmpty={filtered.length === 0 && filteredCustom.length === 0}
       footer={
         editable && onCustom ? (
-          <PickerCustomAction
-            onClick={onCustom}
-          >
-            + Add custom cybernetic
-          </PickerCustomAction>
+          <PickerCustomAction onClick={onCustom}>+ Add custom cybernetic</PickerCustomAction>
         ) : undefined
       }
     >
@@ -364,7 +370,11 @@ export function ImplantPicker({
               <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
                 <InfoModal
                   title={item.name}
-                  content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{item.data.notes}</p>}
+                  content={
+                    <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
+                      {item.data.notes}
+                    </p>
+                  }
                   as="span"
                 />
               </span>
@@ -385,11 +395,7 @@ export function ImplantPicker({
       ))}
 
       {filtered.map((ref) => (
-        <PickerRow
-          key={ref.id}
-          interactive={editable}
-          onClick={() => selectImplant(ref)}
-        >
+        <PickerRow key={ref.id} interactive={editable} onClick={() => selectImplant(ref)}>
           <div className="flex items-center gap-1.5 min-w-0">
             <span className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}>
               {ref.name}

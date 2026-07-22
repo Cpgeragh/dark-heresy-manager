@@ -10,6 +10,8 @@ import { ArcheotechWeaponCard } from "../weapons/ArcheotechWeaponCard";
 import { CustomItemForm } from "./CustomItemForm";
 import { Button } from "../../../ui/Button";
 import { SectionHeader } from "../../../ui/SectionHeader";
+import { ErrorState } from "../../../ui/ErrorState";
+import { LoadingState } from "../../../ui/LoadingState";
 import { uiTextPlaceholder } from "../../../ui/editableStyles";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
 import { useCustomItemLibraryActions } from "../../../hooks/useCustomItemLibraryActions";
@@ -66,7 +68,11 @@ export function ArcheotechTab({
     itemLabel: "archeotech",
   });
 
-  const { items: campaignCustomArcheotechItems, loading: archeotechLoading } = useCampaignCustomItems({
+  const {
+    items: campaignCustomArcheotechItems,
+    loading: archeotechLoading,
+    error: archeotechError,
+  } = useCampaignCustomItems({
     campaignId,
     category: "archeotech",
     mode: isDM ? "admin" : "picker",
@@ -283,7 +289,13 @@ export function ArcheotechTab({
     );
   };
 
-  if (archeotechLoading) return null;
+  if (archeotechError) {
+    return <ErrorState>Unable to load custom archeotech items.</ErrorState>;
+  }
+
+  if (archeotechLoading) {
+    return <LoadingState>Loading custom archeotech items…</LoadingState>;
+  }
 
   return (
     <div className="space-y-8">

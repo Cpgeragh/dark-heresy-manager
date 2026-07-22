@@ -19,6 +19,8 @@ import { CustomImplantForm } from "./CustomImplantForm";
 import { nextAvailableCraftsmanship } from "./cyberneticsHelpers";
 import { Button } from "../../../ui/Button";
 import { SectionHeader } from "../../../ui/SectionHeader";
+import { ErrorState } from "../../../ui/ErrorState";
+import { LoadingState } from "../../../ui/LoadingState";
 import { CYBERNETICS_REFERENCE } from "../../../data/reference/cyberneticsReference";
 import { uiTextPlaceholder } from "../../../ui/editableStyles";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
@@ -109,7 +111,11 @@ export function CyberneticsTab({
     itemLabel: "cybernetic",
   });
 
-  const { items: campaignCustomCyberneticItems, loading: cyberneticsLoading } = useCampaignCustomItems({
+  const {
+    items: campaignCustomCyberneticItems,
+    loading: cyberneticsLoading,
+    error: cyberneticsError,
+  } = useCampaignCustomItems({
     campaignId,
     category: "cybernetic",
     mode: isDM ? "admin" : "picker",
@@ -522,7 +528,13 @@ export function CyberneticsTab({
     );
   };
 
-  if (cyberneticsLoading) return null;
+  if (cyberneticsError) {
+    return <ErrorState>Unable to load custom cybernetic items.</ErrorState>;
+  }
+
+  if (cyberneticsLoading) {
+    return <LoadingState>Loading custom cybernetic items…</LoadingState>;
+  }
 
   return (
     <div className="space-y-6">

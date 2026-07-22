@@ -57,17 +57,26 @@ export default function App() {
     effectiveUserId,
     unlink,
     loading: linkLoading,
+    error: linkError,
   } = useDeviceLink(currentUser?.uid ?? "");
 
   // First name lives on the shared account profile, read live so it syncs
   // across linked devices.
-  const { firstName, loading: profileLoading } = useUserProfile(effectiveUserId);
+  const {
+    firstName,
+    loading: profileLoading,
+    error: profileError,
+  } = useUserProfile(effectiveUserId);
 
   // -------------------------------------------------
   // LOADING STATES
   // -------------------------------------------------
   if (loading || linkLoading || profileLoading) {
     return <SplashScreen label={isPostUpgrade ? "Updating…" : "Loading…"} />;
+  }
+
+  if (linkError || profileError) {
+    return <SplashScreen label="Unable to load your account. Please refresh." />;
   }
 
   if (!currentUser) {

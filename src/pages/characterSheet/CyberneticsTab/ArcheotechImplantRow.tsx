@@ -8,7 +8,7 @@ import { colourArcheotech } from "../../../ui/colourTokens";
 import { CRAFTSMANSHIP_STYLE } from "../../../ui/craftsmanship";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { StatChip } from "../weapons/weaponShared";
-import { LOCATION_DISPLAY } from "./cyberneticsConstants";
+import { ARMOUR_LOCATION_LABELS } from "../../../constants/locations";
 import { TrashIcon } from "../../../ui/TrashIcon";
 
 interface Props {
@@ -18,7 +18,12 @@ interface Props {
   highlightAsArcheotech?: boolean;
 }
 
-export function ArcheotechImplantRow({ item, editable, onRemove, highlightAsArcheotech = true }: Props) {
+export function ArcheotechImplantRow({
+  item,
+  editable,
+  onRemove,
+  highlightAsArcheotech = true,
+}: Props) {
   const locations = item.bodyLocation ?? [];
 
   const containerClass = highlightAsArcheotech
@@ -31,14 +36,15 @@ export function ArcheotechImplantRow({ item, editable, onRemove, highlightAsArch
         <div className="flex items-center gap-2 flex-wrap">
           <span className={uiCardTitle}>{item.name}</span>
           {highlightAsArcheotech && (
-            <Chip className={`${colourArcheotech} shrink-0`}>
-              Archeotech
-            </Chip>
+            <Chip className={`${colourArcheotech} shrink-0`}>Archeotech</Chip>
           )}
         </div>
         <div className="flex flex-wrap items-center gap-1.5 mt-1">
           {locations.length > 0 && (
-            <StatChip label="Location" value={locations.map((l) => LOCATION_DISPLAY[l] ?? l).join(" & ")} />
+            <StatChip
+              label="Location"
+              value={locations.map((location) => ARMOUR_LOCATION_LABELS[location]).join(" & ")}
+            />
           )}
           {item.craftsmanship && (
             <>

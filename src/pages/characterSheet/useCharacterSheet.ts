@@ -42,6 +42,7 @@ export function useCharacterSheet({
     character,
     claimLog,
     loading: characterLoading,
+    error: characterError,
   } = useCharacterData({
     campaignId: path?.campaignId,
     characterId: path?.characterId,
@@ -82,6 +83,7 @@ export function useCharacterSheet({
     character,
     claimLog,
     characterLoading,
+    characterError,
 
     // Role & permissions
     isDM,

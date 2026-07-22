@@ -18,6 +18,7 @@ function skill(over: Partial<SkillEntry> = {}): SkillEntry {
     level: "trained",
     category: "General",
     advanced: false,
+    source: "CR",
     ...over,
   };
 }

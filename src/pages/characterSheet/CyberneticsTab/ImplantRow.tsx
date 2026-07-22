@@ -3,11 +3,18 @@
 import type { CyberneticItem } from "../../../types/Character";
 import { CYBERNETICS_REFERENCE } from "../../../data/reference/cyberneticsReference";
 import { Chip } from "../../../ui/Chip";
-import { uiSection, uiTextBody, uiTextLabel, uiTextMuted, uiItemName, uiInfoModalWrapper } from "../../../ui/editableStyles";
+import {
+  uiSection,
+  uiTextBody,
+  uiTextLabel,
+  uiTextMuted,
+  uiItemName,
+  uiInfoModalWrapper,
+} from "../../../ui/editableStyles";
 import { uiIconRemoveButton } from "../../../ui/buttonStyles";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { CRAFTSMANSHIP_STYLE } from "../../../ui/craftsmanship";
-import { LOCATION_DISPLAY } from "./cyberneticsConstants";
+import { ARMOUR_LOCATION_LABELS } from "../../../constants/locations";
 import { availableCraftsmanship, craftsmanshipDescription } from "./cyberneticsHelpers";
 import { InfoModal } from "../../../components/InfoModal";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
@@ -52,9 +59,7 @@ export function ImplantRow({
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5 min-w-0">
           <p className={`${uiItemName} truncate`}>{item.name}</p>
-          {libraryItem && (
-            <StatusBadge status={libraryItem.status} />
-          )}
+          {libraryItem && <StatusBadge status={libraryItem.status} />}
           <span className={uiInfoModalWrapper}>
             <InfoModal
               title={item.name}
@@ -62,17 +67,13 @@ export function ImplantRow({
                 <div className="space-y-3">
                   {ref?.notes && (
                     <div>
-                      <p className={`${uiTextLabel} font-semibold mb-1`}>
-                        Item Rules
-                      </p>
+                      <p className={`${uiTextLabel} font-semibold mb-1`}>Item Rules</p>
                       <p className={`text-sm ${uiTextBody} leading-relaxed`}>{ref.notes}</p>
                     </div>
                   )}
                   {item.notes && (
                     <div>
-                      <p className={`${uiTextLabel} font-semibold mb-1`}>
-                        Notes
-                      </p>
+                      <p className={`${uiTextLabel} font-semibold mb-1`}>Notes</p>
                       <p className={`text-sm ${uiTextBody} leading-relaxed`}>{item.notes}</p>
                     </div>
                   )}
@@ -84,7 +85,7 @@ export function ImplantRow({
         <div className="flex flex-wrap gap-1.5 mt-1">
           {item.bodyLocation && item.bodyLocation.length > 0 && (
             <Chip className={`border-slate-700 bg-slate-800/40 ${uiTextMuted}`}>
-              {item.bodyLocation.map((l) => LOCATION_DISPLAY[l]).join(" & ")}
+              {item.bodyLocation.map((location) => ARMOUR_LOCATION_LABELS[location]).join(" & ")}
             </Chip>
           )}
           <ItemMetaChips
@@ -143,7 +144,12 @@ export function ImplantRow({
       {/* Craftsmanship badge — clickable when editable */}
       {/* Remove */}
       {editable && (
-        <button type="button" onClick={() => onRemove(item.id)} aria-label="Remove" className={uiIconRemoveButton}>
+        <button
+          type="button"
+          onClick={() => onRemove(item.id)}
+          aria-label="Remove"
+          className={uiIconRemoveButton}
+        >
           <TrashIcon className="w-4 h-4" />
         </button>
       )}

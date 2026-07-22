@@ -53,7 +53,7 @@ export function CharacterRow({
   portraitUrl?: string;
   isDM: boolean;
 }) {
-  const { logs } = useClaimLogs(campaignId, characterId);
+  const { logs, loading: logsLoading, error: logsError } = useClaimLogs(campaignId, characterId);
   const toast = useToast();
   const [showHistory, setShowHistory] = useState(false);
 
@@ -139,7 +139,11 @@ export function CharacterRow({
         >
           <ModalHeader title="History" onClose={() => setShowHistory(false)} />
           <div className="p-4 lg:p-5 space-y-1">
-            {logs.length === 0 ? (
+            {logsError ? (
+              <p className="text-xs lg:text-sm text-red-400">Unable to load character history.</p>
+            ) : logsLoading ? (
+              <p className="text-xs lg:text-sm text-slate-500">Loading history…</p>
+            ) : logs.length === 0 ? (
               <p className="text-xs lg:text-sm text-slate-500">No history yet.</p>
             ) : (
               logs.map((log) => (

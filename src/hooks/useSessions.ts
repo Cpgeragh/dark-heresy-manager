@@ -1,17 +1,10 @@
 // src/hooks/useSessions.ts
 
-import { useCallback, useEffect, useState } from "react";
-import {
-  collection,
-  deleteDoc,
-  doc,
-  onSnapshot,
-  orderBy,
-  query,
-  updateDoc,
-} from "firebase/firestore";
+import { useCallback } from "react";
+import { collection, deleteDoc, doc, orderBy, query, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import type { SessionDocument } from "../types/Firestore";
+import { useQuerySubscription } from "./useFirestoreSubscription";
 
 type SessionWithId = SessionDocument & { id: string };
 type SessionUpdateData = Partial<
@@ -21,44 +14,25 @@ type SessionUpdateData = Partial<
 export function useSessions(campaignId: string | undefined): {
   sessions: SessionWithId[];
   loading: boolean;
+  error: Error | null;
   deleteSession: (sessionId: string) => Promise<void>;
   updateSession: (sessionId: string, data: SessionUpdateData) => Promise<void>;
 } {
-  const [sessions, setSessions] = useState<SessionWithId[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!campaignId) {
-      setSessions([]);
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-
-    const sessionsQuery = query(
-      collection(db, "campaigns", campaignId, "sessions"),
-      orderBy("date", "desc")
-    );
-
-    const unsub = onSnapshot(
-      sessionsQuery,
-      (snap) => {
-        const list: SessionWithId[] = snap.docs.map((d) => ({
-          id: d.id,
-          ...(d.data() as Omit<SessionDocument, "id">),
-        }));
-        setSessions(list);
-        setLoading(false);
-      },
-      (err) => {
-        console.error("Sessions snapshot error:", err);
-        setLoading(false);
-      }
-    );
-
-    return () => unsub();
-  }, [campaignId]);
+  const {
+    data: sessions,
+    loading,
+    error,
+  } = useQuerySubscription(
+    campaignId
+      ? query(collection(db, "campaigns", campaignId, "sessions"), orderBy("date", "desc"))
+      : null,
+    campaignId ? `sessions:${campaignId}` : null,
+    (snapshot) =>
+      snapshot.docs.map((sessionDocument) => ({
+        id: sessionDocument.id,
+        ...(sessionDocument.data() as Omit<SessionDocument, "id">),
+      }))
+  );
 
   const deleteSession = useCallback(
     async (sessionId: string) => {
@@ -89,5 +63,5 @@ export function useSessions(campaignId: string | undefined): {
     [campaignId]
   );
 
-  return { sessions, loading, deleteSession, updateSession };
+  return { sessions, loading, error, deleteSession, updateSession };
 }

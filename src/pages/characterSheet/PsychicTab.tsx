@@ -9,7 +9,14 @@ import {
   type PsychicPowerRef,
   type PsychicDiscipline,
 } from "../../data/reference/psychicReference";
-import { editableInputClass, editableTextareaClass, uiSection, uiFormLabel, uiItemName, uiInfoModalWrapper } from "../../ui/editableStyles";
+import {
+  editableInputClass,
+  editableTextareaClass,
+  uiSection,
+  uiFormLabel,
+  uiItemName,
+  uiInfoModalWrapper,
+} from "../../ui/editableStyles";
 import { Button } from "../../ui/Button";
 import { Chip } from "../../ui/Chip";
 import { SectionHeader } from "../../ui/SectionHeader";
@@ -27,6 +34,7 @@ import {
   segmentedTabPanelId,
   uiSwipeableTabPanel,
 } from "../../ui/segmentedTabStyles";
+import { CUSTOM_ITEM_ORIGIN_OPTIONS, type CustomItemOrigin } from "../../constants/customItems";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -54,7 +62,6 @@ const PSYCHIC_POWER_TABS = [
 ] as const satisfies readonly SegmentedTabOption<PowerGroup>[];
 const PSYCHIC_POWER_TABS_ID = "psychic-power-groups";
 type DisciplineFilter = PsychicDiscipline | "All";
-type CustomPowerOrigin = "Custom" | "2nd Ed";
 type CustomRangeMode = "meters" | "km-radius" | "you" | "unlimited";
 type EditingCustomPower = { target: PowerGroup; power: PsychicPower } | null;
 
@@ -109,7 +116,8 @@ function PowerPicker({
       onClose={onClose}
       isEmpty={filtered.length === 0}
       filterRow={allFilters.map((d) => (
-        <button type="button"
+        <button
+          type="button"
           key={d}
           onClick={() => setDiscipline(d)}
           className={[
@@ -117,7 +125,7 @@ function PowerPicker({
             discipline === d
               ? d === "All"
                 ? "border-slate-400 bg-slate-700 text-slate-100"
-                : disciplineColours[d] ?? disciplineColours.default
+                : (disciplineColours[d] ?? disciplineColours.default)
               : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
           ].join(" ")}
         >
@@ -126,24 +134,16 @@ function PowerPicker({
       ))}
       footer={
         editable ? (
-          <PickerCustomAction
-            onClick={onCustom}
-          >
+          <PickerCustomAction onClick={onCustom}>
             {minorOnly ? "+ Custom minor power" : "+ Custom major power"}
           </PickerCustomAction>
         ) : undefined
       }
     >
       {filtered.map((ref) => (
-        <PickerRow
-          key={ref.id}
-          interactive={editable}
-          onClick={() => onSelect(ref)}
-        >
+        <PickerRow key={ref.id} interactive={editable} onClick={() => onSelect(ref)}>
           <div className="flex items-center gap-1.5">
-            <span className={`${uiItemName} group-hover:text-white`}>
-              {ref.name}
-            </span>
+            <span className={`${uiItemName} group-hover:text-white`}>{ref.name}</span>
             {ref.description && (
               <span
                 className={`${uiInfoModalWrapper} shrink-0`}
@@ -153,7 +153,9 @@ function PowerPicker({
                   as="span"
                   title={ref.name}
                   content={
-                    <p className="text-sm lg:text-base text-slate-300 leading-relaxed">{ref.description}</p>
+                    <p className="text-sm lg:text-base text-slate-300 leading-relaxed">
+                      {ref.description}
+                    </p>
                   }
                   hideTitle
                 />
@@ -211,7 +213,9 @@ function CustomPowerForm({
   const [name, setName] = useState(initialPower?.name ?? "");
   const [description, setDescription] = useState(initialPower?.description ?? "");
   const [discipline, setDiscipline] = useState<PsychicDiscipline | "">(
-    target === "minor" ? "Minor" : (initialPower?.discipline as PsychicDiscipline | undefined) ?? ""
+    target === "minor"
+      ? "Minor"
+      : ((initialPower?.discipline as PsychicDiscipline | undefined) ?? "")
   );
   const [threshold, setThreshold] = useState(initialPower?.threshold ?? "");
   const [focusTime, setFocusTime] = useState<"" | "Half Action" | "Full Action">(
@@ -226,7 +230,7 @@ function CustomPowerForm({
       ? initialPower.sustained
       : ""
   );
-  const [origin, setOrigin] = useState<"" | CustomPowerOrigin>(
+  const [origin, setOrigin] = useState<"" | CustomItemOrigin>(
     initialPower?.source === "2nd Ed" ? "2nd Ed" : initialPower ? "Custom" : ""
   );
 
@@ -308,7 +312,9 @@ function CustomPowerForm({
             autoFocus
           />
           {nameExists && (
-            <p className="text-xs lg:text-sm text-red-300">That power is already on this character.</p>
+            <p className="text-xs lg:text-sm text-red-300">
+              That power is already on this character.
+            </p>
           )}
         </div>
 
@@ -317,9 +323,7 @@ function CustomPowerForm({
             Discipline <span className="text-red-400">*</span>
           </label>
           {target === "minor" ? (
-            <Chip className={`w-fit ${disciplineColours.Minor}`}>
-              Minor
-            </Chip>
+            <Chip className={`w-fit ${disciplineColours.Minor}`}>Minor</Chip>
           ) : (
             <div className="flex flex-wrap gap-1.5">
               {majorDisciplines.map((d) => (
@@ -456,7 +460,7 @@ function CustomPowerForm({
               Origin <span className="text-red-400">*</span>
             </label>
             <div className="grid grid-cols-2 gap-1.5">
-              {(["Custom", "2nd Ed"] as const).map((value) => (
+              {CUSTOM_ITEM_ORIGIN_OPTIONS.map((value) => (
                 <button
                   key={value}
                   type="button"
@@ -492,10 +496,7 @@ function CustomPowerForm({
           <Button className="flex-1" onClick={handleAdd} disabled={!canAdd}>
             {initialPower ? "Save Power" : "Add Power"}
           </Button>
-          <Button
-            variant="secondary"
-            onClick={onCancel}
-          >
+          <Button variant="secondary" onClick={onCancel}>
             Cancel
           </Button>
         </div>
@@ -541,11 +542,11 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
   const [activePowerGroup, setActivePowerGroup] = useState<PowerGroup>(() =>
     psychic.minorPowers.length === 0 && psychic.majorPowers.length > 0 ? "major" : "minor"
   );
-  const { containerRef, transitionClass, switchTo: switchPowerGroup } = useSwipeableTabs(
-    POWER_GROUPS,
-    activePowerGroup,
-    setActivePowerGroup
-  );
+  const {
+    containerRef,
+    transitionClass,
+    switchTo: switchPowerGroup,
+  } = useSwipeableTabs(POWER_GROUPS, activePowerGroup, setActivePowerGroup);
 
   // ── Field updates ────────────────────────────────────────────────────────
 
@@ -639,18 +640,15 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
   // ── Render ────────────────────────────────────────────────────────────────
 
   const pickerInitialDiscipline: DisciplineFilter = pickerTarget === "minor" ? "Minor" : "All";
-  const activePowers =
-    activePowerGroup === "minor" ? psychic.minorPowers : psychic.majorPowers;
-  const activeRemove =
-    activePowerGroup === "minor" ? removeMinorPower : removeMajorPower;
-  const activeOpenPicker =
-    activePowerGroup === "minor" ? openPickerForMinor : openPickerForMajor;
-  const activeEditPower = (power: PsychicPower) => setEditingCustomPower({ target: activePowerGroup, power });
+  const activePowers = activePowerGroup === "minor" ? psychic.minorPowers : psychic.majorPowers;
+  const activeRemove = activePowerGroup === "minor" ? removeMinorPower : removeMajorPower;
+  const activeOpenPicker = activePowerGroup === "minor" ? openPickerForMinor : openPickerForMajor;
+  const activeEditPower = (power: PsychicPower) =>
+    setEditingCustomPower({ target: activePowerGroup, power });
   const activeTitle = activePowerGroup === "minor" ? "Minor Powers" : "Major Powers";
   const activeEmptyText =
     activePowerGroup === "minor" ? "No minor powers recorded." : "No major powers recorded.";
-  const activeAddLabel =
-    activePowerGroup === "minor" ? "+ Add Minor Power" : "+ Add Major Power";
+  const activeAddLabel = activePowerGroup === "minor" ? "+ Add Minor Power" : "+ Add Major Power";
   const existingPowerNames = new Set([
     ...psychic.minorPowers.map((p) => p.name),
     ...psychic.majorPowers.map((p) => p.name),
@@ -662,9 +660,7 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
       <div className={uiSection + " flex flex-col items-center space-y-3"}>
         {/* Psy Rating — derived from highest Psy Rating talent */}
         <div className="inline-flex flex-col items-center gap-2">
-          <span className={uiFormLabel}>
-            Psy Rating
-          </span>
+          <span className={uiFormLabel}>Psy Rating</span>
           <div className="relative inline-flex">
             <div
               className={[
@@ -672,7 +668,9 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
                 psyRatingGlow(psyRating),
               ].join(" ")}
             >
-              <span className="text-sm lg:text-base font-bold font-code text-indigo-300">{psyRating}</span>
+              <span className="text-sm lg:text-base font-bold font-code text-indigo-300">
+                {psyRating}
+              </span>
             </div>
             {psyRating > 0 && (
               <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2">
@@ -691,14 +689,13 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
 
         {/* Disciplines — toggle chips, one per major discipline */}
         <div>
-          <p className={`${uiFormLabel} mb-1.5 text-center`}>
-            Disciplines
-          </p>
+          <p className={`${uiFormLabel} mb-1.5 text-center`}>Disciplines</p>
           <div className="flex flex-wrap gap-1.5 justify-center">
             {PSYCHIC_DISCIPLINES.filter((d) => d !== "Minor").map((d) => {
               const active = (psychic.disciplines ?? []).includes(d);
               return (
-                <button type="button"
+                <button
+                  type="button"
                   key={d}
                   disabled={!editable}
                   onClick={() => handleToggleDiscipline(d)}
@@ -721,10 +718,7 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
       </div>
 
       {/* MINOR POWERS ────────────────────────────────────────────────────── */}
-      <div
-        ref={containerRef}
-        className="lg:hidden space-y-4"
-      >
+      <div ref={containerRef} className="lg:hidden space-y-4">
         <SegmentedTabs
           id={PSYCHIC_POWER_TABS_ID}
           ariaLabel="Psychic power groups"
@@ -766,55 +760,55 @@ export function PsychicTab({ psychic, psyRating, editable, onUpdate }: PsychicTa
 
       <div className="hidden lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start">
         <section className={uiSection + " space-y-4"}>
-        <div className="flex items-center justify-between">
-          <SectionHeader>Minor Powers</SectionHeader>
-          <Button
-            size="sm"
-            onClick={openPickerForMinor}
-            aria-label={editable ? "Add Minor Power" : "View Minor Powers"}
-          >
-            {editable ? "+ Add Minor Power" : "View"}
-          </Button>
-        </div>
+          <div className="flex items-center justify-between">
+            <SectionHeader>Minor Powers</SectionHeader>
+            <Button
+              size="sm"
+              onClick={openPickerForMinor}
+              aria-label={editable ? "Add Minor Power" : "View Minor Powers"}
+            >
+              {editable ? "+ Add Minor Power" : "View"}
+            </Button>
+          </div>
 
-        {psychic.minorPowers.length === 0 ? (
-          <p className="text-sm lg:text-base text-slate-400">No minor powers recorded.</p>
-        ) : (
-          <PowerGrid
-            powers={psychic.minorPowers}
-            editable={editable}
-            onRemove={removeMinorPower}
-            onEdit={(power) => setEditingCustomPower({ target: "minor", power })}
-          />
-        )}
-      </section>
+          {psychic.minorPowers.length === 0 ? (
+            <p className="text-sm lg:text-base text-slate-400">No minor powers recorded.</p>
+          ) : (
+            <PowerGrid
+              powers={psychic.minorPowers}
+              editable={editable}
+              onRemove={removeMinorPower}
+              onEdit={(power) => setEditingCustomPower({ target: "minor", power })}
+            />
+          )}
+        </section>
 
-      {/* MAJOR POWERS ────────────────────────────────────────────────────── */}
-      <section className={uiSection + " space-y-4"}>
-        <div className="flex items-center justify-between">
-          <SectionHeader>Major Powers</SectionHeader>
-          <Button
-            size="sm"
-            onClick={openPickerForMajor}
-            aria-label={editable ? "Add Major Power" : "View Major Powers"}
-          >
-            {editable ? "+ Add Major Power" : "View"}
-          </Button>
-        </div>
+        {/* MAJOR POWERS ────────────────────────────────────────────────────── */}
+        <section className={uiSection + " space-y-4"}>
+          <div className="flex items-center justify-between">
+            <SectionHeader>Major Powers</SectionHeader>
+            <Button
+              size="sm"
+              onClick={openPickerForMajor}
+              aria-label={editable ? "Add Major Power" : "View Major Powers"}
+            >
+              {editable ? "+ Add Major Power" : "View"}
+            </Button>
+          </div>
 
-        {psychic.majorPowers.length === 0 ? (
-          <p className="text-sm lg:text-base text-slate-400">No major powers recorded.</p>
-        ) : (
-          <PowerGrid
-            powers={psychic.majorPowers}
-            editable={editable}
-            onRemove={removeMajorPower}
-            onEdit={(power) => setEditingCustomPower({ target: "major", power })}
-          />
-        )}
-      </section>
+          {psychic.majorPowers.length === 0 ? (
+            <p className="text-sm lg:text-base text-slate-400">No major powers recorded.</p>
+          ) : (
+            <PowerGrid
+              powers={psychic.majorPowers}
+              editable={editable}
+              onRemove={removeMajorPower}
+              onEdit={(power) => setEditingCustomPower({ target: "major", power })}
+            />
+          )}
+        </section>
 
-      {/* POWER PICKER MODAL ──────────────────────────────────────────────── */}
+        {/* POWER PICKER MODAL ──────────────────────────────────────────────── */}
       </div>
 
       {pickerTarget !== null && (

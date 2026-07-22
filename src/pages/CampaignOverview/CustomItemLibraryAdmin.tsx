@@ -5,28 +5,13 @@ import type { CustomItemCategory, CustomItemStatus } from "../../types/CustomIte
 import { useCampaignCustomItems } from "../../hooks/useCampaignCustomItems";
 import { CustomItemAdminRow } from "./CustomItemAdminRow";
 import { Chip } from "../../ui/Chip";
-
-const CATEGORIES: CustomItemCategory[] = [
-  "gear",
-  "consumable",
-  "drug",
-  "cybernetic",
-  "weapon",
-  "armour",
-  "archeotech",
-];
-
-const CATEGORY_LABELS: Record<CustomItemCategory, string> = {
-  gear: "Gear",
-  consumable: "Consumable",
-  drug: "Drug",
-  cybernetic: "Cybernetic",
-  weapon: "Weapon",
-  armour: "Armour",
-  archeotech: "Archeotech",
-};
-
-const STATUSES: CustomItemStatus[] = ["draft", "published", "archived"];
+import { ErrorState } from "../../ui/ErrorState";
+import { LoadingState } from "../../ui/LoadingState";
+import {
+  CUSTOM_ITEM_CATEGORY_LABELS,
+  CUSTOM_ITEM_CATEGORY_ORDER,
+  CUSTOM_ITEM_STATUS_ORDER,
+} from "../../constants/customItems";
 
 export function CustomItemLibraryAdmin({
   campaignId,
@@ -35,7 +20,7 @@ export function CustomItemLibraryAdmin({
   campaignId: string;
   userId: string;
 }) {
-  const { items, loading } = useCampaignCustomItems({
+  const { items, loading, error } = useCampaignCustomItems({
     campaignId,
     mode: "admin",
     includeArchived: true,
@@ -44,7 +29,13 @@ export function CustomItemLibraryAdmin({
   const [filterCategory, setFilterCategory] = useState<CustomItemCategory | "all">("all");
   const [filterStatus, setFilterStatus] = useState<CustomItemStatus | "all">("all");
 
-  if (loading) return null;
+  if (error) {
+    return <ErrorState>Unable to load custom items.</ErrorState>;
+  }
+
+  if (loading) {
+    return <LoadingState>Loading custom items…</LoadingState>;
+  }
 
   const filtered = items
     .filter((i) => filterCategory === "all" || i.category === filterCategory)
@@ -63,14 +54,14 @@ export function CustomItemLibraryAdmin({
         >
           All categories
         </Chip>
-        {CATEGORIES.map((cat) => (
+        {CUSTOM_ITEM_CATEGORY_ORDER.map((cat) => (
           <Chip
             as="button"
             key={cat}
             onClick={() => setFilterCategory(cat)}
             className={filterCategory === cat ? activeChip : inactiveChip}
           >
-            {CATEGORY_LABELS[cat]}
+            {CUSTOM_ITEM_CATEGORY_LABELS[cat]}
           </Chip>
         ))}
       </div>
@@ -82,7 +73,7 @@ export function CustomItemLibraryAdmin({
         >
           All statuses
         </Chip>
-        {STATUSES.map((s) => (
+        {CUSTOM_ITEM_STATUS_ORDER.map((s) => (
           <Chip
             as="button"
             key={s}
@@ -98,12 +89,7 @@ export function CustomItemLibraryAdmin({
       ) : (
         <div className="space-y-2">
           {filtered.map((item) => (
-            <CustomItemAdminRow
-              key={item.id}
-              item={item}
-              campaignId={campaignId}
-              userId={userId}
-            />
+            <CustomItemAdminRow key={item.id} item={item} campaignId={campaignId} userId={userId} />
           ))}
         </div>
       )}

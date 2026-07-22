@@ -8,14 +8,22 @@ import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../ui
 import { OptionPickerScreen } from "../../ui/OptionPickerScreen";
 import { ArrowRight, ArrowLeft } from "../../ui/PickerArrows";
 import { uiPickerBackButton } from "../../ui/buttonStyles";
-import { editableInputClass, uiFormLabel, uiInfoModalWrapper, uiItemName, uiTextBody, uiTextLabel } from "../../ui/editableStyles";
+import {
+  editableInputClass,
+  uiFormLabel,
+  uiInfoModalWrapper,
+  uiItemName,
+  uiTextBody,
+  uiTextLabel,
+} from "../../ui/editableStyles";
 import { DisorderInfoContent } from "./InsanityReferenceModals";
-import { INSANITY_DISORDER_REFERENCE, INSANITY_SEVERITIES, type InsanityDisorderRef } from "./insanityReference";
+import {
+  INSANITY_DISORDER_REFERENCE,
+  INSANITY_SEVERITIES,
+  type InsanityDisorderRef,
+} from "./insanityReference";
 import { disorderTypeChipClass, inactiveChipClass, severityChipClass } from "./insanityUi";
-
-function createDisorderId(): string {
-  return globalThis.crypto?.randomUUID?.() ?? `disorder-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-}
+import { createLocalId } from "../../utils/createLocalId";
 
 const customDisorderTypes = [
   ...Array.from(new Set(INSANITY_DISORDER_REFERENCE.map((ref) => ref.type))).sort(),
@@ -67,7 +75,7 @@ export function InsanityDisorderPicker({
 
   const activeSeverity = selected?.severityOptions.includes(severity)
     ? severity
-    : selected?.severityOptions[0] ?? "Minor";
+    : (selected?.severityOptions[0] ?? "Minor");
   const customSeverityOptions = customSeverityOptionsFor(customType);
   const activeCustomSeverity = customSeverityOptions.includes(severity)
     ? severity
@@ -119,10 +127,16 @@ export function InsanityDisorderPicker({
         footer={
           <div className="space-y-2">
             {!canAddCustom && (
-              <p className="text-xs lg:text-sm text-slate-300"><span className="text-red-500">*</span> Required</p>
+              <p className="text-xs lg:text-sm text-slate-300">
+                <span className="text-red-500">*</span> Required
+              </p>
             )}
             <div className="flex gap-2">
-              <button type="button" onClick={() => setCustomMode(false)} className={uiPickerBackButton}>
+              <button
+                type="button"
+                onClick={() => setCustomMode(false)}
+                className={uiPickerBackButton}
+              >
                 Back
               </button>
               <Button
@@ -131,7 +145,7 @@ export function InsanityDisorderPicker({
                 onClick={() => {
                   if (!canAddCustom) return;
                   onAdd({
-                    id: createDisorderId(),
+                    id: createLocalId("disorder"),
                     type: customType,
                     name: customName.trim(),
                     severity: activeCustomSeverity,
@@ -155,7 +169,9 @@ export function InsanityDisorderPicker({
       >
         <PickerBody>
           <div>
-            <p className={uiFormLabel}>Type <span className="text-red-500">*</span></p>
+            <p className={uiFormLabel}>
+              Type <span className="text-red-500">*</span>
+            </p>
             <button
               type="button"
               onClick={() => setShowTypePicker(true)}
@@ -180,7 +196,9 @@ export function InsanityDisorderPicker({
           </div>
 
           <div>
-            <p className={uiFormLabel}>Severity <span className="text-red-500">*</span></p>
+            <p className={uiFormLabel}>
+              Severity <span className="text-red-500">*</span>
+            </p>
             <div className="mt-1 flex flex-wrap gap-1.5">
               {customSeverityOptions.map((option) => (
                 <Chip
@@ -188,7 +206,9 @@ export function InsanityDisorderPicker({
                   as="button"
                   type="button"
                   onClick={() => setSeverity(option)}
-                  className={activeCustomSeverity === option ? severityChipClass[option] : inactiveChipClass}
+                  className={
+                    activeCustomSeverity === option ? severityChipClass[option] : inactiveChipClass
+                  }
                 >
                   {option}
                 </Chip>
@@ -226,7 +246,7 @@ export function InsanityDisorderPicker({
             className="w-full"
             onClick={() => {
               onAdd({
-                id: createDisorderId(),
+                id: createLocalId("disorder"),
                 referenceId: selected.id,
                 type: selected.type,
                 name: selected.name,
@@ -241,7 +261,9 @@ export function InsanityDisorderPicker({
       >
         <PickerBody>
           <div>
-            <p className={`${uiFormLabel} mb-2 text-center normal-case !text-[15px] lg:!text-base`}>Choose Severity</p>
+            <p className={`${uiFormLabel} mb-2 text-center normal-case !text-[15px] lg:!text-base`}>
+              Choose Severity
+            </p>
             <div className="flex gap-2">
               {selected.severityOptions.map((option) => (
                 <button
@@ -261,7 +283,9 @@ export function InsanityDisorderPicker({
             </div>
           </div>
           {activeSeverityDescription && (
-            <div className={`text-center text-xs lg:text-sm ${uiTextBody} bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed`}>
+            <div
+              className={`text-center text-xs lg:text-sm ${uiTextBody} bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed`}
+            >
               {activeSeverityDescription}
             </div>
           )}
@@ -315,7 +339,9 @@ export function InsanityDisorderPicker({
         >
           <span className={`${uiItemName} group-hover:text-white`}>{ref.name}</span>
           <div className="mt-1 flex flex-wrap gap-1.5">
-            <Chip size="sm" className={disorderTypeChipClass(ref.type)}>{ref.type}</Chip>
+            <Chip size="sm" className={disorderTypeChipClass(ref.type)}>
+              {ref.type}
+            </Chip>
           </div>
           <div className="mt-1 flex items-center gap-1.5">
             <span className={uiTextLabel}>Rules</span>

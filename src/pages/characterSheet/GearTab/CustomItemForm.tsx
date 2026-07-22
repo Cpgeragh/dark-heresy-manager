@@ -2,20 +2,17 @@
 
 import { useRef, useState } from "react";
 import type { GearItem } from "../../../types/Character";
-import {
-  editableInputClass,
-  editableTextareaClass,
-  uiFormLabel,
-} from "../../../ui/editableStyles";
+import { editableInputClass, editableTextareaClass, uiFormLabel } from "../../../ui/editableStyles";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
 import { CustomFormSection } from "../../../ui/CustomFormSection";
 import { CustomFormShell } from "../../../ui/CustomFormShell";
-import { OriginSelector, type CustomItemOrigin } from "../../../ui/OriginSelector";
+import { OriginSelector } from "../../../ui/OriginSelector";
+import type { CustomItemOrigin } from "../../../constants/customItems";
 import { PickerField } from "../../../ui/PickerField";
 import { RequiredFormLabel } from "../../../ui/RequiredFormLabel";
-import { CUSTOM_AVAILABILITY_OPTIONS } from "../weapons/weaponShared";
+import { STANDARD_AVAILABILITY_OPTIONS } from "../../../constants/availability";
 
 interface Props {
   initialItem?: Partial<GearItem>;
@@ -75,7 +72,7 @@ export function CustomItemForm({
     return (
       <OptionPickerScreen
         title="Availability"
-        options={CUSTOM_AVAILABILITY_OPTIONS}
+        options={STANDARD_AVAILABILITY_OPTIONS}
         selected={availability}
         onSelect={(value) => {
           setAvailability(value);
@@ -97,82 +94,79 @@ export function CustomItemForm({
       saving={saving}
     >
       <CustomFormSection title="Identity">
-          <div className="grid grid-cols-2 gap-2">
-            <div className="col-span-2">
-              <RequiredFormLabel htmlFor="custom-gear-name">Name</RequiredFormLabel>
-              <input
-                id="custom-gear-name"
-                required
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                placeholder="Item name..."
-                className={editableInputClass(true) + " mt-0.5"}
-              />
-            </div>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="col-span-2">
+            <RequiredFormLabel htmlFor="custom-gear-name">Name</RequiredFormLabel>
+            <input
+              id="custom-gear-name"
+              required
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              placeholder="Item name..."
+              className={editableInputClass(true) + " mt-0.5"}
+            />
           </div>
+        </div>
       </CustomFormSection>
 
       <CustomFormSection title="Origin">
-        <OriginSelector
-          name="custom-gear-origin"
-          value={origin}
-          onChange={setOrigin}
-          hideLabel
-        />
+        <OriginSelector name="custom-gear-origin" value={origin} onChange={setOrigin} hideLabel />
       </CustomFormSection>
 
       <CustomFormSection title="Details">
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <RequiredFormLabel htmlFor="custom-gear-weight">Weight</RequiredFormLabel>
-              <input
-                id="custom-gear-weight"
-                required
-                type="text"
-                inputMode="decimal"
-                value={weight}
-                onChange={(event) => setWeight(sanitizeWeightInput(event.target.value))}
-                className={editableInputClass(true) + " mt-0.5"}
-              />
-            </div>
-            <div>
-              <RequiredFormLabel htmlFor="custom-gear-cost">Cost</RequiredFormLabel>
-              <input
-                id="custom-gear-cost"
-                required
-                type="text"
-                inputMode="numeric"
-                value={value}
-                onChange={(event) => setValue(sanitizeMoneyInput(event.target.value))}
-                className={editableInputClass(true) + " mt-0.5"}
-              />
-            </div>
-            <PickerField
-              id="custom-gear-availability"
-              label="Availability"
-              value={availability}
-              placeholder="Choose availability"
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <RequiredFormLabel htmlFor="custom-gear-weight">Weight</RequiredFormLabel>
+            <input
+              id="custom-gear-weight"
               required
-              onClick={() => setShowAvailabilityPicker(true)}
-              className="col-span-2"
+              type="text"
+              inputMode="decimal"
+              value={weight}
+              onChange={(event) => setWeight(sanitizeWeightInput(event.target.value))}
+              className={editableInputClass(true) + " mt-0.5"}
             />
           </div>
+          <div>
+            <RequiredFormLabel htmlFor="custom-gear-cost">Cost</RequiredFormLabel>
+            <input
+              id="custom-gear-cost"
+              required
+              type="text"
+              inputMode="numeric"
+              value={value}
+              onChange={(event) => setValue(sanitizeMoneyInput(event.target.value))}
+              className={editableInputClass(true) + " mt-0.5"}
+            />
+          </div>
+          <PickerField
+            id="custom-gear-availability"
+            label="Availability"
+            value={availability}
+            placeholder="Choose availability"
+            required
+            onClick={() => setShowAvailabilityPicker(true)}
+            className="col-span-2"
+          />
+        </div>
       </CustomFormSection>
 
       <CustomFormSection title="Rules">
-          <div className="grid grid-cols-2 gap-2">
-            <div className="col-span-2">
-              <label htmlFor="custom-gear-rules" className={uiFormLabel}>Rules</label>
-              <textarea
-                id="custom-gear-rules"
-                value={description}
-                onChange={(event) => setDescription(event.target.value)}
-                placeholder="Notes, properties, weight, craftsmanship..."
-                rows={3}
-                className={editableTextareaClass(true) + " mt-0.5"}
-              />
-            </div>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="col-span-2">
+            <label htmlFor="custom-gear-rules" className={uiFormLabel}>
+              Rules
+            </label>
+            <textarea
+              id="custom-gear-rules"
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              placeholder="Notes, properties, weight, craftsmanship..."
+              rows={3}
+              className={editableTextareaClass(true) + " mt-0.5"}
+            />
           </div>
+        </div>
       </CustomFormSection>
     </CustomFormShell>
   );

@@ -2,35 +2,31 @@
 
 import { useRef, useState } from "react";
 import type { RangedWeapon, WeaponCraftsmanship } from "../../../types/Character";
-import {
-  editableInputClass,
-  editableTextareaClass,
-  uiFormLabel,
-} from "../../../ui/editableStyles";
+import { editableInputClass, editableTextareaClass, uiFormLabel } from "../../../ui/editableStyles";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/craftsmanship";
 import { CustomFormSection } from "../../../ui/CustomFormSection";
 import { CustomFormShell } from "../../../ui/CustomFormShell";
-import { OriginSelector, type CustomItemOrigin } from "../../../ui/OriginSelector";
+import { OriginSelector } from "../../../ui/OriginSelector";
+import type { CustomItemOrigin } from "../../../constants/customItems";
 import { PickerField } from "../../../ui/PickerField";
 import { RequiredFormLabel } from "../../../ui/RequiredFormLabel";
+import { STANDARD_AVAILABILITY_OPTIONS } from "../../../constants/availability";
+import {
+  sanitizeDiceInput,
+  sanitizeNonNegativeIntegerInput,
+  sanitizePositiveIntegerInput,
+} from "../../../utils/formInput";
 import {
   DAMAGE_TYPE_OPTIONS,
-  CUSTOM_AVAILABILITY_OPTIONS,
   WeaponQualitySelector,
   useWeaponQualityPicker,
   formatDamageInput,
   isValidDiceInput,
-  sanitizeDiceInput,
-  sanitizeNonNegativeIntegerInput,
-  sanitizePositiveIntegerInput,
 } from "./weaponShared";
-import {
-  CUSTOM_AMMO_FAMILY_OPTIONS,
-  type AmmoTrackingMode,
-} from "./weaponHelpers";
+import { CUSTOM_AMMO_FAMILY_OPTIONS, type AmmoTrackingMode } from "./weaponHelpers";
 
 const CUSTOM_RANGED_CLASS_OPTIONS = ["Pistol", "Basic", "Heavy", "Thrown", "Exotic"] as const;
 const RELOAD_TYPE_OPTIONS = ["Half", "Full", "Round", "Special", "—"] as const;
@@ -56,9 +52,8 @@ function parseWeaponDamage(
     base: match?.[1] ?? "1d10",
     plus: match?.[2] ?? "0",
     type:
-      (match?.[3]?.toUpperCase() as
-        | (typeof DAMAGE_TYPE_OPTIONS)[number]["value"]
-        | undefined) ?? fallbackType,
+      (match?.[3]?.toUpperCase() as (typeof DAMAGE_TYPE_OPTIONS)[number]["value"] | undefined) ??
+      fallbackType,
   };
 }
 
@@ -196,7 +191,8 @@ export function CustomRangedForm({
         specialRules: selectedQualities.length > 0 ? selectedQualities.join(", ") : undefined,
         description: description.trim() || undefined,
         integrated: initialWeapon?.integrated ?? integrated,
-        quantity: initialWeapon?.quantity ?? (weaponClass.toLowerCase().includes("thrown") ? 1 : undefined),
+        quantity:
+          initialWeapon?.quantity ?? (weaponClass.toLowerCase().includes("thrown") ? 1 : undefined),
         customLibraryId: initialWeapon?.customLibraryId,
         customLibraryVersionId: initialWeapon?.customLibraryVersionId,
         equipped: initialWeapon?.equipped,
@@ -234,7 +230,10 @@ export function CustomRangedForm({
     return (
       <OptionPickerScreen
         title="Ammo Family"
-        options={CUSTOM_AMMO_FAMILY_OPTIONS.map((option) => ({ value: option.ammoType, label: option.label }))}
+        options={CUSTOM_AMMO_FAMILY_OPTIONS.map((option) => ({
+          value: option.ammoType,
+          label: option.label,
+        }))}
         selected={ammoType}
         onSelect={(value) => {
           setAmmoType(value);
@@ -296,7 +295,7 @@ export function CustomRangedForm({
     return (
       <OptionPickerScreen
         title="Availability"
-        options={CUSTOM_AVAILABILITY_OPTIONS}
+        options={STANDARD_AVAILABILITY_OPTIONS}
         selected={availability}
         onSelect={(value) => {
           setAvailability(value);
@@ -364,233 +363,241 @@ export function CustomRangedForm({
             ))}
           </div>
         </fieldset>
-        <OriginSelector
-          name="custom-ranged-origin"
-          value={origin}
-          onChange={setOrigin}
-        />
+        <OriginSelector name="custom-ranged-origin" value={origin} onChange={setOrigin} />
       </CustomFormSection>
 
       <CustomFormSection title="Combat">
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <RequiredFormLabel htmlFor="custom-ranged-range">Range (m)</RequiredFormLabel>
-              <input
-                id="custom-ranged-range"
-                required
-                type="text"
-                inputMode="numeric"
-                value={rangeMeters}
-                onChange={(event) => setRangeMeters(sanitizePositiveIntegerInput(event.target.value))}
-                className={editableInputClass(true) + " mt-0.5"}
-              />
-            </div>
-
-            <PickerField
-              id="custom-ranged-ammo-family"
-              label="Ammo Family"
-              value={CUSTOM_AMMO_FAMILY_OPTIONS.find((o) => o.ammoType === ammoType)?.label}
-              placeholder="Choose ammo family"
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <RequiredFormLabel htmlFor="custom-ranged-range">Range (m)</RequiredFormLabel>
+            <input
+              id="custom-ranged-range"
               required
-              onClick={() => setShowAmmoFamilyPicker(true)}
+              type="text"
+              inputMode="numeric"
+              value={rangeMeters}
+              onChange={(event) => setRangeMeters(sanitizePositiveIntegerInput(event.target.value))}
+              className={editableInputClass(true) + " mt-0.5"}
             />
-
-            <fieldset aria-required="true" className="col-span-2">
-              <RequiredFormLabel as="legend">Rate of Fire</RequiredFormLabel>
-              <div className="grid grid-cols-3 gap-2 mt-0.5">
-                <button
-                  type="button"
-                  onClick={() => setSingleShot((value) => !value)}
-                  aria-pressed={singleShot}
-                  className={[
-                    "rounded border px-2 py-1 text-sm lg:text-base font-medium transition",
-                    singleShot
-                      ? "border-slate-400 bg-slate-700/70 text-slate-100"
-                      : "border-slate-600 bg-slate-900 text-slate-400 hover:border-slate-500 hover:text-slate-300",
-                  ].join(" ")}
-                >
-                  Single
-                </button>
-                <input
-                  aria-label="Semi-auto rate"
-                  type="text"
-                  inputMode="numeric"
-                  value={semiAuto}
-                  onChange={(event) => setSemiAuto(sanitizePositiveIntegerInput(event.target.value))}
-                  placeholder="Semi"
-                  className={editableInputClass(true)}
-                />
-                <input
-                  aria-label="Full-auto rate"
-                  type="text"
-                  inputMode="numeric"
-                  value={fullAuto}
-                  onChange={(event) => setFullAuto(sanitizePositiveIntegerInput(event.target.value))}
-                  placeholder="Full"
-                  className={editableInputClass(true)}
-                />
-              </div>
-            </fieldset>
-
-            <fieldset aria-required="true" className="col-span-2">
-              <RequiredFormLabel as="legend">Damage</RequiredFormLabel>
-              <div className="grid grid-cols-3 gap-2 mt-0.5">
-                <input
-                  aria-label="Damage dice"
-                  required
-                  type="text"
-                  value={damageBase}
-                  onChange={(event) => setDamageBase(sanitizeDiceInput(event.target.value))}
-                  placeholder="1d10"
-                  className={editableInputClass(true)}
-                />
-                <input
-                  aria-label="Damage bonus"
-                  required
-                  type="text"
-                  inputMode="numeric"
-                  value={damagePlus}
-                  onChange={(event) => setDamagePlus(sanitizeNonNegativeIntegerInput(event.target.value))}
-                  placeholder="Plus"
-                  className={editableInputClass(true)}
-                />
-                <PickerField
-                  id="custom-ranged-damage-type"
-                  ariaLabel="Damage type"
-                  value={DAMAGE_TYPE_OPTIONS.find((o) => o.value === damageType)?.label ?? damageType}
-                  placeholder="Choose damage type"
-                  required
-                  onClick={() => setShowDamageTypePicker(true)}
-                />
-              </div>
-            </fieldset>
-
-            <div>
-              <RequiredFormLabel htmlFor="custom-ranged-pen">Pen</RequiredFormLabel>
-              <input
-                id="custom-ranged-pen"
-                required
-                type="text"
-                inputMode="numeric"
-                value={pen}
-                onChange={(event) => setPen(sanitizeNonNegativeIntegerInput(event.target.value))}
-                className={editableInputClass(true) + " mt-0.5"}
-              />
-            </div>
-
-            <div>
-              <RequiredFormLabel htmlFor="custom-ranged-clip">Clip</RequiredFormLabel>
-              <input
-                id="custom-ranged-clip"
-                required
-                type="text"
-                inputMode="numeric"
-                value={clip}
-                onChange={(event) => setClip(sanitizeNonNegativeIntegerInput(event.target.value))}
-                className={editableInputClass(true) + " mt-0.5"}
-              />
-            </div>
-
-            <fieldset aria-required="true" className="col-span-2">
-              <RequiredFormLabel as="legend">Reload</RequiredFormLabel>
-              <div className="grid grid-cols-2 gap-2 mt-0.5">
-                <input
-                  aria-label="Reload amount"
-                  type="text"
-                  inputMode="numeric"
-                  value={reloadAmount}
-                  onChange={(event) => setReloadAmount(sanitizePositiveIntegerInput(event.target.value))}
-                  placeholder="Amount"
-                  disabled={reloadType === "Special" || reloadType === "—"}
-                  className={editableInputClass(reloadType !== "Special" && reloadType !== "—")}
-                />
-                <PickerField
-                  id="custom-ranged-reload-type"
-                  ariaLabel="Reload type"
-                  value={reloadType}
-                  placeholder="Choose reload"
-                  required
-                  onClick={() => setShowReloadTypePicker(true)}
-                />
-              </div>
-            </fieldset>
-
-            <PickerField
-                id="custom-ranged-ammo-tracking"
-                label="Ammo Tracking"
-                value={ammoTracking === "clip" ? "Clips + rounds" : ammoTracking === "loose" ? "Rounds only" : ""}
-                placeholder="Choose tracking"
-                required
-                onClick={() => setShowAmmoTrackingPicker(true)}
-                className="col-span-2"
-              />
           </div>
+
+          <PickerField
+            id="custom-ranged-ammo-family"
+            label="Ammo Family"
+            value={CUSTOM_AMMO_FAMILY_OPTIONS.find((o) => o.ammoType === ammoType)?.label}
+            placeholder="Choose ammo family"
+            required
+            onClick={() => setShowAmmoFamilyPicker(true)}
+          />
+
+          <fieldset aria-required="true" className="col-span-2">
+            <RequiredFormLabel as="legend">Rate of Fire</RequiredFormLabel>
+            <div className="grid grid-cols-3 gap-2 mt-0.5">
+              <button
+                type="button"
+                onClick={() => setSingleShot((value) => !value)}
+                aria-pressed={singleShot}
+                className={[
+                  "rounded border px-2 py-1 text-sm lg:text-base font-medium transition",
+                  singleShot
+                    ? "border-slate-400 bg-slate-700/70 text-slate-100"
+                    : "border-slate-600 bg-slate-900 text-slate-400 hover:border-slate-500 hover:text-slate-300",
+                ].join(" ")}
+              >
+                Single
+              </button>
+              <input
+                aria-label="Semi-auto rate"
+                type="text"
+                inputMode="numeric"
+                value={semiAuto}
+                onChange={(event) => setSemiAuto(sanitizePositiveIntegerInput(event.target.value))}
+                placeholder="Semi"
+                className={editableInputClass(true)}
+              />
+              <input
+                aria-label="Full-auto rate"
+                type="text"
+                inputMode="numeric"
+                value={fullAuto}
+                onChange={(event) => setFullAuto(sanitizePositiveIntegerInput(event.target.value))}
+                placeholder="Full"
+                className={editableInputClass(true)}
+              />
+            </div>
+          </fieldset>
+
+          <fieldset aria-required="true" className="col-span-2">
+            <RequiredFormLabel as="legend">Damage</RequiredFormLabel>
+            <div className="grid grid-cols-3 gap-2 mt-0.5">
+              <input
+                aria-label="Damage dice"
+                required
+                type="text"
+                value={damageBase}
+                onChange={(event) => setDamageBase(sanitizeDiceInput(event.target.value))}
+                placeholder="1d10"
+                className={editableInputClass(true)}
+              />
+              <input
+                aria-label="Damage bonus"
+                required
+                type="text"
+                inputMode="numeric"
+                value={damagePlus}
+                onChange={(event) =>
+                  setDamagePlus(sanitizeNonNegativeIntegerInput(event.target.value))
+                }
+                placeholder="Plus"
+                className={editableInputClass(true)}
+              />
+              <PickerField
+                id="custom-ranged-damage-type"
+                ariaLabel="Damage type"
+                value={DAMAGE_TYPE_OPTIONS.find((o) => o.value === damageType)?.label ?? damageType}
+                placeholder="Choose damage type"
+                required
+                onClick={() => setShowDamageTypePicker(true)}
+              />
+            </div>
+          </fieldset>
+
+          <div>
+            <RequiredFormLabel htmlFor="custom-ranged-pen">Pen</RequiredFormLabel>
+            <input
+              id="custom-ranged-pen"
+              required
+              type="text"
+              inputMode="numeric"
+              value={pen}
+              onChange={(event) => setPen(sanitizeNonNegativeIntegerInput(event.target.value))}
+              className={editableInputClass(true) + " mt-0.5"}
+            />
+          </div>
+
+          <div>
+            <RequiredFormLabel htmlFor="custom-ranged-clip">Clip</RequiredFormLabel>
+            <input
+              id="custom-ranged-clip"
+              required
+              type="text"
+              inputMode="numeric"
+              value={clip}
+              onChange={(event) => setClip(sanitizeNonNegativeIntegerInput(event.target.value))}
+              className={editableInputClass(true) + " mt-0.5"}
+            />
+          </div>
+
+          <fieldset aria-required="true" className="col-span-2">
+            <RequiredFormLabel as="legend">Reload</RequiredFormLabel>
+            <div className="grid grid-cols-2 gap-2 mt-0.5">
+              <input
+                aria-label="Reload amount"
+                type="text"
+                inputMode="numeric"
+                value={reloadAmount}
+                onChange={(event) =>
+                  setReloadAmount(sanitizePositiveIntegerInput(event.target.value))
+                }
+                placeholder="Amount"
+                disabled={reloadType === "Special" || reloadType === "—"}
+                className={editableInputClass(reloadType !== "Special" && reloadType !== "—")}
+              />
+              <PickerField
+                id="custom-ranged-reload-type"
+                ariaLabel="Reload type"
+                value={reloadType}
+                placeholder="Choose reload"
+                required
+                onClick={() => setShowReloadTypePicker(true)}
+              />
+            </div>
+          </fieldset>
+
+          <PickerField
+            id="custom-ranged-ammo-tracking"
+            label="Ammo Tracking"
+            value={
+              ammoTracking === "clip"
+                ? "Clips + rounds"
+                : ammoTracking === "loose"
+                  ? "Rounds only"
+                  : ""
+            }
+            placeholder="Choose tracking"
+            required
+            onClick={() => setShowAmmoTrackingPicker(true)}
+            className="col-span-2"
+          />
+        </div>
       </CustomFormSection>
 
       <CustomFormSection title="Details">
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <RequiredFormLabel htmlFor="custom-ranged-weight">Weight</RequiredFormLabel>
-              <input
-                id="custom-ranged-weight"
-                required
-                type="text"
-                inputMode="decimal"
-                value={weight}
-                onChange={(event) => setWeight(sanitizeWeightInput(event.target.value))}
-                className={editableInputClass(true) + " mt-0.5"}
-              />
-            </div>
-
-            <div>
-              <RequiredFormLabel htmlFor="custom-ranged-cost">Cost</RequiredFormLabel>
-              <input
-                id="custom-ranged-cost"
-                required
-                type="text"
-                inputMode="numeric"
-                value={value}
-                onChange={(event) => setValue(sanitizeMoneyInput(event.target.value))}
-                className={editableInputClass(true) + " mt-0.5"}
-              />
-            </div>
-            <PickerField
-              id="custom-ranged-availability"
-              label="Availability"
-              value={availability}
-              placeholder="Choose availability"
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <RequiredFormLabel htmlFor="custom-ranged-weight">Weight</RequiredFormLabel>
+            <input
+              id="custom-ranged-weight"
               required
-              onClick={() => setShowAvailabilityPicker(true)}
-              className="col-span-2"
+              type="text"
+              inputMode="decimal"
+              value={weight}
+              onChange={(event) => setWeight(sanitizeWeightInput(event.target.value))}
+              className={editableInputClass(true) + " mt-0.5"}
             />
           </div>
+
+          <div>
+            <RequiredFormLabel htmlFor="custom-ranged-cost">Cost</RequiredFormLabel>
+            <input
+              id="custom-ranged-cost"
+              required
+              type="text"
+              inputMode="numeric"
+              value={value}
+              onChange={(event) => setValue(sanitizeMoneyInput(event.target.value))}
+              className={editableInputClass(true) + " mt-0.5"}
+            />
+          </div>
+          <PickerField
+            id="custom-ranged-availability"
+            label="Availability"
+            value={availability}
+            placeholder="Choose availability"
+            required
+            onClick={() => setShowAvailabilityPicker(true)}
+            className="col-span-2"
+          />
+        </div>
       </CustomFormSection>
 
       <CustomFormSection title="Rules and Qualities">
-          <div className="grid grid-cols-2 gap-2">
-            <WeaponQualitySelector
-              selected={selectedQualities}
-              pendingQuality={qualityPicker.pendingQuality}
-              needsParameter={qualityPicker.needsParameter}
-              parameterValue={qualityPicker.parameterValue}
-              canConfirm={qualityPicker.canConfirm}
-              onParameterValueChange={qualityPicker.setParameterValue}
-              onOpenPicker={qualityPicker.openPicker}
-              onConfirmPending={qualityPicker.confirmPending}
-              onRemove={(q) => setSelectedQualities(selectedQualities.filter((s) => s !== q))}
-            />
+        <div className="grid grid-cols-2 gap-2">
+          <WeaponQualitySelector
+            selected={selectedQualities}
+            pendingQuality={qualityPicker.pendingQuality}
+            needsParameter={qualityPicker.needsParameter}
+            parameterValue={qualityPicker.parameterValue}
+            canConfirm={qualityPicker.canConfirm}
+            onParameterValueChange={qualityPicker.setParameterValue}
+            onOpenPicker={qualityPicker.openPicker}
+            onConfirmPending={qualityPicker.confirmPending}
+            onRemove={(q) => setSelectedQualities(selectedQualities.filter((s) => s !== q))}
+          />
 
-            <div className="col-span-2">
-              <label htmlFor="custom-ranged-rules" className={uiFormLabel}>Rules</label>
-              <textarea
-                id="custom-ranged-rules"
-                value={description}
-                onChange={(event) => setDescription(event.target.value)}
-                rows={3}
-                className={editableTextareaClass(true) + " mt-0.5"}
-              />
-            </div>
+          <div className="col-span-2">
+            <label htmlFor="custom-ranged-rules" className={uiFormLabel}>
+              Rules
+            </label>
+            <textarea
+              id="custom-ranged-rules"
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              rows={3}
+              className={editableTextareaClass(true) + " mt-0.5"}
+            />
           </div>
+        </div>
       </CustomFormSection>
     </CustomFormShell>
   );

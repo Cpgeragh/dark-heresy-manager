@@ -15,11 +15,11 @@ import type { CampaignCustomItem } from "../../src/types/CustomItems";
 const SHIELD_A = "Synford-Pattern \"Lockshield\"";
 const SHIELD_B = "Enforcer Riot Shield";
 
-function row(name: string): HTMLElement {
+function row(name: string): HTMLButtonElement {
   const match = screen
     .getAllByText(name)
     .map((el) => el.closest("button"))
-    .find((el): el is HTMLElement => el !== null);
+    .find((el): el is HTMLButtonElement => el !== null);
   if (!match) throw new Error(`No button row found for: ${name}`);
   return match;
 }

@@ -12,9 +12,6 @@ const makeSkill = (name: string, level: SkillWithComputed["level"]): SkillWithCo
   advanced: false,
   source: "CR",
   total: 30,
-  half: 15,
-  full: 30,
-  opposed: 30,
 });
 
 const skills = [

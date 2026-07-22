@@ -17,6 +17,8 @@ import { CustomItemForm } from "./CustomItemForm";
 import { CustomConsumableForm } from "./CustomConsumableForm";
 import { Button } from "../../../ui/Button";
 import { SectionHeader } from "../../../ui/SectionHeader";
+import { ErrorState } from "../../../ui/ErrorState";
+import { LoadingState } from "../../../ui/LoadingState";
 import { uiTextPlaceholder } from "../../../ui/editableStyles";
 import { colourActiveSky, colourActiveRose } from "../../../ui/colourTokens";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
@@ -121,7 +123,11 @@ export function GearTab({
     itemLabel: "consumable",
   });
 
-  const { items: campaignCustomItems, loading: gearLoading } = useCampaignCustomItems({
+  const {
+    items: campaignCustomItems,
+    loading: gearLoading,
+    error: gearError,
+  } = useCampaignCustomItems({
     campaignId,
     category: "gear",
     mode: isDM ? "admin" : "picker",
@@ -139,7 +145,11 @@ export function GearTab({
     [campaignCustomGear]
   );
 
-  const { items: campaignCustomConsumableItems, loading: consumableLoading } = useCampaignCustomItems({
+  const {
+    items: campaignCustomConsumableItems,
+    loading: consumableLoading,
+    error: consumableError,
+  } = useCampaignCustomItems({
     campaignId,
     category: "consumable",
     mode: isDM ? "admin" : "picker",
@@ -444,7 +454,13 @@ export function GearTab({
         : "hidden lg:block",
     ].join(" ");
 
-  if (gearLoading || consumableLoading) return null;
+  if (gearError || consumableError) {
+    return <ErrorState>Unable to load custom gear.</ErrorState>;
+  }
+
+  if (gearLoading || consumableLoading) {
+    return <LoadingState>Loading custom gear…</LoadingState>;
+  }
 
   return (
     <div ref={containerRef} className="space-y-6">

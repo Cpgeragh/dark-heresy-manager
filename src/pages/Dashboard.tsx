@@ -12,7 +12,7 @@ import { useState, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
 import type { User } from "firebase/auth";
-import { useCampaignsContext } from "../context/CampaignsContext";
+import { useCampaignsContext } from "../context/useCampaignsContext";
 import { useInstallMode } from "../hooks/useInstallMode";
 import { usePlayerCharacters } from "../hooks/usePlayerCharacters";
 import { useArchivedCampaigns } from "../hooks/useArchivedCampaigns";
@@ -36,6 +36,8 @@ import { ModalShell } from "../ui/ModalShell";
 import { PageShell } from "../ui/PageShell";
 import { Panel } from "../ui/Panel";
 import { SectionHeader } from "../ui/SectionHeader";
+import { ErrorState } from "../ui/ErrorState";
+import { LoadingState } from "../ui/LoadingState";
 import { ConfirmInline } from "../ui/ConfirmInline";
 import { ClaimForm } from "./ClaimCharacter/ClaimForm";
 import { ClaimPreview } from "./ClaimCharacter/ClaimPreview";
@@ -137,19 +139,25 @@ function PlayerCampaignRow({
   campaignName: string;
   userId: string;
 }) {
-  const { characters, loading } = usePlayerCharacters(campaignId, userId);
+  const { characters, loading, error } = usePlayerCharacters(campaignId, userId);
 
   return (
     <div>
       <SectionHeader className="mb-3">{campaignName}</SectionHeader>
 
-      {loading && <p className="text-sm lg:text-base text-slate-500">Loading characters…</p>}
+      {error ? (
+        <ErrorState>
+          Unable to load characters. Please refresh the page.
+        </ErrorState>
+      ) : loading ? (
+        <LoadingState>Loading characters…</LoadingState>
+      ) : null}
 
-      {!loading && characters.length === 0 && (
+      {!error && !loading && characters.length === 0 && (
         <p className="text-sm lg:text-base text-slate-500">No characters claimed in this campaign.</p>
       )}
 
-      {!loading && characters.length > 0 && (
+      {!error && !loading && characters.length > 0 && (
         <div className="space-y-3">
           {characters.map((c) => (
             <CharacterCard key={c.id} character={c} campaignId={campaignId} />
@@ -166,12 +174,18 @@ function DmCampaignList({
   userUid,
   campaigns,
   loading,
+  error,
 }: {
   userUid: string;
   campaigns: CampaignWithId[];
   loading: boolean;
+  error: Error | null;
 }) {
-  const { campaigns: archivedCampaigns } = useArchivedCampaigns(userUid);
+  const {
+    campaigns: archivedCampaigns,
+    loading: archivedLoading,
+    error: archivedError,
+  } = useArchivedCampaigns(userUid);
   const [newCampaignName, setNewCampaignName] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
@@ -286,8 +300,12 @@ function DmCampaignList({
       <div>
         <SectionHeader className="mb-3">Your Campaigns</SectionHeader>
 
-        {loading ? (
-          <p className="text-slate-400 text-sm lg:text-base">Loading campaigns…</p>
+        {error ? (
+          <ErrorState>
+            Unable to load campaigns. Please refresh the page.
+          </ErrorState>
+        ) : loading ? (
+          <LoadingState>Loading campaigns…</LoadingState>
         ) : campaigns.length === 0 ? (
           <p className="text-slate-400 text-sm lg:text-base">No campaigns created yet.</p>
         ) : (
@@ -353,7 +371,13 @@ function DmCampaignList({
         )}
 
         {/* Archived */}
-        {archivedCampaigns.length > 0 && (
+        {archivedError ? (
+          <ErrorState className="mt-4">Unable to load archived campaigns.</ErrorState>
+        ) : archivedLoading ? (
+          <LoadingState className="mt-4">Loading archived campaigns…</LoadingState>
+        ) : archivedCampaigns.length === 0 ? (
+          <p className="mt-4 text-slate-500 text-sm lg:text-base">No archived campaigns.</p>
+        ) : (
           <div className="mt-4">
             <button type="button"
               onClick={() => setShowArchived((v) => !v)}
@@ -525,7 +549,8 @@ function ClaimCharacterSection({ effectiveUserId }: { effectiveUserId: string })
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 
 export default function Dashboard({ user, effectiveUserId, isLinked, firstName }: Props) {
-  const { dmCampaigns, playerCampaigns, loading } = useCampaignsContext();
+  const { dmCampaigns, playerCampaigns, dmLoading, playerLoading, dmError, playerError } =
+    useCampaignsContext();
   const installMode = useInstallMode();
 
   return (
@@ -540,7 +565,8 @@ export default function Dashboard({ user, effectiveUserId, isLinked, firstName }
             <DmCampaignList
               userUid={effectiveUserId}
               campaigns={dmCampaigns}
-              loading={loading}
+              loading={dmLoading}
+              error={dmError}
             />
 
             {/* QR codes — only show once the user has at least one campaign */}
@@ -553,16 +579,22 @@ export default function Dashboard({ user, effectiveUserId, isLinked, firstName }
         {/* ── Player section ───────────────────────────────────────────── */}
         <SectionHeader>Campaigns You Play In</SectionHeader>
 
-        {loading && <p className="text-slate-400 text-sm lg:text-base">Loading campaigns…</p>}
+        {playerError ? (
+          <ErrorState>
+            Unable to load campaigns. Please refresh the page.
+          </ErrorState>
+        ) : playerLoading ? (
+          <LoadingState>Loading campaigns…</LoadingState>
+        ) : null}
 
-        {!loading && playerCampaigns.length === 0 && (
+        {!playerError && !playerLoading && playerCampaigns.length === 0 && (
           <p className="text-slate-400 text-sm lg:text-base">
             You are not part of any campaigns yet. Ask your DM for a recovery code to claim
             your character.
           </p>
         )}
 
-        {!loading && playerCampaigns.length > 0 && (
+        {!playerError && !playerLoading && playerCampaigns.length > 0 && (
           <div className="space-y-4">
             {playerCampaigns.map((campaign) => (
               <PlayerCampaignRow

@@ -31,7 +31,7 @@ describe("InsanityTraumaPicker", () => {
     await user.click(screen.getByText("Hysterically Blind or Deaf", { selector: "span" }));
 
     expect(onAdd).not.toHaveBeenCalled();
-    expect(screen.getByText("Choose which effect applies")).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Hysterically Blind or Deaf" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Blind" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Deaf" })).toBeInTheDocument();
   });

@@ -6,98 +6,54 @@
 //
 // Both exclude archived campaigns (archivedAt == null).
 
-import { createContext, useContext, useEffect, useState } from "react";
-import { onSnapshot, query, where } from "firebase/firestore";
+import { query, where } from "firebase/firestore";
 import { campaignsCollectionRef } from "../firebase/converters";
-import type { CampaignWithId } from "../types/Firestore";
+import { useQuerySubscription } from "../hooks/useFirestoreSubscription";
+import { CampaignsContext } from "./useCampaignsContext";
 
-interface CampaignsContextValue {
-  dmCampaigns: CampaignWithId[];
-  playerCampaigns: CampaignWithId[];
-  loading: boolean;
-  error: string | null;
-}
+export function CampaignsProvider({ uid, children }: { uid: string; children: React.ReactNode }) {
+  const {
+    data: dmCampaigns,
+    loading: dmLoading,
+    error: dmError,
+  } = useQuerySubscription(
+    uid
+      ? query(campaignsCollectionRef(), where("dmId", "==", uid), where("archivedAt", "==", null))
+      : null,
+    uid ? `dm-campaigns:${uid}` : null,
+    (snapshot) => snapshot.docs.map((campaignDocument) => campaignDocument.data())
+  );
 
-const CampaignsContext = createContext<CampaignsContextValue>({
-  dmCampaigns: [],
-  playerCampaigns: [],
-  loading: true,
-  error: null,
-});
-
-export function CampaignsProvider({
-  uid,
-  children,
-}: {
-  uid: string;
-  children: React.ReactNode;
-}) {
-  const [dmCampaigns, setDmCampaigns] = useState<CampaignWithId[]>([]);
-  const [playerCampaigns, setPlayerCampaigns] = useState<CampaignWithId[]>([]);
-  const [dmLoading, setDmLoading] = useState(true);
-  const [playerLoading, setPlayerLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Listener 1: campaigns this user runs as DM
-  useEffect(() => {
-    if (!uid) { setDmLoading(false); return; }
-    setDmLoading(true);
-    const q = query(
-      campaignsCollectionRef(),
-      where("dmId", "==", uid),
-      where("archivedAt", "==", null)
-    );
-    return onSnapshot(
-      q,
-      (snap) => {
-        setDmCampaigns(snap.docs.map((d) => d.data()));
-        setDmLoading(false);
-      },
-      (err) => {
-        console.error("CampaignsProvider (dm) error:", err);
-        setError("Failed to load campaigns.");
-        setDmLoading(false);
-      }
-    );
-  }, [uid]);
-
-  // Listener 2: campaigns this user is a player in
-  useEffect(() => {
-    if (!uid) { setPlayerLoading(false); return; }
-    setPlayerLoading(true);
-    const q = query(
-      campaignsCollectionRef(),
-      where("memberIds", "array-contains", uid),
-      where("archivedAt", "==", null)
-    );
-    return onSnapshot(
-      q,
-      (snap) => {
-        setPlayerCampaigns(snap.docs.map((d) => d.data()));
-        setPlayerLoading(false);
-      },
-      (err) => {
-        console.error("CampaignsProvider (player) error:", err);
-        setError("Failed to load campaigns.");
-        setPlayerLoading(false);
-      }
-    );
-  }, [uid]);
+  const {
+    data: playerCampaigns,
+    loading: playerLoading,
+    error: playerError,
+  } = useQuerySubscription(
+    uid
+      ? query(
+          campaignsCollectionRef(),
+          where("memberIds", "array-contains", uid),
+          where("archivedAt", "==", null)
+        )
+      : null,
+    uid ? `player-campaigns:${uid}` : null,
+    (snapshot) => snapshot.docs.map((campaignDocument) => campaignDocument.data())
+  );
 
   return (
     <CampaignsContext.Provider
       value={{
         dmCampaigns,
         playerCampaigns,
+        dmLoading,
+        playerLoading,
         loading: dmLoading || playerLoading,
-        error,
+        dmError,
+        playerError,
+        error: dmError ?? playerError,
       }}
     >
       {children}
     </CampaignsContext.Provider>
   );
-}
-
-export function useCampaignsContext() {
-  return useContext(CampaignsContext);
 }

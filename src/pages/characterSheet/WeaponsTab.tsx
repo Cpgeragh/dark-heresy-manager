@@ -57,6 +57,8 @@ import {
   colourActiveSky,
 } from "../../ui/colourTokens";
 import { useCampaignCustomItems } from "../../hooks/useCampaignCustomItems";
+import { ErrorState } from "../../ui/ErrorState";
+import { LoadingState } from "../../ui/LoadingState";
 import { useCustomItemLibraryActions } from "../../hooks/useCustomItemLibraryActions";
 import { useSwipeableTabs } from "../../hooks/useSwipeableTabs";
 import { SegmentedTabs, type SegmentedTabOption } from "../../ui/SegmentedTabs";
@@ -218,7 +220,11 @@ export function WeaponsTab({
     getBusyAction: getShieldBusyAction,
   } = useCustomItemLibraryActions<"armour">({ campaignId, userId, itemLabel: "shield" });
 
-  const { items: campaignCustomWeaponItems, loading: weaponsLoading } = useCampaignCustomItems({
+  const {
+    items: campaignCustomWeaponItems,
+    loading: weaponsLoading,
+    error: weaponsError,
+  } = useCampaignCustomItems({
     campaignId,
     category: "weapon",
     mode: isDM ? "admin" : "picker",
@@ -238,7 +244,11 @@ export function WeaponsTab({
     () => campaignCustomWeapons.filter((item) => item.data.weaponKind === "grenade"),
     [campaignCustomWeapons]
   );
-  const { items: campaignCustomArmourItems, loading: armoursLoading } = useCampaignCustomItems({
+  const {
+    items: campaignCustomArmourItems,
+    loading: armoursLoading,
+    error: armoursError,
+  } = useCampaignCustomItems({
     campaignId,
     category: "armour",
     mode: isDM ? "admin" : "picker",
@@ -1233,7 +1243,13 @@ export function WeaponsTab({
     ]
   );
 
-  if (weaponsLoading || armoursLoading) return null;
+  if (weaponsError || armoursError) {
+    return <ErrorState>Unable to load custom weapons.</ErrorState>;
+  }
+
+  if (weaponsLoading || armoursLoading) {
+    return <LoadingState>Loading custom weapons…</LoadingState>;
+  }
 
   return (
     <div

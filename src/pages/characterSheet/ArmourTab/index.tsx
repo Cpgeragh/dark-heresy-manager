@@ -11,7 +11,8 @@ import type {
 import type { ArmourRef } from "../../../data/reference/armourReference";
 import type { CampaignCustomItem, CustomArmourData } from "../../../types/CustomItems";
 
-import { wornApAt, bionicBonusAt, naturalArmourBonus, LOCATION_LABELS, LOCATION_ORDER } from "./armourHelpers";
+import { wornApAt, bionicBonusAt, naturalArmourBonus } from "./armourHelpers";
+import { ARMOUR_LOCATION_LABELS, ARMOUR_LOCATION_ORDER } from "../../../constants/locations";
 import { ArmourPicker } from "./ArmourPicker";
 import { ForceFieldPicker } from "./ForceFieldPicker";
 import { CustomPieceForm } from "./CustomPieceForm";
@@ -20,8 +21,15 @@ import { PieceRow } from "./PieceRow";
 import { ArcheotechArmourRow } from "./ArcheotechArmourRow";
 import { ArcheotechForceFieldRow } from "./ArcheotechForceFieldRow";
 import { Button } from "../../../ui/Button";
-import { uiSection, uiTextLabel, uiTextPlaceholder, uiInfoModalWrapper } from "../../../ui/editableStyles";
+import {
+  uiSection,
+  uiTextLabel,
+  uiTextPlaceholder,
+  uiInfoModalWrapper,
+} from "../../../ui/editableStyles";
 import { SectionHeader } from "../../../ui/SectionHeader";
+import { ErrorState } from "../../../ui/ErrorState";
+import { LoadingState } from "../../../ui/LoadingState";
 import { InfoModal } from "../../../components/InfoModal";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
 import { useCustomItemLibraryActions } from "../../../hooks/useCustomItemLibraryActions";
@@ -167,7 +175,11 @@ export function ArmourTab({
     getBusyAction,
   } = useCustomItemLibraryActions<"armour">({ campaignId, userId, itemLabel: "armour" });
 
-  const { items: campaignCustomArmourItems, loading: armourLoading } = useCampaignCustomItems({
+  const {
+    items: campaignCustomArmourItems,
+    loading: armourLoading,
+    error: armourError,
+  } = useCampaignCustomItems({
     campaignId,
     category: "armour",
     mode: isDM ? "admin" : "picker",
@@ -269,7 +281,7 @@ export function ArmourTab({
       const versionId =
         libraryItem.status === "published"
           ? libraryItem.publishedVersionId
-          : libraryItem.draftVersionId ?? libraryItem.latestVersionId;
+          : (libraryItem.draftVersionId ?? libraryItem.latestVersionId);
 
       if (!versionId) {
         toast.error("This custom armour has no usable version.");
@@ -278,7 +290,13 @@ export function ArmourTab({
 
       await onUpdate([
         ...armour,
-        buildArmourSnapshot(crypto.randomUUID(), wornState, libraryItem.data, libraryItem.id, versionId),
+        buildArmourSnapshot(
+          crypto.randomUUID(),
+          wornState,
+          libraryItem.data,
+          libraryItem.id,
+          versionId
+        ),
       ]);
       setShowPicker(false);
       setShowFieldPicker(false);
@@ -490,10 +508,18 @@ export function ArmourTab({
     ]
   );
 
-  if (armourLoading) return null;
+  if (armourError) {
+    return <ErrorState>Unable to load custom armour items.</ErrorState>;
+  }
+
+  if (armourLoading) {
+    return <LoadingState>Loading custom armour items…</LoadingState>;
+  }
 
   const naturalBonus = naturalArmourBonus(traits);
-  const bionicLocations = LOCATION_ORDER.filter((loc) => bionicBonusAt(loc, cybernetics) > 0);
+  const bionicLocations = ARMOUR_LOCATION_ORDER.filter(
+    (loc) => bionicBonusAt(loc, cybernetics) > 0
+  );
   const hasMisc = naturalBonus > 0 || bionicLocations.length > 0;
 
   return (
@@ -517,9 +543,17 @@ export function ArmourTab({
                             title="Misc Bonuses"
                             content={
                               <>
-                                {naturalBonus > 0 && <p>Natural Armour: +{naturalBonus} to all locations.</p>}
+                                {naturalBonus > 0 && (
+                                  <p>Natural Armour: +{naturalBonus} to all locations.</p>
+                                )}
                                 {bionicLocations.length > 0 && (
-                                  <p>Bionic: +2 at {bionicLocations.map((l) => LOCATION_LABELS[l]).join(", ")}.</p>
+                                  <p>
+                                    Bionic: +2 at{" "}
+                                    {bionicLocations
+                                      .map((l) => ARMOUR_LOCATION_LABELS[l])
+                                      .join(", ")}
+                                    .
+                                  </p>
                                 )}
                               </>
                             }
@@ -532,7 +566,7 @@ export function ArmourTab({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800">
-                {LOCATION_ORDER.map((loc) => {
+                {ARMOUR_LOCATION_ORDER.map((loc) => {
                   const regularAp = wornApAt(regularArmour, loc);
                   const nonStackingArcheotechAp = archeotechArmourWorn
                     .filter((a) => !a.stacks && (a.locations ?? []).includes(loc))
@@ -546,7 +580,7 @@ export function ArmourTab({
                   const total = ap + toughnessBonus + misc;
                   return (
                     <tr key={loc} className="hover:bg-slate-800/40 transition">
-                      <td className="py-2 pr-4 text-slate-100">{LOCATION_LABELS[loc]}</td>
+                      <td className="py-2 pr-4 text-slate-100">{ARMOUR_LOCATION_LABELS[loc]}</td>
                       <td className="py-2 px-3 text-center font-code text-white">
                         {toughnessBonus}
                       </td>
@@ -639,10 +673,7 @@ export function ArmourTab({
       <section className="space-y-2">
         <div className="flex items-center justify-between">
           <SectionHeader>Force Fields</SectionHeader>
-          <Button
-            size="sm"
-            onClick={() => setShowFieldPicker(true)}
-          >
+          <Button size="sm" onClick={() => setShowFieldPicker(true)}>
             {editable ? "+ Add" : "View"}
           </Button>
         </div>

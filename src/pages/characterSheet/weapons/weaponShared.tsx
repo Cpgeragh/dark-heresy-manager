@@ -24,6 +24,7 @@ import {
 } from "../../../ui/editableStyles";
 import { uiIconRemoveButton, uiDismissButton } from "../../../ui/buttonStyles";
 import { colourEmerald, colourEmeraldPlain, colourMeta } from "../../../ui/colourTokens";
+import { sanitizePositiveIntegerInput } from "../../../utils/formInput";
 
 export const WEAPON_QUALITY_OPTIONS = Object.keys(WEAPON_SPECIAL_RULES).sort((a, b) =>
   a.localeCompare(b)
@@ -36,37 +37,10 @@ export const DAMAGE_TYPE_OPTIONS = [
   { label: "Explosive", value: "X" },
 ] as const;
 
-export const CUSTOM_AVAILABILITY_OPTIONS = [
-  "Abundant",
-  "Plentiful",
-  "Common",
-  "Average",
-  "Scarce",
-  "Rare",
-  "Very Rare",
-  "Extremely Rare",
-  "Near Unique",
-  "Unique",
-] as const;
-
 const PARAMETERIZED_WEAPON_QUALITIES = new Set(["Blast", "Felling", "Haywire", "Proven"]);
 
 function baseQualityName(quality: string): string {
   return quality.replace(/\s*\([^)]*\)\s*$/, "").trim();
-}
-
-export function sanitizeNonNegativeIntegerInput(value: string): string {
-  return value.replace(/\D/g, "").replace(/^0+(?=\d)/, "");
-}
-
-export function sanitizePositiveIntegerInput(value: string): string {
-  return value.replace(/\D/g, "").replace(/^0+/, "");
-}
-
-export function sanitizeDiceInput(value: string): string {
-  const cleaned = value.toLowerCase().replace(/[^0-9d]/g, "");
-  const [first = "", ...rest] = cleaned.split("d");
-  return rest.length === 0 ? first : `${first}d${rest.join("")}`;
 }
 
 export function isValidDiceInput(value: string): boolean {
@@ -85,14 +59,13 @@ export function useWeaponQualityPicker(selected: string[], onChange: (next: stri
   const [showPicker, setShowPicker] = useState(false);
   const [pendingQuality, setPendingQuality] = useState<string | null>(null);
   const [parameterValue, setParameterValue] = useState("");
-  const available = useMemo(
-    () => {
-      const selectedBaseNames = new Set(selected.map(baseQualityName));
-      return WEAPON_QUALITY_OPTIONS.filter((quality) => !selectedBaseNames.has(quality));
-    },
-    [selected]
-  );
-  const needsParameter = pendingQuality ? PARAMETERIZED_WEAPON_QUALITIES.has(pendingQuality) : false;
+  const available = useMemo(() => {
+    const selectedBaseNames = new Set(selected.map(baseQualityName));
+    return WEAPON_QUALITY_OPTIONS.filter((quality) => !selectedBaseNames.has(quality));
+  }, [selected]);
+  const needsParameter = pendingQuality
+    ? PARAMETERIZED_WEAPON_QUALITIES.has(pendingQuality)
+    : false;
   const canConfirm = Boolean(pendingQuality) && (!needsParameter || parameterValue !== "");
 
   return {
@@ -143,16 +116,16 @@ export function WeaponQualitySelector({
 }) {
   return (
     <div className="col-span-2 space-y-2">
-      <label className={uiFormLabel}>
-        Qualities
-      </label>
+      <label className={uiFormLabel}>Qualities</label>
       <div className="flex gap-2">
         <button
           type="button"
           onClick={onOpenPicker}
           className="w-full rounded border border-slate-500 bg-slate-900 px-2 py-1 text-sm lg:text-base text-slate-200 text-left flex items-center justify-between"
         >
-          <span className={pendingQuality ? "" : "text-slate-500"}>{pendingQuality ?? "Choose quality…"}</span>
+          <span className={pendingQuality ? "" : "text-slate-500"}>
+            {pendingQuality ?? "Choose quality…"}
+          </span>
           <ArrowRight />
         </button>
         {needsParameter && (
@@ -160,17 +133,15 @@ export function WeaponQualitySelector({
             type="text"
             inputMode="numeric"
             value={parameterValue}
-            onChange={(event) => onParameterValueChange(sanitizePositiveIntegerInput(event.target.value))}
+            onChange={(event) =>
+              onParameterValueChange(sanitizePositiveIntegerInput(event.target.value))
+            }
             aria-label={`${pendingQuality} value`}
             placeholder="Value"
             className="w-20 rounded border border-slate-500 bg-slate-900 px-2 py-1 text-sm lg:text-base text-slate-200 focus:outline-none focus:border-red-500"
           />
         )}
-        <Button
-          variant="ghost"
-          onClick={onConfirmPending}
-          disabled={!canConfirm}
-        >
+        <Button variant="ghost" onClick={onConfirmPending} disabled={!canConfirm}>
           Add
         </Button>
       </div>
@@ -197,7 +168,15 @@ export function WeaponQualitySelector({
 
 // ─── Stat Chip ────────────────────────────────────────────────────────────────
 
-export function StatChip({ label, value, size = "md" }: { label: string; value: string | number; size?: "sm" | "md" }) {
+export function StatChip({
+  label,
+  value,
+  size = "md",
+}: {
+  label: string;
+  value: string | number;
+  size?: "sm" | "md";
+}) {
   if (size === "sm") {
     return (
       <div className="flex flex-col items-center bg-slate-800/60 rounded border border-slate-700 px-1.5 py-0.5 min-w-[32px] lg:min-w-[38px]">
@@ -241,9 +220,7 @@ export function DamageTypeChip({ damage, size = "md" }: { damage: string; size?:
     return (
       <div className="flex flex-col items-center bg-slate-800/60 rounded border border-slate-700 px-1.5 py-0.5 min-w-[32px] lg:min-w-[38px]">
         <span className={uiTextLabel}>Type</span>
-        <span className={`text-xs font-code mt-0.5 ${damageType.colour}`}>
-          {damageType.label}
-        </span>
+        <span className={`text-xs font-code mt-0.5 ${damageType.colour}`}>{damageType.label}</span>
       </div>
     );
   }
@@ -312,9 +289,7 @@ export function EquipToggle({
     >
       <div
         className={`w-3.5 h-3.5 rounded border flex items-center justify-center transition ${
-          equipped
-            ? colourEmerald
-            : "border-slate-600 group-hover:border-slate-400"
+          equipped ? colourEmerald : "border-slate-600 group-hover:border-slate-400"
         }`}
       >
         {equipped && (
@@ -361,7 +336,9 @@ export function SpecialRulesContent({
 
   return (
     <div className="space-y-4">
-      {description && <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{description}</p>}
+      {description && (
+        <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{description}</p>
+      )}
       {ruleNames.map((name) => {
         const desc = WEAPON_SPECIAL_RULES[name];
         return (
@@ -393,7 +370,8 @@ export function UpgradeCard({
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs lg:text-sm font-medium text-slate-300">{upgrade.name}</span>
         {editable && (
-          <button type="button"
+          <button
+            type="button"
             onClick={() => onRemove(upgrade.id)}
             className={uiIconRemoveButton}
             aria-label={`Remove ${upgrade.name}`}
@@ -407,7 +385,13 @@ export function UpgradeCard({
           <span className="leading-none">{"\u2696"}</span>
           <span className="leading-none">{displayedWeightModifier}</span>
         </Chip>
-        <ItemMetaChips value={upgrade.value} availability={upgrade.availability} source={upgrade.source} size="sm" bare />
+        <ItemMetaChips
+          value={upgrade.value}
+          availability={upgrade.availability}
+          source={upgrade.source}
+          size="sm"
+          bare
+        />
       </div>
       <div className="flex items-center gap-1.5 mt-1">
         <span className={uiTextLabel}>Rules</span>
@@ -416,7 +400,9 @@ export function UpgradeCard({
             title={upgrade.name}
             content={
               <div className="space-y-2">
-                <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{upgrade.description}</p>
+                <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
+                  {upgrade.description}
+                </p>
                 <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>{upgrade.applicableTo}</p>
               </div>
             }
@@ -450,34 +436,31 @@ export function UpgradePicker({
       emptyMessage="No compatible upgrades available."
       hideSearch
       footer={
-        <Button
-          variant="secondary"
-          fullWidth
-          onClick={onClose}
-        >
+        <Button variant="secondary" fullWidth onClick={onClose}>
           Cancel
         </Button>
       }
     >
       {compatibleUpgrades.map((upgrade) => (
-        <PickerRow
-          key={upgrade.id}
-          interactive={editable}
-          onClick={() => onSelect(upgrade.id)}
-        >
+        <PickerRow key={upgrade.id} interactive={editable} onClick={() => onSelect(upgrade.id)}>
           <div className="flex items-center justify-between gap-2 mb-1">
-            <span className={`${uiItemName} group-hover:text-white`}>
-              {upgrade.name}
-            </span>
+            <span className={`${uiItemName} group-hover:text-white`}>{upgrade.name}</span>
             <div className="flex items-center gap-1.5 text-xs lg:text-sm shrink-0">
               <Chip className={colourMeta}>
                 <span className="leading-none">{"\u2696"}</span>
                 <span className="leading-none">{formatWeightModifier(upgrade.weightModifier)}</span>
               </Chip>
-              <ItemMetaChips value={upgrade.value} availability={upgrade.availability} source={upgrade.source} bare />
+              <ItemMetaChips
+                value={upgrade.value}
+                availability={upgrade.availability}
+                source={upgrade.source}
+                bare
+              />
             </div>
           </div>
-          <p className={`text-xs lg:text-sm ${uiTextBody} leading-relaxed`}>{upgrade.description}</p>
+          <p className={`text-xs lg:text-sm ${uiTextBody} leading-relaxed`}>
+            {upgrade.description}
+          </p>
           <p className={`text-xs lg:text-sm ${uiTextPlaceholder} mt-1`}>{upgrade.applicableTo}</p>
         </PickerRow>
       ))}

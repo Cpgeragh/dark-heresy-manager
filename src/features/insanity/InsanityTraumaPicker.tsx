@@ -9,12 +9,15 @@ import { ArrowLeft } from "../../ui/PickerArrows";
 import { OptionPickerScreen } from "../../ui/OptionPickerScreen";
 import { uiPickerBackButton } from "../../ui/buttonStyles";
 import { colourAmberFaint } from "../../ui/colourTokens";
-import { editableInputClass, uiFormLabel, uiInfoModalWrapper, uiItemName, uiTextLabel } from "../../ui/editableStyles";
+import {
+  editableInputClass,
+  uiFormLabel,
+  uiInfoModalWrapper,
+  uiItemName,
+  uiTextLabel,
+} from "../../ui/editableStyles";
 import { MENTAL_TRAUMAS, type MentalTraumaEntry } from "./insanityReference";
-
-function createTraumaId(): string {
-  return globalThis.crypto?.randomUUID?.() ?? `trauma-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-}
+import { createLocalId } from "../../utils/createLocalId";
 
 export function InsanityTraumaPicker({
   existingReferenceIds,
@@ -39,7 +42,7 @@ export function InsanityTraumaPicker({
 
   function addReferenceTrauma(ref: MentalTraumaEntry, name: string) {
     onAdd({
-      id: createTraumaId(),
+      id: createLocalId("trauma"),
       referenceId: ref.roll,
       roll: ref.roll,
       name,
@@ -86,10 +89,16 @@ export function InsanityTraumaPicker({
         footer={
           <div className="space-y-2">
             {!canAddCustom && (
-              <p className="text-xs lg:text-sm text-slate-300"><span className="text-red-500">*</span> Required</p>
+              <p className="text-xs lg:text-sm text-slate-300">
+                <span className="text-red-500">*</span> Required
+              </p>
             )}
             <div className="flex gap-2">
-              <button type="button" onClick={() => setCustomMode(false)} className={uiPickerBackButton}>
+              <button
+                type="button"
+                onClick={() => setCustomMode(false)}
+                className={uiPickerBackButton}
+              >
                 Back
               </button>
               <Button
@@ -98,7 +107,7 @@ export function InsanityTraumaPicker({
                 onClick={() => {
                   if (!canAddCustom) return;
                   onAdd({
-                    id: createTraumaId(),
+                    id: createLocalId("trauma"),
                     name: customName.trim(),
                     effect: customDetails.trim() || undefined,
                     custom: true,
@@ -165,20 +174,23 @@ export function InsanityTraumaPicker({
       }
     >
       {filtered.map((ref) => (
-        <PickerRow
-          key={ref.roll}
-          onClick={() => handleSelect(ref)}
-        >
+        <PickerRow key={ref.roll} onClick={() => handleSelect(ref)}>
           <span className={`${uiItemName} group-hover:text-white`}>{ref.name}</span>
           <div className="mt-1 flex flex-wrap gap-1.5">
-            <Chip size="sm" className={colourAmberFaint}>{ref.roll}</Chip>
+            <Chip size="sm" className={colourAmberFaint}>
+              {ref.roll}
+            </Chip>
           </div>
           <div className="mt-1 flex items-center gap-1.5">
             <span className={uiTextLabel}>Rules</span>
             <span onClick={(event) => event.stopPropagation()} className={uiInfoModalWrapper}>
               <InfoModal
                 title={ref.name}
-                content={<p className="text-sm leading-relaxed text-slate-300 lg:text-base">{ref.effect}</p>}
+                content={
+                  <p className="text-sm leading-relaxed text-slate-300 lg:text-base">
+                    {ref.effect}
+                  </p>
+                }
                 as="span"
               />
             </span>

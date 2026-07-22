@@ -1,9 +1,9 @@
 // src/hooks/useXpProposals.ts
 
-import { useEffect, useState } from "react";
-import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import { collection, orderBy, query } from "firebase/firestore";
 import { db } from "../firebase";
 import type { XpProposalDocument } from "../types/Firestore";
+import { useQuerySubscription } from "./useFirestoreSubscription";
 
 type XpProposalWithId = XpProposalDocument & { id: string };
 
@@ -13,42 +13,26 @@ export function useXpProposals(
 ): {
   proposals: XpProposalWithId[];
   loading: boolean;
+  error: Error | null;
 } {
-  const [proposals, setProposals] = useState<XpProposalWithId[]>([]);
-  const [loading, setLoading] = useState(true);
+  const {
+    data: proposals,
+    loading,
+    error,
+  } = useQuerySubscription(
+    campaignId && characterId
+      ? query(
+          collection(db, "campaigns", campaignId, "characters", characterId, "xpProposals"),
+          orderBy("proposedAt", "desc")
+        )
+      : null,
+    campaignId && characterId ? `xp-proposals:${campaignId}:${characterId}` : null,
+    (snapshot) =>
+      snapshot.docs.map((proposalDocument) => ({
+        id: proposalDocument.id,
+        ...(proposalDocument.data() as Omit<XpProposalDocument, "id">),
+      }))
+  );
 
-  useEffect(() => {
-    if (!campaignId || !characterId) {
-      setProposals([]);
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-
-    const proposalsQuery = query(
-      collection(db, "campaigns", campaignId, "characters", characterId, "xpProposals"),
-      orderBy("proposedAt", "desc")
-    );
-
-    const unsub = onSnapshot(
-      proposalsQuery,
-      (snap) => {
-        const list: XpProposalWithId[] = snap.docs.map((d) => ({
-          id: d.id,
-          ...(d.data() as Omit<XpProposalDocument, "id">),
-        }));
-        setProposals(list);
-        setLoading(false);
-      },
-      (err) => {
-        console.error("XP proposals snapshot error:", err);
-        setLoading(false);
-      }
-    );
-
-    return () => unsub();
-  }, [campaignId, characterId]);
-
-  return { proposals, loading };
+  return { proposals, loading, error };
 }

@@ -3,8 +3,13 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
+import type { UseCampaignCustomItemsResult } from "../../src/hooks/useCampaignCustomItems";
 
-const useCampaignCustomItemsMock = vi.fn(() => ({ items: [], loading: false, error: null }));
+const useCampaignCustomItemsMock = vi.fn<() => UseCampaignCustomItemsResult>(() => ({
+  items: [],
+  loading: false,
+  error: null,
+}));
 vi.mock("../../src/hooks/useCampaignCustomItems", () => ({
   useCampaignCustomItems: () => useCampaignCustomItemsMock(),
 }));
@@ -160,11 +165,11 @@ describe("WeaponsTab", () => {
 // Real reference rows have their own Rules InfoModal titled with the bare
 // item name, always mounted (closed) into the DOM — filter for whichever
 // match has a button row as an ancestor.
-function row(name: string): HTMLElement {
+function row(name: string): HTMLButtonElement {
   const match = screen
     .getAllByText(name)
     .map((el) => el.closest("button"))
-    .find((el): el is HTMLElement => el !== null);
+    .find((el): el is HTMLButtonElement => el !== null);
   if (!match) throw new Error(`No button row found for: ${name}`);
   return match;
 }

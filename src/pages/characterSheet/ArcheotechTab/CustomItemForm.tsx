@@ -1,7 +1,11 @@
 // src/pages/characterSheet/ArcheotechTab/CustomItemForm.tsx
 
 import { useRef, useState } from "react";
-import type { ArcheotechItem, ArmourLocationKey, CyberneticCraftsmanship } from "../../../types/Character";
+import type {
+  ArcheotechItem,
+  ArmourLocationKey,
+  CyberneticCraftsmanship,
+} from "../../../types/Character";
 import {
   editableInputClass,
   editableTextareaClass,
@@ -13,10 +17,11 @@ import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import { PickerModal, PickerRow } from "../../../ui/PickerModal";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
 import { ArrowLeft } from "../../../ui/PickerArrows";
-import { ITEM_TYPES, AVAILABILITY_OPTIONS, type ItemType } from "./archeotechConstants";
+import { ITEM_TYPES, type ItemType } from "./archeotechConstants";
+import { EXTENDED_AVAILABILITY_OPTIONS } from "../../../constants/availability";
 import { colourSky, colourRose } from "../../../ui/colourTokens";
 import { CYBERNETIC_CRAFTSMANSHIP_OPTIONS } from "../../../ui/craftsmanship";
-import { LOCATION_LABELS, LOCATION_ORDER } from "../ArmourTab/armourHelpers";
+import { ARMOUR_LOCATION_LABELS, ARMOUR_LOCATION_ORDER } from "../../../constants/locations";
 import { CustomFormSection } from "../../../ui/CustomFormSection";
 import { CustomFormShell } from "../../../ui/CustomFormShell";
 import { PickerField } from "../../../ui/PickerField";
@@ -66,7 +71,9 @@ export function CustomItemForm({
   const [availability, setAvailability] = useState(initialItem?.availability ?? "");
 
   // Weapon / Integrated Weapon / Grenade / Mine / Shield stats
-  const [weaponClass, setWeaponClass] = useState<"Ranged" | "Melee" | "">(initialItem?.weaponClass ?? "");
+  const [weaponClass, setWeaponClass] = useState<"Ranged" | "Melee" | "">(
+    initialItem?.weaponClass ?? ""
+  );
   const [damage, setDamage] = useState(initialItem?.damage ?? "");
   const [range, setRange] = useState(initialItem?.range ?? "");
   const [rof, setRof] = useState(initialItem?.rof ?? "");
@@ -84,7 +91,9 @@ export function CustomItemForm({
   const [craftsmanship, setCraftsmanship] = useState<CyberneticCraftsmanship | "">(
     initialItem?.craftsmanship ?? ""
   );
-  const [bodyLocation, setBodyLocation] = useState<ArmourLocationKey[]>(initialItem?.bodyLocation ?? []);
+  const [bodyLocation, setBodyLocation] = useState<ArmourLocationKey[]>(
+    initialItem?.bodyLocation ?? []
+  );
 
   // Force Field stats
   const [protectionRating, setProtectionRating] = useState(
@@ -102,7 +111,9 @@ export function CustomItemForm({
   }
 
   function toggleBodyLocation(loc: ArmourLocationKey) {
-    setBodyLocation((prev) => (prev.includes(loc) ? prev.filter((l) => l !== loc) : [...prev, loc]));
+    setBodyLocation((prev) =>
+      prev.includes(loc) ? prev.filter((l) => l !== loc) : [...prev, loc]
+    );
   }
 
   async function handleAdd() {
@@ -196,7 +207,9 @@ export function CustomItemForm({
               setPhase("details");
             }}
           >
-            <p className="text-sm lg:text-base font-medium text-slate-200 group-hover:text-white">{t}</p>
+            <p className="text-sm lg:text-base font-medium text-slate-200 group-hover:text-white">
+              {t}
+            </p>
             <p className={`text-xs lg:text-sm ${uiTextMuted} mt-0.5`}>{TYPE_DESCRIPTIONS[t]}</p>
           </PickerRow>
         ))}
@@ -214,9 +227,12 @@ export function CustomItemForm({
     return (
       <OptionPickerScreen
         title="Rarity"
-        options={[...AVAILABILITY_OPTIONS]}
+        options={EXTENDED_AVAILABILITY_OPTIONS}
         selected={availability}
-        onSelect={(value) => { setAvailability(value); setShowAvailabilityPicker(false); }}
+        onSelect={(value) => {
+          setAvailability(value);
+          setShowAvailabilityPicker(false);
+        }}
         onClose={() => setShowAvailabilityPicker(false)}
       />
     );
@@ -228,7 +244,10 @@ export function CustomItemForm({
         title="Craftsmanship"
         options={[...CYBERNETIC_CRAFTSMANSHIP_OPTIONS]}
         selected={craftsmanship}
-        onSelect={(value) => { setCraftsmanship(value as CyberneticCraftsmanship); setShowCraftsmanshipPicker(false); }}
+        onSelect={(value) => {
+          setCraftsmanship(value as CyberneticCraftsmanship);
+          setShowCraftsmanshipPicker(false);
+        }}
         onClose={() => setShowCraftsmanshipPicker(false)}
       />
     );
@@ -236,7 +255,7 @@ export function CustomItemForm({
 
   return (
     <CustomFormShell
-      title={startType ? title : selectedType ?? title}
+      title={startType ? title : (selectedType ?? title)}
       scrollPositionRef={formScrollPositionRef}
       titleClassName="text-slate-200"
       closeLabel={startType ? undefined : <ArrowLeft />}
@@ -266,7 +285,9 @@ export function CustomItemForm({
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label htmlFor="custom-archeotech-weight" className={uiFormLabel}>Weight</label>
+              <label htmlFor="custom-archeotech-weight" className={uiFormLabel}>
+                Weight
+              </label>
               <input
                 id="custom-archeotech-weight"
                 type="text"
@@ -278,7 +299,9 @@ export function CustomItemForm({
               />
             </div>
             <div>
-              <label htmlFor="custom-archeotech-value" className={uiFormLabel}>Value</label>
+              <label htmlFor="custom-archeotech-value" className={uiFormLabel}>
+                Value
+              </label>
               <input
                 id="custom-archeotech-value"
                 type="text"
@@ -303,286 +326,309 @@ export function CustomItemForm({
         {/* Weapon / Integrated Weapon / Grenade / Mine stats */}
         {(isWeaponType || isGrenadeType) && (
           <CustomFormSection title="Stats">
-              {isWeaponType && (
-                <fieldset>
-                  <legend className={uiFormLabel}>Class</legend>
-                  <div className="flex gap-2 mt-0.5">
-                    {(["Ranged", "Melee"] as const).map((cls) => (
-                      <button
-                        type="button"
-                        key={cls}
-                        aria-pressed={weaponClass === cls}
-                        onClick={() => setWeaponClass(weaponClass === cls ? "" : cls)}
-                        className={[
-                          "flex-1 py-1.5 rounded border text-sm lg:text-base font-medium transition",
-                          weaponClass === cls
-                            ? cls === "Ranged"
-                              ? colourSky
-                              : colourRose
-                            : "border-slate-700 bg-slate-800 text-slate-400 hover:border-slate-500",
-                        ].join(" ")}
-                      >
-                        {cls}
-                      </button>
-                    ))}
-                  </div>
-                </fieldset>
-              )}
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label htmlFor="custom-archeotech-damage" className={uiFormLabel}>Damage</label>
-                  <input
-                    id="custom-archeotech-damage"
-                    type="text"
-                    value={damage}
-                    onChange={(e) => setDamage(e.target.value)}
-                    placeholder="e.g. 1d10+3"
-                    className={editableInputClass(true) + " mt-0.5"}
-                  />
+            {isWeaponType && (
+              <fieldset>
+                <legend className={uiFormLabel}>Class</legend>
+                <div className="flex gap-2 mt-0.5">
+                  {(["Ranged", "Melee"] as const).map((cls) => (
+                    <button
+                      type="button"
+                      key={cls}
+                      aria-pressed={weaponClass === cls}
+                      onClick={() => setWeaponClass(weaponClass === cls ? "" : cls)}
+                      className={[
+                        "flex-1 py-1.5 rounded border text-sm lg:text-base font-medium transition",
+                        weaponClass === cls
+                          ? cls === "Ranged"
+                            ? colourSky
+                            : colourRose
+                          : "border-slate-700 bg-slate-800 text-slate-400 hover:border-slate-500",
+                      ].join(" ")}
+                    >
+                      {cls}
+                    </button>
+                  ))}
                 </div>
-                <div>
-                  <label htmlFor="custom-archeotech-pen" className={uiFormLabel}>Pen</label>
-                  <input
-                    id="custom-archeotech-pen"
-                    type="text"
-                    value={pen}
-                    onChange={(e) => setPen(e.target.value)}
-                    placeholder="e.g. 4"
-                    className={editableInputClass(true) + " mt-0.5"}
-                  />
-                </div>
-              </div>
-              {showRangedStats && (
-                <>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label htmlFor="custom-archeotech-range" className={uiFormLabel}>Range</label>
-                      <input
-                        id="custom-archeotech-range"
-                        type="text"
-                        value={range}
-                        onChange={(e) => setRange(e.target.value)}
-                        placeholder="e.g. 100m"
-                        className={editableInputClass(true) + " mt-0.5"}
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="custom-archeotech-rof" className={uiFormLabel}>RoF</label>
-                      <input
-                        id="custom-archeotech-rof"
-                        type="text"
-                        value={rof}
-                        onChange={(e) => setRof(e.target.value)}
-                        placeholder="e.g. S/2/5"
-                        className={editableInputClass(true) + " mt-0.5"}
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label htmlFor="custom-archeotech-clip" className={uiFormLabel}>Clip</label>
-                      <input
-                        id="custom-archeotech-clip"
-                        type="text"
-                        value={clip}
-                        onChange={(e) => setClip(e.target.value)}
-                        placeholder="e.g. 30"
-                        className={editableInputClass(true) + " mt-0.5"}
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="custom-archeotech-reload" className={uiFormLabel}>Rld</label>
-                      <input
-                        id="custom-archeotech-reload"
-                        type="text"
-                        value={rld}
-                        onChange={(e) => setRld(e.target.value)}
-                        placeholder="e.g. Full"
-                        className={editableInputClass(true) + " mt-0.5"}
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
+              </fieldset>
+            )}
+            <div className="grid grid-cols-2 gap-2">
               <div>
-                <label htmlFor="custom-archeotech-special-rules" className={uiFormLabel}>
-                  Special Rules <span className="text-slate-600">(optional)</span>
+                <label htmlFor="custom-archeotech-damage" className={uiFormLabel}>
+                  Damage
                 </label>
                 <input
-                  id="custom-archeotech-special-rules"
+                  id="custom-archeotech-damage"
                   type="text"
-                  value={specialRules}
-                  onChange={(e) => setSpecialRules(e.target.value)}
-                  placeholder="e.g. Tearing, Accurate"
+                  value={damage}
+                  onChange={(e) => setDamage(e.target.value)}
+                  placeholder="e.g. 1d10+3"
                   className={editableInputClass(true) + " mt-0.5"}
                 />
               </div>
+              <div>
+                <label htmlFor="custom-archeotech-pen" className={uiFormLabel}>
+                  Pen
+                </label>
+                <input
+                  id="custom-archeotech-pen"
+                  type="text"
+                  value={pen}
+                  onChange={(e) => setPen(e.target.value)}
+                  placeholder="e.g. 4"
+                  className={editableInputClass(true) + " mt-0.5"}
+                />
+              </div>
+            </div>
+            {showRangedStats && (
+              <>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label htmlFor="custom-archeotech-range" className={uiFormLabel}>
+                      Range
+                    </label>
+                    <input
+                      id="custom-archeotech-range"
+                      type="text"
+                      value={range}
+                      onChange={(e) => setRange(e.target.value)}
+                      placeholder="e.g. 100m"
+                      className={editableInputClass(true) + " mt-0.5"}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="custom-archeotech-rof" className={uiFormLabel}>
+                      RoF
+                    </label>
+                    <input
+                      id="custom-archeotech-rof"
+                      type="text"
+                      value={rof}
+                      onChange={(e) => setRof(e.target.value)}
+                      placeholder="e.g. S/2/5"
+                      className={editableInputClass(true) + " mt-0.5"}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label htmlFor="custom-archeotech-clip" className={uiFormLabel}>
+                      Clip
+                    </label>
+                    <input
+                      id="custom-archeotech-clip"
+                      type="text"
+                      value={clip}
+                      onChange={(e) => setClip(e.target.value)}
+                      placeholder="e.g. 30"
+                      className={editableInputClass(true) + " mt-0.5"}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="custom-archeotech-reload" className={uiFormLabel}>
+                      Rld
+                    </label>
+                    <input
+                      id="custom-archeotech-reload"
+                      type="text"
+                      value={rld}
+                      onChange={(e) => setRld(e.target.value)}
+                      placeholder="e.g. Full"
+                      className={editableInputClass(true) + " mt-0.5"}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+            <div>
+              <label htmlFor="custom-archeotech-special-rules" className={uiFormLabel}>
+                Special Rules <span className="text-slate-600">(optional)</span>
+              </label>
+              <input
+                id="custom-archeotech-special-rules"
+                type="text"
+                value={specialRules}
+                onChange={(e) => setSpecialRules(e.target.value)}
+                placeholder="e.g. Tearing, Accurate"
+                className={editableInputClass(true) + " mt-0.5"}
+              />
+            </div>
           </CustomFormSection>
         )}
 
         {/* Armour stats */}
         {selectedType === "Armour" && (
           <CustomFormSection title="Stats">
-              <div>
-                <label htmlFor="custom-archeotech-armour-ap" className={uiFormLabel}>AP</label>
-                <input
-                  id="custom-archeotech-armour-ap"
-                  type="text"
-                  inputMode="numeric"
-                  value={ap}
-                  onChange={(e) => setAp(e.target.value.replace(/[^0-9]/g, ""))}
-                  placeholder="e.g. 6"
-                  className={editableInputClass(true) + " mt-0.5"}
-                />
+            <div>
+              <label htmlFor="custom-archeotech-armour-ap" className={uiFormLabel}>
+                AP
+              </label>
+              <input
+                id="custom-archeotech-armour-ap"
+                type="text"
+                inputMode="numeric"
+                value={ap}
+                onChange={(e) => setAp(e.target.value.replace(/[^0-9]/g, ""))}
+                placeholder="e.g. 6"
+                className={editableInputClass(true) + " mt-0.5"}
+              />
+            </div>
+            <fieldset>
+              <legend className={`${uiFormLabel} block mb-1.5`}>Locations</legend>
+              <div className="flex flex-wrap gap-2">
+                {ARMOUR_LOCATION_ORDER.map((loc) => (
+                  <button
+                    type="button"
+                    key={loc}
+                    aria-pressed={locations.includes(loc)}
+                    onClick={() => toggleLocation(loc)}
+                    className={[
+                      "px-2.5 py-1 rounded border text-xs lg:text-sm font-medium transition",
+                      locations.includes(loc)
+                        ? "border-red-500/60 bg-red-500/10 text-red-300"
+                        : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500",
+                    ].join(" ")}
+                  >
+                    {ARMOUR_LOCATION_LABELS[loc]}
+                  </button>
+                ))}
               </div>
-              <fieldset>
-                <legend className={`${uiFormLabel} block mb-1.5`}>Locations</legend>
-                <div className="flex flex-wrap gap-2">
-                  {LOCATION_ORDER.map((loc) => (
-                    <button
-                      type="button"
-                      key={loc}
-                      aria-pressed={locations.includes(loc)}
-                      onClick={() => toggleLocation(loc)}
-                      className={[
-                        "px-2.5 py-1 rounded border text-xs lg:text-sm font-medium transition",
-                        locations.includes(loc)
-                          ? "border-red-500/60 bg-red-500/10 text-red-300"
-                          : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500",
-                      ].join(" ")}
-                    >
-                      {LOCATION_LABELS[loc]}
-                    </button>
-                  ))}
-                </div>
-              </fieldset>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setStacks(!stacks)}
-                  className={[
-                    "w-4 h-4 rounded border flex items-center justify-center transition shrink-0",
-                    stacks ? "border-red-500 bg-red-500/20" : "border-slate-600 bg-slate-800",
-                  ].join(" ")}
-                  aria-label="Stacks with worn armour"
-                  aria-pressed={stacks}
-                >
-                  {stacks && <span className="text-red-400 text-[10px] leading-none">✓</span>}
-                </button>
-                <span className="text-xs lg:text-sm text-slate-300">
-                  Stacks with worn armour <span className={uiTextMuted}>(default: take higher value)</span>
-                </span>
-              </div>
+            </fieldset>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setStacks(!stacks)}
+                className={[
+                  "w-4 h-4 rounded border flex items-center justify-center transition shrink-0",
+                  stacks ? "border-red-500 bg-red-500/20" : "border-slate-600 bg-slate-800",
+                ].join(" ")}
+                aria-label="Stacks with worn armour"
+                aria-pressed={stacks}
+              >
+                {stacks && <span className="text-red-400 text-[10px] leading-none">✓</span>}
+              </button>
+              <span className="text-xs lg:text-sm text-slate-300">
+                Stacks with worn armour{" "}
+                <span className={uiTextMuted}>(default: take higher value)</span>
+              </span>
+            </div>
           </CustomFormSection>
         )}
 
         {/* Shield stats */}
         {selectedType === "Shield" && (
           <CustomFormSection title="Stats">
+            <div>
+              <label htmlFor="custom-archeotech-shield-ap" className={uiFormLabel}>
+                AP
+              </label>
+              <input
+                id="custom-archeotech-shield-ap"
+                type="text"
+                inputMode="numeric"
+                value={ap}
+                onChange={(e) => setAp(e.target.value.replace(/[^0-9]/g, ""))}
+                placeholder="e.g. 4"
+                className={editableInputClass(true) + " mt-0.5"}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
               <div>
-                <label htmlFor="custom-archeotech-shield-ap" className={uiFormLabel}>AP</label>
-                <input
-                  id="custom-archeotech-shield-ap"
-                  type="text"
-                  inputMode="numeric"
-                  value={ap}
-                  onChange={(e) => setAp(e.target.value.replace(/[^0-9]/g, ""))}
-                  placeholder="e.g. 4"
-                  className={editableInputClass(true) + " mt-0.5"}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label htmlFor="custom-archeotech-shield-damage" className={uiFormLabel}>Damage</label>
-                  <input
-                    id="custom-archeotech-shield-damage"
-                    type="text"
-                    value={damage}
-                    onChange={(e) => setDamage(e.target.value)}
-                    placeholder="e.g. 1d5"
-                    className={editableInputClass(true) + " mt-0.5"}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="custom-archeotech-shield-pen" className={uiFormLabel}>Pen</label>
-                  <input
-                    id="custom-archeotech-shield-pen"
-                    type="text"
-                    value={pen}
-                    onChange={(e) => setPen(e.target.value)}
-                    placeholder="e.g. 0"
-                    className={editableInputClass(true) + " mt-0.5"}
-                  />
-                </div>
-              </div>
-              <div>
-                <label htmlFor="custom-archeotech-shield-special-rules" className={uiFormLabel}>
-                  Special Rules <span className="text-slate-600">(optional)</span>
+                <label htmlFor="custom-archeotech-shield-damage" className={uiFormLabel}>
+                  Damage
                 </label>
                 <input
-                  id="custom-archeotech-shield-special-rules"
+                  id="custom-archeotech-shield-damage"
                   type="text"
-                  value={specialRules}
-                  onChange={(e) => setSpecialRules(e.target.value)}
-                  placeholder="e.g. Primitive"
+                  value={damage}
+                  onChange={(e) => setDamage(e.target.value)}
+                  placeholder="e.g. 1d5"
                   className={editableInputClass(true) + " mt-0.5"}
                 />
               </div>
+              <div>
+                <label htmlFor="custom-archeotech-shield-pen" className={uiFormLabel}>
+                  Pen
+                </label>
+                <input
+                  id="custom-archeotech-shield-pen"
+                  type="text"
+                  value={pen}
+                  onChange={(e) => setPen(e.target.value)}
+                  placeholder="e.g. 0"
+                  className={editableInputClass(true) + " mt-0.5"}
+                />
+              </div>
+            </div>
+            <div>
+              <label htmlFor="custom-archeotech-shield-special-rules" className={uiFormLabel}>
+                Special Rules <span className="text-slate-600">(optional)</span>
+              </label>
+              <input
+                id="custom-archeotech-shield-special-rules"
+                type="text"
+                value={specialRules}
+                onChange={(e) => setSpecialRules(e.target.value)}
+                placeholder="e.g. Primitive"
+                className={editableInputClass(true) + " mt-0.5"}
+              />
+            </div>
           </CustomFormSection>
         )}
 
         {/* Cybernetic stats */}
         {selectedType === "Cybernetic" && (
           <CustomFormSection title="Stats">
-              <PickerField
-                id="custom-archeotech-craftsmanship"
-                label="Craftsmanship"
-                supportingText="(optional)"
-                value={craftsmanship}
-                placeholder="Select craftsmanship"
-                onClick={() => setShowCraftsmanshipPicker(true)}
-              />
-              <fieldset>
-                <legend className={`${uiFormLabel} block mb-1.5`}>
-                  Body Location <span className="text-slate-600">(optional)</span>
-                </legend>
-                <div className="flex flex-wrap gap-2">
-                  {LOCATION_ORDER.map((loc) => (
-                    <button
-                      type="button"
-                      key={loc}
-                      aria-pressed={bodyLocation.includes(loc)}
-                      onClick={() => toggleBodyLocation(loc)}
-                      className={[
-                        "px-2.5 py-1 rounded border text-xs lg:text-sm font-medium transition",
-                        bodyLocation.includes(loc)
-                          ? "border-red-500/60 bg-red-500/10 text-red-300"
-                          : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500",
-                      ].join(" ")}
-                    >
-                      {LOCATION_LABELS[loc]}
-                    </button>
-                  ))}
-                </div>
-              </fieldset>
+            <PickerField
+              id="custom-archeotech-craftsmanship"
+              label="Craftsmanship"
+              supportingText="(optional)"
+              value={craftsmanship}
+              placeholder="Select craftsmanship"
+              onClick={() => setShowCraftsmanshipPicker(true)}
+            />
+            <fieldset>
+              <legend className={`${uiFormLabel} block mb-1.5`}>
+                Body Location <span className="text-slate-600">(optional)</span>
+              </legend>
+              <div className="flex flex-wrap gap-2">
+                {ARMOUR_LOCATION_ORDER.map((loc) => (
+                  <button
+                    type="button"
+                    key={loc}
+                    aria-pressed={bodyLocation.includes(loc)}
+                    onClick={() => toggleBodyLocation(loc)}
+                    className={[
+                      "px-2.5 py-1 rounded border text-xs lg:text-sm font-medium transition",
+                      bodyLocation.includes(loc)
+                        ? "border-red-500/60 bg-red-500/10 text-red-300"
+                        : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500",
+                    ].join(" ")}
+                  >
+                    {ARMOUR_LOCATION_LABELS[loc]}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
           </CustomFormSection>
         )}
 
         {/* Force Field stats */}
         {selectedType === "Force Field" && (
           <CustomFormSection title="Stats">
-              <div>
-                <label htmlFor="custom-archeotech-protection-rating" className={uiFormLabel}>Protection Rating</label>
-                <input
-                  id="custom-archeotech-protection-rating"
-                  type="text"
-                  inputMode="numeric"
-                  value={protectionRating}
-                  onChange={(e) => setProtectionRating(e.target.value.replace(/[^0-9]/g, ""))}
-                  placeholder="e.g. 50"
-                  className={editableInputClass(true) + " mt-0.5"}
-                />
-              </div>
+            <div>
+              <label htmlFor="custom-archeotech-protection-rating" className={uiFormLabel}>
+                Protection Rating
+              </label>
+              <input
+                id="custom-archeotech-protection-rating"
+                type="text"
+                inputMode="numeric"
+                value={protectionRating}
+                onChange={(e) => setProtectionRating(e.target.value.replace(/[^0-9]/g, ""))}
+                placeholder="e.g. 50"
+                className={editableInputClass(true) + " mt-0.5"}
+              />
+            </div>
           </CustomFormSection>
         )}
 

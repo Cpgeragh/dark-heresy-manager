@@ -23,6 +23,8 @@ import { Button } from "../ui/Button";
 import { PageShell } from "../ui/PageShell";
 import { Panel } from "../ui/Panel";
 import { SectionHeader } from "../ui/SectionHeader";
+import { ErrorState } from "../ui/ErrorState";
+import { LoadingState } from "../ui/LoadingState";
 import { useHeaderExtensionSetters } from "../context/HeaderExtensionContext";
 
 export default function CampaignOverview({ effectiveUserId }: { effectiveUserId: string }) {
@@ -30,10 +32,28 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
   const campaignId = params.campaignId;
 
   const isDM = useIsDM(campaignId, effectiveUserId);
-  const { campaign } = useCampaign(campaignId ?? null);
-  const { sessions, loading: sessionsLoading, deleteSession, updateSession } = useSessions(campaignId);
-  const { characters: summaries, loading } = useCharacterSummaries(campaignId);
-  const { characters } = useCampaignCharacters(campaignId ?? null);
+  const {
+    campaign,
+    loading: campaignLoading,
+    error: campaignError,
+  } = useCampaign(campaignId ?? null);
+  const {
+    sessions,
+    loading: sessionsLoading,
+    error: sessionsError,
+    deleteSession,
+    updateSession,
+  } = useSessions(campaignId);
+  const {
+    characters: summaries,
+    loading: summariesLoading,
+    error: summariesError,
+  } = useCharacterSummaries(campaignId);
+  const {
+    characters,
+    loading: charactersLoading,
+    error: charactersError,
+  } = useCampaignCharacters(campaignId ?? null);
   const toast = useToast();
   const { setKebabContent, clearKebabContent } = useHeaderExtensionSetters();
 
@@ -104,8 +124,20 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
     return <div className="text-slate-300 text-center py-10">No campaign selected.</div>;
   }
 
-  if (loading || isDM === null) {
-    return <div className="text-slate-300 text-center py-10">Loading campaign…</div>;
+  if (campaignError || summariesError || charactersError) {
+    return (
+      <ErrorState className="text-center py-10">
+        Unable to load this campaign. Please refresh the page.
+      </ErrorState>
+    );
+  }
+
+  if (campaignLoading || summariesLoading || charactersLoading || isDM === null) {
+    return <LoadingState className="text-center py-10">Loading campaign…</LoadingState>;
+  }
+
+  if (!campaign) {
+    return <div className="text-slate-300 text-center py-10">Campaign not found.</div>;
   }
 
   const filteredCharacters = search.trim()
@@ -204,8 +236,12 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
             )}
           </div>
 
-          {sessionsLoading ? (
-            <p className="text-slate-400 text-sm lg:text-base">Loading sessions…</p>
+          {sessionsError ? (
+            <ErrorState>
+              Unable to load sessions. Please refresh the page.
+            </ErrorState>
+          ) : sessionsLoading ? (
+            <LoadingState>Loading sessions…</LoadingState>
           ) : sessions.length === 0 ? (
             <p className="text-slate-400 text-sm lg:text-base">No sessions recorded yet.</p>
           ) : (

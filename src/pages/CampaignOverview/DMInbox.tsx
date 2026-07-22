@@ -9,6 +9,8 @@ import { MessageInput } from "../../components/MessageInput";
 import { useToast } from "../../components/Toast";
 import { ConfirmInline } from "../../ui/ConfirmInline";
 import { ExpandChevron } from "../../ui/ExpandChevron";
+import { ErrorState } from "../../ui/ErrorState";
+import { LoadingState } from "../../ui/LoadingState";
 import type { CharacterListItem } from "../../types/Firestore";
 
 // ── Helper ────────────────────────────────────────────────────────────────────
@@ -31,7 +33,7 @@ function ThreadView({
   dmUid: string;
   label: string;
 }) {
-  const { messages, loading } = useThreadMessages(campaignId, characterId);
+  const { messages, loading, error } = useThreadMessages(campaignId, characterId);
   const toast = useToast();
   const [clearing, setClearing] = useState(false);
 
@@ -67,7 +69,11 @@ function ThreadView({
 
   return (
     <div className="mt-2 border border-slate-700 rounded-lg p-3 bg-slate-900/40">
-      <MessageThread messages={messages} currentUid={dmUid} loading={loading} />
+      {error ? (
+        <ErrorState>Unable to load this conversation.</ErrorState>
+      ) : (
+        <MessageThread messages={messages} currentUid={dmUid} loading={loading} />
+      )}
       <MessageInput onSend={handleSend} placeholder={`Reply to ${label}…`} />
 
       {/* Clear chat */}
@@ -96,14 +102,24 @@ export function DMInbox({
   dmUid: string;
   characters: CharacterListItem[];
 }) {
-  const { threads, loading } = useThreads(campaignId);
+  const { threads, loading, error } = useThreads(campaignId);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const toggleThread = useCallback((characterId: string) => {
     setExpandedId((prev) => (prev === characterId ? null : characterId));
   }, []);
 
-  if (loading) return null;
+  if (error) {
+    return (
+      <ErrorState>
+        Unable to load messages. Please refresh the page.
+      </ErrorState>
+    );
+  }
+
+  if (loading) {
+    return <LoadingState>Loading messages…</LoadingState>;
+  }
 
   if (threads.length === 0) {
     return <p className="text-slate-400 text-sm lg:text-base">No messages yet.</p>;

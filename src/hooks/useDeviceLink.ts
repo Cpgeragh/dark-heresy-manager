@@ -6,44 +6,27 @@
 // useLinkDevice writes to (or unlink deletes from) userLinks/{myUid} —
 // no page reload required.
 
-import { useState, useEffect } from "react";
-import { doc, onSnapshot, deleteDoc } from "firebase/firestore";
+import { deleteDoc, doc, type DocumentData } from "firebase/firestore";
 import { db } from "../firebase";
+import { useDocumentSubscription } from "./useFirestoreSubscription";
 
 interface DeviceLinkState {
   loading: boolean;
+  error: Error | null;
   isLinked: boolean;
   effectiveUserId: string;
   unlink: () => Promise<void>;
 }
 
 export function useDeviceLink(myUid: string): DeviceLinkState {
-  const [loading, setLoading] = useState(true);
-  const [primaryUid, setPrimaryUid] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Called before auth is ready (myUid is ""); skip and mark as not linked.
-    if (!myUid) {
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-
-    const unsubscribe = onSnapshot(
-      doc(db, "userLinks", myUid),
-      (snap) => {
-        setPrimaryUid(snap.exists() ? (snap.data().primaryUid as string) : null);
-        setLoading(false);
-      },
-      () => {
-        // Treat lookup failure as not linked
-        setLoading(false);
-      }
-    );
-
-    return () => unsubscribe();
-  }, [myUid]);
+  const {
+    data: primaryUid,
+    loading,
+    error,
+  } = useDocumentSubscription<DocumentData, string>(
+    myUid ? doc(db, "userLinks", myUid) : null,
+    (snapshot) => (snapshot.exists() ? (snapshot.data().primaryUid as string) : null)
+  );
 
   async function unlink() {
     await deleteDoc(doc(db, "userLinks", myUid));
@@ -52,6 +35,7 @@ export function useDeviceLink(myUid: string): DeviceLinkState {
 
   return {
     loading,
+    error,
     isLinked: primaryUid !== null,
     effectiveUserId: primaryUid ?? myUid,
     unlink,

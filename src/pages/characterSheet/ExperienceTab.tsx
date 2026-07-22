@@ -19,6 +19,8 @@ import { useXpProposals } from "../../hooks/useXpProposals";
 import { proposeXpSpend } from "../../services/xpService";
 import { useToast } from "../../components/Toast/ToastContext";
 import { TrashIcon } from "../../ui/TrashIcon";
+import { ErrorState } from "../../ui/ErrorState";
+import { LoadingState } from "../../ui/LoadingState";
 
 // All valid rank values in display order.
 const RANK_OPTIONS: RankAdvances["rank"][] = [1, 2, 3, 4, 5, 6, 7, 8, "elite"];
@@ -47,7 +49,10 @@ export function ExperienceTab({
 }: ExperienceTabProps) {
   const toast = useToast();
   const remaining = experience.total - experience.spent;
-  const { proposals } = useXpProposals(campaignId, characterId);
+  const { proposals, loading: proposalsLoading, error: proposalsError } = useXpProposals(
+    campaignId,
+    characterId
+  );
 
   // ── Player proposal state ──────────────────────────────────────────────────
   const [description, setDescription] = useState("");
@@ -324,11 +329,22 @@ export function ExperienceTab({
             </div>
           </div>
 
-          {pendingProposals.length === 0 && resolvedProposals.length === 0 && (
+          {proposalsError && (
+            <ErrorState>Unable to load XP proposals.</ErrorState>
+          )}
+
+          {!proposalsError && proposalsLoading && (
+            <LoadingState>Loading XP proposals…</LoadingState>
+          )}
+
+          {!proposalsError &&
+            !proposalsLoading &&
+            pendingProposals.length === 0 &&
+            resolvedProposals.length === 0 && (
             <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No proposals yet.</p>
           )}
 
-          {pendingProposals.length > 0 && (
+          {!proposalsError && !proposalsLoading && pendingProposals.length > 0 && (
             <div className="space-y-2">
               {pendingProposals.map((p) => (
                 <div
@@ -344,7 +360,7 @@ export function ExperienceTab({
             </div>
           )}
 
-          {resolvedProposals.length > 0 && (
+          {!proposalsError && !proposalsLoading && resolvedProposals.length > 0 && (
             <div className="space-y-2">
               <button type="button"
                 onClick={() => setShowHistory((v) => !v)}

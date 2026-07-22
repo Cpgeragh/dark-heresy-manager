@@ -6,22 +6,10 @@ import { Button } from "../../ui/Button";
 import { uiSection } from "../../ui/editableStyles";
 import { ConfirmInline } from "../../ui/ConfirmInline";
 import { useToast } from "../../components/Toast";
-import {
-  permanentlyDeleteCustomItem,
-  restoreCustomItem,
-} from "../../services/customItemService";
+import { permanentlyDeleteCustomItem, restoreCustomItem } from "../../services/customItemService";
 import { StatusBadge } from "../../ui/StatusBadge";
 import { useCustomItemLibraryActions } from "../../hooks/useCustomItemLibraryActions";
-
-const CATEGORY_LABELS: Record<CustomItemCategory, string> = {
-  gear: "Gear",
-  consumable: "Consumable",
-  drug: "Drug",
-  cybernetic: "Cybernetic",
-  weapon: "Weapon",
-  armour: "Armour",
-  archeotech: "Archeotech",
-};
+import { CUSTOM_ITEM_CATEGORY_LABELS } from "../../constants/customItems";
 
 type ManagementBusyAction = "restore" | "delete";
 
@@ -34,20 +22,17 @@ export function CustomItemAdminRow({
   campaignId: string;
   userId: string;
 }) {
-  const [managementBusyAction, setManagementBusyAction] =
-    useState<ManagementBusyAction | null>(null);
+  const [managementBusyAction, setManagementBusyAction] = useState<ManagementBusyAction | null>(
+    null
+  );
   const toast = useToast();
-  const {
-    publishDefinition,
-    archiveDefinition,
-    updateAllCopies,
-    getBusyAction,
-  } = useCustomItemLibraryActions<CustomItemCategory>({
-    campaignId,
-    userId,
-    itemLabel: item.name,
-    messageStyle: "namedItem",
-  });
+  const { publishDefinition, archiveDefinition, updateAllCopies, getBusyAction } =
+    useCustomItemLibraryActions<CustomItemCategory>({
+      campaignId,
+      userId,
+      itemLabel: item.name,
+      messageStyle: "namedItem",
+    });
   const busyAction = getBusyAction(item.id) ?? managementBusyAction;
   const busy = busyAction !== null;
 
@@ -84,7 +69,7 @@ export function CustomItemAdminRow({
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="text-sm font-medium text-slate-200">{item.name}</span>
             <span className="rounded border border-slate-600 bg-slate-800/60 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-slate-400">
-              {CATEGORY_LABELS[item.category]}
+              {CUSTOM_ITEM_CATEGORY_LABELS[item.category]}
             </span>
             <StatusBadge status={item.status} />
           </div>
@@ -94,38 +79,22 @@ export function CustomItemAdminRow({
         </div>
         <div className="flex flex-wrap items-center gap-2 shrink-0">
           {item.status === "draft" && (
-            <Button
-              size="xs"
-              onClick={() => publishDefinition(item)}
-              disabled={busy}
-            >
+            <Button size="xs" onClick={() => publishDefinition(item)} disabled={busy}>
               {busyAction === "publish" ? "Publishing…" : "Publish"}
             </Button>
           )}
           {item.status !== "archived" && (
-            <Button
-              size="xs"
-              onClick={() => archiveDefinition(item)}
-              disabled={busy}
-            >
+            <Button size="xs" onClick={() => archiveDefinition(item)} disabled={busy}>
               {busyAction === "archive" ? "Archiving…" : "Archive"}
             </Button>
           )}
           {item.status === "published" && !!item.draftVersionId && (
-            <Button
-              size="xs"
-              onClick={() => updateAllCopies(item)}
-              disabled={busy}
-            >
+            <Button size="xs" onClick={() => updateAllCopies(item)} disabled={busy}>
               {busyAction === "updateAll" ? "Updating…" : "Update All Copies"}
             </Button>
           )}
           {item.status === "archived" && (
-            <Button
-              size="xs"
-              onClick={handleRestore}
-              disabled={busy}
-            >
+            <Button size="xs" onClick={handleRestore} disabled={busy}>
               {busyAction === "restore" ? "Restoring…" : "Restore"}
             </Button>
           )}

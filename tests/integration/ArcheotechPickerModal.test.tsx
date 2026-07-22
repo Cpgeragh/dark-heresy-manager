@@ -13,11 +13,11 @@ const ITEM_NAME = "Belecane-Pattern Stasis Grenade";
 // GM-assigned-values step instead of calling onSelect directly.
 const GM_ITEM_NAME = "Cameleoline Grid";
 
-function row(name: string): HTMLElement {
+function row(name: string): HTMLButtonElement {
   const match = screen
     .getAllByText(name)
     .map((el) => el.closest("button"))
-    .find((el): el is HTMLElement => el !== null);
+    .find((el): el is HTMLButtonElement => el !== null);
   if (!match) throw new Error(`No button row found for: ${name}`);
   return match;
 }

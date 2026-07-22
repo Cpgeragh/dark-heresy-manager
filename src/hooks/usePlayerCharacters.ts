@@ -1,42 +1,29 @@
 // src/hooks/usePlayerCharacters.ts
 
-import { useEffect, useState } from "react";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection } from "firebase/firestore";
 import { db } from "../firebase";
 import type { CharacterListItem } from "../types/Firestore";
+import { useQuerySubscription } from "./useFirestoreSubscription";
 
 export function usePlayerCharacters(
   campaignId: string | null,
   userId: string
-): { characters: CharacterListItem[]; loading: boolean } {
-  const [characters, setCharacters] = useState<CharacterListItem[]>([]);
-  const [loading, setLoading] = useState(false);
+): { characters: CharacterListItem[]; loading: boolean; error: Error | null } {
+  const {
+    data: characters,
+    loading,
+    error,
+  } = useQuerySubscription(
+    campaignId ? collection(db, "campaigns", campaignId, "characters") : null,
+    campaignId ? `player-characters:${campaignId}:${userId}` : null,
+    (snapshot) =>
+      snapshot.docs
+        .map((characterDocument) => ({
+          id: characterDocument.id,
+          ...(characterDocument.data() as Omit<CharacterListItem, "id">),
+        }))
+        .filter((character) => character.userId === userId)
+  );
 
-  useEffect(() => {
-    if (!campaignId) {
-      setCharacters([]);
-      return;
-    }
-
-    setLoading(true);
-
-    const unsubscribe = onSnapshot(
-      collection(db, "campaigns", campaignId, "characters"),
-      (snapshot) => {
-        const list = snapshot.docs
-          .map((doc) => ({ id: doc.id, ...(doc.data() as Omit<CharacterListItem, "id">) }))
-          .filter((c) => c.userId === userId);
-        setCharacters(list);
-        setLoading(false);
-      },
-      (err) => {
-        console.error("usePlayerCharacters snapshot error:", err);
-        setLoading(false);
-      }
-    );
-
-    return () => unsubscribe();
-  }, [campaignId, userId]);
-
-  return { characters, loading };
+  return { characters, loading, error };
 }

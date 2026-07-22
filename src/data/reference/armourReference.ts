@@ -4,6 +4,7 @@
 
 import { SkillSource } from "../../types/SkillSource";
 import type { ArmourLocationKey, ArmourQuality } from "../../types/Character";
+import { ARMOUR_LOCATION_ORDER } from "../../constants/locations";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -30,7 +31,7 @@ export interface ArmourRef {
 }
 
 // Convenience shorthands for common location sets
-const ALL: ArmourLocationKey[] = ["head", "body", "rightArm", "leftArm", "rightLeg", "leftLeg"];
+const ALL: ArmourLocationKey[] = [...ARMOUR_LOCATION_ORDER];
 const ARMS_BODY_LEGS: ArmourLocationKey[] = ["body", "rightArm", "leftArm", "rightLeg", "leftLeg"];
 const ARMS: ArmourLocationKey[] = ["rightArm", "leftArm"];
 const LEGS: ArmourLocationKey[] = ["rightLeg", "leftLeg"];

@@ -17,11 +17,11 @@ const MINE_NAME = "Empyrian Brain Mines";
 // which always mounts its (closed) dialog into the DOM (outside any row) — so
 // the name can match both the row and that hidden, button-less title. Filter
 // for whichever match actually has a button row as an ancestor.
-function row(name: string): HTMLElement {
+function row(name: string): HTMLButtonElement {
   const match = screen
     .getAllByText(name)
     .map((el) => el.closest("button"))
-    .find((el): el is HTMLElement => el !== null);
+    .find((el): el is HTMLButtonElement => el !== null);
   if (!match) throw new Error(`No button row found for: ${name}`);
   return match;
 }

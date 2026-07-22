@@ -15,6 +15,7 @@ const untrainedSkills: SkillWithComputed[] = [
     level: "untrained",
     category: "General",
     advanced: false,
+    source: "CR",
     total: 20,
   },
 ];

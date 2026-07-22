@@ -2,29 +2,25 @@
 
 import { useRef, useState } from "react";
 import type { MeleeWeapon, WeaponCraftsmanship } from "../../../types/Character";
-import {
-  editableInputClass,
-  editableTextareaClass,
-  uiFormLabel,
-} from "../../../ui/editableStyles";
+import { editableInputClass, editableTextareaClass, uiFormLabel } from "../../../ui/editableStyles";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/craftsmanship";
 import { CustomFormSection } from "../../../ui/CustomFormSection";
 import { CustomFormShell } from "../../../ui/CustomFormShell";
-import { OriginSelector, type CustomItemOrigin } from "../../../ui/OriginSelector";
+import { OriginSelector } from "../../../ui/OriginSelector";
+import type { CustomItemOrigin } from "../../../constants/customItems";
 import { PickerField } from "../../../ui/PickerField";
 import { RequiredFormLabel } from "../../../ui/RequiredFormLabel";
+import { STANDARD_AVAILABILITY_OPTIONS } from "../../../constants/availability";
+import { sanitizeDiceInput, sanitizeNonNegativeIntegerInput } from "../../../utils/formInput";
 import {
   DAMAGE_TYPE_OPTIONS,
-  CUSTOM_AVAILABILITY_OPTIONS,
   WeaponQualitySelector,
   useWeaponQualityPicker,
   formatDamageInput,
   isValidDiceInput,
-  sanitizeDiceInput,
-  sanitizeNonNegativeIntegerInput,
 } from "./weaponShared";
 
 const CUSTOM_MELEE_CLASS_OPTIONS = ["Melee", "Melee (Two-Handed)", "Melee / Thrown"] as const;
@@ -46,9 +42,8 @@ function parseWeaponDamage(
     base: match?.[1] ?? "1d10",
     plus: match?.[2] ?? "0",
     type:
-      (match?.[3]?.toUpperCase() as
-        | (typeof DAMAGE_TYPE_OPTIONS)[number]["value"]
-        | undefined) ?? fallbackType,
+      (match?.[3]?.toUpperCase() as (typeof DAMAGE_TYPE_OPTIONS)[number]["value"] | undefined) ??
+      fallbackType,
   };
 }
 
@@ -129,7 +124,8 @@ export function CustomMeleeForm({
         specialRules: selectedQualities.length > 0 ? selectedQualities.join(", ") : undefined,
         description: description.trim() || undefined,
         integrated: initialWeapon?.integrated ?? integrated,
-        quantity: initialWeapon?.quantity ?? (weaponClass.toLowerCase().includes("thrown") ? 1 : undefined),
+        quantity:
+          initialWeapon?.quantity ?? (weaponClass.toLowerCase().includes("thrown") ? 1 : undefined),
         customLibraryId: initialWeapon?.customLibraryId,
         customLibraryVersionId: initialWeapon?.customLibraryVersionId,
         equipped: initialWeapon?.equipped,
@@ -181,7 +177,7 @@ export function CustomMeleeForm({
     return (
       <OptionPickerScreen
         title="Availability"
-        options={CUSTOM_AVAILABILITY_OPTIONS}
+        options={STANDARD_AVAILABILITY_OPTIONS}
         selected={availability}
         onSelect={(value) => {
           setAvailability(value);
@@ -203,174 +199,174 @@ export function CustomMeleeForm({
       saving={saving}
     >
       <CustomFormSection title="Identity">
-          <div className="grid grid-cols-2 gap-2">
-            <div className="col-span-2">
-              <RequiredFormLabel htmlFor="custom-melee-name">Name</RequiredFormLabel>
-              <input
-                id="custom-melee-name"
-                required
-                type="text"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                className={editableInputClass(true) + " mt-0.5"}
-              />
-            </div>
-
-            <PickerField
-                id="custom-melee-class"
-                label="Class"
-                value={weaponClass}
-                placeholder="Choose class"
-                required
-                onClick={() => setShowClassPicker(true)}
-                className="col-span-2"
-              />
+        <div className="grid grid-cols-2 gap-2">
+          <div className="col-span-2">
+            <RequiredFormLabel htmlFor="custom-melee-name">Name</RequiredFormLabel>
+            <input
+              id="custom-melee-name"
+              required
+              type="text"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              className={editableInputClass(true) + " mt-0.5"}
+            />
           </div>
+
+          <PickerField
+            id="custom-melee-class"
+            label="Class"
+            value={weaponClass}
+            placeholder="Choose class"
+            required
+            onClick={() => setShowClassPicker(true)}
+            className="col-span-2"
+          />
+        </div>
       </CustomFormSection>
 
       <CustomFormSection title="Craftsmanship & Origin">
-          <fieldset aria-required="true" className="space-y-1">
-            <RequiredFormLabel as="legend">Craftsmanship</RequiredFormLabel>
-            <div className="grid grid-cols-4 gap-1.5">
-              {CRAFTSMANSHIP_OPTIONS.map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  aria-pressed={craftsmanship === option}
-                  onClick={() => setCraftsmanship(option)}
-                  className={[
-                    "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
-                    craftsmanship === option
-                      ? CRAFTSMANSHIP_STYLE[option]
-                      : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
-                  ].join(" ")}
-                >
-                  {option}
-                </button>
-              ))}
-            </div>
-          </fieldset>
-          <OriginSelector
-            name="custom-melee-origin"
-            value={origin}
-            onChange={setOrigin}
-          />
+        <fieldset aria-required="true" className="space-y-1">
+          <RequiredFormLabel as="legend">Craftsmanship</RequiredFormLabel>
+          <div className="grid grid-cols-4 gap-1.5">
+            {CRAFTSMANSHIP_OPTIONS.map((option) => (
+              <button
+                key={option}
+                type="button"
+                aria-pressed={craftsmanship === option}
+                onClick={() => setCraftsmanship(option)}
+                className={[
+                  "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
+                  craftsmanship === option
+                    ? CRAFTSMANSHIP_STYLE[option]
+                    : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
+                ].join(" ")}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+        <OriginSelector name="custom-melee-origin" value={origin} onChange={setOrigin} />
       </CustomFormSection>
 
       <CustomFormSection title="Combat">
-          <div className="grid grid-cols-2 gap-2">
-            <fieldset aria-required="true" className="col-span-2">
-              <RequiredFormLabel as="legend">Damage</RequiredFormLabel>
-              <div className="grid grid-cols-3 gap-2 mt-0.5">
-                <input
-                  aria-label="Damage dice"
-                  required
-                  type="text"
-                  value={damageBase}
-                  onChange={(event) => setDamageBase(sanitizeDiceInput(event.target.value))}
-                  placeholder="1d10"
-                  className={editableInputClass(true)}
-                />
-                <input
-                  aria-label="Damage bonus"
-                  required
-                  type="text"
-                  inputMode="numeric"
-                  value={damagePlus}
-                  onChange={(event) => setDamagePlus(sanitizeNonNegativeIntegerInput(event.target.value))}
-                  placeholder="Plus"
-                  className={editableInputClass(true)}
-                />
-                <PickerField
-                  id="custom-melee-damage-type"
-                  ariaLabel="Damage type"
-                  value={DAMAGE_TYPE_OPTIONS.find((o) => o.value === damageType)?.label ?? damageType}
-                  placeholder="Choose damage type"
-                  required
-                  onClick={() => setShowDamageTypePicker(true)}
-                />
-              </div>
-            </fieldset>
-
-            <div className="col-span-2">
-              <RequiredFormLabel htmlFor="custom-melee-pen">Pen</RequiredFormLabel>
+        <div className="grid grid-cols-2 gap-2">
+          <fieldset aria-required="true" className="col-span-2">
+            <RequiredFormLabel as="legend">Damage</RequiredFormLabel>
+            <div className="grid grid-cols-3 gap-2 mt-0.5">
               <input
-                id="custom-melee-pen"
+                aria-label="Damage dice"
+                required
+                type="text"
+                value={damageBase}
+                onChange={(event) => setDamageBase(sanitizeDiceInput(event.target.value))}
+                placeholder="1d10"
+                className={editableInputClass(true)}
+              />
+              <input
+                aria-label="Damage bonus"
                 required
                 type="text"
                 inputMode="numeric"
-                value={pen}
-                onChange={(event) => setPen(sanitizeNonNegativeIntegerInput(event.target.value))}
-                className={editableInputClass(true) + " mt-0.5"}
+                value={damagePlus}
+                onChange={(event) =>
+                  setDamagePlus(sanitizeNonNegativeIntegerInput(event.target.value))
+                }
+                placeholder="Plus"
+                className={editableInputClass(true)}
+              />
+              <PickerField
+                id="custom-melee-damage-type"
+                ariaLabel="Damage type"
+                value={DAMAGE_TYPE_OPTIONS.find((o) => o.value === damageType)?.label ?? damageType}
+                placeholder="Choose damage type"
+                required
+                onClick={() => setShowDamageTypePicker(true)}
               />
             </div>
+          </fieldset>
+
+          <div className="col-span-2">
+            <RequiredFormLabel htmlFor="custom-melee-pen">Pen</RequiredFormLabel>
+            <input
+              id="custom-melee-pen"
+              required
+              type="text"
+              inputMode="numeric"
+              value={pen}
+              onChange={(event) => setPen(sanitizeNonNegativeIntegerInput(event.target.value))}
+              className={editableInputClass(true) + " mt-0.5"}
+            />
           </div>
+        </div>
       </CustomFormSection>
 
       <CustomFormSection title="Details">
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <RequiredFormLabel htmlFor="custom-melee-weight">Weight</RequiredFormLabel>
-              <input
-                id="custom-melee-weight"
-                required
-                type="text"
-                inputMode="decimal"
-                value={weight}
-                onChange={(event) => setWeight(sanitizeWeightInput(event.target.value))}
-                className={editableInputClass(true) + " mt-0.5"}
-              />
-            </div>
-
-            <div>
-              <RequiredFormLabel htmlFor="custom-melee-cost">Cost</RequiredFormLabel>
-              <input
-                id="custom-melee-cost"
-                required
-                type="text"
-                inputMode="numeric"
-                value={value}
-                onChange={(event) => setValue(sanitizeMoneyInput(event.target.value))}
-                className={editableInputClass(true) + " mt-0.5"}
-              />
-            </div>
-            <PickerField
-              id="custom-melee-availability"
-              label="Availability"
-              value={availability}
-              placeholder="Choose availability"
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <RequiredFormLabel htmlFor="custom-melee-weight">Weight</RequiredFormLabel>
+            <input
+              id="custom-melee-weight"
               required
-              onClick={() => setShowAvailabilityPicker(true)}
-              className="col-span-2"
+              type="text"
+              inputMode="decimal"
+              value={weight}
+              onChange={(event) => setWeight(sanitizeWeightInput(event.target.value))}
+              className={editableInputClass(true) + " mt-0.5"}
             />
           </div>
+
+          <div>
+            <RequiredFormLabel htmlFor="custom-melee-cost">Cost</RequiredFormLabel>
+            <input
+              id="custom-melee-cost"
+              required
+              type="text"
+              inputMode="numeric"
+              value={value}
+              onChange={(event) => setValue(sanitizeMoneyInput(event.target.value))}
+              className={editableInputClass(true) + " mt-0.5"}
+            />
+          </div>
+          <PickerField
+            id="custom-melee-availability"
+            label="Availability"
+            value={availability}
+            placeholder="Choose availability"
+            required
+            onClick={() => setShowAvailabilityPicker(true)}
+            className="col-span-2"
+          />
+        </div>
       </CustomFormSection>
 
       <CustomFormSection title="Rules and Qualities">
-          <div className="grid grid-cols-2 gap-2">
-            <WeaponQualitySelector
-              selected={selectedQualities}
-              pendingQuality={qualityPicker.pendingQuality}
-              needsParameter={qualityPicker.needsParameter}
-              parameterValue={qualityPicker.parameterValue}
-              canConfirm={qualityPicker.canConfirm}
-              onParameterValueChange={qualityPicker.setParameterValue}
-              onOpenPicker={qualityPicker.openPicker}
-              onConfirmPending={qualityPicker.confirmPending}
-              onRemove={(q) => setSelectedQualities(selectedQualities.filter((s) => s !== q))}
-            />
+        <div className="grid grid-cols-2 gap-2">
+          <WeaponQualitySelector
+            selected={selectedQualities}
+            pendingQuality={qualityPicker.pendingQuality}
+            needsParameter={qualityPicker.needsParameter}
+            parameterValue={qualityPicker.parameterValue}
+            canConfirm={qualityPicker.canConfirm}
+            onParameterValueChange={qualityPicker.setParameterValue}
+            onOpenPicker={qualityPicker.openPicker}
+            onConfirmPending={qualityPicker.confirmPending}
+            onRemove={(q) => setSelectedQualities(selectedQualities.filter((s) => s !== q))}
+          />
 
-            <div className="col-span-2">
-              <label htmlFor="custom-melee-rules" className={uiFormLabel}>Rules</label>
-              <textarea
-                id="custom-melee-rules"
-                value={description}
-                onChange={(event) => setDescription(event.target.value)}
-                rows={3}
-                className={editableTextareaClass(true) + " mt-0.5"}
-              />
-            </div>
+          <div className="col-span-2">
+            <label htmlFor="custom-melee-rules" className={uiFormLabel}>
+              Rules
+            </label>
+            <textarea
+              id="custom-melee-rules"
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              rows={3}
+              className={editableTextareaClass(true) + " mt-0.5"}
+            />
           </div>
+        </div>
       </CustomFormSection>
     </CustomFormShell>
   );

@@ -2,29 +2,28 @@
 
 import { useRef, useState } from "react";
 import type { GrenadeItem } from "../../../types/Character";
-import {
-  editableInputClass,
-  editableTextareaClass,
-  uiFormLabel,
-} from "../../../ui/editableStyles";
+import { editableInputClass, editableTextareaClass, uiFormLabel } from "../../../ui/editableStyles";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
 import { formatWeightInput, sanitizeWeightInput } from "../../../ui/weightFormat";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import { CustomFormSection } from "../../../ui/CustomFormSection";
 import { CustomFormShell } from "../../../ui/CustomFormShell";
-import { OriginSelector, type CustomItemOrigin } from "../../../ui/OriginSelector";
+import { OriginSelector } from "../../../ui/OriginSelector";
+import type { CustomItemOrigin } from "../../../constants/customItems";
 import { PickerField } from "../../../ui/PickerField";
 import { RequiredFormLabel } from "../../../ui/RequiredFormLabel";
+import { STANDARD_AVAILABILITY_OPTIONS } from "../../../constants/availability";
+import {
+  sanitizeDiceInput,
+  sanitizeNonNegativeIntegerInput,
+  sanitizePositiveIntegerInput,
+} from "../../../utils/formInput";
 import {
   WeaponQualitySelector,
   useWeaponQualityPicker,
   DAMAGE_TYPE_OPTIONS,
-  CUSTOM_AVAILABILITY_OPTIONS,
   formatDamageInput,
   isValidDiceInput,
-  sanitizeDiceInput,
-  sanitizeNonNegativeIntegerInput,
-  sanitizePositiveIntegerInput,
 } from "./weaponShared";
 
 const CUSTOM_GRENADE_TYPE_OPTIONS = ["Grenade", "Mine"] as const;
@@ -32,7 +31,9 @@ const CUSTOM_GRENADE_TYPE_OPTIONS = ["Grenade", "Mine"] as const;
 function isCustomGrenadeType(
   value: string | undefined
 ): value is (typeof CUSTOM_GRENADE_TYPE_OPTIONS)[number] {
-  return CUSTOM_GRENADE_TYPE_OPTIONS.includes(value as (typeof CUSTOM_GRENADE_TYPE_OPTIONS)[number]);
+  return CUSTOM_GRENADE_TYPE_OPTIONS.includes(
+    value as (typeof CUSTOM_GRENADE_TYPE_OPTIONS)[number]
+  );
 }
 
 function parseInitialGrenadeDamage(damage: string | undefined): {
@@ -91,12 +92,17 @@ export function CustomGrenadeForm({
     initialDamage.type
   );
   const [pen, setPen] = useState(initialGrenade?.pen ?? "0");
-  const [quantity, setQuantity] = useState(initialGrenade?.quantity ? String(initialGrenade.quantity) : "");
+  const [quantity, setQuantity] = useState(
+    initialGrenade?.quantity ? String(initialGrenade.quantity) : ""
+  );
   const [weight, setWeight] = useState(initialGrenade?.weight ?? "");
   const [value, setValue] = useState(initialGrenade?.value ?? "");
   const [selectedQualities, setSelectedQualities] = useState<string[]>(
     initialGrenade?.specialRules && initialGrenade.specialRules !== "—"
-      ? initialGrenade.specialRules.split(",").map((rule) => rule.trim()).filter(Boolean)
+      ? initialGrenade.specialRules
+          .split(",")
+          .map((rule) => rule.trim())
+          .filter(Boolean)
       : []
   );
   const [description, setDescription] = useState(initialGrenade?.description ?? "");
@@ -188,7 +194,7 @@ export function CustomGrenadeForm({
     return (
       <OptionPickerScreen
         title="Availability"
-        options={CUSTOM_AVAILABILITY_OPTIONS}
+        options={STANDARD_AVAILABILITY_OPTIONS}
         selected={availability}
         onSelect={(value) => {
           setAvailability(value);
@@ -209,116 +215,179 @@ export function CustomGrenadeForm({
       onSubmit={addGrenade}
     >
       <CustomFormSection title="Identity">
-          <div className="grid grid-cols-2 gap-2">
-            <div className="col-span-2">
-              <RequiredFormLabel htmlFor="custom-grenade-name">Name</RequiredFormLabel>
-              <input id="custom-grenade-name" required value={name} onChange={(event) => setName(event.target.value)} className={editableInputClass(true) + " mt-0.5"} />
-            </div>
-            <PickerField
-                id="custom-grenade-type"
-                label="Type"
-                value={type}
-                placeholder="Choose type"
-                required
-                onClick={() => setShowTypePicker(true)}
-              />
-            <div>
-              <RequiredFormLabel htmlFor="custom-grenade-quantity">Quantity</RequiredFormLabel>
-              <input id="custom-grenade-quantity" required type="text" inputMode="numeric" value={quantity} onChange={(event) => setQuantity(sanitizePositiveIntegerInput(event.target.value))} placeholder="1+" className={editableInputClass(true) + " mt-0.5"} />
-            </div>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="col-span-2">
+            <RequiredFormLabel htmlFor="custom-grenade-name">Name</RequiredFormLabel>
+            <input
+              id="custom-grenade-name"
+              required
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              className={editableInputClass(true) + " mt-0.5"}
+            />
           </div>
+          <PickerField
+            id="custom-grenade-type"
+            label="Type"
+            value={type}
+            placeholder="Choose type"
+            required
+            onClick={() => setShowTypePicker(true)}
+          />
+          <div>
+            <RequiredFormLabel htmlFor="custom-grenade-quantity">Quantity</RequiredFormLabel>
+            <input
+              id="custom-grenade-quantity"
+              required
+              type="text"
+              inputMode="numeric"
+              value={quantity}
+              onChange={(event) => setQuantity(sanitizePositiveIntegerInput(event.target.value))}
+              placeholder="1+"
+              className={editableInputClass(true) + " mt-0.5"}
+            />
+          </div>
+        </div>
       </CustomFormSection>
 
       <CustomFormSection title="Origin">
-          <OriginSelector
-            name="custom-grenade-origin"
-            value={origin}
-            onChange={setOrigin}
-            hideLabel
-          />
+        <OriginSelector
+          name="custom-grenade-origin"
+          value={origin}
+          onChange={setOrigin}
+          hideLabel
+        />
       </CustomFormSection>
 
       <CustomFormSection title="Combat">
-          <div className="grid grid-cols-3 gap-1.5" role="group" aria-label="Damage mode">
-            {(["damage", "special", "none"] as const).map((option) => (
-              <button
-                key={option}
-                type="button"
-                aria-pressed={damageMode === option}
-                onClick={() => setDamageMode(option)}
-                className={`rounded border px-2 py-1 text-xs lg:text-sm capitalize transition ${
-                  damageMode === option
-                    ? "border-slate-400 bg-slate-700/70 text-slate-100"
-                    : "border-slate-600 bg-slate-900 text-slate-400 hover:border-slate-500 hover:text-slate-300"
-                }`}
-              >
-                {option === "none" ? "No damage" : option}
-              </button>
-            ))}
-          </div>
-          {damageMode === "damage" && (
-            <fieldset aria-required="true">
-              <RequiredFormLabel as="legend">Damage</RequiredFormLabel>
-              <div className="grid grid-cols-3 gap-2 mt-0.5">
-                <input aria-label="Damage dice" required value={damageBase} onChange={(event) => setDamageBase(sanitizeDiceInput(event.target.value))} className={editableInputClass(true)} />
-                <input aria-label="Damage bonus" required type="text" inputMode="numeric" value={damagePlus} onChange={(event) => setDamagePlus(sanitizeNonNegativeIntegerInput(event.target.value))} className={editableInputClass(true)} />
-                <PickerField
-                  id="custom-grenade-damage-type"
-                  ariaLabel="Damage type"
-                  value={DAMAGE_TYPE_OPTIONS.find((o) => o.value === damageType)?.label ?? damageType}
-                  placeholder="Choose damage type"
-                  required
-                  onClick={() => setShowDamageTypePicker(true)}
-                />
-              </div>
-            </fieldset>
-          )}
-          <div>
-            <RequiredFormLabel htmlFor="custom-grenade-pen">Pen</RequiredFormLabel>
-            <input id="custom-grenade-pen" required type="text" inputMode="numeric" value={pen} onChange={(event) => setPen(sanitizeNonNegativeIntegerInput(event.target.value))} className={editableInputClass(true) + " mt-0.5"} />
-          </div>
+        <div className="grid grid-cols-3 gap-1.5" role="group" aria-label="Damage mode">
+          {(["damage", "special", "none"] as const).map((option) => (
+            <button
+              key={option}
+              type="button"
+              aria-pressed={damageMode === option}
+              onClick={() => setDamageMode(option)}
+              className={`rounded border px-2 py-1 text-xs lg:text-sm capitalize transition ${
+                damageMode === option
+                  ? "border-slate-400 bg-slate-700/70 text-slate-100"
+                  : "border-slate-600 bg-slate-900 text-slate-400 hover:border-slate-500 hover:text-slate-300"
+              }`}
+            >
+              {option === "none" ? "No damage" : option}
+            </button>
+          ))}
+        </div>
+        {damageMode === "damage" && (
+          <fieldset aria-required="true">
+            <RequiredFormLabel as="legend">Damage</RequiredFormLabel>
+            <div className="grid grid-cols-3 gap-2 mt-0.5">
+              <input
+                aria-label="Damage dice"
+                required
+                value={damageBase}
+                onChange={(event) => setDamageBase(sanitizeDiceInput(event.target.value))}
+                className={editableInputClass(true)}
+              />
+              <input
+                aria-label="Damage bonus"
+                required
+                type="text"
+                inputMode="numeric"
+                value={damagePlus}
+                onChange={(event) =>
+                  setDamagePlus(sanitizeNonNegativeIntegerInput(event.target.value))
+                }
+                className={editableInputClass(true)}
+              />
+              <PickerField
+                id="custom-grenade-damage-type"
+                ariaLabel="Damage type"
+                value={DAMAGE_TYPE_OPTIONS.find((o) => o.value === damageType)?.label ?? damageType}
+                placeholder="Choose damage type"
+                required
+                onClick={() => setShowDamageTypePicker(true)}
+              />
+            </div>
+          </fieldset>
+        )}
+        <div>
+          <RequiredFormLabel htmlFor="custom-grenade-pen">Pen</RequiredFormLabel>
+          <input
+            id="custom-grenade-pen"
+            required
+            type="text"
+            inputMode="numeric"
+            value={pen}
+            onChange={(event) => setPen(sanitizeNonNegativeIntegerInput(event.target.value))}
+            className={editableInputClass(true) + " mt-0.5"}
+          />
+        </div>
       </CustomFormSection>
 
       <CustomFormSection title="Details">
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <RequiredFormLabel htmlFor="custom-grenade-weight">Weight</RequiredFormLabel>
-              <input id="custom-grenade-weight" required type="text" inputMode="decimal" value={weight} onChange={(event) => setWeight(sanitizeWeightInput(event.target.value))} className={editableInputClass(true) + " mt-0.5"} />
-            </div>
-            <div>
-              <RequiredFormLabel htmlFor="custom-grenade-cost">Cost</RequiredFormLabel>
-              <input id="custom-grenade-cost" required type="text" inputMode="numeric" value={value} onChange={(event) => setValue(sanitizeMoneyInput(event.target.value))} className={editableInputClass(true) + " mt-0.5"} />
-            </div>
-            <PickerField
-                id="custom-grenade-availability"
-                label="Availability"
-                value={availability}
-                placeholder="Choose availability"
-                required
-                onClick={() => setShowAvailabilityPicker(true)}
-                className="col-span-2"
-              />
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <RequiredFormLabel htmlFor="custom-grenade-weight">Weight</RequiredFormLabel>
+            <input
+              id="custom-grenade-weight"
+              required
+              type="text"
+              inputMode="decimal"
+              value={weight}
+              onChange={(event) => setWeight(sanitizeWeightInput(event.target.value))}
+              className={editableInputClass(true) + " mt-0.5"}
+            />
           </div>
+          <div>
+            <RequiredFormLabel htmlFor="custom-grenade-cost">Cost</RequiredFormLabel>
+            <input
+              id="custom-grenade-cost"
+              required
+              type="text"
+              inputMode="numeric"
+              value={value}
+              onChange={(event) => setValue(sanitizeMoneyInput(event.target.value))}
+              className={editableInputClass(true) + " mt-0.5"}
+            />
+          </div>
+          <PickerField
+            id="custom-grenade-availability"
+            label="Availability"
+            value={availability}
+            placeholder="Choose availability"
+            required
+            onClick={() => setShowAvailabilityPicker(true)}
+            className="col-span-2"
+          />
+        </div>
       </CustomFormSection>
 
       <CustomFormSection title="Rules and Qualities">
-          <div className="grid grid-cols-2 gap-2">
-            <WeaponQualitySelector
-              selected={selectedQualities}
-              pendingQuality={qualityPicker.pendingQuality}
-              needsParameter={qualityPicker.needsParameter}
-              parameterValue={qualityPicker.parameterValue}
-              canConfirm={qualityPicker.canConfirm}
-              onParameterValueChange={qualityPicker.setParameterValue}
-              onOpenPicker={qualityPicker.openPicker}
-              onConfirmPending={qualityPicker.confirmPending}
-              onRemove={(q) => setSelectedQualities(selectedQualities.filter((s) => s !== q))}
+        <div className="grid grid-cols-2 gap-2">
+          <WeaponQualitySelector
+            selected={selectedQualities}
+            pendingQuality={qualityPicker.pendingQuality}
+            needsParameter={qualityPicker.needsParameter}
+            parameterValue={qualityPicker.parameterValue}
+            canConfirm={qualityPicker.canConfirm}
+            onParameterValueChange={qualityPicker.setParameterValue}
+            onOpenPicker={qualityPicker.openPicker}
+            onConfirmPending={qualityPicker.confirmPending}
+            onRemove={(q) => setSelectedQualities(selectedQualities.filter((s) => s !== q))}
+          />
+          <div className="col-span-2">
+            <label htmlFor="custom-grenade-rules" className={uiFormLabel}>
+              Rules
+            </label>
+            <textarea
+              id="custom-grenade-rules"
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              rows={3}
+              className={editableTextareaClass(true) + " mt-0.5"}
             />
-            <div className="col-span-2">
-              <label htmlFor="custom-grenade-rules" className={uiFormLabel}>Rules</label>
-              <textarea id="custom-grenade-rules" value={description} onChange={(event) => setDescription(event.target.value)} rows={3} className={editableTextareaClass(true) + " mt-0.5"} />
-            </div>
           </div>
+        </div>
       </CustomFormSection>
     </CustomFormShell>
   );

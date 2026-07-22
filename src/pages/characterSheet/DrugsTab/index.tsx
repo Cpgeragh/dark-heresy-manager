@@ -9,6 +9,8 @@ import { DrugRow } from "./DrugRow";
 import { CustomDrugForm } from "./CustomDrugForm";
 import { Button } from "../../../ui/Button";
 import { SectionHeader } from "../../../ui/SectionHeader";
+import { ErrorState } from "../../../ui/ErrorState";
+import { LoadingState } from "../../../ui/LoadingState";
 import { uiTextBody, uiTextPlaceholder } from "../../../ui/editableStyles";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
 import { useCustomItemLibraryActions } from "../../../hooks/useCustomItemLibraryActions";
@@ -57,7 +59,11 @@ export function DrugsTab({
     getBusyAction,
   } = useCustomItemLibraryActions<"drug">({ campaignId, userId, itemLabel: "drug" });
 
-  const { items: campaignCustomDrugItems, loading: drugsLoading } = useCampaignCustomItems({
+  const {
+    items: campaignCustomDrugItems,
+    loading: drugsLoading,
+    error: drugsError,
+  } = useCampaignCustomItems({
     campaignId,
     category: "drug",
     mode: isDM ? "admin" : "picker",
@@ -254,7 +260,13 @@ export function DrugsTab({
     );
   };
 
-  if (drugsLoading) return null;
+  if (drugsError) {
+    return <ErrorState>Unable to load custom drug items.</ErrorState>;
+  }
+
+  if (drugsLoading) {
+    return <LoadingState>Loading custom drug items…</LoadingState>;
+  }
 
   return (
     <div className="space-y-6">

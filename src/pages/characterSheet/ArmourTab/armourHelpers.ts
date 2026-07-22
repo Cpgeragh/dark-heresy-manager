@@ -1,25 +1,14 @@
 // src/pages/characterSheet/ArmourTab/armourHelpers.ts
 // Constants and pure helper functions for the Armour tab.
 
-import type { ArmourCraftsmanship, ArmourLocationKey, CyberneticItem, TalentEntry, WornArmourPiece } from "../../../types/Character";
-
-export const LOCATION_LABELS: Record<ArmourLocationKey, string> = {
-  head: "Head",
-  body: "Body",
-  rightArm: "Right Arm",
-  leftArm: "Left Arm",
-  rightLeg: "Right Leg",
-  leftLeg: "Left Leg",
-};
-
-export const LOCATION_ORDER: ArmourLocationKey[] = [
-  "head",
-  "body",
-  "rightArm",
-  "leftArm",
-  "rightLeg",
-  "leftLeg",
-];
+import type {
+  ArmourCraftsmanship,
+  ArmourLocationKey,
+  CyberneticItem,
+  TalentEntry,
+  WornArmourPiece,
+} from "../../../types/Character";
+import { ARMOUR_LOCATION_LABELS } from "../../../constants/locations";
 
 /** AP contributed by one piece to one location */
 export function pieceApAt(piece: WornArmourPiece, loc: ArmourLocationKey): number {
@@ -51,7 +40,7 @@ export function wornApAt(pieces: WornArmourPiece[], loc: ArmourLocationKey): num
 /** Human-readable list of locations a piece covers */
 export function locationLabel(locations: ArmourLocationKey[]): string {
   if (locations.length === 6) return "All";
-  return locations.map((l) => LOCATION_LABELS[l]).join(", ");
+  return locations.map((l) => ARMOUR_LOCATION_LABELS[l]).join(", ");
 }
 
 /** Rules text for a worn-armour craftsmanship grade */

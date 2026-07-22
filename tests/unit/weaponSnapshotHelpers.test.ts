@@ -100,8 +100,8 @@ describe("stripWeaponKind / stripArmourKind", () => {
     const weaponData = { weaponKind: "ranged" as const, name: "Lasgun" };
     expect(stripWeaponKind(weaponData)).toEqual({ name: "Lasgun" });
 
-    const armourData = { armourKind: "shield" as const, name: "Riot Shield" };
-    expect(stripArmourKind(armourData)).toEqual({ name: "Riot Shield" });
+    const armourData = { armourKind: "shield" as const, name: "Riot Shield", ap: 4 };
+    expect(stripArmourKind(armourData)).toEqual({ name: "Riot Shield", ap: 4 });
   });
 });
 

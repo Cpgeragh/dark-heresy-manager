@@ -18,12 +18,9 @@ import {
 import { CHARACTERISTIC_LABELS, type CharacteristicModifier } from "./characteristicModifiers";
 import { MutationInfoContent } from "./CorruptionReferenceModals";
 import { MAJOR_MUTATIONS, MINOR_MUTATIONS, type MutationRef } from "./mutationsReference";
+import { createLocalId } from "../../utils/createLocalId";
 
 export type MutationTier = "minor" | "major";
-
-function createMutationId(): string {
-  return globalThis.crypto?.randomUUID?.() ?? `mutation-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-}
 
 function rollModifiersFor(ref: MutationRef): CharacteristicModifier[] {
   return (ref.modifiers ?? []).filter((modifier) => modifier.kind === "roll1d10");
@@ -61,7 +58,7 @@ export function MutationPicker({
 
   function addReferenceMutation(ref: MutationRef) {
     onAdd({
-      id: createMutationId(),
+      id: createLocalId("mutation"),
       referenceId: ref.id,
       roll: ref.roll,
       name: ref.name,
@@ -83,10 +80,16 @@ export function MutationPicker({
         footer={
           <div className="space-y-2">
             {!canAddCustom && (
-              <p className="text-xs lg:text-sm text-slate-300"><span className="text-red-500">*</span> Required</p>
+              <p className="text-xs lg:text-sm text-slate-300">
+                <span className="text-red-500">*</span> Required
+              </p>
             )}
             <div className="flex gap-2">
-              <button type="button" onClick={() => setCustomMode(false)} className={uiPickerBackButton}>
+              <button
+                type="button"
+                onClick={() => setCustomMode(false)}
+                className={uiPickerBackButton}
+              >
                 Back
               </button>
               <Button
@@ -95,7 +98,7 @@ export function MutationPicker({
                 onClick={() => {
                   if (!canAddCustom) return;
                   onAdd({
-                    id: createMutationId(),
+                    id: createLocalId("mutation"),
                     name: customName.trim(),
                     effect: customDetails.trim() || undefined,
                     custom: true,
@@ -164,13 +167,16 @@ export function MutationPicker({
             disabled={!canAdd}
             onClick={() => {
               onAdd({
-                id: createMutationId(),
+                id: createLocalId("mutation"),
                 referenceId: selected.id,
                 roll: selected.roll,
                 name: selected.name,
                 effect: selected.effect,
                 rolledModifiers: Object.fromEntries(
-                  rollModifiers.map((modifier) => [modifier.characteristic, Number(rolls[modifier.characteristic])])
+                  rollModifiers.map((modifier) => [
+                    modifier.characteristic,
+                    Number(rolls[modifier.characteristic]),
+                  ])
                 ),
               });
               setSelected(null);
@@ -184,14 +190,17 @@ export function MutationPicker({
           {rollModifiers.map((modifier) => (
             <div key={modifier.characteristic}>
               <label className={uiFormLabel}>
-                {CHARACTERISTIC_LABELS[modifier.characteristic]} roll (1d10) <span className="text-red-500">*</span>
+                {CHARACTERISTIC_LABELS[modifier.characteristic]} roll (1d10){" "}
+                <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
                 min={1}
                 max={10}
                 value={rolls[modifier.characteristic] ?? ""}
-                onChange={(event) => setRolls((prev) => ({ ...prev, [modifier.characteristic]: event.target.value }))}
+                onChange={(event) =>
+                  setRolls((prev) => ({ ...prev, [modifier.characteristic]: event.target.value }))
+                }
                 placeholder="Enter rolled value..."
                 className={editableInputClass(true) + " mt-0.5"}
               />
@@ -236,12 +245,18 @@ export function MutationPicker({
         >
           <span className={`${uiItemName} group-hover:text-white`}>{ref.name}</span>
           <div className="mt-1 flex flex-wrap gap-1.5">
-            <Chip size="sm" className={colourAmberFaint}>{ref.roll}</Chip>
+            <Chip size="sm" className={colourAmberFaint}>
+              {ref.roll}
+            </Chip>
           </div>
           <div className="mt-1 flex items-center gap-1.5">
             <span className={uiTextLabel}>Rules</span>
             <span onClick={(event) => event.stopPropagation()} className={uiInfoModalWrapper}>
-              <InfoModal title={ref.name} content={<MutationInfoContent mutation={ref} />} as="span" />
+              <InfoModal
+                title={ref.name}
+                content={<MutationInfoContent mutation={ref} />}
+                as="span"
+              />
             </span>
           </div>
         </PickerRow>

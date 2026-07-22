@@ -1,10 +1,10 @@
 // src/hooks/useCharacterData.ts
 
-import { useEffect, useState } from "react";
-import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
+import { collection, orderBy, query } from "firebase/firestore";
 import { db } from "../firebase";
 import { characterDocRef } from "../firebase/converters";
 import type { CharacterDocument, ClaimLogDocument } from "../types/Firestore";
+import { useDocumentSubscription, useQuerySubscription } from "./useFirestoreSubscription";
 
 // Type aliases for clarity
 type Character = CharacterDocument;
@@ -20,6 +20,7 @@ interface UseCharacterDataResult {
   character: Character | null;
   claimLog: ClaimLog[];
   loading: boolean;
+  error: Error | null;
 }
 
 export function useCharacterData({
@@ -27,77 +28,40 @@ export function useCharacterData({
   characterId,
   isDM,
 }: UseCharacterDataArgs): UseCharacterDataResult {
-  const [character, setCharacter] = useState<Character | null>(null);
-  const [claimLog, setClaimLog] = useState<ClaimLog[]>([]);
-  const [loading, setLoading] = useState(true);
+  const activePath = campaignId && characterId;
+  const {
+    data: character,
+    loading: characterLoading,
+    error: characterError,
+  } = useDocumentSubscription<Character, Character>(
+    activePath ? characterDocRef(campaignId, characterId) : null,
+    (snapshot) => (snapshot.exists() ? snapshot.data() : null)
+  );
 
-  // -------------------------------------------------------------
-  // Live character subscription
-  // -------------------------------------------------------------
-  useEffect(() => {
-    if (!campaignId || !characterId) {
-      setCharacter(null);
-      setLoading(false);
-      return;
-    }
+  const claimLogActive = activePath && isDM;
+  const {
+    data: claimLog,
+    loading: claimLogLoading,
+    error: claimLogError,
+  } = useQuerySubscription(
+    claimLogActive
+      ? query(
+          collection(db, "campaigns", campaignId, "characters", characterId, "claimLog"),
+          orderBy("timestamp", "desc")
+        )
+      : null,
+    claimLogActive ? `character-claim-log:${campaignId}:${characterId}` : null,
+    (snapshot) =>
+      snapshot.docs.map((claimLogDocument) => ({
+        id: claimLogDocument.id,
+        ...(claimLogDocument.data() as Omit<ClaimLog, "id">),
+      }))
+  );
 
-    setLoading(true);
-
-    // Use converter for type safety and consistent data transformation
-    const ref = characterDocRef(campaignId, characterId);
-
-    const unsub = onSnapshot(
-      ref,
-      (snap) => {
-        if (!snap.exists()) {
-          setCharacter(null);
-          setLoading(false);
-          return;
-        }
-
-        // Converter handles data transformation (adds id, handles types)
-        const data = snap.data();
-        setCharacter(data);
-        setLoading(false);
-      },
-      (err) => {
-        console.error("Character snapshot error:", err);
-        setLoading(false);
-      }
-    );
-
-    return () => unsub();
-  }, [campaignId, characterId]);
-
-  // -------------------------------------------------------------
-  // Claim log subscription (DM only)
-  // -------------------------------------------------------------
-  useEffect(() => {
-    if (!campaignId || !characterId || !isDM) {
-      setClaimLog([]);
-      return;
-    }
-
-    const logsRef = collection(db, "campaigns", campaignId, "characters", characterId, "claimLog");
-
-    const logsQuery = query(logsRef, orderBy("timestamp", "desc"));
-
-    const unsub = onSnapshot(
-      logsQuery,
-      (snap) => {
-        const list: ClaimLog[] = snap.docs.map((d) => {
-          const data = d.data() as Omit<ClaimLog, "id">;
-          return { id: d.id, ...data };
-        });
-        setClaimLog(list);
-      },
-      (err) => {
-        console.error("Claim log snapshot error:", err);
-      }
-    );
-
-    return () => unsub();
-  }, [campaignId, characterId, isDM]);
-
-  return { character, claimLog, loading };
+  return {
+    character,
+    claimLog,
+    loading: characterLoading || claimLogLoading,
+    error: characterError ?? claimLogError,
+  };
 }

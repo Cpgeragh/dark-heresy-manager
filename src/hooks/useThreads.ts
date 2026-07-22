@@ -1,38 +1,23 @@
 // src/hooks/useThreads.ts
 // Real-time listener for all thread summaries in a campaign (DM inbox).
 
-import { useEffect, useState } from "react";
-import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
+import { collection, orderBy, query } from "firebase/firestore";
 import { db } from "../firebase";
 import type { ThreadSummary } from "../types/Firestore";
+import { useQuerySubscription } from "./useFirestoreSubscription";
 
 export function useThreads(campaignId: string | null) {
-  const [threads, setThreads] = useState<ThreadSummary[]>([]);
-  const [loading, setLoading] = useState(true);
+  const {
+    data: threads,
+    loading,
+    error,
+  } = useQuerySubscription(
+    campaignId
+      ? query(collection(db, "campaigns", campaignId, "threads"), orderBy("lastTimestamp", "desc"))
+      : null,
+    campaignId ? `threads:${campaignId}` : null,
+    (snapshot) => snapshot.docs.map((threadDocument) => threadDocument.data() as ThreadSummary)
+  );
 
-  useEffect(() => {
-    if (!campaignId) {
-      setLoading(false);
-      return;
-    }
-
-    const unsubscribe = onSnapshot(
-      query(
-        collection(db, "campaigns", campaignId, "threads"),
-        orderBy("lastTimestamp", "desc")
-      ),
-      (snap) => {
-        setThreads(snap.docs.map((d) => d.data() as ThreadSummary));
-        setLoading(false);
-      },
-      (err) => {
-        console.error("useThreads error:", err);
-        setLoading(false);
-      }
-    );
-
-    return () => unsubscribe();
-  }, [campaignId]);
-
-  return { threads, loading };
+  return { threads, loading, error };
 }

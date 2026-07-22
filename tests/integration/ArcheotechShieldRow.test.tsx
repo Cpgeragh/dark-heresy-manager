@@ -11,7 +11,7 @@ const baseItem: ArcheotechItem = {
   id: "a1",
   name: "Archeotech Buckler",
   ap: 4,
-  locations: ["armLeft", "body"],
+  locations: ["leftArm", "body"],
   weight: "3 kg",
   value: "—",
   availability: "Very Rare",

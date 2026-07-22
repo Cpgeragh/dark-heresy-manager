@@ -7,7 +7,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import React from "react";
-import { CampaignsProvider, useCampaignsContext } from "../../src/context/CampaignsContext";
+import { CampaignsProvider } from "../../src/context/CampaignsContext";
+import { useCampaignsContext } from "../../src/context/useCampaignsContext";
 import type { CampaignWithId } from "../../src/types/Firestore";
 
 // ── Mocks ──────────────────────────────────────────────────────────────────
@@ -196,7 +197,8 @@ describe("CampaignsProvider — error handling", () => {
 
     act(() => { capturedDmOnError!(new Error("permission-denied")); });
 
-    expect(result.current.error).toMatch(/failed to load/i);
+    expect(result.current.error).toBeInstanceOf(Error);
+    expect(result.current.error?.message).toBe("permission-denied");
     expect(result.current.dmCampaigns).toEqual([]);
   });
 
@@ -207,7 +209,8 @@ describe("CampaignsProvider — error handling", () => {
 
     act(() => { capturedPlayerOnError!(new Error("permission-denied")); });
 
-    expect(result.current.error).toMatch(/failed to load/i);
+    expect(result.current.error).toBeInstanceOf(Error);
+    expect(result.current.error?.message).toBe("permission-denied");
     expect(result.current.playerCampaigns).toEqual([]);
   });
 });

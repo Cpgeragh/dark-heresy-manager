@@ -57,6 +57,8 @@ import { exportCharacterJson } from "../utils/exportCharacter";
 import { normaliseSkills, skillsNeedNormalisation } from "../utils/skillUtils";
 import { SectionDrawer } from "../components/SectionDrawer";
 import { useUserProfile } from "../hooks/useUserProfile";
+import { ErrorState } from "../ui/ErrorState";
+import { LoadingState } from "../ui/LoadingState";
 
 // ================================================================
 // COMPONENT
@@ -69,6 +71,7 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
     path,
     character,
     characterLoading,
+    characterError,
     allowedToEdit,
     isOwner,
     canPlayerRelease,
@@ -105,7 +108,9 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
   // The owner's player name is derived live from their public profile so it
   // stays in sync with their account first name (falls back to the legacy
   // header.playerName for characters claimed before profiles existed).
-  const { firstName: ownerFirstName } = useUserProfile(character?.userId);
+  const { firstName: ownerFirstName, error: ownerProfileError } = useUserProfile(
+    character?.userId
+  );
   const ownerName = ownerFirstName ?? character?.header.playerName?.trim() ?? null;
   const normalisedSkills = useMemo(
     () => (character ? normaliseSkills(character.skills) : []),
@@ -322,7 +327,15 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
   }
 
   if (characterLoading || isDMLoading) {
-    return <div className="text-slate-300 text-center py-10">Loading character…</div>;
+    return <LoadingState className="text-center py-10">Loading character…</LoadingState>;
+  }
+
+  if (characterError) {
+    return (
+      <ErrorState className="text-center py-10">
+        Unable to load this character. Please refresh the page.
+      </ErrorState>
+    );
   }
 
   if (!character) {
@@ -368,6 +381,12 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
 
   return (
     <div>
+      {ownerProfileError && (
+        <p className="mb-4 text-sm lg:text-base text-amber-300">
+          Unable to refresh the owner&apos;s profile name; showing the stored name.
+        </p>
+      )}
+
       {/* DM NAV / OVERRIDE BAR */}
       {isDM && (
         <div className="flex items-center justify-between mb-4 p-2 rounded border border-slate-700 bg-slate-900/60">

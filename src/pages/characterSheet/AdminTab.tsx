@@ -8,6 +8,8 @@ import { uiSection, readOnlyBadgeClass } from "../../ui/editableStyles";
 import { useXpProposals } from "../../hooks/useXpProposals";
 import { approveXpProposal, rejectXpProposal } from "../../services/xpService";
 import { useToast } from "../../components/Toast";
+import { ErrorState } from "../../ui/ErrorState";
+import { LoadingState } from "../../ui/LoadingState";
 
 interface AdminTabProps {
   character: Character;
@@ -34,7 +36,10 @@ export function AdminTab({
   characterId,
 }: AdminTabProps) {
   const toast = useToast();
-  const { proposals } = useXpProposals(campaignId, characterId);
+  const { proposals, loading: proposalsLoading, error: proposalsError } = useXpProposals(
+    campaignId,
+    characterId
+  );
   const pendingProposals = proposals.filter((p) => p.status === "pending");
 
   const handleApprove = useCallback(
@@ -139,7 +144,11 @@ export function AdminTab({
       <section className={uiSection}>
         <h3 className="font-semibold mb-2">Pending XP Proposals</h3>
 
-        {pendingProposals.length === 0 ? (
+        {proposalsError ? (
+          <ErrorState>Unable to load XP proposals.</ErrorState>
+        ) : proposalsLoading ? (
+          <LoadingState>Loading XP proposals…</LoadingState>
+        ) : pendingProposals.length === 0 ? (
           <p className="text-sm lg:text-base text-slate-400">No pending proposals.</p>
         ) : (
           <ul className="space-y-2">

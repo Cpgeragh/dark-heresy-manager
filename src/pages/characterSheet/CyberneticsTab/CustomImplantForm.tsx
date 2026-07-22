@@ -6,19 +6,17 @@ import type {
   CyberneticCraftsmanship,
   CyberneticItem,
 } from "../../../types/Character";
-import {
-  editableInputClass,
-  editableTextareaClass,
-  uiFormLabel,
-} from "../../../ui/editableStyles";
+import { editableInputClass, editableTextareaClass, uiFormLabel } from "../../../ui/editableStyles";
 import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
 import { CRAFTSMANSHIP_STYLE, CYBERNETIC_CRAFTSMANSHIP_OPTIONS } from "../../../ui/craftsmanship";
 import { CustomFormSection } from "../../../ui/CustomFormSection";
 import { CustomFormShell } from "../../../ui/CustomFormShell";
-import { OriginSelector, type CustomItemOrigin } from "../../../ui/OriginSelector";
+import { OriginSelector } from "../../../ui/OriginSelector";
+import type { CustomItemOrigin } from "../../../constants/customItems";
 import { PickerField } from "../../../ui/PickerField";
 import { RequiredFormLabel } from "../../../ui/RequiredFormLabel";
+import { EXTENDED_AVAILABILITY_OPTIONS } from "../../../constants/availability";
 
 interface Props {
   initialItem?: Partial<CyberneticItem>;
@@ -28,22 +26,6 @@ interface Props {
   onAdd: (item: CyberneticItem) => void | Promise<void>;
   onCancel: () => void;
 }
-
-const CUSTOM_IMPLANT_AVAILABILITY_OPTIONS = [
-  "Abundant",
-  "Plentiful",
-  "Common",
-  "Average",
-  "Uncommon",
-  "Scarce",
-  "Rare",
-  "Very Rare",
-  "Extremely Rare",
-  "Near Unique",
-  "Unique",
-  "Issued Only",
-  "Adeptus Mechanicus Only",
-] as const;
 
 const LOCATION_OPTIONS: Array<{ label: string; value?: ArmourLocationKey[] }> = [
   { label: "Not specified" },
@@ -116,9 +98,12 @@ export function CustomImplantForm({
     return (
       <OptionPickerScreen
         title="Availability"
-        options={[...CUSTOM_IMPLANT_AVAILABILITY_OPTIONS]}
+        options={EXTENDED_AVAILABILITY_OPTIONS}
         selected={availability}
-        onSelect={(value) => { setAvailability(value); setShowAvailabilityPicker(false); }}
+        onSelect={(value) => {
+          setAvailability(value);
+          setShowAvailabilityPicker(false);
+        }}
         onClose={() => setShowAvailabilityPicker(false)}
       />
     );
@@ -128,9 +113,15 @@ export function CustomImplantForm({
     return (
       <OptionPickerScreen
         title="Installation"
-        options={LOCATION_OPTIONS.map((option, index) => ({ value: String(index), label: option.label }))}
+        options={LOCATION_OPTIONS.map((option, index) => ({
+          value: String(index),
+          label: option.label,
+        }))}
         selected={locationIndex}
-        onSelect={(value) => { setLocationIndex(value); setShowLocationPicker(false); }}
+        onSelect={(value) => {
+          setLocationIndex(value);
+          setShowLocationPicker(false);
+        }}
         onClose={() => setShowLocationPicker(false)}
       />
     );
@@ -230,7 +221,9 @@ export function CustomImplantForm({
       <CustomFormSection title="Rules">
         <div className="grid grid-cols-2 gap-2">
           <div className="col-span-2">
-            <label htmlFor="custom-cybernetic-rules" className={uiFormLabel}>Rules</label>
+            <label htmlFor="custom-cybernetic-rules" className={uiFormLabel}>
+              Rules
+            </label>
             <textarea
               id="custom-cybernetic-rules"
               value={notes}
@@ -250,9 +243,10 @@ function findLocationOptionIndex(location?: ArmourLocationKey[]) {
   if (!location?.length) return 0;
   return Math.max(
     0,
-    LOCATION_OPTIONS.findIndex((option) =>
-      option.value?.length === location.length &&
-      option.value.every((value, index) => value === location[index])
+    LOCATION_OPTIONS.findIndex(
+      (option) =>
+        option.value?.length === location.length &&
+        option.value.every((value, index) => value === location[index])
     )
   );
 }

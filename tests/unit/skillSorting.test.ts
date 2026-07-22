@@ -17,9 +17,6 @@ const makeSkill = (
   advanced: false,
   source: "CR",
   total,
-  half: Math.floor(total / 2),
-  full: total,
-  opposed: total,
 });
 
 const skills: SkillWithComputed[] = [
