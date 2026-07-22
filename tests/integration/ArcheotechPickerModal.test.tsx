@@ -26,7 +26,14 @@ function renderPicker(editable = true) {
   const onSelect = vi.fn();
   const onClose = vi.fn();
   const onCustom = vi.fn();
-  render(<ArcheotechPickerModal editable={editable} onSelect={onSelect} onClose={onClose} onCustom={onCustom} />);
+  render(
+    <ArcheotechPickerModal
+      editable={editable}
+      onSelect={onSelect}
+      onClose={onClose}
+      onCustom={onCustom}
+    />
+  );
   return { onSelect, onClose, onCustom };
 }
 
@@ -56,5 +63,27 @@ describe("ArcheotechPickerModal", () => {
     await user.click(row(GM_ITEM_NAME));
     expect(screen.getByText(/has no standard cost/)).toBeInTheDocument();
     expect(onSelect).not.toHaveBeenCalled();
+  });
+
+  it("requires and submits both assigned cost and rarity", async () => {
+    const user = userEvent.setup();
+    const { onSelect } = renderPicker();
+
+    await user.click(row(GM_ITEM_NAME));
+
+    const addButton = screen.getByRole("button", { name: "Add to Inventory" });
+    await user.type(screen.getByLabelText(/Cost \(Thrones\)/), "5000");
+    expect(addButton).toBeDisabled();
+
+    await user.click(screen.getByLabelText(/Rarity/));
+    await user.click(screen.getByRole("button", { name: "Rare" }));
+    expect(screen.getByLabelText(/Rarity/)).toHaveTextContent("Rare");
+
+    await user.click(screen.getByRole("button", { name: "Add to Inventory" }));
+    expect(onSelect).toHaveBeenCalledWith(
+      expect.objectContaining({ name: GM_ITEM_NAME }),
+      "5,000 Thrones",
+      "Rare"
+    );
   });
 });

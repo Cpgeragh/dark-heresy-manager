@@ -10,6 +10,7 @@ import { ImplantPicker } from "../../src/pages/characterSheet/CyberneticsTab/Imp
 // fixed (non-variable) cost, so clicking it goes straight to the
 // craftsmanship step with no location sub-step in between.
 const IMPLANT_NAME = "Auger Arrays";
+const VARIABLE_LOCATION_IMPLANT_NAME = "Karrikian Lock-Arm";
 
 function row(name: string): HTMLButtonElement {
   const match = screen
@@ -54,5 +55,33 @@ describe("ImplantPicker", () => {
     renderPicker(false);
     await user.click(row(IMPLANT_NAME));
     expect(screen.queryByText("Select craftsmanship quality:")).not.toBeInTheDocument();
+  });
+
+  it("carries assigned metadata through location and craftsmanship", async () => {
+    const user = userEvent.setup();
+    const { onSelect } = renderPicker();
+
+    await user.click(row(VARIABLE_LOCATION_IMPLANT_NAME));
+
+    const continueButton = screen.getByRole("button", { name: "Continue" });
+    await user.type(screen.getByLabelText(/Cost \(Thrones\)/), "2500");
+    expect(continueButton).toBeDisabled();
+
+    await user.click(screen.getByLabelText(/Rarity/));
+    await user.click(screen.getByRole("button", { name: "Near Unique" }));
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+
+    expect(screen.getByText("Select installation side:")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Left Arm" }));
+    expect(screen.getByText("Select craftsmanship quality:")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Install" }));
+
+    expect(onSelect).toHaveBeenCalledWith(
+      expect.objectContaining({ name: VARIABLE_LOCATION_IMPLANT_NAME }),
+      "Common",
+      ["leftArm"],
+      "2,500 Thrones",
+      "Near Unique"
+    );
   });
 });

@@ -7,8 +7,6 @@ import {
   type CyberneticRef,
 } from "../../../data/reference/cyberneticsReference";
 import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../../ui/PickerModal";
-import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
-import { ArrowRight } from "../../../ui/PickerArrows";
 import { Button } from "../../../ui/Button";
 import { ModalHeader } from "../../../ui/ModalHeader";
 import { ModalShell } from "../../../ui/ModalShell";
@@ -16,18 +14,16 @@ import { InfoModal } from "../../../components/InfoModal";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import {
-  editableInputClass,
   uiTextBody,
   uiTextLabel,
   uiTextMuted,
-  uiFormLabel,
   uiInfoModalWrapper,
   uiItemName,
   uiTextGMNote,
 } from "../../../ui/editableStyles";
 import { uiPickerBackButton } from "../../../ui/buttonStyles";
 import { StatusBadge } from "../../../ui/StatusBadge";
-import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
+import { formatMoneyInput } from "../../../ui/moneyFormat";
 import { CRAFTSMANSHIP_STYLE } from "../../../ui/craftsmanship";
 import { ARMOUR_LOCATION_LABELS } from "../../../constants/locations";
 import {
@@ -36,8 +32,9 @@ import {
   defaultCraftsmanship,
 } from "./cyberneticsHelpers";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
-import { EXTENDED_AVAILABILITY_OPTIONS } from "../../../constants/availability";
 import { isVariableMeta } from "../../../utils/customItemMeta";
+import { useAssignedItemMeta } from "../../../hooks/useAssignedItemMeta";
+import { AssignedItemMetaScreen } from "../../../ui/AssignedItemMetaScreen";
 
 interface Props {
   editable?: boolean;
@@ -67,11 +64,20 @@ export function ImplantPicker({
   const [pendingCost, setPendingCost] = useState<CyberneticRef | null>(null);
   const [location, setLocation] = useState<ArmourLocationKey[] | null>(null);
   const [craftsmanship, setCraftsmanship] = useState<CyberneticCraftsmanship>("Common");
-  const [gmCost, setGmCost] = useState("");
-  const [gmRarity, setGmRarity] = useState("");
   const [assignedValue, setAssignedValue] = useState<string | undefined>();
   const [assignedRarity, setAssignedRarity] = useState<string | undefined>();
-  const [showRarityPicker, setShowRarityPicker] = useState(false);
+  const pendingNeedsRarity = pendingCost ? isVariableMeta(pendingCost.availability) : false;
+  const {
+    gmCost,
+    setGmCost,
+    gmRarity,
+    setGmRarity,
+    showRarityPicker,
+    setShowRarityPicker,
+    costValid,
+    canConfirm: canConfirmCost,
+    resetAssignedItemMeta,
+  } = useAssignedItemMeta({ requiresRarity: pendingNeedsRarity });
 
   const normalizedQuery = query.toLowerCase();
   const filtered = CYBERNETICS_REFERENCE.filter((r) =>
@@ -87,27 +93,20 @@ export function ImplantPicker({
     setPendingCost(null);
     setLocation(null);
     setCraftsmanship("Common");
-    setGmCost("");
-    setGmRarity("");
     setAssignedValue(undefined);
     setAssignedRarity(undefined);
-    setShowRarityPicker(false);
+    resetAssignedItemMeta();
   };
   const selectImplant = (ref: CyberneticRef) => {
     if (!editable) return;
     if (isVariableMeta(ref.value) || isVariableMeta(ref.availability)) {
       setPendingCost(ref);
-      setGmCost("");
-      setGmRarity("");
+      resetAssignedItemMeta();
       return;
     }
     setSelected(ref);
     setCraftsmanship(defaultCraftsmanship(ref));
   };
-  const costNum = Number(gmCost);
-  const costValid = gmCost.trim() !== "" && Number.isInteger(costNum) && costNum >= 0;
-  const pendingNeedsRarity = pendingCost ? isVariableMeta(pendingCost.availability) : false;
-  const canConfirmCost = costValid && (!pendingNeedsRarity || gmRarity !== "");
   const confirmCost = () => {
     if (!pendingCost || !canConfirmCost) return;
     setAssignedValue(formatMoneyInput(gmCost));
@@ -136,84 +135,27 @@ export function ImplantPicker({
   );
 
   if (pendingCost) {
-    if (showRarityPicker) {
-      return (
-        <OptionPickerScreen
-          title="Rarity"
-          options={EXTENDED_AVAILABILITY_OPTIONS}
-          selected={gmRarity}
-          onSelect={(value) => {
-            setGmRarity(value);
-            setShowRarityPicker(false);
-          }}
-          onClose={() => setShowRarityPicker(false)}
-        />
-      );
-    }
     return (
-      <ModalShell
-        ariaLabel="Assigned Cost"
-        onClose={resetPicker}
-        className="max-w-md lg:max-w-lg overflow-y-auto"
-      >
-        <ModalHeader title="Assigned Cost" onClose={resetPicker} />
-
-        <PickerBody>
-          <p className={`text-sm lg:text-base ${uiTextBody}`}>
-            <span className="font-medium text-slate-200">{pendingCost.name}</span> has no listed
-            cost or availability. Enter the values assigned for this implant.
-          </p>
-
-          <div className="space-y-1">
-            <label className={uiFormLabel}>
-              Cost (Thrones) <span className="text-red-400">*</span>
-            </label>
-            <input
-              type="text"
-              inputMode="numeric"
-              value={gmCost}
-              onChange={(e) => setGmCost(sanitizeMoneyInput(e.target.value))}
-              placeholder="e.g. 5000"
-              className={editableInputClass(true)}
-            />
-            {gmCost.trim() !== "" && !costValid && (
-              <p className="text-xs lg:text-sm text-red-400">
-                Must be a whole number of 0 or more.
-              </p>
-            )}
-          </div>
-
-          {pendingNeedsRarity && (
-            <div className="space-y-1">
-              <label className={uiFormLabel}>
-                Rarity <span className="text-red-400">*</span>
-              </label>
-              <button
-                type="button"
-                onClick={() => setShowRarityPicker(true)}
-                className={
-                  editableInputClass(true) +
-                  " appearance-none text-left flex items-center justify-between"
-                }
-              >
-                <span className={gmRarity ? "" : "text-slate-500"}>
-                  {gmRarity || "— Select availability —"}
-                </span>
-                <ArrowRight />
-              </button>
-            </div>
-          )}
-        </PickerBody>
-
-        <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700 flex gap-2">
-          <button type="button" onClick={resetPicker} className={uiPickerBackButton}>
-            Back
-          </button>
-          <Button className="flex-1" onClick={confirmCost} disabled={!canConfirmCost}>
-            Continue
-          </Button>
-        </div>
-      </ModalShell>
+      <AssignedItemMetaScreen
+        title="Assigned Cost"
+        itemName={pendingCost.name}
+        explanation="has no listed cost or availability. Enter the values assigned for this implant."
+        gmCost={gmCost}
+        setGmCost={setGmCost}
+        costValid={costValid}
+        costPlaceholder="e.g. 5000"
+        requiresRarity={pendingNeedsRarity}
+        gmRarity={gmRarity}
+        setGmRarity={setGmRarity}
+        showRarityPicker={showRarityPicker}
+        setShowRarityPicker={setShowRarityPicker}
+        idPrefix="cybernetic-assigned-meta"
+        confirmLabel="Continue"
+        canConfirm={canConfirmCost}
+        onBack={resetPicker}
+        onConfirm={confirmCost}
+        maxWidth="max-w-md lg:max-w-lg"
+      />
     );
   }
 

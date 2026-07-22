@@ -15,16 +15,13 @@ import {
   uiItemName,
   uiTextLabel,
 } from "../../ui/editableStyles";
-import { CHARACTERISTIC_LABELS, type CharacteristicModifier } from "./characteristicModifiers";
 import { MutationInfoContent } from "./CorruptionReferenceModals";
 import { MAJOR_MUTATIONS, MINOR_MUTATIONS, type MutationRef } from "./mutationsReference";
 import { createLocalId } from "../../utils/createLocalId";
+import { RollModifierFields } from "./RollModifierFields";
+import { areRollModifierValuesValid, getRoll1d10Modifiers } from "./rollModifierValues";
 
 export type MutationTier = "minor" | "major";
-
-function rollModifiersFor(ref: MutationRef): CharacteristicModifier[] {
-  return (ref.modifiers ?? []).filter((modifier) => modifier.kind === "roll1d10");
-}
 
 export function MutationPicker({
   tier,
@@ -145,11 +142,8 @@ export function MutationPicker({
   }
 
   if (selected) {
-    const rollModifiers = rollModifiersFor(selected);
-    const canAdd = rollModifiers.every((modifier) => {
-      const parsed = Number(rolls[modifier.characteristic]);
-      return Number.isInteger(parsed) && parsed >= 1 && parsed <= 10;
-    });
+    const rollModifiers = getRoll1d10Modifiers(selected.modifiers);
+    const canAdd = areRollModifierValuesValid(rollModifiers, rolls);
 
     return (
       <PickerModal
@@ -187,25 +181,14 @@ export function MutationPicker({
         }
       >
         <PickerBody>
-          {rollModifiers.map((modifier) => (
-            <div key={modifier.characteristic}>
-              <label className={uiFormLabel}>
-                {CHARACTERISTIC_LABELS[modifier.characteristic]} roll (1d10){" "}
-                <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="number"
-                min={1}
-                max={10}
-                value={rolls[modifier.characteristic] ?? ""}
-                onChange={(event) =>
-                  setRolls((prev) => ({ ...prev, [modifier.characteristic]: event.target.value }))
-                }
-                placeholder="Enter rolled value..."
-                className={editableInputClass(true) + " mt-0.5"}
-              />
-            </div>
-          ))}
+          <RollModifierFields
+            modifiers={rollModifiers}
+            rolls={rolls}
+            onRollChange={(characteristic, value) =>
+              setRolls((previous) => ({ ...previous, [characteristic]: value }))
+            }
+            idPrefix="mutation-roll"
+          />
         </PickerBody>
       </PickerModal>
     );
@@ -235,7 +218,7 @@ export function MutationPicker({
         <PickerRow
           key={ref.id}
           onClick={() => {
-            if (rollModifiersFor(ref).length === 0) {
+            if (getRoll1d10Modifiers(ref.modifiers).length === 0) {
               addReferenceMutation(ref);
             } else {
               setRolls({});

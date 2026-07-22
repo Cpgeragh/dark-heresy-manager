@@ -2,8 +2,9 @@ import { useState } from "react";
 import { Button } from "../../ui/Button";
 import { PickerBody, PickerModal } from "../../ui/PickerModal";
 import { ArrowLeft } from "../../ui/PickerArrows";
-import { editableInputClass, uiFormLabel } from "../../ui/editableStyles";
-import { CHARACTERISTIC_LABELS, type CharacteristicModifier } from "./characteristicModifiers";
+import type { CharacteristicModifier } from "./characteristicModifiers";
+import { RollModifierFields } from "./RollModifierFields";
+import { areRollModifierValuesValid, getRoll1d10Modifiers } from "./rollModifierValues";
 
 export function RollEditor({
   title,
@@ -18,7 +19,7 @@ export function RollEditor({
   onSave: (rolledModifiers: Record<string, number>) => void;
   onCancel: () => void;
 }) {
-  const rollModifiers = modifiers.filter((modifier) => modifier.kind === "roll1d10");
+  const rollModifiers = getRoll1d10Modifiers(modifiers);
   const [rolls, setRolls] = useState<Record<string, string>>(() =>
     Object.fromEntries(
       rollModifiers.map((modifier) => [
@@ -28,10 +29,7 @@ export function RollEditor({
     )
   );
 
-  const canSave = rollModifiers.every((modifier) => {
-    const parsed = Number(rolls[modifier.characteristic]);
-    return Number.isInteger(parsed) && parsed >= 1 && parsed <= 10;
-  });
+  const canSave = areRollModifierValuesValid(rollModifiers, rolls);
 
   return (
     <PickerModal
@@ -50,7 +48,10 @@ export function RollEditor({
           onClick={() =>
             onSave(
               Object.fromEntries(
-                rollModifiers.map((modifier) => [modifier.characteristic, Number(rolls[modifier.characteristic])])
+                rollModifiers.map((modifier) => [
+                  modifier.characteristic,
+                  Number(rolls[modifier.characteristic]),
+                ])
               )
             )
           }
@@ -60,22 +61,14 @@ export function RollEditor({
       }
     >
       <PickerBody>
-        {rollModifiers.map((modifier) => (
-          <div key={modifier.characteristic}>
-            <label className={uiFormLabel}>
-              {CHARACTERISTIC_LABELS[modifier.characteristic]} roll (1d10) <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="number"
-              min={1}
-              max={10}
-              value={rolls[modifier.characteristic] ?? ""}
-              onChange={(event) => setRolls((prev) => ({ ...prev, [modifier.characteristic]: event.target.value }))}
-              placeholder="Enter rolled value..."
-              className={editableInputClass(true) + " mt-0.5"}
-            />
-          </div>
-        ))}
+        <RollModifierFields
+          modifiers={rollModifiers}
+          rolls={rolls}
+          onRollChange={(characteristic, value) =>
+            setRolls((previous) => ({ ...previous, [characteristic]: value }))
+          }
+          idPrefix="roll-editor"
+        />
       </PickerBody>
     </PickerModal>
   );

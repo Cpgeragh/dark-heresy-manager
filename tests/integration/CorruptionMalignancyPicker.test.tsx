@@ -8,7 +8,9 @@ import { CorruptionMalignancyPicker } from "../../src/features/corruption/Corrup
 function setup() {
   const onAdd = vi.fn();
   const onClose = vi.fn();
-  render(<CorruptionMalignancyPicker existingReferenceIds={new Set()} onAdd={onAdd} onClose={onClose} />);
+  render(
+    <CorruptionMalignancyPicker existingReferenceIds={new Set()} onAdd={onAdd} onClose={onClose} />
+  );
   return { onAdd, onClose };
 }
 
@@ -55,7 +57,11 @@ describe("CorruptionMalignancyPicker roll-capture sub-screen", () => {
 
   it("excludes a malignancy already on the character from the list", () => {
     render(
-      <CorruptionMalignancyPicker existingReferenceIds={new Set(["witch-mark"])} onAdd={vi.fn()} onClose={vi.fn()} />
+      <CorruptionMalignancyPicker
+        existingReferenceIds={new Set(["witch-mark"])}
+        onAdd={vi.fn()}
+        onClose={vi.fn()}
+      />
     );
 
     expect(screen.queryByText("Witch-mark", { selector: "span" })).not.toBeInTheDocument();
@@ -75,7 +81,11 @@ describe("CorruptionMalignancyPicker roll-capture sub-screen", () => {
 
     await user.click(addButton);
     expect(onAdd).toHaveBeenCalledWith(
-      expect.objectContaining({ name: "Weeping Eyes", effect: "Eyes that weep blood.", custom: true })
+      expect.objectContaining({
+        name: "Weeping Eyes",
+        effect: "Eyes that weep blood.",
+        custom: true,
+      })
     );
   });
 });

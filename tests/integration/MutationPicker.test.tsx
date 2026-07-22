@@ -8,7 +8,9 @@ import { MutationPicker } from "../../src/features/corruption/MutationPicker";
 function setup(tier: "minor" | "major" = "minor") {
   const onAdd = vi.fn();
   const onClose = vi.fn();
-  render(<MutationPicker tier={tier} existingReferenceIds={new Set()} onAdd={onAdd} onClose={onClose} />);
+  render(
+    <MutationPicker tier={tier} existingReferenceIds={new Set()} onAdd={onAdd} onClose={onClose} />
+  );
   return { onAdd, onClose };
 }
 
@@ -97,7 +99,12 @@ describe("MutationPicker roll-capture sub-screen", () => {
 
   it("excludes a mutation already on the character from the list", () => {
     render(
-      <MutationPicker tier="minor" existingReferenceIds={new Set(["tough-hide"])} onAdd={vi.fn()} onClose={vi.fn()} />
+      <MutationPicker
+        tier="minor"
+        existingReferenceIds={new Set(["tough-hide"])}
+        onAdd={vi.fn()}
+        onClose={vi.fn()}
+      />
     );
 
     expect(screen.queryByText("Tough Hide", { selector: "span" })).not.toBeInTheDocument();

@@ -4,24 +4,19 @@ import { useState } from "react";
 import { InfoModal } from "../../../components/InfoModal";
 import { GEAR_REFERENCE, type GearRef } from "../../../data/reference/gearReference";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
-import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../../ui/PickerModal";
-import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
-import { ArrowLeft, ArrowRight } from "../../../ui/PickerArrows";
-import { Button } from "../../../ui/Button";
+import { PickerCustomAction, PickerModal, PickerRow } from "../../../ui/PickerModal";
 import {
-  editableInputClass,
   uiTextBody,
-  uiFormLabel,
   uiInfoModalWrapper,
   uiItemName,
   uiTextGMNote,
 } from "../../../ui/editableStyles";
-import { uiPickerBackButton } from "../../../ui/buttonStyles";
-import { formatMoneyInput, sanitizeMoneyInput } from "../../../ui/moneyFormat";
+import { formatMoneyInput } from "../../../ui/moneyFormat";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { StatusBadge } from "../../../ui/StatusBadge";
-import { EXTENDED_AVAILABILITY_OPTIONS } from "../../../constants/availability";
 import { isVariableMeta } from "../../../utils/customItemMeta";
+import { useAssignedItemMeta } from "../../../hooks/useAssignedItemMeta";
+import { AssignedItemMetaScreen } from "../../../ui/AssignedItemMetaScreen";
 
 interface Props {
   editable?: boolean;
@@ -42,9 +37,6 @@ export function GearPicker({
 }: Props) {
   const [query, setQuery] = useState("");
   const [pending, setPending] = useState<GearRef | null>(null);
-  const [gmCost, setGmCost] = useState("");
-  const [gmRarity, setGmRarity] = useState("");
-  const [showRarityPicker, setShowRarityPicker] = useState(false);
   const normalizedQuery = query.toLowerCase();
   const filtered = GEAR_REFERENCE.filter((r) =>
     r.name.toLowerCase().includes(normalizedQuery)
@@ -54,20 +46,32 @@ export function GearPicker({
     .filter((item) => item.name.toLowerCase().includes(normalizedQuery))
     .sort((a, b) => a.name.localeCompare(b.name));
   const pendingNeedsRarity = pending ? isVariableMeta(pending.availability) : false;
-  const costNum = Number(gmCost);
-  const costValid = gmCost.trim() !== "" && Number.isInteger(costNum) && costNum >= 0;
-  const canConfirm = costValid && (!pendingNeedsRarity || gmRarity !== "");
+  const {
+    gmCost,
+    setGmCost,
+    gmRarity,
+    setGmRarity,
+    showRarityPicker,
+    setShowRarityPicker,
+    costValid,
+    canConfirm,
+    resetAssignedItemMeta,
+  } = useAssignedItemMeta({ requiresRarity: pendingNeedsRarity });
   const isEmpty = !pending && filtered.length === 0 && filteredCustom.length === 0;
 
   function handleSelect(ref: GearRef) {
     if (!editable) return;
     if (isVariableMeta(ref.value)) {
       setPending(ref);
-      setGmCost("");
-      setGmRarity("");
+      resetAssignedItemMeta();
       return;
     }
     onSelect(ref);
+  }
+
+  function handleAssignedBack() {
+    setPending(null);
+    resetAssignedItemMeta();
   }
 
   function handleConfirm() {
@@ -75,176 +79,120 @@ export function GearPicker({
     onSelect(pending, formatMoneyInput(gmCost), pendingNeedsRarity ? gmRarity : undefined);
   }
 
-  if (showRarityPicker) {
+  if (pending) {
     return (
-      <OptionPickerScreen
-        title="Rarity"
-        options={EXTENDED_AVAILABILITY_OPTIONS}
-        selected={gmRarity}
-        onSelect={(value) => {
-          setGmRarity(value);
-          setShowRarityPicker(false);
-        }}
-        onClose={() => setShowRarityPicker(false)}
+      <AssignedItemMetaScreen
+        title="Assigned Cost"
+        itemName={pending.name}
+        explanation="has a variable or unlisted cost. Enter the value assigned for this item."
+        gmCost={gmCost}
+        setGmCost={setGmCost}
+        costValid={costValid}
+        costPlaceholder="e.g. 500"
+        requiresRarity={pendingNeedsRarity}
+        gmRarity={gmRarity}
+        setGmRarity={setGmRarity}
+        showRarityPicker={showRarityPicker}
+        setShowRarityPicker={setShowRarityPicker}
+        idPrefix="gear-assigned-meta"
+        confirmLabel="Add to Inventory"
+        canConfirm={canConfirm}
+        onBack={handleAssignedBack}
+        onConfirm={handleConfirm}
       />
     );
   }
 
   return (
     <PickerModal
-      title={pending ? "Assigned Cost" : editable ? "Add Item" : "View Items"}
+      title={editable ? "Add Item" : "View Items"}
       placeholder="Search gear…"
       query={query}
       onQueryChange={setQuery}
-      onClose={pending ? () => setPending(null) : onClose}
-      closeLabel={pending ? <ArrowLeft /> : undefined}
-      closeAriaLabel={pending ? "Back" : "Close"}
-      hideSearch={!!pending}
+      onClose={onClose}
       isEmpty={isEmpty}
       footer={
-        !pending && editable ? (
+        editable ? (
           <PickerCustomAction onClick={onCustom}>+ Add custom item</PickerCustomAction>
         ) : undefined
       }
     >
-      {pending ? (
-        <PickerBody>
-          <p className={`text-sm lg:text-base ${uiTextBody}`}>
-            <span className="font-medium text-slate-200">{pending.name}</span> has a variable or
-            unlisted cost. Enter the value assigned for this item.
-          </p>
-
-          <div className="space-y-1">
-            <label className={uiFormLabel}>
-              Cost (Thrones) <span className="text-red-400">*</span>
-            </label>
-            <input
-              type="text"
-              inputMode="numeric"
-              value={gmCost}
-              onChange={(e) => setGmCost(sanitizeMoneyInput(e.target.value))}
-              placeholder="e.g. 500"
-              className={editableInputClass(true)}
-            />
-            {gmCost.trim() !== "" && !costValid && (
-              <p className="text-xs lg:text-sm text-red-400">
-                Must be a whole number of 0 or more.
-              </p>
+      {filteredCustom.map((item) => (
+        <PickerRow
+          key={`custom-${item.id}`}
+          interactive={editable}
+          onClick={() => onSelectCustomItem?.(item)}
+        >
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}>
+              {item.name}
+            </span>
+            <StatusBadge status={item.status} />
+            {item.data.description && (
+              <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
+                <InfoModal
+                  title={item.name}
+                  content={
+                    <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
+                      {item.data.description}
+                    </p>
+                  }
+                  as="span"
+                />
+              </span>
             )}
           </div>
-
-          {pendingNeedsRarity && (
-            <div className="space-y-1">
-              <label className={uiFormLabel}>
-                Rarity <span className="text-red-400">*</span>
-              </label>
-              <button
-                type="button"
-                onClick={() => setShowRarityPicker(true)}
-                className={
-                  editableInputClass(true) +
-                  " appearance-none text-left flex items-center justify-between"
-                }
-              >
-                <span className={gmRarity ? "" : "text-slate-500"}>
-                  {gmRarity || "— Select availability —"}
-                </span>
-                <ArrowRight />
-              </button>
-            </div>
-          )}
-
-          <div className="flex gap-2 pt-1">
-            <button type="button" onClick={() => setPending(null)} className={uiPickerBackButton}>
-              Back
-            </button>
-            <Button className="flex-1" onClick={handleConfirm} disabled={!canConfirm}>
-              Add to Inventory
-            </Button>
+          <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs lg:text-sm">
+            <ItemMetaChips
+              bare
+              weight={item.data.weight}
+              value={item.data.value}
+              availability={item.data.availability}
+              source={item.data.source}
+            />
           </div>
-        </PickerBody>
-      ) : (
-        <>
-          {filteredCustom.map((item) => (
-            <PickerRow
-              key={`custom-${item.id}`}
-              interactive={editable}
-              onClick={() => onSelectCustomItem?.(item)}
-            >
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span
-                  className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}
-                >
-                  {item.name}
-                </span>
-                <StatusBadge status={item.status} />
-                {item.data.description && (
-                  <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
-                    <InfoModal
-                      title={item.name}
-                      content={
-                        <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                          {item.data.description}
-                        </p>
-                      }
-                      as="span"
-                    />
-                  </span>
-                )}
-              </div>
-              <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs lg:text-sm">
-                <ItemMetaChips
-                  bare
-                  weight={item.data.weight}
-                  value={item.data.value}
-                  availability={item.data.availability}
-                  source={item.data.source}
-                />
-              </div>
-            </PickerRow>
-          ))}
+        </PickerRow>
+      ))}
 
-          {filtered.map((ref) => (
-            <PickerRow key={ref.id} interactive={editable} onClick={() => handleSelect(ref)}>
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span
-                  className={`text-sm lg:text-base font-medium text-slate-200 truncate ${editable ? "group-hover:text-white" : ""}`}
-                >
-                  {ref.name}
-                </span>
-                {ref.description && (
-                  <span
-                    className="inline-flex items-center -translate-y-[1.4px]"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <InfoModal
-                      title={ref.name}
-                      content={
-                        <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                          {ref.description}
-                        </p>
-                      }
-                      as="span"
-                    />
-                  </span>
-                )}
-              </div>
-              <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs lg:text-sm">
-                <ItemMetaChips
-                  bare
-                  weight={ref.weight}
-                  value={isVariableMeta(ref.value) ? undefined : ref.value}
-                  availability={isVariableMeta(ref.availability) ? undefined : ref.availability}
-                  source={ref.source}
+      {filtered.map((ref) => (
+        <PickerRow key={ref.id} interactive={editable} onClick={() => handleSelect(ref)}>
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span
+              className={`text-sm lg:text-base font-medium text-slate-200 truncate ${editable ? "group-hover:text-white" : ""}`}
+            >
+              {ref.name}
+            </span>
+            {ref.description && (
+              <span
+                className="inline-flex items-center -translate-y-[1.4px]"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <InfoModal
+                  title={ref.name}
+                  content={
+                    <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
+                      {ref.description}
+                    </p>
+                  }
+                  as="span"
                 />
-                {isVariableMeta(ref.value) && (
-                  <span className={uiTextGMNote}>Cost assigned on add</span>
-                )}
-              </div>
-            </PickerRow>
-          ))}
-        </>
-      )}
+              </span>
+            )}
+          </div>
+          <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs lg:text-sm">
+            <ItemMetaChips
+              bare
+              weight={ref.weight}
+              value={isVariableMeta(ref.value) ? undefined : ref.value}
+              availability={isVariableMeta(ref.availability) ? undefined : ref.availability}
+              source={ref.source}
+            />
+            {isVariableMeta(ref.value) && (
+              <span className={uiTextGMNote}>Cost assigned on add</span>
+            )}
+          </div>
+        </PickerRow>
+      ))}
     </PickerModal>
   );
 }
