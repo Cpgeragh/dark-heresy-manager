@@ -1,8 +1,6 @@
 // src/pages/characterSheet/weapons/weaponShared.tsx
-// Shared display primitives: StatChip, DamageTypeChip,
-// UpgradePicker, and related pure helpers.
+// Shared weapon display components.
 
-import { useMemo, useState } from "react";
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
 import { Button } from "../../../ui/Button";
 import { Chip } from "../../../ui/Chip";
@@ -12,7 +10,7 @@ import type { WeaponUpgradeRef } from "../../../data/reference/weaponUpgradeRefe
 import { PickerModal, PickerRow } from "../../../ui/PickerModal";
 import { ArrowRight } from "../../../ui/PickerArrows";
 import { formatWeightForDisplay } from "../../../ui/weightFormat";
-import { TrashIcon } from "../../../ui/TrashIcon";
+import { RemoveButton } from "../../../ui/RemoveButton";
 import { CloseIcon } from "../../../ui/CloseButton";
 import {
   uiTextBody,
@@ -22,76 +20,10 @@ import {
   uiInfoModalWrapper,
   uiItemName,
 } from "../../../ui/editableStyles";
-import { uiIconRemoveButton, uiDismissButton } from "../../../ui/buttonStyles";
+import { uiDismissButton } from "../../../ui/buttonStyles";
 import { colourEmerald, colourEmeraldPlain, colourMeta } from "../../../ui/colourTokens";
 import { sanitizePositiveIntegerInput } from "../../../utils/formInput";
-
-export const WEAPON_QUALITY_OPTIONS = Object.keys(WEAPON_SPECIAL_RULES).sort((a, b) =>
-  a.localeCompare(b)
-);
-
-export const DAMAGE_TYPE_OPTIONS = [
-  { label: "Impact", value: "I" },
-  { label: "Rending", value: "R" },
-  { label: "Energy", value: "E" },
-  { label: "Explosive", value: "X" },
-] as const;
-
-const PARAMETERIZED_WEAPON_QUALITIES = new Set(["Blast", "Felling", "Haywire", "Proven"]);
-
-function baseQualityName(quality: string): string {
-  return quality.replace(/\s*\([^)]*\)\s*$/, "").trim();
-}
-
-export function isValidDiceInput(value: string): boolean {
-  const match = value.match(/^(\d+)d(\d+)$/i);
-  if (!match) return false;
-  return Number(match[1]) > 0 && Number(match[2]) > 0;
-}
-
-export function formatDamageInput(baseDice: string, plusValue: string, type: string): string {
-  const plus = Number(plusValue || "0");
-  const plusPart = plus > 0 ? `+${plus}` : "";
-  return `${baseDice}${plusPart} ${type}`.trim();
-}
-
-export function useWeaponQualityPicker(selected: string[], onChange: (next: string[]) => void) {
-  const [showPicker, setShowPicker] = useState(false);
-  const [pendingQuality, setPendingQuality] = useState<string | null>(null);
-  const [parameterValue, setParameterValue] = useState("");
-  const available = useMemo(() => {
-    const selectedBaseNames = new Set(selected.map(baseQualityName));
-    return WEAPON_QUALITY_OPTIONS.filter((quality) => !selectedBaseNames.has(quality));
-  }, [selected]);
-  const needsParameter = pendingQuality
-    ? PARAMETERIZED_WEAPON_QUALITIES.has(pendingQuality)
-    : false;
-  const canConfirm = Boolean(pendingQuality) && (!needsParameter || parameterValue !== "");
-
-  return {
-    showPicker,
-    available,
-    pendingQuality,
-    needsParameter,
-    parameterValue,
-    canConfirm,
-    setParameterValue,
-    openPicker: () => setShowPicker(true),
-    closePicker: () => setShowPicker(false),
-    pickQuality: (quality: string) => {
-      setPendingQuality(quality);
-      setParameterValue("");
-      setShowPicker(false);
-    },
-    confirmPending: () => {
-      if (!pendingQuality || !canConfirm) return;
-      const nextQuality = needsParameter ? `${pendingQuality} (${parameterValue})` : pendingQuality;
-      onChange([...selected, nextQuality]);
-      setPendingQuality(null);
-      setParameterValue("");
-    },
-  };
-}
+import { parseDamageType } from "./weaponSharedUtils";
 
 export function WeaponQualitySelector({
   selected,
@@ -168,50 +100,7 @@ export function WeaponQualitySelector({
 
 // ─── Stat Chip ────────────────────────────────────────────────────────────────
 
-export function StatChip({
-  label,
-  value,
-  size = "md",
-}: {
-  label: string;
-  value: string | number;
-  size?: "sm" | "md";
-}) {
-  if (size === "sm") {
-    return (
-      <div className="flex flex-col items-center bg-slate-800/60 rounded border border-slate-700 px-1.5 py-0.5 min-w-[32px] lg:min-w-[38px]">
-        <span className={uiTextLabel}>{label}</span>
-        <span className="text-xs font-code text-slate-200 mt-0.5">{value || "—"}</span>
-      </div>
-    );
-  }
-  return (
-    <div className="flex flex-col items-center bg-slate-800/60 rounded border border-slate-700 px-2 py-0.5 min-w-[36px] lg:min-w-[44px]">
-      <span className={uiTextLabel}>{label}</span>
-      <span className="text-xs lg:text-sm font-code text-slate-200 mt-0.5">{value || "—"}</span>
-    </div>
-  );
-}
-
 // ─── Damage Type Helpers ──────────────────────────────────────────────────────
-
-export function parseDamageType(
-  damage: string
-): { letter: string; label: string; colour: string } | null {
-  const letter = damage.trim().slice(-1).toUpperCase();
-  switch (letter) {
-    case "I":
-      return { letter: "I", label: "Impact", colour: "text-blue-400" };
-    case "R":
-      return { letter: "R", label: "Rending", colour: "text-red-400" };
-    case "E":
-      return { letter: "E", label: "Energy", colour: "text-orange-400" };
-    case "X":
-      return { letter: "X", label: "Explosive", colour: "text-yellow-400" };
-    default:
-      return null;
-  }
-}
 
 export function DamageTypeChip({ damage, size = "md" }: { damage: string; size?: "sm" | "md" }) {
   const damageType = parseDamageType(damage);
@@ -232,17 +121,6 @@ export function DamageTypeChip({ damage, size = "md" }: { damage: string; size?:
       </span>
     </div>
   );
-}
-
-export function computeMeleeTotalDamage(damage: string, sb: number): string {
-  const base = damage.replace(/\s*[IREX]$/i, "").trim();
-  const match = base.match(/^(\d*d\d+)([+-]\d+)?$/i);
-  if (!match) return base;
-  const dice = match[1];
-  const mod = match[2] ? parseInt(match[2], 10) : 0;
-  const total = mod + sb;
-  if (total === 0) return dice;
-  return `${dice}${total > 0 ? "+" : ""}${total}`;
 }
 
 // ─── Equip Toggle ─────────────────────────────────────────────────────────────
@@ -268,22 +146,15 @@ export function EquipToggle({
     ) : null;
   }
   return (
-    <span
-      role="button"
-      tabIndex={0}
-      aria-disabled={disabled && !equipped}
+    <button
+      type="button"
+      disabled={disabled && !equipped}
       onClick={(e) => {
         e.stopPropagation();
         if (!disabled || equipped) onChange();
       }}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          if (!disabled || equipped) onChange();
-        }
-      }}
       title={equipped ? "Click to stow" : disabled ? "Slots full" : "Click to equip"}
-      className={`flex items-center gap-1 shrink-0 group transition ${
+      className={`relative z-10 pointer-events-auto flex items-center gap-1 shrink-0 group transition ${
         disabled && !equipped ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
       }`}
     >
@@ -316,7 +187,7 @@ export function EquipToggle({
       >
         {equipped ? labels.equipped : labels.unequipped}
       </span>
-    </span>
+    </button>
   );
 }
 
@@ -370,14 +241,10 @@ export function UpgradeCard({
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs lg:text-sm font-medium text-slate-300">{upgrade.name}</span>
         {editable && (
-          <button
-            type="button"
+          <RemoveButton
             onClick={() => onRemove(upgrade.id)}
-            className={uiIconRemoveButton}
-            aria-label={`Remove ${upgrade.name}`}
-          >
-            <TrashIcon className="w-4 h-4" />
-          </button>
+            label={`Remove ${upgrade.name}`}
+          />
         )}
       </div>
       <div className="flex flex-wrap gap-1 mt-1">

@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useMemo } from "react";
 import type { Characteristics, CorruptionBlock, SkillEntry } from "../../../types/Character";
-import type { CharField } from "../../../utils/characterFactory";
+import type { CharField } from "../../../types/Character";
 import { useSkillComputation } from "../../../hooks/useSkillComputation";
 import { useSwipeableTabs } from "../../../hooks/useSwipeableTabs";
 import { getCharacteristicModifierTotals } from "../../../features/corruption/characteristicModifierTotals";

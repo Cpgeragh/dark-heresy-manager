@@ -123,7 +123,7 @@ export async function reclaimIdentity(uid: string, code: string): Promise<"dm" |
     await deleteDoc(reclaimRef);
   }
 
-  // Return legacy role value for backwards compatibility during transition
+  // Recovery entries created before roles were stored default to player.
   return role ?? "player";
 }
 

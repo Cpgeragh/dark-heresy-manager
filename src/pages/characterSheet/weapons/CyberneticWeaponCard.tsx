@@ -10,12 +10,12 @@ import { Chip } from "../../../ui/Chip";
 import { uiTextLabel, uiTextMuted, uiTextPlaceholder, uiCardTitle, uiInfoModalWrapper } from "../../../ui/editableStyles";
 import { uiExpandButton } from "../../../ui/buttonStyles";
 import { colourPink, colourOrange } from "../../../ui/colourTokens";
+import { StatChip } from "../../../ui/StatChip";
 import {
-  StatChip,
   DamageTypeChip,
   SpecialRulesContent,
-  computeMeleeTotalDamage,
 } from "./weaponShared";
+import { computeMeleeTotalDamage } from "./weaponSharedUtils";
 import { weaponClassChip, rangedCraftsmanshipDescription, meleeCraftsmanshipDescription } from "./weaponHelpers";
 import { rangedRulesForCraftsmanship, meleeDamageForCraftsmanship } from "../../../utils/weaponUtils";
 import { ExpandChevron } from "../../../ui/ExpandChevron";

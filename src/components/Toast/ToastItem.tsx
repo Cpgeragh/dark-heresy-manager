@@ -21,7 +21,7 @@ export function ToastItem({ toast }: ToastItemProps) {
     } catch (err) {
       console.error("Failed to copy:", err);
     }
-  }, [toast.message]);
+  }, [toast.copyText, toast.message]);
 
   const handleDismiss = useCallback(() => {
     removeToast(toast.id);

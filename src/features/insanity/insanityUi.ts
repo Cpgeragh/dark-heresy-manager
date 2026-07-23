@@ -12,7 +12,7 @@ import {
   colourSky,
   colourTeal,
 } from "../../ui/colourTokens";
-import { chipClassName } from "../../ui/Chip";
+import { chipClassName } from "../../ui/chipStyles";
 import { INSANITY_TRACK, type InsanityTrackEntry } from "./insanityReference";
 
 export const severityChipClass: Record<InsanityDisorderSeverity, string> = {

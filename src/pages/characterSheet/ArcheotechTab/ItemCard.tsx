@@ -12,19 +12,18 @@ import {
   uiItemName,
   uiInfoModalWrapper,
 } from "../../../ui/editableStyles";
-import { uiIconRemoveButton } from "../../../ui/buttonStyles";
+import { RemoveButton } from "../../../ui/RemoveButton";
 import { colourStacks } from "../../../ui/colourTokens";
 import { CRAFTSMANSHIP_STYLE } from "../../../ui/craftsmanship";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
-import { StatChip } from "../weapons/weaponShared";
-import { locationLabel } from "../ArmourTab/armourHelpers";
+import { StatChip } from "../../../ui/StatChip";
+import { locationLabel } from "../../../utils/armourLocations";
 import { ARMOUR_LOCATION_LABELS } from "../../../constants/locations";
 import { InfoModal } from "../../../components/InfoModal";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/StatusBadge";
-import { TrashIcon } from "../../../ui/TrashIcon";
 import { ExpandChevron } from "../../../ui/ExpandChevron";
 
 interface Props extends CustomItemLibraryActionProps<"archeotech"> {
@@ -103,14 +102,10 @@ export function ItemCard({
           <div className={hasBody ? "px-3 pb-3 lg:px-4 lg:pb-4" : ""}>
             {editable && hasBody && (
               <div className="flex justify-end">
-                <button
-                  type="button"
+                <RemoveButton
                   onClick={onRemove}
-                  aria-label="Remove"
-                  className={uiIconRemoveButton}
-                >
-                  <TrashIcon className="w-4 h-4" />
-                </button>
+                  label="Remove"
+                />
               </div>
             )}
 
@@ -204,14 +199,11 @@ export function ItemCard({
         </div>
 
         {editable && !hasBody && (
-          <button
-            type="button"
+          <RemoveButton
             onClick={onRemove}
-            aria-label="Remove"
-            className={`${uiIconRemoveButton} mt-0.5`}
-          >
-            <TrashIcon className="w-4 h-4" />
-          </button>
+            label="Remove"
+            className="mt-0.5"
+          />
         )}
       </div>
     </div>

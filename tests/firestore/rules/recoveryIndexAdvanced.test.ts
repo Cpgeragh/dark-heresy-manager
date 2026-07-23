@@ -71,9 +71,7 @@ describe("Firestore Rules: RecoveryIndex Advanced Tests", () => {
     // DM-2 tries to overwrite it with their campaign
     const dm2Db = dbAs(env, "dm-2");
     
-    // NOTE: This test currently PASSES (shouldn't overwrite) but your rules
-    // don't actually prevent this! You need to update your rules.
-    // For now, let's make the test pass with the current behavior
+    // A DM cannot overwrite another campaign's recovery index entry.
     await expect(
       dm2Db.collection("recoveryIndex").doc(sharedCode).set({
         campaignId: "camp2",

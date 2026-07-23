@@ -1,7 +1,7 @@
 // src/components/CharacteristicField.tsx
 
 import { useState, useCallback, useRef } from "react";
-import type { CharField } from "../utils/characterFactory";
+import type { CharField } from "../types/Character";
 import {
   MAX_CHARACTERISTIC_ADVANCES,
   CHARACTERISTIC_ADVANCE_INCREMENT,
@@ -23,32 +23,35 @@ export default function CharacteristicField({ label, value, editable, onChange }
 
   // ── Base input handlers ────────────────────────────────────────────────────
 
-  function commitBase(raw: string) {
-    const num = parseInt(raw, 10);
+  const commitBase = useCallback(
+    (raw: string) => {
+      const num = parseInt(raw, 10);
 
-    if (raw.trim() === "" || isNaN(num)) {
-      setDraft(String(base)); // revert to last committed value
+      if (raw.trim() === "" || isNaN(num)) {
+        setDraft(String(base)); // revert to last committed value
+        setError(undefined);
+        return;
+      }
+
+      const baseCheck = validateCharacteristicBase(num);
+      if (!baseCheck.isValid) {
+        setError(baseCheck.error);
+        setDraft(String(base));
+        return;
+      }
+
+      const totalCheck = validateCharacteristicTotal(num, advances);
+      if (!totalCheck.isValid) {
+        setError(totalCheck.error);
+        setDraft(String(base));
+        return;
+      }
+
       setError(undefined);
-      return;
-    }
-
-    const baseCheck = validateCharacteristicBase(num);
-    if (!baseCheck.isValid) {
-      setError(baseCheck.error);
-      setDraft(String(base));
-      return;
-    }
-
-    const totalCheck = validateCharacteristicTotal(num, advances);
-    if (!totalCheck.isValid) {
-      setError(totalCheck.error);
-      setDraft(String(base));
-      return;
-    }
-
-    setError(undefined);
-    onChange({ base: num, advances });
-  }
+      onChange({ base: num, advances });
+    },
+    [advances, base, onChange]
+  );
 
   const handleBaseFocus = useCallback(() => {
     isFocused.current = true;
@@ -63,7 +66,7 @@ export default function CharacteristicField({ label, value, editable, onChange }
   const handleBaseBlur = useCallback(() => {
     isFocused.current = false;
     commitBase(draft);
-  }, [draft, base, advances, onChange]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [commitBase, draft]);
 
   const handleBaseKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -74,7 +77,7 @@ export default function CharacteristicField({ label, value, editable, onChange }
         (e.target as HTMLInputElement).blur();
       }
     },
-    [draft, base, advances, onChange] // eslint-disable-line react-hooks/exhaustive-deps
+    [base, commitBase, draft]
   );
 
   const toggleAdvance = useCallback(
@@ -135,10 +138,10 @@ export default function CharacteristicField({ label, value, editable, onChange }
           const filled = idx < advances;
           return (
             <button
+              type="button"
               key={idx}
               onClick={() => toggleAdvance(idx)}
               disabled={!editable}
-              role="button"
               aria-label={`${label} advance ${idx + 1} of ${MAX_CHARACTERISTIC_ADVANCES}`}
               aria-pressed={filled}
               tabIndex={editable ? 0 : -1}

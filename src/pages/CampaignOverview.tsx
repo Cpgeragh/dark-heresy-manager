@@ -3,7 +3,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
-import { useIsDM } from "../hooks/useIsDM";
 import { useCampaign } from "../hooks/useCampaign";
 import { useSessions } from "../hooks/useSessions";
 import { useCharacterSummaries } from "../hooks/useCharacterSummaries";
@@ -25,18 +24,18 @@ import { Panel } from "../ui/Panel";
 import { SectionHeader } from "../ui/SectionHeader";
 import { ErrorState } from "../ui/ErrorState";
 import { LoadingState } from "../ui/LoadingState";
-import { useHeaderExtensionSetters } from "../context/HeaderExtensionContext";
+import { useHeaderExtensionSetters } from "../context/useHeaderExtension";
 
 export default function CampaignOverview({ effectiveUserId }: { effectiveUserId: string }) {
   const params = useParams<{ campaignId: string }>();
   const campaignId = params.campaignId;
 
-  const isDM = useIsDM(campaignId, effectiveUserId);
   const {
     campaign,
     loading: campaignLoading,
     error: campaignError,
   } = useCampaign(campaignId ?? null);
+  const isDM = campaign?.dmId === effectiveUserId;
   const {
     sessions,
     loading: sessionsLoading,
@@ -132,7 +131,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
     );
   }
 
-  if (campaignLoading || summariesLoading || charactersLoading || isDM === null) {
+  if (campaignLoading || summariesLoading || charactersLoading) {
     return <LoadingState className="text-center py-10">Loading campaign…</LoadingState>;
   }
 

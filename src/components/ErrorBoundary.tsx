@@ -15,7 +15,7 @@ interface State {
   errorInfo: React.ErrorInfo | null;
 }
 
-export class ErrorBoundary extends Component<Props, State> {
+class ErrorBoundaryImplementation extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -61,6 +61,10 @@ export class ErrorBoundary extends Component<Props, State> {
 
     return this.props.children;
   }
+}
+
+export function ErrorBoundary(props: Props) {
+  return <ErrorBoundaryImplementation {...props} />;
 }
 
 interface ErrorFallbackProps {

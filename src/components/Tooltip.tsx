@@ -1,6 +1,6 @@
 // src/components/Tooltip.tsx
 
-import { useState, useRef, useEffect, useId } from "react";
+import { useState, useRef, useEffect, useId, useLayoutEffect } from "react";
 import type { ReactNode } from "react";
 
 interface TooltipProps {
@@ -11,7 +11,6 @@ interface TooltipProps {
 
 export function Tooltip({ children, content, maxWidth = 240 }: TooltipProps) {
   const [open, setOpen] = useState(false);
-  const [position, setPosition] = useState({ left: 0, top: 0 });
 
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
@@ -21,7 +20,7 @@ export function Tooltip({ children, content, maxWidth = 240 }: TooltipProps) {
     setOpen((s) => !s);
   }
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!open) return;
 
     const trigger = triggerRef.current;
@@ -43,7 +42,9 @@ export function Tooltip({ children, content, maxWidth = 240 }: TooltipProps) {
       top = rect.top - ttRect.height - 8;
     }
 
-    setPosition({ left, top });
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
+    tooltip.style.visibility = "visible";
   }, [open]);
 
   useEffect(() => {
@@ -87,8 +88,9 @@ export function Tooltip({ children, content, maxWidth = 240 }: TooltipProps) {
           role="tooltip"
           style={{
             position: "fixed",
-            left: position.left,
-            top: position.top,
+            left: 0,
+            top: 0,
+            visibility: "hidden",
             maxWidth: maxWidth,
           }}
           className="z-50 bg-slate-800 border border-slate-700 text-slate-200 text-xs px-3 py-2 rounded shadow-lg"

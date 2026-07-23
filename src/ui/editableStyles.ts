@@ -1,6 +1,6 @@
 // src/ui/editableStyles.ts
 
-import { chipClassName } from "./Chip";
+import { chipClassName } from "./chipStyles";
 import { colourInactive } from "./colourTokens";
 import { fieldControlClass, type FieldResize } from "./fieldStyles";
 

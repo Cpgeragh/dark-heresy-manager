@@ -14,7 +14,8 @@ import {
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerCustomAction, PickerModal, PickerRow } from "../../../ui/PickerModal";
 import { InfoModal } from "../../../components/InfoModal";
-import { StatChip, DamageTypeChip, SpecialRulesContent } from "./weaponShared";
+import { StatChip } from "../../../ui/StatChip";
+import { DamageTypeChip, SpecialRulesContent } from "./weaponShared";
 
 export function ShieldPicker({
   editable = true,

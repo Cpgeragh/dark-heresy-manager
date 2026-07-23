@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import type { Character, Characteristics } from "../types/Character";
-import type { CharField } from "../utils/characterFactory";
+import type { CharField } from "../types/Character";
 import { stripUndefined } from "../utils/stripUndefined";
 import {
   forceAssignCharacter,

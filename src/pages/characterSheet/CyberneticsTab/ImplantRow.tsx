@@ -11,7 +11,7 @@ import {
   uiItemName,
   uiInfoModalWrapper,
 } from "../../../ui/editableStyles";
-import { uiIconRemoveButton } from "../../../ui/buttonStyles";
+import { RemoveButton } from "../../../ui/RemoveButton";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { CRAFTSMANSHIP_STYLE } from "../../../ui/craftsmanship";
 import { ARMOUR_LOCATION_LABELS } from "../../../constants/locations";
@@ -20,7 +20,6 @@ import { InfoModal } from "../../../components/InfoModal";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/StatusBadge";
-import { TrashIcon } from "../../../ui/TrashIcon";
 
 interface Props extends CustomItemLibraryActionProps<"cybernetic"> {
   item: CyberneticItem;
@@ -144,14 +143,7 @@ export function ImplantRow({
       {/* Craftsmanship badge — clickable when editable */}
       {/* Remove */}
       {editable && (
-        <button
-          type="button"
-          onClick={() => onRemove(item.id)}
-          aria-label="Remove"
-          className={uiIconRemoveButton}
-        >
-          <TrashIcon className="w-4 h-4" />
-        </button>
+        <RemoveButton onClick={() => onRemove(item.id)} label="Remove" />
       )}
     </div>
   );

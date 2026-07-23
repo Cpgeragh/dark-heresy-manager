@@ -14,13 +14,13 @@ import { PickerField } from "../../../ui/PickerField";
 import { RequiredFormLabel } from "../../../ui/RequiredFormLabel";
 import { STANDARD_AVAILABILITY_OPTIONS } from "../../../constants/availability";
 import { sanitizeDiceInput, sanitizeNonNegativeIntegerInput } from "../../../utils/formInput";
+import { WeaponQualitySelector } from "./weaponShared";
 import {
-  WeaponQualitySelector,
-  useWeaponQualityPicker,
   DAMAGE_TYPE_OPTIONS,
   formatDamageInput,
   isValidDiceInput,
-} from "./weaponShared";
+} from "./weaponSharedUtils";
+import { useWeaponQualityPicker } from "./useWeaponQualityPicker";
 
 function parseInitialShieldDamage(damage: string | undefined): {
   base: string;

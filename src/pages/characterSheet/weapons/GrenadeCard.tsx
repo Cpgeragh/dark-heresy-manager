@@ -1,7 +1,7 @@
 // src/pages/characterSheet/weapons/GrenadeCard.tsx
 // GrenadeCard — see GrenadePicker.tsx and CustomGrenadeForm.tsx for the picker and custom-item form.
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import type { GrenadeItem } from "../../../types/Character";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
@@ -18,62 +18,19 @@ import {
   uiInfoModalWrapper,
   uiCardTitle,
 } from "../../../ui/editableStyles";
-import { uiExpandButton, uiIconRemoveButton } from "../../../ui/buttonStyles";
+import { uiExpandButton } from "../../../ui/buttonStyles";
 import { colourEmerald, colourCyan, colourViolet, colourTealLight } from "../../../ui/colourTokens";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import { InfoModal } from "../../../components/InfoModal";
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
-import { StatChip, DamageTypeChip, SpecialRulesContent, EquipToggle } from "./weaponShared";
+import { StatChip } from "../../../ui/StatChip";
+import { DamageTypeChip, SpecialRulesContent, EquipToggle } from "./weaponShared";
 import { weaponClassChip } from "./weaponHelpers";
-import { TrashIcon } from "../../../ui/TrashIcon";
+import { RemoveButton } from "../../../ui/RemoveButton";
 import { ExpandChevron } from "../../../ui/ExpandChevron";
-
-export const EXPLOSIVE_MISHAPS_CONTENT = (
-  <div className="space-y-3">
-    <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-      Whenever a jam results from throwing a grenade or firing a grenade, something unfortunate has
-      happened. Roll on the table below to find out the results.
-    </p>
-    <div className="overflow-x-auto">
-      <table className="w-full text-left text-sm lg:text-base border-collapse">
-        <thead>
-          <tr className={`${uiTextLabel} border-b border-slate-700`}>
-            <th className="py-1.5 pr-3 font-medium">Roll</th>
-            <th className="py-1.5 font-medium">Result</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-700/60">
-          <tr>
-            <td className={`py-2 pr-3 align-top font-code ${uiTextBody} whitespace-nowrap`}>1-5</td>
-            <td className={`py-2 ${uiTextBody}`}>
-              <span className="font-semibold text-slate-100">Dud.</span> The explosive or round
-              fails to explode and, in the case of grenade launchers, the weapon must be reloaded
-              before it can fire.
-            </td>
-          </tr>
-          <tr>
-            <td className={`py-2 pr-3 align-top font-code ${uiTextBody} whitespace-nowrap`}>6-8</td>
-            <td className={`py-2 ${uiTextBody}`}>
-              <span className="font-semibold text-slate-100">"It might be ok…"</span> Nothing
-              happens. Roll again on this table next round.
-            </td>
-          </tr>
-          <tr>
-            <td className={`py-2 pr-3 align-top font-code ${uiTextBody} whitespace-nowrap`}>9-0</td>
-            <td className={`py-2 ${uiTextBody}`}>
-              <span className="font-semibold text-slate-100">BOOM!</span> The round or explosive
-              detonates immediately. Centre the effect on the character. If this was the result of
-              firing a grenade launcher, the grenade detonates in the barrel, having its normal
-              effect as well as destroying the weapon.
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-);
+import { ExplosiveMishapsContent } from "./ExplosiveMishapsContent";
 
 export function GrenadeCard({
   item,
@@ -104,10 +61,15 @@ export function GrenadeCard({
   canEquipMoreTypes?: boolean;
   isStowedCard?: boolean;
 } & CustomItemLibraryActionProps<"weapon">) {
-  const [expanded, setExpanded] = useState(!isStowedCard && isEquipped);
-  useEffect(() => {
-    if (!isStowedCard) setExpanded(isEquipped);
-  }, [isEquipped, isStowedCard]);
+  const expansionSource = !isStowedCard && isEquipped;
+  const [previousExpansionSource, setPreviousExpansionSource] =
+    useState(expansionSource);
+  const [expanded, setExpanded] = useState(expansionSource);
+
+  if (previousExpansionSource !== expansionSource) {
+    setPreviousExpansionSource(expansionSource);
+    setExpanded(expansionSource);
+  }
 
   // ── Stowed overflow card — read-only, always collapsed ────────────────────
   if (isStowedCard) {
@@ -143,12 +105,15 @@ export function GrenadeCard({
   return (
     <div className={uiSectionShell + " overflow-hidden"}>
       {/* Header — always visible */}
-      <button type="button"
-        className="w-full flex items-stretch justify-between gap-2 p-3 lg:p-4"
-        onClick={() => setExpanded((e) => !e)}
-        aria-expanded={expanded}
-      >
-        <div className={uiExpandButton}>
+      <div className="relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4">
+        <button
+          type="button"
+          onClick={() => setExpanded((e) => !e)}
+          aria-expanded={expanded}
+          aria-label={`${expanded ? "Collapse" : "Expand"} ${item.name} details`}
+          className="absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
+        />
+        <div className={`${uiExpandButton} relative pointer-events-none`}>
           <div className="flex flex-wrap items-center gap-1.5">
             <p className={`${uiCardTitle} truncate`}>{item.name}</p>
             {libraryItem && (
@@ -169,7 +134,7 @@ export function GrenadeCard({
             )}
           </div>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="relative pointer-events-none flex items-center gap-2 shrink-0">
           {onToggleEquip && (
             <EquipToggle
               equipped={isEquipped}
@@ -180,15 +145,13 @@ export function GrenadeCard({
           )}
           <ExpandChevron expanded={expanded} />
         </div>
-      </button>
+      </div>
 
       {expanded && (
         <div className="px-3 pb-3 lg:px-4 lg:pb-4 space-y-2">
           {editable && (
             <div className="flex justify-end">
-              <button type="button" onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
-                <TrashIcon className="w-4 h-4" />
-              </button>
+              <RemoveButton onClick={onRemove} label="Remove" />
             </div>
           )}
 
@@ -262,7 +225,7 @@ export function GrenadeCard({
               <div className="flex items-center gap-1.5">
                 <span className={uiTextLabel}>Mishaps</span>
                 <span className={uiInfoModalWrapper}>
-                  <InfoModal title="Explosive Mishaps" content={EXPLOSIVE_MISHAPS_CONTENT} />
+                  <InfoModal title="Explosive Mishaps" content={<ExplosiveMishapsContent />} />
                 </span>
               </div>
             )}

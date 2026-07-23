@@ -1,5 +1,5 @@
 // tests/firestore/rules/phase0aRules.test.ts
-// Verifies the security fixes introduced in Phase 0A.
+// Covers user deletion, character creation, claim-log and recovery-index rules.
 
 import { describe, it, expect, afterEach } from "vitest";
 import { getTestEnv } from "../setup";

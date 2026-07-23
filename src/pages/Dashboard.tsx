@@ -483,7 +483,7 @@ function ClaimCharacterSection({ effectiveUserId }: { effectiveUserId: string })
   const navigate = useNavigate();
   const toast = useToast();
 
-  const { loading, error, data, lookup } = useRecoveryLookup();
+  const { loading, error, data, lookup } = useRecoveryLookup(effectiveUserId);
   const { claimCharacter } = useClaimActions();
 
   const handleLookup = useCallback(() => {

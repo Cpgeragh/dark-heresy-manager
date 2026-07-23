@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { useSkillComputation } from "../../src/hooks/useSkillComputation";
 import type { Characteristics, SkillEntry } from "../../src/types/Character";
-import type { CharField } from "../../src/utils/characterFactory";
+import type { CharField } from "../../src/types/Character";
 
 const makeGetCharField = (base: number, advances: number) =>
   (_key: keyof Characteristics): CharField => ({ base, advances });

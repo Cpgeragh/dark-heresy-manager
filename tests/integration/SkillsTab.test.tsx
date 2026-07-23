@@ -6,7 +6,7 @@ import "@testing-library/jest-dom";
 
 import { SkillsTab } from "../../src/pages/characterSheet/SkillsTab";
 import type { SkillEntry, Characteristics } from "../../src/types/Character";
-import type { CharField } from "../../src/utils/characterFactory";
+import type { CharField } from "../../src/types/Character";
 
 const getCharField = (_k: keyof Characteristics): CharField => ({ base: 30, advances: 0 });
 
@@ -66,7 +66,7 @@ describe("SkillsTab", () => {
     const user = userEvent.setup();
     const { onUpdate } = renderTab();
     // Expand the row, then set its level to +20.
-    await user.click(screen.getAllByText("Awareness")[0]);
+    await user.click(screen.getAllByRole("button", { name: "Expand Awareness details" })[0]);
     await user.click(screen.getByLabelText("Set skill level to +20"));
 
     expect(onUpdate).toHaveBeenCalledTimes(1);

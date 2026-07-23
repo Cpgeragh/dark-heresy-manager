@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import type { SkillEntry, Characteristics } from "../types/Character";
-import type { CharField } from "../utils/characterFactory";
+import type { CharField } from "../types/Character";
 import type { CharacteristicTotals } from "../features/corruption/characteristicModifierTotals";
 import { SKILL_ADVANCE_VALUES, SKILL_HALF_DIVISOR } from "../constants/gameRules";
 import { calculateCharacteristicTotal } from "../utils/stats";

@@ -38,6 +38,10 @@ import { MeleeCard } from "../weapons/MeleeCard";
 import { CustomMeleeForm } from "../weapons/CustomMeleeForm";
 import { IndependentCardGrid } from "../weapons/IndependentCardGrid";
 import { ArcheotechWeaponCard } from "../weapons/ArcheotechWeaponCard";
+import {
+  buildMeleeWeaponSnapshot,
+  buildRangedWeaponSnapshot,
+} from "../weapons/weaponSnapshotHelpers";
 import { ArcheotechImplantRow } from "./ArcheotechImplantRow";
 import {
   isIntegratedRangedWeapon,
@@ -766,51 +770,6 @@ function toCustomMeleeWeaponData(weapon: MeleeWeapon): CustomMeleeWeaponData {
     ...data
   } = weapon;
   return { ...data, weaponKind: "melee" };
-}
-
-function buildRangedWeaponSnapshot(
-  id: string,
-  copyFields: Partial<RangedWeapon>,
-  data: CustomRangedWeaponData,
-  customLibraryId: string,
-  customLibraryVersionId: string
-): RangedWeapon {
-  const { weaponKind: _weaponKind, ...weaponData } = data;
-  const quantity =
-    copyFields.quantity ??
-    (weaponData.class?.toLowerCase().includes("thrown") ? 1 : undefined);
-  return {
-    id,
-    ...weaponData,
-    customLibraryId,
-    customLibraryVersionId,
-    ...(copyFields.ammoEntries ? { ammoEntries: copyFields.ammoEntries } : {}),
-    ...(copyFields.upgrades ? { upgrades: copyFields.upgrades } : {}),
-    ...(quantity !== undefined ? { quantity } : {}),
-    ...(copyFields.equipped !== undefined ? { equipped: copyFields.equipped } : {}),
-  };
-}
-
-function buildMeleeWeaponSnapshot(
-  id: string,
-  copyFields: Partial<MeleeWeapon>,
-  data: CustomMeleeWeaponData,
-  customLibraryId: string,
-  customLibraryVersionId: string
-): MeleeWeapon {
-  const { weaponKind: _weaponKind, ...weaponData } = data;
-  const quantity =
-    copyFields.quantity ??
-    (weaponData.class?.toLowerCase().includes("thrown") ? 1 : undefined);
-  return {
-    id,
-    ...weaponData,
-    customLibraryId,
-    customLibraryVersionId,
-    ...(copyFields.upgrades ? { upgrades: copyFields.upgrades } : {}),
-    ...(quantity !== undefined ? { quantity } : {}),
-    ...(copyFields.equipped !== undefined ? { equipped: copyFields.equipped } : {}),
-  };
 }
 
 function toCustomCyberneticData(item: CyberneticItem): CustomCyberneticData {

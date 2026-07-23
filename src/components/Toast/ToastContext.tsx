@@ -1,8 +1,6 @@
 // src/components/Toast/ToastContext.tsx
 
-import { createContext, useContext, useState, useCallback, useRef } from "react";
-import type { ReactNode } from "react";
-import { DEFAULT_TOAST_DURATION } from "../../constants/ui";
+import { createContext, useContext } from "react";
 
 export type ToastType = "success" | "error" | "info" | "warning";
 
@@ -14,7 +12,7 @@ export interface Toast {
   copyText?: string; // if set, the copy button uses this instead of the full message
 }
 
-interface ToastContextValue {
+export interface ToastContextValue {
   toasts: Toast[];
   addToast: (message: string, type?: ToastType, duration?: number, copyText?: string) => void;
   removeToast: (id: string) => void;
@@ -24,76 +22,7 @@ interface ToastContextValue {
   warning: (message: string, duration?: number) => void;
 }
 
-const ToastContext = createContext<ToastContextValue | null>(null);
-
-export function ToastProvider({ children }: { children: ReactNode }) {
-  const [toasts, setToasts] = useState<Toast[]>([]);
-
-  // Store timer IDs to enable cleanup
-  const timersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
-
-  const removeToast = useCallback((id: string) => {
-    // Clear the timer if it exists
-    const timer = timersRef.current.get(id);
-    if (timer) {
-      clearTimeout(timer);
-      timersRef.current.delete(id);
-    }
-
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  }, []);
-
-  const addToast = useCallback(
-    (
-      message: string,
-      type: ToastType = "info",
-      duration = DEFAULT_TOAST_DURATION,
-      copyText?: string
-    ) => {
-      const id = crypto.randomUUID();
-      const toast: Toast = { id, message, type, duration, ...(copyText ? { copyText } : {}) };
-
-      setToasts((prev) => [...prev, toast]);
-
-      if (duration > 0) {
-        const timer = setTimeout(() => {
-          removeToast(id);
-        }, duration);
-
-        // Store timer ID for cleanup
-        timersRef.current.set(id, timer);
-      }
-    },
-    [removeToast]
-  );
-
-  const success = useCallback(
-    (message: string, duration?: number, copyText?: string) =>
-      addToast(message, "success", duration, copyText),
-    [addToast]
-  );
-
-  const error = useCallback(
-    (message: string, duration?: number) => addToast(message, "error", duration),
-    [addToast]
-  );
-
-  const info = useCallback(
-    (message: string, duration?: number) => addToast(message, "info", duration),
-    [addToast]
-  );
-
-  const warning = useCallback(
-    (message: string, duration?: number) => addToast(message, "warning", duration),
-    [addToast]
-  );
-
-  return (
-    <ToastContext.Provider value={{ toasts, addToast, removeToast, success, error, info, warning }}>
-      {children}
-    </ToastContext.Provider>
-  );
-}
+export const ToastContext = createContext<ToastContextValue | null>(null);
 
 export function useToast() {
   const context = useContext(ToastContext);

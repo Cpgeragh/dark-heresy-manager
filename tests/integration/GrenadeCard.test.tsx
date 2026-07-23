@@ -83,13 +83,42 @@ describe("GrenadeCard equip toggle", () => {
     await user.click(screen.getByRole("button", { name: "Equip" }));
     expect(onToggleEquip).toHaveBeenCalled();
   });
+
+  it("resets expansion when equipped status changes", async () => {
+    const user = userEvent.setup();
+    const props = {
+      item: baseItem,
+      editable: true,
+      strengthBonus: 4,
+      onRemove: vi.fn(),
+      onUpdateQty: vi.fn(),
+    };
+    const { rerender } = render(<GrenadeCard {...props} isEquipped={false} />);
+
+    expect(
+      screen.getByRole("button", { name: "Expand Custom Frag details" })
+    ).toBeInTheDocument();
+
+    rerender(<GrenadeCard {...props} isEquipped />);
+    expect(
+      screen.getByRole("button", { name: "Collapse Custom Frag details" })
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Collapse Custom Frag details" }));
+    rerender(<GrenadeCard {...props} isEquipped={false} />);
+    rerender(<GrenadeCard {...props} isEquipped />);
+
+    expect(
+      screen.getByRole("button", { name: "Collapse Custom Frag details" })
+    ).toBeInTheDocument();
+  });
 });
 
 describe("GrenadeCard quantity", () => {
   it("calls onUpdateQty when the quantity is incremented", async () => {
     const user = userEvent.setup();
     const { onUpdateQty } = renderCard();
-    await user.click(screen.getByRole("button", { name: "+" }));
+    await user.click(screen.getByRole("button", { name: "Increase quantity" }));
     expect(onUpdateQty).toHaveBeenCalledWith(6);
   });
 

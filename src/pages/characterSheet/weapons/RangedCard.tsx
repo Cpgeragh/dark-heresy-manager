@@ -30,7 +30,7 @@ import {
   uiItemName,
   uiCardTitle,
 } from "../../../ui/editableStyles";
-import { uiExpandButton, uiIconRemoveButton } from "../../../ui/buttonStyles";
+import { uiExpandButton } from "../../../ui/buttonStyles";
 import { colourArcheotech, colourViolet } from "../../../ui/colourTokens";
 import { Button } from "../../../ui/Button";
 import { Chip } from "../../../ui/Chip";
@@ -39,10 +39,10 @@ import { PickerModal, PickerRow } from "../../../ui/PickerModal";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import { formatWeightForDisplay } from "../../../ui/weightFormat";
 import { InfoModal } from "../../../components/InfoModal";
-import { TrashIcon } from "../../../ui/TrashIcon";
+import { RemoveButton } from "../../../ui/RemoveButton";
 import { ExpandChevron } from "../../../ui/ExpandChevron";
+import { StatChip } from "../../../ui/StatChip";
 import {
-  StatChip,
   DamageTypeChip,
   SpecialRulesContent,
   UpgradePicker,
@@ -105,7 +105,10 @@ function AmmoEntryRow({
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 min-w-0">
           <button
+            type="button"
             onClick={editable ? onSetLoaded : undefined}
+            disabled={!editable}
+            aria-label={entry.loaded ? `${displayName} loaded` : `Mark ${displayName} as loaded`}
             title={entry.loaded ? "Loaded" : "Mark as loaded"}
             className={`w-2 h-2 rounded-full shrink-0 transition ${
               entry.loaded
@@ -486,12 +489,17 @@ export function RangedCard({
   return (
     <div className={uiSectionShell + " overflow-hidden"}>
       {/* Header — always visible */}
-      <button type="button"
-        className="w-full flex items-stretch justify-between gap-2 p-3 lg:p-4"
-        onClick={() => !forceExpanded && setExpanded((e) => !e)}
-        aria-expanded={expanded}
-      >
-        <div className={uiExpandButton}>
+      <div className="relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4">
+        {!forceExpanded && (
+          <button
+            type="button"
+            onClick={() => setExpanded((e) => !e)}
+            aria-expanded={expanded}
+            aria-label={`${expanded ? "Collapse" : "Expand"} ${weapon.name} details`}
+            className="absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
+          />
+        )}
+        <div className={`${uiExpandButton} relative pointer-events-none`}>
           <div className="flex flex-wrap items-center gap-1.5">
             <p className={uiCardTitle}>{weapon.name}</p>
             {libraryItem && (
@@ -516,7 +524,7 @@ export function RangedCard({
             </div>
           )}
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="relative pointer-events-none flex items-center gap-2 shrink-0">
           {onToggleEquip && (
             <EquipToggle
               equipped={isEquipped}
@@ -527,15 +535,13 @@ export function RangedCard({
           )}
           {!forceExpanded && <ExpandChevron expanded={expanded} />}
         </div>
-      </button>
+      </div>
 
       {(expanded || forceExpanded) && (
         <div className="px-3 pb-3 lg:px-4 lg:pb-4 space-y-3">
           {editable && !integrated && (
             <div className="flex justify-end">
-              <button type="button" onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
-                <TrashIcon className="w-4 h-4" />
-              </button>
+              <RemoveButton onClick={onRemove} label="Remove" />
             </div>
           )}
 

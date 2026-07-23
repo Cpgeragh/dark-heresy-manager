@@ -16,7 +16,8 @@ import { PickerCustomAction, PickerModal, PickerRow } from "../../../ui/PickerMo
 import { InfoModal } from "../../../components/InfoModal";
 import { Chip } from "../../../ui/Chip";
 import { colourCyan, colourViolet, colourTealLight } from "../../../ui/colourTokens";
-import { StatChip, DamageTypeChip, SpecialRulesContent } from "./weaponShared";
+import { StatChip } from "../../../ui/StatChip";
+import { DamageTypeChip, SpecialRulesContent } from "./weaponShared";
 import { weaponClassChip } from "./weaponHelpers";
 
 export function GrenadePicker({

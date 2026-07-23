@@ -1,7 +1,7 @@
 // src/pages/ClaimCharacter/ClaimPreview.tsx
 
 import { useCallback } from "react";
-import type { OwnershipState } from "./hooks/useRecoveryLookup";
+import type { OwnershipState } from "../../types/Recovery";
 import type { CharacterDocument, CampaignDocument } from "../../types/Firestore";
 import { Button } from "../../ui/Button";
 import { uiTextError } from "../../ui/editableStyles";
@@ -19,22 +19,22 @@ export function ClaimPreview({ character, campaign, ownership, onClaim }: ClaimP
   function renderStatus() {
     switch (ownership) {
       case "unclaimed":
-        return <p className="text-green-400 text-sm lg:text-base">This character is unclaimed and available.</p>;
-
-      case "claimed-by-you":
-        return <p className="text-amber-300 text-sm lg:text-base">You already own this character.</p>;
-
-      case "claimed-by-other":
         return (
-          <p className={uiTextError}>
-            This character is already claimed by another player.
+          <p className="text-green-400 text-sm lg:text-base">
+            This character is unclaimed and available.
           </p>
         );
 
-      case "locked":
+      case "claimed-by-you":
         return (
-          <p className={uiTextError}>This character is claimed and locked by the DM.</p>
+          <p className="text-amber-300 text-sm lg:text-base">You already own this character.</p>
         );
+
+      case "claimed-by-other":
+        return <p className={uiTextError}>This character is already claimed by another player.</p>;
+
+      case "locked":
+        return <p className={uiTextError}>This character is claimed and locked by the DM.</p>;
     }
   }
 
@@ -62,19 +62,11 @@ export function ClaimPreview({ character, campaign, ownership, onClaim }: ClaimP
       {renderStatus()}
 
       {ownership === "unclaimed" ? (
-        <Button
-          variant="success"
-          fullWidth
-          onClick={handleClaim}
-        >
+        <Button variant="success" fullWidth onClick={handleClaim}>
           Claim This Character
         </Button>
       ) : (
-        <Button
-          variant="secondary"
-          fullWidth
-          disabled
-        >
+        <Button variant="secondary" fullWidth disabled>
           Unavailable
         </Button>
       )}

@@ -8,7 +8,6 @@ import type {
   TalentEntry,
   WornArmourPiece,
 } from "../../../types/Character";
-import { ARMOUR_LOCATION_LABELS } from "../../../constants/locations";
 
 /** AP contributed by one piece to one location */
 export function pieceApAt(piece: WornArmourPiece, loc: ArmourLocationKey): number {
@@ -35,12 +34,6 @@ export function wornApAt(pieces: WornArmourPiece[], loc: ArmourLocationKey): num
     .map((p) => pieceApAt(p, loc))
     .filter((ap) => ap > 0);
   return values.length === 0 ? 0 : Math.max(...values);
-}
-
-/** Human-readable list of locations a piece covers */
-export function locationLabel(locations: ArmourLocationKey[]): string {
-  if (locations.length === 6) return "All";
-  return locations.map((l) => ARMOUR_LOCATION_LABELS[l]).join(", ");
 }
 
 /** Rules text for a worn-armour craftsmanship grade */

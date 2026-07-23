@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Link, useMatch } from "react-router-dom";
-import { useHeaderExtension } from "../context/HeaderExtensionContext";
+import { useHeaderExtension } from "../context/useHeaderExtension";
 import { ROUTES, ROUTE_PATTERNS } from "../constants/routes";
 
 interface AppHeaderProps {

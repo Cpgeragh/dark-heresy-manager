@@ -12,11 +12,9 @@ import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { uiTextMuted, uiTextBody, uiItemName } from "../../../ui/editableStyles";
 import { colourAmberFaint, colourFuchsia } from "../../../ui/colourTokens";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/craftsmanship";
-import { StatChip } from "../weapons/weaponShared";
-import {
-  locationLabel,
-  armourCraftsmanshipDescription,
-} from "./armourHelpers";
+import { StatChip } from "../../../ui/StatChip";
+import { locationLabel } from "../../../utils/armourLocations";
+import { armourCraftsmanshipDescription } from "./armourHelpers";
 
 interface Props {
   editable?: boolean;

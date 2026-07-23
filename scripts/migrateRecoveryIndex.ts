@@ -36,11 +36,11 @@ async function runMigration() {
 
     for (const ch of charsSnap.docs) {
       const characterId = ch.id;
-      const data = ch.data() as any;
+      const data = ch.data() as Record<string, unknown>;
 
       const code = data.recoveryCode;
 
-      if (!code) {
+      if (typeof code !== "string" || code.length === 0) {
         console.warn(`[SKIP] Character ${characterId} has no recoveryCode`);
         continue;
       }

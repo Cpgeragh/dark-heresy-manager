@@ -1,12 +1,16 @@
 // src/types/Character.ts
 
 import type { Timestamp } from "firebase/firestore";
-import type { CharField } from "../utils/characterFactory";
-import { SkillSource } from "./SkillSource"; // ← NEW
+import { SkillSource } from "./SkillSource";
 
 /**
  * CHARACTERISTICS
  */
+export interface CharField {
+  base: number;
+  advances: number;
+}
+
 export interface Characteristics {
   ws: CharField;
   bs: CharField;
@@ -40,7 +44,7 @@ export interface SkillEntry {
   // Whether this is an Advanced Skill
   advanced: boolean;
 
-  // NEW — which book this skill originates from
+  // Source book for this skill
   source: SkillSource;
 
   // User-entered notes

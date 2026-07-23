@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import type { Character, Characteristics } from "../types/Character";
-import type { CharField } from "../utils/characterFactory";
+import type { CharField } from "../types/Character";
 import { calculateCharacteristicTotal } from "../utils/stats";
 import { getCharacteristicModifierTotals } from "../features/corruption/characteristicModifierTotals";
 import { CHARACTERISTIC_LABELS } from "../features/corruption/characteristicModifiers";

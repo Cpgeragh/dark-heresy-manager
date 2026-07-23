@@ -22,7 +22,8 @@ import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../../ui/PickerModal";
 import { ArrowLeft } from "../../../ui/PickerArrows";
 import { InfoModal } from "../../../components/InfoModal";
-import { StatChip, DamageTypeChip, SpecialRulesContent } from "./weaponShared";
+import { StatChip } from "../../../ui/StatChip";
+import { DamageTypeChip, SpecialRulesContent } from "./weaponShared";
 import {
   meleeCraftsmanshipDescription,
 } from "./weaponHelpers";

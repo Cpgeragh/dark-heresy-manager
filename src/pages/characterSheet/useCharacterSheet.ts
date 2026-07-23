@@ -1,7 +1,7 @@
 // src/pages/characterSheet/useCharacterSheet.ts
 
 import { useMemo } from "react";
-import { useIsDM } from "../../hooks/useIsDM";
+import { useCampaign } from "../../hooks/useCampaign";
 import { useDMOverride } from "../../hooks/useDMOverride";
 import { useCharacterData } from "../../hooks/useCharacterData";
 import { useCharacterPermissions } from "../../hooks/useCharacterPermissions";
@@ -31,8 +31,12 @@ export function useCharacterSheet({
   // USER & ROLE
   // ================================================================
   const userId = effectiveUserId;
-  const rawIsDM = useIsDM(path?.campaignId, userId);
-  const isDM = rawIsDM ?? false;
+  const {
+    campaign,
+    loading: campaignLoading,
+    error: campaignError,
+  } = useCampaign(path?.campaignId ?? null);
+  const isDM = campaign?.dmId === userId;
   const { dmReadOnly, toggleDmReadOnly } = useDMOverride();
 
   // ================================================================
@@ -72,7 +76,9 @@ export function useCharacterSheet({
   // ================================================================
   // HELPERS
   // ================================================================
-  const { getCharField, getCharTotal, getEffectiveCharTotal, getCharBonus } = useCharacterHelpers({ character });
+  const { getCharField, getCharTotal, getEffectiveCharTotal, getCharBonus } = useCharacterHelpers({
+    character,
+  });
 
   // ================================================================
   // PUBLIC API
@@ -82,12 +88,12 @@ export function useCharacterSheet({
     path,
     character,
     claimLog,
-    characterLoading,
-    characterError,
+    characterLoading: characterLoading || campaignLoading,
+    characterError: characterError ?? campaignError,
 
     // Role & permissions
     isDM,
-    isDMLoading: rawIsDM === null,
+    isDMLoading: campaignLoading,
     dmReadOnly,
     toggleDmReadOnly,
     allowedToEdit,

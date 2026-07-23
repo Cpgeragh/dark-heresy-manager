@@ -9,7 +9,7 @@ vi.mock("../../src/hooks/useXpProposals", () => ({
 }));
 
 import { ExperienceTab } from "../../src/pages/characterSheet/ExperienceTab";
-import { ToastProvider } from "../../src/components/Toast/ToastContext";
+import { ToastProvider } from "../../src/components/Toast";
 import type { ExperienceBlock } from "../../src/types/Character";
 
 function renderTab(props: Partial<React.ComponentProps<typeof ExperienceTab>> = {}) {

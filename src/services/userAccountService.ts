@@ -1,6 +1,32 @@
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import type { UserDocument } from "../types/Firestore";
+
+/**
+ * Ensures the anonymous-auth user has an account document, records its latest
+ * activity, and returns whether onboarding has been completed.
+ */
+export async function synchroniseUserAccount(uid: string): Promise<boolean> {
+  const reference = doc(db, "users", uid);
+  const snapshot = await getDoc(reference);
+
+  let onboarded = true;
+  if (!snapshot.exists()) {
+    const newUserDocument: UserDocument = {
+      createdAt: serverTimestamp(),
+      lastSeen: serverTimestamp(),
+      onboarded: false,
+    };
+    await setDoc(reference, newUserDocument);
+    onboarded = false;
+  } else {
+    // Missing means a legacy user created before onboarding existed.
+    onboarded = (snapshot.data() as UserDocument).onboarded !== false;
+  }
+
+  await updateDoc(reference, { lastSeen: serverTimestamp() });
+  return onboarded;
+}
 
 /**
  * Returns whether an existing device user document still needs its recovery

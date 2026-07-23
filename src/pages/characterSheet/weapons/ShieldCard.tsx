@@ -15,14 +15,15 @@ import {
   uiInfoModalWrapper,
   uiCardTitle,
 } from "../../../ui/editableStyles";
-import { uiExpandButton, uiIconRemoveButton } from "../../../ui/buttonStyles";
+import { uiExpandButton } from "../../../ui/buttonStyles";
 import { Chip } from "../../../ui/Chip";
 import { colourLime } from "../../../ui/colourTokens";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { InfoModal } from "../../../components/InfoModal";
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
-import { StatChip, DamageTypeChip, SpecialRulesContent, EquipToggle } from "./weaponShared";
-import { TrashIcon } from "../../../ui/TrashIcon";
+import { StatChip } from "../../../ui/StatChip";
+import { DamageTypeChip, SpecialRulesContent, EquipToggle } from "./weaponShared";
+import { RemoveButton } from "../../../ui/RemoveButton";
 import { ExpandChevron } from "../../../ui/ExpandChevron";
 
 export function ShieldCard({
@@ -62,12 +63,15 @@ export function ShieldCard({
   return (
     <div className={uiSectionShell + " overflow-hidden"}>
       {/* Header — always visible */}
-      <button type="button"
-        className="w-full flex items-stretch justify-between gap-2 p-3 lg:p-4"
-        onClick={() => setExpanded((e) => !e)}
-        aria-expanded={expanded}
-      >
-        <div className={uiExpandButton}>
+      <div className="relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4">
+        <button
+          type="button"
+          onClick={() => setExpanded((e) => !e)}
+          aria-expanded={expanded}
+          aria-label={`${expanded ? "Collapse" : "Expand"} ${item.name} details`}
+          className="absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
+        />
+        <div className={`${uiExpandButton} relative pointer-events-none`}>
           <div className="flex flex-wrap items-center gap-1.5">
             <p className={uiCardTitle}>{item.name}</p>
             {libraryItem && (
@@ -78,7 +82,7 @@ export function ShieldCard({
             <Chip size="sm" className={colourLime}>Shield</Chip>
           </div>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="relative pointer-events-none flex items-center gap-2 shrink-0">
           {onToggleEquip && (
             <EquipToggle
               equipped={isEquipped}
@@ -89,15 +93,13 @@ export function ShieldCard({
           )}
           <ExpandChevron expanded={expanded} />
         </div>
-      </button>
+      </div>
 
       {expanded && (
         <div className="px-3 pb-3 lg:px-4 lg:pb-4 space-y-3">
           {editable && (
             <div className="flex justify-end">
-              <button type="button" onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
-                <TrashIcon className="w-4 h-4" />
-              </button>
+              <RemoveButton onClick={onRemove} label="Remove" />
             </div>
           )}
 

@@ -20,12 +20,14 @@ import {
   sanitizePositiveIntegerInput,
 } from "../../../utils/formInput";
 import {
-  DAMAGE_TYPE_OPTIONS,
   WeaponQualitySelector,
-  useWeaponQualityPicker,
+} from "./weaponShared";
+import {
+  DAMAGE_TYPE_OPTIONS,
   formatDamageInput,
   isValidDiceInput,
-} from "./weaponShared";
+} from "./weaponSharedUtils";
+import { useWeaponQualityPicker } from "./useWeaponQualityPicker";
 import { CUSTOM_AMMO_FAMILY_OPTIONS, type AmmoTrackingMode } from "./weaponHelpers";
 
 const CUSTOM_RANGED_CLASS_OPTIONS = ["Pistol", "Basic", "Heavy", "Thrown", "Exotic"] as const;

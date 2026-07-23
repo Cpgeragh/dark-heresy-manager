@@ -3,13 +3,12 @@
 import type { ArcheotechItem } from "../../../types/Character";
 import { Chip } from "../../../ui/Chip";
 import { uiSection, uiTextLabel, uiCardTitle } from "../../../ui/editableStyles";
-import { uiIconRemoveButton } from "../../../ui/buttonStyles";
+import { RemoveButton } from "../../../ui/RemoveButton";
 import { colourArcheotech } from "../../../ui/colourTokens";
 import { CRAFTSMANSHIP_STYLE } from "../../../ui/craftsmanship";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
-import { StatChip } from "../weapons/weaponShared";
+import { StatChip } from "../../../ui/StatChip";
 import { ARMOUR_LOCATION_LABELS } from "../../../constants/locations";
-import { TrashIcon } from "../../../ui/TrashIcon";
 
 interface Props {
   item: ArcheotechItem;
@@ -64,9 +63,7 @@ export function ArcheotechImplantRow({
       </div>
 
       {editable && (
-        <button type="button" onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
-          <TrashIcon className="w-4 h-4" />
-        </button>
+        <RemoveButton onClick={onRemove} label="Remove" />
       )}
     </div>
   );

@@ -11,14 +11,22 @@ initializeApp({ credential: cert(serviceAccount) });
 
 const db = getFirestore();
 
-function migrateWeaponArray(weapons: any[]): { weapons: any[]; changed: boolean } {
+type MigratableItem = Record<string, unknown>;
+
+function isMigratableItem(value: unknown): value is MigratableItem {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function migrateWeaponArray(weapons: unknown[]): { weapons: unknown[]; changed: boolean } {
   let changed = false;
   const migrated = weapons.map((weapon) => {
+    if (!isMigratableItem(weapon)) return weapon;
+
     let w = weapon;
 
     if (Array.isArray(w.attachments)) {
       changed = true;
-      const upgrades = (w.attachments as string[]).map((id: string) =>
+      const upgrades = w.attachments.map((id) =>
         id === "cr-melee-attachment" ? "cr-melee-upgrade" : id
       );
       const { attachments: _, ...rest } = w;
@@ -36,9 +44,10 @@ function migrateWeaponArray(weapons: any[]): { weapons: any[]; changed: boolean 
   return { weapons: migrated, changed };
 }
 
-function migrateItemArray(items: any[]): { items: any[]; changed: boolean } {
+function migrateItemArray(items: unknown[]): { items: unknown[]; changed: boolean } {
   let changed = false;
   const migrated = items.map((item) => {
+    if (!isMigratableItem(item)) return item;
     if (!("rarity" in item)) return item;
     changed = true;
     const { rarity, ...rest } = item;
@@ -72,20 +81,25 @@ async function runMigration() {
       .get();
 
     for (const ch of charsSnap.docs) {
-      const data = ch.data() as any;
-      const update: Record<string, any> = {};
+      const data = ch.data() as Record<string, unknown>;
+      const update: Record<string, unknown> = {};
 
-      const ranged = migrateWeaponArray(data.rangedWeapons ?? []);
+      const ranged = migrateWeaponArray(
+        Array.isArray(data.rangedWeapons) ? data.rangedWeapons : []
+      );
       if (ranged.changed) update.rangedWeapons = ranged.weapons;
 
-      const melee = migrateWeaponArray(data.meleeWeapons ?? []);
+      const melee = migrateWeaponArray(
+        Array.isArray(data.meleeWeapons) ? data.meleeWeapons : []
+      );
       if (melee.changed) update.meleeWeapons = melee.weapons;
 
       for (const key of ITEM_ARRAYS) {
-        if (data[key] !== undefined && !Array.isArray(data[key])) {
+        const items = data[key];
+        if (items !== undefined && !Array.isArray(items)) {
           continue;
         }
-        const result = migrateItemArray(data[key] ?? []);
+        const result = migrateItemArray(items ?? []);
         if (result.changed) update[key] = result.items;
       }
 

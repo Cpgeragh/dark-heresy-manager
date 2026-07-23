@@ -7,7 +7,7 @@ import "@testing-library/jest-dom";
 import { CharacteristicsTab } from "../../src/pages/characterSheet/CharacteristicsTab";
 import { getCharacteristicModifierTotals } from "../../src/features/corruption/characteristicModifierTotals";
 import { CHARACTERISTIC_BONUS_DIVISOR } from "../../src/constants/gameRules";
-import type { CharField } from "../../src/utils/characterFactory";
+import type { CharField } from "../../src/types/Character";
 import type { Characteristics, CorruptionBlock } from "../../src/types/Character";
 
 // Totals chosen so every derived value is unique and verifiable.

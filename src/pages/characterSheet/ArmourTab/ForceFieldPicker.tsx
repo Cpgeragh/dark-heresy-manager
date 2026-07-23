@@ -12,7 +12,7 @@ import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { uiTextMuted, uiTextBody, uiItemName } from "../../../ui/editableStyles";
 import { colourAmberFaint, colourFuchsia } from "../../../ui/colourTokens";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/craftsmanship";
-import { StatChip } from "../weapons/weaponShared";
+import { StatChip } from "../../../ui/StatChip";
 import {
   forceFieldCraftsmanshipDescription,
 } from "./armourHelpers";

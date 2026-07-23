@@ -16,21 +16,21 @@ import {
   uiCardTitle,
   uiInfoModalWrapper,
 } from "../../../ui/editableStyles";
-import { uiExpandButton, uiIconRemoveButton } from "../../../ui/buttonStyles";
+import { uiExpandButton } from "../../../ui/buttonStyles";
 import { colourArcheotech, colourOrange } from "../../../ui/colourTokens";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 import { InfoModal } from "../../../components/InfoModal";
 import { WEAPON_SPECIAL_RULES } from "../../../data/reference/weaponSpecialRules";
+import { StatChip } from "../../../ui/StatChip";
 import {
-  StatChip,
   DamageTypeChip,
   SpecialRulesContent,
-  computeMeleeTotalDamage,
   EquipToggle,
 } from "./weaponShared";
+import { computeMeleeTotalDamage } from "./weaponSharedUtils";
 import { weaponClassChip } from "./weaponHelpers";
-import { EXPLOSIVE_MISHAPS_CONTENT } from "./GrenadeCard";
-import { TrashIcon } from "../../../ui/TrashIcon";
+import { ExplosiveMishapsContent } from "./ExplosiveMishapsContent";
+import { RemoveButton } from "../../../ui/RemoveButton";
 import { ExpandChevron } from "../../../ui/ExpandChevron";
 
 export function ArcheotechWeaponCard({
@@ -96,12 +96,15 @@ export function ArcheotechWeaponCard({
   return (
     <div className={containerClass}>
       {/* Header — always visible */}
-      <button type="button"
-        className="w-full flex items-stretch justify-between gap-2 p-3 lg:p-4"
-        onClick={() => setExpanded((e) => !e)}
-        aria-expanded={expanded}
-      >
-        <div className={uiExpandButton}>
+      <div className="relative w-full flex items-stretch justify-between gap-2 p-3 lg:p-4">
+        <button
+          type="button"
+          onClick={() => setExpanded((e) => !e)}
+          aria-expanded={expanded}
+          aria-label={`${expanded ? "Collapse" : "Expand"} ${item.name} details`}
+          className="absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
+        />
+        <div className={`${uiExpandButton} relative pointer-events-none`}>
           <div className="flex items-center gap-2 flex-wrap">
             <p className={uiCardTitle}>{item.name}</p>
           </div>
@@ -122,7 +125,7 @@ export function ArcheotechWeaponCard({
             </div>
           )}
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="relative pointer-events-none flex items-center gap-2 shrink-0">
           {onToggleEquip && (
             <EquipToggle
               equipped={isEquipped}
@@ -133,15 +136,13 @@ export function ArcheotechWeaponCard({
           )}
           <ExpandChevron expanded={expanded} />
         </div>
-      </button>
+      </div>
 
       {expanded && (
         <div className="px-3 pb-3 lg:px-4 lg:pb-4 space-y-3">
           {editable && onRemove && (
             <div className="flex justify-end">
-              <button type="button" onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
-                <TrashIcon className="w-4 h-4" />
-              </button>
+              <RemoveButton onClick={onRemove} label="Remove" />
             </div>
           )}
 
@@ -202,7 +203,7 @@ export function ArcheotechWeaponCard({
               <div className="flex items-center gap-1.5">
                 <span className={uiTextLabel}>Mishaps</span>
                 <span className={uiInfoModalWrapper}>
-                  <InfoModal title="Explosive Mishaps" content={EXPLOSIVE_MISHAPS_CONTENT} />
+                  <InfoModal title="Explosive Mishaps" content={<ExplosiveMishapsContent />} />
                 </span>
               </div>
             )}

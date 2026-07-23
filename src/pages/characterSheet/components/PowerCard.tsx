@@ -6,8 +6,7 @@ import { sourceColour } from "../../../ui/sourceStyles";
 import type { PsychicPower } from "../../../types/Character";
 import { disciplineColours } from "../psychicStyles";
 import { uiSection, uiTextBody, uiTextPlaceholder, uiTextSubtle, uiInfoModalWrapper } from "../../../ui/editableStyles";
-import { uiIconRemoveButton } from "../../../ui/buttonStyles";
-import { TrashIcon } from "../../../ui/TrashIcon";
+import { RemoveButton } from "../../../ui/RemoveButton";
 
 interface PowerCardProps {
   power: PsychicPower;
@@ -95,13 +94,10 @@ export function PowerCard({ power, editable, onRemove, onEdit }: PowerCardProps)
           </button>
         )}
         {editable && (
-          <button type="button"
+          <RemoveButton
             onClick={() => onRemove(power.id)}
-            aria-label={`Remove ${power.name || "power"}`}
-            className={uiIconRemoveButton}
-          >
-            <TrashIcon className="w-4 h-4" />
-          </button>
+            label={`Remove ${power.name || "power"}`}
+          />
         )}
       </div>
     </div>

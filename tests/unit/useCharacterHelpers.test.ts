@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { useCharacterHelpers } from "../../src/hooks/useCharacterHelpers";
 import type { Character, Characteristics } from "../../src/types/Character";
-import type { CharField } from "../../src/utils/characterFactory";
+import type { CharField } from "../../src/types/Character";
 
 const BLANK: CharField = { base: 0, advances: 0 };
 

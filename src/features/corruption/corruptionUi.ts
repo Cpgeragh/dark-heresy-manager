@@ -6,7 +6,7 @@ import {
   colourRose,
   colourSky,
 } from "../../ui/colourTokens";
-import { chipClassName } from "../../ui/Chip";
+import { chipClassName } from "../../ui/chipStyles";
 import { CORRUPTION_TRACK, type CorruptionTrackEntry } from "./corruptionReference";
 
 export function corruptionDegreeChipClass(entry: CorruptionTrackEntry): string {

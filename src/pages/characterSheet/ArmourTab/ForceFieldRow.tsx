@@ -1,8 +1,8 @@
 import type { WornArmourPiece } from "../../../types/Character";
 import { uiSection, uiTextLabel, uiTextMuted, uiTextPlaceholder, uiItemName, uiInfoModalWrapper } from "../../../ui/editableStyles";
-import { uiIconRemoveButton } from "../../../ui/buttonStyles";
+import { RemoveButton } from "../../../ui/RemoveButton";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
-import { StatChip } from "../weapons/weaponShared";
+import { StatChip } from "../../../ui/StatChip";
 import { InfoModal } from "../../../components/InfoModal";
 import { ARMOUR_REFERENCE } from "../../../data/reference/armourReference";
 import { ARMOUR_SPECIAL_RULES } from "../../../data/reference/armourSpecialRules";
@@ -10,7 +10,6 @@ import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActi
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/StatusBadge";
 import { forceFieldCraftsmanshipDescription } from "./armourHelpers";
-import { TrashIcon } from "../../../ui/TrashIcon";
 
 interface Props extends CustomItemLibraryActionProps<"armour"> {
   piece: WornArmourPiece;
@@ -139,9 +138,7 @@ export function ForceFieldRow({
       )}
 
       {editable && (
-        <button type="button" onClick={() => onRemove(piece.id)} aria-label="Remove" className={uiIconRemoveButton}>
-          <TrashIcon className="w-4 h-4" />
-        </button>
+        <RemoveButton onClick={() => onRemove(piece.id)} label="Remove" />
       )}
     </div>
   );

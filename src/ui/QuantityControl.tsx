@@ -51,6 +51,7 @@ export function QuantityControl({ quantity, editable, onUpdate, size = "md" }: P
       {editable && (
         <button type="button"
           onClick={() => onUpdate(Math.max(0, quantity - 1))}
+          aria-label="Decrease quantity"
           className={`${sizeStyles.btn} rounded bg-slate-700 hover:bg-slate-600 text-slate-300 leading-none flex items-center justify-center`}
         >
           −
@@ -85,6 +86,7 @@ export function QuantityControl({ quantity, editable, onUpdate, size = "md" }: P
       {editable && (
         <button type="button"
           onClick={() => onUpdate(quantity + 1)}
+          aria-label="Increase quantity"
           className={`${sizeStyles.btn} rounded bg-slate-700 hover:bg-slate-600 text-slate-300 leading-none flex items-center justify-center`}
         >
           +

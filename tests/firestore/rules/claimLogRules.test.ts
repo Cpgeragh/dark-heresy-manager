@@ -239,7 +239,6 @@ describe("Firestore Rules: ClaimLog Rules", () => {
     );
 
     for (const action of ["force-assign", "force-release"]) {
-      // eslint-disable-next-line no-await-in-loop
       await expect(
         col.doc(`dm-${action}`).set({ action, actorUid: "dm-1" })
       ).resolves.toBeUndefined();
@@ -256,7 +255,6 @@ describe("Firestore Rules: ClaimLog Rules", () => {
     );
 
     for (const action of ["claim", "release"]) {
-      // eslint-disable-next-line no-await-in-loop
       await expect(
         col.doc(`dm-${action}`).set({ action, actorUid: "dm-1" })
       ).rejects.toThrow();

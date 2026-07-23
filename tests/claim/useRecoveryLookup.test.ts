@@ -9,7 +9,7 @@ vi.mock("../../src/firebase", () => {
   return {
     auth: {
       get currentUser() {
-        return { uid: mockUid };
+        return { uid: "device-user" };
       },
     },
     db: {},
@@ -22,7 +22,9 @@ let mockUid: string | null = null;
    MOCK FIRESTORE
 ------------------------------ */
 vi.mock("firebase/firestore", async () => {
-  const actual = await vi.importActual<any>("firebase/firestore");
+  const actual = await vi.importActual<typeof import("firebase/firestore")>(
+    "firebase/firestore"
+  );
   return {
     ...actual,
     // doc() must return an object with withConverter() so characterDocRef doesn't throw
@@ -33,10 +35,12 @@ vi.mock("firebase/firestore", async () => {
 
 import { getDoc } from "firebase/firestore";
 
-function mockGetDocSequence(docs: any[]) {
+type MockGetDocResult = Awaited<ReturnType<typeof getDoc>>;
+
+function mockGetDocSequence(docs: unknown[]) {
   let call = 0;
-  (getDoc as any).mockImplementation(() => {
-    return Promise.resolve(docs[call++]);
+  vi.mocked(getDoc).mockImplementation(() => {
+    return Promise.resolve(docs[call++] as MockGetDocResult);
   });
 }
 
@@ -55,7 +59,7 @@ describe("useRecoveryLookup ownership derivation", () => {
       { exists: () => true, data: () => ({ userId: null }) },
     ]);
 
-    const { result } = renderHook(() => useRecoveryLookup());
+    const { result } = renderHook(() => useRecoveryLookup(mockUid));
 
     await act(() => result.current.lookup("DH-TEST-0001"));
 
@@ -68,13 +72,10 @@ describe("useRecoveryLookup ownership derivation", () => {
     mockGetDocSequence([
       { exists: () => true, data: () => ({ campaignId: "c1", characterId: "ch1" }) },
       { exists: () => true, data: () => ({}) },
-      { exists: () =>
-          true,
-        data: () => ({ userId: "A", isEditableByPlayer: true }),
-      },
+      { exists: () => true, data: () => ({ userId: "A", isEditableByPlayer: true }) },
     ]);
 
-    const { result } = renderHook(() => useRecoveryLookup());
+    const { result } = renderHook(() => useRecoveryLookup(mockUid));
 
     await act(() => result.current.lookup("DH-TEST-0002"));
 
@@ -90,7 +91,7 @@ describe("useRecoveryLookup ownership derivation", () => {
       { exists: () => true, data: () => ({ userId: "A", isEditableByPlayer: true }) },
     ]);
 
-    const { result } = renderHook(() => useRecoveryLookup());
+    const { result } = renderHook(() => useRecoveryLookup(mockUid));
 
     await act(() => result.current.lookup("DH-TEST-0003"));
 
@@ -106,7 +107,7 @@ describe("useRecoveryLookup ownership derivation", () => {
       { exists: () => true, data: () => ({ userId: "A", isEditableByPlayer: false }) },
     ]);
 
-    const { result } = renderHook(() => useRecoveryLookup());
+    const { result } = renderHook(() => useRecoveryLookup(mockUid));
 
     await act(() => result.current.lookup("DH-TEST-0004"));
 

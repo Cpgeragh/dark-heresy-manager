@@ -2,11 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
-import { getDoc, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
 import type { User } from "firebase/auth";
 import { auth } from "../firebase";
-import { userDocRef } from "../firebase/converters";
-import type { UserDocument } from "../types/Firestore";
+import { synchroniseUserAccount } from "../services/userAccountService";
 
 interface UseAuthResult {
   currentUser: User | null;
@@ -36,33 +34,10 @@ export function useAuth(): UseAuthResult {
 
         setCurrentUser(user);
 
-        const ref = userDocRef(user.uid);
-        const snap = await getDoc(ref);
+        const userIsOnboarded = await synchroniseUserAccount(user.uid);
 
         if (ignore) return;
-
-        if (!snap.exists()) {
-          const newUserDoc: UserDocument = {
-            createdAt: serverTimestamp(),
-            lastSeen: serverTimestamp(),
-            onboarded: false,
-          };
-
-          await setDoc(ref, newUserDoc);
-
-          if (ignore) return;
-
-          setOnboarded(false);
-        } else {
-          const data = snap.data();
-
-          if (ignore) return;
-
-          // undefined means a legacy user created before onboarding existed — treat as onboarded
-          setOnboarded(data.onboarded !== false);
-        }
-
-        await updateDoc(ref, { lastSeen: serverTimestamp() });
+        setOnboarded(userIsOnboarded);
       } catch (err) {
         console.error("Auth error:", err);
       } finally {

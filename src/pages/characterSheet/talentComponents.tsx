@@ -16,7 +16,7 @@ import {
   uiItemName,
   uiTextLabel,
 } from "../../ui/editableStyles";
-import { uiIconRemoveButton } from "../../ui/buttonStyles";
+import { RemoveButton } from "../../ui/RemoveButton";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { Button } from "../../ui/Button";
 import { Chip } from "../../ui/Chip";
@@ -27,15 +27,11 @@ import { sourceColour } from "../../ui/sourceStyles";
 import { PickerBody, PickerModal, PickerRow } from "../../ui/PickerModal";
 import { OptionPickerScreen } from "../../ui/OptionPickerScreen";
 import { ArrowLeft, ArrowRight } from "../../ui/PickerArrows";
-import { TrashIcon } from "../../ui/TrashIcon";
+import { normaliseSources } from "./talentUtils";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 export type AnyListItem = TalentData | TraitData;
-
-export function normaliseSources(s: SkillSource | SkillSource[]): SkillSource[] {
-  return Array.isArray(s) ? s : [s];
-}
 
 // ─── TalentPickerModal ────────────────────────────────────────────────────────
 
@@ -318,13 +314,11 @@ export function EntryCard({ entry, editable, onRemove }: EntryCardProps) {
         </div>
       </div>
       {editable && (
-        <button type="button"
+        <RemoveButton
           onClick={() => onRemove(entry.uid)}
-          aria-label={`Remove ${entry.name}`}
-          className={`${uiIconRemoveButton} mt-0.5`}
-        >
-          <TrashIcon className="w-4 h-4" />
-        </button>
+          label={`Remove ${entry.name}`}
+          className="mt-0.5"
+        />
       )}
     </div>
   );

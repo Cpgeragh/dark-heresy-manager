@@ -18,13 +18,13 @@ import {
   sanitizeNonNegativeIntegerInput,
   sanitizePositiveIntegerInput,
 } from "../../../utils/formInput";
+import { WeaponQualitySelector } from "./weaponShared";
 import {
-  WeaponQualitySelector,
-  useWeaponQualityPicker,
   DAMAGE_TYPE_OPTIONS,
   formatDamageInput,
   isValidDiceInput,
-} from "./weaponShared";
+} from "./weaponSharedUtils";
+import { useWeaponQualityPicker } from "./useWeaponQualityPicker";
 
 const CUSTOM_GRENADE_TYPE_OPTIONS = ["Grenade", "Mine"] as const;
 

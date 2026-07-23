@@ -23,7 +23,8 @@ import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../..
 import { ArrowRight, ArrowLeft } from "../../../ui/PickerArrows";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
 import { InfoModal } from "../../../components/InfoModal";
-import { StatChip, DamageTypeChip, SpecialRulesContent } from "./weaponShared";
+import { StatChip } from "../../../ui/StatChip";
+import { DamageTypeChip, SpecialRulesContent } from "./weaponShared";
 import {
   weaponClassChip,
   ammoFamilyChip,

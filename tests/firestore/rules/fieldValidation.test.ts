@@ -81,7 +81,6 @@ describe("Firestore Rules: Field Validation", () => {
     ];
     
     for (let i = 0; i < testCodes.length; i++) {
-      // eslint-disable-next-line no-await-in-loop
       await expect(
         dmDb.collection(`campaigns/${campaignId}/characters`).doc(`char-${i}`).set({
           userId: null,

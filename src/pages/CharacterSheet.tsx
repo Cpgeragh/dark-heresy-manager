@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { useHeaderExtensionSetters } from "../context/HeaderExtensionContext";
+import { useHeaderExtensionSetters } from "../context/useHeaderExtension";
 import { CharacterKebabContent } from "./characterSheet/CharacterKebabContent";
 
 import { useCharacterSheet } from "./characterSheet/useCharacterSheet";
@@ -112,9 +112,11 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
     character?.userId
   );
   const ownerName = ownerFirstName ?? character?.header.playerName?.trim() ?? null;
+  const hasCharacter = Boolean(character);
+  const savedSkills = character?.skills;
   const normalisedSkills = useMemo(
-    () => (character ? normaliseSkills(character.skills) : []),
-    [character?.skills]
+    () => (hasCharacter ? normaliseSkills(savedSkills) : []),
+    [hasCharacter, savedSkills]
   );
 
   const psyRating = useMemo(

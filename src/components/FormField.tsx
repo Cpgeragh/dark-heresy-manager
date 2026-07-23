@@ -14,8 +14,8 @@ interface FormFieldProps {
   description?: string;
   rows?: number;
   className?: string;
-  error?: string; // NEW: validation error message
-  onBlur?: () => void; // NEW: for validation on blur
+  error?: string;
+  onBlur?: () => void;
 }
 
 export function FormField({
@@ -28,8 +28,8 @@ export function FormField({
   description,
   rows = 3,
   className = "",
-  error, // NEW
-  onBlur, // NEW
+  error,
+  onBlur,
 }: FormFieldProps) {
   const hasError = !!error && editable;
   const controlClass = fieldControlClass({

@@ -2,16 +2,26 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { ClaimPreview } from "../../src/pages/ClaimCharacter/ClaimPreview";
+import type { CharacterHeader } from "../../src/types/Character";
+import type { CampaignDocument } from "../../src/types/Firestore";
+import { createEmptyCharacterData } from "../../src/utils/characterFactory";
 
 const mockCharacter = {
   id: "char-123",
-  header: { characterName: "Brother Corvus" },
-} as any;
+  ...createEmptyCharacterData({
+    campaignId: "campaign-123",
+    recoveryCode: "DH-TEST-0123",
+    characterName: "Brother Corvus",
+  }),
+};
 
-const mockCampaign = {
+const mockCampaign: CampaignDocument = {
   name: "The Calixis Conspiracy",
   dmId: "dm-uid",
-} as any;
+  memberIds: [],
+  createdAt: new Date(),
+  archivedAt: null,
+};
 
 describe("ClaimPreview", () => {
   it("renders character and campaign name", () => {
@@ -111,7 +121,7 @@ describe("ClaimPreview", () => {
   it("falls back to Unnamed Character when no characterName", () => {
     render(
       <ClaimPreview
-        character={{ ...mockCharacter, header: {} }}
+        character={{ ...mockCharacter, header: {} as CharacterHeader }}
         campaign={mockCampaign}
         ownership="unclaimed"
         onClaim={vi.fn()}

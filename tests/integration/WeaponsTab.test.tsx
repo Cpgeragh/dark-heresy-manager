@@ -255,7 +255,7 @@ describe("WeaponsTab remove / equip-toggle", () => {
   it("removes a Ranged weapon", async () => {
     const user = userEvent.setup();
     const { noop } = renderTab();
-    await user.click(screen.getByText("Lasgun")); // expand the card
+    await user.click(screen.getByRole("button", { name: "Expand Lasgun details" }));
     await user.click(screen.getByRole("button", { name: "Remove" }));
     expect(noop).toHaveBeenCalledWith([]);
   });
@@ -312,7 +312,7 @@ describe("WeaponsTab custom-item library actions", () => {
     useCampaignCustomItemsMock.mockReturnValue({ items: [makeLibraryItem()], loading: false, error: null });
 
     renderTab({ isDM: true, rangedWeapons: [linkedWeapon], meleeWeapons: [] });
-    await user.click(screen.getByText("Custom Lasgun"));
+    await user.click(screen.getByRole("button", { name: "Expand Custom Lasgun details" }));
     await user.click(screen.getByRole("button", { name: "Publish" }));
     expect(publishCustomItemMock).toHaveBeenCalledWith(
       expect.objectContaining({ customItemId: "lib1" })
@@ -326,7 +326,7 @@ describe("WeaponsTab custom-item library actions", () => {
     useCampaignCustomItemsMock.mockReturnValue({ items: [makeLibraryItem()], loading: false, error: null });
 
     renderTab({ isDM: true, rangedWeapons: [linkedWeapon], meleeWeapons: [] });
-    await user.click(screen.getByText("Custom Lasgun"));
+    await user.click(screen.getByRole("button", { name: "Expand Custom Lasgun details" }));
     await user.click(screen.getByRole("button", { name: "Archive" }));
     expect(archiveCustomItemMock).toHaveBeenCalledWith(
       expect.objectContaining({ customItemId: "lib1" })

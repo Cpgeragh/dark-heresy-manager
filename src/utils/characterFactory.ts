@@ -1,13 +1,7 @@
 // src/utils/characterFactory.ts
 
-import type { Character } from "../types/Character";
+import type { Character, CharField } from "../types/Character";
 import { DEFAULT_SKILLS } from "../data/defaultSkills";
-
-/** Small helper to create a CharField-like object */
-export interface CharField {
-  base: number;
-  advances: number; // 0–4
-}
 
 function char(base = 0, advances = 0): CharField {
   return { base, advances };
@@ -63,7 +57,6 @@ export function createEmptyCharacterData(params: {
       fel: char(),
     },
 
-    // Now prepopulated with DH2e skills
     skills: DEFAULT_SKILLS,
 
     wounds: {

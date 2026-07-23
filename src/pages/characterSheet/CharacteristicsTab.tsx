@@ -1,7 +1,7 @@
 // src/pages/characterSheet/CharacteristicsTab.tsx
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import type { CharField } from "../../utils/characterFactory";
+import type { CharField } from "../../types/Character";
 import type { Characteristics, CorruptionBlock } from "../../types/Character";
 import {
   getCharacteristicModifierTotals,

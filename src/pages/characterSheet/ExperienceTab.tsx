@@ -10,7 +10,7 @@ import {
   uiTextPlaceholder,
   uiFormLabel,
 } from "../../ui/editableStyles";
-import { uiIconRemoveButton } from "../../ui/buttonStyles";
+import { RemoveButton } from "../../ui/RemoveButton";
 import { Button } from "../../ui/Button";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { OptionPickerScreen } from "../../ui/OptionPickerScreen";
@@ -18,7 +18,6 @@ import { ArrowRight } from "../../ui/PickerArrows";
 import { useXpProposals } from "../../hooks/useXpProposals";
 import { proposeXpSpend } from "../../services/xpService";
 import { useToast } from "../../components/Toast/ToastContext";
-import { TrashIcon } from "../../ui/TrashIcon";
 import { ErrorState } from "../../ui/ErrorState";
 import { LoadingState } from "../../ui/LoadingState";
 
@@ -211,13 +210,10 @@ export function ExperienceTab({
                       <div className="flex items-center gap-2 shrink-0">
                         <span className="text-xs lg:text-sm text-slate-400">{adv.cost} XP</span>
                         {isDM && (
-                          <button type="button"
+                          <RemoveButton
                             onClick={() => handleRemoveAdvance(rankBlock.rank, adv.id)}
-                            aria-label="Remove"
-                            className={uiIconRemoveButton}
-                          >
-                            <TrashIcon className="w-4 h-4" />
-                          </button>
+                            label="Remove"
+                          />
                         )}
                       </div>
                     </div>

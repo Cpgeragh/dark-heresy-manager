@@ -1,6 +1,6 @@
 // src/features/insanity/InsanityPanel.tsx
 
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { FormField } from "../../components/FormField";
 import { InfoModal } from "../../components/InfoModal";
 import { Stepper } from "../../components/Stepper";
@@ -13,7 +13,7 @@ import type {
 } from "../../types/Character";
 import { Button } from "../../ui/Button";
 import { Chip } from "../../ui/Chip";
-import { uiIconRemoveButton } from "../../ui/buttonStyles";
+import { RemoveButton } from "../../ui/RemoveButton";
 import { colourActiveRose, colourActiveSky, colourAmberFaint } from "../../ui/colourTokens";
 import {
   uiFormLabel,
@@ -30,7 +30,6 @@ import {
   segmentedTabPanelId,
   uiSwipeableTabPanel,
 } from "../../ui/segmentedTabStyles";
-import { TrashIcon } from "../../ui/TrashIcon";
 import { InsanityDisorderPicker } from "./InsanityDisorderPicker";
 import { DisorderInfoContent } from "./InsanityReferenceModals";
 import { InsanityTraumaPicker } from "./InsanityTraumaPicker";
@@ -274,9 +273,7 @@ function DisorderRow({
           </div>
         </div>
         {editable && (
-          <button type="button" onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
-            <TrashIcon className="w-4 h-4" />
-          </button>
+          <RemoveButton onClick={onRemove} label="Remove" />
         )}
       </div>
     </div>
@@ -322,9 +319,7 @@ function TraumaRow({
           </div>
         </div>
         {editable && (
-          <button type="button" onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
-            <TrashIcon className="w-4 h-4" />
-          </button>
+          <RemoveButton onClick={onRemove} label="Remove" />
         )}
       </div>
     </div>
@@ -461,15 +456,24 @@ function DisordersList({
 }
 
 export function InsanityPanel({ insanity, editable, onUpdate, sectionClassName }: InsanityPanelProps) {
-  const value = insanity ?? { points: 0, disorders: [] };
+  const value = useMemo(
+    () => insanity ?? { points: 0, disorders: [] },
+    [insanity]
+  );
   const [showDisorderPicker, setShowDisorderPicker] = useState(false);
   const [showTraumaPicker, setShowTraumaPicker] = useState(false);
-  const structuredDisorders = Array.isArray(value.disorders) ? value.disorders : [];
+  const structuredDisorders = useMemo(
+    () => (Array.isArray(value.disorders) ? value.disorders : []),
+    [value.disorders]
+  );
   const existingDisorderReferenceIds = new Set(
     structuredDisorders.map((d) => d.referenceId).filter((id): id is string => Boolean(id))
   );
   const legacyDisorders = typeof value.disorders === "string" ? value.disorders : value.disorderNotes ?? "";
-  const structuredTrauma = value.currentTrauma ?? [];
+  const structuredTrauma = useMemo(
+    () => value.currentTrauma ?? [],
+    [value.currentTrauma]
+  );
   const existingTraumaReferenceIds = new Set(
     structuredTrauma.map((t) => t.referenceId).filter((id): id is string => Boolean(id))
   );

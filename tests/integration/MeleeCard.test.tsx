@@ -99,7 +99,7 @@ describe("MeleeCard thrown weapon", () => {
   it("calls onUpdateQuantity when the stepper is incremented", async () => {
     const user = userEvent.setup();
     const { onUpdateQuantity } = renderCard({ weapon: { ...baseWeapon, class: "Melee / Thrown", quantity: 3 } });
-    await user.click(screen.getByRole("button", { name: "+" }));
+    await user.click(screen.getByRole("button", { name: "Increase quantity" }));
     expect(onUpdateQuantity).toHaveBeenCalledWith(4);
   });
 });

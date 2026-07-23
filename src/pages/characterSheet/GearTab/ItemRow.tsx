@@ -3,13 +3,12 @@
 import type { GearItem } from "../../../types/Character";
 import { GEAR_REFERENCE } from "../../../data/reference/gearReference";
 import { uiSection, uiItemName, uiInfoModalWrapper } from "../../../ui/editableStyles";
-import { uiIconRemoveButton } from "../../../ui/buttonStyles";
+import { RemoveButton } from "../../../ui/RemoveButton";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { InfoModal } from "../../../components/InfoModal";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/StatusBadge";
-import { TrashIcon } from "../../../ui/TrashIcon";
 
 interface Props extends CustomItemLibraryActionProps<"gear"> {
   item: GearItem;
@@ -80,9 +79,7 @@ export function ItemRow({
         </div>
 
         {editable && (
-          <button type="button" onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
-            <TrashIcon className="w-4 h-4" />
-          </button>
+          <RemoveButton onClick={onRemove} label="Remove" />
         )}
       </div>
     </div>

@@ -4,13 +4,12 @@ import type { DrugItem } from "../../../types/Character";
 import { InfoModal } from "../../../components/InfoModal";
 import { DRUGS_REFERENCE } from "../../../data/reference/drugsReference";
 import { uiSection, uiTextBody, uiTextLabel, uiTextMuted, uiItemName, uiInfoModalWrapper } from "../../../ui/editableStyles";
-import { uiIconRemoveButton } from "../../../ui/buttonStyles";
+import { RemoveButton } from "../../../ui/RemoveButton";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/StatusBadge";
-import { TrashIcon } from "../../../ui/TrashIcon";
 
 export function DrugRow({
   item,
@@ -126,9 +125,7 @@ export function DrugRow({
 
       {/* Remove */}
       {editable && (
-        <button type="button" onClick={() => onRemove(item.id)} aria-label="Remove" className={uiIconRemoveButton}>
-          <TrashIcon className="w-4 h-4" />
-        </button>
+        <RemoveButton onClick={() => onRemove(item.id)} label="Remove" />
       )}
     </div>
   );

@@ -159,7 +159,7 @@ export function ImplantPicker({
     );
   }
 
-  // ── Step 2: Location picker (arm/leg implants only) ───────────────────────
+  // ── Location picker (arm/leg implants only) ──────────────────────────────
   if (selected && selected.requiresLocation && !location) {
     const isArm = selected.requiresLocation === "arm";
     const options: { label: string; value: ArmourLocationKey[] }[] = isArm
@@ -207,7 +207,7 @@ export function ImplantPicker({
     );
   }
 
-  // ── Step 3: Craftsmanship picker ──────────────────────────────────────────
+  // ── Craftsmanship picker ─────────────────────────────────────────────────
   if (selected) {
     const qualities = availableCraftsmanship(selected);
     return (
@@ -282,7 +282,7 @@ export function ImplantPicker({
     );
   }
 
-  // ── Step 1: Search list ───────────────────────────────────────────────────
+  // ── Search list ──────────────────────────────────────────────────────────
   return (
     <PickerModal
       title={editable ? "Add Cybernetic" : "View Cybernetics"}

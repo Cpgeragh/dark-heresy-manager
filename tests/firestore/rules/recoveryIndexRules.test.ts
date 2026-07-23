@@ -149,7 +149,7 @@ describe("Firestore Rules: recoveryIndex", () => {
       dmDb.collection("recoveryIndex").doc("MISSING-CAMPID").set({
         // campaignId missing
         characterId: "char1",
-      } as any)
+      })
     ).rejects.toThrow();
   });
 
@@ -164,7 +164,7 @@ describe("Firestore Rules: recoveryIndex", () => {
       dmDb.collection("recoveryIndex").doc("NO-CHARID").set({
         campaignId: "camp1",
         // characterId omitted
-      } as any)
+      })
     ).rejects.toThrow();
   });
 });

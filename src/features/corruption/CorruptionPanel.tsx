@@ -1,6 +1,6 @@
 // src/features/corruption/CorruptionPanel.tsx
 
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { FormField } from "../../components/FormField";
 import { InfoModal } from "../../components/InfoModal";
 import { Stepper } from "../../components/Stepper";
@@ -8,7 +8,7 @@ import { useSwipeableTabs } from "../../hooks/useSwipeableTabs";
 import type { CorruptionBlock, CorruptionMalignancyEntry, CorruptionMutationEntry } from "../../types/Character";
 import { Button } from "../../ui/Button";
 import { Chip } from "../../ui/Chip";
-import { uiIconRemoveButton } from "../../ui/buttonStyles";
+import { RemoveButton } from "../../ui/RemoveButton";
 import {
   colourActiveEmerald,
   colourActiveOrange,
@@ -36,9 +36,9 @@ import { getRollDisplayEntries } from "./characteristicModifiers";
 import { CorruptionMalignancyPicker } from "./CorruptionMalignancyPicker";
 import { MalignancyInfoContent } from "./CorruptionReferenceModals";
 import { MutationPicker } from "./MutationPicker";
-import { mutationDisplayName, MutationRow } from "./MutationRow";
+import { mutationDisplayName } from "./mutationDisplay";
+import { MutationRow } from "./MutationRow";
 import { RollEditor } from "./RollEditor";
-import { TrashIcon } from "../../ui/TrashIcon";
 import {
   CORRUPTION_RULE_TEXT,
   getCorruptionMalignancyRef,
@@ -303,9 +303,7 @@ export function MalignancyRow({
                 Edit Rolls
               </Button>
             )}
-            <button type="button" onClick={onRemove} aria-label="Remove" className={uiIconRemoveButton}>
-              <TrashIcon className="w-4 h-4" />
-            </button>
+            <RemoveButton onClick={onRemove} label="Remove" />
           </div>
         )}
       </div>
@@ -420,22 +418,34 @@ function MutationsList({
 }
 
 export function CorruptionPanel({ corruption, editable, onUpdate, sectionClassName }: CorruptionPanelProps) {
-  const value = corruption ?? { points: 0, malignancies: [] };
+  const value = useMemo(
+    () => corruption ?? { points: 0, malignancies: [] },
+    [corruption]
+  );
   const [showMalignancyPicker, setShowMalignancyPicker] = useState(false);
   const [showMinorMutationPicker, setShowMinorMutationPicker] = useState(false);
   const [showMajorMutationPicker, setShowMajorMutationPicker] = useState(false);
 
-  const structuredMalignancies = Array.isArray(value.malignancies) ? value.malignancies : [];
+  const structuredMalignancies = useMemo(
+    () => (Array.isArray(value.malignancies) ? value.malignancies : []),
+    [value.malignancies]
+  );
   const legacyMalignancies = typeof value.malignancies === "string" ? value.malignancies : value.malignancyNotes ?? "";
   const existingMalignancyReferenceIds = new Set(
     structuredMalignancies.map((m) => m.referenceId).filter((id): id is string => Boolean(id))
   );
 
-  const minorMutations = value.minorMutations ?? [];
+  const minorMutations = useMemo(
+    () => value.minorMutations ?? [],
+    [value.minorMutations]
+  );
   const existingMinorMutationReferenceIds = new Set(
     minorMutations.map((m) => m.referenceId).filter((id): id is string => Boolean(id))
   );
-  const majorMutations = value.majorMutations ?? [];
+  const majorMutations = useMemo(
+    () => value.majorMutations ?? [],
+    [value.majorMutations]
+  );
   const existingMajorMutationReferenceIds = new Set(
     majorMutations.map((m) => m.referenceId).filter((id): id is string => Boolean(id))
   );

@@ -1,14 +1,18 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockDoc, mockGetDoc, mockUpdateDoc } = vi.hoisted(() => ({
+const { mockDoc, mockGetDoc, mockServerTimestamp, mockSetDoc, mockUpdateDoc } = vi.hoisted(() => ({
   mockDoc: vi.fn((..._args: unknown[]) => "user-ref"),
   mockGetDoc: vi.fn(),
+  mockServerTimestamp: vi.fn(() => "server-time"),
+  mockSetDoc: vi.fn().mockResolvedValue(undefined),
   mockUpdateDoc: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock("firebase/firestore", () => ({
   doc: (...args: unknown[]) => mockDoc(...args),
   getDoc: (...args: unknown[]) => mockGetDoc(...args),
+  serverTimestamp: () => mockServerTimestamp(),
+  setDoc: (...args: unknown[]) => mockSetDoc(...args),
   updateDoc: (...args: unknown[]) => mockUpdateDoc(...args),
 }));
 
@@ -20,6 +24,7 @@ import {
   completeOnboarding,
   markRecoveryCodeBackedUp,
   needsRecoveryCodeBackup,
+  synchroniseUserAccount,
 } from "../../src/services/userAccountService";
 
 beforeEach(() => {
@@ -27,6 +32,34 @@ beforeEach(() => {
 });
 
 describe("user account recovery state", () => {
+  it("creates a missing user account and reports onboarding as incomplete", async () => {
+    mockGetDoc.mockResolvedValue({ exists: () => false });
+
+    await expect(synchroniseUserAccount("user-new")).resolves.toBe(false);
+    expect(mockSetDoc).toHaveBeenCalledWith("user-ref", {
+      createdAt: "server-time",
+      lastSeen: "server-time",
+      onboarded: false,
+    });
+    expect(mockUpdateDoc).toHaveBeenCalledWith("user-ref", {
+      lastSeen: "server-time",
+    });
+  });
+
+  it.each([
+    [{ onboarded: false }, false],
+    [{ onboarded: true }, true],
+    [{}, true],
+  ])("reports the stored onboarding state for an existing account", async (data, expected) => {
+    mockGetDoc.mockResolvedValue({ exists: () => true, data: () => data });
+
+    await expect(synchroniseUserAccount("user-existing")).resolves.toBe(expected);
+    expect(mockSetDoc).not.toHaveBeenCalled();
+    expect(mockUpdateDoc).toHaveBeenCalledWith("user-ref", {
+      lastSeen: "server-time",
+    });
+  });
+
   it("does not request backup when the user document is missing", async () => {
     mockGetDoc.mockResolvedValue({ exists: () => false });
 

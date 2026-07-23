@@ -14,27 +14,22 @@ import { useEffect, useState } from "react";
 
 export type InstallMode = "full" | "player";
 
+function getInitialInstallMode(): InstallMode {
+  const params = new URLSearchParams(window.location.search);
+  const invite = params.get("invite");
+  if (invite === "player" || invite === "full") return invite;
+
+  const stored = localStorage.getItem("installMode");
+  if (stored === "player" || stored === "full") return stored;
+  return "full";
+}
+
 export function useInstallMode(): InstallMode {
-  const [mode, setMode] = useState<InstallMode>(() => {
-    const stored = localStorage.getItem("installMode");
-    if (stored === "player" || stored === "full") return stored;
-    return "full"; // default until useEffect runs
-  });
+  const [mode] = useState<InstallMode>(getInitialInstallMode);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const invite = params.get("invite");
-    if (invite === "player") {
-      localStorage.setItem("installMode", "player");
-      setMode("player");
-    } else if (invite === "full") {
-      localStorage.setItem("installMode", "full");
-      setMode("full");
-    } else if (!localStorage.getItem("installMode")) {
-      localStorage.setItem("installMode", "full");
-      setMode("full");
-    }
-  }, []);
+    localStorage.setItem("installMode", mode);
+  }, [mode]);
 
   return mode;
 }

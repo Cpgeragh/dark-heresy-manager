@@ -8,6 +8,7 @@ import { useLinkDevice } from "../hooks/useLinkDevice";
 import { useToast } from "../components/Toast";
 import { uiSection, uiTextError } from "../ui/editableStyles";
 import { Button } from "../ui/Button";
+import { ConfirmInline } from "../ui/ConfirmInline";
 import { PageShell } from "../ui/PageShell";
 import { Panel } from "../ui/Panel";
 import { SectionHeader } from "../ui/SectionHeader";
@@ -25,13 +26,11 @@ export default function Settings({ user: _user, effectiveUserId, isLinked, unlin
   // ── Recovery code state ──────────────────────────────────────────────────
   const [revealedCode, setRevealedCode] = useState<string | null>(null);
   const [revealing, setRevealing] = useState(false);
-  const [confirmRotate, setConfirmRotate] = useState(false);
   const [rotating, setRotating] = useState(false);
 
   // ── Device link state ────────────────────────────────────────────────────
   const { linkDevice, loading: linking, error: linkError } = useLinkDevice();
   const [linkCode, setLinkCode] = useState("");
-  const [confirmUnlink, setConfirmUnlink] = useState(false);
   const [unlinking, setUnlinking] = useState(false);
 
   async function handleReveal() {
@@ -53,7 +52,6 @@ export default function Settings({ user: _user, effectiveUserId, isLinked, unlin
 
   async function handleRotate() {
     setRotating(true);
-    setConfirmRotate(false);
     try {
       const newCode = await rotateRecoveryCode(effectiveUserId);
       setRevealedCode(newCode);
@@ -80,7 +78,6 @@ export default function Settings({ user: _user, effectiveUserId, isLinked, unlin
     setUnlinking(true);
     try {
       await unlink();
-      setConfirmUnlink(false);
       toast.success("Device unlinked.");
     } catch {
       toast.error("Failed to unlink device. Please try again.");
@@ -92,14 +89,13 @@ export default function Settings({ user: _user, effectiveUserId, isLinked, unlin
   return (
     <PageShell title="Settings">
       <Panel>
-
         {/* ── Recovery Code ───────────────────────────────────────────────── */}
         <div>
           <SectionHeader className="mb-3">Recovery Code</SectionHeader>
           <section className={uiSection + " space-y-3"}>
             <p className="text-slate-400 text-sm lg:text-base">
-              Use this code to reclaim your campaigns and characters if you lose access to
-              this device. Keep it somewhere safe and private.
+              Use this code to reclaim your campaigns and characters if you lose access to this
+              device. Keep it somewhere safe and private.
             </p>
 
             {revealedCode ? (
@@ -117,25 +113,16 @@ export default function Settings({ user: _user, effectiveUserId, isLinked, unlin
                   <Button variant="ghost" onClick={() => setRevealedCode(null)}>
                     Hide
                   </Button>
-                  {confirmRotate ? (
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm lg:text-base text-amber-400">Rotate code?</span>
-                      <Button onClick={handleRotate} disabled={rotating}>
-                        {rotating ? "Rotating…" : "Yes, rotate"}
-                      </Button>
-                      <Button variant="ghost" onClick={() => setConfirmRotate(false)}>
-                        Cancel
-                      </Button>
-                    </div>
-                  ) : (
-                    <Button
-                      variant="ghost"
-                      onClick={() => setConfirmRotate(true)}
-                      disabled={rotating}
-                    >
-                      Rotate Code
-                    </Button>
-                  )}
+                  <ConfirmInline
+                    triggerLabel="Rotate Code"
+                    question="Rotate code?"
+                    onConfirm={handleRotate}
+                    variant="warning"
+                    busy={rotating}
+                    confirmLabel="Yes, rotate"
+                    cancelLabel="Cancel"
+                    busyLabel="Rotating…"
+                  />
                 </div>
                 <p className="text-xs lg:text-sm text-slate-600">
                   Rotating generates a new code and invalidates the old one.
@@ -156,34 +143,25 @@ export default function Settings({ user: _user, effectiveUserId, isLinked, unlin
             {isLinked ? (
               <>
                 <p className="text-slate-400 text-sm lg:text-base">
-                  This device is linked to another account. All campaigns and characters
-                  from that account are accessible here.
+                  This device is linked to another account. All campaigns and characters from that
+                  account are accessible here.
                 </p>
-                {confirmUnlink ? (
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm lg:text-base text-amber-400">Unlink this device?</span>
-                    <Button onClick={handleUnlink} disabled={unlinking}>
-                      {unlinking ? "Unlinking…" : "Yes, unlink"}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      onClick={() => setConfirmUnlink(false)}
-                      disabled={unlinking}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                ) : (
-                  <Button variant="ghost" onClick={() => setConfirmUnlink(true)}>
-                    Unlink This Device
-                  </Button>
-                )}
+                <ConfirmInline
+                  triggerLabel="Unlink This Device"
+                  question="Unlink this device?"
+                  onConfirm={handleUnlink}
+                  variant="warning"
+                  busy={unlinking}
+                  confirmLabel="Yes, unlink"
+                  cancelLabel="Cancel"
+                  busyLabel="Unlinking…"
+                />
               </>
             ) : (
               <>
                 <p className="text-slate-400 text-sm lg:text-base">
-                  Enter the recovery code from your other device to access all its campaigns
-                  and characters here.
+                  Enter the recovery code from your other device to access all its campaigns and
+                  characters here.
                 </p>
                 <input
                   type="text"
@@ -200,7 +178,6 @@ export default function Settings({ user: _user, effectiveUserId, isLinked, unlin
             )}
           </section>
         </div>
-
       </Panel>
     </PageShell>
   );

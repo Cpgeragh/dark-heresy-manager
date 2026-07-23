@@ -73,6 +73,18 @@ interface SectionDrawerProps {
 }
 
 export function SectionDrawer({
+  ...props
+}: SectionDrawerProps) {
+  const externalRequest =
+    props.externalOpen && props.externalCategoryLabel
+      ? props.externalCategoryLabel
+      : "local";
+  const drawerStateKey = `${props.isDM ? "dm" : "player"}:${externalRequest}`;
+
+  return <SectionDrawerContent key={drawerStateKey} {...props} />;
+}
+
+function SectionDrawerContent({
   activeTab,
   onTabChange,
   isDM,
@@ -80,28 +92,27 @@ export function SectionDrawer({
   externalCategoryLabel,
   onExternalClose,
 }: SectionDrawerProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [level, setLevel] = useState<"categories" | "pages">("categories");
-  const [activeCategoryIndex, setActiveCategoryIndex] = useState<number | null>(null);
-
   const visibleCategories = CATEGORIES.filter((c) => !c.dmOnly || isDM);
+  const externalCategoryIndex =
+    externalOpen && externalCategoryLabel
+      ? visibleCategories.findIndex((category) => category.label === externalCategoryLabel)
+      : -1;
+  const hasExternalCategory = externalCategoryIndex >= 0;
+
+  const [isOpen, setIsOpen] = useState(hasExternalCategory);
+  const [level, setLevel] = useState<"categories" | "pages">(
+    hasExternalCategory ? "pages" : "categories"
+  );
+  const [activeCategoryIndex, setActiveCategoryIndex] = useState<number | null>(
+    hasExternalCategory ? externalCategoryIndex : null
+  );
+
   const activeCategory =
     activeCategoryIndex !== null ? visibleCategories[activeCategoryIndex] : null;
 
   const open = useCallback(() => {
     setIsOpen(true);
   }, []);
-
-  // Desktop bar trigger: open and jump straight to the requested category's pages
-  useEffect(() => {
-    if (!externalOpen || !externalCategoryLabel) return;
-    const cats = CATEGORIES.filter((c) => !c.dmOnly || isDM);
-    const idx = cats.findIndex((c) => c.label === externalCategoryLabel);
-    if (idx === -1) return;
-    setActiveCategoryIndex(idx);
-    setLevel("pages");
-    setIsOpen(true);
-  }, [externalOpen, externalCategoryLabel, isDM]);
 
   const close = useCallback(() => {
     setIsOpen(false);
@@ -213,6 +224,7 @@ export function SectionDrawer({
                 {/* Back button */}
                 <button type="button"
                   onClick={goBack}
+                  aria-label={`Back to categories from ${activeCategory.label}`}
                   className="flex items-center gap-2 px-4 py-3 w-full text-sm hover:bg-slate-800 transition border-b border-slate-700"
                 >
                   <ArrowLeft />

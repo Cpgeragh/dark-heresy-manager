@@ -16,12 +16,14 @@ import { RequiredFormLabel } from "../../../ui/RequiredFormLabel";
 import { STANDARD_AVAILABILITY_OPTIONS } from "../../../constants/availability";
 import { sanitizeDiceInput, sanitizeNonNegativeIntegerInput } from "../../../utils/formInput";
 import {
-  DAMAGE_TYPE_OPTIONS,
   WeaponQualitySelector,
-  useWeaponQualityPicker,
+} from "./weaponShared";
+import {
+  DAMAGE_TYPE_OPTIONS,
   formatDamageInput,
   isValidDiceInput,
-} from "./weaponShared";
+} from "./weaponSharedUtils";
+import { useWeaponQualityPicker } from "./useWeaponQualityPicker";
 
 const CUSTOM_MELEE_CLASS_OPTIONS = ["Melee", "Melee (Two-Handed)", "Melee / Thrown"] as const;
 

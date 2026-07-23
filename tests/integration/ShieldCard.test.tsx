@@ -65,7 +65,7 @@ describe("ShieldCard expand/collapse", () => {
     const user = userEvent.setup();
     renderCard({ isEquipped: false });
     expect(screen.queryByText("Damage")).not.toBeInTheDocument();
-    await user.click(screen.getByText("Custom Buckler"));
+    await user.click(screen.getByRole("button", { name: "Expand Custom Buckler details" }));
     expect(screen.getByText("Damage")).toBeInTheDocument();
   });
 });

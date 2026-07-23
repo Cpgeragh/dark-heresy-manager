@@ -7,9 +7,8 @@ import { charColour } from "../../../ui/sourceStyles";
 import { Chip } from "../../../ui/Chip";
 import { InfoModal } from "../../../components/InfoModal";
 import { SKILL_DESCRIPTIONS } from "../../../data/skillDescriptions";
-import { uiIconRemoveButton } from "../../../ui/buttonStyles";
+import { RemoveButton } from "../../../ui/RemoveButton";
 import { uiInfoModalWrapper, uiItemName, uiSectionShell } from "../../../ui/editableStyles";
-import { TrashIcon } from "../../../ui/TrashIcon";
 import { ExpandChevron } from "../../../ui/ExpandChevron";
 import { colourPurple, colourTeal } from "../../../ui/colourTokens";
 
@@ -54,18 +53,25 @@ export function SkillRow({ skill, editable, updateLevel, previewMode = false, on
   return (
     <div className={uiSectionShell + " overflow-hidden"}>
       {/* COLLAPSED ROW */}
-      <button type="button"
-        onClick={onSelect ? () => onSelect(skill.id) : handleToggle}
-        aria-expanded={onSelect ? undefined : expanded}
-        className="w-full px-3 lg:px-4 py-2.5 lg:py-3 text-left hover:bg-slate-700/40 transition group"
-      >
+      <div className="relative w-full px-3 lg:px-4 py-2.5 lg:py-3 text-left hover:bg-slate-700/40 transition group">
+        <button
+          type="button"
+          onClick={onSelect ? () => onSelect(skill.id) : handleToggle}
+          aria-expanded={onSelect ? undefined : expanded}
+          aria-label={
+            onSelect
+              ? `Select ${skill.name}`
+              : `${expanded ? "Collapse" : "Expand"} ${skill.name} details`
+          }
+          className="absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
+        />
         {/* Mobile: name+chips in a left column, total in its own centered column, chevron last */}
-        <div className="lg:hidden flex items-center gap-3">
+        <div className="relative pointer-events-none lg:hidden flex items-center gap-3">
           <div className="flex-1 min-w-0 space-y-1.5">
             <div className="flex items-center gap-1.5">
               <span className={`${uiItemName} truncate ${onSelect ? "group-hover:text-white" : ""}`}>{displayName}</span>
               {SKILL_DESCRIPTIONS[skill.name] && (
-                <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
+                <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
                   <InfoModal title={skill.name} content={SKILL_DESCRIPTIONS[skill.name]} as="span" />
                 </span>
               )}
@@ -88,29 +94,27 @@ export function SkillRow({ skill, editable, updateLevel, previewMode = false, on
             {skill.total ?? "--"}<span className="text-sm font-normal text-slate-300 ml-1">pts</span>
           </span>
           {onSelect ? (
-            <span
-              role="button"
-              tabIndex={0}
+            <button
+              type="button"
               aria-expanded={expanded}
               aria-label={expanded ? "Collapse skill details" : "Expand skill details"}
-              onClick={(e) => { e.stopPropagation(); handleToggle(); }}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); handleToggle(); } }}
-              className="p-1 -m-1"
+              onClick={handleToggle}
+              className="relative z-10 pointer-events-auto p-1 -m-1"
             >
               <ExpandChevron expanded={expanded} />
-            </span>
+            </button>
           ) : (
             <ExpandChevron expanded={expanded} />
           )}
         </div>
 
         {/* Desktop: name+chips in a left column, total in its own centered column, chevron last */}
-        <div className="hidden lg:flex lg:items-center lg:gap-3">
+        <div className="relative pointer-events-none hidden lg:flex lg:items-center lg:gap-3">
           <div className="flex-1 min-w-0 space-y-1.5">
             <div className="flex items-center gap-1.5">
               <span className={`${uiItemName} truncate ${onSelect ? "group-hover:text-white" : ""}`}>{displayName}</span>
               {SKILL_DESCRIPTIONS[skill.name] && (
-                <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
+                <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
                   <InfoModal title={skill.name} content={SKILL_DESCRIPTIONS[skill.name]} as="span" />
                 </span>
               )}
@@ -133,22 +137,20 @@ export function SkillRow({ skill, editable, updateLevel, previewMode = false, on
             {skill.total ?? "--"}<span className="text-sm font-normal text-slate-300 ml-1">pts</span>
           </span>
           {onSelect ? (
-            <span
-              role="button"
-              tabIndex={0}
+            <button
+              type="button"
               aria-expanded={expanded}
               aria-label={expanded ? "Collapse skill details" : "Expand skill details"}
-              onClick={(e) => { e.stopPropagation(); handleToggle(); }}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); handleToggle(); } }}
-              className="p-1 -m-1"
+              onClick={handleToggle}
+              className="relative z-10 pointer-events-auto p-1 -m-1"
             >
               <ExpandChevron expanded={expanded} />
-            </span>
+            </button>
           ) : (
             <ExpandChevron expanded={expanded} />
           )}
         </div>
-      </button>
+      </div>
 
       {/* EXPANDED BODY */}
       {expanded && (
@@ -157,13 +159,11 @@ export function SkillRow({ skill, editable, updateLevel, previewMode = false, on
           <div className="space-y-2">
               {editable && skill.level !== "untrained" && (
                 <div className="flex justify-end">
-                  <button type="button"
+                  <RemoveButton
                     onClick={handleRemove}
-                    className={`${uiIconRemoveButton} focus:outline-none`}
-                    aria-label={`Remove ${skill.name}`}
-                  >
-                    <TrashIcon className="w-4 h-4" />
-                  </button>
+                    className="focus:outline-none"
+                    label={`Remove ${skill.name}`}
+                  />
                 </div>
               )}
               <div className="flex flex-wrap items-center gap-2">
