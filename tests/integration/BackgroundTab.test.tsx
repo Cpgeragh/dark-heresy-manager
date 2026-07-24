@@ -27,6 +27,62 @@ function renderTab(props: Partial<React.ComponentProps<typeof BackgroundTab>> = 
 }
 
 describe("BackgroundTab", () => {
+  it("selects a career and assigns its starting rank", async () => {
+    const user = userEvent.setup();
+    const { onUpdateHeader } = renderTab();
+
+    await user.click(screen.getByText("— Select career —"));
+    await user.click(screen.getByText("Guardsman"));
+
+    expect(onUpdateHeader).toHaveBeenCalledWith(
+      expect.objectContaining({ career: "Guardsman", rank: "Conscript" })
+    );
+  });
+
+  it("selects a rank from the selected career progression", async () => {
+    const user = userEvent.setup();
+    const { onUpdateHeader } = renderTab({
+      header: {
+        characterName: "Brother Corvus",
+        career: "Guardsman",
+        rank: "Conscript",
+      },
+    });
+
+    await user.click(screen.getByRole("button", { name: "Conscript" }));
+    await user.click(screen.getByText("Storm Trooper"));
+
+    expect(onUpdateHeader).toHaveBeenCalledWith(
+      expect.objectContaining({ career: "Guardsman", rank: "Storm Trooper" })
+    );
+  });
+
+  it("shows career and rank reference information", async () => {
+    const user = userEvent.setup();
+    renderTab({
+      header: {
+        characterName: "Brother Corvus",
+        career: "Guardsman",
+        rank: "Conscript",
+      },
+    });
+
+    await user.click(screen.getByRole("button", { name: "Show information about Guardsman" }));
+    expect(
+      screen.getByText(/Guardsmen are the fighters, killers and warriors/)
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Close" }));
+    await user.click(screen.getByRole("button", { name: "Show information about Conscript" }));
+    expect(screen.getByText("Rank 1")).toBeInTheDocument();
+    expect(screen.getByText("0–499")).toBeInTheDocument();
+  });
+
+  it("keeps the rank selector unavailable until a recognised career is selected", () => {
+    renderTab();
+    expect(screen.getByRole("button", { name: "Select a career first" })).toBeDisabled();
+  });
+
   it("shows a placeholder when no homeworld is selected", () => {
     renderTab();
     expect(screen.getByText("— Select homeworld —")).toBeInTheDocument();
