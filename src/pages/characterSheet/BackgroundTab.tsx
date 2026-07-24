@@ -14,9 +14,11 @@ import {
 import { SectionHeader } from "../../ui/SectionHeader";
 import { HOMEWORLD_LIST } from "../../data/homeworldData";
 import { findCareerByName, type CareerData, type CareerRankData } from "../../data/careerData";
+import { findDivinationByResult, type DivinationData } from "../../data/divinationData";
 import { OptionPickerScreen } from "../../ui/OptionPickerScreen";
 import { ArrowRight } from "../../ui/PickerArrows";
 import { CareerInfoContent, CareerPicker, RankInfoContent, RankPicker } from "./CareerPicker";
+import { DivinationInfoContent, DivinationPicker } from "./DivinationPicker";
 
 interface BackgroundTabProps {
   header: CharacterHeader;
@@ -39,12 +41,14 @@ export function BackgroundTab({
   const [showHomeworldPicker, setShowHomeworldPicker] = useState(false);
   const [showCareerPicker, setShowCareerPicker] = useState(false);
   const [showRankPicker, setShowRankPicker] = useState(false);
+  const [showDivinationPicker, setShowDivinationPicker] = useState(false);
 
   const selectedHomeworld = HOMEWORLD_LIST.find((hw) => hw.id === talents.homeworld);
   const selectedCareer = findCareerByName(header.career);
   const selectedRank = selectedCareer?.ranks.find(
     (rank) => rank.name.toLowerCase() === header.rank?.toLowerCase()
   );
+  const selectedDivination = findDivinationByResult(header.divination);
 
   // ── Header field helpers ───────────────────────────────────────────────────
   const updateHeaderField = useCallback(
@@ -56,10 +60,6 @@ export function BackgroundTab({
 
   const handleCharacterName = useCallback(
     (v: string) => updateHeaderField("characterName", v),
-    [updateHeaderField]
-  );
-  const handleDivination = useCallback(
-    (v: string) => updateHeaderField("divination", v),
     [updateHeaderField]
   );
   const handleDescription = useCallback(
@@ -95,6 +95,14 @@ export function BackgroundTab({
     (rank: CareerRankData) => {
       updateHeaderField("rank", rank.name);
       setShowRankPicker(false);
+    },
+    [updateHeaderField]
+  );
+
+  const handleDivinationSelect = useCallback(
+    (divination: DivinationData) => {
+      updateHeaderField("divination", divination.result);
+      setShowDivinationPicker(false);
     },
     [updateHeaderField]
   );
@@ -193,13 +201,30 @@ export function BackgroundTab({
       <div>
         <SectionHeader className="mb-3">Divination</SectionHeader>
         <section className={uiSection}>
-          <FormField
-            label="Divination"
-            value={header.divination ?? ""}
-            onChange={handleDivination}
-            editable={editable}
-            placeholder="e.g. Trust in your fear."
-          />
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-1.5">
+              <span className={`${uiFormLabelSecondary} mb-0`}>Divination</span>
+              {selectedDivination && (
+                <span className={uiInfoModalWrapper}>
+                  <InfoModal
+                    title={selectedDivination.result}
+                    content={<DivinationInfoContent divination={selectedDivination} />}
+                  />
+                </span>
+              )}
+            </div>
+            <button
+              type="button"
+              disabled={!editable}
+              onClick={editable ? () => setShowDivinationPicker(true) : undefined}
+              className={`${editableInputClass(editable)} appearance-none text-left flex items-center justify-between`}
+            >
+              <span className={header.divination ? "" : "text-slate-500"}>
+                {header.divination || "— Select divination —"}
+              </span>
+              {editable && <ArrowRight />}
+            </button>
+          </div>
         </section>
       </div>
 
@@ -285,6 +310,14 @@ export function BackgroundTab({
           selected={header.rank}
           onSelect={handleRankSelect}
           onClose={() => setShowRankPicker(false)}
+        />
+      )}
+
+      {showDivinationPicker && (
+        <DivinationPicker
+          selected={header.divination}
+          onSelect={handleDivinationSelect}
+          onClose={() => setShowDivinationPicker(false)}
         />
       )}
     </div>

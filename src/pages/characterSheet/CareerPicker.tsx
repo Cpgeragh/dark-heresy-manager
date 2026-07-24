@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { InfoModal } from "../../components/InfoModal";
 import { CAREER_LIST, type CareerData, type CareerRankData } from "../../data/careerData";
+import { Chip } from "../../ui/Chip";
+import { colourMeta } from "../../ui/colourTokens";
 import {
   uiInfoModalWrapper,
   uiItemName,
@@ -9,6 +11,7 @@ import {
   uiTextMuted,
 } from "../../ui/editableStyles";
 import { PickerModal, PickerRow } from "../../ui/PickerModal";
+import { sourceColour } from "../../ui/sourceStyles";
 
 function InfoSection({ title, content }: { title: string; content: string }) {
   return (
@@ -118,9 +121,12 @@ export function CareerPicker({
               />
             </span>
           </div>
-          <p className={`mt-1 text-xs lg:text-sm ${uiTextMuted}`}>
-            Starting Rank: {career.startingRank} · {career.source}
-          </p>
+          <div className="mt-1 flex flex-wrap items-center gap-1.5">
+            <Chip className={colourMeta}>Starting Rank: {career.startingRank}</Chip>
+            <Chip className={`bg-slate-800/40 font-code ${sourceColour(career.source)}`}>
+              {career.source}
+            </Chip>
+          </div>
         </PickerRow>
       ))}
     </PickerModal>
@@ -170,10 +176,18 @@ export function RankPicker({
               />
             </span>
           </div>
-          <p className={`mt-1 text-xs lg:text-sm ${uiTextMuted}`}>
-            Rank {rank.tier} · {rank.xpLevel} XP
-            {rank.paths?.length ? ` · ${rank.paths.join(" / ")} path` : ""}
-          </p>
+          <div className="mt-1 flex flex-wrap items-center gap-1.5">
+            <Chip className={colourMeta}>Rank {rank.tier}</Chip>
+            <Chip className={colourMeta}>{rank.xpLevel} XP</Chip>
+            {rank.paths?.length && (
+              <Chip className={colourMeta}>
+                {rank.paths.length > 1 ? "Paths" : "Path"}: {rank.paths.join(" / ")}
+              </Chip>
+            )}
+            <Chip className={`bg-slate-800/40 font-code ${sourceColour(career.source)}`}>
+              {career.source}
+            </Chip>
+          </div>
         </PickerRow>
       ))}
     </PickerModal>

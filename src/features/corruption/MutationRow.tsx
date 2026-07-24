@@ -4,7 +4,8 @@ import type { CorruptionMutationEntry } from "../../types/Character";
 import { Button } from "../../ui/Button";
 import { Chip } from "../../ui/Chip";
 import { RemoveButton } from "../../ui/RemoveButton";
-import { colourAmberFaint, colourRose, colourSky } from "../../ui/colourTokens";
+import { RollChip } from "../../ui/RollChip";
+import { colourRose, colourSky } from "../../ui/colourTokens";
 import { uiInfoModalWrapper, uiItemName, uiSection, uiTextLabel } from "../../ui/editableStyles";
 import { getRollDisplayEntries } from "./characteristicModifiers";
 import { MutationInfoContent } from "./CorruptionReferenceModals";
@@ -38,7 +39,7 @@ export function MutationRow({
           <span className={uiItemName}>{display.name}</span>
           {display.roll && (
             <div className="mt-1 flex flex-wrap gap-1.5">
-              <Chip size="sm" className={colourAmberFaint}>{display.roll}</Chip>
+              <RollChip>{display.roll}</RollChip>
             </div>
           )}
           {rollEntries.length > 0 && (

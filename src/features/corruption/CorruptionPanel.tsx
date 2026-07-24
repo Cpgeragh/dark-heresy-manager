@@ -9,11 +9,11 @@ import type { CorruptionBlock, CorruptionMalignancyEntry, CorruptionMutationEntr
 import { Button } from "../../ui/Button";
 import { Chip } from "../../ui/Chip";
 import { RemoveButton } from "../../ui/RemoveButton";
+import { RollChip } from "../../ui/RollChip";
 import {
   colourActiveEmerald,
   colourActiveOrange,
   colourActiveSky,
-  colourAmberFaint,
   colourRose,
   colourSky,
 } from "../../ui/colourTokens";
@@ -274,7 +274,7 @@ export function MalignancyRow({
           <span className={uiItemName}>{display.name}</span>
           {display.roll && (
             <div className="mt-1 flex flex-wrap gap-1.5">
-              <Chip size="sm" className={colourAmberFaint}>{display.roll}</Chip>
+              <RollChip>{display.roll}</RollChip>
             </div>
           )}
           {rollEntries.length > 0 && (

@@ -83,6 +83,35 @@ describe("BackgroundTab", () => {
     expect(screen.getByRole("button", { name: "Select a career first" })).toBeDisabled();
   });
 
+  it("selects a divination from the reference list", async () => {
+    const user = userEvent.setup();
+    const { onUpdateHeader } = renderTab();
+
+    await user.click(screen.getByText("— Select divination —"));
+    await user.click(screen.getByText("“Trust in your fear.”"));
+
+    expect(onUpdateHeader).toHaveBeenCalledWith(
+      expect.objectContaining({ divination: "Trust in your fear." })
+    );
+  });
+
+  it("shows the selected divination effect", async () => {
+    const user = userEvent.setup();
+    renderTab({
+      header: {
+        characterName: "Brother Corvus",
+        divination: "Trust in your fear.",
+      },
+    });
+
+    await user.click(
+      screen.getByRole("button", {
+        name: "Show information about Trust in your fear.",
+      })
+    );
+    expect(screen.getByText("Increase Agility by +2 and gain 1 Fate Point.")).toBeInTheDocument();
+  });
+
   it("shows a placeholder when no homeworld is selected", () => {
     renderTab();
     expect(screen.getByText("— Select homeworld —")).toBeInTheDocument();

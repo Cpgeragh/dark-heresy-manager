@@ -14,7 +14,8 @@ import type {
 import { Button } from "../../ui/Button";
 import { Chip } from "../../ui/Chip";
 import { RemoveButton } from "../../ui/RemoveButton";
-import { colourActiveRose, colourActiveSky, colourAmberFaint } from "../../ui/colourTokens";
+import { RollChip } from "../../ui/RollChip";
+import { colourActiveRose, colourActiveSky } from "../../ui/colourTokens";
 import {
   uiFormLabel,
   uiInfoModalWrapper,
@@ -305,7 +306,7 @@ function TraumaRow({
           <span className={uiItemName}>{name}</span>
           {roll && (
             <div className="mt-1 flex flex-wrap gap-1.5">
-              <Chip size="sm" className={colourAmberFaint}>{roll}</Chip>
+              <RollChip>{roll}</RollChip>
             </div>
           )}
           <div className="mt-1 flex items-center gap-1.5">

@@ -3,11 +3,10 @@ import { FormField } from "../../components/FormField";
 import { InfoModal } from "../../components/InfoModal";
 import type { CorruptionMutationEntry } from "../../types/Character";
 import { Button } from "../../ui/Button";
-import { Chip } from "../../ui/Chip";
 import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../ui/PickerModal";
 import { ArrowLeft } from "../../ui/PickerArrows";
+import { RollChip } from "../../ui/RollChip";
 import { uiPickerBackButton } from "../../ui/buttonStyles";
-import { colourAmberFaint } from "../../ui/colourTokens";
 import {
   editableInputClass,
   uiFormLabel,
@@ -228,9 +227,7 @@ export function MutationPicker({
         >
           <span className={`${uiItemName} group-hover:text-white`}>{ref.name}</span>
           <div className="mt-1 flex flex-wrap gap-1.5">
-            <Chip size="sm" className={colourAmberFaint}>
-              {ref.roll}
-            </Chip>
+            <RollChip>{ref.roll}</RollChip>
           </div>
           <div className="mt-1 flex items-center gap-1.5">
             <span className={uiTextLabel}>Rules</span>
