@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { InfoModal } from "../../components/InfoModal";
 import { CAREER_LIST, type CareerData, type CareerRankData } from "../../data/careerData";
+import type { HomeworldData } from "../../data/homeworldData";
 import { Chip } from "../../ui/Chip";
 import { colourMeta } from "../../ui/colourTokens";
 import {
@@ -22,7 +23,17 @@ function InfoSection({ title, content }: { title: string; content: string }) {
   );
 }
 
-export function CareerInfoContent({ career }: { career: CareerData }) {
+export function CareerInfoContent({
+  career,
+  homeworld,
+}: {
+  career: CareerData;
+  homeworld?: HomeworldData;
+}) {
+  const homeworldCareer = homeworld?.careers.find(
+    (entry) => (entry.careerName ?? entry.name) === career.name
+  );
+
   return (
     <div className="space-y-4">
       <blockquote className="border-l-2 border-red-700 pl-3 italic">
@@ -31,6 +42,10 @@ export function CareerInfoContent({ career }: { career: CareerData }) {
       </blockquote>
 
       <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{career.description}</p>
+
+      {homeworldCareer && (
+        <InfoSection title={homeworldCareer.name} content={homeworldCareer.description} />
+      )}
 
       {career.startingPsychicPowers && (
         <InfoSection title="Starting Psychic Powers" content={career.startingPsychicPowers} />
@@ -83,17 +98,23 @@ export function RankInfoContent({ career, rank }: { career: CareerData; rank: Ca
 
 export function CareerPicker({
   selected,
+  homeworld,
   onSelect,
   onClose,
 }: {
   selected?: string;
+  homeworld: HomeworldData;
   onSelect: (career: CareerData) => void;
   onClose: () => void;
 }) {
   const [query, setQuery] = useState("");
   const normalizedQuery = query.trim().toLowerCase();
-  const careers = CAREER_LIST.filter((career) =>
-    career.name.toLowerCase().includes(normalizedQuery)
+  const careers = CAREER_LIST.filter(
+    (career) =>
+      homeworld.careers.some(
+        (homeworldCareer) => (homeworldCareer.careerName ?? homeworldCareer.name) === career.name
+      ) &&
+      career.name.toLowerCase().includes(normalizedQuery)
   ).sort((a, b) => a.name.localeCompare(b.name));
 
   return (
@@ -116,13 +137,12 @@ export function CareerPicker({
             <span className={uiInfoModalWrapper} onClick={(event) => event.stopPropagation()}>
               <InfoModal
                 title={career.name}
-                content={<CareerInfoContent career={career} />}
+                content={<CareerInfoContent career={career} homeworld={homeworld} />}
                 as="span"
               />
             </span>
           </div>
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
-            <Chip className={colourMeta}>Starting Rank: {career.startingRank}</Chip>
             <Chip className={`bg-slate-800/40 font-code ${sourceColour(career.source)}`}>
               {career.source}
             </Chip>

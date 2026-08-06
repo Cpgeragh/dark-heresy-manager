@@ -1,6 +1,6 @@
 // tests/integration/BackgroundTab.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -29,9 +29,11 @@ function renderTab(props: Partial<React.ComponentProps<typeof BackgroundTab>> = 
 describe("BackgroundTab", () => {
   it("selects a career and assigns its starting rank", async () => {
     const user = userEvent.setup();
-    const { onUpdateHeader } = renderTab();
+    const { onUpdateHeader } = renderTab({
+      talents: { homeworld: "feral-world", talents: [], traits: [] },
+    });
 
-    await user.click(screen.getByText("— Select career —"));
+    await user.click(screen.getByRole("button", { name: "Select Career" }));
     await user.click(screen.getByText("Guardsman"));
 
     expect(onUpdateHeader).toHaveBeenCalledWith(
@@ -47,9 +49,10 @@ describe("BackgroundTab", () => {
         career: "Guardsman",
         rank: "Conscript",
       },
+      talents: { homeworld: "feral-world", talents: [], traits: [] },
     });
 
-    await user.click(screen.getByRole("button", { name: "Conscript" }));
+    await user.click(screen.getByRole("button", { name: "Change Rank" }));
     await user.click(screen.getByText("Storm Trooper"));
 
     expect(onUpdateHeader).toHaveBeenCalledWith(
@@ -74,20 +77,36 @@ describe("BackgroundTab", () => {
 
     await user.click(screen.getByRole("button", { name: "Close" }));
     await user.click(screen.getByRole("button", { name: "Show information about Conscript" }));
-    expect(screen.getByText("Rank 1")).toBeInTheDocument();
-    expect(screen.getByText("0–499")).toBeInTheDocument();
+    const rankModal = screen.getByRole("dialog", { name: "Conscript" });
+    expect(within(rankModal).getByText("Rank 1")).toBeInTheDocument();
+    expect(within(rankModal).getByText("0–499")).toBeInTheDocument();
   });
 
-  it("keeps the rank selector unavailable until a recognised career is selected", () => {
+  it("adds the selected homeworld's career text to the existing career modal", async () => {
+    const user = userEvent.setup();
+    renderTab({
+      header: { characterName: "Brother Corvus", career: "Adept" },
+      talents: { homeworld: "forge-world", talents: [], traits: [] },
+    });
+
+    await user.click(screen.getByRole("button", { name: "Show information about Adept" }));
+
+    const modal = screen.getByRole("dialog", { name: "Adept" });
+    expect(within(modal).getByText("Forge World Adepts")).toBeInTheDocument();
+    expect(within(modal).getByText(/Forge world Adepts toil among the gathered wisdom/)).toBeInTheDocument();
+  });
+
+  it("keeps the career and rank selectors unavailable until a homeworld is selected", () => {
     renderTab();
-    expect(screen.getByRole("button", { name: "Select a career first" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Select Career" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Select Rank" })).toBeDisabled();
   });
 
   it("selects a divination from the reference list", async () => {
     const user = userEvent.setup();
     const { onUpdateHeader } = renderTab();
 
-    await user.click(screen.getByText("— Select divination —"));
+    await user.click(screen.getByRole("button", { name: "Select Divination" }));
     await user.click(screen.getByText("“Trust in your fear.”"));
 
     expect(onUpdateHeader).toHaveBeenCalledWith(
@@ -121,22 +140,52 @@ describe("BackgroundTab", () => {
     const user = userEvent.setup();
     const { onUpdateTalents } = renderTab();
 
-    await user.click(screen.getByText("— Select homeworld —"));
-    await user.click(screen.getByText("Hive World (CR)"));
+    await user.click(screen.getByRole("button", { name: "Select Homeworld" }));
+    await user.click(screen.getByText("Hive World"));
 
     expect(onUpdateTalents).toHaveBeenCalledWith(
       expect.objectContaining({ homeworld: "hive-world" })
     );
   });
 
-  it("shows the current homeworld and its description", () => {
+  it("shows the current homeworld with its source chip", () => {
     renderTab({ talents: { homeworld: "hive-world", talents: [], traits: [] } });
-    expect(screen.getByText("Hive World (CR)")).toBeInTheDocument();
-    expect(screen.getByText(/streetwise, quick, and resourceful/)).toBeInTheDocument();
+    expect(screen.getByText("Hive World")).toBeInTheDocument();
+    expect(screen.getByText("CR")).toBeInTheDocument();
+  });
+
+  it("lists homeworld skills and traits with their existing information modals", async () => {
+    const user = userEvent.setup();
+    renderTab({ talents: { homeworld: "feral-world", talents: [], traits: [] } });
+
+    await user.click(screen.getByRole("button", { name: "Show information about Feral World" }));
+
+    const modal = screen.getByRole("dialog", { name: "Feral World" });
+    expect(within(modal).getByText("Speak Language (Tribal Dialect)")).toBeInTheDocument();
+    expect(within(modal).getByText("Iron Stomach")).toBeInTheDocument();
+    expect(
+      within(modal).getByRole("button", {
+        name: "Show information about Speak Language (Tribal Dialect)",
+      })
+    ).toBeInTheDocument();
+    expect(
+      within(modal).getByRole("button", { name: "Show information about Iron Stomach" })
+    ).toBeInTheDocument();
+    expect(within(modal).queryByText("01–15")).not.toBeInTheDocument();
+  });
+
+  it("filters careers to the selected homeworld", async () => {
+    const user = userEvent.setup();
+    renderTab({ talents: { homeworld: "feral-world", talents: [], traits: [] } });
+
+    await user.click(screen.getByRole("button", { name: "Select Career" }));
+
+    expect(screen.getByText("Assassin")).toBeInTheDocument();
+    expect(screen.queryByText("Arbitrator")).not.toBeInTheDocument();
   });
 
   it("disables the homeworld field when not editable", () => {
     renderTab({ editable: false });
-    expect(screen.getByText("— Select homeworld —").closest("button")).toBeDisabled();
+    expect(screen.queryByRole("button", { name: "Select Homeworld" })).not.toBeInTheDocument();
   });
 });
