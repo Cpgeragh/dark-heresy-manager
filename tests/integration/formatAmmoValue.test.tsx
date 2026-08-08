@@ -11,6 +11,7 @@ describe("money formatting", () => {
   it("renders a symbol, formatted whole number, and Thrones", () => {
     expect(formatMoneyForDisplay("1000 Thrones")).toBe("₮ 1,000 Thrones");
     expect(formatMoneyForDisplay(30)).toBe("₮ 30 Thrones");
+    expect(formatMoneyForDisplay("10,000+")).toBe("₮ 10,000+ Thrones");
   });
 
   it("normalizes empty and missing values to zero", () => {

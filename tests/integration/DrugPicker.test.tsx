@@ -30,6 +30,13 @@ describe("DrugPicker", () => {
     expect(screen.getAllByText(DRUG_NAME).length).toBeGreaterThan(0);
   });
 
+  it("renders IH drugs but excludes IH medical gear", () => {
+    renderPicker();
+    expect(screen.getByText("Dryas")).toBeInTheDocument();
+    expect(screen.getByText("Night Dust")).toBeInTheDocument();
+    expect(screen.queryByText("Cast Spray")).not.toBeInTheDocument();
+  });
+
   it("filters the list by search query", async () => {
     const user = userEvent.setup();
     renderPicker();

@@ -28,6 +28,7 @@ import { AdminTab } from "./characterSheet/AdminTab";
 import { ArcheotechTab } from "./characterSheet/ArcheotechTab";
 import { BackgroundTab } from "./characterSheet/BackgroundTab";
 import { WeaponTrainingTab } from "./characterSheet/WeaponTrainingTab";
+import { CompanionsTab } from "./characterSheet/CompanionsTab";
 
 import type { TabId } from "./characterSheet/types";
 import type {
@@ -51,6 +52,7 @@ import type {
   CyberneticItem,
   ArcheotechItem,
   PsychicBlock,
+  CompanionItem,
 } from "../types/Character";
 
 import { exportCharacterJson } from "../utils/exportCharacter";
@@ -280,6 +282,11 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
     [updateField]
   );
 
+  const handleUpdateCompanions = useCallback(
+    (next: CompanionItem[]) => updateField("companions", next),
+    [updateField]
+  );
+
   const handleUpdateConsumables = useCallback(
     (next: ConsumableItem[]) => updateField("consumables", next),
     [updateField]
@@ -368,6 +375,7 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
     cybernetics: "Cybernetics",
     psychic: "Psychic Powers",
     gear: "Gear",
+    companions: "Companions",
     drugs: "Drugs",
     xp: "Experience",
     notes: "Notes",
@@ -598,6 +606,14 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
               editable={allowedToEdit}
               onUpdate={handleUpdateGear}
               onUpdateConsumables={handleUpdateConsumables}
+            />
+          )}
+
+          {activeTab === "companions" && (
+            <CompanionsTab
+              companions={character.companions ?? []}
+              editable={allowedToEdit}
+              onUpdate={handleUpdateCompanions}
             />
           )}
 

@@ -36,6 +36,25 @@ export function halveRange(range: string): string {
   return `${Math.ceil(parseInt(rangeMatch[1]) / 2)}m`;
 }
 
+function reduceRangeByPercent(range: string, percent: number): string {
+  const rangeMatch = range.match(/^(\d+)m$/i);
+  if (!rangeMatch) return range;
+  const reduced = Number(rangeMatch[1]) * (1 - percent / 100);
+  return `${Number.isInteger(reduced) ? reduced : reduced.toFixed(1)}m`;
+}
+
+function reduceRangeAtMost(range: string, maximum: number): string {
+  const rangeMatch = range.match(/^(\d+)m$/i);
+  if (!rangeMatch) return range;
+  return `${Math.min(parseInt(rangeMatch[1]), maximum)}m`;
+}
+
+function setDamageType(damage: string, type: string): string {
+  const damageMatch = damage.trim().match(/^(\d*d\d+)([+-]\d+)?\s*[IREX]?$/i);
+  if (!damageMatch) return damage;
+  return `${damageMatch[1]}${damageMatch[2] ?? ""} ${type}`;
+}
+
 export function halveClip(clip: string): string {
   const clipVal = parseInt(clip);
   return isNaN(clipVal) ? clip : String(Math.max(1, Math.ceil(clipVal / 2)));
@@ -80,6 +99,16 @@ function parseKg(value?: string): number {
   return match ? Number(match[1]) : 0;
 }
 
+function multiplyClip(clip: string, multiplier: number): string {
+  const numeric = Number.parseFloat(clip);
+  return Number.isFinite(numeric) ? String(numeric * multiplier) : clip;
+}
+
+function addThrones(value: string | undefined, amount: number): string {
+  const parsed = Number.parseInt((value ?? "").replace(/[^\d]/g, ""), 10);
+  return `${(Number.isFinite(parsed) ? parsed : 0) + amount} Thrones`;
+}
+
 function parseWeightModifier(modifier: string): { multiplier: number; flatKg: number } {
   const trimmed = modifier.trim();
   if (!trimmed || trimmed === "-" || trimmed === "—" || trimmed === "0") {
@@ -116,13 +145,14 @@ export function effectiveRangedStats(
   weapon: RangedWeapon,
   upgradeRefs: WeaponUpgradeRef[],
   loadedAmmoRef?: AmmoRef
-): { damage: string; range: string; clip: string; pen: string; specialRules: string; weight: string } {
+): { damage: string; range: string; clip: string; pen: string; specialRules: string; weight: string; value: string } {
   let damage = weapon.damage ?? "";
   let range = weapon.range ?? "";
   let clip = weapon.clip ?? "";
   let pen = weapon.pen ?? "";
   let specialRules = weapon.specialRules ?? "";
-  const weight = effectiveWeaponWeight(weapon.weight, upgradeRefs);
+  let weight = effectiveWeaponWeight(weapon.weight, upgradeRefs);
+  let value = weapon.value ?? "";
   for (const ref of upgradeRefs) {
     if (ref.id === "cr-compact") {
       damage = modifyDamageBonus(damage, -1);
@@ -133,7 +163,26 @@ export function effectiveRangedStats(
     } else if (ref.id === "cr-overcharge-pack") {
       damage = modifyDamageBonus(damage, +1);
       clip = halveClip(clip);
+    } else if (ref.id === "ih-forearm-weapon-mounting") {
+      range = reduceRangeByPercent(range, 30);
     }
+  }
+  if (
+    weapon.referenceId === "ih-irontalon-pistol" &&
+    loadedAmmoRef &&
+    loadedAmmoRef.id !== "ih-irontalon-fragmenting-ammunition"
+  ) {
+    specialRules = removeSpecialRule(removeSpecialRule(specialRules, "Primitive"), "Tearing");
+  }
+  const loadedModifiers = loadedAmmoRef?.loadedWeaponModifiers;
+  if (loadedModifiers?.clipMultiplier) {
+    clip = multiplyClip(clip, loadedModifiers.clipMultiplier);
+  }
+  if (loadedModifiers?.weightKg) {
+    weight = formatKg(parseKg(weight) + loadedModifiers.weightKg);
+  }
+  if (loadedModifiers?.valueThrones) {
+    value = addThrones(value, loadedModifiers.valueThrones);
   }
   switch (loadedAmmoRef?.id) {
     case "cr-dumdum-bullets":
@@ -154,13 +203,22 @@ export function effectiveRangedStats(
     case "dh-psybolt-ammunition":
       specialRules = addSpecialRule(specialRules, "Sanctified");
       break;
+    case "ih-blazer-shotgun-shells":
+      range = reduceRangeAtMost(range, 15);
+      damage = setDamageType(damage, "E");
+      specialRules = addSpecialRule(addSpecialRule(specialRules, "Flame"), "Primitive");
+      break;
+    case "ih-psycannon-bolts":
+    case "ih-blessed-ammunition":
+      specialRules = addSpecialRule(specialRules, "Holy");
+      break;
     case "lw-purity-round":
       specialRules = addSpecialRule(specialRules, "Haywire (2)");
       break;
     default:
       break;
   }
-  return { damage, range, clip, pen, specialRules, weight };
+  return { damage, range, clip, pen, specialRules, weight, value };
 }
 
 export function effectiveMeleeStats(
@@ -174,6 +232,8 @@ export function effectiveMeleeStats(
     if (ref.id === "cr-mono") {
       pen = modifyPen(pen, +2);
       specialRules = removeSpecialRule(specialRules, "Primitive");
+    } else if (ref.id === "ih-sanctified-weapon") {
+      specialRules = addSpecialRule(specialRules, "Sanctified");
     }
   }
   return { pen, specialRules, weight };
@@ -187,9 +247,21 @@ export function getCompatibleUpgrades(
   isMelee: boolean,
   currentIds: string[],
   ammoType?: string,
+  ammoTracking?: string,
+  specialRules?: string,
+  craftsmanship?: string,
 ): WeaponUpgradeRef[] {
   const cls = weaponClass.toLowerCase();
   const name = weaponName.toLowerCase();
+  const ammoLower = ammoType?.toLowerCase() ?? "";
+  const isLas = ammoLower.includes("charge pack") || ammoLower.includes("las");
+  const isSolidProjectile = ["bullets", "shells", "shot"].some((type) => ammoLower.includes(type));
+  const isBolt = ammoLower.includes("bolt");
+  const isPrimitive = ammoLower.includes("arrow") || ammoLower.includes("quarrel");
+  const isMelta = ammoLower.includes("melta");
+  const hasIntegralCanister = ammoLower.includes("plasma flask") || ammoLower.includes("melta canister");
+  const hasPrimitiveQuality = /(?:^|,)\s*primitive\b/i.test(specialRules ?? "");
+  const goodOrBetter = craftsmanship === "Good" || craftsmanship === "Best";
   const hasSight = currentIds.some(
     (id) => id === "cr-red-dot-laser-sight" || id === "cr-telescopic-sight"
   );
@@ -226,6 +298,16 @@ export function getCompatibleUpgrades(
         );
       case "cr-telescopic-sight":
         return !isMelee && !hasSight && cls === "basic";
+      case "ih-duplus-ammo-clips":
+        return !isMelee && ammoTracking !== "unit" && (cls === "basic" || cls === "pistol" || isSolidProjectile || isLas);
+      case "ih-forearm-weapon-mounting":
+        return !isMelee && cls === "pistol" && (isPrimitive || isLas || isSolidProjectile || isBolt || isMelta);
+      case "ih-targeter":
+        return !isMelee && (cls === "heavy" || isLas || isSolidProjectile || isBolt);
+      case "ih-tripod-and-bipods":
+        return !isMelee && (cls === "basic" || cls === "heavy" || hasIntegralCanister);
+      case "ih-sanctified-weapon":
+        return isMelee && goodOrBetter && (hasPrimitiveQuality || currentIds.includes("cr-mono") || name.includes("chain"));
       default:
         return false;
     }
@@ -239,7 +321,7 @@ export function rangedCraftsmanshipDescription(craftsmanship: WeaponCraftsmanshi
     case "Poor":
       return "Poor ranged weapons are more prone to malfunction. A Poor ranged weapon has the Unreliable quality. If it already has this quality, it jams on any failed roll to hit.";
     case "Good":
-      return "Good ranged weapons are more reliable. A Good ranged weapon has the Reliable quality. If it already has this quality, there is no further effect beyond fine workmanship.";
+      return "Good ranged weapons are more reliable. A Good ranged weapon has the Reliable quality. If it already has the Unreliable quality, the two qualities cancel and the weapon has neither.";
     case "Best":
       return "Best ranged weapons never suffer from jamming or overheating. If a roll would result in either, count it as a miss instead.";
     case "Common":
@@ -373,6 +455,40 @@ export const CUSTOM_AMMO_FAMILY_OPTIONS = [
 export function compatibleAmmoIdsForAmmoType(ammoType?: string): readonly string[] | undefined {
   return CUSTOM_AMMO_FAMILY_OPTIONS.find((option) => option.ammoType === ammoType)
     ?.compatibleAmmoIds;
+}
+
+/** Adds source-specific special ammunition available to a weapon's existing ammo family. */
+export function compatibleAmmoIdsWithIH(
+  ids: readonly string[] | undefined,
+  ammoType?: string,
+  weaponClass?: string
+): readonly string[] | undefined {
+  if (!ids) return ids;
+
+  const type = ammoType?.toLowerCase() ?? "";
+  const extras = new Set<string>();
+  const isSolidProjectile =
+    type === "bullets" || type === "shells" || type === "shot" || type === "solid projectile";
+
+  if (type === "shells") extras.add("ih-blazer-shotgun-shells");
+  if (isSolidProjectile) {
+    extras.add("ih-void-rounds");
+    extras.add("ih-blessed-ammunition");
+  }
+  if (type === "bolt shells" || type === "bolt") {
+    extras.add("ih-psycannon-bolts");
+    extras.add("ih-blessed-ammunition");
+  }
+  if (type === "fuel (pistol)" || type === "fuel (basic)" || type === "flame") {
+    extras.add("ih-blessed-ammunition");
+  }
+
+  const isNonPistol = !weaponClass?.toLowerCase().includes("pistol");
+  if (isNonPistol && type === "melta canister (basic)") extras.add("cr-melta-backpack-feed-line");
+  if (isNonPistol && type === "plasma flask (basic)") extras.add("cr-plasma-backpack-feed-line");
+  if (isNonPistol && type === "fuel (basic)") extras.add("cr-flamer-backpack-fuel-hose");
+
+  return [...new Set([...ids, ...extras])];
 }
 
 // ─── Melee Craftsmanship ────────────────────────────────────────────────────

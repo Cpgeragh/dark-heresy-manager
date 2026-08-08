@@ -150,9 +150,18 @@ export interface WeaponAmmoEntry {
   id: string; // unique per entry (crypto.randomUUID())
   referenceId?: string; // AmmoRef.id if created from reference data
   name: string; // e.g. "Bolt Shells", "Psybolt Ammunition"
+  profile?: string; // firing profile this ammunition belongs to; omitted for ordinary single-profile weapons
   clips: number; // full clips/magazines carried, including the loaded clip
   rounds: number; // loose individual rounds carried
   loaded: boolean; // true = currently chambered
+}
+
+/** One fixed magazine fitted to a weapon with an internal magazine selector. */
+export interface WeaponMagazineSlot {
+  id: string;
+  referenceId?: string;
+  name?: string;
+  rounds: number;
 }
 
 export interface RangedWeapon extends CustomLibraryLinkFields {
@@ -175,12 +184,16 @@ export interface RangedWeapon extends CustomLibraryLinkFields {
   craftsmanship?: WeaponCraftsmanship;
   upgrades?: string[]; // WeaponUpgradeRef.id values for fitted upgrades
   ammoEntries?: WeaponAmmoEntry[]; // ammo types carried; one marked loaded
+  loadedAmmoByProfile?: Record<string, string>; // ammo-entry id selected for each firing profile
+  magazineSlots?: WeaponMagazineSlot[]; // fixed internal magazines, when supplied by the weapon
+  activeMagazineSlotId?: string; // the currently selected internal magazine
   ammoTracking?: "clip" | "loose"; // clip = spare clips plus partial rounds; loose = rounds only
   ammoType?: string; // custom/reference ammo family label used for chip display and ammo filtering
   quantity?: number; // for thrown weapons (bolas, throwing stars) — how many carried
   description?: string; // rules text copied from reference data when needed
   integrated?: boolean; // true for custom built-in weapons without a reference id
   equipped?: boolean; // true = carried on body, shown expanded and pinned to top
+  concealedBionic?: { cyberneticId: string; craftsmanship: CyberneticCraftsmanship };
 }
 
 export interface MeleeWeapon extends CustomLibraryLinkFields {
@@ -191,6 +204,8 @@ export interface MeleeWeapon extends CustomLibraryLinkFields {
   damage?: string;
   pen?: string;
   specialRules?: string;
+  /** Multiplier applied to Strength Bonus for total melee Damage (Power Fist = 2). */
+  strengthBonusMultiplier?: number;
   weight?: string;
   value?: string;
   availability?: string;
@@ -199,9 +214,13 @@ export interface MeleeWeapon extends CustomLibraryLinkFields {
   craftsmanship?: WeaponCraftsmanship;
   upgrades?: string[]; // WeaponUpgradeRef.id values for fitted upgrades
   quantity?: number; // for thrown melee weapons (knives, spears) — how many carried
+  alternateRangedAmmoEntries?: WeaponAmmoEntry[]; // ammunition carried for a built-in ranged profile
+  loadedAlternateRangedAmmoId?: string; // selected entry for a built-in ranged profile
+  alternateRangedAmmoReferenceId?: string; // loaded ammunition for a built-in ranged profile
   description?: string; // custom rules text separate from qualities
   integrated?: boolean; // true for custom built-in weapons without a reference id
   equipped?: boolean; // true = carried on body, shown expanded and pinned to top
+  concealedBionic?: { cyberneticId: string; craftsmanship: CyberneticCraftsmanship };
 }
 
 export type StandardCraftsmanship = "Poor" | "Common" | "Good" | "Best";
@@ -258,12 +277,22 @@ export interface WornArmourPiece extends CustomLibraryLinkFields {
   availability?: string;
   source?: string;
   craftsmanship?: ArmourCraftsmanship;
+  /** ArmourUpgradeRef.id values for upgrades fitted to this piece. */
+  upgrades?: string[];
   qualities?: ArmourQuality[];
   custom?: boolean; // true when created via "Add Custom"
   /** true for force fields — no locations or AP, tracked separately in the Armour tab */
   isForceField?: boolean;
   /** Protection Rating for force fields */
   protectionRating?: number;
+}
+
+export interface CompanionItem {
+  id: string;
+  /** Links back to CompanionRef.id. */
+  referenceId: string;
+  name: string;
+  source?: string;
 }
 
 /**
@@ -282,6 +311,7 @@ export interface CyberneticItem extends CustomLibraryLinkFields {
   source?: string;
   /** Specific body locations where this implant is installed (e.g. ["rightArm"]) */
   bodyLocation?: ArmourLocationKey[];
+  concealedWeapon?: { armId: string; weaponId: string; weaponType: "ranged" | "melee" };
 }
 
 /**
@@ -541,6 +571,7 @@ export interface Character {
   shields?: ShieldItem[];
   cybernetics?: CyberneticItem[];
   archeotech?: ArcheotechItem[];
+  companions?: CompanionItem[];
 
   weaponTraining: WeaponTrainingBlock;
   experience: ExperienceBlock;

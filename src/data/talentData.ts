@@ -1195,6 +1195,39 @@ export const TALENT_LIST: readonly TalentData[] = [
       "Psy Rating 4, 30+ Corruption Points (if a Player Character), one or more Psychic Powers that can be used to directly kill with psychic energy (Bio-Lightning, Blood Boil, Psychic Blade, Soul Killer, etc.)",
   },
 
+  // ─── Inquisitor's Handbook ──────────────────────────────────────────────────
+  {
+    id: "beast-hunter",
+    name: "Beast Hunter",
+    source: SkillSource.IH,
+    hasSpecialisation: false,
+  },
+  {
+    id: "machinator-array",
+    name: "Machinator Array",
+    source: SkillSource.IH,
+    hasSpecialisation: false,
+  },
+  {
+    id: "the-reaping",
+    name: "The Reaping",
+    source: SkillSource.IH,
+    hasSpecialisation: false,
+  },
+  {
+    id: "duty-unto-death",
+    name: "Duty Unto Death",
+    source: SkillSource.IH,
+    hasSpecialisation: false,
+    prerequisites: "WP 45, Pure Faith",
+  },
+  {
+    id: "labyrinth-conditioning",
+    name: "Labyrinth Conditioning",
+    source: SkillSource.IH,
+    hasSpecialisation: false,
+  },
+
   // ─── Book of Judgement ──────────────────────────────────────────────────────
   { id: "legalese", name: "Legalese", source: SkillSource.BoJ, hasSpecialisation: false },
   { id: "pack-hunter", name: "Pack Hunter", source: SkillSource.BoJ, hasSpecialisation: false },

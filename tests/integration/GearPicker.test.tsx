@@ -5,6 +5,8 @@ import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
 import { GearPicker } from "../../src/pages/characterSheet/GearTab/GearPicker";
+import { GEAR_REFERENCE } from "../../src/data/reference/gearReference";
+import { SkillSource } from "../../src/types/SkillSource";
 
 // "Backpack" has a fixed (non-variable) cost, so clicking it calls onSelect
 // directly with no GM-assigned-cost sub-step in between.
@@ -30,6 +32,31 @@ function renderPicker(editable = true) {
 }
 
 describe("GearPicker", () => {
+  it("contains the complete IH Gear set and excludes the cross-category entries", () => {
+    const ihGear = GEAR_REFERENCE.filter((item) => item.source === SkillSource.IH);
+
+    expect(ihGear).toHaveLength(84);
+    expect(ihGear).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: "Braid Cloak",
+          value: "80 Thrones",
+          weight: "2 kg",
+          availability: "Uncommon",
+        }),
+        expect.objectContaining({
+          name: "Psy-Tracker",
+          value: "1,000 Thrones",
+          weight: "1.5 kg",
+          availability: "Rare",
+        }),
+      ])
+    );
+    expect(ihGear.some((item) => item.name === "Dryas")).toBe(false);
+    expect(ihGear.some((item) => item.name === "Ploin Juice")).toBe(false);
+    expect(ihGear.some((item) => item.name === "Void Rounds")).toBe(false);
+  });
+
   it("renders gear from reference data", () => {
     renderPicker();
     expect(screen.getAllByText(GEAR_NAME).length).toBeGreaterThan(0);

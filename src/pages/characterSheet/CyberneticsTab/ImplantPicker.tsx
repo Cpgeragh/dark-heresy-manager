@@ -28,7 +28,9 @@ import { CRAFTSMANSHIP_STYLE } from "../../../ui/craftsmanship";
 import { ARMOUR_LOCATION_LABELS } from "../../../constants/locations";
 import {
   availableCraftsmanship,
+  concealedWeaponBionicDescription,
   craftsmanshipDescription,
+  craftsmanshipValue,
   defaultCraftsmanship,
 } from "./cyberneticsHelpers";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
@@ -127,7 +129,9 @@ export function ImplantPicker({
         <div key={quality}>
           <p className={`${uiTextLabel} font-semibold mb-1`}>{quality}</p>
           <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-            {craftsmanshipDescription(ref, quality)}
+            {ref.id === "ih-concealed-weapon-bionic"
+              ? concealedWeaponBionicDescription(quality)
+              : craftsmanshipDescription(ref, quality)}
           </p>
         </div>
       ))}
@@ -252,10 +256,17 @@ export function ImplantPicker({
           </div>
 
           <div
-            className={`text-xs lg:text-sm ${uiTextBody} bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed`}
+            className={`whitespace-pre-line text-xs lg:text-sm ${uiTextBody} bg-slate-800/60 rounded p-3 lg:p-4 leading-relaxed`}
           >
-            {craftsmanshipDescription(selected, craftsmanship)}
+            {selected.id === "ih-concealed-weapon-bionic"
+              ? concealedWeaponBionicDescription(craftsmanship)
+              : craftsmanshipDescription(selected, craftsmanship)}
           </div>
+          <ItemMetaChips
+            value={craftsmanshipValue(selected, craftsmanship)}
+            availability={selected.availability}
+            source={selected.source}
+          />
         </PickerBody>
 
         <div className="px-4 lg:px-5 py-3 lg:py-4 border-t border-slate-700 flex gap-2">

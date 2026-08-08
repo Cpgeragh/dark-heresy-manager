@@ -4,21 +4,31 @@
 
 export const WEAPON_SPECIAL_RULES: Record<string, string> = {
   Accurate:
-    "When fired with an Aim action, this weapon grants an additional +10 bonus on top of " +
-    "the normal Aim bonus. When using a Full Aim, it grants +20 instead of +10.",
+    "Some weapons are designed with precision in mind and respond superbly in skilled hands. " +
+    "They grant an additional bonus of +10 to the firer’s Ballistic Skill when used with an Aim " +
+    "Action, this is in addition to the bonus granted from Aiming. When firing a single shot from " +
+    "a single Basic Weapon with the Accurate quality benefiting from the Aim action, the attack gains " +
+    "an extra 1d10 of damage for every two degrees of success to a maximum of two extra 1d10.",
 
-  Balanced: "Balanced weapons grant a +10 bonus to Weapon Skill Tests when used to Parry.",
+  Balanced:
+    "Some weapons, such as swords and knives, are designed so that the weight of the hilt " +
+    "balances the weight of the blade, making the weapon easier to wield. Balanced weapons grant " +
+    "a +10 bonus to Weapon Skill Tests made to Parry.",
 
   Compact:
     "A smaller version of a pistol or basic weapon favoured for concealment over stopping power. " +
     "Halves the weapon's weight, clip size, and range, and reduces its Damage by 1.",
 
   Blast:
-    "On a hit, all targets within the weapon's Blast radius suffer the weapon's damage. " +
-    "The number in parentheses is the radius in metres. Targets in the blast make an " +
-    "Agility Test (Difficulty set by the GM) to reduce or avoid the damage.",
+    "Many missiles, grenades and some guns create an explosion when they hit their target. When " +
+    "working out a hit from a Blast weapon anyone within the weapon’s blast radius in metres, " +
+    "indicated by the number in parenthesis, is also hit. Roll Hit Location and Damage individually " +
+    "for each person affected by a blast.",
 
-  Defensive: "A Defensive weapon grants a +15 bonus to Weapon Skill Tests made to Parry.",
+  Defensive:
+    "A Defensive weapon, such as a shield, is intended to be used to block attacks and is awkward " +
+    "when used for making attacks. Defensive weapons grant a +15 bonus to tests made when used " +
+    "to Parry, but take a –10 penalty when used to make attacks.",
 
   Excruciating:
     "Targets damaged by a weapon with this quality must succeed at either a Difficult (-10) " +
@@ -31,12 +41,28 @@ export const WEAPON_SPECIAL_RULES: Record<string, string> = {
     "Toughness (x2) or reduces Unnatural Toughness (x3) by one multiplier.",
 
   Flame:
-    "Flame weapons do not roll to hit. Instead, all targets within a 30 degree cone up to the " +
-    "weapon's range are automatically hit unless they pass an Agility Test. Targets that " +
-    "fail are also set on fire (Toughness Test each round or take 1d10 Energy damage, " +
-    "extinguished by a Full Action).",
+    "Flame weapons project a cone of flame out to the range of the weapon. Unlike other weapons, " +
+    "flamers have just one range, and when fired, cast fiery death out to this distance. The wielder " +
+    "does not need to Test Ballistic Skill; he simply fires the weapon. All creatures in the flame’s " +
+    "path, a cone-shaped area extending in a 30 degree arc from the firer out to the weapon’s range, " +
+    "must make an Agility Test or be struck by the flames and take damage normally. If they take " +
+    "damage, they must succeed on a second Agility Test or be set on fire. Cover does not protect " +
+    "characters from attacks made by Flame weapons. Because Flame weapons make no roll to hit, " +
+    "they are always considered to hit targets in the body, and will Jam if the firer rolls a 9 on " +
+    "his Damage dice (before adding any bonuses). Normally when a weapon is fired without the " +
+    "appropriate talent or a heavy weapon is fired without bracing, the wielder suffers a –20 or –30 " +
+    "BS penalty respectively. As Flame weapons do not use BS, instead of a –20/–30 to the attack " +
+    "roll, anyone in the area of effect of the flames gains a +20/+30 bonus to their Agility Test " +
+    "to avoid damage.",
 
-  Flexible: "Flexible weapons cannot be Parried.",
+  Flexible:
+    "Some weapons are made up from lots of loosely connected segments, such as chains or supple " +
+    "woven hides, such as whips. These kinds of weapons lash about when used to attack and cannot " +
+    "be Parried.",
+
+  Fast:
+    "The size and speed of this weapon makes it hard to Parry. Opponents that would Parry an attack " +
+    "against a weapon with the Fast quality take a –20 penalty on their Weapon Skill Tests.",
 
   Haywire:
     "Uses blasts of electromagnetic radiation to destroy the inner workings of machines and " +
@@ -54,7 +80,10 @@ export const WEAPON_SPECIAL_RULES: Record<string, string> = {
     "Against creatures of the Warp (Daemons, Possessed), this weapon counts as having " +
     "the Sanctified quality. Against other targets it has no special effect.",
 
-  Inaccurate: "This weapon gains no benefit from the Aim action.",
+  Inaccurate:
+    "Weapons with this quality are either badly designed or simply woefully made, and regardless " +
+    "of the care taken when used, offer little better than a lucky chance to hit. No bonus is gained " +
+    "from the use of the Aim Action with such weapons.",
 
   Maximal:
     "The weapon has two fire settings. Before attacking, choose to fire normally (standard profile) " +
@@ -67,19 +96,25 @@ export const WEAPON_SPECIAL_RULES: Record<string, string> = {
     "armour and never lose their edge. The weapon no longer counts as Primitive and gains +2 Penetration.",
 
   Overheats:
-    "Roll a 91-00 when firing and the weapon overheats. The wielder takes Energy damage " +
-    "equal to the weapon's Pen (ignoring armour) and the weapon is unusable until cooled " +
-    "(one round of inaction).",
+    "Certain weapons are prone to overheating, either because of poor design or they fire unstable " +
+    "superheated ammunition. An unmodified to hit roll of 91 or higher causes the weapon to " +
+    "Overheat. Roll 1d10: 1–5, the firer must make a Toughness Test or drop the weapon, which " +
+    "cannot be fired for 1d10 Rounds; 6–8, the firer takes 1d10+2 Energy Damage and must drop " +
+    "the weapon, which is too hot to pick up (anyone trying takes 1d10+1 Energy Damage) for 1d10 " +
+    "Rounds; 9–10, the weapon explodes and is destroyed, and the firer and anyone within four " +
+    "metres takes Damage as if they had taken a single hit from the weapon.",
 
   Primitive:
-    "The weapon's damage dice cap at 5. When rolling for damage, treat any die result " +
-    "above 5 as 5. This does not affect bonuses added to the roll.",
+    "Crude and basic in design, these kinds of weapons, while still deadly, are less effective " +
+    "against modern armour. Non-primitive armour gets its APs doubled before being reduced for " +
+    "penetration. For example, Guard Flak Armour (AP 4) hit with a Great Weapon (Primitive quality " +
+    "and Pen 2) would provide 6 points of armour: (4x2)-2.",
 
   "Power Field":
     "A field of power wreathes weapons with this quality, increasing Damage and Penetration. " +
-    "These modifiers are already included in the weapon's profile. When you successfully Parry " +
-    "an attack made with a weapon that lacks this quality, you have a 75% chance of destroying " +
-    "the attacker's weapon.",
+    "Such modifiers are already included in the weapon’s profile. When you successfully use this " +
+    "weapon to Parry an attack made with a weapon that lacks this quality, you have a 75% chance " +
+    "of destroying your attacker’s weapon.",
 
   Proven:
     "This weapon always inflicts massive trauma. Any die roll for damage lower than the Proven " +
@@ -91,59 +126,86 @@ export const WEAPON_SPECIAL_RULES: Record<string, string> = {
     "Penetration value for that attack.",
 
   Reliable:
-    "The weapon only jams on a roll of 00. If it does jam, it can be cleared with a " +
-    "Half Action.",
+    "Based on tried and true technology, Reliable weapons seldom fail. If a Reliable weapon Jams, " +
+    "roll 1d10 and only on a roll of 10 has it in fact Jammed, otherwise it just misses as normal.",
 
   Recharge:
-    "After each shot the weapon requires a Full Action to recharge before it can fire " + "again.",
+    "Because of the volatile nature of the weapon’s ammunition or due to the way it fires, the weapon " +
+    "needs time between shots to Recharge. The weapon must spend the Round after firing building up " +
+    "a charge and cannot be fired—in effect you can only fire the weapon every other Round.",
 
   Sanctified:
     "Damage from this weapon counts as Holy. Against Daemons and creatures of the Warp, " +
     "its damage ignores the effects of Daemonic (X) and similar warp-based resistances.",
 
   Scatter:
-    "When used at Point Blank range, the weapon gains +10 to hit and increases damage by " +
-    "+3. At Long or Extreme range it takes -3 to damage.",
+    "The standard ammunition of these weapons spreads out when fired, hitting more of the target. " +
+    "If fired at a foe within Point Blank range, each two degrees of success the firer scores " +
+    "indicates another hit. However, at longer ranges this spread of small projectiles reduces its " +
+    "effectiveness. All Armour Points are doubled against hits from scatter weapons at Long or " +
+    "Extreme Range. Pistols with the Scatter quality fired in melee are considered to be firing at " +
+    "Point-Blank range. However, they do not gain the +30 BS bonus for being at Point-Blank range. " +
+    "When firing a semi- or full-auto burst at point blank range with a weapon that has the Scatter " +
+    "quality, the extra hits for rate of fire and scatter are worked out separately and both applied.",
 
   Shocking:
-    "A target that takes at least 1 wound from this weapon must pass a Toughness Test or " +
-    "be Stunned for a number of rounds equal to the degrees of failure.",
+    "Shocking weapons can Stun their opponents with a powerful surge of energy. A target that takes " +
+    "at least 1 point of Damage from a Shocking weapon, after Armour and Toughness Bonus, must make " +
+    "a Toughness Test, though they receive a +10 bonus for every Armour point they have on the " +
+    "location hit. If they fail, they are Stunned for a number of Rounds equal to half the Damage " +
+    "they suffered.",
 
   Smoke:
-    "Rather than inflicting Damage, a hit creates a smokescreen 3d10 metres in diameter from " +
-    "the point of impact. The screen lasts 2d10 Rounds, or less in adverse weather conditions.",
+    "Rather than inflicting Damage, these weapons throw up dense clouds of smoke to create cover. " +
+    "When a hit is scored from a weapon with the Smoke quality, it creates a smokescreen 3d10 " +
+    "metres in diameter from the point of impact. This screen lasts for 2d10 Rounds, or less in " +
+    "adverse weather conditions.",
 
   Snare:
-    "On a successful hit, the target must make an Agility Test or be immobilised. An immobilised " +
-    "target cannot take other actions except to escape, either by bursting the bonds with a " +
-    "Strength Test or wriggling free with an Agility Test. The target is helpless until he escapes.",
+    "Weapons with this quality are designed to entangle enemies. On a successful hit, the target " +
+    "must make an Agility Test or be immobilised. An immobilised target can attempt no other actions " +
+    "except to try to escape the bonds. He can attempt to burst the bonds (a Strength Test) or " +
+    "wriggle free (an Agility Test) in his Turn. The target is considered helpless until he escapes.",
 
   Storm:
     "Doubles the number of hits inflicted on the target. In fully automatic mode, each Degree " +
     "of Success yields two additional hits (up to the weapon's firing rate, as normal). " +
     "Storm weapons consume ammunition at twice the normal rate.",
 
-  Tearing: "Roll one additional damage die and discard the lowest result.",
+  Tearing:
+    "Tearing weapons are vicious devices, often using multitudes of fast-moving jagged teeth or " +
+    "fragmented or explosive ammunition to rip into flesh and bone. These weapons roll one extra die " +
+    "for damage, and the lowest result is discarded.",
 
   Toxic:
-    "Targets hit must pass a Toughness Test or suffer additional damage from poison " +
-    "(see weapon entry for specific effects).",
+    "Some weapons rely on toxins and poisons to do their damage. Anyone that takes Damage from a " +
+    "Toxic weapon, after reduction for Armour and Toughness Bonus must make a Toughness Test with " +
+    "a –5 penalty for every point of Damage taken. Success indicates there is no further effect from " +
+    "the weapon. Failure however deals an immediate 1d10 points of Impact Damage to the target with " +
+    "no reduction from Armour or Toughness Bonus.",
 
   "Twin-linked":
     "Gains +20 to hit when fired and uses twice the normal ammunition. On a successful attack " +
     "with two or more Degrees of Success, scores one additional hit. Reload time is doubled.",
 
-  Unbalanced: "This weapon is unwieldy and cannot be used to Parry.",
+  "Two-Handed":
+    "This weapon requires two hands to use.",
+
+  Unbalanced:
+    "Heavy and difficult to ready after an attack, these kinds of weapons impose a –10% penalty " +
+    "when used to Parry.",
 
   Unreliable:
-    "The weapon jams on any roll of 91-00. Clearing the jam requires a Full Action " +
-    "and a Routine (+20) Tech-Use Test.",
+    "Certain weapons misfire more often than normal because they are badly maintained or constructed. " +
+    "An Unreliable weapon suffers a Jam on a roll of 91 or higher, even if fired on Semi- or Full Auto.",
 
   Unstable:
-    "When an Unstable weapon scores a hit, roll 1d10. On 1 it inflicts half Damage, on 2-9 " +
-    "it deals normal Damage, and on 10 it inflicts twice normal Damage.",
+    "Weapons with this quality use ammunition that is both volatile and unstable and can react " +
+    "unpredictably when detonated. When an Unstable weapon scores a hit, roll 1d10. On a score of " +
+    "1 it inflicts only half Damage, on a score of 2–9 it deals normal Damage, and on a score of " +
+    "10 it inflicts twice the normal Damage.",
 
   Unwieldy:
-    "This weapon is too cumbersome to be used to Parry or Dodge when two-handed. " +
-    "Striking with it counts as a Full Action.",
+    "Huge and often top-heavy, Unwieldy weapons are too awkward to be used defensively. Unwieldy " +
+    "weapons cannot be used to Parry.",
 };

@@ -160,6 +160,63 @@ export const WEAPON_UPGRADE_REFERENCE: WeaponUpgradeRef[] = [
     applicableTo: "Any Basic Las, Solid Projectile, Bolt, Primitive or Plasma weapon.",
   },
 
+  // ── Inquisitor's Handbook ────────────────────────────────────────────────
+  {
+    id: "ih-duplus-ammo-clips",
+    name: "Duplus Ammo Clips",
+    source: SkillSource.IH,
+    weightModifier: "0 kg",
+    value: "10 Thrones",
+    availability: "Scarce",
+    description:
+      "Double-ended ammunition clips designed to shorten reloading time. Users simply flip the clip over when one side is exhausted. The clip is effectively two clips attached to each other and requires two clips worth of ammo to fill. A weapon with these special clips reduces their loading time by half (thus a weapon that takes two Full Actions to reload becomes a single Full Action). Normally only utilised by officers—troopers finding tape just as effective at holding two clips together, and a lot cheaper!",
+    applicableTo: "Any Basic, Pistol, Solid Projectile or Las weapon with a removable clip.",
+  },
+  {
+    id: "ih-forearm-weapon-mounting",
+    name: "Forearm Weapon Mounting",
+    source: SkillSource.IH,
+    weightModifier: "+1 kg",
+    value: "300 Thrones",
+    availability: "Scarce",
+    description:
+      "As the name suggests, these heavy gauntlets allow for a single ranged weapon to be mounted along the arm, with specific hand movement triggering the weapon. This upgrade allows the user to keep both hands free. A weapon in a forearm mount functions as listed except that its range is reduced by 30%.",
+    applicableTo: "Any Primitive, Las, Solid Projectile, Bolt or Melta pistol.",
+  },
+  {
+    id: "ih-targeter",
+    name: "Targeter",
+    source: SkillSource.IH,
+    weightModifier: "+1.5 kg",
+    value: "2,250 Thrones",
+    availability: "Rare",
+    description:
+      "Expensive, heavy and rarely used except by elite forces, a targeter uses a variety of guidance cogitators and omni-sights to improve accuracy. These upgrades are normally hard-wired into a specific weapon for maximum efficiency. Commonly viewed as adding to the weapon’s machine-spirit, they create an even closer bond between gunner and gun. A targeter grants a +10 bonus on all Ballistic Skill Tests made with the weapon.",
+    applicableTo: "Any Las, Solid Projectile, Bolt or Heavy weapon.",
+  },
+  {
+    id: "ih-tripod-and-bipods",
+    name: "Tripod and Bipods",
+    source: SkillSource.IH,
+    weightModifier: "+2 kg",
+    value: "25 Thrones",
+    availability: "Average",
+    description:
+      "These attachments are for heavier weapons or those using integral ammunition canisters rather than a backpack-mounted source (such as plasma guns or meltaguns). Resting the weapon on the ground increases accuracy but sacrifices mobility, thus making them more common in static defence lines. Bipods and tripods allow a weapon to be braced anywhere there is a reasonably flat surface. A weapon braced on a bipod has a 90-degree fire arc while one on a tripod has a 180-degree arc. Bracing with a tripod requires a Full Action. Bracing with a bipod requires a Half Action.",
+    applicableTo: "Heavier weapons or weapons using integral ammunition canisters rather than a backpack-mounted source.",
+  },
+  {
+    id: "ih-sanctified-weapon",
+    name: "Sanctified Weapon",
+    source: SkillSource.IH,
+    weightModifier: "0 kg",
+    value: "+500 Thrones",
+    availability: "Very Rare",
+    description:
+      "The prayers and blessing of those of true faith in the God-Emperor of Mankind, coupled with the ancient lore of Ecclesiastical alchemistry, is able to turn mere mundane bullets and blades into weapons that are capable of harming the foul denizens of the warp and other such unnatural horrors. The sole effect of these upgrades is to make the Damage caused by the weapon in question counted as “Holy”, which has certain effects on some Daemonic and warp creatures (as will be noted in their description). Obtaining such items is only possible through the Holy Ordos or high-ranking members of the Ecclesiarchy, and the cost and rarity shown reflects this.",
+    applicableTo: "Any Primitive weapon (including Mono upgraded weapons) or Chain weapon of at least Good quality craftsmanship.",
+  },
+
   {
     id: "lw-integrated-weapon-components",
     name: "Integrated Weapon Components",

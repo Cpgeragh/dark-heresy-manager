@@ -259,7 +259,7 @@ export const TRAIT_LIST: readonly TraitData[] = [
   { id: "homeworld-engram-implantation", name: "Engram Implantation", source: SkillSource.IH, hasSpecialisation: false },
   { id: "homeworld-failsafe-control", name: "Failsafe Control", source: SkillSource.IH, hasSpecialisation: false },
   { id: "homeworld-imperial-conditioning", name: "Imperial Conditioning", source: SkillSource.IH, hasSpecialisation: false },
-  { id: "homeworld-through-a-mirror-darkly", name: "Through A Mirror Darkly", source: SkillSource.IH, hasSpecialisation: false },
+  { id: "homeworld-through-a-mirror-darkly", name: "Through a Mirror Darkly", source: SkillSource.IH, hasSpecialisation: false },
 
   // ─── Book of Judgement ─────────────────────────────────────────────────────
   { id: "blank-slate", name: "Blank Slate", source: SkillSource.BoJ, hasSpecialisation: false },

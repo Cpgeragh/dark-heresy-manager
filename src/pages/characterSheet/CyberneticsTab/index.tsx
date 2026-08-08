@@ -16,7 +16,7 @@ import type { ArcheotechItem } from "../../../types/Character";
 import { ImplantPicker } from "./ImplantPicker";
 import { ImplantRow } from "./ImplantRow";
 import { CustomImplantForm } from "./CustomImplantForm";
-import { nextAvailableCraftsmanship } from "./cyberneticsHelpers";
+import { craftsmanshipValue, nextAvailableCraftsmanship } from "./cyberneticsHelpers";
 import { Button } from "../../../ui/Button";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { ErrorState } from "../../../ui/ErrorState";
@@ -43,6 +43,7 @@ import {
   buildRangedWeaponSnapshot,
 } from "../weapons/weaponSnapshotHelpers";
 import { ArcheotechImplantRow } from "./ArcheotechImplantRow";
+import { ConcealedWeaponBionicInstaller } from "./ConcealedWeaponBionicInstaller";
 import {
   isIntegratedRangedWeapon,
   isIntegratedMeleeWeapon,
@@ -95,6 +96,10 @@ export function CyberneticsTab({
   onUpdateArcheotech,
 }: CyberneticsTabProps) {
   const [showPicker, setShowPicker] = useState(false);
+  const [installingConcealedWeapon, setInstallingConcealedWeapon] = useState<{
+    ref: CyberneticRef;
+    craftsmanship: CyberneticCraftsmanship;
+  } | null>(null);
   const [showCustomForm, setShowCustomForm] = useState(false);
   const [showIntegratedPicker, setShowIntegratedPicker] = useState(false);
   const [showCustomIntegratedRanged, setShowCustomIntegratedRanged] = useState(false);
@@ -145,6 +150,11 @@ export function CyberneticsTab({
       gmRarity?: string
     ) => {
       if (!editable) return;
+      if (ref.id === "ih-concealed-weapon-bionic") {
+        setShowPicker(false);
+        setInstallingConcealedWeapon({ ref, craftsmanship });
+        return;
+      }
       onUpdate([
         ...cybernetics,
         {
@@ -152,7 +162,7 @@ export function CyberneticsTab({
           referenceId: ref.id,
           name: ref.name,
           craftsmanship,
-          value: gmValue ?? ref.value,
+          value: gmValue ?? craftsmanshipValue(ref, craftsmanship),
           availability: gmRarity ?? ref.availability,
           source: ref.source,
           ...(bodyLocation ? { bodyLocation } : {}),
@@ -163,18 +173,74 @@ export function CyberneticsTab({
     [editable, cybernetics, onUpdate]
   );
 
+  const installConcealedWeaponBionic = useCallback(
+    (armId: string, weapon: { id: string; type: "ranged" | "melee" }) => {
+      if (!editable || !installingConcealedWeapon) return;
+      const { ref, craftsmanship } = installingConcealedWeapon;
+      const cyberneticId = crypto.randomUUID();
+      onUpdate([
+        ...cybernetics,
+        {
+          id: cyberneticId,
+          referenceId: ref.id,
+          name: ref.name,
+          craftsmanship,
+          value: craftsmanshipValue(ref, craftsmanship),
+          availability: ref.availability,
+          source: ref.source,
+          concealedWeapon: { armId, weaponId: weapon.id, weaponType: weapon.type },
+        },
+      ]);
+      if (weapon.type === "ranged") {
+        onUpdateRanged(rangedWeapons.map((item) =>
+          item.id === weapon.id ? { ...item, concealedBionic: { cyberneticId, craftsmanship } } : item
+        ));
+      } else {
+        onUpdateMelee(meleeWeapons.map((item) =>
+          item.id === weapon.id ? { ...item, concealedBionic: { cyberneticId, craftsmanship } } : item
+        ));
+      }
+      setInstallingConcealedWeapon(null);
+    },
+    [cybernetics, editable, installingConcealedWeapon, meleeWeapons, onUpdate, onUpdateMelee, onUpdateRanged, rangedWeapons]
+  );
+
   const cycleQuality = useCallback(
     (id: string) => {
       if (!editable) return;
+      const current = cybernetics.find((item) => item.id === id);
+      const ref = CYBERNETICS_REFERENCE.find((item) => item.id === current?.referenceId);
+      const craftsmanship = nextAvailableCraftsmanship(current?.craftsmanship ?? "Common", ref);
+      if (current?.concealedWeapon) {
+        if (current.concealedWeapon.weaponType === "ranged") {
+          onUpdateRanged(rangedWeapons.map((item) =>
+            item.id === current.concealedWeapon?.weaponId && item.concealedBionic
+              ? { ...item, concealedBionic: { ...item.concealedBionic, craftsmanship } }
+              : item
+          ));
+        } else {
+          onUpdateMelee(meleeWeapons.map((item) =>
+            item.id === current.concealedWeapon?.weaponId && item.concealedBionic
+              ? { ...item, concealedBionic: { ...item.concealedBionic, craftsmanship } }
+              : item
+          ));
+        }
+      }
       onUpdate(
         cybernetics.map((c) => {
           if (c.id !== id) return c;
           const ref = CYBERNETICS_REFERENCE.find((r) => r.id === c.referenceId);
-          return { ...c, craftsmanship: nextAvailableCraftsmanship(c.craftsmanship, ref) };
+          const craftsmanship = nextAvailableCraftsmanship(c.craftsmanship, ref);
+          const hasQualitySpecificCost = Boolean(ref?.poorValue || ref?.goodValue);
+          return {
+            ...c,
+            craftsmanship,
+            ...(hasQualitySpecificCost && ref ? { value: craftsmanshipValue(ref, craftsmanship) } : {}),
+          };
         })
       );
     },
-    [editable, cybernetics, onUpdate]
+    [editable, cybernetics, meleeWeapons, onUpdate, onUpdateMelee, onUpdateRanged, rangedWeapons]
   );
 
   const addCustomImplant = useCallback(
@@ -300,9 +366,15 @@ export function CyberneticsTab({
   const removeImplant = useCallback(
     (id: string) => {
       if (!editable) return;
+      onUpdateRanged(rangedWeapons.map((item) =>
+        item.concealedBionic?.cyberneticId === id ? { ...item, concealedBionic: undefined } : item
+      ));
+      onUpdateMelee(meleeWeapons.map((item) =>
+        item.concealedBionic?.cyberneticId === id ? { ...item, concealedBionic: undefined } : item
+      ));
       onUpdate(cybernetics.filter((c) => c.id !== id));
     },
-    [editable, cybernetics, onUpdate]
+    [editable, cybernetics, meleeWeapons, onUpdate, onUpdateMelee, onUpdateRanged, rangedWeapons]
   );
 
   // ── Integrated weapons ─────────────────────────────────────────────────────
@@ -493,6 +565,14 @@ export function CyberneticsTab({
   ];
 
   const renderImplantRow = (item: CyberneticItem) => {
+    const linkedArm = item.concealedWeapon
+      ? cybernetics.find((candidate) => candidate.id === item.concealedWeapon?.armId)
+      : undefined;
+    const linkedWeapon = item.concealedWeapon?.weaponType === "ranged"
+      ? rangedWeapons.find((candidate) => candidate.id === item.concealedWeapon?.weaponId)
+      : item.concealedWeapon?.weaponType === "melee"
+        ? meleeWeapons.find((candidate) => candidate.id === item.concealedWeapon?.weaponId)
+        : undefined;
     const linkedLibraryItem = item.customLibraryId
       ? campaignCustomCyberneticsById.get(item.customLibraryId)
       : undefined;
@@ -517,6 +597,9 @@ export function CyberneticsTab({
       <ImplantRow
         key={item.id}
         item={item}
+        linkedArmName={linkedArm?.name}
+        linkedWeaponName={linkedWeapon?.name}
+        linkedWeaponType={item.concealedWeapon?.weaponType}
         editable={editable}
         libraryItem={libraryItem}
         isDM={isDM && editable}
@@ -565,6 +648,7 @@ export function CyberneticsTab({
                 key={weapon.id}
                 weapon={weapon}
                 editable={editable}
+                strengthBonus={strengthBonus}
                 integrated
                 allowUpgrades={false}
                 forceExpanded
@@ -691,6 +775,16 @@ export function CyberneticsTab({
             setShowCustomForm(true);
           }}
           onClose={() => setShowPicker(false)}
+        />
+      )}
+      {installingConcealedWeapon && (
+        <ConcealedWeaponBionicInstaller
+          cybernetics={cybernetics}
+          rangedWeapons={rangedWeapons}
+          meleeWeapons={meleeWeapons}
+          strengthBonus={strengthBonus}
+          onInstall={installConcealedWeaponBionic}
+          onClose={() => setInstallingConcealedWeapon(null)}
         />
       )}
 

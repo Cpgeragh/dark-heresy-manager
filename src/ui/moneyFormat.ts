@@ -37,5 +37,6 @@ export function formatMoneyInput(value: string): string {
 }
 
 export function formatMoneyForDisplay(value?: string | number | null): string {
-  return `₮ ${formatInteger(parseMoneyNumber(value))} Thrones`;
+  const hasOpenEndedCost = typeof value === "string" && /\+\s*(?:thrones?)?\s*$/i.test(value);
+  return `₮ ${formatInteger(parseMoneyNumber(value))}${hasOpenEndedCost ? "+" : ""} Thrones`;
 }

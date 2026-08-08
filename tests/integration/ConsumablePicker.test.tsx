@@ -30,6 +30,12 @@ describe("ConsumablePicker", () => {
     expect(screen.getAllByText(CONSUMABLE_NAME).length).toBeGreaterThan(0);
   });
 
+  it("includes IH consumables but excludes IH drugs", () => {
+    renderPicker();
+    expect(screen.getByText("Belly-Churn")).toBeInTheDocument();
+    expect(screen.queryByText("Dryas")).not.toBeInTheDocument();
+  });
+
   it("calls onSelect with the chosen ref when an item is clicked", async () => {
     const user = userEvent.setup();
     const { onSelect } = renderPicker();

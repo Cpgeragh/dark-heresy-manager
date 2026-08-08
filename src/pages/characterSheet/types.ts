@@ -11,6 +11,7 @@ export type TabId =
   | "cybernetics"
   | "psychic"
   | "gear"
+  | "companions"
   | "drugs"
   | "xp"
   | "notes"

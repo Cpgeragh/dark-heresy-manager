@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { WornArmourPiece } from "../../../types/Character";
 import { uiSection, uiTextLabel, uiTextMuted, uiTextPlaceholder, uiItemName, uiInfoModalWrapper } from "../../../ui/editableStyles";
 import { RemoveButton } from "../../../ui/RemoveButton";
@@ -11,6 +12,13 @@ import { ARMOUR_SPECIAL_RULES } from "../../../data/reference/armourSpecialRules
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/StatusBadge";
+import { Button } from "../../../ui/Button";
+import { ARMOUR_UPGRADE_REFERENCE } from "../../../data/reference/armourUpgradeReference";
+import {
+  ArmourUpgradeCard,
+  ArmourUpgradePicker,
+  compatibleArmourUpgrades,
+} from "./ArmourUpgradePicker";
 
 interface Props extends CustomItemLibraryActionProps<"armour"> {
   piece: WornArmourPiece;
@@ -18,6 +26,8 @@ interface Props extends CustomItemLibraryActionProps<"armour"> {
   worn: boolean;
   onToggle: (id: string) => void;
   onRemove: (id: string) => void;
+  onAddUpgrade: (pieceId: string, upgradeId: string) => void;
+  onRemoveUpgrade: (pieceId: string, upgradeId: string) => void;
 }
 
 function ArmourQualitiesContent({ qualities }: { qualities: string[] }) {
@@ -51,7 +61,10 @@ export function PieceRow({
   onUpdateAllCopies,
   onToggle,
   onRemove,
+  onAddUpgrade,
+  onRemoveUpgrade,
 }: Props) {
+  const [showUpgradePicker, setShowUpgradePicker] = useState(false);
   const apDesc =
     Object.keys(piece.apOverrides ?? {}).length > 0 ? `${piece.ap}*` : String(piece.ap);
   const craftsmanship = piece.craftsmanship ?? "Common";
@@ -59,6 +72,10 @@ export function PieceRow({
   const ref = ARMOUR_REFERENCE.find((r) => r.id === piece.referenceId);
   const qualities = piece.qualities ?? ref?.qualities ?? [];
   const notes = piece.notes ?? ref?.notes;
+  const upgradeIds = piece.upgrades ?? [];
+  const upgradeRefs = ARMOUR_UPGRADE_REFERENCE.filter((upgrade) => upgradeIds.includes(upgrade.id));
+  const compatible = compatibleArmourUpgrades(piece);
+  const addableCompatible = compatible.filter((upgrade) => !upgradeIds.includes(upgrade.id));
 
   return (
     <div className={[uiSection, "flex items-start gap-3", !worn ? "opacity-60" : ""].join(" ")}>
@@ -118,6 +135,31 @@ export function PieceRow({
           />
         </div>
 
+        {(upgradeRefs.length > 0 || addableCompatible.length > 0) && (
+          <div className="border-t border-slate-800 pt-2 mt-2 space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className={uiTextLabel}>Upgrades</span>
+              <Button size="xs" onClick={() => setShowUpgradePicker(true)}>
+                {editable ? "+ Add" : "View"}
+              </Button>
+            </div>
+            {upgradeRefs.length === 0 ? (
+              <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>None fitted</p>
+            ) : (
+              <div className="space-y-1.5">
+                {upgradeRefs.map((upgrade) => (
+                  <ArmourUpgradeCard
+                    key={upgrade.id}
+                    upgrade={upgrade}
+                    editable={editable}
+                    onRemove={(upgradeId) => onRemoveUpgrade(piece.id, upgradeId)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {libraryItem && (
           <CustomItemActionButtons
             libraryItem={libraryItem}
@@ -143,6 +185,18 @@ export function PieceRow({
 
       {editable && (
         <RemoveButton onClick={() => onRemove(piece.id)} label="Remove" />
+      )}
+
+      {showUpgradePicker && (
+        <ArmourUpgradePicker
+          upgrades={editable ? addableCompatible : compatible}
+          editable={editable}
+          onSelect={(upgradeId) => {
+            onAddUpgrade(piece.id, upgradeId);
+            setShowUpgradePicker(false);
+          }}
+          onClose={() => setShowUpgradePicker(false)}
+        />
       )}
     </div>
   );

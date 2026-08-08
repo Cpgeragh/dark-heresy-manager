@@ -1,6 +1,6 @@
 // tests/integration/ArmourTab.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
 vi.mock("../../src/hooks/useCampaignCustomItems", () => ({
@@ -83,5 +83,24 @@ describe("ArmourTab", () => {
     expect(screen.getByText("No armour worn.")).toBeInTheDocument();
     expect(screen.getByText("No armour stowed.")).toBeInTheDocument();
     expect(screen.getByText("No force field equipped.")).toBeInTheDocument();
+  });
+
+  it("fits Hexagrammatic Wards to compatible armour", () => {
+    const armour = [
+      piece({
+        referenceId: "cr-power-armour",
+        name: "Power Armour",
+        locations: ["head", "body", "rightArm", "leftArm", "rightLeg", "leftLeg"],
+      }),
+    ];
+    const { onUpdate } = renderTab({ armour });
+
+    const upgradeHeader = screen.getAllByText("Upgrades").at(-1)!.parentElement!;
+    fireEvent.click(within(upgradeHeader).getByText("+ Add"));
+    fireEvent.click(screen.getByText("Hexagrammatic Wards"));
+
+    expect(onUpdate).toHaveBeenCalledWith([
+      expect.objectContaining({ upgrades: ["ih-hexagrammatic-wards"] }),
+    ]);
   });
 });

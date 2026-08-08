@@ -47,6 +47,10 @@ const CATEGORIES: {
     ],
   },
   {
+    label: "Companions",
+    tabs: [{ id: "companions", label: "Companions" }],
+  },
+  {
     label: "Equipment",
     tabs: [
       { id: "archeotech", label: "Archeotech" },

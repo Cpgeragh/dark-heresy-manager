@@ -85,6 +85,10 @@ describe("rangedRulesForCraftsmanship", () => {
     expect(rangedRulesForCraftsmanship("Tearing", "Good")).toBe("Tearing, Reliable");
   });
 
+  it("cancels Unreliable instead of adding Reliable for Good craftsmanship", () => {
+    expect(rangedRulesForCraftsmanship("Tearing, Unreliable", "Good")).toBe("Tearing");
+  });
+
   it("leaves rules unchanged for Common craftsmanship", () => {
     expect(rangedRulesForCraftsmanship("Tearing", "Common")).toBe("Tearing");
   });

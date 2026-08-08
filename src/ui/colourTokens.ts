@@ -32,7 +32,10 @@ export const colourActiveEmerald = "border-emerald-400 bg-emerald-600/80 text-wh
 export const colourActiveOutlineTeal = "border-teal-400 text-teal-400 font-semibold hover:bg-teal-400/10";
 export const colourActiveOutlineViolet = "border-violet-400 text-violet-400 font-semibold hover:bg-violet-400/10";
 export const colourActiveOutlineOrange = "border-orange-400 text-orange-400 font-semibold hover:bg-orange-400/10";
+export const colourActiveOutlineCyan = "border-cyan-400 text-cyan-300 font-semibold hover:bg-cyan-400/10";
 export const colourActiveOutlineSky = "border-sky-400 text-sky-400 font-semibold hover:bg-sky-400/10";
 export const colourActiveOutlineAmber = "border-amber-400 text-amber-400 font-semibold hover:bg-amber-400/10";
+export const colourButtonOutlineOrange = "!border-orange-500 !text-orange-400 enabled:hover:!bg-orange-500/10";
+export const colourButtonOutlineCyan = "!border-cyan-500 !text-cyan-300 enabled:hover:!bg-cyan-500/10";
 // Same style, no hover — for static/non-interactive display (e.g. a chip that isn't itself clickable).
 export const colourOutlineFuchsia = "border-fuchsia-400 text-fuchsia-400 font-semibold";

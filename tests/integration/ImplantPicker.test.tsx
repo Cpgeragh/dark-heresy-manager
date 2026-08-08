@@ -5,6 +5,9 @@ import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
 import { ImplantPicker } from "../../src/pages/characterSheet/CyberneticsTab/ImplantPicker";
+import { CYBERNETICS_REFERENCE } from "../../src/data/reference/cyberneticsReference";
+import { SkillSource } from "../../src/types/SkillSource";
+import { craftsmanshipValue } from "../../src/pages/characterSheet/CyberneticsTab/cyberneticsHelpers";
 
 // "Auger Arrays" is a real reference entry with no requiresLocation and a
 // fixed (non-variable) cost, so clicking it goes straight to the
@@ -29,6 +32,22 @@ function renderPicker(editable = true) {
 }
 
 describe("ImplantPicker", () => {
+  it("contains the complete IH implant set with its quality-specific costs", () => {
+    const ihImplants = CYBERNETICS_REFERENCE.filter((item) => item.source === SkillSource.IH);
+    const concealedWeaponBionic = ihImplants.find(
+      (item) => item.id === "ih-concealed-weapon-bionic"
+    );
+    const hermeticInfusion = ihImplants.find((item) => item.id === "ih-hermetic-infusion");
+
+    expect(ihImplants).toHaveLength(7);
+    expect(concealedWeaponBionic).toBeDefined();
+    expect(hermeticInfusion).toBeDefined();
+    expect(craftsmanshipValue(concealedWeaponBionic!, "Poor")).toBe("150 Thrones");
+    expect(craftsmanshipValue(concealedWeaponBionic!, "Common")).toBe("300 Thrones");
+    expect(craftsmanshipValue(concealedWeaponBionic!, "Good")).toBe("750 Thrones");
+    expect(craftsmanshipValue(hermeticInfusion!, "Good")).toBe("17,000 Thrones");
+  });
+
   it("renders implants from reference data", () => {
     renderPicker();
     expect(screen.getAllByText(IMPLANT_NAME).length).toBeGreaterThan(0);

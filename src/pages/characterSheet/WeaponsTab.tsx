@@ -7,6 +7,7 @@ import type {
   RangedWeapon,
   MeleeWeapon,
   WeaponAmmoEntry,
+  WeaponMagazineSlot,
   GrenadeItem,
   CyberneticItem,
   ShieldItem,
@@ -609,6 +610,26 @@ export function WeaponsTab({
     [editable, rangedWeapons, onUpdateRanged]
   );
 
+  const updateRangedProfileLoadedAmmo = useCallback(
+    (weaponId: string, profile: string, entryId: string) => {
+      if (!editable) return;
+      onUpdateRanged(rangedWeapons.map((w) => w.id === weaponId
+        ? { ...w, loadedAmmoByProfile: { ...w.loadedAmmoByProfile, [profile]: entryId } }
+        : w));
+    },
+    [editable, rangedWeapons, onUpdateRanged]
+  );
+
+  const updateRangedMagazineSlots = useCallback(
+    (weaponId: string, magazineSlots: WeaponMagazineSlot[], activeMagazineSlotId?: string) => {
+      if (!editable) return;
+      onUpdateRanged(rangedWeapons.map((weapon) => weapon.id === weaponId
+        ? { ...weapon, magazineSlots, activeMagazineSlotId }
+        : weapon));
+    },
+    [editable, rangedWeapons, onUpdateRanged]
+  );
+
   const updateRangedQuantity = useCallback(
     (weaponId: string, quantity: number) => {
       if (!editable) return;
@@ -634,6 +655,7 @@ export function WeaponsTab({
           damage,
           pen: String(ref.pen),
           specialRules: ref.specialRules,
+          strengthBonusMultiplier: ref.strengthBonusMultiplier,
           weight: ref.weight,
           value: ref.value,
           availability: ref.availability,
@@ -927,6 +949,20 @@ export function WeaponsTab({
     (weaponId: string, quantity: number) => {
       if (!editable) return;
       onUpdateMelee(meleeWeapons.map((w) => (w.id === weaponId ? { ...w, quantity } : w)));
+    },
+    [editable, meleeWeapons, onUpdateMelee]
+  );
+
+  const updateMeleeAlternateRangedAmmoEntries = useCallback(
+    (weaponId: string, alternateRangedAmmoEntries: WeaponAmmoEntry[], loadedAlternateRangedAmmoId?: string) => {
+      if (!editable) return;
+      onUpdateMelee(
+        meleeWeapons.map((weapon) =>
+          weapon.id === weaponId
+            ? { ...weapon, alternateRangedAmmoEntries, loadedAlternateRangedAmmoId, alternateRangedAmmoReferenceId: undefined }
+            : weapon
+        )
+      );
     },
     [editable, meleeWeapons, onUpdateMelee]
   );
@@ -1322,6 +1358,7 @@ export function WeaponsTab({
                   key={entry.weapon.id}
                   weapon={entry.weapon}
                   editable={editable}
+                  strengthBonus={strengthBonus}
                   integrated
                   allowUpgrades={false}
                   forceExpanded
@@ -1330,6 +1367,8 @@ export function WeaponsTab({
                   onAddUpgrade={() => {}}
                   onRemoveUpgrade={() => {}}
                   onUpdateAmmoEntries={(entries) => updateRangedAmmoEntries(entry.weapon.id, entries)}
+                  onUpdateLoadedAmmoByProfile={(profile, entryId) => updateRangedProfileLoadedAmmo(entry.weapon.id, profile, entryId)}
+                  onUpdateMagazineSlots={(slots, activeSlotId) => updateRangedMagazineSlots(entry.weapon.id, slots, activeSlotId)}
                   onUpdateQuantity={(qty) => updateRangedQuantity(entry.weapon.id, qty)}
                   grenades={grenades}
                   onUpdateGrenades={onUpdateGrenades}
@@ -1341,6 +1380,7 @@ export function WeaponsTab({
                 key={entry.weapon.id}
                 weapon={entry.weapon}
                 editable={editable}
+                strengthBonus={strengthBonus}
                 {...getWeaponLibraryProps(entry.weapon, "ranged")}
                 onRemove={() => removeRanged(entry.index)}
                 onAddUpgrade={(upgradeId) => addUpgradeToRanged(entry.weapon.id, upgradeId)}
@@ -1348,6 +1388,8 @@ export function WeaponsTab({
                   removeUpgradeFromRanged(entry.weapon.id, upgradeId)
                 }
                 onUpdateAmmoEntries={(entries) => updateRangedAmmoEntries(entry.weapon.id, entries)}
+                onUpdateLoadedAmmoByProfile={(profile, entryId) => updateRangedProfileLoadedAmmo(entry.weapon.id, profile, entryId)}
+                onUpdateMagazineSlots={(slots, activeSlotId) => updateRangedMagazineSlots(entry.weapon.id, slots, activeSlotId)}
                 onUpdateQuantity={(qty) => updateRangedQuantity(entry.weapon.id, qty)}
                 grenades={grenades}
                 onUpdateGrenades={onUpdateGrenades}
@@ -1430,6 +1472,9 @@ export function WeaponsTab({
                   onAddUpgrade={() => {}}
                   onRemoveUpgrade={() => {}}
                   onUpdateQuantity={(qty) => updateMeleeQuantity(entry.weapon.id, qty)}
+                  onUpdateAlternateRangedAmmoEntries={(entries, loadedAmmoId) =>
+                    updateMeleeAlternateRangedAmmoEntries(entry.weapon.id, entries, loadedAmmoId)
+                  }
                 />
               );
             return (
@@ -1445,6 +1490,9 @@ export function WeaponsTab({
                   removeUpgradeFromMelee(entry.weapon.id, upgradeId)
                 }
                 onUpdateQuantity={(qty) => updateMeleeQuantity(entry.weapon.id, qty)}
+                onUpdateAlternateRangedAmmoEntries={(entries, loadedAmmoId) =>
+                  updateMeleeAlternateRangedAmmoEntries(entry.weapon.id, entries, loadedAmmoId)
+                }
                 isEquipped={entry.weapon.equipped ?? false}
                 onToggleEquip={() => toggleEquipMelee(entry.weapon.id)}
                 slotsDisabled={
@@ -1606,6 +1654,7 @@ export function WeaponsTab({
       {picker === "melee" && (
         <MeleePicker
           editable={editable}
+          strengthBonus={strengthBonus}
           customItems={campaignCustomWeapons.filter((item) => item.status !== "archived")}
           onSelect={addFromMeleeRef}
           onSelectCustomItem={addWeaponFromLibrary}

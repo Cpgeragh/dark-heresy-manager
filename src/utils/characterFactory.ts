@@ -102,6 +102,7 @@ export function createEmptyCharacterData(params: {
     },
 
     gear: [],
+    companions: [],
 
     weaponTraining: {
       trained: [],

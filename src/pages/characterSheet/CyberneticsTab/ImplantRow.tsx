@@ -15,7 +15,11 @@ import { RemoveButton } from "../../../ui/RemoveButton";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { CRAFTSMANSHIP_STYLE } from "../../../ui/craftsmanship";
 import { ARMOUR_LOCATION_LABELS } from "../../../constants/locations";
-import { availableCraftsmanship, craftsmanshipDescription } from "./cyberneticsHelpers";
+import {
+  availableCraftsmanship,
+  concealedWeaponBionicDescription,
+  craftsmanshipDescription,
+} from "./cyberneticsHelpers";
 import { InfoModal } from "../../../components/InfoModal";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
@@ -23,6 +27,9 @@ import { StatusBadge } from "../../../ui/StatusBadge";
 
 interface Props extends CustomItemLibraryActionProps<"cybernetic"> {
   item: CyberneticItem;
+  linkedArmName?: string;
+  linkedWeaponName?: string;
+  linkedWeaponType?: "ranged" | "melee";
   editable: boolean;
   onCycleQuality: (id: string) => void;
   onRemove: (id: string) => void;
@@ -30,6 +37,9 @@ interface Props extends CustomItemLibraryActionProps<"cybernetic"> {
 
 export function ImplantRow({
   item,
+  linkedArmName,
+  linkedWeaponName,
+  linkedWeaponType,
   editable,
   libraryItem,
   isDM = false,
@@ -49,8 +59,11 @@ export function ImplantRow({
     ? item.craftsmanship
     : qualityOptions[0];
   const qualityDescription = ref
-    ? craftsmanshipDescription(ref, displayedCraftsmanship)
+    ? ref.id === "ih-concealed-weapon-bionic"
+      ? concealedWeaponBionicDescription(displayedCraftsmanship, linkedWeaponType)
+      : craftsmanshipDescription(ref, displayedCraftsmanship)
     : (item.notes ?? "No rules recorded.");
+  const isConcealedWeaponBionic = ref?.id === "ih-concealed-weapon-bionic";
 
   return (
     <div className={[uiSection, "flex items-start gap-3"].join(" ")}>
@@ -59,27 +72,29 @@ export function ImplantRow({
         <div className="flex items-center gap-1.5 min-w-0">
           <p className={`${uiItemName} truncate`}>{item.name}</p>
           {libraryItem && <StatusBadge status={libraryItem.status} />}
-          <span className={uiInfoModalWrapper}>
-            <InfoModal
-              title={item.name}
-              content={
-                <div className="space-y-3">
-                  {ref?.notes && (
-                    <div>
-                      <p className={`${uiTextLabel} font-semibold mb-1`}>Item Rules</p>
-                      <p className={`text-sm ${uiTextBody} leading-relaxed`}>{ref.notes}</p>
-                    </div>
-                  )}
-                  {item.notes && (
-                    <div>
-                      <p className={`${uiTextLabel} font-semibold mb-1`}>Notes</p>
+          {!isConcealedWeaponBionic && (ref?.notes || item.notes) && (
+            <span className={uiInfoModalWrapper}>
+              <InfoModal
+                title={item.name}
+                content={
+                  <div className="space-y-3">
+                    {ref?.notes && (
+                      <div>
+                        <p className={`${uiTextLabel} font-semibold mb-1`}>Item Rules</p>
+                        <p className={`text-sm ${uiTextBody} leading-relaxed`}>{ref.notes}</p>
+                      </div>
+                    )}
+                    {item.notes && (
+                      <div>
+                        <p className={`${uiTextLabel} font-semibold mb-1`}>Notes</p>
                       <p className={`text-sm ${uiTextBody} leading-relaxed`}>{item.notes}</p>
                     </div>
-                  )}
-                </div>
-              }
-            />
-          </span>
+                    )}
+                  </div>
+                }
+              />
+            </span>
+          )}
         </div>
         <div className="flex flex-wrap gap-1.5 mt-1">
           {item.bodyLocation && item.bodyLocation.length > 0 && (
@@ -94,6 +109,13 @@ export function ImplantRow({
             source={item.source ?? ref?.source}
           />
         </div>
+        {linkedArmName && linkedWeaponName && (
+          <div className="mt-1 flex flex-wrap items-center gap-1.5">
+            <span className={uiTextLabel}>Linked</span>
+            <Chip className="border-pink-500/50 bg-pink-500/10 text-pink-300">{linkedArmName}</Chip>
+            <Chip className="border-pink-500/50 bg-pink-500/10 text-pink-300">{linkedWeaponName}</Chip>
+          </div>
+        )}
         <div className="flex items-center gap-1.5 mt-1">
           <span className={uiTextLabel}>Quality</span>
           <Chip
@@ -117,7 +139,7 @@ export function ImplantRow({
           <span className={uiInfoModalWrapper}>
             <InfoModal
               title={`${displayedCraftsmanship} ${item.name}`}
-              content={qualityDescription}
+              content={<p className={`whitespace-pre-line text-sm ${uiTextBody} leading-relaxed`}>{qualityDescription}</p>}
             />
           </span>
         </div>

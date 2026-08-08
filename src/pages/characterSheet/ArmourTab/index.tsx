@@ -364,6 +364,34 @@ export function ArmourTab({
     [editable, armour, onUpdate]
   );
 
+  const addUpgradeToArmour = useCallback(
+    (pieceId: string, upgradeId: string) => {
+      if (!editable) return;
+      onUpdate(
+        armour.map((piece) =>
+          piece.id === pieceId
+            ? { ...piece, upgrades: [...(piece.upgrades ?? []), upgradeId] }
+            : piece
+        )
+      );
+    },
+    [armour, editable, onUpdate]
+  );
+
+  const removeUpgradeFromArmour = useCallback(
+    (pieceId: string, upgradeId: string) => {
+      if (!editable) return;
+      onUpdate(
+        armour.map((piece) =>
+          piece.id === pieceId
+            ? { ...piece, upgrades: (piece.upgrades ?? []).filter((id) => id !== upgradeId) }
+            : piece
+        )
+      );
+    },
+    [armour, editable, onUpdate]
+  );
+
   const toggleForceField = useCallback(
     (id: string) => {
       if (!editable) return;
@@ -456,17 +484,21 @@ export function ArmourTab({
           onUpdateAllCopies={() => libraryItem && updateAllArmourCopies(libraryItem)}
           onToggle={toggleWorn}
           onRemove={removePiece}
+          onAddUpgrade={addUpgradeToArmour}
+          onRemoveUpgrade={removeUpgradeFromArmour}
         />
       );
     },
     [
       archiveArmourDefinition,
+      addUpgradeToArmour,
       editable,
       getBusyAction,
       getLibraryItemForPiece,
       isDM,
       publishArmourDefinition,
       removePiece,
+      removeUpgradeFromArmour,
       toggleWorn,
       updateAllArmourCopies,
       userId,
@@ -763,6 +795,7 @@ function toCustomArmourData(piece: WornArmourPiece): CustomArmourData {
     customLibraryId: _customLibraryId,
     customLibraryVersionId: _customLibraryVersionId,
     worn: _worn,
+    upgrades: _upgrades,
     ...data
   } = piece;
 

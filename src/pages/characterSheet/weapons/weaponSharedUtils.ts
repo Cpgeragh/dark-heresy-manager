@@ -45,13 +45,13 @@ export function parseDamageType(
   }
 }
 
-export function computeMeleeTotalDamage(damage: string, strengthBonus: number): string {
+export function computeMeleeTotalDamage(damage: string, strengthBonus: number, multiplier = 1): string {
   const base = damage.replace(/\s*[IREX]$/i, "").trim();
   const match = base.match(/^(\d*d\d+)([+-]\d+)?$/i);
   if (!match) return base;
   const dice = match[1];
   const modifier = match[2] ? parseInt(match[2], 10) : 0;
-  const total = modifier + strengthBonus;
+  const total = modifier + strengthBonus * multiplier;
   if (total === 0) return dice;
   return `${dice}${total > 0 ? "+" : ""}${total}`;
 }

@@ -1,7 +1,7 @@
 // src/pages/characterSheet/weapons/RangedPicker.tsx
 
 import { useState } from "react";
-import type { WeaponCraftsmanship } from "../../../types/Character";
+import type { RangedWeapon, WeaponCraftsmanship } from "../../../types/Character";
 import {
   RANGED_WEAPON_REFERENCE,
   type RangedWeaponRef,
@@ -9,9 +9,7 @@ import {
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import {
   uiTextBody,
-  uiTextLabel,
   uiTextMuted,
-  uiInfoModalWrapper,
   uiItemName,
 } from "../../../ui/editableStyles";
 import { colourAmberFaint, colourFuchsia } from "../../../ui/colourTokens";
@@ -22,14 +20,122 @@ import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../../ui/PickerModal";
 import { ArrowRight, ArrowLeft } from "../../../ui/PickerArrows";
 import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
-import { InfoModal } from "../../../components/InfoModal";
 import { StatChip } from "../../../ui/StatChip";
-import { DamageTypeChip, SpecialRulesContent } from "./weaponShared";
+import { DamageTypeChip } from "./weaponShared";
+import { RangedCard } from "./RangedCard";
 import {
   weaponClassChip,
   ammoFamilyChip,
   rangedCraftsmanshipDescription,
 } from "./weaponHelpers";
+
+function RangedWeaponCardPickerRow({ ref, editable, onSelect }: { ref: RangedWeaponRef; editable: boolean; onSelect: () => void }) {
+  const weapon: RangedWeapon = {
+    id: `picker-${ref.id}`,
+    referenceId: ref.id,
+    name: ref.name,
+    class: ref.class,
+    range: ref.range,
+    rof: ref.rof,
+    damage: ref.damage,
+    pen: String(ref.pen),
+    clip: String(ref.clip),
+    rld: ref.reload,
+    specialRules: ref.specialRules,
+    weight: ref.weight,
+    value: ref.value,
+    availability: ref.availability,
+    source: ref.source,
+    ammoType: ref.ammoType,
+    ammoTracking: ref.ammoTracking,
+    craftsmanship: "Common",
+    upgrades: [],
+    ammoEntries: [],
+  };
+  return <RangedCard weapon={weapon} editable={false} onSelect={editable ? onSelect : undefined} onRemove={() => {}} onAddUpgrade={() => {}} onRemoveUpgrade={() => {}} onUpdateAmmoEntries={() => {}} onUpdateQuantity={() => {}} allowUpgrades={false} />;
+}
+
+/*
+function RangedReferenceRow({
+  ref,
+  editable,
+  onSelect,
+}: {
+  ref: RangedWeaponRef;
+  editable: boolean;
+  onSelect: () => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const toggle = () => setExpanded((value) => !value);
+  const weaponClass = weaponClassChip(ref.class);
+  const ammoFamily = ammoFamilyChip(ref.ammoType);
+
+  return (
+    <div className={uiSectionShell + " overflow-hidden"}>
+      <div className="relative w-full px-3 lg:px-4 py-2.5 lg:py-3 text-left hover:bg-slate-700/40 transition group">
+        <button
+          type="button"
+          onClick={editable ? onSelect : toggle}
+          aria-label={editable ? `Select ${ref.name}` : `${expanded ? "Collapse" : "Expand"} ${ref.name}`}
+          className="absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
+        />
+        <div className="relative pointer-events-none flex items-center gap-3">
+          <div className="flex-1 min-w-0 space-y-1.5">
+            <div className="flex items-center gap-1.5">
+              <span className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}>{ref.name}</span>
+              {ref.description && (
+                <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
+                  <InfoModal title={ref.name} content={ref.description} as="span" />
+                </span>
+              )}
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5">
+              {weaponClass && <Chip size="sm" className={weaponClass.active}>{weaponClass.label}</Chip>}
+              {ammoFamily && <Chip size="sm" className={ammoFamily.className}>{ammoFamily.label}</Chip>}
+              <ItemMetaChips weight={ref.weight} value={ref.value} availability={ref.availability} source={ref.source} />
+            </div>
+          </div>
+          {editable ? (
+            <button
+              type="button"
+              onClick={toggle}
+              aria-expanded={expanded}
+              aria-label={`${expanded ? "Collapse" : "Expand"} ${ref.name} details`}
+              className="relative z-10 pointer-events-auto p-1 -m-1"
+            >
+              <ExpandChevron expanded={expanded} />
+            </button>
+          ) : (
+            <ExpandChevron expanded={expanded} />
+          )}
+        </div>
+      </div>
+      {expanded && (
+        <div className="border-t border-slate-600 px-3 lg:px-4 py-3 space-y-2">
+          <div className="flex flex-wrap gap-1.5">
+            <StatChip size="sm" label="Range" value={ref.range} />
+            <StatChip size="sm" label="ROF" value={ref.rof} />
+            <StatChip size="sm" label="Dmg" value={ref.damage} />
+            <DamageTypeChip size="sm" damage={ref.damage} />
+            <StatChip size="sm" label="Pen" value={ref.pen} />
+            <StatChip size="sm" label="Clip" value={ref.clip} />
+            <StatChip size="sm" label="Reload" value={ref.reload} />
+          </div>
+          {ref.specialRules && ref.specialRules !== "—" && (
+            <div className="flex items-center gap-1.5">
+              <span className={uiTextLabel}>Qualities</span>
+              <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>{ref.specialRules}</span>
+              <span className={uiInfoModalWrapper}>
+                <InfoModal title={`${ref.name} Qualities`} content={<SpecialRulesContent rules={ref.specialRules} />} as="span" />
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+*/
 
 export function RangedPicker({
   editable = true,
@@ -250,11 +356,16 @@ export function RangedPicker({
         );
       })}
       {filtered.map((ref) => (
-        <PickerRow
+        <RangedWeaponCardPickerRow
           key={ref.id}
-          interactive={editable}
-          onClick={() => setSelected(ref)}
-        >
+          ref={ref}
+          editable={editable}
+          onSelect={() => setSelected(ref)}
+        />
+      ))}
+      {/* Previous flat picker row retained below while the new expandable row is verified.
+      {false && filtered.map((ref) => (
+        <PickerRow key={ref.id}>
           <span
             className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}
           >
@@ -296,6 +407,7 @@ export function RangedPicker({
           )}
         </PickerRow>
       ))}
+      */}
     </PickerModal>
   );
 }

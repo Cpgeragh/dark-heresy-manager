@@ -106,7 +106,12 @@ export type CustomWeaponData =
 export type CustomArmourData =
   | (Omit<
       WornArmourPiece,
-      "id" | "referenceId" | "customLibraryId" | "customLibraryVersionId" | "worn"
+      | "id"
+      | "referenceId"
+      | "customLibraryId"
+      | "customLibraryVersionId"
+      | "worn"
+      | "upgrades"
     > & {
       armourKind: "worn";
     })

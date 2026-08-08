@@ -19,7 +19,7 @@ import {
   uiCardTitle,
 } from "../../../ui/editableStyles";
 import { uiExpandButton } from "../../../ui/buttonStyles";
-import { colourEmerald, colourCyan, colourViolet, colourTealLight } from "../../../ui/colourTokens";
+import { colourEmerald, colourCyan, colourOrange, colourViolet, colourTealLight } from "../../../ui/colourTokens";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
@@ -99,7 +99,7 @@ export function GrenadeCard({
     .filter((name) => Boolean(name) && Boolean(WEAPON_SPECIAL_RULES[name]));
 
   const equippedCount = isEquipped ? Math.min(item.quantity, 3) : item.quantity;
-  const showMishaps = item.type !== "Mine";
+  const showMishaps = item.type !== "Mine" && item.type !== "Missile";
   const thrownRange = `${Math.max(0, strengthBonus) * 3}m`;
 
   return (
@@ -121,8 +121,8 @@ export function GrenadeCard({
             )}
           </div>
           <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
-            <Chip size="sm" className={item.type === "Mine" ? colourViolet : colourCyan}>
-              {item.type === "Mine" ? "Mine" : "Grenade"}
+            <Chip size="sm" className={item.type === "Mine" ? colourViolet : item.type === "Missile" ? colourOrange : colourCyan}>
+              {item.type ?? "Grenade"}
             </Chip>
             {(() => { const c = weaponClassChip(item.class); return c ? (
               <Chip size="sm" className={c.label === "Exotic" ? colourTealLight : c.active}>{c.label}</Chip>
@@ -171,7 +171,7 @@ export function GrenadeCard({
 
           {/* Stat chips */}
           <div className="flex flex-wrap gap-1.5">
-            {item.type !== "Mine" && <StatChip label="Range" value={thrownRange} />}
+            {item.type !== "Mine" && item.type !== "Missile" && <StatChip label="Range" value={thrownRange} />}
             {(!item.damage || item.damage === "—") && (
               <StatChip label="Damage" value="—" />
             )}

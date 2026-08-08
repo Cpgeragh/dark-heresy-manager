@@ -57,9 +57,21 @@ export function addSpecialRule(rules: string, rule: string): string {
   return `${cleaned}, ${rule}`;
 }
 
+export function removeSpecialRule(rules: string, rule: string): string {
+  const remaining = rules
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter((entry) => entry && entry.toLowerCase() !== rule.toLowerCase());
+  return remaining.length > 0 ? remaining.join(", ") : "—";
+}
+
 export function rangedRulesForCraftsmanship(rules: string, craftsmanship: WeaponCraftsmanship): string {
   if (craftsmanship === "Poor") return addSpecialRule(rules, "Unreliable");
-  if (craftsmanship === "Good") return addSpecialRule(rules, "Reliable");
+  if (craftsmanship === "Good") {
+    const hasUnreliable = rules.split(",").some((entry) => entry.trim().toLowerCase() === "unreliable");
+    if (hasUnreliable) return removeSpecialRule(removeSpecialRule(rules, "Unreliable"), "Reliable");
+    return addSpecialRule(rules, "Reliable");
+  }
   return rules;
 }
 

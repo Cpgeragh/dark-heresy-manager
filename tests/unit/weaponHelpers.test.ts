@@ -8,6 +8,7 @@ import {
   removeSpecialRule,
   effectiveWeaponWeight,
   effectiveRangedStats,
+  compatibleAmmoIdsWithIH,
   effectiveMeleeStats,
   getCompatibleUpgrades,
   weaponClassChip,
@@ -258,6 +259,18 @@ describe("effectiveRangedStats", () => {
     expect(result.specialRules).toBe("Reliable, Sanctified");
   });
 
+  it("applies Blazer Shotgun Shells: limits range, changes damage to Energy, and adds qualities", () => {
+    const result = effectiveRangedStats(baseWeapon, [], ammo("ih-blazer-shotgun-shells"));
+    expect(result.range).toBe("15m");
+    expect(result.damage).toBe("1d10+3 E");
+    expect(result.specialRules).toBe("Reliable, Flame, Primitive");
+  });
+
+  it("applies Blessed Ammunition: adds Holy", () => {
+    const result = effectiveRangedStats(baseWeapon, [], ammo("ih-blessed-ammunition"));
+    expect(result.specialRules).toBe("Reliable, Holy");
+  });
+
   it("applies Purity Round: adds Haywire (2)", () => {
     const result = effectiveRangedStats(baseWeapon, [], ammo("lw-purity-round"));
     expect(result.specialRules).toBe("Reliable, Haywire (2)");
@@ -452,6 +465,33 @@ describe("ammoFamilyChip", () => {
 
   it("falls back to the raw label for an unrecognised ammo type", () => {
     expect(ammoFamilyChip("Xenos Toxin")?.label).toBe("Xenos Toxin");
+  });
+});
+
+describe("compatibleAmmoIdsWithIH", () => {
+  it("adds the IH shotgun ammunition to shell-compatible weapons", () => {
+    expect(
+      compatibleAmmoIdsWithIH(["cr-shells"], "Shells")
+    ).toEqual(
+      expect.arrayContaining([
+        "cr-shells",
+        "ih-blazer-shotgun-shells",
+        "ih-void-rounds",
+        "ih-blessed-ammunition",
+      ])
+    );
+  });
+
+  it("adds IH bolt ammunition to bolt-compatible weapons", () => {
+    expect(
+      compatibleAmmoIdsWithIH(["cr-bolt-shells"], "Bolt Shells")
+    ).toEqual(
+      expect.arrayContaining([
+        "cr-bolt-shells",
+        "ih-psycannon-bolts",
+        "ih-blessed-ammunition",
+      ])
+    );
   });
 });
 

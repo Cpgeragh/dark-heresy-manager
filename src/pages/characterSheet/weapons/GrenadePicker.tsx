@@ -15,7 +15,7 @@ import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerCustomAction, PickerModal, PickerRow } from "../../../ui/PickerModal";
 import { InfoModal } from "../../../components/InfoModal";
 import { Chip } from "../../../ui/Chip";
-import { colourCyan, colourViolet, colourTealLight } from "../../../ui/colourTokens";
+import { colourCyan, colourOrange, colourViolet, colourTealLight } from "../../../ui/colourTokens";
 import { StatChip } from "../../../ui/StatChip";
 import { DamageTypeChip, SpecialRulesContent } from "./weaponShared";
 import { weaponClassChip } from "./weaponHelpers";
@@ -84,15 +84,15 @@ export function GrenadePicker({
               <StatusBadge status={item.status} />
             </div>
             <div className="flex flex-wrap gap-1.5 mt-1">
-              <Chip size="sm" className={data.type === "Mine" ? colourViolet : colourCyan}>
-                {data.type === "Mine" ? "Mine" : "Grenade"}
+              <Chip size="sm" className={data.type === "Mine" ? colourViolet : data.type === "Missile" ? colourOrange : colourCyan}>
+                {data.type ?? "Grenade"}
               </Chip>
               {(() => { const c = weaponClassChip(data.class); return c ? (
                 <Chip size="sm" className={c.label === "Exotic" ? colourTealLight : c.active}>{c.label}</Chip>
               ) : null; })()}
             </div>
             <div className="flex flex-wrap gap-1.5 mt-1">
-              {data.type !== "Mine" && <StatChip size="sm" label="Range" value={thrownRange} />}
+              {data.type !== "Mine" && data.type !== "Missile" && <StatChip size="sm" label="Range" value={thrownRange} />}
               {data.damage && data.damage !== "—" && <StatChip size="sm" label="Dmg" value={data.damage} />}
               {data.damage && <DamageTypeChip size="sm" damage={data.damage} />}
               {data.pen && <StatChip size="sm" label="Pen" value={data.pen} />}
@@ -132,15 +132,15 @@ export function GrenadePicker({
             {ref.name}
           </span>
           <div className="flex flex-wrap gap-1.5 mt-1">
-            <Chip size="sm" className={ref.type === "Mine" ? colourViolet : colourCyan}>
-              {ref.type === "Mine" ? "Mine" : "Grenade"}
+            <Chip size="sm" className={ref.type === "Mine" ? colourViolet : ref.type === "Missile" ? colourOrange : colourCyan}>
+              {ref.type ?? "Grenade"}
             </Chip>
             {(() => { const c = weaponClassChip(ref.class); return c ? (
               <Chip size="sm" className={c.label === "Exotic" ? colourTealLight : c.active}>{c.label}</Chip>
             ) : null; })()}
           </div>
           <div className="flex flex-wrap gap-1.5 mt-1">
-            {ref.type !== "Mine" && <StatChip size="sm" label="Range" value={thrownRange} />}
+            {ref.type !== "Mine" && ref.type !== "Missile" && <StatChip size="sm" label="Range" value={thrownRange} />}
             {ref.damage !== "—" && <StatChip size="sm" label="Dmg" value={ref.damage} />}
             <DamageTypeChip size="sm" damage={ref.damage} />
             <StatChip size="sm" label="Pen" value={ref.pen} />

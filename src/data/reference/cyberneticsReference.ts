@@ -26,6 +26,9 @@ export interface CyberneticRef {
   source: SkillSource;
   /** Cost listed is for Common craftsmanship */
   value: string;
+  /** Optional craftsmanship-specific costs when the source lists them separately */
+  poorValue?: string;
+  goodValue?: string;
   availability: string;
   /** General rules that apply regardless of craftsmanship */
   notes?: string;
@@ -477,5 +480,91 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
       "3+ DoF: Hard (–20) Toughness Test or lose 1d5 Fellowship permanently. " +
       "Process can be shortened to 1 Round at –10 per Round reduced.",
     good: "Also alters skin tone in addition to facial structure.",
+  },
+
+  // ── Inquisitor's Handbook ────────────────────────────────────────────────
+  {
+    id: "ih-chem-gland",
+    name: "Chem Gland",
+    source: SkillSource.IH,
+    value: "5,000 Thrones",
+    availability: "Very Rare",
+    notes:
+      "These rare and expensive implants are wonders of the bio-sculptor’s craft. Invisibly concealed within the body are miniaturised chemical factories that consume the user’s own natural resources to synthesise powerful chemical agents. Pick up to three substances when the implant is performed (such as Stimm, Panimmune, and so on). Cost is plus the cost of the drugs.",
+    common:
+      "The character can “gland” any one of these at will as a Half Action by succeeding on a Routine (+10) Toughness Test. A failed Test however inflicts a level of Fatigue. A failure by four or more degrees deals 1d10 points of Toughness Damage.",
+  },
+  {
+    id: "ih-injector-rig",
+    name: "Injector Rig",
+    source: SkillSource.IH,
+    value: "750 Thrones",
+    availability: "Scarce",
+    notes:
+      "These relatively crude cybernetic systems are obviously artificial and might include arrays of intramuscular hypodermics or flesh-wielded drug tubes linked to bulky chem-canisters sutured to the user’s back. These rigs may contain ten doses of up to four separate substances at once (most commonly Frenzon, Slaught, Stimm and De-Tox). Cost is plus the cost of the drugs.",
+    common:
+      "Injecting one of these is a Half Action and the effects are instant. Depending on the nature of the rig, it may be triggered either by manual control or by remote control by some other individual (particularly if the user is a slave fighter). As well as the normal dangers of excessive drug use and the drugs themselves, if the user suffers a Critical Hit, there is a chance that the injector malfunctions and poisons him. The character must succeed on a Toughness Test or the injector deals 2d10 points of Damage, ignoring Armour Points.",
+  },
+  {
+    id: "ih-concealed-weapon-bionic",
+    name: "Concealed Weapon Bionic",
+    source: SkillSource.IH,
+    value: "300 Thrones",
+    poorValue: "150 Thrones",
+    goodValue: "750 Thrones",
+    availability: "Scarce",
+    notes:
+      "Using a pre-existing bionic arm, a pistol or a short, single-handed melee weapon can be modified and implanted as a concealed device. Weapons concealed in this fashion can be deployed and readied as a Half Action. Cost is plus the cost of the weapon and bionic arm.\n\nDisadvantage: Any catastrophic Jam or Overheat automatically disables the limb in question as well as the weapon.",
+    poor:
+      "The bionic weapon functions as normal, but gains the Unreliable Quality. In addition, the weapon cannot be removed with a Disarm, and locating the weapon requires a detailed inspection or a successful auspex scan.",
+    common: "As Poor, but the weapon loses the Unreliable Quality.",
+    good: "As Common, but the weapon functions as being best craftsmanship.",
+  },
+  {
+    id: "ih-hermetic-infusion",
+    name: "Hermetic Infusion",
+    source: SkillSource.IH,
+    value: "3,000 Thrones",
+    goodValue: "17,000 Thrones",
+    availability: "Tech-Priest Only",
+    notes:
+      "As another departure from the frailties of the flesh, the infuser system replaces human blood and blood processing organs with a far more efficient biomechanical serum, the most advanced forms of which contain legions of microscopic homunculitic machines that can search out and repair damage on a cellular level with frightening speed.\n\nPrerequisite: Tech-Priest, Autosanguine talent.\n\nDisadvantages: Aside from a greying of the flesh and visible withering of the tissues, Hermetic Infusion has one marked side effect: the tech-priest’s body can no longer use human blood, and so cannot be treated for Blood Loss or severe injuries by transfusion or regular medical treatments. Instead, the tech-priest must look to his own care (if possible) or that of a Magos Biologis to replace his lost serum.",
+    common:
+      "The tech-priest gains a +10 bonus on Tests made to resist toxins, diseases and radioactive contamination. As well, the tech-priest gains the Die Hard talent.",
+    good:
+      "As Common, but the bonus on Tests increases to +20 and the tech-priest gains the Regeneration trait.",
+  },
+  {
+    id: "ih-mining-helot-augmetics",
+    name: "Mining Helot Augmetics",
+    source: SkillSource.IH,
+    value: "2,000 Thrones",
+    availability: "Scarce",
+    notes:
+      "A forge world is a hungry monster, devouring raw materials without pause or satiation. This hunger is fed by the blood and sweat of countless indentured labours (known as helots) and servitors who toil to feed the macro forges and titanic foundries. The Machine God is not without gifts for those that labour to feed it. In the deep mines, the helots are fitted with massive implant-drills and rams bonded into their nervous system, and their bodies are augmented to better perform their duties. Such improvements are often crudely fitted, and endlessly recycled for use again after the failure of their current fleshy housing.\n\nDrawbacks: Unfortunately, the side effects of these somewhat crude and bulky flesh-metal fusions reduce the character’s Agility Characteristic by −10. These implants are performed with little thought given to the level of pain or discomfort they inflict, thus recipients gain 1d10 Insanity Points.",
+    common:
+      "Mining Helot Augmetics give the character an extra limb fitted with a breacher. This implant increases the character’s Strength and Toughness Characteristics each by +10, thanks to surgically implanted muscle tissue and bionic skeletal reinforcement.",
+  },
+  {
+    id: "ih-rite-of-setesh",
+    name: "The Rite of Setesh",
+    source: SkillSource.IH,
+    value: "100,000 Thrones",
+    availability: "Very Rare",
+    notes:
+      "Utilised by the rich and powerful whose fear of death is sufficient to overcome their love of humanity, these augmetic rigs (known in Mechanicus lore as the Rite of Setesh) involve the living mummification of a dying body and its emplacement in an all-encompassing exoskeleton designed to keep an advanced aged or disease-ravaged body alive long past natural limits, trapping the body in what amounts to little more than a semi-mobile iron coffin devoid of human contact. The use of these augmetics is largely frowned upon even by the Mechanicus as skirting the edge of techno-heresy in form and function.\n\nDrawbacks: The character reduces Weapon Skill, Ballistic Skill and Agility to half (round down). Life in one of these devices is nightmarish and painful. The character gains 2d10 Insanity Points. Also, the rotted biology contained within adds +5 to any Critical Effect inflicted against the character.",
+    common:
+      "This rite grants a character the Machine (4) trait (except this Trait does not affect his or her mind) and the Regeneration trait. Wounds and mental characteristics are unchanged.",
+  },
+  {
+    id: "ih-vehicle-interface-circuits",
+    name: "Vehicle Interface Circuits",
+    source: SkillSource.IH,
+    value: "2,000 Thrones",
+    availability: "Rare",
+    notes:
+      "Interface circuitry is one of the greatest treasures preserved from the golden past by the Adeptus Mechanicus. Glimmering neuron-interface circuitry implanted into the tissues of the hands allows an intuitive interface between a pilot and his craft.\n\nThe most famous examples of implanted interface circuitry are from Galvia in the Scarus Sector, but certain forge worlds have the designs and capacity to create such wonders, one being the vast Myromentz orbital station in the Lathe System.",
+    common:
+      "Interface implants grant a +10 bonus on Pilot Tests when operating any vehicle with interface receptors. In addition, a character equipped with this circuitry may also make a Perception Test (Difficulty set by the GM) to determine a vehicle’s status and condition as a Free Action.",
   },
 ];

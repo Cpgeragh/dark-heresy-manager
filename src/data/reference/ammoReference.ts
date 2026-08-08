@@ -13,16 +13,28 @@ export interface AmmoRef {
   /** Free-text "Used With" compatibility note */
   compatibleWith: string;
   /** Throne cost per purchase unit, e.g. "1 Throne", "16 Thrones" */
-  cost: string;
+  cost?: string;
   /**
    * How many rounds/charges per purchase.
    * Numeric string ("20", "6", "1") or "full clip" for weapons
    * where the amount equals the weapon's own clip size.
    */
   purchaseAmount: string;
-  availability: string;
+  availability?: string;
   /** Game-mechanical effects for special ammunition */
   description?: string;
+  /** A full unit's capacity for particular weapons, when it differs from that weapon's printed Clip value. */
+  capacityByWeaponId?: Record<string, number>;
+  /** Fixed weight for one complete ammunition unit, when the source supplies one. */
+  unitWeightKg?: number;
+  /** A fitted backpack supply changes the weapon while it is loaded. */
+  loadedWeaponModifiers?: {
+    clipMultiplier?: number;
+    weightKg?: number;
+    valueThrones?: number;
+  };
+  /** The entry is a fitted feed configuration rather than spare ammunition. */
+  isBackpackFeed?: boolean;
 }
 
 export const RECHARGING_POWER_PACKS_TEXT =
@@ -49,8 +61,27 @@ export function usesUnitAmmoTracking(ammo?: Pick<AmmoRef, "id">): boolean {
     "dh-cryptus-shotgun-shells",
     "dh-psybolt-ammunition",
     "dh-psyflame-ammunition",
+    "ih-blazer-shotgun-shells",
+    "ih-void-rounds",
+    "ih-psycannon-bolts",
+    "ih-blessed-ammunition",
     "lw-purity-round",
   ]).has(ammo.id);
+}
+
+/** Some ammunition is purchased as a complete clip even for weapons otherwise tracked by individual rounds. */
+export function isSoldAsFullClip(ammo?: Pick<AmmoRef, "purchaseAmount">): boolean {
+  return ammo?.purchaseAmount?.trim().toLowerCase() === "full clip";
+}
+
+/** Resolves a full ammunition unit's capacity, including weapon-specific exceptions. */
+export function ammoCapacityForWeapon(
+  ammo: Pick<AmmoRef, "capacityByWeaponId"> | undefined,
+  weaponReferenceId: string | undefined,
+  fallbackClip: string | undefined
+): string | undefined {
+  const override = weaponReferenceId ? ammo?.capacityByWeaponId?.[weaponReferenceId] : undefined;
+  return override != null ? String(override) : fallbackClip;
 }
 
 // ─── Reference Data ───────────────────────────────────────────────────────────
@@ -116,6 +147,9 @@ export const AMMO_REFERENCE: AmmoRef[] = [
     availability: "Common",
     description:
       "Powerful batteries used almost exclusively by las weapons. Provides shots equal to the weapon's full clip value.",
+    capacityByWeaponId: {
+      "ih-voss-pattern-hellpistol": 5,
+    },
   },
   {
     id: "cr-charge-pack-basic",
@@ -127,6 +161,25 @@ export const AMMO_REFERENCE: AmmoRef[] = [
     availability: "Common",
     description:
       "Powerful batteries used almost exclusively by las weapons. Provides shots equal to the weapon's full clip value.",
+    capacityByWeaponId: {
+      "ih-dlaku-hellgun": 12,
+      "ih-voss-pattern-hellgun": 10,
+    },
+  },
+  {
+    id: "ih-power-capacitor",
+    name: "Power Capacitor",
+    source: SkillSource.IH,
+    compatibleWith: "D’laku Hellgun, Voss Pattern Hellgun, and Voss Pattern Hellpistol",
+    purchaseAmount: "full clip",
+    description:
+      "A backpack-mounted power source. It provides the listed weapon’s full capacitor capacity and weighs 6 kg.",
+    unitWeightKg: 6,
+    capacityByWeaponId: {
+      "ih-dlaku-hellgun": 40,
+      "ih-voss-pattern-hellgun": 40,
+      "ih-voss-pattern-hellpistol": 20,
+    },
   },
   {
     id: "cr-charge-pack-heavy",
@@ -163,6 +216,19 @@ export const AMMO_REFERENCE: AmmoRef[] = [
     availability: "Scarce",
     description:
       "Liquid fuel for flame weapons, ranging from purest promethium to crude flammable alcohols. Provides shots equal to the weapon's full clip value.",
+  },
+  {
+    id: "cr-flamer-backpack-fuel-hose",
+    name: "Flamer Backpack & Fuel Hose",
+    source: SkillSource.CR,
+    compatibleWith: "Non-pistol flame weapons using Fuel (basic)",
+    cost: "100 Thrones",
+    purchaseAmount: "backpack",
+    description:
+      "Replaces an underslung canister with a backpack and fuel hose. Doubles Clip size, adds 6 kg, and increases the weapon’s cost by 100 Thrones.",
+    isBackpackFeed: true,
+    unitWeightKg: 0,
+    loadedWeaponModifiers: { clipMultiplier: 2, weightKg: 6, valueThrones: 100 },
   },
 
   // ── Core Rulebook — Bolt ─────────────────────────────────────────────────
@@ -203,6 +269,19 @@ export const AMMO_REFERENCE: AmmoRef[] = [
     description:
       "Specially refined chemicals injected into highly pressurised canisters for meltaguns. Provides shots equal to the weapon's full clip value.",
   },
+  {
+    id: "cr-melta-backpack-feed-line",
+    name: "Melta Backpack & Feed Line",
+    source: SkillSource.CR,
+    compatibleWith: "Non-pistol melta weapons using Melta Canister (basic)",
+    cost: "100 Thrones",
+    purchaseAmount: "backpack",
+    description:
+      "Replaces attached canisters with a backpack and feed line. Doubles Clip size, adds 6 kg, and increases the weapon’s cost by 100 Thrones.",
+    isBackpackFeed: true,
+    unitWeightKg: 0,
+    loadedWeaponModifiers: { clipMultiplier: 2, weightKg: 6, valueThrones: 100 },
+  },
 
   // ── Core Rulebook — Plasma ───────────────────────────────────────────────
 
@@ -227,6 +306,22 @@ export const AMMO_REFERENCE: AmmoRef[] = [
     availability: "Rare",
     description:
       "Highly dangerous and volatile photonic hydrogen, compressed and contained within reinforced flasks. Provides shots equal to the weapon's full clip value.",
+    capacityByWeaponId: {
+      "ih-plasma-blaster": 12,
+    },
+  },
+  {
+    id: "cr-plasma-backpack-feed-line",
+    name: "Plasma Backpack & Feed Line",
+    source: SkillSource.CR,
+    compatibleWith: "Non-pistol plasma weapons using Plasma Flask (basic)",
+    cost: "100 Thrones",
+    purchaseAmount: "backpack",
+    description:
+      "Replaces attached plasma flasks with a backpack and feed line. Doubles Clip size, adds 6 kg, and increases the weapon’s cost by 100 Thrones.",
+    isBackpackFeed: true,
+    unitWeightKg: 0,
+    loadedWeaponModifiers: { clipMultiplier: 2, weightKg: 6, valueThrones: 100 },
   },
 
   // ── Core Rulebook — Special ──────────────────────────────────────────────
@@ -352,7 +447,130 @@ export const AMMO_REFERENCE: AmmoRef[] = [
       "Imperial standard ammunition cannot be adapted for this weapon.",
   },
 
+  // ── Inquisitor's Handbook ────────────────────────────────────────────────
+
+  {
+    id: "ih-spitfire-shells",
+    name: "Spitfire Shells",
+    source: SkillSource.IH,
+    compatibleWith: "Spitfire bolt pistol",
+    cost: "5 Thrones",
+    purchaseAmount: "full clip",
+    availability: "Scarce",
+    description:
+      "Modified rocket-propelled distress flares fitted with crude impact detonators. Spitfire shells are Scarce with a base cost of 5 Thrones per reload.",
+  },
+  {
+    id: "ih-valentine-cell",
+    name: "Valentine Cell",
+    source: SkillSource.IH,
+    compatibleWith: "Duelling Las",
+    cost: "20 Thrones",
+    purchaseAmount: "1",
+    availability: "Rare",
+    description:
+      "A special single-shot cell used by the Valentine Duelling Las instead of a standard power pack. It cannot be combined with an overcharge pack or an additional hot-shot charge.",
+  },
+  {
+    id: "ih-mariette-cylinder",
+    name: "Mariette Cylinder",
+    source: SkillSource.IH,
+    compatibleWith: "Mariette Cylinder Pistol",
+    cost: "100 Thrones",
+    purchaseAmount: "1",
+    availability: "Rare",
+    description:
+      "A self-contained ammunition-barrel cylinder for the Mariette. It is a Rare item with a base cost of 100 Thrones each.",
+  },
+  {
+    id: "ih-hypo-darts",
+    name: "Hypo Darts",
+    source: SkillSource.IH,
+    compatibleWith: "Hypo pistol",
+    cost: "5 Thrones",
+    purchaseAmount: "1",
+    availability: "Scarce",
+    description:
+      "Injector darts designed not to unduly harm their targets. Hypo-pistol ammo is Scarce and each hypo-dart has a base cost of 5 Thrones each.",
+  },
+  {
+    id: "ih-razor-darts",
+    name: "Razor Darts",
+    source: SkillSource.IH,
+    compatibleWith: "Widower",
+    cost: "15 Thrones",
+    purchaseAmount: "1",
+    availability: "Rare",
+    description:
+      "The Widower profile assumes a standard razor-dart, although poisoned or explosive darts are not unknown. Razor darts are also Rare items with a base cost of 15 Thrones each.",
+  },
+  {
+    id: "ih-blazer-shotgun-shells",
+    name: "Blazer Shotgun Shells",
+    source: SkillSource.IH,
+    compatibleWith: "Any shotgun",
+    cost: "4 Thrones",
+    purchaseAmount: "1",
+    availability: "Common",
+    description:
+      "These shells are packed with pyrotechnic materials, so when fired a huge gout of flame is produced for several seconds. While not as lethal as regular rounds, a volley excels at frightening off most enemies. As they can also be used in standard shotguns, they offer excellent tactical flexibility without the need for specialised flamer weapons. The duration of the discharge means it can only be used in single-shot mode.\n\nBlazer shotgun shells may be used with any shotgun and, when fired, reduce the weapon’s Range to 15 metres unless that would be greater than its actual Range. In addition, they change the weapon’s Damage type to Energy (E) and give it the Flame and Primitive qualities.",
+  },
+  {
+    id: "ih-irontalon-fragmenting-ammunition",
+    name: "Irontalon Fragmenting Ammunition",
+    source: SkillSource.IH,
+    compatibleWith: "Cypra Mundi Irontalon Pistol",
+    cost: "30 Thrones",
+    purchaseAmount: "full clip",
+    availability: "Rare",
+    description:
+      "Specialised fragmenting ammunition designed to violently stop a target without undue risk to a ship’s hull. It may only be used with the Cypra Mundi Irontalon Pistol.",
+  },
+  {
+    id: "ih-void-rounds",
+    name: "Void Rounds",
+    source: SkillSource.IH,
+    compatibleWith: "SP weapons (all)",
+    cost: "8 Thrones",
+    purchaseAmount: "1",
+    availability: "Scarce",
+    description:
+      "Specialised void rounds can be created by using self-igniting chemicals such that the weapon can be used in void environments without the risk of misfiring or rapid overheating.\n\nWeapons using void rounds gain the Reliable quality in void conditions.",
+  },
+  {
+    id: "ih-psycannon-bolts",
+    name: "Psycannon Bolts",
+    source: SkillSource.IH,
+    compatibleWith: "Bolt weapons",
+    cost: "250 Thrones",
+    purchaseAmount: "1",
+    availability: "Very Rare",
+    description:
+      "A true psycannon is a highly advanced form of bolter weapon utilised by the legendary Grey Knights, and aside from their armouries and a few powerful members of the Ordo Malleus, it is extremely rare even among the ranks of the Inquisition. Psycannon bolts, however, utilise the same core of psy-antheaemic substance in their construction and are capable of ripping through warp-stuff and barriers of psychic force with ease. Shockingly fatal even to those without psychic powers, it is whispered by some that those slain by psycannon bolts have their souls snuffed out like guttering candles.\n\nPsycannon bolts add +5 to all Critical Damage inflicted. Psycannon bolts inflict double their rolled Damage against targets with a Psy Rating, Daemons and other warp entities after Armour and Toughness Bonuses are taken into account. Damage inflicted by psycannon bolts is classed as Holy and ignores any psychically or warp-generated armour or protective field (such as Daemonic Resilience, Telekinetic Shield, etc).\n\nPsycannon bolts are only ever obtainable from somebody with full Inquisitorial rank.",
+  },
+  {
+    id: "ih-blessed-ammunition",
+    name: "Blessed Ammunition",
+    source: SkillSource.IH,
+    compatibleWith: "Bolt Weapons, Flamers, and Solid Projectile Weapons",
+    cost: "50 Thrones",
+    purchaseAmount: "1",
+    availability: "Very Rare",
+    description:
+      "The prayers and blessing of those of true faith in the God-Emperor of Mankind, coupled with the ancient lore of Ecclesiastical alchemistry, is able to turn mere mundane bullets and blades into weapons that are capable of harming the foul denizens of the warp and other such unnatural horrors.\n\nThe sole effect of these upgrades is to make the Damage caused by the weapon in question counted as “Holy”, which has certain effects on some Daemonic and warp creatures (as will be noted in their description). Obtaining such items is only possible through the Holy Ordos or high-ranking members of the Ecclesiarchy, and the cost and rarity shown reflects this.",
+  },
+
   // ── Lathe Worlds ─────────────────────────────────────────────────────────
+  {
+    id: "ih-catechist-stake-bolts",
+    name: "Catechist Stake-Bolts",
+    source: SkillSource.IH,
+    compatibleWith: "Catechist Pattern Stake-Crossbow",
+    cost: "50 Thrones",
+    purchaseAmount: "1",
+    availability: "Rare",
+    description: "Specially constructed 15 centimetre adamantine-silver alloy stakes, diamantine-tipped and micro-etched with prayers of anathema against witches and Daemons. They count as Holy and gain Tearing against targets with a Psy Rating or Sorcery. If more than 5 Damage is dealt after Armour and Toughness Bonus, the bolt becomes embedded; removing it by force deals an additional 1d5 Damage ignoring Armour and Toughness Bonus. Stake-bolts are only obtainable through the Holy Ordos.",
+  },
   {
     id: "lw-purity-round",
     name: "Purity Round",

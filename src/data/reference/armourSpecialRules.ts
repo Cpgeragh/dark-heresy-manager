@@ -1,7 +1,8 @@
 export const ARMOUR_SPECIAL_RULES: Record<string, string> = {
   Primitive:
-    "Only provides full AP against weapons that also have the Primitive quality. " +
-    "Against all other attacks, AP is halved (round up).",
+    "Primitive Armour’s APs are halved before being reduced for the weapon’s Penetration. For example, " +
+    "a suit of Feudal Plate (Primitive, AP 5) hit with a Chainsword (Pen 2) would provide 1 point " +
+    "of armour: (5/2 [rounded up])-2.",
   Flak:
     "Counts as AP 5 against any hit from a weapon with the Blast quality, " +
     "provided the wearer was not at the point where the blast originated.",

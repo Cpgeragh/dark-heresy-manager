@@ -575,7 +575,7 @@ export const HOMEWORLD_LIST: readonly HomeworldData[] = [
       {
         name: "Engram Implantation",
         description:
-          "With portions of the subjects’ minds left more or less as blank slates waiting to be filled, their reprogrammers often use egramatic induction to burn a variety of useful skill patterns directly into the Acolyte’s cortex.",
+          "With portions of the subjects’ minds left more or less as blank slates waiting to be filled, their reprogrammers often use engramatic induction to burn a variety of useful skill patterns directly into the Acolyte’s cortex.",
         effectLabel: "Effect",
         effect:
           "You begin play with Deceive (Fel) and Intimidate (S) skills. You treat Common Lore (Tech) (Int) and Survival (Int) as Basic Skills. You also begin with the Jaded and Pistol Weapon Training (SP and Las) talents.",
@@ -597,7 +597,7 @@ export const HOMEWORLD_LIST: readonly HomeworldData[] = [
           "You gain a +10 bonus on Willpower Tests made to resist Fear or attempts to control or possess your mind (psychically, chemically or otherwise).",
       },
       {
-        name: "Through A Mirror Darkly",
+        name: "Through a Mirror Darkly",
         description:
           "The mind cleansing process has numerous side effects, including an eroding effect on the subject’s sanity and unique dangers of its own for the character.",
         effectLabel: "Effect",
