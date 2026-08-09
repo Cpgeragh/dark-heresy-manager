@@ -2356,7 +2356,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     value: "500 Thrones",
     availability: "Scarce",
     ammoType: "Charge Pack (Basic)",
-    compatibleAmmoIds: ["ih-power-capacitor", "cr-charge-pack-basic"],
+    compatibleAmmoIds: ["ih-hellgun-capacitor", "cr-charge-pack-basic"],
     ammoTracking: "clip",
   },
   {
@@ -2651,7 +2651,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     value: "180 Thrones",
     availability: "Rare",
     ammoType: "Charge Pack (Basic)",
-    compatibleAmmoIds: ["ih-power-capacitor", "cr-charge-pack-basic"],
+    compatibleAmmoIds: ["ih-hellgun-capacitor", "cr-charge-pack-basic"],
     ammoTracking: "clip",
   },
   {
@@ -2671,7 +2671,7 @@ export const RANGED_WEAPON_REFERENCE: RangedWeaponRef[] = [
     value: "140 Thrones",
     availability: "Rare",
     ammoType: "Charge Pack (Pistol)",
-    compatibleAmmoIds: ["ih-power-capacitor", "cr-charge-pack-pistol"],
+    compatibleAmmoIds: ["ih-hellgun-capacitor", "cr-charge-pack-pistol"],
     ammoTracking: "clip",
   },
   {

@@ -76,3 +76,12 @@ export function craftsmanshipValue(
   if (quality === "Good") return ref.goodValue ?? ref.value;
   return ref.value;
 }
+
+export function craftsmanshipAvailability(
+  ref: CyberneticRef,
+  quality: CyberneticCraftsmanship
+): string {
+  if (quality === "Poor") return ref.poorAvailability ?? ref.availability;
+  if (quality === "Good") return ref.goodAvailability ?? ref.availability;
+  return ref.availability;
+}

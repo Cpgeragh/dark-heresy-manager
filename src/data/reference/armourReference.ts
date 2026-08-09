@@ -28,6 +28,8 @@ export interface ArmourRef {
   isForceField?: boolean;
   /** Protection Rating for force fields */
   protectionRating?: number;
+  /** For force fields whose burnt-out power source is replaced with a purchased spare, not repaired or recharged. Holds the replacement cost. */
+  spareCellValue?: string;
 }
 
 // Convenience shorthands for common location sets
@@ -502,7 +504,6 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     ap: 5,
     apOverrides: { head: 4 },
     notes:
-      "AP 5 all locations (AP 4 on Head). " +
       "+20 to resist toxins or diseases that do not penetrate the armour. " +
       "+10 on Fear Tests with an olfactory component (e.g. rotting bodies). " +
       "Helmet incorporates a re-breather.",
@@ -574,7 +575,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     apOverrides: { body: 8 },
     qualities: POWERED,
     notes:
-      "AP 7 all locations (AP 8 on Body). +10 Strength. " +
+      "+10 Strength. " +
       "Integrated targeter (+5 BS), re-breather, and comm-link. " +
       "Users with a Heavy weapon count as Braced. " +
       "Critical Damage to the Body from behind triggers the Power Unit table: " +
@@ -711,7 +712,7 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
     apOverrides: { head: 6, body: 14 },
     qualities: POWERED,
     notes:
-      "AP 6 Head, AP 10 Arms and Legs, AP 14 Body. Adds +30 Strength and increases size by one step. " +
+      "Adds +30 Strength and increases size by one step. " +
       "Must be refuelled every 1d5 hours. Without power, the armour cannot move. Far too bulky to be worn by a human.",
     weight: "60 kg",
     value: "—",
@@ -733,12 +734,12 @@ export const ARMOUR_REFERENCE: ArmourRef[] = [
   { id: "ih-environmental-body-glove", name: "Environmental Body Glove", source: SkillSource.IH, locations: ALL, ap: 1, notes: "Environmental body gloves add +1 Armour Point to all locations and grant a +10 bonus on Survival Tests. Such suits are almost invariably equipped with a re-breather, comm-bead and photo-contacts.", weight: "5 kg", value: "625 Thrones", availability: "Rare" },
   { id: "ih-slither-boots", name: "Slither Boots", source: SkillSource.IH, locations: LEGS, ap: 3, notes: "Slither boots provide a +10 bonus to Agility Tests made to maintain footing in treacherous or slick conditions and provide 6 AP (Legs) versus corrosives.", weight: "6 kg", value: "500 Thrones", availability: "Rare" },
   { id: "ih-wind-armour", name: "Wind Armour", source: SkillSource.IH, locations: ALL, ap: 3, notes: "The wearer is immune to environmental effects of strong wind and dire storms.", weight: "18 kg", value: "2,200 Thrones", availability: "Rare" },
-  { id: "ih-boarding-armour", name: "Boarding Armour", source: SkillSource.IH, locations: ALL, ap: 5, apOverrides: { rightArm: 3, leftArm: 3, rightLeg: 3, leftLeg: 3 }, notes: "Provides 3 AP of flak armour to the Legs and Arms, and 5 AP of carapace armour to the Head and Body. Includes a Void Suit and photo-visor.", weight: "17 kg", value: "1,225 Thrones", availability: "Rare" },
-  { id: "ih-selenite-pattern-heavy-duty-void-suit", name: "Selenite Pattern Heavy Duty Void Suit", source: SkillSource.IH, locations: ALL, ap: 3, apOverrides: { head: 4 }, notes: "Sustains life in hard vacuum for ten hours; includes an internal vox-link, seal patching kit, compact grapnel/clasp with ten metres of line, and photo-visor. −10 Agility while worn. An impellor version has Movement 6 in zero or reduced gravity.", weight: "20 kg", value: "600 Thrones", availability: "Average" },
+  { id: "ih-boarding-armour", name: "Boarding Armour", source: SkillSource.IH, locations: ALL, ap: 5, apOverrides: { rightArm: 3, leftArm: 3, rightLeg: 3, leftLeg: 3 }, notes: "Includes a Void Suit and photo-visor.", weight: "17 kg", value: "1,225 Thrones", availability: "Rare" },
+  { id: "ih-selenite-pattern-heavy-duty-void-suit", name: "Selenite Pattern Heavy Duty Void Suit", source: SkillSource.IH, locations: ALL, ap: 3, apOverrides: { head: 4 }, notes: "Sustains life in hard vacuum for ten hours; includes an internal vox-link, seal patching kit, compact grapnel/clasp with ten metres of line, and photo-visor. −10 Agility while worn.", weight: "20 kg", value: "600 Thrones", availability: "Average" },
   { id: "ih-windrider-carapace-scale-armour", name: "Windrider Carapace Scale Armour", source: SkillSource.IH, locations: ["body"], ap: 6, weight: "6 kg", value: "800 Thrones", availability: "Scarce" },
   { id: "ih-flak-greatcoat", name: "Flak Greatcoat", source: SkillSource.IH, locations: ["body", "rightArm", "leftArm"], ap: 4, qualities: FLAK, weight: "9 kg", value: "150 Thrones", availability: "Average" },
   { id: "ih-lidhl-light-power-armour", name: "Lidhl Light Power Armour", source: SkillSource.IH, locations: ALL, ap: 6, qualities: POWERED, weight: "40 kg", value: "8,000 Thrones", availability: "Very Rare" },
   { id: "ih-amulet-of-warding", name: "Amulet of Warding", source: SkillSource.IH, isForceField: true, locations: [], ap: 0, notes: "Roll 3d10 to reduce incoming Damage. Double ones bypasses the field; double tens overloads it for 1d10 Rounds, with an extra 1d10 roll—8 burns it out. −20 Concealment and Stealth while active. One hour maximum activation; recharge takes two hours. Activate as a Half Action.", weight: "1 kg", value: "30,000 Thrones", availability: "Very Rare" },
-  { id: "ih-refractor-field", name: "Refractor Field", source: SkillSource.IH, isForceField: true, locations: [], ap: 0, notes: "Against high velocity Impact, Energy (gunfire, etc.) and Explosive (bolt weapon) attacks, roll 2d10 to reduce Damage. Double ones bypasses the field; double tens overloads it and burns out the power cell. Ineffective against close combat, mines and similar close-range or slow-moving attacks. Cells last one hour and are not rechargeable.", weight: "1.5 kg", value: "20,000 Thrones", availability: "Very Rare" },
+  { id: "ih-refractor-field", name: "Refractor Field", source: SkillSource.IH, isForceField: true, locations: [], ap: 0, notes: "Against high velocity Impact, Energy (gunfire, etc.) and Explosive (bolt weapon) attacks, roll 2d10 to reduce Damage. Double ones bypasses the field; double tens overloads it and burns out the power cell. Ineffective against close combat, mines and similar close-range or slow-moving attacks. Cells last one hour and are not rechargeable, a replacement costs 1,000 Thrones and is Rare.", weight: "1.5 kg", value: "20,000 Thrones", availability: "Very Rare", spareCellValue: "1,000 Thrones" },
   { id: "ih-rosarius", name: "Rosarius", source: SkillSource.IH, isForceField: true, locations: [], ap: 0, notes: "No effect against close combat. Roll 2d10 to reduce ranged Damage. Double ones means no reduction; double tens reduces Damage by 20 and overloads it for 1d10 Rounds—an extra 1d10 roll of 9 means it fails until repaired. Blocking more than 12 Damage creates a photon-flash effect centred on the wearer.", weight: "2 kg", value: "25,000 Thrones", availability: "Rare" },
 ];

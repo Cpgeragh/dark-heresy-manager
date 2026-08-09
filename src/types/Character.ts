@@ -285,6 +285,8 @@ export interface WornArmourPiece extends CustomLibraryLinkFields {
   isForceField?: boolean;
   /** Protection Rating for force fields */
   protectionRating?: number;
+  /** Spare replacement power cells carried, for force fields that don't recharge (e.g. Refractor Field). */
+  spareCells?: number;
 }
 
 export interface CompanionItem {

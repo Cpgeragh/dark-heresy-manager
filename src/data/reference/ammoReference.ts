@@ -167,11 +167,13 @@ export const AMMO_REFERENCE: AmmoRef[] = [
     },
   },
   {
-    id: "ih-power-capacitor",
-    name: "Power Capacitor",
+    id: "ih-hellgun-capacitor",
+    name: "Hellgun Capacitor",
     source: SkillSource.IH,
     compatibleWith: "D’laku Hellgun, Voss Pattern Hellgun, and Voss Pattern Hellpistol",
+    cost: "50 Thrones",
     purchaseAmount: "full clip",
+    availability: "Rare",
     description:
       "A backpack-mounted power source. It provides the listed weapon’s full capacitor capacity and weighs 6 kg.",
     unitWeightKg: 6,

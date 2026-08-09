@@ -29,7 +29,12 @@ export function compatibleArmourUpgrades(piece: WornArmourPiece): ArmourUpgradeR
     reference.locations.includes("body") && name.includes("carapace");
   const isPowerArmour = name.includes("power armour") || name.includes("powered armour");
 
-  return isCarapaceBreastplateOrSuit || isPowerArmour ? ARMOUR_UPGRADE_REFERENCE : [];
+  const generallyCompatible = isCarapaceBreastplateOrSuit || isPowerArmour;
+  return ARMOUR_UPGRADE_REFERENCE.filter((upgrade) =>
+    upgrade.restrictedToArmourIds
+      ? upgrade.restrictedToArmourIds.includes(reference.id)
+      : generallyCompatible
+  );
 }
 
 export function ArmourUpgradeCard({

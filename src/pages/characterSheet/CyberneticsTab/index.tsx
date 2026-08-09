@@ -16,7 +16,7 @@ import type { ArcheotechItem } from "../../../types/Character";
 import { ImplantPicker } from "./ImplantPicker";
 import { ImplantRow } from "./ImplantRow";
 import { CustomImplantForm } from "./CustomImplantForm";
-import { craftsmanshipValue, nextAvailableCraftsmanship } from "./cyberneticsHelpers";
+import { craftsmanshipAvailability, craftsmanshipValue, nextAvailableCraftsmanship } from "./cyberneticsHelpers";
 import { Button } from "../../../ui/Button";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { ErrorState } from "../../../ui/ErrorState";
@@ -186,7 +186,7 @@ export function CyberneticsTab({
           name: ref.name,
           craftsmanship,
           value: craftsmanshipValue(ref, craftsmanship),
-          availability: ref.availability,
+          availability: craftsmanshipAvailability(ref, craftsmanship),
           source: ref.source,
           concealedWeapon: { armId, weaponId: weapon.id, weaponType: weapon.type },
         },
@@ -232,10 +232,14 @@ export function CyberneticsTab({
           const ref = CYBERNETICS_REFERENCE.find((r) => r.id === c.referenceId);
           const craftsmanship = nextAvailableCraftsmanship(c.craftsmanship, ref);
           const hasQualitySpecificCost = Boolean(ref?.poorValue || ref?.goodValue);
+          const hasQualitySpecificAvailability = Boolean(ref?.poorAvailability || ref?.goodAvailability);
           return {
             ...c,
             craftsmanship,
             ...(hasQualitySpecificCost && ref ? { value: craftsmanshipValue(ref, craftsmanship) } : {}),
+            ...(hasQualitySpecificAvailability && ref
+              ? { availability: craftsmanshipAvailability(ref, craftsmanship) }
+              : {}),
           };
         })
       );

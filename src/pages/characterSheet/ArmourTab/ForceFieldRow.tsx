@@ -10,12 +10,14 @@ import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActi
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/StatusBadge";
 import { forceFieldCraftsmanshipDescription } from "./armourHelpers";
+import { Stepper } from "../../../components/Stepper";
 
 interface Props extends CustomItemLibraryActionProps<"armour"> {
   piece: WornArmourPiece;
   editable: boolean;
   onToggle: (id: string) => void;
   onRemove: (id: string) => void;
+  onUpdateSpareCells: (id: string, value: number) => void;
 }
 
 function ForceFieldQualitiesContent({ qualities }: { qualities: string[] }) {
@@ -48,6 +50,7 @@ export function ForceFieldRow({
   onUpdateAllCopies,
   onToggle,
   onRemove,
+  onUpdateSpareCells,
 }: Props) {
   const active = piece.worn;
   const ref = ARMOUR_REFERENCE.find((r) => r.id === piece.referenceId);
@@ -113,6 +116,17 @@ export function ForceFieldRow({
             content={forceFieldCraftsmanshipDescription(craftsmanship)}
           />
         </div>
+
+        {ref?.spareCellValue && (
+          <div className="flex items-center gap-1.5 mt-1">
+            <span className={uiTextLabel}>Spare Cells</span>
+            <Stepper
+              value={piece.spareCells ?? 0}
+              editable={editable}
+              onChange={(value) => onUpdateSpareCells(piece.id, value)}
+            />
+          </div>
+        )}
 
         {libraryItem && (
           <CustomItemActionButtons

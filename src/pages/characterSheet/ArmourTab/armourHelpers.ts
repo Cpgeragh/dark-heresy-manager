@@ -8,6 +8,8 @@ import type {
   TalentEntry,
   WornArmourPiece,
 } from "../../../types/Character";
+import type { ArmourUpgradeRef } from "../../../data/reference/armourUpgradeReference";
+import { ARMOUR_LOCATION_LABELS } from "../../../constants/locations";
 
 /** AP contributed by one piece to one location */
 export function pieceApAt(piece: WornArmourPiece, loc: ArmourLocationKey): number {
@@ -34,6 +36,60 @@ export function wornApAt(pieces: WornArmourPiece[], loc: ArmourLocationKey): num
     .map((p) => pieceApAt(p, loc))
     .filter((ap) => ap > 0);
   return values.length === 0 ? 0 : Math.max(...values);
+}
+
+function formatKg(value: number): string {
+  if (!Number.isFinite(value) || value < 0) return "0 kg";
+  return `${Number(value.toFixed(2))} kg`;
+}
+
+function parseKg(value?: string): number {
+  const match = value?.trim().match(/^(\d+(?:\.\d+)?)\s*(?:kg)?$/i);
+  return match ? Number(match[1]) : 0;
+}
+
+function parseWeightDelta(value: string): number {
+  const trimmed = value.trim();
+  if (!trimmed || trimmed === "-" || trimmed === "—" || trimmed === "0") return 0;
+  const match = trimmed.match(/^([+-]?\d+(?:\.\d+)?)\s*(?:kg)?$/i);
+  return match ? Number(match[1]) : 0;
+}
+
+/** Base piece weight plus every fitted upgrade's weight delta, resolved to one real number. */
+export function effectiveArmourWeight(piece: WornArmourPiece, upgradeRefs: ArmourUpgradeRef[]): string {
+  const baseKg = parseKg(piece.weight);
+  const deltaKg = upgradeRefs.reduce((total, ref) => total + parseWeightDelta(ref.weight), 0);
+  return formatKg(baseKg + deltaKg);
+}
+
+/** "3 (Head 4)" style breakdown for pieces with per-location AP overrides; plain "3" otherwise. */
+export function apBreakdown(piece: WornArmourPiece): string {
+  const overrides = piece.apOverrides;
+  if (!overrides || Object.keys(overrides).length === 0) return String(piece.ap);
+
+  const byValue = new Map<number, ArmourLocationKey[]>();
+  for (const [location, value] of Object.entries(overrides) as [ArmourLocationKey, number][]) {
+    const list = byValue.get(value) ?? [];
+    list.push(location);
+    byValue.set(value, list);
+  }
+
+  const parts = [...byValue.entries()].map(([value, locations]) => {
+    const set = new Set(locations);
+    let label: string;
+    if (set.size === 2 && set.has("rightArm") && set.has("leftArm")) {
+      label = "Arms";
+    } else if (set.size === 2 && set.has("rightLeg") && set.has("leftLeg")) {
+      label = "Legs";
+    } else if (set.size === 4 && set.has("rightArm") && set.has("leftArm") && set.has("rightLeg") && set.has("leftLeg")) {
+      label = "Arms and Legs";
+    } else {
+      label = locations.map((loc) => ARMOUR_LOCATION_LABELS[loc]).join(", ");
+    }
+    return `${label} ${value}`;
+  });
+
+  return `${piece.ap} (${parts.join(", ")})`;
 }
 
 /** Rules text for a worn-armour craftsmanship grade */

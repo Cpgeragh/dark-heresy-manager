@@ -409,6 +409,14 @@ export function ArmourTab({
     [editable, armour, onUpdate]
   );
 
+  const updateSpareCells = useCallback(
+    (id: string, value: number) => {
+      if (!editable) return;
+      onUpdate(armour.map((p) => (p.id === id ? { ...p, spareCells: value } : p)));
+    },
+    [editable, armour, onUpdate]
+  );
+
   const regularArmour = armour.filter((p) => !p.isForceField);
   const forceFields = armour.filter((p) => p.isForceField);
   const worn = regularArmour.filter((p) => p.worn);
@@ -524,6 +532,7 @@ export function ArmourTab({
           onUpdateAllCopies={() => libraryItem && updateAllArmourCopies(libraryItem)}
           onToggle={toggleForceField}
           onRemove={removePiece}
+          onUpdateSpareCells={updateSpareCells}
         />
       );
     },
@@ -537,6 +546,7 @@ export function ArmourTab({
       removePiece,
       toggleForceField,
       updateAllArmourCopies,
+      updateSpareCells,
     ]
   );
 

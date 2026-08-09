@@ -30,6 +30,9 @@ export interface CyberneticRef {
   poorValue?: string;
   goodValue?: string;
   availability: string;
+  /** Optional craftsmanship-specific availability when the source lists it separately */
+  poorAvailability?: string;
+  goodAvailability?: string;
   /** General rules that apply regardless of craftsmanship */
   notes?: string;
   /** Rules at Poor craftsmanship */
@@ -513,6 +516,7 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
     poorValue: "150 Thrones",
     goodValue: "750 Thrones",
     availability: "Scarce",
+    goodAvailability: "Rare",
     notes:
       "Using a pre-existing bionic arm, a pistol or a short, single-handed melee weapon can be modified and implanted as a concealed device. Weapons concealed in this fashion can be deployed and readied as a Half Action. Cost is plus the cost of the weapon and bionic arm.\n\nDisadvantage: Any catastrophic Jam or Overheat automatically disables the limb in question as well as the weapon.",
     poor:

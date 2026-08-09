@@ -1441,10 +1441,21 @@ export const GEAR_REFERENCE: GearRef[] = [
     availability: "Rare",
   },
   {
+    id: "ih-lumenmould",
+    name: "Lumenmould",
+    source: SkillSource.IH,
+    description:
+      "This phosphorescent fungus provides reliable lighting for most of the Black Holds, where it thrives in the toxic sludge lining most decks. By scraping the mould and sludge into clear containers, crude light sources can be created to offer this greenish-yellow glow in areas without other sources of illumination. Others simply use the slime as body paint, making their already unsettling forms even more terrifying. A patch of lumenmould lights an area dimly for five metres.",
+    weight: "—",
+    value: "—",
+    availability: "—",
+  },
+  {
     id: "ih-navis-prima",
     name: "Navis Prima",
     source: SkillSource.IH,
-    description: "",
+    description:
+      "While a character is actively consulting a Navis Prima, they receive a +10 bonus to Navigation (Stellar) Tests.",
     weight: "—",
     value: "Priceless",
     availability: "Very Rare",
@@ -1720,19 +1731,11 @@ export const GEAR_REFERENCE: GearRef[] = [
     availability: "Very Rare (Ordo Xenos only)",
   },
   {
-    id: "ih-cherubim",
-    name: "Cherubim",
-    source: SkillSource.IH,
-    description: "",
-    weight: "—",
-    value: "3,000 Thrones",
-    availability: "Rare",
-  },
-  {
     id: "ih-thurible",
     name: "Thurible",
     source: SkillSource.IH,
-    description: "",
+    description:
+      "A self-heating metal censer suspended on chains, used to burn Drusine Incense.",
     weight: "5 kg",
     value: "500 Thrones",
     availability: "Rare",

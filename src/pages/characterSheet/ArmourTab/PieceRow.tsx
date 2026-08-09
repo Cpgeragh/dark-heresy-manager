@@ -5,7 +5,7 @@ import { RemoveButton } from "../../../ui/RemoveButton";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { StatChip } from "../../../ui/StatChip";
 import { InfoModal } from "../../../components/InfoModal";
-import { armourCraftsmanshipDescription } from "./armourHelpers";
+import { apBreakdown, armourCraftsmanshipDescription, effectiveArmourWeight } from "./armourHelpers";
 import { locationLabel } from "../../../utils/armourLocations";
 import { ARMOUR_REFERENCE } from "../../../data/reference/armourReference";
 import { ARMOUR_SPECIAL_RULES } from "../../../data/reference/armourSpecialRules";
@@ -65,8 +65,7 @@ export function PieceRow({
   onRemoveUpgrade,
 }: Props) {
   const [showUpgradePicker, setShowUpgradePicker] = useState(false);
-  const apDesc =
-    Object.keys(piece.apOverrides ?? {}).length > 0 ? `${piece.ap}*` : String(piece.ap);
+  const apDesc = apBreakdown(piece);
   const craftsmanship = piece.craftsmanship ?? "Common";
 
   const ref = ARMOUR_REFERENCE.find((r) => r.id === piece.referenceId);
@@ -93,7 +92,7 @@ export function PieceRow({
             <StatChip label="AP" value={apDesc} />
           </div>
           <ItemMetaChips
-            weight={piece.weight}
+            weight={effectiveArmourWeight(piece, upgradeRefs)}
             value={piece.value}
             availability={piece.availability}
             source={piece.source}
