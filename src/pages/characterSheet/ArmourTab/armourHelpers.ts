@@ -63,7 +63,10 @@ export function effectiveArmourWeight(piece: WornArmourPiece, upgradeRefs: Armou
 }
 
 /** "3 (Head 4)" style breakdown for pieces with per-location AP overrides; plain "3" otherwise. */
-export function apBreakdown(piece: WornArmourPiece): string {
+export function apBreakdown(piece: {
+  ap: number;
+  apOverrides?: Partial<Record<ArmourLocationKey, number>>;
+}): string {
   const overrides = piece.apOverrides;
   if (!overrides || Object.keys(overrides).length === 0) return String(piece.ap);
 

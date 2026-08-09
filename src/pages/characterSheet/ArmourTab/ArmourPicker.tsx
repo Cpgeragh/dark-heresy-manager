@@ -14,7 +14,7 @@ import { colourAmberFaint, colourFuchsia } from "../../../ui/colourTokens";
 import { CRAFTSMANSHIP_OPTIONS, CRAFTSMANSHIP_STYLE } from "../../../ui/craftsmanship";
 import { StatChip } from "../../../ui/StatChip";
 import { locationLabel } from "../../../utils/armourLocations";
-import { armourCraftsmanshipDescription } from "./armourHelpers";
+import { apBreakdown, armourCraftsmanshipDescription } from "./armourHelpers";
 
 interface Props {
   editable?: boolean;
@@ -129,7 +129,7 @@ export function ArmourPicker({
               {item.name}
             </span>
             <div className="flex flex-wrap gap-1.5 mt-1">
-              <StatChip size="sm" label="AP" value={`${data.ap}${Object.keys(data.apOverrides ?? {}).length > 0 ? "*" : ""}`} />
+              <StatChip size="sm" label="AP" value={apBreakdown(data)} />
               <StatChip size="sm" label="Location" value={locationLabel(data.locations)} />
             </div>
             <div className="flex flex-wrap gap-1.5 mt-1">
@@ -153,7 +153,7 @@ export function ArmourPicker({
             {ref.name}
           </span>
           <div className="flex flex-wrap gap-1.5 mt-1">
-            <StatChip size="sm" label="AP" value={`${ref.ap}${Object.keys(ref.apOverrides ?? {}).length > 0 ? "*" : ""}`} />
+            <StatChip size="sm" label="AP" value={apBreakdown(ref)} />
             <StatChip size="sm" label="Location" value={locationLabel(ref.locations)} />
           </div>
           <div className="flex flex-wrap gap-1.5 mt-1">
