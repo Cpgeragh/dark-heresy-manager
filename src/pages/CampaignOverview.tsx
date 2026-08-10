@@ -251,7 +251,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
                   session={session}
                   characters={summaries}
                   isDM={isDM}
-                  onDelete={isDM ? () => deleteSession(session.id) : undefined}
+                  onDelete={isDM ? (reverseXp) => deleteSession(session.id, reverseXp) : undefined}
                   onSave={isDM ? (data) => updateSession(session.id, data) : undefined}
                   onApplyXp={
                     isDM

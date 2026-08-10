@@ -5,6 +5,7 @@ const { mockDeleteDoc, mockDoc, mockIncrement, mockRunTransaction, mockTransacti
     const mockTransaction = {
       get: vi.fn(),
       update: vi.fn(),
+      delete: vi.fn(),
     };
     return {
       mockDeleteDoc: vi.fn().mockResolvedValue(undefined),
@@ -124,5 +125,54 @@ describe("applySessionXp", () => {
     await applySessionXp("camp-1", "sess-1", [], 200);
 
     expect(mockRunTransaction).not.toHaveBeenCalled();
+  });
+});
+
+describe("deleteSession with XP reversal", () => {
+  it("plain delete (no reverseXp) never starts a transaction", async () => {
+    await deleteSession("camp-1", "sess-1");
+    await deleteSession("camp-1", "sess-1", false);
+
+    expect(mockRunTransaction).not.toHaveBeenCalled();
+    expect(mockDeleteDoc).toHaveBeenCalledTimes(2);
+  });
+
+  it("reverses XP from every attendee and deletes the session when applied", async () => {
+    mockTransaction.get.mockResolvedValue({
+      exists: () => true,
+      data: () => ({ xpApplied: true, xpAwarded: 200, attendees: ["char-1", "char-2"] }),
+    });
+
+    await deleteSession("camp-1", "sess-1", true);
+
+    expect(mockRunTransaction).toHaveBeenCalledWith("mock-db", expect.any(Function));
+    expect(mockIncrement).toHaveBeenCalledWith(-200);
+    expect(mockTransaction.update).toHaveBeenCalledWith("campaigns/camp-1/characters/char-1", {
+      "experience.total": "increment:-200",
+    });
+    expect(mockTransaction.update).toHaveBeenCalledWith("campaigns/camp-1/characters/char-2", {
+      "experience.total": "increment:-200",
+    });
+    expect(mockTransaction.delete).toHaveBeenCalledWith("campaigns/camp-1/sessions/sess-1");
+  });
+
+  it("deletes the session without touching any character when XP was never applied", async () => {
+    mockTransaction.get.mockResolvedValue({
+      exists: () => true,
+      data: () => ({ xpApplied: false, xpAwarded: 200, attendees: ["char-1"] }),
+    });
+
+    await deleteSession("camp-1", "sess-1", true);
+
+    expect(mockTransaction.update).not.toHaveBeenCalled();
+    expect(mockTransaction.delete).toHaveBeenCalledWith("campaigns/camp-1/sessions/sess-1");
+  });
+
+  it("still deletes cleanly if the session is already gone", async () => {
+    mockTransaction.get.mockResolvedValue({ exists: () => false, data: () => undefined });
+
+    await expect(deleteSession("camp-1", "sess-1", true)).resolves.toBeUndefined();
+    expect(mockTransaction.update).not.toHaveBeenCalled();
+    expect(mockTransaction.delete).toHaveBeenCalledWith("campaigns/camp-1/sessions/sess-1");
   });
 });

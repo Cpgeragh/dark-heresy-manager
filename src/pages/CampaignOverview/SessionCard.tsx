@@ -26,7 +26,7 @@ interface Props {
   session: SessionWithId;
   characters: Character[];
   isDM: boolean;
-  onDelete?: () => Promise<void>;
+  onDelete?: (reverseXp: boolean) => Promise<void>;
   onSave?: (data: SessionUpdateData) => Promise<void>;
   onApplyXp?: () => Promise<void>;
 }
@@ -47,6 +47,8 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
   const [mode, setMode] = useState<"view" | "edit">("view");
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [reverseXp, setReverseXp] = useState(false);
   const [applyingXp, setApplyingXp] = useState(false);
 
   const [date, setDate] = useState(toInputDate(session.date));
@@ -104,14 +106,16 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
     if (!onDelete) return;
     setDeleting(true);
     try {
-      await onDelete();
+      await onDelete(reverseXp);
     } catch (err) {
       console.error("Failed to delete session:", err);
       toast.error("Failed to delete session. Please try again.");
     } finally {
       setDeleting(false);
+      setConfirmingDelete(false);
+      setReverseXp(false);
     }
-  }, [onDelete, toast]);
+  }, [onDelete, reverseXp, toast]);
 
   const handleApplyXp = useCallback(async () => {
     if (!onApplyXp) return;
@@ -252,13 +256,49 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
             </Button>
           )}
           {isDM && onDelete && (
-            <ConfirmInline
-              triggerLabel="Delete"
-              question="Delete?"
-              size="sm"
-              busy={deleting}
-              onConfirm={handleDelete}
-            />
+            session.xpApplied === true ? (
+              confirmingDelete ? (
+                <div className="flex flex-col items-start gap-1.5" onClick={(e) => e.preventDefault()}>
+                  <span className="text-xs lg:text-sm text-red-400">
+                    This session's XP was already applied. Deleting it won't remove that XP unless checked below.
+                  </span>
+                  <label className="flex items-center gap-1.5 text-xs lg:text-sm text-slate-300 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={reverseXp}
+                      onChange={(e) => setReverseXp(e.target.checked)}
+                      disabled={deleting}
+                    />
+                    Also remove {session.xpAwarded} XP from attendees
+                  </label>
+                  <div className="flex items-center gap-1">
+                    <Button variant="danger" size="sm" disabled={deleting} onClick={() => handleDelete()}>
+                      {deleting ? "…" : "Yes"}
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      disabled={deleting}
+                      onClick={() => { setConfirmingDelete(false); setReverseXp(false); }}
+                    >
+                      No
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <Button variant="dangerGhost" size="sm" onClick={() => setConfirmingDelete(true)}>
+                  Delete
+                </Button>
+              )
+            ) : (
+              <ConfirmInline
+                triggerLabel="Delete"
+                question="Delete?"
+                size="sm"
+                busy={deleting}
+                onConfirm={() => handleDelete()}
+              />
+            )
           )}
         </div>
       </div>

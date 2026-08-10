@@ -17,7 +17,7 @@ export function useSessions(campaignId: string | undefined): {
   sessions: SessionWithId[];
   loading: boolean;
   error: Error | null;
-  deleteSession: (sessionId: string) => Promise<void>;
+  deleteSession: (sessionId: string, reverseXp?: boolean) => Promise<void>;
   updateSession: (sessionId: string, data: SessionUpdateData) => Promise<void>;
 } {
   const {
@@ -37,9 +37,9 @@ export function useSessions(campaignId: string | undefined): {
   );
 
   const deleteSession = useCallback(
-    async (sessionId: string) => {
+    async (sessionId: string, reverseXp = false) => {
       if (!campaignId) return;
-      await deleteSessionDocument(campaignId, sessionId);
+      await deleteSessionDocument(campaignId, sessionId, reverseXp);
     },
     [campaignId]
   );

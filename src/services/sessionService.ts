@@ -62,9 +62,37 @@ export async function updateSession(
   );
 }
 
-/** Permanently deletes a campaign session. */
-export async function deleteSession(campaignId: string, sessionId: string): Promise<void> {
-  await deleteDoc(doc(db, "campaigns", campaignId, "sessions", sessionId));
+/**
+ * Permanently deletes a campaign session. If reverseXp is true and the
+ * session's XP was applied, also removes that XP from every attendee, in
+ * the same transaction as the delete so it can't race or double-reverse.
+ */
+export async function deleteSession(
+  campaignId: string,
+  sessionId: string,
+  reverseXp = false
+): Promise<void> {
+  const sessionRef = doc(db, "campaigns", campaignId, "sessions", sessionId);
+
+  if (!reverseXp) {
+    await deleteDoc(sessionRef);
+    return;
+  }
+
+  await runTransaction(db, async (transaction) => {
+    const sessionSnap = await transaction.get(sessionRef);
+    if (sessionSnap.exists()) {
+      const session = sessionSnap.data() as SessionDocument;
+      if (session.xpApplied === true) {
+        for (const characterId of session.attendees) {
+          transaction.update(doc(db, "campaigns", campaignId, "characters", characterId), {
+            "experience.total": increment(-session.xpAwarded),
+          });
+        }
+      }
+    }
+    transaction.delete(sessionRef);
+  });
 }
 
 /**

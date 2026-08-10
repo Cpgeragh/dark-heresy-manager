@@ -1,5 +1,6 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { SessionCard } from "../../src/pages/CampaignOverview/SessionCard";
 import { ToastProvider } from "../../src/components/Toast";
@@ -78,5 +79,96 @@ describe("SessionCard", () => {
     const session = { ...baseSession, summary: "" };
     renderWithToast(<SessionCard session={session} characters={characters} isDM={false} />);
     expect(screen.queryByText("The acolytes investigated the underhive.")).not.toBeInTheDocument();
+  });
+});
+
+describe("SessionCard delete confirmation", () => {
+  it("uses the plain Delete? confirm and calls onDelete(false) when XP was never applied", async () => {
+    const user = userEvent.setup();
+    const onDelete = vi.fn().mockResolvedValue(undefined);
+    const session = { ...baseSession, xpApplied: undefined };
+    renderWithToast(
+      <SessionCard session={session} characters={characters} isDM={true} onDelete={onDelete} />
+    );
+
+    expect(screen.queryByText(/won't remove that XP/)).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getByRole("button", { name: "Yes" }));
+
+    expect(onDelete).toHaveBeenCalledWith(false);
+  });
+
+  it("shows the reversal warning and checkbox once XP has been applied", async () => {
+    const user = userEvent.setup();
+    const onDelete = vi.fn().mockResolvedValue(undefined);
+    const session = { ...baseSession, xpApplied: true };
+    renderWithToast(
+      <SessionCard session={session} characters={characters} isDM={true} onDelete={onDelete} />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+
+    expect(screen.getByText(/already applied/)).toBeInTheDocument();
+    expect(screen.getByText(/Also remove 200 XP from attendees/)).toBeInTheDocument();
+  });
+
+  it("calls onDelete(false) when confirmed without checking the reversal box", async () => {
+    const user = userEvent.setup();
+    const onDelete = vi.fn().mockResolvedValue(undefined);
+    const session = { ...baseSession, xpApplied: true };
+    renderWithToast(
+      <SessionCard session={session} characters={characters} isDM={true} onDelete={onDelete} />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getByRole("button", { name: "Yes" }));
+
+    expect(onDelete).toHaveBeenCalledWith(false);
+  });
+
+  it("calls onDelete(true) when the reversal checkbox is checked before confirming", async () => {
+    const user = userEvent.setup();
+    const onDelete = vi.fn().mockResolvedValue(undefined);
+    const session = { ...baseSession, xpApplied: true };
+    renderWithToast(
+      <SessionCard session={session} characters={characters} isDM={true} onDelete={onDelete} />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getByRole("checkbox"));
+    await user.click(screen.getByRole("button", { name: "Yes" }));
+
+    expect(onDelete).toHaveBeenCalledWith(true);
+  });
+
+  it("cancelling the reversal confirm discards the checked state", async () => {
+    const user = userEvent.setup();
+    const onDelete = vi.fn().mockResolvedValue(undefined);
+    const session = { ...baseSession, xpApplied: true };
+    renderWithToast(
+      <SessionCard session={session} characters={characters} isDM={true} onDelete={onDelete} />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+    await user.click(screen.getByRole("checkbox"));
+    await user.click(screen.getByRole("button", { name: "No" }));
+
+    expect(onDelete).not.toHaveBeenCalled();
+    expect(screen.queryByText(/already applied/)).not.toBeInTheDocument();
+
+    // Reopening should start unchecked again, not remember the discarded state.
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+    expect(screen.getByRole("checkbox")).not.toBeChecked();
+  });
+
+  it("does not show any delete control for a non-DM viewer", () => {
+    const onDelete = vi.fn();
+    const session = { ...baseSession, xpApplied: true };
+    renderWithToast(
+      <SessionCard session={session} characters={characters} isDM={false} onDelete={onDelete} />
+    );
+
+    expect(screen.queryByRole("button", { name: "Delete" })).not.toBeInTheDocument();
   });
 });
