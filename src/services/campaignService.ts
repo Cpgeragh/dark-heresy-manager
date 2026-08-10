@@ -8,10 +8,11 @@ import {
   serverTimestamp,
   setDoc,
   updateDoc,
-  writeBatch,
+  type DocumentReference,
 } from "firebase/firestore";
 import { db } from "../firebase";
 import type { CampaignDocument } from "../types/Firestore";
+import { batchDeleteRefs } from "../utils/firestoreBatchDelete";
 
 /**
  * Creates a new campaign owned by the given DM.
@@ -59,43 +60,62 @@ export async function restoreCampaign(campaignId: string): Promise<void> {
 }
 
 /**
- * Deletes a campaign and all its subcollection data atomically.
+ * Deletes a campaign and all its subcollection data.
  * Cleans up: characters (+ their claimLog / xpProposals), sessions,
- * recoveryIndex entries, and the campaign document itself.
- *
- * Note: Firestore batches are capped at 500 ops. This is safe for typical
- * campaigns (≤ ~30 characters, ≤ ~50 sessions). Very large campaigns would
- * need chunked batches — not a concern at current scale.
+ * message threads (+ their messages), the custom item library (+ version
+ * history), recoveryIndex entries, and the campaign document itself.
  */
 export async function deleteCampaign(campaignId: string): Promise<void> {
-  const batch = writeBatch(db);
+  const refs: DocumentReference[] = [];
 
-  // ── Characters ─────────────────────────────────────────────────────────────
+  // ── Characters + their claim logs and XP proposals ──────────────────────────
   const charactersSnap = await getDocs(collection(db, "campaigns", campaignId, "characters"));
 
   for (const charDoc of charactersSnap.docs) {
-    // xpProposals subcollection
+    const claimLogSnap = await getDocs(
+      collection(db, "campaigns", campaignId, "characters", charDoc.id, "claimLog")
+    );
+    claimLogSnap.docs.forEach((d) => refs.push(d.ref));
+
     const xpProposalsSnap = await getDocs(
       collection(db, "campaigns", campaignId, "characters", charDoc.id, "xpProposals")
     );
-    xpProposalsSnap.docs.forEach((d) => batch.delete(d.ref));
+    xpProposalsSnap.docs.forEach((d) => refs.push(d.ref));
 
-    // recoveryIndex entry
     const recoveryCode = (charDoc.data() as { recoveryCode?: string }).recoveryCode;
     if (recoveryCode) {
-      batch.delete(doc(db, "recoveryIndex", recoveryCode));
+      refs.push(doc(db, "recoveryIndex", recoveryCode));
     }
 
-    // character document
-    batch.delete(charDoc.ref);
+    refs.push(charDoc.ref);
   }
 
-  // ── Sessions ────────────────────────────────────────────────────────────────
+  // ── Sessions ──────────────────────────────────────────────────────────────
   const sessionsSnap = await getDocs(collection(db, "campaigns", campaignId, "sessions"));
-  sessionsSnap.docs.forEach((d) => batch.delete(d.ref));
+  sessionsSnap.docs.forEach((d) => refs.push(d.ref));
 
-  // ── Campaign document ───────────────────────────────────────────────────────
-  batch.delete(doc(db, "campaigns", campaignId));
+  // ── Message threads + their messages ─────────────────────────────────────
+  const threadsSnap = await getDocs(collection(db, "campaigns", campaignId, "threads"));
+  for (const threadDoc of threadsSnap.docs) {
+    const messagesSnap = await getDocs(
+      collection(db, "campaigns", campaignId, "threads", threadDoc.id, "messages")
+    );
+    messagesSnap.docs.forEach((d) => refs.push(d.ref));
+    refs.push(threadDoc.ref);
+  }
 
-  await batch.commit();
+  // ── Custom item library + version history ────────────────────────────────
+  const customItemsSnap = await getDocs(collection(db, "campaigns", campaignId, "customItems"));
+  for (const itemDoc of customItemsSnap.docs) {
+    const versionsSnap = await getDocs(
+      collection(db, "campaigns", campaignId, "customItems", itemDoc.id, "versions")
+    );
+    versionsSnap.docs.forEach((d) => refs.push(d.ref));
+    refs.push(itemDoc.ref);
+  }
+
+  // ── Campaign document ─────────────────────────────────────────────────────
+  refs.push(doc(db, "campaigns", campaignId));
+
+  await batchDeleteRefs(db, refs);
 }

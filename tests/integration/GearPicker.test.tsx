@@ -35,7 +35,7 @@ describe("GearPicker", () => {
   it("contains the complete IH Gear set and excludes the cross-category entries", () => {
     const ihGear = GEAR_REFERENCE.filter((item) => item.source === SkillSource.IH);
 
-    expect(ihGear).toHaveLength(84);
+    expect(ihGear).toHaveLength(86);
     expect(ihGear).toEqual(
       expect.arrayContaining([
         expect.objectContaining({

@@ -203,7 +203,11 @@ service cloud.firestore {
              );
 
         allow delete:
-          if dmOwnsCampaign() && resource.data.status == "archived";
+          if dmOwnsCampaign() &&
+             (
+               resource.data.status == "archived" ||
+               !existsAfter(/databases/$(database)/documents/campaigns/$(campaignId))
+             );
 
         match /versions/{versionId} {
 
@@ -383,6 +387,12 @@ service cloud.firestore {
             );
 
           allow update: if false;
+
+          // Deletable only as a consequence of the character itself being
+          // deleted in the same atomic write — never on its own.
+          allow delete:
+            if dmOwnsCampaign() &&
+               !existsAfter(/databases/$(database)/documents/campaigns/$(campaignId)/characters/$(characterId));
           allow delete: if false;
         }
       }

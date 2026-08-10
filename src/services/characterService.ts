@@ -3,6 +3,7 @@
 import {
   arrayUnion,
   getDoc,
+  getDocs,
   runTransaction,
   setDoc,
   updateDoc,
@@ -10,6 +11,7 @@ import {
   writeBatch,
   collection,
   doc,
+  type DocumentReference,
   type UpdateData,
 } from "firebase/firestore";
 
@@ -20,6 +22,7 @@ import type { Character } from "../types/Character";
 import { buildClaimLogPayload } from "../utils/claimLog";
 import { generateRecoveryCode } from "../utils/recoveryCode";
 import { createEmptyCharacterData } from "../utils/characterFactory";
+import { batchDeleteRefs } from "../utils/firestoreBatchDelete";
 
 /**
  * Load a single character with full typing.
@@ -194,19 +197,37 @@ export async function forceReleaseCharacter(
 }
 
 /**
- * Deletes a character and its recovery index entry atomically.
+ * Deletes a character and everything tied to it: its claim log, XP
+ * proposals, message thread (+ messages), recovery index entry, and the
+ * character document itself.
  */
 export async function deleteCharacter(
   campaignId: string,
   characterId: string,
   recoveryCode: string
 ): Promise<void> {
-  const charRef = characterDocRef(campaignId, characterId);
-  const recoveryRef = doc(db, "recoveryIndex", recoveryCode);
-  const batch = writeBatch(db);
-  batch.delete(charRef);
-  batch.delete(recoveryRef);
-  await batch.commit();
+  const refs: DocumentReference[] = [];
+
+  const claimLogSnap = await getDocs(
+    collection(db, "campaigns", campaignId, "characters", characterId, "claimLog")
+  );
+  claimLogSnap.docs.forEach((d) => refs.push(d.ref));
+
+  const xpProposalsSnap = await getDocs(
+    collection(db, "campaigns", campaignId, "characters", characterId, "xpProposals")
+  );
+  xpProposalsSnap.docs.forEach((d) => refs.push(d.ref));
+
+  const messagesSnap = await getDocs(
+    collection(db, "campaigns", campaignId, "threads", characterId, "messages")
+  );
+  messagesSnap.docs.forEach((d) => refs.push(d.ref));
+  refs.push(doc(db, "campaigns", campaignId, "threads", characterId));
+
+  refs.push(doc(db, "recoveryIndex", recoveryCode));
+  refs.push(characterDocRef(campaignId, characterId));
+
+  await batchDeleteRefs(db, refs);
 }
 
 /**

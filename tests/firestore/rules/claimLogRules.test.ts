@@ -330,4 +330,41 @@ describe("Firestore Rules: ClaimLog Rules", () => {
     await expect(playerDoc.update({ action: "release" })).rejects.toThrow();
     await expect(playerDoc.delete()).rejects.toThrow();
   });
+
+  it("DM can delete a claim log as part of deleting the character in the same batch", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await setupCampaignAndCharacter(env);
+    await createClaimLog(env, campaignId, characterId, "batch-delete-log", {
+      action: "claim",
+      actorUid: "player-1",
+    });
+
+    const dmDb = dbAs(env, "dm-1");
+    const batch = dmDb.batch();
+    batch.delete(
+      dmDb
+        .collection(`campaigns/${campaignId}/characters/${characterId}/claimLog`)
+        .doc("batch-delete-log")
+    );
+    batch.delete(dmDb.collection(`campaigns/${campaignId}/characters`).doc(characterId));
+
+    await expect(batch.commit()).resolves.toBeUndefined();
+  });
+
+  it("DM cannot delete a claim log on its own while the character still exists", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await setupCampaignAndCharacter(env);
+    await createClaimLog(env, campaignId, characterId, "solo-delete-log", {
+      action: "claim",
+      actorUid: "player-1",
+    });
+
+    const dmDb = dbAs(env, "dm-1");
+    await expect(
+      dmDb
+        .collection(`campaigns/${campaignId}/characters/${characterId}/claimLog`)
+        .doc("solo-delete-log")
+        .delete()
+    ).rejects.toThrow();
+  });
 });

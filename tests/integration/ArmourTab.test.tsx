@@ -85,7 +85,7 @@ describe("ArmourTab", () => {
     expect(screen.getByText("No force field equipped.")).toBeInTheDocument();
   });
 
-  it("fits Hexagrammatic Wards to compatible armour", () => {
+  it("fits Hexagramatic Wards to compatible armour", () => {
     const armour = [
       piece({
         referenceId: "cr-power-armour",
@@ -97,10 +97,10 @@ describe("ArmourTab", () => {
 
     const upgradeHeader = screen.getAllByText("Upgrades").at(-1)!.parentElement!;
     fireEvent.click(within(upgradeHeader).getByText("+ Add"));
-    fireEvent.click(screen.getByText("Hexagrammatic Wards"));
+    fireEvent.click(screen.getByText("Hexagramatic Wards"));
 
     expect(onUpdate).toHaveBeenCalledWith([
-      expect.objectContaining({ upgrades: ["ih-hexagrammatic-wards"] }),
+      expect.objectContaining({ upgrades: ["ih-hexagramatic-wards"] }),
     ]);
   });
 });

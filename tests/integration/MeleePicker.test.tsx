@@ -100,7 +100,7 @@ describe("MeleePicker", () => {
   it("shows the craftsmanship screen after selecting a weapon", async () => {
     const user = userEvent.setup();
     renderPicker();
-    await user.click(screen.getByText("Sword"));
+    await user.click(screen.getByRole("button", { name: "Select Sword" }));
     expect(screen.getByText("Select weapon craftsmanship:")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Poor" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Common" })).toBeInTheDocument();
@@ -112,7 +112,7 @@ describe("MeleePicker", () => {
   it("calls onSelect with the chosen ref and craftsmanship", async () => {
     const user = userEvent.setup();
     const { onSelect } = renderPicker();
-    await user.click(screen.getByText("Sword"));
+    await user.click(screen.getByRole("button", { name: "Select Sword" }));
     await user.click(screen.getByRole("button", { name: "Best" }));
     await user.click(screen.getByRole("button", { name: "Add Weapon" }));
     expect(onSelect).toHaveBeenCalledWith(expect.objectContaining({ id: "ref-sword" }), "Best");
@@ -121,7 +121,7 @@ describe("MeleePicker", () => {
   it("defaults to Common craftsmanship when no selection is made", async () => {
     const user = userEvent.setup();
     const { onSelect } = renderPicker();
-    await user.click(screen.getByText("Sword"));
+    await user.click(screen.getByRole("button", { name: "Select Sword" }));
     await user.click(screen.getByRole("button", { name: "Add Weapon" }));
     expect(onSelect).toHaveBeenCalledWith(expect.objectContaining({ id: "ref-sword" }), "Common");
   });
@@ -129,7 +129,7 @@ describe("MeleePicker", () => {
   it("returns to the list when the back button is clicked", async () => {
     const user = userEvent.setup();
     renderPicker();
-    await user.click(screen.getByText("Sword"));
+    await user.click(screen.getByRole("button", { name: "Select Sword" }));
     expect(screen.getByRole("button", { name: "Add Weapon" })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Back" }));
     expect(screen.getByPlaceholderText("Search weapons…")).toBeInTheDocument();
@@ -176,7 +176,7 @@ describe("MeleePicker", () => {
   it("does not open the craftsmanship screen when clicking a weapon in read-only mode", async () => {
     const user = userEvent.setup();
     const { onSelect } = renderPicker({ editable: false });
-    await user.click(screen.getByText("Sword"));
+    await user.click(screen.getByRole("button", { name: "Expand Sword details" }));
     expect(screen.queryByText("Select weapon craftsmanship:")).not.toBeInTheDocument();
     expect(onSelect).not.toHaveBeenCalled();
   });

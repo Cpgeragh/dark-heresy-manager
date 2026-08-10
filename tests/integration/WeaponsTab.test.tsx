@@ -191,7 +191,7 @@ describe("WeaponsTab add from reference", () => {
     const user = userEvent.setup();
     const { noop } = renderTab({ rangedWeapons: [], meleeWeapons: [] });
     await user.click(addButtonIn("Ranged"));
-    await user.click(row("Lasgun"));
+    await user.click(screen.getByRole("button", { name: "Select Lasgun" }));
     await user.click(screen.getByRole("button", { name: "Add Weapon" }));
     expect(noop).toHaveBeenCalledWith(
       expect.arrayContaining([expect.objectContaining({ name: "Lasgun", craftsmanship: "Common" })])
@@ -202,7 +202,7 @@ describe("WeaponsTab add from reference", () => {
     const user = userEvent.setup();
     const { noop } = renderTab({ rangedWeapons: [], meleeWeapons: [] });
     await user.click(addButtonIn("Ranged"));
-    await user.click(row("Lasgun"));
+    await user.click(screen.getByRole("button", { name: "Select Lasgun" }));
     await user.click(screen.getByRole("button", { name: "Poor" }));
     await user.click(screen.getByRole("button", { name: "Add Weapon" }));
     expect(noop).toHaveBeenCalledWith(
@@ -220,7 +220,7 @@ describe("WeaponsTab add from reference", () => {
     const user = userEvent.setup();
     const { noop } = renderTab({ rangedWeapons: [], meleeWeapons: [] });
     await user.click(addButtonIn("Melee"));
-    await user.click(row("Chainsword"));
+    await user.click(screen.getByRole("button", { name: "Select Chainsword" }));
     await user.click(screen.getByRole("button", { name: "Best" }));
     await user.click(screen.getByRole("button", { name: "Add Weapon" }));
     expect(noop).toHaveBeenCalledWith(

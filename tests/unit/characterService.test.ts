@@ -1,6 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockAuth, mockBatch, mockDoc, mockRunTransaction, mockTransaction } = vi.hoisted(() => {
+const {
+  mockAuth,
+  mockBatch,
+  mockBatchDeleteRefs,
+  mockDoc,
+  mockGetDocs,
+  mockRunTransaction,
+  mockTransaction,
+} = vi.hoisted(() => {
   const mockTransaction = {
     get: vi.fn(),
     set: vi.fn(),
@@ -18,7 +26,15 @@ const { mockAuth, mockBatch, mockDoc, mockRunTransaction, mockTransaction } = vi
       currentUser: { uid: string } | null;
     },
     mockBatch,
-    mockDoc: vi.fn(() => "claim-log-ref"),
+    mockBatchDeleteRefs: vi.fn().mockResolvedValue(undefined),
+    // Single-arg calls are the auto-ID form used by doc(collectionRef); keep
+    // returning the old constant there. Multi-arg calls (doc(db, "a", "b"))
+    // are the explicit-path form deleteCharacter uses — join into a path so
+    // different refs are distinguishable in assertions.
+    mockDoc: vi.fn((...args: unknown[]) =>
+      args.length <= 1 ? "claim-log-ref" : args.slice(1).join("/")
+    ),
+    mockGetDocs: vi.fn(),
     mockRunTransaction: vi.fn(async (_db: unknown, operation: (transaction: unknown) => unknown) =>
       operation(mockTransaction)
     ),
@@ -29,9 +45,10 @@ const { mockAuth, mockBatch, mockDoc, mockRunTransaction, mockTransaction } = vi
 vi.mock("firebase/firestore", () => ({
   addDoc: vi.fn(),
   arrayUnion: (value: string) => `array-union:${value}`,
-  collection: vi.fn(() => "claim-logs-ref"),
-  doc: mockDoc,
+  collection: (...args: unknown[]) => args.slice(1).join("/"),
+  doc: (...args: unknown[]) => mockDoc(...args),
   getDoc: vi.fn(),
+  getDocs: (...args: unknown[]) => mockGetDocs(...args),
   runTransaction: mockRunTransaction,
   serverTimestamp: () => "server-timestamp",
   setDoc: vi.fn(),
@@ -51,12 +68,23 @@ vi.mock("../../src/firebase/converters", () => ({
   charactersCollectionRef: vi.fn(),
 }));
 
-import { claimCharacter, releaseCharacter } from "../../src/services/characterService";
+vi.mock("../../src/utils/firestoreBatchDelete", () => ({
+  batchDeleteRefs: (...args: unknown[]) => mockBatchDeleteRefs(...args),
+}));
+
+import { claimCharacter, deleteCharacter, releaseCharacter } from "../../src/services/characterService";
+
+function snapshot(docs: { id: string; ref: string }[]) {
+  return { docs: docs.map((d) => ({ id: d.id, ref: d.ref, data: () => ({}) })) };
+}
+
+const emptySnapshot = snapshot([]);
 
 beforeEach(() => {
   vi.clearAllMocks();
   mockAuth.currentUser = { uid: "actor-1" };
   mockBatch.commit.mockResolvedValue(undefined);
+  mockBatchDeleteRefs.mockResolvedValue(undefined);
   mockTransaction.get.mockResolvedValue({
     exists: () => true,
     data: () => ({ userId: null }),
@@ -119,5 +147,58 @@ describe("character claiming operations", () => {
       timestamp: "server-timestamp",
     });
     expect(mockBatch.commit).toHaveBeenCalledOnce();
+  });
+});
+
+describe("deleteCharacter", () => {
+  it("gathers the character's claim log, XP proposals, message thread and its messages, recovery index entry, and the character itself", async () => {
+    mockGetDocs.mockImplementation(async (path: string) => {
+      switch (path) {
+        case "campaigns/camp-1/characters/char-1/claimLog":
+          return snapshot([{ id: "log-1", ref: "campaigns/camp-1/characters/char-1/claimLog/log-1" }]);
+        case "campaigns/camp-1/characters/char-1/xpProposals":
+          return snapshot([{ id: "prop-1", ref: "campaigns/camp-1/characters/char-1/xpProposals/prop-1" }]);
+        case "campaigns/camp-1/threads/char-1/messages":
+          return snapshot([{ id: "msg-1", ref: "campaigns/camp-1/threads/char-1/messages/msg-1" }]);
+        default:
+          return emptySnapshot;
+      }
+    });
+
+    await deleteCharacter("camp-1", "char-1", "DH-AAAA-1111");
+
+    expect(mockBatchDeleteRefs).toHaveBeenCalledOnce();
+    const [dbArg, refs] = mockBatchDeleteRefs.mock.calls[0];
+    expect(dbArg).toBe("mock-db");
+    expect(refs).toEqual(
+      expect.arrayContaining([
+        "campaigns/camp-1/characters/char-1/claimLog/log-1",
+        "campaigns/camp-1/characters/char-1/xpProposals/prop-1",
+        "campaigns/camp-1/threads/char-1/messages/msg-1",
+        "campaigns/camp-1/threads/char-1",
+        "recoveryIndex/DH-AAAA-1111",
+        "character:camp-1:char-1",
+      ])
+    );
+    expect(refs).toHaveLength(6);
+  });
+
+  it("pushes the thread ref even when the character never had any messages", async () => {
+    mockGetDocs.mockResolvedValue(emptySnapshot);
+
+    await deleteCharacter("camp-2", "char-2", "DH-BBBB-2222");
+
+    const [, refs] = mockBatchDeleteRefs.mock.calls[0];
+    expect(refs).toEqual(
+      expect.arrayContaining(["campaigns/camp-2/threads/char-2", "character:camp-2:char-2"])
+    );
+  });
+
+  it("propagates failures from the batch delete", async () => {
+    mockGetDocs.mockResolvedValue(emptySnapshot);
+    const error = new Error("delete failed");
+    mockBatchDeleteRefs.mockRejectedValueOnce(error);
+
+    await expect(deleteCharacter("camp-3", "char-3", "DH-CCCC-3333")).rejects.toBe(error);
   });
 });
