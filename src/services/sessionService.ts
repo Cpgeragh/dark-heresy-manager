@@ -6,6 +6,7 @@ import {
   deleteDoc,
   doc,
   increment,
+  runTransaction,
   serverTimestamp,
   updateDoc,
   writeBatch,
@@ -68,7 +69,10 @@ export async function deleteSession(campaignId: string, sessionId: string): Prom
 
 /**
  * Manually applies XP from a session to all attendee characters.
- * Marks the session xpApplied: true to prevent double-application.
+ * Marks the session xpApplied: true to prevent double-application. Runs as
+ * a transaction so two near-simultaneous calls (two DM tabs, a slow click
+ * followed by an impatient second one) can't both slip past the
+ * already-applied check before either write lands.
  * Use for sessions created before automatic XP distribution was added.
  */
 export async function applySessionXp(
@@ -79,17 +83,23 @@ export async function applySessionXp(
 ): Promise<void> {
   if (xpAmount <= 0 || attendeeIds.length === 0) return;
 
-  const batch = writeBatch(db);
+  const sessionRef = doc(db, "campaigns", campaignId, "sessions", sessionId);
 
-  batch.update(doc(db, "campaigns", campaignId, "sessions", sessionId), {
-    xpApplied: true,
+  await runTransaction(db, async (transaction) => {
+    const sessionSnap = await transaction.get(sessionRef);
+    if (!sessionSnap.exists()) {
+      throw new Error("Session does not exist.");
+    }
+    if (sessionSnap.data().xpApplied === true) {
+      throw new Error("XP has already been applied for this session.");
+    }
+
+    transaction.update(sessionRef, { xpApplied: true });
+
+    for (const characterId of attendeeIds) {
+      transaction.update(doc(db, "campaigns", campaignId, "characters", characterId), {
+        "experience.total": increment(xpAmount),
+      });
+    }
   });
-
-  for (const characterId of attendeeIds) {
-    batch.update(doc(db, "campaigns", campaignId, "characters", characterId), {
-      "experience.total": increment(xpAmount),
-    });
-  }
-
-  await batch.commit();
 }

@@ -1,16 +1,29 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockDeleteDoc, mockDoc, mockUpdateDoc } = vi.hoisted(() => ({
-  mockDeleteDoc: vi.fn().mockResolvedValue(undefined),
-  mockDoc: vi.fn((..._args: unknown[]) => "doc-ref"),
-  mockUpdateDoc: vi.fn().mockResolvedValue(undefined),
-}));
+const { mockDeleteDoc, mockDoc, mockIncrement, mockRunTransaction, mockTransaction, mockUpdateDoc } =
+  vi.hoisted(() => {
+    const mockTransaction = {
+      get: vi.fn(),
+      update: vi.fn(),
+    };
+    return {
+      mockDeleteDoc: vi.fn().mockResolvedValue(undefined),
+      mockDoc: vi.fn((...args: unknown[]) => args.slice(1).join("/")),
+      mockIncrement: vi.fn((amount: number) => `increment:${amount}`),
+      mockRunTransaction: vi.fn(
+        async (_db: unknown, operation: (transaction: unknown) => unknown) => operation(mockTransaction)
+      ),
+      mockTransaction,
+      mockUpdateDoc: vi.fn().mockResolvedValue(undefined),
+    };
+  });
 
 vi.mock("firebase/firestore", () => ({
   collection: vi.fn(),
   deleteDoc: (...args: unknown[]) => mockDeleteDoc(...args),
   doc: (...args: unknown[]) => mockDoc(...args),
-  increment: vi.fn(),
+  increment: (...args: [number]) => mockIncrement(...args),
+  runTransaction: (...args: unknown[]) => mockRunTransaction(...args),
   serverTimestamp: vi.fn(),
   updateDoc: (...args: unknown[]) => mockUpdateDoc(...args),
   writeBatch: vi.fn(),
@@ -20,10 +33,14 @@ vi.mock("../../src/firebase", () => ({
   db: "mock-db",
 }));
 
-import { deleteSession, updateSession } from "../../src/services/sessionService";
+import { applySessionXp, deleteSession, updateSession } from "../../src/services/sessionService";
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mockTransaction.get.mockResolvedValue({
+    exists: () => true,
+    data: () => ({ xpApplied: false }),
+  });
 });
 
 describe("session write operations", () => {
@@ -38,14 +55,14 @@ describe("session write operations", () => {
     await updateSession("camp-1", "session-1", update);
 
     expect(mockDoc).toHaveBeenCalledWith("mock-db", "campaigns", "camp-1", "sessions", "session-1");
-    expect(mockUpdateDoc).toHaveBeenCalledWith("doc-ref", update);
+    expect(mockUpdateDoc).toHaveBeenCalledWith("campaigns/camp-1/sessions/session-1", update);
   });
 
   it("deletes the requested session", async () => {
     await deleteSession("camp-2", "session-2");
 
     expect(mockDoc).toHaveBeenCalledWith("mock-db", "campaigns", "camp-2", "sessions", "session-2");
-    expect(mockDeleteDoc).toHaveBeenCalledWith("doc-ref");
+    expect(mockDeleteDoc).toHaveBeenCalledWith("campaigns/camp-2/sessions/session-2");
   });
 
   it("preserves Firestore failures for the caller to handle", async () => {
@@ -55,5 +72,57 @@ describe("session write operations", () => {
     await expect(updateSession("camp-3", "session-3", { summary: "No change" })).rejects.toBe(
       error
     );
+  });
+});
+
+describe("applySessionXp", () => {
+  it("applies XP to every attendee and marks the session applied", async () => {
+    await applySessionXp("camp-1", "sess-1", ["char-1", "char-2"], 200);
+
+    expect(mockRunTransaction).toHaveBeenCalledWith("mock-db", expect.any(Function));
+    expect(mockTransaction.get).toHaveBeenCalledWith("campaigns/camp-1/sessions/sess-1");
+    expect(mockTransaction.update).toHaveBeenCalledWith("campaigns/camp-1/sessions/sess-1", {
+      xpApplied: true,
+    });
+    expect(mockTransaction.update).toHaveBeenCalledWith("campaigns/camp-1/characters/char-1", {
+      "experience.total": "increment:200",
+    });
+    expect(mockTransaction.update).toHaveBeenCalledWith("campaigns/camp-1/characters/char-2", {
+      "experience.total": "increment:200",
+    });
+  });
+
+  it("rejects and touches nothing when XP was already applied", async () => {
+    mockTransaction.get.mockResolvedValue({
+      exists: () => true,
+      data: () => ({ xpApplied: true }),
+    });
+
+    await expect(applySessionXp("camp-1", "sess-1", ["char-1"], 200)).rejects.toThrow(
+      "XP has already been applied for this session."
+    );
+    expect(mockTransaction.update).not.toHaveBeenCalled();
+  });
+
+  it("rejects if the session no longer exists", async () => {
+    mockTransaction.get.mockResolvedValue({ exists: () => false, data: () => undefined });
+
+    await expect(applySessionXp("camp-1", "sess-1", ["char-1"], 200)).rejects.toThrow(
+      "Session does not exist."
+    );
+    expect(mockTransaction.update).not.toHaveBeenCalled();
+  });
+
+  it("does nothing for zero or negative XP without starting a transaction", async () => {
+    await applySessionXp("camp-1", "sess-1", ["char-1"], 0);
+    await applySessionXp("camp-1", "sess-1", ["char-1"], -50);
+
+    expect(mockRunTransaction).not.toHaveBeenCalled();
+  });
+
+  it("does nothing when there are no attendees, even with positive XP", async () => {
+    await applySessionXp("camp-1", "sess-1", [], 200);
+
+    expect(mockRunTransaction).not.toHaveBeenCalled();
   });
 });
