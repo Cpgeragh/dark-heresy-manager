@@ -74,6 +74,14 @@ export function ExperienceTab({
     () => proposals.filter((p) => p.status !== "pending"),
     [proposals]
   );
+  // Approved proposals move experience.spent via a separate write path
+  // (approveXpProposal's increment()). Folding their total back in here
+  // every time ranks change keeps both paths agreeing on the same number,
+  // instead of a manual advance silently erasing an approved proposal's cost.
+  const approvedProposalTotal = useMemo(
+    () => proposals.filter((p) => p.status === "approved").reduce((sum, p) => sum + p.xpCost, 0),
+    [proposals]
+  );
 
   // ── Player handlers ────────────────────────────────────────────────────────
   const handlePropose = useCallback(async () => {
@@ -119,11 +127,11 @@ export function ExperienceTab({
           (a, b) => RANK_OPTIONS.indexOf(a.rank) - RANK_OPTIONS.indexOf(b.rank)
         );
 
-    onUpdate({ ...experience, ranks: updatedRanks, spent: calcSpent(updatedRanks) });
+    onUpdate({ ...experience, ranks: updatedRanks, spent: calcSpent(updatedRanks) + approvedProposalTotal });
     setNewName("");
     setNewCost(0);
     setNewNotes("");
-  }, [experience, newRank, newName, newCost, newNotes, onUpdate]);
+  }, [experience, newRank, newName, newCost, newNotes, onUpdate, approvedProposalTotal]);
 
   const handleRemoveAdvance = useCallback(
     (rank: RankAdvances["rank"], advanceId: string) => {
@@ -133,9 +141,9 @@ export function ExperienceTab({
         )
         .filter((r) => r.advances.length > 0);
 
-      onUpdate({ ...experience, ranks: updatedRanks, spent: calcSpent(updatedRanks) });
+      onUpdate({ ...experience, ranks: updatedRanks, spent: calcSpent(updatedRanks) + approvedProposalTotal });
     },
-    [experience, onUpdate]
+    [experience, onUpdate, approvedProposalTotal]
   );
 
   // ── Render ─────────────────────────────────────────────────────────────────
