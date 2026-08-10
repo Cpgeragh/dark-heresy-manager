@@ -94,6 +94,7 @@ export function useCharacterSheet({
     // Role & permissions
     isDM,
     isDMLoading: campaignLoading,
+    memberIds: campaign?.memberIds ?? [],
     dmReadOnly,
     toggleDmReadOnly,
     allowedToEdit,

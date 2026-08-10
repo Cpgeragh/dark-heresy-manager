@@ -1,6 +1,6 @@
 // src/pages/characterSheet/AdminTab.tsx
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import type { Character } from "../../types/Character";
 import type { ClaimLog } from "../../types/ClaimLog";
 import { Button } from "../../ui/Button";
@@ -10,6 +10,7 @@ import { approveXpProposal, rejectXpProposal } from "../../services/xpService";
 import { useToast } from "../../components/Toast";
 import { ErrorState } from "../../ui/ErrorState";
 import { LoadingState } from "../../ui/LoadingState";
+import { PlayerPicker } from "./PlayerPicker";
 
 interface AdminTabProps {
   character: Character;
@@ -17,11 +18,14 @@ interface AdminTabProps {
   ownerName: string | null;
   claimLog: ClaimLog[];
   onDMForceRelease: () => void;
+  onDMForceAssign: (targetUid: string) => void;
   onDMToggleEdit: () => void;
   isDmForceReleasing?: boolean;
+  isDmForceAssigning?: boolean;
   isDmTogglingEdit?: boolean;
   campaignId: string;
   characterId: string;
+  memberIds: string[];
 }
 
 export function AdminTab({
@@ -29,13 +33,17 @@ export function AdminTab({
   ownerName,
   claimLog,
   onDMForceRelease,
+  onDMForceAssign,
   onDMToggleEdit,
   isDmForceReleasing = false,
+  isDmForceAssigning = false,
   isDmTogglingEdit = false,
   campaignId,
   characterId,
+  memberIds,
 }: AdminTabProps) {
   const toast = useToast();
+  const [showPlayerPicker, setShowPlayerPicker] = useState(false);
   const { proposals, loading: proposalsLoading, error: proposalsError } = useXpProposals(
     campaignId,
     characterId
@@ -137,8 +145,27 @@ export function AdminTab({
           >
             {isDmTogglingEdit ? "Updating…" : "Toggle Player Edit Permission"}
           </Button>
+
+          <Button
+            variant="warning"
+            onClick={() => setShowPlayerPicker(true)}
+            disabled={isDmForceAssigning || memberIds.length === 0}
+          >
+            {isDmForceAssigning ? "Assigning…" : "Force Assign To…"}
+          </Button>
         </div>
       </section>
+
+      {showPlayerPicker && (
+        <PlayerPicker
+          memberIds={memberIds}
+          onSelect={(uid) => {
+            onDMForceAssign(uid);
+            setShowPlayerPicker(false);
+          }}
+          onClose={() => setShowPlayerPicker(false)}
+        />
+      )}
 
       {/* PENDING XP PROPOSALS */}
       <section className={uiSection}>
