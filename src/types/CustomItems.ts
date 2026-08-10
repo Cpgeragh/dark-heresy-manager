@@ -9,6 +9,7 @@ import type {
   GearItem,
   GrenadeItem,
   MeleeWeapon,
+  PsychicPower,
   RangedWeapon,
   ShieldItem,
   WornArmourPiece,
@@ -21,7 +22,8 @@ export type CustomItemCategory =
   | "cybernetic"
   | "weapon"
   | "armour"
-  | "archeotech";
+  | "archeotech"
+  | "power";
 
 export type CustomItemStatus = "draft" | "published" | "archived";
 
@@ -127,6 +129,11 @@ export type CustomArcheotechData = Omit<
   "id" | "referenceId" | "customLibraryId" | "customLibraryVersionId" | "equipped"
 >;
 
+export type CustomPsychicPowerData = Omit<
+  PsychicPower,
+  "id" | "customLibraryId" | "customLibraryVersionId" | "known"
+>;
+
 export interface CustomItemDataByCategory {
   gear: CustomGearData;
   consumable: CustomConsumableData;
@@ -135,6 +142,7 @@ export interface CustomItemDataByCategory {
   weapon: CustomWeaponData;
   armour: CustomArmourData;
   archeotech: CustomArcheotechData;
+  power: CustomPsychicPowerData;
 }
 
 export type CustomItemData = CustomItemDataByCategory[CustomItemCategory];

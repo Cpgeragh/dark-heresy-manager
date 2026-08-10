@@ -5,8 +5,9 @@ import { Chip } from "../../../ui/Chip";
 import { sourceColour } from "../../../ui/sourceStyles";
 import type { PsychicPower } from "../../../types/Character";
 import { disciplineColours } from "../psychicStyles";
-import { uiSection, uiTextBody, uiTextPlaceholder, uiTextSubtle, uiInfoModalWrapper } from "../../../ui/editableStyles";
+import { uiSection, uiTextBody, uiTextPlaceholder, uiInfoModalWrapper } from "../../../ui/editableStyles";
 import { RemoveButton } from "../../../ui/RemoveButton";
+import { StatChip } from "../../../ui/StatChip";
 
 interface PowerCardProps {
   power: PsychicPower;
@@ -17,48 +18,42 @@ interface PowerCardProps {
 
 /** Shared stat row — used in both the card and the InfoModal header. */
 function PowerStats({ power }: { power: PsychicPower }) {
-  const hasAny =
-    power.discipline || power.threshold || power.focusTime || power.range || power.sustained;
+  const sourceLabel = power.source ?? power.origin;
+  const hasChips = sourceLabel || power.discipline;
+  const hasStats = power.threshold || power.focusTime || power.range || power.sustained;
 
-  if (!hasAny) return null;
+  if (!hasChips && !hasStats) return null;
 
   return (
-    <div className="flex flex-wrap items-center gap-x-3 lg:gap-x-4 gap-y-0.5 text-xs lg:text-sm">
-      {power.source && (
-        <Chip className={`bg-slate-800/40 font-code ${sourceColour(power.source)}`}>
-          {power.source}
-        </Chip>
+    <div className="space-y-1.5">
+      {hasChips && (
+        <div className="flex flex-wrap items-center gap-x-3 lg:gap-x-4 gap-y-0.5 text-xs lg:text-sm">
+          {sourceLabel && (
+            <Chip className={`bg-slate-800/40 font-code ${sourceColour(sourceLabel)}`}>
+              {sourceLabel}
+            </Chip>
+          )}
+          {power.discipline && (
+            <Chip className={disciplineColours[power.discipline] ?? disciplineColours.default}>
+              {power.discipline}
+            </Chip>
+          )}
+        </div>
       )}
-      {power.discipline && (
-        <Chip className={disciplineColours[power.discipline] ?? disciplineColours.default}>
-          {power.discipline}
-        </Chip>
-      )}
-      {power.threshold && (
-        <span>
-          <span className={uiTextSubtle}>PT </span>
-          <span className="text-slate-200 font-code">{power.threshold}</span>
-        </span>
-      )}
-      {power.focusTime && <span className="text-slate-100">{power.focusTime}</span>}
-      {power.range && (
-        <span>
-          <span className={uiTextSubtle}>Range: </span>
-          <span className="text-slate-200">{power.range}</span>
-        </span>
-      )}
-      {power.sustained && (
-        <span>
-          <span className={uiTextSubtle}>Sustained: </span>
-          <span className="text-slate-200">{power.sustained}</span>
-        </span>
+      {hasStats && (
+        <div className="flex flex-wrap gap-1.5">
+          {power.threshold && <StatChip label="PT" value={power.threshold} />}
+          {power.focusTime && <StatChip label="Action" value={power.focusTime} />}
+          {power.range && <StatChip label="Range" value={power.range} />}
+          {power.sustained && <StatChip label="Sustained" value={power.sustained} />}
+        </div>
       )}
     </div>
   );
 }
 
 export function PowerCard({ power, editable, onRemove, onEdit }: PowerCardProps) {
-  const isCustomPower = power.custom || power.source === "Custom" || power.source === "2nd Ed";
+  const isCustomPower = !!power.custom;
   const modalContent = (
     <>
       {power.description ? (

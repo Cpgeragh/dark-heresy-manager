@@ -231,7 +231,7 @@ function CustomPowerForm({
       : ""
   );
   const [origin, setOrigin] = useState<"" | CustomItemOrigin>(
-    initialPower?.source === "2nd Ed" ? "2nd Ed" : initialPower ? "Custom" : ""
+    initialPower?.origin === "2nd Ed" ? "2nd Ed" : initialPower ? "Custom" : ""
   );
 
   const trimmedName = name.trim();
@@ -279,7 +279,7 @@ function CustomPowerForm({
       focusTime,
       range: formatRange(),
       sustained,
-      source: origin,
+      origin: origin as CustomItemOrigin,
       description: description.trim() || undefined,
       isMinor: target === "minor",
       custom: true,

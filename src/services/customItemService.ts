@@ -21,6 +21,7 @@ import type {
   CustomItemCreator,
   CustomItemDataByCategory,
   CustomItemStatus,
+  CustomPsychicPowerData,
   CustomWeaponData,
 } from "../types/CustomItems";
 import { stripUndefined } from "../utils/stripUndefined";
@@ -400,6 +401,22 @@ export function buildCharacterCopyUpdate(
       : updateLinkedArray("armour", character.armour, customItemId, customLibraryVersionId, stripKindFields(armourData));
   }
 
+  if (category === "power") {
+    const powerField = (data as CustomPsychicPowerData).isMinor ? "minorPowers" : "majorPowers";
+    const items = character.psychic[powerField];
+    if (!items.length) return null;
+
+    let updatedCopies = 0;
+    const next = items.map((item) => {
+      if (item.customLibraryId !== customItemId) return item;
+      updatedCopies += 1;
+      return { ...item, ...data, customLibraryId: customItemId, customLibraryVersionId };
+    });
+
+    if (updatedCopies === 0) return null;
+    return { psychic: { ...character.psychic, [powerField]: next }, updatedCopies };
+  }
+
   switch (category) {
     case "gear":
       return updateLinkedArray("gear", character.gear, customItemId, customLibraryVersionId, data);
@@ -490,6 +507,19 @@ export function buildCharacterCopyRemoval(
       update[field] = filtered;
     }
   }
+
+  const nextPsychic = { ...character.psychic };
+  let psychicChanged = false;
+  for (const field of ["minorPowers", "majorPowers"] as const) {
+    const items = character.psychic[field];
+    const filtered = items.filter((item) => item.customLibraryId !== customItemId);
+    if (filtered.length < items.length) {
+      removedCopies += items.length - filtered.length;
+      nextPsychic[field] = filtered;
+      psychicChanged = true;
+    }
+  }
+  if (psychicChanged) update.psychic = nextPsychic;
 
   if (removedCopies === 0) return null;
   return { ...update, removedCopies } as { removedCopies: number } & Partial<Character>;

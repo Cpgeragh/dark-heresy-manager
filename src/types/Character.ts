@@ -2,6 +2,7 @@
 
 import type { Timestamp } from "firebase/firestore";
 import { SkillSource } from "./SkillSource";
+import type { CustomItemOrigin } from "../constants/customItems";
 
 /**
  * CHARACTERISTICS
@@ -501,7 +502,7 @@ export interface ExperienceBlock {
 /**
  * PSYCHIC
  */
-export interface PsychicPower {
+export interface PsychicPower extends CustomLibraryLinkFields {
   id: string;
   name: string;
   discipline?: string;
@@ -511,6 +512,7 @@ export interface PsychicPower {
   range?: string;
   description?: string;
   source?: string;
+  origin?: CustomItemOrigin;
   isMinor?: boolean;
   custom?: boolean;
   known: boolean;

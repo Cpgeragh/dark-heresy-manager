@@ -12,6 +12,7 @@ export const CUSTOM_ITEM_CATEGORY_ORDER = [
   "weapon",
   "armour",
   "archeotech",
+  "power",
 ] as const satisfies readonly CustomItemCategory[];
 
 export const CUSTOM_ITEM_CATEGORY_LABELS = {
@@ -22,6 +23,7 @@ export const CUSTOM_ITEM_CATEGORY_LABELS = {
   weapon: "Weapon",
   armour: "Armour",
   archeotech: "Archeotech",
+  power: "Psychic Power",
 } as const satisfies Record<CustomItemCategory, string>;
 
 export const CUSTOM_ITEM_STATUS_ORDER = [
