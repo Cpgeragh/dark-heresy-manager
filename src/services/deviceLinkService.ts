@@ -1,17 +1,11 @@
 import {
-  collection,
   deleteDoc,
   doc,
   getDoc,
-  getDocs,
-  query,
   serverTimestamp,
   setDoc,
-  where,
 } from "firebase/firestore";
 import { db } from "../firebase";
-
-const MAX_LINKED_DEVICES = 3;
 
 /**
  * Links a secondary device to the account identified by a recovery code.
@@ -27,13 +21,6 @@ export async function linkDeviceToAccount(currentUid: string, recoveryCode: stri
   const primaryUid = recoverySnapshot.data().uid as string;
   if (primaryUid === currentUid) {
     throw new Error("This recovery code belongs to this device.");
-  }
-
-  const existingLinks = await getDocs(
-    query(collection(db, "userLinks"), where("primaryUid", "==", primaryUid))
-  );
-  if (existingLinks.size >= MAX_LINKED_DEVICES) {
-    throw new Error("This account already has 3 linked devices — the maximum allowed.");
   }
 
   const proofRef = doc(db, "linkProofs", currentUid);

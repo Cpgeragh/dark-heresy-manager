@@ -1,14 +1,24 @@
-# Manual Test Checklist — Character Sheet
+# Manual Test Checklist — Complete App
 
-Twenty pages plus cross-cutting systems, one at a time. Every item comes
-from reading the actual logic, not a generic "does it load" pass. Check
-items off as you verify them; anything under **Watch for** is the likeliest
-place a real bug hides. Coverage notes are at the bottom — read those before
-assuming this is literally every file.
+Thirty pages and cross-cutting sections, containing 201 checks. Every item
+comes from reading the actual logic, not a generic "does it load" pass.
+Check items off as you verify them; anything under **Watch for** is the
+likeliest place a real bug hides. Coverage notes are at the bottom — read
+those before assuming this is literally every file.
+
+### How to use this checklist
+
+For every section, test once as the DM and once as an owning player wherever both roles can reach it. Use a second plain-player browser profile for permission checks. Unless a check explicitly says otherwise, verify three things after every change: the screen updates immediately, the value still exists after leaving and returning, and a full browser refresh shows the same value. For destructive or account-level tests, use a disposable campaign and characters.
+
+While you're on any page, it's worth trying a blank, negative, or huge value in one number field and a long or unusual string in one text field — that alone catches most broken-input bugs without needing to repeat it on every field on every page.
 
 ## 1. Vitals
 
 Wounds and Fate Points — the combat-status header block.
+
+### How to test this page
+
+Use an editable character with Total Wounds above 5, Current Wounds in the middle of the range, and a known Toughness Bonus. Exercise every boundary by typing it directly where typing is allowed and by using the steppers. After each accepted change, leave Vitals, return, and refresh. For the Fatigue cross-check, change Toughness on Characteristics in a second tab and return to Vitals without reloading. The expected value or colour is stated in each checkbox below.
 
 - [ ] Total Wounds field rejects 0, blank, and negative — only accepts 1+
 - [ ] Current Wounds stepper won't go above Total Wounds
@@ -27,6 +37,10 @@ down with it.
 
 Insanity Points track, Degree of Madness, Temporary Trauma, and Disorders.
 
+### How to test this page
+
+Start at 0 and set Points to one below, exactly on, and one above every documented threshold. At each value compare the chip, bar, counters, and retirement state before moving on. Add one entry of each supported type, refresh, then remove it. For legacy coverage, open or import a fixture containing old free-text disorder notes before adding a structured disorder. Repeat the tab checks at a phone-width viewport using real touch input if possible.
+
 - [ ] Points stepper 0–100; Degree chip and timeline bar move together and land on the right degree at each threshold
 - [ ] "X pts until Trauma Test" and "X pts until [next Degree]" counters show the correct remaining distance and update live
 - [ ] At the top of the track, the page switches to "Character retires from play" and hides the Status/Thresholds grid
@@ -43,6 +57,10 @@ when a new structured disorder is added.
 
 Corruption Points track, Malignancies, Minor and Major Mutations.
 
+### How to test this page
+
+Use the same boundary method as Insanity: one below, on, and one above every threshold. Add a rollable and non-rollable entry, enter the minimum and maximum permitted physical roll values, refresh, and inspect Characteristics. Then remove each source and confirm only its own modifier disappears. Repeat the three groups on both phone and desktop layouts.
+
 - [ ] Points stepper 0–100; Degree chip, timeline, and "pts until Malignancy Test" / "pts until [Degree]" all track correctly
 - [ ] Top of track shows "Character removed from play" and hides the Status/Thresholds grid
 - [ ] Add a Malignancy that rolls a characteristic modifier — "Edit Rolls" button appears, entering values saves them
@@ -58,6 +76,10 @@ modifier and see it appear, remove the malignancy and see it disappear.
 ## 4. Characteristics
 
 The nine core stats, Characteristic Bonuses, and Movement.
+
+### How to test this page
+
+Record all nine starting values. For each characteristic, set a simple Base value, exercise all four Advance positions, and independently calculate the total and bonus. Use Agility values around a tens boundary to make movement changes obvious. Add positive and negative Corruption modifiers from named sources, including enough negative adjustment to cross the floor of 1. Test Enter, Escape, blur, refresh, phone carousel, and desktop grid separately.
 
 - [ ] Each stat total = Base + Advances, displayed correctly as you edit either field
 - [ ] A stat with a Corruption-sourced adjustment shows the (+N) / (−N) badge in the right colour, and the info icon lists every contributing source by name
@@ -77,6 +99,10 @@ Corruption & Mutations above.
 
 Basic and Advanced skills, grouped by category, with computed totals.
 
+### How to test this page
+
+Choose one flat Basic skill, one grouped Basic specialisation, one flat Advanced skill, and one grouped Advanced specialisation. Record their governing characteristic, calculate trained and untrained totals by hand, then change that characteristic across a tens boundary and add a Corruption modifier. Verify both the main list and picker after every change, including removal and refresh.
+
 - [ ] Basic / Advanced tabs show the right skills in each
 - [ ] A category with more than one specialisation (e.g. Common Lore) groups them together under one header, sharing a single characteristic chip; single-skill categories and "General" list flat instead
 - [ ] Untrained **Basic** skill total = characteristic ÷ 2, rounded down, and it's visible without adding the skill
@@ -88,6 +114,10 @@ Basic and Advanced skills, grouped by category, with computed totals.
 ## 6. Talents
 
 Regular Talents and Faith Talents (grouped by Emperor's Mercy / Sign / Wrath).
+
+### How to test this page
+
+Use four known fixtures: a fixed-list specialisation, numeric specialisation, free-text specialisation, and repeatable talent. For each, try to submit with no selection, an invalid selection, and a valid selection. Add, refresh, remove, and add again. Check Faith Talent grouping independently and inspect prerequisite text before committing the addition.
 
 - [ ] Talents / Faith Talents tabs both list, add, and remove correctly
 - [ ] Faith Talents land in the correct one of the three groups
@@ -101,6 +131,10 @@ Regular Talents and Faith Talents (grouped by Emperor's Mercy / Sign / Wrath).
 
 Weapon-group training toggles plus a free-text Exotic Weapon list.
 
+### How to test this page
+
+Record the initial state, toggle several non-adjacent groups in a recognisable pattern, navigate away, and refresh. Add two distinct Exotic Weapon names, try blank/whitespace and duplicate names, remove one, and confirm the other and all toggles are unchanged.
+
 - [ ] Each weapon group toggles on/off independently and persists after leaving the tab
 - [ ] Adding and removing a custom Exotic Weapon entry works and doesn't affect the toggle list
 
@@ -111,6 +145,10 @@ the exact same picker component as Talents (§6), including specialisation
 handling — the same three specialisation checks from §6 apply here for any
 trait that has one (e.g. Unnatural Characteristic).
 
+### How to test this page
+
+Repeat the fixed-list, numeric, and free-text specialisation procedure from Talents using Traits that support each mode. Add enough traits to force both columns to grow and scroll, then test at narrow, medium, and wide widths. Refresh before removing entries so persistence and layout are both exercised.
+
 - [ ] Add and remove Traits; duplicates blocked by the picker (unless repeatable, see §6)
 - [ ] Two-column layout holds up with a long list (10+) without overlapping or clipping
 
@@ -119,6 +157,10 @@ trait that has one (e.g. Unnatural Characteristic).
 Ranged, Melee, Grenades, and Shields — four sub-categories under one tab,
 plus a shared equip-slot system that limits how much can be readied at once.
 This page is much bigger than it looks; go through it deliberately.
+
+### How to test this page
+
+Use a disposable character and create a small labelled test inventory: one normal ranged weapon, one Heavy weapon, one one-handed melee weapon, one Two-Handed weapon, one shield, three grenade types, a clip-fed weapon, a loose-ammunition weapon, and a multi-magazine weapon. Record slot use and ammunition before every action. Work through equip limits first, then grenades, firing/reloading, alternate profiles, upgrades, cybernetic links, and finally custom forms. Refresh after each group and cross-check Armour, Archeotech, and Cybernetics where links exist.
 
 **Equip slots (this applies across Ranged, Melee, and Shields together):**
 - [ ] You can equip up to 4 slots' worth of gear in total — confirm the app actually stops you at the limit rather than just visually suggesting one
@@ -162,6 +204,10 @@ independently.
 
 Worn armour, upgrades, and Force Fields.
 
+### How to test this page
+
+Add the five named armour fixtures and inspect their picker summaries before adding them. After adding, compare every per-location AP value, total weight, value, resistance, and craftsmanship state with the reference data. Fit and remove upgrades, activate fields in sequence, change spare cells, refresh, and then inspect Armour values from another linked page such as Cybernetics. Use a fresh custom item for the publishing lifecycle rather than modifying reference data.
+
 - [ ] Selenite Void Suit, Boarding Armour, Hospitaller Carapace, Sororitas Powered Armour, and Ork Mega Armour all show a real per-location AP breakdown (e.g. "3 (Head 4)"), not an asterisk. Check this on **both** the equipped-piece card and in the "Add Armour" picker list, both surfaces need to show the real breakdown.
 - [ ] Fit the Impellor upgrade to a Selenite Void Suit — weight chip becomes 25 kg (20 base + 5), not 20 kg next to a separate "+5"
 - [ ] The Impellor upgrade is only offered on the Selenite Void Suit — not on any carapace or power armour piece
@@ -175,6 +221,10 @@ Worn armour, upgrades, and Force Fields.
 
 Implants, bionics, and the Concealed Weapon Bionic install flow.
 
+### How to test this page
+
+Use a character with enough funds/context to install the Concealed Weapon Bionic at Poor, Common, and Good craftsmanship, recording cost and availability before and after cycling. Add one common-only implant, one Good-only Mechadendrite, and one location-assigned bionic. Refresh after installation, then cross-check granted weapons on Weapons and Toughness contributions on Armour before removing the parent implant.
+
 - [ ] Install a Concealed Weapon Bionic at Good craftsmanship — cost shows 750 Thrones *and* availability shows Rare (not Scarce)
 - [ ] Install the same at Poor and Common — cost changes (150 / 300) but availability stays Scarce at both
 - [ ] Cycling craftsmanship on an already-installed Concealed Weapon Bionic updates cost and availability together, every time, not just cost
@@ -187,6 +237,10 @@ Implants, bionics, and the Concealed Weapon Bionic install flow.
 
 Minor and Major powers, by discipline, plus custom power creation.
 
+### How to test this page
+
+Begin with no Psy Rating talent, then add successive Psy Rating talents from Talents and observe this page after each change. Toggle disciplines and prove they do not alter picker eligibility. For the custom form, test every required field independently by leaving only that field invalid, then add a valid power, refresh, edit it, and confirm the same record changes rather than a duplicate appearing.
+
 - [ ] **Psy Rating is not set on this page at all** — it's derived from the highest "Psy Rating N" talent added on the Talents tab (§6). Confirm: add/change that talent, and this page's Psy Rating number and glow update to match, with no direct input field for it here
 - [ ] Disciplines (Biomancy, Divination, etc.) are toggled independently as a simple record of what the character knows — confirm toggling them does *not* restrict which powers the picker will show
 - [ ] Minor / Major tabs and the discipline filter narrow the picker list correctly
@@ -198,6 +252,10 @@ Minor and Major powers, by discipline, plus custom power creation.
 
 General equipment, split into Items and Consumables.
 
+### How to test this page
+
+Add one fixed-price item, one variable-price item, one normal consumable, and Lumenmould. Search with full names, partial names, mixed case, and no-result text in both tabs. Exercise quantities around 0 and through several increments, refresh, then remove the entries. Complete the custom-item lifecycle with a uniquely named disposable item.
+
 - [ ] Items / Consumables tabs both list, add, and remove correctly
 - [ ] Consumables carry their own quantity control (e.g. doses of Panimune) — confirm it increments/decrements and doesn't get confused with a plain gear item's lack of quantity
 - [ ] Search finds items by partial name in both sections
@@ -208,6 +266,10 @@ General equipment, split into Items and Consumables.
 ## 14. Companions
 
 Pet/companion stat blocks — currently just the Adeptus Arbites Cyber-Mastiff.
+
+### How to test this page
+
+Add the Cyber-Mastiff to a clean character, refresh, expand it, and compare every displayed value with its reference entry. Open each linked rule popup one at a time and record any entry that falls back to missing rules text. Collapse, re-expand, navigate away and back, then remove and refresh.
 
 - [ ] Add the Cyber-Mastiff — full stat block (characteristics, Movement, Wounds, Skills, Talents, Traits, Weapons, Armour, Gear) all display and match the source
 - [ ] Expand/collapse on the companion card works
@@ -225,6 +287,10 @@ resolve.
 
 Drugs and combat stimulants carried by the character.
 
+### How to test this page
+
+Add and remove a reference drug, then create a uniquely named custom drug. In the custom form, make one field invalid at a time and verify Add remains unavailable; then submit a valid form, refresh, edit/publish through §21, and remove it. Exercise quantity at 0, 1, and a large value.
+
 - [ ] Add/remove from the reference list
 - [ ] Custom drug creation — Name, quantity (positive whole number), Origin, Availability, Weight, and Value are all required before Add enables
 - [ ] Custom drug creation and publishing — see §21, Custom Item Library
@@ -232,6 +298,10 @@ Drugs and combat stimulants carried by the character.
 ## 16. Experience
 
 XP total, spend history, and the player-proposal / DM-approval workflow.
+
+### How to test this page
+
+Use two signed-in profiles: the owning player on Experience and the DM on Admin. Record Total, itemised advances, `spent`, and Remaining XP before each operation. Submit one proposal for approval and another for rejection; refresh both profiles after resolution. Then reproduce the exact approve-then-manual-advance sequence in **Watch for** and compare the arithmetic line by line.
 
 - [ ] Remaining XP = Total − the sum of every advance's cost across every rank, recalculated correctly as advances are added
 - [ ] As a player: submit a spend proposal, confirm it shows as Pending
@@ -250,12 +320,20 @@ exact sequence, in that order.
 
 Free-text notes.
 
+### How to test this page
+
+Enter a multi-paragraph fixture containing blank lines, Unicode, emoji, punctuation, and HTML/script-like text. Save by every supported mechanism, navigate away, refresh, and compare the text character-for-character. Open the same character as a read-only viewer and confirm both rendering and the absence of editing controls. Repeat once while offline and reconnect.
+
 - [ ] Text saves and reloads correctly, including line breaks
 - [ ] Read-only view (as a non-owner) renders the same text without an editable box
 
 ## 18. Background
 
 Homeworld, Career, Rank, and Divination — the cascading-selection page.
+
+### How to test this page
+
+Use a fresh character and record the header plus stored Background state before opening the page. Select valid Homeworld/Career/Rank combinations, then deliberately invalidate the cascade by changing each parent. Refresh after every cascade. Inspect the picker metadata and Divination modal, then compare Skills and Traits to confirm whether starting benefits are informational or automatically applied.
 
 - [ ] Pick a Homeworld, then a Career it supports, then a Rank — all three stay set
 - [ ] Switch to a Homeworld that does *not* support the current Career — Career and Rank both clear automatically
@@ -278,6 +356,10 @@ elsewhere in this same app, so the inconsistency is easy to assume is a bug.
 
 Rare Archeotech items — some of which are also armour, weapons, shields, or explosives.
 
+### How to test this page
+
+Add one fixture of each type: Armour, Weapon, Grenade/Mine, and plain item. Keep Archeotech open in one browser tab and the linked destination page in another, then equip/stow and change quantities from both sides. Refresh both tabs and verify the same underlying record is shown. Complete one custom draft/publish/archive lifecycle through §21.
+
 - [ ] Add an Archeotech item typed as Armour — confirm it also appears on the Armour tab, and equipping/stowing from either tab stays in sync immediately (this is genuinely the same underlying list on both tabs, not a copy, so it should never need a refresh to agree)
 - [ ] Same check for one typed as a Weapon (Weapons tab) and one typed as a Grenade/Mine (counts toward the 2-type grenade limit in §9)
 - [ ] A plain (non-armour, non-weapon) Archeotech item behaves like a normal gear-style entry
@@ -286,6 +368,10 @@ Rare Archeotech items — some of which are also armour, weapons, shields, or ex
 ## 20. Admin (DM only)
 
 DM controls: XP proposal approval, claim log, and access overrides.
+
+### How to test this page
+
+Keep the DM on Admin and the owning player on the same character in a second profile. Submit proposals and ownership/edit changes from their respective screens while observing both sessions live. Refresh after every action and inspect the claim log.
 
 - [ ] Approve a pending proposal from Experience — the player's Remaining XP drops by that amount (then see the Experience §16 Watch for — do this test in combination with adding a manual advance)
 - [ ] Reject a pending proposal — Remaining XP is untouched, proposal moves out of Pending
@@ -301,6 +387,10 @@ custom item you create goes through the same draft → publish → archive
 lifecycle. Test it once, deliberately, rather than trusting it works the
 same everywhere it's used.
 
+### How to test this system
+
+Use three profiles: creator/player A, unrelated player B, and the DM. Give at least two characters copies before editing so propagation is measurable. At every lifecycle state, record which profiles can see the definition and which characters hold copies. Refresh all profiles between draft, publish, update, and archive.
+
 - [ ] Create a custom item as a normal player — it starts as **draft**, and only you can see it (log in as a second player/character and confirm they can't)
 - [ ] As DM, the same draft item is visible in admin view before publishing
 - [ ] DM publishes it — status becomes **published**, and it's now visible to every player in the picker, not just its creator
@@ -312,6 +402,10 @@ same everywhere it's used.
 - [ ] A weapon/armour/gear card for a custom item you didn't create shows no edit-definition controls at all unless you're the DM — you can still see and equip/use it, just not edit its underlying definition
 
 ## 22. Offline & Account Sync
+
+### How to test this system
+
+Use browser network controls or disable the device network, but verify the browser is genuinely offline rather than just slow. Make an edit while offline, reconnect, and confirm it synced. Separately, open the same character in two tabs on one device and confirm an edit in one appears in the other without a refresh.
 
 - [ ] Turn off network connectivity while on any tab — an amber "You are offline" banner appears at the bottom of the screen
 - [ ] Make an edit while offline, then reconnect — confirm the edit actually persisted and synced rather than being silently lost
@@ -325,6 +419,10 @@ separate machinery from the in-app Offline banner above and worth checking
 on an actual installed copy (phone home-screen icon or desktop PWA install),
 not just a browser tab.
 
+### How to test this system
+
+Use three environments: a clean browser profile, an already-installed PWA on the old release, and a normal development tab without a service worker. Record the deployed version before each launch. Test normal update, interrupted update, and restart.
+
 - [ ] Fresh install / first-ever load shows the "Loading…" splash, not "Updating…"
 - [ ] Ship a new deploy and reopen the installed app — it should briefly show an "Updating…" splash, then land straight in the app with no further reload prompt (the reload happens automatically, not via a "New version available" button)
 - [ ] Immediately after that auto-update, the app should skip straight past the splash on that specific load — no double-splash flash
@@ -336,6 +434,10 @@ not just a browser tab.
 First-ever launch on a new device/browser profile. The step you're on lives
 in the URL (`?step=`), not just component state.
 
+### How to test this page
+
+Use a new disposable browser profile for each path: new user, reclaim, refresh-on-code, and legacy user needing NameGate. Copy the generated recovery code to a secure scratch record and prove it on a second profile. At every step test refresh, Back, and Forward before completing onboarding.
+
 - [ ] Welcome step — "Get Started" stays disabled until a first name is entered; spaces are stripped as you type, not just trimmed on submit
 - [ ] Get Started generates and displays a recovery code once — the "Copy code" button must actually be pressed (button label flips to "Copied") before the "I've saved my recovery code" checkbox becomes checkable, and "I've saved my code" stays disabled until both the copy and the checkbox are done
 - [ ] Browser Back/Forward moves correctly between Welcome → Show Code and Welcome → Reclaim, matching whichever path you took
@@ -346,6 +448,10 @@ in the URL (`?step=`), not just component state.
 ## 25. Dashboard
 
 The landing page after onboarding — separate DM and Player sections on one screen.
+
+### How to test this page
+
+Use a DM with active and archived campaigns, an owning player with multiple claimed characters, a linked secondary device, and a player-invite-only device. Work through DM actions first, then player cards and claim states. Refresh after every mutation.
 
 **DM section** (hidden entirely on a device installed via the player-only QR invite — see the QR bullet below):
 - [ ] Create a campaign; blank/whitespace-only names are rejected
@@ -364,11 +470,16 @@ The landing page after onboarding — separate DM and Player sections on one scr
 - [ ] The code field validates the DH-XXXX-XXXX shape before "Look Up Character" enables at all
 - [ ] Looking up a valid code shows character name, campaign name, and one of four distinct ownership states: unclaimed (green, claimable) / already yours / claimed by another player / claimed and locked by the DM — confirm the last two show different explanatory text even though both are equally un-claimable right now
 - [ ] Claiming an unclaimed character navigates straight to its character sheet afterwards
+- [ ] Recovery backup banner appears only under its intended account/device conditions; copying the code works, and rotating the code replaces any stale code shown by the banner
 
 ## 26. Campaign Overview
 
 The per-campaign hub — characters, sessions, messages, and (DM only) the
 custom item library admin table (§21).
+
+### How to test this page
+
+Use a disposable campaign with at least two players, several characters, one applied session, one unapplied session, messages, and custom items. Exercise character operations and JSON import/export before sessions. Refresh after every mutation and verify the owning player's view as well as the DM's.
 
 - [ ] Character search box filters the character list live, by name substring
 - [ ] DM: create a new character — get back a recovery code in a toast that includes a copy button, distinct from the normal toast style
@@ -387,6 +498,10 @@ custom item library admin table (§21).
 A DM ↔ player chat thread per character, reachable from the header, entirely
 separate from the 20 character-sheet tabs.
 
+### How to test this page
+
+Open the same character thread as player and DM in separate profiles. Start empty, send messages in both directions, observe unread state without refreshing, then reopen/clear as the DM.
+
 - [ ] The Messages icon in the header appears only while viewing a character sheet (not on Dashboard or Campaign Overview), for both DM and player
 - [ ] As a player, opening Messages with no character context (i.e. not on a character sheet) shows a prompt to open a character sheet first rather than an empty/broken drawer
 - [ ] As DM, the inbox (inside Campaign Overview, §26) lists every character's thread at once, each with a live unread count and a last-message preview, ordered most-recent-first
@@ -400,11 +515,16 @@ separate from the 20 character-sheet tabs.
 
 Reachable only from the header while on the Dashboard route.
 
+### How to test this page
+
+Use a disposable primary account and several linkable secondary profiles. Record every device's original identity and visible data before linking. Exercise reveal, rotate, repeated linking, and unlink, proving old and new codes from fresh profiles after each transition.
+
 - [ ] Reveal Recovery Code — on a device that's never generated one, revealing it creates one on the spot rather than erroring
 - [ ] Rotate Code — displays a new code once; the old code should stop working immediately afterwards (try it in a fresh Link/Reclaim attempt to confirm)
 - [ ] Link This Device — entering another account's recovery code switches this device onto that account's data; this is a *switch*, not a merge, so confirm you understand which account's campaigns/characters you're looking at afterwards, especially if this device already had its own separate data before linking
-- [ ] A 4th device attempting to link to an account that already has 3 linked devices is rejected with a clear error — the cap is exactly 3
+- [ ] There is deliberately no limit on how many devices can be linked to one account — linking a 4th, 5th, etc. device should succeed the same as any other
 - [ ] Unlink This Device — reverts this device back to its own separate identity; campaigns/characters that only existed on the (now former) primary account disappear from view here afterwards, and this device's own pre-linking data (if any) reappears
+- [ ] Recovery backup banner and Settings always show the same current recovery code after reveal or rotation; an old code disappears from all visible surfaces and fails on a fresh device
 
 ## 29. Cross-cutting permission boundaries
 
@@ -414,6 +534,10 @@ testing doesn't confirm the boundary is actually enforced; these are worth a
 deliberate pass, ideally from a second device/browser profile logged in as a
 plain player, not just skimmed as the DM.
 
+### How to test this system
+
+Use at least two identities: a plain player who doesn't own the character, and the owning player with editing toggled both on and off by the DM mid-session. Clear local cache between identities so a cached document isn't mistaken for authorised access.
+
 - [ ] A player cannot edit a character they haven't claimed, even via a direct URL to that character's sheet — the page should visibly be read-only, not just "probably won't save"
 - [ ] A player can only edit a character that is both (a) owned by them and (b) currently flagged editable by the DM — have the DM flip that flag off while the player still has the sheet open, then have the player try to make an edit: it should fail rather than appear to succeed and quietly not save
 - [ ] The DM's own edit access defaults to **read-only** every single time a character sheet is opened, including reopening the exact same character a second time in the same session — confirm "Editing enabled" has to be pressed again each time and this choice is never remembered
@@ -421,40 +545,55 @@ plain player, not just skimmed as the DM.
 - [ ] Force-releasing a character (DM, from Admin) behaves the same way — ownership and edit permission clear together, not just ownership
 - [ ] The claim history log (§26) is append-only — there is no edit or delete control for an individual past entry anywhere in the UI
 
+## 30. Character Sheet Shell, Portrait & Navigation
+
+These behaviours sit around all twenty sheet tabs rather than belonging to one rules page. They cover the portrait pipeline, section drawer, header actions, direct routes, and recovery from missing data.
+
+### How to test this system
+
+Use one editable character and one read-only character. Open the sheet on phone and desktop widths. Work through portrait changes first, then every section-drawer destination, header action, browser navigation, and refresh.
+
+- [ ] Upload every supported portrait format, position/crop at each edge, confirm the saved output is square at the intended 256 px size, then refresh and compare the image in the sheet header, Dashboard card, and Campaign Overview
+- [ ] Replace an existing portrait and confirm every visible copy updates; if removal is supported, remove it and confirm the default placeholder returns everywhere without leaving stale cached images
+- [ ] Open every one of the twenty sections from the drawer on phone and desktop — the correct title/content becomes active, the drawer closes appropriately, and no prior page's modal or temporary state overlays the new section
+- [ ] Keyboard, mouse, touch, and swipe navigation select the same sections without double-activation; rapid navigation never leaves two sections active or saves input to the wrong section
+- [ ] Browser Back/Forward and refresh from Dashboard → Campaign → Character → section produce a coherent route and a working way back; pending/invalid form text is either deliberately preserved or deliberately discarded with warning
+- [ ] Directly open valid Dashboard, Campaign, Character, onboarding-step, and invite URLs in a new tab and after PWA relaunch — each lands on the intended screen after authentication/onboarding gates complete
+- [ ] Header actions appear only on their intended routes and roles; Settings, Messages, export, release, edit-enable, and navigation controls all target the currently visible campaign/character after rapid route changes
+
 ---
 
 ## Coverage notes
 
-This checklist now covers the whole app, not just the 20 character-sheet
-tabs the title names — sections 21–29 are cross-cutting systems and the
-app-shell pages (Dashboard, Onboarding, Settings, Campaign Overview,
-Messages) that sit outside the character sheet entirely. Everything below
-was read in full, not sampled.
+This checklist covers the 20 character-sheet sections, the cross-cutting
+systems, and the app-shell pages outside the character sheet. Sections
+21–30 cover systems and pages such as Dashboard, Onboarding, Settings,
+Campaign Overview, and Messages.
 
-**Character sheet (§1–20):** every tab component, every picker it opens,
-every custom-item form, and the shared hooks/helpers behind them —
+**Character-sheet source review (§1–20):** The reviewed scope includes every
+tab component, picker, custom-item form, and the shared hooks and helpers
+behind them:
 `useCharacterSheet` and its five constituent hooks (`useCharacterPermissions`,
 `useCharacterMutations`, `useCharacterData`, `useCharacterHelpers`,
 `useDMOverride`), `useSkillComputation`/`useSkillFiltering`/
 `useSkillSorting`/`useSkillGroupCollapse`, `useSwipeableTabs`,
 `useQuantityEdit`, `useAssignedItemMeta`, all of `WeaponsTab.tsx` end to end
-(~1785 lines, including every handler body, the slot-counting math, and the
-grenade "stowed beyond 3" split card), `ArmourPicker.tsx` and
+(approximately 1,785 lines, including the handler bodies, slot-counting
+logic, and the grenade "stowed beyond 3" split card), `ArmourPicker.tsx` and
 `ArmourUpgradePicker.tsx`, `ArcheotechPickerModal.tsx`, and every custom
 form (ranged/melee/grenade/shield/armour/gear/consumable). The Insanity and
-Corruption features were read down to their data layer:
+Corruption review also includes their data-layer implementation:
 `characteristicModifiers.ts`, `characteristicModifierTotals.ts`,
 `rollModifierValues.ts`, `RollEditor.tsx`/`RollModifierFields.tsx` (the
-manual 1d10-roll-for-modifier flow on certain Malignancies/Mutations — the
-player types in a physically-rolled 1–10 value, the app doesn't roll it for
-them), both reference pickers, both row components, and the
-`corruptionUi.ts`/`insanityUi.ts` timeline/colour logic. `RollChip` turned
-out to be a static styled label (a roll-range display), not an interactive
-roller — worth knowing so nobody goes looking for a "roll" button that
-doesn't exist.
+manual 1d10 modifier flow used by certain Malignancies and Mutations), both
+reference pickers, both row components, and the
+`corruptionUi.ts`/`insanityUi.ts` timeline/colour logic. `RollChip` is a
+static roll-range label rather than an interactive roller; no
+manual roll-button test is therefore required.
 
-**App shell & account system (new this pass, §23–29):** `App.tsx` (route
-shell, auth gate, onboarding gate, NameGate), `useAuth`, `useDeviceLink`,
+**App-shell and account-system source review (§23–30):** The reviewed scope
+includes `App.tsx` (route shell, auth gate, onboarding gate, NameGate),
+`useAuth`, `useDeviceLink`,
 `useLinkDevice`, `identityService.ts`, `deviceLinkService.ts`,
 `userAccountService.ts`, `profileService.ts`, `Settings.tsx`,
 `Onboarding.tsx`, `NameGate.tsx`, `Dashboard.tsx` and all its inline
@@ -463,54 +602,43 @@ sub-components, `CampaignOverview.tsx` plus every file under
 `CustomItemLibraryAdmin`, `CustomItemAdminRow`), the `ClaimCharacter/` flow
 (`ClaimForm`, `ClaimPreview`, `useRecoveryLookup`, `useClaimActions`),
 `characterService.ts`, `campaignService.ts`, `sessionService.ts`,
-`recoveryLookupService.ts` in full, `customItemService.ts` end to end this
-time (previously only its data model was read — the propagation/removal
-logic for custom items is now fully covered), `useCustomItemLibraryActions`,
+`recoveryLookupService.ts`, the propagation and removal logic in
+`customItemService.ts`, `useCustomItemLibraryActions`,
 `MessageDrawer.tsx`, `DMInbox.tsx`, `MessageThread.tsx`, `MessageInput.tsx`,
 `messageService.ts`, `useThreads`, `useThreadMessages`, `useClaimLogs`,
 `AppHeader.tsx`, `SectionDrawer.tsx`, `RecoveryBackupBanner.tsx`,
 `useInstallMode`, `CampaignsContext.tsx`, `useCampaign`, `usePlayerCharacters`,
 `useArchivedCampaigns`, `useCampaignCharacters`, `useCharacterSummaries`,
 `useXpProposals`, `useUserProfile`, `firestore.rules` in full (617 lines —
-this is where §29's permission-boundary items came from), `firebase.ts`
-(confirms multi-tab persistent offline cache is explicitly configured, not
-incidental), `main.tsx`/`pwaUpdateState.ts` (the service-worker
-install/update flow behind §23), `PortraitUpload.tsx`/`portraitService.ts`
-(crop-to-256px-then-base64, stored directly on the character document —
-there's no separate file storage bucket involved despite `getStorage` being
-initialised in `firebase.ts`), the Toast system in full
+the source for the permission-boundary checks in §29), `firebase.ts`
+(including explicit multi-tab persistent offline-cache configuration),
+`main.tsx`/`pwaUpdateState.ts` (the service-worker install and update flow
+behind §23), `PortraitUpload.tsx`/`portraitService.ts` (crop to 256 px and
+base64 storage on the character document), the Toast system
 (`ToastProvider`/`ToastItem`/`ToastContainer`/`ToastContext`), and the
-smaller shared form primitives with actual logic in them —
+shared form primitives containing application logic:
 `CharacteristicField.tsx`, `FormField.tsx`, `ValidatedNumberInput.tsx`,
 `Tooltip.tsx`, plus `validation.ts`, `recoveryCode.ts`, `claimLog.ts`,
 `characterFactory.ts`, `weaponUtils.ts`, `stats.ts`, `skillUtils.ts`,
 `exportCharacter.ts`, `armourLocations.ts`, `createLocalId.ts`,
 `formInput.ts`, and `gameRules.ts`.
 
-**Deliberately not covered, and why that's fine:** the `data/reference/*`
-sourcebook files were exhaustively audited for content correctness in the
-earlier IH sourcebook pass (a separate exercise from this one) rather than
-re-read here for behaviour, since they're static data, not logic. The
-`ui/*` primitives (`Button`, `Chip`, `PickerModal`, `ModalShell`, `Stepper`,
+**Excluded from this behavioural source review:** The `data/reference/*`
+sourcebook files were audited for content correctness during the separate IH
+sourcebook review. They contain static data and were not re-reviewed as
+behavioural logic for this checklist. The `ui/*` primitives (`Button`,
+`Chip`, `PickerModal`, `ModalShell`, `Stepper`,
 `StatChip`, `ItemMetaChips`, and the `*Styles.ts`/`colourTokens.ts` files)
-are presentation-only wrappers with no independent business logic — they've
-been exercised indirectly through literally every section above rather than
-read file-by-file. Type-definition files (`types/*.ts`) were consulted
-inline while reading the logic that uses them rather than read standalone.
+are presentation-only wrappers with no independent business logic. Their
+behaviour is exercised indirectly through the relevant checklist sections
+rather than through separate file-level tests. Type-definition files
+(`types/*.ts`) were reviewed alongside the logic that consumes them rather
+than as an independent category.
 
-**One loose end worth flagging rather than silently dropping:**
-`forceAssignCharacter` (assign a character straight to a specific target
-account) exists fully wired from `characterService.ts` up through
-`useCharacterMutations`/`useCharacterSheet` as `dmForceAssign`, but
-`CharacterSheet.tsx` never actually passes it to `AdminTab` — there is no
-button anywhere in the UI that calls it. Nothing to manually test here since
-it's unreachable, but it's either a feature that was never finished or one
-that's meant to have been removed; worth a decision either way rather than
-leaving it as dead code that quietly bit-rots.
-
-**Genuinely out of scope for a checklist like this, not just skipped:**
-accessibility (screen readers, keyboard-only navigation) and true
-concurrent-edit races (two devices editing the same character field within
-the same second) are different categories of testing entirely — call them
-out separately if you want them covered, they were not folded silently into
-"done" here.
+**Separate test scopes:** Accessibility testing, true concurrent-edit race
+testing, cross-browser and cross-device compatibility, and tests requiring
+direct Firestore/API calls are maintained as separate QA activities rather
+than being included in this click-through checklist. Permission boundaries
+reachable through the normal UI are covered in §29. Permission paths that
+require direct requests are covered by the automated Firestore rules suite
+(`npm run test:rules`).
