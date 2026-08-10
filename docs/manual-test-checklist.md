@@ -1,6 +1,6 @@
 # Manual Test Checklist — Complete App
 
-Thirty pages and cross-cutting sections, containing 201 checks. Every item
+Thirty pages and cross-cutting sections, containing 208 checks. Every item
 comes from reading the actual logic, not a generic "does it load" pass.
 Check items off as you verify them; anything under **Watch for** is the
 likeliest place a real bug hides. Coverage notes are at the bottom — read
@@ -307,14 +307,14 @@ Use two signed-in profiles: the owning player on Experience and the DM on Admin.
 - [ ] As a player: submit a spend proposal, confirm it shows as Pending
 - [ ] History toggle reveals previously resolved proposals without losing the pending ones
 
-**Watch for — this one's real, not routine:** approving a proposal (on
-Admin) increments `experience.spent` directly. Adding or removing a manual
-advance here recalculates `experience.spent` from scratch as the sum of every
-itemized advance, and overwrites it. These are two different write paths to
-the same field. Concretely: approve a proposal, note the new Remaining XP,
-then add or remove any manual advance — if Remaining XP jumps back as though
-the approved proposal never happened, that's this bug landing. Test that
-exact sequence, in that order.
+**Watch for:** approving a proposal (on Admin) increments `experience.spent`
+directly; adding or removing a manual advance recalculates `experience.spent`
+from the sum of every itemised advance plus every already-approved
+proposal's cost. These are two different write paths to the same field, so
+test the interaction directly: approve a proposal, note the new Remaining
+XP, then add or remove any manual advance. Remaining XP should stay
+consistent throughout and never jump backward as though the approved
+proposal had never happened. Test that exact sequence, in that order.
 
 ## 17. Notes
 
@@ -377,6 +377,9 @@ Keep the DM on Admin and the owning player on the same character in a second pro
 - [ ] Reject a pending proposal — Remaining XP is untouched, proposal moves out of Pending
 - [ ] Claim log shows the correct owner name (not just a raw ID) for the most recent claim
 - [ ] Force Release Ownership actually unclaims the character (owner becomes "None") separately from Toggle Player Edit Permission, which only flips whether the *current* owner can edit — confirm these are doing two different things, not the same thing twice
+- [ ] Force Assign To… opens a picker listing every campaign member by resolved first name (falling back to their raw UID for a member with no profile name yet); selecting one immediately assigns the character to them and turns Player Edit Permission on
+- [ ] Force Assign To… is disabled when the campaign has no members yet
+- [ ] Force-assigning a character that already has a different owner reassigns it directly with no release step in between — confirm the previous owner loses access and the new owner gains it immediately
 - [ ] Tab is genuinely invisible/inaccessible to non-DM players
 
 ## 21. Custom Item Library
@@ -491,7 +494,11 @@ Use a disposable campaign with at least two players, several characters, one app
 - [ ] Session History: create a session with a date, XP awarded, a public summary, and private DM-only notes, plus an attendee checklist — XP is **not** applied automatically on save
 - [ ] "Apply XP" appears once per session while unapplied; after applying, it becomes a permanent "XP Applied ✓" badge — confirm there's no way to re-apply or undo it from the UI afterwards
 - [ ] Edit a session's XP value after it's already been applied — the in-app note says this does *not* retroactively adjust characters' totals; confirm that's actually true (Remaining XP on the affected characters shouldn't move just from editing the session record)
-- [ ] Delete a session — requires confirmation, removes it from the list
+- [ ] Delete a session that has **not** had XP applied — plain Yes/No confirmation, removes it from the list, no XP warning shown
+- [ ] Delete a session that **has** had XP applied — shows a warning ("This session's XP was already applied…") and an "Also remove {N} XP from attendees" checkbox instead of the plain confirm
+- [ ] Confirm that delete with the checkbox left unchecked — session is removed, every attendee's Remaining XP is unchanged
+- [ ] Confirm that delete with the checkbox checked — session is removed **and** every attendee's XP total drops by the session's XP amount
+- [ ] Cancel out of that confirm after checking the box, then reopen it — the checkbox starts unchecked again rather than remembering the discarded state
 
 ## 27. Messages
 
@@ -609,7 +616,7 @@ sub-components, `CampaignOverview.tsx` plus every file under
 `AppHeader.tsx`, `SectionDrawer.tsx`, `RecoveryBackupBanner.tsx`,
 `useInstallMode`, `CampaignsContext.tsx`, `useCampaign`, `usePlayerCharacters`,
 `useArchivedCampaigns`, `useCampaignCharacters`, `useCharacterSummaries`,
-`useXpProposals`, `useUserProfile`, `firestore.rules` in full (617 lines —
+`useXpProposals`, `useUserProfile`, `firestore.rules` in full (622 lines —
 the source for the permission-boundary checks in §29), `firebase.ts`
 (including explicit multi-tab persistent offline-cache configuration),
 `main.tsx`/`pwaUpdateState.ts` (the service-worker install and update flow
