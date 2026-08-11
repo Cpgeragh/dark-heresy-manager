@@ -209,7 +209,7 @@ export function MutationPicker({
             setCustomDetails("");
           }}
         >
-          + Add custom {title.toLowerCase()}
+          Add custom {title.toLowerCase()}
         </PickerCustomAction>
       }
     >

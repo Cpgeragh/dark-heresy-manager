@@ -3,23 +3,21 @@
 import { useState } from "react";
 import { Link, useMatch } from "react-router-dom";
 import { useHeaderExtension } from "../context/useHeaderExtension";
-import { ROUTES, ROUTE_PATTERNS } from "../constants/routes";
+import { ROUTES } from "../constants/routes";
 
 interface AppHeaderProps {
   currentPath: string;
-  onOpenMessages?: () => void;
 }
 
-export function AppHeader({ currentPath, onOpenMessages }: AppHeaderProps) {
+export function AppHeader({ currentPath }: AppHeaderProps) {
   const { backHref, kebabContent } = useHeaderExtension();
   const [kebabOpen, setKebabOpen] = useState(false);
-  const isOnCharacterSheet = !!useMatch(ROUTE_PATTERNS.CHARACTER_SHEET);
   const isOnDashboard = !!useMatch(ROUTES.DASHBOARD);
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-900/80 backdrop-blur">
       <div className="max-w-7xl mx-auto px-4 lg:px-6 py-2 grid grid-cols-[1fr_auto_1fr] items-center">
-        {/* Left icons — home/back + messages */}
+        {/* Left icon — home/back */}
         <div className="flex items-center gap-2">
           {(backHref || currentPath !== ROUTES.DASHBOARD) && (
             <Link
@@ -44,28 +42,6 @@ export function AppHeader({ currentPath, onOpenMessages }: AppHeaderProps) {
             </Link>
           )}
 
-          {onOpenMessages && isOnCharacterSheet && (
-            <button type="button"
-              onClick={onOpenMessages}
-              aria-label="Messages"
-              className="h-8 w-8 rounded-lg bg-slate-800 border border-slate-600 flex items-center justify-center hover:bg-slate-700 transition"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-5 h-5 text-slate-300"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"
-                />
-              </svg>
-            </button>
-          )}
         </div>
 
         {/* App name — centred */}

@@ -158,7 +158,7 @@ function SectionDrawerContent({
       <button type="button"
         onClick={open}
         aria-label="Open section navigation"
-        className="px-3 py-2 rounded-lg border border-slate-500 bg-slate-800 text-slate-200 hover:bg-slate-700 transition text-base leading-none"
+        className="flex h-10 w-11 items-center justify-center rounded-lg border border-slate-500 bg-slate-800 text-base leading-none text-slate-200 transition hover:bg-slate-700"
       >
         ☰
       </button>

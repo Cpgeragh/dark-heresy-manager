@@ -79,7 +79,7 @@ export function MessageDrawer({
 
       {/* Panel */}
       <div
-        className={`fixed top-0 right-0 h-full w-full sm:w-96 z-50 bg-slate-900 border-l border-slate-700 flex flex-col transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 right-0 h-full w-72 max-w-[85vw] z-50 bg-slate-900 border-l border-slate-700 flex flex-col transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
         role="dialog"

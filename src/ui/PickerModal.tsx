@@ -6,6 +6,7 @@ import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from "react";
 import { editableInputClass } from "./editableStyles";
 import { ModalHeader } from "./ModalHeader";
 import { ModalShell } from "./ModalShell";
+import { PlusIcon } from "./PlusIcon";
 
 export function PickerBody({
   className = "",
@@ -63,13 +64,23 @@ export function PickerCustomAction({
   type = "button",
   ...props
 }: PickerCustomActionProps) {
+  const label = typeof children === "string"
+    ? children.trim().replace(/^\+\s*/, "")
+    : children;
+
   return (
     <button
       type={type}
-      className={`w-full text-sm lg:text-base text-red-500 hover:text-red-400 text-center py-1 lg:py-1.5 transition ${className}`.trim()}
+      className={`group flex w-full items-center justify-center gap-2 rounded border border-red-500/70 bg-red-950/20 py-2.5 text-sm text-red-400 transition hover:border-red-400 hover:bg-red-950/35 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-40 lg:text-base ${className}`.trim()}
       {...props}
     >
-      {children}
+      <PlusIcon className="h-4 w-4 shrink-0" />
+      <span
+        className="font-bold capitalize"
+        style={{ WebkitTextStroke: "0.35px currentColor" }}
+      >
+        {label}
+      </span>
     </button>
   );
 }

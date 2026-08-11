@@ -111,7 +111,6 @@ export default function App() {
           {/* HEADER */}
           <AppHeader
             currentPath={location.pathname}
-            onOpenMessages={() => setMessagesOpen(true)}
           />
 
           {/* ROUTES */}
@@ -133,7 +132,12 @@ export default function App() {
 
                   <Route
                     path={ROUTE_PATTERNS.CHARACTER_SHEET}
-                    element={<CharacterSheet effectiveUserId={effectiveUserId} />}
+                    element={
+                      <CharacterSheet
+                        effectiveUserId={effectiveUserId}
+                        onOpenMessages={() => setMessagesOpen(true)}
+                      />
+                    }
                   />
 
                   <Route
