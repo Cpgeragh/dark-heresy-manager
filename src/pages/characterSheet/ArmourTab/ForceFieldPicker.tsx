@@ -49,6 +49,10 @@ export function ForceFieldPicker({
   const filtered = ARMOUR_REFERENCE.filter(
     (r) => r.isForceField && r.name.toLowerCase().includes(normalisedQuery)
   ).sort((a, b) => a.name.localeCompare(b.name));
+  const pickerEntries = [
+    ...filteredCustom.map((item) => ({ kind: "custom" as const, name: item.name, item })),
+    ...filtered.map((ref) => ({ kind: "reference" as const, name: ref.name, ref })),
+  ].sort((a, b) => a.name.localeCompare(b.name));
 
   function resetPicker() {
     setSelected(null);
@@ -123,7 +127,23 @@ export function ForceFieldPicker({
         ) : undefined
       }
     >
-      {filteredCustom.map((item) => {
+      {pickerEntries.map((entry) => {
+        if (entry.kind === "reference") {
+          const ref = entry.ref;
+          return (
+            <PickerRow key={ref.id} interactive={editable} onClick={() => setSelected(ref)}>
+              <span className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}>{ref.name}</span>
+              <div className="flex flex-wrap gap-1.5 mt-1">
+                {ref.protectionRating !== undefined && <StatChip size="sm" label="PR" value={String(ref.protectionRating)} />}
+              </div>
+              <div className="flex flex-wrap gap-1.5 mt-1">
+                <ItemMetaChips weight={ref.weight} value={ref.value} availability={ref.availability} source={ref.source} />
+              </div>
+            </PickerRow>
+          );
+        }
+
+        const item = entry.item;
         const data = item.data;
         if (data.armourKind !== "worn") return null;
         return (
@@ -148,23 +168,6 @@ export function ForceFieldPicker({
           </PickerRow>
         );
       })}
-      {filtered.map((ref) => (
-        <PickerRow
-          key={ref.id}
-          interactive={editable}
-          onClick={() => setSelected(ref)}
-        >
-          <span className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}>
-            {ref.name}
-          </span>
-          <div className="flex flex-wrap gap-1.5 mt-1">
-            {ref.protectionRating !== undefined && <StatChip size="sm" label="PR" value={String(ref.protectionRating)} />}
-          </div>
-          <div className="flex flex-wrap gap-1.5 mt-1">
-            <ItemMetaChips weight={ref.weight} value={ref.value} availability={ref.availability} source={ref.source} />
-          </div>
-        </PickerRow>
-      ))}
     </PickerModal>
   );
 }

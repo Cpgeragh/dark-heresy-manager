@@ -154,9 +154,13 @@ export function MeleePicker({
     .filter((r) => r.name.toLowerCase().includes(normalisedQuery))
     .sort((a, b) => a.name.localeCompare(b.name));
   const filteredCustom = customItems
-    .filter((item) => item.data.weaponKind === "melee")
+    .filter((item) => item.data.weaponKind === "melee" && !item.data.integrated)
     .filter((item) => item.name.toLowerCase().includes(normalisedQuery))
     .sort((a, b) => a.name.localeCompare(b.name));
+  const pickerEntries = [
+    ...filteredCustom.map((item) => ({ kind: "custom" as const, name: item.name, item })),
+    ...filtered.map((ref) => ({ kind: "reference" as const, name: ref.name, ref })),
+  ].sort((a, b) => a.name.localeCompare(b.name));
   const modalTitle = editable ? title : `${title.replace(/^Add /, "View ")}s`;
 
   function resetPicker() {
@@ -232,7 +236,20 @@ export function MeleePicker({
         ) : undefined
       }
     >
-      {filteredCustom.map((item) => {
+      {pickerEntries.map((entry) => {
+        if (entry.kind === "reference") {
+          const ref = entry.ref;
+          return (
+            <MeleeWeaponCardPickerRow
+              key={ref.id}
+              ref={ref}
+              editable={editable}
+              strengthBonus={strengthBonus}
+              onSelect={() => setSelected(ref)}
+            />
+          );
+        }
+        const item = entry.item;
         const data = item.data;
         if (data.weaponKind !== "melee") return null;
         return (
@@ -261,15 +278,6 @@ export function MeleePicker({
           </PickerRow>
         );
       })}
-      {filtered.map((ref) => (
-        <MeleeWeaponCardPickerRow
-          key={ref.id}
-          ref={ref}
-          editable={editable}
-          strengthBonus={strengthBonus}
-          onSelect={() => setSelected(ref)}
-        />
-      ))}
       {/* Previous flat picker row retained below while the new expandable row is verified.
       {false && filtered.map((ref) => (
         <PickerRow

@@ -80,6 +80,10 @@ export function DrugsTab({
     () => new Map(campaignCustomDrugs.map((item) => [item.id, item])),
     [campaignCustomDrugs]
   );
+  const sortedDrugs = useMemo(
+    () => [...drugs].sort((a, b) => a.name.localeCompare(b.name)),
+    [drugs]
+  );
 
   const addDrug = useCallback(
     (ref: DrugRef) => {
@@ -216,8 +220,8 @@ export function DrugsTab({
   );
 
   const drugColumns = [
-    drugs.filter((_, index) => index % 2 === 0),
-    drugs.filter((_, index) => index % 2 === 1),
+    sortedDrugs.filter((_, index) => index % 2 === 0),
+    sortedDrugs.filter((_, index) => index % 2 === 1),
   ];
 
   const renderDrugRow = (item: DrugItem) => {
@@ -296,7 +300,7 @@ export function DrugsTab({
         {drugs.length === 0 && <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No drugs carried.</p>}
 
         <div className="space-y-3 sm:hidden">
-          {drugs.map(renderDrugRow)}
+          {sortedDrugs.map(renderDrugRow)}
         </div>
 
         <div className="hidden sm:grid sm:grid-cols-2 sm:gap-3 sm:items-start">

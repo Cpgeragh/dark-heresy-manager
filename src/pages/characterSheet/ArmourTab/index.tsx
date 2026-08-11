@@ -418,9 +418,9 @@ export function ArmourTab({
   );
 
   const regularArmour = armour.filter((p) => !p.isForceField);
-  const forceFields = armour.filter((p) => p.isForceField);
-  const worn = regularArmour.filter((p) => p.worn);
-  const stowed = regularArmour.filter((p) => !p.worn);
+  const forceFields = armour.filter((p) => p.isForceField).sort((a, b) => a.name.localeCompare(b.name));
+  const worn = regularArmour.filter((p) => p.worn).sort((a, b) => a.name.localeCompare(b.name));
+  const stowed = regularArmour.filter((p) => !p.worn).sort((a, b) => a.name.localeCompare(b.name));
 
   const archeotechArmourItems = (archeotech ?? []).filter((a) => a.type === "Armour");
   const archeotechArmourWorn = archeotechArmourItems.filter((a) => a.equipped);

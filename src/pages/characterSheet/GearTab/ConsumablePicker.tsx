@@ -37,6 +37,10 @@ export function ConsumablePicker({
     .filter((item) => item.status !== "archived")
     .filter((item) => item.name.toLowerCase().includes(normalizedQuery))
     .sort((a, b) => a.name.localeCompare(b.name));
+  const pickerEntries = [
+    ...filteredCustom.map((item) => ({ kind: "custom" as const, name: item.name, item })),
+    ...filtered.map((ref) => ({ kind: "reference" as const, name: ref.name, ref })),
+  ].sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <PickerModal
@@ -57,22 +61,22 @@ export function ConsumablePicker({
         ) : undefined
       }
     >
-      {filteredCustom.map((item) => (
+      {pickerEntries.map((entry) => entry.kind === "custom" ? (
         <PickerRow
-          key={`custom-${item.id}`}
+          key={`custom-${entry.item.id}`}
           interactive={editable}
-          onClick={() => onSelectCustomItem?.(item)}
+          onClick={() => onSelectCustomItem?.(entry.item)}
         >
           <div className="flex items-center gap-1.5 min-w-0">
             <span className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}>
-              {item.name}
+              {entry.item.name}
             </span>
-            <StatusBadge status={item.status} />
-            {item.data.description && (
+            <StatusBadge status={entry.item.status} />
+            {entry.item.data.description && (
               <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
                 <InfoModal
-                  title={item.name}
-                  content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{item.data.description}</p>}
+                  title={entry.item.name}
+                  content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{entry.item.data.description}</p>}
                   as="span"
                 />
               </span>
@@ -81,30 +85,28 @@ export function ConsumablePicker({
           <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs lg:text-sm">
             <ItemMetaChips
               bare
-              weight={item.data.weight}
-              value={item.data.value}
-              availability={item.data.availability}
-              source={item.data.source}
+              weight={entry.item.data.weight}
+              value={entry.item.data.value}
+              availability={entry.item.data.availability}
+              source={entry.item.data.source}
             />
           </div>
         </PickerRow>
-      ))}
-
-      {filtered.map((ref) => (
+      ) : (
         <PickerRow
-          key={ref.id}
+          key={entry.ref.id}
           interactive={editable}
-          onClick={() => onSelect(ref)}
+          onClick={() => onSelect(entry.ref)}
         >
           <div className="flex items-center gap-1.5 min-w-0">
             <span className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}>
-              {ref.name}
+              {entry.ref.name}
             </span>
-            {ref.description && (
+            {entry.ref.description && (
               <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
                 <InfoModal
-                  title={ref.name}
-                  content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{ref.description}</p>}
+                  title={entry.ref.name}
+                  content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{entry.ref.description}</p>}
                   as="span"
                 />
               </span>
@@ -113,10 +115,10 @@ export function ConsumablePicker({
           <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs lg:text-sm">
             <ItemMetaChips
               bare
-              weight={ref.weight}
-              value={ref.value}
-              availability={ref.availability}
-              source={ref.source}
+              weight={entry.ref.weight}
+              value={entry.ref.value}
+              availability={entry.ref.availability}
+              source={entry.ref.source}
             />
           </div>
         </PickerRow>

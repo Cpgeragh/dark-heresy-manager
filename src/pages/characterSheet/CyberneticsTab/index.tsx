@@ -140,6 +140,33 @@ export function CyberneticsTab({
     () => new Map(campaignCustomCybernetics.map((item) => [item.id, item])),
     [campaignCustomCybernetics]
   );
+  const {
+    items: campaignCustomWeaponItems,
+    loading: customWeaponsLoading,
+    error: customWeaponsError,
+  } = useCampaignCustomItems({
+    campaignId,
+    category: "weapon",
+    mode: isDM ? "admin" : "picker",
+    userId,
+    characterId,
+    includeArchived: isDM,
+  });
+  const campaignCustomIntegratedWeapons = useMemo(
+    () => (campaignCustomWeaponItems as CampaignCustomItem<"weapon">[]).filter((item) => {
+      const data = item.data;
+      return (
+        item.status !== "archived" &&
+        (data.weaponKind === "ranged" || data.weaponKind === "melee") &&
+        !!data.integrated
+      );
+    }),
+    [campaignCustomWeaponItems]
+  );
+  const sortedCybernetics = useMemo(
+    () => [...cybernetics].sort((a, b) => a.name.localeCompare(b.name)),
+    [cybernetics]
+  );
 
   const install = useCallback(
     (
@@ -479,6 +506,52 @@ export function CyberneticsTab({
     [editable, meleeWeapons, onUpdateMelee]
   );
 
+  const addIntegratedFromLibrary = useCallback(
+    (libraryItem: CampaignCustomItem<"weapon">) => {
+      if (!editable) return;
+      const versionId =
+        libraryItem.status === "published"
+          ? libraryItem.publishedVersionId
+          : libraryItem.draftVersionId ?? libraryItem.latestVersionId;
+      if (!versionId) {
+        toast.error("This custom integrated weapon has no usable version.");
+        return;
+      }
+
+      const id = crypto.randomUUID();
+      if (libraryItem.data.weaponKind === "ranged") {
+        onUpdateRanged([
+          ...rangedWeapons,
+          {
+            ...buildRangedWeaponSnapshot(
+              id,
+              { integrated: true },
+              libraryItem.data,
+              libraryItem.id,
+              versionId
+            ),
+            integrated: true,
+          },
+        ]);
+      } else if (libraryItem.data.weaponKind === "melee") {
+        onUpdateMelee([
+          ...meleeWeapons,
+          {
+            ...buildMeleeWeaponSnapshot(
+              id,
+              { integrated: true },
+              libraryItem.data,
+              libraryItem.id,
+              versionId
+            ),
+            integrated: true,
+          },
+        ]);
+      }
+    },
+    [editable, meleeWeapons, onUpdateMelee, onUpdateRanged, rangedWeapons, toast]
+  );
+
   const addCustomIntegratedRanged = useCallback(
     async (weapon: RangedWeapon) => {
       if (!editable || !userId) return;
@@ -566,8 +639,8 @@ export function CyberneticsTab({
   );
 
   const cyberneticColumns = [
-    cybernetics.filter((_, index) => index % 2 === 0),
-    cybernetics.filter((_, index) => index % 2 === 1),
+    sortedCybernetics.filter((_, index) => index % 2 === 0),
+    sortedCybernetics.filter((_, index) => index % 2 === 1),
   ];
 
   const renderImplantRow = (item: CyberneticItem) => {
@@ -621,11 +694,11 @@ export function CyberneticsTab({
     );
   };
 
-  if (cyberneticsError) {
-    return <ErrorState>Unable to load custom cybernetic items.</ErrorState>;
+  if (cyberneticsError || customWeaponsError) {
+    return <ErrorState>Unable to load custom cybernetic or integrated weapon items.</ErrorState>;
   }
 
-  if (cyberneticsLoading) {
+  if (cyberneticsLoading || customWeaponsLoading) {
     return <LoadingState>Loading custom cybernetic items…</LoadingState>;
   }
 
@@ -649,8 +722,9 @@ export function CyberneticsTab({
 
         <IndependentCardGrid
           items={[
-            ...integratedRanged.map((weapon) => (
-              <RangedCard
+            ...integratedRanged.map((weapon) => ({
+              name: weapon.name,
+              card: <RangedCard
                 key={weapon.id}
                 weapon={weapon}
                 editable={editable}
@@ -669,10 +743,11 @@ export function CyberneticsTab({
                 onUpdateQuantity={(qty) =>
                   onUpdateRanged(rangedWeapons.map((w) => (w.id === weapon.id ? { ...w, quantity: qty } : w)))
                 }
-              />
-            )),
-            ...integratedMelee.map((weapon) => (
-              <MeleeCard
+              />,
+            })),
+            ...integratedMelee.map((weapon) => ({
+              name: weapon.name,
+              card: <MeleeCard
                 key={weapon.id}
                 weapon={weapon}
                 editable={editable}
@@ -688,19 +763,22 @@ export function CyberneticsTab({
                 onUpdateQuantity={(qty) =>
                   onUpdateMelee(meleeWeapons.map((w) => (w.id === weapon.id ? { ...w, quantity: qty } : w)))
                 }
-              />
-            )),
-            ...archeotechIntegratedItems.map((item) => (
-              <ArcheotechWeaponCard
+              />,
+            })),
+            ...archeotechIntegratedItems.map((item) => ({
+              name: item.name,
+              card: <ArcheotechWeaponCard
                 key={item.id}
                 item={item}
                 editable={editable}
                 isEquipped={item.equipped ?? false}
                 onToggleEquip={() => toggleEquipArcheotech(item.id)}
                 onRemove={() => removeArcheotech(item.id)}
-              />
-            )),
-          ]}
+              />,
+            })),
+          ]
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .map((entry) => entry.card)}
         />
       </section>
 
@@ -721,7 +799,7 @@ export function CyberneticsTab({
         )}
 
         <div className="space-y-3 sm:hidden">
-          {cybernetics.map(renderImplantRow)}
+          {sortedCybernetics.map(renderImplantRow)}
         </div>
 
         <div className="hidden sm:grid sm:grid-cols-2 sm:gap-3 sm:items-start">
@@ -746,6 +824,8 @@ export function CyberneticsTab({
           editable={editable}
           onSelectRanged={addIntegratedFromRangedRef}
           onSelectMelee={addIntegratedFromMeleeRef}
+          customItems={campaignCustomIntegratedWeapons}
+          onSelectCustomItem={addIntegratedFromLibrary}
           onCustomRanged={editable ? () => setShowCustomIntegratedRanged(true) : undefined}
           onCustomMelee={editable ? () => setShowCustomIntegratedMelee(true) : undefined}
           onClose={() => setShowIntegratedPicker(false)}

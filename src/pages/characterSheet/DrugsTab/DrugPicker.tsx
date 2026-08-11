@@ -72,6 +72,10 @@ export function DrugPicker({
     .filter((item) => item.status !== "archived")
     .filter((item) => item.name.toLowerCase().includes(normalizedQuery))
     .sort((a, b) => a.name.localeCompare(b.name));
+  const pickerEntries = [
+    ...filteredCustom.map((item) => ({ kind: "custom" as const, name: item.name, item })),
+    ...filtered.map((ref) => ({ kind: "reference" as const, name: ref.name, ref })),
+  ].sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <PickerModal
@@ -92,43 +96,42 @@ export function DrugPicker({
         ) : undefined
       }
     >
-      {filteredCustom.map((item) => (
-        <PickerRow
-          key={`custom-${item.id}`}
-          interactive={editable}
-          onClick={() => onSelectCustomItem?.(item)}
-        >
-          <div className="flex items-center gap-1.5 min-w-0">
-            <span className={`${uiItemName} group-hover:text-white truncate`}>
-              {item.name}
-            </span>
-            <StatusBadge status={item.status} />
-            {item.data.notes && (
-              <span
-                className={uiInfoModalWrapper}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <InfoModal
-                  title={item.name}
-                  content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{item.data.notes}</p>}
-                  as="span"
+      {pickerEntries.map((entry) => {
+        if (entry.kind === "custom") {
+          const item = entry.item;
+          return (
+            <PickerRow
+              key={`custom-${item.id}`}
+              interactive={editable}
+              onClick={() => onSelectCustomItem?.(item)}
+            >
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className={`${uiItemName} group-hover:text-white truncate`}>{item.name}</span>
+                <StatusBadge status={item.status} />
+                {item.data.notes && (
+                  <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
+                    <InfoModal
+                      title={item.name}
+                      content={<p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{item.data.notes}</p>}
+                      as="span"
+                    />
+                  </span>
+                )}
+              </div>
+              <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                <ItemMetaChips
+                  bare
+                  weight={item.data.weight ?? "0 kg"}
+                  value={item.data.value}
+                  availability={item.data.availability}
+                  source={item.data.source}
                 />
-              </span>
-            )}
-          </div>
-          <div className="mt-1 flex flex-wrap items-center gap-1.5">
-            <ItemMetaChips
-              bare
-              weight={item.data.weight ?? "0 kg"}
-              value={item.data.value}
-              availability={item.data.availability}
-              source={item.data.source}
-            />
-          </div>
-        </PickerRow>
-      ))}
+              </div>
+            </PickerRow>
+          );
+        }
 
-      {filtered.map((ref) => {
+        const ref = entry.ref;
         const hasInfo = !!(ref.duration || ref.effect || ref.sideEffect || ref.notes);
 
         return (

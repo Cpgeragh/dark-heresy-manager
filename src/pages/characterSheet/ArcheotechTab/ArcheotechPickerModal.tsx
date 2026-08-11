@@ -78,6 +78,10 @@ export function ArcheotechPickerModal({
       )
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [customItems, query]);
+  const pickerEntries = [
+    ...filteredCustom.map((item) => ({ kind: "custom" as const, name: item.name, item })),
+    ...filtered.map((ref) => ({ kind: "reference" as const, name: ref.name, ref })),
+  ].sort((a, b) => a.name.localeCompare(b.name));
 
   const needsGmInput = (ref: ArcheotechRef) =>
     isVariableMeta(ref.value) || isVariableMeta(ref.availability);
@@ -142,24 +146,24 @@ export function ArcheotechPickerModal({
         ) : undefined
       }
     >
-      {filteredCustom.map((item) => (
+      {pickerEntries.map((entry) => entry.kind === "custom" ? (
         <PickerRow
-          key={`custom-${item.id}`}
+          key={`custom-${entry.item.id}`}
           interactive={editable}
-          onClick={() => onSelectCustomItem?.(item)}
+          onClick={() => onSelectCustomItem?.(entry.item)}
         >
           <div className="flex items-center gap-1.5 min-w-0">
             <span className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}>
-              {item.name}
+              {entry.item.name}
             </span>
-            <StatusBadge status={item.status} />
-            {item.data.description && (
+            <StatusBadge status={entry.item.status} />
+            {entry.item.data.description && (
               <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
                 <InfoModal
-                  title={item.name}
+                  title={entry.item.name}
                   content={
                     <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                      {item.data.description}
+                      {entry.item.data.description}
                     </p>
                   }
                   as="span"
@@ -168,31 +172,29 @@ export function ArcheotechPickerModal({
             )}
           </div>
           <div className="flex items-center gap-2 text-xs lg:text-sm mt-0.5 flex-wrap">
-            {item.data.type && <span className={uiTextMuted}>{item.data.type}</span>}
+            {entry.item.data.type && <span className={uiTextMuted}>{entry.item.data.type}</span>}
             <ItemMetaChips
               bare
-              weight={item.data.weight}
-              value={item.data.value}
-              availability={item.data.availability}
-              source={item.data.source}
+              weight={entry.item.data.weight}
+              value={entry.item.data.value}
+              availability={entry.item.data.availability}
+              source={entry.item.data.source}
             />
           </div>
         </PickerRow>
-      ))}
-
-      {filtered.map((ref) => (
-        <PickerRow key={ref.id} interactive={editable} onClick={() => handleRowClick(ref)}>
+      ) : (
+        <PickerRow key={entry.ref.id} interactive={editable} onClick={() => handleRowClick(entry.ref)}>
           <div className="flex items-center gap-1.5 min-w-0">
             <span className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}>
-              {ref.name}
+              {entry.ref.name}
             </span>
-            {ref.description && (
+            {entry.ref.description && (
               <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
                 <InfoModal
-                  title={ref.name}
+                  title={entry.ref.name}
                   content={
                     <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                      {ref.description}
+                      {entry.ref.description}
                     </p>
                   }
                   as="span"
@@ -201,15 +203,15 @@ export function ArcheotechPickerModal({
             )}
           </div>
           <div className="flex items-center gap-2 text-xs lg:text-sm mt-0.5 flex-wrap">
-            <span className={uiTextMuted}>{ref.type}</span>
+            <span className={uiTextMuted}>{entry.ref.type}</span>
             <ItemMetaChips
               bare
-              weight={ref.weight}
-              value={isVariableMeta(ref.value) ? undefined : ref.value}
-              availability={isVariableMeta(ref.availability) ? undefined : ref.availability}
-              source={ref.source}
+              weight={entry.ref.weight}
+              value={isVariableMeta(entry.ref.value) ? undefined : entry.ref.value}
+              availability={isVariableMeta(entry.ref.availability) ? undefined : entry.ref.availability}
+              source={entry.ref.source}
             />
-            {needsGmInput(ref) && (
+            {needsGmInput(entry.ref) && (
               <span className={uiTextGMNote}>GM determines cost &amp; availability</span>
             )}
           </div>

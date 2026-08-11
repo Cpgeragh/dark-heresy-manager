@@ -1,10 +1,12 @@
 ﻿import { useState } from "react";
 import type { RangedWeaponRef, MeleeWeaponRef } from "../../../data/reference/weaponReference";
 import type { WeaponCraftsmanship } from "../../../types/Character";
+import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { Button } from "../../../ui/Button";
 import { Chip } from "../../../ui/Chip";
 import { InfoModal } from "../../../components/InfoModal";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
+import { StatusBadge } from "../../../ui/StatusBadge";
 import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../../ui/PickerModal";
 import { ArrowLeft } from "../../../ui/PickerArrows";
 import { uiTextBody, uiTextLabel, uiTextMuted, uiItemName, uiInfoModalWrapper } from "../../../ui/editableStyles";
@@ -25,6 +27,8 @@ export function IntegratedWeaponPicker({
   editable = true,
   onSelectRanged,
   onSelectMelee,
+  customItems = [],
+  onSelectCustomItem,
   onCustomRanged,
   onCustomMelee,
   onClose,
@@ -33,6 +37,8 @@ export function IntegratedWeaponPicker({
   editable?: boolean;
   onSelectRanged: (ref: RangedWeaponRef, craftsmanship: WeaponCraftsmanship) => void;
   onSelectMelee: (ref: MeleeWeaponRef, craftsmanship: WeaponCraftsmanship) => void;
+  customItems?: CampaignCustomItem<"weapon">[];
+  onSelectCustomItem?: (item: CampaignCustomItem<"weapon">) => void;
   onCustomRanged?: () => void;
   onCustomMelee?: () => void;
   onClose: () => void;
@@ -46,7 +52,17 @@ export function IntegratedWeaponPicker({
     ref.name.toLowerCase().includes(lowerQuery)
   );
   const melee = INTEGRATED_MELEE_REFS.filter((ref) => ref.name.toLowerCase().includes(lowerQuery));
-  const isEmpty = ranged.length === 0 && melee.length === 0;
+  const custom = customItems
+    .filter((item) => item.status !== "archived")
+    .filter((item) => {
+      const data = item.data;
+      return (
+        (data.weaponKind === "ranged" || data.weaponKind === "melee") &&
+        !!data.integrated &&
+        item.name.toLowerCase().includes(lowerQuery)
+      );
+    });
+  const isEmpty = ranged.length === 0 && melee.length === 0 && custom.length === 0;
 
   function resetPicker() {
     setSelected(null);
@@ -137,7 +153,8 @@ export function IntegratedWeaponPicker({
         ) : undefined
       }
     >
-      {ranged.map((ref) => (
+      {[
+        ...ranged.map((ref) => ({ name: ref.name, row: (
         <PickerRow
           key={ref.id}
           interactive={editable}
@@ -183,8 +200,8 @@ export function IntegratedWeaponPicker({
             </div>
           )}
         </PickerRow>
-      ))}
-      {melee.map((ref) => (
+      ) })),
+      ...melee.map((ref) => ({ name: ref.name, row: (
         <PickerRow
           key={ref.id}
           interactive={editable}
@@ -227,7 +244,64 @@ export function IntegratedWeaponPicker({
             </div>
           )}
         </PickerRow>
-      ))}
+      ) })),
+      ...custom.map((item) => {
+        const data = item.data;
+        if (data.weaponKind !== "ranged" && data.weaponKind !== "melee") {
+          return { name: item.name, row: null };
+        }
+        const isRanged = data.weaponKind === "ranged";
+        return { name: item.name, row: (
+          <PickerRow
+            key={`custom-${item.id}`}
+            interactive={editable}
+            onClick={() => onSelectCustomItem?.(item)}
+          >
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className={`${uiItemName} ${editable ? "group-hover:text-white" : ""}`}>{item.name}</span>
+              <StatusBadge status={item.status} />
+            </div>
+            <div className="flex flex-wrap gap-1.5 mt-1">
+              <Chip size="sm" className={colourViolet}>Integrated</Chip>
+              <Chip size="sm" className={isRanged ? colourSky : colourOrange}>
+                {isRanged ? "Ranged" : "Melee"}
+              </Chip>
+              <ItemMetaChips
+                weight={data.weight}
+                value={data.value}
+                availability={data.availability}
+                source={data.source}
+              />
+            </div>
+            <div className={`flex items-center gap-2 text-xs lg:text-sm ${uiTextMuted} mt-0.5 flex-wrap font-code`}>
+              <span>{data.class}</span>
+              {isRanged && <span>{data.range}</span>}
+              {isRanged && <span>{data.rof}</span>}
+              <span>{data.damage}</span>
+              <span>Pen {data.pen}</span>
+              {isRanged && <span>Clip {data.clip}</span>}
+            </div>
+            {data.specialRules && data.specialRules !== "—" && (
+              <div className="flex items-center gap-1.5 mt-1">
+                <span className={uiTextLabel}>Qualities</span>
+                <span className={`text-xs lg:text-sm ${uiTextMuted} italic`}>{data.specialRules}</span>
+                <span className={uiInfoModalWrapper}>
+                  <InfoModal title={`${item.name} Qualities`} content={<SpecialRulesContent rules={data.specialRules} />} as="span" />
+                </span>
+              </div>
+            )}
+            {data.description && (
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className={uiTextLabel}>Rules</span>
+                <span className={uiInfoModalWrapper}>
+                  <InfoModal title={item.name} content={<SpecialRulesContent rules="" description={data.description} />} as="span" />
+                </span>
+              </div>
+            )}
+          </PickerRow>
+        ) };
+      }),
+      ].sort((a, b) => a.name.localeCompare(b.name)).map((entry) => entry.row)}
     </PickerModal>
   );
 }

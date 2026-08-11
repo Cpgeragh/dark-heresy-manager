@@ -69,10 +69,11 @@ export function GrenadePicker({
         ) : undefined
       }
     >
-      {filteredCustomLibraryItems.map((item) => {
+      {[
+        ...filteredCustomLibraryItems.map((item) => {
         const data = item.data;
-        if (data.weaponKind !== "grenade") return null;
-        return (
+        if (data.weaponKind !== "grenade") return { name: item.name, row: null };
+        return { name: item.name, row: (
           <PickerRow
             key={`custom-${item.id}`}
             interactive={editable}
@@ -121,9 +122,9 @@ export function GrenadePicker({
               </div>
             )}
           </PickerRow>
-        );
-      })}
-      {filtered.map((ref) => (
+        ) };
+      }),
+      ...filtered.map((ref) => ({ name: ref.name, row: (
         <PickerRow
           key={ref.id}
           interactive={editable}
@@ -169,7 +170,8 @@ export function GrenadePicker({
             </div>
           )}
         </PickerRow>
-      ))}
+      ) })),
+      ].sort((a, b) => a.name.localeCompare(b.name)).map((entry) => entry.row)}
     </PickerModal>
   );
 }

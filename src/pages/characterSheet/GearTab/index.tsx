@@ -167,6 +167,14 @@ export function GearTab({
     () => new Map(campaignCustomConsumables.map((item) => [item.id, item])),
     [campaignCustomConsumables]
   );
+  const sortedGear = useMemo(
+    () => [...gear].sort((a, b) => a.name.localeCompare(b.name)),
+    [gear]
+  );
+  const sortedConsumables = useMemo(
+    () => [...consumables].sort((a, b) => a.name.localeCompare(b.name)),
+    [consumables]
+  );
 
   // ── Consumable handlers ──────────────────────────────────────────────────
 
@@ -496,7 +504,7 @@ export function GearTab({
         )}
 
         <div className="space-y-3">
-          {gear.map((item) => (
+          {sortedGear.map((item) => (
             (() => {
               const linkedLibraryItem = item.customLibraryId
                 ? campaignCustomGearById.get(item.customLibraryId)
@@ -564,7 +572,7 @@ export function GearTab({
         )}
 
         <div className="space-y-3">
-          {consumables.map((item) => (
+          {sortedConsumables.map((item) => (
             (() => {
               const linkedLibraryItem = item.customLibraryId
                 ? campaignCustomConsumablesById.get(item.customLibraryId)

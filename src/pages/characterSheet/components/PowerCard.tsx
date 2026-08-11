@@ -13,6 +13,8 @@ import {
   uiTextBody,
   uiTextPlaceholder,
 } from "../../../ui/editableStyles";
+import { Button } from "../../../ui/Button";
+import { PickerBody, PickerModal } from "../../../ui/PickerModal";
 import { RemoveButton } from "../../../ui/RemoveButton";
 import { StatChip } from "../../../ui/StatChip";
 import { ExpandChevron } from "../../../ui/ExpandChevron";
@@ -78,6 +80,7 @@ export function PowerCard({
   onUpdateAllCopies,
 }: PowerCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const [deleteArmed, setDeleteArmed] = useState(false);
 
   const modalContent = (
     <>
@@ -121,7 +124,16 @@ export function PowerCard({
           <PowerIdentityChips power={power} />
         </div>
 
-        <div className="relative pointer-events-none flex items-center shrink-0">
+        <div className="relative pointer-events-none flex items-center gap-4 shrink-0">
+          {editable && (
+            <div className="relative z-20 pointer-events-auto">
+              <RemoveButton
+                onClick={() => setDeleteArmed(true)}
+                label={`Delete ${power.name || "power"}`}
+              />
+            </div>
+          )}
+
           {onSelect ? (
             <button
               type="button"
@@ -142,15 +154,6 @@ export function PowerCard({
         <div className="px-3 pb-3 lg:px-4 lg:pb-4 space-y-3">
           <PowerStats power={power} />
 
-          {editable && (
-            <div className="flex justify-end">
-              <RemoveButton
-                onClick={() => onRemove(power.id)}
-                label={`Remove ${power.name || "power"}`}
-              />
-            </div>
-          )}
-
           {libraryItem && (
             <CustomItemActionButtons
               libraryItem={libraryItem}
@@ -164,6 +167,34 @@ export function PowerCard({
             />
           )}
         </div>
+      )}
+
+      {deleteArmed && (
+        <PickerModal
+          title="Delete Psychic Power"
+          query=""
+          onQueryChange={() => undefined}
+          onClose={() => setDeleteArmed(false)}
+          isEmpty={false}
+          hideSearch
+          maxWidth="max-w-sm"
+          footer={
+            <div className="grid grid-cols-2 gap-2">
+              <Button variant="primary" onClick={() => onRemove(power.id)}>
+                Delete
+              </Button>
+              <Button variant="ghost" onClick={() => setDeleteArmed(false)}>
+                Cancel
+              </Button>
+            </div>
+          }
+        >
+          <PickerBody>
+            <p className={`text-sm lg:text-base ${uiTextBody} text-center`}>
+              Delete {power.name || "this power"} from this character?
+            </p>
+          </PickerBody>
+        </PickerModal>
       )}
     </div>
   );

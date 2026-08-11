@@ -91,6 +91,10 @@ export function ImplantPicker({
     .filter((item) => item.status !== "archived")
     .filter((item) => item.name.toLowerCase().includes(normalizedQuery))
     .sort((a, b) => a.name.localeCompare(b.name));
+  const pickerEntries = [
+    ...filteredCustom.map((item) => ({ kind: "custom" as const, name: item.name, item })),
+    ...filtered.map((ref) => ({ kind: "reference" as const, name: ref.name, ref })),
+  ].sort((a, b) => a.name.localeCompare(b.name));
 
   const resetPicker = () => {
     setSelected(null);
@@ -312,24 +316,24 @@ export function ImplantPicker({
         ) : undefined
       }
     >
-      {filteredCustom.map((item) => (
+      {pickerEntries.map((entry) => entry.kind === "custom" ? (
         <PickerRow
-          key={`custom-${item.id}`}
+          key={`custom-${entry.item.id}`}
           interactive={editable}
-          onClick={() => onSelectCustomItem?.(item)}
+          onClick={() => onSelectCustomItem?.(entry.item)}
         >
           <div className="flex items-center gap-1.5 min-w-0">
             <span className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}>
-              {item.name}
+              {entry.item.name}
             </span>
-            <StatusBadge status={item.status} />
-            {item.data.notes && (
+            <StatusBadge status={entry.item.status} />
+            {entry.item.data.notes && (
               <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
                 <InfoModal
-                  title={item.name}
+                  title={entry.item.name}
                   content={
                     <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                      {item.data.notes}
+                      {entry.item.data.notes}
                     </p>
                   }
                   as="span"
@@ -340,37 +344,35 @@ export function ImplantPicker({
           <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs lg:text-sm">
             <ItemMetaChips
               bare
-              value={item.data.value}
-              availability={item.data.availability}
-              source={item.data.source}
+              value={entry.item.data.value}
+              availability={entry.item.data.availability}
+              source={entry.item.data.source}
             />
-            <Chip className={CRAFTSMANSHIP_STYLE[item.data.craftsmanship]}>
-              {item.data.craftsmanship}
+            <Chip className={CRAFTSMANSHIP_STYLE[entry.item.data.craftsmanship]}>
+              {entry.item.data.craftsmanship}
             </Chip>
           </div>
         </PickerRow>
-      ))}
-
-      {filtered.map((ref) => (
-        <PickerRow key={ref.id} interactive={editable} onClick={() => selectImplant(ref)}>
+      ) : (
+        <PickerRow key={entry.ref.id} interactive={editable} onClick={() => selectImplant(entry.ref)}>
           <div className="flex items-center gap-1.5 min-w-0">
             <span className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}>
-              {ref.name}
+              {entry.ref.name}
             </span>
-            {(ref.notes || ref.poor || ref.common || ref.good) && (
+            {(entry.ref.notes || entry.ref.poor || entry.ref.common || entry.ref.good) && (
               <span className={uiInfoModalWrapper} onClick={(e) => e.stopPropagation()}>
-                <InfoModal title={ref.name} content={implantInfo(ref)} as="span" />
+                <InfoModal title={entry.ref.name} content={implantInfo(entry.ref)} as="span" />
               </span>
             )}
           </div>
           <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs lg:text-sm">
             <ItemMetaChips
               bare
-              value={isVariableMeta(ref.value) ? undefined : ref.value}
-              availability={isVariableMeta(ref.availability) ? undefined : ref.availability}
-              source={ref.source}
+              value={isVariableMeta(entry.ref.value) ? undefined : entry.ref.value}
+              availability={isVariableMeta(entry.ref.availability) ? undefined : entry.ref.availability}
+              source={entry.ref.source}
             />
-            {(isVariableMeta(ref.value) || isVariableMeta(ref.availability)) && (
+            {(isVariableMeta(entry.ref.value) || isVariableMeta(entry.ref.availability)) && (
               <span className={uiTextGMNote}>Cost assigned on add</span>
             )}
           </div>

@@ -168,6 +168,11 @@ function PowerPicker({
     .filter((item) => !existingNames.has(item.name))
     .sort((a, b) => a.name.localeCompare(b.name));
 
+  const pickerItems = [
+    ...filteredCustom.map((item) => ({ kind: "custom" as const, name: item.name, item })),
+    ...filtered.map((ref) => ({ kind: "reference" as const, name: ref.name, ref })),
+  ].sort((a, b) => a.name.localeCompare(b.name));
+
   if (showDisciplineFilterPicker) {
     return (
       <OptionPickerScreen
@@ -237,26 +242,27 @@ function PowerPicker({
       }
     >
       <div className="space-y-3 p-3 lg:p-4">
-        {filteredCustom.map((item) => (
-          <PowerCard
-            key={item.id}
-            power={customPowerPreview(item)}
-            editable={false}
-            onRemove={() => undefined}
-            onSelect={editable ? () => onSelectCustomItem(item) : undefined}
-            selectLabel={`Select ${item.name}`}
-          />
-        ))}
-        {filtered.map((ref) => (
-          <PowerCard
-            key={ref.id}
-            power={referencePowerPreview(ref)}
-            editable={false}
-            onRemove={() => undefined}
-            onSelect={editable ? () => onSelect(ref) : undefined}
-            selectLabel={`Select ${ref.name}`}
-          />
-        ))}
+        {pickerItems.map((entry) =>
+          entry.kind === "custom" ? (
+            <PowerCard
+              key={`custom-${entry.item.id}`}
+              power={customPowerPreview(entry.item)}
+              editable={false}
+              onRemove={() => undefined}
+              onSelect={editable ? () => onSelectCustomItem(entry.item) : undefined}
+              selectLabel={`Select ${entry.item.name}`}
+            />
+          ) : (
+            <PowerCard
+              key={`reference-${entry.ref.id}`}
+              power={referencePowerPreview(entry.ref)}
+              editable={false}
+              onRemove={() => undefined}
+              onSelect={editable ? () => onSelect(entry.ref) : undefined}
+              selectLabel={`Select ${entry.ref.name}`}
+            />
+          )
+        )}
       </div>
     </PickerModal>
   );
