@@ -144,6 +144,7 @@ export function RangedPicker({
   onSelectCustomItem,
   onCustom,
   onClose,
+  suspended = false,
   references = RANGED_WEAPON_REFERENCE,
   title = "Add Ranged Weapon",
   placeholder = "Search weapons…",
@@ -153,8 +154,9 @@ export function RangedPicker({
   customItems?: CampaignCustomItem<"weapon">[];
   onSelect: (ref: RangedWeaponRef, craftsmanship: WeaponCraftsmanship) => void;
   onSelectCustomItem?: (item: CampaignCustomItem<"weapon">) => void;
-  onCustom: () => void;
-  onClose: () => void;
+    onCustom: () => void;
+    onClose: () => void;
+    suspended?: boolean;
   references?: RangedWeaponRef[];
   title?: string;
   placeholder?: string;
@@ -285,6 +287,7 @@ export function RangedPicker({
       query={query}
       onQueryChange={setQuery}
       onClose={onClose}
+      suspended={suspended}
       isEmpty={filtered.length === 0 && filteredCustom.length === 0}
       filterRow={
         <div className="flex gap-2 w-full">

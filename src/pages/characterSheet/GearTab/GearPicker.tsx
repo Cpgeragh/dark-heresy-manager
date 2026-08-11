@@ -25,6 +25,7 @@ interface Props {
   onSelectCustomItem?: (item: CampaignCustomItem<"gear">) => void;
   onCustom: () => void;
   onClose: () => void;
+  suspended?: boolean;
 }
 
 export function GearPicker({
@@ -34,6 +35,7 @@ export function GearPicker({
   onSelectCustomItem,
   onCustom,
   onClose,
+  suspended = false,
 }: Props) {
   const [query, setQuery] = useState("");
   const [pending, setPending] = useState<GearRef | null>(null);
@@ -111,6 +113,7 @@ export function GearPicker({
       query={query}
       onQueryChange={setQuery}
       onClose={onClose}
+      suspended={suspended}
       isEmpty={isEmpty}
       footer={
         editable ? (

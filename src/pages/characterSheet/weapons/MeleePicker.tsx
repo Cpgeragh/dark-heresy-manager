@@ -127,6 +127,7 @@ export function MeleePicker({
   onSelectCustomItem,
   onCustom,
   onClose,
+  suspended = false,
   references = MELEE_WEAPON_REFERENCE,
   title = "Add Melee Weapon",
   placeholder = "Search weapons…",
@@ -137,8 +138,9 @@ export function MeleePicker({
   customItems?: CampaignCustomItem<"weapon">[];
   onSelect: (ref: MeleeWeaponRef, craftsmanship: WeaponCraftsmanship) => void;
   onSelectCustomItem?: (item: CampaignCustomItem<"weapon">) => void;
-  onCustom: () => void;
-  onClose: () => void;
+    onCustom: () => void;
+    onClose: () => void;
+    suspended?: boolean;
   references?: MeleeWeaponRef[];
   title?: string;
   placeholder?: string;
@@ -218,6 +220,7 @@ export function MeleePicker({
       query={query}
       onQueryChange={setQuery}
       onClose={onClose}
+      suspended={suspended}
       isEmpty={filtered.length === 0 && filteredCustom.length === 0}
       footer={
         editable && showCustom ? (

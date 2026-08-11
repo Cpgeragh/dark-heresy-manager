@@ -746,9 +746,10 @@ export function CyberneticsTab({
           editable={editable}
           onSelectRanged={addIntegratedFromRangedRef}
           onSelectMelee={addIntegratedFromMeleeRef}
-          onCustomRanged={editable ? () => { setShowIntegratedPicker(false); setShowCustomIntegratedRanged(true); } : undefined}
-          onCustomMelee={editable ? () => { setShowIntegratedPicker(false); setShowCustomIntegratedMelee(true); } : undefined}
+          onCustomRanged={editable ? () => setShowCustomIntegratedRanged(true) : undefined}
+          onCustomMelee={editable ? () => setShowCustomIntegratedMelee(true) : undefined}
           onClose={() => setShowIntegratedPicker(false)}
+          suspended={showCustomIntegratedRanged || showCustomIntegratedMelee}
         />
       )}
 
@@ -783,10 +784,10 @@ export function CyberneticsTab({
           onSelect={install}
           onSelectCustomItem={beginInstallCyberneticFromLibrary}
           onCustom={() => {
-            setShowPicker(false);
             setShowCustomForm(true);
           }}
           onClose={() => setShowPicker(false)}
+          suspended={showCustomForm}
         />
       )}
       {installingConcealedWeapon && (

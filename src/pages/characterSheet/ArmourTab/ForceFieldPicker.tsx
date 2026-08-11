@@ -24,6 +24,7 @@ interface Props {
   onSelectCustomItem?: (item: CampaignCustomItem<"armour">) => void;
   onCustom?: () => void;
   onClose: () => void;
+  suspended?: boolean;
 }
 
 export function ForceFieldPicker({
@@ -33,6 +34,7 @@ export function ForceFieldPicker({
   onSelectCustomItem,
   onCustom,
   onClose,
+  suspended = false,
 }: Props) {
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<ArmourRef | null>(null);
@@ -109,6 +111,7 @@ export function ForceFieldPicker({
       query={query}
       onQueryChange={setQuery}
       onClose={onClose}
+      suspended={suspended}
       isEmpty={filtered.length === 0 && filteredCustom.length === 0}
       footer={
         editable ? (

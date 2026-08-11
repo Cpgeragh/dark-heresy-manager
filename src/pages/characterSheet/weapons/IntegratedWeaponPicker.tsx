@@ -28,6 +28,7 @@ export function IntegratedWeaponPicker({
   onCustomRanged,
   onCustomMelee,
   onClose,
+  suspended = false,
 }: {
   editable?: boolean;
   onSelectRanged: (ref: RangedWeaponRef, craftsmanship: WeaponCraftsmanship) => void;
@@ -35,6 +36,7 @@ export function IntegratedWeaponPicker({
   onCustomRanged?: () => void;
   onCustomMelee?: () => void;
   onClose: () => void;
+  suspended?: boolean;
 }) {
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<SelectedIntegrated | null>(null);
@@ -116,6 +118,7 @@ export function IntegratedWeaponPicker({
       query={query}
       onQueryChange={setQuery}
       onClose={onClose}
+      suspended={suspended}
       isEmpty={isEmpty}
       footer={
         editable && (onCustomRanged || onCustomMelee) ? (

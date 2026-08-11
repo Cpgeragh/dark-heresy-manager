@@ -364,10 +364,10 @@ export function ArcheotechTab({
           onSelect={addFromRef}
           onSelectCustomItem={addArcheotechFromLibrary}
           onCustom={() => {
-            setShowPicker(false);
             setShowCustomForm(true);
           }}
           onClose={() => setShowPicker(false)}
+          suspended={showCustomForm}
         />
       )}
     </div>

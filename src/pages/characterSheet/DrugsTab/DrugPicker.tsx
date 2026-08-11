@@ -53,6 +53,7 @@ export function DrugPicker({
   onSelectCustomItem,
   onCustom,
   onClose,
+  suspended = false,
 }: {
   editable?: boolean;
   customItems?: CampaignCustomItem<"drug">[];
@@ -60,6 +61,7 @@ export function DrugPicker({
   onSelectCustomItem?: (item: CampaignCustomItem<"drug">) => void;
   onCustom?: () => void;
   onClose: () => void;
+  suspended?: boolean;
 }) {
   const [query, setQuery] = useState("");
   const normalizedQuery = query.toLowerCase();
@@ -78,6 +80,7 @@ export function DrugPicker({
       query={query}
       onQueryChange={setQuery}
       onClose={onClose}
+      suspended={suspended}
       isEmpty={filtered.length === 0 && filteredCustom.length === 0}
       footer={
         editable && onCustom ? (

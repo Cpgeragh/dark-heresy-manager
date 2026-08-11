@@ -776,11 +776,11 @@ export function ArmourTab({
           onSelect={fromReference}
           onSelectCustomItem={(item) => addArmourFromLibrary(item)}
           onCustom={() => {
-            setShowPicker(false);
             setCustomFormForceField(false);
             setShowCustomForm(true);
           }}
           onClose={() => setShowPicker(false)}
+          suspended={showCustomForm && !customFormForceField}
         />
       )}
       {showFieldPicker && (
@@ -792,11 +792,11 @@ export function ArmourTab({
           }}
           onSelectCustomItem={(item) => addArmourFromLibrary(item, true)}
           onCustom={() => {
-            setShowFieldPicker(false);
             setCustomFormForceField(true);
             setShowCustomForm(true);
           }}
           onClose={() => setShowFieldPicker(false)}
+          suspended={showCustomForm && customFormForceField}
         />
       )}
     </div>

@@ -29,6 +29,7 @@ interface Props {
   onSelectCustomItem?: (item: CampaignCustomItem<"archeotech">) => void;
   onCustom: () => void;
   onClose: () => void;
+  suspended?: boolean;
 }
 
 export function ArcheotechPickerModal({
@@ -38,6 +39,7 @@ export function ArcheotechPickerModal({
   onSelectCustomItem,
   onCustom,
   onClose,
+  suspended = false,
 }: Props) {
   const [query, setQuery] = useState("");
   const [pending, setPending] = useState<ArcheotechRef | null>(null);
@@ -132,6 +134,7 @@ export function ArcheotechPickerModal({
       query={query}
       onQueryChange={setQuery}
       onClose={onClose}
+      suspended={suspended}
       isEmpty={filtered.length === 0 && filteredCustom.length === 0}
       footer={
         editable ? (

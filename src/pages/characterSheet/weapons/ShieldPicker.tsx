@@ -24,6 +24,7 @@ export function ShieldPicker({
   onSelectCustom,
   onCustom,
   onClose,
+  suspended = false,
 }: {
   editable?: boolean;
   customLibraryItems?: CampaignCustomItem<"armour">[];
@@ -31,6 +32,7 @@ export function ShieldPicker({
   onSelectCustom?: (item: CampaignCustomItem<"armour">) => void;
   onCustom?: () => void;
   onClose: () => void;
+  suspended?: boolean;
 }) {
   const [query, setQuery] = useState("");
   const normalizedQuery = query.toLowerCase();
@@ -49,6 +51,7 @@ export function ShieldPicker({
       query={query}
       onQueryChange={setQuery}
       onClose={onClose}
+      suspended={suspended}
       isEmpty={filtered.length === 0 && filteredCustomLibraryItems.length === 0}
       footer={
         editable && onCustom ? (

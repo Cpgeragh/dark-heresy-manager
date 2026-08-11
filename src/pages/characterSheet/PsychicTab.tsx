@@ -27,7 +27,7 @@ import { OptionPickerScreen } from "../../ui/OptionPickerScreen";
 import { InfoModal } from "../../components/InfoModal";
 import { TALENT_DESCRIPTIONS } from "../../data/talentDescriptions";
 import { sourceColour } from "../../ui/sourceStyles";
-import { disciplineColours, psyRatingGlow } from "./psychicStyles";
+import { disciplineColours, disciplineInactiveColours, psyRatingGlow } from "./psychicStyles";
 import { colourActiveSky, colourActiveRose } from "../../ui/colourTokens";
 import { SegmentedTabs, type SegmentedTabOption } from "../../ui/SegmentedTabs";
 import {
@@ -124,6 +124,7 @@ function PowerPicker({
   onSelectCustomItem,
   onCustom,
   onClose,
+  suspended = false,
 }: {
   excludeMinor?: boolean;
   minorOnly?: boolean;
@@ -134,6 +135,7 @@ function PowerPicker({
   onSelectCustomItem: (item: CampaignCustomItem<"power">) => void;
   onCustom: () => void;
   onClose: () => void;
+  suspended?: boolean;
 }) {
   const [query, setQuery] = useState("");
   const [disciplineFilter, setDisciplineFilter] = useState<string | null>(null);
@@ -202,6 +204,7 @@ function PowerPicker({
       query={query}
       onQueryChange={setQuery}
       onClose={onClose}
+      suspended={suspended}
       isEmpty={filtered.length === 0 && filteredCustom.length === 0}
       filterRow={
         <div className="flex gap-2 w-full">
@@ -283,7 +286,7 @@ function CustomPowerForm({
   target: PowerGroup;
   existingNames: Set<string>;
   initialPower?: PsychicPower;
-  onAdd: (power: PsychicPower) => void;
+  onAdd: (power: PsychicPower) => void | Promise<void>;
   onBack: () => void;
   onCancel: () => void;
 }) {
@@ -312,6 +315,7 @@ function CustomPowerForm({
   const [origin, setOrigin] = useState<"" | CustomItemOrigin>(
     initialPower?.origin === "2nd Ed" ? "2nd Ed" : initialPower ? "Custom" : ""
   );
+  const [saving, setSaving] = useState(false);
 
   const trimmedName = name.trim();
   const initialName = initialPower?.name.trim() ?? "";
@@ -348,24 +352,29 @@ function CustomPowerForm({
     return `${rangeValue}m`;
   }
 
-  function handleAdd() {
-    if (!canAdd) return;
-    onAdd({
-      id: initialPower?.id ?? crypto.randomUUID(),
-      name: trimmedName,
-      discipline,
-      threshold,
-      focusTime,
-      range: formatRange(),
-      sustained,
-      origin: origin as CustomItemOrigin,
-      description: description.trim() || undefined,
-      isMinor: target === "minor",
-      custom: true,
-      known: initialPower?.known ?? true,
-      customLibraryId: initialPower?.customLibraryId,
-      customLibraryVersionId: initialPower?.customLibraryVersionId,
-    });
+  async function handleAdd() {
+    if (!canAdd || saving) return;
+    setSaving(true);
+    try {
+      await onAdd({
+        id: initialPower?.id ?? crypto.randomUUID(),
+        name: trimmedName,
+        discipline,
+        threshold,
+        focusTime,
+        range: formatRange(),
+        sustained,
+        origin: origin as CustomItemOrigin,
+        description: description.trim() || undefined,
+        isMinor: target === "minor",
+        custom: true,
+        known: initialPower?.known ?? true,
+        customLibraryId: initialPower?.customLibraryId,
+        customLibraryVersionId: initialPower?.customLibraryVersionId,
+      });
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -574,8 +583,8 @@ function CustomPowerForm({
         </div>
 
         <div className="flex gap-2 pt-1">
-          <Button className="flex-1" onClick={handleAdd} disabled={!canAdd}>
-            {initialPower ? "Save Power" : "Add Power"}
+          <Button className="flex-1" onClick={handleAdd} disabled={!canAdd || saving}>
+            {saving ? "Saving..." : initialPower ? "Save Power" : "Add Power"}
           </Button>
           <Button variant="secondary" onClick={onCancel}>
             Cancel
@@ -800,7 +809,6 @@ export function PsychicTab({
             { ...power, customLibraryId: customItemId, customLibraryVersionId: versionId },
           ],
         });
-        setPickerTarget(customTarget);
         setCustomTarget(null);
         toast.success("Custom power saved as a campaign draft.");
       } catch (err) {
@@ -915,9 +923,7 @@ export function PsychicTab({
                     "px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm transition",
                     active
                       ? `${disciplineColours[d] ?? disciplineColours.default} font-semibold`
-                      : editable
-                        ? "border-slate-500 text-slate-100 hover:bg-slate-800"
-                        : "border-slate-700 text-slate-500 opacity-60 cursor-not-allowed",
+                      : `${disciplineInactiveColours[d] ?? disciplineInactiveColours.default} ${editable ? "" : "cursor-default"}`,
                   ].join(" ")}
                 >
                   {d}
@@ -1049,9 +1055,9 @@ export function PsychicTab({
           onCustom={() => {
             if (pickerTarget === null) return;
             setCustomTarget(pickerTarget);
-            setPickerTarget(null);
           }}
           onClose={() => setPickerTarget(null)}
+          suspended={customTarget !== null}
         />
       )}
 
@@ -1060,14 +1066,8 @@ export function PsychicTab({
           target={customTarget}
           existingNames={existingPowerNames}
           onAdd={addCustomPower}
-          onBack={() => {
-            setPickerTarget(customTarget);
-            setCustomTarget(null);
-          }}
-          onCancel={() => {
-            setPickerTarget(customTarget);
-            setCustomTarget(null);
-          }}
+          onBack={() => setCustomTarget(null)}
+          onCancel={() => setCustomTarget(null)}
         />
       )}
 

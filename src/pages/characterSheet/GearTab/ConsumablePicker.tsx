@@ -16,6 +16,7 @@ interface Props {
   onSelectCustomItem?: (item: CampaignCustomItem<"consumable">) => void;
   onCustom?: () => void;
   onClose: () => void;
+  suspended?: boolean;
 }
 
 export function ConsumablePicker({
@@ -25,6 +26,7 @@ export function ConsumablePicker({
   onSelectCustomItem,
   onCustom,
   onClose,
+  suspended = false,
 }: Props) {
   const [query, setQuery] = useState("");
   const normalizedQuery = query.toLowerCase();
@@ -43,6 +45,7 @@ export function ConsumablePicker({
       query={query}
       onQueryChange={setQuery}
       onClose={onClose}
+      suspended={suspended}
       isEmpty={filtered.length === 0 && filteredCustom.length === 0}
       footer={
         editable && onCustom ? (

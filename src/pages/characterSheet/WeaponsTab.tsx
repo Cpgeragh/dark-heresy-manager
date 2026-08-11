@@ -1650,10 +1650,10 @@ export function WeaponsTab({
           onSelectCustomItem={addWeaponFromLibrary}
           references={NORMAL_RANGED_REFS}
           onCustom={() => {
-            setPicker(null);
             setShowCustomRanged(true);
           }}
           onClose={() => setPicker(null)}
+          suspended={showCustomRanged}
         />
       )}
       {picker === "melee" && (
@@ -1665,10 +1665,10 @@ export function WeaponsTab({
           onSelectCustomItem={addWeaponFromLibrary}
           references={NORMAL_MELEE_REFS}
           onCustom={() => {
-            setPicker(null);
             setShowCustomMelee(true);
           }}
           onClose={() => setPicker(null)}
+          suspended={showCustomMelee}
         />
       )}
       {picker === "grenades" && (
@@ -1679,10 +1679,10 @@ export function WeaponsTab({
           onSelect={addFromGrenadeRef}
           onSelectCustom={addWeaponFromLibrary}
           onCustom={() => {
-            setPicker(null);
             setShowCustomGrenade(true);
           }}
           onClose={() => setPicker(null)}
+          suspended={showCustomGrenade}
         />
       )}
       {picker === "shields" && (
@@ -1692,10 +1692,10 @@ export function WeaponsTab({
           onSelect={addFromShieldRef}
           onSelectCustom={addShieldFromLibrary}
           onCustom={() => {
-            setPicker(null);
             setShowCustomShield(true);
           }}
           onClose={() => setPicker(null)}
+          suspended={showCustomShield}
         />
       )}
       {showCustomGrenade && (

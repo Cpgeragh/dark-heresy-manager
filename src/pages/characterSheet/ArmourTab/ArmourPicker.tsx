@@ -23,6 +23,7 @@ interface Props {
   onSelectCustomItem?: (item: CampaignCustomItem<"armour">) => void;
   onCustom: () => void;
   onClose: () => void;
+  suspended?: boolean;
 }
 
 export function ArmourPicker({
@@ -32,6 +33,7 @@ export function ArmourPicker({
   onSelectCustomItem,
   onCustom,
   onClose,
+  suspended = false,
 }: Props) {
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<ArmourRef | null>(null);
@@ -108,6 +110,7 @@ export function ArmourPicker({
       query={query}
       onQueryChange={setQuery}
       onClose={onClose}
+      suspended={suspended}
       isEmpty={filtered.length === 0 && filteredCustom.length === 0}
       footer={
         editable ? (

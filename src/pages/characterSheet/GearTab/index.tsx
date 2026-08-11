@@ -624,11 +624,11 @@ export function GearTab({
           onSelect={addConsumableFromRef}
           onSelectCustomItem={addConsumableFromLibrary}
           onCustom={() => {
-            setShowConsumablePicker(false);
             setShowCustomConsumableForm(true);
             setActiveGearSection("consumables");
           }}
           onClose={() => setShowConsumablePicker(false)}
+          suspended={showCustomConsumableForm}
         />
       )}
 
@@ -652,11 +652,11 @@ export function GearTab({
           onSelect={addFromRef}
           onSelectCustomItem={addCustomFromLibrary}
           onCustom={() => {
-            setShowGearPicker(false);
             setShowCustomForm(true);
             setActiveGearSection("items");
           }}
           onClose={() => setShowGearPicker(false)}
+          suspended={showCustomForm}
         />
       )}
 

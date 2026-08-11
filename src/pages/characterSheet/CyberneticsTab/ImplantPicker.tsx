@@ -51,6 +51,7 @@ interface Props {
   onSelectCustomItem?: (item: CampaignCustomItem<"cybernetic">) => void;
   onCustom?: () => void;
   onClose: () => void;
+  suspended?: boolean;
 }
 
 export function ImplantPicker({
@@ -60,6 +61,7 @@ export function ImplantPicker({
   onSelectCustomItem,
   onCustom,
   onClose,
+  suspended = false,
 }: Props) {
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<CyberneticRef | null>(null);
@@ -302,6 +304,7 @@ export function ImplantPicker({
       query={query}
       onQueryChange={setQuery}
       onClose={onClose}
+      suspended={suspended}
       isEmpty={filtered.length === 0 && filteredCustom.length === 0}
       footer={
         editable && onCustom ? (

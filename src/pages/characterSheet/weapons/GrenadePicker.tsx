@@ -28,6 +28,7 @@ export function GrenadePicker({
   onSelectCustom,
   onCustom,
   onClose,
+  suspended = false,
 }: {
   editable?: boolean;
   strengthBonus: number;
@@ -36,6 +37,7 @@ export function GrenadePicker({
   onSelectCustom?: (item: CampaignCustomItem<"weapon">) => void;
   onCustom?: () => void;
   onClose: () => void;
+  suspended?: boolean;
 }) {
   const [query, setQuery] = useState("");
   const normalizedQuery = query.toLowerCase();
@@ -55,6 +57,7 @@ export function GrenadePicker({
       query={query}
       onQueryChange={setQuery}
       onClose={onClose}
+      suspended={suspended}
       isEmpty={filtered.length === 0 && filteredCustomLibraryItems.length === 0}
       footer={
         editable && onCustom ? (

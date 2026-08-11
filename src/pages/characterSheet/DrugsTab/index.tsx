@@ -315,10 +315,10 @@ export function DrugsTab({
           onSelect={addDrug}
           onSelectCustomItem={addDrugFromLibrary}
           onCustom={() => {
-            setShowPicker(false);
             setShowCustomForm(true);
           }}
           onClose={() => setShowPicker(false)}
+          suspended={showCustomForm}
         />
       )}
 

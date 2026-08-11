@@ -84,6 +84,7 @@ interface ModalShellProps {
   className?: string;
   closeOnBackdrop?: boolean;
   onClose: () => void;
+  suspended?: boolean;
   style?: CSSProperties;
   viewportAware?: boolean;
 }
@@ -94,6 +95,7 @@ export function ModalShell({
   className = "",
   closeOnBackdrop = true,
   onClose,
+  suspended = false,
   style,
   viewportAware = false,
 }: ModalShellProps) {
@@ -146,7 +148,11 @@ export function ModalShell({
       onClose={() => {
         if (!unmountingRef.current) onClose();
       }}
-      className={`m-auto w-[calc(100%-2rem)] bg-slate-900 border border-slate-500 rounded-xl shadow-2xl p-0 text-slate-200 backdrop:bg-black/70 backdrop:backdrop-blur-sm ${className}`.trim()}
+      className={`m-auto w-[calc(100%-2rem)] bg-slate-900 border border-slate-500 rounded-xl shadow-2xl p-0 text-slate-200 ${
+        suspended
+          ? "invisible backdrop:bg-transparent backdrop:backdrop-blur-none"
+          : "backdrop:bg-black/70 backdrop:backdrop-blur-sm"
+      } ${className}`.trim()}
       style={{ ...style, ...viewportStyle }}
     >
       {children}

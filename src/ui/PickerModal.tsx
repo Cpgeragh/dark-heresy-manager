@@ -109,6 +109,8 @@ interface Props {
   maxWidth?: string;
   /** Optional form-lifetime scroll position used when a sub-picker temporarily replaces this modal. */
   scrollPositionRef?: { current: number };
+  /** Keep the picker mounted without displaying its dialog or backdrop. */
+  suspended?: boolean;
   /** The list rows. */
   children: ReactNode;
 }
@@ -135,6 +137,7 @@ export function PickerModal({
   maxHeight = "max-h-[85vh]",
   maxWidth = "max-w-lg lg:max-w-2xl",
   scrollPositionRef,
+  suspended = false,
   children,
 }: Props) {
   const listRef = useRef<HTMLDivElement>(null);
@@ -149,6 +152,7 @@ export function PickerModal({
     <ModalShell
       ariaLabel={title}
       onClose={onClose}
+      suspended={suspended}
       viewportAware
       className={`min-h-0 ${maxWidth} flex flex-col overflow-hidden ${maxHeight}`}
     >
