@@ -9,6 +9,7 @@ import type {
   CustomConsumableData,
   CustomCyberneticData,
   CustomDrugData,
+  CustomPsychicPowerData,
   CustomWeaponData,
 } from "../../src/types/CustomItems";
 
@@ -45,7 +46,7 @@ function characterWithItems(overrides: Partial<Character>): Character {
     ...overrides,
     weaponTraining: { trained: [], exoticWeapons: [] },
     experience: { ranks: [], total: 0, spent: 0 },
-    psychic: { psyRating: 0, minorPowers: [], majorPowers: [] },
+    psychic: overrides.psychic ?? { psyRating: 0, minorPowers: [], majorPowers: [] },
   };
 }
 
@@ -83,6 +84,10 @@ function characterWithMeleeWeapons(meleeWeapons: Character["meleeWeapons"]): Cha
 
 function characterWithGrenades(grenades: Character["grenades"]): Character {
   return characterWithItems({ grenades });
+}
+
+function characterWithPsychicPowers(psychic: Character["psychic"]): Character {
+  return characterWithItems({ psychic });
 }
 
 describe("custom item copy removal", () => {
@@ -125,6 +130,24 @@ describe("custom item copy removal", () => {
   it("returns null when character has no relevant arrays", () => {
     const update = buildCharacterCopyRemoval(characterWithItems({}), "lib-1");
     expect(update).toBeNull();
+  });
+
+  it("removes matching minor and major psychic powers", () => {
+    const update = buildCharacterCopyRemoval(
+      characterWithPsychicPowers({
+        psyRating: 3,
+        minorPowers: [
+          { id: "p1", name: "Sense Presence", known: true, customLibraryId: "lib-1" },
+          { id: "p2", name: "Second Sight", known: true },
+        ],
+        majorPowers: [{ id: "p3", name: "Machine Curse", known: true, customLibraryId: "lib-1" }],
+      }),
+      "lib-1"
+    );
+    expect(update?.removedCopies).toBe(2);
+    expect(update?.psychic?.minorPowers).toHaveLength(1);
+    expect(update?.psychic?.minorPowers?.[0]).toMatchObject({ id: "p2" });
+    expect(update?.psychic?.majorPowers).toHaveLength(0);
   });
 });
 
@@ -655,5 +678,107 @@ describe("custom item copy updates", () => {
       quantity: 2,
       equipped: false,
     });
+  });
+
+  it("updates linked minor psychic power definition fields while preserving known state", () => {
+    const definition: CustomPsychicPowerData = {
+      name: "Revised Sense Presence",
+      discipline: "Minor",
+      threshold: "10",
+      focusTime: "Half Action",
+      range: "50m",
+      sustained: "No",
+      isMinor: true,
+      custom: true,
+      origin: "Custom",
+    };
+
+    const update = buildCharacterCopyUpdate(
+      characterWithPsychicPowers({
+        psyRating: 3,
+        minorPowers: [
+          {
+            id: "copy-1",
+            name: "Old Sense Presence",
+            discipline: "Minor",
+            threshold: "8",
+            focusTime: "Half Action",
+            range: "30m",
+            sustained: "No",
+            isMinor: true,
+            custom: true,
+            origin: "Custom",
+            known: true,
+            customLibraryId: "power-library-1",
+            customLibraryVersionId: "power-version-1",
+          },
+        ],
+        majorPowers: [],
+      }),
+      "power",
+      "power-library-1",
+      "power-version-2",
+      definition
+    );
+
+    expect(update?.updatedCopies).toBe(1);
+    expect(update?.psychic?.minorPowers?.[0]).toMatchObject({
+      id: "copy-1",
+      name: "Revised Sense Presence",
+      threshold: "10",
+      range: "50m",
+      known: true,
+      customLibraryId: "power-library-1",
+      customLibraryVersionId: "power-version-2",
+    });
+  });
+
+  it("routes major psychic power updates to majorPowers, not minorPowers", () => {
+    const definition: CustomPsychicPowerData = {
+      name: "Revised Machine Curse",
+      discipline: "Telekinetics",
+      threshold: "20",
+      focusTime: "Full Action",
+      range: "10m",
+      sustained: "Yes",
+      isMinor: false,
+      custom: true,
+      origin: "2nd Ed",
+    };
+
+    const update = buildCharacterCopyUpdate(
+      characterWithPsychicPowers({
+        psyRating: 5,
+        minorPowers: [],
+        majorPowers: [
+          {
+            id: "copy-1",
+            name: "Old Machine Curse",
+            discipline: "Telekinetics",
+            threshold: "18",
+            isMinor: false,
+            custom: true,
+            origin: "2nd Ed",
+            known: true,
+            customLibraryId: "power-library-2",
+            customLibraryVersionId: "power-version-1",
+          },
+        ],
+      }),
+      "power",
+      "power-library-2",
+      "power-version-2",
+      definition
+    );
+
+    expect(update?.updatedCopies).toBe(1);
+    expect(update?.psychic?.majorPowers?.[0]).toMatchObject({
+      id: "copy-1",
+      name: "Revised Machine Curse",
+      threshold: "20",
+      customLibraryId: "power-library-2",
+      customLibraryVersionId: "power-version-2",
+    });
+    expect(update?.psychic?.minorPowers).toHaveLength(0);
   });
 });

@@ -590,6 +590,11 @@ export default function CharacterSheet({ effectiveUserId }: { effectiveUserId: s
 
           {activeTab === "psychic" && (
             <PsychicTab
+              campaignId={path.campaignId}
+              characterId={character.id}
+              userId={effectiveUserId}
+              characterName={character.header.characterName}
+              isDM={isDM}
               psychic={character.psychic}
               psyRating={psyRating}
               editable={allowedToEdit}

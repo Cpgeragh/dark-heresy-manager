@@ -8,12 +8,13 @@ import { disciplineColours } from "../psychicStyles";
 import { uiSection, uiTextBody, uiTextPlaceholder, uiInfoModalWrapper } from "../../../ui/editableStyles";
 import { RemoveButton } from "../../../ui/RemoveButton";
 import { StatChip } from "../../../ui/StatChip";
+import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
+import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 
-interface PowerCardProps {
+interface PowerCardProps extends CustomItemLibraryActionProps<"power"> {
   power: PsychicPower;
   editable: boolean;
   onRemove: (id: string) => void;
-  onEdit?: (power: PsychicPower) => void;
 }
 
 /** Shared stat row — used in both the card and the InfoModal header. */
@@ -52,8 +53,19 @@ function PowerStats({ power }: { power: PsychicPower }) {
   );
 }
 
-export function PowerCard({ power, editable, onRemove, onEdit }: PowerCardProps) {
-  const isCustomPower = !!power.custom;
+export function PowerCard({
+  power,
+  editable,
+  onRemove,
+  libraryItem,
+  isDM = false,
+  canEditDefinition = false,
+  busyAction = null,
+  onEditDefinition,
+  onPublish,
+  onArchive,
+  onUpdateAllCopies,
+}: PowerCardProps) {
   const modalContent = (
     <>
       {power.description ? (
@@ -76,18 +88,21 @@ export function PowerCard({ power, editable, onRemove, onEdit }: PowerCardProps)
           </span>
         </div>
         <PowerStats power={power} />
+        {libraryItem && (
+          <CustomItemActionButtons
+            libraryItem={libraryItem}
+            isDM={isDM}
+            canEditDefinition={canEditDefinition}
+            busyAction={busyAction}
+            onEditDefinition={onEditDefinition}
+            onPublish={onPublish}
+            onArchive={onArchive}
+            onUpdateAllCopies={onUpdateAllCopies}
+          />
+        )}
       </div>
 
       <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
-        {editable && isCustomPower && onEdit && (
-          <button type="button"
-            onClick={() => onEdit(power)}
-            aria-label={`Edit ${power.name || "power"}`}
-            className="text-slate-500 hover:text-amber-300 transition text-xs lg:text-sm"
-          >
-            Edit
-          </button>
-        )}
         {editable && (
           <RemoveButton
             onClick={() => onRemove(power.id)}
