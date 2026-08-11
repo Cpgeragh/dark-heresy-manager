@@ -96,7 +96,7 @@ describe("ArmourTab", () => {
     const { onUpdate } = renderTab({ armour });
 
     const upgradeHeader = screen.getAllByText("Upgrades").at(-1)!.parentElement!;
-    fireEvent.click(within(upgradeHeader).getByText("+ Add"));
+    fireEvent.click(within(upgradeHeader).getByRole("button", { name: "Add upgrade" }));
     fireEvent.click(screen.getByText("Hexagramatic Wards"));
 
     expect(onUpdate).toHaveBeenCalledWith([

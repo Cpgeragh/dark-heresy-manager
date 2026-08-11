@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import type { WeaponTrainingBlock, WeaponTrainingTalentId } from "../../types/Character";
 import { WEAPON_TRAINING_GROUPS } from "../../data/weaponTrainingData";
 import { Button } from "../../ui/Button";
+import { AddButton } from "../../ui/AddButton";
 import { editableInputClass, uiFormLabel, uiTextPlaceholder } from "../../ui/editableStyles";
 import { uiDismissButton } from "../../ui/buttonStyles";
 import { ModalHeader } from "../../ui/ModalHeader";
@@ -107,13 +108,11 @@ export function WeaponTrainingTab({ weaponTraining, editable, onUpdate }: Weapon
           <span className="relative">
             Exotic Weapon Training
             {editable && (
-              <Button
-                size="xs"
+              <AddButton
+                label="Add Exotic Weapon"
                 onClick={() => setShowExoticModal(true)}
                 className="absolute left-full ml-2 top-1/2 -translate-y-1/2 -mt-px"
-              >
-                + Add
-              </Button>
+              />
             )}
           </span>
         </p>

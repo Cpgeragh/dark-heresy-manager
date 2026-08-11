@@ -8,7 +8,7 @@ describe("CompanionsTab", () => {
     const onUpdate = vi.fn();
     render(<CompanionsTab companions={[]} editable onUpdate={onUpdate} />);
 
-    fireEvent.click(screen.getByText("+ Add"));
+    fireEvent.click(screen.getByRole("button", { name: "Add companion" }));
     fireEvent.click(screen.getByRole("button", { name: "Select Adeptus Arbites Cyber-Mastiff" }));
 
     expect(onUpdate).toHaveBeenCalledWith([
@@ -43,7 +43,7 @@ describe("CompanionsTab", () => {
   it("expands companion details instead of closing the picker in view mode", () => {
     render(<CompanionsTab companions={[]} editable={false} onUpdate={vi.fn()} />);
 
-    fireEvent.click(screen.getByText("View"));
+    fireEvent.click(screen.getByRole("button", { name: "View companions" }));
     fireEvent.click(screen.getByRole("button", { name: "Expand Adeptus Arbites Cyber-Mastiff details" }));
 
     expect(screen.getByRole("dialog", { name: "View Companions" })).toBeInTheDocument();

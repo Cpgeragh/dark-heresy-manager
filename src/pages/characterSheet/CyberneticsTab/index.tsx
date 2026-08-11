@@ -168,7 +168,6 @@ export function CyberneticsTab({
           ...(bodyLocation ? { bodyLocation } : {}),
         },
       ]);
-      setShowPicker(false);
     },
     [editable, cybernetics, onUpdate]
   );
@@ -201,6 +200,7 @@ export function CyberneticsTab({
         ));
       }
       setInstallingConcealedWeapon(null);
+      setShowPicker(true);
     },
     [cybernetics, editable, installingConcealedWeapon, meleeWeapons, onUpdate, onUpdateMelee, onUpdateRanged, rangedWeapons]
   );
@@ -275,6 +275,7 @@ export function CyberneticsTab({
           ),
         ]);
         setShowCustomForm(false);
+        setShowPicker(true);
         toast.success("Custom cybernetic saved as a campaign draft.");
       } catch (err) {
         console.error("Failed to create custom cybernetic:", err);
@@ -319,6 +320,7 @@ export function CyberneticsTab({
         ),
       ]);
       setInstallingCustomCybernetic(null);
+      setShowPicker(true);
     },
     [cybernetics, editable, installingCustomCybernetic, onUpdate, toast]
   );
@@ -447,7 +449,6 @@ export function CyberneticsTab({
           integrated: true,
         },
       ]);
-      setShowIntegratedPicker(false);
     },
     [editable, rangedWeapons, onUpdateRanged]
   );
@@ -474,7 +475,6 @@ export function CyberneticsTab({
           integrated: true,
         },
       ]);
-      setShowIntegratedPicker(false);
     },
     [editable, meleeWeapons, onUpdateMelee]
   );
@@ -496,6 +496,7 @@ export function CyberneticsTab({
           buildRangedWeaponSnapshot(nextWeapon.id, nextWeapon, data, customItemId, versionId),
         ]);
         setShowCustomIntegratedRanged(false);
+        setShowIntegratedPicker(true);
         toast.success("Custom integrated ranged weapon saved as a campaign draft.");
       } catch (err) {
         console.error("Failed to create custom integrated ranged weapon:", err);
@@ -522,6 +523,7 @@ export function CyberneticsTab({
           buildMeleeWeaponSnapshot(nextWeapon.id, nextWeapon, data, customItemId, versionId),
         ]);
         setShowCustomIntegratedMelee(false);
+        setShowIntegratedPicker(true);
         toast.success("Custom integrated melee weapon saved as a campaign draft.");
       } catch (err) {
         console.error("Failed to create custom integrated melee weapon:", err);
@@ -755,7 +757,10 @@ export function CyberneticsTab({
           title="Custom Integrated Ranged Weapon"
           integrated
           onAdd={addCustomIntegratedRanged}
-          onCancel={() => setShowCustomIntegratedRanged(false)}
+          onCancel={() => {
+            setShowCustomIntegratedRanged(false);
+            setShowIntegratedPicker(true);
+          }}
         />
       )}
 
@@ -764,7 +769,10 @@ export function CyberneticsTab({
           title="Custom Integrated Melee Weapon"
           integrated
           onAdd={addCustomIntegratedMelee}
-          onCancel={() => setShowCustomIntegratedMelee(false)}
+          onCancel={() => {
+            setShowCustomIntegratedMelee(false);
+            setShowIntegratedPicker(true);
+          }}
         />
       )}
 
@@ -788,14 +796,20 @@ export function CyberneticsTab({
           meleeWeapons={meleeWeapons}
           strengthBonus={strengthBonus}
           onInstall={installConcealedWeaponBionic}
-          onClose={() => setInstallingConcealedWeapon(null)}
+          onClose={() => {
+            setInstallingConcealedWeapon(null);
+            setShowPicker(true);
+          }}
         />
       )}
 
       {showCustomForm && (
         <CustomImplantForm
           onAdd={addCustomImplant}
-          onCancel={() => setShowCustomForm(false)}
+          onCancel={() => {
+            setShowCustomForm(false);
+            setShowPicker(true);
+          }}
         />
       )}
 
@@ -812,7 +826,10 @@ export function CyberneticsTab({
               installingCustomCybernetic.latestVersionId,
           }}
           onAdd={finishInstallCyberneticFromLibrary}
-          onCancel={() => setInstallingCustomCybernetic(null)}
+          onCancel={() => {
+            setInstallingCustomCybernetic(null);
+            setShowPicker(true);
+          }}
         />
       )}
 

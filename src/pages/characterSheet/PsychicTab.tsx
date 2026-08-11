@@ -14,14 +14,14 @@ import {
   editableTextareaClass,
   uiSection,
   uiFormLabel,
-  uiItemName,
-  uiInfoModalWrapper,
 } from "../../ui/editableStyles";
 import { Button } from "../../ui/Button";
+import { AddButton } from "../../ui/AddButton";
+import { ViewButton } from "../../ui/ViewButton";
 import { Chip } from "../../ui/Chip";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { PowerCard } from "./components/PowerCard";
-import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../ui/PickerModal";
+import { PickerBody, PickerCustomAction, PickerModal } from "../../ui/PickerModal";
 import { ArrowLeft, ArrowRight } from "../../ui/PickerArrows";
 import { OptionPickerScreen } from "../../ui/OptionPickerScreen";
 import { InfoModal } from "../../components/InfoModal";
@@ -40,7 +40,6 @@ import { useCampaignCustomItems } from "../../hooks/useCampaignCustomItems";
 import { useCustomItemLibraryActions } from "../../hooks/useCustomItemLibraryActions";
 import { createDraftCustomItem, saveDraftCustomItem } from "../../services/customItemService";
 import { useToast } from "../../components/Toast";
-import { StatusBadge } from "../../ui/StatusBadge";
 import type { CampaignCustomItem, CustomPsychicPowerData } from "../../types/CustomItems";
 import type { CustomItemLibraryAction } from "../../types/CustomItemActions";
 
@@ -86,6 +85,31 @@ function toCustomPowerData(power: PsychicPower): CustomPsychicPowerData {
     ...data
   } = power;
   return data;
+}
+
+function referencePowerPreview(ref: PsychicPowerRef): PsychicPower {
+  return {
+    id: ref.id,
+    name: ref.name,
+    discipline: ref.discipline,
+    threshold: String(ref.threshold),
+    focusTime: ref.focusTime,
+    sustained: ref.sustained ? "Yes" : "No",
+    range: ref.range,
+    description: ref.description,
+    source: ref.source,
+    isMinor: ref.discipline === "Minor",
+    known: true,
+  };
+}
+
+function customPowerPreview(item: CampaignCustomItem<"power">): PsychicPower {
+  return {
+    ...item.data,
+    id: item.id,
+    name: item.name,
+    known: true,
+  };
 }
 
 // ─── Sub-component: Power Picker Modal ───────────────────────────────────────
@@ -209,61 +233,28 @@ function PowerPicker({
         ) : undefined
       }
     >
-      {filteredCustom.map((item) => (
-        <PickerRow key={item.id} interactive={editable} onClick={() => onSelectCustomItem(item)}>
-          <div className="flex items-center gap-1.5">
-            <span className={`${uiItemName} group-hover:text-white`}>{item.name}</span>
-            <StatusBadge status={item.status} />
-          </div>
-          <div className="flex items-center gap-2 text-xs lg:text-sm text-slate-500 mt-0.5 flex-wrap">
-            {item.data.discipline && (
-              <Chip className={disciplineColours[item.data.discipline] ?? disciplineColours.default}>
-                {item.data.discipline}
-              </Chip>
-            )}
-            <span className="font-code">PT {item.data.threshold}</span>
-            <span>{item.data.focusTime}</span>
-            <span>{item.data.range}</span>
-            {item.data.sustained === "Yes" && <span className="text-amber-500/80">Sustained</span>}
-          </div>
-        </PickerRow>
-      ))}
-      {filtered.map((ref) => (
-        <PickerRow key={ref.id} interactive={editable} onClick={() => onSelect(ref)}>
-          <div className="flex items-center gap-1.5">
-            <span className={`${uiItemName} group-hover:text-white`}>{ref.name}</span>
-            {ref.description && (
-              <span
-                className={`${uiInfoModalWrapper} shrink-0`}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <InfoModal
-                  as="span"
-                  title={ref.name}
-                  content={
-                    <p className="text-sm lg:text-base text-slate-300 leading-relaxed">
-                      {ref.description}
-                    </p>
-                  }
-                  hideTitle
-                />
-              </span>
-            )}
-          </div>
-          <div className="flex items-center gap-2 text-xs lg:text-sm text-slate-500 mt-0.5 flex-wrap">
-            <Chip className={`bg-slate-800/40 font-code ${sourceColour(ref.source)}`}>
-              {ref.source}
-            </Chip>
-            <Chip className={disciplineColours[ref.discipline] ?? disciplineColours.default}>
-              {ref.discipline}
-            </Chip>
-            <span className="font-code">PT {ref.threshold}</span>
-            <span>{ref.focusTime}</span>
-            <span>{ref.range}</span>
-            {ref.sustained && <span className="text-amber-500/80">Sustained</span>}
-          </div>
-        </PickerRow>
-      ))}
+      <div className="space-y-3 p-3 lg:p-4">
+        {filteredCustom.map((item) => (
+          <PowerCard
+            key={item.id}
+            power={customPowerPreview(item)}
+            editable={false}
+            onRemove={() => undefined}
+            onSelect={editable ? () => onSelectCustomItem(item) : undefined}
+            selectLabel={`Select ${item.name}`}
+          />
+        ))}
+        {filtered.map((ref) => (
+          <PowerCard
+            key={ref.id}
+            power={referencePowerPreview(ref)}
+            editable={false}
+            onRemove={() => undefined}
+            onSelect={editable ? () => onSelect(ref) : undefined}
+            selectLabel={`Select ${ref.name}`}
+          />
+        ))}
+      </div>
     </PickerModal>
   );
 }
@@ -751,7 +742,6 @@ export function PsychicTab({
         ...psychic,
         [type]: [...psychic[type], newPower],
       });
-      setPickerTarget(null);
     },
     [editable, psychic, onUpdate]
   );
@@ -780,7 +770,6 @@ export function PsychicTab({
         ...psychic,
         [type]: [...psychic[type], newPower],
       });
-      setPickerTarget(null);
     },
     [editable, psychic, onUpdate, toast]
   );
@@ -811,6 +800,7 @@ export function PsychicTab({
             { ...power, customLibraryId: customItemId, customLibraryVersionId: versionId },
           ],
         });
+        setPickerTarget(customTarget);
         setCustomTarget(null);
         toast.success("Custom power saved as a campaign draft.");
       } catch (err) {
@@ -870,7 +860,6 @@ export function PsychicTab({
   const activeTitle = activePowerGroup === "minor" ? "Minor Powers" : "Major Powers";
   const activeEmptyText =
     activePowerGroup === "minor" ? "No minor powers recorded." : "No major powers recorded.";
-  const activeAddLabel = activePowerGroup === "minor" ? "+ Add Minor Power" : "+ Add Major Power";
   const existingPowerNames = new Set([
     ...psychic.minorPowers.map((p) => p.name),
     ...psychic.majorPowers.map((p) => p.name),
@@ -958,13 +947,11 @@ export function PsychicTab({
         >
           <div className="flex items-center justify-between">
             <SectionHeader>{activeTitle}</SectionHeader>
-            <Button
-              size="sm"
-              onClick={activeOpenPicker}
-              aria-label={editable ? `Add ${activeTitle.slice(0, -1)}` : `View ${activeTitle}`}
-            >
-              {editable ? activeAddLabel : "View"}
-            </Button>
+            {editable ? (
+              <AddButton label={`Add ${activeTitle.slice(0, -1)}`} onClick={activeOpenPicker} />
+            ) : (
+              <ViewButton label={`View ${activeTitle}`} onClick={activeOpenPicker} />
+            )}
           </div>
 
           {activePowers.length === 0 ? (
@@ -991,13 +978,11 @@ export function PsychicTab({
         <section className={uiSection + " space-y-4"}>
           <div className="flex items-center justify-between">
             <SectionHeader>Minor Powers</SectionHeader>
-            <Button
-              size="sm"
-              onClick={openPickerForMinor}
-              aria-label={editable ? "Add Minor Power" : "View Minor Powers"}
-            >
-              {editable ? "+ Add Minor Power" : "View"}
-            </Button>
+            {editable ? (
+              <AddButton label="Add Minor Power" onClick={openPickerForMinor} />
+            ) : (
+              <ViewButton label="View Minor Powers" onClick={openPickerForMinor} />
+            )}
           </div>
 
           {psychic.minorPowers.length === 0 ? (
@@ -1023,13 +1008,11 @@ export function PsychicTab({
         <section className={uiSection + " space-y-4"}>
           <div className="flex items-center justify-between">
             <SectionHeader>Major Powers</SectionHeader>
-            <Button
-              size="sm"
-              onClick={openPickerForMajor}
-              aria-label={editable ? "Add Major Power" : "View Major Powers"}
-            >
-              {editable ? "+ Add Major Power" : "View"}
-            </Button>
+            {editable ? (
+              <AddButton label="Add Major Power" onClick={openPickerForMajor} />
+            ) : (
+              <ViewButton label="View Major Powers" onClick={openPickerForMajor} />
+            )}
           </div>
 
           {psychic.majorPowers.length === 0 ? (
@@ -1081,7 +1064,10 @@ export function PsychicTab({
             setPickerTarget(customTarget);
             setCustomTarget(null);
           }}
-          onCancel={() => setCustomTarget(null)}
+          onCancel={() => {
+            setPickerTarget(customTarget);
+            setCustomTarget(null);
+          }}
         />
       )}
 

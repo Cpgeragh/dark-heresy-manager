@@ -66,11 +66,14 @@ export function IntegratedWeaponPicker({
         footer={
           <Button
             className="w-full"
-            onClick={() =>
-              selected.kind === "ranged"
-                ? onSelectRanged(selected.ref, craftsmanship)
-                : onSelectMelee(selected.ref, craftsmanship)
-            }
+            onClick={() => {
+              if (selected.kind === "ranged") {
+                onSelectRanged(selected.ref, craftsmanship);
+              } else {
+                onSelectMelee(selected.ref, craftsmanship);
+              }
+              resetPicker();
+            }}
           >
             Add Weapon
           </Button>

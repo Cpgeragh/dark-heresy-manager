@@ -22,6 +22,8 @@ import {
 import { uiExpandButton } from "../../../ui/buttonStyles";
 import { colourPink, colourViolet } from "../../../ui/colourTokens";
 import { Button } from "../../../ui/Button";
+import { AddButton } from "../../../ui/AddButton";
+import { ViewButton } from "../../../ui/ViewButton";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { QuantityControl } from "../../../ui/QuantityControl";
@@ -501,12 +503,11 @@ export function MeleeCard({
                   Upgrades
                 </span>
                 {(editable ? visibleCompatible.length > 0 : upgradeRefs.length > 0 || visibleCompatible.length > 0) && (
-                  <Button
-                    size="xs"
-                    onClick={() => setShowUpgradePicker(true)}
-                  >
-                    {editable ? "+ Add" : "View"}
-                  </Button>
+                  editable ? (
+                    <AddButton label="Add upgrade" onClick={() => setShowUpgradePicker(true)} />
+                  ) : (
+                    <ViewButton label="View upgrades" onClick={() => setShowUpgradePicker(true)} />
+                  )
                 )}
               </div>
               {upgradeRefs.length === 0 ? (
@@ -532,7 +533,6 @@ export function MeleeCard({
               editable={editable}
               onSelect={(id) => {
                 onAddUpgrade(id);
-                setShowUpgradePicker(false);
               }}
               onClose={() => setShowUpgradePicker(false)}
             />
@@ -545,6 +545,7 @@ export function MeleeCard({
               showCustom={false}
               title="Add Chimera Pistol Ammo"
               editable={editable}
+              closeOnSelect={false}
               onSelect={(name, referenceId) => handleAddPistolAmmo(name, referenceId)}
               onClose={() => setShowPistolAmmoPicker(false)}
             />

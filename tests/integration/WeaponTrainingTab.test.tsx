@@ -94,14 +94,14 @@ describe("WeaponTrainingTab", () => {
 
   it("hides the exotic weapon add affordance in read-only mode", () => {
     renderTab({ editable: false });
-    expect(screen.queryByText("+ Add")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Add Exotic Weapon" })).not.toBeInTheDocument();
   });
 
   it("adds an exotic weapon through the modal", async () => {
     const user = userEvent.setup();
     const { onUpdate } = renderTab();
 
-    await user.click(screen.getByText("+ Add"));
+    await user.click(screen.getByRole("button", { name: "Add Exotic Weapon" }));
     await user.type(screen.getByPlaceholderText("e.g. Needle Pistol"), "Needle Pistol");
     await user.click(screen.getByRole("button", { name: "+ Add Exotic" }));
 

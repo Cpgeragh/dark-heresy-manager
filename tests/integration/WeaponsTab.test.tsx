@@ -92,12 +92,12 @@ describe("WeaponsTab", () => {
 
   it("shows add affordances when editable", () => {
     renderTab({ rangedWeapons: [], meleeWeapons: [] });
-    expect(screen.getAllByText("+ Add").length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByRole("button", { name: /^Add /i }).length).toBeGreaterThanOrEqual(2);
   });
 
   it("shows 'View' labels in read-only mode", () => {
     renderTab({ editable: false, rangedWeapons: [], meleeWeapons: [] });
-    expect(screen.getAllByText("View").length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByRole("button", { name: /^View /i }).length).toBeGreaterThanOrEqual(2);
   });
 
   it("shows only rounds for loose-loaded ranged ammo", () => {
@@ -183,7 +183,7 @@ function addButtonIn(sectionHeading: string): HTMLElement {
     .map((el) => el.closest("section"))
     .find((el): el is HTMLElement => el !== null);
   if (!heading) throw new Error(`No <section> found for heading: ${sectionHeading}`);
-  return within(heading).getByText("+ Add");
+  return within(heading).getByRole("button", { name: /^Add /i });
 }
 
 describe("WeaponsTab add from reference", () => {

@@ -8,7 +8,8 @@ import { ArcheotechPickerModal } from "./ArcheotechPickerModal";
 import { ItemCard } from "./ItemCard";
 import { ArcheotechWeaponCard } from "../weapons/ArcheotechWeaponCard";
 import { CustomItemForm } from "./CustomItemForm";
-import { Button } from "../../../ui/Button";
+import { AddButton } from "../../../ui/AddButton";
+import { ViewButton } from "../../../ui/ViewButton";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { ErrorState } from "../../../ui/ErrorState";
 import { LoadingState } from "../../../ui/LoadingState";
@@ -105,7 +106,6 @@ export function ArcheotechTab({
           availability: gmRarity || undefined,
         },
       ]);
-      setShowPicker(false);
     },
     [editable, archeotech, onUpdate]
   );
@@ -132,6 +132,7 @@ export function ArcheotechTab({
           buildArcheotechSnapshot(item.id, item.equipped, data, customItemId, versionId),
         ]);
         setShowCustomForm(false);
+        setShowPicker(true);
         toast.success("Custom archeotech saved as a campaign draft.");
       } catch (err) {
         console.error("Failed to create custom archeotech:", err);
@@ -159,7 +160,6 @@ export function ArcheotechTab({
         ...archeotech,
         buildArcheotechSnapshot(crypto.randomUUID(), undefined, libraryItem.data, libraryItem.id, versionId),
       ]);
-      setShowPicker(false);
     },
     [archeotech, editable, onUpdate, toast]
   );
@@ -303,12 +303,11 @@ export function ArcheotechTab({
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <SectionHeader>Inventory ({archeotech.length})</SectionHeader>
-          <Button
-            size="sm"
-            onClick={() => setShowPicker(true)}
-          >
-            {editable ? "+ Add" : "View"}
-          </Button>
+          {editable ? (
+            <AddButton label="Add item" onClick={() => setShowPicker(true)} />
+          ) : (
+            <ViewButton label="View items" onClick={() => setShowPicker(true)} />
+          )}
         </div>
 
         {archeotech.length === 0 && (
@@ -330,7 +329,10 @@ export function ArcheotechTab({
         {showCustomForm && (
           <CustomItemForm
             onAdd={addCustom}
-            onCancel={() => setShowCustomForm(false)}
+            onCancel={() => {
+              setShowCustomForm(false);
+              setShowPicker(true);
+            }}
             onBack={() => { setShowCustomForm(false); setShowPicker(true); }}
           />
         )}

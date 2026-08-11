@@ -6,7 +6,8 @@ import type {
   TalentEntry,
 } from "../../types/Character";
 import { TALENT_LIST } from "../../data/talentData";
-import { Button } from "../../ui/Button";
+import { AddButton } from "../../ui/AddButton";
+import { ViewButton } from "../../ui/ViewButton";
 import { uiSection, uiTextPlaceholder, uiFormLabel } from "../../ui/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { SegmentedTabs, type SegmentedTabOption } from "../../ui/SegmentedTabs";
@@ -80,12 +81,11 @@ function FaithTalentSection({
     <div>
       <div className="mb-3 flex items-center justify-between">
         <SectionHeader>Faith Talents</SectionHeader>
-      <Button
-        size="sm"
-        onClick={() => setShowPicker(true)}
-      >
-        {editable ? "+ Add Faith Talent" : "View Faith Talents"}
-      </Button>
+      {editable ? (
+        <AddButton label="Add Faith Talent" onClick={() => setShowPicker(true)} />
+      ) : (
+        <ViewButton label="View Faith Talents" onClick={() => setShowPicker(true)} />
+      )}
       </div>
 
       <section className={uiSection + " space-y-4"}>

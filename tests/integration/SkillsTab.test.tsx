@@ -48,13 +48,13 @@ describe("SkillsTab", () => {
 
   it("shows the add affordance when editable", () => {
     renderTab();
-    expect(screen.getByText("+ Add Skill")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Add advanced skill" })).toBeInTheDocument();
   });
 
   it("shows 'View Skills' and no add button in read-only mode", () => {
     renderTab({ editable: false });
-    expect(screen.getAllByText("View").length).toBeGreaterThan(0);
-    expect(screen.queryByText("+ Add Skill")).not.toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "View advanced skills" }).length).toBeGreaterThan(0);
+    expect(screen.queryByRole("button", { name: "Add advanced skill" })).not.toBeInTheDocument();
   });
 
   it("shows the empty message when there are no trained skills", () => {

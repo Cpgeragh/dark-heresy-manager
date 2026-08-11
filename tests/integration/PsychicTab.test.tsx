@@ -161,8 +161,8 @@ describe("PsychicTab", () => {
   it("adds a reference power to the character", async () => {
     const user = userEvent.setup();
     const { onUpdate } = renderTab();
-    await user.click(screen.getAllByText("+ Add Minor Power")[0]);
-    await user.click(await screen.findByText("Fake Minor Power"));
+    await user.click(screen.getAllByRole("button", { name: "Add Minor Power" })[0]);
+    await user.click(await screen.findByRole("button", { name: "Select Fake Minor Power" }));
     expect(onUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
         minorPowers: [expect.objectContaining({ name: "Fake Minor Power", isMinor: true })],
@@ -173,7 +173,7 @@ describe("PsychicTab", () => {
   it("creates a custom power as a campaign draft", async () => {
     const user = userEvent.setup();
     const { onUpdate } = renderTab();
-    await user.click(screen.getAllByText("+ Add Minor Power")[0]);
+    await user.click(screen.getAllByRole("button", { name: "Add Minor Power" })[0]);
     await user.click(await screen.findByText("+ Custom minor power"));
     await user.type(screen.getByPlaceholderText("Power name..."), "Homebrew Whisper");
     await user.click(screen.getByRole("button", { name: "Half" }));
@@ -212,8 +212,8 @@ describe("PsychicTab", () => {
     });
     const user = userEvent.setup();
     const { onUpdate } = renderTab();
-    await user.click(screen.getAllByText("+ Add Major Power")[0]);
-    await user.click(await screen.findByText("Library Power"));
+    await user.click(screen.getAllByRole("button", { name: "Add Major Power" })[0]);
+    await user.click(await screen.findByRole("button", { name: "Select Library Power" }));
 
     expect(onUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -228,7 +228,8 @@ describe("PsychicTab", () => {
     );
   });
 
-  it("shows Publish and Archive to the DM for a draft custom power still on the character", () => {
+  it("shows Publish and Archive to the DM for a draft custom power still on the character", async () => {
+    const user = userEvent.setup();
     useCampaignCustomItemsMock.mockReturnValue({
       items: [
         libraryPower({ status: "draft", publishedVersionId: null, draftVersionId: "lib-version-1" }),
@@ -260,6 +261,7 @@ describe("PsychicTab", () => {
         ],
       },
     });
+    await user.click(screen.getAllByRole("button", { name: "Expand Library Power details" })[0]);
     expect(screen.getAllByText("Publish").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Archive").length).toBeGreaterThanOrEqual(1);
   });
@@ -299,6 +301,7 @@ describe("PsychicTab", () => {
       },
     });
 
+    await user.click(screen.getAllByRole("button", { name: "Expand Library Power details" })[0]);
     await user.click(screen.getAllByRole("button", { name: "Edit Definition" })[0]);
     const nameInput = await screen.findByDisplayValue("Library Power");
     await user.clear(nameInput);
@@ -327,7 +330,7 @@ describe("PsychicTab", () => {
   it("filters the Major picker by discipline", async () => {
     const user = userEvent.setup();
     renderTab();
-    await user.click(screen.getAllByText("+ Add Major Power")[0]);
+    await user.click(screen.getAllByRole("button", { name: "Add Major Power" })[0]);
     expect(await screen.findByText("Fake Major Power")).toBeInTheDocument();
     expect(screen.getByText("Fake Biomancy Power")).toBeInTheDocument();
 
@@ -347,7 +350,7 @@ describe("PsychicTab", () => {
     });
     const user = userEvent.setup();
     renderTab();
-    await user.click(screen.getAllByText("+ Add Major Power")[0]);
+    await user.click(screen.getAllByRole("button", { name: "Add Major Power" })[0]);
     expect(await screen.findByText("Library Power")).toBeInTheDocument();
 
     await user.click(screen.getByText("All Sources"));
@@ -361,7 +364,7 @@ describe("PsychicTab", () => {
   it("shows only a Source filter, no Discipline filter, on the Minor picker", async () => {
     const user = userEvent.setup();
     renderTab();
-    await user.click(screen.getAllByText("+ Add Minor Power")[0]);
+    await user.click(screen.getAllByRole("button", { name: "Add Minor Power" })[0]);
     await screen.findByText("Fake Minor Power");
 
     expect(screen.getByText("All Sources")).toBeInTheDocument();

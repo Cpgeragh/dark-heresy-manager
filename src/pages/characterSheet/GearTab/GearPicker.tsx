@@ -77,6 +77,7 @@ export function GearPicker({
   function handleConfirm() {
     if (!pending || !canConfirm) return;
     onSelect(pending, formatMoneyInput(gmCost), pendingNeedsRarity ? gmRarity : undefined);
+    handleAssignedBack();
   }
 
   if (pending) {

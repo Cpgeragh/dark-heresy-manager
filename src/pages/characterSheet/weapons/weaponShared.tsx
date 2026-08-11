@@ -304,7 +304,7 @@ export function UpgradePicker({
       hideSearch
       footer={
         <Button variant="secondary" fullWidth onClick={onClose}>
-          Cancel
+          Done
         </Button>
       }
     >

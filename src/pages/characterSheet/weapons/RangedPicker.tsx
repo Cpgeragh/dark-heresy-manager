@@ -242,7 +242,10 @@ export function RangedPicker({
         isEmpty={false}
         hideSearch
         footer={
-          <Button className="w-full" onClick={() => onSelect(selected, craftsmanship)}>
+          <Button className="w-full" onClick={() => {
+            onSelect(selected, craftsmanship);
+            resetPicker();
+          }}>
             Add Weapon
           </Button>
         }

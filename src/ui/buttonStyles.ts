@@ -11,3 +11,6 @@ export const uiExpandButton =
 
 export const uiIconRemoveButton =
   "inline-flex items-center justify-center rounded border border-red-500 text-red-500 hover:bg-red-500/10 transition p-1 shrink-0";
+
+export const uiIconAddButton =
+  "inline-flex items-center justify-center rounded border border-red-500 text-red-500 hover:bg-red-500/10 transition p-1.5 shrink-0";

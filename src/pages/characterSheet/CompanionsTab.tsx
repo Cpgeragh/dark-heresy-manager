@@ -2,6 +2,8 @@ import { useState } from "react";
 import type { CompanionItem } from "../../types/Character";
 import { COMPANION_REFERENCE, type CompanionRef } from "../../data/reference/companionReference";
 import { Button } from "../../ui/Button";
+import { AddButton } from "../../ui/AddButton";
+import { ViewButton } from "../../ui/ViewButton";
 import { InfoModal } from "../../components/InfoModal";
 import { ItemMetaChips } from "../../ui/ItemMetaChips";
 import { PickerModal } from "../../ui/PickerModal";
@@ -112,7 +114,7 @@ function CompanionPicker({
       isEmpty={available.length === 0}
       emptyMessage="No companions available."
       hideSearch
-      footer={<Button variant="secondary" fullWidth onClick={onClose}>Cancel</Button>}
+      footer={<Button variant="secondary" fullWidth onClick={onClose}>Done</Button>}
     >
       {available.map((ref) => (
         <CompanionPickerCard
@@ -322,9 +324,11 @@ export function CompanionsTab({
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <SectionHeader>Companions</SectionHeader>
-        <Button size="sm" onClick={() => setShowPicker(true)}>
-          {editable ? "+ Add" : "View"}
-        </Button>
+        {editable ? (
+          <AddButton label="Add companion" onClick={() => setShowPicker(true)} />
+        ) : (
+          <ViewButton label="View companions" onClick={() => setShowPicker(true)} />
+        )}
       </div>
 
       {companions.length === 0 ? (
@@ -351,7 +355,6 @@ export function CompanionsTab({
               ...companions,
               { id: crypto.randomUUID(), referenceId: ref.id, name: ref.name, source: ref.source },
             ]);
-            setShowPicker(false);
           }}
           onClose={() => setShowPicker(false)}
         />

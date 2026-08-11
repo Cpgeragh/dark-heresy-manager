@@ -21,6 +21,8 @@ import { PieceRow } from "./PieceRow";
 import { ArcheotechArmourRow } from "./ArcheotechArmourRow";
 import { ArcheotechForceFieldRow } from "./ArcheotechForceFieldRow";
 import { Button } from "../../../ui/Button";
+import { AddButton } from "../../../ui/AddButton";
+import { ViewButton } from "../../../ui/ViewButton";
 import {
   uiSection,
   uiTextLabel,
@@ -206,8 +208,6 @@ export function ArmourTab({
         ...armour,
         { ...nextPiece, worn: piece.isForceField ? piece.worn : pickerMode === "worn" },
       ]);
-      setShowPicker(false);
-      setShowFieldPicker(false);
       setShowCustomForm(false);
     },
     [editable, armour, onUpdate, pickerMode]
@@ -264,13 +264,15 @@ export function ArmourTab({
           ),
         ]);
         setShowCustomForm(false);
+        if (customFormForceField) setShowFieldPicker(true);
+        else setShowPicker(true);
         toast.success("Custom armour saved as a campaign draft.");
       } catch (err) {
         console.error("Failed to create custom armour:", err);
         toast.error("Failed to save custom armour.");
       }
     },
-    [armour, campaignId, characterId, characterName, editable, onUpdate, pickerMode, toast, userId]
+    [armour, campaignId, characterId, characterName, customFormForceField, editable, onUpdate, pickerMode, toast, userId]
   );
 
   const addArmourFromLibrary = useCallback(
@@ -298,8 +300,6 @@ export function ArmourTab({
           versionId
         ),
       ]);
-      setShowPicker(false);
-      setShowFieldPicker(false);
     },
     [armour, editable, onUpdate, pickerMode, toast]
   );
@@ -715,9 +715,11 @@ export function ArmourTab({
       <section className="space-y-2">
         <div className="flex items-center justify-between">
           <SectionHeader>Force Fields</SectionHeader>
-          <Button size="sm" onClick={() => setShowFieldPicker(true)}>
-            {editable ? "+ Add" : "View"}
-          </Button>
+          {editable ? (
+            <AddButton label="Add force field" onClick={() => setShowFieldPicker(true)} />
+          ) : (
+            <ViewButton label="View force fields" onClick={() => setShowFieldPicker(true)} />
+          )}
         </div>
         {forceFields.length === 0 && archeotechForceFieldItems.length === 0 && (
           <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No force field equipped.</p>
@@ -741,7 +743,11 @@ export function ArmourTab({
           title={customFormForceField ? "Custom Force Field" : "Custom Piece"}
           forceField={customFormForceField}
           onAdd={addCustomPiece}
-          onCancel={() => setShowCustomForm(false)}
+          onCancel={() => {
+            setShowCustomForm(false);
+            if (customFormForceField) setShowFieldPicker(true);
+            else setShowPicker(true);
+          }}
         />
       )}
 
@@ -783,7 +789,6 @@ export function ArmourTab({
           customItems={campaignCustomArmour.filter((item) => item.status !== "archived")}
           onSelect={(ref, craftsmanship) => {
             fromReference(ref, craftsmanship);
-            setShowFieldPicker(false);
           }}
           onSelectCustomItem={(item) => addArmourFromLibrary(item, true)}
           onCustom={() => {

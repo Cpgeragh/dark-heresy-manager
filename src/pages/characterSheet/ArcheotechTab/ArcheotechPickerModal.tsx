@@ -98,6 +98,7 @@ export function ArcheotechPickerModal({
   function handleConfirm() {
     if (!pending || !canConfirm) return;
     onSelect(pending, formatMoneyInput(gmCost), gmRarity);
+    handleAssignedBack();
   }
 
   if (pending) {

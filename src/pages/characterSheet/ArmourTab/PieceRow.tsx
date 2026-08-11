@@ -12,7 +12,8 @@ import { ARMOUR_SPECIAL_RULES } from "../../../data/reference/armourSpecialRules
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 import { StatusBadge } from "../../../ui/StatusBadge";
-import { Button } from "../../../ui/Button";
+import { AddButton } from "../../../ui/AddButton";
+import { ViewButton } from "../../../ui/ViewButton";
 import { ARMOUR_UPGRADE_REFERENCE } from "../../../data/reference/armourUpgradeReference";
 import {
   ArmourUpgradeCard,
@@ -138,9 +139,11 @@ export function PieceRow({
           <div className="border-t border-slate-800 pt-2 mt-2 space-y-1.5">
             <div className="flex items-center justify-between">
               <span className={uiTextLabel}>Upgrades</span>
-              <Button size="xs" onClick={() => setShowUpgradePicker(true)}>
-                {editable ? "+ Add" : "View"}
-              </Button>
+              {editable ? (
+                <AddButton label="Add upgrade" onClick={() => setShowUpgradePicker(true)} />
+              ) : (
+                <ViewButton label="View upgrades" onClick={() => setShowUpgradePicker(true)} />
+              )}
             </div>
             {upgradeRefs.length === 0 ? (
               <p className={`text-xs lg:text-sm ${uiTextPlaceholder}`}>None fitted</p>
@@ -192,7 +195,6 @@ export function PieceRow({
           editable={editable}
           onSelect={(upgradeId) => {
             onAddUpgrade(piece.id, upgradeId);
-            setShowUpgradePicker(false);
           }}
           onClose={() => setShowUpgradePicker(false)}
         />

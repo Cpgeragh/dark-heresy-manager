@@ -7,7 +7,8 @@ import type { CampaignCustomItem, CustomDrugData } from "../../../types/CustomIt
 import { DrugPicker } from "./DrugPicker";
 import { DrugRow } from "./DrugRow";
 import { CustomDrugForm } from "./CustomDrugForm";
-import { Button } from "../../../ui/Button";
+import { AddButton } from "../../../ui/AddButton";
+import { ViewButton } from "../../../ui/ViewButton";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { ErrorState } from "../../../ui/ErrorState";
 import { LoadingState } from "../../../ui/LoadingState";
@@ -96,7 +97,6 @@ export function DrugsTab({
           source: ref.source,
         },
       ]);
-      setShowPicker(false);
     },
     [editable, drugs, onUpdate]
   );
@@ -131,6 +131,7 @@ export function DrugsTab({
           buildDrugSnapshot(item.id, item.quantity, data, customItemId, versionId),
         ]);
         setShowCustomForm(false);
+        setShowPicker(true);
         toast.success("Custom drug saved as a campaign draft.");
       } catch (err) {
         console.error("Failed to create custom drug:", err);
@@ -158,7 +159,6 @@ export function DrugsTab({
         ...drugs,
         buildDrugSnapshot(crypto.randomUUID(), 1, libraryItem.data, libraryItem.id, versionId),
       ]);
-      setShowPicker(false);
     },
     [drugs, editable, onUpdate, toast]
   );
@@ -286,12 +286,11 @@ export function DrugsTab({
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <SectionHeader>Carried</SectionHeader>
-        <Button
-          size="sm"
-          onClick={() => setShowPicker(true)}
-        >
-          {editable ? "+ Add" : "View"}
-        </Button>
+        {editable ? (
+          <AddButton label="Add drug" onClick={() => setShowPicker(true)} />
+        ) : (
+          <ViewButton label="View drugs" onClick={() => setShowPicker(true)} />
+        )}
         </div>
 
         {drugs.length === 0 && <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No drugs carried.</p>}
@@ -326,7 +325,10 @@ export function DrugsTab({
       {showCustomForm && (
         <CustomDrugForm
           onAdd={addCustomDrug}
-          onCancel={() => setShowCustomForm(false)}
+          onCancel={() => {
+            setShowCustomForm(false);
+            setShowPicker(true);
+          }}
         />
       )}
 

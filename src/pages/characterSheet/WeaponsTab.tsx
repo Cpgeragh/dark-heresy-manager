@@ -15,7 +15,8 @@ import type {
   WeaponCraftsmanship,
 } from "../../types/Character";
 import type { CampaignCustomItem } from "../../types/CustomItems";
-import { Button } from "../../ui/Button";
+import { AddButton } from "../../ui/AddButton";
+import { ViewButton } from "../../ui/ViewButton";
 import { CYBERNETICS_REFERENCE } from "../../data/reference/cyberneticsReference";
 import { ARCHEOTECH_REFERENCE } from "../../data/reference/archeotechReference";
 import {
@@ -440,7 +441,6 @@ export function WeaponsTab({
           source: ref.source,
         },
       ]);
-      setPicker(null);
     },
     [editable, grenades, onUpdateGrenades]
   );
@@ -467,6 +467,7 @@ export function WeaponsTab({
           buildGrenadeSnapshot(item.id, item, data, customItemId, versionId),
         ]);
         setShowCustomGrenade(false);
+        setPicker("grenades");
         toast.success("Custom grenade saved as a campaign draft.");
       } catch (err) {
         console.error("Failed to create custom grenade:", err);
@@ -522,7 +523,6 @@ export function WeaponsTab({
           quantity: isThrown ? 1 : undefined,
         },
       ]);
-      setPicker(null);
     },
     [editable, rangedWeapons, onUpdateRanged]
   );
@@ -550,6 +550,7 @@ export function WeaponsTab({
           buildRangedWeaponSnapshot(nextWeapon.id, nextWeapon, data, customItemId, versionId),
         ]);
         setShowCustomRanged(false);
+        setPicker("ranged");
         toast.success("Custom ranged weapon saved as a campaign draft.");
       } catch (err) {
         console.error("Failed to create custom ranged weapon:", err);
@@ -664,7 +665,6 @@ export function WeaponsTab({
           quantity: isThrown ? 1 : undefined,
         },
       ]);
-      setPicker(null);
     },
     [editable, meleeWeapons, onUpdateMelee]
   );
@@ -692,6 +692,7 @@ export function WeaponsTab({
           buildMeleeWeaponSnapshot(nextWeapon.id, nextWeapon, data, customItemId, versionId),
         ]);
         setShowCustomMelee(false);
+        setPicker("melee");
         toast.success("Custom melee weapon saved as a campaign draft.");
       } catch (err) {
         console.error("Failed to create custom melee weapon:", err);
@@ -726,7 +727,6 @@ export function WeaponsTab({
             versionId
           ),
         ]);
-        setPicker(null);
         return;
       }
 
@@ -735,7 +735,6 @@ export function WeaponsTab({
           ...grenades,
           buildGrenadeSnapshot(crypto.randomUUID(), {}, libraryItem.data, libraryItem.id, versionId),
         ]);
-        setPicker(null);
         return;
       }
 
@@ -743,7 +742,6 @@ export function WeaponsTab({
         ...meleeWeapons,
         buildMeleeWeaponSnapshot(crypto.randomUUID(), {}, libraryItem.data, libraryItem.id, versionId),
       ]);
-      setPicker(null);
     },
     [editable, grenades, meleeWeapons, onUpdateGrenades, onUpdateMelee, onUpdateRanged, rangedWeapons, toast]
   );
@@ -768,7 +766,6 @@ export function WeaponsTab({
         ...(shields ?? []),
         buildShieldSnapshot(crypto.randomUUID(), {}, libraryItem.data, libraryItem.id, versionId),
       ]);
-      setPicker(null);
     },
     [editable, onUpdateShields, shields, toast]
   );
@@ -990,7 +987,6 @@ export function WeaponsTab({
           source: ref.source,
         },
       ]);
-      setPicker(null);
     },
     [editable, shields, onUpdateShields]
   );
@@ -1017,6 +1013,7 @@ export function WeaponsTab({
           buildShieldSnapshot(item.id, item, data, customItemId, versionId),
         ]);
         setShowCustomShield(false);
+        setPicker("shields");
         toast.success("Custom shield saved as a campaign draft.");
       } catch (err) {
         console.error("Failed to create custom shield:", err);
@@ -1313,12 +1310,11 @@ export function WeaponsTab({
           <div className="flex items-center justify-between">
             <SectionHeader>Ranged</SectionHeader>
             {!showCustomRanged && (
-            <Button
-              size="xs"
-              onClick={() => setPicker("ranged")}
-            >
-              {editable ? "+ Add" : "View"}
-            </Button>
+              editable ? (
+                <AddButton label="Add ranged weapon" onClick={() => setPicker("ranged")} />
+              ) : (
+                <ViewButton label="View ranged weapons" onClick={() => setPicker("ranged")} />
+              )
             )}
           </div>
 
@@ -1404,7 +1400,13 @@ export function WeaponsTab({
           })}
 
           {showCustomRanged && (
-            <CustomRangedForm onAdd={addCustomRanged} onCancel={() => setShowCustomRanged(false)} />
+            <CustomRangedForm
+              onAdd={addCustomRanged}
+              onCancel={() => {
+                setShowCustomRanged(false);
+                setPicker("ranged");
+              }}
+            />
           )}
         </section>
 
@@ -1418,12 +1420,11 @@ export function WeaponsTab({
           <div className="flex items-center justify-between">
             <SectionHeader>Melee</SectionHeader>
             {!showCustomMelee && (
-            <Button
-              size="xs"
-              onClick={() => setPicker("melee")}
-            >
-              {editable ? "+ Add" : "View"}
-            </Button>
+              editable ? (
+                <AddButton label="Add melee weapon" onClick={() => setPicker("melee")} />
+              ) : (
+                <ViewButton label="View melee weapons" onClick={() => setPicker("melee")} />
+              )
             )}
           </div>
 
@@ -1503,7 +1504,13 @@ export function WeaponsTab({
           })}
 
           {showCustomMelee && (
-            <CustomMeleeForm onAdd={addCustomMelee} onCancel={() => setShowCustomMelee(false)} />
+            <CustomMeleeForm
+              onAdd={addCustomMelee}
+              onCancel={() => {
+                setShowCustomMelee(false);
+                setPicker("melee");
+              }}
+            />
           )}
         </section>
       </div>
@@ -1517,12 +1524,11 @@ export function WeaponsTab({
       >
         <div className="flex items-center justify-between">
           <SectionHeader>Explosives</SectionHeader>
-            <Button
-              size="xs"
-              onClick={() => setPicker("grenades")}
-            >
-              {editable ? "+ Add" : "View"}
-            </Button>
+            {editable ? (
+              <AddButton label="Add explosive" onClick={() => setPicker("grenades")} />
+            ) : (
+              <ViewButton label="View explosives" onClick={() => setPicker("grenades")} />
+            )}
         </div>
 
         {allGrenadeEntries.length === 0 && (
@@ -1583,12 +1589,11 @@ export function WeaponsTab({
       >
         <div className="flex items-center justify-between">
           <SectionHeader>Shields</SectionHeader>
-        <Button
-          size="xs"
-          onClick={() => setPicker("shields")}
-        >
-          {editable ? "+ Add" : "View"}
-        </Button>
+        {editable ? (
+          <AddButton label="Add shield" onClick={() => setPicker("shields")} />
+        ) : (
+          <ViewButton label="View shields" onClick={() => setPicker("shields")} />
+        )}
         </div>
 
         {(shields ?? []).length === 0 && archeotechShieldItems.length === 0 && (
@@ -1696,13 +1701,19 @@ export function WeaponsTab({
       {showCustomGrenade && (
         <CustomGrenadeForm
           onAdd={addCustomGrenade}
-          onCancel={() => setShowCustomGrenade(false)}
+          onCancel={() => {
+            setShowCustomGrenade(false);
+            setPicker("grenades");
+          }}
         />
       )}
       {showCustomShield && (
         <CustomShieldForm
           onAdd={addCustomShield}
-          onCancel={() => setShowCustomShield(false)}
+          onCancel={() => {
+            setShowCustomShield(false);
+            setPicker("shields");
+          }}
         />
       )}
       {editingWeaponDefinition?.kind === "ranged" && (

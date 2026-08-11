@@ -92,7 +92,7 @@ export function ArmourUpgradePicker({
       isEmpty={upgrades.length === 0}
       emptyMessage="No compatible upgrades available."
       hideSearch
-      footer={<Button variant="secondary" fullWidth onClick={onClose}>Cancel</Button>}
+      footer={<Button variant="secondary" fullWidth onClick={onClose}>Done</Button>}
     >
       {upgrades.map((upgrade) => (
         <PickerRow key={upgrade.id} interactive={editable} onClick={() => onSelect(upgrade.id)}>

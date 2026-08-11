@@ -42,6 +42,8 @@ import {
   colourViolet,
 } from "../../../ui/colourTokens";
 import { Button } from "../../../ui/Button";
+import { AddButton } from "../../../ui/AddButton";
+import { ViewButton } from "../../../ui/ViewButton";
 import { Chip } from "../../../ui/Chip";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { PickerModal, PickerRow } from "../../../ui/PickerModal";
@@ -245,6 +247,7 @@ export function AmmoPicker({
   showCustom = true,
   title,
   editable = true,
+  closeOnSelect = true,
   onSelect,
   onClose,
 }: {
@@ -254,6 +257,7 @@ export function AmmoPicker({
   showCustom?: boolean;
   title?: string;
   editable?: boolean;
+  closeOnSelect?: boolean;
   onSelect: (name: string, referenceId?: string) => void;
   onClose: () => void;
 }) {
@@ -292,7 +296,8 @@ export function AmmoPicker({
                 onClick={() => {
                   if (customName.trim()) {
                     onSelect(customName.trim());
-                    onClose();
+                    if (closeOnSelect) onClose();
+                    else setCustomName("");
                   }
                 }}
                 disabled={!customName.trim() || (!allowDuplicates && existingNames.has(customName.trim()))}
@@ -300,6 +305,9 @@ export function AmmoPicker({
                 Add
               </Button>
             </div>
+            {!closeOnSelect && (
+              <Button variant="secondary" fullWidth onClick={onClose}>Done</Button>
+            )}
           </div>
         ) : undefined
       }
@@ -310,7 +318,7 @@ export function AmmoPicker({
           interactive={editable}
           onClick={() => {
             onSelect(formatAmmoName(ammo.name), ammo.id);
-            onClose();
+            if (closeOnSelect) onClose();
           }}
           disabled={editable && !allowDuplicates && existingNames.has(formatAmmoName(ammo.name))}
         >
@@ -996,12 +1004,11 @@ export function RangedCard({
             <div className="border-t border-slate-800 pt-2 space-y-2">
               <div className="flex items-center justify-between">
                 <span className={uiTextLabel}>Ammo</span>
-                <Button
-                  size="xs"
-                  onClick={() => setShowAmmoPicker(true)}
-                >
-                  {editable ? "+ Add" : "View"}
-                </Button>
+                {editable ? (
+                  <AddButton label="Add ammo" onClick={() => setShowAmmoPicker(true)} />
+                ) : (
+                  <ViewButton label="View ammo" onClick={() => setShowAmmoPicker(true)} />
+                )}
               </div>
 
               {activeAmmoFamily && (
@@ -1058,12 +1065,11 @@ export function RangedCard({
               <div className="flex items-center justify-between">
                 <span className={uiTextLabel}>Upgrades</span>
                 {(editable ? visibleCompatible.length > 0 : upgradeRefs.length > 0 || visibleCompatible.length > 0) && (
-                  <Button
-                    size="xs"
-                    onClick={() => setShowUpgradePicker(true)}
-                  >
-                    {editable ? "+ Add" : "View"}
-                  </Button>
+                  editable ? (
+                    <AddButton label="Add upgrade" onClick={() => setShowUpgradePicker(true)} />
+                  ) : (
+                    <ViewButton label="View upgrades" onClick={() => setShowUpgradePicker(true)} />
+                  )
                 )}
               </div>
               {upgradeRefs.length === 0 ? (
@@ -1089,7 +1095,6 @@ export function RangedCard({
               editable={editable}
               onSelect={(id) => {
                 onAddUpgrade(id);
-                setShowUpgradePicker(false);
               }}
               onClose={() => setShowUpgradePicker(false)}
             />
@@ -1100,6 +1105,7 @@ export function RangedCard({
               compatibleIds={profileCompatibleAmmoIds}
               existingNames={existingAmmoNames}
               editable={editable}
+              closeOnSelect={false}
               onSelect={handleAddAmmo}
               onClose={() => setShowAmmoPicker(false)}
             />

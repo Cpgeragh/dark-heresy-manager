@@ -7,6 +7,8 @@ import { useSkillComputation } from "../../../hooks/useSkillComputation";
 import { useSwipeableTabs } from "../../../hooks/useSwipeableTabs";
 import { getCharacteristicModifierTotals } from "../../../features/corruption/characteristicModifierTotals";
 import { Button } from "../../../ui/Button";
+import { AddButton } from "../../../ui/AddButton";
+import { ViewButton } from "../../../ui/ViewButton";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { SegmentedTabs, type SegmentedTabOption } from "../../../ui/SegmentedTabs";
 import {
@@ -188,12 +190,11 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
                 Untrained
               </Button>
             ) : (
-              <Button
-                size="sm"
-                onClick={() => setIsAddOpen(true)}
-              >
-                {editable ? "+ Add Skill" : "View"}
-              </Button>
+              editable ? (
+                <AddButton label="Add advanced skill" onClick={() => setIsAddOpen(true)} />
+              ) : (
+                <ViewButton label="View advanced skills" onClick={() => setIsAddOpen(true)} />
+              )
             )}
           </div>
           {activeView === "basic" ? (
@@ -225,12 +226,11 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
         <section className={uiSection + " space-y-3"}>
           <div className="flex items-center justify-between">
             <SectionHeader>Advanced Skills</SectionHeader>
-            <Button
-              size="sm"
-              onClick={() => setIsAddOpen(true)}
-            >
-              {editable ? "+ Add Skill" : "View"}
-            </Button>
+            {editable ? (
+              <AddButton label="Add advanced skill" onClick={() => setIsAddOpen(true)} />
+            ) : (
+              <ViewButton label="View advanced skills" onClick={() => setIsAddOpen(true)} />
+            )}
           </div>
           {advancedItems.length === 0 ? (
             <p className={`text-sm ${uiTextPlaceholder}`}>No advanced skills trained yet.</p>

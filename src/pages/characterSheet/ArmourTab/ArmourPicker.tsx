@@ -65,7 +65,10 @@ export function ArmourPicker({
         isEmpty={false}
         hideSearch
         footer={
-          <Button className="w-full" onClick={() => onSelect(selected, craftsmanship)}>
+          <Button className="w-full" onClick={() => {
+            onSelect(selected, craftsmanship);
+            resetPicker();
+          }}>
             Add Armour
           </Button>
         }

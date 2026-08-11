@@ -15,7 +15,8 @@ import { ItemRow } from "./ItemRow";
 import { GearPicker } from "./GearPicker";
 import { CustomItemForm } from "./CustomItemForm";
 import { CustomConsumableForm } from "./CustomConsumableForm";
-import { Button } from "../../../ui/Button";
+import { AddButton } from "../../../ui/AddButton";
+import { ViewButton } from "../../../ui/ViewButton";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { ErrorState } from "../../../ui/ErrorState";
 import { LoadingState } from "../../../ui/LoadingState";
@@ -186,7 +187,6 @@ export function GearTab({
           source: ref.source,
         },
       ]);
-      setShowConsumablePicker(false);
     },
     [editable, consumables, onUpdateConsumables]
   );
@@ -231,6 +231,7 @@ export function GearTab({
           buildConsumableSnapshot(item.id, item.quantity, data, customItemId, versionId),
         ]);
         setShowCustomConsumableForm(false);
+        setShowConsumablePicker(true);
         setActiveGearSection("consumables");
         toast.success("Custom consumable saved as a campaign draft.");
       } catch (err) {
@@ -268,7 +269,6 @@ export function GearTab({
         ...consumables,
         buildConsumableSnapshot(crypto.randomUUID(), 1, libraryItem.data, libraryItem.id, versionId),
       ]);
-      setShowConsumablePicker(false);
     },
     [consumables, editable, onUpdateConsumables, toast]
   );
@@ -335,7 +335,6 @@ export function GearTab({
           source: ref.source,
         },
       ]);
-      setShowGearPicker(false);
     },
     [editable, gear, onUpdate]
   );
@@ -362,6 +361,7 @@ export function GearTab({
           buildGearSnapshot(item.id, data, customItemId, versionId),
         ]);
         setShowCustomForm(false);
+        setShowGearPicker(true);
         setActiveGearSection("items");
         toast.success("Custom gear saved as a campaign draft.");
       } catch (err) {
@@ -390,7 +390,6 @@ export function GearTab({
         ...gear,
         buildGearSnapshot(crypto.randomUUID(), libraryItem.data, libraryItem.id, versionId),
       ]);
-      setShowGearPicker(false);
     },
     [editable, gear, onUpdate, toast]
   );
@@ -484,12 +483,11 @@ export function GearTab({
         <div className="flex items-center justify-between">
           <SectionHeader>Items</SectionHeader>
           {!showCustomForm && (
-          <Button
-            size="sm"
-            onClick={() => setShowGearPicker(true)}
-          >
-            {editable ? "+ Add" : "View"}
-          </Button>
+            editable ? (
+              <AddButton label="Add item" onClick={() => setShowGearPicker(true)} />
+            ) : (
+              <ViewButton label="View items" onClick={() => setShowGearPicker(true)} />
+            )
           )}
         </div>
 
@@ -554,12 +552,11 @@ export function GearTab({
       >
         <div className="flex items-center justify-between">
           <SectionHeader>Consumables</SectionHeader>
-        <Button
-          size="sm"
-          onClick={() => setShowConsumablePicker(true)}
-        >
-          {editable ? "+ Add" : "View"}
-        </Button>
+        {editable ? (
+          <AddButton label="Add consumable" onClick={() => setShowConsumablePicker(true)} />
+        ) : (
+          <ViewButton label="View consumables" onClick={() => setShowConsumablePicker(true)} />
+        )}
         </div>
 
         {consumables.length === 0 && (
@@ -638,7 +635,10 @@ export function GearTab({
       {showCustomConsumableForm && (
         <CustomConsumableForm
           onAdd={addCustomConsumable}
-          onCancel={() => setShowCustomConsumableForm(false)}
+          onCancel={() => {
+            setShowCustomConsumableForm(false);
+            setShowConsumablePicker(true);
+          }}
         />
       )}
 
@@ -663,7 +663,10 @@ export function GearTab({
       {showCustomForm && (
         <CustomItemForm
           onAdd={addCustom}
-          onCancel={() => setShowCustomForm(false)}
+          onCancel={() => {
+            setShowCustomForm(false);
+            setShowGearPicker(true);
+          }}
         />
       )}
 

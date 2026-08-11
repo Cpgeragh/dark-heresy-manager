@@ -275,15 +275,16 @@ export function ImplantPicker({
           </button>
           <Button
             className="flex-1"
-            onClick={() =>
+            onClick={() => {
               onSelect(
                 selected,
                 craftsmanship,
                 location ?? undefined,
                 assignedValue,
                 assignedRarity
-              )
-            }
+              );
+              resetPicker();
+            }}
             disabled={!editable}
           >
             Install
