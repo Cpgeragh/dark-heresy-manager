@@ -71,7 +71,7 @@ describe("CorruptionMalignancyPicker roll-capture sub-screen", () => {
     const user = userEvent.setup();
     const { onAdd } = setup();
 
-    await user.click(screen.getByRole("button", { name: "+ Add custom malignancy" }));
+    await user.click(screen.getByRole("button", { name: "Add custom malignancy" }));
     const addButton = screen.getByRole("button", { name: "Add Malignancy" });
     expect(addButton).toBeDisabled();
 

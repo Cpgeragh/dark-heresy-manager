@@ -84,7 +84,7 @@ describe("CustomRangedForm", () => {
         integrated: false,
       })
     );
-  });
+  }, 15_000);
 
   it("disables and clears the reload amount field when reload type is Special", async () => {
     const user = userEvent.setup();

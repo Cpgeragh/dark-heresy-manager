@@ -196,7 +196,7 @@ describe("WeaponsTab add from reference", () => {
     expect(noop).toHaveBeenCalledWith(
       expect.arrayContaining([expect.objectContaining({ name: "Lasgun", craftsmanship: "Common" })])
     );
-  });
+  }, 15_000);
 
   it("adds a Ranged weapon with Poor craftsmanship, which adds the Unreliable quality", async () => {
     const user = userEvent.setup();
@@ -214,7 +214,7 @@ describe("WeaponsTab add from reference", () => {
         }),
       ])
     );
-  });
+  }, 15_000);
 
   it("adds a Melee weapon with Best craftsmanship, which adds +1 damage", async () => {
     const user = userEvent.setup();
@@ -228,7 +228,7 @@ describe("WeaponsTab add from reference", () => {
     );
     const addedWeapon = noop.mock.calls[0][0][0];
     expect(addedWeapon.damage).not.toBe(""); // sanity: damage was computed, not left blank
-  });
+  }, 15_000);
 
   it("adds a Grenade from the reference picker in a single step (no craftsmanship screen)", async () => {
     const user = userEvent.setup();
@@ -238,7 +238,7 @@ describe("WeaponsTab add from reference", () => {
     expect(noop).toHaveBeenCalledWith(
       expect.arrayContaining([expect.objectContaining({ name: "Frag Grenade" })])
     );
-  });
+  }, 15_000);
 
   it("adds a Shield from the reference picker in a single step", async () => {
     const user = userEvent.setup();

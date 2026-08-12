@@ -1,7 +1,11 @@
 // src/pages/characterSheet/SkillsTab/AddSkillModal.tsx
 
 import { useState, useMemo } from "react";
-import { CHAR_LABEL, type SkillWithComputed } from "./skillsConstants";
+import {
+  CHAR_LABEL,
+  getSkillGroupCharacteristics,
+  type SkillWithComputed,
+} from "./skillsConstants";
 import { charColour } from "../../../ui/sourceStyles";
 import { Chip } from "../../../ui/Chip";
 import { PickerModal } from "../../../ui/PickerModal";
@@ -37,8 +41,14 @@ export function AddSkillModal({
   const [openCategory, setOpenCategory] = useState<string | null>(null);
   const modalTitle = title ?? (editable ? "Add Skill" : "View Skills");
 
+  const handleClose = () => {
+    setSearch("");
+    setOpenCategory(null);
+    onClose();
+  };
+
   const listItems = useMemo((): ListItem[] => {
-    const query = search.toLowerCase();
+    const query = search.trim().toLowerCase();
     const filtered = untrainedSkills.filter((s) =>
       s.name.toLowerCase().includes(query)
     );
@@ -114,7 +124,7 @@ export function AddSkillModal({
       placeholder="Search skills…"
       query={search}
       onQueryChange={setSearch}
-      onClose={onClose}
+      onClose={handleClose}
       isEmpty={listItems.length === 0}
       emptyMessage="No skills found."
     >
@@ -143,10 +153,16 @@ export function AddSkillModal({
                 <span className={`${uiItemName} truncate block group-hover:text-white`}>
                   {item.category}
                 </span>
-                <div className="flex items-center gap-1.5">
-                  <Chip size="sm" className={`bg-slate-800 font-code shrink-0 ${charColour(item.skills[0].characteristic)}`}>
-                    {CHAR_LABEL[item.skills[0].characteristic]}
-                  </Chip>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {getSkillGroupCharacteristics(item.skills).map((characteristic) => (
+                    <Chip
+                      key={characteristic}
+                      size="sm"
+                      className={`bg-slate-800 font-code shrink-0 ${charColour(characteristic)}`}
+                    >
+                      {CHAR_LABEL[characteristic]}
+                    </Chip>
+                  ))}
                   {item.skills[0].advanced && (
                     <Chip size="sm" className={`shrink-0 ${colourPurple}`}>
                       Advanced

@@ -5,10 +5,18 @@ import type { SkillAdvanceLevel } from "../../../types/Character";
 import { CHAR_LABEL, type SkillWithComputed } from "./skillsConstants";
 import { charColour } from "../../../ui/sourceStyles";
 import { Chip } from "../../../ui/Chip";
+import { StatChip } from "../../../ui/StatChip";
 import { InfoModal } from "../../../components/InfoModal";
 import { SKILL_DESCRIPTIONS } from "../../../data/skillDescriptions";
 import { RemoveButton } from "../../../ui/RemoveButton";
-import { uiInfoModalWrapper, uiItemName, uiSectionShell } from "../../../ui/editableStyles";
+import { Button } from "../../../ui/Button";
+import { PickerBody, PickerModal } from "../../../ui/PickerModal";
+import {
+  uiInfoModalWrapper,
+  uiItemName,
+  uiSectionShell,
+  uiTextBody,
+} from "../../../ui/editableStyles";
 import { ExpandChevron } from "../../../ui/ExpandChevron";
 import { colourPurple, colourTeal } from "../../../ui/colourTokens";
 
@@ -31,6 +39,7 @@ const LEVEL_BADGE: Record<string, string> = {
 
 export function SkillRow({ skill, editable, updateLevel, previewMode = false, onSelect, indented = false, hideLevelChip = false }: SkillRowProps) {
   const [expanded, setExpanded] = useState(false);
+  const [deleteArmed, setDeleteArmed] = useState(false);
 
   const levelBadgeClass = LEVEL_BADGE[skill.level] ?? "";
 
@@ -90,22 +99,30 @@ export function SkillRow({ skill, editable, updateLevel, previewMode = false, on
               )}
             </div>
           </div>
-          <span className="font-code font-extrabold shrink-0 text-white text-xl">
-            {skill.total ?? "--"}<span className="text-sm font-normal text-slate-300 ml-1">pts</span>
-          </span>
-          {onSelect ? (
-            <button
-              type="button"
-              aria-expanded={expanded}
-              aria-label={expanded ? "Collapse skill details" : "Expand skill details"}
-              onClick={handleToggle}
-              className="relative z-10 pointer-events-auto p-1 -m-1"
-            >
+          <div className="relative pointer-events-none flex items-center gap-4 shrink-0">
+            <StatChip label="Total" value={skill.total ?? "—"} />
+            {editable && skill.level !== "untrained" && (
+              <div className="relative z-20 pointer-events-auto">
+                <RemoveButton
+                  onClick={() => setDeleteArmed(true)}
+                  label={`Delete ${skill.name}`}
+                />
+              </div>
+            )}
+            {onSelect ? (
+              <button
+                type="button"
+                aria-expanded={expanded}
+                aria-label={expanded ? "Collapse skill details" : "Expand skill details"}
+                onClick={handleToggle}
+                className="relative z-10 pointer-events-auto p-1 -m-1"
+              >
+                <ExpandChevron expanded={expanded} />
+              </button>
+            ) : (
               <ExpandChevron expanded={expanded} />
-            </button>
-          ) : (
-            <ExpandChevron expanded={expanded} />
-          )}
+            )}
+          </div>
         </div>
 
         {/* Desktop: name+chips in a left column, total in its own centered column, chevron last */}
@@ -133,22 +150,30 @@ export function SkillRow({ skill, editable, updateLevel, previewMode = false, on
               )}
             </div>
           </div>
-          <span className="font-code font-extrabold shrink-0 text-white text-2xl">
-            {skill.total ?? "--"}<span className="text-sm font-normal text-slate-300 ml-1">pts</span>
-          </span>
-          {onSelect ? (
-            <button
-              type="button"
-              aria-expanded={expanded}
-              aria-label={expanded ? "Collapse skill details" : "Expand skill details"}
-              onClick={handleToggle}
-              className="relative z-10 pointer-events-auto p-1 -m-1"
-            >
+          <div className="relative pointer-events-none flex items-center gap-4 shrink-0">
+            <StatChip label="Total" value={skill.total ?? "—"} />
+            {editable && skill.level !== "untrained" && (
+              <div className="relative z-20 pointer-events-auto">
+                <RemoveButton
+                  onClick={() => setDeleteArmed(true)}
+                  label={`Delete ${skill.name}`}
+                />
+              </div>
+            )}
+            {onSelect ? (
+              <button
+                type="button"
+                aria-expanded={expanded}
+                aria-label={expanded ? "Collapse skill details" : "Expand skill details"}
+                onClick={handleToggle}
+                className="relative z-10 pointer-events-auto p-1 -m-1"
+              >
+                <ExpandChevron expanded={expanded} />
+              </button>
+            ) : (
               <ExpandChevron expanded={expanded} />
-            </button>
-          ) : (
-            <ExpandChevron expanded={expanded} />
-          )}
+            )}
+          </div>
         </div>
       </div>
 
@@ -157,15 +182,6 @@ export function SkillRow({ skill, editable, updateLevel, previewMode = false, on
         <div className="px-3 lg:px-4 pb-3 lg:pb-4 pt-2 lg:pt-3 border-t border-slate-600 space-y-3">
           {/* Level buttons */}
           <div className="space-y-2">
-              {editable && skill.level !== "untrained" && (
-                <div className="flex justify-end">
-                  <RemoveButton
-                    onClick={handleRemove}
-                    className="focus:outline-none"
-                    label={`Remove ${skill.name}`}
-                  />
-                </div>
-              )}
               <div className="flex flex-wrap items-center gap-2">
                 {(skill.advanced
                   ? (["trained", "+10", "+20"] as const)
@@ -190,6 +206,34 @@ export function SkillRow({ skill, editable, updateLevel, previewMode = false, on
               </div>
           </div>
         </div>
+      )}
+
+      {deleteArmed && (
+        <PickerModal
+          title="Delete Skill"
+          query=""
+          onQueryChange={() => undefined}
+          onClose={() => setDeleteArmed(false)}
+          isEmpty={false}
+          hideSearch
+          maxWidth="max-w-sm"
+          footer={
+            <div className="grid grid-cols-2 gap-2">
+              <Button variant="primary" onClick={handleRemove}>
+                Delete
+              </Button>
+              <Button variant="ghost" onClick={() => setDeleteArmed(false)}>
+                Cancel
+              </Button>
+            </div>
+          }
+        >
+          <PickerBody>
+            <p className={`text-sm lg:text-base ${uiTextBody} text-center`}>
+              Delete {skill.name} from this character?
+            </p>
+          </PickerBody>
+        </PickerModal>
       )}
     </div>
   );

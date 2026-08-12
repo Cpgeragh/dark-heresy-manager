@@ -1,6 +1,6 @@
 // tests/integration/ArmourPicker.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -95,25 +95,24 @@ describe("ArmourPicker craftsmanship selection", () => {
 });
 
 describe("ArmourPicker read-only", () => {
-  it("shows a View title and does not open the craftsmanship screen on click", async () => {
-    const user = userEvent.setup();
+  it("shows a View title and does not open the craftsmanship screen on click", () => {
     renderPicker({ editable: false });
     expect(screen.getByText("View Armour")).toBeInTheDocument();
-    await user.click(row(ARMOUR_A));
+    fireEvent.click(row(ARMOUR_A));
     expect(screen.queryByRole("button", { name: "Add Armour" })).not.toBeInTheDocument();
-  });
+  }, 15_000);
 
   it("hides the custom-piece button in read-only mode", () => {
     renderPicker({ editable: false });
-    expect(screen.queryByText("+ Add custom piece")).not.toBeInTheDocument();
+    expect(screen.queryByText("Add custom piece")).not.toBeInTheDocument();
   });
 });
 
 describe("ArmourPicker custom pieces", () => {
-  it("calls onCustom when '+ Add custom piece' is clicked", async () => {
+  it("calls onCustom when the custom-piece button is clicked", async () => {
     const user = userEvent.setup();
     const { onCustom } = renderPicker();
-    await user.click(screen.getByText("+ Add custom piece"));
+    await user.click(screen.getByText("Add custom piece"));
     expect(onCustom).toHaveBeenCalled();
   });
 

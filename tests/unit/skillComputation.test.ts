@@ -110,6 +110,16 @@ describe("useSkillComputation", () => {
     expect(result.current[0].total).toBe(1);
   });
 
+  it("keeps an untrained basic skill total at a minimum of 1", () => {
+    const { result } = renderHook(() =>
+      useSkillComputation({
+        skills: [makeSkill("Acrobatics", "untrained")],
+        getCharField: makeGetCharField(1, 0),
+      })
+    );
+    expect(result.current[0].total).toBe(1);
+  });
+
   it("applies modifier to an untrained advanced skill (no halving)", () => {
     const { result } = renderHook(() =>
       useSkillComputation({

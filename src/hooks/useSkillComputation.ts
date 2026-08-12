@@ -21,7 +21,9 @@ function computeTotal(
   const charTotal = Math.max(1, rawCharTotal + (modifierTotals[skill.characteristic] ?? 0));
 
   if (skill.level === "untrained") {
-    return skill.advanced ? charTotal : Math.floor(charTotal / SKILL_HALF_DIVISOR);
+    return skill.advanced
+      ? charTotal
+      : Math.max(1, Math.floor(charTotal / SKILL_HALF_DIVISOR));
   }
 
   const levelMod =

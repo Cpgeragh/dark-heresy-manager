@@ -79,6 +79,55 @@ describe("AddSkillModal skill row", () => {
     expect(screen.getByLabelText("Set skill level to untrained")).toBeInTheDocument();
     expect(screen.getByLabelText("Set skill level to trained")).toBeInTheDocument();
   });
+
+  it("ignores leading and trailing spaces in search", async () => {
+    const user = userEvent.setup();
+    setup();
+
+    await user.type(screen.getByRole("textbox"), " Awareness ");
+
+    expect(screen.getAllByRole("button", { name: /Awareness/ }).length).toBeGreaterThan(0);
+    expect(screen.queryByText("No skills found.")).not.toBeInTheDocument();
+  });
+
+  it("clears search when the picker closes", async () => {
+    const user = userEvent.setup();
+    const { onClose } = setup();
+    const search = screen.getByRole("textbox");
+
+    await user.type(search, "Aware");
+    await user.click(screen.getByRole("button", { name: "Close" }));
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(search).toHaveValue("");
+  });
+
+  it("shows every characteristic used by a mixed-characteristic group", () => {
+    setup({
+      untrainedSkills: [
+        {
+          ...untrainedSkills[0],
+          id: "trade-agri",
+          name: "Trade (Agri)",
+          characteristic: "s",
+          category: "Trade",
+          advanced: true,
+        },
+        {
+          ...untrainedSkills[0],
+          id: "trade-cook",
+          name: "Trade (Cook)",
+          characteristic: "int",
+          category: "Trade",
+          advanced: true,
+        },
+      ],
+    });
+
+    const groupButton = screen.getByRole("button", { name: /Trade/ });
+    expect(groupButton).toHaveTextContent("S");
+    expect(groupButton).toHaveTextContent("Int");
+  });
 });
 
 describe("AddSkillModal in read-only View Skills mode", () => {

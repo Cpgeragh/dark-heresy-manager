@@ -70,7 +70,7 @@ describe("InsanityDisorderPicker", () => {
     const user = userEvent.setup();
     const { onAdd } = setup();
 
-    await user.click(screen.getByText("+ Add custom disorder"));
+    await user.click(screen.getByRole("button", { name: "Add custom disorder" }));
     // Type defaults to "Delusion", the alphabetically-first real disorder type.
     await user.click(screen.getByText("Delusion"));
     await user.click(screen.getByText("Phobia"));

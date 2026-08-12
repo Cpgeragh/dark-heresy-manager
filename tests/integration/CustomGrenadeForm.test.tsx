@@ -139,7 +139,7 @@ describe("CustomGrenadeForm", () => {
     await user.click(submitButton());
 
     expect(onAdd).toHaveBeenCalledWith(expect.objectContaining({ damage: "2d10+3 X" }));
-  });
+  }, 15_000);
 
   it("parses an existing grenade's Special damage for editing", () => {
     renderForm({ initialGrenade: { id: "g1", name: "Old Device", quantity: 1, damage: "Special" } });

@@ -45,3 +45,9 @@ export const CHAR_FULL_LABEL: Record<keyof Characteristics, string> = {
   wp: "Willpower (WP)",
   fel: "Fellowship (Fel)",
 };
+
+export function getSkillGroupCharacteristics(
+  skills: readonly { characteristic: keyof Characteristics }[]
+): (keyof Characteristics)[] {
+  return [...new Set(skills.map((skill) => skill.characteristic))];
+}

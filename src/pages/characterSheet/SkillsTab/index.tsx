@@ -6,7 +6,6 @@ import type { CharField } from "../../../types/Character";
 import { useSkillComputation } from "../../../hooks/useSkillComputation";
 import { useSwipeableTabs } from "../../../hooks/useSwipeableTabs";
 import { getCharacteristicModifierTotals } from "../../../features/corruption/characteristicModifierTotals";
-import { Button } from "../../../ui/Button";
 import { AddButton } from "../../../ui/AddButton";
 import { ViewButton } from "../../../ui/ViewButton";
 import { SectionHeader } from "../../../ui/SectionHeader";
@@ -183,12 +182,11 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
           <div className="flex items-center justify-between">
             <SectionHeader>{activeView === "basic" ? "Basic Skills" : "Advanced Skills"}</SectionHeader>
             {activeView === "basic" ? (
-              <Button
-                size="sm"
-                onClick={() => setIsUntrainedBasicOpen(true)}
-              >
-                Untrained
-              </Button>
+              editable ? (
+                <AddButton label="Add basic skill" onClick={() => setIsUntrainedBasicOpen(true)} />
+              ) : (
+                <ViewButton label="View basic skills" onClick={() => setIsUntrainedBasicOpen(true)} />
+              )
             ) : (
               editable ? (
                 <AddButton label="Add advanced skill" onClick={() => setIsAddOpen(true)} />
@@ -214,12 +212,11 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
         <section className={uiSection + " space-y-3"}>
           <div className="flex items-center justify-between">
             <SectionHeader>Basic Skills</SectionHeader>
-            <Button
-              size="sm"
-              onClick={() => setIsUntrainedBasicOpen(true)}
-            >
-              Untrained
-            </Button>
+            {editable ? (
+              <AddButton label="Add basic skill" onClick={() => setIsUntrainedBasicOpen(true)} />
+            ) : (
+              <ViewButton label="View basic skills" onClick={() => setIsUntrainedBasicOpen(true)} />
+            )}
           </div>
           {renderBasicSection()}
         </section>

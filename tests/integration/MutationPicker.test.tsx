@@ -114,7 +114,7 @@ describe("MutationPicker roll-capture sub-screen", () => {
     const user = userEvent.setup();
     const { onAdd } = setup();
 
-    await user.click(screen.getByRole("button", { name: "+ Add custom minor mutation" }));
+    await user.click(screen.getByRole("button", { name: "Add custom minor mutation" }));
     const addButton = screen.getByRole("button", { name: "Add Minor Mutation" });
     expect(addButton).toBeDisabled();
 

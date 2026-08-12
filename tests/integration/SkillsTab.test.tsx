@@ -46,14 +46,121 @@ describe("SkillsTab", () => {
     expect(screen.getAllByText("Awareness").length).toBeGreaterThan(0);
   });
 
+  it("shows the computed skill total in a labelled stat chip", () => {
+    renderTab();
+
+    const totalLabels = screen.getAllByText("Total");
+    expect(totalLabels.length).toBeGreaterThan(0);
+    for (const label of totalLabels) {
+      expect(label.parentElement).toHaveTextContent("30");
+      const controlGroup = label.parentElement?.parentElement;
+      expect(controlGroup).toHaveClass("gap-4", "shrink-0");
+      expect(
+        controlGroup?.querySelector('button[aria-label="Delete Awareness"]')
+      ).toBeInTheDocument();
+    }
+  });
+
+  it("places grouped skill chips beneath the category name", () => {
+    renderTab({
+      skills: [
+        skill({
+          id: "ciphers-acolyte",
+          name: "Ciphers (Acolyte)",
+          characteristic: "int",
+          category: "Ciphers",
+          advanced: true,
+        }),
+        skill({
+          id: "ciphers-war-cant",
+          name: "Ciphers (War Cant)",
+          characteristic: "int",
+          category: "Ciphers",
+          advanced: true,
+        }),
+      ],
+    });
+
+    const categoryName = screen.getByText("Ciphers");
+    const contentBlock = categoryName.parentElement;
+
+    expect(contentBlock).toHaveClass("space-y-1.5");
+    expect(contentBlock?.children[0]).toBe(categoryName);
+    expect(contentBlock?.children[1]).toHaveTextContent("Int");
+    expect(contentBlock?.children[1]).toHaveTextContent("Advanced");
+  });
+
+  it("shows every characteristic used by a mixed-characteristic group", () => {
+    renderTab({
+      skills: [
+        skill({
+          id: "trade-agri",
+          name: "Trade (Agri)",
+          characteristic: "s",
+          category: "Trade",
+          advanced: true,
+        }),
+        skill({
+          id: "trade-cook",
+          name: "Trade (Cook)",
+          characteristic: "int",
+          category: "Trade",
+          advanced: true,
+        }),
+      ],
+    });
+
+    const groupButtons = screen.getAllByRole("button", { name: /Trade/ });
+    expect(groupButtons.length).toBeGreaterThan(0);
+    for (const groupButton of groupButtons) {
+      expect(groupButton).toHaveTextContent("S");
+      expect(groupButton).toHaveTextContent("Int");
+    }
+  });
+
+  it("uses the card-header delete confirmation before removing a skill", async () => {
+    const user = userEvent.setup();
+    const { onUpdate } = renderTab();
+
+    const deleteButtons = screen.getAllByRole("button", {
+      name: "Delete Awareness",
+    });
+
+    expect(deleteButtons.length).toBeGreaterThan(0);
+    for (const deleteButton of deleteButtons) {
+      expect(deleteButton.parentElement?.parentElement).toHaveClass("gap-4");
+    }
+
+    await user.click(deleteButtons[0]);
+    expect(
+      screen.getByText("Delete Awareness from this character?")
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(onUpdate).not.toHaveBeenCalled();
+    expect(
+      screen.queryByText("Delete Awareness from this character?")
+    ).not.toBeInTheDocument();
+
+    await user.click(deleteButtons[0]);
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+
+    expect(onUpdate).toHaveBeenCalledTimes(1);
+    const next = onUpdate.mock.calls[0][0] as SkillEntry[];
+    expect(next.find((entry) => entry.id === "s1")?.level).toBe("untrained");
+  });
+
   it("shows the add affordance when editable", () => {
     renderTab();
+    expect(screen.getAllByRole("button", { name: "Add basic skill" }).length).toBeGreaterThan(0);
     expect(screen.getByRole("button", { name: "Add advanced skill" })).toBeInTheDocument();
   });
 
   it("shows 'View Skills' and no add button in read-only mode", () => {
     renderTab({ editable: false });
+    expect(screen.getAllByRole("button", { name: "View basic skills" }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole("button", { name: "View advanced skills" }).length).toBeGreaterThan(0);
+    expect(screen.queryByRole("button", { name: "Add basic skill" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Add advanced skill" })).not.toBeInTheDocument();
   });
 

@@ -174,7 +174,7 @@ describe("PsychicTab", () => {
     const user = userEvent.setup();
     const { onUpdate } = renderTab();
     await user.click(screen.getAllByRole("button", { name: "Add Minor Power" })[0]);
-    await user.click(await screen.findByText("+ Custom minor power"));
+    await user.click(await screen.findByRole("button", { name: "Custom Minor Power" }));
     await user.type(screen.getByPlaceholderText("Power name..."), "Homebrew Whisper");
     await user.click(screen.getByRole("button", { name: "Half" }));
     await user.type(screen.getByPlaceholderText("e.g. 8"), "6");

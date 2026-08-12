@@ -2,7 +2,11 @@
 
 import { useState, useCallback } from "react";
 import type { SkillAdvanceLevel } from "../../../types/Character";
-import { CHAR_LABEL, type SkillWithComputed } from "./skillsConstants";
+import {
+  CHAR_LABEL,
+  getSkillGroupCharacteristics,
+  type SkillWithComputed,
+} from "./skillsConstants";
 import { charColour } from "../../../ui/sourceStyles";
 import { Chip } from "../../../ui/Chip";
 import { SkillRow } from "./SkillRow";
@@ -25,6 +29,7 @@ export function SkillGroupRow({
 }: SkillGroupRowProps) {
   const [expanded, setExpanded] = useState(false);
   const toggle = useCallback(() => setExpanded((p) => !p), []);
+  const characteristics = getSkillGroupCharacteristics(skills);
 
   return (
     <div className={uiSectionShell + " overflow-hidden"}>
@@ -33,17 +38,27 @@ export function SkillGroupRow({
         aria-expanded={expanded}
         className="w-full flex items-center gap-3 px-3 lg:px-4 py-2.5 lg:py-3 text-left hover:bg-slate-700/40 transition"
       >
-        <span className="text-sm lg:text-base font-semibold text-slate-100 flex-1 min-w-0 truncate">
-          {category}
-        </span>
-        <Chip size="sm" className={`bg-slate-800 font-code shrink-0 ${charColour(skills[0].characteristic)}`}>
-          {CHAR_LABEL[skills[0].characteristic]}
-        </Chip>
-        {skills[0].advanced && (
-          <Chip size="sm" className={`shrink-0 ${colourPurple}`}>
-            Advanced
-          </Chip>
-        )}
+        <div className="flex-1 min-w-0 space-y-1.5">
+          <span className="block text-sm lg:text-base font-semibold text-slate-100 truncate">
+            {category}
+          </span>
+          <div className="flex flex-wrap items-center gap-1.5">
+            {characteristics.map((characteristic) => (
+              <Chip
+                key={characteristic}
+                size="sm"
+                className={`bg-slate-800 font-code shrink-0 ${charColour(characteristic)}`}
+              >
+                {CHAR_LABEL[characteristic]}
+              </Chip>
+            ))}
+            {skills[0].advanced && (
+              <Chip size="sm" className={`shrink-0 ${colourPurple}`}>
+                Advanced
+              </Chip>
+            )}
+          </div>
+        </div>
         <ExpandChevron expanded={expanded} />
       </button>
       {expanded && (
