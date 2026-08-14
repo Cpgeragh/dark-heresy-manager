@@ -436,6 +436,8 @@ export interface TalentAcquisitionDetails {
   exoticWeapon?: string;
   /** Home World selected by Cult Briefing (Culture). */
   homeworldId?: string;
+  /** Required choices and rolls belonging to Traits granted by that Home World. */
+  homeworldTraitChoices?: HomeworldTraitChoices;
   /** Augmetic selected by Cult Briefing (Heretek). */
   augmeticName?: string;
   augmeticReferenceId?: string;
@@ -475,6 +477,47 @@ export interface TalentAcquisitionDetails {
   riteOfPureThoughtReviewed?: boolean;
   riteOriginalDisorders?: InsanityDisorderEntry[];
   riteReplacementDisorderIds?: string[];
+  /** Choices and fixed rolls made when a Trait is acquired directly. */
+  trait?: TraitAcquisitionDetails;
+}
+
+export interface SkinOfIronGrant {
+  rank: 1 | 3 | 5 | 7;
+  kind: "new" | "upgrade";
+  cyberneticId: string;
+  cyberneticReferenceId?: string;
+  previousCraftsmanship?: CyberneticCraftsmanship;
+}
+
+export interface SanctioningAcquisition {
+  resultId: string;
+  resultName: string;
+  rolledValue?: number;
+  ageIncrease?: number;
+  thronesGained?: number;
+}
+
+export interface TraitAcquisitionDetails {
+  soulBound?: {
+    entity: string;
+    consequence: "insanity" | "blindness" | "characteristic" | "mutation";
+    characteristic?: keyof Characteristics;
+    rolledValue?: number;
+    mutationName?: string;
+  };
+  blankSlateSkillIds?: string[];
+  sanctioning?: SanctioningAcquisition;
+  skinOfIronGrants?: SkinOfIronGrant[];
+}
+
+export interface HomeworldTraitChoices {
+  /** Noble Born — second Peer group granted by Supremely Connected. */
+  peerGroup?: string;
+  /** Schola Progenium — Las or SP selections granted by Skill at Arms. */
+  basicWeaponGroup?: "Las" | "SP";
+  pistolWeaponGroup?: "Las" | "SP";
+  /** Mind Cleansed — the once-only starting Insanity roll. */
+  startingInsanity?: number;
 }
 
 export interface TalentEntry {
@@ -492,6 +535,9 @@ export interface TalentEntry {
 export interface TalentsAndTraitsBlock {
   homeworld: string; // HomeworldId (e.g. "hive-world") or "" if unset
   homeworldNotes?: string; // optional freeform background notes
+  homeworldTraitChoices?: HomeworldTraitChoices;
+  /** Acquisition result for the Trait granted by the selected Career. */
+  careerTraitAcquisition?: TraitAcquisitionDetails;
   talents: TalentEntry[];
   traits: TalentEntry[];
 }

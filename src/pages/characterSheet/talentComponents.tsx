@@ -26,10 +26,11 @@ import { TALENT_DESCRIPTIONS } from "../../data/talentDescriptions";
 import { TRAIT_DESCRIPTIONS } from "../../data/traitDescriptions";
 import { sourceColour } from "../../ui/sourceStyles";
 import { PickerBody, PickerModal, PickerRow } from "../../ui/PickerModal";
-import { OptionPickerScreen } from "../../ui/OptionPickerScreen";
+import { OptionPickerScreen, type PickerOption } from "../../ui/OptionPickerScreen";
 import { ArrowLeft, ArrowRight } from "../../ui/PickerArrows";
 import { ExpandChevron } from "../../ui/ExpandChevron";
 import { needsTalentAcquisition } from "./TalentAcquisitionModal";
+import { sanitizePositiveIntegerInput } from "../../utils/formInput";
 import {
   getAvailableTalentChoices,
   getTalentBehaviour,
@@ -81,7 +82,10 @@ export function TalentPickerModal({
         const owned = entries.filter((entry) => entry.talentId === item.id);
         if (useTalentBehaviours) {
           if (!isTalentAvailableInPicker(item as TalentData, entries)) return false;
-        } else if (!item.repeatable && owned.length > 0) {
+        } else if (
+          (!item.repeatable && owned.length > 0) ||
+          ("maxPurchases" in item && item.maxPurchases !== undefined && owned.length >= item.maxPurchases)
+        ) {
           return false;
         }
         return !normalizedQuery || item.name.toLocaleLowerCase().includes(normalizedQuery);
@@ -90,6 +94,7 @@ export function TalentPickerModal({
   }, [entries, listData, query, useTalentBehaviours]);
 
   const talentData = picked as TalentData | null;
+  const traitData = !useTalentBehaviours ? picked as TraitData | null : null;
   const ownedForPicked = picked
     ? entries.filter((entry) => entry.talentId === picked.id)
     : [];
@@ -97,16 +102,26 @@ export function TalentPickerModal({
     ? getTalentBehaviour(talentData)
     : null;
   const isNumeric = talentData?.specialisationMin !== undefined;
-  const choiceOptions = talentData
+  const choiceOptions: readonly PickerOption[] = talentData
     ? useTalentBehaviours
       ? getAvailableTalentChoices(talentData, ownedForPicked)
-      : (talentData.specialisationOptions ?? [])
+      : (traitData?.specialisationOptions ?? []).map((option) => {
+          const value = typeof option === "string" ? option : option.value;
+          const label = typeof option === "string" ? option : option.label;
+          if (!traitData?.repeatableSpecialisation) return option;
+          const ownedCount = ownedForPicked.filter(
+            (entry) => entry.specialisation?.trim().toLocaleLowerCase() === value.toLocaleLowerCase()
+          ).length;
+          return { value, label, ownedCount };
+        })
     : [];
   const composedSpecialisation = detailChoice?.displayPrefix
     ? `${detailChoice.displayPrefix}: ${specialisation.trim()}`
     : specialisation.trim();
   const duplicateChoice =
-    composedSpecialisation.length > 0 && hasTalentChoice(ownedForPicked, composedSpecialisation);
+    composedSpecialisation.length > 0 &&
+    !traitData?.repeatableSpecialisation &&
+    hasTalentChoice(ownedForPicked, composedSpecialisation);
 
   const numericValid = () => {
     if (!talentData) return false;
@@ -198,23 +213,35 @@ export function TalentPickerModal({
             ) : isNumeric ? (
               <>
                 <input
-                  type="number"
+                  type={traitData?.positiveIntegerInput ? "text" : "number"}
+                  inputMode="numeric"
                   value={specialisation}
-                  onChange={(event) => setSpecialisation(event.target.value)}
+                  onChange={(event) => {
+                    const next = event.target.value;
+                    if (traitData?.positiveIntegerInput) {
+                      setSpecialisation(sanitizePositiveIntegerInput(next));
+                    } else if (/^\d*$/.test(next)) {
+                      setSpecialisation(next);
+                    }
+                  }}
                   onKeyDown={(event) => {
                     if (event.key === "Enter" && canAdd) handleSpecAdd();
                   }}
                   min={talentData.specialisationMin}
                   max={talentData.specialisationMax}
                   step={1}
-                  placeholder={talentData.specialisationLabel ?? "Value…"}
+                  placeholder={
+                    traitData?.specialisationPlaceholder ?? talentData.specialisationLabel ?? "Value…"
+                  }
                   className={editableInputClass(true)}
                 />
-                <p className={`text-xs ${uiTextPlaceholder}`}>
-                  {talentData.specialisationMax !== undefined
-                    ? `Whole number ${talentData.specialisationMin}–${talentData.specialisationMax}.`
-                    : `Whole number, ${talentData.specialisationMin} or higher.`}
-                </p>
+                {!traitData?.hideSpecialisationHelp && (
+                  <p className={`text-xs ${uiTextPlaceholder}`}>
+                    {talentData.specialisationMax !== undefined
+                      ? `Whole number ${talentData.specialisationMin}–${talentData.specialisationMax}.`
+                      : `Whole number, ${talentData.specialisationMin} or higher.`}
+                  </p>
+                )}
               </>
             ) : (
               <input
@@ -280,9 +307,11 @@ export function TalentPickerModal({
           (!useTalentBehaviours && (row.specialisationOptions?.length ?? 0) > 0);
         const usesTextEntry =
           row.hasSpecialisation || itemBehaviour?.kind === "repeatable-free-text";
-        const opensAcquisition = useTalentBehaviours && needsTalentAcquisition(
-          { uid: "picker-preview", talentId: row.id, name: row.name },
-          { homeworld: "", talents: [...entries], traits: [] }
+        const opensAcquisition = Boolean(!useTalentBehaviours && (row as TraitData).acquisition) || (
+          useTalentBehaviours && needsTalentAcquisition(
+            { uid: "picker-preview", talentId: row.id, name: row.name },
+            { homeworld: "", talents: [...entries], traits: [] }
+          )
         );
         const opensNextStep = usesChoicePicker || usesTextEntry || opensAcquisition;
         return (
@@ -358,6 +387,7 @@ interface EntryCardProps {
   removable?: boolean;
   deletionBlockedMessage?: string;
   statusAfterSource?: boolean;
+  deletionNoun?: "Talent" | "Trait";
 }
 
 export function EntryCard({
@@ -371,6 +401,7 @@ export function EntryCard({
   removable = true,
   deletionBlockedMessage,
   statusAfterSource = false,
+  deletionNoun = "Talent",
 }: EntryCardProps) {
   const [deleteArmed, setDeleteArmed] = useState(false);
   const shownName = displayName ?? entry.name;
@@ -426,7 +457,7 @@ export function EntryCard({
 
       {deleteArmed && (
         <PickerModal
-          title={deletionBlockedMessage ? "Cannot Delete Talent" : "Delete Talent"}
+          title={deletionBlockedMessage ? `Cannot Delete ${deletionNoun}` : `Delete ${deletionNoun}`}
           query=""
           onQueryChange={() => undefined}
           onClose={() => setDeleteArmed(false)}

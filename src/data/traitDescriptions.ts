@@ -15,7 +15,7 @@ export const TRAIT_DESCRIPTIONS: Record<string, string> = {
     "Automatically fails all sight-based Tests and all Ballistic Skill Tests. Takes a –30 penalty to Weapon Skill Tests and most other Tests that ordinarily involve vision.",
   "brutal-charge": "Deals an extra 3 points of Damage when charging.",
   burrower:
-    "Can burrow through soil, rock, and sand; some can burrow through metal. Leaves a tunnel behind — creatures one size smaller may traverse it freely. 50% chance per Round the tunnel collapses.",
+    "Can move through solid objects by burrowing. This Trait always includes a number indicating its speed. It can burrow through soil, rock, and sand; some can burrow through metal. It leaves a tunnel behind — creatures one size smaller may traverse it freely. There is a 50% chance each Round that the tunnel collapses.",
   crawler:
     "Movement equals half Agility Bonus. Takes no penalties for moving over Difficult Terrain.",
   daemonic:
@@ -23,10 +23,10 @@ export const TRAIT_DESCRIPTIONS: Record<string, string> = {
   "dark-sight":
     "Sees normally in all levels of darkness. Never takes penalties for dim or absent lighting.",
   fear: "Characters who encounter this creature must pass a Willpower Test, modified by the Fear Rating. On failure, roll on the Shock Table, adding +10 per degree of failure. Fear Rating: 1 Disturbing (0), 2 Frightening (–10), 3 Horrifying (–20), 4 Terrifying (–30).",
-  flyer: "Can fly at a speed listed in the creature entry.",
+  flyer: "Can fly at the selected speed.",
   "from-beyond":
     "Immune to Fear, Pinning, Insanity Points, and Psychic Powers used to cloud, control, or delude its mind.",
-  hoverer: "Can fly up to two metres off the ground. Speed is listed in the creature entry.",
+  hoverer: "Can fly up to two metres off the ground at the selected speed.",
   incorporeal:
     "Insubstantial and weightless; may pass through solid objects. Gains +30 to Concealment Tests when hiding inside something. May become completely silent, automatically passing Silent Move Tests. Immune to normal weapons — only Daemons, Psychic Powers, warp creatures, other incorporeal creatures, and force weapons can harm it. Cannot normally affect non-incorporeal creatures without a special ability or Talent. Cannot pass through Geller fields or similar barriers.",
   machine:
@@ -40,7 +40,7 @@ export const TRAIT_DESCRIPTIONS: Record<string, string> = {
   phase:
     "Can become incorporeal or corporeal by spending a Half Action. Functions as the Incorporeal trait while insubstantial, except cannot cross psychically charged barriers, holy wards, Geller fields, or void shields.",
   possession:
-    "Can attempt to possess a mortal body using a Full Action within a few metres. Entity and target make Opposed Willpower Tests each Round; the first to accumulate five cumulative degrees of success wins. A repelled entity cannot try again for 24 hours and takes 1d10 Damage. During possession, the victim gains +10 Strength and Toughness and 1d10 Wounds, using the entity's mental stats and powers. Surviving possession permanently reduces Toughness and Willpower by 2d10 and inflicts 1d10 Insanity Points.",
+    "Can attempt to possess a mortal body using a Full Action within a few metres. Entity and target make Opposed Willpower Tests each Round; the first to accumulate five cumulative degrees of success wins. A repelled entity cannot try again for 24 hours and takes 1d10 Damage. During possession, the victim gains +10 Strength and Toughness and 1d10 Wounds, using the entity's mental stats and powers. The entity may recall the victim's memories and skills with a successful Intelligence Test. Daemonic possession may immediately mutate the victim and cause further mutation over time. Surviving possession permanently reduces Toughness and Willpower by 2d10 and inflicts 1d10 Insanity Points.",
   quadruped:
     "Movement equals twice the Agility Bonus. Creatures with more than four legs gain an additional ×1 multiplier per extra pair of legs.",
   regeneration:
@@ -49,20 +49,20 @@ export const TRAIT_DESCRIPTIONS: Record<string, string> = {
   "sonar-sense":
     "Perceives all solid objects within 30 metres via echolocation. Other creatures within range may detect the keening with a Difficult (–10) Awareness Test.",
   "soul-bound":
-    "Soul is bound to a higher power for protection. Gains an extra d10 on Perils of the Warp rolls, discarding whichever to get a more favourable result. Upon binding, choose one effect: 1d10 Insanity Points, permanent loss of sight, permanent loss of 1d10 from one Characteristic, or a random mutation (Ruinous Powers only).",
+    "Soul is bound to a chosen higher power or being for protection, leaving the character permanently indebted to that entity. Gains an extra d10 on Perils of the Warp rolls, discarding whichever to get a more favourable result. Upon binding, choose one effect: 1d10 Insanity Points, permanent loss of sight, permanent loss of 1d10 from one Characteristic, or a random mutation (Ruinous Powers only).",
   stampede:
     "On a failed Willpower Test, automatically charges in a straight line overrunning everything in its path, dealing Natural Weapon Damage (or 1d5+SB Impact if it has none). Spreads to all creatures within sight. Continues until the threat is no longer visible or for 1d10 minutes, whichever is last.",
   "strange-physiology":
     "The creature's alien physiology means it dies only when Damage equals or exceeds its Wounds.",
   "stuff-of-nightmares":
-    "Completely immune to poison, disease, the need to breathe, most environmental hazards, Blood Loss, Stunning, and any Critical result — unless caused by a Psychic Power, force weapon, or holy attack.",
+    "Completely immune to poison, disease, the need to breathe, most environmental hazards, Blood Loss, Stunning, and any Critical result other than one that would destroy the creature outright, unless caused by a Psychic Power, force weapon, or holy attack.",
   sturdy: "+20 to Tests made to resist Grappling and the Takedown talent.",
   toxic:
     "Delivers poison via natural attacks, contact, or stench. Targets must pass a Toughness Test or suffer 1d10 Damage ignoring Armour. Variations are listed in the creature entry.",
   "unnatural-characteristic":
-    "Double the Bonus of one Characteristic. May be taken multiple times; each additional application to the same Characteristic increases the multiplier by 1 (×2, ×3, ×4 etc.). Does not increase movement even if applied to Agility. If Daemonic and Unnatural Toughness both apply, do not multiply Toughness Bonus twice; add 1 to the Unnatural Toughness multiplier instead.",
+    "Double the Bonus of one Characteristic. May be taken multiple times; each additional application to the same Characteristic increases the multiplier by 1 (×2, ×3, ×4 etc.). During a successful Opposed Characteristic Test, add the Bonus multiplier to the degrees of success. Does not increase movement even if applied to Agility. If Daemonic and Unnatural Toughness both apply, do not multiply Toughness Bonus twice; add 1 to the Unnatural Toughness multiplier instead.",
   "unnatural-senses":
-    "Perceives surroundings by means other than sight or hearing. Range is listed in the creature entry, typically 15 metres.",
+    "Perceives surroundings by means other than sight or hearing, out to the selected range in metres.",
   "unnatural-speed":
     "Doubles Agility Bonus for movement, applied after other modifiers from size and Traits.",
   "warp-instability":
@@ -72,7 +72,7 @@ export const TRAIT_DESCRIPTIONS: Record<string, string> = {
 
   // ─── Core Rulebook — Career Traits ──────────────────────────────────────────
   "mechanicus-implants":
-    "You bear the sacred implants of the Adeptus Mechanicus: an Electro-Graft (data port interface), Electoo Inductors (bio-electrical power siphon), a Respirator Unit (+20 to resist airborne toxins and gas weapons; includes a vox-synthesiser), a Cyber-Mantle (implant anchorage framework), a Potentia Coil (power storage), and Cranial Circuitry (cognitive augmentation).",
+    "You bear the sacred implants of the Adeptus Mechanicus: an Electro-Graft (once properly trained, it permits data-port and data-net interfaces), Electoo Inductors (emit or siphon bio-electrical power), a Respirator Unit (+20 to resist airborne toxins and gas weapons; includes a vox-synthesiser), a Cyber-Mantle (implant anchorage framework), a Potentia Coil (power storage), and Cranial Circuitry (cognitive augmentation).",
   "sanctioned-psyker":
     "Taken aboard the Black Ships to Holy Terra and sanctioned by agents of the Golden Throne through painful rituals that test the soul against the psychic predators of the warp. Roll on Table 1-5: Sanctioning Side Effects to determine the mark left by the sanctioning. Starting age is increased by 3d10 years.",
 

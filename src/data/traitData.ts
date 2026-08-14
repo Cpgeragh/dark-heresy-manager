@@ -8,7 +8,12 @@ export interface TraitData {
   source: SkillSource;
   hasSpecialisation: boolean;
   specialisationLabel?: string;
-  specialisationOptions?: readonly string[];
+  specialisationOptions?: readonly (string | { value: string; label: string })[];
+  /** Allows the same fixed specialisation to be acquired more than once. */
+  repeatableSpecialisation?: boolean;
+  specialisationPlaceholder?: string;
+  hideSpecialisationHelp?: boolean;
+  positiveIntegerInput?: boolean;
   /** Present on numeric specialisations — signals integer-only input and sets the lower bound. */
   specialisationMin?: number;
   /** Present on numeric specialisations with a defined upper bound. */
@@ -16,6 +21,8 @@ export interface TraitData {
   prerequisites?: string;
   description?: string;
   repeatable?: boolean;
+  maxPurchases?: number;
+  acquisition?: "soul-bound" | "blank-slate" | "sanctioned-psyker" | "skin-of-iron";
 }
 
 export const TRAIT_LIST: readonly TraitData[] = [
@@ -36,7 +43,11 @@ export const TRAIT_LIST: readonly TraitData[] = [
   { id: "bestial", name: "Bestial", source: SkillSource.CR, hasSpecialisation: false },
   { id: "blind", name: "Blind", source: SkillSource.CR, hasSpecialisation: false },
   { id: "brutal-charge", name: "Brutal Charge", source: SkillSource.CR, hasSpecialisation: false },
-  { id: "burrower", name: "Burrower", source: SkillSource.CR, hasSpecialisation: false },
+  {
+    id: "burrower", name: "Burrower", source: SkillSource.CR, hasSpecialisation: true,
+    specialisationLabel: "Speed", specialisationPlaceholder: "1+",
+    hideSpecialisationHelp: true, positiveIntegerInput: true, specialisationMin: 1,
+  },
   { id: "crawler", name: "Crawler", source: SkillSource.CR, hasSpecialisation: false },
   { id: "daemonic", name: "Daemonic", source: SkillSource.CR, hasSpecialisation: false },
   { id: "dark-sight", name: "Dark Sight", source: SkillSource.CR, hasSpecialisation: false },
@@ -45,21 +56,36 @@ export const TRAIT_LIST: readonly TraitData[] = [
     name: "Fear",
     source: SkillSource.CR,
     hasSpecialisation: true,
-    specialisationLabel: "Rating (1–4)",
-    specialisationMin: 1,
-    specialisationMax: 4,
+    specialisationLabel: "Fear Rating",
+    specialisationOptions: [
+      { value: "1", label: "1 — Disturbing (0)" },
+      { value: "2", label: "2 — Frightening (−10)" },
+      { value: "3", label: "3 — Horrifying (−20)" },
+      { value: "4", label: "4 — Terrifying (−30)" },
+    ],
   },
-  { id: "flyer", name: "Flyer", source: SkillSource.CR, hasSpecialisation: false },
+  {
+    id: "flyer", name: "Flyer", source: SkillSource.CR, hasSpecialisation: true,
+    specialisationLabel: "Speed", specialisationPlaceholder: "1+",
+    hideSpecialisationHelp: true, positiveIntegerInput: true, specialisationMin: 1,
+  },
   { id: "from-beyond", name: "From Beyond", source: SkillSource.CR, hasSpecialisation: false },
-  { id: "hoverer", name: "Hoverer", source: SkillSource.CR, hasSpecialisation: false },
+  {
+    id: "hoverer", name: "Hoverer", source: SkillSource.CR, hasSpecialisation: true,
+    specialisationLabel: "Speed", specialisationPlaceholder: "1+",
+    hideSpecialisationHelp: true, positiveIntegerInput: true, specialisationMin: 1,
+  },
   { id: "incorporeal", name: "Incorporeal", source: SkillSource.CR, hasSpecialisation: false },
   {
     id: "machine",
     name: "Machine",
     source: SkillSource.CR,
     hasSpecialisation: true,
-    specialisationLabel: "Armour Value",
+    specialisationLabel: "Armour Points",
+    specialisationPlaceholder: "1–5",
+    positiveIntegerInput: true,
     specialisationMin: 1,
+    specialisationMax: 5,
   },
   { id: "multiple-arms", name: "Multiple Arms", source: SkillSource.CR, hasSpecialisation: false },
   {
@@ -67,7 +93,10 @@ export const TRAIT_LIST: readonly TraitData[] = [
     name: "Natural Armour",
     source: SkillSource.CR,
     hasSpecialisation: true,
-    specialisationLabel: "Armour Value",
+    specialisationLabel: "Armour Points",
+    specialisationPlaceholder: "1+",
+    hideSpecialisationHelp: true,
+    positiveIntegerInput: true,
     specialisationMin: 1,
   },
   {
@@ -85,10 +114,19 @@ export const TRAIT_LIST: readonly TraitData[] = [
     name: "Size",
     source: SkillSource.CR,
     hasSpecialisation: true,
-    specialisationLabel: "Category",
+    specialisationLabel: "Size Category",
+    specialisationOptions: [
+      "Minuscule",
+      "Puny",
+      "Scrawny",
+      "Average",
+      "Hulking",
+      "Enormous",
+      "Massive",
+    ],
   },
   { id: "sonar-sense", name: "Sonar Sense", source: SkillSource.CR, hasSpecialisation: false },
-  { id: "soul-bound", name: "Soul-bound", source: SkillSource.CR, hasSpecialisation: false },
+  { id: "soul-bound", name: "Soul-bound", source: SkillSource.CR, hasSpecialisation: false, acquisition: "soul-bound" },
   { id: "stampede", name: "Stampede", source: SkillSource.CR, hasSpecialisation: false },
   {
     id: "strange-physiology",
@@ -122,12 +160,18 @@ export const TRAIT_LIST: readonly TraitData[] = [
       "Fellowship",
     ],
     repeatable: true,
+    repeatableSpecialisation: true,
   },
   {
     id: "unnatural-senses",
     name: "Unnatural Senses",
     source: SkillSource.CR,
-    hasSpecialisation: false,
+    hasSpecialisation: true,
+    specialisationLabel: "Range (metres)",
+    specialisationPlaceholder: "15+",
+    hideSpecialisationHelp: true,
+    positiveIntegerInput: true,
+    specialisationMin: 1,
   },
   {
     id: "unnatural-speed",
@@ -162,6 +206,7 @@ export const TRAIT_LIST: readonly TraitData[] = [
     name: "Sanctioned Psyker",
     source: SkillSource.CR,
     hasSpecialisation: false,
+    acquisition: "sanctioned-psyker",
   },
 
   // ─── Disciples of the Dark Gods ─────────────────────────────────────────────
@@ -200,7 +245,15 @@ export const TRAIT_LIST: readonly TraitData[] = [
     source: SkillSource.LW,
     hasSpecialisation: false,
   },
-  { id: "skin-of-iron", name: "Skin of Iron", source: SkillSource.LW, hasSpecialisation: false },
+  {
+    id: "skin-of-iron",
+    name: "Skin of Iron",
+    source: SkillSource.LW,
+    hasSpecialisation: false,
+    repeatable: true,
+    maxPurchases: 4,
+    acquisition: "skin-of-iron",
+  },
   {
     id: "excommunicate-mechanicum",
     name: "Excommunicate Mechanicum",
@@ -262,7 +315,7 @@ export const TRAIT_LIST: readonly TraitData[] = [
   { id: "homeworld-through-a-mirror-darkly", name: "Through a Mirror Darkly", source: SkillSource.IH, hasSpecialisation: false },
 
   // ─── Book of Judgement ─────────────────────────────────────────────────────
-  { id: "blank-slate", name: "Blank Slate", source: SkillSource.BoJ, hasSpecialisation: false },
+  { id: "blank-slate", name: "Blank Slate", source: SkillSource.BoJ, hasSpecialisation: false, acquisition: "blank-slate" },
 ];
 
 export type TraitId = (typeof TRAIT_LIST)[number]["id"];

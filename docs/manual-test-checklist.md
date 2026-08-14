@@ -344,10 +344,31 @@ trait that has one (e.g. Unnatural Characteristic).
 
 ### How to test this page
 
-Repeat the fixed-list, numeric, and free-text specialisation procedure from Talents using Traits that support each mode. Add enough traits to force both columns to grow and scroll, then test at narrow, medium, and wide widths. Refresh before removing entries so persistence and layout are both exercised.
+Use a disposable character. Test ordinary, fixed-choice, numeric, repeatable,
+and acquisition-based Traits, refreshing after each group. Keep Characteristics,
+Skills, Insanity, Armour, Cybernetics, Talents, and Weapon Training available for
+cross-checking permanent effects and their named sources.
 
-- [ ] Add and remove Traits; duplicates blocked by the picker (unless repeatable, see §6)
-- [ ] Two-column layout holds up with a long list (10+) without overlapping or clipping
+- [ ] Add and remove an ordinary Trait; deletion uses the same Delete/Cancel confirmation as Talents
+- [ ] In view-only mode, picker rows do not activate; in edit mode, each pressed row alone shows the shared touch feedback
+- [ ] Secondary choice screens use a forward arrow to enter and a back arrow to return, preserving the parent picker position
+- [ ] Fear uses the four labelled ratings; Size uses Minuscule through Massive; both disappear after one selection
+- [ ] Natural Armour accepts digits only and requires 1+; Machine accepts only 1–5; Burrower, Flyer, Hoverer, and Unnatural Senses require a positive whole-number speed/range
+- [ ] Unnatural Characteristic groups different Characteristics under one expandable card; repeated copies of the same Characteristic show **Owned: N** and deleting lowers that count by one
+- [ ] Add 10+ mixed Traits: two natural-height columns remain aligned without stretched cards, blank gaps, overlap, or clipping
+- [ ] Natural Armour and Armour Plating add named Misc AP sources; only the strongest Machine value applies, including Machine granted by The Flesh is Weak
+- [ ] Multiple Arms, Labourer Build, Fit For Purpose, Superior Origins, Soul-bound, and Sanctioning changes appear on the affected Characteristic with the Trait named as the source; deletion reverses them
+- [ ] Size, Amorphous, Crawler, Quadruped, and Unnatural Speed update movement correctly; Unnatural Agility does not multiply movement; Burrow/Fly/Hover speeds appear as separate modes
+- [ ] Wary shows +1 Initiative; relevant Homeworld Traits update Basic/Trained Skill use and modifiers with named Trait sources
+- [ ] Soul-bound requires the bound entity and one permanent consequence; test Insanity, blindness, Characteristic loss, and mutation routes, including required rolls/text and deletion reversal
+- [ ] Blank Slate requires exactly three Common Lore, Forbidden Lore, Scholastic Lore, or Trade Skills; all three count as Trained and gain +10, and removal restores their independent state
+- [ ] Sanctioned Psyker requires one of all 13 source-table results plus the 3d10 age increase; check an Insanity result, both +3 Characteristic results, Reconstructed Skull, Throne Wed/Chem Geld, and Optical Rupture/Common Cybernetic Senses
+- [ ] Choosing Imperial Psyker records Sanctioned Psyker as a read-only Career Trait; changing Career removes its derived effects and any Optical Rupture implant without touching independent copies
+- [ ] Choosing Tech-Priest shows Mechanicus Implants as a read-only Career Trait and lists all six granted implants on Cybernetics
+- [ ] Skin of Iron Rank 1 installs one Common cybernetic; Ranks 3, 5, and 7 each allow a new Common cybernetic or an existing implant upgrade to Good; the card shows **Owned: N/4**, disappears at four, and deleting the latest grant removes/restores only that grant
+- [ ] Homeworld Traits appear read-only on Traits. Noble Born records its extra Peer group; Schola records both weapon groups; Mind Cleansed records 3–7 starting Insanity; changing Homeworld removes the old derived effects without removing independent copies
+- [ ] Cult Briefing (Culture) collects the selected Homeworld's required choices and grants the same read-only Traits, Talent/Weapon Training effects, and named sources
+- [ ] Description popups include the audited details for Burrower, Possession, Soul-bound, Stuff of Nightmares, Unnatural Characteristic, Unnatural Senses, and Mechanicus Implants
 
 ## 9. Weapons
 
@@ -609,7 +630,7 @@ Homeworld, Career, Rank, and Divination — the cascading-selection page.
 
 ### How to test this page
 
-Use a fresh character and record the header plus stored Background state before opening the page. Select valid Homeworld/Career/Rank combinations, then deliberately invalidate the cascade by changing each parent. Refresh after every cascade. Inspect the picker metadata and Divination modal, then compare Skills and Traits to confirm whether starting benefits are informational or automatically applied.
+Use a fresh character and record the header plus stored Background state before opening the page. Select valid Homeworld/Career/Rank combinations, then deliberately invalidate the cascade by changing each parent. Refresh after every cascade. Inspect the picker metadata and Divination modal, then compare Skills, Traits, Talents, Weapon Training, Characteristics, Insanity, and Cybernetics to confirm the recorded starting benefits.
 
 - [ ] Pick a Homeworld, then a Career it supports, then a Rank — all three stay set
 - [ ] Switch to a Homeworld that does *not* support the current Career — Career and Rank both clear automatically
@@ -618,13 +639,11 @@ Use a fresh character and record the header plus stored Background state before 
 - [ ] Rank picker shows tier, XP level, and path (if the rank branches into named paths) for each rank
 - [ ] Divination picker sets the result text and info modal correctly
 
-**Watch for:** selecting a Homeworld does **not** automatically add its
-starting skills or traits anywhere else in the app — the info popup shows
-you what you're meant to have (e.g. "Speak Language (Tribal Dialect)" for
-Feral World), but nothing adds it to the Skills or Traits tab for you. That
-may well be intentional, but it's worth confirming it's not expected to
-auto-apply, since Corruption's characteristic modifiers *do* auto-apply
-elsewhere in this same app, so the inconsistency is easy to assume is a bug.
+**Expected:** Homeworld Traits are calculated from the selected Homeworld and
+shown as read-only entries on Traits. Their permanent mechanical effects and
+grants apply across the relevant pages without saving duplicate Trait entries.
+Starting Skills that are merely listed by the Homeworld remain informational;
+Trait rules that explicitly change Skill use are applied automatically.
 
 - [ ] Open a brand-new character (freshly created by the DM, never opened before) straight to Background — the character factory sets its internal homeworld to Feral World even though the header's homeworld text starts blank. Confirm what actually displays (blank, or Feral World pre-selected) and that the picker and the header text agree with each other rather than contradicting
 

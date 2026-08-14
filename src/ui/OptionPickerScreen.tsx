@@ -6,7 +6,12 @@ import { uiItemName } from "./editableStyles";
 import { Chip } from "./Chip";
 import { colourAmberFaint } from "./colourTokens";
 
-export type PickerOption = string | { value: string; label: string; owned?: boolean };
+export type PickerOption = string | {
+  value: string;
+  label: string;
+  owned?: boolean;
+  ownedCount?: number;
+};
 
 export function OptionPickerScreen({
   title,
@@ -36,6 +41,7 @@ export function OptionPickerScreen({
         const value = typeof option === "string" ? option : option.value;
         const label = typeof option === "string" ? option : option.label;
         const owned = typeof option === "string" ? false : option.owned;
+        const ownedCount = typeof option === "string" ? undefined : option.ownedCount;
         return (
           <PickerRow
             key={value}
@@ -44,7 +50,11 @@ export function OptionPickerScreen({
           >
             <span className="flex w-full items-center justify-between gap-3">
               <span className={`${uiItemName} group-hover:text-white`}>{label}</span>
-              {owned && <Chip className={colourAmberFaint}>Owned</Chip>}
+              {ownedCount !== undefined && ownedCount > 0 ? (
+                <Chip className={colourAmberFaint}>Owned: {ownedCount}</Chip>
+              ) : owned ? (
+                <Chip className={colourAmberFaint}>Owned</Chip>
+              ) : null}
             </span>
           </PickerRow>
         );

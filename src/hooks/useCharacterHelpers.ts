@@ -35,7 +35,8 @@ export function useCharacterHelpers({ character }: UseCharacterHelpersProps) {
       if (!character) return rawTotal;
       const modifierTotals = getCharacteristicModifierTotals(
         character.corruption,
-        character.talentsAndTraits
+        character.talentsAndTraits,
+        character.header?.career
       );
       return Math.max(1, rawTotal + (modifierTotals[statKey] ?? 0));
     },

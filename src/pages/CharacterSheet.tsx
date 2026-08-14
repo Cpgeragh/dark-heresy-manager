@@ -494,6 +494,7 @@ export default function CharacterSheet({
             <InsanityTab
               insanity={character.insanity}
               talents={character.talentsAndTraits}
+              career={character.header.career}
               editable={allowedToEdit}
               onUpdate={handleUpdateInsanity}
             />
@@ -515,6 +516,7 @@ export default function CharacterSheet({
               editable={allowedToEdit}
               corruption={character.corruption}
               talents={character.talentsAndTraits}
+              career={character.header.career}
               updateCharacteristic={updateCharacteristic}
             />
           )}
@@ -559,8 +561,11 @@ export default function CharacterSheet({
           {activeTab === "traits" && (
             <TraitsTab
               talents={character.talentsAndTraits}
+              career={character.header.career}
+              cybernetics={character.cybernetics ?? []}
               editable={allowedToEdit}
               onUpdateTalents={handleUpdateTalents}
+              onUpdateCybernetics={handleUpdateCybernetics}
             />
           )}
 
@@ -603,6 +608,7 @@ export default function CharacterSheet({
               onUpdateArcheotech={handleUpdateArcheotech}
               traits={character.talentsAndTraits.traits}
               talents={character.talentsAndTraits}
+              career={character.header.career}
             />
           )}
 
@@ -623,6 +629,7 @@ export default function CharacterSheet({
               onUpdateMelee={handleUpdateMeleeWeapons}
               archeotech={character.archeotech ?? []}
               onUpdateArcheotech={handleUpdateArcheotech}
+              career={character.header.career}
             />
           )}
 
@@ -700,10 +707,12 @@ export default function CharacterSheet({
             <BackgroundTab
               header={character.header}
               talents={character.talentsAndTraits}
+              cybernetics={character.cybernetics ?? []}
               editable={allowedToEdit}
               playerName={ownerName}
               onUpdateHeader={handleUpdateHeader}
               onUpdateTalents={handleUpdateTalents}
+              onUpdateCybernetics={handleUpdateCybernetics}
             />
           )}
 

@@ -16,6 +16,7 @@ import type {
   TalentsAndTraitsBlock,
   WeaponTrainingTalentId,
   WeaponTrainingBlock,
+  HomeworldTraitChoices,
 } from "../../types/Character";
 import {
   isIntegratedMeleeWeapon,
@@ -48,6 +49,10 @@ import {
   isPurityArcheotech,
 } from "../../features/talents/purityOfFlesh";
 import { getPsyRatingAcquisitionGrants } from "./talentUtils";
+import {
+  HomeworldTraitAcquisitionModal,
+  homeworldNeedsTraitAcquisition,
+} from "./HomeworldTraitAcquisitionModal";
 
 export interface TalentAcquisitionResult {
   entry: TalentEntry;
@@ -189,6 +194,8 @@ export function TalentAcquisitionModal({
   const [fatalReplacements, setFatalReplacements] = useState<Record<string, string>>({});
   const [purityStage, setPurityStage] = useState<"purity" | "reformed-skin">("purity");
   const [activePicker, setActivePicker] = useState<AcquisitionPicker | null>(null);
+  const [homeworldTraitChoices, setHomeworldTraitChoices] = useState<HomeworldTraitChoices | undefined>();
+  const [showHomeworldTraitAcquisition, setShowHomeworldTraitAcquisition] = useState(false);
   const acquisitionScrollPositionRef = useRef(0);
 
   const homeworldOptions = HOMEWORLD_LIST.filter(
@@ -275,6 +282,9 @@ export function TalentAcquisitionModal({
           (!selectingConcealedWeapon || (replacement && concealedWeaponChoice))
         );
       }
+      if (entry.specialisation === "Culture" && homeworldNeedsTraitAcquisition(primaryChoice)) {
+        return Boolean(primaryChoice && homeworldTraitChoices);
+      }
       return Boolean(primaryChoice);
     }
     if (entry.talentId === "sicarius-tutoring") return Boolean(primaryChoice.trim());
@@ -307,6 +317,7 @@ export function TalentAcquisitionModal({
     fatalReplacements,
     removedDisorderIds,
     replacementDisorders,
+    homeworldTraitChoices,
   ]);
 
   const complete = () => {
@@ -380,7 +391,13 @@ export function TalentAcquisitionModal({
       } else if (entry.specialisation === "Blood") {
         completedEntry = { ...entry, acquisition: { weaponTrainingId: primaryChoice as WeaponTrainingTalentId } };
       } else if (entry.specialisation === "Culture") {
-        completedEntry = { ...entry, acquisition: { homeworldId: primaryChoice } };
+        completedEntry = {
+          ...entry,
+          acquisition: {
+            homeworldId: primaryChoice,
+            ...(homeworldTraitChoices ? { homeworldTraitChoices } : {}),
+          },
+        };
       }
     } else if (entry.talentId === "sicarius-tutoring") {
       completedEntry = entry.specialisation === "Guardsman"
@@ -619,7 +636,13 @@ export function TalentAcquisitionModal({
         title: "Another Home World",
         options: homeworldOptions.map((item) => ({ value: item.id, label: item.name })),
         selected: primaryChoice,
-        onSelect: setPrimaryChoice,
+        onSelect: (value) => {
+          setPrimaryChoice(value);
+          setHomeworldTraitChoices(undefined);
+          if (homeworldNeedsTraitAcquisition(value)) {
+            setShowHomeworldTraitAcquisition(true);
+          }
+        },
       };
       break;
     case "peer-group":
@@ -692,6 +715,22 @@ export function TalentAcquisitionModal({
           setActivePicker(null);
         }}
         onClose={() => setActivePicker(null)}
+      />
+    );
+  }
+
+  if (showHomeworldTraitAcquisition && primaryChoice) {
+    return (
+      <HomeworldTraitAcquisitionModal
+        homeworldId={primaryChoice}
+        onComplete={(choices) => {
+          setHomeworldTraitChoices(choices);
+          setShowHomeworldTraitAcquisition(false);
+        }}
+        onClose={() => {
+          setShowHomeworldTraitAcquisition(false);
+          setActivePicker("homeworld");
+        }}
       />
     );
   }

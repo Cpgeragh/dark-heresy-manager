@@ -25,7 +25,7 @@ const { MOCK_TALENT_LIST } = vi.hoisted(() => ({
     { id: "psy-rating-6", name: "Psy Rating 6", source: "CR", hasSpecialisation: false },
     { id: "touched-by-the-fates", name: "Touched by the Fates", source: "DotDG", hasSpecialisation: false },
     { id: "purity-of-flesh", name: "Purity of Flesh", source: "LW", hasSpecialisation: false },
-    { id: "cult-briefing", name: "Cult Briefing", source: "DH", hasSpecialisation: true, behaviour: { kind: "fixed-single", options: ["Blood", "Heretek", "Pleasure"] } },
+    { id: "cult-briefing", name: "Cult Briefing", source: "DH", hasSpecialisation: true, behaviour: { kind: "fixed-single", options: ["Blood", "Culture", "Heretek", "Pleasure"] } },
     { id: "sicarius-tutoring", name: "Sicarius Tutoring", source: "DH", hasSpecialisation: true, behaviour: { kind: "fixed-single", options: ["Scum"] } },
     { id: "peer", name: "Peer", source: "CR", hasSpecialisation: true, repeatable: true, behaviour: { kind: "fixed-repeatable", options: ["Academics", "Workers"] } },
     { id: "chem-geld", name: "Chem Geld", source: "CR", hasSpecialisation: false },
@@ -361,6 +361,33 @@ describe("TalentsTab", () => {
         }),
       })
     );
+  });
+
+  it("records the choices belonging to a Cult Briefing Culture Homeworld", async () => {
+    const user = userEvent.setup();
+    const onUpdateCharacter = vi.fn();
+    renderTab({ onUpdateCharacter });
+    await user.click(screen.getAllByRole("button", { name: "Add Talent" })[0]);
+    await user.click(screen.getByText("Cult Briefing"));
+    await user.click(screen.getByText("Culture"));
+    await user.click(screen.getByRole("button", { name: "Another Home World" }));
+    await user.click(within(screen.getByRole("dialog", { name: "Another Home World" })).getByRole("button", { name: "Noble Born" }));
+    await user.click(screen.getByRole("button", { name: /Additional Peer group/ }));
+    await user.click(screen.getByText("Mercantile"));
+    await user.click(screen.getByRole("button", { name: "Apply Homeworld" }));
+    await user.click(screen.getByRole("button", { name: "Apply and add Talent" }));
+    expect(onUpdateCharacter).toHaveBeenCalledWith(expect.objectContaining({
+      talentsAndTraits: expect.objectContaining({
+        talents: expect.arrayContaining([
+          expect.objectContaining({
+            acquisition: expect.objectContaining({
+              homeworldId: "noble-born",
+              homeworldTraitChoices: { peerGroup: "Mercantile" },
+            }),
+          }),
+        ]),
+      }),
+    }));
   });
 
   it("allows an already-owned Cult Briefing Pleasure reward and records its source", async () => {

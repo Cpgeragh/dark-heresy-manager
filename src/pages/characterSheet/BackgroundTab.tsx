@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import type { ReactNode } from "react";
-import type { CharacterHeader, TalentsAndTraitsBlock } from "../../types/Character";
+import type { CharacterHeader, CyberneticItem, TalentsAndTraitsBlock } from "../../types/Character";
 import { FormField } from "../../components/FormField";
 import { InfoModal } from "../../components/InfoModal";
 import {
@@ -25,6 +25,12 @@ import { sourceColour } from "../../ui/sourceStyles";
 import { CareerInfoContent, CareerPicker, RankInfoContent, RankPicker } from "./CareerPicker";
 import { DivinationInfoContent, DivinationPicker } from "./DivinationPicker";
 import { HomeworldInfoContent, HomeworldPicker } from "./HomeworldPicker";
+import { TRAIT_LIST } from "../../data/traitData";
+import { TraitAcquisitionModal } from "./TraitAcquisitionModal";
+import {
+  HomeworldTraitAcquisitionModal,
+  homeworldNeedsTraitAcquisition,
+} from "./HomeworldTraitAcquisitionModal";
 
 interface BackgroundTabProps {
   header: CharacterHeader;
@@ -34,6 +40,8 @@ interface BackgroundTabProps {
   playerName: string | null;
   onUpdateHeader: (next: CharacterHeader) => void;
   onUpdateTalents: (next: TalentsAndTraitsBlock) => void;
+  cybernetics?: CyberneticItem[];
+  onUpdateCybernetics?: (next: CyberneticItem[]) => void | Promise<void>;
 }
 
 function BackgroundPickerField({
@@ -92,11 +100,15 @@ export function BackgroundTab({
   playerName,
   onUpdateHeader,
   onUpdateTalents,
+  cybernetics = [],
+  onUpdateCybernetics,
 }: BackgroundTabProps) {
   const [showHomeworldPicker, setShowHomeworldPicker] = useState(false);
   const [showCareerPicker, setShowCareerPicker] = useState(false);
   const [showRankPicker, setShowRankPicker] = useState(false);
   const [showDivinationPicker, setShowDivinationPicker] = useState(false);
+  const [pendingHomeworldId, setPendingHomeworldId] = useState<string | null>(null);
+  const [pendingCareer, setPendingCareer] = useState<CareerData | null>(null);
 
   const selectedHomeworld = HOMEWORLD_LIST.find((hw) => hw.id === talents.homeworld);
   const selectedCareer = findCareerByName(header.career);
@@ -125,6 +137,11 @@ export function BackgroundTab({
   // ── Talent / homeworld helpers ─────────────────────────────────────────────
   const handleHomeworldSelect = useCallback(
     (value: string) => {
+      if (homeworldNeedsTraitAcquisition(value)) {
+        setShowHomeworldPicker(false);
+        setPendingHomeworldId(value);
+        return;
+      }
       const homeworld = HOMEWORLD_LIST.find((entry) => entry.id === value);
       const currentCareerIsAllowed =
         !header.career ||
@@ -132,17 +149,32 @@ export function BackgroundTab({
           (career) => (career.careerName ?? career.name) === header.career
         );
 
-      onUpdateTalents({ ...talents, homeworld: value });
+      onUpdateTalents({
+        ...talents,
+        homeworld: value,
+        homeworldTraitChoices: undefined,
+        ...(currentCareerIsAllowed ? {} : { careerTraitAcquisition: undefined }),
+      });
       if (!currentCareerIsAllowed) {
         onUpdateHeader({ ...header, career: "", rank: "" });
+        if (onUpdateCybernetics) {
+          void onUpdateCybernetics(cybernetics.filter(
+            (item) => item.grantedByTalentEntryUid !== "career:imperial-psyker:sanctioned-psyker"
+          ));
+        }
       }
       setShowHomeworldPicker(false);
     },
-    [header, talents, onUpdateHeader, onUpdateTalents]
+    [cybernetics, header, onUpdateCybernetics, talents, onUpdateHeader, onUpdateTalents]
   );
 
   const handleCareerSelect = useCallback(
     (career: CareerData) => {
+      if (career.name === "Imperial Psyker") {
+        setShowCareerPicker(false);
+        setPendingCareer(career);
+        return;
+      }
       const currentRankBelongsToCareer = career.ranks.some(
         (rank) => rank.name.toLowerCase() === header.rank?.toLowerCase()
       );
@@ -151,9 +183,15 @@ export function BackgroundTab({
         career: career.name,
         rank: currentRankBelongsToCareer ? header.rank : career.startingRank,
       });
+      onUpdateTalents({ ...talents, careerTraitAcquisition: undefined });
+      if (onUpdateCybernetics) {
+        void onUpdateCybernetics(cybernetics.filter(
+          (item) => item.grantedByTalentEntryUid !== "career:imperial-psyker:sanctioned-psyker"
+        ));
+      }
       setShowCareerPicker(false);
     },
-    [header, onUpdateHeader]
+    [cybernetics, header, onUpdateCybernetics, onUpdateHeader, onUpdateTalents, talents]
   );
 
   const handleRankSelect = useCallback(
@@ -402,6 +440,77 @@ export function BackgroundTab({
           onClose={() => setShowCareerPicker(false)}
         />
       )}
+
+      {pendingHomeworldId && (
+        <HomeworldTraitAcquisitionModal
+          homeworldId={pendingHomeworldId}
+          onComplete={(choices) => {
+            const homeworld = HOMEWORLD_LIST.find((entry) => entry.id === pendingHomeworldId);
+            const currentCareerIsAllowed =
+              !header.career ||
+              homeworld?.careers.some(
+                (career) => (career.careerName ?? career.name) === header.career
+              );
+            onUpdateTalents({
+              ...talents,
+              homeworld: pendingHomeworldId,
+              homeworldTraitChoices: choices,
+              ...(currentCareerIsAllowed ? {} : { careerTraitAcquisition: undefined }),
+            });
+            if (!currentCareerIsAllowed) {
+              onUpdateHeader({ ...header, career: "", rank: "" });
+              if (onUpdateCybernetics) {
+                void onUpdateCybernetics(cybernetics.filter(
+                  (item) => item.grantedByTalentEntryUid !== "career:imperial-psyker:sanctioned-psyker"
+                ));
+              }
+            }
+            setPendingHomeworldId(null);
+          }}
+          onClose={() => {
+            setPendingHomeworldId(null);
+            setShowHomeworldPicker(true);
+          }}
+        />
+      )}
+
+      {pendingCareer && (() => {
+        const trait = TRAIT_LIST.find((item) => item.id === "sanctioned-psyker");
+        if (!trait) return null;
+        return (
+          <TraitAcquisitionModal
+            trait={trait}
+            entry={{
+              uid: "career:imperial-psyker:sanctioned-psyker",
+              talentId: trait.id,
+              name: trait.name,
+            }}
+            cybernetics={cybernetics}
+            onComplete={(result) => {
+              const currentRankBelongsToCareer = pendingCareer.ranks.some(
+                (rank) => rank.name.toLowerCase() === header.rank?.toLowerCase()
+              );
+              onUpdateHeader({
+                ...header,
+                career: pendingCareer.name,
+                rank: currentRankBelongsToCareer ? header.rank : pendingCareer.startingRank,
+              });
+              onUpdateTalents({
+                ...talents,
+                careerTraitAcquisition: result.entry.acquisition?.trait,
+              });
+              if (result.cybernetics && onUpdateCybernetics) {
+                void onUpdateCybernetics(result.cybernetics);
+              }
+              setPendingCareer(null);
+            }}
+            onClose={() => {
+              setPendingCareer(null);
+              setShowCareerPicker(true);
+            }}
+          />
+        );
+      })()}
 
       {showRankPicker && selectedCareer && (
         <RankPicker

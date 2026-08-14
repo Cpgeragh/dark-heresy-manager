@@ -13,6 +13,7 @@ import type {
   TalentsAndTraitsBlock,
 } from "../../types/Character";
 import { getTalentInsanityModifierSources } from "../talents/talentEffects";
+import { getTraitInsanityModifierSources } from "../traits/traitEffects";
 import { Button } from "../../ui/Button";
 import { Chip } from "../../ui/Chip";
 import { RemoveButton } from "../../ui/RemoveButton";
@@ -62,6 +63,7 @@ interface InsanityPanelProps {
   onUpdate: (next: InsanityBlock) => void;
   sectionClassName: string;
   talents?: TalentsAndTraitsBlock;
+  career?: string;
 }
 
 type EntryGroup = "trauma" | "disorders";
@@ -459,16 +461,18 @@ function DisordersList({
   return <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No disorders recorded.</p>;
 }
 
-export function InsanityPanel({ insanity, editable, onUpdate, sectionClassName, talents }: InsanityPanelProps) {
+export function InsanityPanel({ insanity, editable, onUpdate, sectionClassName, talents, career }: InsanityPanelProps) {
   const value = useMemo(
     () => insanity ?? { points: 0, disorders: [] },
     [insanity]
   );
   const [showDisorderPicker, setShowDisorderPicker] = useState(false);
   const [showTraumaPicker, setShowTraumaPicker] = useState(false);
-  const talentSources = talents ? getTalentInsanityModifierSources(talents) : [];
-  const talentAdjustment = talentSources.reduce((total, source) => total + source.amount, 0);
-  const effectivePoints = Math.min(100, Math.max(0, value.points + talentAdjustment));
+  const recordedSources = talents
+    ? [...getTalentInsanityModifierSources(talents), ...getTraitInsanityModifierSources(talents, career)]
+    : [];
+  const recordedAdjustment = recordedSources.reduce((total, source) => total + source.amount, 0);
+  const effectivePoints = Math.min(100, Math.max(0, value.points + recordedAdjustment));
   const structuredDisorders = useMemo(
     () => (Array.isArray(value.disorders) ? value.disorders : []),
     [value.disorders]
@@ -490,8 +494,8 @@ export function InsanityPanel({ insanity, editable, onUpdate, sectionClassName, 
   );
 
   const handlePointsChange = useCallback(
-    (points: number) => onUpdate({ ...value, points: Math.max(0, points - talentAdjustment) }),
-    [value, onUpdate, talentAdjustment]
+    (points: number) => onUpdate({ ...value, points: Math.max(0, points - recordedAdjustment) }),
+    [value, onUpdate, recordedAdjustment]
   );
 
   const handleLegacyDisordersChange = useCallback(
@@ -550,14 +554,14 @@ export function InsanityPanel({ insanity, editable, onUpdate, sectionClassName, 
         <div className="inline-flex flex-col items-center gap-2">
           <span className="inline-flex items-center gap-1">
             <span className={uiFormLabel}>Points</span>
-            {talentSources.length > 0 && (
+            {recordedSources.length > 0 && (
               <span className={uiInfoModalWrapper}>
                 <InfoModal
                   title="Insanity Point Adjustments"
                   content={
                     <ul className="space-y-1 text-sm leading-relaxed text-slate-300 lg:text-base">
-                      {talentSources.map((source, index) => (
-                        <li key={index}>{source.name} (Talent): +{source.amount}</li>
+                      {recordedSources.map((source, index) => (
+                        <li key={index}>{source.name} ({source.type}): +{source.amount}</li>
                       ))}
                     </ul>
                   }

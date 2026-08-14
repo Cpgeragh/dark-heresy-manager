@@ -22,7 +22,9 @@ import { SectionHeader } from "../../../ui/SectionHeader";
 import { ErrorState } from "../../../ui/ErrorState";
 import { LoadingState } from "../../../ui/LoadingState";
 import { CYBERNETICS_REFERENCE } from "../../../data/reference/cyberneticsReference";
-import { uiTextPlaceholder } from "../../../ui/editableStyles";
+import { uiItemName, uiSection, uiTextPlaceholder } from "../../../ui/editableStyles";
+import { Chip } from "../../../ui/Chip";
+import { sourceColour } from "../../../ui/sourceStyles";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
 import { useCustomItemLibraryActions } from "../../../hooks/useCustomItemLibraryActions";
 import {
@@ -69,6 +71,7 @@ interface CyberneticsTabProps {
   onUpdateMelee: (next: MeleeWeapon[]) => void | Promise<void>;
   archeotech?: ArcheotechItem[];
   onUpdateArcheotech?: (next: ArcheotechItem[]) => void | Promise<void>;
+  career?: string;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -94,6 +97,7 @@ export function CyberneticsTab({
   onUpdateMelee,
   archeotech,
   onUpdateArcheotech,
+  career,
 }: CyberneticsTabProps) {
   const [showPicker, setShowPicker] = useState(false);
   const [installingConcealedWeapon, setInstallingConcealedWeapon] = useState<{
@@ -783,6 +787,23 @@ export function CyberneticsTab({
       </section>
 
       {/* ── INSTALLED IMPLANTS ────────────────────────────────────────────── */}
+      {career === "Tech-Priest" && (
+        <section className="space-y-3">
+          <SectionHeader>Mechanicus Implants</SectionHeader>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {["Electro-Graft", "Electoo Inductors", "Respirator Unit", "Cyber-Mantle", "Potentia Coil", "Cranial Circuitry"].map((name) => (
+              <div key={name} className={uiSection}>
+                <div className={uiItemName}>{name}</div>
+                <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                  <Chip className={`bg-slate-800/40 font-code ${sourceColour("CR")}`}>CR</Chip>
+                  <Chip className="border-amber-500/60 bg-amber-950/30 text-amber-300">Granted by Mechanicus Implants</Chip>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <SectionHeader>Installed Implants</SectionHeader>

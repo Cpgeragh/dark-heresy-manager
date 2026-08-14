@@ -12,7 +12,7 @@ import type {
 import type { ArmourRef } from "../../../data/reference/armourReference";
 import type { CampaignCustomItem, CustomArmourData } from "../../../types/CustomItems";
 
-import { wornApAt, bionicBonusAt, naturalArmourBonus } from "./armourHelpers";
+import { wornApAt, bionicBonusAt } from "./armourHelpers";
 import { ARMOUR_LOCATION_LABELS, ARMOUR_LOCATION_ORDER } from "../../../constants/locations";
 import { ArmourPicker } from "./ArmourPicker";
 import { ForceFieldPicker } from "./ForceFieldPicker";
@@ -42,7 +42,7 @@ import {
   saveDraftCustomItem,
 } from "../../../services/customItemService";
 import { useToast } from "../../../components/Toast";
-import { getMachineArmourSource } from "../../../features/talents/talentEffects";
+import { getTraitArmourSources } from "../../../features/traits/traitEffects";
 
 interface ArmourTabProps {
   campaignId: string;
@@ -59,6 +59,7 @@ interface ArmourTabProps {
   onUpdateArcheotech?: (next: ArcheotechItem[]) => void | Promise<void>;
   traits?: TalentEntry[];
   talents?: TalentsAndTraitsBlock;
+  career?: string;
 }
 
 interface EditingArmourDefinition {
@@ -165,6 +166,7 @@ export function ArmourTab({
   onUpdateArcheotech,
   traits = [],
   talents,
+  career,
 }: ArmourTabProps) {
   const [showPicker, setShowPicker] = useState(false);
   const [showFieldPicker, setShowFieldPicker] = useState(false);
@@ -562,13 +564,13 @@ export function ArmourTab({
     return <LoadingState>Loading custom armour items…</LoadingState>;
   }
 
-  const naturalBonus = naturalArmourBonus(traits);
-  const machineSource = talents ? getMachineArmourSource(talents) : null;
-  const machineBonus = machineSource?.amount ?? 0;
+  const effectiveTalents = talents ?? { homeworld: "", talents: [], traits };
+  const traitArmourSources = getTraitArmourSources(effectiveTalents, career);
+  const traitArmourBonus = traitArmourSources.reduce((total, source) => total + source.amount, 0);
   const bionicLocations = ARMOUR_LOCATION_ORDER.filter(
     (loc) => bionicBonusAt(loc, cybernetics) > 0
   );
-  const hasMisc = naturalBonus > 0 || machineBonus > 0 || bionicLocations.length > 0;
+  const hasMisc = traitArmourBonus > 0 || bionicLocations.length > 0;
 
   return (
     <div className="space-y-6">
@@ -591,12 +593,11 @@ export function ArmourTab({
                             title="Misc Bonuses"
                             content={
                               <>
-                                {naturalBonus > 0 && (
-                                  <p>Natural Armour: +{naturalBonus} to all locations.</p>
-                                )}
-                                {machineSource && (
-                                  <p>{machineSource.name} (Talent): +{machineBonus} to all locations.</p>
-                                )}
+                                {traitArmourSources.map((source) => (
+                                  <p key={`${source.kind}:${source.name}`}>
+                                    {source.name} ({source.type}): +{source.amount} to all locations.
+                                  </p>
+                                ))}
                                 {bionicLocations.length > 0 && (
                                   <p>
                                     Bionic: +2 at{" "}
@@ -627,7 +628,7 @@ export function ArmourTab({
                     .reduce((sum, a) => sum + (a.ap ?? 0), 0);
                   const ap = Math.max(regularAp, nonStackingArcheotechAp) + stackingAp;
                   const bionic = bionicBonusAt(loc, cybernetics);
-                  const misc = bionic + naturalBonus + machineBonus;
+                  const misc = bionic + traitArmourBonus;
                   const total = ap + toughnessBonus + misc;
                   return (
                     <tr key={loc} className="hover:bg-slate-800/40 transition">

@@ -89,4 +89,16 @@ describe("OptionPickerScreen with value/label pairs", () => {
     const rendingButton = screen.getByText("Rending").closest("button")!;
     expect(rendingButton.className).toContain("bg-slate-800");
   });
+
+  it("shows a numbered Owned chip when an option supplies an owned count", () => {
+    render(
+      <OptionPickerScreen
+        title="Characteristic"
+        options={[{ value: "Weapon Skill", label: "Weapon Skill", ownedCount: 2 }]}
+        onSelect={vi.fn()}
+        onClose={vi.fn()}
+      />
+    );
+    expect(screen.getByText("Owned: 2")).toBeInTheDocument();
+  });
 });

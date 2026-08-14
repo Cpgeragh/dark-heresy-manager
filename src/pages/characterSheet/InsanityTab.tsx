@@ -9,15 +9,17 @@ interface InsanityTabProps {
   editable: boolean;
   onUpdate: (next: InsanityBlock) => void;
   talents?: TalentsAndTraitsBlock;
+  career?: string;
 }
 
-export function InsanityTab({ insanity, editable, onUpdate, talents }: InsanityTabProps) {
+export function InsanityTab({ insanity, editable, onUpdate, talents, career }: InsanityTabProps) {
   return (
     <InsanityPanel
       insanity={insanity}
       editable={editable}
       onUpdate={onUpdate}
       talents={talents}
+      career={career}
       sectionClassName={uiSection}
     />
   );

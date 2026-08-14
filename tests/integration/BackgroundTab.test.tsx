@@ -148,6 +148,26 @@ describe("BackgroundTab", () => {
     );
   });
 
+  it("removes a Career-granted Optical Rupture implant when a Homeworld change invalidates Imperial Psyker", async () => {
+    const user = userEvent.setup();
+    const onUpdateCybernetics = vi.fn();
+    const { onUpdateHeader } = renderTab({
+      header: { characterName: "Brother Corvus", career: "Imperial Psyker", rank: "Sanctionite" },
+      talents: { homeworld: "feral-world", talents: [], traits: [], careerTraitAcquisition: { sanctioning: { resultId: "optical-rupture", resultName: "Optical Rupture" } } },
+      cybernetics: [
+        { id: "sanctioned-eyes", name: "Cybernetic Senses", craftsmanship: "Common", grantedByTalentEntryUid: "career:imperial-psyker:sanctioned-psyker" },
+        { id: "independent", name: "Bionic Arm", craftsmanship: "Common" },
+      ],
+      onUpdateCybernetics,
+    });
+    await user.click(screen.getByRole("button", { name: "Change Homeworld" }));
+    await user.click(screen.getByText("Forge World"));
+    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ career: "", rank: "" }));
+    expect(onUpdateCybernetics).toHaveBeenCalledWith([
+      expect.objectContaining({ id: "independent" }),
+    ]);
+  });
+
   it("shows the current homeworld with its source chip", () => {
     renderTab({ talents: { homeworld: "hive-world", talents: [], traits: [] } });
     expect(screen.getByText("Hive World")).toBeInTheDocument();

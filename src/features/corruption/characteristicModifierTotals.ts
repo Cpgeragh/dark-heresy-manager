@@ -7,6 +7,10 @@ import {
   getTalentCharacteristicModifierSources,
   getTalentCharacteristicModifierTotals,
 } from "../talents/talentEffects";
+import {
+  getTraitCharacteristicModifierSources,
+  getTraitCharacteristicModifierTotals,
+} from "../traits/traitEffects";
 
 export type CharacteristicTotals = Partial<Record<CharacteristicModifier["characteristic"], number>>;
 
@@ -23,7 +27,8 @@ function applyModifiers(
 
 export function getCharacteristicModifierTotals(
   corruption: CorruptionBlock,
-  talents?: TalentsAndTraitsBlock
+  talents?: TalentsAndTraitsBlock,
+  career?: string
 ): CharacteristicTotals {
   const totals: CharacteristicTotals = {};
 
@@ -39,20 +44,25 @@ export function getCharacteristicModifierTotals(
   }
 
   return talents
-    ? combineCharacteristicModifierTotals(totals, getTalentCharacteristicModifierTotals(talents))
+    ? combineCharacteristicModifierTotals(
+        totals,
+        getTalentCharacteristicModifierTotals(talents),
+        getTraitCharacteristicModifierTotals(talents, career)
+      )
     : totals;
 }
 
 export interface CharacteristicModifierSource {
   name: string;
-  type: "Malignancy" | "Minor Mutation" | "Major Mutation" | "Talent";
+  type: "Malignancy" | "Minor Mutation" | "Major Mutation" | "Talent" | "Trait";
   amount: number;
 }
 
 export function getCharacteristicModifierSources(
   corruption: CorruptionBlock,
   characteristic: CharacteristicModifier["characteristic"],
-  talents?: TalentsAndTraitsBlock
+  talents?: TalentsAndTraitsBlock,
+  career?: string
 ): CharacteristicModifierSource[] {
   const sources: CharacteristicModifierSource[] = [];
 
@@ -86,6 +96,9 @@ export function getCharacteristicModifierSources(
     checkEntry(ref?.name ?? entry.name, "Major Mutation", ref?.modifiers, entry.rolledModifiers);
   }
 
-  if (talents) sources.push(...getTalentCharacteristicModifierSources(talents, characteristic));
+  if (talents) {
+    sources.push(...getTalentCharacteristicModifierSources(talents, characteristic));
+    sources.push(...getTraitCharacteristicModifierSources(talents, characteristic, career));
+  }
   return sources;
 }

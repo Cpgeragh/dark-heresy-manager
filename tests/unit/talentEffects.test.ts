@@ -143,9 +143,10 @@ describe("Talent cross-page effects", () => {
       skill({ id: "tech-use", name: "Tech-Use", advanced: true, level: "untrained" })
     );
     expect(untrainedTechUse.minimumLevel).toBe("trained");
-    expect(untrainedTechUse.sources).toEqual([
+    expect(untrainedTechUse.sources).toEqual(expect.arrayContaining([
       expect.objectContaining({ name: "Cult Briefing (Heretek): Trained" }),
-    ]);
+      expect.objectContaining({ name: "Caves of Steel: counts as Basic" }),
+    ]));
 
     for (const level of ["trained", "+10", "+20"] as const) {
       const trainedTechUse = getTalentSkillEffects(

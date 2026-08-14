@@ -8,10 +8,15 @@ import type {
   TalentsAndTraitsBlock,
   WeaponTrainingTalentId,
 } from "../../types/Character";
+import {
+  getTraitGrantedTalentSpecs,
+  getTraitGrantedWeaponTrainingIds,
+  getTraitSkillEffects,
+} from "../traits/traitEffects";
 
 export interface TalentModifierSource {
   name: string;
-  type: "Talent";
+  type: "Talent" | "Trait";
   amount: number;
 }
 
@@ -230,6 +235,12 @@ export function getTalentSkillEffects(
     effects.sources.push({ name: "Sicarius Tutoring (Assassin)", type: "Talent", amount: 10 });
   }
 
+  const traitEffects = getTraitSkillEffects(talents, skill);
+  if (traitEffects.countsAsBasic) effects.countsAsBasic = true;
+  if (traitEffects.minimumLevel) effects.minimumLevel = traitEffects.minimumLevel;
+  effects.modifier += traitEffects.modifier;
+  effects.sources.push(...traitEffects.sources);
+
   return effects;
 }
 
@@ -281,6 +292,9 @@ export function getGrantedTalentEntries(talents: TalentsAndTraitsBlock): TalentE
     if (hasChoice(origin, "Scum") && origin.acquisition?.grantedTalentSpecialisation) {
       grants.push(virtualGrant(origin, "peer", "Peer", origin.acquisition.grantedTalentSpecialisation));
     }
+  }
+  for (const grant of getTraitGrantedTalentSpecs(talents)) {
+    grants.push(virtualGrant(grant.origin, grant.id, grant.name, grant.specialisation));
   }
   return grants;
 }
@@ -334,9 +348,9 @@ export function getGrantedTraitEntries(talents: TalentsAndTraitsBlock): TalentEn
 export function getGrantedWeaponTrainingIds(
   talents: TalentsAndTraitsBlock
 ): WeaponTrainingTalentId[] {
-  return talents.talents
+  return [...new Set([...talents.talents
     .map((entry) => entry.acquisition?.weaponTrainingId)
-    .filter((id): id is WeaponTrainingTalentId => Boolean(id));
+    .filter((id): id is WeaponTrainingTalentId => Boolean(id)), ...getTraitGrantedWeaponTrainingIds(talents)])];
 }
 
 export function getGrantedExoticWeapons(talents: TalentsAndTraitsBlock): string[] {

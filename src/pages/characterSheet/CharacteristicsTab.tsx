@@ -26,6 +26,7 @@ import {
   uiInfoModalWrapper,
 } from "../../ui/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
+import { getTraitMovementEffects, getWaryInitiativeBonus } from "../../features/traits/traitEffects";
 
 // ─── StatBlock ────────────────────────────────────────────────────────────────
 // Extracted to module level to avoid re-creating the component on every render.
@@ -127,6 +128,7 @@ interface CharacteristicsTabProps {
   editable: boolean;
   corruption: CorruptionBlock;
   talents?: TalentsAndTraitsBlock;
+  career?: string;
   updateCharacteristic: (statKey: keyof Characteristics, value: CharField) => void;
 }
 
@@ -137,9 +139,10 @@ export function CharacteristicsTab({
   editable,
   corruption,
   talents,
+  career,
   updateCharacteristic,
 }: CharacteristicsTabProps) {
-  const modifierTotals = getCharacteristicModifierTotals(corruption, talents);
+  const modifierTotals = getCharacteristicModifierTotals(corruption, talents, career);
   const [activeStat, setActiveStat] = useState<keyof Characteristics>("ws");
   const [containerWidth, setContainerWidth] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -298,6 +301,12 @@ export function CharacteristicsTab({
   const PB = getCharBonus("per");
   const WPB = getCharBonus("wp");
   const FB = getCharBonus("fel");
+  const baseMovementAB = Math.floor(getEffectiveCharTotal("ag") / CHARACTERISTIC_BONUS_DIVISOR);
+  const movementEffects = talents
+    ? getTraitMovementEffects(talents, baseMovementAB, career)
+    : { agilityBonus: baseMovementAB, sources: [], modes: [] };
+  const movementAB = movementEffects.agilityBonus;
+  const waryInitiative = talents ? getWaryInitiativeBonus(talents, career) : 0;
 
   return (
     <div className="space-y-6 text-slate-100">
@@ -378,10 +387,10 @@ export function CharacteristicsTab({
         </div>
         <div className="grid grid-cols-4 gap-1">
           {[
-            { label: "Half", value: AB },
-            { label: "Full", value: AB * MOVEMENT_FULL_MULTIPLIER },
-            { label: "Charge", value: AB * MOVEMENT_CHARGE_MULTIPLIER },
-            { label: "Run", value: AB * MOVEMENT_RUN_MULTIPLIER },
+            { label: "Half", value: movementAB },
+            { label: "Full", value: movementAB * MOVEMENT_FULL_MULTIPLIER },
+            { label: "Charge", value: movementAB * MOVEMENT_CHARGE_MULTIPLIER },
+            { label: "Run", value: movementAB * MOVEMENT_RUN_MULTIPLIER },
           ].map(({ label, value }) => (
             <div key={label} className={`${uiCell} text-center py-1 lg:py-1.5 px-0.5 lg:px-1`}>
               <div className={uiCellLabel}>{label}</div>
@@ -389,6 +398,28 @@ export function CharacteristicsTab({
             </div>
           ))}
         </div>
+        {(movementEffects.sources.length > 0 || movementEffects.modes.length > 0 || waryInitiative > 0) && (
+          <div className="mt-2 space-y-2">
+            {movementEffects.sources.length > 0 && (
+              <p className="text-xs lg:text-sm text-amber-300">
+                Movement effects: {movementEffects.sources.join(" · ")}
+              </p>
+            )}
+            {movementEffects.modes.length > 0 && (
+              <div className="grid grid-cols-1 gap-1 sm:grid-cols-3">
+                {movementEffects.modes.map((mode) => (
+                  <div key={`${mode.name}:${mode.source}`} className={`${uiCell} text-center py-1.5 px-2`}>
+                    <div className={uiCellLabel}>{mode.name}</div>
+                    <div className={uiCellValueSm}>{mode.speed}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {waryInitiative > 0 && (
+              <p className="text-xs lg:text-sm text-amber-300">Initiative: +{waryInitiative} from Wary.</p>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Main stats — mobile swiper */}
@@ -405,7 +436,7 @@ export function CharacteristicsTab({
               statKey={prevStat}
               editable={false}
               adjustment={modifierTotals[prevStat] ?? 0}
-              sources={getCharacteristicModifierSources(corruption, prevStat, talents)}
+              sources={getCharacteristicModifierSources(corruption, prevStat, talents, career)}
               getCharField={getCharField}
               updateCharacteristic={updateCharacteristic}
             />
@@ -417,7 +448,7 @@ export function CharacteristicsTab({
               statKey={activeStat}
               editable={editable}
               adjustment={modifierTotals[activeStat] ?? 0}
-              sources={getCharacteristicModifierSources(corruption, activeStat, talents)}
+              sources={getCharacteristicModifierSources(corruption, activeStat, talents, career)}
               getCharField={getCharField}
               updateCharacteristic={updateCharacteristic}
             />
@@ -433,7 +464,7 @@ export function CharacteristicsTab({
               statKey={nextStat}
               editable={false}
               adjustment={modifierTotals[nextStat] ?? 0}
-              sources={getCharacteristicModifierSources(corruption, nextStat, talents)}
+              sources={getCharacteristicModifierSources(corruption, nextStat, talents, career)}
               getCharField={getCharField}
               updateCharacteristic={updateCharacteristic}
             />
@@ -450,7 +481,7 @@ export function CharacteristicsTab({
             statKey={key}
             editable={editable}
             adjustment={modifierTotals[key] ?? 0}
-            sources={getCharacteristicModifierSources(corruption, key, talents)}
+            sources={getCharacteristicModifierSources(corruption, key, talents, career)}
             getCharField={getCharField}
             updateCharacteristic={updateCharacteristic}
           />
