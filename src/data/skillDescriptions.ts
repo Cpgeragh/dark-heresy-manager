@@ -9,26 +9,27 @@ export const SKILL_DESCRIPTIONS: Record<string, string> = {
   Barter:
     "Negotiate deals and get better prices. Success reduces price by 10%; each additional degree reduces by a further 5%. Important deals may be Opposed Tests. Typically takes about five minutes.",
   Blather:
-    "Stall for time by running off at the mouth to confuse and distract. Opposed by target's Willpower or Scrutiny; success dumbfounds the target for one Round per degree of success. Can affect targets equal to Fellowship Bonus who must understand the language. Full Action.",
+    "Stall for time by running off at the mouth to confuse and distract. Opposed by the target's Willpower or Scrutiny. If you succeed and the target fails, they are dumbfounded for one Round, plus one additional Round per degree of success. If both succeed, the character with the most degrees of success wins; if the target wins or both fail, they act normally. Can affect similar targets equal to Fellowship Bonus who understand the language. Targets in obvious danger or aware of preparations to harm them are unaffected. Full Action.",
   Carouse:
     "Resist the effects of alcohol and intoxicants. Test whenever you imbibe — failure gives 1 level of Fatigue. Passing out renders you unconscious for 1d10 minus Toughness Bonus hours (minimum 1). Free Action whenever you imbibe.",
   Charm:
     "Befriend others and convince people to do things for you. Can affect targets equal to Fellowship Bonus who must see, hear, and understand you. Typically takes one minute.",
   "Chem-Use":
-    "Handle, prepare and apply chemicals, toxins and drugs. Failed Test wastes the chemical; failing by 5+ degrees poisons yourself. Halves the time to use a toxin wand or administer an antidote on a successful Test. Full Action to administer.",
+    "Handle, identify, prepare and apply chemicals, toxins, poisons and drugs, and manufacture toxins using the Crafting rules. A failed Test wastes the chemical; failing by 5+ degrees poisons or overdoses yourself. A successful Test halves the time needed to use a toxin wand or administer an antidote. Administering a chemical is a Full Action.",
   Climb:
     "Ascend or descend sheer surfaces — walls without handholds, overhangs and poor climbing conditions. Success allows movement at half your Half Move rate. Half Action.",
   Command:
-    "Direct subordinates to follow your orders. Can affect targets equal to Fellowship Bonus who must see, hear, and understand you. Failing by 5+ degrees causes them to contradict your orders. Half Action for simple commands, Full Action for involved instructions.",
+    "Direct people under your authority to follow your orders. Success means they follow the instruction; ordinary failure means they misinterpret it or do nothing, while failing by 5+ degrees causes them to contradict it. Can affect targets equal to Fellowship Bonus who must see, hear and understand you. Half Action for simple commands, Full Action for involved instructions.",
   Concealment:
-    "Hide from sight using terrain, obstacles, fog or darkness. Always Opposed against the observer's Awareness or half Perception. Remaining perfectly still grants +10. Only test when someone actively searches. Half Action.",
+    "Hide from sight using terrain, obstacles, fog or darkness; without suitable terrain or a concealing effect, the Test automatically fails. Always Opposed against the observer's Awareness or half Perception. Remaining perfectly still grants +10. Only Test when someone actively searches. Usually a Half Action.",
   Contortionist:
-    "Escape bonds, slip free from grapples or squeeze through tight spaces. Escaping bonds is Difficulty based on captor's Intelligence vs your Agility; escaping a grapple is Opposed by the grappler's Strength. Failing by 5+ degrees when squeezing means you get stuck. Most Tests take one minute; escaping a grapple is a Full Action.",
+    "Escape bonds, slip free from grapples or squeeze through tight spaces. Escaping bonds is Hard (-20) when the captor's Intelligence exceeds your Agility, with circumstances able to change the Difficulty; escaping a grapple is Opposed by the grappler's Strength. Failing by 5+ degrees when squeezing means you get stuck. Most Tests take one minute, reduced by ten seconds per degree of success; escaping a grapple is a Full Action.",
   Deceive:
     "Lie convincingly and swindle others. Typically Opposed by the target's Scrutiny. Can affect targets equal to Fellowship Bonus who must see, hear, and understand you. Typically takes one minute.",
   Demolition:
-    "Plant explosive devices, defuse bombs and manufacture explosives. Planting: failing by 5+ degrees sets it off immediately; each degree of success makes it harder to detect and defuse. Defusing: Opposed by the planter's original roll — failing by 5+ degrees triggers it. Planting or defusing is usually a Full Action.",
-  Diplomacy: "Conduct formal negotiations and diplomatic discussions.",
+    "Plant explosive devices, defuse bombs and manufacture explosives. Planting: success sets the chosen trigger; ordinary failure means the explosive will not activate, while failing by 5+ degrees sets it off immediately. Each degree of success makes it harder to detect and defuse. Voluntarily increasing the Difficulty or spending an additional minute setting it grants +2 Damage per step or minute. Defusing is Opposed by the planter's original Test; ordinary failure can normally be retried next Round, while failing by 5+ degrees triggers the bomb. Planting or defusing is usually a Full Action; manufacturing takes at least one minute and usually longer.",
+  Diplomacy:
+    "Conduct negotiations between two or more factions without arousing hostility. The GM sets how many Rounds are available, and every party makes an Opposed Fellowship Test each Round. If one party succeeds while the opposition fails, the winner secures agreement on one point, plus another point per degree of success. If multiple parties succeed, the one with the most degrees of success secures one point per degree by which they beat the others. Securing agreement on every point first wins the talks; reaching the time limit preserves only the points already agreed, while a Round in which every party fails ends the discussions in bickering.",
   Disguise:
     "Mask your true appearance with clothing, props and make-up. Often Opposed by targets' Scrutiny. Disguising as the opposite sex, a different race or a specific person imposes greater difficulty. Minimum one minute for a simple disguise.",
   Dodge:
@@ -36,11 +37,11 @@ export const SKILL_DESCRIPTIONS: Record<string, string> = {
   Evaluate:
     "Determine the approximate market value of objects and valuables. GMs typically roll this in secret and tell the player what their character believes. Taking more time grants bonuses; a quick glance may impose penalties. Usually takes at least one minute.",
   Gamble:
-    "Participate in games of chance — all participants make Opposed Tests and the most degrees of success wins. You can substitute Sleight of Hand to cheat (granting +20 to Gamble, but failing by 5+ degrees means you're caught). Can represent a single hand or an entire day of gaming.",
+    "Participate in games of chance. All participants make Opposed Tests; the most degrees of success wins, or the fewest degrees of failure if everyone fails. You may deliberately throw the game and lose automatically. You can substitute Sleight of Hand to cheat, granting +20 to Gamble, but failing the Sleight of Hand Test by 5+ degrees exposes the ruse. Can represent a single hand or an entire day of gaming.",
   Inquiry:
     "Pick up rumours, secrets and guarded information through questions and observation. Success reveals basic information; additional degrees of success reveal more. Can also chase a specific fact or secret. Usually represents about an hour of activity.",
   Interrogation:
-    "Extract information from unwilling subjects — Opposed by target's Willpower. Success gives one answer plus one per degree. Failing by 5+ degrees deals 1d10+Willpower Bonus Damage and gives the target +30 to resist further interrogation. Inflicts 1 Fatigue on the target per Test. Takes 1d5 hours.",
+    "Extract information from unwilling subjects, Opposed by the target's Willpower. Success gives one answer plus one per degree; losing gives nothing useful. A serious failure deals 1d10 plus Willpower Bonus Damage. Failing by 5+ degrees deals that Damage and gives the target +30 to resist further interrogation. Each Test inflicts 1 Fatigue on the target and takes 1d5 hours.",
   Intimidate:
     "Coerce or frighten individuals or small groups. Can use Strength (physical threats), Intelligence or Fellowship (subtle threats) at the GM's option. Can affect targets equal to the relevant Bonus who must see, hear, and understand you. Full Action.",
   Invocation:
@@ -51,9 +52,10 @@ export const SKILL_DESCRIPTIONS: Record<string, string> = {
     "Read and write any language you can speak. Tests are only needed for challenging dialects, archaic usage, poor penmanship or obscure phraseology. Reading one page (approximately 750 words) takes about one minute.",
   Logic:
     "Solve mathematical problems, decipher codes and address complex theoretical problems. Purely theoretical — Tech-Use is its practical counterpart. Tech-Priests may use it to incant mathematical rituals on machinery. Usually takes one minute.",
-  "Logis Prophesying": "Practice techno-divination and make predictions through data analysis.",
+  "Logis Prophesying":
+    "Analyse past and present information to predict the most probable future outcome for a person, place or thing. The GM sets the Test Difficulty according to the outcome being investigated, and having more relevant information makes the Test easier. Success reveals the most probable outcome or location; each additional degree of success reveals either the next step in the chain of events or the next most probable location. These predictions are probabilities, not certainties, and outside influences can change the result.",
   Medicae:
-    "First Aid (Full Action): removes Damage equal to Intelligence Bonus from Lightly Wounded, 1 Damage from Heavily Wounded, or 1 Critical Damage. Failure by 3+ degrees deals 1 Damage; patients at 0 Wounds must pass Toughness or die. Extended Care (daily Tests for Lightly Wounded, weekly for others): success removes double normal Damage plus 1 per degree. Tend patients equal to Intelligence Bonus simultaneously.",
+    "First Aid (a Full Action for both healer and patient): removes Damage equal to Intelligence Bonus from Lightly Wounded, 1 Damage from Heavily Wounded, or 1 Critical Damage. Ordinary failure causes no additional harm and the patient heals naturally; failure by 3+ degrees deals 1 Damage, while patients at 0 Wounds must pass Toughness or die. First Aid may be applied to each Wound only once. Extended Care (daily Tests for Lightly Wounded, weekly for others): success removes double normal Damage plus 1 per degree. Tend patients equal to Intelligence Bonus without penalty; each additional patient imposes a cumulative -10. On an ordinary Extended Care failure, patients heal at their natural rates. Failure by 3+ degrees deals 1 Damage to every Lightly or Heavily Wounded patient, using Sudden Death to resolve Critical Damage; failure by 5+ degrees deals 1d10 Damage to every patient, again using Sudden Death to resolve Critical Damage.",
   Psyniscience:
     "Detect Daemons, psykers and Warp disturbances. Success extends your senses Perception Bonus + 1d10 metres; each degree adds 1d10+PB metres. Standard success: awareness of disruption. One degree: general location. Two or more degrees: exact location of the source. Full Action.",
   Scrutiny:
@@ -69,14 +71,15 @@ export const SKILL_DESCRIPTIONS: Record<string, string> = {
   "Sleight of Hand":
     "Palm objects, pick pockets or perform tricks with small items. Usually Opposed against the target's Awareness or half Perception; smaller objects are easier. Can substitute for Gamble to cheat. Half Action; can be attempted as a Free Action at −10 Difficulty.",
   Survival:
-    "Subsist in the wild through hunting, fishing, fire-making and shelter construction. Difficulty depends on the environment. Failing by 5+ degrees causes spectacular failure — rockslides, stirring hostile wildlife, consuming poison. Takes one hour, reduced by ten minutes per degree of success.",
-  Swim: "Swim and dive. Normal conditions need no Test; Tests required in rough water or for extended periods. Does not protect against harm from toxic or dangerous liquids. Free Action made as part of a Move Action.",
+    "Subsist in the wild through hunting, fishing, fire-making and shelter construction. Difficulty depends on the environment. Failing by 5+ degrees causes spectacular failure — rockslides, stirring hostile wildlife or consuming poison. Normally takes one hour, reduced by ten minutes per degree of success. In urgent circumstances, the GM may increase the Difficulty and reduce the time to one minute.",
+  Swim:
+    "Swim and dive. Normal conditions need no Test; Tests are required in rough water or for extended periods. Unusual substances may increase the Difficulty, and the Skill neither protects against harmful liquids nor removes the need for protective clothing. Free Action made as part of a Move Action.",
   "Tech-Use":
-    "Operate unusual or malfunctioning technology and repair damaged equipment. No Test for basic equipment under normal conditions. Understanding an unfamiliar item: typically one minute. Repairing an item: typically one hour, reduced by ten minutes per degree of success.",
+    "Operate unusual or malfunctioning technology, repair damaged equipment and sometimes build an item from scratch, although a relevant Trade skill is normally more appropriate for construction. No Test for basic equipment under normal conditions. Understanding an unfamiliar item typically takes one minute. Repairing an item typically takes one hour, reduced by ten minutes per degree of success.",
   Tracking:
     "Follow prey by reading tracks and environmental signs. Obvious tracks need no Test and don't slow movement; following obscure tracks halves movement speed. When quarry has covered tracks, Opposed by their Concealment. Can deduce distance, numbers and racial type of quarry. Free Action made as part of a Move Action.",
   Wrangling:
-    "Ride, care for, train and control domesticated animals. Routine care needs no Test. Training a trick requires weekly Tests (1 success for simple, 3 for moderate, 10 for difficult). Domestic animals are always friendly; wild or hostile animals require a successful Test to calm. Of no use against cyber-animals. Befriending is a Full Action; training takes at least a week.",
+    "Ride, care for, train and control domesticated animals. Routine care needs no Test. Training a trick requires weekly Tests (1 success for simple, 3 for moderate, 10 for difficult). Domestic animals are always friendly; wild or hostile animals require a successful Test to calm, with possible penalties for especially loyal or ornery animals. Of no use against cyber-animals. Befriending is a Full Action; training takes at least a week.",
 
   // ===== CIPHERS =====
   "Ciphers (Acolyte)":
@@ -92,11 +95,11 @@ export const SKILL_DESCRIPTIONS: Record<string, string> = {
 
   // ===== DRIVE =====
   "Drive (Ground Vehicle)":
-    "Control land-based or hover vehicles; normal conditions need no Test. Tests called for in treacherous terrain, excessive speed or dangerous manoeuvres. Typically a Half Action. | Ground Vehicle: autos, trucks and other land-based vehicles.",
+    "Control land-based or hover vehicles; normal conditions need no Test. Tests called for in treacherous terrain, excessive speed or dangerous manoeuvres; Opposed Drive Tests are made between pursuers and pursued during a chase. Typically a Half Action. | Ground Vehicle: autos, trucks and other land-based vehicles.",
   "Drive (Hover Vehicle)":
-    "Control land-based or hover vehicles; normal conditions need no Test. Tests called for in treacherous terrain, excessive speed or dangerous manoeuvres. Typically a Half Action. | Hover Vehicle: hover-capable vehicles and landspeeders.",
+    "Control land-based or hover vehicles; normal conditions need no Test. Tests called for in treacherous terrain, excessive speed or dangerous manoeuvres; Opposed Drive Tests are made between pursuers and pursued during a chase. Typically a Half Action. | Hover Vehicle: hover-capable vehicles and landspeeders.",
   "Drive (Walker)":
-    "Control land-based or hover vehicles; normal conditions need no Test. Tests called for in treacherous terrain, excessive speed or dangerous manoeuvres. Typically a Half Action. | Walker: bipedal or multi-legged walker vehicles.",
+    "Control land-based or hover vehicles; normal conditions need no Test. Tests called for in treacherous terrain, excessive speed or dangerous manoeuvres; Opposed Drive Tests are made between pursuers and pursued during a chase. Typically a Half Action. | Walker: bipedal or multi-legged walker vehicles.",
 
   // ===== PILOT =====
   "Pilot (Civilian Craft)":
@@ -108,9 +111,9 @@ export const SKILL_DESCRIPTIONS: Record<string, string> = {
 
   // ===== NAVIGATION =====
   "Navigation (Surface)":
-    "Chart courses and avoid getting lost using maps, technical readouts and landmarks. One successful Test per day typically keeps you on track; finding your position takes one minute or less. | Surface: navigate across a planet's surface using logi-compasses, map readouts and geographical knowledge.",
+    "Chart courses, estimate travel times and avoid getting lost using maps, technical readouts and landmarks. One successful Test per day typically keeps you on track, though unusual conditions may require additional Tests. Navigation normally takes several hours; finding your position takes one minute or less. | Surface: navigate across a planet's surface using logi-compasses, map readouts and geographical knowledge.",
   "Navigation (Stellar)":
-    "Chart courses and avoid getting lost using maps, technical readouts and landmarks. One successful Test per day typically keeps you on track; finding your position takes one minute or less. | Stellar: navigate in space between planets using star charts and cartomantic rituals.",
+    "Chart courses, estimate travel times and avoid getting lost using maps, technical readouts and landmarks. One successful Test per day typically keeps you on track, though unusual conditions may require additional Tests. Navigation normally takes several hours; finding your position takes one minute or less. | Stellar: navigate in space between planets using star charts and cartomantic rituals.",
 
   // ===== SPEAK LANGUAGE =====
   "Speak Language (High Gothic)":
@@ -192,39 +195,43 @@ export const SKILL_DESCRIPTIONS: Record<string, string> = {
 
   // ===== FORBIDDEN LORE =====
   "Forbidden Lore (The Black Library)":
-    "Recall dangerous and often heretical knowledge from unconventional sources. Success reveals basic information; each degree reveals more. No time at all; possession may warrant Inquisitorial attention and may grant Corruption or Insanity Points at GM's discretion. | The Black Library: secret knowledge of the Black Library, its forbidden contents, strange industries and the unspeakable pale things that toil within its walls.",
+    "Recall dangerous and often heretical knowledge from unconventional sources. Success reveals basic information; each degree reveals more. No time at all; possessing this Skill is often sufficient to warrant termination at the hands of the Inquisition and may grant Corruption or Insanity Points at the GM's discretion. | The Black Library: secret knowledge of the Black Library, its forbidden contents, strange industries and the unspeakable pale things that toil within its walls.",
   "Forbidden Lore (Cults)":
-    "Recall dangerous and often heretical knowledge from unconventional sources. Success reveals basic information; each degree reveals more. No time at all; possession may warrant Inquisitorial attention and may grant Corruption or Insanity Points at GM's discretion. | Cults: knowledge of the most notorious Imperial Cults and some of their sub-sects and splinter cabals.",
+    "Recall dangerous and often heretical knowledge from unconventional sources. Success reveals basic information; each degree reveals more. No time at all; possessing this Skill is often sufficient to warrant termination at the hands of the Inquisition and may grant Corruption or Insanity Points at the GM's discretion. | Cults: knowledge of the most notorious Imperial Cults and some of their sub-sects and splinter cabals.",
   "Forbidden Lore (Daemonology)":
-    "Recall dangerous and often heretical knowledge from unconventional sources. Success reveals basic information; each degree reveals more. No time at all; possession may warrant Inquisitorial attention and may grant Corruption or Insanity Points at GM's discretion. | Daemonology: terrible comprehension of some of the recorded warp entities and their various manifestations.",
+    "Recall dangerous and often heretical knowledge from unconventional sources. Success reveals basic information; each degree reveals more. No time at all; possessing this Skill is often sufficient to warrant termination at the hands of the Inquisition and may grant Corruption or Insanity Points at the GM's discretion. | Daemonology: terrible comprehension of some of the recorded warp entities and their various manifestations.",
   "Forbidden Lore (Heresy)":
-    "Recall dangerous and often heretical knowledge from unconventional sources. Success reveals basic information; each degree reveals more. No time at all; possession may warrant Inquisitorial attention and may grant Corruption or Insanity Points at GM's discretion. | Heresy: unpleasant appreciation for those acts and practices deemed heretical by the Imperium.",
+    "Recall dangerous and often heretical knowledge from unconventional sources. Success reveals basic information; each degree reveals more. No time at all; possessing this Skill is often sufficient to warrant termination at the hands of the Inquisition and may grant Corruption or Insanity Points at the GM's discretion. | Heresy: unpleasant appreciation for those acts and practices deemed heretical by the Imperium.",
   "Forbidden Lore (Inquisition)":
-    "Recall dangerous and often heretical knowledge from unconventional sources. Success reveals basic information; each degree reveals more. No time at all; possession may warrant Inquisitorial attention and may grant Corruption or Insanity Points at GM's discretion. | Inquisition: a general understanding (often based on hearsay and rumour) of that most terrible and secret of organisations.",
+    "Recall dangerous and often heretical knowledge from unconventional sources. Success reveals basic information; each degree reveals more. No time at all; possessing this Skill is often sufficient to warrant termination at the hands of the Inquisition and may grant Corruption or Insanity Points at the GM's discretion. | Inquisition: a general understanding (often based on hearsay and rumour) of that most terrible and secret of organisations.",
   "Forbidden Lore (Archeotech)":
-    "Recall dangerous and often heretical knowledge from unconventional sources. Success reveals basic information; each degree reveals more. No time at all; possession may warrant Inquisitorial attention and may grant Corruption or Insanity Points at GM's discretion. | Archeotech: knowledge of the great tech devices of ancient times and clues to their function and purpose.",
+    "Recall dangerous and often heretical knowledge from unconventional sources. Success reveals basic information; each degree reveals more. No time at all; possessing this Skill is often sufficient to warrant termination at the hands of the Inquisition and may grant Corruption or Insanity Points at the GM's discretion. | Archeotech: knowledge of the great tech devices of ancient times and clues to their function and purpose.",
   "Forbidden Lore (Mutants)":
-    "Recall dangerous and often heretical knowledge from unconventional sources. Success reveals basic information; each degree reveals more. No time at all; possession may warrant Inquisitorial attention and may grant Corruption or Insanity Points at GM's discretion. | Mutants: covering the study of both stable and unstable mutations and some of their more unfortunate results.",
-  "Forbidden Lore (Ordos)":
-    "Recall dangerous and often heretical knowledge from unconventional sources. Success reveals basic information; each degree reveals more. No time at all; possession may warrant Inquisitorial attention and may grant Corruption or Insanity Points at GM's discretion. | Ordos: slightly more specialised knowledge of a particular Ordo's practices — Malleus, Hereticus or Xenos.",
+    "Recall dangerous and often heretical knowledge from unconventional sources. Success reveals basic information; each degree reveals more. No time at all; possessing this Skill is often sufficient to warrant termination at the hands of the Inquisition and may grant Corruption or Insanity Points at the GM's discretion. | Mutants: covering the study of both stable and unstable mutations and some of their more unfortunate results.",
+  "Forbidden Lore (Ordos: Malleus)":
+    "Recall dangerous and often heretical knowledge from unconventional sources. Success reveals basic information; each degree reveals more. No time at all; possessing this Skill is often sufficient to warrant termination at the hands of the Inquisition and may grant Corruption or Insanity Points at the GM's discretion. | Ordos — Malleus: specialised knowledge of the Ordo Malleus's practices.",
+  "Forbidden Lore (Ordos: Hereticus)":
+    "Recall dangerous and often heretical knowledge from unconventional sources. Success reveals basic information; each degree reveals more. No time at all; possessing this Skill is often sufficient to warrant termination at the hands of the Inquisition and may grant Corruption or Insanity Points at the GM's discretion. | Ordos — Hereticus: specialised knowledge of the Ordo Hereticus's practices.",
+  "Forbidden Lore (Ordos: Xenos)":
+    "Recall dangerous and often heretical knowledge from unconventional sources. Success reveals basic information; each degree reveals more. No time at all; possessing this Skill is often sufficient to warrant termination at the hands of the Inquisition and may grant Corruption or Insanity Points at the GM's discretion. | Ordos — Xenos: specialised knowledge of the Ordo Xenos's practices.",
   "Forbidden Lore (Adeptus Mechanicus)":
-    "Recall dangerous and often heretical knowledge from unconventional sources. Success reveals basic information; each degree reveals more. No time at all; possession may warrant Inquisitorial attention and may grant Corruption or Insanity Points at GM's discretion. | Adeptus Mechanicus: an understanding of the followers of the Machine God, including their observances, common beliefs and core philosophies.",
+    "Recall dangerous and often heretical knowledge from unconventional sources. Success reveals basic information; each degree reveals more. No time at all; possessing this Skill is often sufficient to warrant termination at the hands of the Inquisition and may grant Corruption or Insanity Points at the GM's discretion. | Adeptus Mechanicus: an understanding of the followers of the Machine God, including their observances, common beliefs and core philosophies.",
   "Forbidden Lore (Psykers)":
-    "Recall dangerous and often heretical knowledge from unconventional sources. Success reveals basic information; each degree reveals more. No time at all; possession may warrant Inquisitorial attention and may grant Corruption or Insanity Points at GM's discretion. | Psykers: skill in identifying the signs of psykers as well as the results of their powers and the extent of their capabilities.",
+    "Recall dangerous and often heretical knowledge from unconventional sources. Success reveals basic information; each degree reveals more. No time at all; possessing this Skill is often sufficient to warrant termination at the hands of the Inquisition and may grant Corruption or Insanity Points at the GM's discretion. | Psykers: skill in identifying the signs of psykers as well as the results of their powers and the extent of their capabilities.",
   "Forbidden Lore (Warp)":
-    "Recall dangerous and often heretical knowledge from unconventional sources. Success reveals basic information; each degree reveals more. No time at all; possession may warrant Inquisitorial attention and may grant Corruption or Insanity Points at GM's discretion. | Warp: an understanding of the ways of the warp, especially its interaction with realspace and how its tides and eddies affect travel between the stars.",
+    "Recall dangerous and often heretical knowledge from unconventional sources. Success reveals basic information; each degree reveals more. No time at all; possessing this Skill is often sufficient to warrant termination at the hands of the Inquisition and may grant Corruption or Insanity Points at the GM's discretion. | Warp: an understanding of the ways of the warp, especially its interaction with realspace and how its tides and eddies affect travel between the stars.",
   "Forbidden Lore (Xenos)":
-    "Recall dangerous and often heretical knowledge from unconventional sources. Success reveals basic information; each degree reveals more. No time at all; possession may warrant Inquisitorial attention and may grant Corruption or Insanity Points at GM's discretion. | Xenos: knowledge of the most commonly encountered species of aliens within the Imperium.",
+    "Recall dangerous and often heretical knowledge from unconventional sources. Success reveals basic information; each degree reveals more. No time at all; possessing this Skill is often sufficient to warrant termination at the hands of the Inquisition and may grant Corruption or Insanity Points at the GM's discretion. | Xenos: knowledge of the most commonly encountered species of aliens within the Imperium.",
 
   // ===== PERFORMER SKILLS =====
   "Performer (Dancer)":
-    "Entertain and enthrall crowds. A Storyteller or Singer performance can substitute for Charm (Difficult −10); a Musician or Singer performance can substitute for Blather (Difficult −10). Variable time from a short poem to a full opera. | Dancer: entertain through choreographed movement and dance.",
+    "Entertain and enthrall crowds, and earn an income much as with Trade. A Storyteller or Singer performance can substitute for Charm (Difficult −10); a Musician or Singer performance can substitute for Blather (Difficult −10). Variable time from a short poem to a full opera. | Dancer: entertain through choreographed movement and dance.",
   "Performer (Musician)":
-    "Entertain and enthrall crowds. A Storyteller or Singer performance can substitute for Charm (Difficult −10); a Musician or Singer performance can substitute for Blather (Difficult −10). Variable time from a short poem to a full opera. | Musician: play musical instruments to entertain crowds and substitute for Blather (Difficult −10).",
+    "Entertain and enthrall crowds, and earn an income much as with Trade. A Storyteller or Singer performance can substitute for Charm (Difficult −10); a Musician or Singer performance can substitute for Blather (Difficult −10). Variable time from a short poem to a full opera. | Musician: play musical instruments to entertain crowds and substitute for Blather (Difficult −10).",
   "Performer (Singer)":
-    "Entertain and enthrall crowds. A Storyteller or Singer performance can substitute for Charm (Difficult −10); a Musician or Singer performance can substitute for Blather (Difficult −10). Variable time from a short poem to a full opera. | Singer: entertain through vocal performance and substitute for Charm or Blather (Difficult −10).",
+    "Entertain and enthrall crowds, and earn an income much as with Trade. A Storyteller or Singer performance can substitute for Charm (Difficult −10); a Musician or Singer performance can substitute for Blather (Difficult −10). Variable time from a short poem to a full opera. | Singer: entertain through vocal performance and substitute for Charm or Blather (Difficult −10).",
   "Performer (Storyteller)":
-    "Entertain and enthrall crowds. A Storyteller or Singer performance can substitute for Charm (Difficult −10); a Musician or Singer performance can substitute for Blather (Difficult −10). Variable time from a short poem to a full opera. | Storyteller: captivate audiences with tales and narratives and substitute for Charm (Difficult −10).",
+    "Entertain and enthrall crowds, and earn an income much as with Trade. A Storyteller or Singer performance can substitute for Charm (Difficult −10); a Musician or Singer performance can substitute for Blather (Difficult −10). Variable time from a short poem to a full opera. | Storyteller: captivate audiences with tales and narratives and substitute for Charm (Difficult −10).",
 
   // ===== TRADE SKILLS =====
   "Trade (Agri)":

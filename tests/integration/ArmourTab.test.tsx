@@ -66,6 +66,23 @@ describe("ArmourTab", () => {
     expect(screen.getAllByText("3").length).toBeGreaterThanOrEqual(6);
   });
 
+  it("adds The Flesh is Weak Machine AP to every location and labels its source", () => {
+    renderTab({
+      armour: [],
+      toughnessBonus: 0,
+      talents: {
+        homeworld: "",
+        talents: [
+          { uid: "f1", talentId: "the-flesh-is-weak", name: "The Flesh is Weak" },
+          { uid: "f2", talentId: "the-flesh-is-weak", name: "The Flesh is Weak" },
+        ],
+        traits: [],
+      },
+    });
+    expect(screen.getAllByText("2").length).toBeGreaterThanOrEqual(6);
+    expect(screen.getByRole("button", { name: "Show information about Misc Bonuses" })).toBeInTheDocument();
+  });
+
   it("shows equip/stow add affordances when editable", () => {
     renderTab();
     expect(screen.getByText("+ Equip")).toBeInTheDocument();

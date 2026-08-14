@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Chip } from "../../../ui/Chip";
 import { sourceColour } from "../../../ui/sourceStyles";
 import type { PsychicPower } from "../../../types/Character";
-import { disciplineColours } from "../psychicStyles";
+import { disciplineColours, psychicSelectionSourceColours } from "../psychicStyles";
 import {
   uiCardTitle,
   uiInfoModalWrapper,
@@ -20,6 +20,7 @@ import { StatChip } from "../../../ui/StatChip";
 import { ExpandChevron } from "../../../ui/ExpandChevron";
 import { CustomItemActionButtons } from "../../../ui/CustomItemActionButtons";
 import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
+import { uiPickerPressFeedback } from "../../../ui/buttonStyles";
 
 interface PowerCardProps extends CustomItemLibraryActionProps<"power"> {
   power: PsychicPower;
@@ -27,12 +28,22 @@ interface PowerCardProps extends CustomItemLibraryActionProps<"power"> {
   onRemove: (id: string) => void;
   onSelect?: () => void;
   selectLabel?: string;
+  onLinkPurchase?: () => void;
+  onLinkPsyRatingGrant?: () => void;
+  talentSourceName?: string;
+  pickerMode?: boolean;
 }
 
 /** Shared stat row — used in both the card and the InfoModal header. */
-function PowerIdentityChips({ power }: { power: PsychicPower }) {
+function PowerIdentityChips({
+  power,
+  talentSourceName,
+}: {
+  power: PsychicPower;
+  talentSourceName?: string;
+}) {
   const sourceLabel = power.source ?? power.origin;
-  if (!sourceLabel && !power.discipline) return null;
+  if (!sourceLabel && !power.discipline && !power.talentEntryUid && !power.psyRatingTalentEntryUid) return null;
 
   return (
     <div className="flex flex-wrap items-center gap-1.5 text-xs lg:text-sm">
@@ -44,6 +55,16 @@ function PowerIdentityChips({ power }: { power: PsychicPower }) {
       {power.discipline && (
         <Chip className={disciplineColours[power.discipline] ?? disciplineColours.default}>
           {power.discipline}
+        </Chip>
+      )}
+      {power.talentEntryUid && (
+        <Chip className={psychicSelectionSourceColours.talent}>
+          {talentSourceName ?? "Talent purchase"}
+        </Chip>
+      )}
+      {power.psyRatingTalentEntryUid && (
+        <Chip className={psychicSelectionSourceColours.psyRating}>
+          {talentSourceName ?? "Psy Rating grant"}
         </Chip>
       )}
     </div>
@@ -78,6 +99,10 @@ export function PowerCard({
   onPublish,
   onArchive,
   onUpdateAllCopies,
+  onLinkPurchase,
+  onLinkPsyRatingGrant,
+  talentSourceName,
+  pickerMode = false,
 }: PowerCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [deleteArmed, setDeleteArmed] = useState(false);
@@ -104,7 +129,7 @@ export function PowerCard({
               ? (selectLabel ?? `Select ${power.name || "psychic power"}`)
               : `${expanded ? "Collapse" : "Expand"} ${power.name || "psychic power"} details`
           }
-          className="absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
+          className={`absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 ${uiPickerPressFeedback(pickerMode && Boolean(onSelect))}`}
         />
 
         <div className="relative pointer-events-none min-w-0 flex-1 space-y-1.5">
@@ -121,7 +146,7 @@ export function PowerCard({
               />
             </span>
           </div>
-          <PowerIdentityChips power={power} />
+          <PowerIdentityChips power={power} talentSourceName={talentSourceName} />
         </div>
 
         <div className="relative pointer-events-none flex items-center gap-4 shrink-0">
@@ -153,6 +178,19 @@ export function PowerCard({
       {expanded && (
         <div className="px-3 pb-3 lg:px-4 lg:pb-4 space-y-3">
           <PowerStats power={power} />
+
+          {onLinkPurchase && (
+            <Button size="sm" onClick={onLinkPurchase}>
+              {power.isMinor || power.discipline === "Minor"
+                ? "Use Minor Psychic Power selection"
+                : "Use Psychic Power selection"}
+            </Button>
+          )}
+          {onLinkPsyRatingGrant && (
+            <Button size="sm" variant="secondary" onClick={onLinkPsyRatingGrant}>
+              Use Psy Rating selection
+            </Button>
+          )}
 
           {libraryItem && (
             <CustomItemActionButtons

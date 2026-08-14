@@ -109,6 +109,9 @@ export function ImplantRow({
             source={item.source ?? ref?.source}
           />
         </div>
+        {item.grantedByTalentName && (
+          <p className="mt-1 text-xs text-amber-300">Granted by {item.grantedByTalentName}</p>
+        )}
         {linkedArmName && linkedWeaponName && (
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
             <span className={uiTextLabel}>Linked</span>
@@ -164,7 +167,7 @@ export function ImplantRow({
 
       {/* Craftsmanship badge — clickable when editable */}
       {/* Remove */}
-      {editable && (
+      {editable && !item.grantedByTalentEntryUid && (
         <RemoveButton onClick={() => onRemove(item.id)} label="Remove" />
       )}
     </div>

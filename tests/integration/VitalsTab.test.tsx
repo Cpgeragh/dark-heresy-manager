@@ -69,4 +69,26 @@ describe("VitalsTab", () => {
     expect(screen.getByRole("button", { name: "Show information about Fatigue" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Show information about Using Fate Points" })).toBeInTheDocument();
   });
+
+  it("shows effective Wounds and the Talent sources without overwriting the base", () => {
+    render(
+      <VitalsTab
+        character={makeCharacter()}
+        editable
+        toughnessBonus={4}
+        talents={{
+          homeworld: "",
+          talents: [
+            { uid: "s1", talentId: "sound-constitution", name: "Sound Constitution" },
+            { uid: "s2", talentId: "sound-constitution", name: "Sound Constitution" },
+          ],
+          traits: [],
+        }}
+        onUpdateWounds={() => undefined}
+        onUpdateFate={() => undefined}
+      />
+    );
+    expect(screen.getByText("= 22 (+2)")).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "Total wounds" })).toHaveValue("20");
+  });
 });

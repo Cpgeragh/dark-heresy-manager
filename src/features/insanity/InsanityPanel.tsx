@@ -10,7 +10,9 @@ import type {
   InsanityDisorderEntry,
   InsanityDisorderSeverity,
   InsanityTraumaEntry,
+  TalentsAndTraitsBlock,
 } from "../../types/Character";
+import { getTalentInsanityModifierSources } from "../talents/talentEffects";
 import { Button } from "../../ui/Button";
 import { Chip } from "../../ui/Chip";
 import { RemoveButton } from "../../ui/RemoveButton";
@@ -59,6 +61,7 @@ interface InsanityPanelProps {
   editable: boolean;
   onUpdate: (next: InsanityBlock) => void;
   sectionClassName: string;
+  talents?: TalentsAndTraitsBlock;
 }
 
 type EntryGroup = "trauma" | "disorders";
@@ -456,13 +459,16 @@ function DisordersList({
   return <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No disorders recorded.</p>;
 }
 
-export function InsanityPanel({ insanity, editable, onUpdate, sectionClassName }: InsanityPanelProps) {
+export function InsanityPanel({ insanity, editable, onUpdate, sectionClassName, talents }: InsanityPanelProps) {
   const value = useMemo(
     () => insanity ?? { points: 0, disorders: [] },
     [insanity]
   );
   const [showDisorderPicker, setShowDisorderPicker] = useState(false);
   const [showTraumaPicker, setShowTraumaPicker] = useState(false);
+  const talentSources = talents ? getTalentInsanityModifierSources(talents) : [];
+  const talentAdjustment = talentSources.reduce((total, source) => total + source.amount, 0);
+  const effectivePoints = Math.min(100, Math.max(0, value.points + talentAdjustment));
   const structuredDisorders = useMemo(
     () => (Array.isArray(value.disorders) ? value.disorders : []),
     [value.disorders]
@@ -484,8 +490,8 @@ export function InsanityPanel({ insanity, editable, onUpdate, sectionClassName }
   );
 
   const handlePointsChange = useCallback(
-    (points: number) => onUpdate({ ...value, points }),
-    [value, onUpdate]
+    (points: number) => onUpdate({ ...value, points: Math.max(0, points - talentAdjustment) }),
+    [value, onUpdate, talentAdjustment]
   );
 
   const handleLegacyDisordersChange = useCallback(
@@ -542,16 +548,32 @@ export function InsanityPanel({ insanity, editable, onUpdate, sectionClassName }
     <div className="space-y-6">
       <div className={`${sectionClassName} flex flex-col items-center space-y-3`}>
         <div className="inline-flex flex-col items-center gap-2">
-          <span className={uiFormLabel}>Points</span>
+          <span className="inline-flex items-center gap-1">
+            <span className={uiFormLabel}>Points</span>
+            {talentSources.length > 0 && (
+              <span className={uiInfoModalWrapper}>
+                <InfoModal
+                  title="Insanity Point Adjustments"
+                  content={
+                    <ul className="space-y-1 text-sm leading-relaxed text-slate-300 lg:text-base">
+                      {talentSources.map((source, index) => (
+                        <li key={index}>{source.name} (Talent): +{source.amount}</li>
+                      ))}
+                    </ul>
+                  }
+                />
+              </span>
+            )}
+          </span>
           <Stepper
-            value={value.points}
+            value={effectivePoints}
             max={100}
             editable={editable}
             onChange={handlePointsChange}
-            dangerClassName={insanityStepperClass(getInsanityTrackEntry(value.points))}
+            dangerClassName={insanityStepperClass(getInsanityTrackEntry(effectivePoints))}
           />
         </div>
-        <InsanityStatusChips points={value.points} />
+        <InsanityStatusChips points={effectivePoints} />
       </div>
 
       {/* Mobile — tab switcher between Temporary Trauma and Disorders */}

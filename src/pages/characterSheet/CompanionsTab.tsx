@@ -11,7 +11,7 @@ import { RemoveButton } from "../../ui/RemoveButton";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { StatChip } from "../../ui/StatChip";
 import { ExpandChevron } from "../../ui/ExpandChevron";
-import { uiExpandButton } from "../../ui/buttonStyles";
+import { uiExpandButton, uiPickerPressFeedback } from "../../ui/buttonStyles";
 import {
   uiInfoModalWrapper,
   uiItemName,
@@ -62,7 +62,7 @@ function CompanionPickerCard({
               ? `Select ${ref.name}`
               : `${expanded ? "Collapse" : "Expand"} ${ref.name} details`
           }
-          className="absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
+          className={`absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 ${uiPickerPressFeedback(Boolean(onSelect))}`}
         />
         <div className={`${uiExpandButton} relative pointer-events-none flex items-center gap-2`}>
           <div className="flex items-center gap-1.5">

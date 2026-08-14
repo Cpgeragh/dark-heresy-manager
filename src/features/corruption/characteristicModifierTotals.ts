@@ -1,7 +1,12 @@
-import type { CorruptionBlock } from "../../types/Character";
+import type { CorruptionBlock, TalentsAndTraitsBlock } from "../../types/Character";
 import type { CharacteristicModifier } from "./characteristicModifiers";
 import { getCorruptionMalignancyRef } from "./corruptionReference";
 import { getMutationRef } from "./mutationsReference";
+import {
+  combineCharacteristicModifierTotals,
+  getTalentCharacteristicModifierSources,
+  getTalentCharacteristicModifierTotals,
+} from "../talents/talentEffects";
 
 export type CharacteristicTotals = Partial<Record<CharacteristicModifier["characteristic"], number>>;
 
@@ -16,7 +21,10 @@ function applyModifiers(
   }
 }
 
-export function getCharacteristicModifierTotals(corruption: CorruptionBlock): CharacteristicTotals {
+export function getCharacteristicModifierTotals(
+  corruption: CorruptionBlock,
+  talents?: TalentsAndTraitsBlock
+): CharacteristicTotals {
   const totals: CharacteristicTotals = {};
 
   const malignancies = Array.isArray(corruption.malignancies) ? corruption.malignancies : [];
@@ -30,18 +38,21 @@ export function getCharacteristicModifierTotals(corruption: CorruptionBlock): Ch
     applyModifiers(totals, getMutationRef(entry.referenceId)?.modifiers, entry.rolledModifiers);
   }
 
-  return totals;
+  return talents
+    ? combineCharacteristicModifierTotals(totals, getTalentCharacteristicModifierTotals(talents))
+    : totals;
 }
 
 export interface CharacteristicModifierSource {
   name: string;
-  type: "Malignancy" | "Minor Mutation" | "Major Mutation";
+  type: "Malignancy" | "Minor Mutation" | "Major Mutation" | "Talent";
   amount: number;
 }
 
 export function getCharacteristicModifierSources(
   corruption: CorruptionBlock,
-  characteristic: CharacteristicModifier["characteristic"]
+  characteristic: CharacteristicModifier["characteristic"],
+  talents?: TalentsAndTraitsBlock
 ): CharacteristicModifierSource[] {
   const sources: CharacteristicModifierSource[] = [];
 
@@ -75,5 +86,6 @@ export function getCharacteristicModifierSources(
     checkEntry(ref?.name ?? entry.name, "Major Mutation", ref?.modifiers, entry.rolledModifiers);
   }
 
+  if (talents) sources.push(...getTalentCharacteristicModifierSources(talents, characteristic));
   return sources;
 }

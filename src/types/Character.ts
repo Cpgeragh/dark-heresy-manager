@@ -315,6 +315,8 @@ export interface CyberneticItem extends CustomLibraryLinkFields {
   /** Specific body locations where this implant is installed (e.g. ["rightArm"]) */
   bodyLocation?: ArmourLocationKey[];
   concealedWeapon?: { armId: string; weaponId: string; weaponType: "ranged" | "melee" };
+  grantedByTalentEntryUid?: string;
+  grantedByTalentName?: string;
 }
 
 /**
@@ -424,12 +426,67 @@ export interface GrenadeItem extends CustomLibraryLinkFields {
  */
 
 /** A single talent or trait instance on a character sheet. */
+export interface TalentAcquisitionDetails {
+  /** Extra Talent granted by this purchase, when the top-level specialisation is already in use. */
+  grantedTalentId?: string;
+  grantedTalentName?: string;
+  grantedTalentSpecialisation?: string;
+  /** Weapon Training granted by Cult Briefing or Sicarius Tutoring. */
+  weaponTrainingId?: WeaponTrainingTalentId;
+  exoticWeapon?: string;
+  /** Home World selected by Cult Briefing (Culture). */
+  homeworldId?: string;
+  /** Augmetic selected by Cult Briefing (Heretek). */
+  augmeticName?: string;
+  augmeticReferenceId?: string;
+  /** Willpower Bonus fixed at the time a Psy Rating Talent is purchased. */
+  psyRatingWillpowerBonus?: number;
+  psyRatingMinorPowerGrants?: number;
+  psyRatingMajorPowerGrants?: number;
+  psyRatingDiscipline?: string;
+  psyRatingNewDiscipline?: boolean;
+  /** Fate Points calculated when Touched by the Fates is purchased. */
+  touchedByFatesPoints?: number;
+  /** Purity of Flesh decisions and rolled losses. */
+  purity?: {
+    removedCyberneticIds: string[];
+    removedCybernetics?: CyberneticItem[];
+    /** Integrated weapons removed from the character by Purity of Flesh. */
+    removedIntegratedRangedWeapons?: RangedWeapon[];
+    removedIntegratedMeleeWeapons?: MeleeWeapon[];
+    /** Archeotech cybernetics and integrated weapons removed by Purity of Flesh. */
+    removedArcheotech?: ArcheotechItem[];
+    /** Concealed-weapon links cleared when their cybernetic was removed. */
+    removedConcealedWeaponLinks?: Array<{
+      weaponId: string;
+      weaponType: "ranged" | "melee";
+      cyberneticId: string;
+      craftsmanship: CyberneticCraftsmanship;
+    }>;
+    qualifyingBionicsRemoved: number;
+    fatePointsGained: number;
+    toughnessLoss?: number;
+    woundsLoss?: number;
+  };
+  /** Whether this replacement reverses Fate gained from Purity of Flesh. */
+  reformedSkinPurityReplacement?: boolean;
+  purityTalentEntryUid?: string;
+  /** Marks that Rite of Pure Thought's GM-led disorder review was completed. */
+  riteOfPureThoughtReviewed?: boolean;
+  riteOriginalDisorders?: InsanityDisorderEntry[];
+  riteReplacementDisorderIds?: string[];
+}
+
 export interface TalentEntry {
   uid: string; // unique per-character instance (crypto.randomUUID())
   talentId: string; // references TalentData.id or TraitData.id
   name: string; // display name, e.g. "Hatred (Heretics)"
   specialisation?: string; // chosen value when hasSpecialisation is true
   notes?: string; // optional player notes
+  acquisition?: TalentAcquisitionDetails;
+  /** Display-only provenance for a grant calculated from another purchase; never saved as a purchase. */
+  grantedByTalentEntryUid?: string;
+  grantedByTalentName?: string;
 }
 
 export interface TalentsAndTraitsBlock {
@@ -504,6 +561,10 @@ export interface ExperienceBlock {
  */
 export interface PsychicPower extends CustomLibraryLinkFields {
   id: string;
+  /** Character-only link to the exact Minor Psychic Power/Psychic Power purchase consumed. */
+  talentEntryUid?: string;
+  /** Psy Rating Talent purchase that granted this power selection. */
+  psyRatingTalentEntryUid?: string;
   name: string;
   discipline?: string;
   threshold?: string;

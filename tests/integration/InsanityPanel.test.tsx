@@ -35,6 +35,24 @@ describe("InsanityPanel points wiring", () => {
     render(<InsanityWiring initial={{ points: 100, disorders: [] }} />);
     expect(screen.getByText("Character retires from play")).toBeInTheDocument();
   });
+
+  it("shows Chem Geld's acquisition point with its Talent source", () => {
+    render(
+      <InsanityPanel
+        insanity={{ points: 4, disorders: [] }}
+        editable
+        onUpdate={() => undefined}
+        sectionClassName=""
+        talents={{
+          homeworld: "",
+          talents: [{ uid: "c1", talentId: "chem-geld", name: "Chem Geld" }],
+          traits: [],
+        }}
+      />
+    );
+    expect(screen.getAllByText("5").length).toBeGreaterThan(0);
+    expect(screen.getByRole("button", { name: "Show information about Insanity Point Adjustments" })).toBeInTheDocument();
+  });
 });
 
 describe("InsanityPanel tab switching", () => {

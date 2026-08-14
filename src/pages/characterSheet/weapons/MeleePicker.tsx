@@ -1,6 +1,6 @@
 // src/pages/characterSheet/weapons/MeleePicker.tsx
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { MeleeWeapon, WeaponCraftsmanship } from "../../../types/Character";
 import {
   MELEE_WEAPON_REFERENCE,
@@ -42,7 +42,7 @@ function MeleeWeaponCardPickerRow({ ref, editable, strengthBonus, onSelect }: { 
     craftsmanship: "Common",
     upgrades: [],
   };
-  return <MeleeCard weapon={weapon} editable={false} strengthBonus={strengthBonus} onSelect={editable ? onSelect : undefined} onRemove={() => {}} onAddUpgrade={() => {}} onRemoveUpgrade={() => {}} onUpdateQuantity={() => {}} allowUpgrades={false} />;
+  return <MeleeCard weapon={weapon} editable={false} pickerMode strengthBonus={strengthBonus} onSelect={editable ? onSelect : undefined} onRemove={() => {}} onAddUpgrade={() => {}} onRemoveUpgrade={() => {}} onUpdateQuantity={() => {}} allowUpgrades={false} />;
 }
 
 /*
@@ -149,6 +149,7 @@ export function MeleePicker({
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<MeleeWeaponRef | null>(null);
   const [craftsmanship, setCraftsmanship] = useState<WeaponCraftsmanship>("Common");
+  const listScrollPositionRef = useRef(0);
   const normalisedQuery = query.toLowerCase();
   const filtered = references
     .filter((r) => r.name.toLowerCase().includes(normalisedQuery))
@@ -225,6 +226,7 @@ export function MeleePicker({
       onQueryChange={setQuery}
       onClose={onClose}
       suspended={suspended}
+      scrollPositionRef={listScrollPositionRef}
       isEmpty={filtered.length === 0 && filteredCustom.length === 0}
       footer={
         editable && showCustom ? (

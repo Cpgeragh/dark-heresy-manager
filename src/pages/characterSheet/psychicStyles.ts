@@ -21,13 +21,18 @@ export const disciplineColours: Record<string, string> = {
 };
 
 export const disciplineInactiveColours: Record<string, string> = {
-  Biomancy: "border-emerald-800/60 bg-emerald-950/20 text-emerald-400/65",
-  Divination: "border-cyan-800/60 bg-cyan-950/20 text-cyan-400/65",
-  Pyromancy: "border-orange-800/60 bg-orange-950/20 text-orange-400/65",
-  Telekinetics: "border-sky-800/60 bg-sky-950/20 text-sky-400/65",
-  Telepathy: "border-fuchsia-800/60 bg-fuchsia-950/20 text-fuchsia-400/65",
+  Biomancy: "border-emerald-800/45 bg-emerald-950/15 text-emerald-400/50",
+  Divination: "border-cyan-800/45 bg-cyan-950/15 text-cyan-400/50",
+  Pyromancy: "border-orange-800/45 bg-orange-950/15 text-orange-400/50",
+  Telekinetics: "border-sky-800/45 bg-sky-950/15 text-sky-400/50",
+  Telepathy: "border-fuchsia-800/45 bg-fuchsia-950/15 text-fuchsia-400/50",
   default: colourInactive,
 };
+
+export const psychicSelectionSourceColours = {
+  talent: "border-amber-500/50 bg-amber-500/10 text-amber-300",
+  psyRating: "border-indigo-500/50 bg-indigo-500/10 text-indigo-300",
+} as const;
 
 export function psyRatingGlow(psyRating: number): string {
   const capped = Math.max(0, Math.min(6, psyRating));

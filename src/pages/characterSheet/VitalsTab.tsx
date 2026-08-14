@@ -7,7 +7,9 @@ import type {
   Character,
   WoundsBlock,
   FateBlock,
+  TalentsAndTraitsBlock,
 } from "../../types/Character";
+import { getTalentFateEffects, getTalentWoundModifierSources } from "../../features/talents/talentEffects";
 import {
   uiSection,
   uiCell,
@@ -30,6 +32,7 @@ interface VitalsTabProps {
   toughnessBonus: number;
   onUpdateWounds: (next: WoundsBlock) => void;
   onUpdateFate: (next: FateBlock) => void;
+  talents?: TalentsAndTraitsBlock;
 }
 
 const totalInputClass =
@@ -41,8 +44,18 @@ export function VitalsTab({
   toughnessBonus,
   onUpdateWounds,
   onUpdateFate,
+  talents,
 }: VitalsTabProps) {
   const { wounds, fate } = character;
+  const woundSources = talents ? getTalentWoundModifierSources(talents) : [];
+  const woundAdjustment = woundSources.reduce((total, source) => total + source.amount, 0);
+  const effectiveWoundsTotal = Math.max(1, wounds.total + woundAdjustment);
+  const fateEffects = talents ? getTalentFateEffects(talents) : { modifierSources: [] };
+  const fateAdjustment = fateEffects.modifierSources.reduce((total, source) => total + source.amount, 0);
+  const effectiveFateTotal = Math.max(
+    0,
+    (fateEffects.overrideTotal ?? fate.total) + fateAdjustment
+  );
 
   const [woundsTotalDraft, setWoundsTotalDraft] = useState<string | null>(null);
   const [fateTotalDraft, setFateTotalDraft] = useState<string | null>(null);
@@ -110,7 +123,25 @@ export function VitalsTab({
         <section className={uiSection}>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             <div className={uiCell + " text-center p-2 lg:p-3 flex flex-col"}>
-              <div className="text-xs lg:text-base text-slate-100 mb-2">Total Wounds</div>
+              <div className="flex items-center justify-center gap-1 text-xs lg:text-base text-slate-100 mb-2">
+                <span>Total Wounds</span>
+                {woundSources.length > 0 && (
+                  <span className={uiInfoModalWrapper}>
+                    <InfoModal
+                      title="Total Wounds Adjustments"
+                      content={
+                        <ul className="space-y-1 text-sm leading-relaxed text-slate-300 lg:text-base">
+                          {woundSources.map((source, index) => (
+                            <li key={index}>
+                              {source.name} (Talent): {source.amount > 0 ? "+" : ""}{source.amount}
+                            </li>
+                          ))}
+                        </ul>
+                      }
+                    />
+                  </span>
+                )}
+              </div>
               <div className="flex-1 flex items-center justify-center">
                 {editable ? (
                   <input
@@ -125,7 +156,12 @@ export function VitalsTab({
                     aria-label="Total wounds"
                   />
                 ) : (
-                  <div className={uiCellValue}>{wounds.total}</div>
+                  <div className={uiCellValue}>{effectiveWoundsTotal}</div>
+                )}
+                {editable && woundAdjustment !== 0 && (
+                  <span className={`ml-1 text-xs font-code ${woundAdjustment > 0 ? "text-emerald-400" : "text-red-400"}`}>
+                    = {effectiveWoundsTotal} ({woundAdjustment > 0 ? "+" : ""}{woundAdjustment})
+                  </span>
                 )}
               </div>
             </div>
@@ -135,7 +171,7 @@ export function VitalsTab({
               <div className="flex-1 flex items-center justify-center">
                 <Stepper
                   value={wounds.current}
-                  max={wounds.total}
+                  max={effectiveWoundsTotal}
                   editable={editable}
                   onChange={handleCurrentWoundsChange}
                   dangerClassName={dangerClass(wounds.current, WOUNDS_CRITICAL_THRESHOLD)}
@@ -225,7 +261,26 @@ export function VitalsTab({
         <section className={uiSection}>
           <div className="grid grid-cols-2 gap-3">
             <div className={uiCell + " text-center p-2 lg:p-3 flex flex-col"}>
-              <div className="text-xs lg:text-base text-slate-100 mb-2">Total</div>
+              <div className="flex items-center justify-center gap-1 text-xs lg:text-base text-slate-100 mb-2">
+                <span>Total</span>
+                {(fateEffects.overrideSource || fateEffects.modifierSources.length > 0) && (
+                  <span className={uiInfoModalWrapper}>
+                    <InfoModal
+                      title="Total Fate Point Adjustments"
+                      content={
+                        <ul className="space-y-1 text-sm leading-relaxed text-slate-300 lg:text-base">
+                          {fateEffects.overrideSource && (
+                            <li>{fateEffects.overrideSource} (Talent): set to {fateEffects.overrideTotal}</li>
+                          )}
+                          {fateEffects.modifierSources.map((source, index) => (
+                            <li key={index}>{source.name} (Talent): {source.amount > 0 ? "+" : ""}{source.amount}</li>
+                          ))}
+                        </ul>
+                      }
+                    />
+                  </span>
+                )}
+              </div>
               <div className="flex-1 flex items-center justify-center">
                 {editable ? (
                   <input
@@ -240,7 +295,10 @@ export function VitalsTab({
                     aria-label="Total fate points"
                   />
                 ) : (
-                  <div className={uiCellValue}>{fate.total}</div>
+                  <div className={uiCellValue}>{effectiveFateTotal}</div>
+                )}
+                {editable && effectiveFateTotal !== fate.total && (
+                  <span className="ml-1 text-xs font-code text-emerald-400">= {effectiveFateTotal}</span>
                 )}
               </div>
             </div>
@@ -250,7 +308,7 @@ export function VitalsTab({
               <div className="flex-1 flex items-center justify-center">
                 <Stepper
                   value={fate.current}
-                  max={fate.total}
+                  max={effectiveFateTotal}
                   editable={editable}
                   onChange={handleCurrentFateChange}
                   dangerClassName={dangerClass(fate.current, FATE_CRITICAL_THRESHOLD)}

@@ -33,7 +33,7 @@ import {
   uiItemName,
   uiCardTitle,
 } from "../../../ui/editableStyles";
-import { uiExpandButton } from "../../../ui/buttonStyles";
+import { uiExpandButton, uiPickerPressFeedback } from "../../../ui/buttonStyles";
 import {
   colourArcheotech,
   colourButtonOutlineCyan,
@@ -404,6 +404,7 @@ export function RangedCard({
   slotsDisabled = false,
   forceExpanded = false,
   integrated = false,
+  pickerMode = false,
 }: {
   weapon: RangedWeapon;
   editable: boolean;
@@ -425,6 +426,7 @@ export function RangedCard({
   slotsDisabled?: boolean;
   forceExpanded?: boolean;
   integrated?: boolean;
+  pickerMode?: boolean;
 } & CustomItemLibraryActionProps<"weapon">) {
   const [expanded, setExpanded] = useState(isEquipped);
   useEffect(() => {
@@ -651,7 +653,7 @@ export function RangedCard({
             onClick={onSelect ?? (() => setExpanded((e) => !e))}
             aria-expanded={onSelect ? undefined : expanded}
             aria-label={onSelect ? `Select ${weapon.name}` : `${expanded ? "Collapse" : "Expand"} ${weapon.name} details`}
-            className="absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
+            className={`absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 ${uiPickerPressFeedback(pickerMode && Boolean(onSelect))}`}
           />
         )}
         <div className={`${uiExpandButton} relative pointer-events-none`}>

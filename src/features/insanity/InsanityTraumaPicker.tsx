@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { FormField } from "../../components/FormField";
 import { InfoModal } from "../../components/InfoModal";
 import type { InsanityTraumaEntry } from "../../types/Character";
@@ -32,6 +32,7 @@ export function InsanityTraumaPicker({
   const [customName, setCustomName] = useState("");
   const [customDetails, setCustomDetails] = useState("");
   const [selected, setSelected] = useState<MentalTraumaEntry | null>(null);
+  const listScrollPositionRef = useRef(0);
 
   const filtered = MENTAL_TRAUMAS.filter((ref) => {
     const searchable = `${ref.roll} ${ref.name} ${ref.effect}`.toLowerCase();
@@ -159,6 +160,7 @@ export function InsanityTraumaPicker({
       query={query}
       onQueryChange={setQuery}
       onClose={onClose}
+      scrollPositionRef={listScrollPositionRef}
       isEmpty={filtered.length === 0}
       footer={
         <PickerCustomAction

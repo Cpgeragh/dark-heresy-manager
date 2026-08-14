@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import type { SkillAdvanceLevel } from "../../../types/Character";
 import { CHAR_LABEL, type SkillWithComputed } from "./skillsConstants";
-import { charColour } from "../../../ui/sourceStyles";
+import { charColour, sourceColour } from "../../../ui/sourceStyles";
 import { Chip } from "../../../ui/Chip";
 import { StatChip } from "../../../ui/StatChip";
 import { InfoModal } from "../../../components/InfoModal";
@@ -18,6 +18,7 @@ import {
   uiTextBody,
 } from "../../../ui/editableStyles";
 import { ExpandChevron } from "../../../ui/ExpandChevron";
+import { uiPickerPressFeedback } from "../../../ui/buttonStyles";
 import { colourPurple, colourTeal } from "../../../ui/colourTokens";
 
 interface SkillRowProps {
@@ -42,6 +43,11 @@ export function SkillRow({ skill, editable, updateLevel, previewMode = false, on
   const [deleteArmed, setDeleteArmed] = useState(false);
 
   const levelBadgeClass = LEVEL_BADGE[skill.level] ?? "";
+  const talentSourceSummary = skill.talentSources
+    ?.map((source) =>
+      `${source.name}${source.amount !== 0 ? `: ${source.amount > 0 ? "+" : ""}${source.amount}` : ""}`
+    )
+    .join(" · ");
 
   const displayName = indented
     ? skill.name.slice(skill.category.length).trim().replace(/^\(|\)$/g, "").trim() || skill.name
@@ -62,7 +68,9 @@ export function SkillRow({ skill, editable, updateLevel, previewMode = false, on
   return (
     <div className={uiSectionShell + " overflow-hidden"}>
       {/* COLLAPSED ROW */}
-      <div className="relative w-full px-3 lg:px-4 py-2.5 lg:py-3 text-left hover:bg-slate-700/40 transition group">
+      <div className={`relative w-full text-left hover:bg-slate-700/40 transition group ${
+        previewMode ? "p-3 lg:p-4" : "px-3 lg:px-4 py-2.5 lg:py-3"
+      }`}>
         <button
           type="button"
           onClick={onSelect ? () => onSelect(skill.id) : handleToggle}
@@ -72,7 +80,7 @@ export function SkillRow({ skill, editable, updateLevel, previewMode = false, on
               ? `Select ${skill.name}`
               : `${expanded ? "Collapse" : "Expand"} ${skill.name} details`
           }
-          className="absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
+          className={`absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 ${uiPickerPressFeedback(previewMode && Boolean(onSelect))}`}
         />
         {/* Mobile: name+chips in a left column, total in its own centered column, chevron last */}
         <div className="relative pointer-events-none lg:hidden flex items-center gap-3">
@@ -86,6 +94,11 @@ export function SkillRow({ skill, editable, updateLevel, previewMode = false, on
               )}
             </div>
             <div className="flex items-center gap-1.5">
+              {previewMode && skill.source && (
+                <Chip size="sm" className={`bg-slate-800/40 font-code shrink-0 ${sourceColour(skill.source)}`}>
+                  {skill.source}
+                </Chip>
+              )}
               <Chip size="sm" className={`bg-slate-800 font-code shrink-0 ${charColour(skill.characteristic)}`}>
                 {CHAR_LABEL[skill.characteristic]}
               </Chip>
@@ -98,10 +111,31 @@ export function SkillRow({ skill, editable, updateLevel, previewMode = false, on
                 </Chip>
               )}
             </div>
+            {talentSourceSummary && (
+              <p className="text-xs leading-snug text-amber-300">
+                Talent effect: {talentSourceSummary}
+              </p>
+            )}
           </div>
           <div className="relative pointer-events-none flex items-center gap-4 shrink-0">
             <StatChip label="Total" value={skill.total ?? "—"} />
-            {editable && skill.level !== "untrained" && (
+            {(skill.talentSources?.length ?? 0) > 0 && (
+              <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
+                <InfoModal
+                  title={`${skill.name} Talent Adjustments`}
+                  content={
+                    <ul className="space-y-1 text-sm leading-relaxed text-slate-300 lg:text-base">
+                      {skill.talentSources?.map((source, index) => (
+                        <li key={index}>
+                          {source.name}{source.amount !== 0 ? `: ${source.amount > 0 ? "+" : ""}${source.amount}` : ""}
+                        </li>
+                      ))}
+                    </ul>
+                  }
+                />
+              </span>
+            )}
+            {editable && skill.level !== "untrained" && !(skill.talentMinimumLevel && skill.baseLevel === "untrained") && (
               <div className="relative z-20 pointer-events-auto">
                 <RemoveButton
                   onClick={() => setDeleteArmed(true)}
@@ -137,6 +171,11 @@ export function SkillRow({ skill, editable, updateLevel, previewMode = false, on
               )}
             </div>
             <div className="flex items-center gap-1.5">
+              {previewMode && skill.source && (
+                <Chip className={`bg-slate-800/40 font-code shrink-0 ${sourceColour(skill.source)}`}>
+                  {skill.source}
+                </Chip>
+              )}
               <Chip className={`bg-slate-800 font-code shrink-0 ${charColour(skill.characteristic)}`}>
                 {CHAR_LABEL[skill.characteristic]}
               </Chip>
@@ -149,10 +188,31 @@ export function SkillRow({ skill, editable, updateLevel, previewMode = false, on
                 </Chip>
               )}
             </div>
+            {talentSourceSummary && (
+              <p className="text-xs leading-snug text-amber-300">
+                Talent effect: {talentSourceSummary}
+              </p>
+            )}
           </div>
           <div className="relative pointer-events-none flex items-center gap-4 shrink-0">
             <StatChip label="Total" value={skill.total ?? "—"} />
-            {editable && skill.level !== "untrained" && (
+            {(skill.talentSources?.length ?? 0) > 0 && (
+              <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
+                <InfoModal
+                  title={`${skill.name} Talent Adjustments`}
+                  content={
+                    <ul className="space-y-1 text-sm leading-relaxed text-slate-300 lg:text-base">
+                      {skill.talentSources?.map((source, index) => (
+                        <li key={index}>
+                          {source.name}{source.amount !== 0 ? `: ${source.amount > 0 ? "+" : ""}${source.amount}` : ""}
+                        </li>
+                      ))}
+                    </ul>
+                  }
+                />
+              </span>
+            )}
+            {editable && skill.level !== "untrained" && !(skill.talentMinimumLevel && skill.baseLevel === "untrained") && (
               <div className="relative z-20 pointer-events-auto">
                 <RemoveButton
                   onClick={() => setDeleteArmed(true)}

@@ -1,6 +1,6 @@
 // src/pages/characterSheet/ArmourTab/ForceFieldPicker.tsx
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ArmourCraftsmanship } from "../../../types/Character";
 import { ARMOUR_REFERENCE, type ArmourRef } from "../../../data/reference/armourReference";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
@@ -39,6 +39,7 @@ export function ForceFieldPicker({
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<ArmourRef | null>(null);
   const [craftsmanship, setCraftsmanship] = useState<ArmourCraftsmanship>("Common");
+  const listScrollPositionRef = useRef(0);
   const normalisedQuery = query.toLowerCase();
   const filteredCustom = customItems
     .filter((item) => {
@@ -116,6 +117,7 @@ export function ForceFieldPicker({
       onQueryChange={setQuery}
       onClose={onClose}
       suspended={suspended}
+      scrollPositionRef={listScrollPositionRef}
       isEmpty={filtered.length === 0 && filteredCustom.length === 0}
       footer={
         editable ? (

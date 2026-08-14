@@ -1,10 +1,10 @@
 // tests/integration/PickerModal.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { PickerModal } from "../../src/ui/PickerModal";
+import { PickerModal, PickerRow } from "../../src/ui/PickerModal";
 
 function setup(overrides: Partial<React.ComponentProps<typeof PickerModal>> = {}) {
   const onClose = vi.fn();
@@ -68,5 +68,52 @@ describe("PickerModal", () => {
     expect(screen.queryByPlaceholderText("Search…")).not.toBeInTheDocument();
     expect(screen.getByText("Filter Chips")).toBeInTheDocument();
     expect(screen.getByText("Add custom")).toBeInTheDocument();
+  });
+
+  it("gives interactive picker rows visible pressed feedback", () => {
+    const { rerender } = render(<PickerRow>Interactive row</PickerRow>);
+    expect(screen.getByRole("button", { name: "Interactive row" })).toHaveClass(
+      "active:scale-[0.99]",
+      "active:!border-red-400",
+      "active:!bg-slate-700",
+      "active:ring-1"
+    );
+
+    rerender(<PickerRow interactive={false}>Read-only row</PickerRow>);
+    expect(screen.getByRole("button", { name: "Read-only row" })).not.toHaveClass(
+      "active:scale-[0.99]"
+    );
+  });
+
+  it("does not treat every enabled button in a picker as a selectable card", () => {
+    setup({
+      filterRow: <button type="button">Bespoke filter</button>,
+      footer: <button type="button" disabled>Disabled action</button>,
+    });
+
+    expect(screen.getByRole("dialog", { name: "Add Item" }).className).not.toContain(
+      "button:enabled"
+    );
+    expect(screen.getByRole("button", { name: "Bespoke filter" })).not.toHaveClass(
+      "active:!bg-slate-700"
+    );
+  });
+
+  it("records and restores a supplied scroll position", () => {
+    const scrollPositionRef = { current: 75 };
+    setup({ scrollPositionRef });
+
+    let scrollContainer = screen.getByTestId("row").parentElement as HTMLElement;
+    expect(scrollContainer).toHaveClass("overflow-y-auto");
+    expect(scrollContainer.scrollTop).toBe(75);
+
+    scrollContainer.scrollTop = 190;
+    fireEvent.scroll(scrollContainer);
+    expect(scrollPositionRef.current).toBe(190);
+
+    cleanup();
+    setup({ scrollPositionRef });
+    scrollContainer = screen.getByTestId("row").parentElement as HTMLElement;
+    expect(scrollContainer.scrollTop).toBe(190);
   });
 });

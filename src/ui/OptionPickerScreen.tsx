@@ -3,8 +3,10 @@
 import { PickerModal, PickerRow } from "./PickerModal";
 import { ArrowLeft } from "./PickerArrows";
 import { uiItemName } from "./editableStyles";
+import { Chip } from "./Chip";
+import { colourAmberFaint } from "./colourTokens";
 
-export type PickerOption = string | { value: string; label: string };
+export type PickerOption = string | { value: string; label: string; owned?: boolean };
 
 export function OptionPickerScreen({
   title,
@@ -33,13 +35,17 @@ export function OptionPickerScreen({
       {options.map((option) => {
         const value = typeof option === "string" ? option : option.value;
         const label = typeof option === "string" ? option : option.label;
+        const owned = typeof option === "string" ? false : option.owned;
         return (
           <PickerRow
             key={value}
             onClick={() => onSelect(value)}
             selected={value === selected}
           >
-            <span className={`${uiItemName} group-hover:text-white`}>{label}</span>
+            <span className="flex w-full items-center justify-between gap-3">
+              <span className={`${uiItemName} group-hover:text-white`}>{label}</span>
+              {owned && <Chip className={colourAmberFaint}>Owned</Chip>}
+            </span>
           </PickerRow>
         );
       })}

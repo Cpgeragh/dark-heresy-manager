@@ -1,7 +1,7 @@
 // src/pages/characterSheet/SkillsTab/index.tsx
 
 import { useState, useCallback, useMemo } from "react";
-import type { Characteristics, CorruptionBlock, SkillEntry } from "../../../types/Character";
+import type { Characteristics, CorruptionBlock, SkillEntry, TalentsAndTraitsBlock } from "../../../types/Character";
 import type { CharField } from "../../../types/Character";
 import { useSkillComputation } from "../../../hooks/useSkillComputation";
 import { useSwipeableTabs } from "../../../hooks/useSwipeableTabs";
@@ -9,13 +9,19 @@ import { getCharacteristicModifierTotals } from "../../../features/corruption/ch
 import { AddButton } from "../../../ui/AddButton";
 import { ViewButton } from "../../../ui/ViewButton";
 import { SectionHeader } from "../../../ui/SectionHeader";
+import { InfoModal } from "../../../components/InfoModal";
 import { SegmentedTabs, type SegmentedTabOption } from "../../../ui/SegmentedTabs";
 import {
   segmentedTabId,
   segmentedTabPanelId,
   uiSwipeableTabPanel,
 } from "../../../ui/segmentedTabStyles";
-import { uiSection, uiTextPlaceholder } from "../../../ui/editableStyles";
+import {
+  uiInfoModalWrapper,
+  uiSection,
+  uiTextBody,
+  uiTextPlaceholder,
+} from "../../../ui/editableStyles";
 import { SkillRow } from "./SkillRow";
 import { SkillGroupRow } from "./SkillGroupRow";
 import { AddSkillModal } from "./AddSkillModal";
@@ -27,6 +33,7 @@ interface SkillsTabProps {
   onUpdate: (next: SkillEntry[]) => void;
   getCharField: (statKey: keyof Characteristics) => CharField;
   corruption: CorruptionBlock;
+  talents?: TalentsAndTraitsBlock;
 }
 
 type DisplayItem =
@@ -47,9 +54,34 @@ const SKILLS_TABS = [
     activeClassName: "border-fuchsia-400 bg-fuchsia-600/80 text-white shadow-sm shadow-fuchsia-950/50",
   },
 ] as const satisfies readonly SegmentedTabOption<SkillsView>[];
+
+function SkillTypeHeading({ type }: { type: SkillsView }) {
+  const basic = type === "basic";
+  const title = basic ? "Basic Skills" : "Advanced Skills";
+  const content = basic ? (
+    <div className={`space-y-3 text-sm leading-relaxed lg:text-base ${uiTextBody}`}>
+      <p>Basic Skills can be attempted while Untrained using half the relevant Characteristic, rounded down.</p>
+      <p>The first acquisition makes the Skill Trained and uses the full Characteristic. Further acquisitions increase its Total by +10 and then +20.</p>
+    </div>
+  ) : (
+    <div className={`space-y-3 text-sm leading-relaxed lg:text-base ${uiTextBody}`}>
+      <p>Advanced Skills cannot be attempted while Untrained. The displayed Total shows the Characteristic value the Skill will use once it becomes Trained.</p>
+      <p>The first acquisition makes the Skill Trained. Further acquisitions increase its Total by +10 and then +20.</p>
+    </div>
+  );
+
+  return (
+    <div className="flex items-center gap-1.5">
+      <SectionHeader>{title}</SectionHeader>
+      <span className={uiInfoModalWrapper}>
+        <InfoModal title={title} content={content} as="span" />
+      </span>
+    </div>
+  );
+}
 const SKILLS_TABS_ID = "skill-type";
 
-export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption }: SkillsTabProps) {
+export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption, talents }: SkillsTabProps) {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isUntrainedBasicOpen, setIsUntrainedBasicOpen] = useState(false);
   const [activeView, setActiveView] = useState<SkillsView>("basic");
@@ -59,8 +91,8 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
     setActiveView
   );
 
-  const modifierTotals = getCharacteristicModifierTotals(corruption);
-  const computedSkills = useSkillComputation({ skills, getCharField, modifierTotals });
+  const modifierTotals = getCharacteristicModifierTotals(corruption, talents);
+  const computedSkills = useSkillComputation({ skills, getCharField, modifierTotals, talents });
 
   const trainedSkills = useMemo(
     () =>
@@ -180,7 +212,7 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
           className={["space-y-4", uiSwipeableTabPanel, transitionClass].join(" ")}
         >
           <div className="flex items-center justify-between">
-            <SectionHeader>{activeView === "basic" ? "Basic Skills" : "Advanced Skills"}</SectionHeader>
+            <SkillTypeHeading type={activeView} />
             {activeView === "basic" ? (
               editable ? (
                 <AddButton label="Add basic skill" onClick={() => setIsUntrainedBasicOpen(true)} />
@@ -211,7 +243,7 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
       <div className="hidden lg:grid lg:grid-cols-2 lg:gap-4 lg:items-start">
         <section className={uiSection + " space-y-3"}>
           <div className="flex items-center justify-between">
-            <SectionHeader>Basic Skills</SectionHeader>
+            <SkillTypeHeading type="basic" />
             {editable ? (
               <AddButton label="Add basic skill" onClick={() => setIsUntrainedBasicOpen(true)} />
             ) : (
@@ -222,7 +254,7 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
         </section>
         <section className={uiSection + " space-y-3"}>
           <div className="flex items-center justify-between">
-            <SectionHeader>Advanced Skills</SectionHeader>
+            <SkillTypeHeading type="advanced" />
             {editable ? (
               <AddButton label="Add advanced skill" onClick={() => setIsAddOpen(true)} />
             ) : (

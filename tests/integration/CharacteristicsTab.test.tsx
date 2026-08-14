@@ -27,9 +27,10 @@ function getCharField(_key: keyof Characteristics): CharField {
 // so tests exercise the same adjustment math production code uses, driven by `corruption`.
 function renderTab(
   getCharTotal = vi.fn((k: keyof Characteristics) => TOTALS[k]),
-  corruption: CorruptionBlock = { points: 0, malignancies: [] }
+  corruption: CorruptionBlock = { points: 0, malignancies: [] },
+  talents?: React.ComponentProps<typeof CharacteristicsTab>["talents"]
 ) {
-  const modifierTotals = getCharacteristicModifierTotals(corruption);
+  const modifierTotals = getCharacteristicModifierTotals(corruption, talents);
   const getEffectiveCharTotal = vi.fn((k: keyof Characteristics) =>
     Math.max(1, getCharTotal(k) + (modifierTotals[k] ?? 0))
   );
@@ -44,6 +45,7 @@ function renderTab(
       getCharBonus={getCharBonus}
       editable={false}
       corruption={corruption}
+      talents={talents}
       updateCharacteristic={() => {}}
     />
   );
@@ -161,6 +163,20 @@ describe("CharacteristicsTab", () => {
 
     const willpowerCard = screen.getByText("Willpower (WP)").closest("div")!;
     expect(willpowerCard.querySelector(".text-emerald-400, .text-red-400")).not.toBeInTheDocument();
+  });
+
+  it("shows a Talent adjustment and its source", async () => {
+    const user = userEvent.setup();
+    renderTab(undefined, { points: 0, malignancies: [] }, {
+      homeworld: "",
+      talents: [{ uid: "m1", talentId: "machinator-array", name: "Machinator Array" }],
+      traits: [],
+    });
+    const strengthCard = screen.getByText("Strength (S)").closest("div")!;
+    expect(within(strengthCard).getByText("(+10)")).toBeInTheDocument();
+    await user.click(within(strengthCard).getByRole("button", { name: /Show information about Strength.*Adjustments/ }));
+    const dialog = screen.getByRole("dialog", { name: /Strength.*Adjustments/ });
+    expect(within(dialog).getByText((_, element) => element?.tagName === "LI" && element.textContent === "Machinator Array (Talent): +10")).toBeInTheDocument();
   });
 });
 

@@ -56,6 +56,23 @@ export function useCharacterMutations({
     [allowedToEdit, character, campaignId, characterId, toast]
   );
 
+  const updateFields = useCallback(
+    async (partial: Partial<Character>): Promise<void> => {
+      if (!allowedToEdit || !character) return;
+      setIsUpdating(true);
+      try {
+        await updateCharacter(campaignId, characterId, stripUndefined(partial));
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Failed to update character";
+        toast.error(`Update failed: ${message}`);
+        console.error("Failed to update character:", err);
+      } finally {
+        setIsUpdating(false);
+      }
+    },
+    [allowedToEdit, character, campaignId, characterId, toast]
+  );
+
   // ================================================================
   // UPDATE CHARACTERISTIC
   // ================================================================
@@ -170,6 +187,7 @@ export function useCharacterMutations({
   return {
     // Mutations
     updateField,
+    updateFields,
     updateCharacteristic,
     releaseCharacter,
     dmForceRelease,

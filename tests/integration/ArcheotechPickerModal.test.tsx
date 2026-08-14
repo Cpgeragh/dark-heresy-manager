@@ -1,6 +1,7 @@
 // tests/integration/ArcheotechPickerModal.test.tsx
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -85,5 +86,43 @@ describe("ArcheotechPickerModal", () => {
       "5,000 Thrones",
       "Rare"
     );
+  });
+
+  it("restores both the assigned-values form and the parent list positions", async () => {
+    const user = userEvent.setup();
+    renderPicker();
+
+    const list = screen
+      .getByRole("dialog", { name: "Add Archeotech" })
+      .querySelector<HTMLElement>(".overflow-y-auto");
+    if (!list) throw new Error("No Archeotech picker scroll container found");
+    list.scrollTop = 130;
+    fireEvent.scroll(list);
+
+    await user.click(row(GM_ITEM_NAME));
+    const assignedForm = screen
+      .getByRole("dialog", { name: "GM-Assigned Values" })
+      .querySelector<HTMLElement>(".overflow-y-auto");
+    if (!assignedForm) throw new Error("No assigned-values scroll container found");
+    assignedForm.scrollTop = 210;
+    fireEvent.scroll(assignedForm);
+
+    await user.click(screen.getByLabelText(/Rarity/));
+    await user.click(screen.getByRole("button", { name: "Back" }));
+    expect(
+      screen
+        .getByRole("dialog", { name: "GM-Assigned Values" })
+        .querySelector<HTMLElement>(".overflow-y-auto")?.scrollTop
+    ).toBe(210);
+
+    const assignedDialog = screen.getByRole("dialog", { name: "GM-Assigned Values" });
+    const assignedBack = assignedDialog.querySelector<HTMLButtonElement>('button[aria-label="Back"]');
+    if (!assignedBack) throw new Error("No assigned-values Back button found");
+    await user.click(assignedBack);
+    expect(
+      screen
+        .getByRole("dialog", { name: "Add Archeotech" })
+        .querySelector<HTMLElement>(".overflow-y-auto")?.scrollTop
+    ).toBe(130);
   });
 });

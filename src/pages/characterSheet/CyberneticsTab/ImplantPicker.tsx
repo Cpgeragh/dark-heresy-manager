@@ -1,6 +1,6 @@
 // src/pages/characterSheet/CyberneticsTab/ImplantPicker.tsx
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { CyberneticCraftsmanship, ArmourLocationKey } from "../../../types/Character";
 import {
   CYBERNETICS_REFERENCE,
@@ -70,6 +70,7 @@ export function ImplantPicker({
   const [craftsmanship, setCraftsmanship] = useState<CyberneticCraftsmanship>("Common");
   const [assignedValue, setAssignedValue] = useState<string | undefined>();
   const [assignedRarity, setAssignedRarity] = useState<string | undefined>();
+  const listScrollPositionRef = useRef(0);
   const pendingNeedsRarity = pendingCost ? isVariableMeta(pendingCost.availability) : false;
   const {
     gmCost,
@@ -309,6 +310,7 @@ export function ImplantPicker({
       onQueryChange={setQuery}
       onClose={onClose}
       suspended={suspended}
+      scrollPositionRef={listScrollPositionRef}
       isEmpty={filtered.length === 0 && filteredCustom.length === 0}
       footer={
         editable && onCustom ? (

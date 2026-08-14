@@ -1,5 +1,14 @@
 import { Button } from "./Button";
 
+/** Shared footer key for forms that mark mandatory controls with a red asterisk. */
+export function RequiredFieldsNote() {
+  return (
+    <p className="text-xs lg:text-sm text-slate-300">
+      <span className="text-red-500" aria-hidden="true">*</span> Required
+    </p>
+  );
+}
+
 interface CustomFormFooterProps {
   canSubmit: boolean;
   submitLabel: string;
@@ -23,9 +32,7 @@ export function CustomFormFooter({
   return (
     <div className={`space-y-2 ${className}`.trim()}>
       {!canSubmit && (
-        <p className="text-xs lg:text-sm text-slate-300">
-          <span className="text-red-500" aria-hidden="true">*</span> Required
-        </p>
+        <RequiredFieldsNote />
       )}
       <div className="flex gap-2">
         <Button className="flex-1" onClick={onSubmit} disabled={!canSubmit || saving}>

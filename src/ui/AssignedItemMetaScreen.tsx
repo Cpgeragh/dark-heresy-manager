@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { Button } from "./Button";
 import { uiPickerBackButton } from "./buttonStyles";
 import { AssignedItemMetaFields, type AssignedItemMetaFieldsProps } from "./AssignedItemMetaFields";
@@ -35,6 +36,8 @@ export function AssignedItemMetaScreen({
   maxWidth,
   ...fieldProps
 }: AssignedItemMetaScreenProps) {
+  const formScrollPositionRef = useRef(0);
+
   if (showRarityPicker) {
     return (
       <OptionPickerScreen
@@ -61,6 +64,7 @@ export function AssignedItemMetaScreen({
       closeAriaLabel="Back"
       hideSearch
       maxWidth={maxWidth}
+      scrollPositionRef={formScrollPositionRef}
     >
       <PickerBody>
         <AssignedItemMetaFields

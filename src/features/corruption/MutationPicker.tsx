@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { FormField } from "../../components/FormField";
 import { InfoModal } from "../../components/InfoModal";
 import type { CorruptionMutationEntry } from "../../types/Character";
@@ -39,6 +39,7 @@ export function MutationPicker({
   const [customDetails, setCustomDetails] = useState("");
   const [selected, setSelected] = useState<MutationRef | null>(null);
   const [rolls, setRolls] = useState<Record<string, string>>({});
+  const listScrollPositionRef = useRef(0);
 
   const title = tier === "minor" ? "Minor Mutation" : "Major Mutation";
   const source = tier === "minor" ? MINOR_MUTATIONS : MAJOR_MUTATIONS;
@@ -200,6 +201,7 @@ export function MutationPicker({
       query={query}
       onQueryChange={setQuery}
       onClose={onClose}
+      scrollPositionRef={listScrollPositionRef}
       isEmpty={filtered.length === 0}
       footer={
         <PickerCustomAction

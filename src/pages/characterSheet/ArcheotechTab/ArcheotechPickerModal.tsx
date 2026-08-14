@@ -1,6 +1,6 @@
 // src/pages/characterSheet/ArcheotechTab/ArcheotechPickerModal.tsx
 
-import { useState, useMemo } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   ARCHEOTECH_REFERENCE,
   type ArcheotechRef,
@@ -43,6 +43,7 @@ export function ArcheotechPickerModal({
 }: Props) {
   const [query, setQuery] = useState("");
   const [pending, setPending] = useState<ArcheotechRef | null>(null);
+  const listScrollPositionRef = useRef(0);
   const {
     gmCost,
     setGmCost,
@@ -139,6 +140,7 @@ export function ArcheotechPickerModal({
       onQueryChange={setQuery}
       onClose={onClose}
       suspended={suspended}
+      scrollPositionRef={listScrollPositionRef}
       isEmpty={filtered.length === 0 && filteredCustom.length === 0}
       footer={
         editable ? (

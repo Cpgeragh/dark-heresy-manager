@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -64,6 +65,26 @@ describe("InsanityDisorderPicker", () => {
     await user.click(screen.getByText("All Disorder Types"));
     await user.click(screen.getByText("Phobia"));
     expect(screen.getByText("Fear of the Dead", { selector: "span" })).toBeInTheDocument();
+  });
+
+  it("restores the disorder list position after returning from the type filter", async () => {
+    const user = userEvent.setup();
+    setup();
+    const list = screen
+      .getByRole("dialog", { name: "Add Disorder" })
+      .querySelector<HTMLElement>(".overflow-y-auto");
+    if (!list) throw new Error("No Disorder picker scroll container found");
+    list.scrollTop = 155;
+    fireEvent.scroll(list);
+
+    await user.click(screen.getByText("All Disorder Types"));
+    await user.click(screen.getByRole("button", { name: "Back" }));
+
+    expect(
+      screen
+        .getByRole("dialog", { name: "Add Disorder" })
+        .querySelector<HTMLElement>(".overflow-y-auto")?.scrollTop
+    ).toBe(155);
   });
 
   it("picks a Type for a custom disorder via the Type picker", async () => {

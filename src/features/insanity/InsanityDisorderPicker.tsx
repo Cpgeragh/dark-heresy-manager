@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { InsanityDisorderEntry, InsanityDisorderSeverity } from "../../types/Character";
 import { FormField } from "../../components/FormField";
 import { InfoModal } from "../../components/InfoModal";
@@ -7,7 +7,7 @@ import { Chip } from "../../ui/Chip";
 import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../ui/PickerModal";
 import { OptionPickerScreen } from "../../ui/OptionPickerScreen";
 import { ArrowRight, ArrowLeft } from "../../ui/PickerArrows";
-import { uiPickerBackButton } from "../../ui/buttonStyles";
+import { uiPickerBackButton, uiPickerPressFeedback } from "../../ui/buttonStyles";
 import {
   editableInputClass,
   uiFormLabel,
@@ -58,6 +58,8 @@ export function InsanityDisorderPicker({
   const [notes, setNotes] = useState("");
   const [showTypePicker, setShowTypePicker] = useState(false);
   const [showTypeFilterPicker, setShowTypeFilterPicker] = useState(false);
+  const listScrollPositionRef = useRef(0);
+  const customScrollPositionRef = useRef(0);
 
   const typeOptions = [
     "All",
@@ -123,6 +125,7 @@ export function InsanityDisorderPicker({
         closeLabel={<ArrowLeft />}
         closeAriaLabel="Back"
         hideSearch
+        scrollPositionRef={customScrollPositionRef}
         isEmpty={false}
         footer={
           <div className="space-y-2">
@@ -175,7 +178,7 @@ export function InsanityDisorderPicker({
             <button
               type="button"
               onClick={() => setShowTypePicker(true)}
-              className="mt-1 w-full rounded border border-slate-500 bg-slate-900 px-2 py-1.5 text-sm lg:text-base text-slate-200 text-left flex items-center justify-between"
+              className={`mt-1 w-full rounded border border-slate-500 bg-slate-900 px-2 py-1.5 text-sm lg:text-base text-slate-200 text-left flex items-center justify-between ${uiPickerPressFeedback()}`}
             >
               <span>{customType}</span>
               <ArrowRight />
@@ -301,12 +304,13 @@ export function InsanityDisorderPicker({
       query={query}
       onQueryChange={setQuery}
       onClose={onClose}
+      scrollPositionRef={listScrollPositionRef}
       isEmpty={filtered.length === 0}
       filterRow={
         <button
           type="button"
           onClick={() => setShowTypeFilterPicker(true)}
-          className="w-full rounded border border-slate-500 bg-slate-900 px-2 py-1 text-xs lg:text-sm text-slate-200 text-left flex items-center justify-between"
+          className={`w-full rounded border border-slate-500 bg-slate-900 px-2 py-1 text-xs lg:text-sm text-slate-200 text-left flex items-center justify-between ${uiPickerPressFeedback()}`}
         >
           <span>{typeFilter === "All" ? "All Disorder Types" : typeFilter}</span>
           <ArrowRight />

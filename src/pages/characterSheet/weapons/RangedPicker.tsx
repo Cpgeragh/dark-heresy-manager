@@ -1,6 +1,6 @@
 // src/pages/characterSheet/weapons/RangedPicker.tsx
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { RangedWeapon, WeaponCraftsmanship } from "../../../types/Character";
 import {
   RANGED_WEAPON_REFERENCE,
@@ -23,6 +23,7 @@ import { OptionPickerScreen } from "../../../ui/OptionPickerScreen";
 import { StatChip } from "../../../ui/StatChip";
 import { DamageTypeChip } from "./weaponShared";
 import { RangedCard } from "./RangedCard";
+import { uiPickerPressFeedback } from "../../../ui/buttonStyles";
 import {
   weaponClassChip,
   ammoFamilyChip,
@@ -52,7 +53,7 @@ function RangedWeaponCardPickerRow({ ref, editable, onSelect }: { ref: RangedWea
     upgrades: [],
     ammoEntries: [],
   };
-  return <RangedCard weapon={weapon} editable={false} onSelect={editable ? onSelect : undefined} onRemove={() => {}} onAddUpgrade={() => {}} onRemoveUpgrade={() => {}} onUpdateAmmoEntries={() => {}} onUpdateQuantity={() => {}} allowUpgrades={false} />;
+  return <RangedCard weapon={weapon} editable={false} pickerMode onSelect={editable ? onSelect : undefined} onRemove={() => {}} onAddUpgrade={() => {}} onRemoveUpgrade={() => {}} onUpdateAmmoEntries={() => {}} onUpdateQuantity={() => {}} allowUpgrades={false} />;
 }
 
 /*
@@ -169,6 +170,7 @@ export function RangedPicker({
   const [familyFilter, setFamilyFilter] = useState<string | null>(null);
   const [showClassFilterPicker, setShowClassFilterPicker] = useState(false);
   const [showFamilyFilterPicker, setShowFamilyFilterPicker] = useState(false);
+  const listScrollPositionRef = useRef(0);
   const normalisedQuery = query.toLowerCase();
   const families = Array.from(
     new Map(
@@ -292,13 +294,14 @@ export function RangedPicker({
       onQueryChange={setQuery}
       onClose={onClose}
       suspended={suspended}
+      scrollPositionRef={listScrollPositionRef}
       isEmpty={filtered.length === 0 && filteredCustom.length === 0}
       filterRow={
         <div className="flex gap-2 w-full">
           <button
             type="button"
             onClick={() => setShowClassFilterPicker(true)}
-            className="flex-1 rounded border border-slate-500 bg-slate-900 px-2 py-1 text-xs lg:text-sm text-slate-200 text-left flex items-center justify-between"
+            className={`flex-1 rounded border border-slate-500 bg-slate-900 px-2 py-1 text-xs lg:text-sm text-slate-200 text-left flex items-center justify-between ${uiPickerPressFeedback()}`}
           >
             <span>{classFilter ?? "All Classes"}</span>
             <ArrowRight />
@@ -306,7 +309,7 @@ export function RangedPicker({
           <button
             type="button"
             onClick={() => setShowFamilyFilterPicker(true)}
-            className="flex-1 rounded border border-slate-500 bg-slate-900 px-2 py-1 text-xs lg:text-sm text-slate-200 text-left flex items-center justify-between"
+            className={`flex-1 rounded border border-slate-500 bg-slate-900 px-2 py-1 text-xs lg:text-sm text-slate-200 text-left flex items-center justify-between ${uiPickerPressFeedback()}`}
           >
             <span>{familyFilter ?? "All Types"}</span>
             <ArrowRight />

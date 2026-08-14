@@ -1,11 +1,16 @@
 // src/pages/characterSheet/PsychicTab.tsx
 
-import { useState, useCallback } from "react";
-import type { PsychicBlock, PsychicPower } from "../../types/Character";
+import { useState, useCallback, useRef } from "react";
+import type {
+  PsychicBlock,
+  PsychicPower,
+  TalentsAndTraitsBlock,
+} from "../../types/Character";
 import { useSwipeableTabs } from "../../hooks/useSwipeableTabs";
 import {
   PSYCHIC_POWER_REFERENCE,
   PSYCHIC_DISCIPLINES,
+  getPsychicPowerDescription,
   type PsychicPowerRef,
   type PsychicDiscipline,
 } from "../../data/reference/psychicReference";
@@ -14,6 +19,7 @@ import {
   editableTextareaClass,
   uiSection,
   uiFormLabel,
+  uiItemName,
 } from "../../ui/editableStyles";
 import { Button } from "../../ui/Button";
 import { AddButton } from "../../ui/AddButton";
@@ -21,13 +27,19 @@ import { ViewButton } from "../../ui/ViewButton";
 import { Chip } from "../../ui/Chip";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { PowerCard } from "./components/PowerCard";
-import { PickerBody, PickerCustomAction, PickerModal } from "../../ui/PickerModal";
+import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../ui/PickerModal";
 import { ArrowLeft, ArrowRight } from "../../ui/PickerArrows";
+import { uiPickerPressFeedback } from "../../ui/buttonStyles";
 import { OptionPickerScreen } from "../../ui/OptionPickerScreen";
 import { InfoModal } from "../../components/InfoModal";
 import { TALENT_DESCRIPTIONS } from "../../data/talentDescriptions";
 import { sourceColour } from "../../ui/sourceStyles";
-import { disciplineColours, disciplineInactiveColours, psyRatingGlow } from "./psychicStyles";
+import {
+  disciplineColours,
+  disciplineInactiveColours,
+  psyRatingGlow,
+  psychicSelectionSourceColours,
+} from "./psychicStyles";
 import { colourActiveSky, colourActiveRose } from "../../ui/colourTokens";
 import { SegmentedTabs, type SegmentedTabOption } from "../../ui/SegmentedTabs";
 import {
@@ -42,6 +54,12 @@ import { createDraftCustomItem, saveDraftCustomItem } from "../../services/custo
 import { useToast } from "../../components/Toast";
 import type { CampaignCustomItem, CustomPsychicPowerData } from "../../types/CustomItems";
 import type { CustomItemLibraryAction } from "../../types/CustomItemActions";
+import {
+  getAvailablePsychicTalentPurchases,
+  getAvailablePsyRatingPowerGrants,
+  linkPowerToPsyRatingGrant,
+  linkPowerToTalentPurchase,
+} from "./talentUtils";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -52,6 +70,7 @@ interface PsychicTabProps {
   characterName?: string;
   isDM: boolean;
   psychic: PsychicBlock;
+  talents: TalentsAndTraitsBlock;
   psyRating: number;
   editable: boolean;
   onUpdate: (next: PsychicBlock) => void | Promise<void>;
@@ -76,9 +95,63 @@ const PSYCHIC_POWER_TABS_ID = "psychic-power-groups";
 type CustomRangeMode = "meters" | "km-radius" | "you" | "unlimited";
 type EditingCustomPower = { target: PowerGroup; power: PsychicPower } | null;
 
+function normalisePowerName(name: string): string {
+  return name.trim().toLocaleLowerCase();
+}
+
+function PowerSectionHeading({
+  title,
+  availableSelections,
+}: {
+  title: string;
+  availableSelections: number;
+}) {
+  return (
+    <div className="flex min-w-0 flex-col items-start gap-2">
+      <SectionHeader>{title}</SectionHeader>
+      {availableSelections > 0 && (
+        <Chip className="border-amber-500/60 bg-amber-950/30 text-amber-300">
+          Available: {availableSelections}
+        </Chip>
+      )}
+    </div>
+  );
+}
+
+function PowerRouteCard({
+  title,
+  status,
+  statusClassName,
+  onClick,
+}: {
+  title: string;
+  status: string;
+  statusClassName: string;
+  onClick: () => void;
+}) {
+  return (
+    <PickerRow
+      card
+      aria-label={title}
+      className="rounded-lg border border-slate-500 bg-slate-900/60"
+      onClick={onClick}
+    >
+      <div className="flex items-center gap-3">
+        <div className="min-w-0 flex-1 space-y-2">
+          <p className={uiItemName}>{title}</p>
+          <Chip className={statusClassName}>{status}</Chip>
+        </div>
+        <ArrowRight />
+      </div>
+    </PickerRow>
+  );
+}
+
 function toCustomPowerData(power: PsychicPower): CustomPsychicPowerData {
   const {
     id: _id,
+    talentEntryUid: _talentEntryUid,
+    psyRatingTalentEntryUid: _psyRatingTalentEntryUid,
     customLibraryId: _customLibraryId,
     customLibraryVersionId: _customLibraryVersionId,
     known: _known,
@@ -96,7 +169,7 @@ function referencePowerPreview(ref: PsychicPowerRef): PsychicPower {
     focusTime: ref.focusTime,
     sustained: ref.sustained ? "Yes" : "No",
     range: ref.range,
-    description: ref.description,
+    description: getPsychicPowerDescription(ref),
     source: ref.source,
     isMinor: ref.discipline === "Minor",
     known: true,
@@ -124,7 +197,11 @@ function PowerPicker({
   onSelectCustomItem,
   onCustom,
   onClose,
+  backToRoutes = false,
   suspended = false,
+  requiredDiscipline,
+  selectionLocked = false,
+  selectionBusy = false,
 }: {
   excludeMinor?: boolean;
   minorOnly?: boolean;
@@ -135,18 +212,24 @@ function PowerPicker({
   onSelectCustomItem: (item: CampaignCustomItem<"power">) => void;
   onCustom: () => void;
   onClose: () => void;
+  backToRoutes?: boolean;
   suspended?: boolean;
+  requiredDiscipline?: string;
+  selectionLocked?: boolean;
+  selectionBusy?: boolean;
 }) {
   const [query, setQuery] = useState("");
   const [disciplineFilter, setDisciplineFilter] = useState<string | null>(null);
   const [sourceFilter, setSourceFilter] = useState<string | null>(null);
   const [showDisciplineFilterPicker, setShowDisciplineFilterPicker] = useState(false);
   const [showSourceFilterPicker, setShowSourceFilterPicker] = useState(false);
+  const listScrollPositionRef = useRef(0);
 
   const scopedReference = PSYCHIC_POWER_REFERENCE.filter((r) => {
     const notMinor = !excludeMinor || r.discipline !== "Minor";
     const onlyMinor = !minorOnly || r.discipline === "Minor";
-    return notMinor && onlyMinor;
+    const correctDiscipline = !requiredDiscipline || r.discipline === requiredDiscipline;
+    return notMinor && onlyMinor && correctDiscipline;
   });
 
   const majorDisciplineOptions = PSYCHIC_DISCIPLINES.filter((d) => d !== "Minor");
@@ -156,16 +239,17 @@ function PowerPicker({
     .filter((r) => r.name.toLowerCase().includes(query.toLowerCase()))
     .filter((r) => !disciplineFilter || r.discipline === disciplineFilter)
     .filter((r) => !sourceFilter || r.source === sourceFilter)
-    .filter((r) => !existingNames.has(r.name))
+    .filter((r) => !existingNames.has(normalisePowerName(r.name)))
     .sort((a, b) => a.name.localeCompare(b.name));
 
   const filteredCustom = customItems
     .filter((item) => item.status !== "archived")
     .filter((item) => (excludeMinor ? !item.data.isMinor : minorOnly ? item.data.isMinor : true))
+    .filter((item) => !requiredDiscipline || item.data.discipline === requiredDiscipline)
     .filter((item) => item.name.toLowerCase().includes(query.toLowerCase()))
     .filter((item) => !disciplineFilter || item.data.discipline === disciplineFilter)
     .filter((item) => !sourceFilter || (item.data.source ?? item.data.origin) === sourceFilter)
-    .filter((item) => !existingNames.has(item.name))
+    .filter((item) => !existingNames.has(normalisePowerName(item.name)))
     .sort((a, b) => a.name.localeCompare(b.name));
 
   const pickerItems = [
@@ -209,15 +293,18 @@ function PowerPicker({
       query={query}
       onQueryChange={setQuery}
       onClose={onClose}
+      closeLabel={backToRoutes ? <ArrowLeft /> : undefined}
+      closeAriaLabel={backToRoutes ? "Back" : "Close"}
       suspended={suspended}
+      scrollPositionRef={listScrollPositionRef}
       isEmpty={filtered.length === 0 && filteredCustom.length === 0}
       filterRow={
-        <div className="flex gap-2 w-full">
-          {!minorOnly && (
+        <div className="flex flex-wrap gap-2 w-full">
+          {!minorOnly && !requiredDiscipline && (
             <button
               type="button"
               onClick={() => setShowDisciplineFilterPicker(true)}
-              className="flex-1 rounded border border-slate-500 bg-slate-900 px-2 py-1 text-xs lg:text-sm text-slate-200 text-left flex items-center justify-between"
+              className={`flex-1 rounded border border-slate-500 bg-slate-900 px-2 py-1 text-xs lg:text-sm text-slate-200 text-left flex items-center justify-between ${uiPickerPressFeedback()}`}
             >
               <span>{disciplineFilter ?? "All Disciplines"}</span>
               <ArrowRight />
@@ -226,15 +313,20 @@ function PowerPicker({
           <button
             type="button"
             onClick={() => setShowSourceFilterPicker(true)}
-            className="flex-1 rounded border border-slate-500 bg-slate-900 px-2 py-1 text-xs lg:text-sm text-slate-200 text-left flex items-center justify-between"
+            className={`flex-1 rounded border border-slate-500 bg-slate-900 px-2 py-1 text-xs lg:text-sm text-slate-200 text-left flex items-center justify-between ${uiPickerPressFeedback()}`}
           >
             <span>{sourceFilter ?? "All Sources"}</span>
             <ArrowRight />
           </button>
+          {selectionLocked && (
+            <Chip className="border-amber-500/70 bg-amber-950/30 text-amber-300">
+              All selections used
+            </Chip>
+          )}
         </div>
       }
       footer={
-        editable ? (
+        editable && !selectionLocked && !selectionBusy ? (
           <PickerCustomAction onClick={onCustom}>
             {minorOnly ? "Custom Minor Power" : "Custom Major Power"}
           </PickerCustomAction>
@@ -248,8 +340,9 @@ function PowerPicker({
               key={`custom-${entry.item.id}`}
               power={customPowerPreview(entry.item)}
               editable={false}
+              pickerMode
               onRemove={() => undefined}
-              onSelect={editable ? () => onSelectCustomItem(entry.item) : undefined}
+              onSelect={editable && !selectionLocked && !selectionBusy ? () => onSelectCustomItem(entry.item) : undefined}
               selectLabel={`Select ${entry.item.name}`}
             />
           ) : (
@@ -257,8 +350,9 @@ function PowerPicker({
               key={`reference-${entry.ref.id}`}
               power={referencePowerPreview(entry.ref)}
               editable={false}
+              pickerMode
               onRemove={() => undefined}
-              onSelect={editable ? () => onSelect(entry.ref) : undefined}
+              onSelect={editable && !selectionLocked && !selectionBusy ? () => onSelect(entry.ref) : undefined}
               selectLabel={`Select ${entry.ref.name}`}
             />
           )
@@ -288,6 +382,7 @@ function CustomPowerForm({
   onAdd,
   onBack,
   onCancel,
+  requiredDiscipline,
 }: {
   target: PowerGroup;
   existingNames: Set<string>;
@@ -295,6 +390,7 @@ function CustomPowerForm({
   onAdd: (power: PsychicPower) => void | Promise<void>;
   onBack: () => void;
   onCancel: () => void;
+  requiredDiscipline?: string;
 }) {
   const majorDisciplines = PSYCHIC_DISCIPLINES.filter((d) => d !== "Minor");
   const initialRange = rangeToFormValue(initialPower?.range);
@@ -303,7 +399,7 @@ function CustomPowerForm({
   const [discipline, setDiscipline] = useState<PsychicDiscipline | "">(
     target === "minor"
       ? "Minor"
-      : ((initialPower?.discipline as PsychicDiscipline | undefined) ?? "")
+      : ((requiredDiscipline as PsychicDiscipline | undefined) ?? (initialPower?.discipline as PsychicDiscipline | undefined) ?? "")
   );
   const [threshold, setThreshold] = useState(initialPower?.threshold ?? "");
   const [focusTime, setFocusTime] = useState<"" | "Half Action" | "Full Action">(
@@ -325,7 +421,9 @@ function CustomPowerForm({
 
   const trimmedName = name.trim();
   const initialName = initialPower?.name.trim() ?? "";
-  const nameExists = trimmedName !== initialName && existingNames.has(trimmedName);
+  const nameKey = normalisePowerName(trimmedName);
+  const initialNameKey = normalisePowerName(initialName);
+  const nameExists = nameKey !== initialNameKey && existingNames.has(nameKey);
   const thresholdIsValid = /^[1-9]\d*$/.test(threshold);
   const metresRangeIsValid = /^[1-9]\d*$/.test(rangeValue);
   const kmRangeIsValid = /^[1-9]\d*(?:\.\d)?$/.test(rangeValue);
@@ -375,6 +473,8 @@ function CustomPowerForm({
         isMinor: target === "minor",
         custom: true,
         known: initialPower?.known ?? true,
+        talentEntryUid: initialPower?.talentEntryUid,
+        psyRatingTalentEntryUid: initialPower?.psyRatingTalentEntryUid,
         customLibraryId: initialPower?.customLibraryId,
         customLibraryVersionId: initialPower?.customLibraryVersionId,
       });
@@ -418,8 +518,10 @@ function CustomPowerForm({
           <label className={uiFormLabel}>
             Discipline <span className="text-red-400">*</span>
           </label>
-          {target === "minor" ? (
-            <Chip className={`w-fit ${disciplineColours.Minor}`}>Minor</Chip>
+          {target === "minor" || requiredDiscipline ? (
+            <Chip className={`w-fit ${disciplineColours[target === "minor" ? "Minor" : requiredDiscipline ?? ""] ?? disciplineColours.default}`}>
+              {target === "minor" ? "Minor" : requiredDiscipline}
+            </Chip>
           ) : (
             <div className="flex flex-wrap gap-1.5">
               {majorDisciplines.map((d) => (
@@ -605,6 +707,7 @@ function CustomPowerForm({
 
 function PowerGrid({
   powers,
+  talents,
   editable,
   isDM,
   userId,
@@ -615,8 +718,13 @@ function PowerGrid({
   onPublishPower,
   onArchivePower,
   onUpdateAllPowerCopies,
+  canLinkPurchase,
+  onLinkPurchase,
+  canLinkPsyRatingGrant,
+  onLinkPsyRatingGrant,
 }: {
   powers: PsychicPower[];
+  talents: TalentsAndTraitsBlock;
   editable: boolean;
   isDM: boolean;
   userId: string | null;
@@ -627,12 +735,20 @@ function PowerGrid({
   onPublishPower: (item: CampaignCustomItem<"power">) => void;
   onArchivePower: (item: CampaignCustomItem<"power">) => void;
   onUpdateAllPowerCopies: (item: CampaignCustomItem<"power">) => void;
+  canLinkPurchase: boolean;
+  onLinkPurchase: (power: PsychicPower) => void;
+  canLinkPsyRatingGrant: (power: PsychicPower) => boolean;
+  onLinkPsyRatingGrant: (power: PsychicPower) => void;
 }) {
   const sortedPowers = [...powers].sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <div className="space-y-3">
       {sortedPowers.map((power) => {
+        const linkedTalentUid = power.talentEntryUid ?? power.psyRatingTalentEntryUid;
+        const talentSourceName = linkedTalentUid
+          ? talents.talents.find((entry) => entry.uid === linkedTalentUid)?.name
+          : undefined;
         const libraryItem = power.customLibraryId
           ? campaignCustomPowersById.get(power.customLibraryId)
           : undefined;
@@ -644,6 +760,7 @@ function PowerGrid({
           <PowerCard
             key={power.id}
             power={power}
+            talentSourceName={talentSourceName}
             editable={editable}
             onRemove={onRemove}
             libraryItem={libraryItem}
@@ -654,6 +771,16 @@ function PowerGrid({
             onPublish={() => libraryItem && onPublishPower(libraryItem)}
             onArchive={() => libraryItem && onArchivePower(libraryItem)}
             onUpdateAllCopies={() => libraryItem && onUpdateAllPowerCopies(libraryItem)}
+            onLinkPurchase={
+              canLinkPurchase && !power.talentEntryUid && !power.psyRatingTalentEntryUid
+                ? () => onLinkPurchase(power)
+                : undefined
+            }
+            onLinkPsyRatingGrant={
+              canLinkPsyRatingGrant(power) && !power.talentEntryUid && !power.psyRatingTalentEntryUid
+                ? () => onLinkPsyRatingGrant(power)
+                : undefined
+            }
           />
         );
       })}
@@ -668,11 +795,19 @@ export function PsychicTab({
   characterName,
   isDM,
   psychic,
+  talents,
   psyRating,
   editable,
   onUpdate,
 }: PsychicTabProps) {
   const [pickerTarget, setPickerTarget] = useState<PickerTarget>(null);
+  const [purchaseChoiceTarget, setPurchaseChoiceTarget] = useState<PickerTarget>(null);
+  const [pendingTalentEntryUid, setPendingTalentEntryUid] = useState<string | undefined>();
+  const [purchaseModeTarget, setPurchaseModeTarget] = useState<PickerTarget>(null);
+  const [pendingPsyRatingTalentEntryUid, setPendingPsyRatingTalentEntryUid] = useState<string | undefined>();
+  const [psyRatingModeTarget, setPsyRatingModeTarget] = useState<PickerTarget>(null);
+  const [powerSelectionBusy, setPowerSelectionBusy] = useState(false);
+  const powerSelectionBusyRef = useRef(false);
   const [customTarget, setCustomTarget] = useState<PickerTarget>(null);
   const [editingCustomPower, setEditingCustomPower] = useState<EditingCustomPower>(null);
   const [activePowerGroup, setActivePowerGroup] = useState<PowerGroup>(() =>
@@ -699,17 +834,57 @@ export function PsychicTab({
   const { publishDefinition, archiveDefinition, updateAllCopies, getBusyAction } =
     useCustomItemLibraryActions<"power">({ campaignId, userId, itemLabel: "psychic power" });
 
-  // ── Field updates ────────────────────────────────────────────────────────
+  const availableMinorPurchases = getAvailablePsychicTalentPurchases(talents, psychic, "minor");
+  const availableMajorPurchases = getAvailablePsychicTalentPurchases(talents, psychic, "major");
+  const availableMinorPsyRatingGrants = getAvailablePsyRatingPowerGrants(talents, psychic, "minor");
+  const availableMajorPsyRatingGrants = getAvailablePsyRatingPowerGrants(talents, psychic, "major");
+  const availableMinorPsyRatingCount = availableMinorPsyRatingGrants.reduce((total, grant) => total + grant.remaining, 0);
+  const availableMajorPsyRatingCount = availableMajorPsyRatingGrants.reduce((total, grant) => total + grant.remaining, 0);
 
-  const handleToggleDiscipline = useCallback(
-    (d: string) => {
-      if (!editable) return;
-      const current = psychic.disciplines ?? [];
-      const next = current.includes(d) ? current.filter((x) => x !== d) : [...current, d];
-      onUpdate({ ...psychic, disciplines: next });
+  const advancePurchasedPowerMode = useCallback(
+    (target: PowerGroup, usedPurchaseUid: string | undefined) => {
+      if (!usedPurchaseUid || purchaseModeTarget !== target) {
+        setPendingTalentEntryUid(undefined);
+        return;
+      }
+      const available = target === "minor" ? availableMinorPurchases : availableMajorPurchases;
+      const nextPurchase = available.find((entry) => entry.uid !== usedPurchaseUid);
+      if (nextPurchase) {
+        setPendingTalentEntryUid(nextPurchase.uid);
+      } else {
+        setPendingTalentEntryUid(undefined);
+        setPurchaseModeTarget(null);
+        setPickerTarget(null);
+      }
     },
-    [editable, psychic, onUpdate]
+    [purchaseModeTarget, availableMinorPurchases, availableMajorPurchases]
   );
+
+  const advancePsyRatingGrantMode = useCallback(
+    (target: PowerGroup, usedTalentUid: string | undefined) => {
+      if (!usedTalentUid || psyRatingModeTarget !== target) {
+        setPendingPsyRatingTalentEntryUid(undefined);
+        return;
+      }
+      const available = target === "minor"
+        ? availableMinorPsyRatingGrants
+        : availableMajorPsyRatingGrants;
+      const usedGrant = available.find((grant) => grant.entry.uid === usedTalentUid);
+      const nextGrant = usedGrant && usedGrant.remaining > 1
+        ? usedGrant
+        : available.find((grant) => grant.entry.uid !== usedTalentUid);
+      if (nextGrant) {
+        setPendingPsyRatingTalentEntryUid(nextGrant.entry.uid);
+      } else {
+        setPendingPsyRatingTalentEntryUid(undefined);
+        setPsyRatingModeTarget(null);
+        setPickerTarget(null);
+      }
+    },
+    [psyRatingModeTarget, availableMinorPsyRatingGrants, availableMajorPsyRatingGrants]
+  );
+
+  // ── Field updates ────────────────────────────────────────────────────────
 
   // ── Power array operations ────────────────────────────────────────────────
 
@@ -737,8 +912,10 @@ export function PsychicTab({
 
   /** Add a power from the reference picker */
   const fromReference = useCallback(
-    (ref: PsychicPowerRef) => {
-      if (!editable) return;
+    async (ref: PsychicPowerRef) => {
+      if (!editable || powerSelectionBusyRef.current) return;
+      powerSelectionBusyRef.current = true;
+      setPowerSelectionBusy(true);
       const newPower: PsychicPower = {
         id: crypto.randomUUID(),
         name: ref.name,
@@ -747,24 +924,33 @@ export function PsychicTab({
         focusTime: ref.focusTime,
         sustained: ref.sustained ? "Yes" : "No",
         range: ref.range,
-        description: ref.description,
+        description: getPsychicPowerDescription(ref),
         source: ref.source,
         isMinor: ref.discipline === "Minor",
         known: true,
+        ...(pendingTalentEntryUid ? { talentEntryUid: pendingTalentEntryUid } : {}),
+        ...(pendingPsyRatingTalentEntryUid ? { psyRatingTalentEntryUid: pendingPsyRatingTalentEntryUid } : {}),
       };
       const type = ref.discipline === "Minor" ? "minorPowers" : "majorPowers";
-      onUpdate({
-        ...psychic,
-        [type]: [...psychic[type], newPower],
-      });
+      try {
+        await onUpdate({
+          ...psychic,
+          [type]: [...psychic[type], newPower],
+        });
+        advancePurchasedPowerMode(type === "minorPowers" ? "minor" : "major", pendingTalentEntryUid);
+        advancePsyRatingGrantMode(type === "minorPowers" ? "minor" : "major", pendingPsyRatingTalentEntryUid);
+      } finally {
+        powerSelectionBusyRef.current = false;
+        setPowerSelectionBusy(false);
+      }
     },
-    [editable, psychic, onUpdate]
+    [editable, psychic, onUpdate, pendingTalentEntryUid, pendingPsyRatingTalentEntryUid, advancePurchasedPowerMode, advancePsyRatingGrantMode]
   );
 
   /** Add a power selected from the campaign's custom item library */
   const fromCustomLibrary = useCallback(
     async (libraryItem: CampaignCustomItem<"power">) => {
-      if (!editable) return;
+      if (!editable || powerSelectionBusyRef.current) return;
       const versionId =
         libraryItem.status === "published"
           ? libraryItem.publishedVersionId
@@ -773,6 +959,8 @@ export function PsychicTab({
         toast.error("This custom power has no usable version.");
         return;
       }
+      powerSelectionBusyRef.current = true;
+      setPowerSelectionBusy(true);
       const type = libraryItem.data.isMinor ? "minorPowers" : "majorPowers";
       const newPower: PsychicPower = {
         id: crypto.randomUUID(),
@@ -780,17 +968,54 @@ export function PsychicTab({
         known: true,
         customLibraryId: libraryItem.id,
         customLibraryVersionId: versionId,
+        ...(pendingTalentEntryUid ? { talentEntryUid: pendingTalentEntryUid } : {}),
+        ...(pendingPsyRatingTalentEntryUid ? { psyRatingTalentEntryUid: pendingPsyRatingTalentEntryUid } : {}),
       };
-      await onUpdate({
-        ...psychic,
-        [type]: [...psychic[type], newPower],
-      });
+      try {
+        await onUpdate({
+          ...psychic,
+          [type]: [...psychic[type], newPower],
+        });
+        advancePurchasedPowerMode(type === "minorPowers" ? "minor" : "major", pendingTalentEntryUid);
+        advancePsyRatingGrantMode(type === "minorPowers" ? "minor" : "major", pendingPsyRatingTalentEntryUid);
+      } finally {
+        powerSelectionBusyRef.current = false;
+        setPowerSelectionBusy(false);
+      }
     },
-    [editable, psychic, onUpdate, toast]
+    [editable, psychic, onUpdate, toast, pendingTalentEntryUid, pendingPsyRatingTalentEntryUid, advancePurchasedPowerMode, advancePsyRatingGrantMode]
   );
 
-  const openPickerForMinor = useCallback(() => setPickerTarget("minor"), []);
-  const openPickerForMajor = useCallback(() => setPickerTarget("major"), []);
+  const beginAddPower = useCallback(
+    (target: PowerGroup) => {
+      if (!editable) {
+        setPurchaseModeTarget(null);
+        setPsyRatingModeTarget(null);
+        setPendingTalentEntryUid(undefined);
+        setPendingPsyRatingTalentEntryUid(undefined);
+        setPurchaseChoiceTarget(null);
+        setPickerTarget(target);
+        return;
+      }
+      const available = target === "minor" ? availableMinorPurchases : availableMajorPurchases;
+      const grants = target === "minor" ? availableMinorPsyRatingGrants : availableMajorPsyRatingGrants;
+      if (available.length > 0 || grants.length > 0) {
+        setPurchaseModeTarget(null);
+        setPsyRatingModeTarget(null);
+        setPurchaseChoiceTarget(target);
+      } else {
+        setPurchaseModeTarget(null);
+        setPsyRatingModeTarget(null);
+        setPendingTalentEntryUid(undefined);
+        setPendingPsyRatingTalentEntryUid(undefined);
+        setPickerTarget(target);
+      }
+    },
+    [editable, availableMinorPurchases, availableMajorPurchases, availableMinorPsyRatingGrants, availableMajorPsyRatingGrants]
+  );
+
+  const openPickerForMinor = useCallback(() => beginAddPower("minor"), [beginAddPower]);
+  const openPickerForMajor = useCallback(() => beginAddPower("major"), [beginAddPower]);
 
   const addCustomPower = useCallback(
     async (power: PsychicPower) => {
@@ -812,10 +1037,18 @@ export function PsychicTab({
           ...psychic,
           [type]: [
             ...psychic[type],
-            { ...power, customLibraryId: customItemId, customLibraryVersionId: versionId },
+            {
+              ...power,
+              customLibraryId: customItemId,
+              customLibraryVersionId: versionId,
+              ...(pendingTalentEntryUid ? { talentEntryUid: pendingTalentEntryUid } : {}),
+              ...(pendingPsyRatingTalentEntryUid ? { psyRatingTalentEntryUid: pendingPsyRatingTalentEntryUid } : {}),
+            },
           ],
         });
         setCustomTarget(null);
+        advancePurchasedPowerMode(customTarget, pendingTalentEntryUid);
+        advancePsyRatingGrantMode(customTarget, pendingPsyRatingTalentEntryUid);
         toast.success("Custom power saved as a campaign draft.");
       } catch (err) {
         console.error("Failed to create custom power:", err);
@@ -832,6 +1065,10 @@ export function PsychicTab({
       psychic,
       onUpdate,
       toast,
+      pendingTalentEntryUid,
+      pendingPsyRatingTalentEntryUid,
+      advancePurchasedPowerMode,
+      advancePsyRatingGrantMode,
     ]
   );
 
@@ -864,6 +1101,42 @@ export function PsychicTab({
     },
     [editable, editingCustomPower, campaignId, characterId, characterName, userId, psychic, onUpdate, toast]
   );
+
+  const handleLinkExistingPower = useCallback(
+    (group: PowerGroup, power: PsychicPower) => {
+      if (!editable || power.talentEntryUid) return;
+      const available = group === "minor" ? availableMinorPurchases : availableMajorPurchases;
+      const purchase = available[0];
+      if (!purchase) return;
+      const next = linkPowerToTalentPurchase(psychic, talents, power.id, purchase.uid);
+      if (next !== psychic) onUpdate(next);
+    },
+    [
+      editable,
+      availableMinorPurchases,
+      availableMajorPurchases,
+      psychic,
+      talents,
+      onUpdate,
+    ]
+  );
+
+  const handleLinkExistingPowerToPsyRating = useCallback(
+    (group: PowerGroup, power: PsychicPower) => {
+      if (!editable || power.talentEntryUid || power.psyRatingTalentEntryUid) return;
+      const available = group === "minor" ? availableMinorPsyRatingGrants : availableMajorPsyRatingGrants;
+      const grant = available.find(
+        (candidate) =>
+          group === "minor" ||
+          !candidate.entry.acquisition?.psyRatingDiscipline ||
+          candidate.entry.acquisition.psyRatingDiscipline === power.discipline
+      );
+      if (!grant) return;
+      const next = linkPowerToPsyRatingGrant(psychic, talents, power.id, grant.entry.uid);
+      if (next !== psychic) onUpdate(next);
+    },
+    [editable, availableMinorPsyRatingGrants, availableMajorPsyRatingGrants, psychic, talents, onUpdate]
+  );
   // ── Render ────────────────────────────────────────────────────────────────
 
   const activePowers = activePowerGroup === "minor" ? psychic.minorPowers : psychic.majorPowers;
@@ -875,8 +1148,8 @@ export function PsychicTab({
   const activeEmptyText =
     activePowerGroup === "minor" ? "No minor powers recorded." : "No major powers recorded.";
   const existingPowerNames = new Set([
-    ...psychic.minorPowers.map((p) => p.name),
-    ...psychic.majorPowers.map((p) => p.name),
+    ...psychic.minorPowers.map((p) => normalisePowerName(p.name)),
+    ...psychic.majorPowers.map((p) => normalisePowerName(p.name)),
   ]);
 
   return (
@@ -912,28 +1185,25 @@ export function PsychicTab({
           </div>
         </div>
 
-        {/* Disciplines — toggle chips, one per major discipline */}
+        {/* Disciplines — read-only status chips activated through Psy Rating Talents */}
         <div>
           <p className={`${uiFormLabel} mb-1.5 text-center`}>Disciplines</p>
           <div className="flex flex-wrap gap-1.5 justify-center">
             {PSYCHIC_DISCIPLINES.filter((d) => d !== "Minor").map((d) => {
               const active = (psychic.disciplines ?? []).includes(d);
               return (
-                <button
-                  type="button"
+                <span
                   key={d}
-                  disabled={!editable}
-                  onClick={() => handleToggleDiscipline(d)}
-                  aria-pressed={active}
+                  aria-label={`${d}: ${active ? "known" : "not known"}`}
                   className={[
                     "px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm transition",
                     active
                       ? `${disciplineColours[d] ?? disciplineColours.default} font-semibold`
-                      : `${disciplineInactiveColours[d] ?? disciplineInactiveColours.default} ${editable ? "" : "cursor-default"}`,
+                      : disciplineInactiveColours[d] ?? disciplineInactiveColours.default,
                   ].join(" ")}
                 >
                   {d}
-                </button>
+                </span>
               );
             })}
           </div>
@@ -958,19 +1228,24 @@ export function PsychicTab({
           role="tabpanel"
         >
           <div className="flex items-center justify-between">
-            <SectionHeader>{activeTitle}</SectionHeader>
+            <PowerSectionHeading
+              title={activeTitle}
+              availableSelections={activePowerGroup === "minor"
+                ? availableMinorPurchases.length + availableMinorPsyRatingCount
+                : availableMajorPurchases.length + availableMajorPsyRatingCount}
+            />
             {editable ? (
               <AddButton label={`Add ${activeTitle.slice(0, -1)}`} onClick={activeOpenPicker} />
             ) : (
               <ViewButton label={`View ${activeTitle}`} onClick={activeOpenPicker} />
             )}
           </div>
-
           {activePowers.length === 0 ? (
             <p className="text-sm lg:text-base text-slate-400">{activeEmptyText}</p>
           ) : (
             <PowerGrid
               powers={activePowers}
+              talents={talents}
               editable={editable}
               isDM={isDM}
               userId={userId}
@@ -981,6 +1256,17 @@ export function PsychicTab({
               onPublishPower={publishDefinition}
               onArchivePower={archiveDefinition}
               onUpdateAllPowerCopies={updateAllCopies}
+              canLinkPurchase={
+                activePowerGroup === "minor"
+                  ? availableMinorPurchases.length > 0
+                  : availableMajorPurchases.length > 0
+              }
+              onLinkPurchase={(power) => handleLinkExistingPower(activePowerGroup, power)}
+              canLinkPsyRatingGrant={(power) =>
+                (activePowerGroup === "minor" ? availableMinorPsyRatingGrants : availableMajorPsyRatingGrants)
+                  .some((grant) => activePowerGroup === "minor" || !grant.entry.acquisition?.psyRatingDiscipline || grant.entry.acquisition.psyRatingDiscipline === power.discipline)
+              }
+              onLinkPsyRatingGrant={(power) => handleLinkExistingPowerToPsyRating(activePowerGroup, power)}
             />
           )}
         </section>
@@ -989,19 +1275,22 @@ export function PsychicTab({
       <div className="hidden lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start">
         <section className={uiSection + " space-y-4"}>
           <div className="flex items-center justify-between">
-            <SectionHeader>Minor Powers</SectionHeader>
+            <PowerSectionHeading
+              title="Minor Powers"
+              availableSelections={availableMinorPurchases.length + availableMinorPsyRatingCount}
+            />
             {editable ? (
               <AddButton label="Add Minor Power" onClick={openPickerForMinor} />
             ) : (
               <ViewButton label="View Minor Powers" onClick={openPickerForMinor} />
             )}
           </div>
-
           {psychic.minorPowers.length === 0 ? (
             <p className="text-sm lg:text-base text-slate-400">No minor powers recorded.</p>
           ) : (
             <PowerGrid
               powers={psychic.minorPowers}
+              talents={talents}
               editable={editable}
               isDM={isDM}
               userId={userId}
@@ -1012,6 +1301,10 @@ export function PsychicTab({
               onPublishPower={publishDefinition}
               onArchivePower={archiveDefinition}
               onUpdateAllPowerCopies={updateAllCopies}
+              canLinkPurchase={availableMinorPurchases.length > 0}
+              onLinkPurchase={(power) => handleLinkExistingPower("minor", power)}
+              canLinkPsyRatingGrant={() => availableMinorPsyRatingGrants.length > 0}
+              onLinkPsyRatingGrant={(power) => handleLinkExistingPowerToPsyRating("minor", power)}
             />
           )}
         </section>
@@ -1019,19 +1312,22 @@ export function PsychicTab({
         {/* MAJOR POWERS ────────────────────────────────────────────────────── */}
         <section className={uiSection + " space-y-4"}>
           <div className="flex items-center justify-between">
-            <SectionHeader>Major Powers</SectionHeader>
+            <PowerSectionHeading
+              title="Major Powers"
+              availableSelections={availableMajorPurchases.length + availableMajorPsyRatingCount}
+            />
             {editable ? (
               <AddButton label="Add Major Power" onClick={openPickerForMajor} />
             ) : (
               <ViewButton label="View Major Powers" onClick={openPickerForMajor} />
             )}
           </div>
-
           {psychic.majorPowers.length === 0 ? (
             <p className="text-sm lg:text-base text-slate-400">No major powers recorded.</p>
           ) : (
             <PowerGrid
               powers={psychic.majorPowers}
+              talents={talents}
               editable={editable}
               isDM={isDM}
               userId={userId}
@@ -1042,12 +1338,90 @@ export function PsychicTab({
               onPublishPower={publishDefinition}
               onArchivePower={archiveDefinition}
               onUpdateAllPowerCopies={updateAllCopies}
+              canLinkPurchase={availableMajorPurchases.length > 0}
+              onLinkPurchase={(power) => handleLinkExistingPower("major", power)}
+              canLinkPsyRatingGrant={(power) => availableMajorPsyRatingGrants.some(
+                (grant) => !grant.entry.acquisition?.psyRatingDiscipline || grant.entry.acquisition.psyRatingDiscipline === power.discipline
+              )}
+              onLinkPsyRatingGrant={(power) => handleLinkExistingPowerToPsyRating("major", power)}
             />
           )}
         </section>
 
         {/* POWER PICKER MODAL ──────────────────────────────────────────────── */}
       </div>
+
+      {purchaseChoiceTarget !== null && (
+        <PickerModal
+          title={`Add ${purchaseChoiceTarget === "minor" ? "Minor" : "Major"} Power`}
+          query=""
+          onQueryChange={() => undefined}
+          onClose={() => setPurchaseChoiceTarget(null)}
+          isEmpty={false}
+          hideSearch
+          maxWidth="max-w-sm"
+          suspended={pickerTarget !== null}
+        >
+          <PickerBody>
+            <div className="space-y-2">
+              {(purchaseChoiceTarget === "minor" ? availableMinorPurchases : availableMajorPurchases).length > 0 && (
+                <PowerRouteCard
+                  title={purchaseChoiceTarget === "minor"
+                    ? "Use Minor Psychic Power selection"
+                    : "Use Psychic Power selection"}
+                  status={`Available: ${purchaseChoiceTarget === "minor"
+                    ? availableMinorPurchases.length
+                    : availableMajorPurchases.length}`}
+                  statusClassName={psychicSelectionSourceColours.talent}
+                  onClick={() => {
+                    const available = purchaseChoiceTarget === "minor"
+                      ? availableMinorPurchases
+                      : availableMajorPurchases;
+                    setPurchaseModeTarget(purchaseChoiceTarget);
+                    setPsyRatingModeTarget(null);
+                    setPendingTalentEntryUid(available[0]?.uid);
+                    setPendingPsyRatingTalentEntryUid(undefined);
+                    setPickerTarget(purchaseChoiceTarget);
+                  }}
+                />
+              )}
+              {(purchaseChoiceTarget === "minor" ? availableMinorPsyRatingGrants : availableMajorPsyRatingGrants).length > 0 && (
+                <PowerRouteCard
+                  title="Use Psy Rating selection"
+                  status={`Available: ${purchaseChoiceTarget === "minor"
+                    ? availableMinorPsyRatingCount
+                    : availableMajorPsyRatingCount}`}
+                  statusClassName={psychicSelectionSourceColours.psyRating}
+                  onClick={() => {
+                    const available = purchaseChoiceTarget === "minor"
+                      ? availableMinorPsyRatingGrants
+                      : availableMajorPsyRatingGrants;
+                    setPendingTalentEntryUid(undefined);
+                    setPurchaseModeTarget(null);
+                    setPsyRatingModeTarget(purchaseChoiceTarget);
+                    setPendingPsyRatingTalentEntryUid(available[0]?.entry.uid);
+                    setPickerTarget(purchaseChoiceTarget);
+                  }}
+                />
+              )}
+              <PowerRouteCard
+                title={purchaseChoiceTarget === "minor"
+                  ? "Add independent Minor power"
+                  : "Add independent Major power"}
+                status="No selection used"
+                statusClassName="border-slate-500 bg-slate-800/40 text-slate-300"
+                onClick={() => {
+                  setPendingTalentEntryUid(undefined);
+                  setPurchaseModeTarget(null);
+                  setPsyRatingModeTarget(null);
+                  setPendingPsyRatingTalentEntryUid(undefined);
+                  setPickerTarget(purchaseChoiceTarget);
+                }}
+              />
+            </div>
+          </PickerBody>
+        </PickerModal>
+      )}
 
       {pickerTarget !== null && (
         <PowerPicker
@@ -1056,14 +1430,31 @@ export function PsychicTab({
           editable={editable}
           existingNames={existingPowerNames}
           customItems={campaignCustomPowers}
+          selectionLocked={
+            (purchaseModeTarget === pickerTarget && !pendingTalentEntryUid) ||
+            (psyRatingModeTarget === pickerTarget && !pendingPsyRatingTalentEntryUid)
+          }
+          selectionBusy={powerSelectionBusy}
           onSelect={fromReference}
           onSelectCustomItem={fromCustomLibrary}
           onCustom={() => {
             if (pickerTarget === null) return;
             setCustomTarget(pickerTarget);
           }}
-          onClose={() => setPickerTarget(null)}
+          backToRoutes={purchaseChoiceTarget !== null}
+          onClose={() => {
+            setPickerTarget(null);
+            setPendingTalentEntryUid(undefined);
+            setPurchaseModeTarget(null);
+            setPendingPsyRatingTalentEntryUid(undefined);
+            setPsyRatingModeTarget(null);
+          }}
           suspended={customTarget !== null}
+          requiredDiscipline={
+            pendingPsyRatingTalentEntryUid
+              ? talents.talents.find((entry) => entry.uid === pendingPsyRatingTalentEntryUid)?.acquisition?.psyRatingDiscipline
+              : undefined
+          }
         />
       )}
 
@@ -1074,6 +1465,11 @@ export function PsychicTab({
           onAdd={addCustomPower}
           onBack={() => setCustomTarget(null)}
           onCancel={() => setCustomTarget(null)}
+          requiredDiscipline={
+            pendingPsyRatingTalentEntryUid
+              ? talents.talents.find((entry) => entry.uid === pendingPsyRatingTalentEntryUid)?.acquisition?.psyRatingDiscipline
+              : undefined
+          }
         />
       )}
 

@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { editableInputClass, uiFormLabel } from "./editableStyles";
 import { ArrowRight } from "./PickerArrows";
 import { RequiredFormLabel } from "./RequiredFormLabel";
+import { uiPickerPressFeedback } from "./buttonStyles";
 
 interface SharedPickerFieldProps {
   id: string;
@@ -68,7 +69,7 @@ export function PickerField({
         onClick={onClick}
         className={`${editableInputClass(!disabled)} ${
           label ? "mt-0.5" : ""
-        } appearance-none text-left flex items-center justify-between ${buttonClassName}`.trim()}
+        } appearance-none text-left flex items-center justify-between ${uiPickerPressFeedback(!disabled)} ${buttonClassName}`.trim()}
       >
         <span className={value ? "" : "text-slate-500"}>
           {value || placeholder}

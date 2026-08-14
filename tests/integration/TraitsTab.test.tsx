@@ -107,4 +107,18 @@ describe("TraitsTab", () => {
     const next = onUpdateTalents.mock.calls[0][0] as TalentsAndTraitsBlock;
     expect(next.traits).toHaveLength(0);
   });
+
+  it("shows The Flesh is Weak's Machine Trait as a read-only grant", () => {
+    renderTab({
+      talents: makeTalents({
+        talents: [
+          { uid: "f1", talentId: "the-flesh-is-weak", name: "The Flesh is Weak" },
+          { uid: "f2", talentId: "the-flesh-is-weak", name: "The Flesh is Weak" },
+        ],
+      }),
+    });
+    expect(screen.getByText("Machine (2)")).toBeInTheDocument();
+    expect(screen.getByText("Granted by The Flesh is Weak")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Remove Machine (2)")).not.toBeInTheDocument();
+  });
 });

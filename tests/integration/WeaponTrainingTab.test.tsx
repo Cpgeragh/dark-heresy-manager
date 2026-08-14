@@ -120,4 +120,34 @@ describe("WeaponTrainingTab", () => {
     const next = onUpdate.mock.calls[0][0] as WeaponTrainingBlock;
     expect(next.exoticWeapons).toEqual([]);
   });
+
+  it("shows Talent-granted training as active, labelled, and not independently removable", () => {
+    renderTab({
+      talents: {
+        homeworld: "",
+        talents: [
+          {
+            uid: "blood",
+            talentId: "cult-briefing",
+            name: "Cult Briefing (Blood)",
+            specialisation: "Blood",
+            acquisition: { weaponTrainingId: "melee-chain" },
+          },
+          {
+            uid: "guard",
+            talentId: "sicarius-tutoring",
+            name: "Sicarius Tutoring (Guardsman)",
+            specialisation: "Guardsman",
+            acquisition: { exoticWeapon: "Needle Pistol" },
+          },
+        ],
+        traits: [],
+      },
+    });
+    const chain = screen.getAllByRole("button", { name: "Chain" }).find((button) => button.getAttribute("aria-pressed") === "true")!;
+    expect(chain).toBeDisabled();
+    expect(screen.getByText(/Granted by Cult Briefing \(Blood\): Chain/)).toBeInTheDocument();
+    expect(screen.getByText("Granted by Sicarius Tutoring (Guardsman)")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Remove Needle Pistol")).not.toBeInTheDocument();
+  });
 });

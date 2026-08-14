@@ -96,6 +96,7 @@ export default function CharacterSheet({
     getCharBonus,
     updateCharacteristic,
     updateField,
+    updateFields,
     releaseCharacter,
     dmForceRelease,
     dmForceAssign,
@@ -483,6 +484,7 @@ export default function CharacterSheet({
               character={character}
               editable={allowedToEdit}
               toughnessBonus={getCharBonus("t")}
+              talents={character.talentsAndTraits}
               onUpdateWounds={handleUpdateWounds}
               onUpdateFate={handleUpdateFate}
             />
@@ -491,6 +493,7 @@ export default function CharacterSheet({
           {activeTab === "insanity" && (
             <InsanityTab
               insanity={character.insanity}
+              talents={character.talentsAndTraits}
               editable={allowedToEdit}
               onUpdate={handleUpdateInsanity}
             />
@@ -511,6 +514,7 @@ export default function CharacterSheet({
               getCharBonus={getCharBonus}
               editable={allowedToEdit}
               corruption={character.corruption}
+              talents={character.talentsAndTraits}
               updateCharacteristic={updateCharacteristic}
             />
           )}
@@ -522,20 +526,31 @@ export default function CharacterSheet({
               onUpdate={handleUpdateSkills}
               getCharField={getCharField}
               corruption={character.corruption}
+              talents={character.talentsAndTraits}
             />
           )}
 
           {activeTab === "talents" && (
             <TalentsTab
               talents={character.talentsAndTraits}
+              psychic={character.psychic}
+              cybernetics={character.cybernetics ?? []}
+              rangedWeapons={character.rangedWeapons}
+              meleeWeapons={character.meleeWeapons}
+              archeotech={character.archeotech ?? []}
+              insanity={character.insanity}
+              willpowerBonus={getCharBonus("wp")}
+              weaponTraining={character.weaponTraining}
               editable={allowedToEdit}
               onUpdateTalents={handleUpdateTalents}
+              onUpdateCharacter={updateFields}
             />
           )}
 
           {activeTab === "training" && (
             <WeaponTrainingTab
               weaponTraining={character.weaponTraining}
+              talents={character.talentsAndTraits}
               editable={allowedToEdit}
               onUpdate={handleUpdateWeaponTraining}
             />
@@ -587,6 +602,7 @@ export default function CharacterSheet({
               archeotech={character.archeotech ?? []}
               onUpdateArcheotech={handleUpdateArcheotech}
               traits={character.talentsAndTraits.traits}
+              talents={character.talentsAndTraits}
             />
           )}
 
@@ -618,6 +634,7 @@ export default function CharacterSheet({
               characterName={character.header.characterName}
               isDM={isDM}
               psychic={character.psychic}
+              talents={character.talentsAndTraits}
               psyRating={psyRating}
               editable={allowedToEdit}
               onUpdate={handleUpdatePsychic}

@@ -33,7 +33,10 @@ export function useCharacterHelpers({ character }: UseCharacterHelpersProps) {
     (statKey: keyof Characteristics): number => {
       const rawTotal = getCharTotal(statKey);
       if (!character) return rawTotal;
-      const modifierTotals = getCharacteristicModifierTotals(character.corruption);
+      const modifierTotals = getCharacteristicModifierTotals(
+        character.corruption,
+        character.talentsAndTraits
+      );
       return Math.max(1, rawTotal + (modifierTotals[statKey] ?? 0));
     },
     [character, getCharTotal]

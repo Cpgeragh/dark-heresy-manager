@@ -1,6 +1,6 @@
 // src/pages/characterSheet/GearTab/GearPicker.tsx
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { InfoModal } from "../../../components/InfoModal";
 import { GEAR_REFERENCE, type GearRef } from "../../../data/reference/gearReference";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
@@ -39,6 +39,7 @@ export function GearPicker({
 }: Props) {
   const [query, setQuery] = useState("");
   const [pending, setPending] = useState<GearRef | null>(null);
+  const listScrollPositionRef = useRef(0);
   const normalizedQuery = query.toLowerCase();
   const filtered = GEAR_REFERENCE.filter((r) =>
     r.name.toLowerCase().includes(normalizedQuery)
@@ -118,6 +119,7 @@ export function GearPicker({
       onQueryChange={setQuery}
       onClose={onClose}
       suspended={suspended}
+      scrollPositionRef={listScrollPositionRef}
       isEmpty={isEmpty}
       footer={
         editable ? (

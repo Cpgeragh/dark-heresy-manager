@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { FormField } from "../../components/FormField";
 import { InfoModal } from "../../components/InfoModal";
 import type { CorruptionMalignancyEntry } from "../../types/Character";
@@ -35,6 +35,7 @@ export function CorruptionMalignancyPicker({
   const [customDetails, setCustomDetails] = useState("");
   const [selected, setSelected] = useState<CorruptionMalignancyRef | null>(null);
   const [rolls, setRolls] = useState<Record<string, string>>({});
+  const listScrollPositionRef = useRef(0);
 
   const filtered = CORRUPTION_MALIGNANCIES.filter((ref) => {
     const searchable = `${ref.roll} ${ref.name} ${ref.effect}`.toLowerCase();
@@ -190,6 +191,7 @@ export function CorruptionMalignancyPicker({
       query={query}
       onQueryChange={setQuery}
       onClose={onClose}
+      scrollPositionRef={listScrollPositionRef}
       isEmpty={filtered.length === 0}
       footer={
         <PickerCustomAction

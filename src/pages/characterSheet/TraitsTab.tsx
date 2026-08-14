@@ -4,6 +4,7 @@ import { useCallback } from "react";
 import type { TalentsAndTraitsBlock, TalentEntry } from "../../types/Character";
 import { TRAIT_LIST } from "../../data/traitData";
 import { EntrySection } from "./talentComponents";
+import { getGrantedTraitEntries } from "../../features/talents/talentEffects";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -16,6 +17,7 @@ interface TraitsTabProps {
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export function TraitsTab({ talents, editable, onUpdateTalents }: TraitsTabProps) {
+  const displayTraits = [...talents.traits, ...getGrantedTraitEntries(talents)];
   const handleAddTrait = useCallback(
     (entry: TalentEntry) => {
       onUpdateTalents({ ...talents, traits: [...talents.traits, entry] });
@@ -38,7 +40,7 @@ export function TraitsTab({ talents, editable, onUpdateTalents }: TraitsTabProps
       <EntrySection
         title="Traits"
         singular="Trait"
-        entries={talents.traits}
+        entries={displayTraits}
         listData={TRAIT_LIST}
         editable={editable}
         columns={2}

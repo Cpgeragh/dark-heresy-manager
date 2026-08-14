@@ -1,5 +1,6 @@
 ﻿import { useState } from "react";
 import type { RangedWeaponRef, MeleeWeaponRef } from "../../../data/reference/weaponReference";
+import { useRef } from "react";
 import type { WeaponCraftsmanship } from "../../../types/Character";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { Button } from "../../../ui/Button";
@@ -47,6 +48,7 @@ export function IntegratedWeaponPicker({
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<SelectedIntegrated | null>(null);
   const [craftsmanship, setCraftsmanship] = useState<WeaponCraftsmanship>("Common");
+  const listScrollPositionRef = useRef(0);
   const lowerQuery = query.toLowerCase();
   const ranged = INTEGRATED_RANGED_REFS.filter((ref) =>
     ref.name.toLowerCase().includes(lowerQuery)
@@ -135,6 +137,7 @@ export function IntegratedWeaponPicker({
       onQueryChange={setQuery}
       onClose={onClose}
       suspended={suspended}
+      scrollPositionRef={listScrollPositionRef}
       isEmpty={isEmpty}
       footer={
         editable && (onCustomRanged || onCustomMelee) ? (

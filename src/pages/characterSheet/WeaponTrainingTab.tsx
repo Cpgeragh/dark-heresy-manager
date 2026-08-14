@@ -1,7 +1,7 @@
 // src/pages/characterSheet/WeaponTrainingTab.tsx
 
 import { useState, useCallback } from "react";
-import type { WeaponTrainingBlock, WeaponTrainingTalentId } from "../../types/Character";
+import type { TalentsAndTraitsBlock, WeaponTrainingBlock, WeaponTrainingTalentId } from "../../types/Character";
 import { WEAPON_TRAINING_GROUPS } from "../../data/weaponTrainingData";
 import { Button } from "../../ui/Button";
 import { AddButton } from "../../ui/AddButton";
@@ -18,11 +18,16 @@ import {
   colourActiveOutlineAmber,
   colourOutlineFuchsia,
 } from "../../ui/colourTokens";
+import {
+  getGrantedExoticWeapons,
+  getGrantedWeaponTrainingIds,
+} from "../../features/talents/talentEffects";
 
 interface WeaponTrainingTabProps {
   weaponTraining: WeaponTrainingBlock;
   editable: boolean;
   onUpdate: (next: WeaponTrainingBlock) => void;
+  talents?: TalentsAndTraitsBlock;
 }
 
 const GROUP_ACTIVE_STYLE: Record<string, string> = {
@@ -33,9 +38,11 @@ const GROUP_ACTIVE_STYLE: Record<string, string> = {
   "Thrown Weapon Training": colourActiveOutlineAmber,
 };
 
-export function WeaponTrainingTab({ weaponTraining, editable, onUpdate }: WeaponTrainingTabProps) {
+export function WeaponTrainingTab({ weaponTraining, editable, onUpdate, talents }: WeaponTrainingTabProps) {
   const [newExotic, setNewExotic] = useState("");
   const [showExoticModal, setShowExoticModal] = useState(false);
+  const grantedTraining = talents ? getGrantedWeaponTrainingIds(talents) : [];
+  const grantedExotics = talents ? getGrantedExoticWeapons(talents) : [];
 
   const handleToggleTraining = useCallback(
     (id: WeaponTrainingTalentId) => {
@@ -80,13 +87,16 @@ export function WeaponTrainingTab({ weaponTraining, editable, onUpdate }: Weapon
           </p>
           <div className="flex flex-wrap justify-center gap-1.5">
             {group.items.map(({ id, display }) => {
-              const active = weaponTraining.trained.includes(id as WeaponTrainingTalentId);
+              const trainingId = id as WeaponTrainingTalentId;
+              const granted = grantedTraining.includes(trainingId);
+              const active = weaponTraining.trained.includes(trainingId) || granted;
               return (
                 <button type="button"
                   key={id}
-                  disabled={!editable}
-                  onClick={() => handleToggleTraining(id as WeaponTrainingTalentId)}
+                  disabled={!editable || granted}
+                  onClick={() => handleToggleTraining(trainingId)}
                   aria-pressed={active}
+                  title={granted ? "Granted by Cult Briefing (Blood)" : undefined}
                   className={`px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm transition ${
                     active
                       ? GROUP_ACTIVE_STYLE[group.label]
@@ -100,6 +110,11 @@ export function WeaponTrainingTab({ weaponTraining, editable, onUpdate }: Weapon
               );
             })}
           </div>
+          {group.items.some((item) => grantedTraining.includes(item.id)) && (
+            <p className="mt-1 text-xs text-amber-300">
+              Granted by Cult Briefing (Blood): {group.items.filter((item) => grantedTraining.includes(item.id)).map((item) => item.display).join(", ")}
+            </p>
+          )}
         </div>
       ))}
 
@@ -122,13 +137,16 @@ export function WeaponTrainingTab({ weaponTraining, editable, onUpdate }: Weapon
         )}
 
         <div className="flex flex-wrap justify-center gap-1.5 max-w-xl mx-auto">
-          {weaponTraining.exoticWeapons.map((weapon, index) => (
+          {[...weaponTraining.exoticWeapons, ...grantedExotics].map((weapon, index) => {
+            const granted = index >= weaponTraining.exoticWeapons.length;
+            return (
             <span
-              key={index}
+              key={`${granted ? "granted" : "owned"}:${index}:${weapon}`}
+              title={granted ? "Granted by Sicarius Tutoring (Guardsman)" : undefined}
               className={`inline-flex items-center gap-1 px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm ${colourOutlineFuchsia}`}
             >
               {weapon}
-              {editable && (
+              {editable && !granted && (
                 <button type="button"
                   onClick={() => handleRemoveExotic(index)}
                   aria-label={`Remove ${weapon}`}
@@ -138,8 +156,12 @@ export function WeaponTrainingTab({ weaponTraining, editable, onUpdate }: Weapon
                 </button>
               )}
             </span>
-          ))}
+            );
+          })}
         </div>
+        {grantedExotics.length > 0 && (
+          <p className="mt-1 text-xs text-amber-300">Granted by Sicarius Tutoring (Guardsman)</p>
+        )}
       </div>
 
       {showExoticModal && (

@@ -131,7 +131,7 @@ export type CustomArcheotechData = Omit<
 
 export type CustomPsychicPowerData = Omit<
   PsychicPower,
-  "id" | "customLibraryId" | "customLibraryVersionId" | "known"
+  "id" | "talentEntryUid" | "customLibraryId" | "customLibraryVersionId" | "known"
 >;
 
 export interface CustomItemDataByCategory {

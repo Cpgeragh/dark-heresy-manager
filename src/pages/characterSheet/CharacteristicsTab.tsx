@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { CharField } from "../../types/Character";
-import type { Characteristics, CorruptionBlock } from "../../types/Character";
+import type { Characteristics, CorruptionBlock, TalentsAndTraitsBlock } from "../../types/Character";
 import {
   getCharacteristicModifierTotals,
   getCharacteristicModifierSources,
@@ -126,6 +126,7 @@ interface CharacteristicsTabProps {
   getCharBonus: (statKey: keyof Characteristics) => number;
   editable: boolean;
   corruption: CorruptionBlock;
+  talents?: TalentsAndTraitsBlock;
   updateCharacteristic: (statKey: keyof Characteristics, value: CharField) => void;
 }
 
@@ -135,9 +136,10 @@ export function CharacteristicsTab({
   getCharBonus,
   editable,
   corruption,
+  talents,
   updateCharacteristic,
 }: CharacteristicsTabProps) {
-  const modifierTotals = getCharacteristicModifierTotals(corruption);
+  const modifierTotals = getCharacteristicModifierTotals(corruption, talents);
   const [activeStat, setActiveStat] = useState<keyof Characteristics>("ws");
   const [containerWidth, setContainerWidth] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -403,7 +405,7 @@ export function CharacteristicsTab({
               statKey={prevStat}
               editable={false}
               adjustment={modifierTotals[prevStat] ?? 0}
-              sources={getCharacteristicModifierSources(corruption, prevStat)}
+              sources={getCharacteristicModifierSources(corruption, prevStat, talents)}
               getCharField={getCharField}
               updateCharacteristic={updateCharacteristic}
             />
@@ -415,7 +417,7 @@ export function CharacteristicsTab({
               statKey={activeStat}
               editable={editable}
               adjustment={modifierTotals[activeStat] ?? 0}
-              sources={getCharacteristicModifierSources(corruption, activeStat)}
+              sources={getCharacteristicModifierSources(corruption, activeStat, talents)}
               getCharField={getCharField}
               updateCharacteristic={updateCharacteristic}
             />
@@ -431,7 +433,7 @@ export function CharacteristicsTab({
               statKey={nextStat}
               editable={false}
               adjustment={modifierTotals[nextStat] ?? 0}
-              sources={getCharacteristicModifierSources(corruption, nextStat)}
+              sources={getCharacteristicModifierSources(corruption, nextStat, talents)}
               getCharField={getCharField}
               updateCharacteristic={updateCharacteristic}
             />
@@ -448,7 +450,7 @@ export function CharacteristicsTab({
             statKey={key}
             editable={editable}
             adjustment={modifierTotals[key] ?? 0}
-            sources={getCharacteristicModifierSources(corruption, key)}
+            sources={getCharacteristicModifierSources(corruption, key, talents)}
             getCharField={getCharField}
             updateCharacteristic={updateCharacteristic}
           />

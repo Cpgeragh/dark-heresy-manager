@@ -36,6 +36,23 @@ export interface PsychicPowerRef {
   description: string;
 }
 
+export const PSYCHIC_DISCIPLINE_RULES: Partial<Record<PsychicDiscipline, string>> = {
+  Pyromancy:
+    "Any Pyromancy power that inflicts Damage may also set the target on fire.",
+  Telepathy:
+    "If a Psyker uses a telepathic power on a target who has twice the Psyker's own Insanity Points or twice the Psyker's own Corruption Points, " +
+    "the Psyker must make a Willpower Test. On a failure, psychic rot inflicts 1d10 Insanity Points or Corruption Points, " +
+    "depending on which caused the psychic rot. If the target has both twice the Psyker's Insanity Points and twice the Psyker's Corruption Points, " +
+    "the Psyker must make a second Willpower Test; failure inflicts a further 1d10 Insanity Points or Corruption Points.",
+};
+
+export function getPsychicPowerDescription(ref: PsychicPowerRef): string {
+  const disciplineRule = PSYCHIC_DISCIPLINE_RULES[ref.discipline];
+  return disciplineRule
+    ? `${ref.description} Discipline rule: ${disciplineRule}`
+    : ref.description;
+}
+
 // ─── Psychic Power Reference ─────────────────────────────────────────────────
 
 export const PSYCHIC_POWER_REFERENCE: PsychicPowerRef[] = [
@@ -722,9 +739,11 @@ export const PSYCHIC_POWER_REFERENCE: PsychicPowerRef[] = [
     description:
       "You open your inner eye to perceive events at places far away, becoming aware of a single space anywhere within Range " +
       "(you need not know the destination, only direction and distance). " +
-      "If the point is inside a solid object, the power fails. " +
-      "You can see up to normal vision range from that point; you may change your facing 90 degrees by spending a Half Action. " +
-      "Far Sight does not grant special forms of vision and does not pick up sound. " +
+      "If the point is inside a solid object, the power fails; you can view inside buildings, bodies of water, pockets of gas and similar spaces without impediment. " +
+      "You can see up to normal vision range from that point and may change your facing 90 degrees by spending a Half Action. " +
+      "Once the point is chosen, you may not select another without manifesting the power again. " +
+      "Far Sight does not grant special forms of vision, so darkness still obscures your view normally. " +
+      "It does not pick up sound, though you may use Lip Reading to work out what speakers are saying. " +
       "While using this power, you can spend no more than a Half Action each Round and take a -30 penalty to all Tests. " +
       "Overbleed: For every 10 points by which you exceed the Threshold, double the Range.",
   },
@@ -798,7 +817,8 @@ export const PSYCHIC_POWER_REFERENCE: PsychicPowerRef[] = [
       "You derive a new piece of information for every 10 Rounds: at 10 Rounds — strongest recent emotion; " +
       "20 — general features of the person; 30 — clear image of the person; 40 — occupation; 50 — name; " +
       "+10 Rounds per additional fact (as determined by the GM). " +
-      "Overbleed: For every 10 points by which you exceed the Threshold, cut the time required by half.",
+      "Overbleed: Exceeding the Threshold by 10 points reduces the time to derive a new fact to 5 Rounds; " +
+      "by 20 points, to 2 Rounds; by 30 points, to every Round.",
   },
   {
     id: "personal-augury",
@@ -838,7 +858,8 @@ export const PSYCHIC_POWER_REFERENCE: PsychicPowerRef[] = [
       "2 (Shape) = longstanding emotions, Corruption Point presence (not amount), " +
       "major emotions of the past 12 hours, Insanity Points, madness/addictions, precise Psy Rating if applicable; " +
       "3 (Pattern) = exact Corruption Points, whether they have Minor Psychic Powers, " +
-      "and whether their aura is genuine or artificially produced.",
+      "and whether their aura is genuine or artificially produced. " +
+      "You must manifest this power each time you wish to view an additional person's aura.",
   },
 
   // ── Pyromancy ─────────────────────────────────────────────────────────────
@@ -858,7 +879,7 @@ export const PSYCHIC_POWER_REFERENCE: PsychicPowerRef[] = [
       "All those affected must make an Agility Test or be blinded for a number of Rounds equal to 1d10 times the Psyker's Psy Rating. " +
       "Blinded targets automatically fail vision-based Tests, move at half speed, " +
       "and take a -20 penalty on Tests involving fighting, movement or reactions. " +
-      "Note: Any Pyromancy power that inflicts Damage may also set the target on fire. " +
+      "You may accidentally blind yourself with this power. " +
       "Overbleed: For every 10 points by which you exceed the Threshold, extend the Range by 4 metres.",
   },
   {
@@ -873,8 +894,7 @@ export const PSYCHIC_POWER_REFERENCE: PsychicPowerRef[] = [
     description:
       "You wreathe your hands in waves of shimmering flame. " +
       "Your unarmed attacks deal 1d10+SB Energy Damage. " +
-      "In addition, your unarmed strikes do not count as having the Primitive special quality. " +
-      "Note: Any Pyromancy power that inflicts Damage may also set the target on fire.",
+      "In addition, your unarmed strikes do not count as having the Primitive special quality.",
   },
   {
     id: "call-flame",
@@ -919,7 +939,6 @@ export const PSYCHIC_POWER_REFERENCE: PsychicPowerRef[] = [
     description:
       "You create bolts of flame with your mind and hurl them at your foes. " +
       "Make a Challenging (+0) Willpower Test to strike the target. On a hit, the bolt deals 1d10+5 Energy Damage. " +
-      "Note: Any Pyromancy power that inflicts Damage may also set the target on fire. " +
       "Overbleed: For every 5 points by which the Power Roll exceeds the Threshold, you generate an additional Fire Bolt " +
       "directed at any target within Range (Test Willpower separately for each target).",
   },
@@ -936,7 +955,6 @@ export const PSYCHIC_POWER_REFERENCE: PsychicPowerRef[] = [
       "You instantly create an intense conflagration about your target as the air itself ignites. " +
       "You can call a Fire Storm anywhere within range you have line of sight to. " +
       "The Fire Storm has a 6-metre radius from the targeted point and deals 1d10+5 Energy Damage to all creatures and objects in the area. " +
-      "Note: Any Pyromancy power that inflicts Damage may also set the target on fire. " +
       "Overbleed: For every 5 points by which you exceed the Threshold, deal an additional 1d10 points of Damage.",
   },
   {
@@ -965,11 +983,13 @@ export const PSYCHIC_POWER_REFERENCE: PsychicPowerRef[] = [
     threshold: 19,
     focusTime: "Full Action",
     sustained: true,
-    range: "—",
+    range: "10m",
     description:
-      "Threshold 19, Full Action, Sustained. " +
-      "Note: Any Pyromancy power that inflicts Damage may also set the target on fire. " +
-      "Consult the Core Rulebook for full rules.",
+      "You generate intense heat and flame by psychically agitating molecules in a tightly focused area. " +
+      "You must concentrate on a single point, making the power difficult to use against non-stationary targets. " +
+      "Incinerate deals 1d10+1 Energy Damage. Each Round after the first that you spend a Full Action concentrating on the target, " +
+      "provided it remains within Range and line of sight, the power deals the previous Round's Damage plus 1. " +
+      "Damage caused by Incinerate ignores both Armour and Toughness.",
   },
   {
     id: "sculpt-flame",
@@ -1184,6 +1204,7 @@ export const PSYCHIC_POWER_REFERENCE: PsychicPowerRef[] = [
     description:
       "You stretch out your thoughts to animals, becoming able to perceive their emotions and establish rudimentary communication. " +
       "The relative simplicity of an animal's mind allows you to dominate them. " +
+      "When you manifest this power, select one animal within Range. " +
       "Each Round you sustain the power, you may spend a Reaction to give the animal a simple command " +
       "(come, guard, flee, heel, attack, and so on). " +
       "If the animal feels threatened or is ordered to act against its nature, it may Test Willpower to break your control.",
@@ -1257,7 +1278,8 @@ export const PSYCHIC_POWER_REFERENCE: PsychicPowerRef[] = [
       "Round 3 (Short Term Memory) = last 12 hours of memories, two further significant items, simple passwords and routines; " +
       "Round 4 (Subconscious) = why significant items matter, beliefs, motivations, contacts, ciphers, pivotal life moments; " +
       "Round 5 (Soul Baring) = complete access to the target's psyche. " +
-      "A covert scan requires a -10 penalty to your Test; success leaves the target with only a faint sense of unease.",
+      "A covert scan requires a -10 penalty to your Test; success leaves the target with only a faint sense of unease. " +
+      "If you do not attempt a covert scan, the target is fully aware that their psyche is under attack and may try to break physical contact or strike out.",
   },
   {
     id: "projection",

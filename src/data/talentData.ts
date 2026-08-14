@@ -2,6 +2,22 @@
 
 import { SkillSource } from "../types/SkillSource";
 
+export type TalentBehaviour =
+  | { kind: "ordinary" }
+  | { kind: "ranked"; maxPurchases?: number }
+  | { kind: "fixed-repeatable"; options: readonly string[] }
+  | { kind: "fixed-single"; options: readonly string[] }
+  | {
+      kind: "hybrid";
+      options: readonly (
+        | { label: string; value: string }
+        | { label: string; detailLabel: string; displayPrefix: string }
+      )[];
+    }
+  | { kind: "repeatable-free-text"; detailLabel: string }
+  | { kind: "psychic-purchase"; powerGroup: "minor" | "major" }
+  | { kind: "managed-elsewhere" };
+
 export interface TalentData {
   id: string;
   name: string;
@@ -16,6 +32,7 @@ export interface TalentData {
   prerequisites?: string;
   repeatable?: boolean; // true = can be taken more than once (e.g. Sound Constitution)
   description?: string;
+  behaviour?: TalentBehaviour;
   /** Faith Talent group — present only on BoM Faith Talents */
   faithGroup?: "sign" | "mercy" | "wrath";
 }
@@ -43,6 +60,7 @@ export const TALENT_LIST: readonly TalentData[] = [
     hasSpecialisation: true,
     specialisationLabel: "Group",
     repeatable: true,
+    behaviour: { kind: "managed-elsewhere" },
   },
   {
     id: "armour-of-contempt",
@@ -212,6 +230,10 @@ export const TALENT_LIST: readonly TalentData[] = [
     hasSpecialisation: true,
     specialisationLabel: "Discipline",
     prerequisites: "Psy Rating 3",
+    behaviour: {
+      kind: "fixed-single",
+      options: ["Biomancy", "Divination", "Pyromancy", "Telekinetics", "Telepathy"],
+    },
   },
   {
     id: "disturbing-voice",
@@ -239,7 +261,7 @@ export const TALENT_LIST: readonly TalentData[] = [
     name: "Electrical Succour",
     source: SkillSource.CR,
     hasSpecialisation: false,
-    prerequisites: "Tech-Priest",
+    prerequisites: "Tech-Priest (Electoo inductor/Potentia coil)",
   },
   {
     id: "electro-graft-use",
@@ -252,7 +274,7 @@ export const TALENT_LIST: readonly TalentData[] = [
     name: "Energy Cache",
     source: SkillSource.CR,
     hasSpecialisation: false,
-    prerequisites: "Tech-Priest",
+    prerequisites: "Tech-Priest (Potentia coil)",
   },
   {
     id: "exotic-weapon-training",
@@ -261,6 +283,7 @@ export const TALENT_LIST: readonly TalentData[] = [
     hasSpecialisation: true,
     specialisationLabel: "Weapon",
     repeatable: true,
+    behaviour: { kind: "managed-elsewhere" },
   },
   {
     id: "favoured-by-the-warp",
@@ -275,21 +298,21 @@ export const TALENT_LIST: readonly TalentData[] = [
     name: "Feedback Screech",
     source: SkillSource.CR,
     hasSpecialisation: false,
-    prerequisites: "Tech-Priest",
+    prerequisites: "Tech-Priest (Respirator Unit)",
   },
   {
     id: "ferric-lure",
     name: "Ferric Lure",
     source: SkillSource.CR,
     hasSpecialisation: false,
-    prerequisites: "Tech-Priest",
+    prerequisites: "Tech-Priest (Electoo inductor/Potentia coil)",
   },
   {
     id: "ferric-summons",
     name: "Ferric Summons",
     source: SkillSource.CR,
     hasSpecialisation: false,
-    prerequisites: "Tech-Priest, Ferric Lure",
+    prerequisites: "Tech-Priest (Electoo inductor/Potentia coil), Ferric Lure",
   },
   { id: "flagellant", name: "Flagellant", source: SkillSource.CR, hasSpecialisation: false },
   {
@@ -315,13 +338,24 @@ export const TALENT_LIST: readonly TalentData[] = [
     specialisationLabel: "Group",
     prerequisites: "Fel 50, Peer",
     repeatable: true,
+    behaviour: {
+      kind: "fixed-repeatable",
+      options: [
+        "Administratum",
+        "Ecclesiarchy",
+        "Imperial Guard",
+        "Imperial Navy",
+        "Inquisition",
+        "Underworld",
+      ],
+    },
   },
   {
     id: "gun-blessing",
     name: "Gun Blessing",
     source: SkillSource.CR,
     hasSpecialisation: false,
-    prerequisites: "Tech-Priest",
+    prerequisites: "Tech-Priest (Electoo inductor/Potentia coil)",
   },
   {
     id: "gunslinger",
@@ -351,6 +385,18 @@ export const TALENT_LIST: readonly TalentData[] = [
     hasSpecialisation: true,
     specialisationLabel: "Group",
     repeatable: true,
+    behaviour: {
+      kind: "hybrid",
+      options: [
+        { label: "Criminals", value: "Criminals" },
+        { label: "Cult (specific)", detailLabel: "Cult", displayPrefix: "Cult" },
+        { label: "Daemons", value: "Daemons" },
+        { label: "Xeno (specific)", detailLabel: "Xeno", displayPrefix: "Xeno" },
+        { label: "Psykers", value: "Psykers" },
+        { label: "Heretics", value: "Heretics" },
+        { label: "Mutants", value: "Mutants" },
+      ],
+    },
   },
   {
     id: "heavy-weapon-training",
@@ -359,6 +405,7 @@ export const TALENT_LIST: readonly TalentData[] = [
     hasSpecialisation: true,
     specialisationLabel: "Group",
     repeatable: true,
+    behaviour: { kind: "managed-elsewhere" },
   },
   {
     id: "heightened-senses",
@@ -367,6 +414,10 @@ export const TALENT_LIST: readonly TalentData[] = [
     hasSpecialisation: true,
     specialisationLabel: "Sense",
     repeatable: true,
+    behaviour: {
+      kind: "fixed-repeatable",
+      options: ["Sight", "Sound", "Smell", "Taste", "Touch"],
+    },
   },
   {
     id: "hip-shooting",
@@ -456,35 +507,35 @@ export const TALENT_LIST: readonly TalentData[] = [
     name: "Luminen Blast",
     source: SkillSource.CR,
     hasSpecialisation: false,
-    prerequisites: "Tech-Priest",
+    prerequisites: "Tech-Priest (Electoo inductor/Potentia coil)",
   },
   {
     id: "luminen-charge",
     name: "Luminen Charge",
     source: SkillSource.CR,
     hasSpecialisation: false,
-    prerequisites: "Tech-Priest",
+    prerequisites: "Tech-Priest (Electoo inductor/Potentia coil)",
   },
   {
     id: "luminen-shock",
     name: "Luminen Shock",
     source: SkillSource.CR,
     hasSpecialisation: false,
-    prerequisites: "Tech-Priest",
+    prerequisites: "Tech-Priest (Electoo inductor/Potentia coil)",
   },
   {
     id: "maglev-grace",
     name: "Maglev Grace",
     source: SkillSource.CR,
     hasSpecialisation: false,
-    prerequisites: "Tech-Priest",
+    prerequisites: "Tech-Priest (Potentia coil)",
   },
   {
     id: "maglev-transcendence",
     name: "Maglev Transcendence",
     source: SkillSource.CR,
     hasSpecialisation: false,
-    prerequisites: "Tech-Priest, Maglev Grace",
+    prerequisites: "Tech-Priest (Potentia coil), Maglev Grace",
   },
   {
     id: "marksman",
@@ -513,8 +564,12 @@ export const TALENT_LIST: readonly TalentData[] = [
     source: SkillSource.CR,
     hasSpecialisation: true,
     specialisationLabel: "Type",
-    prerequisites: "Tech-Priest",
+    prerequisites: "Tech-Priest (Cyber Mantle/Cranial Circuitry)",
     repeatable: true,
+    behaviour: {
+      kind: "fixed-repeatable",
+      options: ["Gun", "Manipulator", "Medicae", "Optical", "Utility"],
+    },
   },
   { id: "meditation", name: "Meditation", source: SkillSource.CR, hasSpecialisation: false },
   {
@@ -524,13 +579,14 @@ export const TALENT_LIST: readonly TalentData[] = [
     hasSpecialisation: true,
     specialisationLabel: "Group",
     repeatable: true,
+    behaviour: { kind: "managed-elsewhere" },
   },
   {
     id: "mental-fortress",
     name: "Mental Fortress",
     source: SkillSource.CR,
     hasSpecialisation: false,
-    prerequisites: "WP 50, Strong-Minded",
+    prerequisites: "WP 50, Strong Minded",
   },
   {
     id: "mental-rage",
@@ -553,6 +609,7 @@ export const TALENT_LIST: readonly TalentData[] = [
     source: SkillSource.CR,
     hasSpecialisation: false,
     repeatable: true,
+    behaviour: { kind: "psychic-purchase", powerGroup: "minor" },
   },
   {
     id: "nerves-of-steel",
@@ -570,6 +627,28 @@ export const TALENT_LIST: readonly TalentData[] = [
     specialisationLabel: "Group",
     prerequisites: "Fel 30",
     repeatable: true,
+    behaviour: {
+      kind: "fixed-repeatable",
+      options: [
+        "Academics",
+        "Adeptus Arbites",
+        "Adeptus Mechanicus",
+        "Administratum",
+        "Astropaths",
+        "Ecclesiarchy",
+        "Feral Worlders",
+        "Government",
+        "Hivers",
+        "Inquisition",
+        "Middle Classes",
+        "Military",
+        "Nobility",
+        "The Insane",
+        "Underworld",
+        "Void Born",
+        "Workers",
+      ],
+    },
   },
   {
     id: "pistol-training",
@@ -578,6 +657,7 @@ export const TALENT_LIST: readonly TalentData[] = [
     hasSpecialisation: true,
     specialisationLabel: "Group",
     repeatable: true,
+    behaviour: { kind: "managed-elsewhere" },
   },
   {
     id: "power-well",
@@ -585,6 +665,8 @@ export const TALENT_LIST: readonly TalentData[] = [
     source: SkillSource.CR,
     hasSpecialisation: false,
     prerequisites: "Psy Rating 2",
+    repeatable: true,
+    behaviour: { kind: "ranked" },
   },
   {
     id: "precise-blow",
@@ -640,9 +722,9 @@ export const TALENT_LIST: readonly TalentData[] = [
     id: "psychic-power",
     name: "Psychic Power",
     source: SkillSource.CR,
-    hasSpecialisation: true,
-    specialisationLabel: "Power Name",
+    hasSpecialisation: false,
     repeatable: true,
+    behaviour: { kind: "psychic-purchase", powerGroup: "major" },
   },
   { id: "quick-draw", name: "Quick Draw", source: SkillSource.CR, hasSpecialisation: false },
   {
@@ -660,27 +742,31 @@ export const TALENT_LIST: readonly TalentData[] = [
     hasSpecialisation: true,
     specialisationLabel: "Type",
     repeatable: true,
+    behaviour: {
+      kind: "fixed-repeatable",
+      options: ["Cold", "Fear", "Heat", "Poisons", "Psychic Powers"],
+    },
   },
   {
     id: "rite-of-awe",
     name: "Rite of Awe",
     source: SkillSource.CR,
     hasSpecialisation: false,
-    prerequisites: "Tech-Priest",
+    prerequisites: "Tech-Priest (Respirator Unit)",
   },
   {
     id: "rite-of-fear",
     name: "Rite of Fear",
     source: SkillSource.CR,
     hasSpecialisation: false,
-    prerequisites: "Tech-Priest",
+    prerequisites: "Tech-Priest (Respirator Unit)",
   },
   {
     id: "rite-of-pure-thought",
     name: "Rite of Pure Thought",
     source: SkillSource.CR,
     hasSpecialisation: false,
-    prerequisites: "Tech-Priest",
+    prerequisites: "Tech-Priest (Cranial Circuitry)",
   },
   {
     id: "sharpshooter",
@@ -695,6 +781,7 @@ export const TALENT_LIST: readonly TalentData[] = [
     source: SkillSource.CR,
     hasSpecialisation: false,
     repeatable: true,
+    behaviour: { kind: "ranked" },
   },
   { id: "sprint", name: "Sprint", source: SkillSource.CR, hasSpecialisation: false },
   {
@@ -739,6 +826,7 @@ export const TALENT_LIST: readonly TalentData[] = [
     hasSpecialisation: true,
     specialisationLabel: "Skill",
     repeatable: true,
+    behaviour: { kind: "fixed-repeatable", options: [] },
   },
   {
     id: "technical-knock",
@@ -752,6 +840,7 @@ export const TALENT_LIST: readonly TalentData[] = [
     name: "Thrown Weapon Training",
     source: SkillSource.CR,
     hasSpecialisation: false,
+    behaviour: { kind: "managed-elsewhere" },
   },
   {
     id: "total-recall",
@@ -775,6 +864,7 @@ export const TALENT_LIST: readonly TalentData[] = [
     specialisationLabel: "Type",
     prerequisites: "WS 35 or BS 35, Ag 35",
     repeatable: true,
+    behaviour: { kind: "fixed-repeatable", options: ["Melee", "Ballistic"] },
   },
   { id: "unremarkable", name: "Unremarkable", source: SkillSource.CR, hasSpecialisation: false },
   {
@@ -1185,6 +1275,10 @@ export const TALENT_LIST: readonly TalentData[] = [
     hasSpecialisation: true,
     specialisationLabel: "Discipline",
     prerequisites: "Psi Rating 5, Discipline Focus Talent for the chosen Talent Group",
+    behaviour: {
+      kind: "fixed-single",
+      options: ["Biomancy", "Divination", "Pyromancy", "Telekinetics", "Telepathy"],
+    },
   },
   {
     id: "psychic-vampire",
@@ -1298,7 +1392,15 @@ export const TALENT_LIST: readonly TalentData[] = [
     source: SkillSource.LW,
     hasSpecialisation: false,
   },
-  { id: "reformed-skin", name: "Reformed Skin", source: SkillSource.LW, hasSpecialisation: false },
+  {
+    id: "reformed-skin",
+    name: "Reformed Skin",
+    source: SkillSource.LW,
+    hasSpecialisation: true,
+    specialisationLabel: "Replacement",
+    repeatable: true,
+    behaviour: { kind: "repeatable-free-text", detailLabel: "Replacement" },
+  },
   {
     id: "gift-of-purity",
     name: "Gift of Purity",
@@ -1355,11 +1457,10 @@ export const TALENT_LIST: readonly TalentData[] = [
     id: "the-flesh-is-weak",
     name: "The Flesh is Weak",
     source: SkillSource.LW,
-    hasSpecialisation: true,
-    specialisationLabel: "Level",
-    specialisationMin: 1,
-    specialisationMax: 4,
+    hasSpecialisation: false,
     prerequisites: "None",
+    repeatable: true,
+    behaviour: { kind: "ranked", maxPurchases: 4 },
   },
 
   // ─── Daemon Hunter ───────────────────────────────────────────────────────────
@@ -1395,6 +1496,10 @@ export const TALENT_LIST: readonly TalentData[] = [
     source: SkillSource.DH,
     hasSpecialisation: true,
     specialisationLabel: "Type",
+    behaviour: {
+      kind: "fixed-single",
+      options: ["Political", "Heretek", "Pleasure", "Infestation", "Blood", "Culture"],
+    },
   },
   {
     id: "sicarius-tutoring",
@@ -1402,6 +1507,20 @@ export const TALENT_LIST: readonly TalentData[] = [
     source: SkillSource.DH,
     hasSpecialisation: true,
     specialisationLabel: "Career",
+    behaviour: {
+      kind: "fixed-single",
+      options: [
+        "Adept",
+        "Arbitrator",
+        "Assassin",
+        "Battle Sister",
+        "Cleric",
+        "Guardsman",
+        "Imperial Psyker",
+        "Scum",
+        "Tech-Priest",
+      ],
+    },
   },
   { id: "blessed-flame", name: "Blessed Flame", source: SkillSource.DH, hasSpecialisation: false },
   {

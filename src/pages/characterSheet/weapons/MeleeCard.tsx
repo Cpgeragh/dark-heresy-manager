@@ -19,7 +19,7 @@ import {
   uiInfoModalWrapper,
   uiCardTitle,
 } from "../../../ui/editableStyles";
-import { uiExpandButton } from "../../../ui/buttonStyles";
+import { uiExpandButton, uiPickerPressFeedback } from "../../../ui/buttonStyles";
 import { colourPink, colourViolet } from "../../../ui/colourTokens";
 import { Button } from "../../../ui/Button";
 import { AddButton } from "../../../ui/AddButton";
@@ -82,6 +82,7 @@ export function MeleeCard({
   slotsDisabled = false,
   forceExpanded = false,
   integrated = false,
+  pickerMode = false,
 }: {
   weapon: MeleeWeapon;
   editable: boolean;
@@ -98,6 +99,7 @@ export function MeleeCard({
   slotsDisabled?: boolean;
   forceExpanded?: boolean;
   integrated?: boolean;
+  pickerMode?: boolean;
 } & CustomItemLibraryActionProps<"weapon">) {
   const [expanded, setExpanded] = useState(isEquipped);
   useEffect(() => {
@@ -250,7 +252,7 @@ export function MeleeCard({
             onClick={onSelect ?? (() => setExpanded((e) => !e))}
             aria-expanded={onSelect ? undefined : expanded}
             aria-label={onSelect ? `Select ${weapon.name}` : `${expanded ? "Collapse" : "Expand"} ${weapon.name} details`}
-            className="absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
+            className={`absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 ${uiPickerPressFeedback(pickerMode && Boolean(onSelect))}`}
           />
         )}
         <div className={`${uiExpandButton} relative pointer-events-none`}>

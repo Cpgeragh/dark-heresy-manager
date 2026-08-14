@@ -7,6 +7,7 @@ import type {
   ArmourCraftsmanship,
   ArcheotechItem,
   TalentEntry,
+  TalentsAndTraitsBlock,
 } from "../../../types/Character";
 import type { ArmourRef } from "../../../data/reference/armourReference";
 import type { CampaignCustomItem, CustomArmourData } from "../../../types/CustomItems";
@@ -41,6 +42,7 @@ import {
   saveDraftCustomItem,
 } from "../../../services/customItemService";
 import { useToast } from "../../../components/Toast";
+import { getMachineArmourSource } from "../../../features/talents/talentEffects";
 
 interface ArmourTabProps {
   campaignId: string;
@@ -56,6 +58,7 @@ interface ArmourTabProps {
   archeotech?: ArcheotechItem[];
   onUpdateArcheotech?: (next: ArcheotechItem[]) => void | Promise<void>;
   traits?: TalentEntry[];
+  talents?: TalentsAndTraitsBlock;
 }
 
 interface EditingArmourDefinition {
@@ -161,6 +164,7 @@ export function ArmourTab({
   archeotech,
   onUpdateArcheotech,
   traits = [],
+  talents,
 }: ArmourTabProps) {
   const [showPicker, setShowPicker] = useState(false);
   const [showFieldPicker, setShowFieldPicker] = useState(false);
@@ -559,10 +563,12 @@ export function ArmourTab({
   }
 
   const naturalBonus = naturalArmourBonus(traits);
+  const machineSource = talents ? getMachineArmourSource(talents) : null;
+  const machineBonus = machineSource?.amount ?? 0;
   const bionicLocations = ARMOUR_LOCATION_ORDER.filter(
     (loc) => bionicBonusAt(loc, cybernetics) > 0
   );
-  const hasMisc = naturalBonus > 0 || bionicLocations.length > 0;
+  const hasMisc = naturalBonus > 0 || machineBonus > 0 || bionicLocations.length > 0;
 
   return (
     <div className="space-y-6">
@@ -587,6 +593,9 @@ export function ArmourTab({
                               <>
                                 {naturalBonus > 0 && (
                                   <p>Natural Armour: +{naturalBonus} to all locations.</p>
+                                )}
+                                {machineSource && (
+                                  <p>{machineSource.name} (Talent): +{machineBonus} to all locations.</p>
                                 )}
                                 {bionicLocations.length > 0 && (
                                   <p>
@@ -618,7 +627,7 @@ export function ArmourTab({
                     .reduce((sum, a) => sum + (a.ap ?? 0), 0);
                   const ap = Math.max(regularAp, nonStackingArcheotechAp) + stackingAp;
                   const bionic = bionicBonusAt(loc, cybernetics);
-                  const misc = bionic + naturalBonus;
+                  const misc = bionic + naturalBonus + machineBonus;
                   const total = ap + toughnessBonus + misc;
                   return (
                     <tr key={loc} className="hover:bg-slate-800/40 transition">

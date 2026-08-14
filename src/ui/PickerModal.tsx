@@ -7,6 +7,7 @@ import { editableInputClass } from "./editableStyles";
 import { ModalHeader } from "./ModalHeader";
 import { ModalShell } from "./ModalShell";
 import { PlusIcon } from "./PlusIcon";
+import { uiPickerPressFeedback } from "./buttonStyles";
 
 export function PickerBody({
   className = "",
@@ -23,6 +24,7 @@ export function PickerBody({
 export type PickerRowProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   interactive?: boolean;
   selected?: boolean;
+  card?: boolean;
 };
 
 export function PickerRow({
@@ -32,6 +34,7 @@ export function PickerRow({
   interactive = true,
   onClick,
   selected = false,
+  card = false,
   tabIndex,
   type = "button",
   ...props
@@ -44,11 +47,11 @@ export function PickerRow({
       disabled={disabled}
       onClick={respondsToInput ? onClick : undefined}
       tabIndex={respondsToInput ? tabIndex : -1}
-      className={`w-full text-left px-4 lg:px-5 py-3 lg:py-4 transition ${
+      className={`w-full text-left ${card ? "p-3 lg:p-4" : "px-4 lg:px-5 py-3 lg:py-4"} transition ${
         respondsToInput ? "group" : ""
       } ${selected ? "bg-slate-800" : respondsToInput ? "hover:bg-slate-800" : ""} ${
         respondsToInput ? "cursor-pointer" : disabled ? "" : "cursor-default"
-      } disabled:opacity-40 disabled:cursor-not-allowed ${className}`.trim()}
+      } ${uiPickerPressFeedback(respondsToInput)} disabled:opacity-40 disabled:cursor-not-allowed ${className}`.trim()}
       {...props}
     >
       {children}
@@ -71,7 +74,7 @@ export function PickerCustomAction({
   return (
     <button
       type={type}
-      className={`group flex w-full items-center justify-center gap-2 rounded border border-red-500/70 bg-red-950/20 py-2.5 text-sm text-red-400 transition hover:border-red-400 hover:bg-red-950/35 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-40 lg:text-base ${className}`.trim()}
+      className={`group flex w-full items-center justify-center gap-2 rounded border border-red-500/70 bg-red-950/20 py-2.5 text-sm text-red-400 transition hover:border-red-400 hover:bg-red-950/35 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-40 lg:text-base ${uiPickerPressFeedback(!props.disabled)} ${className}`.trim()}
       {...props}
     >
       <PlusIcon className="h-4 w-4 shrink-0" />

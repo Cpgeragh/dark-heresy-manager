@@ -1,6 +1,7 @@
 // tests/integration/RangedPicker.test.tsx
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -185,11 +186,22 @@ describe("RangedPicker", () => {
   it("returns to the list when the back button is clicked", async () => {
     const user = userEvent.setup();
     renderPicker();
+    const list = screen
+      .getByRole("dialog", { name: "Add Ranged Weapon" })
+      .querySelector<HTMLElement>(".overflow-y-auto");
+    if (!list) throw new Error("No Ranged picker scroll container found");
+    list.scrollTop = 175;
+    fireEvent.scroll(list);
     await user.click(screen.getByRole("button", { name: "Select Lasgun" }));
     expect(screen.getByRole("button", { name: "Add Weapon" })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Back" }));
     expect(screen.getByPlaceholderText("Search weapons…")).toBeInTheDocument();
     expect(screen.getByText("Autopistol")).toBeInTheDocument();
+    expect(
+      screen
+        .getByRole("dialog", { name: "Add Ranged Weapon" })
+        .querySelector<HTMLElement>(".overflow-y-auto")?.scrollTop
+    ).toBe(175);
   });
 
   it("shows a Draft badge only for draft-status custom items", () => {

@@ -3,6 +3,7 @@
 export function ArrowRight() {
   return (
     <svg
+      data-picker-arrow="right"
       viewBox="0 0 20 20"
       fill="none"
       aria-hidden="true"
@@ -23,6 +24,7 @@ export function ArrowRight() {
 export function ArrowLeft() {
   return (
     <svg
+      data-picker-arrow="left"
       viewBox="0 0 20 20"
       fill="none"
       aria-hidden="true"
