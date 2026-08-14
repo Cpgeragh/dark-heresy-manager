@@ -97,35 +97,232 @@ Corruption & Mutations above.
 
 ## 5. Skills
 
-Basic and Advanced skills, grouped by category, with computed totals.
+Basic and Advanced Skills, grouped by category, with computed totals and
+Talent-supplied adjustments.
 
 ### How to test this page
 
-Choose one flat Basic skill, one grouped Basic specialisation, one flat Advanced skill, and one grouped Advanced specialisation. Record their governing characteristic, calculate trained and untrained totals by hand, then change that characteristic across a tens boundary and add a Corruption modifier. Verify both the main list and picker after every change, including removal and refresh.
+Use a disposable character. Record its Characteristics before starting. Test
+one flat Basic Skill, one grouped Basic Skill, one flat Advanced Skill, and
+one grouped Advanced Skill. Keep this character for the Talent cross-page
+checks below.
 
-- [ ] Basic / Advanced tabs show the right skills in each
-- [ ] A category with more than one specialisation (e.g. Common Lore) groups them together under one header, sharing a single characteristic chip; single-skill categories and "General" list flat instead
-- [ ] Untrained **Basic** skill total = characteristic ÷ 2, rounded down, and it's visible without adding the skill
-- [ ] Untrained **Advanced** skills are hidden until added via the picker — there is no "half stat" fallback for these, they genuinely can't be attempted until trained
-- [ ] Level buttons are only ever **Trained / +10 / +20** — there is no +30 tier, and Advanced skills never show an "Untrained" button once opened (only Basic skills do, and only inside the picker's preview)
-- [ ] A skill total reacts correctly when its governing characteristic changes, and when a Corruption adjustment touches that characteristic
-- [ ] The "add skill" picker groups multi-specialisation categories the same way the main list does, and drilling into a category and picking a specialisation adds only that one
+**Page, rules, and totals:**
+
+- [ ] On a phone, the **Basic / Advanced** switch changes the visible section and a horizontal swipe changes it in the same direction
+- [ ] The information button beside **Basic Skills** explains that an Untrained Basic Skill is attempted using half its governing Characteristic, rounded down
+- [ ] The information button beside **Advanced Skills** explains that an Untrained Advanced Skill cannot be attempted; the number shown in its picker is the Total it will use after becoming Trained
+- [ ] An Untrained Basic Skill is visible on the Basic page and its Total is the governing Characteristic ÷ 2, rounded down
+- [ ] An Untrained Advanced Skill is absent from the main Advanced page but is present in the Advanced picker with its future Trained Total
+- [ ] Training a Skill uses the full governing Characteristic; subsequent acquisitions/level changes produce **+10** and then **+20**
+- [ ] The available levels stop at **Trained / +10 / +20** — there is no +30 tier
+- [ ] Changing the governing Characteristic updates the Skill Total immediately
+- [ ] A Corruption adjustment to that Characteristic also updates the Total, and the Characteristic and Skill pages agree
+- [ ] Refresh the app and confirm the Skill levels and computed totals still agree with the saved Characteristic and Corruption entries
+
+**Cards, groups, and pickers:**
+
+- [ ] In Edit mode the section has a plus button; in View mode it has an eye button
+- [ ] The main Skill picker closes with ×; a grouped category opened with a forward arrow closes with a back arrow
+- [ ] Press and hold a selectable Skill or group card — only that card shows the pressed effect
+- [ ] Repeat in View mode — cards may be opened for information but do not show selection feedback or add anything
+- [ ] Search finds partial names regardless of capitalisation and ignores leading/trailing spaces
+- [ ] General and single-entry categories appear as individual Skill cards
+- [ ] Multi-entry categories such as Ciphers, Common Lore, Forbidden Lore, Performer, and Trade appear as grouped cards
+- [ ] A group displays every Characteristic used by its children rather than incorrectly showing only one
+- [ ] Open a group after scrolling down, press Back, and confirm the parent picker returns to the same scroll position
+- [ ] Add one child from a group — only that Skill becomes Trained and disappears from the untrained picker
+- [ ] The picker stays open after adding; add a second Skill without closing and reopening it
+- [ ] Expand a picker card using its chevron — this previews its information without selecting it
+- [ ] Source, Characteristic, Basic/Advanced, current level, and Total chips are readable and do not overlap on a phone
+- [ ] Delete a trained Skill: the first tap opens **Delete Skill**, Cancel changes nothing, and Delete returns it to Untrained and to the appropriate picker
+
+**Talent-supplied Skill effects:**
+
+- [ ] Add **Talented (Awareness)** — Awareness gains +10 and its card says `Talent effect: Talented (Awareness): +10`
+- [ ] Repeat Talented with a Skill that was not independently trained — the +10 is still shown, but Talented does not falsely record an extra Skill acquisition
+- [ ] Add **Machinator Array** — Silent Move receives −10 and names Machinator Array as the source
+- [ ] Add **Cult Briefing (Political)** — every Common Lore Skill counts as Basic while the Talent is owned
+- [ ] With Tech-Use Untrained, add **Cult Briefing (Heretek)** — Tech-Use becomes Trained, cannot be deleted as if independently purchased, and names the Talent source
+- [ ] Independently train Tech-Use first, then add Cult Briefing (Heretek) — the Skill does not gain another level and the redundant training source is not displayed
+- [ ] Remove Cult Briefing (Heretek) from both preparations: a solely granted Tech-Use returns to Untrained, while independently trained Tech-Use remains Trained
+- [ ] Add **Cult Briefing (Infestation)** and repeat the same solely-granted versus independently-trained check with Medicae
+- [ ] Add **Sicarius Tutoring (Adept)** — Deceive uses Intelligence and names the source
+- [ ] Add **Sicarius Tutoring (Tech-Priest)** — Inquiry uses Intelligence and names the source
+- [ ] Add **Sicarius Tutoring (Arbitrator)** — Shadowing gains +10 from Talented (Shadowing)
+- [ ] Add **Sicarius Tutoring (Assassin)** — Concealment gains +10 from Talented (Concealment)
+- [ ] Remove each source Talent — only its derived effect disappears; independently purchased Skill levels remain unchanged
 
 ## 6. Talents
 
-Regular Talents and Faith Talents (grouped by Emperor's Mercy / Sign / Wrath).
+Regular and Faith Talents, including ranked purchases, specialised choices,
+Psychic selections, granted entries, and acquisition effects that update other
+parts of the character.
 
 ### How to test this page
 
-Use four known fixtures: a fixed-list specialisation, numeric specialisation, free-text specialisation, and repeatable talent. For each, try to submit with no selection, an invalid selection, and a valid selection. Add, refresh, remove, and add again. Check Faith Talent grouping independently and inspect prerequisite text before committing the addition.
+Use a disposable character and record its Wounds, Fate, Insanity,
+Characteristics, Skills, Disciplines, Weapon Training, Traits, cybernetics,
+integrated weapons, and Archeotech before starting. The rare acquisition tests
+below deliberately change several of those pages.
 
-- [ ] Talents / Faith Talents tabs both list, add, and remove correctly
-- [ ] Faith Talents land in the correct one of the three groups
-- [ ] Add a talent that requires a specialisation from a **fixed list** (e.g. Peer) — you're taken to a sub-screen to pick one, and can't add without picking
-- [ ] Add a talent that requires a **numeric** specialisation (bounded min/max) — non-integers and out-of-range values are rejected, the Add button only enables once a valid number is entered
-- [ ] Add a talent that requires **free-text** specialisation (e.g. Enemy) — typing something is required before Add enables
-- [ ] A **repeatable** talent (one that allows multiple copies with different specialisations) can genuinely be added more than once; a non-repeatable one is correctly hidden from the picker after it's been added
-- [ ] Prerequisites text (where present) shows in the picker row before you commit to adding
+**Page, cards, and navigation:**
+
+- [ ] On a phone, **Talents / Faith Talents** switches sections and a horizontal swipe changes the section in the same direction
+- [ ] Edit mode uses plus buttons and View mode uses eye buttons
+- [ ] The main picker closes with ×; every secondary screen opened with a forward arrow returns with a back arrow
+- [ ] Press and hold a selectable card — only that card shows the pressed effect; View mode does not show selection feedback
+- [ ] Search is case-insensitive and ignores leading/trailing spaces
+- [ ] Picker cards show the Talent name, information button, source chip, prerequisites where present, and a forward arrow only when another step is required
+- [ ] Prerequisites are informational: the app displays them but does not silently enforce them
+- [ ] The picker stays open after adding a Talent; finite Talents disappear while repeatable Talents remain
+- [ ] Enter and cancel a choice/acquisition screen — it returns to the still-open Talent picker at the same scroll position
+- [ ] Complete a choice/acquisition screen — it also returns to the same still-open picker position
+- [ ] All six Weapon Training entries are absent: Basic, Heavy, Melee, Pistol, Thrown, and Exotic Weapon Training
+- [ ] Every normal Talent deletion uses a two-step **Delete / Cancel** confirmation
+- [ ] Refresh after several additions and deletions and confirm the same cards, ranks, choices, and sources remain
+
+**Ranked Talents:**
+
+- [ ] Add **Sound Constitution** three times — its picker chip progresses through `Owned: 1`, `Owned: 2`, and `Owned: 3`, while the page shows one `Sound Constitution (3)` card
+- [ ] Sound Constitution remains in the picker indefinitely and each purchase adds exactly +1 maximum Wound
+- [ ] Open the Wounds adjustment information — the source is listed as Sound Constitution with its total rank
+- [ ] Delete the ranked card once — only one purchase is removed, the card becomes `(2)`, and maximum Wounds fall by one
+- [ ] Add **Power Well** repeatedly — it remains available, aggregates into one numbered card, and confirmed deletion removes one purchase at a time
+- [ ] Add **The Flesh is Weak** four times — its picker status progresses from `Owned: 1/4` to `Owned: 4/4`, and one card progresses from rank (1) to rank (4)
+- [ ] At rank 4 The Flesh is Weak disappears from the picker; deleting one purchase lowers it to rank 3 and makes it available again
+- [ ] Traits shows one read-only **Machine (rank)** grant and Armour receives the same number of Misc AP at every location
+- [ ] Give the character Natural Armour and at least one location with a bionic bonus as well — **Misc Bonuses** lists Natural Armour, The Flesh is Weak, and Bionic as separate lines, while the location total contains their combined value
+
+**Fixed repeatable choices:**
+
+- [ ] **Peer** offers exactly: Academics, Adeptus Arbites, Adeptus Mechanicus, Administratum, Astropaths, Ecclesiarchy, Feral Worlders, Government, Hivers, Inquisition, Middle Classes, Military, Nobility, The Insane, Underworld, Void Born, and Workers
+- [ ] **Good Reputation** offers exactly: Administratum, Ecclesiarchy, Imperial Guard, Imperial Navy, Inquisition, and Underworld
+- [ ] **Heightened Senses** offers exactly: Sight, Sound, Smell, Taste, and Touch
+- [ ] **Mechadendrite Use** offers exactly: Gun, Manipulator, Medicae, Optical, and Utility
+- [ ] **Resistance** offers exactly: Cold, Fear, Heat, Poisons, and Psychic Powers
+- [ ] **Two-Weapon Wielder** offers exactly: Melee and Ballistic
+- [ ] **Talented** uses the current Skills reference catalogue rather than an unrelated hand-written list
+- [ ] Buy one choice — the Talent displays as one normal named card, for example `Resistance (Fear)`
+- [ ] Reopen its choice picker — the owned choice is absent and cannot be duplicated with different capitalisation
+- [ ] Buy a second choice — the entries become one expandable parent with separately listed children
+- [ ] Expand and collapse the parent, then delete one child — only that purchase is removed and the surviving child returns to a normal card when only one remains
+- [ ] Exhaust every finite option — the whole Talent disappears from the Add Talent picker
+
+**Single-purchase fixed choices:**
+
+- [ ] **Discipline Focus** and **Psychic Supremacy** each offer Biomancy, Divination, Pyromancy, Telekinetics, and Telepathy
+- [ ] **Cult Briefing** offers Political, Heretek, Pleasure, Infestation, Blood, and Culture
+- [ ] **Sicarius Tutoring** offers Adept, Arbitrator, Assassin, Battle Sister, Cleric, Guardsman, Imperial Psyker, Scum, and Tech-Priest
+- [ ] After choosing one option, the entire single-purchase Talent disappears rather than offering the remaining choices as separate purchases
+
+**Hatred and open text:**
+
+- [ ] Hatred offers Criminals, Cult (specific), Daemons, Xeno (specific), Psykers, Heretics, and Mutants
+- [ ] Each ordinary Hatred choice can be selected only once
+- [ ] Cult (specific) requires a non-blank cult name and displays `Hatred (Cult: name)`
+- [ ] Xeno (specific) requires a non-blank xeno name and displays `Hatred (Xeno: name)`
+- [ ] Distinct Cult and Xeno names can be added repeatedly; duplicates differing only by spaces or capitalisation are rejected
+- [ ] Multiple Hatred purchases group into one expandable parent with individually deletable children
+- [ ] Hatred remains available after every ordinary fixed choice is owned because Cult and Xeno are open-ended
+- [ ] Reformed Skin requires non-blank replacement text and rejects a duplicate replacement case-insensitively
+- [ ] One Reformed Skin is a normal named card; two or more form an expandable group with individually deletable children
+
+**Psychic purchase records:**
+
+- [ ] Add **Minor Psychic Power** and **Psychic Power** on Talents — no actual power is chosen here
+- [ ] Their Talent cards and picker cards show `Owned: N`; they do not show availability
+- [ ] Add several purchases — each Add creates one selection and the Talent remains available
+- [ ] Delete an unused purchase — Delete/Cancel confirmation appears and only one purchase is removed
+- [ ] Link every purchase to powers on Psychic, then tap the Talent trash button — **Cannot Delete Talent** explains that its linked Psychic powers must be deleted first
+- [ ] The warning appears only after tapping trash; it is not permanently printed on the Talent card
+- [ ] Delete a linked power on Psychic, return here, and confirm the released Talent purchase can now be deleted
+
+**Simple permanent and granted effects:**
+
+- [ ] Add **Chem Geld** — Insanity displays exactly +1 and its adjustment popup names Chem Geld
+- [ ] Add **Machinator Array** — Strength and Toughness gain +10; Agility and Fellowship lose 5; each adjustment popup names Machinator Array
+- [ ] The Machinator Array information also states the −10 Silent Move penalty and inability to swim; only the numeric Characteristic/Skill effects are calculated by the app
+- [ ] Add **Touched by the Fates**, confirm the displayed half-Willpower-Bonus value, and verify Vitals sets total Fate to that recorded value
+- [ ] Change Willpower afterwards — the already recorded Touched by the Fates value does not silently recalculate
+- [ ] Add **The Power Within** — a read-only `Resistance (Psychic Powers)` card appears with `Granted by The Power Within`
+- [ ] Add **Purity of Flesh** — a read-only `Gift of Purity` card appears and cannot be deleted independently
+- [ ] If an independently purchased Talent duplicates a calculated grant, only one visible card is shown; removing the independent copy reveals the still-active granted card
+
+**Cult Briefing acquisition routes:**
+
+- [ ] Political makes every Common Lore count as Basic while owned
+- [ ] Heretek requires a granted augmetic and one of Autosanguine, Logis Implant, Orthoproxy, or Technical Knock; Tech-Use also becomes Trained when it was Untrained
+- [ ] A Heretek augmetic that requires a body location cannot be completed until a valid location is chosen
+- [ ] Choosing Concealed Weapon Bionic requires an existing Bionic Arm and an eligible unmodified pistol or one-handed melee weapon; readable errors appear when either is missing
+- [ ] Completing Concealed Weapon Bionic installs the augmetic and links the selected weapon; deleting Cult Briefing removes that granted augmetic and clears the weapon link
+- [ ] Pleasure grants +5 Fellowship and requires Chem Geld or Decadence
+- [ ] Infestation trains Medicae and displays a read-only Hardy grant
+- [ ] Blood requires one of Melee Weapon Training (Primitive, Chain, Shock, or Power) and displays a read-only Frenzy grant
+- [ ] Culture excludes the character's current Home World and adds all Traits from the selected other Home World as read-only, source-labelled entries
+- [ ] For Heretek, Pleasure, and Blood, an already-owned reward remains selectable with an Owned marker so acquisition can still be completed
+- [ ] Selecting an already-owned reward records the source without displaying a duplicate card or advancing the independently owned Talent
+- [ ] Remove each Cult Briefing Talent — derived Characteristics, Skills, grants, Traits, Weapon Training, and augmetics disappear, but independently owned copies remain
+- [ ] If Chem Geld is both independently owned and granted through Pleasure, Insanity still gains only +1
+
+**Sicarius Tutoring acquisition routes:**
+
+- [ ] Adept makes Deceive use Intelligence
+- [ ] Arbitrator grants read-only Talented (Shadowing) and the +10 appears on Skills
+- [ ] Assassin grants read-only Talented (Concealment) and the +10 appears on Skills
+- [ ] Battle Sister grants read-only Swift Attack
+- [ ] Cleric grants read-only Disturbing Voice
+- [ ] Guardsman requires a non-blank Exotic Weapon name and adds it to Weapon Training
+- [ ] Imperial Psyker adds exactly +1 maximum Wound and names Sicarius Tutoring as the source
+- [ ] Scum requires one Peer group; an already-owned group remains selectable without creating a duplicate visible Peer card
+- [ ] Tech-Priest makes Inquiry use Intelligence
+- [ ] Removing Sicarius Tutoring removes only these derived benefits and leaves independently purchased copies unchanged
+
+**Psy Rating acquisition:**
+
+- [ ] Psy Rating 1 and 2 record the current Willpower Bonus and each grants Minor selections equal to half that Bonus, rounded up
+- [ ] Psy Rating 3 requires a previously unknown Discipline, activates it on Psychic, grants one power from it, and grants the same rounded-up Minor selection count
+- [ ] For Psy Rating 4, the Known Discipline route grants the rounded-up number of Major and Minor selections; the New Discipline route grants one Major selection and no Minor selections
+- [ ] For Psy Rating 5, the Known Discipline route grants the rounded-up number of Major selections; the New Discipline route grants one Major selection
+- [ ] For Psy Rating 6, the Known Discipline route grants the rounded-up number of Major and Minor selections; the New Discipline route grants one Major selection
+- [ ] A Known Discipline picker contains only active Disciplines; a New Discipline picker excludes every active Discipline
+- [ ] Acquisition clearly displays the recorded Willpower Bonus and the resulting Minor/Major selection counts before confirmation
+- [ ] Later Willpower changes do not retroactively change selections already recorded by an owned Psy Rating Talent
+- [ ] Psychic displays the highest owned Psy Rating, not the most recently purchased one
+- [ ] A Psy Rating Talent with linked powers cannot be deleted; tapping trash opens the same Cannot Delete warning used for Psychic purchase Talents
+- [ ] After deleting linked powers, deleting the Talent removes a Discipline only if that purchase introduced it and no other remaining Psy Rating Talent also introduced it
+
+**Purity of Flesh and Reformed Skin:**
+
+- [ ] Prepare normal cybernetics, a custom implant, integrated ranged and melee weapons, a cybernetic/integrated Archeotech item, and a Mechadendrite
+- [ ] The Purity acquisition inventory lists every removable item, including custom items, and does not require a manually entered bionic count
+- [ ] Fate Points Gained is calculated automatically as one per two qualifying removals, rounded down
+- [ ] Mechadendrites are removed but marked as not qualifying for Fate
+- [ ] Mark no life-critical items and complete acquisition — all listed items are removed, concealed-weapon links are cleared, and no Toughness/Wound loss is applied
+- [ ] Repeat on a fresh character with a long inventory; search the Life-Critical Removals picker, select several items, press Back/Done, and confirm the selection count remains
+- [ ] With life-critical removals selected, Permanent Toughness Loss offers only 1–5 and Wounds Lost is exactly 1 regardless of how many items were marked
+- [ ] Continue to the Reformed Skin stage — every marked item requires its own non-blank replacement before completion
+- [ ] Completion creates one source-noted Reformed Skin entry for every life-critical removal
+- [ ] A later Reformed Skin purchase asks whether its cause is Purity of Flesh or Critical Damage
+- [ ] Choosing Purity removes all Fate Points gained by that Purity purchase; additional Purity-related replacements do not subtract the same Fate again
+- [ ] Choosing Critical Damage leaves Purity Fate unchanged
+- [ ] Delete Purity of Flesh — the second confirmation offers **Delete and restore recorded changes**, **Delete Talent only**, and **Cancel**
+- [ ] Delete and restore returns recorded implants, integrated weapons, Archeotech, and concealed-weapon links without duplicating items already present
+- [ ] Delete Talent only leaves the removed inventory removed while all calculated Talent effects disappear
+
+**Rite of Pure Thought:**
+
+- [ ] The acquisition lists the character's structured Mental Disorders and requires confirmation that the GM reviewed the changes
+- [ ] Every disorder selected for removal requires a non-blank replacement name
+- [ ] Each replacement retains the removed disorder's severity and is identified as its replacement
+- [ ] Deleting Rite of Pure Thought offers the same restore/delete-only decision: restore brings back the recorded original disorders, while delete-only leaves the replacements in place
+
+**Faith Talents and read-only mode:**
+
+- [ ] Faith Talents land under the correct **Emperor's Mercy / Emperor's Sign / Emperor's Wrath** heading
+- [ ] The Faith picker stays open after an addition and removes the now-owned non-repeatable Talent
+- [ ] Faith Talent deletion uses Delete/Cancel and removes only the chosen entry
+- [ ] In View mode, Talent and Faith pickers remain searchable and information popups work, but cards do not add, delete, or show selection feedback
 
 ## 7. Weapon Training
 
@@ -235,18 +432,97 @@ Use a character with enough funds/context to install the Concealed Weapon Bionic
 
 ## 12. Psychic Powers
 
-Minor and Major powers, by discipline, plus custom power creation.
+Minor and Major powers, Talent and Psy Rating selections, read-only Disciplines,
+manual linking, filters, and custom power creation.
 
 ### How to test this page
 
-Begin with no Psy Rating talent, then add successive Psy Rating talents from Talents and observe this page after each change. Toggle disciplines and prove they do not alter picker eligibility. For the custom form, test every required field independently by leaving only that field invalid, then add a valid power, refresh, edit it, and confirm the same record changes rather than a duplicate appearing.
+Use the same disposable character from Talents. First test with no Psychic
+purchase or Psy Rating Talent, then prepare several Minor Psychic Power,
+Psychic Power, and Psy Rating selections without spending them.
 
-- [ ] **Psy Rating is not set on this page at all** — it's derived from the highest "Psy Rating N" talent added on the Talents tab (§6). Confirm: add/change that talent, and this page's Psy Rating number and glow update to match, with no direct input field for it here
-- [ ] Disciplines (Biomancy, Divination, etc.) are toggled independently as a simple record of what the character knows — confirm toggling them does *not* restrict which powers the picker will show
-- [ ] Minor / Major tabs and the discipline filter narrow the picker list correctly
-- [ ] Create a custom power — Name (non-duplicate), Discipline, PT (positive whole number), Action (Half/Full), Range (each of the four modes: metres as a whole number, km radius allowing one decimal, "You", "Unlimited"), Sustained (Yes/No), and Origin are all individually required; Add stays disabled until every one is valid
-- [ ] Edit an existing custom power — same form, pre-filled, saves in place rather than creating a duplicate
-- [ ] The Edit control only ever appears on custom (or "2nd Ed") powers, never on standard reference powers
+**Header and read-only status:**
+
+- [ ] Psy Rating has no input on this page and equals the highest owned `Psy Rating N` Talent
+- [ ] The Psy Rating information button opens the rules for that exact rating
+- [ ] Biomancy, Divination, Pyromancy, Telekinetics, and Telepathy are read-only status chips — tapping them cannot activate or deactivate a Discipline
+- [ ] A Discipline introduced by a Psy Rating Talent appears bright; unknown Disciplines are visibly dimmer
+- [ ] Minor and Major sections each have a plus button in Edit mode and an eye button in View mode
+- [ ] An `Available: N` chip appears below the matching Minor/Major heading only while at least one Talent or Psy Rating selection remains
+- [ ] The heading count equals unused Psychic Talent purchases plus unused Psy Rating selections for that section
+- [ ] Refresh and confirm Psy Rating, Disciplines, availability, powers, and links remain unchanged
+
+**Add-route menu and navigation:**
+
+- [ ] When matching selections exist, pressing plus first opens a route menu rather than immediately adding a power
+- [ ] The route menu shows **Use Minor Psychic Power/Psychic Power selection** only when that matching Talent purchase is available
+- [ ] It shows **Use Psy Rating selection** only when that kind of selection is available
+- [ ] It always offers **Add independent Minor/Major power**, labelled `No selection used`
+- [ ] Talent availability uses the amber chip; Psy Rating availability uses the indigo chip; the independent route uses a neutral chip
+- [ ] Each route card has a forward arrow and visible pressed feedback on only the touched card
+- [ ] A power picker entered through a route returns to the route menu with a back arrow
+- [ ] Discipline and source filters opened with forward arrows return with back arrows
+- [ ] A custom form entered from a power picker returns to that picker with Back
+- [ ] After returning from any secondary screen, the previous picker retains its search, filters, and scroll position
+- [ ] The main picker closes with × only when it was opened directly; secondary screens use Back
+
+**Minor Psychic Power and Psychic Power Talent selections:**
+
+- [ ] Prepare two unused Minor Psychic Power purchases — the Minor heading says Available: 2 and the Talent route says Available: 2
+- [ ] Choose the Talent route and add two different Minor powers consecutively without choosing the route again
+- [ ] After the first addition, the picker stays open and availability falls to 1
+- [ ] After the second addition, the app returns to the route menu, the exhausted Talent route disappears, and no independent power is added accidentally
+- [ ] Each linked power has a chip naming **Minor Psychic Power**, while Talents still shows the owned purchase records
+- [ ] Repeat with two Psychic Power purchases in Major Powers; each linked power names **Psychic Power**
+- [ ] A Minor purchase cannot link a Major power and a Major purchase cannot link a Minor power
+- [ ] Delete one linked power using Delete/Cancel confirmation — the power disappears, its Talent purchase remains, and availability returns by one
+
+**Psy Rating selections:**
+
+- [ ] Prepare a Psy Rating grant with several selections — the route shows the full remaining count
+- [ ] Choose the Psy Rating route and add powers consecutively until that particular grant is exhausted
+- [ ] Every linked power has a chip naming the exact source, for example `Psy Rating 4`, rather than a generic Psy Rating label
+- [ ] When the final selection is used, the app returns to the route menu instead of silently entering another route
+- [ ] If several Psy Rating Talents were purchased before choosing powers, selections are consumed in purchase order and each power receives the corresponding Talent chip
+- [ ] A Major Psy Rating selection only displays powers from the Discipline recorded on that Talent
+- [ ] A custom Major power created through that route has its required Discipline fixed to the same value
+- [ ] Deleting a linked power releases one selection back to the correct Psy Rating Talent
+
+**Independent powers and manual assignment:**
+
+- [ ] Add an independent power while both other selection types are available — neither availability count changes and the card has no selection-source chip
+- [ ] Expand an unlinked power — when compatible selections exist, the appropriate **Use … selection** actions appear
+- [ ] Assign it to a Psychic Talent purchase — the correct chip appears and availability falls by one
+- [ ] On another unlinked power, use a compatible Psy Rating selection — the exact Psy Rating chip appears and availability falls by one
+- [ ] Once a power has either link, the other assignment action is unavailable; one power cannot consume two selections
+- [ ] A selection already used by one power cannot be assigned to another power
+- [ ] A Major power from the wrong Discipline cannot consume a Discipline-specific Psy Rating selection
+
+**Power picker:**
+
+- [ ] The Minor picker contains only Minor powers, has a Source filter, and does not show an unnecessary Discipline filter
+- [ ] The Major picker contains only Major powers and its Discipline and Source filters can be combined
+- [ ] Search is case-insensitive and owned power names disappear from the available list
+- [ ] Adding an ordinary independent power keeps the picker open so another can be added
+- [ ] Press and hold a selectable power card — only that card shows the pressed effect
+- [ ] In View mode, search, filters, expansion, and information remain usable, but there is no pressed selection feedback and nothing can be added or linked
+- [ ] Power cards show source, Discipline, selection source where applicable, PT, Action, Range, Sustained, and the complete rules text
+- [ ] Delete asks for confirmation; Cancel preserves the power and Delete removes only that power
+
+**Custom powers and campaign library:**
+
+- [ ] Attempt to create a custom power while signed out — the app explains that sign-in is required rather than losing the form silently
+- [ ] Name is required and rejects an existing reference, character, or campaign power even when only capitalisation or surrounding spaces differ
+- [ ] Major Discipline is required unless a Psy Rating route has already fixed it; Minor powers are fixed to Minor
+- [ ] PT is required and accepts only a positive whole number
+- [ ] Action is required and allows Half Action or Full Action
+- [ ] Metres requires a positive whole number; km radius allows a positive value with at most one decimal place; You and Unlimited require no number
+- [ ] Sustained Yes/No and Origin Custom/2nd Ed are each required
+- [ ] Optional description text saves and reappears in the information popup
+- [ ] A valid custom power is added as a campaign draft and remains attached to the character after refresh
+- [ ] Edit the custom power — the form is pre-filled and saving updates that character power rather than creating a duplicate
+- [ ] Standard reference powers have no Edit control; Custom and 2nd Ed powers have the permitted definition controls
+- [ ] As DM, publish a draft, select the published power from the campaign library on another eligible character, update all copies, and archive it; existing character copies remain readable while the archived definition disappears from add pickers
 
 ## 13. Gear
 
