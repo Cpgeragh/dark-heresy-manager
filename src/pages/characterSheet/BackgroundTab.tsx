@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import type { ReactNode } from "react";
-import type { CharacterHeader, CyberneticItem, TalentsAndTraitsBlock } from "../../types/Character";
+import type { CharacterHeader, CyberneticItem, GearItem, TalentsAndTraitsBlock } from "../../types/Character";
 import { FormField } from "../../components/FormField";
 import { InfoModal } from "../../components/InfoModal";
 import {
@@ -23,6 +23,7 @@ import { colourMeta } from "../../ui/colourTokens";
 import { RollChip } from "../../ui/RollChip";
 import { sourceColour } from "../../ui/sourceStyles";
 import { CareerInfoContent, CareerPicker, RankInfoContent, RankPicker } from "./CareerPicker";
+import { SANCTIONING_RESULTS } from "../../features/traits/sanctioningReference";
 import { DivinationInfoContent, DivinationPicker } from "./DivinationPicker";
 import { HomeworldInfoContent, HomeworldPicker } from "./HomeworldPicker";
 import { TRAIT_LIST } from "../../data/traitData";
@@ -42,6 +43,8 @@ interface BackgroundTabProps {
   onUpdateTalents: (next: TalentsAndTraitsBlock) => void;
   cybernetics?: CyberneticItem[];
   onUpdateCybernetics?: (next: CyberneticItem[]) => void | Promise<void>;
+  gear?: GearItem[];
+  onUpdateGear?: (next: GearItem[]) => void | Promise<void>;
 }
 
 function BackgroundPickerField({
@@ -70,17 +73,15 @@ function BackgroundPickerField({
           <span className={uiFormLabel}>{label}</span>
           {info}
         </div>
-        {showAction && (
-          <Button
-            size="xs"
-            disabled={disabled}
-            onClick={onClick}
-            aria-label={`${selected ? "Change" : "Select"} ${label}`}
-            className="shrink-0"
-          >
-            {selected ? "Change" : "Select"}
-          </Button>
-        )}
+        <Button
+          size="xs"
+          disabled={disabled}
+          onClick={onClick}
+          aria-label={`${selected ? "Change" : "Select"} ${label}`}
+          className={`shrink-0 ${showAction ? "" : "invisible"}`}
+        >
+          {selected ? "Change" : "Select"}
+        </Button>
       </div>
       <div className={uiSectionShell + " overflow-hidden"}>
         <div className="min-h-11 px-3 py-2.5 lg:px-4 lg:py-3">
@@ -102,6 +103,8 @@ export function BackgroundTab({
   onUpdateTalents,
   cybernetics = [],
   onUpdateCybernetics,
+  gear = [],
+  onUpdateGear,
 }: BackgroundTabProps) {
   const [showHomeworldPicker, setShowHomeworldPicker] = useState(false);
   const [showCareerPicker, setShowCareerPicker] = useState(false);
@@ -296,86 +299,131 @@ export function BackgroundTab({
 
           <div className="border-t border-slate-700/70" />
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <BackgroundPickerField
-              label="Career"
-              selected={!!header.career}
-              value={
-                selectedCareer && (
-                  <div className="flex min-w-0 flex-col gap-1.5">
-                    <span className={`${uiItemName} truncate`}>{selectedCareer.name}</span>
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <Chip className={`bg-slate-800/40 font-code ${sourceColour(selectedCareer.source)}`}>
-                        {selectedCareer.source}
-                      </Chip>
+          {(() => {
+            const sanctioning = talents.careerTraitAcquisition?.sanctioning;
+            const sanctioningRef = sanctioning
+              ? SANCTIONING_RESULTS.find((result) => result.id === sanctioning.resultId)
+              : undefined;
+            const rankField = (
+              <BackgroundPickerField
+                label="Rank"
+                selected={!!header.rank}
+                value={
+                  selectedCareer &&
+                  selectedRank && (
+                    <div className="flex min-w-0 flex-col gap-1.5">
+                      <span className={`${uiItemName} truncate`}>{selectedRank.name}</span>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <Chip className={colourMeta}>Rank {selectedRank.tier}</Chip>
+                        <Chip className={colourMeta}>{selectedRank.xpLevel} XP</Chip>
+                        {selectedRank.paths?.length && (
+                          <Chip className={colourMeta}>
+                            {selectedRank.paths.length > 1 ? "Paths" : "Path"}: {selectedRank.paths.join(" / ")}
+                          </Chip>
+                        )}
+                        <Chip className={`bg-slate-800/40 font-code ${sourceColour(selectedCareer.source)}`}>
+                          {selectedCareer.source}
+                        </Chip>
+                      </div>
                     </div>
-                  </div>
-                )
-              }
-              emptyText={selectedHomeworld ? "— Select career —" : "Select a homeworld first"}
-              showAction={editable}
-              disabled={!editable || !selectedHomeworld}
-              onClick={() => setShowCareerPicker(true)}
-              info={
-                selectedCareer && (
-                  <span className={uiInfoModalWrapper}>
-                    <InfoModal
-                      title={selectedCareer.name}
-                      content={
-                        <CareerInfoContent career={selectedCareer} homeworld={selectedHomeworld} />
+                  )
+                }
+                emptyText={
+                  selectedHomeworld
+                    ? selectedCareer
+                      ? "— Select rank —"
+                      : "Select a career first"
+                    : "Select a homeworld first"
+                }
+                showAction={editable}
+                disabled={!editable || !selectedHomeworld || !selectedCareer}
+                onClick={() => setShowRankPicker(true)}
+                info={
+                  selectedCareer &&
+                  selectedRank && (
+                    <span className={uiInfoModalWrapper}>
+                      <InfoModal
+                        title={selectedRank.name}
+                        content={<RankInfoContent career={selectedCareer} rank={selectedRank} />}
+                      />
+                    </span>
+                  )
+                }
+              />
+            );
+            return (
+              <>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <BackgroundPickerField
+                    label="Career"
+                    selected={!!header.career}
+                    value={
+                      selectedCareer && (
+                        <div className="flex min-w-0 flex-col gap-1.5">
+                          <span className={`${uiItemName} truncate`}>{selectedCareer.name}</span>
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <Chip className={`bg-slate-800/40 font-code ${sourceColour(selectedCareer.source)}`}>
+                              {selectedCareer.source}
+                            </Chip>
+                          </div>
+                        </div>
+                      )
+                    }
+                    emptyText={selectedHomeworld ? "— Select career —" : "Select a homeworld first"}
+                    showAction={editable}
+                    disabled={!editable || !selectedHomeworld}
+                    onClick={() => setShowCareerPicker(true)}
+                    info={
+                      selectedCareer && (
+                        <span className={uiInfoModalWrapper}>
+                          <InfoModal
+                            title={selectedCareer.name}
+                            content={
+                              <CareerInfoContent career={selectedCareer} homeworld={selectedHomeworld} />
+                            }
+                          />
+                        </span>
+                      )
+                    }
+                  />
+
+                  {sanctioning && selectedCareer ? (
+                    <BackgroundPickerField
+                      label="Sanctioning Effect"
+                      selected
+                      value={
+                        <div className="flex min-w-0 flex-col gap-1.5">
+                          <span className={`${uiItemName} truncate`}>{sanctioning.resultName}</span>
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            {sanctioningRef && <RollChip>{sanctioningRef.roll}</RollChip>}
+                            <Chip className={`bg-slate-800/40 font-code ${sourceColour(selectedCareer.source)}`}>
+                              {selectedCareer.source}
+                            </Chip>
+                          </div>
+                        </div>
+                      }
+                      emptyText=""
+                      showAction={false}
+                      disabled={false}
+                      onClick={() => {}}
+                      info={
+                        sanctioningRef?.effect && (
+                          <span className={uiInfoModalWrapper}>
+                            <InfoModal title={sanctioning.resultName} content={sanctioningRef.effect} />
+                          </span>
+                        )
                       }
                     />
-                  </span>
-                )
-              }
-            />
-
-            <BackgroundPickerField
-              label="Rank"
-              selected={!!header.rank}
-              value={
-                selectedCareer &&
-                selectedRank && (
-                  <div className="flex min-w-0 flex-col gap-1.5">
-                    <span className={`${uiItemName} truncate`}>{selectedRank.name}</span>
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <Chip className={colourMeta}>Rank {selectedRank.tier}</Chip>
-                      <Chip className={colourMeta}>{selectedRank.xpLevel} XP</Chip>
-                      {selectedRank.paths?.length && (
-                        <Chip className={colourMeta}>
-                          {selectedRank.paths.length > 1 ? "Paths" : "Path"}: {selectedRank.paths.join(" / ")}
-                        </Chip>
-                      )}
-                      <Chip className={`bg-slate-800/40 font-code ${sourceColour(selectedCareer.source)}`}>
-                        {selectedCareer.source}
-                      </Chip>
-                    </div>
-                  </div>
-                )
-              }
-              emptyText={
-                selectedHomeworld
-                  ? selectedCareer
-                    ? "— Select rank —"
-                    : "Select a career first"
-                  : "Select a homeworld first"
-              }
-              showAction={editable}
-              disabled={!editable || !selectedHomeworld || !selectedCareer}
-              onClick={() => setShowRankPicker(true)}
-              info={
-                selectedCareer &&
-                selectedRank && (
-                  <span className={uiInfoModalWrapper}>
-                    <InfoModal
-                      title={selectedRank.name}
-                      content={<RankInfoContent career={selectedCareer} rank={selectedRank} />}
-                    />
-                  </span>
-                )
-              }
-            />
-          </div>
+                  ) : (
+                    rankField
+                  )}
+                </div>
+                {sanctioning && (
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">{rankField}</div>
+                )}
+              </>
+            );
+          })()}
 
           <div className="border-t border-slate-700/70" />
 
@@ -486,6 +534,7 @@ export function BackgroundTab({
               name: trait.name,
             }}
             cybernetics={cybernetics}
+            gear={gear}
             onComplete={(result) => {
               const currentRankBelongsToCareer = pendingCareer.ranks.some(
                 (rank) => rank.name.toLowerCase() === header.rank?.toLowerCase()
@@ -501,6 +550,9 @@ export function BackgroundTab({
               });
               if (result.cybernetics && onUpdateCybernetics) {
                 void onUpdateCybernetics(result.cybernetics);
+              }
+              if (result.gear && onUpdateGear) {
+                void onUpdateGear(result.gear);
               }
               setPendingCareer(null);
             }}

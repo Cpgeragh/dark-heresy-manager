@@ -331,6 +331,8 @@ export interface GearItem extends CustomLibraryLinkFields {
   value?: string;
   availability?: string;
   source?: string;
+  grantedByTalentEntryUid?: string;
+  grantedByTalentName?: string;
 }
 
 /**

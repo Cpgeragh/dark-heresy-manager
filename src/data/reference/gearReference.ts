@@ -197,6 +197,28 @@ export const GEAR_REFERENCE: GearRef[] = [
     value: "2,500 Thrones",
     availability: "Very Rare",
   },
+  {
+    id: "cr-carven-dentures",
+    name: "Carven Dentures",
+    source: SkillSource.CR,
+    description:
+      "A set of Good-quality dentures carved from the teeth of dead pilgrims, replacing teeth lost to " +
+      "the sanctioning rituals of the Black Ships. Of inestimable sentimental value to the wearer.",
+    weight: "0.1 kg",
+    value: "50 Thrones",
+    availability: "Near Unique",
+  },
+  {
+    id: "cr-chattallium-ring",
+    name: "Chattallium Ring",
+    source: SkillSource.CR,
+    description:
+      "A ring of chattallium granted to a psyker who has sworn to cleave only unto the Emperor as a " +
+      "result of the Black Ships' sanctioning rituals.",
+    weight: "0.1 kg",
+    value: "100 Thrones",
+    availability: "Near Unique",
+  },
 
   // ── Core Rulebook — Tools ─────────────────────────────────────────────────
 

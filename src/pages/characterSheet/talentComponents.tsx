@@ -417,18 +417,30 @@ export function EntryCard({
       <div className="min-w-0 space-y-1.5">
         <div className="flex items-center gap-1.5">
           <span className={`${uiItemName} break-words`}>{shownName}</span>
-          {description && (
+          {(description || entry.notes) && (
             <span className={uiInfoModalWrapper}>
-              <InfoModal title={shownName} content={description} />
+              <InfoModal
+                title={shownName}
+                content={
+                  <div className="space-y-3">
+                    {description && (
+                      <p className={`text-sm ${uiTextBody} leading-relaxed`}>{description}</p>
+                    )}
+                    {entry.notes && (
+                      <div>
+                        <p className={`${uiTextLabel} font-semibold mb-1`}>Notes</p>
+                        <p className={`text-sm ${uiTextBody} leading-relaxed`}>{entry.notes}</p>
+                      </div>
+                    )}
+                  </div>
+                }
+              />
             </span>
           )}
         </div>
         {!statusAfterSource && secondaryText && <p className="text-sm text-amber-300">{secondaryText}</p>}
         {!statusAfterSource && isGranted && (
           <p className="text-sm text-amber-300">Granted by {entry.grantedByTalentName}</p>
-        )}
-        {entry.notes && !description && (
-          <p className={`text-sm ${uiTextBody}`}>{entry.notes}</p>
         )}
         <div className="flex flex-wrap items-center gap-1.5">
           {refSources.map((source) => (

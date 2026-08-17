@@ -1,25 +1,32 @@
 import { useMemo, useState } from "react";
 import { DEFAULT_SKILLS } from "../../data/defaultSkills";
 import { CYBERNETICS_REFERENCE } from "../../data/reference/cyberneticsReference";
+import { GEAR_REFERENCE } from "../../data/reference/gearReference";
 import type { TraitData } from "../../data/traitData";
+import { SANCTIONING_RESULTS } from "../../features/traits/sanctioningReference";
+import { notesForSanctioning } from "../../features/traits/traitEffects";
+import { InfoModal } from "../../components/InfoModal";
 import type {
   ArmourLocationKey,
   CyberneticItem,
+  GearItem,
   SanctioningAcquisition,
   TalentEntry,
 } from "../../types/Character";
 import { Button } from "../../ui/Button";
 import { Chip } from "../../ui/Chip";
 import { RequiredFieldsNote } from "../../ui/CustomFormFooter";
-import { editableInputClass, uiFormLabel, uiTextBody } from "../../ui/editableStyles";
+import { editableInputClass, uiFormLabel, uiInfoModalWrapper, uiItemName, uiTextBody, uiTextLabel } from "../../ui/editableStyles";
 import { OptionPickerScreen, type PickerOption } from "../../ui/OptionPickerScreen";
 import { PickerBody, PickerModal, PickerRow } from "../../ui/PickerModal";
 import { PickerField } from "../../ui/PickerField";
+import { RollChip } from "../../ui/RollChip";
 import { sanitizePositiveIntegerInput } from "../../utils/formInput";
 
 export interface TraitAcquisitionResult {
   entry: TalentEntry;
   cybernetics?: CyberneticItem[];
+  gear?: GearItem[];
 }
 
 const CHARACTERISTICS: readonly { value: string; label: string }[] = [
@@ -35,22 +42,6 @@ const SOUL_CONSEQUENCES: readonly { value: string; label: string }[] = [
   { value: "mutation", label: "Random mutation" },
 ];
 
-const SANCTIONING_RESULTS = [
-  ["reconstructed-skull", "01–08", "Reconstructed Skull", "thrones"],
-  ["hunted", "09–14", "Hunted", "d10"],
-  ["unlovely-memories", "15–25", "Unlovely Memories", "d5"],
-  ["the-horror", "26–35", "The Horror, the Horror", "d5"],
-  ["pain-through-nerve-induction", "36–42", "Pain through Nerve Induction", "none"],
-  ["dental-probes", "43–49", "Dental Probes", "none"],
-  ["optical-rupture", "50–57", "Optical Rupture", "none"],
-  ["screaming-devotions", "58–63", "Screaming Devotions", "none"],
-  ["irradiance", "64–70", "Irradiance", "none"],
-  ["tongue-bound", "71–75", "Tongue Bound", "none"],
-  ["throne-wed", "76–88", "Throne Wed", "none"],
-  ["witch-prickling", "89–94", "Witch Prickling", "none"],
-  ["hypno-doctrination", "95–00", "Hypno-doctrination", "none"],
-] as const;
-
 type PickerKind = "soul-consequence" | "characteristic" | "sanctioning" | "skin-kind" | "skin-cybernetic" | "skin-upgrade" | "skin-location";
 
 function requiredRollRange(resultId: string): { min: number; max: number; label: string } | null {
@@ -60,19 +51,11 @@ function requiredRollRange(resultId: string): { min: number; max: number; label:
   return null;
 }
 
-function notesForSanctioning(result: SanctioningAcquisition): string {
-  const detail = result.thronesGained
-    ? `; ${result.thronesGained} Throne Gelt gained`
-    : result.rolledValue
-      ? `; ${result.rolledValue} Insanity Points gained`
-      : "";
-  return `Sanctioning Side Effect: ${result.resultName}${detail}. Age increased by ${result.ageIncrease} years.`;
-}
-
 export function TraitAcquisitionModal({
   trait,
   entry,
   cybernetics,
+  gear = [],
   ownedTraitEntries = [],
   onComplete,
   onClose,
@@ -80,6 +63,7 @@ export function TraitAcquisitionModal({
   trait: TraitData;
   entry: TalentEntry;
   cybernetics: CyberneticItem[];
+  gear?: GearItem[];
   ownedTraitEntries?: TalentEntry[];
   onComplete: (result: TraitAcquisitionResult) => void;
   onClose: () => void;
@@ -103,7 +87,7 @@ export function TraitAcquisitionModal({
     () => DEFAULT_SKILLS.filter((skill) => ["Common Lore", "Forbidden Lore", "Scholastic Lore", "Trade"].includes(skill.category)),
     []
   );
-  const selectedSanction = SANCTIONING_RESULTS.find(([id]) => id === sanctionResultId);
+  const selectedSanction = SANCTIONING_RESULTS.find((result) => result.id === sanctionResultId);
   const sanctionRange = requiredRollRange(sanctionResultId);
   const selectedCybernetic = CYBERNETICS_REFERENCE.find((item) => item.id === skinCyberneticId);
   const skinRank = ([1, 3, 5, 7] as const)[Math.min(ownedTraitEntries.length, 3)];
@@ -117,7 +101,30 @@ export function TraitAcquisitionModal({
     return <OptionPickerScreen title="Characteristic" options={CHARACTERISTICS} selected={characteristic} onSelect={(value) => { setCharacteristic(value); setPicker(null); }} onClose={() => setPicker(null)} />;
   }
   if (picker === "sanctioning") {
-    return <OptionPickerScreen title="Sanctioning Side Effect" options={SANCTIONING_RESULTS.map(([id, range, name]) => ({ value: id, label: `${range} — ${name}` }))} selected={sanctionResultId} onSelect={(value) => { setSanctionResultId(value); setRolledValue(""); setPicker(null); }} onClose={() => setPicker(null)} />;
+    return (
+      <PickerModal title="Sanctioning Side Effect" query="" onQueryChange={() => undefined} onClose={() => setPicker(null)} hideSearch isEmpty={false}>
+        <PickerBody>
+          {SANCTIONING_RESULTS.map((result) => (
+            <PickerRow
+              key={result.id}
+              onClick={() => { setSanctionResultId(result.id); setRolledValue(""); setPicker(null); }}
+              selected={result.id === sanctionResultId}
+            >
+              <span className={`${uiItemName} group-hover:text-white`}>{result.name}</span>
+              <div className="mt-1 flex flex-wrap gap-1.5">
+                <RollChip>{result.roll}</RollChip>
+              </div>
+              <div className="mt-1 flex items-center gap-1.5">
+                <span className={uiTextLabel}>Rules</span>
+                <span onClick={(event) => event.stopPropagation()} className={uiInfoModalWrapper}>
+                  <InfoModal title={result.name} content={result.effect} as="span" />
+                </span>
+              </div>
+            </PickerRow>
+          ))}
+        </PickerBody>
+      </PickerModal>
+    );
   }
   if (picker === "skin-kind") {
     return <OptionPickerScreen title={`Rank ${skinRank} Benefit`} options={[{ value: "new", label: "Gain a new Common cybernetic" }, { value: "upgrade", label: "Upgrade an existing cybernetic to Good" }]} selected={skinKind} onSelect={(value) => { setSkinKind(value as "new" | "upgrade"); setSkinCyberneticId(""); setSkinLocation(""); setPicker(null); }} onClose={() => setPicker(null)} />;
@@ -188,20 +195,27 @@ export function TraitAcquisitionModal({
     return (
       <PickerModal title="Sanctioned Psyker Acquisition" query="" onQueryChange={() => undefined} onClose={onClose} hideSearch isEmpty={false} maxWidth="max-w-lg">
         <PickerBody><div className="space-y-3">
-          <PickerField id="sanctioning-result" label="Sanctioning side effect" value={selectedSanction ? `${selectedSanction[1]} — ${selectedSanction[2]}` : ""} placeholder="Choose result…" required onClick={() => setPicker("sanctioning")} />
+          <PickerField id="sanctioning-result" label="Sanctioning side effect" value={selectedSanction ? `${selectedSanction.roll} — ${selectedSanction.name}` : ""} placeholder="Choose result…" required onClick={() => setPicker("sanctioning")} />
           {sanctionRange && <div><label htmlFor="sanction-roll" className={uiFormLabel}>{sanctionRange.label} <span className="text-red-500">*</span></label><input id="sanction-roll" type="text" inputMode="numeric" value={rolledValue} onChange={(event) => setRolledValue(sanitizePositiveIntegerInput(event.target.value))} placeholder={`${sanctionRange.min}–${sanctionRange.max}`} className={`${editableInputClass(true)} mt-0.5`} /></div>}
           <div><label htmlFor="sanction-age" className={uiFormLabel}>Starting age increase (3d10) <span className="text-red-500">*</span></label><input id="sanction-age" type="text" inputMode="numeric" value={ageIncrease} onChange={(event) => setAgeIncrease(sanitizePositiveIntegerInput(event.target.value))} placeholder="3–30" className={`${editableInputClass(true)} mt-0.5`} /></div>
           {!canSubmit && <RequiredFieldsNote />}
           <Button fullWidth disabled={!canSubmit} onClick={() => {
             if (!selectedSanction) return;
-            const sanctioning: SanctioningAcquisition = { resultId: selectedSanction[0], resultName: selectedSanction[2], ageIncrease: age, ...(sanctionRange && sanctionResultId === "reconstructed-skull" ? { thronesGained: roll } : sanctionRange ? { rolledValue: roll } : {}) };
+            const sanctioning: SanctioningAcquisition = { resultId: selectedSanction.id, resultName: selectedSanction.name, ageIncrease: age, ...(sanctionRange && sanctionResultId === "reconstructed-skull" ? { thronesGained: roll } : sanctionRange ? { rolledValue: roll } : {}) };
             const senseRef = CYBERNETICS_REFERENCE.find((item) => item.id === "cr-cybernetic-senses");
             const addedSense = sanctionResultId === "optical-rupture" && senseRef ? [{ id: crypto.randomUUID(), referenceId: senseRef.id, name: senseRef.name, craftsmanship: "Common" as const, value: senseRef.value, availability: senseRef.availability, source: senseRef.source, notes: "Eyes replaced through Sanctioned Psyker (Optical Rupture).", grantedByTalentEntryUid: entry.uid, grantedByTalentName: "Sanctioned Psyker" }] : [];
+            const gearRefId = sanctionResultId === "dental-probes" ? "cr-carven-dentures" : sanctionResultId === "throne-wed" ? "cr-chattallium-ring" : null;
+            const gearRef = gearRefId ? GEAR_REFERENCE.find((item) => item.id === gearRefId) : undefined;
+            const addedGear = gearRef ? [{ id: crypto.randomUUID(), referenceId: gearRef.id, name: gearRef.name, description: gearRef.description, weight: gearRef.weight, value: gearRef.value, availability: gearRef.availability, source: gearRef.source, grantedByTalentEntryUid: entry.uid, grantedByTalentName: "Sanctioned Psyker" }] : [];
             onComplete({
               entry: { ...entry, notes: notesForSanctioning(sanctioning), acquisition: { ...entry.acquisition, trait: { sanctioning } } },
               cybernetics: [
                 ...cybernetics.filter((item) => item.grantedByTalentEntryUid !== entry.uid),
                 ...addedSense,
+              ],
+              gear: [
+                ...gear.filter((item) => item.grantedByTalentEntryUid !== entry.uid),
+                ...addedGear,
               ],
             });
           }}>Apply and add Trait</Button>

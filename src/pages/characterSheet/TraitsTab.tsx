@@ -1,7 +1,7 @@
 // src/pages/characterSheet/TraitsTab.tsx
 
 import { useCallback, useMemo, useState } from "react";
-import type { CyberneticItem, TalentsAndTraitsBlock, TalentEntry } from "../../types/Character";
+import type { CyberneticItem, GearItem, TalentsAndTraitsBlock, TalentEntry } from "../../types/Character";
 import { TRAIT_LIST } from "../../data/traitData";
 import { EntryCard, TalentPickerModal } from "./talentComponents";
 import { getDerivedTraitEntries } from "../../features/traits/traitEffects";
@@ -16,9 +16,11 @@ interface TraitsTabProps {
   talents: TalentsAndTraitsBlock;
   career?: string;
   cybernetics?: CyberneticItem[];
+  gear?: GearItem[];
   editable: boolean;
   onUpdateTalents: (next: TalentsAndTraitsBlock) => void;
   onUpdateCybernetics?: (next: CyberneticItem[]) => void | Promise<void>;
+  onUpdateGear?: (next: GearItem[]) => void | Promise<void>;
 }
 
 function UnnaturalCharacteristicCards({
@@ -85,9 +87,11 @@ export function TraitsTab({
   talents,
   career,
   cybernetics = [],
+  gear = [],
   editable,
   onUpdateTalents,
   onUpdateCybernetics,
+  onUpdateGear,
 }: TraitsTabProps) {
   const [showPicker, setShowPicker] = useState(false);
   const [pendingAcquisition, setPendingAcquisition] = useState<TalentEntry | null>(null);
@@ -237,6 +241,7 @@ export function TraitsTab({
                 trait={trait}
                 entry={pendingAcquisition}
                 cybernetics={cybernetics}
+                gear={gear}
                 ownedTraitEntries={talents.traits.filter(
                   (entry) => entry.talentId === pendingAcquisition.talentId
                 )}
@@ -247,6 +252,9 @@ export function TraitsTab({
                   });
                   if (result.cybernetics && onUpdateCybernetics) {
                     void onUpdateCybernetics(result.cybernetics);
+                  }
+                  if (result.gear && onUpdateGear) {
+                    void onUpdateGear(result.gear);
                   }
                   setPendingAcquisition(null);
                 }}

@@ -53,7 +53,7 @@ export const TRAIT_DESCRIPTIONS: Record<string, string> = {
   stampede:
     "On a failed Willpower Test, automatically charges in a straight line overrunning everything in its path, dealing Natural Weapon Damage (or 1d5+SB Impact if it has none). Spreads to all creatures within sight. Continues until the threat is no longer visible or for 1d10 minutes, whichever is last.",
   "strange-physiology":
-    "The creature's alien physiology means it dies only when Damage equals or exceeds its Wounds.",
+    "All hits count as Body hits. The creature dies only when Damage equals or exceeds its Wounds.",
   "stuff-of-nightmares":
     "Completely immune to poison, disease, the need to breathe, most environmental hazards, Blood Loss, Stunning, and any Critical result other than one that would destroy the creature outright, unless caused by a Psychic Power, force weapon, or holy attack.",
   sturdy: "+20 to Tests made to resist Grappling and the Takedown talent.",

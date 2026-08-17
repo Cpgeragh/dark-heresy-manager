@@ -563,9 +563,11 @@ export default function CharacterSheet({
               talents={character.talentsAndTraits}
               career={character.header.career}
               cybernetics={character.cybernetics ?? []}
+              gear={character.gear ?? []}
               editable={allowedToEdit}
               onUpdateTalents={handleUpdateTalents}
               onUpdateCybernetics={handleUpdateCybernetics}
+              onUpdateGear={handleUpdateGear}
             />
           )}
 
@@ -713,6 +715,8 @@ export default function CharacterSheet({
               onUpdateHeader={handleUpdateHeader}
               onUpdateTalents={handleUpdateTalents}
               onUpdateCybernetics={handleUpdateCybernetics}
+              gear={character.gear ?? []}
+              onUpdateGear={handleUpdateGear}
             />
           )}
 

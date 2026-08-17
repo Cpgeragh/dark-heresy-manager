@@ -206,6 +206,6 @@ describe("BackgroundTab", () => {
 
   it("disables the homeworld field when not editable", () => {
     renderTab({ editable: false });
-    expect(screen.queryByRole("button", { name: "Select Homeworld" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Select Homeworld" })).toBeDisabled();
   });
 });

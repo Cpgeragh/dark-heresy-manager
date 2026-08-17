@@ -3,6 +3,7 @@ import { TRAIT_LIST } from "../../data/traitData";
 import type {
   Characteristics,
   HomeworldTraitChoices,
+  SanctioningAcquisition,
   SkillAdvanceLevel,
   SkillEntry,
   TalentEntry,
@@ -25,6 +26,17 @@ export interface TraitSkillEffects {
 
 function traitReference(name: string, source: string) {
   return TRAIT_LIST.find((trait) => trait.name === name && trait.source === source);
+}
+
+export function notesForSanctioning(result: SanctioningAcquisition): string {
+  const detail = result.thronesGained
+    ? `; ${result.thronesGained} Throne Gelt gained`
+    : result.rolledValue
+      ? `; ${result.rolledValue} Insanity Points gained`
+      : result.resultId === "tongue-bound"
+        ? "; must pass a Hard (–20) Willpower Test to speak the names of the Ruinous Powers, and stutters when speaking of daemons"
+        : "";
+  return `Sanctioning Side Effect: ${result.resultName}${detail}. Age increased by ${result.ageIncrease} years.`;
 }
 
 function homeworldEntries(
@@ -108,6 +120,9 @@ export function getDerivedTraitEntries(
       talentId: "sanctioned-psyker",
       name: "Sanctioned Psyker",
       acquisition: { trait: talents.careerTraitAcquisition },
+      notes: talents.careerTraitAcquisition?.sanctioning
+        ? notesForSanctioning(talents.careerTraitAcquisition.sanctioning)
+        : undefined,
       grantedByTalentEntryUid: "career:imperial-psyker",
       grantedByTalentName: "Career: Imperial Psyker",
     });

@@ -55,13 +55,47 @@ describe("TraitAcquisitionModal", () => {
     const user = userEvent.setup();
     const onComplete = renderAcquisition("sanctioned-psyker");
     await user.click(screen.getByRole("button", { name: /Sanctioning side effect/ }));
-    await user.click(screen.getByText(/89–94 — Witch Prickling/));
+    await user.click(screen.getByText("Witch Prickling"));
     await user.type(screen.getByLabelText(/Starting age increase/), "18");
     await user.click(screen.getByRole("button", { name: "Apply and add Trait" }));
     expect(onComplete.mock.calls[0][0].entry.acquisition.trait.sanctioning).toEqual(expect.objectContaining({
       resultId: "witch-prickling",
       ageIncrease: 18,
     }));
+  });
+
+  it("grants Carven Dentures when Dental Probes is rolled", async () => {
+    const user = userEvent.setup();
+    const onComplete = renderAcquisition("sanctioned-psyker");
+    await user.click(screen.getByRole("button", { name: /Sanctioning side effect/ }));
+    await user.click(screen.getByText("Dental Probes"));
+    await user.type(screen.getByLabelText(/Starting age increase/), "12");
+    await user.click(screen.getByRole("button", { name: "Apply and add Trait" }));
+    expect(onComplete.mock.calls[0][0].gear).toEqual([
+      expect.objectContaining({ name: "Carven Dentures", referenceId: "cr-carven-dentures" }),
+    ]);
+  });
+
+  it("grants a Chattallium Ring when Throne Wed is rolled", async () => {
+    const user = userEvent.setup();
+    const onComplete = renderAcquisition("sanctioned-psyker");
+    await user.click(screen.getByRole("button", { name: /Sanctioning side effect/ }));
+    await user.click(screen.getByText("Throne Wed"));
+    await user.type(screen.getByLabelText(/Starting age increase/), "20");
+    await user.click(screen.getByRole("button", { name: "Apply and add Trait" }));
+    expect(onComplete.mock.calls[0][0].gear).toEqual([
+      expect.objectContaining({ name: "Chattallium Ring", referenceId: "cr-chattallium-ring" }),
+    ]);
+  });
+
+  it("notes the Willpower Test requirement when Tongue Bound is rolled", async () => {
+    const user = userEvent.setup();
+    const onComplete = renderAcquisition("sanctioned-psyker");
+    await user.click(screen.getByRole("button", { name: /Sanctioning side effect/ }));
+    await user.click(screen.getByText("Tongue Bound"));
+    await user.type(screen.getByLabelText(/Starting age increase/), "10");
+    await user.click(screen.getByRole("button", { name: "Apply and add Trait" }));
+    expect(onComplete.mock.calls[0][0].entry.notes).toContain("Hard (–20) Willpower Test");
   });
 
   it("installs the Common cybernetic granted by Skin of Iron", async () => {
