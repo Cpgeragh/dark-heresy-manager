@@ -140,7 +140,7 @@ export function PieceRow({
             <div className="flex items-center justify-between">
               <span className={uiTextLabel}>Upgrades</span>
               {editable ? (
-                <AddButton label="Add upgrade" onClick={() => setShowUpgradePicker(true)} />
+                <AddButton label="Add upgrade" size="sm" onClick={() => setShowUpgradePicker(true)} />
               ) : (
                 <ViewButton label="View upgrades" onClick={() => setShowUpgradePicker(true)} />
               )}

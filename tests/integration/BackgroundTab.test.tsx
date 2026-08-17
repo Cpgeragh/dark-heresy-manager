@@ -1,6 +1,6 @@
 // tests/integration/BackgroundTab.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, within, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -207,5 +207,151 @@ describe("BackgroundTab", () => {
   it("disables the homeworld field when not editable", () => {
     renderTab({ editable: false });
     expect(screen.getByRole("button", { name: "Select Homeworld" })).toBeDisabled();
+  });
+
+  it("selects a skin option", async () => {
+    const user = userEvent.setup();
+    const { onUpdateHeader } = renderTab();
+    await user.click(screen.getAllByRole("button", { name: "Select Skin" })[0]);
+    await user.click(screen.getByText("Tan"));
+    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ skin: "Tan" }));
+  });
+
+  it("selects a hair option", async () => {
+    const user = userEvent.setup();
+    const { onUpdateHeader } = renderTab();
+    await user.click(screen.getAllByRole("button", { name: "Select Hair" })[0]);
+    await user.click(screen.getByText("Auburn"));
+    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ hair: "Auburn" }));
+  });
+
+  it("selects an eyes option", async () => {
+    const user = userEvent.setup();
+    const { onUpdateHeader } = renderTab();
+    await user.click(screen.getAllByRole("button", { name: "Select Eyes" })[0]);
+    await user.click(screen.getByText("Violet"));
+    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ eyes: "Violet" }));
+  });
+
+  it("adds a quirk", async () => {
+    const user = userEvent.setup();
+    const { onUpdateHeader } = renderTab();
+    await user.click(screen.getAllByRole("button", { name: "Add Quirk" })[0]);
+    await user.click(screen.getByText("Bald"));
+    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ quirks: ["Bald"] }));
+  });
+
+  it("excludes already-added quirks from the picker", async () => {
+    const user = userEvent.setup();
+    renderTab({ header: { characterName: "Brother Corvus", quirks: ["Bald"] } });
+    await user.click(screen.getAllByRole("button", { name: "Add Quirk" })[0]);
+    const modal = screen.getByRole("dialog", { name: "Add Quirk" });
+    expect(within(modal).queryByText("Bald")).not.toBeInTheDocument();
+  });
+
+  it("removes a quirk", async () => {
+    const user = userEvent.setup();
+    const { onUpdateHeader } = renderTab({
+      header: { characterName: "Brother Corvus", quirks: ["Bald", "Hairy"] },
+    });
+    await user.click(screen.getAllByRole("button", { name: "Remove Bald" })[0]);
+    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ quirks: ["Hairy"] }));
+  });
+
+  it("accepts a valid whole-number age and rejects zero", () => {
+    const { onUpdateHeader } = renderTab();
+    const ageInput = screen.getAllByLabelText("Age")[0];
+    fireEvent.change(ageInput, { target: { value: "0" } });
+    expect(onUpdateHeader).not.toHaveBeenCalled();
+    fireEvent.change(ageInput, { target: { value: "25" } });
+    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ age: 25 }));
+  });
+
+  it("accepts a whole-number weight and rejects a decimal", () => {
+    const { onUpdateHeader } = renderTab();
+    const weightInput = screen.getAllByLabelText("Weight")[0];
+    fireEvent.change(weightInput, { target: { value: "65.5" } });
+    expect(onUpdateHeader).not.toHaveBeenCalled();
+    fireEvent.change(weightInput, { target: { value: "65" } });
+    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ weight: 65 }));
+  });
+
+  it("accepts a height with up to 2 decimal places and rejects a third", () => {
+    const { onUpdateHeader } = renderTab();
+    const heightInput = screen.getAllByLabelText("Height")[0];
+    fireEvent.change(heightInput, { target: { value: "1.905" } });
+    expect(onUpdateHeader).not.toHaveBeenCalled();
+    expect(heightInput).toHaveValue("");
+    fireEvent.change(heightInput, { target: { value: "1.9" } });
+    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ height: 1.9 }));
+  });
+
+  it("sets gender directly for Male and Female", async () => {
+    const user = userEvent.setup();
+    const { onUpdateHeader } = renderTab();
+    await user.click(screen.getAllByRole("button", { name: "Select Gender" })[0]);
+    await user.click(screen.getByRole("button", { name: "Female" }));
+    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ gender: "Female" }));
+  });
+
+  it("selects Other as a standalone value when left blank", async () => {
+    const user = userEvent.setup();
+    const { onUpdateHeader } = renderTab();
+    await user.click(screen.getAllByRole("button", { name: "Select Gender" })[0]);
+    await user.click(screen.getByRole("button", { name: "Other" }));
+    await user.click(screen.getByRole("button", { name: "Use This" }));
+    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ gender: "Other" }));
+  });
+
+  it("lets a custom name be typed for Other", async () => {
+    const user = userEvent.setup();
+    const { onUpdateHeader } = renderTab();
+    await user.click(screen.getAllByRole("button", { name: "Select Gender" })[0]);
+    await user.click(screen.getByRole("button", { name: "Other" }));
+    fireEvent.change(screen.getByLabelText("Rename"), { target: { value: "Non-binary" } });
+    await user.click(screen.getByRole("button", { name: "Use This" }));
+    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ gender: "Non-binary" }));
+  });
+
+  it("pre-fills the custom name when re-editing an existing custom gender", async () => {
+    const user = userEvent.setup();
+    renderTab({ header: { characterName: "Brother Corvus", gender: "Ecclesiarchy-blessed" } });
+    await user.click(screen.getAllByRole("button", { name: "Change Gender" })[0]);
+    expect(screen.getByRole("button", { name: "Other" })).toHaveClass("bg-slate-800");
+    await user.click(screen.getByRole("button", { name: "Other" }));
+    expect(screen.getByLabelText("Rename")).toHaveValue("Ecclesiarchy-blessed");
+  });
+
+  it("shows the selected gender on the closed field", () => {
+    renderTab({ header: { characterName: "Brother Corvus", gender: "Ecclesiarchy-blessed" } });
+    expect(screen.getAllByText("Ecclesiarchy-blessed").length).toBeGreaterThan(0);
+  });
+
+  it("lists skin options alphabetically", async () => {
+    const user = userEvent.setup();
+    renderTab();
+    await user.click(screen.getAllByRole("button", { name: "Select Skin" })[0]);
+    const modal = screen.getByRole("dialog", { name: "Skin" });
+    const rows = within(modal).getAllByRole("button").map((el) => el.textContent);
+    expect(rows).toEqual([...rows].sort((a, b) => (a ?? "").localeCompare(b ?? "")));
+  });
+
+  it("prompts for a colour when picking a '(any)' skin option and combines it", async () => {
+    const user = userEvent.setup();
+    const { onUpdateHeader } = renderTab();
+    await user.click(screen.getAllByRole("button", { name: "Select Skin" })[0]);
+    await user.click(screen.getByText("Stained (any)"));
+    fireEvent.change(screen.getByLabelText("Colour"), { target: { value: "Blue" } });
+    await user.click(screen.getByRole("button", { name: "Use This" }));
+    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ skin: "Stained (Blue)" }));
+  });
+
+  it("uses the '(any)' option as-is when no colour is given", async () => {
+    const user = userEvent.setup();
+    const { onUpdateHeader } = renderTab();
+    await user.click(screen.getAllByRole("button", { name: "Select Skin" })[0]);
+    await user.click(screen.getByText("Stained (any)"));
+    await user.click(screen.getByRole("button", { name: "Use This" }));
+    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ skin: "Stained (any)" }));
   });
 });

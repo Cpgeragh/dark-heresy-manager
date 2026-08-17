@@ -143,7 +143,7 @@ export function WeaponTrainingTab({ weaponTraining, editable, onUpdate, talents 
             <span
               key={`${granted ? "granted" : "owned"}:${index}:${weapon}`}
               title={granted ? "Granted by Sicarius Tutoring (Guardsman)" : undefined}
-              className={`inline-flex items-center gap-1 px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm ${colourOutlineFuchsia}`}
+              className={`inline-flex items-center gap-2.5 lg:gap-3 px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm ${colourOutlineFuchsia}`}
             >
               {weapon}
               {editable && !granted && (

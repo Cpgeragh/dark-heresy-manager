@@ -647,6 +647,14 @@ export interface CharacterHeader {
   homeWorld?: string;
   divination?: string;
   description?: string;
+  age?: number;
+  gender?: string;
+  skin?: string;
+  hair?: string;
+  eyes?: string;
+  height?: number;
+  weight?: number;
+  quirks?: string[];
 }
 
 /**

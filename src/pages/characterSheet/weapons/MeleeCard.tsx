@@ -506,7 +506,7 @@ export function MeleeCard({
                 </span>
                 {(editable ? visibleCompatible.length > 0 : upgradeRefs.length > 0 || visibleCompatible.length > 0) && (
                   editable ? (
-                    <AddButton label="Add upgrade" onClick={() => setShowUpgradePicker(true)} />
+                    <AddButton label="Add upgrade" size="sm" onClick={() => setShowUpgradePicker(true)} />
                   ) : (
                     <ViewButton label="View upgrades" onClick={() => setShowUpgradePicker(true)} />
                   )

@@ -16,7 +16,7 @@ const fieldControlInvalid =
   "bg-slate-900 border-red-500 text-slate-200 focus:outline-none focus:border-red-400";
 
 const fieldControlReadOnly =
-  "bg-slate-800 border-slate-500 text-slate-400 opacity-70 cursor-not-allowed";
+  "bg-slate-900 border-slate-500 text-slate-200 cursor-not-allowed";
 
 export function fieldControlClass({
   editable,
