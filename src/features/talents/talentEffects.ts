@@ -308,16 +308,19 @@ function normaliseTalentChoice(value?: string): string {
  * grant in acquisition data, but avoid showing a duplicate card until the
  * independently purchased copy is removed.
  */
-export function getVisibleGrantedTalentEntries(
-  talents: TalentsAndTraitsBlock
+export function filterTalentEntriesCoveredByGrants(
+  entries: TalentEntry[],
+  grants: TalentEntry[]
 ): TalentEntry[] {
-  return getGrantedTalentEntries(talents).filter(
-    (grant) => !talents.talents.some(
-      (owned) =>
-        owned.talentId === grant.talentId &&
-        normaliseTalentChoice(owned.specialisation) === normaliseTalentChoice(grant.specialisation)
-    )
-  );
+  return entries.filter((entry) => {
+    const talent = TALENT_LIST.find((item) => item.id === entry.talentId);
+    if (talent?.repeatable) return true;
+    return !grants.some(
+      (grant) =>
+        grant.talentId === entry.talentId &&
+        normaliseTalentChoice(grant.specialisation) === normaliseTalentChoice(entry.specialisation)
+    );
+  });
 }
 
 export function getGrantedTraitEntries(talents: TalentsAndTraitsBlock): TalentEntry[] {

@@ -23,7 +23,8 @@ export type CustomItemCategory =
   | "weapon"
   | "armour"
   | "archeotech"
-  | "power";
+  | "power"
+  | "trait";
 
 export type CustomItemStatus = "draft" | "published" | "archived";
 
@@ -134,6 +135,12 @@ export type CustomPsychicPowerData = Omit<
   "id" | "talentEntryUid" | "customLibraryId" | "customLibraryVersionId" | "known"
 >;
 
+export type CustomTraitData = {
+  name: string;
+  description: string;
+  source: string;
+};
+
 export interface CustomItemDataByCategory {
   gear: CustomGearData;
   consumable: CustomConsumableData;
@@ -143,6 +150,7 @@ export interface CustomItemDataByCategory {
   armour: CustomArmourData;
   archeotech: CustomArcheotechData;
   power: CustomPsychicPowerData;
+  trait: CustomTraitData;
 }
 
 export type CustomItemData = CustomItemDataByCategory[CustomItemCategory];

@@ -11,6 +11,12 @@ import { SectionHeader } from "../../ui/SectionHeader";
 import { ExpandChevron } from "../../ui/ExpandChevron";
 import { uiItemName, uiSection, uiSectionShell, uiTextPlaceholder } from "../../ui/editableStyles";
 import { TraitAcquisitionModal } from "./TraitAcquisitionModal";
+import { CustomTraitForm } from "./CustomTraitForm";
+import { useCampaignCustomItems } from "../../hooks/useCampaignCustomItems";
+import { useCustomItemLibraryActions } from "../../hooks/useCustomItemLibraryActions";
+import { createDraftCustomItem, saveDraftCustomItem } from "../../services/customItemService";
+import { useToast } from "../../components/Toast";
+import type { CampaignCustomItem, CustomTraitData } from "../../types/CustomItems";
 
 interface TraitsTabProps {
   talents: TalentsAndTraitsBlock;
@@ -21,6 +27,21 @@ interface TraitsTabProps {
   onUpdateTalents: (next: TalentsAndTraitsBlock) => void;
   onUpdateCybernetics?: (next: CyberneticItem[]) => void | Promise<void>;
   onUpdateGear?: (next: GearItem[]) => void | Promise<void>;
+  campaignId?: string;
+  characterId?: string;
+  userId?: string | null;
+  characterName?: string;
+  isDM?: boolean;
+}
+
+function buildTraitSnapshot(
+  uid: string,
+  talentId: string,
+  data: CustomTraitData,
+  customLibraryId: string,
+  customLibraryVersionId: string
+): TalentEntry {
+  return { uid, talentId, ...data, customLibraryId, customLibraryVersionId };
 }
 
 function UnnaturalCharacteristicCards({
@@ -92,12 +113,126 @@ export function TraitsTab({
   onUpdateTalents,
   onUpdateCybernetics,
   onUpdateGear,
+  campaignId,
+  characterId,
+  userId,
+  characterName,
+  isDM = false,
 }: TraitsTabProps) {
+  const toast = useToast();
   const [showPicker, setShowPicker] = useState(false);
+  const [customTraitOpen, setCustomTraitOpen] = useState(false);
+  const [editingCustomTrait, setEditingCustomTrait] = useState<TalentEntry | null>(null);
   const [pendingAcquisition, setPendingAcquisition] = useState<TalentEntry | null>(null);
-  const displayTraits = useMemo(
-    () => [...talents.traits, ...getDerivedTraitEntries(talents, career)],
+  const { items: campaignCustomTraits } = useCampaignCustomItems({
+    campaignId,
+    category: "trait",
+    mode: "picker",
+    userId,
+  }) as { items: CampaignCustomItem<"trait">[] };
+  const campaignCustomTraitsById = useMemo(
+    () => new Map(campaignCustomTraits.map((item) => [item.id, item])),
+    [campaignCustomTraits]
+  );
+  const { publishDefinition, archiveDefinition, updateAllCopies, getBusyAction } =
+    useCustomItemLibraryActions<"trait">({
+      campaignId: campaignId ?? "",
+      userId,
+      itemLabel: "trait",
+    });
+
+  const addCustomTrait = useCallback(
+    async (data: CustomTraitData) => {
+      if (!userId || !campaignId) {
+        toast.error("You must be signed in to create campaign custom traits.");
+        return;
+      }
+      const { customItemId, versionId } = await createDraftCustomItem({
+        campaignId,
+        category: "trait",
+        creator: { userId, characterId, characterName },
+        data,
+      });
+      onUpdateTalents({
+        ...talents,
+        traits: [
+          ...talents.traits,
+          buildTraitSnapshot(crypto.randomUUID(), `custom-trait:${customItemId}`, data, customItemId, versionId),
+        ],
+      });
+      setCustomTraitOpen(false);
+      toast.success("Custom trait saved as a campaign draft.");
+    },
+    [userId, campaignId, characterId, characterName, talents, onUpdateTalents, toast]
+  );
+
+  const fromCustomLibrary = useCallback(
+    (item: CampaignCustomItem<"trait">) => {
+      const versionId =
+        item.status === "published"
+          ? item.publishedVersionId
+          : (item.draftVersionId ?? item.latestVersionId);
+      if (!versionId) {
+        toast.error("This custom trait has no usable version.");
+        return;
+      }
+      onUpdateTalents({
+        ...talents,
+        traits: [
+          ...talents.traits,
+          buildTraitSnapshot(crypto.randomUUID(), `custom-trait:${item.id}`, item.data, item.id, versionId),
+        ],
+      });
+      setShowPicker(false);
+    },
+    [talents, onUpdateTalents, toast]
+  );
+
+  const updateCustomTrait = useCallback(
+    async (data: CustomTraitData) => {
+      if (!userId || !campaignId || !editingCustomTrait?.customLibraryId) return;
+      try {
+        const versionId = await saveDraftCustomItem({
+          campaignId,
+          customItemId: editingCustomTrait.customLibraryId,
+          editor: { userId, characterId, characterName },
+          data,
+        });
+        onUpdateTalents({
+          ...talents,
+          traits: talents.traits.map((entry) =>
+            entry.uid === editingCustomTrait.uid
+              ? { ...entry, ...data, customLibraryVersionId: versionId }
+              : entry
+          ),
+        });
+        setEditingCustomTrait(null);
+        toast.success("Custom trait draft updated.");
+      } catch (err) {
+        console.error("Failed to update custom trait definition:", err);
+        toast.error("Failed to update custom trait definition.");
+      }
+    },
+    [userId, campaignId, characterId, characterName, editingCustomTrait, talents, onUpdateTalents, toast]
+  );
+
+  const derivedTraitEntries = useMemo(
+    () => getDerivedTraitEntries(talents, career),
     [career, talents]
+  );
+  const derivedTalentIds = useMemo(
+    () => new Set(derivedTraitEntries.map((entry) => entry.talentId)),
+    [derivedTraitEntries]
+  );
+  const displayTraits = useMemo(
+    () => [
+      ...talents.traits.filter((entry) => {
+        const trait = TRAIT_LIST.find((item) => item.id === entry.talentId);
+        return trait?.repeatable || !derivedTalentIds.has(entry.talentId);
+      }),
+      ...derivedTraitEntries,
+    ],
+    [talents.traits, derivedTraitEntries, derivedTalentIds]
   );
   const unnaturalEntries = displayTraits.filter(
     (entry) => entry.talentId === "unnatural-characteristic"
@@ -150,19 +285,35 @@ export function TraitsTab({
   );
 
   const cards = [
-    ...ordinaryEntries.map((entry) => ({
-      key: entry.uid,
-      sortName: entry.name,
-      node: (
-        <EntryCard
-          entry={entry}
-          editable={editable}
-          onRemove={handleRemoveTrait}
-          confirmDeletion
-          deletionNoun="Trait"
-        />
-      ),
-    })),
+    ...ordinaryEntries.map((entry) => {
+      const libraryItem = entry.customLibraryId
+        ? campaignCustomTraitsById.get(entry.customLibraryId)
+        : undefined;
+      const canEditDefinition =
+        !!libraryItem && editable && (isDM || (!!userId && libraryItem.creator.userId === userId));
+      const busyAction = libraryItem ? getBusyAction(libraryItem.id) : null;
+      return {
+        key: entry.uid,
+        sortName: entry.name,
+        node: (
+          <EntryCard
+            entry={entry}
+            editable={editable}
+            onRemove={handleRemoveTrait}
+            confirmDeletion
+            deletionNoun="Trait"
+            libraryItem={libraryItem}
+            isDM={isDM && editable}
+            canEditDefinition={canEditDefinition}
+            busyAction={busyAction}
+            onEditDefinition={() => setEditingCustomTrait(entry)}
+            onPublish={() => libraryItem && publishDefinition(libraryItem)}
+            onArchive={() => libraryItem && archiveDefinition(libraryItem)}
+            onUpdateAllCopies={() => libraryItem && updateAllCopies(libraryItem)}
+          />
+        ),
+      };
+    }),
     ...(unnaturalEntries.length > 0
       ? [{
           key: "unnatural-characteristic-group",
@@ -231,6 +382,33 @@ export function TraitsTab({
               onAdd={handleAddTrait}
               onClose={() => setShowPicker(false)}
               suspended={!!pendingAcquisition}
+              customItems={campaignCustomTraits}
+              onSelectCustomItem={fromCustomLibrary}
+              onCustomAction={
+                editable
+                  ? () => {
+                      setShowPicker(false);
+                      setCustomTraitOpen(true);
+                    }
+                  : undefined
+              }
+              customActionLabel="Custom Trait"
+            />
+          )}
+          {customTraitOpen && (
+            <CustomTraitForm onAdd={addCustomTrait} onCancel={() => setCustomTraitOpen(false)} />
+          )}
+          {editingCustomTrait && (
+            <CustomTraitForm
+              title="Edit Custom Trait"
+              submitLabel="Save"
+              initialTrait={
+                editingCustomTrait.customLibraryId
+                  ? campaignCustomTraitsById.get(editingCustomTrait.customLibraryId)?.data
+                  : undefined
+              }
+              onAdd={updateCustomTrait}
+              onCancel={() => setEditingCustomTrait(null)}
             />
           )}
           {pendingAcquisition && (() => {

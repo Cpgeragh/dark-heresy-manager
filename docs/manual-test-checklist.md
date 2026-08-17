@@ -369,6 +369,11 @@ cross-checking permanent effects and their named sources.
 - [ ] Homeworld Traits appear read-only on Traits. Noble Born records its extra Peer group; Schola records both weapon groups; Mind Cleansed records 3–7 starting Insanity; changing Homeworld removes the old derived effects without removing independent copies
 - [ ] Cult Briefing (Culture) collects the selected Homeworld's required choices and grants the same read-only Traits, Talent/Weapon Training effects, and named sources
 - [ ] Description popups include the audited details for Burrower, Possession, Soul-bound, Stuff of Nightmares, Unnatural Characteristic, Unnatural Senses, and Mechanicus Implants
+- [ ] Opening the Sanctioning side-effect picker shows a Rules button on every result with its full sourcebook effect text, before you've picked one
+- [ ] Picking a Sanctioning result shows its name, roll range, and effect text on a Sanctioning Effect card next to Career on Background, and its rules text appears in the Sanctioned Psyker card's Notes on this page, separated into its own "Roll Results" section from the general rules text
+- [ ] Add Sanctioned Psyker directly on this page, then separately select Imperial Psyker as Career — only one Sanctioned Psyker card is shown (the career-derived one); changing Career away from Imperial Psyker afterwards brings back the manually-added copy rather than losing it. The same check applies to Machine when both The Flesh is Weak and an independent Machine trait are present
+- [ ] Custom trait creation — Name, Rules Text, and Origin (Custom/2nd Ed) are all required before Add enables; the saved rules text and Origin both actually appear on the character's own card afterwards, not just in the library definition
+- [ ] Custom trait creation and publishing — see §21, Custom Item Library
 
 ## 9. Weapons
 
@@ -680,8 +685,8 @@ Keep the DM on Admin and the owning player on the same character in a second pro
 ## 21. Custom Item Library
 
 Not a page — a system shared by Gear, Consumables, Drugs, Archeotech,
-Weapons (Ranged/Melee/Grenades/Shields), Armour, and Force Fields. Any
-custom item you create goes through the same draft → publish → archive
+Weapons (Ranged/Melee/Grenades/Shields), Armour, Force Fields, and Traits.
+Any custom item you create goes through the same draft → publish → archive
 lifecycle. Test it once, deliberately, rather than trusting it works the
 same everywhere it's used.
 
@@ -698,6 +703,7 @@ Use three profiles: creator/player A, unrelated player B, and the DM. Give at le
 - [ ] Try triggering Publish/Archive/Update twice quickly (double-click) — the button should show its busy state ("Publishing…" etc.) and not fire twice
 - [ ] "Update All Copies" on an item that currently has an unpublished draft also publishes that draft as part of the same click — confirm the item's status flips to Published and the "pending draft" state clears, you shouldn't need to press Publish separately first or afterwards
 - [ ] A weapon/armour/gear card for a custom item you didn't create shows no edit-definition controls at all unless you're the DM — you can still see and equip/use it, just not edit its underlying definition
+- [ ] For a non-repeatable item (e.g. a Trait), once you've added a copy of a specific custom item from the library, that same item no longer appears in the add picker — confirm you can't select it again and end up with two copies of the same one
 
 ## 22. Offline & Account Sync
 

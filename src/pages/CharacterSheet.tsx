@@ -568,6 +568,11 @@ export default function CharacterSheet({
               onUpdateTalents={handleUpdateTalents}
               onUpdateCybernetics={handleUpdateCybernetics}
               onUpdateGear={handleUpdateGear}
+              campaignId={path.campaignId}
+              characterId={character.id}
+              userId={effectiveUserId}
+              characterName={character.header.characterName}
+              isDM={isDM}
             />
           )}
 

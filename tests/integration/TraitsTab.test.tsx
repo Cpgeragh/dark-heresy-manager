@@ -83,6 +83,7 @@ const { MOCK_TRAIT_LIST } = vi.hoisted(() => {
 vi.mock("../../src/data/traitData", () => ({ TRAIT_LIST: MOCK_TRAIT_LIST }));
 
 import { TraitsTab } from "../../src/pages/characterSheet/TraitsTab";
+import { ToastProvider } from "../../src/components/Toast";
 import type { TalentEntry, TalentsAndTraitsBlock } from "../../src/types/Character";
 
 function makeTalents(over: Partial<TalentsAndTraitsBlock> = {}): TalentsAndTraitsBlock {
@@ -92,12 +93,14 @@ function makeTalents(over: Partial<TalentsAndTraitsBlock> = {}): TalentsAndTrait
 function renderTab(props: Partial<React.ComponentProps<typeof TraitsTab>> = {}) {
   const onUpdateTalents = vi.fn();
   render(
-    <TraitsTab
-      talents={makeTalents()}
-      editable={true}
-      onUpdateTalents={onUpdateTalents}
-      {...props}
-    />
+    <ToastProvider>
+      <TraitsTab
+        talents={makeTalents()}
+        editable={true}
+        onUpdateTalents={onUpdateTalents}
+        {...props}
+      />
+    </ToastProvider>
   );
   return { onUpdateTalents };
 }
@@ -112,13 +115,19 @@ describe("TraitsTab", () => {
 
   it("uses the shared Add and View controls", () => {
     const { unmount } = render(
-      <TraitsTab talents={makeTalents()} editable onUpdateTalents={vi.fn()} />
+      <ToastProvider>
+        <TraitsTab talents={makeTalents()} editable onUpdateTalents={vi.fn()} />
+      </ToastProvider>
     );
     expect(screen.getByRole("button", { name: "Add Trait" })).toBeInTheDocument();
     expect(screen.queryByText("+ Add Trait")).not.toBeInTheDocument();
     unmount();
 
-    render(<TraitsTab talents={makeTalents()} editable={false} onUpdateTalents={vi.fn()} />);
+    render(
+      <ToastProvider>
+        <TraitsTab talents={makeTalents()} editable={false} onUpdateTalents={vi.fn()} />
+      </ToastProvider>
+    );
     expect(screen.getByRole("button", { name: "View Traits" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Add Trait" })).not.toBeInTheDocument();
   });

@@ -289,7 +289,7 @@ describe("PsychicTab", () => {
     await user.type(screen.getByPlaceholderText("e.g. 8"), "6");
     await user.click(screen.getByRole("button", { name: "You" }));
     await user.click(screen.getByRole("button", { name: "No" }));
-    await user.click(screen.getByRole("button", { name: "Custom" }));
+    await user.click(screen.getByRole("radio", { name: "Custom" }));
     await user.click(screen.getByRole("button", { name: "Add Power" }));
 
     expect(createDraftCustomItemMock).toHaveBeenCalledWith(
@@ -329,7 +329,7 @@ describe("PsychicTab", () => {
     await user.type(screen.getByPlaceholderText("e.g. 8"), "6");
     await user.click(screen.getByRole("button", { name: "You" }));
     await user.click(screen.getByRole("button", { name: "No" }));
-    await user.click(screen.getByRole("button", { name: "Custom" }));
+    await user.click(screen.getByRole("radio", { name: "Custom" }));
     await user.click(screen.getByRole("button", { name: "Add Power" }));
 
     expect(createDraftCustomItemMock.mock.calls[0][0].data).not.toHaveProperty("talentEntryUid");

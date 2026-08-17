@@ -522,12 +522,14 @@ export interface HomeworldTraitChoices {
   startingInsanity?: number;
 }
 
-export interface TalentEntry {
+export interface TalentEntry extends CustomLibraryLinkFields {
   uid: string; // unique per-character instance (crypto.randomUUID())
   talentId: string; // references TalentData.id or TraitData.id
   name: string; // display name, e.g. "Hatred (Heretics)"
   specialisation?: string; // chosen value when hasSpecialisation is true
   notes?: string; // optional player notes
+  description?: string; // a custom trait's own rules text
+  source?: string; // a custom trait's own origin (Custom / 2nd Ed)
   acquisition?: TalentAcquisitionDetails;
   /** Display-only provenance for a grant calculated from another purchase; never saved as a purchase. */
   grantedByTalentEntryUid?: string;

@@ -10,6 +10,7 @@ import type {
   TalentsAndTraitsBlock,
   WeaponTrainingTalentId,
 } from "../../types/Character";
+import { SANCTIONING_RESULTS } from "./sanctioningReference";
 
 export interface TraitModifierSource {
   name: string;
@@ -29,14 +30,15 @@ function traitReference(name: string, source: string) {
 }
 
 export function notesForSanctioning(result: SanctioningAcquisition): string {
+  const effect = SANCTIONING_RESULTS.find((entry) => entry.id === result.resultId)?.effect;
   const detail = result.thronesGained
-    ? `; ${result.thronesGained} Throne Gelt gained`
+    ? `Throne Gelt gained: ${result.thronesGained}`
     : result.rolledValue
-      ? `; ${result.rolledValue} Insanity Points gained`
-      : result.resultId === "tongue-bound"
-        ? "; must pass a Hard (–20) Willpower Test to speak the names of the Ruinous Powers, and stutters when speaking of daemons"
-        : "";
-  return `Sanctioning Side Effect: ${result.resultName}${detail}. Age increased by ${result.ageIncrease} years.`;
+      ? `Insanity Points gained: ${result.rolledValue}`
+      : undefined;
+  const resultGroup = [`${result.resultName} (Sanctioning Side Effect)`, effect].filter(Boolean).join("\n");
+  const rollGroup = ["Roll Results", detail, `Age increased by ${result.ageIncrease} years`].filter(Boolean).join("\n");
+  return [resultGroup, rollGroup].join("\n\n");
 }
 
 function homeworldEntries(
@@ -51,7 +53,6 @@ function homeworldEntries(
       uid: `${originUid}:${reference?.id ?? index}`,
       talentId: reference?.id ?? `homeworld-trait:${homeworld.id}:${index}`,
       name: trait.name,
-      notes: `${trait.effectLabel}: ${trait.effect}`,
       acquisition: { homeworldTraitChoices: choices },
       grantedByTalentEntryUid: originUid,
       grantedByTalentName: originName,

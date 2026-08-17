@@ -33,7 +33,6 @@ import { uiPickerPressFeedback } from "../../ui/buttonStyles";
 import { OptionPickerScreen } from "../../ui/OptionPickerScreen";
 import { InfoModal } from "../../components/InfoModal";
 import { TALENT_DESCRIPTIONS } from "../../data/talentDescriptions";
-import { sourceColour } from "../../ui/sourceStyles";
 import {
   disciplineColours,
   disciplineInactiveColours,
@@ -47,7 +46,8 @@ import {
   segmentedTabPanelId,
   uiSwipeableTabPanel,
 } from "../../ui/segmentedTabStyles";
-import { CUSTOM_ITEM_ORIGIN_OPTIONS, type CustomItemOrigin } from "../../constants/customItems";
+import type { CustomItemOrigin } from "../../constants/customItems";
+import { OriginSelector } from "../../ui/OriginSelector";
 import { useCampaignCustomItems } from "../../hooks/useCampaignCustomItems";
 import { useCustomItemLibraryActions } from "../../hooks/useCustomItemLibraryActions";
 import { createDraftCustomItem, saveDraftCustomItem } from "../../services/customItemService";
@@ -653,28 +653,7 @@ function CustomPowerForm({
             </div>
           </div>
 
-          <div className="space-y-1">
-            <label className={uiFormLabel}>
-              Origin <span className="text-red-400">*</span>
-            </label>
-            <div className="grid grid-cols-2 gap-1.5">
-              {CUSTOM_ITEM_ORIGIN_OPTIONS.map((value) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setOrigin(value)}
-                  className={[
-                    "text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-1.5 rounded border transition",
-                    origin === value
-                      ? `${sourceColour(value)} bg-slate-800/70 font-semibold`
-                      : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500 hover:text-slate-300",
-                  ].join(" ")}
-                >
-                  {value}
-                </button>
-              ))}
-            </div>
-          </div>
+          <OriginSelector name="custom-power-origin" value={origin} onChange={setOrigin} />
         </div>
 
         <div className="space-y-1">

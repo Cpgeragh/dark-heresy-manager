@@ -182,7 +182,8 @@ service cloud.firestore {
                "weapon",
                "armour",
                "archeotech",
-               "power"
+               "power",
+               "trait"
              ] &&
              userOwnsCreator(request.resource.data) &&
              request.resource.data.publishedVersionId == null &&

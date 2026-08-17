@@ -8,7 +8,7 @@ import type {
 import {
   getGrantedExoticWeapons,
   getGrantedTalentEntries,
-  getVisibleGrantedTalentEntries,
+  filterTalentEntriesCoveredByGrants,
   getGrantedTraitEntries,
   getGrantedWeaponTrainingIds,
   getMachineArmourSource,
@@ -193,20 +193,16 @@ describe("Talent cross-page effects", () => {
     expect(getGrantedExoticWeapons(talents)).toEqual(["Needle Pistol"]);
   });
 
-  it("keeps a recorded grant but hides its duplicate card until the independent copy is removed", () => {
+  it("hides a manually-added duplicate once the same talent is granted independently", () => {
     const grantOrigin = entry("cult", "cult-briefing", "Cult Briefing (Pleasure)", "Pleasure", {
       grantedTalentId: "chem-geld",
       grantedTalentName: "Chem Geld",
     });
     const directCopy = entry("chem", "chem-geld", "Chem Geld");
 
-    expect(getGrantedTalentEntries(block([grantOrigin, directCopy]))).toEqual([
-      expect.objectContaining({ talentId: "chem-geld", grantedByTalentEntryUid: "cult" }),
-    ]);
-    expect(getVisibleGrantedTalentEntries(block([grantOrigin, directCopy]))).toEqual([]);
-    expect(getVisibleGrantedTalentEntries(block([grantOrigin]))).toEqual([
-      expect.objectContaining({ talentId: "chem-geld", grantedByTalentEntryUid: "cult" }),
-    ]);
+    const grants = getGrantedTalentEntries(block([grantOrigin]));
+    expect(filterTalentEntriesCoveredByGrants([directCopy], grants)).toEqual([]);
+    expect(filterTalentEntriesCoveredByGrants([directCopy], [])).toEqual([directCopy]);
   });
 
   it("tracks Touched by the Fates and reverses Purity Fate through linked Reformed Skin", () => {

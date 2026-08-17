@@ -31,7 +31,7 @@ import {
   getAvailablePsychicTalentPurchases,
   getTalentBehaviour,
 } from "./talentUtils";
-import { getVisibleGrantedTalentEntries } from "../../features/talents/talentEffects";
+import { getGrantedTalentEntries, filterTalentEntriesCoveredByGrants } from "../../features/talents/talentEffects";
 import {
   needsTalentAcquisition,
   TalentAcquisitionModal,
@@ -546,13 +546,16 @@ export function TalentsTab({
     activeView,
     setActiveView
   );
-  const regularEntries = useMemo(
-    () => [
-      ...talents.talents.filter((entry) => !FAITH_TALENT_IDS.has(entry.talentId)),
-      ...getVisibleGrantedTalentEntries(talents),
-    ],
-    [talents]
-  );
+  const regularEntries = useMemo(() => {
+    const grantedEntries = getGrantedTalentEntries(talents);
+    return [
+      ...filterTalentEntriesCoveredByGrants(
+        talents.talents.filter((entry) => !FAITH_TALENT_IDS.has(entry.talentId)),
+        grantedEntries
+      ),
+      ...grantedEntries,
+    ];
+  }, [talents]);
   const faithEntries = useMemo(
     () => talents.talents.filter((entry) => FAITH_TALENT_IDS.has(entry.talentId)),
     [talents.talents]

@@ -25,7 +25,11 @@ import { InfoModal } from "../../components/InfoModal";
 import { TALENT_DESCRIPTIONS } from "../../data/talentDescriptions";
 import { TRAIT_DESCRIPTIONS } from "../../data/traitDescriptions";
 import { sourceColour } from "../../ui/sourceStyles";
-import { PickerBody, PickerModal, PickerRow } from "../../ui/PickerModal";
+import { colourAmberFaint } from "../../ui/colourTokens";
+import type { CampaignCustomItem } from "../../types/CustomItems";
+import type { CustomItemLibraryActionProps } from "../../types/CustomItemActions";
+import { CustomItemActionButtons } from "../../ui/CustomItemActionButtons";
+import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../ui/PickerModal";
 import { OptionPickerScreen, type PickerOption } from "../../ui/OptionPickerScreen";
 import { ArrowLeft, ArrowRight } from "../../ui/PickerArrows";
 import { ExpandChevron } from "../../ui/ExpandChevron";
@@ -53,6 +57,10 @@ export function TalentPickerModal({
   onAdd,
   onClose,
   suspended = false,
+  customItems = [],
+  onSelectCustomItem,
+  onCustomAction,
+  customActionLabel = "Custom",
 }: {
   title: string;
   listData: readonly AnyListItem[];
@@ -62,6 +70,10 @@ export function TalentPickerModal({
   onAdd: (entry: TalentEntry) => void;
   onClose: () => void;
   suspended?: boolean;
+  customItems?: readonly CampaignCustomItem<"trait">[];
+  onSelectCustomItem?: (item: CampaignCustomItem<"trait">) => void;
+  onCustomAction?: () => void;
+  customActionLabel?: string;
 }) {
   const [query, setQuery] = useState("");
   const [picked, setPicked] = useState<AnyListItem | null>(null);
@@ -92,6 +104,19 @@ export function TalentPickerModal({
       })
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [entries, listData, query, useTalentBehaviours]);
+
+  const filteredCustom = useMemo(
+    () =>
+      customItems
+        .filter((item) => item.status !== "archived")
+        .filter((item) => !entries.some((entry) => entry.customLibraryId === item.id))
+        .filter(
+          (item) =>
+            !query.trim() || item.name.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase())
+        )
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    [customItems, entries, query]
+  );
 
   const talentData = picked as TalentData | null;
   const traitData = !useTalentBehaviours ? picked as TraitData | null : null;
@@ -278,9 +303,22 @@ export function TalentPickerModal({
       onClose={onClose}
       suspended={suspended}
       scrollPositionRef={listScrollPositionRef}
-      isEmpty={filtered.length === 0}
+      isEmpty={filtered.length === 0 && filteredCustom.length === 0}
+      footer={
+        onCustomAction && (
+          <PickerCustomAction onClick={onCustomAction}>{customActionLabel}</PickerCustomAction>
+        )
+      }
     >
       <div className="space-y-3 p-3 lg:p-4" data-testid="talent-picker-card-list">
+      {filteredCustom.map((item) => (
+        <PickerRow key={item.id} onClick={() => onSelectCustomItem?.(item)}>
+          <span className={`${uiItemName} truncate block group-hover:text-white`}>{item.name}</span>
+          <div className="mt-1 flex flex-wrap items-center gap-1.5">
+            <Chip className={colourAmberFaint}>{item.status === "draft" ? "Draft" : "Custom"}</Chip>
+          </div>
+        </PickerRow>
+      ))}
       {filtered.map((item) => {
         const row = item as TalentData;
         const sources = normaliseSources(item.source as SkillSource | SkillSource[]);
@@ -376,7 +414,7 @@ export function TalentPickerModal({
   );
 }
 
-interface EntryCardProps {
+interface EntryCardProps extends CustomItemLibraryActionProps<"trait"> {
   entry: TalentEntry;
   editable: boolean;
   onRemove: (uid: string) => void;
@@ -402,15 +440,23 @@ export function EntryCard({
   deletionBlockedMessage,
   statusAfterSource = false,
   deletionNoun = "Talent",
+  libraryItem,
+  isDM = false,
+  canEditDefinition = false,
+  busyAction = null,
+  onEditDefinition,
+  onPublish,
+  onArchive,
+  onUpdateAllCopies,
 }: EntryCardProps) {
   const [deleteArmed, setDeleteArmed] = useState(false);
   const shownName = displayName ?? entry.name;
   const isGranted = Boolean(entry.grantedByTalentEntryUid);
-  const description = TALENT_DESCRIPTIONS[entry.talentId] ?? TRAIT_DESCRIPTIONS[entry.talentId];
+  const description = TALENT_DESCRIPTIONS[entry.talentId] ?? TRAIT_DESCRIPTIONS[entry.talentId] ?? entry.description;
   const refData = (
     [...TALENT_LIST, ...TRAIT_LIST] as Array<{ id: string; source: SkillSource | SkillSource[] }>
   ).find((reference) => reference.id === entry.talentId);
-  const refSources = refData ? normaliseSources(refData.source) : [];
+  const refSources = refData ? normaliseSources(refData.source) : entry.source ? [entry.source] : [];
 
   return (
     <div className={uiSection + " flex items-start justify-between gap-2 text-sm lg:text-base"}>
@@ -429,7 +475,19 @@ export function EntryCard({
                     {entry.notes && (
                       <div>
                         <p className={`${uiTextLabel} font-semibold mb-1`}>Notes</p>
-                        <p className={`text-sm ${uiTextBody} leading-relaxed`}>{entry.notes}</p>
+                        <div className="space-y-2">
+                          {entry.notes.split("\n\n").map((group, index) => {
+                            const breakAt = group.indexOf("\n");
+                            const heading = breakAt === -1 ? group : group.slice(0, breakAt);
+                            const body = breakAt === -1 ? "" : group.slice(breakAt + 1);
+                            return (
+                              <p key={index} className={`text-sm ${uiTextBody} leading-relaxed whitespace-pre-line`}>
+                                <span className="font-semibold">{heading}</span>
+                                {body && `\n${body}`}
+                              </p>
+                            );
+                          })}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -457,6 +515,19 @@ export function EntryCard({
         {statusAfterSource && secondaryText && <p className="text-sm text-amber-300">{secondaryText}</p>}
         {statusAfterSource && isGranted && (
           <p className="text-sm text-amber-300">Granted by {entry.grantedByTalentName}</p>
+        )}
+        {libraryItem && (
+          <CustomItemActionButtons
+            libraryItem={libraryItem}
+            isDM={isDM}
+            canEditDefinition={canEditDefinition}
+            busyAction={busyAction}
+            onEditDefinition={onEditDefinition}
+            onPublish={onPublish}
+            onArchive={onArchive}
+            onUpdateAllCopies={onUpdateAllCopies}
+            className="mt-1 flex flex-wrap gap-2"
+          />
         )}
       </div>
       {editable && (removable || deletionBlockedMessage) && !isGranted && (
