@@ -273,14 +273,8 @@ export function BackgroundTab({
     [editable, talents, onUpdateTalents]
   );
 
-  const handleAge = useCallback(
-    (raw: string) => {
-      if (raw === "" || /^[1-9]\d*$/.test(raw)) {
-        updateHeaderField("age", raw === "" ? undefined : Number(raw));
-      }
-    },
-    [updateHeaderField]
-  );
+  const [editingAge, setEditingAge] = useState(false);
+  const [ageDraft, setAgeDraft] = useState("");
 
   const handleWeight = useCallback(
     (raw: string) => {
@@ -306,11 +300,14 @@ export function BackgroundTab({
   );
 
   const handleRemoveQuirk = useCallback(
-    (index: number) => {
-      updateHeaderField("quirks", (header.quirks ?? []).filter((_, i) => i !== index));
+    (quirk: string) => {
+      updateHeaderField("quirks", (header.quirks ?? []).filter((q) => q !== quirk));
     },
     [header.quirks, updateHeaderField]
   );
+
+  const sanctioningAgeIncrease = talents.careerTraitAcquisition?.sanctioning?.ageIncrease;
+  const displayedAge = header.age !== undefined ? header.age + (sanctioningAgeIncrease ?? 0) : undefined;
 
   const appearanceSection = (
     <div>
@@ -318,17 +315,62 @@ export function BackgroundTab({
       <section className={uiSection + " space-y-4"}>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div className="space-y-1">
-            <label className={uiFormLabel}>Age</label>
-            <input
-              type="text"
-              inputMode="numeric"
-              disabled={!editable}
-              aria-label="Age"
-              value={header.age !== undefined ? String(header.age) : ""}
-              onChange={(e) => handleAge(e.target.value)}
-              placeholder="e.g. 25"
-              className={editableInputClass(editable) + " font-code"}
-            />
+            <label className={uiFormLabel}>
+              <span className="flex items-center gap-1.5">
+                Age
+                {sanctioningAgeIncrease && (
+                  <span className={uiInfoModalWrapper}>
+                    <InfoModal
+                      title="Age"
+                      content={
+                        <div>
+                          <div className="font-semibold text-slate-100">Modifiers</div>
+                          <ul className="mt-1 space-y-1">
+                            <li>Sanctioned Psyker: +{sanctioningAgeIncrease}</li>
+                          </ul>
+                        </div>
+                      }
+                    />
+                  </span>
+                )}
+              </span>
+            </label>
+            {editingAge ? (
+              <input
+                type="text"
+                inputMode="numeric"
+                aria-label="Age"
+                value={ageDraft}
+                onChange={(e) => {
+                  if (e.target.value === "" || /^[1-9]\d*$/.test(e.target.value)) setAgeDraft(e.target.value);
+                }}
+                onBlur={() => {
+                  if (ageDraft === "" || /^[1-9]\d*$/.test(ageDraft)) {
+                    updateHeaderField("age", ageDraft === "" ? undefined : Number(ageDraft));
+                  }
+                  setEditingAge(false);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") e.currentTarget.blur();
+                  if (e.key === "Escape") setEditingAge(false);
+                }}
+                placeholder="e.g. 25"
+                className={editableInputClass(editable) + " font-code"}
+              />
+            ) : (
+              <button
+                type="button"
+                disabled={!editable}
+                aria-label="Age"
+                onClick={() => {
+                  setAgeDraft(header.age !== undefined ? String(header.age) : "");
+                  setEditingAge(true);
+                }}
+                className={editableInputClass(editable) + " font-code text-left"}
+              >
+                {displayedAge !== undefined ? displayedAge : <span className={uiTextPlaceholder}>e.g. 25</span>}
+              </button>
+            )}
           </div>
           <div className="space-y-1">
             <label className={uiFormLabel}>Height</label>
@@ -429,16 +471,16 @@ export function BackgroundTab({
             <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>None.</p>
           )}
           <div className="flex flex-wrap gap-1.5">
-            {(header.quirks ?? []).map((quirk, index) => (
+            {[...(header.quirks ?? [])].sort((a, b) => a.localeCompare(b)).map((quirk) => (
               <span
-                key={`${quirk}:${index}`}
+                key={quirk}
                 className={`inline-flex items-center gap-2.5 lg:gap-3 px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm ${colourMeta}`}
               >
                 {quirk}
                 {editable && (
                   <button
                     type="button"
-                    onClick={() => handleRemoveQuirk(index)}
+                    onClick={() => handleRemoveQuirk(quirk)}
                     aria-label={`Remove ${quirk}`}
                     className={uiDismissButton}
                   >
@@ -875,7 +917,6 @@ export function BackgroundTab({
           existing={header.quirks ?? []}
           onSelect={(quirk) => {
             updateHeaderField("quirks", [...(header.quirks ?? []), quirk]);
-            setShowQuirkPicker(false);
           }}
           onClose={() => setShowQuirkPicker(false)}
         />

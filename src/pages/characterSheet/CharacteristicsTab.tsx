@@ -375,11 +375,31 @@ export function CharacteristicsTab({
               title="Movement"
               content={
                 <>
-                  <div>AB = Agility ÷ {CHARACTERISTIC_BONUS_DIVISOR}</div>
-                  <div>Half: AB × {MOVEMENT_HALF_MULTIPLIER}</div>
-                  <div>Full: AB × {MOVEMENT_FULL_MULTIPLIER}</div>
-                  <div>Charge: AB × {MOVEMENT_CHARGE_MULTIPLIER}</div>
-                  <div>Run: AB × {MOVEMENT_RUN_MULTIPLIER}</div>
+                  <p className="text-sm lg:text-base text-slate-300 leading-relaxed">
+                    During a Round, characters may move at one of four speeds: Half Move, Full Move,
+                    Charge, or Run. The number of metres a character may move in his Turn is
+                    determined by his Agility Bonus. Traits can modify some or all movement speeds.
+                  </p>
+                  <div className="mt-2 space-y-1">
+                    <div>AB = Agility ÷ {CHARACTERISTIC_BONUS_DIVISOR}</div>
+                    <div>Half: AB × {MOVEMENT_HALF_MULTIPLIER}</div>
+                    <div>Full: AB × {MOVEMENT_FULL_MULTIPLIER}</div>
+                    <div>Charge: AB × {MOVEMENT_CHARGE_MULTIPLIER}</div>
+                    <div>Run: AB × {MOVEMENT_RUN_MULTIPLIER}</div>
+                  </div>
+                  {movementEffects.sources.length > 0 && (
+                    <div className="mt-2 pt-2 border-t border-slate-700">
+                      <div className="font-semibold text-slate-100">Movement effects</div>
+                      <ul className="mt-1 space-y-1">
+                        {movementEffects.sources.map((source, i) => (
+                          <li key={i}>{source}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {waryInitiative > 0 && (
+                    <div>Initiative: +{waryInitiative} from Wary.</div>
+                  )}
                 </>
               }
             />
@@ -398,26 +418,16 @@ export function CharacteristicsTab({
             </div>
           ))}
         </div>
-        {(movementEffects.sources.length > 0 || movementEffects.modes.length > 0 || waryInitiative > 0) && (
+        {movementEffects.modes.length > 0 && (
           <div className="mt-2 space-y-2">
-            {movementEffects.sources.length > 0 && (
-              <p className="text-xs lg:text-sm text-amber-300">
-                Movement effects: {movementEffects.sources.join(" · ")}
-              </p>
-            )}
-            {movementEffects.modes.length > 0 && (
-              <div className="grid grid-cols-1 gap-1 sm:grid-cols-3">
-                {movementEffects.modes.map((mode) => (
-                  <div key={`${mode.name}:${mode.source}`} className={`${uiCell} text-center py-1.5 px-2`}>
-                    <div className={uiCellLabel}>{mode.name}</div>
-                    <div className={uiCellValueSm}>{mode.speed}</div>
-                  </div>
-                ))}
-              </div>
-            )}
-            {waryInitiative > 0 && (
-              <p className="text-xs lg:text-sm text-amber-300">Initiative: +{waryInitiative} from Wary.</p>
-            )}
+            <div className="grid grid-cols-1 gap-1 sm:grid-cols-3">
+              {movementEffects.modes.map((mode) => (
+                <div key={`${mode.name}:${mode.source}`} className={`${uiCell} text-center py-1.5 px-2`}>
+                  <div className={uiCellLabel}>{mode.name}</div>
+                  <div className={uiCellValueSm}>{mode.speed}</div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>

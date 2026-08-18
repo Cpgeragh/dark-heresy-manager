@@ -90,6 +90,9 @@ Record all nine starting values. For each characteristic, set a simple Base valu
 - [ ] On desktop: all nine shown as a grid, all editable at once
 - [ ] Advances are 4 click-to-fill pips, not 4 independent toggles: clicking pip 3 when only 1 is currently filled fills pips 1–3 together; clicking an already-filled pip retracts back to that pip — confirm this "fill up to" behaviour rather than expecting each pip to toggle on/off independently
 - [ ] Typing a Base value, then pressing Escape before it's committed, reverts the field to its last saved value and clears any error state; pressing Enter commits immediately without needing to blur the field
+- [ ] Movement's info icon holds the rules paragraph, the AB formula, and (only when a movement-affecting trait is active) a "Modifiers" list of what's contributing — none of this shows as plain text on the page itself, only inside the modal
+- [ ] With multiple movement-affecting traits active at once (e.g. Size + Quadruped + Unnatural Speed), the multiplying/halving traits (Amorphous, Crawler, Quadruped) apply to the base Agility Bonus first, then Size's flat adjustment, then Unnatural Speed doubles the result last — confirm the displayed Half/Full/Charge/Run numbers reflect that order
+- [ ] Movement's "Modifiers" list is alphabetical regardless of which order the traits were acquired in
 
 **Watch for:** the adjustment badge and its info popup are driven entirely
 by Corruption entries — this is the other half of the cross-page link from
@@ -631,11 +634,11 @@ Enter a multi-paragraph fixture containing blank lines, Unicode, emoji, punctuat
 
 ## 18. Background
 
-Homeworld, Career, Rank, and Divination — the cascading-selection page.
+Identity (Character Name, Player Name), Appearance (Age, Gender, Skin, Hair, Eyes, Height, Weight, Quirks, Description), and Background (Homeworld, Career, Rank, Divination, Background Notes) — the cascading-selection page. On mobile, Appearance and Background are a swipeable tab pair below the fixed Identity section; on desktop they sit side by side.
 
 ### How to test this page
 
-Use a fresh character and record the header plus stored Background state before opening the page. Select valid Homeworld/Career/Rank combinations, then deliberately invalidate the cascade by changing each parent. Refresh after every cascade. Inspect the picker metadata and Divination modal, then compare Skills, Traits, Talents, Weapon Training, Characteristics, Insanity, and Cybernetics to confirm the recorded starting benefits.
+Use a fresh character and record the header plus stored Background state before opening the page. Select valid Homeworld/Career/Rank combinations, then deliberately invalidate the cascade by changing each parent. Refresh after every cascade. Inspect the picker metadata and Divination modal, then compare Skills, Traits, Talents, Weapon Training, Characteristics, Insanity, and Cybernetics to confirm the recorded starting benefits. Test the Appearance fields at both a mobile width (swipe/tap between Appearance and Background) and a desktop width (both shown side by side, each of Career/Sanctioning Effect/Rank on its own full-width row).
 
 - [ ] Pick a Homeworld, then a Career it supports, then a Rank — all three stay set
 - [ ] Switch to a Homeworld that does *not* support the current Career — Career and Rank both clear automatically
@@ -651,6 +654,20 @@ Starting Skills that are merely listed by the Homeworld remain informational;
 Trait rules that explicitly change Skill use are applied automatically.
 
 - [ ] Open a brand-new character (freshly created by the DM, never opened before) straight to Background — the character factory sets its internal homeworld to Feral World even though the header's homeworld text starts blank. Confirm what actually displays (blank, or Feral World pre-selected) and that the picker and the header text agree with each other rather than contradicting
+
+- [ ] Player Name is always read-only, shows "Set from the player's account" while unclaimed, and fills in automatically once a player claims the character
+- [ ] Age only accepts whole numbers 1 and up — typing 0 or a non-numeric value is rejected outright, no error message, the field just doesn't change
+- [ ] Weight only accepts whole numbers 1 and up, same rejection behaviour as Age
+- [ ] Height accepts up to 2 decimal places (including values under 1, e.g. 0.85) — a 3rd decimal digit is rejected as you type it
+- [ ] Gender: Male/Female set directly; Other opens a sub-step — leaving the name blank stores "Other" as-is, typing a name stores that name instead; re-opening Other on an existing custom value pre-fills the name field
+- [ ] Skin/Hair/Eyes pickers list their options alphabetically
+- [ ] Picking a Skin/Hair/Eyes option ending in "(any)" (Stained, Dyed, Lenses) opens a follow-up asking what colour/kind — leaving it blank keeps the option as-is (e.g. "Stained (any)"), typing a value combines it (e.g. "Stained (Blue)"); re-picking an already-qualified option pre-fills what was typed before
+- [ ] Quirks: add multiple from a searchable, alphabetised list without the picker closing between picks; already-added quirks are excluded from the picker; the added chips display alphabetically regardless of the order they were added in; each has its own remove (×) button
+- [ ] Divination's result text wraps across multiple lines instead of being cut off with an ellipsis (matters most on mobile, where it's a full sentence in a narrow card)
+- [ ] Gender/Skin/Hair/Eyes boxes are visually compact (smaller height/text) compared to Age/Height/Weight, matching the narrower grid cells they sit in
+- [ ] Career, Sanctioning Effect, and Rank each get their own full-width row on desktop — never squeezed into a shared 2-column grid, even when Sanctioning Effect isn't present
+- [ ] Selecting Imperial Psyker as Career and completing the Sanctioned Psyker acquisition (rolling 3d10 for the starting age increase) actually adds that roll to Age — the Age field shows the combined total (base + roll), and its info icon shows a "Modifiers" breakdown listing "Sanctioned Psyker: +X"
+- [ ] After completing Sanctioned Psyker, click Age to edit it — the input shows the raw base (not the combined total); typing a new base and committing (blur/Enter) re-adds the Sanctioned Psyker roll on top of the new value, so the modifier keeps applying no matter how many times Age is edited afterward
 
 ## 19. Archeotech
 

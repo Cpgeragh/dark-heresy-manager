@@ -241,6 +241,14 @@ describe("BackgroundTab", () => {
     expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ quirks: ["Bald"] }));
   });
 
+  it("keeps the quirk picker open after adding one, so multiple can be added", async () => {
+    const user = userEvent.setup();
+    renderTab();
+    await user.click(screen.getAllByRole("button", { name: "Add Quirk" })[0]);
+    await user.click(screen.getByText("Bald"));
+    expect(screen.getByRole("dialog", { name: "Add Quirk" })).toBeInTheDocument();
+  });
+
   it("excludes already-added quirks from the picker", async () => {
     const user = userEvent.setup();
     renderTab({ header: { characterName: "Brother Corvus", quirks: ["Bald"] } });
@@ -258,13 +266,37 @@ describe("BackgroundTab", () => {
     expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ quirks: ["Hairy"] }));
   });
 
-  it("accepts a valid whole-number age and rejects zero", () => {
+  it("accepts a valid whole-number age and rejects zero", async () => {
+    const user = userEvent.setup();
     const { onUpdateHeader } = renderTab();
-    const ageInput = screen.getAllByLabelText("Age")[0];
+    await user.click(screen.getAllByRole("button", { name: "Age" })[0]);
+    const ageInput = screen.getAllByRole("textbox", { name: "Age" })[0];
     fireEvent.change(ageInput, { target: { value: "0" } });
-    expect(onUpdateHeader).not.toHaveBeenCalled();
+    expect(ageInput).toHaveValue("");
     fireEvent.change(ageInput, { target: { value: "25" } });
+    fireEvent.blur(ageInput);
     expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ age: 25 }));
+  });
+
+  it("shows the Sanctioned Psyker age increase applied on top of a manually entered age, even after re-editing", async () => {
+    const user = userEvent.setup();
+    const { onUpdateHeader } = renderTab({
+      header: { characterName: "Brother Corvus", age: 20 },
+      talents: {
+        homeworld: "",
+        talents: [],
+        traits: [],
+        careerTraitAcquisition: { sanctioning: { resultId: "hunted", resultName: "Hunted", ageIncrease: 10 } },
+      },
+    });
+    expect(screen.getAllByRole("button", { name: "Age" })[0]).toHaveTextContent("30");
+
+    await user.click(screen.getAllByRole("button", { name: "Age" })[0]);
+    const ageInput = screen.getAllByRole("textbox", { name: "Age" })[0];
+    expect(ageInput).toHaveValue("20");
+    fireEvent.change(ageInput, { target: { value: "50" } });
+    fireEvent.blur(ageInput);
+    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ age: 50 }));
   });
 
   it("accepts a whole-number weight and rejects a decimal", () => {

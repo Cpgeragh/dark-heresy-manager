@@ -108,7 +108,7 @@ describe("Trait cross-page effects", () => {
       trait("burrower", "7"),
     ] });
     const movement = getTraitMovementEffects(talents, 4);
-    expect(movement.agilityBonus).toBe(20);
+    expect(movement.agilityBonus).toBe(18);
     expect(movement.modes).toEqual([{ name: "Burrow", speed: 7, source: "burrower" }]);
   });
 

@@ -377,27 +377,29 @@ export function getTraitMovementEffects(
   const entries = getActiveTraitEntries(talents, career);
   let bonus = baseAgilityBonus;
   const sources: string[] = [];
-  const size = entries.find((entry) => entry.talentId === "size");
-  if (size?.specialisation && SIZE_ADJUSTMENT[size.specialisation] !== undefined) {
-    bonus = Math.max(1, bonus + SIZE_ADJUSTMENT[size.specialisation]);
-    sources.push(`Size (${size.specialisation})`);
-  }
   if (entries.some((entry) => entry.talentId === "amorphous")) {
     bonus = Math.max(1, Math.floor(bonus / 2));
-    sources.push("Amorphous");
+    sources.push("Amorphous: AB halved");
   }
   if (entries.some((entry) => entry.talentId === "crawler")) {
     bonus = Math.max(1, Math.floor(bonus / 2));
-    sources.push("Crawler");
+    sources.push("Crawler: AB halved");
   }
   if (entries.some((entry) => entry.talentId === "quadruped")) {
     bonus *= 2;
-    sources.push("Quadruped");
+    sources.push("Quadruped: AB doubled");
+  }
+  const size = entries.find((entry) => entry.talentId === "size");
+  if (size?.specialisation && SIZE_ADJUSTMENT[size.specialisation] !== undefined) {
+    bonus = Math.max(1, bonus + SIZE_ADJUSTMENT[size.specialisation]);
+    const sizeAdj = SIZE_ADJUSTMENT[size.specialisation];
+    sources.push(`Size (${size.specialisation}): ${sizeAdj > 0 ? "+" : ""}${sizeAdj} AB`);
   }
   if (entries.some((entry) => entry.talentId === "unnatural-speed")) {
     bonus *= 2;
-    sources.push("Unnatural Speed");
+    sources.push("Unnatural Speed: AB doubled");
   }
+  sources.sort((a, b) => a.localeCompare(b));
   const modes = entries.flatMap((entry) => {
     const names = { burrower: "Burrow", flyer: "Fly", hoverer: "Hover" } as const;
     const name = names[entry.talentId as keyof typeof names];

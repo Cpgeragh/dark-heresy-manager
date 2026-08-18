@@ -40,7 +40,7 @@ export const uiSectionShell = "rounded-lg border border-slate-500 bg-slate-900/6
 /** Standard padded section card. */
 export const uiSection = `${uiSectionShell} p-3 lg:p-4`;
 
-export const uiCell = "rounded border border-slate-500 bg-slate-950/60";
+export const uiCell = "rounded border border-slate-500 bg-slate-900/60";
 
 /** Label inside a compact stat cell (tight column grids: Quick View, bonuses, movement). */
 export const uiCellLabel = "text-[10px] lg:text-xs text-slate-300 leading-tight";
