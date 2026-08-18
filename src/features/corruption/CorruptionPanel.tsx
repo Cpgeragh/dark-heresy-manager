@@ -9,6 +9,7 @@ import type { CorruptionBlock, CorruptionMalignancyEntry, CorruptionMutationEntr
 import { AddButton } from "../../ui/AddButton";
 import { Button } from "../../ui/Button";
 import { Chip } from "../../ui/Chip";
+import { PickerBody, PickerModal } from "../../ui/PickerModal";
 import { RemoveButton } from "../../ui/RemoveButton";
 import { RollChip } from "../../ui/RollChip";
 import { ViewButton } from "../../ui/ViewButton";
@@ -24,6 +25,7 @@ import {
   uiInfoModalWrapper,
   uiItemName,
   uiSection,
+  uiTextBody,
   uiTextLabel,
   uiTextPlaceholder,
 } from "../../ui/editableStyles";
@@ -272,6 +274,7 @@ export function MalignancyRow({
   onUpdateRolls: (rolledModifiers: Record<string, number>) => void;
 }) {
   const [isEditingRolls, setIsEditingRolls] = useState(false);
+  const [deleteArmed, setDeleteArmed] = useState(false);
   const ref = getCorruptionMalignancyRef(malignancy.referenceId);
   const display = {
     roll: ref?.roll ?? malignancy.roll,
@@ -321,7 +324,7 @@ export function MalignancyRow({
                 Edit Rolls
               </Button>
             )}
-            <RemoveButton onClick={onRemove} label="Remove" />
+            <RemoveButton onClick={() => setDeleteArmed(true)} label="Remove" />
           </div>
         )}
       </div>
@@ -336,6 +339,29 @@ export function MalignancyRow({
           }}
           onCancel={() => setIsEditingRolls(false)}
         />
+      )}
+      {deleteArmed && (
+        <PickerModal
+          title="Delete Malignancy"
+          query=""
+          onQueryChange={() => undefined}
+          onClose={() => setDeleteArmed(false)}
+          isEmpty={false}
+          hideSearch
+          maxWidth="max-w-sm"
+          footer={
+            <div className="grid grid-cols-2 gap-2">
+              <Button variant="primary" onClick={onRemove}>Delete</Button>
+              <Button variant="ghost" onClick={() => setDeleteArmed(false)}>Cancel</Button>
+            </div>
+          }
+        >
+          <PickerBody>
+            <p className={`text-sm lg:text-base ${uiTextBody} text-center`}>
+              Delete {display.name} from this character?
+            </p>
+          </PickerBody>
+        </PickerModal>
       )}
     </div>
   );

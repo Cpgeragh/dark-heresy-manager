@@ -64,4 +64,39 @@ describe("MalignancyRow", () => {
 
     expect(screen.getByText("Custom")).toBeInTheDocument();
   });
+
+  it("arms a confirm step on Remove instead of deleting immediately", async () => {
+    const user = userEvent.setup();
+    const onRemove = vi.fn();
+    render(<MalignancyRow malignancy={palsyLikeEntry()} editable onRemove={onRemove} onUpdateRolls={vi.fn()} />);
+
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+
+    expect(onRemove).not.toHaveBeenCalled();
+    expect(screen.getByRole("dialog", { name: "Delete Malignancy" })).toBeInTheDocument();
+    expect(screen.getByText("Delete Palsy from this character?")).toBeInTheDocument();
+  });
+
+  it("deletes only after confirming", async () => {
+    const user = userEvent.setup();
+    const onRemove = vi.fn();
+    render(<MalignancyRow malignancy={palsyLikeEntry()} editable onRemove={onRemove} onUpdateRolls={vi.fn()} />);
+
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+
+    expect(onRemove).toHaveBeenCalled();
+  });
+
+  it("cancels without deleting", async () => {
+    const user = userEvent.setup();
+    const onRemove = vi.fn();
+    render(<MalignancyRow malignancy={palsyLikeEntry()} editable onRemove={onRemove} onUpdateRolls={vi.fn()} />);
+
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(onRemove).not.toHaveBeenCalled();
+    expect(screen.queryByRole("dialog", { name: "Delete Malignancy" })).not.toBeInTheDocument();
+  });
 });

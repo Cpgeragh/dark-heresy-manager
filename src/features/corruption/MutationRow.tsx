@@ -3,10 +3,11 @@ import { InfoModal } from "../../components/InfoModal";
 import type { CorruptionMutationEntry } from "../../types/Character";
 import { Button } from "../../ui/Button";
 import { Chip } from "../../ui/Chip";
+import { PickerBody, PickerModal } from "../../ui/PickerModal";
 import { RemoveButton } from "../../ui/RemoveButton";
 import { RollChip } from "../../ui/RollChip";
 import { colourRose, colourSky } from "../../ui/colourTokens";
-import { uiInfoModalWrapper, uiItemName, uiSection, uiTextLabel } from "../../ui/editableStyles";
+import { uiInfoModalWrapper, uiItemName, uiSection, uiTextBody, uiTextLabel } from "../../ui/editableStyles";
 import { sourceColour } from "../../ui/sourceStyles";
 import { getRollDisplayEntries } from "./characteristicModifiers";
 import { MutationInfoContent } from "./CorruptionReferenceModals";
@@ -25,6 +26,7 @@ export function MutationRow({
   onUpdateRolls: (rolledModifiers: Record<string, number>) => void;
 }) {
   const [isEditingRolls, setIsEditingRolls] = useState(false);
+  const [deleteArmed, setDeleteArmed] = useState(false);
   const ref = getMutationRef(mutation.referenceId);
   const display = {
     roll: ref?.roll ?? mutation.roll,
@@ -74,7 +76,7 @@ export function MutationRow({
                 Edit Rolls
               </Button>
             )}
-            <RemoveButton onClick={onRemove} label="Remove" />
+            <RemoveButton onClick={() => setDeleteArmed(true)} label="Remove" />
           </div>
         )}
       </div>
@@ -89,6 +91,29 @@ export function MutationRow({
           }}
           onCancel={() => setIsEditingRolls(false)}
         />
+      )}
+      {deleteArmed && (
+        <PickerModal
+          title="Delete Mutation"
+          query=""
+          onQueryChange={() => undefined}
+          onClose={() => setDeleteArmed(false)}
+          isEmpty={false}
+          hideSearch
+          maxWidth="max-w-sm"
+          footer={
+            <div className="grid grid-cols-2 gap-2">
+              <Button variant="primary" onClick={onRemove}>Delete</Button>
+              <Button variant="ghost" onClick={() => setDeleteArmed(false)}>Cancel</Button>
+            </div>
+          }
+        >
+          <PickerBody>
+            <p className={`text-sm lg:text-base ${uiTextBody} text-center`}>
+              Delete {display.name} from this character?
+            </p>
+          </PickerBody>
+        </PickerModal>
       )}
     </div>
   );

@@ -131,6 +131,180 @@ describe("InsanityPanel editable=false", () => {
   });
 });
 
+describe("InsanityPanel disorder severity escalation", () => {
+  it("escalates a disorder to the next severity tier", async () => {
+    const user = userEvent.setup();
+    render(
+      <InsanityWiring
+        initial={{
+          points: 20,
+          disorders: [
+            { id: "d1", referenceId: "phobia-fear-of-the-dead", type: "Phobia", name: "Fear of the Dead", severity: "Minor" },
+          ],
+        }}
+      />
+    );
+
+    await user.click(screen.getAllByRole("button", { name: "Escalate to Severe" })[0]);
+
+    expect(screen.getByRole("dialog", { name: "Escalate to Severe" })).toBeInTheDocument();
+    expect(screen.getByText("Escalate Fear of the Dead to Severe?")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Escalate" }));
+
+    expect(screen.getAllByText("Severe").length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("button", { name: "Escalate to Acute" }).length).toBeGreaterThan(0);
+  });
+
+  it("cancels an escalation without changing severity", async () => {
+    const user = userEvent.setup();
+    render(
+      <InsanityWiring
+        initial={{
+          points: 20,
+          disorders: [
+            { id: "d1", referenceId: "phobia-fear-of-the-dead", type: "Phobia", name: "Fear of the Dead", severity: "Minor" },
+          ],
+        }}
+      />
+    );
+
+    await user.click(screen.getAllByRole("button", { name: "Escalate to Severe" })[0]);
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(screen.queryByRole("dialog", { name: "Escalate to Severe" })).not.toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Escalate to Severe" }).length).toBeGreaterThan(0);
+  });
+
+  it("hides the escalate button once a disorder is at its highest severity", () => {
+    render(
+      <InsanityWiring
+        initial={{
+          points: 20,
+          disorders: [
+            { id: "d1", referenceId: "phobia-fear-of-the-dead", type: "Phobia", name: "Fear of the Dead", severity: "Acute" },
+          ],
+        }}
+      />
+    );
+
+    expect(screen.queryByRole("button", { name: /Escalate/ })).not.toBeInTheDocument();
+  });
+
+  it("caps a disorder type with no Acute tier at Severe", () => {
+    render(
+      <InsanityWiring
+        initial={{
+          points: 20,
+          disorders: [
+            { id: "d1", type: "Horrific Nightmares", name: "Recurring Dream", severity: "Severe", custom: true },
+          ],
+        }}
+      />
+    );
+
+    expect(screen.queryByRole("button", { name: /Escalate/ })).not.toBeInTheDocument();
+  });
+
+  it("offers only an escalate to Acute for The Flesh is Weak, which has no Minor tier", () => {
+    render(
+      <InsanityWiring
+        initial={{
+          points: 20,
+          disorders: [
+            { id: "d1", referenceId: "flesh-is-weak", type: "The Flesh is Weak", name: "The Flesh is Weak", severity: "Severe" },
+          ],
+        }}
+      />
+    );
+
+    expect(screen.getAllByRole("button", { name: "Escalate to Acute" }).length).toBeGreaterThan(0);
+  });
+
+  it("hides the escalate button in read-only mode", () => {
+    render(
+      <InsanityWiring
+        initial={{
+          points: 20,
+          disorders: [
+            { id: "d1", referenceId: "phobia-fear-of-the-dead", type: "Phobia", name: "Fear of the Dead", severity: "Minor" },
+          ],
+        }}
+        editable={false}
+      />
+    );
+
+    expect(screen.queryByRole("button", { name: /Escalate/ })).not.toBeInTheDocument();
+  });
+});
+
+describe("InsanityPanel delete confirmation", () => {
+  it("arms a confirm step on a disorder's Remove instead of deleting immediately", async () => {
+    const user = userEvent.setup();
+    render(
+      <InsanityWiring
+        initial={{
+          points: 20,
+          disorders: [
+            { id: "d1", referenceId: "phobia-fear-of-the-dead", type: "Phobia", name: "Fear of the Dead", severity: "Minor" },
+          ],
+        }}
+      />
+    );
+
+    await user.click(screen.getAllByRole("button", { name: "Remove" })[0]);
+
+    expect(screen.getByRole("dialog", { name: "Delete Disorder" })).toBeInTheDocument();
+    expect(screen.getByText("Delete Fear of the Dead from this character?")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+
+    expect(screen.queryByText("Fear of the Dead", { selector: "span" })).not.toBeInTheDocument();
+  });
+
+  it("cancels a disorder deletion without removing it", async () => {
+    const user = userEvent.setup();
+    render(
+      <InsanityWiring
+        initial={{
+          points: 20,
+          disorders: [
+            { id: "d1", referenceId: "phobia-fear-of-the-dead", type: "Phobia", name: "Fear of the Dead", severity: "Minor" },
+          ],
+        }}
+      />
+    );
+
+    await user.click(screen.getAllByRole("button", { name: "Remove" })[0]);
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(screen.queryByRole("dialog", { name: "Delete Disorder" })).not.toBeInTheDocument();
+    expect(screen.getAllByText("Fear of the Dead", { selector: "span" }).length).toBeGreaterThan(0);
+  });
+
+  it("arms a confirm step on a trauma's Remove and deletes only after confirming", async () => {
+    const user = userEvent.setup();
+    render(
+      <InsanityWiring
+        initial={{
+          points: 0,
+          disorders: [],
+          currentTrauma: [{ id: "t1", referenceId: "01-40", roll: "01-40", name: "Withdrawn and Quiet" }],
+        }}
+      />
+    );
+
+    await user.click(screen.getAllByRole("button", { name: "Remove" })[0]);
+
+    expect(screen.getByRole("dialog", { name: "Delete Trauma" })).toBeInTheDocument();
+    expect(screen.getByText("Delete Withdrawn and Quiet from this character?")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+
+    expect(screen.queryByText("Withdrawn and Quiet", { selector: "span" })).not.toBeInTheDocument();
+  });
+});
+
 describe("InsanityPanel legacy free-text fallback", () => {
   it("shows legacy disorder notes as a text field when disorders is still the old string format", () => {
     render(<InsanityWiring initial={{ points: 0, disorders: "Some old disorder notes" }} />);

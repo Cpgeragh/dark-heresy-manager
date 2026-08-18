@@ -15,7 +15,9 @@ import type {
 import { getTalentInsanityModifierSources } from "../talents/talentEffects";
 import { getTraitInsanityModifierSources } from "../traits/traitEffects";
 import { AddButton } from "../../ui/AddButton";
+import { Button } from "../../ui/Button";
 import { Chip } from "../../ui/Chip";
+import { PickerBody, PickerModal } from "../../ui/PickerModal";
 import { RemoveButton } from "../../ui/RemoveButton";
 import { RollChip } from "../../ui/RollChip";
 import { ViewButton } from "../../ui/ViewButton";
@@ -25,6 +27,7 @@ import {
   uiInfoModalWrapper,
   uiItemName,
   uiSection,
+  uiTextBody,
   uiTextLabel,
   uiTextPlaceholder,
 } from "../../ui/editableStyles";
@@ -43,6 +46,7 @@ import {
   getInsanityDisorderRef,
   getInsanityTrackEntry,
   getMentalTraumaRef,
+  getNextDisorderSeverity,
   getNextInsanityDegreeEntry,
   getNextInsanityTrackEntry,
   INSANITY_RULE_TEXT,
@@ -234,12 +238,17 @@ function DisorderRow({
   disorder,
   editable,
   onRemove,
+  onEscalate,
 }: {
   disorder: InsanityDisorderEntry;
   editable: boolean;
   onRemove: () => void;
+  onEscalate: (severity: InsanityDisorderSeverity) => void;
 }) {
+  const [deleteArmed, setDeleteArmed] = useState(false);
+  const [escalateArmed, setEscalateArmed] = useState(false);
   const ref = getInsanityDisorderRef(disorder.referenceId);
+  const nextSeverity = getNextDisorderSeverity(disorder);
 
   return (
     <div className={uiSection}>
@@ -286,9 +295,70 @@ function DisorderRow({
           </div>
         </div>
         {editable && (
-          <RemoveButton onClick={onRemove} label="Remove" />
+          <div className="flex shrink-0 gap-1.5">
+            {nextSeverity && (
+              <Button size="xs" onClick={() => setEscalateArmed(true)}>
+                Escalate to {nextSeverity}
+              </Button>
+            )}
+            <RemoveButton onClick={() => setDeleteArmed(true)} label="Remove" />
+          </div>
         )}
       </div>
+      {escalateArmed && nextSeverity && (
+        <PickerModal
+          title={`Escalate to ${nextSeverity}`}
+          query=""
+          onQueryChange={() => undefined}
+          onClose={() => setEscalateArmed(false)}
+          isEmpty={false}
+          hideSearch
+          maxWidth="max-w-sm"
+          footer={
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                variant="primary"
+                onClick={() => {
+                  onEscalate(nextSeverity);
+                  setEscalateArmed(false);
+                }}
+              >
+                Escalate
+              </Button>
+              <Button variant="ghost" onClick={() => setEscalateArmed(false)}>Cancel</Button>
+            </div>
+          }
+        >
+          <PickerBody>
+            <p className={`text-sm lg:text-base ${uiTextBody} text-center`}>
+              Escalate {disorder.name} to {nextSeverity}?
+            </p>
+          </PickerBody>
+        </PickerModal>
+      )}
+      {deleteArmed && (
+        <PickerModal
+          title="Delete Disorder"
+          query=""
+          onQueryChange={() => undefined}
+          onClose={() => setDeleteArmed(false)}
+          isEmpty={false}
+          hideSearch
+          maxWidth="max-w-sm"
+          footer={
+            <div className="grid grid-cols-2 gap-2">
+              <Button variant="primary" onClick={onRemove}>Delete</Button>
+              <Button variant="ghost" onClick={() => setDeleteArmed(false)}>Cancel</Button>
+            </div>
+          }
+        >
+          <PickerBody>
+            <p className={`text-sm lg:text-base ${uiTextBody} text-center`}>
+              Delete {disorder.name} from this character?
+            </p>
+          </PickerBody>
+        </PickerModal>
+      )}
     </div>
   );
 }
@@ -306,6 +376,7 @@ function TraumaRow({
   editable: boolean;
   onRemove: () => void;
 }) {
+  const [deleteArmed, setDeleteArmed] = useState(false);
   const ref = getMentalTraumaRef(trauma.referenceId);
   const name = trauma.name ?? ref?.name ?? "Custom Trauma";
   const roll = ref?.roll ?? trauma.roll;
@@ -337,9 +408,32 @@ function TraumaRow({
           </div>
         </div>
         {editable && (
-          <RemoveButton onClick={onRemove} label="Remove" />
+          <RemoveButton onClick={() => setDeleteArmed(true)} label="Remove" />
         )}
       </div>
+      {deleteArmed && (
+        <PickerModal
+          title="Delete Trauma"
+          query=""
+          onQueryChange={() => undefined}
+          onClose={() => setDeleteArmed(false)}
+          isEmpty={false}
+          hideSearch
+          maxWidth="max-w-sm"
+          footer={
+            <div className="grid grid-cols-2 gap-2">
+              <Button variant="primary" onClick={onRemove}>Delete</Button>
+              <Button variant="ghost" onClick={() => setDeleteArmed(false)}>Cancel</Button>
+            </div>
+          }
+        >
+          <PickerBody>
+            <p className={`text-sm lg:text-base ${uiTextBody} text-center`}>
+              Delete {name} from this character?
+            </p>
+          </PickerBody>
+        </PickerModal>
+      )}
     </div>
   );
 }
@@ -420,12 +514,14 @@ function DisordersList({
   legacyDisorders,
   editable,
   onRemove,
+  onEscalate,
   onLegacyChange,
 }: {
   disorders: InsanityDisorderEntry[];
   legacyDisorders: string;
   editable: boolean;
   onRemove: (id: string) => void;
+  onEscalate: (id: string, severity: InsanityDisorderSeverity) => void;
   onLegacyChange: (notes: string) => void;
 }) {
   if (disorders.length > 0) {
@@ -439,6 +535,7 @@ function DisordersList({
               disorder={disorder}
               editable={editable}
               onRemove={() => onRemove(disorder.id)}
+              onEscalate={(severity) => onEscalate(disorder.id, severity)}
             />
           ))}
         {legacyDisorders.trim() && (
@@ -539,6 +636,15 @@ export function InsanityPanel({ insanity, editable, onUpdate, sectionClassName, 
     [value, structuredDisorders, onUpdate]
   );
 
+  const handleEscalateDisorder = useCallback(
+    (id: string, severity: InsanityDisorderSeverity) =>
+      onUpdate({
+        ...value,
+        disorders: structuredDisorders.map((entry) => (entry.id === id ? { ...entry, severity } : entry)),
+      }),
+    [value, structuredDisorders, onUpdate]
+  );
+
   const handleAddTrauma = useCallback(
     (entry: InsanityTraumaEntry) =>
       onUpdate({ ...value, currentTrauma: [...structuredTrauma, entry] }),
@@ -625,6 +731,7 @@ export function InsanityPanel({ insanity, editable, onUpdate, sectionClassName, 
                 legacyDisorders={legacyDisorders}
                 editable={editable}
                 onRemove={handleRemoveDisorder}
+                onEscalate={handleEscalateDisorder}
                 onLegacyChange={handleLegacyDisordersChange}
               />
             </>
@@ -646,6 +753,7 @@ export function InsanityPanel({ insanity, editable, onUpdate, sectionClassName, 
             legacyDisorders={legacyDisorders}
             editable={editable}
             onRemove={handleRemoveDisorder}
+            onEscalate={handleEscalateDisorder}
             onLegacyChange={handleLegacyDisordersChange}
           />
         </section>

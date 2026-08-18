@@ -24,6 +24,7 @@ import {
 } from "../../ui/editableStyles";
 import { DisorderInfoContent } from "./InsanityReferenceModals";
 import {
+  customSeverityOptionsFor,
   INSANITY_DISORDER_REFERENCE,
   INSANITY_SEVERITIES,
   type InsanityDisorderRef,
@@ -35,15 +36,6 @@ const customDisorderTypes = [
   ...Array.from(new Set(INSANITY_DISORDER_REFERENCE.map((ref) => ref.type))).sort(),
   "Other",
 ];
-
-const allSeverityOptions: InsanityDisorderSeverity[] = ["Minor", "Severe", "Acute"];
-const severeSeverityOptions: InsanityDisorderSeverity[] = ["Severe", "Acute"];
-
-function customSeverityOptionsFor(type: string): InsanityDisorderSeverity[] {
-  if (type === "The Flesh is Weak") return severeSeverityOptions;
-  if (type === "Horrific Nightmares") return ["Minor", "Severe"];
-  return allSeverityOptions;
-}
 
 export function InsanityDisorderPicker({
   existingReferenceIds,

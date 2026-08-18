@@ -66,4 +66,39 @@ describe("MutationRow", () => {
 
     expect(screen.getByText("2nd Ed")).toBeInTheDocument();
   });
+
+  it("arms a confirm step on Remove instead of deleting immediately", async () => {
+    const user = userEvent.setup();
+    const onRemove = vi.fn();
+    render(<MutationRow mutation={palsyLikeEntry()} editable onRemove={onRemove} onUpdateRolls={vi.fn()} />);
+
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+
+    expect(onRemove).not.toHaveBeenCalled();
+    expect(screen.getByRole("dialog", { name: "Delete Mutation" })).toBeInTheDocument();
+    expect(screen.getByText("Delete Misshapen from this character?")).toBeInTheDocument();
+  });
+
+  it("deletes only after confirming", async () => {
+    const user = userEvent.setup();
+    const onRemove = vi.fn();
+    render(<MutationRow mutation={palsyLikeEntry()} editable onRemove={onRemove} onUpdateRolls={vi.fn()} />);
+
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+
+    expect(onRemove).toHaveBeenCalled();
+  });
+
+  it("cancels without deleting", async () => {
+    const user = userEvent.setup();
+    const onRemove = vi.fn();
+    render(<MutationRow mutation={palsyLikeEntry()} editable onRemove={onRemove} onUpdateRolls={vi.fn()} />);
+
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(onRemove).not.toHaveBeenCalled();
+    expect(screen.queryByRole("dialog", { name: "Delete Mutation" })).not.toBeInTheDocument();
+  });
 });

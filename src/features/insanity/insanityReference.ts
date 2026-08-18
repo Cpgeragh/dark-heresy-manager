@@ -1,4 +1,4 @@
-import type { InsanityDisorderSeverity } from "../../types/Character";
+import type { InsanityDisorderEntry, InsanityDisorderSeverity } from "../../types/Character";
 
 export interface InsanityTrackEntry {
   min: number;
@@ -109,6 +109,15 @@ export const INSANITY_DISORDER_REFERENCE: InsanityDisorderRef[] = [
   { id: "horrific-nightmares", type: "Horrific Nightmares", name: "Horrific Nightmares", severityOptions: ["Minor", "Severe"], description: "The character suffers from vivid and reoccurring nightmares. After any stressful day, the character must pass a Willpower Test in order not to succumb to his terrors while asleep. If he fails, the character suffers a single level of Fatigue on the following day." },
 ];
 
+const ALL_DISORDER_SEVERITIES: InsanityDisorderSeverity[] = ["Minor", "Severe", "Acute"];
+const SEVERE_ONLY_DISORDER_SEVERITIES: InsanityDisorderSeverity[] = ["Severe", "Acute"];
+
+export function customSeverityOptionsFor(type: string): InsanityDisorderSeverity[] {
+  if (type === "The Flesh is Weak") return SEVERE_ONLY_DISORDER_SEVERITIES;
+  if (type === "Horrific Nightmares") return ["Minor", "Severe"];
+  return ALL_DISORDER_SEVERITIES;
+}
+
 export function getInsanityTrackEntry(points: number): InsanityTrackEntry {
   const safePoints = Math.max(0, Math.floor(points || 0));
   return (
@@ -132,6 +141,19 @@ export function getNextInsanityDegreeEntry(points: number): InsanityTrackEntry |
 export function getInsanityDisorderRef(referenceId?: string): InsanityDisorderRef | undefined {
   if (!referenceId) return undefined;
   return INSANITY_DISORDER_REFERENCE.find((disorder) => disorder.id === referenceId);
+}
+
+export function getDisorderSeverityOptions(disorder: InsanityDisorderEntry): InsanityDisorderSeverity[] {
+  const ref = getInsanityDisorderRef(disorder.referenceId);
+  if (ref) return ref.severityOptions;
+  return customSeverityOptionsFor(disorder.type);
+}
+
+export function getNextDisorderSeverity(disorder: InsanityDisorderEntry): InsanityDisorderSeverity | undefined {
+  const options = getDisorderSeverityOptions(disorder);
+  const index = options.indexOf(disorder.severity);
+  if (index === -1 || index === options.length - 1) return undefined;
+  return options[index + 1];
 }
 
 export function getMentalTraumaRef(roll?: string): MentalTraumaEntry | undefined {
