@@ -5,11 +5,17 @@ import "@testing-library/jest-dom";
 
 import { MutationPicker } from "../../src/features/corruption/MutationPicker";
 
-function setup(tier: "minor" | "major" = "minor") {
+function setup(tier: "minor" | "major" = "minor", editable = true) {
   const onAdd = vi.fn();
   const onClose = vi.fn();
   render(
-    <MutationPicker tier={tier} existingReferenceIds={new Set()} onAdd={onAdd} onClose={onClose} />
+    <MutationPicker
+      tier={tier}
+      existingReferenceIds={new Set()}
+      editable={editable}
+      onAdd={onAdd}
+      onClose={onClose}
+    />
   );
   return { onAdd, onClose };
 }
@@ -102,6 +108,7 @@ describe("MutationPicker roll-capture sub-screen", () => {
       <MutationPicker
         tier="minor"
         existingReferenceIds={new Set(["tough-hide"])}
+        editable
         onAdd={vi.fn()}
         onClose={vi.fn()}
       />
@@ -110,7 +117,7 @@ describe("MutationPicker roll-capture sub-screen", () => {
     expect(screen.queryByText("Tough Hide", { selector: "span" })).not.toBeInTheDocument();
   });
 
-  it("adds a custom mutation with a name and details", async () => {
+  it("adds a custom mutation with a name, origin, and rules text", async () => {
     const user = userEvent.setup();
     const { onAdd } = setup();
 
@@ -119,12 +126,35 @@ describe("MutationPicker roll-capture sub-screen", () => {
     expect(addButton).toBeDisabled();
 
     await user.type(screen.getByPlaceholderText("Name the mutation..."), "Extra Toes");
-    await user.type(screen.getByPlaceholderText("Optional details..."), "Just weird toes.");
+    expect(addButton).toBeDisabled();
+
+    await user.click(screen.getByRole("radio", { name: "2nd Ed" }));
+    expect(addButton).toBeDisabled();
+
+    await user.type(screen.getByPlaceholderText("What this mutation does..."), "Just weird toes.");
     expect(addButton).not.toBeDisabled();
 
     await user.click(addButton);
     expect(onAdd).toHaveBeenCalledWith(
-      expect.objectContaining({ name: "Extra Toes", effect: "Just weird toes.", custom: true })
+      expect.objectContaining({
+        name: "Extra Toes",
+        effect: "Just weird toes.",
+        source: "2nd Ed",
+        custom: true,
+      })
     );
+  });
+});
+
+describe("MutationPicker editable=false", () => {
+  it("shows a View title, ignores row clicks, and hides the custom-add action", async () => {
+    const user = userEvent.setup();
+    const { onAdd } = setup("minor", false);
+
+    expect(screen.getByRole("dialog", { name: "View Minor Mutations" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Add custom minor mutation" })).not.toBeInTheDocument();
+
+    await user.click(screen.getByText("Tough Hide", { selector: "span" }));
+    expect(onAdd).not.toHaveBeenCalled();
   });
 });

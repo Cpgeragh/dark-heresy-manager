@@ -1,17 +1,21 @@
 import { useRef, useState } from "react";
-import { FormField } from "../../components/FormField";
 import { InfoModal } from "../../components/InfoModal";
 import type { CorruptionMutationEntry } from "../../types/Character";
+import type { CustomItemOrigin } from "../../constants/customItems";
 import { Button } from "../../ui/Button";
+import { CustomFormSection } from "../../ui/CustomFormSection";
+import { CustomFormShell } from "../../ui/CustomFormShell";
+import { OriginSelector } from "../../ui/OriginSelector";
 import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../ui/PickerModal";
 import { ArrowLeft } from "../../ui/PickerArrows";
+import { RequiredFormLabel } from "../../ui/RequiredFormLabel";
 import { RollChip } from "../../ui/RollChip";
-import { uiPickerBackButton } from "../../ui/buttonStyles";
 import {
   editableInputClass,
-  uiFormLabel,
+  editableTextareaClass,
   uiInfoModalWrapper,
   uiItemName,
+  uiSectionShell,
   uiTextLabel,
 } from "../../ui/editableStyles";
 import { MutationInfoContent } from "./CorruptionReferenceModals";
@@ -25,11 +29,13 @@ export type MutationTier = "minor" | "major";
 export function MutationPicker({
   tier,
   existingReferenceIds,
+  editable,
   onAdd,
   onClose,
 }: {
   tier: MutationTier;
   existingReferenceIds: Set<string>;
+  editable: boolean;
   onAdd: (entry: CorruptionMutationEntry) => void;
   onClose: () => void;
 }) {
@@ -37,9 +43,11 @@ export function MutationPicker({
   const [customMode, setCustomMode] = useState(false);
   const [customName, setCustomName] = useState("");
   const [customDetails, setCustomDetails] = useState("");
+  const [customOrigin, setCustomOrigin] = useState<"" | CustomItemOrigin>("");
   const [selected, setSelected] = useState<MutationRef | null>(null);
   const [rolls, setRolls] = useState<Record<string, string>>({});
   const listScrollPositionRef = useRef(0);
+  const customFormScrollPositionRef = useRef(0);
 
   const title = tier === "minor" ? "Minor Mutation" : "Major Mutation";
   const source = tier === "minor" ? MINOR_MUTATIONS : MAJOR_MUTATIONS;
@@ -51,7 +59,7 @@ export function MutationPicker({
       return !existingReferenceIds.has(ref.id) && searchable.includes(query.trim().toLowerCase());
     })
     .sort((a, b) => a.name.localeCompare(b.name));
-  const canAddCustom = Boolean(customName.trim());
+  const canAddCustom = Boolean(customName.trim()) && Boolean(customDetails.trim()) && Boolean(customOrigin);
 
   function addReferenceMutation(ref: MutationRef) {
     onAdd({
@@ -65,79 +73,62 @@ export function MutationPicker({
 
   if (customMode) {
     return (
-      <PickerModal
+      <CustomFormShell
         title={`Custom ${title}`}
-        query=""
-        onQueryChange={() => undefined}
-        onClose={() => setCustomMode(false)}
+        scrollPositionRef={customFormScrollPositionRef}
         closeLabel={<ArrowLeft />}
         closeAriaLabel="Back"
-        hideSearch
-        isEmpty={false}
-        footer={
-          <div className="space-y-2">
-            {!canAddCustom && (
-              <p className="text-xs lg:text-sm text-slate-300">
-                <span className="text-red-500">*</span> Required
-              </p>
-            )}
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setCustomMode(false)}
-                className={uiPickerBackButton}
-              >
-                Back
-              </button>
-              <Button
-                size="sm"
-                type="button"
-                onClick={() => {
-                  if (!canAddCustom) return;
-                  onAdd({
-                    id: createLocalId("mutation"),
-                    name: customName.trim(),
-                    effect: customDetails.trim() || undefined,
-                    custom: true,
-                  });
-                  setCustomName("");
-                  setCustomDetails("");
-                  setCustomMode(false);
-                }}
-                disabled={!canAddCustom}
-                className="flex-1"
-              >
-                Add {title}
-              </Button>
-            </div>
-          </div>
-        }
+        onClose={() => setCustomMode(false)}
+        canSubmit={canAddCustom}
+        submitLabel={`Add ${title}`}
+        onSubmit={() => {
+          if (!canAddCustom || !customOrigin) return;
+          onAdd({
+            id: createLocalId("mutation"),
+            name: customName.trim(),
+            effect: customDetails.trim(),
+            source: customOrigin,
+            custom: true,
+          });
+          setCustomName("");
+          setCustomDetails("");
+          setCustomOrigin("");
+          setCustomMode(false);
+        }}
       >
-        <PickerBody>
+        <CustomFormSection title="Identity">
           <div>
-            <label className={uiFormLabel}>
-              Name <span className="text-red-500">*</span>
-            </label>
+            <RequiredFormLabel htmlFor="custom-mutation-name">Name</RequiredFormLabel>
             <input
-              type="text"
+              id="custom-mutation-name"
+              required
               value={customName}
               onChange={(event) => setCustomName(event.target.value)}
               placeholder="Name the mutation..."
               className={editableInputClass(true) + " mt-0.5"}
             />
           </div>
+        </CustomFormSection>
 
-          <FormField
-            label="Details"
-            value={customDetails}
-            onChange={setCustomDetails}
-            editable
-            type="textarea"
-            rows={3}
-            placeholder="Optional details..."
-          />
-        </PickerBody>
-      </PickerModal>
+        <CustomFormSection title="Origin">
+          <OriginSelector name="custom-mutation-origin" value={customOrigin} onChange={setCustomOrigin} />
+        </CustomFormSection>
+
+        <CustomFormSection title="Rules">
+          <div>
+            <RequiredFormLabel htmlFor="custom-mutation-rules">Rules Text</RequiredFormLabel>
+            <textarea
+              id="custom-mutation-rules"
+              required
+              value={customDetails}
+              onChange={(event) => setCustomDetails(event.target.value)}
+              placeholder="What this mutation does..."
+              rows={4}
+              className={editableTextareaClass(true) + " mt-0.5"}
+            />
+          </div>
+        </CustomFormSection>
+      </CustomFormShell>
     );
   }
 
@@ -196,7 +187,7 @@ export function MutationPicker({
 
   return (
     <PickerModal
-      title={`Add ${title}`}
+      title={editable ? `Add ${title}` : `View ${title}s`}
       placeholder={`Search ${title.toLowerCase()}s...`}
       query={query}
       onQueryChange={setQuery}
@@ -204,20 +195,27 @@ export function MutationPicker({
       scrollPositionRef={listScrollPositionRef}
       isEmpty={filtered.length === 0}
       footer={
-        <PickerCustomAction
-          onClick={() => {
-            setCustomMode(true);
-            setCustomName("");
-            setCustomDetails("");
-          }}
-        >
-          Add custom {title.toLowerCase()}
-        </PickerCustomAction>
+        editable && (
+          <PickerCustomAction
+            onClick={() => {
+              setCustomMode(true);
+              setCustomName("");
+              setCustomDetails("");
+              setCustomOrigin("");
+            }}
+          >
+            Add custom {title.toLowerCase()}
+          </PickerCustomAction>
+        )
       }
     >
+      <div className="space-y-3 p-3 lg:p-4">
       {filtered.map((ref) => (
         <PickerRow
           key={ref.id}
+          card
+          className={uiSectionShell}
+          interactive={editable}
           onClick={() => {
             if (getRoll1d10Modifiers(ref.modifiers).length === 0) {
               addReferenceMutation(ref);
@@ -243,6 +241,7 @@ export function MutationPicker({
           </div>
         </PickerRow>
       ))}
+      </div>
     </PickerModal>
   );
 }

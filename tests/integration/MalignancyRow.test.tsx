@@ -51,4 +51,17 @@ describe("MalignancyRow", () => {
 
     expect(screen.queryByRole("button", { name: "Edit Rolls" })).not.toBeInTheDocument();
   });
+
+  it("shows a source chip for a custom malignancy with an origin", () => {
+    render(
+      <MalignancyRow
+        malignancy={{ id: "m3", name: "Weeping Eyes", effect: "Eyes that weep blood.", source: "Custom", custom: true }}
+        editable
+        onRemove={vi.fn()}
+        onUpdateRolls={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText("Custom")).toBeInTheDocument();
+  });
 });

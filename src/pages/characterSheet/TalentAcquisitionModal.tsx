@@ -798,7 +798,7 @@ export function TalentAcquisitionModal({
       scrollPositionRef={acquisitionScrollPositionRef}
       footer={
         <div className="space-y-2">
-          {!canComplete && <RequiredFieldsNote />}
+          <RequiredFieldsNote />
           <Button fullWidth onClick={handleApply} disabled={!canComplete}>
             {entry.talentId === "purity-of-flesh" && purityStage === "purity" && hasFatalRemovals
               ? "Continue to Reformed Skin"

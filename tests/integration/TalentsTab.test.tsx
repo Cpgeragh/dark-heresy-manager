@@ -352,7 +352,7 @@ describe("TalentsTab", () => {
     expect(screen.getByText("Required")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Melee Weapon Training" }));
     await user.click(within(screen.getByRole("dialog", { name: "Melee Weapon Training" })).getByRole("button", { name: "Chain" }));
-    expect(screen.queryByText("Required")).not.toBeInTheDocument();
+    expect(screen.getByText("Required")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Apply and add Talent" }));
     expect(onUpdateCharacter).toHaveBeenCalledWith(
       expect.objectContaining({

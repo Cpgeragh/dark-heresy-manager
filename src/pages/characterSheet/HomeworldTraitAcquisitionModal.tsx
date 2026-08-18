@@ -136,7 +136,7 @@ export function HomeworldTraitAcquisitionModal({
               />
             </div>
           )}
-          {!canSubmit && <RequiredFieldsNote />}
+          <RequiredFieldsNote />
           <Button
             fullWidth
             disabled={!canSubmit}

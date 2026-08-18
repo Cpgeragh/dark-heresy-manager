@@ -7,6 +7,7 @@ import { RemoveButton } from "../../ui/RemoveButton";
 import { RollChip } from "../../ui/RollChip";
 import { colourRose, colourSky } from "../../ui/colourTokens";
 import { uiInfoModalWrapper, uiItemName, uiSection, uiTextLabel } from "../../ui/editableStyles";
+import { sourceColour } from "../../ui/sourceStyles";
 import { getRollDisplayEntries } from "./characteristicModifiers";
 import { MutationInfoContent } from "./CorruptionReferenceModals";
 import { getMutationRef } from "./mutationsReference";
@@ -37,9 +38,14 @@ export function MutationRow({
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <span className={uiItemName}>{display.name}</span>
-          {display.roll && (
+          {(display.roll || mutation.source) && (
             <div className="mt-1 flex flex-wrap gap-1.5">
-              <RollChip>{display.roll}</RollChip>
+              {display.roll && <RollChip>{display.roll}</RollChip>}
+              {mutation.source && (
+                <Chip size="sm" className={`bg-slate-800/40 font-code ${sourceColour(mutation.source)}`}>
+                  {mutation.source}
+                </Chip>
+              )}
             </div>
           )}
           {rollEntries.length > 0 && (

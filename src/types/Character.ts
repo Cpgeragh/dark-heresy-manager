@@ -104,6 +104,7 @@ export interface CorruptionMalignancyEntry {
   effect?: string;
   notes?: string;
   custom?: boolean;
+  source?: string; // a custom malignancy's own origin (Custom / 2nd Ed)
   rolledModifiers?: Record<string, number>;
 }
 
@@ -115,6 +116,7 @@ export interface CorruptionMutationEntry {
   effect?: string;
   notes?: string;
   custom?: boolean;
+  source?: string; // a custom mutation's own origin (Custom / 2nd Ed)
   rolledModifiers?: Record<string, number>;
 }
 

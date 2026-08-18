@@ -1,17 +1,21 @@
 import { useRef, useState } from "react";
-import { FormField } from "../../components/FormField";
 import { InfoModal } from "../../components/InfoModal";
 import type { CorruptionMalignancyEntry } from "../../types/Character";
+import type { CustomItemOrigin } from "../../constants/customItems";
 import { Button } from "../../ui/Button";
+import { CustomFormSection } from "../../ui/CustomFormSection";
+import { CustomFormShell } from "../../ui/CustomFormShell";
+import { OriginSelector } from "../../ui/OriginSelector";
 import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../ui/PickerModal";
 import { ArrowLeft } from "../../ui/PickerArrows";
+import { RequiredFormLabel } from "../../ui/RequiredFormLabel";
 import { RollChip } from "../../ui/RollChip";
-import { uiPickerBackButton } from "../../ui/buttonStyles";
 import {
   editableInputClass,
-  uiFormLabel,
+  editableTextareaClass,
   uiInfoModalWrapper,
   uiItemName,
+  uiSectionShell,
   uiTextLabel,
 } from "../../ui/editableStyles";
 import { MalignancyInfoContent } from "./CorruptionReferenceModals";
@@ -22,10 +26,12 @@ import { areRollModifierValuesValid, getRoll1d10Modifiers } from "./rollModifier
 
 export function CorruptionMalignancyPicker({
   existingReferenceIds,
+  editable,
   onAdd,
   onClose,
 }: {
   existingReferenceIds: Set<string>;
+  editable: boolean;
   onAdd: (entry: CorruptionMalignancyEntry) => void;
   onClose: () => void;
 }) {
@@ -33,15 +39,17 @@ export function CorruptionMalignancyPicker({
   const [customMode, setCustomMode] = useState(false);
   const [customName, setCustomName] = useState("");
   const [customDetails, setCustomDetails] = useState("");
+  const [customOrigin, setCustomOrigin] = useState<"" | CustomItemOrigin>("");
   const [selected, setSelected] = useState<CorruptionMalignancyRef | null>(null);
   const [rolls, setRolls] = useState<Record<string, string>>({});
   const listScrollPositionRef = useRef(0);
+  const customFormScrollPositionRef = useRef(0);
 
   const filtered = CORRUPTION_MALIGNANCIES.filter((ref) => {
     const searchable = `${ref.roll} ${ref.name} ${ref.effect}`.toLowerCase();
     return !existingReferenceIds.has(ref.id) && searchable.includes(query.trim().toLowerCase());
   }).sort((a, b) => a.name.localeCompare(b.name));
-  const canAddCustom = Boolean(customName.trim());
+  const canAddCustom = Boolean(customName.trim()) && Boolean(customDetails.trim()) && Boolean(customOrigin);
 
   function addReferenceMalignancy(ref: CorruptionMalignancyRef) {
     onAdd({
@@ -55,79 +63,62 @@ export function CorruptionMalignancyPicker({
 
   if (customMode) {
     return (
-      <PickerModal
+      <CustomFormShell
         title="Custom Malignancy"
-        query=""
-        onQueryChange={() => undefined}
-        onClose={() => setCustomMode(false)}
+        scrollPositionRef={customFormScrollPositionRef}
         closeLabel={<ArrowLeft />}
         closeAriaLabel="Back"
-        hideSearch
-        isEmpty={false}
-        footer={
-          <div className="space-y-2">
-            {!canAddCustom && (
-              <p className="text-xs lg:text-sm text-slate-300">
-                <span className="text-red-500">*</span> Required
-              </p>
-            )}
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setCustomMode(false)}
-                className={uiPickerBackButton}
-              >
-                Back
-              </button>
-              <Button
-                size="sm"
-                type="button"
-                onClick={() => {
-                  if (!canAddCustom) return;
-                  onAdd({
-                    id: createLocalId("malignancy"),
-                    name: customName.trim(),
-                    effect: customDetails.trim() || undefined,
-                    custom: true,
-                  });
-                  setCustomName("");
-                  setCustomDetails("");
-                  setCustomMode(false);
-                }}
-                disabled={!canAddCustom}
-                className="flex-1"
-              >
-                Add Malignancy
-              </Button>
-            </div>
-          </div>
-        }
+        onClose={() => setCustomMode(false)}
+        canSubmit={canAddCustom}
+        submitLabel="Add Malignancy"
+        onSubmit={() => {
+          if (!canAddCustom || !customOrigin) return;
+          onAdd({
+            id: createLocalId("malignancy"),
+            name: customName.trim(),
+            effect: customDetails.trim(),
+            source: customOrigin,
+            custom: true,
+          });
+          setCustomName("");
+          setCustomDetails("");
+          setCustomOrigin("");
+          setCustomMode(false);
+        }}
       >
-        <PickerBody>
+        <CustomFormSection title="Identity">
           <div>
-            <label className={uiFormLabel}>
-              Name <span className="text-red-500">*</span>
-            </label>
+            <RequiredFormLabel htmlFor="custom-malignancy-name">Name</RequiredFormLabel>
             <input
-              type="text"
+              id="custom-malignancy-name"
+              required
               value={customName}
               onChange={(event) => setCustomName(event.target.value)}
               placeholder="Name the malignancy..."
               className={editableInputClass(true) + " mt-0.5"}
             />
           </div>
+        </CustomFormSection>
 
-          <FormField
-            label="Details"
-            value={customDetails}
-            onChange={setCustomDetails}
-            editable
-            type="textarea"
-            rows={3}
-            placeholder="Optional details..."
-          />
-        </PickerBody>
-      </PickerModal>
+        <CustomFormSection title="Origin">
+          <OriginSelector name="custom-malignancy-origin" value={customOrigin} onChange={setCustomOrigin} />
+        </CustomFormSection>
+
+        <CustomFormSection title="Rules">
+          <div>
+            <RequiredFormLabel htmlFor="custom-malignancy-rules">Rules Text</RequiredFormLabel>
+            <textarea
+              id="custom-malignancy-rules"
+              required
+              value={customDetails}
+              onChange={(event) => setCustomDetails(event.target.value)}
+              placeholder="What this malignancy does..."
+              rows={4}
+              className={editableTextareaClass(true) + " mt-0.5"}
+            />
+          </div>
+        </CustomFormSection>
+      </CustomFormShell>
     );
   }
 
@@ -186,7 +177,7 @@ export function CorruptionMalignancyPicker({
 
   return (
     <PickerModal
-      title="Add Malignancy"
+      title={editable ? "Add Malignancy" : "View Malignancies"}
       placeholder="Search malignancies..."
       query={query}
       onQueryChange={setQuery}
@@ -194,20 +185,27 @@ export function CorruptionMalignancyPicker({
       scrollPositionRef={listScrollPositionRef}
       isEmpty={filtered.length === 0}
       footer={
-        <PickerCustomAction
-          onClick={() => {
-            setCustomMode(true);
-            setCustomName("");
-            setCustomDetails("");
-          }}
-        >
-          + Add custom malignancy
-        </PickerCustomAction>
+        editable && (
+          <PickerCustomAction
+            onClick={() => {
+              setCustomMode(true);
+              setCustomName("");
+              setCustomDetails("");
+              setCustomOrigin("");
+            }}
+          >
+            + Add custom malignancy
+          </PickerCustomAction>
+        )
       }
     >
+      <div className="space-y-3 p-3 lg:p-4">
       {filtered.map((ref) => (
         <PickerRow
           key={ref.id}
+          card
+          className={uiSectionShell}
+          interactive={editable}
           onClick={() => {
             if (getRoll1d10Modifiers(ref.modifiers).length === 0) {
               addReferenceMalignancy(ref);
@@ -233,6 +231,7 @@ export function CorruptionMalignancyPicker({
           </div>
         </PickerRow>
       ))}
+      </div>
     </PickerModal>
   );
 }

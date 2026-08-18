@@ -67,6 +67,11 @@ Use the same boundary method as Insanity: one below, on, and one above every thr
 - [ ] A Malignancy with no rollable modifiers does *not* show an "Edit Rolls" button
 - [ ] Add a Minor and a Major Mutation independently — they stay in separate groups, don't cross-contaminate
 - [ ] On phone: three-way tab switch (Malignancies / Minor / Major) swipes correctly; on desktop, all three show side by side
+- [ ] Editable mode shows an icon Add button beside each group header; read-only mode shows a View icon button instead, which opens the picker in browse-only mode — rows don't respond to clicks and there's no custom-add action
+- [ ] Malignancy/Mutation picker rows are boxed cards, matching Talents/Traits/Skills/Psychic
+- [ ] Custom Malignancy/Mutation form requires Name, Origin (Custom/2nd Ed), and Rules Text — Add stays disabled until all three are filled
+- [ ] Once added, a custom malignancy/mutation shows its Origin as a source chip on the entry
+- [ ] Custom Malignancy/Mutation form's "* Required" hint stays visible even after every field is filled in, not just while incomplete
 
 **Watch for:** this is the one page that writes to another page — a rolled
 characteristic modifier here should appear as an adjustment badge on the
@@ -184,6 +189,7 @@ below deliberately change several of those pages.
 - [ ] All six Weapon Training entries are absent: Basic, Heavy, Melee, Pistol, Thrown, and Exotic Weapon Training
 - [ ] Every normal Talent deletion uses a two-step **Delete / Cancel** confirmation
 - [ ] Refresh after several additions and deletions and confirm the same cards, ranks, choices, and sources remain
+- [ ] Any acquisition screen showing a "* Required" hint keeps it visible even once every required field is filled, not just while incomplete
 
 **Ranked Talents:**
 
@@ -377,6 +383,7 @@ cross-checking permanent effects and their named sources.
 - [ ] Add Sanctioned Psyker directly on this page, then separately select Imperial Psyker as Career — only one Sanctioned Psyker card is shown (the career-derived one); changing Career away from Imperial Psyker afterwards brings back the manually-added copy rather than losing it. The same check applies to Machine when both The Flesh is Weak and an independent Machine trait are present
 - [ ] Custom trait creation — Name, Rules Text, and Origin (Custom/2nd Ed) are all required before Add enables; the saved rules text and Origin both actually appear on the character's own card afterwards, not just in the library definition
 - [ ] Custom trait creation and publishing — see §21, Custom Item Library
+- [ ] Custom trait creation's and every Trait acquisition screen's (Soul-bound, Sanctioning, Blank Slate, etc.) "* Required" hint stays visible once all fields are filled, not just while incomplete
 
 ## 9. Weapons
 
@@ -421,6 +428,7 @@ Use a disposable character and create a small labelled test inventory: one norma
 - [ ] Damage entered as dice notation (e.g. "1d10+3") plus a damage type (I/R/E/X) round-trips correctly, including editing an existing custom weapon and seeing the same values pre-filled
 - [ ] Reload entered as an amount + type (e.g. "2 Full") parses and re-displays correctly, and the special-case values ("Full", "Special", "—") all work
 - [ ] Custom weapon/grenade/shield creation and publishing — see §21, Custom Item Library
+- [ ] Custom weapon/grenade/shield forms' "* Required" hint stays visible once all fields are filled, not just while incomplete
 
 **Watch for:** weapons with a fixed number of internal magazine slots (e.g.
 Panoptic, Spectre) — confirm each magazine tracks its own rounds
@@ -442,6 +450,7 @@ Add the five named armour fixtures and inspect their picker summaries before add
 - [ ] Refractor Field shows a Spare Cells counter that goes up/down and persists; Amulet of Warding and Rosarius do not show one
 - [ ] Craftsmanship (Poor/Common/Good/Best) is chosen at the moment you add a piece, both for worn armour and Force Fields — confirm the default is Common and cycling afterwards updates AP/weight/value where the rules say it should
 - [ ] Custom armour and custom Force Field creation and publishing — see §21
+- [ ] Custom armour and Force Field forms' "* Required" hint stays visible once all fields are filled, not just while incomplete
 
 ## 11. Cybernetics
 
@@ -458,6 +467,7 @@ Use a character with enough funds/context to install the Concealed Weapon Bionic
 - [ ] Mechadendrites specifically are locked to **Good** craftsmanship only, never Common/Poor/Best
 - [ ] For the handful of other implants that *do* list Poor/Common/Good text, cycling still only changes cost, not availability — confirm the new availability logic from §11's first item didn't leak onto them
 - [ ] A bionic implant assigned a body location shows up as a Toughness Bonus contribution on the relevant Armour location
+- [ ] Custom implant form's "* Required" hint stays visible once all fields are filled, not just while incomplete
 
 ## 12. Psychic Powers
 
@@ -567,6 +577,7 @@ Add one fixed-price item, one variable-price item, one normal consumable, and Lu
 - [ ] An item with a listed "Varies" price (Cognomen, Forgery Kit) shows a "Cost assigned on add" note directly in the picker list, then prompts for a manually entered cost and rarity before it can actually be added
 - [ ] Lumenmould specifically (no fixed listed price) shows the same note and prompt
 - [ ] Custom gear and custom consumable creation and publishing — see §21, Custom Item Library
+- [ ] Custom gear/consumable forms' "* Required" hint stays visible once all fields are filled, not just while incomplete
 
 ## 14. Companions
 
@@ -599,6 +610,7 @@ Add and remove a reference drug, then create a uniquely named custom drug. In th
 - [ ] Add/remove from the reference list
 - [ ] Custom drug creation — Name, quantity (positive whole number), Origin, Availability, Weight, and Value are all required before Add enables
 - [ ] Custom drug creation and publishing — see §21, Custom Item Library
+- [ ] Custom drug form's "* Required" hint stays visible once all fields are filled, not just while incomplete
 
 ## 16. Experience
 
@@ -668,6 +680,7 @@ Trait rules that explicitly change Skill use are applied automatically.
 - [ ] Career, Sanctioning Effect, and Rank each get their own full-width row on desktop — never squeezed into a shared 2-column grid, even when Sanctioning Effect isn't present
 - [ ] Selecting Imperial Psyker as Career and completing the Sanctioned Psyker acquisition (rolling 3d10 for the starting age increase) actually adds that roll to Age — the Age field shows the combined total (base + roll), and its info icon shows a "Modifiers" breakdown listing "Sanctioned Psyker: +X"
 - [ ] After completing Sanctioned Psyker, click Age to edit it — the input shows the raw base (not the combined total); typing a new base and committing (blur/Enter) re-adds the Sanctioned Psyker roll on top of the new value, so the modifier keeps applying no matter how many times Age is edited afterward
+- [ ] The Sanctioning Effect picker's "* Required" hint (when a roll is still needed) stays visible once every field is filled, not just while incomplete
 
 ## 19. Archeotech
 
@@ -681,6 +694,7 @@ Add one fixture of each type: Armour, Weapon, Grenade/Mine, and plain item. Keep
 - [ ] Same check for one typed as a Weapon (Weapons tab) and one typed as a Grenade/Mine (counts toward the 2-type grenade limit in §9)
 - [ ] A plain (non-armour, non-weapon) Archeotech item behaves like a normal gear-style entry
 - [ ] Custom archeotech creation and publishing — see §21, Custom Item Library
+- [ ] Custom archeotech form's "* Required" hint stays visible once all fields are filled, not just while incomplete
 
 ## 20. Admin (DM only)
 

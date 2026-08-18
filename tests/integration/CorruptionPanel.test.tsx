@@ -59,36 +59,36 @@ describe("CorruptionPanel tab switching", () => {
 });
 
 describe("CorruptionPanel picker wiring", () => {
-  it("opens the Malignancy picker from the Malignancies + Add button", async () => {
+  it("opens the Malignancy picker from the Malignancies Add button", async () => {
     const user = userEvent.setup();
     render(<CorruptionWiring initial={{ points: 0, malignancies: [] }} />);
 
-    await user.click(findButtonNear("Malignancies", "+ Add"));
+    await user.click(findButtonNear("Malignancies", "Add Malignancy"));
 
-    expect(screen.getByText("Add Malignancy")).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Add Malignancy" })).toBeInTheDocument();
   });
 
-  it("opens the Minor Mutation picker from the Minor Mutations + Add button", async () => {
+  it("opens the Minor Mutation picker from the Minor Mutations Add button", async () => {
     const user = userEvent.setup();
     render(<CorruptionWiring initial={{ points: 0, malignancies: [] }} />);
 
-    await user.click(findButtonNear("Minor Mutations", "+ Add"));
+    await user.click(findButtonNear("Minor Mutations", "Add Minor Mutation"));
 
-    expect(screen.getByText("Add Minor Mutation")).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Add Minor Mutation" })).toBeInTheDocument();
   });
 
-  it("opens the Major Mutation picker from the Major Mutations + Add button", async () => {
+  it("opens the Major Mutation picker from the Major Mutations Add button", async () => {
     const user = userEvent.setup();
     render(<CorruptionWiring initial={{ points: 0, malignancies: [] }} />);
 
-    await user.click(findButtonNear("Major Mutations", "+ Add"));
+    await user.click(findButtonNear("Major Mutations", "Add Major Mutation"));
 
-    expect(screen.getByText("Add Major Mutation")).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Add Major Mutation" })).toBeInTheDocument();
   });
 });
 
 describe("CorruptionPanel editable=false", () => {
-  it("hides Add/Remove actions and disables the stepper", () => {
+  it("hides Remove actions and disables the stepper", () => {
     render(
       <CorruptionWiring
         initial={{ points: 20, malignancies: [{ id: "m1", referenceId: "witch-mark", name: "Witch-mark" }] }}
@@ -96,10 +96,24 @@ describe("CorruptionPanel editable=false", () => {
       />
     );
 
-    expect(screen.queryByRole("button", { name: "+ Add" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Add Malignancy" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Remove" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Increase" })).toHaveAttribute("aria-disabled", "true");
     expect(screen.getByRole("button", { name: "Decrease" })).toHaveAttribute("aria-disabled", "true");
+  });
+
+  it("shows a View Malignancies button that opens the picker in read-only mode", async () => {
+    const user = userEvent.setup();
+    render(
+      <CorruptionWiring
+        initial={{ points: 0, malignancies: [] }}
+        editable={false}
+      />
+    );
+
+    await user.click(findButtonNear("Malignancies", "View Malignancies"));
+
+    expect(screen.getByRole("dialog", { name: "View Malignancies" })).toBeInTheDocument();
   });
 });
 

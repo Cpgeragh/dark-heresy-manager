@@ -34,8 +34,8 @@ const CATEGORIES: {
     tabs: [
       { id: "background", label: "Background" },
       { id: "stats", label: "Characteristics" },
-      { id: "insanity", label: "Insanity" },
       { id: "corruption", label: "Corruption & Mutations" },
+      { id: "insanity", label: "Insanity" },
       { id: "notes", label: "Notes" },
       { id: "xp", label: "XP" },
     ],

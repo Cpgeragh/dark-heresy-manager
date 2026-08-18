@@ -160,7 +160,7 @@ export function TraitAcquisitionModal({
                 );
               })}
             </div>
-            {!canSubmit && <RequiredFieldsNote />}
+            <RequiredFieldsNote />
             <Button fullWidth disabled={!canSubmit} onClick={() => onComplete({ entry: { ...entry, notes: `Imprinted Skills: ${blankSkills.map((id) => DEFAULT_SKILLS.find((skill) => skill.id === id)?.name).join(", ")}.`, acquisition: { ...entry.acquisition, trait: { blankSlateSkillIds: blankSkills } } } })}>Apply and add Trait</Button>
           </div>
         </PickerBody>
@@ -180,7 +180,7 @@ export function TraitAcquisitionModal({
           {consequence === "characteristic" && <PickerField id="soul-bound-characteristic" label="Characteristic" value={CHARACTERISTICS.find((option) => option.value === characteristic)?.label ?? ""} placeholder="Choose Characteristic…" required onClick={() => setPicker("characteristic")} />}
           {rollRequired && <div><label htmlFor="soul-bound-roll" className={uiFormLabel}>Rolled result (1d10) <span className="text-red-500">*</span></label><input id="soul-bound-roll" type="text" inputMode="numeric" value={rolledValue} onChange={(event) => setRolledValue(sanitizePositiveIntegerInput(event.target.value))} placeholder="1–10" className={`${editableInputClass(true)} mt-0.5`} /></div>}
           {consequence === "mutation" && <div><label htmlFor="soul-bound-mutation" className={uiFormLabel}>Mutation <span className="text-red-500">*</span></label><input id="soul-bound-mutation" value={mutationName} onChange={(event) => setMutationName(event.target.value)} placeholder="Enter mutation…" className={`${editableInputClass(true)} mt-0.5`} /></div>}
-          {!canSubmit && <RequiredFieldsNote />}
+          <RequiredFieldsNote />
           <Button fullWidth disabled={!canSubmit} onClick={() => onComplete({ entry: { ...entry, notes: `Bound to ${entity.trim()}; ${SOUL_CONSEQUENCES.find((option) => option.value === consequence)?.label}.`, acquisition: { ...entry.acquisition, trait: { soulBound: { entity: entity.trim(), consequence: consequence as "insanity" | "blindness" | "characteristic" | "mutation", ...(characteristic ? { characteristic: characteristic as "ws" } : {}), ...(rollRequired ? { rolledValue: roll } : {}), ...(mutationName.trim() ? { mutationName: mutationName.trim() } : {}) } } } } })}>Apply and add Trait</Button>
         </div></PickerBody>
       </PickerModal>
@@ -198,7 +198,7 @@ export function TraitAcquisitionModal({
           <PickerField id="sanctioning-result" label="Sanctioning side effect" value={selectedSanction ? `${selectedSanction.roll} — ${selectedSanction.name}` : ""} placeholder="Choose result…" required onClick={() => setPicker("sanctioning")} />
           {sanctionRange && <div><label htmlFor="sanction-roll" className={uiFormLabel}>{sanctionRange.label} <span className="text-red-500">*</span></label><input id="sanction-roll" type="text" inputMode="numeric" value={rolledValue} onChange={(event) => setRolledValue(sanitizePositiveIntegerInput(event.target.value))} placeholder={`${sanctionRange.min}–${sanctionRange.max}`} className={`${editableInputClass(true)} mt-0.5`} /></div>}
           <div><label htmlFor="sanction-age" className={uiFormLabel}>Starting age increase (3d10) <span className="text-red-500">*</span></label><input id="sanction-age" type="text" inputMode="numeric" value={ageIncrease} onChange={(event) => setAgeIncrease(sanitizePositiveIntegerInput(event.target.value))} placeholder="3–30" className={`${editableInputClass(true)} mt-0.5`} /></div>
-          {!canSubmit && <RequiredFieldsNote />}
+          <RequiredFieldsNote />
           <Button fullWidth disabled={!canSubmit} onClick={() => {
             if (!selectedSanction) return;
             const sanctioning: SanctioningAcquisition = { resultId: selectedSanction.id, resultName: selectedSanction.name, ageIncrease: age, ...(sanctionRange && sanctionResultId === "reconstructed-skull" ? { thronesGained: roll } : sanctionRange ? { rolledValue: roll } : {}) };
@@ -246,7 +246,7 @@ export function TraitAcquisitionModal({
             {upgradeCandidates.length === 0 && <p className="text-sm text-red-400">No installed Poor or Common cybernetic can be upgraded.</p>}
           </>
         )}
-        {!canSubmitSkin && <RequiredFieldsNote />}
+        <RequiredFieldsNote />
         <Button fullWidth disabled={!canSubmitSkin} onClick={() => {
           if (skinKind === "upgrade") {
             if (!selectedUpgrade) return;

@@ -31,9 +31,7 @@ export function CustomFormFooter({
 }: CustomFormFooterProps) {
   return (
     <div className={`space-y-2 ${className}`.trim()}>
-      {!canSubmit && (
-        <RequiredFieldsNote />
-      )}
+      <RequiredFieldsNote />
       <div className="flex gap-2">
         <Button className="flex-1" onClick={onSubmit} disabled={!canSubmit || saving}>
           {saving ? savingLabel : submitLabel}

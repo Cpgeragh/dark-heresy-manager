@@ -6,10 +6,12 @@ import { InfoModal } from "../../components/InfoModal";
 import { Stepper } from "../../components/Stepper";
 import { useSwipeableTabs } from "../../hooks/useSwipeableTabs";
 import type { CorruptionBlock, CorruptionMalignancyEntry, CorruptionMutationEntry } from "../../types/Character";
+import { AddButton } from "../../ui/AddButton";
 import { Button } from "../../ui/Button";
 import { Chip } from "../../ui/Chip";
 import { RemoveButton } from "../../ui/RemoveButton";
 import { RollChip } from "../../ui/RollChip";
+import { ViewButton } from "../../ui/ViewButton";
 import {
   colourActiveEmerald,
   colourActiveOrange,
@@ -26,6 +28,7 @@ import {
   uiTextPlaceholder,
 } from "../../ui/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
+import { sourceColour } from "../../ui/sourceStyles";
 import { SegmentedTabs, type SegmentedTabOption } from "../../ui/SegmentedTabs";
 import {
   segmentedTabId,
@@ -230,14 +233,24 @@ function CorruptionStatusChips({ points }: { points: number }) {
   );
 }
 
-function GroupHeader({ label, editable, onAdd }: { label: string; editable: boolean; onAdd: () => void }) {
+function GroupHeader({
+  label,
+  singular,
+  editable,
+  onAdd,
+}: {
+  label: string;
+  singular: string;
+  editable: boolean;
+  onAdd: () => void;
+}) {
   return (
     <div className="flex items-center justify-between gap-2">
       <SectionHeader>{label}</SectionHeader>
-      {editable && (
-        <Button size="xs" onClick={onAdd}>
-          + Add
-        </Button>
+      {editable ? (
+        <AddButton label={`Add ${singular}`} onClick={onAdd} />
+      ) : (
+        <ViewButton label={`View ${label}`} onClick={onAdd} />
       )}
     </div>
   );
@@ -272,9 +285,14 @@ export function MalignancyRow({
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <span className={uiItemName}>{display.name}</span>
-          {display.roll && (
+          {(display.roll || malignancy.source) && (
             <div className="mt-1 flex flex-wrap gap-1.5">
-              <RollChip>{display.roll}</RollChip>
+              {display.roll && <RollChip>{display.roll}</RollChip>}
+              {malignancy.source && (
+                <Chip size="sm" className={`bg-slate-800/40 font-code ${sourceColour(malignancy.source)}`}>
+                  {malignancy.source}
+                </Chip>
+              )}
             </div>
           )}
           {rollEntries.length > 0 && (
@@ -550,7 +568,12 @@ export function CorruptionPanel({ corruption, editable, onUpdate, sectionClassNa
     if (group === "malignancies") {
       return (
         <>
-          <GroupHeader label="Malignancies" editable={editable} onAdd={() => setShowMalignancyPicker(true)} />
+          <GroupHeader
+            label="Malignancies"
+            singular="Malignancy"
+            editable={editable}
+            onAdd={() => setShowMalignancyPicker(true)}
+          />
           <MalignanciesList
             malignancies={structuredMalignancies}
             legacyMalignancies={legacyMalignancies}
@@ -565,7 +588,12 @@ export function CorruptionPanel({ corruption, editable, onUpdate, sectionClassNa
     if (group === "minorMutations") {
       return (
         <>
-          <GroupHeader label="Minor Mutations" editable={editable} onAdd={() => setShowMinorMutationPicker(true)} />
+          <GroupHeader
+            label="Minor Mutations"
+            singular="Minor Mutation"
+            editable={editable}
+            onAdd={() => setShowMinorMutationPicker(true)}
+          />
           <MutationsList
             mutations={minorMutations}
             editable={editable}
@@ -578,7 +606,12 @@ export function CorruptionPanel({ corruption, editable, onUpdate, sectionClassNa
     }
     return (
       <>
-        <GroupHeader label="Major Mutations" editable={editable} onAdd={() => setShowMajorMutationPicker(true)} />
+        <GroupHeader
+          label="Major Mutations"
+          singular="Major Mutation"
+          editable={editable}
+          onAdd={() => setShowMajorMutationPicker(true)}
+        />
         <MutationsList
           mutations={majorMutations}
           editable={editable}
@@ -637,6 +670,7 @@ export function CorruptionPanel({ corruption, editable, onUpdate, sectionClassNa
       {showMalignancyPicker && (
         <CorruptionMalignancyPicker
           existingReferenceIds={existingMalignancyReferenceIds}
+          editable={editable}
           onAdd={handleAddMalignancy}
           onClose={() => setShowMalignancyPicker(false)}
         />
@@ -645,6 +679,7 @@ export function CorruptionPanel({ corruption, editable, onUpdate, sectionClassNa
         <MutationPicker
           tier="minor"
           existingReferenceIds={existingMinorMutationReferenceIds}
+          editable={editable}
           onAdd={handleAddMinorMutation}
           onClose={() => setShowMinorMutationPicker(false)}
         />
@@ -653,6 +688,7 @@ export function CorruptionPanel({ corruption, editable, onUpdate, sectionClassNa
         <MutationPicker
           tier="major"
           existingReferenceIds={existingMajorMutationReferenceIds}
+          editable={editable}
           onAdd={handleAddMajorMutation}
           onClose={() => setShowMajorMutationPicker(false)}
         />

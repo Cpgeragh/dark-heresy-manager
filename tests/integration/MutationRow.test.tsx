@@ -53,4 +53,17 @@ describe("MutationRow", () => {
 
     expect(screen.queryByRole("button", { name: "Edit Rolls" })).not.toBeInTheDocument();
   });
+
+  it("shows a source chip for a custom mutation with an origin", () => {
+    render(
+      <MutationRow
+        mutation={{ id: "m3", name: "Extra Toes", effect: "Just weird toes.", source: "2nd Ed", custom: true }}
+        editable
+        onRemove={vi.fn()}
+        onUpdateRolls={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText("2nd Ed")).toBeInTheDocument();
+  });
 });
