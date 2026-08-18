@@ -53,6 +53,7 @@ import type {
   ArcheotechItem,
   PsychicBlock,
   CompanionItem,
+  NoteEntry,
 } from "../types/Character";
 
 import { exportCharacterJson } from "../utils/exportCharacter";
@@ -322,7 +323,7 @@ export default function CharacterSheet({
   );
 
   const handleUpdateNotes = useCallback(
-    (value: string) => updateField("notes", value),
+    (value: string | NoteEntry[]) => updateField("notes", value),
     [updateField]
   );
 
@@ -704,7 +705,7 @@ export default function CharacterSheet({
 
           {activeTab === "notes" && (
             <NotesTab
-              notes={character.notes ?? ""}
+              notes={character.notes ?? []}
               editable={allowedToEdit}
               onSave={handleUpdateNotes}
             />

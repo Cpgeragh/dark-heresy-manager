@@ -665,6 +665,13 @@ export interface CharacterHeader {
  * MAIN CHARACTER TYPE
  * Firestore stores everything except `id`.
  */
+export interface NoteEntry {
+  id: string;
+  title: string;
+  text: string;
+  updatedAt: string; // ISO timestamp; drives newest-first sort
+}
+
 export interface Character {
   id: string;
   campaignId: string;
@@ -704,6 +711,6 @@ export interface Character {
   experience: ExperienceBlock;
   psychic: PsychicBlock;
 
-  notes?: string;
+  notes?: string | NoteEntry[];
   portraitUrl?: string;
 }
