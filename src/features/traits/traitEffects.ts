@@ -144,7 +144,13 @@ export function getActiveTraitEntries(
   talents: TalentsAndTraitsBlock,
   career?: string
 ): TalentEntry[] {
-  return [...talents.traits, ...getDerivedTraitEntries(talents, career)];
+  const derived = getDerivedTraitEntries(talents, career);
+  const derivedTalentIds = new Set(derived.map((entry) => entry.talentId));
+  const manual = talents.traits.filter((entry) => {
+    const trait = TRAIT_LIST.find((item) => item.id === entry.talentId);
+    return trait?.repeatable || !derivedTalentIds.has(entry.talentId);
+  });
+  return [...manual, ...derived];
 }
 
 function addSource(

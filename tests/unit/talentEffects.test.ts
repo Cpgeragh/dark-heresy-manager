@@ -6,6 +6,7 @@ import type {
   TalentsAndTraitsBlock,
 } from "../../src/types/Character";
 import {
+  getActiveTalentEntries,
   getGrantedExoticWeapons,
   getGrantedTalentEntries,
   filterTalentEntriesCoveredByGrants,
@@ -203,6 +204,19 @@ describe("Talent cross-page effects", () => {
     const grants = getGrantedTalentEntries(block([grantOrigin]));
     expect(filterTalentEntriesCoveredByGrants([directCopy], grants)).toEqual([]);
     expect(filterTalentEntriesCoveredByGrants([directCopy], [])).toEqual([directCopy]);
+  });
+
+  it("counts a granted Talent only once even when the same Talent is also directly purchased", () => {
+    const talents = block([
+      entry("cult", "cult-briefing", "Cult Briefing (Pleasure)", "Pleasure", {
+        grantedTalentId: "chem-geld",
+        grantedTalentName: "Chem Geld",
+      }),
+      entry("chem", "chem-geld", "Chem Geld"),
+    ]);
+
+    const active = getActiveTalentEntries(talents);
+    expect(active.filter((item) => item.talentId === "chem-geld")).toHaveLength(1);
   });
 
   it("tracks Touched by the Fates and reverses Purity Fate through linked Reformed Skin", () => {

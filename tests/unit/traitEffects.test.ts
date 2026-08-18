@@ -81,6 +81,28 @@ describe("Trait cross-page effects", () => {
     );
   });
 
+  it("counts a manually-purchased Sanctioned Psyker only once when the same career also derives it", () => {
+    const manual = trait("sanctioned-psyker", undefined, {
+      uid: "manual-sanctioned",
+      acquisition: {
+        trait: { sanctioning: { resultId: "hunted", resultName: "Hunted", rolledValue: 1, ageIncrease: 5 } },
+      },
+    });
+    const talents = block({
+      traits: [manual],
+      careerTraitAcquisition: {
+        sanctioning: { resultId: "hunted", resultName: "Hunted", rolledValue: 5, ageIncrease: 12 },
+      },
+    });
+
+    const active = getActiveTraitEntries(talents, "Imperial Psyker");
+    expect(active.filter((entry) => entry.talentId === "sanctioned-psyker")).toHaveLength(1);
+
+    const insanitySources = getTraitInsanityModifierSources(talents, "Imperial Psyker");
+    expect(insanitySources).toHaveLength(1);
+    expect(insanitySources[0].amount).toBe(5);
+  });
+
   it("derives Blind as a read-only consequence of Soul-bound blindness", () => {
     const talents = block({ traits: [trait("soul-bound", undefined, {
       acquisition: { trait: { soulBound: { entity: "The Emperor", consequence: "blindness" } } },

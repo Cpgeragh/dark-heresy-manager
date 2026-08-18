@@ -4,7 +4,7 @@ import { useCallback, useMemo, useState } from "react";
 import type { CyberneticItem, GearItem, TalentsAndTraitsBlock, TalentEntry } from "../../types/Character";
 import { TRAIT_LIST } from "../../data/traitData";
 import { EntryCard, TalentPickerModal } from "./talentComponents";
-import { getDerivedTraitEntries } from "../../features/traits/traitEffects";
+import { getActiveTraitEntries } from "../../features/traits/traitEffects";
 import { AddButton } from "../../ui/AddButton";
 import { ViewButton } from "../../ui/ViewButton";
 import { SectionHeader } from "../../ui/SectionHeader";
@@ -216,23 +216,9 @@ export function TraitsTab({
     [userId, campaignId, characterId, characterName, editingCustomTrait, talents, onUpdateTalents, toast]
   );
 
-  const derivedTraitEntries = useMemo(
-    () => getDerivedTraitEntries(talents, career),
-    [career, talents]
-  );
-  const derivedTalentIds = useMemo(
-    () => new Set(derivedTraitEntries.map((entry) => entry.talentId)),
-    [derivedTraitEntries]
-  );
   const displayTraits = useMemo(
-    () => [
-      ...talents.traits.filter((entry) => {
-        const trait = TRAIT_LIST.find((item) => item.id === entry.talentId);
-        return trait?.repeatable || !derivedTalentIds.has(entry.talentId);
-      }),
-      ...derivedTraitEntries,
-    ],
-    [talents.traits, derivedTraitEntries, derivedTalentIds]
+    () => getActiveTraitEntries(talents, career),
+    [talents, career]
   );
   const unnaturalEntries = displayTraits.filter(
     (entry) => entry.talentId === "unnatural-characteristic"

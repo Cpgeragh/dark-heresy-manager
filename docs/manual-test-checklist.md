@@ -46,7 +46,13 @@ Start at 0 and set Points to one below, exactly on, and one above every document
 - [ ] At the top of the track, the page switches to "Character retires from play" and hides the Status/Thresholds grid
 - [ ] Add a Temporary Trauma from the picker — roll chip and rules text match the entry chosen
 - [ ] Add a Disorder — severity chip colour and info text match its severity, type chip is correct
-- [ ] Remove a Trauma and a Disorder — list updates immediately, no stale row
+- [ ] Remove a Trauma and a Disorder — both arm a confirm step ("Delete [name] from this character?" with Delete/Cancel) instead of deleting on the first tap; the list only updates after confirming
+- [ ] Escalate a Disorder to its next severity tier — button reads "Escalate to Severe"/"Escalate to Acute" depending on current tier, arms its own confirm step ("Escalate [name] to [tier]?" with Escalate/Cancel), and disappears once already at the highest tier for that disorder (The Flesh is Weak has no Minor tier; Horrific Nightmares has no Acute tier)
+- [ ] Editable mode shows an icon Add button beside Disorders and Temporary Trauma headers; read-only mode shows a View icon button instead, which opens the picker in browse-only mode — rows don't respond to clicks and there's no custom-add action
+- [ ] Disorder/Trauma picker rows are boxed cards, matching Talents/Traits/Skills/Psychic
+- [ ] Custom Disorder form requires Type, Name, Origin (Custom/2nd Ed), Severity, and Rules Text; custom Trauma form requires Name, Origin, and Rules Text — Add stays disabled until every required field is filled
+- [ ] Once added, a custom disorder/trauma shows its Origin as a source chip on the entry
+- [ ] Custom Disorder/Trauma form's "* Required" hint stays visible even after every field is filled in, not just while incomplete
 - [ ] On phone: swiping between Temporary Trauma and Disorders tabs works both directions
 
 **Watch for:** a character with old free-text disorder notes (from before the
@@ -72,6 +78,7 @@ Use the same boundary method as Insanity: one below, on, and one above every thr
 - [ ] Custom Malignancy/Mutation form requires Name, Origin (Custom/2nd Ed), and Rules Text — Add stays disabled until all three are filled
 - [ ] Once added, a custom malignancy/mutation shows its Origin as a source chip on the entry
 - [ ] Custom Malignancy/Mutation form's "* Required" hint stays visible even after every field is filled in, not just while incomplete
+- [ ] Removing a Malignancy, Minor Mutation, or Major Mutation arms a confirm step ("Delete [name] from this character?" with Delete/Cancel) instead of deleting on the first tap
 
 **Watch for:** this is the one page that writes to another page — a rolled
 characteristic modifier here should appear as an adjustment badge on the
@@ -381,6 +388,7 @@ cross-checking permanent effects and their named sources.
 - [ ] Opening the Sanctioning side-effect picker shows a Rules button on every result with its full sourcebook effect text, before you've picked one
 - [ ] Picking a Sanctioning result shows its name, roll range, and effect text on a Sanctioning Effect card next to Career on Background, and its rules text appears in the Sanctioned Psyker card's Notes on this page, separated into its own "Roll Results" section from the general rules text
 - [ ] Add Sanctioned Psyker directly on this page, then separately select Imperial Psyker as Career — only one Sanctioned Psyker card is shown (the career-derived one); changing Career away from Imperial Psyker afterwards brings back the manually-added copy rather than losing it. The same check applies to Machine when both The Flesh is Weak and an independent Machine trait are present
+- [ ] With that same manual-plus-career-derived Sanctioned Psyker duplicate present, confirm its Sanctioning side-effect (whatever it rolled — an Insanity Points gain or a Characteristic change) only applies once on Characteristics/Insanity, not twice, even though only one card is visible — this was a real bug (the hidden copy still counted) fixed this session
 - [ ] Custom trait creation — Name, Rules Text, and Origin (Custom/2nd Ed) are all required before Add enables; the saved rules text and Origin both actually appear on the character's own card afterwards, not just in the library definition
 - [ ] Custom trait creation and publishing — see §21, Custom Item Library
 - [ ] Custom trait creation's and every Trait acquisition screen's (Soul-bound, Sanctioning, Blank Slate, etc.) "* Required" hint stays visible once all fields are filled, not just while incomplete

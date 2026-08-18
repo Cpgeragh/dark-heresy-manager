@@ -26,16 +26,25 @@ function entriesFor(talents: TalentsAndTraitsBlock, talentId: string): TalentEnt
   return talents.talents.filter((entry) => entry.talentId === talentId);
 }
 
+export function getActiveTalentEntries(talents: TalentsAndTraitsBlock): TalentEntry[] {
+  const grants = getGrantedTalentEntries(talents);
+  return [...filterTalentEntriesCoveredByGrants(talents.talents, grants), ...grants];
+}
+
+function activeEntriesFor(talents: TalentsAndTraitsBlock, talentId: string): TalentEntry[] {
+  return getActiveTalentEntries(talents).filter((entry) => entry.talentId === talentId);
+}
+
 function hasChoice(entry: TalentEntry, choice: string): boolean {
   return entry.specialisation?.trim().toLocaleLowerCase() === choice.toLocaleLowerCase();
 }
 
 function cultEntry(talents: TalentsAndTraitsBlock, choice: string): TalentEntry | undefined {
-  return entriesFor(talents, "cult-briefing").find((entry) => hasChoice(entry, choice));
+  return activeEntriesFor(talents, "cult-briefing").find((entry) => hasChoice(entry, choice));
 }
 
 function sicariusEntry(talents: TalentsAndTraitsBlock, choice: string): TalentEntry | undefined {
-  return entriesFor(talents, "sicarius-tutoring").find((entry) => hasChoice(entry, choice));
+  return activeEntriesFor(talents, "sicarius-tutoring").find((entry) => hasChoice(entry, choice));
 }
 
 function addCharacteristicSource(
@@ -52,7 +61,7 @@ export function getTalentCharacteristicModifierSources(
 ): TalentModifierSource[] {
   const sources: TalentModifierSource[] = [];
 
-  if (entriesFor(talents, "machinator-array").length > 0) {
+  if (activeEntriesFor(talents, "machinator-array").length > 0) {
     const amount = characteristic === "s" || characteristic === "t"
       ? 10
       : characteristic === "ag" || characteristic === "fel"
@@ -66,7 +75,7 @@ export function getTalentCharacteristicModifierSources(
   }
 
   if (characteristic === "t") {
-    for (const entry of entriesFor(talents, "purity-of-flesh")) {
+    for (const entry of activeEntriesFor(talents, "purity-of-flesh")) {
       const loss = entry.acquisition?.purity?.toughnessLoss ?? 0;
       addCharacteristicSource(sources, "Purity of Flesh", -loss);
     }
@@ -105,14 +114,14 @@ export function getTalentWoundModifierSources(
   talents: TalentsAndTraitsBlock
 ): TalentModifierSource[] {
   const sources: TalentModifierSource[] = [];
-  const soundConstitution = entriesFor(talents, "sound-constitution").length;
+  const soundConstitution = activeEntriesFor(talents, "sound-constitution").length;
   addCharacteristicSource(sources, `Sound Constitution${soundConstitution > 1 ? ` (${soundConstitution})` : ""}`, soundConstitution);
 
   if (sicariusEntry(talents, "Imperial Psyker")) {
     addCharacteristicSource(sources, "Sicarius Tutoring (Imperial Psyker)", 1);
   }
 
-  for (const entry of entriesFor(talents, "purity-of-flesh")) {
+  for (const entry of activeEntriesFor(talents, "purity-of-flesh")) {
     const loss = entry.acquisition?.purity?.woundsLoss ?? 0;
     addCharacteristicSource(sources, "Purity of Flesh", -loss);
   }
@@ -142,15 +151,15 @@ export interface TalentFateEffects {
 
 export function getTalentFateEffects(talents: TalentsAndTraitsBlock): TalentFateEffects {
   const modifierSources: TalentModifierSource[] = [];
-  const touched = entriesFor(talents, "touched-by-the-fates").find(
+  const touched = activeEntriesFor(talents, "touched-by-the-fates").find(
     (entry) => entry.acquisition?.touchedByFatesPoints !== undefined
   );
 
-  for (const purity of entriesFor(talents, "purity-of-flesh")) {
+  for (const purity of activeEntriesFor(talents, "purity-of-flesh")) {
     const gained = purity.acquisition?.purity?.fatePointsGained ?? 0;
     if (gained <= 0) continue;
     modifierSources.push({ name: "Purity of Flesh", type: "Talent", amount: gained });
-    const replaced = entriesFor(talents, "reformed-skin").some(
+    const replaced = activeEntriesFor(talents, "reformed-skin").some(
       (entry) =>
         entry.acquisition?.reformedSkinPurityReplacement &&
         entry.acquisition?.purityTalentEntryUid === purity.uid
@@ -192,13 +201,13 @@ export function getTalentSkillEffects(
 ): TalentSkillEffects {
   const effects: TalentSkillEffects = { modifier: 0, sources: [] };
 
-  for (const entry of entriesFor(talents, "talented")) {
+  for (const entry of activeEntriesFor(talents, "talented")) {
     if (!skillMatchesTalentChoice(skill, entry)) continue;
     effects.modifier += 10;
     effects.sources.push({ name: entry.name, type: "Talent", amount: 10 });
   }
 
-  if (skill.id === "silent-move" && entriesFor(talents, "machinator-array").length > 0) {
+  if (skill.id === "silent-move" && activeEntriesFor(talents, "machinator-array").length > 0) {
     effects.modifier -= 10;
     effects.sources.push({ name: "Machinator Array", type: "Talent", amount: -10 });
   }
