@@ -22,7 +22,7 @@ export const TRAIT_DESCRIPTIONS: Record<string, string> = {
     "Doubles Toughness Bonus against all Damage. Immune to poison and disease. The doubling does not apply against force weapons, Psychic Powers, holy attacks, or other Daemonic creatures. If combined with Unnatural Toughness, do not multiply Toughness Bonus twice; add 1 to the Unnatural Toughness multiplier instead.",
   "dark-sight":
     "Sees normally in all levels of darkness. Never takes penalties for dim or absent lighting.",
-  fear: "Characters who encounter this creature must pass a Willpower Test, modified by the Fear Rating. On failure, roll on the Shock Table, adding +10 per degree of failure. Fear Rating: 1 Disturbing (0), 2 Frightening (–10), 3 Horrifying (–20), 4 Terrifying (–30).",
+  fear: "Characters who encounter this creature must pass a Willpower Test, modified by the Fear Rating. On failure, roll on the Shock Table, adding +10 per degree of failure. Fear Rating: 1 Disturbing (0), 2 Frightening (–10), 3 Horrifying (–20), 4 Terrifying (–30). A character is immune and need not test if the first digit of their own Insanity total is double the Fear Rating or more.",
   flyer: "Can fly at the selected speed.",
   "from-beyond":
     "Immune to Fear, Pinning, Insanity Points, and Psychic Powers used to cloud, control, or delude its mind.",
