@@ -1,18 +1,21 @@
 import { useRef, useState } from "react";
-import { FormField } from "../../components/FormField";
 import { InfoModal } from "../../components/InfoModal";
 import type { InsanityTraumaEntry } from "../../types/Character";
-import { Button } from "../../ui/Button";
-import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../ui/PickerModal";
+import type { CustomItemOrigin } from "../../constants/customItems";
+import { CustomFormSection } from "../../ui/CustomFormSection";
+import { CustomFormShell } from "../../ui/CustomFormShell";
+import { OriginSelector } from "../../ui/OriginSelector";
+import { PickerCustomAction, PickerModal, PickerRow } from "../../ui/PickerModal";
 import { ArrowLeft } from "../../ui/PickerArrows";
 import { OptionPickerScreen } from "../../ui/OptionPickerScreen";
+import { RequiredFormLabel } from "../../ui/RequiredFormLabel";
 import { RollChip } from "../../ui/RollChip";
-import { uiPickerBackButton } from "../../ui/buttonStyles";
 import {
   editableInputClass,
-  uiFormLabel,
+  editableTextareaClass,
   uiInfoModalWrapper,
   uiItemName,
+  uiSectionShell,
   uiTextLabel,
 } from "../../ui/editableStyles";
 import { MENTAL_TRAUMAS, type MentalTraumaEntry } from "./insanityReference";
@@ -20,10 +23,12 @@ import { createLocalId } from "../../utils/createLocalId";
 
 export function InsanityTraumaPicker({
   existingReferenceIds,
+  editable,
   onAdd,
   onClose,
 }: {
   existingReferenceIds: Set<string>;
+  editable: boolean;
   onAdd: (entry: InsanityTraumaEntry) => void;
   onClose: () => void;
 }) {
@@ -31,14 +36,16 @@ export function InsanityTraumaPicker({
   const [customMode, setCustomMode] = useState(false);
   const [customName, setCustomName] = useState("");
   const [customDetails, setCustomDetails] = useState("");
+  const [customOrigin, setCustomOrigin] = useState<"" | CustomItemOrigin>("");
   const [selected, setSelected] = useState<MentalTraumaEntry | null>(null);
   const listScrollPositionRef = useRef(0);
+  const customFormScrollPositionRef = useRef(0);
 
   const filtered = MENTAL_TRAUMAS.filter((ref) => {
     const searchable = `${ref.roll} ${ref.name} ${ref.effect}`.toLowerCase();
     return !existingReferenceIds.has(ref.roll) && searchable.includes(query.trim().toLowerCase());
   }).sort((a, b) => a.name.localeCompare(b.name));
-  const canAddCustom = Boolean(customName.trim());
+  const canAddCustom = Boolean(customName.trim()) && Boolean(customOrigin) && Boolean(customDetails.trim());
 
   function addReferenceTrauma(ref: MentalTraumaEntry, name: string) {
     onAdd({
@@ -77,85 +84,69 @@ export function InsanityTraumaPicker({
 
   if (customMode) {
     return (
-      <PickerModal
+      <CustomFormShell
         title="Custom Trauma"
-        query=""
-        onQueryChange={() => undefined}
-        onClose={() => setCustomMode(false)}
+        scrollPositionRef={customFormScrollPositionRef}
         closeLabel={<ArrowLeft />}
         closeAriaLabel="Back"
-        hideSearch
-        isEmpty={false}
-        footer={
-          <div className="space-y-2">
-            {!canAddCustom && (
-              <p className="text-xs lg:text-sm text-slate-300">
-                <span className="text-red-500">*</span> Required
-              </p>
-            )}
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setCustomMode(false)}
-                className={uiPickerBackButton}
-              >
-                Back
-              </button>
-              <Button
-                size="sm"
-                type="button"
-                onClick={() => {
-                  if (!canAddCustom) return;
-                  onAdd({
-                    id: createLocalId("trauma"),
-                    name: customName.trim(),
-                    effect: customDetails.trim() || undefined,
-                    custom: true,
-                  });
-                  setCustomName("");
-                  setCustomDetails("");
-                  setCustomMode(false);
-                }}
-                disabled={!canAddCustom}
-                className="flex-1"
-              >
-                Add Trauma
-              </Button>
-            </div>
-          </div>
-        }
+        onClose={() => setCustomMode(false)}
+        canSubmit={canAddCustom}
+        submitLabel="Add Trauma"
+        onSubmit={() => {
+          if (!canAddCustom || !customOrigin) return;
+          onAdd({
+            id: createLocalId("trauma"),
+            name: customName.trim(),
+            effect: customDetails.trim(),
+            source: customOrigin,
+            custom: true,
+          });
+          setCustomName("");
+          setCustomDetails("");
+          setCustomOrigin("");
+          setCustomMode(false);
+        }}
       >
-        <PickerBody>
+        <CustomFormSection title="Identity">
           <div>
-            <label className={uiFormLabel}>
-              Name <span className="text-red-500">*</span>
-            </label>
+            <RequiredFormLabel htmlFor="custom-trauma-name">Name</RequiredFormLabel>
             <input
+              id="custom-trauma-name"
               type="text"
+              required
               value={customName}
               onChange={(event) => setCustomName(event.target.value)}
               placeholder="Name the trauma..."
               className={editableInputClass(true) + " mt-0.5"}
             />
           </div>
+        </CustomFormSection>
 
-          <FormField
-            label="Details"
-            value={customDetails}
-            onChange={setCustomDetails}
-            editable
-            type="textarea"
-            rows={3}
-            placeholder="Optional details..."
-          />
-        </PickerBody>
-      </PickerModal>
+        <CustomFormSection title="Origin">
+          <OriginSelector name="custom-trauma-origin" value={customOrigin} onChange={setCustomOrigin} />
+        </CustomFormSection>
+
+        <CustomFormSection title="Rules">
+          <div>
+            <RequiredFormLabel htmlFor="custom-trauma-rules">Rules Text</RequiredFormLabel>
+            <textarea
+              id="custom-trauma-rules"
+              required
+              value={customDetails}
+              onChange={(event) => setCustomDetails(event.target.value)}
+              placeholder="What this trauma does..."
+              rows={4}
+              className={editableTextareaClass(true) + " mt-0.5"}
+            />
+          </div>
+        </CustomFormSection>
+      </CustomFormShell>
     );
   }
 
   return (
     <PickerModal
-      title="Add Trauma"
+      title={editable ? "Add Trauma" : "View Temporary Trauma"}
       placeholder="Search mental traumas..."
       query={query}
       onQueryChange={setQuery}
@@ -163,19 +154,29 @@ export function InsanityTraumaPicker({
       scrollPositionRef={listScrollPositionRef}
       isEmpty={filtered.length === 0}
       footer={
-        <PickerCustomAction
-          onClick={() => {
-            setCustomMode(true);
-            setCustomName("");
-            setCustomDetails("");
-          }}
-        >
-          + Add custom trauma
-        </PickerCustomAction>
+        editable && (
+          <PickerCustomAction
+            onClick={() => {
+              setCustomMode(true);
+              setCustomName("");
+              setCustomDetails("");
+              setCustomOrigin("");
+            }}
+          >
+            + Add custom trauma
+          </PickerCustomAction>
+        )
       }
     >
+      <div className="space-y-3 p-3 lg:p-4">
       {filtered.map((ref) => (
-        <PickerRow key={ref.roll} onClick={() => handleSelect(ref)}>
+        <PickerRow
+          key={ref.roll}
+          card
+          className={uiSectionShell}
+          interactive={editable}
+          onClick={() => handleSelect(ref)}
+        >
           <span className={`${uiItemName} group-hover:text-white`}>{ref.name}</span>
           <div className="mt-1 flex flex-wrap gap-1.5">
             <RollChip>{ref.roll}</RollChip>
@@ -196,6 +197,7 @@ export function InsanityTraumaPicker({
           </div>
         </PickerRow>
       ))}
+      </div>
     </PickerModal>
   );
 }

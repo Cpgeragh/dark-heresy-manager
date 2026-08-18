@@ -77,6 +77,7 @@ export interface InsanityDisorderEntry {
   severity: InsanityDisorderSeverity;
   notes?: string;
   custom?: boolean;
+  source?: string; // a custom disorder's own origin (Custom / 2nd Ed)
 }
 
 export interface InsanityTraumaEntry {
@@ -87,6 +88,7 @@ export interface InsanityTraumaEntry {
   effect?: string;
   notes?: string;
   custom?: boolean;
+  source?: string; // a custom trauma's own origin (Custom / 2nd Ed)
 }
 
 export interface InsanityBlock {

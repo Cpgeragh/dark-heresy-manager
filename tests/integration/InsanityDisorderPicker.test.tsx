@@ -6,10 +6,17 @@ import "@testing-library/jest-dom";
 
 import { InsanityDisorderPicker } from "../../src/features/insanity/InsanityDisorderPicker";
 
-function setup(existingReferenceIds = new Set<string>()) {
+function setup(existingReferenceIds = new Set<string>(), editable = true) {
   const onAdd = vi.fn();
   const onClose = vi.fn();
-  render(<InsanityDisorderPicker existingReferenceIds={existingReferenceIds} onAdd={onAdd} onClose={onClose} />);
+  render(
+    <InsanityDisorderPicker
+      existingReferenceIds={existingReferenceIds}
+      editable={editable}
+      onAdd={onAdd}
+      onClose={onClose}
+    />
+  );
   return { onAdd, onClose };
 }
 
@@ -87,17 +94,47 @@ describe("InsanityDisorderPicker", () => {
     ).toBe(155);
   });
 
-  it("picks a Type for a custom disorder via the Type picker", async () => {
+  it("adds a custom disorder with a type, name, origin, and rules text", async () => {
     const user = userEvent.setup();
     const { onAdd } = setup();
 
     await user.click(screen.getByRole("button", { name: "Add custom disorder" }));
+    expect(screen.getByRole("button", { name: "Add Disorder" })).toBeDisabled();
+
     // Type defaults to "Delusion", the alphabetically-first real disorder type.
     await user.click(screen.getByText("Delusion"));
     await user.click(screen.getByText("Phobia"));
     await user.type(screen.getByPlaceholderText("Name the disorder…"), "Custom Fear");
-    await user.click(screen.getByRole("button", { name: "Add Disorder" }));
+    expect(screen.getByRole("button", { name: "Add Disorder" })).toBeDisabled();
 
-    expect(onAdd).toHaveBeenCalledWith(expect.objectContaining({ type: "Phobia", name: "Custom Fear" }));
+    await user.click(screen.getByRole("radio", { name: "2nd Ed" }));
+    expect(screen.getByRole("button", { name: "Add Disorder" })).toBeDisabled();
+
+    await user.type(screen.getByPlaceholderText("What this disorder does…"), "Fear of something specific.");
+    expect(screen.getByRole("button", { name: "Add Disorder" })).not.toBeDisabled();
+
+    await user.click(screen.getByRole("button", { name: "Add Disorder" }));
+    expect(onAdd).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: "Phobia",
+        name: "Custom Fear",
+        notes: "Fear of something specific.",
+        source: "2nd Ed",
+        custom: true,
+      })
+    );
+  });
+});
+
+describe("InsanityDisorderPicker editable=false", () => {
+  it("shows a View title, ignores row clicks, and hides the custom-add action", async () => {
+    const user = userEvent.setup();
+    const { onAdd } = setup(new Set(), false);
+
+    expect(screen.getByRole("dialog", { name: "View Disorders" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Add custom disorder" })).not.toBeInTheDocument();
+
+    await user.click(screen.getByText("Fear of the Dead", { selector: "span" }));
+    expect(onAdd).not.toHaveBeenCalled();
   });
 });

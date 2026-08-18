@@ -14,10 +14,11 @@ import type {
 } from "../../types/Character";
 import { getTalentInsanityModifierSources } from "../talents/talentEffects";
 import { getTraitInsanityModifierSources } from "../traits/traitEffects";
-import { Button } from "../../ui/Button";
+import { AddButton } from "../../ui/AddButton";
 import { Chip } from "../../ui/Chip";
 import { RemoveButton } from "../../ui/RemoveButton";
 import { RollChip } from "../../ui/RollChip";
+import { ViewButton } from "../../ui/ViewButton";
 import { colourActiveRose, colourActiveSky } from "../../ui/colourTokens";
 import {
   uiFormLabel,
@@ -28,6 +29,7 @@ import {
   uiTextPlaceholder,
 } from "../../ui/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
+import { sourceColour } from "../../ui/sourceStyles";
 import { SegmentedTabs, type SegmentedTabOption } from "../../ui/SegmentedTabs";
 import {
   segmentedTabId,
@@ -259,6 +261,11 @@ function DisorderRow({
                 />
               </span>
             </span>
+            {disorder.source && (
+              <Chip size="sm" className={`bg-slate-800/40 font-code ${sourceColour(disorder.source)}`}>
+                {disorder.source}
+              </Chip>
+            )}
           </div>
           <div className="mt-1 flex items-center gap-1.5">
             <span className={uiTextLabel}>Rules</span>
@@ -309,9 +316,14 @@ function TraumaRow({
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <span className={uiItemName}>{name}</span>
-          {roll && (
+          {(roll || trauma.source) && (
             <div className="mt-1 flex flex-wrap gap-1.5">
-              <RollChip>{roll}</RollChip>
+              {roll && <RollChip>{roll}</RollChip>}
+              {trauma.source && (
+                <Chip size="sm" className={`bg-slate-800/40 font-code ${sourceColour(trauma.source)}`}>
+                  {trauma.source}
+                </Chip>
+              )}
             </div>
           )}
           <div className="mt-1 flex items-center gap-1.5">
@@ -354,10 +366,10 @@ function TraumaHeader({
           />
         </span>
       </span>
-      {editable && (
-        <Button size="xs" onClick={onAdd}>
-          + Add
-        </Button>
+      {editable ? (
+        <AddButton label="Add Trauma" onClick={onAdd} />
+      ) : (
+        <ViewButton label="View Temporary Trauma" onClick={onAdd} />
       )}
     </div>
   );
@@ -394,10 +406,10 @@ function DisordersHeader({
   return (
     <div className="flex items-center justify-between gap-2">
       <SectionHeader>Disorders</SectionHeader>
-      {editable && (
-        <Button size="xs" onClick={onAdd}>
-          + Add
-        </Button>
+      {editable ? (
+        <AddButton label="Add Disorder" onClick={onAdd} />
+      ) : (
+        <ViewButton label="View Disorders" onClick={onAdd} />
       )}
     </div>
   );
@@ -642,6 +654,7 @@ export function InsanityPanel({ insanity, editable, onUpdate, sectionClassName, 
       {showDisorderPicker && (
         <InsanityDisorderPicker
           existingReferenceIds={existingDisorderReferenceIds}
+          editable={editable}
           onAdd={handleAddDisorder}
           onClose={() => setShowDisorderPicker(false)}
         />
@@ -650,6 +663,7 @@ export function InsanityPanel({ insanity, editable, onUpdate, sectionClassName, 
       {showTraumaPicker && (
         <InsanityTraumaPicker
           existingReferenceIds={existingTraumaReferenceIds}
+          editable={editable}
           onAdd={handleAddTrauma}
           onClose={() => setShowTraumaPicker(false)}
         />

@@ -1,18 +1,24 @@
 import { useRef, useState } from "react";
 import type { InsanityDisorderEntry, InsanityDisorderSeverity } from "../../types/Character";
-import { FormField } from "../../components/FormField";
+import type { CustomItemOrigin } from "../../constants/customItems";
 import { InfoModal } from "../../components/InfoModal";
 import { Button } from "../../ui/Button";
 import { Chip } from "../../ui/Chip";
+import { CustomFormSection } from "../../ui/CustomFormSection";
+import { CustomFormShell } from "../../ui/CustomFormShell";
+import { OriginSelector } from "../../ui/OriginSelector";
 import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../ui/PickerModal";
 import { OptionPickerScreen } from "../../ui/OptionPickerScreen";
 import { ArrowRight, ArrowLeft } from "../../ui/PickerArrows";
-import { uiPickerBackButton, uiPickerPressFeedback } from "../../ui/buttonStyles";
+import { RequiredFormLabel } from "../../ui/RequiredFormLabel";
+import { uiPickerPressFeedback } from "../../ui/buttonStyles";
 import {
   editableInputClass,
+  editableTextareaClass,
   uiFormLabel,
   uiInfoModalWrapper,
   uiItemName,
+  uiSectionShell,
   uiTextBody,
   uiTextLabel,
 } from "../../ui/editableStyles";
@@ -41,10 +47,12 @@ function customSeverityOptionsFor(type: string): InsanityDisorderSeverity[] {
 
 export function InsanityDisorderPicker({
   existingReferenceIds,
+  editable,
   onAdd,
   onClose,
 }: {
   existingReferenceIds: Set<string>;
+  editable: boolean;
   onAdd: (entry: InsanityDisorderEntry) => void;
   onClose: () => void;
 }) {
@@ -56,6 +64,7 @@ export function InsanityDisorderPicker({
   const [severity, setSeverity] = useState<InsanityDisorderSeverity>("Minor");
   const [customName, setCustomName] = useState("");
   const [notes, setNotes] = useState("");
+  const [customOrigin, setCustomOrigin] = useState<"" | CustomItemOrigin>("");
   const [showTypePicker, setShowTypePicker] = useState(false);
   const [showTypeFilterPicker, setShowTypeFilterPicker] = useState(false);
   const listScrollPositionRef = useRef(0);
@@ -84,7 +93,7 @@ export function InsanityDisorderPicker({
     : customSeverityOptions[0];
   const activeSeverityDescription =
     INSANITY_SEVERITIES.find((entry) => entry.severity === activeSeverity)?.description ?? "";
-  const canAddCustom = Boolean(customName.trim());
+  const canAddCustom = Boolean(customName.trim()) && Boolean(customOrigin) && Boolean(notes.trim());
 
   if (showTypePicker) {
     return (
@@ -117,65 +126,38 @@ export function InsanityDisorderPicker({
 
   if (customMode) {
     return (
-      <PickerModal
+      <CustomFormShell
         title="Custom Disorder"
-        query=""
-        onQueryChange={() => undefined}
-        onClose={() => setCustomMode(false)}
+        scrollPositionRef={customScrollPositionRef}
         closeLabel={<ArrowLeft />}
         closeAriaLabel="Back"
-        hideSearch
-        scrollPositionRef={customScrollPositionRef}
-        isEmpty={false}
-        footer={
-          <div className="space-y-2">
-            {!canAddCustom && (
-              <p className="text-xs lg:text-sm text-slate-300">
-                <span className="text-red-500">*</span> Required
-              </p>
-            )}
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setCustomMode(false)}
-                className={uiPickerBackButton}
-              >
-                Back
-              </button>
-              <Button
-                size="sm"
-                type="button"
-                onClick={() => {
-                  if (!canAddCustom) return;
-                  onAdd({
-                    id: createLocalId("disorder"),
-                    type: customType,
-                    name: customName.trim(),
-                    severity: activeCustomSeverity,
-                    notes: notes.trim() || undefined,
-                    custom: true,
-                  });
-                  setCustomMode(false);
-                  setCustomType(customDisorderTypes[0]);
-                  setSeverity("Minor");
-                  setCustomName("");
-                  setNotes("");
-                }}
-                disabled={!canAddCustom}
-                className="flex-1"
-              >
-                Add Disorder
-              </Button>
-            </div>
-          </div>
-        }
+        onClose={() => setCustomMode(false)}
+        canSubmit={canAddCustom}
+        submitLabel="Add Disorder"
+        onSubmit={() => {
+          if (!canAddCustom || !customOrigin) return;
+          onAdd({
+            id: createLocalId("disorder"),
+            type: customType,
+            name: customName.trim(),
+            severity: activeCustomSeverity,
+            notes: notes.trim(),
+            source: customOrigin,
+            custom: true,
+          });
+          setCustomMode(false);
+          setCustomType(customDisorderTypes[0]);
+          setSeverity("Minor");
+          setCustomName("");
+          setNotes("");
+          setCustomOrigin("");
+        }}
       >
-        <PickerBody>
+        <CustomFormSection title="Identity">
           <div>
-            <p className={uiFormLabel}>
-              Type <span className="text-red-500">*</span>
-            </p>
+            <RequiredFormLabel htmlFor="custom-disorder-type">Type</RequiredFormLabel>
             <button
+              id="custom-disorder-type"
               type="button"
               onClick={() => setShowTypePicker(true)}
               className={`mt-1 w-full rounded border border-slate-500 bg-slate-900 px-2 py-1.5 text-sm lg:text-base text-slate-200 text-left flex items-center justify-between ${uiPickerPressFeedback()}`}
@@ -184,20 +166,25 @@ export function InsanityDisorderPicker({
               <ArrowRight />
             </button>
           </div>
-
           <div>
-            <label className={uiFormLabel}>
-              Name <span className="text-red-500">*</span>
-            </label>
+            <RequiredFormLabel htmlFor="custom-disorder-name">Name</RequiredFormLabel>
             <input
+              id="custom-disorder-name"
               type="text"
+              required
               value={customName}
               onChange={(event) => setCustomName(event.target.value)}
               placeholder="Name the disorder…"
               className={editableInputClass(true) + " mt-0.5"}
             />
           </div>
+        </CustomFormSection>
 
+        <CustomFormSection title="Origin">
+          <OriginSelector name="custom-disorder-origin" value={customOrigin} onChange={setCustomOrigin} />
+        </CustomFormSection>
+
+        <CustomFormSection title="Rules">
           <div>
             <p className={uiFormLabel}>
               Severity <span className="text-red-500">*</span>
@@ -218,18 +205,20 @@ export function InsanityDisorderPicker({
               ))}
             </div>
           </div>
-
-          <FormField
-            label="Notes"
-            value={notes}
-            onChange={setNotes}
-            editable
-            type="textarea"
-            rows={3}
-            placeholder="Optional details…"
-          />
-        </PickerBody>
-      </PickerModal>
+          <div>
+            <RequiredFormLabel htmlFor="custom-disorder-rules">Rules Text</RequiredFormLabel>
+            <textarea
+              id="custom-disorder-rules"
+              required
+              value={notes}
+              onChange={(event) => setNotes(event.target.value)}
+              placeholder="What this disorder does…"
+              rows={4}
+              className={editableTextareaClass(true) + " mt-0.5"}
+            />
+          </div>
+        </CustomFormSection>
+      </CustomFormShell>
     );
   }
 
@@ -299,7 +288,7 @@ export function InsanityDisorderPicker({
 
   return (
     <PickerModal
-      title="Add Disorder"
+      title={editable ? "Add Disorder" : "View Disorders"}
       placeholder="Search disorders..."
       query={query}
       onQueryChange={setQuery}
@@ -317,23 +306,30 @@ export function InsanityDisorderPicker({
         </button>
       }
       footer={
-        <PickerCustomAction
-          onClick={() => {
-            setCustomMode(true);
-            setSelected(null);
-            setCustomType(customDisorderTypes[0]);
-            setSeverity("Minor");
-            setCustomName("");
-            setNotes("");
-          }}
-        >
-          + Add custom disorder
-        </PickerCustomAction>
+        editable && (
+          <PickerCustomAction
+            onClick={() => {
+              setCustomMode(true);
+              setSelected(null);
+              setCustomType(customDisorderTypes[0]);
+              setSeverity("Minor");
+              setCustomName("");
+              setNotes("");
+              setCustomOrigin("");
+            }}
+          >
+            + Add custom disorder
+          </PickerCustomAction>
+        )
       }
     >
+      <div className="space-y-3 p-3 lg:p-4">
       {filtered.map((ref) => (
         <PickerRow
           key={ref.id}
+          card
+          className={uiSectionShell}
+          interactive={editable}
           onClick={() => {
             setSelected(ref);
             setSeverity(ref.severityOptions[0]);
@@ -366,6 +362,7 @@ export function InsanityDisorderPicker({
           </div>
         </PickerRow>
       ))}
+      </div>
     </PickerModal>
   );
 }

@@ -76,18 +76,18 @@ describe("InsanityPanel picker wiring", () => {
     const user = userEvent.setup();
     render(<InsanityWiring initial={{ points: 0, disorders: [] }} />);
 
-    await user.click(findButtonNear("Disorders", "+ Add"));
+    await user.click(findButtonNear("Disorders", "Add Disorder"));
 
-    expect(screen.getByText("Add Disorder")).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Add Disorder" })).toBeInTheDocument();
   });
 
   it("opens the Trauma picker from the Temporary Trauma + Add button", async () => {
     const user = userEvent.setup();
     render(<InsanityWiring initial={{ points: 0, disorders: [] }} />);
 
-    await user.click(findButtonNear("Temporary Trauma", "+ Add"));
+    await user.click(findButtonNear("Temporary Trauma", "Add Trauma"));
 
-    expect(screen.getByText("Add Trauma")).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Add Trauma" })).toBeInTheDocument();
   });
 });
 
@@ -105,10 +105,29 @@ describe("InsanityPanel editable=false", () => {
       />
     );
 
-    expect(screen.queryByRole("button", { name: "+ Add" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Add Disorder" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Add Trauma" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Remove" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Increase" })).toHaveAttribute("aria-disabled", "true");
     expect(screen.getByRole("button", { name: "Decrease" })).toHaveAttribute("aria-disabled", "true");
+  });
+
+  it("shows a View Disorders button that opens the picker in read-only mode", async () => {
+    const user = userEvent.setup();
+    render(<InsanityWiring initial={{ points: 0, disorders: [] }} editable={false} />);
+
+    await user.click(findButtonNear("Disorders", "View Disorders"));
+
+    expect(screen.getByRole("dialog", { name: "View Disorders" })).toBeInTheDocument();
+  });
+
+  it("shows a View Temporary Trauma button that opens the picker in read-only mode", async () => {
+    const user = userEvent.setup();
+    render(<InsanityWiring initial={{ points: 0, disorders: [] }} editable={false} />);
+
+    await user.click(findButtonNear("Temporary Trauma", "View Temporary Trauma"));
+
+    expect(screen.getByRole("dialog", { name: "View Temporary Trauma" })).toBeInTheDocument();
   });
 });
 
