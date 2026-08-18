@@ -643,14 +643,24 @@ proposal had never happened. Test that exact sequence, in that order.
 
 ## 17. Notes
 
-Free-text notes.
+Player's personal notes, structured entries (Title + Note text, each with its own timestamp), not the DM's session notes elsewhere in the app.
 
 ### How to test this page
 
-Enter a multi-paragraph fixture containing blank lines, Unicode, emoji, punctuation, and HTML/script-like text. Save by every supported mechanism, navigate away, refresh, and compare the text character-for-character. Open the same character as a read-only viewer and confirm both rendering and the absence of editing controls. Repeat once while offline and reconnect.
+Start on a character with old-style plain-text notes (a legacy fixture, `notes` saved as a plain string) and confirm it still shows/edits exactly as it always did. Add several new entries with distinct titles and enough body text to exceed three lines. Exercise add, edit, delete-with-confirm, and search, then repeat the read-only checks as a non-owner. Test at both phone and desktop widths.
 
-- [ ] Text saves and reloads correctly, including line breaks
-- [ ] Read-only view (as a non-owner) renders the same text without an editable box
+- [ ] A character with old-style plain-text notes and zero structured entries still shows that text in a plain editable textarea (or plain read-only paragraph for a non-owner), unchanged from before
+- [ ] Adding the first structured note while legacy text still exists wraps the old text into its own entry (titled "Notes") alongside the new one — nothing is lost, and the page switches to the card list from then on
+- [ ] Add Note requires both Title and Note text — Add stays disabled until both are filled
+- [ ] Notes display as cards, two per row on both phone and desktop, sorted newest-first
+- [ ] A note's preview shows up to three lines of its text and stops there (no more, no less) regardless of how short or long the actual note is — card heights stay consistent within a row either way
+- [ ] Tapping a card opens it for reading only — no Title/Note inputs, no Save button, just the full text
+- [ ] Edit sits on the card itself, next to Remove; opening it pre-fills Title and Note with the entry's current values, and Save updates the card in place and bumps its date
+- [ ] Removing a note arms a confirm step ("Delete '[title]' from this character?" with Delete/Cancel) instead of deleting on the first tap
+- [ ] On a narrow phone screen, the title, preview text, and date never overlap the Edit/Remove buttons — Edit/Remove sit on their own row above the content on mobile, back inline with it on desktop
+- [ ] Search box (shown only once at least one note exists) filters by both title and note text, case-insensitive, live as you type
+- [ ] A search with no matches shows "No notes match your search.", distinct from the true empty state's "No notes yet."
+- [ ] Read-only mode: the search box still works and cards still open for reading, but there's no Add button and no Edit/Remove on any card
 
 ## 18. Background
 

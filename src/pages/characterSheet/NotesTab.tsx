@@ -36,6 +36,7 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
   const legacyText = typeof notes === "string" ? notes : "";
   const sorted = [...entries].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 
+  const [query, setQuery] = useState("");
   const [mode, setMode] = useState<"add" | "edit" | "view" | null>(null);
   const [activeEntry, setActiveEntry] = useState<NoteEntry | null>(null);
   const [deleteArmed, setDeleteArmed] = useState<NoteEntry | null>(null);
@@ -102,11 +103,35 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
     setDeleteArmed(null);
   }
 
+  const normalisedQuery = query.trim().toLowerCase();
+  const filtered = normalisedQuery
+    ? sorted.filter(
+        (entry) =>
+          entry.title.toLowerCase().includes(normalisedQuery) ||
+          entry.text.toLowerCase().includes(normalisedQuery)
+      )
+    : sorted;
+
   return (
     <div className="space-y-3">
-      {editable && (
-        <div className="flex justify-end">
-          <AddButton label="Add Note" onClick={openAdd} />
+      {(editable || entries.length > 0) && (
+        <div className="flex items-center justify-end gap-2">
+          {entries.length > 0 && (
+            <input
+              type="search"
+              name="notes-search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search notes…"
+              enterKeyHint="search"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="none"
+              spellCheck={false}
+              className={editableInputClass(true) + " w-40 lg:w-56"}
+            />
+          )}
+          {editable && <AddButton label="Add Note" onClick={openAdd} />}
         </div>
       )}
 
@@ -125,9 +150,11 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
         )
       ) : sorted.length === 0 ? (
         <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No notes yet.</p>
+      ) : filtered.length === 0 ? (
+        <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No notes match your search.</p>
       ) : (
         <div className="grid grid-cols-2 items-start gap-3">
-          {[sorted.slice(0, Math.ceil(sorted.length / 2)), sorted.slice(Math.ceil(sorted.length / 2))].map(
+          {[filtered.slice(0, Math.ceil(filtered.length / 2)), filtered.slice(Math.ceil(filtered.length / 2))].map(
             (column, index) => (
               <div key={index} className="space-y-3">
                 {column.map((entry) => (

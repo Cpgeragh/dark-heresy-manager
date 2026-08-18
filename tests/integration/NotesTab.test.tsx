@@ -92,6 +92,57 @@ describe("NotesTab adding notes", () => {
   });
 });
 
+describe("NotesTab search", () => {
+  function twoEntries(): NoteEntry[] {
+    return [
+      { id: "n1", title: "Session 12", text: "Found the relic in the vault.", updatedAt: "2026-01-02T00:00:00.000Z" },
+      { id: "n2", title: "Inquisitor Varn", text: "Suspicious of the cult.", updatedAt: "2026-01-01T00:00:00.000Z" },
+    ];
+  }
+
+  it("filters by title match, case-insensitively", async () => {
+    const user = userEvent.setup();
+    render(<NotesWiring initial={twoEntries()} />);
+
+    await user.type(screen.getByPlaceholderText("Search notes…"), "varn");
+
+    expect(screen.getByText("Inquisitor Varn")).toBeInTheDocument();
+    expect(screen.queryByText("Session 12")).not.toBeInTheDocument();
+  });
+
+  it("filters by body text match", async () => {
+    const user = userEvent.setup();
+    render(<NotesWiring initial={twoEntries()} />);
+
+    await user.type(screen.getByPlaceholderText("Search notes…"), "relic");
+
+    expect(screen.getByText("Session 12")).toBeInTheDocument();
+    expect(screen.queryByText("Inquisitor Varn")).not.toBeInTheDocument();
+  });
+
+  it("shows a no-match message distinct from the empty state when a query matches nothing", async () => {
+    const user = userEvent.setup();
+    render(<NotesWiring initial={twoEntries()} />);
+
+    await user.type(screen.getByPlaceholderText("Search notes…"), "xyz");
+
+    expect(screen.getByText("No notes match your search.")).toBeInTheDocument();
+    expect(screen.queryByText("No notes yet.")).not.toBeInTheDocument();
+  });
+
+  it("shows the search box to read-only viewers too, but not the Add button", () => {
+    render(<NotesWiring initial={twoEntries()} editable={false} />);
+
+    expect(screen.getByPlaceholderText("Search notes…")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Add Note" })).not.toBeInTheDocument();
+  });
+
+  it("hides the search box entirely when there are no entries", () => {
+    render(<NotesWiring initial={[]} />);
+    expect(screen.queryByPlaceholderText("Search notes…")).not.toBeInTheDocument();
+  });
+});
+
 describe("NotesTab editing and deleting", () => {
   function oneEntry(): NoteEntry[] {
     return [{ id: "n1", title: "Session 12", text: "Found the relic.", updatedAt: "2026-01-01T00:00:00.000Z" }];
