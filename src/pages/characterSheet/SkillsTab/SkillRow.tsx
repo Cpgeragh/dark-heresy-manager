@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import type { SkillAdvanceLevel } from "../../../types/Character";
 import { CHAR_LABEL, type SkillWithComputed } from "./skillsConstants";
+import type { SkillTierAccess } from "../../../features/experience/skillAdvanceCosts";
 import { charColour, sourceColour } from "../../../ui/sourceStyles";
 import { Chip } from "../../../ui/Chip";
 import { StatChip } from "../../../ui/StatChip";
@@ -12,6 +13,8 @@ import { RemoveButton } from "../../../ui/RemoveButton";
 import { Button } from "../../../ui/Button";
 import { PickerBody, PickerModal } from "../../../ui/PickerModal";
 import {
+  editableInputClass,
+  uiFormLabel,
   uiInfoModalWrapper,
   uiItemName,
   uiSectionShell,
@@ -20,6 +23,7 @@ import {
 import { ExpandChevron } from "../../../ui/ExpandChevron";
 import { uiPickerPressFeedback } from "../../../ui/buttonStyles";
 import { colourPurple, colourTeal, colourValue } from "../../../ui/colourTokens";
+import { sanitizePositiveIntegerInput } from "../../../utils/formInput";
 
 interface SkillRowProps {
   skill: SkillWithComputed;
@@ -31,6 +35,9 @@ interface SkillRowProps {
   hideLevelChip?: boolean;
   /** Real XP cost to train this skill, shown as a chip in previewMode when known. */
   cost?: number;
+  /** What buying this skill's next tier looks like right now. Owned rows only, not previewMode. */
+  nextTierAccess?: SkillTierAccess;
+  onManualUpgrade?: (id: string, level: SkillAdvanceLevel, cost: number) => void;
 }
 
 const LEVEL_BADGE: Record<string, string> = {
@@ -40,9 +47,23 @@ const LEVEL_BADGE: Record<string, string> = {
   "+20": "bg-green-500/10 border-green-400 text-green-400",
 };
 
-export function SkillRow({ skill, editable, updateLevel, previewMode = false, onSelect, indented = false, hideLevelChip = false, cost }: SkillRowProps) {
+export function SkillRow({
+  skill,
+  editable,
+  updateLevel,
+  previewMode = false,
+  onSelect,
+  indented = false,
+  hideLevelChip = false,
+  cost,
+  nextTierAccess,
+  onManualUpgrade,
+}: SkillRowProps) {
   const [expanded, setExpanded] = useState(false);
   const [deleteArmed, setDeleteArmed] = useState(false);
+  const [upgradeArmed, setUpgradeArmed] = useState(false);
+  const [manualUpgradeArmed, setManualUpgradeArmed] = useState(false);
+  const [manualUpgradeCost, setManualUpgradeCost] = useState("");
 
   const levelBadgeClass = LEVEL_BADGE[skill.level] ?? "";
   const talentSourceSummary = skill.talentSources
@@ -57,15 +78,13 @@ export function SkillRow({ skill, editable, updateLevel, previewMode = false, on
 
   const handleToggle = useCallback(() => setExpanded((p) => !p), []);
 
-  const handleLevelClick = useCallback(
-    (value: SkillAdvanceLevel) => updateLevel(skill.id, value),
-    [skill.id, updateLevel]
-  );
-
   const handleRemove = useCallback(
     () => updateLevel(skill.id, "untrained"),
     [skill.id, updateLevel]
   );
+
+  const manualUpgradeCostNumber = Number(manualUpgradeCost);
+  const canConfirmManualUpgrade = manualUpgradeCost.trim() !== "" && manualUpgradeCostNumber > 0;
 
   return (
     <div className={uiSectionShell + " overflow-hidden"}>
@@ -252,32 +271,123 @@ export function SkillRow({ skill, editable, updateLevel, previewMode = false, on
       {/* EXPANDED BODY */}
       {expanded && (
         <div className="px-3 lg:px-4 pb-3 lg:pb-4 pt-2 lg:pt-3 border-t border-slate-600 space-y-3">
-          {/* Level buttons */}
-          <div className="space-y-2">
-              <div className="flex flex-wrap items-center gap-2">
-                {(skill.advanced
-                  ? (["trained", "+10", "+20"] as const)
-                  : (previewMode ? ["untrained", "trained", "+10", "+20"] : ["trained", "+10", "+20"]) as readonly ("untrained" | "trained" | "+10" | "+20")[]
-                ).map((value) => (
-                  <button type="button"
-                    key={value}
-                    aria-pressed={skill.level === value}
-                    aria-label={`Set skill level to ${value}`}
-                    onClick={editable ? () => handleLevelClick(value) : undefined}
-                    className={`flex-1 px-3 lg:px-4 py-2 rounded border text-sm lg:text-base ${
-                      editable ? "transition focus:outline-none" : "cursor-default"
-                    } ${
-                      skill.level === value
-                        ? `${LEVEL_BADGE[value]} font-semibold`
-                        : "border-slate-500 bg-slate-800 text-slate-100 hover:bg-slate-700"
-                    }`}
-                  >
-                    {value === "trained" ? "Trained" : value === "untrained" ? "Untrained" : value}
-                  </button>
-                ))}
+          {previewMode ? (
+            <div className="flex flex-wrap items-center gap-2">
+              {(skill.advanced
+                ? (["trained", "+10", "+20"] as const)
+                : (["untrained", "trained", "+10", "+20"] as const)
+              ).map((value) => (
+                <button type="button"
+                  key={value}
+                  aria-pressed={skill.level === value}
+                  aria-label={`Set skill level to ${value}`}
+                  className={`flex-1 px-3 lg:px-4 py-2 rounded border text-sm lg:text-base cursor-default ${
+                    skill.level === value
+                      ? `${LEVEL_BADGE[value]} font-semibold`
+                      : "border-slate-500 bg-slate-800 text-slate-100"
+                  }`}
+                >
+                  {value === "trained" ? "Trained" : value === "untrained" ? "Untrained" : value}
+                </button>
+              ))}
+            </div>
+          ) : (
+            editable &&
+            nextTierAccess &&
+            nextTierAccess.status !== "maxed" && (
+              <div className="flex flex-wrap gap-2">
+                {nextTierAccess.status === "unlocked" && (
+                  <Button size="sm" onClick={() => setUpgradeArmed(true)}>
+                    Upgrade to {nextTierAccess.level} ({nextTierAccess.cost} XP)
+                  </Button>
+                )}
+                {nextTierAccess.status === "not-on-career" && (
+                  <Button size="sm" variant="ghost" onClick={() => setManualUpgradeArmed(true)}>
+                    Upgrade to {nextTierAccess.level} (type your own cost)
+                  </Button>
+                )}
               </div>
-          </div>
+            )
+          )}
         </div>
+      )}
+
+      {upgradeArmed && nextTierAccess?.status === "unlocked" && (
+        <PickerModal
+          title="Upgrade Skill"
+          query=""
+          onQueryChange={() => undefined}
+          onClose={() => setUpgradeArmed(false)}
+          isEmpty={false}
+          hideSearch
+          maxWidth="max-w-sm"
+          footer={
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                variant="primary"
+                onClick={() => {
+                  updateLevel(skill.id, nextTierAccess.level);
+                  setUpgradeArmed(false);
+                }}
+              >
+                Upgrade
+              </Button>
+              <Button variant="ghost" onClick={() => setUpgradeArmed(false)}>
+                Cancel
+              </Button>
+            </div>
+          }
+        >
+          <PickerBody>
+            <p className={`text-sm lg:text-base ${uiTextBody} text-center`}>
+              Upgrade {skill.name} to {nextTierAccess.level} for {nextTierAccess.cost} XP?
+            </p>
+          </PickerBody>
+        </PickerModal>
+      )}
+
+      {manualUpgradeArmed && nextTierAccess?.status === "not-on-career" && (
+        <PickerModal
+          title="Upgrade Skill"
+          query=""
+          onQueryChange={() => undefined}
+          onClose={() => setManualUpgradeArmed(false)}
+          isEmpty={false}
+          hideSearch
+          maxWidth="max-w-sm"
+          footer={
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                variant="primary"
+                disabled={!canConfirmManualUpgrade}
+                onClick={() => {
+                  onManualUpgrade?.(skill.id, nextTierAccess.level, manualUpgradeCostNumber);
+                  setManualUpgradeArmed(false);
+                  setManualUpgradeCost("");
+                }}
+              >
+                Upgrade
+              </Button>
+              <Button variant="ghost" onClick={() => setManualUpgradeArmed(false)}>
+                Cancel
+              </Button>
+            </div>
+          }
+        >
+          <PickerBody>
+            <label className={uiFormLabel}>
+              XP Cost to upgrade {skill.name} to {nextTierAccess.level}
+            </label>
+            <input
+              type="text"
+              inputMode="numeric"
+              value={manualUpgradeCost}
+              onChange={(event) => setManualUpgradeCost(sanitizePositiveIntegerInput(event.target.value))}
+              placeholder="0"
+              className={editableInputClass(true) + " mt-0.5"}
+            />
+          </PickerBody>
+        </PickerModal>
       )}
 
       {deleteArmed && (

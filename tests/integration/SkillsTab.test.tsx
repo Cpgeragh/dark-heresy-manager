@@ -273,16 +273,56 @@ describe("SkillsTab", () => {
     expect(screen.getAllByText("No advanced skills trained yet.").length).toBeGreaterThan(0);
   });
 
-  it("updates a skill's level through onUpdate", async () => {
+  it("upgrades a skill's level through onUpdate, with a manual cost when it's not on any career table", async () => {
     const user = userEvent.setup();
     const { onUpdate } = renderTab();
-    // Expand the row, then set its level to +20.
+    // No career/rank configured, so the next tier (+10) has no real cost — the
+    // manual-cost upgrade path is what should appear.
     await user.click(screen.getAllByRole("button", { name: "Expand Awareness details" })[0]);
-    await user.click(screen.getByLabelText("Set skill level to +20"));
+    await user.click(screen.getByRole("button", { name: "Upgrade to +10 (type your own cost)" }));
+
+    const costInput = screen.getByRole("textbox");
+    await user.type(costInput, "150");
+    await user.click(screen.getByRole("button", { name: "Upgrade" }));
 
     expect(onUpdate).toHaveBeenCalledTimes(1);
     const next = onUpdate.mock.calls[0][0] as SkillEntry[];
-    expect(next.find((s) => s.id === "s1")?.level).toBe("+20");
+    const updated = next.find((s) => s.id === "s1");
+    expect(updated?.level).toBe("+10");
+    expect(updated?.manualCosts?.["+10"]).toBe(150);
+  });
+
+  it("upgrades using the real career cost when the next tier is actually unlocked, no manual cost stored", async () => {
+    const user = userEvent.setup();
+    // Awareness +10 is a real Scout-rank advance, costing 100 XP. Id has to
+    // match the real reference data ("awareness"), not the test fixture default.
+    const { onUpdate } = renderTab({
+      career: "Guardsman",
+      rank: "Scout",
+      skills: [skill({ id: "awareness" })],
+    });
+    await user.click(screen.getAllByRole("button", { name: "Expand Awareness details" })[0]);
+    await user.click(screen.getByRole("button", { name: "Upgrade to +10 (100 XP)" }));
+    await user.click(screen.getByRole("button", { name: "Upgrade" }));
+
+    expect(onUpdate).toHaveBeenCalledTimes(1);
+    const next = onUpdate.mock.calls[0][0] as SkillEntry[];
+    const updated = next.find((s) => s.id === "awareness");
+    expect(updated?.level).toBe("+10");
+    expect(updated?.manualCosts).toBeUndefined();
+  });
+
+  it("shows no upgrade option at all when the next tier exists for the career but hasn't been reached yet", async () => {
+    const user = userEvent.setup();
+    // Awareness +10 only appears at Scout; at Conscript it's real but locked, not
+    // a manual-cost case.
+    renderTab({
+      career: "Guardsman",
+      rank: "Conscript",
+      skills: [skill({ id: "awareness" })],
+    });
+    await user.click(screen.getAllByRole("button", { name: "Expand Awareness details" })[0]);
+    expect(screen.queryByRole("button", { name: /Upgrade/ })).not.toBeInTheDocument();
   });
 
   it("shows Talent skill adjustments and keeps granted training read-only", async () => {

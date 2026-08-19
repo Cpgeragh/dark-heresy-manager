@@ -6,7 +6,7 @@ import type { CharField } from "../../../types/Character";
 import { useSkillComputation } from "../../../hooks/useSkillComputation";
 import { useSwipeableTabs } from "../../../hooks/useSwipeableTabs";
 import { getCharacteristicModifierTotals } from "../../../features/corruption/characteristicModifierTotals";
-import { getUnlockedSkillTrainingCosts } from "../../../features/experience/skillAdvanceCosts";
+import { getNextSkillTierAccess, getUnlockedSkillTrainingCosts } from "../../../features/experience/skillAdvanceCosts";
 import { AddButton } from "../../../ui/AddButton";
 import { ViewButton } from "../../../ui/ViewButton";
 import { SectionHeader } from "../../../ui/SectionHeader";
@@ -190,6 +190,21 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
     [skills, onUpdate]
   );
 
+  const getNextTierAccess = useCallback(
+    (skillId: string, level: SkillEntry["level"]) => getNextSkillTierAccess(career, rank, skillId, level),
+    [career, rank]
+  );
+
+  const handleManualUpgrade = useCallback(
+    (id: string, level: SkillEntry["level"], cost: number) =>
+      onUpdate(
+        skills.map((s) =>
+          s.id === id ? { ...s, level, manualCosts: { ...s.manualCosts, [level]: cost } } : s
+        )
+      ),
+    [skills, onUpdate]
+  );
+
   const renderItems = (items: DisplayItem[]) =>
     items.map((item) =>
       item.type === "skill" ? (
@@ -198,6 +213,8 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
           skill={item.skill}
           editable={editable}
           updateLevel={updateLevel}
+          nextTierAccess={getNextTierAccess(item.skill.id, item.skill.level)}
+          onManualUpgrade={handleManualUpgrade}
         />
       ) : (
         <SkillGroupRow
@@ -206,6 +223,8 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
           skills={item.skills}
           editable={editable}
           updateLevel={updateLevel}
+          getNextTierAccess={getNextTierAccess}
+          onManualUpgrade={handleManualUpgrade}
         />
       )
     );

@@ -7,6 +7,7 @@ import {
   getSkillGroupCharacteristics,
   type SkillWithComputed,
 } from "./skillsConstants";
+import type { SkillTierAccess } from "../../../features/experience/skillAdvanceCosts";
 import { charColour } from "../../../ui/sourceStyles";
 import { Chip } from "../../../ui/Chip";
 import { SkillRow } from "./SkillRow";
@@ -19,6 +20,8 @@ interface SkillGroupRowProps {
   skills: SkillWithComputed[];
   editable: boolean;
   updateLevel: (id: string, level: SkillAdvanceLevel) => void;
+  getNextTierAccess?: (skillId: string, level: SkillAdvanceLevel) => SkillTierAccess;
+  onManualUpgrade?: (id: string, level: SkillAdvanceLevel, cost: number) => void;
 }
 
 export function SkillGroupRow({
@@ -26,6 +29,8 @@ export function SkillGroupRow({
   skills,
   editable,
   updateLevel,
+  getNextTierAccess,
+  onManualUpgrade,
 }: SkillGroupRowProps) {
   const [expanded, setExpanded] = useState(false);
   const toggle = useCallback(() => setExpanded((p) => !p), []);
@@ -69,6 +74,8 @@ export function SkillGroupRow({
               skill={skill}
               editable={editable}
               updateLevel={updateLevel}
+              nextTierAccess={getNextTierAccess?.(skill.id, skill.level)}
+              onManualUpgrade={onManualUpgrade}
             />
           ))}
         </div>
