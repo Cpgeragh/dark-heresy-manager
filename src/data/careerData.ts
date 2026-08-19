@@ -24,6 +24,24 @@ export interface CareerTableRow {
   effect: string;
 }
 
+export interface CareerStartingSkillOption {
+  skillId: string;
+}
+
+export interface CareerStartingSkillGrant {
+  /** One option = a fixed grant. Two or more = a real "or" choice. */
+  options: readonly CareerStartingSkillOption[];
+}
+
+export interface CareerStartingTalentOption {
+  talentId: string;
+  specialisation?: string;
+}
+
+export interface CareerStartingTalentGrant {
+  options: readonly CareerStartingTalentOption[];
+}
+
 export interface CareerData {
   id: string;
   name: string;
@@ -33,6 +51,8 @@ export interface CareerData {
   description: string;
   startingSkills: string;
   startingTalents: string;
+  startingSkillGrants?: readonly CareerStartingSkillGrant[];
+  startingTalentGrants?: readonly CareerStartingTalentGrant[];
   startingGear: string;
   startingRank: string;
   startingPsychicPowers?: string;

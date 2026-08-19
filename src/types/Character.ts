@@ -529,6 +529,12 @@ export interface HomeworldTraitChoices {
   startingInsanity?: number;
 }
 
+export interface CareerStartingChoices {
+  /** Selected option index per grant, keyed by the grant's position in CareerData.startingSkillGrants/startingTalentGrants. */
+  skillChoices?: Record<number, number>;
+  talentChoices?: Record<number, number>;
+}
+
 export interface TalentEntry extends CustomLibraryLinkFields {
   uid: string; // unique per-character instance (crypto.randomUUID())
   talentId: string; // references TalentData.id or TraitData.id
@@ -549,6 +555,8 @@ export interface TalentsAndTraitsBlock {
   homeworldTraitChoices?: HomeworldTraitChoices;
   /** Acquisition result for the Trait granted by the selected Career. */
   careerTraitAcquisition?: TraitAcquisitionDetails;
+  /** Selected option per career starting skill/talent "or" choice. */
+  careerStartingChoices?: CareerStartingChoices;
   talents: TalentEntry[];
   traits: TalentEntry[];
 }
