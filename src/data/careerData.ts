@@ -91,6 +91,23 @@ export const CAREER_LIST: readonly CareerData[] = [
       "Speak Language (Low Gothic) (Int), Literacy (Int), Trade (Copyist) (Int) or Trade (Valet) (Fel), Common Lore (Imperium) (Int), Scholastic Lore (Legend) (Int) or Common Lore (Tech) (Int).",
     startingTalents:
       "Melee Weapon Training (Primitive) or Pistol Training (SP), Light Sleeper or Resistance (Cold), Sprint or Unremarkable.",
+    startingSkillGrants: [
+      { options: [{ skillId: "speak-low-gothic" }] },
+      { options: [{ skillId: "literacy" }] },
+      { options: [{ skillId: "trade-copyist" }, { skillId: "trade-valet" }] },
+      { options: [{ skillId: "common-imperium" }] },
+      { options: [{ skillId: "scholastic-legend" }, { skillId: "common-tech" }] },
+    ],
+    startingTalentGrants: [
+      {
+        options: [
+          { talentId: "melee-weapon-training", specialisation: "Primitive" },
+          { talentId: "pistol-training", specialisation: "SP" },
+        ],
+      },
+      { options: [{ talentId: "light-sleeper" }, { talentId: "resistance", specialisation: "Cold" }] },
+      { options: [{ talentId: "sprint" }, { talentId: "unremarkable" }] },
+    ],
     startingGear:
       "Stub revolver and 6 bullets or staff, Administratum robes (Common Quality Clothing), auto-quill or writing kit, chrono or hour glass, data-slate or illuminated tome, backpack.",
     startingRank: "Archivist",
@@ -216,6 +233,26 @@ export const CAREER_LIST: readonly CareerData[] = [
     startingSkills: "Speak Language (Low Gothic) (Int), Drive (Ground Vehicle) (Ag) or Swim (S).",
     startingTalents:
       "Melee Weapon Training (Primitive), Pistol Training (Primitive) or Pistol Training (Las), Basic Weapons Training (Las), Basic Weapon Training (Primitive) or Basic Weapons Training (SP).",
+    startingSkillGrants: [
+      { options: [{ skillId: "speak-low-gothic" }] },
+      { options: [{ skillId: "drive-ground" }, { skillId: "swim" }] },
+    ],
+    startingTalentGrants: [
+      { options: [{ talentId: "melee-weapon-training", specialisation: "Primitive" }] },
+      {
+        options: [
+          { talentId: "pistol-training", specialisation: "Primitive" },
+          { talentId: "pistol-training", specialisation: "Las" },
+        ],
+      },
+      { options: [{ talentId: "basic-weapon-training", specialisation: "Las" }] },
+      {
+        options: [
+          { talentId: "basic-weapon-training", specialisation: "Primitive" },
+          { talentId: "basic-weapon-training", specialisation: "SP" },
+        ],
+      },
+    ],
     startingGear:
       "Sword or axe or hammer, intlock pistol and 12 shots or las pistol and 1 charge pack, lasgun and 1 charge pack, bow and 10 arrows or musket and 12 shots or shotgun and 12 shells, knife, guard flak armour, uniform or stealth gear or street clothes (Common Quality Clothing), 1 week corpse starch rations, mercenary licence or explosive collar (still attached) or Imperial Infantryman’s Uplifting Primer.",
     startingRank: "Conscript",
