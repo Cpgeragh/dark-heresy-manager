@@ -54,4 +54,24 @@ describe("getSpentXp", () => {
   it("is zero for a brand new character", () => {
     expect(getSpentXp(makeCharacter())).toBe(0);
   });
+
+  it("sums manual rank advances, Characteristic Advances, and Skills together", () => {
+    const data = createEmptyCharacterData({ campaignId: "c", recoveryCode: "r" });
+    const char: Character = {
+      ...data,
+      id: "test-char",
+      header: { ...data.header, career: "Guardsman", rank: "Conscript" },
+      characteristics: { ...data.characteristics, ws: { base: 30, advances: 1 } },
+      skills: [
+        { id: "awareness", name: "Awareness", characteristic: "per", level: "trained", category: "General", advanced: false, source: "CR" },
+      ],
+      experience: {
+        total: 1000,
+        spent: 0,
+        ranks: [{ rank: 1, advances: [{ id: "a1", name: "+5 WS", cost: 100 }] }],
+      },
+    };
+    // 100 (manual advance) + 100 (WS Simple) + 100 (Awareness Trained)
+    expect(getSpentXp(char)).toBe(300);
+  });
 });

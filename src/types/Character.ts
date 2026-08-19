@@ -50,6 +50,9 @@ export interface SkillEntry {
 
   // User-entered notes
   notes?: string;
+
+  /** XP cost paid for tiers bought off the career table, keyed by the tier reached. */
+  manualCosts?: Partial<Record<Exclude<SkillAdvanceLevel, "untrained">, number>>;
 }
 
 /**

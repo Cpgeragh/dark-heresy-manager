@@ -8,12 +8,14 @@ import {
 } from "./skillsConstants";
 import { charColour, sourceColour } from "../../../ui/sourceStyles";
 import { Chip } from "../../../ui/Chip";
-import { PickerModal } from "../../../ui/PickerModal";
+import { Button } from "../../../ui/Button";
+import { PickerModal, PickerBody } from "../../../ui/PickerModal";
 import { ArrowRight, ArrowLeft } from "../../../ui/PickerArrows";
 import { SkillRow } from "./SkillRow";
 import { colourPurple } from "../../../ui/colourTokens";
-import { uiItemName, uiSectionShell } from "../../../ui/editableStyles";
+import { editableInputClass, uiFormLabel, uiItemName, uiSectionShell } from "../../../ui/editableStyles";
 import { uiPickerPressFeedback } from "../../../ui/buttonStyles";
+import { sanitizePositiveIntegerInput } from "../../../utils/formInput";
 
 interface AddSkillModalProps {
   isOpen: boolean;
@@ -21,8 +23,10 @@ interface AddSkillModalProps {
   editable?: boolean;
   onClose: () => void;
   untrainedSkills: SkillWithComputed[];
-  onAdd: (id: string) => void;
+  onAdd: (id: string, manualCost?: number) => void;
   hideLevelChip?: boolean;
+  /** Real training cost for whichever skills are unlocked for this character. When omitted, every skill shows with no restriction, matching the old behaviour. */
+  unlockedCosts?: Map<string, number>;
 }
 
 type ListItem =
@@ -37,21 +41,45 @@ export function AddSkillModal({
   untrainedSkills,
   onAdd,
   hideLevelChip = false,
+  unlockedCosts,
 }: AddSkillModalProps) {
   const [search, setSearch] = useState("");
   const [openCategory, setOpenCategory] = useState<string | null>(null);
+  const [showAll, setShowAll] = useState(false);
+  const [pendingManualSkill, setPendingManualSkill] = useState<SkillWithComputed | null>(null);
+  const [manualCost, setManualCost] = useState("");
   const listScrollPositionRef = useRef(0);
   const modalTitle = title ?? (editable ? "Add Skill" : "View Skills");
 
   const handleClose = () => {
     setSearch("");
     setOpenCategory(null);
+    setShowAll(false);
     onClose();
   };
 
+  const handleSelect = (skill: SkillWithComputed) => {
+    const knownCost = unlockedCosts?.get(skill.id);
+    if (knownCost !== undefined) {
+      onAdd(skill.id);
+      return;
+    }
+    if (unlockedCosts) {
+      setPendingManualSkill(skill);
+      setManualCost("");
+      return;
+    }
+    onAdd(skill.id);
+  };
+
+  const visibleSkills =
+    unlockedCosts && !showAll
+      ? untrainedSkills.filter((s) => unlockedCosts.has(s.id))
+      : untrainedSkills;
+
   const listItems = useMemo((): ListItem[] => {
     const query = search.trim().toLowerCase();
-    const filtered = untrainedSkills.filter((s) =>
+    const filtered = visibleSkills.filter((s) =>
       s.name.toLowerCase().includes(query)
     );
 
@@ -80,9 +108,52 @@ export function AddSkillModal({
       const bKey = b.type === "skill" ? b.skill.name : b.category;
       return aKey.localeCompare(bKey);
     });
-  }, [untrainedSkills, search]);
+  }, [visibleSkills, search]);
 
   if (!isOpen) return null;
+
+  if (pendingManualSkill) {
+    const cost = Number(manualCost);
+    const canConfirm = manualCost.trim() !== "" && cost > 0;
+    return (
+      <PickerModal
+        title={`Train ${pendingManualSkill.name}`}
+        titleClassName="text-red-500"
+        closeLabel={<ArrowLeft />}
+        closeAriaLabel="Back"
+        query=""
+        onQueryChange={() => undefined}
+        onClose={() => setPendingManualSkill(null)}
+        isEmpty={false}
+        hideSearch
+        footer={
+          <Button
+            className="w-full"
+            disabled={!canConfirm}
+            onClick={() => {
+              onAdd(pendingManualSkill.id, cost);
+              setPendingManualSkill(null);
+              setManualCost("");
+            }}
+          >
+            Train {pendingManualSkill.name}
+          </Button>
+        }
+      >
+        <PickerBody>
+          <label className={uiFormLabel}>XP Cost</label>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={manualCost}
+            onChange={(event) => setManualCost(sanitizePositiveIntegerInput(event.target.value))}
+            placeholder="0"
+            className={editableInputClass(true) + " mt-0.5"}
+          />
+        </PickerBody>
+      </PickerModal>
+    );
+  }
 
   if (openCategory) {
     const group = listItems.find(
@@ -111,9 +182,10 @@ export function AddSkillModal({
               editable={false}
               previewMode
               updateLevel={() => {}}
-              onSelect={editable ? onAdd : undefined}
+              onSelect={editable ? () => handleSelect(skill) : undefined}
               indented
               hideLevelChip={hideLevelChip}
+              cost={unlockedCosts?.get(skill.id)}
             />
           ))}
         </div>
@@ -132,6 +204,17 @@ export function AddSkillModal({
       scrollPositionRef={listScrollPositionRef}
       isEmpty={listItems.length === 0}
       emptyMessage="No skills found."
+      filterRow={
+        unlockedCosts && (
+          <button
+            type="button"
+            onClick={() => setShowAll((v) => !v)}
+            className="w-full rounded border border-slate-500 bg-slate-900 px-2 py-1 text-xs lg:text-sm text-slate-200 text-left"
+          >
+            {showAll ? "Show only what's available" : "Show all skills"}
+          </button>
+        )
+      }
     >
       <div className="space-y-3 p-3 lg:p-4" data-testid="skill-picker-card-list">
       {listItems.map((item) => {
@@ -143,8 +226,9 @@ export function AddSkillModal({
               editable={false}
               previewMode
               updateLevel={() => {}}
-              onSelect={editable ? onAdd : undefined}
+              onSelect={editable ? () => handleSelect(item.skill) : undefined}
               hideLevelChip={hideLevelChip}
+              cost={unlockedCosts?.get(item.skill.id)}
             />
           );
         }

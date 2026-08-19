@@ -564,6 +564,8 @@ export default function CharacterSheet({
               getCharField={getCharField}
               corruption={character.corruption}
               talents={character.talentsAndTraits}
+              career={character.header.career}
+              rank={character.header.rank}
             />
           )}
 

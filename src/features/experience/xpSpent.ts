@@ -2,6 +2,7 @@
 
 import type { Character } from "../../types/Character";
 import { getCharacteristicAdvancesSpent } from "./characteristicAdvanceCosts";
+import { getSkillsSpent } from "./skillAdvanceCosts";
 
 function getRanksSpent(character: Character): number {
   return character.experience.ranks.reduce(
@@ -12,5 +13,9 @@ function getRanksSpent(character: Character): number {
 
 /** The single source of truth for how much XP a character has spent. */
 export function getSpentXp(character: Character): number {
-  return getRanksSpent(character) + getCharacteristicAdvancesSpent(character);
+  return (
+    getRanksSpent(character) +
+    getCharacteristicAdvancesSpent(character) +
+    getSkillsSpent(character)
+  );
 }

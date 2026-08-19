@@ -6,6 +6,7 @@ import type { CharField } from "../../../types/Character";
 import { useSkillComputation } from "../../../hooks/useSkillComputation";
 import { useSwipeableTabs } from "../../../hooks/useSwipeableTabs";
 import { getCharacteristicModifierTotals } from "../../../features/corruption/characteristicModifierTotals";
+import { getUnlockedSkillTrainingCosts } from "../../../features/experience/skillAdvanceCosts";
 import { AddButton } from "../../../ui/AddButton";
 import { ViewButton } from "../../../ui/ViewButton";
 import { SectionHeader } from "../../../ui/SectionHeader";
@@ -34,6 +35,8 @@ interface SkillsTabProps {
   getCharField: (statKey: keyof Characteristics) => CharField;
   corruption: CorruptionBlock;
   talents?: TalentsAndTraitsBlock;
+  career?: string;
+  rank?: string;
 }
 
 type DisplayItem =
@@ -81,9 +84,15 @@ function SkillTypeHeading({ type }: { type: SkillsView }) {
 }
 const SKILLS_TABS_ID = "skill-type";
 
-export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption, talents }: SkillsTabProps) {
+export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption, talents, career, rank }: SkillsTabProps) {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isUntrainedBasicOpen, setIsUntrainedBasicOpen] = useState(false);
+  // undefined (not an empty Map) when no career is set, so AddSkillModal knows
+  // to show every skill unrestricted rather than reading "no matches yet".
+  const unlockedSkillTrainingCosts = useMemo(
+    () => (career ? getUnlockedSkillTrainingCosts(career, rank) : undefined),
+    [career, rank]
+  );
   const [activeView, setActiveView] = useState<SkillsView>("basic");
   const { containerRef, transitionClass, switchTo: switchView } = useSwipeableTabs(
     SKILLS_VIEWS,
@@ -164,7 +173,20 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
   );
 
   const handleAdd = useCallback(
-    (id: string) => onUpdate(skills.map((s) => (s.id === id ? { ...s, level: "trained" } : s))),
+    (id: string, manualCost?: number) =>
+      onUpdate(
+        skills.map((s) =>
+          s.id === id
+            ? {
+                ...s,
+                level: "trained",
+                ...(manualCost !== undefined
+                  ? { manualCosts: { ...s.manualCosts, trained: manualCost } }
+                  : {}),
+              }
+            : s
+        )
+      ),
     [skills, onUpdate]
   );
 
@@ -276,6 +298,7 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
         untrainedSkills={untrainedSkills}
         onAdd={handleAdd}
         hideLevelChip
+        unlockedCosts={unlockedSkillTrainingCosts}
       />
       <AddSkillModal
         title="Untrained Basic Skills"
@@ -284,6 +307,7 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
         onClose={() => setIsUntrainedBasicOpen(false)}
         untrainedSkills={untrainedBasicSkills}
         onAdd={handleAdd}
+        unlockedCosts={unlockedSkillTrainingCosts}
       />
     </div>
   );

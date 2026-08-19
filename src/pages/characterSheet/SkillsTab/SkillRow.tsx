@@ -19,7 +19,7 @@ import {
 } from "../../../ui/editableStyles";
 import { ExpandChevron } from "../../../ui/ExpandChevron";
 import { uiPickerPressFeedback } from "../../../ui/buttonStyles";
-import { colourPurple, colourTeal } from "../../../ui/colourTokens";
+import { colourPurple, colourTeal, colourValue } from "../../../ui/colourTokens";
 
 interface SkillRowProps {
   skill: SkillWithComputed;
@@ -29,6 +29,8 @@ interface SkillRowProps {
   onSelect?: (id: string) => void;
   indented?: boolean;
   hideLevelChip?: boolean;
+  /** Real XP cost to train this skill, shown as a chip in previewMode when known. */
+  cost?: number;
 }
 
 const LEVEL_BADGE: Record<string, string> = {
@@ -38,7 +40,7 @@ const LEVEL_BADGE: Record<string, string> = {
   "+20": "bg-green-500/10 border-green-400 text-green-400",
 };
 
-export function SkillRow({ skill, editable, updateLevel, previewMode = false, onSelect, indented = false, hideLevelChip = false }: SkillRowProps) {
+export function SkillRow({ skill, editable, updateLevel, previewMode = false, onSelect, indented = false, hideLevelChip = false, cost }: SkillRowProps) {
   const [expanded, setExpanded] = useState(false);
   const [deleteArmed, setDeleteArmed] = useState(false);
 
@@ -97,6 +99,11 @@ export function SkillRow({ skill, editable, updateLevel, previewMode = false, on
               {previewMode && skill.source && (
                 <Chip size="sm" className={`bg-slate-800/40 font-code shrink-0 ${sourceColour(skill.source)}`}>
                   {skill.source}
+                </Chip>
+              )}
+              {previewMode && cost !== undefined && (
+                <Chip size="sm" className={`font-code shrink-0 ${colourValue}`}>
+                  {cost} XP
                 </Chip>
               )}
               <Chip size="sm" className={`bg-slate-800 font-code shrink-0 ${charColour(skill.characteristic)}`}>
@@ -174,6 +181,11 @@ export function SkillRow({ skill, editable, updateLevel, previewMode = false, on
               {previewMode && skill.source && (
                 <Chip className={`bg-slate-800/40 font-code shrink-0 ${sourceColour(skill.source)}`}>
                   {skill.source}
+                </Chip>
+              )}
+              {previewMode && cost !== undefined && (
+                <Chip className={`font-code shrink-0 ${colourValue}`}>
+                  {cost} XP
                 </Chip>
               )}
               <Chip className={`bg-slate-800 font-code shrink-0 ${charColour(skill.characteristic)}`}>

@@ -130,6 +130,62 @@ describe("AddSkillModal skill row", () => {
   });
 });
 
+describe("AddSkillModal with a career-restricted list", () => {
+  const twoSkills: SkillWithComputed[] = [
+    { ...untrainedSkills[0], id: "s1", name: "Awareness" },
+    { ...untrainedSkills[0], id: "s2", name: "Dodge" },
+  ];
+
+  it("only shows skills with a known unlocked cost by default", () => {
+    setup({ untrainedSkills: twoSkills, unlockedCosts: new Map([["s1", 100]]) });
+    expect(screen.getByRole("button", { name: "Select Awareness" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Select Dodge" })).not.toBeInTheDocument();
+  });
+
+  it("shows the known cost as a chip", () => {
+    setup({ untrainedSkills: twoSkills, unlockedCosts: new Map([["s1", 100]]) });
+    expect(screen.getAllByText("100 XP").length).toBeGreaterThan(0);
+  });
+
+  it("selecting a skill with a known cost calls onAdd with no manual cost", async () => {
+    const user = userEvent.setup();
+    const { onAdd } = setup({ untrainedSkills: twoSkills, unlockedCosts: new Map([["s1", 100]]) });
+    await user.click(screen.getByRole("button", { name: "Select Awareness" }));
+    expect(onAdd).toHaveBeenCalledWith("s1");
+  });
+
+  it("reveals every skill via the show-all toggle", async () => {
+    const user = userEvent.setup();
+    setup({ untrainedSkills: twoSkills, unlockedCosts: new Map([["s1", 100]]) });
+    expect(screen.queryByRole("button", { name: "Select Dodge" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Show all skills" }));
+    expect(screen.getByRole("button", { name: "Select Dodge" })).toBeInTheDocument();
+  });
+
+  it("selecting a skill with no known cost opens a manual cost entry step instead of calling onAdd directly", async () => {
+    const user = userEvent.setup();
+    const { onAdd } = setup({ untrainedSkills: twoSkills, unlockedCosts: new Map([["s1", 100]]) });
+    await user.click(screen.getByRole("button", { name: "Show all skills" }));
+    await user.click(screen.getByRole("button", { name: "Select Dodge" }));
+
+    expect(onAdd).not.toHaveBeenCalled();
+    expect(screen.getByRole("dialog", { name: "Train Dodge" })).toBeInTheDocument();
+
+    const costInput = screen.getByRole("textbox");
+    await user.type(costInput, "250");
+    await user.click(screen.getByRole("button", { name: "Train Dodge" }));
+
+    expect(onAdd).toHaveBeenCalledWith("s2", 250);
+  });
+
+  it("does not restrict or show cost chips when unlockedCosts isn't provided at all", () => {
+    setup({ untrainedSkills: twoSkills });
+    expect(screen.getByRole("button", { name: "Select Dodge" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Show all skills" })).not.toBeInTheDocument();
+    expect(screen.queryByText("100 XP")).not.toBeInTheDocument();
+  });
+});
+
 describe("AddSkillModal in read-only View Skills mode", () => {
   it("expands the row on click (no separate select action exists, so the row itself toggles)", async () => {
     const user = userEvent.setup();
