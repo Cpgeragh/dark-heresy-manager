@@ -32,6 +32,7 @@ import {
   craftsmanshipDescription,
   craftsmanshipValue,
   defaultCraftsmanship,
+  hasQualityText,
 } from "./cyberneticsHelpers";
 import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { isVariableMeta } from "../../../utils/customItemMeta";
@@ -43,7 +44,7 @@ interface Props {
   customItems?: CampaignCustomItem<"cybernetic">[];
   onSelect: (
     ref: CyberneticRef,
-    craftsmanship: CyberneticCraftsmanship,
+    craftsmanship: CyberneticCraftsmanship | undefined,
     bodyLocation?: ArmourLocationKey[],
     gmValue?: string,
     gmRarity?: string
@@ -71,6 +72,7 @@ export function ImplantPicker({
   const [assignedValue, setAssignedValue] = useState<string | undefined>();
   const [assignedRarity, setAssignedRarity] = useState<string | undefined>();
   const listScrollPositionRef = useRef(0);
+  const pendingNeedsCost = pendingCost ? isVariableMeta(pendingCost.value) : false;
   const pendingNeedsRarity = pendingCost ? isVariableMeta(pendingCost.availability) : false;
   const {
     gmCost,
@@ -82,7 +84,7 @@ export function ImplantPicker({
     costValid,
     canConfirm: canConfirmCost,
     resetAssignedItemMeta,
-  } = useAssignedItemMeta({ requiresRarity: pendingNeedsRarity });
+  } = useAssignedItemMeta({ requiresCost: pendingNeedsCost, requiresRarity: pendingNeedsRarity });
 
   const normalizedQuery = query.toLowerCase();
   const filtered = CYBERNETICS_REFERENCE.filter((r) =>
@@ -106,6 +108,15 @@ export function ImplantPicker({
     setAssignedRarity(undefined);
     resetAssignedItemMeta();
   };
+  const finalizeSelection = (ref: CyberneticRef, gmValue?: string, gmRarity?: string) => {
+    if (!hasQualityText(ref) && !ref.requiresLocation) {
+      onSelect(ref, undefined, undefined, gmValue, gmRarity);
+      resetPicker();
+      return;
+    }
+    setSelected(ref);
+    setCraftsmanship(defaultCraftsmanship(ref));
+  };
   const selectImplant = (ref: CyberneticRef) => {
     if (!editable) return;
     if (isVariableMeta(ref.value) || isVariableMeta(ref.availability)) {
@@ -113,16 +124,17 @@ export function ImplantPicker({
       resetAssignedItemMeta();
       return;
     }
-    setSelected(ref);
-    setCraftsmanship(defaultCraftsmanship(ref));
+    finalizeSelection(ref);
   };
   const confirmCost = () => {
     if (!pendingCost || !canConfirmCost) return;
-    setAssignedValue(formatMoneyInput(gmCost));
-    setAssignedRarity(pendingNeedsRarity ? gmRarity : undefined);
-    setSelected(pendingCost);
+    const nextValue = pendingNeedsCost ? formatMoneyInput(gmCost) : undefined;
+    const nextRarity = pendingNeedsRarity ? gmRarity : undefined;
+    setAssignedValue(nextValue);
+    setAssignedRarity(nextRarity);
+    const ref = pendingCost;
     setPendingCost(null);
-    setCraftsmanship(defaultCraftsmanship(pendingCost));
+    finalizeSelection(ref, nextValue, nextRarity);
   };
   const implantInfo = (ref: CyberneticRef) => (
     <div className="space-y-3">
@@ -155,6 +167,7 @@ export function ImplantPicker({
         setGmCost={setGmCost}
         costValid={costValid}
         costPlaceholder="e.g. 5000"
+        requiresCost={pendingNeedsCost}
         requiresRarity={pendingNeedsRarity}
         gmRarity={gmRarity}
         setGmRarity={setGmRarity}
@@ -350,8 +363,8 @@ export function ImplantPicker({
               availability={entry.item.data.availability}
               source={entry.item.data.source}
             />
-            <Chip className={CRAFTSMANSHIP_STYLE[entry.item.data.craftsmanship]}>
-              {entry.item.data.craftsmanship}
+            <Chip className={CRAFTSMANSHIP_STYLE[entry.item.data.craftsmanship ?? "Common"]}>
+              {entry.item.data.craftsmanship ?? "Common"}
             </Chip>
           </div>
         </PickerRow>
@@ -374,8 +387,14 @@ export function ImplantPicker({
               availability={isVariableMeta(entry.ref.availability) ? undefined : entry.ref.availability}
               source={entry.ref.source}
             />
-            {(isVariableMeta(entry.ref.value) || isVariableMeta(entry.ref.availability)) && (
+            {isVariableMeta(entry.ref.value) && isVariableMeta(entry.ref.availability) && (
+              <span className={uiTextGMNote}>Cost and availability assigned on add</span>
+            )}
+            {isVariableMeta(entry.ref.value) && !isVariableMeta(entry.ref.availability) && (
               <span className={uiTextGMNote}>Cost assigned on add</span>
+            )}
+            {!isVariableMeta(entry.ref.value) && isVariableMeta(entry.ref.availability) && (
+              <span className={uiTextGMNote}>Availability assigned on add</span>
             )}
           </div>
         </PickerRow>

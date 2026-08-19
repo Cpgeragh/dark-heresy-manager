@@ -18,6 +18,18 @@ describe("useAssignedItemMeta", () => {
     expect(result.current.canConfirm).toBe(true);
   });
 
+  it("does not require a cost when configured, but still requires rarity if asked for", () => {
+    const { result } = renderHook(() =>
+      useAssignedItemMeta({ requiresCost: false, requiresRarity: true })
+    );
+
+    expect(result.current.costValid).toBe(true);
+    expect(result.current.canConfirm).toBe(false);
+
+    act(() => result.current.setGmRarity("Rare"));
+    expect(result.current.canConfirm).toBe(true);
+  });
+
   it("requires rarity when configured and resets every field", () => {
     const { result } = renderHook(() => useAssignedItemMeta({ requiresRarity: true }));
 

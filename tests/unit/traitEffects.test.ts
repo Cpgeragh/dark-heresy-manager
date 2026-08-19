@@ -58,6 +58,13 @@ describe("Trait cross-page effects", () => {
     const hive = block({ homeworld: "hive-world" });
     expect(getTraitSkillEffects(hive, techUse).countsAsBasic).toBe(true);
 
+    const commonTech = DEFAULT_SKILLS.find((skill) => skill.id === "common-tech")!;
+    const machineCult = DEFAULT_SKILLS.find((skill) => skill.id === "common-machine-cult")!;
+    const forge = block({ homeworld: "forge-world" });
+    expect(getTraitSkillEffects(forge, commonTech).countsAsBasic).toBe(true);
+    expect(getTraitSkillEffects(forge, machineCult).countsAsBasic).toBe(true);
+    expect(getTraitSkillEffects(hive, machineCult).countsAsBasic).toBeUndefined();
+
     const lore = DEFAULT_SKILLS.find((skill) => skill.category === "Common Lore")!;
     const blank = block({ traits: [trait("blank-slate", undefined, {
       acquisition: { trait: { blankSlateSkillIds: [lore.id, "trade-copyist", "forbidden-inquisition"] } },

@@ -43,7 +43,7 @@ import { CloseIcon } from "../../ui/CloseButton";
 import { uiDismissButton } from "../../ui/buttonStyles";
 import { TRAIT_LIST } from "../../data/traitData";
 import { TraitAcquisitionModal } from "./TraitAcquisitionModal";
-import { careerNeedsStartingChoice } from "../../features/career/careerStartingBenefits";
+import { applyTechPriestImplants, careerNeedsStartingChoice } from "../../features/career/careerStartingBenefits";
 import { CareerStartingChoiceModal } from "./CareerStartingChoiceModal";
 import {
   HomeworldTraitAcquisitionModal,
@@ -248,9 +248,14 @@ export function BackgroundTab({
       });
       onUpdateTalents({ ...talents, careerTraitAcquisition: undefined, careerStartingChoices: undefined });
       if (onUpdateCybernetics) {
-        void onUpdateCybernetics(cybernetics.filter(
-          (item) => item.grantedByTalentEntryUid !== "career:imperial-psyker:sanctioned-psyker"
-        ));
+        void onUpdateCybernetics(
+          applyTechPriestImplants(
+            cybernetics.filter(
+              (item) => item.grantedByTalentEntryUid !== "career:imperial-psyker:sanctioned-psyker"
+            ),
+            career.name
+          )
+        );
       }
       setShowCareerPicker(false);
     },
@@ -850,8 +855,10 @@ export function BackgroundTab({
                 careerTraitAcquisition: result.entry.acquisition?.trait,
                 careerStartingChoices: undefined,
               });
-              if (result.cybernetics && onUpdateCybernetics) {
-                void onUpdateCybernetics(result.cybernetics);
+              if (onUpdateCybernetics) {
+                void onUpdateCybernetics(
+                  applyTechPriestImplants(result.cybernetics ?? cybernetics, pendingCareer.name)
+                );
               }
               if (result.gear && onUpdateGear) {
                 void onUpdateGear(result.gear);
@@ -884,9 +891,14 @@ export function BackgroundTab({
               careerStartingChoices: choices,
             });
             if (onUpdateCybernetics) {
-              void onUpdateCybernetics(cybernetics.filter(
-                (item) => item.grantedByTalentEntryUid !== "career:imperial-psyker:sanctioned-psyker"
-              ));
+              void onUpdateCybernetics(
+                applyTechPriestImplants(
+                  cybernetics.filter(
+                    (item) => item.grantedByTalentEntryUid !== "career:imperial-psyker:sanctioned-psyker"
+                  ),
+                  pendingStartingChoiceCareer.name
+                )
+              );
             }
             setPendingStartingChoiceCareer(null);
           }}

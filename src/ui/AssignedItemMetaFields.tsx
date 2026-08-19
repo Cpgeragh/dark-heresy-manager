@@ -10,6 +10,7 @@ export interface AssignedItemMetaFieldsProps {
   setGmCost: (value: string) => void;
   costValid: boolean;
   costPlaceholder: string;
+  requiresCost?: boolean;
   requiresRarity: boolean;
   gmRarity: string;
   onOpenRarityPicker: () => void;
@@ -23,6 +24,7 @@ export function AssignedItemMetaFields({
   setGmCost,
   costValid,
   costPlaceholder,
+  requiresCost = true,
   requiresRarity,
   gmRarity,
   onOpenRarityPicker,
@@ -37,23 +39,25 @@ export function AssignedItemMetaFields({
         <span className="font-medium text-slate-200">{itemName}</span> {explanation}
       </p>
 
-      <div className="space-y-1">
-        <label htmlFor={costId} className={uiFormLabel}>
-          Cost (Thrones) <span className="text-red-400">*</span>
-        </label>
-        <input
-          id={costId}
-          type="text"
-          inputMode="numeric"
-          value={gmCost}
-          onChange={(event) => setGmCost(sanitizeMoneyInput(event.target.value))}
-          placeholder={costPlaceholder}
-          className={editableInputClass(true)}
-        />
-        {gmCost.trim() !== "" && !costValid && (
-          <p className="text-xs lg:text-sm text-red-400">Must be a whole number of 0 or more.</p>
-        )}
-      </div>
+      {requiresCost && (
+        <div className="space-y-1">
+          <label htmlFor={costId} className={uiFormLabel}>
+            Cost (Thrones) <span className="text-red-400">*</span>
+          </label>
+          <input
+            id={costId}
+            type="text"
+            inputMode="numeric"
+            value={gmCost}
+            onChange={(event) => setGmCost(sanitizeMoneyInput(event.target.value))}
+            placeholder={costPlaceholder}
+            className={editableInputClass(true)}
+          />
+          {gmCost.trim() !== "" && !costValid && (
+            <p className="text-xs lg:text-sm text-red-400">Must be a whole number of 0 or more.</p>
+          )}
+        </div>
+      )}
 
       {requiresRarity && (
         <div className="space-y-1">

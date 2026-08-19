@@ -571,4 +571,61 @@ export const CYBERNETICS_REFERENCE: CyberneticRef[] = [
     common:
       "Interface implants grant a +10 bonus on Pilot Tests when operating any vehicle with interface receptors. In addition, a character equipped with this circuitry may also make a Perception Test (Difficulty set by the GM) to determine a vehicle’s status and condition as a Free Action.",
   },
+
+  // ── Core Rulebook — Tech-Priest Mechanicus Implants ────────────────────────
+
+  {
+    id: "cr-electro-graft",
+    name: "Electro-Graft",
+    source: SkillSource.CR,
+    value: "—",
+    availability: "Adeptus Mechanicus Only",
+    notes:
+      "This is a small port that is grafted into your nervous system. Once you have been properly trained, this will allow you to interface with machine data ports, and certain types of data nets. Electro-grafts can take many forms, such as electoos, skull shunts, finger probes or spine jacks.",
+  },
+  {
+    id: "cr-electoo-inductors",
+    name: "Electoo Inductors",
+    source: SkillSource.CR,
+    value: "—",
+    availability: "Adeptus Mechanicus Only",
+    notes:
+      "These are palm-sized metal skin grafts that appear much like tattoos to the uninitiated. The electoos are wired into your nervous system, where they derive power from the bio-electrical emanations of the flesh. They can be used to emit or siphon power in many ways. Electoo inductors can be any colour, and can appear anywhere on the body—though hands or mechadendrites are the usual sites.",
+  },
+  {
+    id: "cr-respirator-unit",
+    name: "Respirator Unit",
+    source: SkillSource.CR,
+    value: "—",
+    availability: "Adeptus Mechanicus Only",
+    notes:
+      "This implant covers the lower half of your face with a network of grilles and tubing. It purifies your air supply, granting a +20% bonus to resist airborne toxins and gas weapons. The respirator unit also contains a vox-synthesiser capable of transmitting your voice in a variety of ways. Respirators can appear as simple grille units or intricate mask-like carvings.",
+  },
+  {
+    id: "cr-cyber-mantle",
+    name: "Cyber-Mantle",
+    source: SkillSource.CR,
+    value: "—",
+    availability: "Adeptus Mechanicus Only",
+    notes:
+      "This is a framework of metal, wires and impulse transmitters that is bolted on to your spine and lower ribcage. As you gain further implants, this mantle will act as a sub-dermal anchorage point. Amongst some servants of the Omnissiah, this cyber-mantle is often referred to as ‘the true flesh’. One would have to look beneath the red robes of a Tech-Priest to discover what a cyber-mantle looks like, and thus no one admits to having seen one.",
+  },
+  {
+    id: "cr-potentia-coil",
+    name: "Potentia Coil",
+    source: SkillSource.CR,
+    value: "—",
+    availability: "Adeptus Mechanicus Only",
+    notes:
+      "Cradled within the cyber-mantle is a power unit known as the potentia coil. This mass can store energy and produce various types of fields. Coils come in many types, from small crystal stack affairs, to bulky electrical galvanitors salvaged from vehicle engines. Many a hunchback within the Adeptus Mechanicus is blamed upon a primitive coil.",
+  },
+  {
+    id: "cr-cranial-circuitry",
+    name: "Cranial Circuitry",
+    source: SkillSource.CR,
+    value: "—",
+    availability: "Adeptus Mechanicus Only",
+    notes:
+      "This is a series of linked processors, implants and cortical circuits that augments your mental capacities. Most sit within housing bolted onto the skull, whilst others nestle within the brain itself. As you grow in the seriousness of your devotions, more and more of the brain that deals with useless things such as emotion and intuition can be scooped away to provide room for additional augmentations. Cranial circuits are often very crude-looking, and frequently rather aged.",
+  },
 ];

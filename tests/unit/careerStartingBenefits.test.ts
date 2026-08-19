@@ -1,9 +1,12 @@
 import { describe, it, expect } from "vitest";
 import {
+  applyTechPriestImplants,
   careerNeedsStartingChoice,
   getDerivedCareerSkillIds,
   getDerivedCareerTalentGrants,
+  TECH_PRIEST_MECHANICUS_IMPLANT_GRANT_UID,
 } from "../../src/features/career/careerStartingBenefits";
+import type { CyberneticItem } from "../../src/types/Character";
 
 describe("getDerivedCareerSkillIds", () => {
   it("returns an empty array for a career with no data", () => {
@@ -46,6 +49,45 @@ describe("getDerivedCareerTalentGrants", () => {
   it("resolves an 'or' choice once captured", () => {
     const grants = getDerivedCareerTalentGrants("Guardsman", { talentChoices: { 1: 1 } });
     expect(grants).toContainEqual({ talentId: "pistol-training", specialisation: "Las", grantIndex: 1 });
+  });
+});
+
+describe("applyTechPriestImplants", () => {
+  it("grants all six implants when the career is Tech-Priest, with real availability but no cost or craftsmanship", () => {
+    const granted = applyTechPriestImplants([], "Tech-Priest");
+    expect(granted).toHaveLength(6);
+    for (const item of granted) {
+      expect(item.craftsmanship).toBeUndefined();
+      expect(item.value).toBeUndefined();
+      expect(item.availability).toBe("Adeptus Mechanicus Only");
+      expect(item.grantedByTalentEntryUid).toBe(TECH_PRIEST_MECHANICUS_IMPLANT_GRANT_UID);
+    }
+  });
+
+  it("grants nothing for a different career", () => {
+    expect(applyTechPriestImplants([], "Guardsman")).toEqual([]);
+  });
+
+  it("removes the granted implants when the career changes away from Tech-Priest", () => {
+    const granted = applyTechPriestImplants([], "Tech-Priest");
+    expect(applyTechPriestImplants(granted, "Guardsman")).toEqual([]);
+  });
+
+  it("leaves manually-added cybernetics untouched", () => {
+    const manual: CyberneticItem = {
+      id: "manual-1",
+      name: "Bionic Arm",
+      craftsmanship: "Common",
+    };
+    const result = applyTechPriestImplants([manual], "Tech-Priest");
+    expect(result).toContainEqual(manual);
+    expect(result).toHaveLength(7);
+  });
+
+  it("does not duplicate the granted implants if applied again", () => {
+    const once = applyTechPriestImplants([], "Tech-Priest");
+    const twice = applyTechPriestImplants(once, "Tech-Priest");
+    expect(twice).toHaveLength(6);
   });
 });
 

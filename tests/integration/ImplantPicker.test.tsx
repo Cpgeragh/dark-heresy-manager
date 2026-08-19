@@ -14,6 +14,9 @@ import { craftsmanshipValue } from "../../src/pages/characterSheet/CyberneticsTa
 // craftsmanship step with no location sub-step in between.
 const IMPLANT_NAME = "Auger Arrays";
 const VARIABLE_LOCATION_IMPLANT_NAME = "Karrikian Lock-Arm";
+// A real Tech-Priest implant with no quality-tiered text and no location
+// requirement, variable cost but a fixed real availability.
+const NO_QUALITY_IMPLANT_NAME = "Electro-Graft";
 
 function row(name: string): HTMLButtonElement {
   const match = screen
@@ -101,6 +104,40 @@ describe("ImplantPicker", () => {
       ["leftArm"],
       "2,500 Thrones",
       "Near Unique"
+    );
+  });
+
+  it("shows the row label naming only the field actually missing", () => {
+    renderPicker();
+    const electroGraftRow = row(NO_QUALITY_IMPLANT_NAME);
+    expect(electroGraftRow.textContent).toContain("Cost assigned on add");
+    expect(electroGraftRow.textContent).not.toContain("Cost and availability assigned on add");
+  });
+
+  it("only asks for cost, not rarity, for an item with a real fixed availability", async () => {
+    const user = userEvent.setup();
+    renderPicker();
+    await user.click(row(NO_QUALITY_IMPLANT_NAME));
+
+    expect(screen.getByLabelText(/Cost \(Thrones\)/)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/Rarity/)).not.toBeInTheDocument();
+  });
+
+  it("skips the craftsmanship step entirely for an item with no real quality data and no location", async () => {
+    const user = userEvent.setup();
+    const { onSelect } = renderPicker();
+
+    await user.click(row(NO_QUALITY_IMPLANT_NAME));
+    await user.type(screen.getByLabelText(/Cost \(Thrones\)/), "0");
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+
+    expect(screen.queryByText("Select craftsmanship quality:")).not.toBeInTheDocument();
+    expect(onSelect).toHaveBeenCalledWith(
+      expect.objectContaining({ name: NO_QUALITY_IMPLANT_NAME }),
+      undefined,
+      undefined,
+      "0 Thrones",
+      undefined
     );
   });
 });

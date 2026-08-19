@@ -9,14 +9,17 @@ export function nextCraftsmanship(current: CyberneticCraftsmanship): CyberneticC
   return CYBERNETIC_CRAFTSMANSHIP_OPTIONS[(idx + 1) % CYBERNETIC_CRAFTSMANSHIP_OPTIONS.length];
 }
 
+export function hasQualityText(ref?: CyberneticRef): boolean {
+  return Boolean(ref?.poor || ref?.common || ref?.good);
+}
+
 export function availableCraftsmanship(ref?: CyberneticRef): CyberneticCraftsmanship[] {
   if (!ref) return ["Common"];
   if (ref.notes?.includes("All mechadendrites are Good craftsmanship unless noted")) {
     return ["Good"];
   }
 
-  const hasAnyQualityText = Boolean(ref.poor || ref.common || ref.good);
-  if (!hasAnyQualityText) return ["Common"];
+  if (!hasQualityText(ref)) return ["Common"];
 
   const qualities: CyberneticCraftsmanship[] = [];
   if (ref.poor) qualities.push("Poor");

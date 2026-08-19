@@ -1,7 +1,8 @@
 // src/features/career/careerStartingBenefits.ts
 
 import { CAREER_LIST } from "../../data/careerData";
-import type { CareerStartingChoices } from "../../types/Character";
+import { CYBERNETICS_REFERENCE } from "../../data/reference/cyberneticsReference";
+import type { CareerStartingChoices, CyberneticItem } from "../../types/Character";
 
 function findCareer(careerName?: string) {
   return CAREER_LIST.find((career) => career.name === careerName);
@@ -55,4 +56,38 @@ export function careerNeedsStartingChoice(careerName: string | undefined): boole
     ...(career.startingSkillGrants ?? []),
     ...(career.startingTalentGrants ?? []),
   ].some((grant) => grant.options.length > 1);
+}
+
+export const TECH_PRIEST_MECHANICUS_IMPLANT_GRANT_UID = "career:tech-priest:mechanicus-implants";
+
+const TECH_PRIEST_IMPLANT_REFERENCE_IDS = [
+  "cr-electro-graft",
+  "cr-electoo-inductors",
+  "cr-respirator-unit",
+  "cr-cyber-mantle",
+  "cr-potentia-coil",
+  "cr-cranial-circuitry",
+];
+
+/** Tech-Priests are judged a suitable vessel for these implants at creation, no real cost or craftsmanship listed. */
+export function applyTechPriestImplants(
+  cybernetics: CyberneticItem[],
+  careerName: string
+): CyberneticItem[] {
+  const withoutOld = cybernetics.filter(
+    (item) => item.grantedByTalentEntryUid !== TECH_PRIEST_MECHANICUS_IMPLANT_GRANT_UID
+  );
+  if (careerName !== "Tech-Priest") return withoutOld;
+  const granted: CyberneticItem[] = TECH_PRIEST_IMPLANT_REFERENCE_IDS.map((referenceId) => {
+    const reference = CYBERNETICS_REFERENCE.find((ref) => ref.id === referenceId)!;
+    return {
+      id: `${TECH_PRIEST_MECHANICUS_IMPLANT_GRANT_UID}:${referenceId}`,
+      referenceId,
+      name: reference.name,
+      availability: reference.availability,
+      grantedByTalentEntryUid: TECH_PRIEST_MECHANICUS_IMPLANT_GRANT_UID,
+      grantedByTalentName: "Career: Tech-Priest",
+    };
+  });
+  return [...withoutOld, ...granted];
 }

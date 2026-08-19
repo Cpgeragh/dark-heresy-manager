@@ -175,7 +175,7 @@ export function CyberneticsTab({
   const install = useCallback(
     (
       ref: CyberneticRef,
-      craftsmanship: CyberneticCraftsmanship,
+      craftsmanship: CyberneticCraftsmanship | undefined,
       bodyLocation?: ArmourLocationKey[],
       gmValue?: string,
       gmRarity?: string
@@ -183,7 +183,7 @@ export function CyberneticsTab({
       if (!editable) return;
       if (ref.id === "ih-concealed-weapon-bionic") {
         setShowPicker(false);
-        setInstallingConcealedWeapon({ ref, craftsmanship });
+        setInstallingConcealedWeapon({ ref, craftsmanship: craftsmanship ?? "Common" });
         return;
       }
       onUpdate([
@@ -192,8 +192,12 @@ export function CyberneticsTab({
           id: crypto.randomUUID(),
           referenceId: ref.id,
           name: ref.name,
-          craftsmanship,
-          value: gmValue ?? craftsmanshipValue(ref, craftsmanship),
+          ...(craftsmanship ? { craftsmanship } : {}),
+          ...(craftsmanship
+            ? { value: gmValue ?? craftsmanshipValue(ref, craftsmanship) }
+            : gmValue !== undefined
+              ? { value: gmValue }
+              : {}),
           availability: gmRarity ?? ref.availability,
           source: ref.source,
           ...(bodyLocation ? { bodyLocation } : {}),
@@ -261,7 +265,7 @@ export function CyberneticsTab({
         cybernetics.map((c) => {
           if (c.id !== id) return c;
           const ref = CYBERNETICS_REFERENCE.find((r) => r.id === c.referenceId);
-          const craftsmanship = nextAvailableCraftsmanship(c.craftsmanship, ref);
+          const craftsmanship = nextAvailableCraftsmanship(c.craftsmanship ?? "Common", ref);
           const hasQualitySpecificCost = Boolean(ref?.poorValue || ref?.goodValue);
           const hasQualitySpecificAvailability = Boolean(ref?.poorAvailability || ref?.goodAvailability);
           return {

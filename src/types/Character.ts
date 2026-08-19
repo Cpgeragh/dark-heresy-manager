@@ -314,7 +314,7 @@ export interface CyberneticItem extends CustomLibraryLinkFields {
   id: string;
   referenceId?: string; // links back to CyberneticRef.id
   name: string;
-  craftsmanship: CyberneticCraftsmanship;
+  craftsmanship?: CyberneticCraftsmanship;
   notes?: string; // player-added notes
   value?: string;
   availability?: string;

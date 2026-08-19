@@ -15,6 +15,7 @@ import { RemoveButton } from "../../../ui/RemoveButton";
 import { ItemMetaChips } from "../../../ui/ItemMetaChips";
 import { CRAFTSMANSHIP_STYLE } from "../../../ui/craftsmanship";
 import { ARMOUR_LOCATION_LABELS } from "../../../constants/locations";
+import { isVariableMeta } from "../../../utils/customItemMeta";
 import {
   availableCraftsmanship,
   concealedWeaponBionicDescription,
@@ -55,9 +56,10 @@ export function ImplantRow({
   const ref = CYBERNETICS_REFERENCE.find((r) => r.id === item.referenceId);
   const qualityOptions = availableCraftsmanship(ref);
   const canChangeQuality = editable && qualityOptions.length > 1;
-  const displayedCraftsmanship = qualityOptions.includes(item.craftsmanship)
-    ? item.craftsmanship
-    : qualityOptions[0];
+  const displayedCraftsmanship =
+    item.craftsmanship && qualityOptions.includes(item.craftsmanship)
+      ? item.craftsmanship
+      : qualityOptions[0];
   const qualityDescription = ref
     ? ref.id === "ih-concealed-weapon-bionic"
       ? concealedWeaponBionicDescription(displayedCraftsmanship, linkedWeaponType)
@@ -104,8 +106,8 @@ export function ImplantRow({
           )}
           <ItemMetaChips
             bare
-            value={item.value ?? ref?.value}
-            availability={item.availability ?? ref?.availability}
+            value={item.value ?? (isVariableMeta(ref?.value) ? undefined : ref?.value)}
+            availability={item.availability ?? (isVariableMeta(ref?.availability) ? undefined : ref?.availability)}
             source={item.source ?? ref?.source}
           />
         </div>
@@ -119,33 +121,35 @@ export function ImplantRow({
             <Chip className="border-pink-500/50 bg-pink-500/10 text-pink-300">{linkedWeaponName}</Chip>
           </div>
         )}
-        <div className="flex items-center gap-1.5 mt-1">
-          <span className={uiTextLabel}>Quality</span>
-          <Chip
-            as="button"
-            type="button"
-            onClick={() => canChangeQuality && onCycleQuality(item.id)}
-            title={
-              canChangeQuality
-                ? `Click to change quality (currently ${displayedCraftsmanship})`
-                : displayedCraftsmanship
-            }
-            disabled={!canChangeQuality}
-            className={[
-              CRAFTSMANSHIP_STYLE[displayedCraftsmanship],
-              canChangeQuality ? "cursor-pointer hover:opacity-80" : "cursor-default",
-              "transition shrink-0",
-            ].join(" ")}
-          >
-            {displayedCraftsmanship}
-          </Chip>
-          <span className={uiInfoModalWrapper}>
-            <InfoModal
-              title={`${displayedCraftsmanship} ${item.name}`}
-              content={<p className={`whitespace-pre-line text-sm ${uiTextBody} leading-relaxed`}>{qualityDescription}</p>}
-            />
-          </span>
-        </div>
+        {item.craftsmanship && (
+          <div className="flex items-center gap-1.5 mt-1">
+            <span className={uiTextLabel}>Quality</span>
+            <Chip
+              as="button"
+              type="button"
+              onClick={() => canChangeQuality && onCycleQuality(item.id)}
+              title={
+                canChangeQuality
+                  ? `Click to change quality (currently ${displayedCraftsmanship})`
+                  : displayedCraftsmanship
+              }
+              disabled={!canChangeQuality}
+              className={[
+                CRAFTSMANSHIP_STYLE[displayedCraftsmanship],
+                canChangeQuality ? "cursor-pointer hover:opacity-80" : "cursor-default",
+                "transition shrink-0",
+              ].join(" ")}
+            >
+              {displayedCraftsmanship}
+            </Chip>
+            <span className={uiInfoModalWrapper}>
+              <InfoModal
+                title={`${displayedCraftsmanship} ${item.name}`}
+                content={<p className={`whitespace-pre-line text-sm ${uiTextBody} leading-relaxed`}>{qualityDescription}</p>}
+              />
+            </span>
+          </div>
+        )}
         {libraryItem && (
           <CustomItemActionButtons
             libraryItem={libraryItem}

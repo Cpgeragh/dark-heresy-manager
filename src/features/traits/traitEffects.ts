@@ -255,6 +255,10 @@ export function getTraitSkillEffects(
     effects.sources.push({ name, type: "Trait", amount });
   };
 
+  if (talents.homeworld === "forge-world" && matchesAny(skill, ["common-tech", "common-machine-cult"])) {
+    applyBasic("Forge World");
+  }
+
   for (const entry of entries) {
     switch (entry.talentId) {
       case "homeworld-primitive":
