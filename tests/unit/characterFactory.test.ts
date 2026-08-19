@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { createEmptyCharacterData } from "../../src/utils/characterFactory";
+import { createEmptyCharacterData, isBackgroundComplete } from "../../src/utils/characterFactory";
+import type { Character } from "../../src/types/Character";
 
 const base = { campaignId: "campaign-123", recoveryCode: "DH-ABCD-1234" };
 
@@ -67,5 +68,43 @@ describe("createEmptyCharacterData", () => {
     expect(char.rangedWeapons).toHaveLength(0);
     expect(char.meleeWeapons).toHaveLength(0);
     expect(char.gear).toHaveLength(0);
+  });
+});
+
+function makeCharacter(overrides: {
+  homeworld?: string;
+  career?: string;
+  rank?: string;
+  backgroundComplete?: boolean;
+}): Character {
+  const data = createEmptyCharacterData(base);
+  return {
+    ...data,
+    id: "test-char",
+    header: { ...data.header, career: overrides.career ?? "", rank: overrides.rank ?? "" },
+    talentsAndTraits: { ...data.talentsAndTraits, homeworld: overrides.homeworld ?? "" },
+    backgroundComplete: overrides.backgroundComplete,
+  };
+}
+
+describe("isBackgroundComplete", () => {
+  it("is false when none of Homeworld, Career, or Rank are set", () => {
+    expect(isBackgroundComplete(makeCharacter({}))).toBe(false);
+  });
+
+  it("is false when only some of the three are set", () => {
+    expect(isBackgroundComplete(makeCharacter({ homeworld: "hive-world", career: "Guardsman" }))).toBe(false);
+  });
+
+  it("is true once all three are set, even without the flag persisted", () => {
+    expect(
+      isBackgroundComplete(
+        makeCharacter({ homeworld: "hive-world", career: "Guardsman", rank: "Conscript" })
+      )
+    ).toBe(true);
+  });
+
+  it("is true when the flag is already set, regardless of the live fields", () => {
+    expect(isBackgroundComplete(makeCharacter({ backgroundComplete: true }))).toBe(true);
   });
 });

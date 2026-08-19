@@ -713,4 +713,7 @@ export interface Character {
 
   notes?: string | NoteEntry[];
   portraitUrl?: string;
+
+  /** True once Homeworld, Career, and Rank have all been set at least once. */
+  backgroundComplete?: boolean;
 }

@@ -125,3 +125,16 @@ export function createEmptyCharacterData(params: {
     notes: "",
   };
 }
+
+/**
+ * True once Homeworld, Career, and Rank have all been set at least once.
+ * Checks the live fields too (not just the flag), so a character that
+ * already has all three filled counts as complete immediately, even before
+ * the flag itself has been persisted.
+ */
+export function isBackgroundComplete(character: Character): boolean {
+  return Boolean(
+    character.backgroundComplete ||
+      (character.talentsAndTraits.homeworld && character.header.career && character.header.rank)
+  );
+}

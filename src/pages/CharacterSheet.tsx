@@ -57,6 +57,7 @@ import type {
 } from "../types/Character";
 
 import { exportCharacterJson } from "../utils/exportCharacter";
+import { isBackgroundComplete } from "../utils/characterFactory";
 import { normaliseSkills, skillsNeedNormalisation } from "../utils/skillUtils";
 import { SectionDrawer } from "../components/SectionDrawer";
 import { useUserProfile } from "../hooks/useUserProfile";
@@ -157,6 +158,25 @@ export default function CharacterSheet({
   );
 
   const basePath = `/campaign/${params.campaignId}/character/${params.characterId}`;
+
+  // New characters must finish Background (Homeworld, Career, Rank) before a
+  // player can leave it. DM browsing is never gated. Once complete, this
+  // never re-locks even if a field is cleared later, since it checks the
+  // persisted flag first.
+  const backgroundSatisfied = character ? isBackgroundComplete(character) : true;
+
+  useEffect(() => {
+    if (!character || character.backgroundComplete || !backgroundSatisfied) return;
+    updateField("backgroundComplete", true);
+  }, [character, backgroundSatisfied, updateField]);
+
+  useEffect(() => {
+    if (!character || isDM || backgroundSatisfied) return;
+    if (activeTab !== "background") {
+      navigate(`${basePath}?tab=background`, { replace: true });
+    }
+  }, [character, isDM, backgroundSatisfied, activeTab, basePath, navigate]);
+
   useEffect(() => {
     window.history.pushState(null, "", window.location.href);
 
@@ -429,11 +449,13 @@ export default function CharacterSheet({
 
       {/* Balanced page toolbar: navigation, centred title, matching spacer */}
       <div className="mb-4 grid grid-cols-[2.75rem_minmax(0,1fr)_2.75rem] items-center rounded-lg border border-slate-700 bg-slate-900/60 p-2">
-        <SectionDrawer
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-          isDM={isDM}
-        />
+        {(isDM || backgroundSatisfied) && (
+          <SectionDrawer
+            activeTab={activeTab}
+            onTabChange={handleTabChange}
+            isDM={isDM}
+          />
+        )}
         <h1 className="px-2 text-center font-cinzel text-sm font-bold leading-tight text-red-500 sm:text-base lg:text-lg">
           {TAB_TITLES[activeTab]}
         </h1>
