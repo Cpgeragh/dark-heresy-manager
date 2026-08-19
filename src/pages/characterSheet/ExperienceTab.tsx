@@ -1,6 +1,6 @@
 // src/pages/characterSheet/ExperienceTab.tsx
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback } from "react";
 import type { ExperienceBlock, RankAdvances } from "../../types/Character";
 import {
   editableInputClass,
@@ -15,49 +15,24 @@ import { Button } from "../../ui/Button";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { OptionPickerScreen } from "../../ui/OptionPickerScreen";
 import { ArrowRight } from "../../ui/PickerArrows";
-import { useXpProposals } from "../../hooks/useXpProposals";
-import { proposeXpSpend } from "../../services/xpService";
-import { useToast } from "../../components/Toast/ToastContext";
-import { ErrorState } from "../../ui/ErrorState";
-import { LoadingState } from "../../ui/LoadingState";
 
 // All valid rank values in display order.
 const RANK_OPTIONS: RankAdvances["rank"][] = [1, 2, 3, 4, 5, 6, 7, 8, "elite"];
-
-// Recalculate spent as the sum of every advance cost across all ranks.
-function calcSpent(ranks: RankAdvances[]): number {
-  return ranks.reduce((total, r) => total + r.advances.reduce((s, a) => s + a.cost, 0), 0);
-}
 
 interface ExperienceTabProps {
   experience: ExperienceBlock;
   campaignId: string;
   characterId: string;
-  isOwnedByCurrentPlayer: boolean;
   isDM: boolean;
   onUpdate: (next: ExperienceBlock) => void;
 }
 
 export function ExperienceTab({
   experience,
-  campaignId,
-  characterId,
-  isOwnedByCurrentPlayer,
   isDM,
   onUpdate,
 }: ExperienceTabProps) {
-  const toast = useToast();
   const remaining = experience.total - experience.spent;
-  const { proposals, loading: proposalsLoading, error: proposalsError } = useXpProposals(
-    campaignId,
-    characterId
-  );
-
-  // ── Player proposal state ──────────────────────────────────────────────────
-  const [description, setDescription] = useState("");
-  const [xpCost, setXpCost] = useState(0);
-  const [submitting, setSubmitting] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
 
   // ── DM add-advance form state ──────────────────────────────────────────────
   const [newRank, setNewRank] = useState<RankAdvances["rank"]>(1);
@@ -65,40 +40,6 @@ export function ExperienceTab({
   const [newCost, setNewCost] = useState(0);
   const [newNotes, setNewNotes] = useState("");
   const [showRankPicker, setShowRankPicker] = useState(false);
-
-  const pendingProposals = useMemo(
-    () => proposals.filter((p) => p.status === "pending"),
-    [proposals]
-  );
-  const resolvedProposals = useMemo(
-    () => proposals.filter((p) => p.status !== "pending"),
-    [proposals]
-  );
-  // Approved proposals move experience.spent via a separate write path
-  // (approveXpProposal's increment()). Folding their total back in here
-  // every time ranks change keeps both paths agreeing on the same number,
-  // instead of a manual advance silently erasing an approved proposal's cost.
-  const approvedProposalTotal = useMemo(
-    () => proposals.filter((p) => p.status === "approved").reduce((sum, p) => sum + p.xpCost, 0),
-    [proposals]
-  );
-
-  // ── Player handlers ────────────────────────────────────────────────────────
-  const handlePropose = useCallback(async () => {
-    if (!description.trim() || xpCost <= 0) return;
-    setSubmitting(true);
-    try {
-      await proposeXpSpend(campaignId, characterId, description.trim(), xpCost);
-      setDescription("");
-      setXpCost(0);
-      toast.success("Proposal submitted.");
-    } catch (err) {
-      console.error("XP proposal error:", err);
-      toast.error("Failed to submit proposal. Please try again.");
-    } finally {
-      setSubmitting(false);
-    }
-  }, [campaignId, characterId, description, xpCost, toast]);
 
   // ── DM handlers ───────────────────────────────────────────────────────────
   const handleTotalChange = useCallback(
@@ -127,11 +68,11 @@ export function ExperienceTab({
           (a, b) => RANK_OPTIONS.indexOf(a.rank) - RANK_OPTIONS.indexOf(b.rank)
         );
 
-    onUpdate({ ...experience, ranks: updatedRanks, spent: calcSpent(updatedRanks) + approvedProposalTotal });
+    onUpdate({ ...experience, ranks: updatedRanks });
     setNewName("");
     setNewCost(0);
     setNewNotes("");
-  }, [experience, newRank, newName, newCost, newNotes, onUpdate, approvedProposalTotal]);
+  }, [experience, newRank, newName, newCost, newNotes, onUpdate]);
 
   const handleRemoveAdvance = useCallback(
     (rank: RankAdvances["rank"], advanceId: string) => {
@@ -141,9 +82,9 @@ export function ExperienceTab({
         )
         .filter((r) => r.advances.length > 0);
 
-      onUpdate({ ...experience, ranks: updatedRanks, spent: calcSpent(updatedRanks) + approvedProposalTotal });
+      onUpdate({ ...experience, ranks: updatedRanks });
     },
-    [experience, onUpdate, approvedProposalTotal]
+    [experience, onUpdate]
   );
 
   // ── Render ─────────────────────────────────────────────────────────────────
@@ -300,100 +241,6 @@ export function ExperienceTab({
           </div>
         )}
       </section>
-
-      {/* XP PROPOSALS — player only */}
-      {isOwnedByCurrentPlayer && (
-        <section className="space-y-3">
-          <SectionHeader>Propose XP Spend</SectionHeader>
-
-          <div className="flex flex-col sm:flex-row gap-2">
-            <input
-              placeholder="What are you buying?"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className={editableInputClass(true) + " flex-1 min-w-0"}
-            />
-            <div className="flex gap-2">
-              <div className="w-24 lg:w-32 shrink-0">
-                <input
-                  type="number"
-                  min={0}
-                  placeholder="Cost"
-                  value={xpCost}
-                  onChange={(e) => setXpCost(Math.max(0, Number(e.target.value)))}
-                  className={editableInputClass(true)}
-                />
-              </div>
-              <Button
-                onClick={handlePropose}
-                disabled={submitting || !description.trim() || xpCost <= 0}
-              >
-                {submitting ? "…" : "Propose"}
-              </Button>
-            </div>
-          </div>
-
-          {proposalsError && (
-            <ErrorState>Unable to load XP proposals.</ErrorState>
-          )}
-
-          {!proposalsError && proposalsLoading && (
-            <LoadingState>Loading XP proposals…</LoadingState>
-          )}
-
-          {!proposalsError &&
-            !proposalsLoading &&
-            pendingProposals.length === 0 &&
-            resolvedProposals.length === 0 && (
-            <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No proposals yet.</p>
-          )}
-
-          {!proposalsError && !proposalsLoading && pendingProposals.length > 0 && (
-            <div className="space-y-2">
-              {pendingProposals.map((p) => (
-                <div
-                  key={p.id}
-                  className="flex items-center justify-between border border-slate-500 rounded px-3 lg:px-4 py-2 lg:py-2.5 text-sm lg:text-base"
-                >
-                  <span>
-                    {p.description} — {p.xpCost} XP
-                  </span>
-                  <span className="text-slate-400">pending</span>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {!proposalsError && !proposalsLoading && resolvedProposals.length > 0 && (
-            <div className="space-y-2">
-              <button type="button"
-                onClick={() => setShowHistory((v) => !v)}
-                className="text-xs lg:text-sm text-slate-400 hover:text-slate-200"
-              >
-                {showHistory ? "Hide" : "Show"} history ({resolvedProposals.length})
-              </button>
-
-              {showHistory && (
-                <div className="space-y-2">
-                  {resolvedProposals.map((p) => (
-                    <div
-                      key={p.id}
-                      className="flex items-center justify-between border border-slate-500/50 rounded px-3 lg:px-4 py-2 lg:py-2.5 text-sm lg:text-base opacity-60"
-                    >
-                      <span>
-                        {p.description} — {p.xpCost} XP
-                      </span>
-                      <span className={p.status === "approved" ? "text-green-400" : "text-red-400"}>
-                        {p.status}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </section>
-      )}
 
       {showRankPicker && (
         <OptionPickerScreen

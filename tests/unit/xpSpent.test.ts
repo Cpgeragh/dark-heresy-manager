@@ -1,0 +1,57 @@
+import { describe, it, expect } from "vitest";
+import { getSpentXp } from "../../src/features/experience/xpSpent";
+import { createEmptyCharacterData } from "../../src/utils/characterFactory";
+import type { Character } from "../../src/types/Character";
+
+function makeCharacter(overrides: Partial<Character> = {}): Character {
+  const data = createEmptyCharacterData({ campaignId: "c", recoveryCode: "r" });
+  return { ...data, id: "test-char", ...overrides };
+}
+
+describe("getSpentXp", () => {
+  it("sums manual rank advances", () => {
+    const char = makeCharacter({
+      experience: {
+        total: 1000,
+        spent: 0,
+        ranks: [{ rank: 1, advances: [{ id: "a1", name: "+5 WS", cost: 100 }] }],
+      },
+    });
+    expect(getSpentXp(char)).toBe(100);
+  });
+
+  it("sums manual rank advances across multiple ranks and advances", () => {
+    const char = makeCharacter({
+      experience: {
+        total: 1000,
+        spent: 0,
+        ranks: [
+          { rank: 1, advances: [{ id: "a1", name: "+5 WS", cost: 100 }, { id: "a2", name: "Dodge", cost: 100 }] },
+          { rank: 2, advances: [{ id: "a3", name: "Quick Draw", cost: 100 }] },
+        ],
+      },
+    });
+    expect(getSpentXp(char)).toBe(300);
+  });
+
+  it("sums manual rank advances and Characteristic Advances together", () => {
+    const data = createEmptyCharacterData({ campaignId: "c", recoveryCode: "r" });
+    const char: Character = {
+      ...data,
+      id: "test-char",
+      header: { ...data.header, career: "Guardsman" },
+      characteristics: { ...data.characteristics, ws: { base: 30, advances: 1 } },
+      experience: {
+        total: 1000,
+        spent: 0,
+        ranks: [{ rank: 1, advances: [{ id: "a1", name: "+5 WS", cost: 100 }] }],
+      },
+    };
+    // 100 (manual advance) + 100 (WS Simple tier for Guardsman)
+    expect(getSpentXp(char)).toBe(200);
+  });
+
+  it("is zero for a brand new character", () => {
+    expect(getSpentXp(makeCharacter())).toBe(0);
+  });
+});

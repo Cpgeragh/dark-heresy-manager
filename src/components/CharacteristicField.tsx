@@ -13,9 +13,11 @@ interface Props {
   value: CharField;
   editable: boolean;
   onChange: (newValue: CharField) => void;
+  /** XP cost of each of the 4 advance tiers, in order. Undefined entries show no cost. */
+  tierCosts?: (number | undefined)[];
 }
 
-export default function CharacteristicField({ label, value, editable, onChange }: Props) {
+export default function CharacteristicField({ label, value, editable, onChange, tierCosts }: Props) {
   const { base, advances } = value;
   const [error, setError] = useState<string | undefined>();
   const [draft, setDraft] = useState(String(base));
@@ -136,23 +138,28 @@ export default function CharacteristicField({ label, value, editable, onChange }
         <span className="text-sm lg:text-base text-slate-400">Advances:</span>
         {Array.from({ length: MAX_CHARACTERISTIC_ADVANCES }).map((_, idx) => {
           const filled = idx < advances;
+          const cost = tierCosts?.[idx];
           return (
-            <button
-              type="button"
-              key={idx}
-              onClick={() => toggleAdvance(idx)}
-              disabled={!editable}
-              aria-label={`${label} advance ${idx + 1} of ${MAX_CHARACTERISTIC_ADVANCES}`}
-              aria-pressed={filled}
-              tabIndex={editable ? 0 : -1}
-              className={`h-8 w-8 sm:h-6 sm:w-6 lg:h-8 lg:w-8 border rounded flex items-center justify-center
-                ${filled ? "bg-red-700 border-red-500" : "bg-slate-900 border-slate-600"}
-                ${
-                  editable
-                    ? "cursor-pointer hover:bg-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
-                    : "opacity-50 cursor-not-allowed"
-                }`}
-            />
+            <div key={idx} className="flex flex-col items-center gap-0.5">
+              <button
+                type="button"
+                onClick={() => toggleAdvance(idx)}
+                disabled={!editable}
+                aria-label={`${label} advance ${idx + 1} of ${MAX_CHARACTERISTIC_ADVANCES}${cost !== undefined ? `, ${cost} XP` : ""}`}
+                aria-pressed={filled}
+                tabIndex={editable ? 0 : -1}
+                className={`h-8 w-8 sm:h-6 sm:w-6 lg:h-8 lg:w-8 border rounded flex items-center justify-center
+                  ${filled ? "bg-red-700 border-red-500" : "bg-slate-900 border-slate-600"}
+                  ${
+                    editable
+                      ? "cursor-pointer hover:bg-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
+                      : "opacity-50 cursor-not-allowed"
+                  }`}
+              />
+              {cost !== undefined && (
+                <span className="text-[10px] leading-none text-slate-500 font-code">{cost}</span>
+              )}
+            </div>
           );
         })}
       </div>

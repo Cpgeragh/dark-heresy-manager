@@ -100,18 +100,6 @@ export interface SessionDocument {
 }
 
 /**
- * XP proposal document stored in
- * /campaigns/{campaignId}/characters/{characterId}/xpProposals/{proposalId}
- */
-export interface XpProposalDocument {
-  playerId: string;
-  description: string;
-  xpCost: number;
-  status: "pending" | "approved" | "rejected";
-  proposedAt: Timestamp | Date | FieldValue;
-}
-
-/**
  * A single message in a player-DM thread.
  * Stored in /campaigns/{campaignId}/threads/{playerUid}/messages/{messageId}
  */

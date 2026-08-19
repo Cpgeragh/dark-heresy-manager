@@ -58,6 +58,7 @@ import type {
 
 import { exportCharacterJson } from "../utils/exportCharacter";
 import { isBackgroundComplete } from "../utils/characterFactory";
+import { getSpentXp } from "../features/experience/xpSpent";
 import { normaliseSkills, skillsNeedNormalisation } from "../utils/skillUtils";
 import { SectionDrawer } from "../components/SectionDrawer";
 import { useUserProfile } from "../hooks/useUserProfile";
@@ -176,6 +177,17 @@ export default function CharacterSheet({
       navigate(`${basePath}?tab=background`, { replace: true });
     }
   }, [character, isDM, backgroundSatisfied, activeTab, basePath, navigate]);
+
+  // Single source of truth for experience.spent — recalculated from what's
+  // actually owned (manual advances, Characteristic Advances, and later
+  // Skills/Talents/Traits) and written here only, so nothing else ever needs
+  // to compute or save this number itself.
+  useEffect(() => {
+    if (!character || !allowedToEdit) return;
+    const computedSpent = getSpentXp(character);
+    if (character.experience.spent === computedSpent) return;
+    updateField("experience", { ...character.experience, spent: computedSpent });
+  }, [character, allowedToEdit, updateField]);
 
   useEffect(() => {
     window.history.pushState(null, "", window.location.href);
@@ -719,7 +731,6 @@ export default function CharacterSheet({
               experience={character.experience}
               campaignId={path.campaignId}
               characterId={character.id}
-              isOwnedByCurrentPlayer={isOwner && !isDM}
               isDM={isDM}
               onUpdate={handleUpdateExperience}
             />
@@ -772,8 +783,6 @@ export default function CharacterSheet({
               isDmForceReleasing={isDmForceReleasing}
               isDmForceAssigning={isDmForceAssigning}
               isDmTogglingEdit={isDmTogglingEdit}
-              campaignId={path.campaignId}
-              characterId={character.id}
               memberIds={memberIds}
             />
           )}

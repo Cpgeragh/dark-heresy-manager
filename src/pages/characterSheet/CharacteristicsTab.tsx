@@ -18,6 +18,7 @@ import {
   MOVEMENT_RUN_MULTIPLIER,
 } from "../../constants/gameRules";
 import { calculateCharacteristicTotal } from "../../utils/stats";
+import { getCharacteristicTierCosts } from "../../features/experience/characteristicAdvanceCosts";
 import {
   uiSection,
   uiCell,
@@ -37,6 +38,7 @@ interface StatBlockProps {
   editable: boolean;
   adjustment: number;
   sources: CharacteristicModifierSource[];
+  tierCosts: (number | undefined)[];
   getCharField: (statKey: keyof Characteristics) => CharField;
   updateCharacteristic: (statKey: keyof Characteristics, value: CharField) => void;
 }
@@ -47,6 +49,7 @@ function StatBlock({
   editable,
   adjustment,
   sources,
+  tierCosts,
   getCharField,
   updateCharacteristic,
 }: StatBlockProps) {
@@ -95,7 +98,13 @@ function StatBlock({
       </div>
 
       {/* Base / Advances */}
-      <CharacteristicField label="" value={value} editable={editable} onChange={handleChange} />
+      <CharacteristicField
+        label=""
+        value={value}
+        editable={editable}
+        onChange={handleChange}
+        tierCosts={tierCosts}
+      />
     </div>
   );
 }
@@ -447,6 +456,7 @@ export function CharacteristicsTab({
               editable={false}
               adjustment={modifierTotals[prevStat] ?? 0}
               sources={getCharacteristicModifierSources(corruption, prevStat, talents, career)}
+              tierCosts={getCharacteristicTierCosts(career, prevStat)}
               getCharField={getCharField}
               updateCharacteristic={updateCharacteristic}
             />
@@ -459,6 +469,7 @@ export function CharacteristicsTab({
               editable={editable}
               adjustment={modifierTotals[activeStat] ?? 0}
               sources={getCharacteristicModifierSources(corruption, activeStat, talents, career)}
+              tierCosts={getCharacteristicTierCosts(career, activeStat)}
               getCharField={getCharField}
               updateCharacteristic={updateCharacteristic}
             />
@@ -475,6 +486,7 @@ export function CharacteristicsTab({
               editable={false}
               adjustment={modifierTotals[nextStat] ?? 0}
               sources={getCharacteristicModifierSources(corruption, nextStat, talents, career)}
+              tierCosts={getCharacteristicTierCosts(career, nextStat)}
               getCharField={getCharField}
               updateCharacteristic={updateCharacteristic}
             />
@@ -492,6 +504,7 @@ export function CharacteristicsTab({
             editable={editable}
             adjustment={modifierTotals[key] ?? 0}
             sources={getCharacteristicModifierSources(corruption, key, talents, career)}
+            tierCosts={getCharacteristicTierCosts(career, key)}
             getCharField={getCharField}
             updateCharacteristic={updateCharacteristic}
           />

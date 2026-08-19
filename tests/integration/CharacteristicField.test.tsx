@@ -54,4 +54,33 @@ describe("CharacteristicField", () => {
 
     expect(onChange).toHaveBeenCalled();
   });
+
+  it("shows a cost label under each advance square when tierCosts are given", () => {
+    render(
+      <CharacteristicField
+        label="Weapon Skill"
+        value={{ base: 30, advances: 0 }}
+        editable
+        onChange={() => {}}
+        tierCosts={[100, 250, 500, 750]}
+      />
+    );
+
+    for (const cost of ["100", "250", "500", "750"]) {
+      expect(screen.getByText(cost)).toBeInTheDocument();
+    }
+  });
+
+  it("shows no cost labels when tierCosts is omitted", () => {
+    render(
+      <CharacteristicField
+        label="Weapon Skill"
+        value={{ base: 30, advances: 0 }}
+        editable
+        onChange={() => {}}
+      />
+    );
+
+    expect(screen.queryByText("100")).not.toBeInTheDocument();
+  });
 });

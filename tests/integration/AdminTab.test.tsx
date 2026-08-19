@@ -2,29 +2,19 @@
 //
 // Focused on the Force Assign wiring added to AdminTab (button + PlayerPicker).
 // Not a full retrofit of AdminTab's pre-existing behaviour (ownership display,
-// XP proposal approve/reject, claim history), which had no prior test coverage.
+// claim history), which had no prior test coverage.
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-const { mockGetFirstName, mockUseXpProposals } = vi.hoisted(() => ({
+const { mockGetFirstName } = vi.hoisted(() => ({
   mockGetFirstName: vi.fn(),
-  mockUseXpProposals: vi.fn(() => ({ proposals: [], loading: false, error: null })),
 }));
 
 vi.mock("../../src/services/profileService", () => ({
   getFirstName: mockGetFirstName,
-}));
-
-vi.mock("../../src/hooks/useXpProposals", () => ({
-  useXpProposals: () => mockUseXpProposals(),
-}));
-
-vi.mock("../../src/services/xpService", () => ({
-  approveXpProposal: vi.fn(),
-  rejectXpProposal: vi.fn(),
 }));
 
 import { AdminTab } from "../../src/pages/characterSheet/AdminTab";
@@ -46,8 +36,6 @@ function renderAdminTab(overrides: Partial<React.ComponentProps<typeof AdminTab>
         onDMForceRelease={onDMForceRelease}
         onDMForceAssign={onDMForceAssign}
         onDMToggleEdit={onDMToggleEdit}
-        campaignId="camp-1"
-        characterId="char-1"
         memberIds={["uid-1", "uid-2"]}
         {...overrides}
       />
@@ -58,7 +46,6 @@ function renderAdminTab(overrides: Partial<React.ComponentProps<typeof AdminTab>
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockUseXpProposals.mockReturnValue({ proposals: [], loading: false, error: null });
 });
 
 describe("AdminTab Force Assign", () => {
