@@ -28,6 +28,7 @@ interface WeaponTrainingTabProps {
   editable: boolean;
   onUpdate: (next: WeaponTrainingBlock) => void;
   talents?: TalentsAndTraitsBlock;
+  career?: string;
 }
 
 const GROUP_ACTIVE_STYLE: Record<string, string> = {
@@ -38,10 +39,10 @@ const GROUP_ACTIVE_STYLE: Record<string, string> = {
   "Thrown Weapon Training": colourActiveOutlineAmber,
 };
 
-export function WeaponTrainingTab({ weaponTraining, editable, onUpdate, talents }: WeaponTrainingTabProps) {
+export function WeaponTrainingTab({ weaponTraining, editable, onUpdate, talents, career }: WeaponTrainingTabProps) {
   const [newExotic, setNewExotic] = useState("");
   const [showExoticModal, setShowExoticModal] = useState(false);
-  const grantedTraining = talents ? getGrantedWeaponTrainingIds(talents) : [];
+  const grantedTraining = talents ? getGrantedWeaponTrainingIds(talents, career) : [];
   const grantedExotics = talents ? getGrantedExoticWeapons(talents) : [];
 
   const handleToggleTraining = useCallback(

@@ -44,6 +44,7 @@ import { uiTextBody } from "../../ui/editableStyles";
 
 interface TalentsTabProps {
   talents: TalentsAndTraitsBlock;
+  career?: string;
   psychic: PsychicBlock;
   cybernetics?: CyberneticItem[];
   rangedWeapons?: RangedWeapon[];
@@ -323,6 +324,7 @@ function RegularTalentSection({
 
 export function TalentsTab({
   talents,
+  career,
   psychic,
   cybernetics = [],
   rangedWeapons = [],
@@ -547,7 +549,7 @@ export function TalentsTab({
     setActiveView
   );
   const regularEntries = useMemo(() => {
-    const grantedEntries = getGrantedTalentEntries(talents);
+    const grantedEntries = getGrantedTalentEntries(talents, career);
     return [
       ...filterTalentEntriesCoveredByGrants(
         talents.talents.filter((entry) => !FAITH_TALENT_IDS.has(entry.talentId)),
@@ -555,7 +557,7 @@ export function TalentsTab({
       ),
       ...grantedEntries,
     ];
-  }, [talents]);
+  }, [talents, career]);
   const faithEntries = useMemo(
     () => talents.talents.filter((entry) => FAITH_TALENT_IDS.has(entry.talentId)),
     [talents.talents]
@@ -639,6 +641,7 @@ export function TalentsTab({
         <TalentAcquisitionModal
           entry={pendingAcquisition}
           talents={talents}
+          career={career}
           currentHomeworldId={talents.homeworld}
           cybernetics={cybernetics}
           rangedWeapons={rangedWeapons}

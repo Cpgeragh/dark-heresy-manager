@@ -43,6 +43,8 @@ import { CloseIcon } from "../../ui/CloseButton";
 import { uiDismissButton } from "../../ui/buttonStyles";
 import { TRAIT_LIST } from "../../data/traitData";
 import { TraitAcquisitionModal } from "./TraitAcquisitionModal";
+import { careerNeedsStartingChoice } from "../../features/career/careerStartingBenefits";
+import { CareerStartingChoiceModal } from "./CareerStartingChoiceModal";
 import {
   HomeworldTraitAcquisitionModal,
   homeworldNeedsTraitAcquisition,
@@ -157,6 +159,7 @@ export function BackgroundTab({
   );
   const [pendingHomeworldId, setPendingHomeworldId] = useState<string | null>(null);
   const [pendingCareer, setPendingCareer] = useState<CareerData | null>(null);
+  const [pendingStartingChoiceCareer, setPendingStartingChoiceCareer] = useState<CareerData | null>(null);
   const [activeSectionGroup, setActiveSectionGroup] = useState<BackgroundSectionGroup>("appearance");
 
   const { containerRef, transitionClass, switchTo } = useSwipeableTabs(
@@ -230,6 +233,11 @@ export function BackgroundTab({
         setPendingCareer(career);
         return;
       }
+      if (careerNeedsStartingChoice(career.name)) {
+        setShowCareerPicker(false);
+        setPendingStartingChoiceCareer(career);
+        return;
+      }
       const currentRankBelongsToCareer = career.ranks.some(
         (rank) => rank.name.toLowerCase() === header.rank?.toLowerCase()
       );
@@ -238,7 +246,7 @@ export function BackgroundTab({
         career: career.name,
         rank: currentRankBelongsToCareer ? header.rank : career.startingRank,
       });
-      onUpdateTalents({ ...talents, careerTraitAcquisition: undefined });
+      onUpdateTalents({ ...talents, careerTraitAcquisition: undefined, careerStartingChoices: undefined });
       if (onUpdateCybernetics) {
         void onUpdateCybernetics(cybernetics.filter(
           (item) => item.grantedByTalentEntryUid !== "career:imperial-psyker:sanctioned-psyker"
@@ -840,6 +848,7 @@ export function BackgroundTab({
               onUpdateTalents({
                 ...talents,
                 careerTraitAcquisition: result.entry.acquisition?.trait,
+                careerStartingChoices: undefined,
               });
               if (result.cybernetics && onUpdateCybernetics) {
                 void onUpdateCybernetics(result.cybernetics);
@@ -856,6 +865,37 @@ export function BackgroundTab({
           />
         );
       })()}
+
+      {pendingStartingChoiceCareer && (
+        <CareerStartingChoiceModal
+          career={pendingStartingChoiceCareer}
+          onComplete={(choices) => {
+            const currentRankBelongsToCareer = pendingStartingChoiceCareer.ranks.some(
+              (rank) => rank.name.toLowerCase() === header.rank?.toLowerCase()
+            );
+            onUpdateHeader({
+              ...header,
+              career: pendingStartingChoiceCareer.name,
+              rank: currentRankBelongsToCareer ? header.rank : pendingStartingChoiceCareer.startingRank,
+            });
+            onUpdateTalents({
+              ...talents,
+              careerTraitAcquisition: undefined,
+              careerStartingChoices: choices,
+            });
+            if (onUpdateCybernetics) {
+              void onUpdateCybernetics(cybernetics.filter(
+                (item) => item.grantedByTalentEntryUid !== "career:imperial-psyker:sanctioned-psyker"
+              ));
+            }
+            setPendingStartingChoiceCareer(null);
+          }}
+          onClose={() => {
+            setPendingStartingChoiceCareer(null);
+            setShowCareerPicker(true);
+          }}
+        />
+      )}
 
       {showRankPicker && selectedCareer && (
         <RankPicker

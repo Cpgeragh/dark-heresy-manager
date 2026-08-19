@@ -27,9 +27,10 @@ function computeTotal(
   skill: SkillEntry,
   getCharField: (key: keyof Characteristics) => CharField,
   modifierTotals: CharacteristicTotals,
-  talents?: TalentsAndTraitsBlock
+  talents?: TalentsAndTraitsBlock,
+  career?: string
 ): number | null {
-  const talentEffects = talents ? getTalentSkillEffects(talents, skill) : undefined;
+  const talentEffects = talents ? getTalentSkillEffects(talents, skill, career) : undefined;
   const characteristic = talentEffects?.characteristic ?? skill.characteristic;
   const charField = getCharField(characteristic);
   const rawCharTotal = calculateCharacteristicTotal(charField.base, charField.advances);
@@ -61,6 +62,7 @@ interface UseSkillComputationArgs {
   getCharField: (key: keyof Characteristics) => CharField;
   modifierTotals?: CharacteristicTotals;
   talents?: TalentsAndTraitsBlock;
+  career?: string;
 }
 
 export function useSkillComputation({
@@ -68,15 +70,16 @@ export function useSkillComputation({
   getCharField,
   modifierTotals = {},
   talents,
+  career,
 }: UseSkillComputationArgs): SkillWithComputed[] {
   return useMemo(
     () =>
       skills.map((s) => {
-        const effects = talents ? getTalentSkillEffects(talents, s) : undefined;
+        const effects = talents ? getTalentSkillEffects(talents, s, career) : undefined;
         const effectiveLevel = effects?.minimumLevel && LEVEL_RANK[effects.minimumLevel] > LEVEL_RANK[s.level]
           ? effects.minimumLevel
           : s.level;
-        const total = computeTotal(s, getCharField, modifierTotals, talents);
+        const total = computeTotal(s, getCharField, modifierTotals, talents, career);
         return {
           ...s,
           ...(effects?.characteristic ? { characteristic: effects.characteristic } : {}),
@@ -93,6 +96,6 @@ export function useSkillComputation({
             : {}),
         };
       }),
-    [skills, getCharField, modifierTotals, talents]
+    [skills, getCharField, modifierTotals, talents, career]
   );
 }

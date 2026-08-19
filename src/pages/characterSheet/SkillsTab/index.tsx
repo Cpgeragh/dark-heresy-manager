@@ -101,7 +101,7 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
   );
 
   const modifierTotals = getCharacteristicModifierTotals(corruption, talents);
-  const computedSkills = useSkillComputation({ skills, getCharField, modifierTotals, talents });
+  const computedSkills = useSkillComputation({ skills, getCharField, modifierTotals, talents, career });
 
   const trainedSkills = useMemo(
     () =>

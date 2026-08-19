@@ -67,6 +67,7 @@ export interface TalentAcquisitionResult {
 interface Props {
   entry: TalentEntry;
   talents: TalentsAndTraitsBlock;
+  career?: string;
   currentHomeworldId: string;
   cybernetics: CyberneticItem[];
   rangedWeapons: RangedWeapon[];
@@ -168,6 +169,7 @@ export function needsTalentAcquisition(entry: TalentEntry, talents: TalentsAndTr
 export function TalentAcquisitionModal({
   entry,
   talents,
+  career,
   currentHomeworldId,
   cybernetics,
   rangedWeapons,
@@ -214,7 +216,7 @@ export function TalentAcquisitionModal({
       .map((weapon) => ({ value: `melee:${weapon.id}`, label: `${weapon.name} (Melee)` })),
   ].sort((a, b) => a.label.localeCompare(b.label));
   const disorders = structuredDisorders(insanity);
-  const ownedTalentEntries = [...talents.talents, ...getGrantedTalentEntries(talents)];
+  const ownedTalentEntries = [...talents.talents, ...getGrantedTalentEntries(talents, career)];
   const ownsTalent = (talentId: string, specialisation?: string) => ownedTalentEntries.some(
     (owned) =>
       owned.talentId === talentId &&

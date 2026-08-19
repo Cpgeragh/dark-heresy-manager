@@ -27,17 +27,44 @@ function renderTab(props: Partial<React.ComponentProps<typeof BackgroundTab>> = 
 }
 
 describe("BackgroundTab", () => {
-  it("selects a career and assigns its starting rank", async () => {
+  it("selects a career with no starting choices and assigns its starting rank immediately", async () => {
     const user = userEvent.setup();
     const { onUpdateHeader } = renderTab({
+      talents: { homeworld: "hive-world", talents: [], traits: [] },
+    });
+
+    await user.click(screen.getByRole("button", { name: "Select Career" }));
+    await user.click(screen.getByText("Arbitrator"));
+
+    expect(onUpdateHeader).toHaveBeenCalledWith(
+      expect.objectContaining({ career: "Arbitrator", rank: "Trooper" })
+    );
+  });
+
+  it("pauses on a career with starting choices, then commits once they're resolved", async () => {
+    const user = userEvent.setup();
+    const { onUpdateHeader, onUpdateTalents } = renderTab({
       talents: { homeworld: "feral-world", talents: [], traits: [] },
     });
 
     await user.click(screen.getByRole("button", { name: "Select Career" }));
     await user.click(screen.getByText("Guardsman"));
 
+    expect(onUpdateHeader).not.toHaveBeenCalled();
+    expect(screen.getByText("Guardsman Starting Choices")).toBeInTheDocument();
+
+    await user.click(screen.getByText("Swim"));
+    await user.click(screen.getByText("Pistol Training (Las)"));
+    await user.click(screen.getByText("Basic Weapon Training (SP)"));
+    await user.click(screen.getByRole("button", { name: "Confirm" }));
+
     expect(onUpdateHeader).toHaveBeenCalledWith(
       expect.objectContaining({ career: "Guardsman", rank: "Conscript" })
+    );
+    expect(onUpdateTalents).toHaveBeenCalledWith(
+      expect.objectContaining({
+        careerStartingChoices: { skillChoices: { 1: 1 }, talentChoices: { 1: 1, 3: 1 } },
+      })
     );
   });
 

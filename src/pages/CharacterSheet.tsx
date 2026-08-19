@@ -572,6 +572,7 @@ export default function CharacterSheet({
           {activeTab === "talents" && (
             <TalentsTab
               talents={character.talentsAndTraits}
+              career={character.header.career}
               psychic={character.psychic}
               cybernetics={character.cybernetics ?? []}
               rangedWeapons={character.rangedWeapons}
@@ -590,6 +591,7 @@ export default function CharacterSheet({
             <WeaponTrainingTab
               weaponTraining={character.weaponTraining}
               talents={character.talentsAndTraits}
+              career={character.header.career}
               editable={allowedToEdit}
               onUpdate={handleUpdateWeaponTraining}
             />

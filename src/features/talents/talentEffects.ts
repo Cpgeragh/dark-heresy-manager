@@ -1,5 +1,6 @@
 import { HOMEWORLD_LIST } from "../../data/homeworldData";
 import { TALENT_LIST } from "../../data/talentData";
+import { WEAPON_TRAINING_GROUPS } from "../../data/weaponTrainingData";
 import type {
   Characteristics,
   SkillAdvanceLevel,
@@ -13,6 +14,7 @@ import {
   getTraitGrantedWeaponTrainingIds,
   getTraitSkillEffects,
 } from "../traits/traitEffects";
+import { getDerivedCareerSkillIds, getDerivedCareerTalentGrants } from "../career/careerStartingBenefits";
 
 export interface TalentModifierSource {
   name: string;
@@ -26,8 +28,8 @@ function entriesFor(talents: TalentsAndTraitsBlock, talentId: string): TalentEnt
   return talents.talents.filter((entry) => entry.talentId === talentId);
 }
 
-export function getActiveTalentEntries(talents: TalentsAndTraitsBlock): TalentEntry[] {
-  const grants = getGrantedTalentEntries(talents);
+export function getActiveTalentEntries(talents: TalentsAndTraitsBlock, career?: string): TalentEntry[] {
+  const grants = getGrantedTalentEntries(talents, career);
   return [...filterTalentEntriesCoveredByGrants(talents.talents, grants), ...grants];
 }
 
@@ -197,9 +199,15 @@ function skillMatchesTalentChoice(skill: SkillEntry, entry: TalentEntry): boolea
 
 export function getTalentSkillEffects(
   talents: TalentsAndTraitsBlock,
-  skill: SkillEntry
+  skill: SkillEntry,
+  career?: string
 ): TalentSkillEffects {
   const effects: TalentSkillEffects = { modifier: 0, sources: [] };
+
+  if (skill.level === "untrained" && getDerivedCareerSkillIds(career, talents.careerStartingChoices).includes(skill.id)) {
+    effects.minimumLevel = "trained";
+    effects.sources.push({ name: `Career: ${career}`, type: "Talent", amount: 0 });
+  }
 
   for (const entry of activeEntriesFor(talents, "talented")) {
     if (!skillMatchesTalentChoice(skill, entry)) continue;
@@ -244,13 +252,21 @@ export function getTalentSkillEffects(
     effects.sources.push({ name: "Sicarius Tutoring (Assassin)", type: "Talent", amount: 10 });
   }
 
-  const traitEffects = getTraitSkillEffects(talents, skill);
+  const traitEffects = getTraitSkillEffects(talents, skill, career);
   if (traitEffects.countsAsBasic) effects.countsAsBasic = true;
   if (traitEffects.minimumLevel) effects.minimumLevel = traitEffects.minimumLevel;
   effects.modifier += traitEffects.modifier;
   effects.sources.push(...traitEffects.sources);
 
   return effects;
+}
+
+/** Resolves a career-granted talent into its real weapon-training id, or undefined if it isn't one. */
+function weaponTrainingIdFor(talentId: string, specialisation: string | undefined): WeaponTrainingTalentId | undefined {
+  if (!specialisation) return undefined;
+  const talent = TALENT_LIST.find((item) => item.id === talentId);
+  const group = WEAPON_TRAINING_GROUPS.find((item) => item.label === talent?.name);
+  return group?.items.find((item) => item.display === specialisation)?.id;
 }
 
 function virtualGrant(
@@ -269,7 +285,7 @@ function virtualGrant(
   };
 }
 
-export function getGrantedTalentEntries(talents: TalentsAndTraitsBlock): TalentEntry[] {
+export function getGrantedTalentEntries(talents: TalentsAndTraitsBlock, career?: string): TalentEntry[] {
   const grants: TalentEntry[] = [];
   for (const origin of entriesFor(talents, "the-power-within")) {
     grants.push(virtualGrant(origin, "resistance", "Resistance", "Psychic Powers"));
@@ -304,6 +320,19 @@ export function getGrantedTalentEntries(talents: TalentsAndTraitsBlock): TalentE
   }
   for (const grant of getTraitGrantedTalentSpecs(talents)) {
     grants.push(virtualGrant(grant.origin, grant.id, grant.name, grant.specialisation));
+  }
+  for (const grant of getDerivedCareerTalentGrants(career, talents.careerStartingChoices)) {
+    if (weaponTrainingIdFor(grant.talentId, grant.specialisation)) continue;
+    const reference = TALENT_LIST.find((talent) => talent.id === grant.talentId);
+    const name = reference?.name ?? grant.talentId;
+    grants.push({
+      uid: `grant:career:${career}:${grant.grantIndex}`,
+      talentId: grant.talentId,
+      name: grant.specialisation ? `${name} (${grant.specialisation})` : name,
+      ...(grant.specialisation ? { specialisation: grant.specialisation } : {}),
+      grantedByTalentEntryUid: `career:${career}`,
+      grantedByTalentName: `Career: ${career}`,
+    });
   }
   return grants;
 }
@@ -358,11 +387,19 @@ export function getGrantedTraitEntries(talents: TalentsAndTraitsBlock): TalentEn
 }
 
 export function getGrantedWeaponTrainingIds(
-  talents: TalentsAndTraitsBlock
+  talents: TalentsAndTraitsBlock,
+  career?: string
 ): WeaponTrainingTalentId[] {
-  return [...new Set([...talents.talents
-    .map((entry) => entry.acquisition?.weaponTrainingId)
-    .filter((id): id is WeaponTrainingTalentId => Boolean(id)), ...getTraitGrantedWeaponTrainingIds(talents)])];
+  const careerGranted = getDerivedCareerTalentGrants(career, talents.careerStartingChoices)
+    .map((grant) => weaponTrainingIdFor(grant.talentId, grant.specialisation))
+    .filter((id): id is WeaponTrainingTalentId => Boolean(id));
+  return [...new Set([
+    ...talents.talents
+      .map((entry) => entry.acquisition?.weaponTrainingId)
+      .filter((id): id is WeaponTrainingTalentId => Boolean(id)),
+    ...getTraitGrantedWeaponTrainingIds(talents),
+    ...careerGranted,
+  ])];
 }
 
 export function getGrantedExoticWeapons(talents: TalentsAndTraitsBlock): string[] {
