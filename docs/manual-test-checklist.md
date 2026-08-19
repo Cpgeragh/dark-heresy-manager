@@ -168,6 +168,13 @@ checks below.
 - [ ] Add **Sicarius Tutoring (Assassin)** — Concealment gains +10 from Talented (Concealment)
 - [ ] Remove each source Talent — only its derived effect disappears; independently purchased Skill levels remain unchanged
 
+**Career-granted starting Skills (new):**
+
+- [ ] Create a fresh character and pick Guardsman as Career — the starting-choice screen shows a Drive (Ground Vehicle)/Swim pick; once resolved, whichever was picked shows as Trained on Skills without spending any XP
+- [ ] The Speak Language (Low Gothic) skill Guardsman always grants shows as Trained immediately, no choice screen needed for it
+- [ ] Change Career away from Guardsman to a career with no starting-benefit data yet — the granted Skill reverts to Untrained
+- [ ] Re-pick Guardsman after changing away — the choice screen appears again; picking differently this time updates which Skill is granted
+
 ## 6. Talents
 
 Regular and Faith Talents, including ranked purchases, specialised choices,
@@ -340,6 +347,12 @@ below deliberately change several of those pages.
 - [ ] Faith Talent deletion uses Delete/Cancel and removes only the chosen entry
 - [ ] In View mode, Talent and Faith pickers remain searchable and information popups work, but cards do not add, delete, or show selection feedback
 
+**Career-granted starting Talents (new):**
+
+- [ ] On the same Guardsman starting-choice screen used for Skills, resolve the two Talent "or" choices — the picked Talents (e.g. Pistol Training) show as owned Talent cards without spending XP
+- [ ] Melee Weapon Training (Primitive) and Basic Weapon Training (Las), the two fixed Guardsman Talent grants, appear automatically with no choice needed
+- [ ] A granted Pistol/Basic/Melee Weapon Training talent does **not** get its own card here — check Weapon Training instead, its button there is already active and locked, matching how Skill at Arms already works
+
 ## 7. Weapon Training
 
 Weapon-group training toggles plus a free-text Exotic Weapon list.
@@ -476,6 +489,15 @@ Use a character with enough funds/context to install the Concealed Weapon Bionic
 - [ ] For the handful of other implants that *do* list Poor/Common/Good text, cycling still only changes cost, not availability — confirm the new availability logic from §11's first item didn't leak onto them
 - [ ] A bionic implant assigned a body location shows up as a Toughness Bonus contribution on the relevant Armour location
 - [ ] Custom implant form's "* Required" hint stays visible once all fields are filled, not just while incomplete
+
+**Tech-Priest Mechanicus Implants and assign-cost fixes (new):**
+
+- [ ] Pick Tech-Priest as Career (Background) — Electro-Graft, Electoo Inductors, Respirator Unit, Cyber-Mantle, Potentia Coil, and Cranial Circuitry all appear on Cybernetics automatically, none showing a cost, rarity, or Quality badge
+- [ ] Change Career away from Tech-Priest — all six disappear from Cybernetics
+- [ ] Open the "Add Cybernetic" picker on any character (not just Tech-Priest) and find one of the six by name — it shows "Adeptus Mechanicus Only" as its rarity chip and no cost chip, with the row's small text reading "Cost assigned on add"
+- [ ] Pick one of the six from that picker — it asks only for a cost, not a rarity (rarity's already fixed), and skips the craftsmanship-quality step entirely, installing directly once the cost is confirmed
+- [ ] For an existing implant that's missing **both** cost and rarity (e.g. Landrian Revealer), the row still reads "Cost and availability assigned on add" and the assign screen still asks for both
+- [ ] For Karrikian Lock-Arm specifically (no real quality data, but does need a body location) — confirm it still goes through the location step and still ends up forced to Common craftsmanship, this one's deliberately unchanged
 
 ## 12. Psychic Powers
 
@@ -699,6 +721,13 @@ Trait rules that explicitly change Skill use are applied automatically.
 - [ ] Selecting Imperial Psyker as Career and completing the Sanctioned Psyker acquisition (rolling 3d10 for the starting age increase) actually adds that roll to Age — the Age field shows the combined total (base + roll), and its info icon shows a "Modifiers" breakdown listing "Sanctioned Psyker: +X"
 - [ ] After completing Sanctioned Psyker, click Age to edit it — the input shows the raw base (not the combined total); typing a new base and committing (blur/Enter) re-adds the Sanctioned Psyker roll on top of the new value, so the modifier keeps applying no matter how many times Age is edited afterward
 - [ ] The Sanctioning Effect picker's "* Required" hint (when a roll is still needed) stays visible once every field is filled, not just while incomplete
+
+**Career starting-benefit choices (new):**
+
+- [ ] Picking a career with any real "or" choice in its starting skills/talents (currently Guardsman or Adept) pauses on a dedicated choice screen instead of committing the career immediately; Confirm stays disabled until every choice is made
+- [ ] Picking a career with no starting-benefit data yet (any career besides Guardsman/Adept, or Imperial Psyker which has its own separate Sanctioning screen) commits immediately with no extra screen, unchanged from before
+- [ ] Cancel out of the starting-choice screen — no career gets committed and the Career picker reopens
+- [ ] After confirming Guardsman's choices, switch to Adept, then back to Guardsman — the choice screen appears fresh each time and doesn't carry over the previous career's picks
 
 ## 19. Archeotech
 

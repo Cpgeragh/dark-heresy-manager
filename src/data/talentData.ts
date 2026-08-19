@@ -744,7 +744,7 @@ export const TALENT_LIST: readonly TalentData[] = [
     repeatable: true,
     behaviour: {
       kind: "fixed-repeatable",
-      options: ["Cold", "Fear", "Heat", "Poisons", "Psychic Powers"],
+      options: ["Cold", "Fear", "Heat", "Poisons", "Psychic Powers", "Insanity"],
     },
   },
   {
@@ -839,7 +839,8 @@ export const TALENT_LIST: readonly TalentData[] = [
     id: "thrown-weapon-training",
     name: "Thrown Weapon Training",
     source: SkillSource.CR,
-    hasSpecialisation: false,
+    hasSpecialisation: true,
+    specialisationLabel: "Group",
     behaviour: { kind: "managed-elsewhere" },
   },
   {
