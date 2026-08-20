@@ -9,6 +9,7 @@ import { TRAIT_LIST } from "../../data/traitData";
 import type { SkillSource } from "../../types/SkillSource";
 import {
   editableInputClass,
+  uiFormLabel,
   uiInfoModalWrapper,
   uiItemName,
   uiSection,
@@ -25,7 +26,12 @@ import { InfoModal } from "../../components/InfoModal";
 import { TALENT_DESCRIPTIONS } from "../../data/talentDescriptions";
 import { TRAIT_DESCRIPTIONS } from "../../data/traitDescriptions";
 import { sourceColour } from "../../ui/sourceStyles";
-import { colourAmberFaint } from "../../ui/colourTokens";
+import { colourAmberFaint, colourValue } from "../../ui/colourTokens";
+import {
+  getNextTalentCost,
+  getTalentRankChips,
+  hasAnyUnlockedTalentOption,
+} from "../../features/experience/talentAdvanceCosts";
 import type { CampaignCustomItem } from "../../types/CustomItems";
 import type { CustomItemLibraryActionProps } from "../../types/CustomItemActions";
 import { CustomItemActionButtons } from "../../ui/CustomItemActionButtons";
@@ -34,7 +40,7 @@ import { OptionPickerScreen, type PickerOption } from "../../ui/OptionPickerScre
 import { ArrowLeft, ArrowRight } from "../../ui/PickerArrows";
 import { ExpandChevron } from "../../ui/ExpandChevron";
 import { needsTalentAcquisition } from "./TalentAcquisitionModal";
-import { sanitizePositiveIntegerInput } from "../../utils/formInput";
+import { sanitizeNonNegativeIntegerInput, sanitizePositiveIntegerInput } from "../../utils/formInput";
 import {
   getAvailableTalentChoices,
   getTalentBehaviour,
@@ -61,6 +67,8 @@ export function TalentPickerModal({
   onSelectCustomItem,
   onCustomAction,
   customActionLabel = "Custom",
+  career,
+  rank,
 }: {
   title: string;
   listData: readonly AnyListItem[];
@@ -74,17 +82,47 @@ export function TalentPickerModal({
   onSelectCustomItem?: (item: CampaignCustomItem<"trait">) => void;
   onCustomAction?: () => void;
   customActionLabel?: string;
+  career?: string;
+  rank?: string;
 }) {
   const [query, setQuery] = useState("");
+  const [showOverflow, setShowOverflow] = useState(false);
   const [picked, setPicked] = useState<AnyListItem | null>(null);
   const [specialisation, setSpecialisation] = useState("");
   const [showChoicePicker, setShowChoicePicker] = useState(false);
   const [detailChoice, setDetailChoice] = useState<DetailChoice>(null);
+  const [pendingManualCost, setPendingManualCost] = useState<{ talent: AnyListItem; specialisation?: string } | null>(null);
+  const [manualCostInput, setManualCostInput] = useState("");
   const listScrollPositionRef = useRef(0);
   const detailScrollPositionRef = useRef(0);
+  const overflowScrollPositionRef = useRef(0);
   const modalTitle = editable ? title : title.replace(/^Add\b/, "View");
 
   const filtered = useMemo(() => {
+    const seen = new Set<string>();
+    const normalizedQuery = query.trim().toLocaleLowerCase();
+    return [...listData]
+      .filter((item) => {
+        if (seen.has(item.id)) return false;
+        seen.add(item.id);
+        const owned = entries.filter((entry) => entry.talentId === item.id);
+        if (useTalentBehaviours) {
+          if (!isTalentAvailableInPicker(item as TalentData, entries)) return false;
+        } else if (
+          (!item.repeatable && owned.length > 0) ||
+          ("maxPurchases" in item && item.maxPurchases !== undefined && owned.length >= item.maxPurchases)
+        ) {
+          return false;
+        }
+        if (career && !hasAnyUnlockedTalentOption(career, rank, item.id, entries)) {
+          return false;
+        }
+        return !normalizedQuery || item.name.toLocaleLowerCase().includes(normalizedQuery);
+      })
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [career, entries, listData, query, rank, useTalentBehaviours]);
+
+  const overflowFiltered = useMemo(() => {
     const seen = new Set<string>();
     const normalizedQuery = query.trim().toLocaleLowerCase();
     return [...listData]
@@ -129,16 +167,52 @@ export function TalentPickerModal({
   const isNumeric = talentData?.specialisationMin !== undefined;
   const choiceOptions: readonly PickerOption[] = talentData
     ? useTalentBehaviours
-      ? getAvailableTalentChoices(talentData, ownedForPicked)
-      : (traitData?.specialisationOptions ?? []).map((option) => {
-          const value = typeof option === "string" ? option : option.value;
-          const label = typeof option === "string" ? option : option.label;
-          if (!traitData?.repeatableSpecialisation) return option;
-          const ownedCount = ownedForPicked.filter(
-            (entry) => entry.specialisation?.trim().toLocaleLowerCase() === value.toLocaleLowerCase()
-          ).length;
-          return { value, label, ownedCount };
-        })
+      ? (() => {
+          const values = getAvailableTalentChoices(talentData, ownedForPicked);
+          if (!career) return values;
+          return values
+            .map((value) => {
+              const hybridOption =
+                behaviour?.kind === "hybrid"
+                  ? behaviour.options.find((option) => option.label === value)
+                  : undefined;
+              const lookupValue =
+                hybridOption && !("value" in hybridOption) ? hybridOption.displayPrefix : value;
+              return {
+                value,
+                label: value,
+                cost: getNextTalentCost(career, rank, talentData.id, lookupValue, entries),
+                rankChips: getTalentRankChips(career, talentData.id, lookupValue),
+              };
+            })
+            .filter((option) => showOverflow || option.cost !== undefined);
+        })()
+      : (() => {
+          const base = (traitData?.specialisationOptions ?? []).map((option) => {
+            const value = typeof option === "string" ? option : option.value;
+            const label = typeof option === "string" ? option : option.label;
+            if (!traitData?.repeatableSpecialisation) return option;
+            const ownedCount = ownedForPicked.filter(
+              (entry) => entry.specialisation?.trim().toLocaleLowerCase() === value.toLocaleLowerCase()
+            ).length;
+            return { value, label, ownedCount };
+          });
+          if (!career) return base;
+          return base
+            .map((option) => {
+              const value = typeof option === "string" ? option : option.value;
+              const label = typeof option === "string" ? option : option.label;
+              const ownedCount = typeof option !== "string" && "ownedCount" in option ? option.ownedCount : undefined;
+              return {
+                value,
+                label,
+                ...(ownedCount !== undefined ? { ownedCount } : {}),
+                cost: getNextTalentCost(career, rank, traitData!.id, value, entries),
+                rankChips: getTalentRankChips(career, traitData!.id, value),
+              };
+            })
+            .filter((option) => showOverflow || option.cost !== undefined);
+        })()
     : [];
   const composedSpecialisation = detailChoice?.displayPrefix
     ? `${detailChoice.displayPrefix}: ${specialisation.trim()}`
@@ -167,20 +241,36 @@ export function TalentPickerModal({
     setShowChoicePicker(false);
   };
 
+  const attemptOverflowAdd = (item: AnyListItem, itemSpecialisation?: string) => {
+    setPendingManualCost({ talent: item, specialisation: itemSpecialisation });
+    setManualCostInput("");
+  };
+
+  const attemptRealAdd = (item: AnyListItem, itemSpecialisation?: string) => {
+    if (!career) {
+      onAdd(makeTalentEntry(item as TalentData, itemSpecialisation));
+      resetPicked();
+      return;
+    }
+    const cost = getNextTalentCost(career, rank, item.id, itemSpecialisation, entries);
+    if (cost === undefined) return;
+    onAdd(makeTalentEntry(item as TalentData, itemSpecialisation));
+    resetPicked();
+  };
+
   const handleSpecAdd = () => {
     if (!talentData || !canAdd) return;
-    onAdd(makeTalentEntry(talentData, composedSpecialisation));
-    resetPicked();
+    (showOverflow ? attemptOverflowAdd : attemptRealAdd)(talentData, composedSpecialisation);
   };
 
   const handleChoiceSelect = (value: string) => {
     if (!talentData) return;
+    const add = showOverflow ? attemptOverflowAdd : attemptRealAdd;
     if (behaviour?.kind === "hybrid") {
       const option = behaviour.options.find((entry) => entry.label === value);
       if (!option) return;
       if ("value" in option) {
-        onAdd(makeTalentEntry(talentData, option.value));
-        resetPicked();
+        add(talentData, option.value);
         return;
       }
       setDetailChoice({
@@ -191,9 +281,156 @@ export function TalentPickerModal({
       setShowChoicePicker(false);
       return;
     }
-    onAdd(makeTalentEntry(talentData, value));
-    resetPicked();
+    add(talentData, value);
   };
+
+  if (pendingManualCost) {
+    const cost = Number(manualCostInput);
+    const canConfirm = manualCostInput.trim() !== "";
+    return (
+      <PickerModal
+        title={`Buy ${pendingManualCost.talent.name}`}
+        closeLabel={<ArrowLeft />}
+        closeAriaLabel="Back"
+        query=""
+        onQueryChange={() => undefined}
+        onClose={() => setPendingManualCost(null)}
+        isEmpty={false}
+        hideSearch
+        footer={
+          <Button
+            className="w-full"
+            disabled={!canConfirm}
+            onClick={() => {
+              onAdd(makeTalentEntry(pendingManualCost.talent as TalentData, pendingManualCost.specialisation, cost));
+              setPendingManualCost(null);
+              resetPicked();
+            }}
+          >
+            Buy {pendingManualCost.talent.name}
+          </Button>
+        }
+      >
+        <PickerBody>
+          <label className={uiFormLabel}>XP Cost</label>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={manualCostInput}
+            onChange={(event) => setManualCostInput(sanitizeNonNegativeIntegerInput(event.target.value))}
+            placeholder="0"
+            className={editableInputClass(true) + " mt-0.5"}
+          />
+        </PickerBody>
+      </PickerModal>
+    );
+  }
+
+  if (showOverflow && !picked && !showChoicePicker) {
+    return (
+      <PickerModal
+        title={modalTitle}
+        placeholder="Search…"
+        query={query}
+        onQueryChange={setQuery}
+        onClose={() => setShowOverflow(false)}
+        closeLabel={<ArrowLeft />}
+        closeAriaLabel="Back"
+        suspended={suspended}
+        scrollPositionRef={overflowScrollPositionRef}
+        isEmpty={overflowFiltered.length === 0 && filteredCustom.length === 0}
+        footer={
+          onCustomAction && (
+            <PickerCustomAction onClick={onCustomAction}>{customActionLabel}</PickerCustomAction>
+          )
+        }
+      >
+        <div className="space-y-3 p-3 lg:p-4">
+          {filteredCustom.map((item) => (
+            <PickerRow key={item.id} onClick={() => onSelectCustomItem?.(item)}>
+              <span className={`${uiItemName} truncate block group-hover:text-white`}>{item.name}</span>
+              <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                <Chip className={colourAmberFaint}>{item.status === "draft" ? "Draft" : "Custom"}</Chip>
+              </div>
+            </PickerRow>
+          ))}
+          {overflowFiltered.map((item) => {
+            const row = item as TalentData;
+            const sources = normaliseSources(item.source as SkillSource | SkillSource[]);
+            const itemBehaviour = useTalentBehaviours ? getTalentBehaviour(row) : null;
+            const usesChoicePicker =
+              itemBehaviour?.kind === "fixed-repeatable" ||
+              itemBehaviour?.kind === "fixed-single" ||
+              itemBehaviour?.kind === "hybrid" ||
+              (!useTalentBehaviours && (row.specialisationOptions?.length ?? 0) > 0);
+            const usesTextEntry = row.hasSpecialisation || itemBehaviour?.kind === "repeatable-free-text";
+            const ownedCount = entries.filter((entry) => entry.talentId === item.id).length;
+            const opensAcquisition = Boolean(!useTalentBehaviours && (row as TraitData).acquisition) || (
+              useTalentBehaviours && needsTalentAcquisition(
+                { uid: "picker-preview", talentId: row.id, name: row.name },
+                { homeworld: "", talents: [...entries], traits: [] }
+              )
+            );
+            return (
+              <PickerRow
+                key={item.id}
+                card
+                className={`${uiSectionShell} flex items-center gap-3 overflow-hidden`}
+                interactive={editable}
+                onClick={() => {
+                  if (!editable) return;
+                  if (usesChoicePicker) {
+                    setPicked(item);
+                    setShowChoicePicker(true);
+                  } else if (usesTextEntry) {
+                    setPicked(item);
+                  } else {
+                    attemptOverflowAdd(item);
+                  }
+                }}
+              >
+                <div className="flex-1 min-w-0 space-y-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <span className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}>
+                      {item.name}
+                    </span>
+                    {(TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]) && (
+                      <span className={uiInfoModalWrapper} onClick={(event) => event.stopPropagation()}>
+                        <InfoModal
+                          title={item.name}
+                          content={TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]}
+                          as="span"
+                        />
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {sources.map((source) => (
+                      <Chip key={source} className={`bg-slate-800/40 font-code ${sourceColour(source)}`}>
+                        {source}
+                      </Chip>
+                    ))}
+                    {ownedCount > 0 && (
+                      <Chip className="border-amber-500/60 bg-amber-950/30 text-amber-300">
+                        Owned: {ownedCount}
+                      </Chip>
+                    )}
+                  </div>
+                  {row.prerequisites && (
+                    <div className="text-xs lg:text-sm">
+                      <span className={uiTextLabel}>Prerequisites: </span>
+                      <span className="text-slate-300 font-medium">{row.prerequisites}</span>
+                    </div>
+                  )}
+                </div>
+                {(usesChoicePicker || usesTextEntry || opensAcquisition) && <ArrowRight />}
+              </PickerRow>
+            );
+          })}
+        </div>
+      </PickerModal>
+    );
+  }
 
   if (showChoicePicker && talentData) {
     return (
@@ -303,7 +540,18 @@ export function TalentPickerModal({
       onClose={onClose}
       suspended={suspended}
       scrollPositionRef={listScrollPositionRef}
-      isEmpty={filtered.length === 0 && filteredCustom.length === 0}
+      isEmpty={filtered.length === 0}
+      filterRow={
+        career && (
+          <button
+            type="button"
+            onClick={() => setShowOverflow(true)}
+            className="w-full rounded border border-slate-500 bg-slate-900 px-2 py-1 text-xs lg:text-sm text-slate-200 text-left"
+          >
+            Show all
+          </button>
+        )
+      }
       footer={
         onCustomAction && (
           <PickerCustomAction onClick={onCustomAction}>{customActionLabel}</PickerCustomAction>
@@ -311,14 +559,6 @@ export function TalentPickerModal({
       }
     >
       <div className="space-y-3 p-3 lg:p-4" data-testid="talent-picker-card-list">
-      {filteredCustom.map((item) => (
-        <PickerRow key={item.id} onClick={() => onSelectCustomItem?.(item)}>
-          <span className={`${uiItemName} truncate block group-hover:text-white`}>{item.name}</span>
-          <div className="mt-1 flex flex-wrap items-center gap-1.5">
-            <Chip className={colourAmberFaint}>{item.status === "draft" ? "Draft" : "Custom"}</Chip>
-          </div>
-        </PickerRow>
-      ))}
       {filtered.map((item) => {
         const row = item as TalentData;
         const sources = normaliseSources(item.source as SkillSource | SkillSource[]);
@@ -352,6 +592,14 @@ export function TalentPickerModal({
           )
         );
         const opensNextStep = usesChoicePicker || usesTextEntry || opensAcquisition;
+        const cost =
+          career && !usesChoicePicker && !usesTextEntry
+            ? getNextTalentCost(career, rank, item.id, undefined, entries)
+            : undefined;
+        const rankChips =
+          career && !usesChoicePicker && !usesTextEntry
+            ? getTalentRankChips(career, item.id, undefined)
+            : undefined;
         return (
           <PickerRow
             key={item.id}
@@ -367,7 +615,7 @@ export function TalentPickerModal({
               } else if (usesTextEntry) {
                 setPicked(item);
               } else {
-                onAdd(makeTalentEntry(itemTalent));
+                attemptRealAdd(itemTalent);
               }
             }}
           >
@@ -397,7 +645,19 @@ export function TalentPickerModal({
                     {ownedLabel}
                   </Chip>
                 )}
+                {cost !== undefined && (
+                  <Chip className={colourValue}>{cost} XP</Chip>
+                )}
               </div>
+              {rankChips && rankChips.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {rankChips.map((rankName) => (
+                    <Chip key={rankName} size="sm" className="bg-slate-800/40 font-code text-slate-400">
+                      {rankName}
+                    </Chip>
+                  ))}
+                </div>
+              )}
               {row.prerequisites && (
                 <div className="text-xs lg:text-sm">
                   <span className={uiTextLabel}>Prerequisites: </span>
