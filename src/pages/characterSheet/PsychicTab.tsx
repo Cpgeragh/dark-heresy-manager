@@ -36,7 +36,7 @@ import { TALENT_DESCRIPTIONS } from "../../data/talentDescriptions";
 import {
   disciplineColours,
   disciplineInactiveColours,
-  psyRatingGlow,
+  psyRatingPulseVars,
   psychicSelectionSourceColours,
 } from "./psychicStyles";
 import { colourActiveSky, colourActiveRose } from "../../ui/colourTokens";
@@ -1140,10 +1140,8 @@ export function PsychicTab({
           <span className={uiFormLabel}>Psy Rating</span>
           <div className="relative inline-flex">
             <div
-              className={[
-                "w-[26px] h-[26px] flex items-center justify-center rounded border border-indigo-500/50 bg-indigo-950/40 transition-shadow",
-                psyRatingGlow(psyRating),
-              ].join(" ")}
+              className="w-[26px] h-[26px] flex items-center justify-center rounded border border-indigo-500/50 bg-indigo-950/40 transition-shadow animate-psy-pulse"
+              style={psyRatingPulseVars(psyRating)}
             >
               <span className="text-sm lg:text-base font-bold font-code text-indigo-300">
                 {psyRating}
