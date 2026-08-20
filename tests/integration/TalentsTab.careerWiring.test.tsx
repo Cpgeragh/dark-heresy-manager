@@ -66,4 +66,53 @@ describe("TalentsTab and TraitsTab, career/rank wiring into the picker", () => {
     const card = within(dialog).getByText("Unnatural Characteristic").closest("button");
     expect(card).toBeInTheDocument();
   });
+
+  it("gives Traits the same overflow screen, hidden until 'Show all', manual-cost only", async () => {
+    const user = userEvent.setup();
+    render(
+      <ToastProvider>
+        <TraitsTab
+          talents={makeTalents()}
+          career="Adept"
+          rank="Sage Logister"
+          editable
+          onUpdateTalents={vi.fn()}
+        />
+      </ToastProvider>
+    );
+    await user.click(screen.getAllByRole("button", { name: "Add Trait" })[0]);
+    const dialog = screen.getByRole("dialog", { name: "Add Trait" });
+    expect(within(dialog).queryByText("Strange Physiology")).not.toBeInTheDocument();
+
+    await user.click(within(dialog).getByRole("button", { name: "Show all" }));
+    await user.click(within(dialog).getByText("Strange Physiology"));
+    expect(screen.getByText("XP Cost")).toBeInTheDocument();
+    await user.type(screen.getByPlaceholderText("0"), "50");
+    await user.click(screen.getByRole("button", { name: "Buy Strange Physiology" }));
+
+    expect(screen.getAllByText("Strange Physiology").length).toBeGreaterThan(0);
+  });
+
+  it("still triggers the acquisition flow for a Trait bought through manual-cost on the overflow screen", async () => {
+    const user = userEvent.setup();
+    render(
+      <ToastProvider>
+        <TraitsTab
+          talents={makeTalents()}
+          career="Adept"
+          rank="Sage Logister"
+          editable
+          onUpdateTalents={vi.fn()}
+        />
+      </ToastProvider>
+    );
+    await user.click(screen.getAllByRole("button", { name: "Add Trait" })[0]);
+    const dialog = screen.getByRole("dialog", { name: "Add Trait" });
+    await user.click(within(dialog).getByRole("button", { name: "Show all" }));
+    await user.click(within(dialog).getByText("Soul-bound"));
+    await user.type(screen.getByPlaceholderText("0"), "50");
+    await user.click(screen.getByRole("button", { name: "Buy Soul-bound" }));
+
+    expect(await screen.findByRole("dialog", { name: "Soul-bound Acquisition" })).toBeInTheDocument();
+  });
 });
