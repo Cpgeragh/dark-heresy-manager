@@ -9,10 +9,12 @@ function matches(
   id: string,
   specialisation?: string
 ): boolean {
-  return (
-    (advance.talentId === id || advance.traitId === id) &&
-    (advance.specialisation ?? "").toLocaleLowerCase() === (specialisation ?? "").toLocaleLowerCase()
-  );
+  if (advance.talentId !== id && advance.traitId !== id) return false;
+  const advanceSpec = (advance.specialisation ?? "").toLocaleLowerCase();
+  const givenSpec = (specialisation ?? "").toLocaleLowerCase();
+  if (advanceSpec === givenSpec) return true;
+  const colonIndex = givenSpec.indexOf(":");
+  return colonIndex !== -1 && givenSpec.slice(0, colonIndex).trim() === advanceSpec;
 }
 
 function isTalentOrTraitAdvance(advance: { kind: string }): boolean {

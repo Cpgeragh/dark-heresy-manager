@@ -65,7 +65,7 @@ describe("Talent behaviour metadata", () => {
     ["good-reputation", ["Administratum", "Ecclesiarchy", "Imperial Guard", "Imperial Navy", "Inquisition", "Underworld"]],
     ["heightened-senses", ["Sight", "Sound", "Smell", "Taste", "Touch"]],
     ["mechadendrite-use", ["Gun", "Manipulator", "Medicae", "Optical", "Utility"]],
-    ["resistance", ["Cold", "Fear", "Heat", "Poisons", "Psychic Powers"]],
+    ["resistance", ["Cold", "Fear", "Heat", "Poisons", "Psychic Powers", "Insanity"]],
     ["two-weapon-wielder", ["Melee", "Ballistic"]],
     ["discipline-focus", ["Biomancy", "Divination", "Pyromancy", "Telekinetics", "Telepathy"]],
     ["psychic-supremacy", ["Biomancy", "Divination", "Pyromancy", "Telekinetics", "Telepathy"]],
@@ -117,7 +117,7 @@ describe("Talent purchase calculations", () => {
     const entries = [purchase("r1", resistance.id, "fear")];
     expect(hasTalentChoice(entries, "Fear")).toBe(true);
     expect(getAvailableTalentChoices(resistance, entries)).not.toContain("Fear");
-    const all = ["Cold", "Fear", "Heat", "Poisons", "Psychic Powers"].map((choice, index) =>
+    const all = ["Cold", "Fear", "Heat", "Poisons", "Psychic Powers", "Insanity"].map((choice, index) =>
       purchase(`r${index}`, resistance.id, choice)
     );
     expect(isTalentAvailableInPicker(resistance, all)).toBe(false);
