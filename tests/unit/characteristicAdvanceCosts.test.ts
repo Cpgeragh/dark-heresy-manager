@@ -49,6 +49,10 @@ describe("getCharacteristicTierCosts", () => {
       undefined,
     ]);
   });
+
+  it("returns four null entries for a characteristic that's confirmed unbuyable for a career", () => {
+    expect(getCharacteristicTierCosts("Tech-Priest", "fel")).toEqual([null, null, null, null]);
+  });
 });
 
 describe("getCharacteristicAdvancesSpent", () => {
@@ -70,6 +74,11 @@ describe("getCharacteristicAdvancesSpent", () => {
 
   it("is zero for a character with no career set, regardless of advances owned", () => {
     const char = makeCharacter({ advances: { ws: 3 } });
+    expect(getCharacteristicAdvancesSpent(char)).toBe(0);
+  });
+
+  it("treats a null (unbuyable) tier as zero spent, even if advances were somehow set", () => {
+    const char = makeCharacter({ career: "Tech-Priest", advances: { fel: 2 } });
     expect(getCharacteristicAdvancesSpent(char)).toBe(0);
   });
 });

@@ -38,7 +38,7 @@ interface StatBlockProps {
   editable: boolean;
   adjustment: number;
   sources: CharacteristicModifierSource[];
-  tierCosts: (number | undefined)[];
+  tierCosts: (number | null | undefined)[];
   getCharField: (statKey: keyof Characteristics) => CharField;
   updateCharacteristic: (statKey: keyof Characteristics, value: CharField) => void;
 }

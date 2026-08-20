@@ -83,4 +83,43 @@ describe("CharacteristicField", () => {
 
     expect(screen.queryByText("100")).not.toBeInTheDocument();
   });
+
+  it("disables a null-cost tier even when editable, and blocks the click", () => {
+    const onChange = vi.fn();
+    render(
+      <CharacteristicField
+        label="Fellowship"
+        value={{ base: 30, advances: 0 }}
+        editable
+        onChange={onChange}
+        tierCosts={[null, null, null, null]}
+      />
+    );
+
+    const firstAdvance = screen.getByRole("button", { name: /fellowship advance 1 of 4/i });
+    expect(firstAdvance).toBeDisabled();
+    expect(firstAdvance).toHaveAccessibleName(/not available for this career/i);
+
+    fireEvent.click(firstAdvance);
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.queryByText("100")).not.toBeInTheDocument();
+  });
+
+  it("distinguishes a locked (null) tier from an uncosted (undefined) tier in the accessible name", () => {
+    render(
+      <CharacteristicField
+        label="Weapon Skill"
+        value={{ base: 30, advances: 0 }}
+        editable
+        onChange={() => {}}
+        tierCosts={[100, null, undefined, undefined]}
+      />
+    );
+
+    expect(screen.getByRole("button", { name: /weapon skill advance 1 of 4, 100 xp/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /weapon skill advance 2 of 4, not available for this career/i })
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^weapon skill advance 3 of 4$/i })).toBeInTheDocument();
+  });
 });

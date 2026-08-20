@@ -14,7 +14,7 @@ interface Props {
   editable: boolean;
   onChange: (newValue: CharField) => void;
   /** XP cost of each of the 4 advance tiers, in order. Undefined entries show no cost. */
-  tierCosts?: (number | undefined)[];
+  tierCosts?: (number | null | undefined)[];
 }
 
 export default function CharacteristicField({ label, value, editable, onChange, tierCosts }: Props) {
@@ -85,6 +85,7 @@ export default function CharacteristicField({ label, value, editable, onChange, 
   const toggleAdvance = useCallback(
     (index: number) => {
       if (!editable) return;
+      if (tierCosts?.[index] === null) return;
 
       let newAdvances = index < advances ? index : index + 1;
 
@@ -101,7 +102,7 @@ export default function CharacteristicField({ label, value, editable, onChange, 
       setError(undefined);
       onChange({ base, advances: newAdvances });
     },
-    [editable, base, advances, onChange]
+    [editable, base, advances, onChange, tierCosts]
   );
 
   const total = base + advances * CHARACTERISTIC_ADVANCE_INCREMENT;
@@ -139,24 +140,28 @@ export default function CharacteristicField({ label, value, editable, onChange, 
         {Array.from({ length: MAX_CHARACTERISTIC_ADVANCES }).map((_, idx) => {
           const filled = idx < advances;
           const cost = tierCosts?.[idx];
+          const locked = cost === null;
+          const clickable = editable && !locked;
           return (
             <div key={idx} className="flex flex-col items-center gap-0.5">
               <button
                 type="button"
                 onClick={() => toggleAdvance(idx)}
-                disabled={!editable}
-                aria-label={`${label} advance ${idx + 1} of ${MAX_CHARACTERISTIC_ADVANCES}${cost !== undefined ? `, ${cost} XP` : ""}`}
+                disabled={!clickable}
+                aria-label={`${label} advance ${idx + 1} of ${MAX_CHARACTERISTIC_ADVANCES}${
+                  typeof cost === "number" ? `, ${cost} XP` : locked ? ", not available for this career" : ""
+                }`}
                 aria-pressed={filled}
-                tabIndex={editable ? 0 : -1}
+                tabIndex={clickable ? 0 : -1}
                 className={`h-8 w-8 sm:h-6 sm:w-6 lg:h-8 lg:w-8 border rounded flex items-center justify-center
                   ${filled ? "bg-red-700 border-red-500" : "bg-slate-900 border-slate-600"}
                   ${
-                    editable
+                    clickable
                       ? "cursor-pointer hover:bg-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
                       : "opacity-50 cursor-not-allowed"
                   }`}
               />
-              {cost !== undefined && (
+              {typeof cost === "number" && (
                 <span className="text-[10px] leading-none text-slate-500 font-code">{cost}</span>
               )}
             </div>

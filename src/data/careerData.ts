@@ -486,7 +486,7 @@ export const CAREER_LIST: readonly CareerData[] = [
       rank("technographer", "Technographer", 1, "0–499"),
       rank("mech-wright", "Mech-Wright", 2, "500–999"),
       rank("electro-priest", "Electro-Priest", 3, "1,000–1,999"),
-      rank("engineer", "Engineer", 4, "2,000–2,999"),
+      rank("enginseer", "Enginseer", 4, "2,000–2,999"),
       rank("tech-priest", "Tech-Priest", 5, "3,000–5,999"),
       rank("technomancer", "Technomancer", 6, "6,000–7,999", ["Technomancer"]),
       rank("mech-deacon", "Mech-Deacon", 6, "6,000–7,999", ["Mech-Deacon"]),

@@ -639,6 +639,7 @@ export const TALENT_LIST: readonly TalentData[] = [
         "Feral Worlders",
         "Government",
         "Hivers",
+        "Imperial Navy",
         "Inquisition",
         "Middle Classes",
         "Military",
