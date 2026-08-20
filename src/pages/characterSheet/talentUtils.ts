@@ -100,13 +100,14 @@ export function isTalentAvailableInPicker(
   }
 }
 
-export function makeTalentEntry(talent: TalentData, specialisation?: string): TalentEntry {
+export function makeTalentEntry(talent: TalentData, specialisation?: string, manualCost?: number): TalentEntry {
   const trimmed = specialisation?.trim();
   return {
     uid: crypto.randomUUID(),
     talentId: talent.id,
     name: trimmed ? `${talent.name} (${trimmed})` : talent.name,
     ...(trimmed ? { specialisation: trimmed } : {}),
+    ...(manualCost !== undefined ? { manualCost } : {}),
   };
 }
 

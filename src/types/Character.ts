@@ -544,6 +544,8 @@ export interface TalentEntry extends CustomLibraryLinkFields {
   description?: string; // a custom trait's own rules text
   source?: string; // a custom trait's own origin (Custom / 2nd Ed)
   acquisition?: TalentAcquisitionDetails;
+  /** Hand-typed XP cost, only used when this entry has no real cost on the character's career table. */
+  manualCost?: number;
   /** Display-only provenance for a grant calculated from another purchase; never saved as a purchase. */
   grantedByTalentEntryUid?: string;
   grantedByTalentName?: string;
