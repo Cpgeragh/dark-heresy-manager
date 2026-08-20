@@ -74,4 +74,28 @@ describe("getSpentXp", () => {
     // 100 (manual advance) + 100 (WS Simple) + 100 (Awareness Trained)
     expect(getSpentXp(char)).toBe(300);
   });
+
+  it("sums manual rank advances, Characteristic Advances, Skills, and Talents together", () => {
+    const data = createEmptyCharacterData({ campaignId: "c", recoveryCode: "r" });
+    const char: Character = {
+      ...data,
+      id: "test-char",
+      header: { ...data.header, career: "Guardsman", rank: "Conscript" },
+      characteristics: { ...data.characteristics, ws: { base: 30, advances: 1 } },
+      skills: [
+        { id: "awareness", name: "Awareness", characteristic: "per", level: "trained", category: "General", advanced: false, source: "CR" },
+      ],
+      talentsAndTraits: {
+        ...data.talentsAndTraits,
+        talents: [{ uid: "s1", talentId: "sound-constitution", name: "Sound Constitution" }],
+      },
+      experience: {
+        total: 1000,
+        spent: 0,
+        ranks: [{ rank: 1, advances: [{ id: "a1", name: "+5 WS", cost: 100 }] }],
+      },
+    };
+    // 100 (manual advance) + 100 (WS Simple) + 100 (Awareness Trained) + 100 (Sound Constitution)
+    expect(getSpentXp(char)).toBe(400);
+  });
 });

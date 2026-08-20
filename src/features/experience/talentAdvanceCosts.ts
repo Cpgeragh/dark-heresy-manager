@@ -1,6 +1,6 @@
 // src/features/experience/talentAdvanceCosts.ts
 
-import type { TalentEntry } from "../../types/Character";
+import type { Character, TalentEntry } from "../../types/Character";
 import { getAllCareerAdvances, getUnlockedCareerAdvances } from "./careerAdvanceAccess";
 import { findCareerByName } from "../../data/careerData";
 
@@ -95,4 +95,19 @@ export function getTalentRankChips(
     }
   }
   return chips;
+}
+
+/** Total XP currently spent on Talents and Traits — real cost first, falling back to a manually-entered one. Granted entries are free by construction. */
+export function getTalentsSpent(character: Character): number {
+  const career = character.header.career;
+  const rank = character.header.rank;
+  const counted: TalentEntry[] = [];
+  let total = 0;
+  for (const entry of [...character.talentsAndTraits.talents, ...character.talentsAndTraits.traits]) {
+    if (entry.grantedByTalentEntryUid) continue;
+    const realCost = getNextTalentCost(career, rank, entry.talentId, entry.specialisation, counted);
+    total += realCost ?? entry.manualCost ?? 0;
+    counted.push(entry);
+  }
+  return total;
 }

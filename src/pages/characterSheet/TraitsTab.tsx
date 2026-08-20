@@ -21,6 +21,7 @@ import type { CampaignCustomItem, CustomTraitData } from "../../types/CustomItem
 interface TraitsTabProps {
   talents: TalentsAndTraitsBlock;
   career?: string;
+  rank?: string;
   cybernetics?: CyberneticItem[];
   gear?: GearItem[];
   editable: boolean;
@@ -107,6 +108,7 @@ function UnnaturalCharacteristicCards({
 export function TraitsTab({
   talents,
   career,
+  rank,
   cybernetics = [],
   gear = [],
   editable,
@@ -364,6 +366,8 @@ export function TraitsTab({
               title={editable ? "Add Trait" : "View Traits"}
               listData={TRAIT_LIST}
               entries={displayTraits}
+              career={career}
+              rank={rank}
               editable={editable}
               onAdd={handleAddTrait}
               onClose={() => setShowPicker(false)}

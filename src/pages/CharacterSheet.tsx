@@ -573,6 +573,7 @@ export default function CharacterSheet({
             <TalentsTab
               talents={character.talentsAndTraits}
               career={character.header.career}
+              rank={character.header.rank}
               psychic={character.psychic}
               cybernetics={character.cybernetics ?? []}
               rangedWeapons={character.rangedWeapons}
@@ -601,6 +602,7 @@ export default function CharacterSheet({
             <TraitsTab
               talents={character.talentsAndTraits}
               career={character.header.career}
+              rank={character.header.rank}
               cybernetics={character.cybernetics ?? []}
               gear={character.gear ?? []}
               editable={allowedToEdit}

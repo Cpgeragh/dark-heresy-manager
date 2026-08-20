@@ -45,6 +45,7 @@ import { uiTextBody } from "../../ui/editableStyles";
 interface TalentsTabProps {
   talents: TalentsAndTraitsBlock;
   career?: string;
+  rank?: string;
   psychic: PsychicBlock;
   cybernetics?: CyberneticItem[];
   rangedWeapons?: RangedWeapon[];
@@ -98,12 +99,16 @@ function FaithTalentSection({
   onAdd,
   onRemove,
   pickerSuspended = false,
+  career,
+  rank,
 }: {
   entries: TalentEntry[];
   editable: boolean;
   onAdd: (entry: TalentEntry) => void;
   onRemove: (uid: string) => void;
   pickerSuspended?: boolean;
+  career?: string;
+  rank?: string;
 }) {
   const [showPicker, setShowPicker] = useState(false);
   return (
@@ -152,6 +157,8 @@ function FaithTalentSection({
             onAdd={onAdd}
             onClose={() => setShowPicker(false)}
             suspended={pickerSuspended}
+            career={career}
+            rank={rank}
           />
         )}
       </section>
@@ -278,6 +285,8 @@ function RegularTalentSection({
   onRemove,
   columns = 1,
   pickerSuspended = false,
+  career,
+  rank,
 }: {
   entries: TalentEntry[];
   psychic: PsychicBlock;
@@ -286,6 +295,8 @@ function RegularTalentSection({
   onRemove: (uid: string) => void;
   columns?: 1 | 2;
   pickerSuspended?: boolean;
+  career?: string;
+  rank?: string;
 }) {
   const [showPicker, setShowPicker] = useState(false);
   return (
@@ -315,6 +326,8 @@ function RegularTalentSection({
             onAdd={onAdd}
             onClose={() => setShowPicker(false)}
             suspended={pickerSuspended}
+            career={career}
+            rank={rank}
           />
         )}
       </section>
@@ -325,6 +338,7 @@ function RegularTalentSection({
 export function TalentsTab({
   talents,
   career,
+  rank,
   psychic,
   cybernetics = [],
   rangedWeapons = [],
@@ -592,6 +606,8 @@ export function TalentsTab({
                   onAdd={handleAddTalent}
                   onRemove={handleRemoveTalent}
                   pickerSuspended={pendingAcquisition !== null}
+                  career={career}
+                  rank={rank}
                 />
               ) : (
                 <FaithTalentSection
@@ -600,6 +616,8 @@ export function TalentsTab({
                   onAdd={handleAddTalent}
                   onRemove={handleRemoveTalent}
                   pickerSuspended={pendingAcquisition !== null}
+                  career={career}
+                  rank={rank}
                 />
               )}
             </section>
@@ -612,6 +630,8 @@ export function TalentsTab({
             onAdd={handleAddTalent}
             onRemove={handleRemoveTalent}
             pickerSuspended={pendingAcquisition !== null}
+            career={career}
+            rank={rank}
           />
         )}
       </div>
@@ -625,6 +645,8 @@ export function TalentsTab({
           onRemove={handleRemoveTalent}
           columns={showFaith ? 1 : 2}
           pickerSuspended={pendingAcquisition !== null}
+          career={career}
+          rank={rank}
         />
         {showFaith && (
           <FaithTalentSection
@@ -633,6 +655,8 @@ export function TalentsTab({
             onAdd={handleAddTalent}
             onRemove={handleRemoveTalent}
             pickerSuspended={pendingAcquisition !== null}
+            career={career}
+            rank={rank}
           />
         )}
       </div>
