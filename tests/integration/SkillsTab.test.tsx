@@ -277,6 +277,23 @@ describe("SkillsTab", () => {
     expect(updated?.manualCosts?.["+10"]).toBe(150);
   });
 
+  it("accepts 0 as a valid manual upgrade cost, blocking only a blank field", async () => {
+    const user = userEvent.setup();
+    const { onUpdate } = renderTab();
+    await user.click(screen.getAllByRole("button", { name: "Upgrade to +10 (type your own cost)" })[0]);
+
+    const confirmButton = screen.getByRole("button", { name: "Upgrade" });
+    expect(confirmButton).toBeDisabled();
+
+    await user.type(screen.getByRole("textbox"), "0");
+    expect(confirmButton).toBeEnabled();
+    await user.click(confirmButton);
+
+    const next = onUpdate.mock.calls[0][0] as SkillEntry[];
+    const updated = next.find((s) => s.id === "s1");
+    expect(updated?.manualCosts?.["+10"]).toBe(0);
+  });
+
   it("upgrades using the real career cost when the next tier is actually unlocked, no manual cost stored", async () => {
     const user = userEvent.setup();
     // Awareness +10 is a real Scout-rank advance, costing 100 XP. Id has to

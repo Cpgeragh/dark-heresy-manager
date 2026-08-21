@@ -22,7 +22,7 @@ import {
 } from "../../../ui/editableStyles";
 import { uiPickerPressFeedback } from "../../../ui/buttonStyles";
 import { colourPurple, colourTeal, colourValue } from "../../../ui/colourTokens";
-import { sanitizePositiveIntegerInput } from "../../../utils/formInput";
+import { sanitizeNonNegativeIntegerInput } from "../../../utils/formInput";
 
 interface SkillRowProps {
   skill: SkillWithComputed;
@@ -80,7 +80,7 @@ export function SkillRow({
   );
 
   const manualUpgradeCostNumber = Number(manualUpgradeCost);
-  const canConfirmManualUpgrade = manualUpgradeCost.trim() !== "" && manualUpgradeCostNumber > 0;
+  const canConfirmManualUpgrade = manualUpgradeCost.trim() !== "";
 
   return (
     <div className={uiSectionShell + " overflow-hidden"}>
@@ -333,7 +333,7 @@ export function SkillRow({
               type="text"
               inputMode="numeric"
               value={manualUpgradeCost}
-              onChange={(event) => setManualUpgradeCost(sanitizePositiveIntegerInput(event.target.value))}
+              onChange={(event) => setManualUpgradeCost(sanitizeNonNegativeIntegerInput(event.target.value))}
               placeholder="0"
               className={editableInputClass(true) + " mt-0.5"}
             />

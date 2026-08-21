@@ -15,7 +15,7 @@ import { SkillRow } from "./SkillRow";
 import { colourPurple } from "../../../ui/colourTokens";
 import { editableInputClass, uiFormLabel, uiItemName, uiSectionShell } from "../../../ui/editableStyles";
 import { uiPickerPressFeedback } from "../../../ui/buttonStyles";
-import { sanitizePositiveIntegerInput } from "../../../utils/formInput";
+import { sanitizeNonNegativeIntegerInput } from "../../../utils/formInput";
 
 interface AddSkillModalProps {
   isOpen: boolean;
@@ -114,7 +114,7 @@ export function AddSkillModal({
 
   if (pendingManualSkill) {
     const cost = Number(manualCost);
-    const canConfirm = manualCost.trim() !== "" && cost > 0;
+    const canConfirm = manualCost.trim() !== "";
     return (
       <PickerModal
         title={`Train ${pendingManualSkill.name}`}
@@ -146,7 +146,7 @@ export function AddSkillModal({
             type="text"
             inputMode="numeric"
             value={manualCost}
-            onChange={(event) => setManualCost(sanitizePositiveIntegerInput(event.target.value))}
+            onChange={(event) => setManualCost(sanitizeNonNegativeIntegerInput(event.target.value))}
             placeholder="0"
             className={editableInputClass(true) + " mt-0.5"}
           />

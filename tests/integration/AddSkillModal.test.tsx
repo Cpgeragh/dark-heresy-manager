@@ -142,6 +142,22 @@ describe("AddSkillModal with a career-restricted list", () => {
     expect(onAdd).toHaveBeenCalledWith("s2", 250);
   });
 
+  it("accepts 0 as a valid manual cost, blocking only a blank field", async () => {
+    const user = userEvent.setup();
+    const { onAdd } = setup({ untrainedSkills: twoSkills, unlockedCosts: new Map([["s1", 100]]) });
+    await user.click(screen.getByRole("button", { name: "Show all skills" }));
+    await user.click(screen.getByRole("button", { name: "Select Dodge" }));
+
+    const confirmButton = screen.getByRole("button", { name: "Train Dodge" });
+    expect(confirmButton).toBeDisabled();
+
+    await user.type(screen.getByRole("textbox"), "0");
+    expect(confirmButton).toBeEnabled();
+    await user.click(confirmButton);
+
+    expect(onAdd).toHaveBeenCalledWith("s2", 0);
+  });
+
   it("does not restrict or show cost chips when unlockedCosts isn't provided at all", () => {
     setup({ untrainedSkills: twoSkills });
     expect(screen.getByRole("button", { name: "Select Dodge" })).toBeInTheDocument();
