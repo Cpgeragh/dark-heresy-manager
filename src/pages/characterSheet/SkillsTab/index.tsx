@@ -122,8 +122,10 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
 
   const buildItems = useCallback(
     (view: SkillsView): DisplayItem[] => {
+      const viewSkills = trainedSkills.filter((skill) => skill.advanced === (view === "advanced"));
+
       const groups = new Map<string, SkillWithComputed[]>();
-      for (const skill of trainedSkills) {
+      for (const skill of viewSkills) {
         const arr = groups.get(skill.category) ?? [];
         arr.push(skill);
         groups.set(skill.category, arr);
@@ -138,16 +140,11 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
         }
       }
 
-      return items
-        .filter((item) => {
-          const isAdv = item.type === "skill" ? item.skill.advanced : item.skills[0].advanced;
-          return isAdv === (view === "advanced");
-        })
-        .sort((a, b) => {
-          const aKey = a.type === "skill" ? a.skill.name : a.category;
-          const bKey = b.type === "skill" ? b.skill.name : b.category;
-          return aKey.localeCompare(bKey);
-        });
+      return items.sort((a, b) => {
+        const aKey = a.type === "skill" ? a.skill.name : a.category;
+        const bKey = b.type === "skill" ? b.skill.name : b.category;
+        return aKey.localeCompare(bKey);
+      });
     },
     [trainedSkills]
   );
