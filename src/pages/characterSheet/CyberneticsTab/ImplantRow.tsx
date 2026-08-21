@@ -112,7 +112,7 @@ export function ImplantRow({
           />
         </div>
         {item.grantedByTalentName && (
-          <p className="mt-1 text-xs text-amber-300">Granted by {item.grantedByTalentName}</p>
+          <p className="mt-1 text-xs text-amber-300">{item.grantedByTalentName} ({item.grantedByType}): Granted</p>
         )}
         {linkedArmName && linkedWeaponName && (
           <div className="mt-1 flex flex-wrap items-center gap-1.5">

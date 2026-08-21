@@ -203,10 +203,10 @@ export function TraitAcquisitionModal({
             if (!selectedSanction) return;
             const sanctioning: SanctioningAcquisition = { resultId: selectedSanction.id, resultName: selectedSanction.name, ageIncrease: age, ...(sanctionRange && sanctionResultId === "reconstructed-skull" ? { thronesGained: roll } : sanctionRange ? { rolledValue: roll } : {}) };
             const senseRef = CYBERNETICS_REFERENCE.find((item) => item.id === "cr-cybernetic-senses");
-            const addedSense = sanctionResultId === "optical-rupture" && senseRef ? [{ id: crypto.randomUUID(), referenceId: senseRef.id, name: senseRef.name, craftsmanship: "Common" as const, value: senseRef.value, availability: senseRef.availability, source: senseRef.source, notes: "Eyes replaced through Sanctioned Psyker (Optical Rupture).", grantedByTalentEntryUid: entry.uid, grantedByTalentName: "Sanctioned Psyker" }] : [];
+            const addedSense = sanctionResultId === "optical-rupture" && senseRef ? [{ id: crypto.randomUUID(), referenceId: senseRef.id, name: senseRef.name, craftsmanship: "Common" as const, value: senseRef.value, availability: senseRef.availability, source: senseRef.source, notes: "Eyes replaced through Sanctioned Psyker (Optical Rupture).", grantedByTalentEntryUid: entry.uid, grantedByTalentName: "Sanctioned Psyker", grantedByType: "Trait" as const }] : [];
             const gearRefId = sanctionResultId === "dental-probes" ? "cr-carven-dentures" : sanctionResultId === "throne-wed" ? "cr-chattallium-ring" : null;
             const gearRef = gearRefId ? GEAR_REFERENCE.find((item) => item.id === gearRefId) : undefined;
-            const addedGear = gearRef ? [{ id: crypto.randomUUID(), referenceId: gearRef.id, name: gearRef.name, description: gearRef.description, weight: gearRef.weight, value: gearRef.value, availability: gearRef.availability, source: gearRef.source, grantedByTalentEntryUid: entry.uid, grantedByTalentName: "Sanctioned Psyker" }] : [];
+            const addedGear = gearRef ? [{ id: crypto.randomUUID(), referenceId: gearRef.id, name: gearRef.name, description: gearRef.description, weight: gearRef.weight, value: gearRef.value, availability: gearRef.availability, source: gearRef.source, grantedByTalentEntryUid: entry.uid, grantedByTalentName: "Sanctioned Psyker", grantedByType: "Trait" as const }] : [];
             onComplete({
               entry: { ...entry, notes: notesForSanctioning(sanctioning), acquisition: { ...entry.acquisition, trait: { sanctioning } } },
               cybernetics: [
@@ -257,7 +257,7 @@ export function TraitAcquisitionModal({
             return;
           }
           if (!selectedCybernetic) return;
-          const item: CyberneticItem = { id: crypto.randomUUID(), referenceId: selectedCybernetic.id, name: selectedCybernetic.name, craftsmanship: "Common", value: selectedCybernetic.value, availability: selectedCybernetic.availability, source: selectedCybernetic.source, ...(skinLocation ? { bodyLocation: [skinLocation] } : {}), grantedByTalentEntryUid: entry.uid, grantedByTalentName: "Skin of Iron" };
+          const item: CyberneticItem = { id: crypto.randomUUID(), referenceId: selectedCybernetic.id, name: selectedCybernetic.name, craftsmanship: "Common", value: selectedCybernetic.value, availability: selectedCybernetic.availability, source: selectedCybernetic.source, ...(skinLocation ? { bodyLocation: [skinLocation] } : {}), grantedByTalentEntryUid: entry.uid, grantedByTalentName: "Skin of Iron", grantedByType: "Trait" };
           onComplete({ entry: { ...entry, notes: `Common ${selectedCybernetic.name} gained at Rank ${skinRank}.`, acquisition: { ...entry.acquisition, trait: { skinOfIronGrants: [{ rank: skinRank, kind: "new", cyberneticId: item.id, cyberneticReferenceId: selectedCybernetic.id }] } } }, cybernetics: [...cybernetics, item] });
         }}>Apply and add Trait</Button>
       </div></PickerBody>

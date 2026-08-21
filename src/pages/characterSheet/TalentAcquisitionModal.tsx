@@ -354,6 +354,7 @@ export function TalentAcquisitionModal({
           source: selectedCybernetic.source,
           grantedByTalentEntryUid: entry.uid,
           grantedByTalentName: entry.name,
+          grantedByType: "Talent",
           ...(bodyLocation ? { bodyLocation } : {}),
           ...(selectingConcealedWeapon ? {
             concealedWeapon: {

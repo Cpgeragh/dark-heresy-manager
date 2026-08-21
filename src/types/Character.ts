@@ -324,6 +324,7 @@ export interface CyberneticItem extends CustomLibraryLinkFields {
   concealedWeapon?: { armId: string; weaponId: string; weaponType: "ranged" | "melee" };
   grantedByTalentEntryUid?: string;
   grantedByTalentName?: string;
+  grantedByType?: "Talent" | "Trait" | "Career" | "Homeworld";
 }
 
 /**
@@ -340,6 +341,7 @@ export interface GearItem extends CustomLibraryLinkFields {
   source?: string;
   grantedByTalentEntryUid?: string;
   grantedByTalentName?: string;
+  grantedByType?: "Talent" | "Trait" | "Career" | "Homeworld";
 }
 
 /**
@@ -549,6 +551,7 @@ export interface TalentEntry extends CustomLibraryLinkFields {
   /** Display-only provenance for a grant calculated from another purchase; never saved as a purchase. */
   grantedByTalentEntryUid?: string;
   grantedByTalentName?: string;
+  grantedByType?: "Talent" | "Trait" | "Career" | "Homeworld";
 }
 
 export interface TalentsAndTraitsBlock {

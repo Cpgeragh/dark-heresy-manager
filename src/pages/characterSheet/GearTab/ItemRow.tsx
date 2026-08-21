@@ -64,6 +64,9 @@ export function ItemRow({
             source={item.source}
             className="flex flex-wrap gap-1.5 mt-1"
           />
+          {item.grantedByTalentName && (
+            <p className="mt-1 text-xs text-amber-300">{item.grantedByTalentName} ({item.grantedByType}): Granted</p>
+          )}
           {libraryItem && (
             <CustomItemActionButtons
               libraryItem={libraryItem}
@@ -78,7 +81,7 @@ export function ItemRow({
           )}
         </div>
 
-        {editable && (
+        {editable && !item.grantedByTalentEntryUid && (
           <RemoveButton onClick={onRemove} label="Remove" />
         )}
       </div>

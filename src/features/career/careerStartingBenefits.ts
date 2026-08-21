@@ -86,7 +86,8 @@ export function applyTechPriestImplants(
       name: reference.name,
       availability: reference.availability,
       grantedByTalentEntryUid: TECH_PRIEST_MECHANICUS_IMPLANT_GRANT_UID,
-      grantedByTalentName: "Career: Tech-Priest",
+      grantedByTalentName: "Tech-Priest",
+      grantedByType: "Career",
     };
   });
   return [...withoutOld, ...granted];

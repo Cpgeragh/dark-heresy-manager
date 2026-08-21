@@ -1029,9 +1029,9 @@ describe("TalentsTab", () => {
     const talents = makeTalents({ talents: [entry("pw", "the-power-within", "The Power Within")] });
     renderTab({ talents });
     expect(screen.getAllByText("Resistance (Psychic Powers)").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Granted by The Power Within").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("The Power Within (Talent): Granted").length).toBeGreaterThan(0);
     expect(screen.queryByRole("button", { name: "Delete Resistance (Psychic Powers)" })).not.toBeInTheDocument();
-    for (const grantedText of screen.getAllByText("Granted by The Power Within")) {
+    for (const grantedText of screen.getAllByText("The Power Within (Talent): Granted")) {
       const cardContent = grantedText.parentElement;
       const sourceChip = within(cardContent!).getByText("CR");
       expect(

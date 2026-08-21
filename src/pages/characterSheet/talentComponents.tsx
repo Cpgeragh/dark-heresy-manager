@@ -758,7 +758,7 @@ export function EntryCard({
         </div>
         {!statusAfterSource && secondaryText && <p className="text-sm text-amber-300">{secondaryText}</p>}
         {!statusAfterSource && isGranted && (
-          <p className="text-sm text-amber-300">Granted by {entry.grantedByTalentName}</p>
+          <p className="text-sm text-amber-300">{entry.grantedByTalentName} ({entry.grantedByType}): Granted</p>
         )}
         <div className="flex flex-wrap items-center gap-1.5">
           {refSources.map((source) => (
@@ -774,7 +774,7 @@ export function EntryCard({
         </div>
         {statusAfterSource && secondaryText && <p className="text-sm text-amber-300">{secondaryText}</p>}
         {statusAfterSource && isGranted && (
-          <p className="text-sm text-amber-300">Granted by {entry.grantedByTalentName}</p>
+          <p className="text-sm text-amber-300">{entry.grantedByTalentName} ({entry.grantedByType}): Granted</p>
         )}
         {libraryItem && (
           <CustomItemActionButtons
