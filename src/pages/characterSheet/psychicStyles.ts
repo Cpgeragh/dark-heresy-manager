@@ -21,12 +21,22 @@ export const disciplineColours: Record<string, string> = {
   default: colourInactive,
 };
 
+export const disciplineActiveColours: Record<string, string> = {
+  Minor: colourViolet,
+  Biomancy: "border-emerald-500/60 bg-emerald-950/50 text-emerald-300 font-semibold",
+  Divination: "border-cyan-500/60 bg-cyan-950/50 text-cyan-300 font-semibold",
+  Pyromancy: "border-orange-500/60 bg-orange-950/50 text-orange-300 font-semibold",
+  Telekinetics: "border-sky-500/60 bg-sky-950/50 text-sky-300 font-semibold",
+  Telepathy: "border-fuchsia-500/60 bg-fuchsia-950/50 text-fuchsia-300 font-semibold",
+  default: colourInactive,
+};
+
 export const disciplineInactiveColours: Record<string, string> = {
-  Biomancy: "border-emerald-800/45 bg-emerald-950/15 text-emerald-400/50",
-  Divination: "border-cyan-800/45 bg-cyan-950/15 text-cyan-400/50",
-  Pyromancy: "border-orange-800/45 bg-orange-950/15 text-orange-400/50",
-  Telekinetics: "border-sky-800/45 bg-sky-950/15 text-sky-400/50",
-  Telepathy: "border-fuchsia-800/45 bg-fuchsia-950/15 text-fuchsia-400/50",
+  Biomancy: "border-emerald-700/50 bg-emerald-950/15 text-emerald-400/50",
+  Divination: "border-cyan-700/50 bg-cyan-950/15 text-cyan-400/50",
+  Pyromancy: "border-orange-700/50 bg-orange-950/15 text-orange-400/50",
+  Telekinetics: "border-sky-700/50 bg-sky-950/15 text-sky-400/50",
+  Telepathy: "border-fuchsia-700/50 bg-fuchsia-950/15 text-fuchsia-400/50",
   default: colourInactive,
 };
 

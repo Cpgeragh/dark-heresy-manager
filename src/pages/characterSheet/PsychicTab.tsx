@@ -34,6 +34,7 @@ import { OptionPickerScreen } from "../../ui/OptionPickerScreen";
 import { InfoModal } from "../../components/InfoModal";
 import { TALENT_DESCRIPTIONS } from "../../data/talentDescriptions";
 import {
+  disciplineActiveColours,
   disciplineColours,
   disciplineInactiveColours,
   psyRatingPulseVars,
@@ -1175,7 +1176,7 @@ export function PsychicTab({
                   className={[
                     "px-2.5 lg:px-3 py-1 lg:py-1.5 rounded border text-xs lg:text-sm transition",
                     active
-                      ? `${disciplineColours[d] ?? disciplineColours.default} font-semibold`
+                      ? disciplineActiveColours[d] ?? disciplineActiveColours.default
                       : disciplineInactiveColours[d] ?? disciplineInactiveColours.default,
                   ].join(" ")}
                 >
