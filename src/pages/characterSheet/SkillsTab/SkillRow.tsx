@@ -20,7 +20,6 @@ import {
   uiSectionShell,
   uiTextBody,
 } from "../../../ui/editableStyles";
-import { ExpandChevron } from "../../../ui/ExpandChevron";
 import { uiPickerPressFeedback } from "../../../ui/buttonStyles";
 import { colourPurple, colourTeal, colourValue } from "../../../ui/colourTokens";
 import { sanitizePositiveIntegerInput } from "../../../utils/formInput";
@@ -59,7 +58,6 @@ export function SkillRow({
   nextTierAccess,
   onManualUpgrade,
 }: SkillRowProps) {
-  const [expanded, setExpanded] = useState(false);
   const [deleteArmed, setDeleteArmed] = useState(false);
   const [upgradeArmed, setUpgradeArmed] = useState(false);
   const [manualUpgradeArmed, setManualUpgradeArmed] = useState(false);
@@ -76,8 +74,6 @@ export function SkillRow({
     ? skill.name.slice(skill.category.length).trim().replace(/^\(|\)$/g, "").trim() || skill.name
     : skill.name;
 
-  const handleToggle = useCallback(() => setExpanded((p) => !p), []);
-
   const handleRemove = useCallback(
     () => updateLevel(skill.id, "untrained"),
     [skill.id, updateLevel]
@@ -92,17 +88,14 @@ export function SkillRow({
       <div className={`relative w-full text-left hover:bg-slate-700/40 transition group ${
         previewMode ? "p-3 lg:p-4" : "px-3 lg:px-4 py-2.5 lg:py-3"
       }`}>
-        <button
-          type="button"
-          onClick={onSelect ? () => onSelect(skill.id) : handleToggle}
-          aria-expanded={onSelect ? undefined : expanded}
-          aria-label={
-            onSelect
-              ? `Select ${skill.name}`
-              : `${expanded ? "Collapse" : "Expand"} ${skill.name} details`
-          }
-          className={`absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 ${uiPickerPressFeedback(previewMode && Boolean(onSelect))}`}
-        />
+        {onSelect && (
+          <button
+            type="button"
+            onClick={() => onSelect(skill.id)}
+            aria-label={`Select ${skill.name}`}
+            className={`absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 ${uiPickerPressFeedback(previewMode)}`}
+          />
+        )}
         {/* Mobile: name+chips in a left column, total in its own centered column, chevron last */}
         <div className="relative pointer-events-none lg:hidden flex items-center gap-3">
           <div className="flex-1 min-w-0 space-y-1.5">
@@ -161,6 +154,20 @@ export function SkillRow({
                 />
               </span>
             )}
+            {editable && nextTierAccess && nextTierAccess.status !== "maxed" && (
+              <div className="relative z-20 pointer-events-auto">
+                {nextTierAccess.status === "unlocked" && (
+                  <Button size="xs" onClick={() => setUpgradeArmed(true)}>
+                    Upgrade to {nextTierAccess.level} ({nextTierAccess.cost} XP)
+                  </Button>
+                )}
+                {nextTierAccess.status === "not-on-career" && (
+                  <Button size="xs" variant="ghost" onClick={() => setManualUpgradeArmed(true)}>
+                    Upgrade to {nextTierAccess.level} (type your own cost)
+                  </Button>
+                )}
+              </div>
+            )}
             {editable && skill.level !== "untrained" && !(skill.talentMinimumLevel && skill.baseLevel === "untrained") && (
               <div className="relative z-20 pointer-events-auto">
                 <RemoveButton
@@ -168,19 +175,6 @@ export function SkillRow({
                   label={`Delete ${skill.name}`}
                 />
               </div>
-            )}
-            {onSelect ? (
-              <button
-                type="button"
-                aria-expanded={expanded}
-                aria-label={expanded ? "Collapse skill details" : "Expand skill details"}
-                onClick={handleToggle}
-                className="relative z-10 pointer-events-auto p-1 -m-1"
-              >
-                <ExpandChevron expanded={expanded} />
-              </button>
-            ) : (
-              <ExpandChevron expanded={expanded} />
             )}
           </div>
         </div>
@@ -243,6 +237,20 @@ export function SkillRow({
                 />
               </span>
             )}
+            {editable && nextTierAccess && nextTierAccess.status !== "maxed" && (
+              <div className="relative z-20 pointer-events-auto">
+                {nextTierAccess.status === "unlocked" && (
+                  <Button size="xs" onClick={() => setUpgradeArmed(true)}>
+                    Upgrade to {nextTierAccess.level} ({nextTierAccess.cost} XP)
+                  </Button>
+                )}
+                {nextTierAccess.status === "not-on-career" && (
+                  <Button size="xs" variant="ghost" onClick={() => setManualUpgradeArmed(true)}>
+                    Upgrade to {nextTierAccess.level} (type your own cost)
+                  </Button>
+                )}
+              </div>
+            )}
             {editable && skill.level !== "untrained" && !(skill.talentMinimumLevel && skill.baseLevel === "untrained") && (
               <div className="relative z-20 pointer-events-auto">
                 <RemoveButton
@@ -251,66 +259,9 @@ export function SkillRow({
                 />
               </div>
             )}
-            {onSelect ? (
-              <button
-                type="button"
-                aria-expanded={expanded}
-                aria-label={expanded ? "Collapse skill details" : "Expand skill details"}
-                onClick={handleToggle}
-                className="relative z-10 pointer-events-auto p-1 -m-1"
-              >
-                <ExpandChevron expanded={expanded} />
-              </button>
-            ) : (
-              <ExpandChevron expanded={expanded} />
-            )}
           </div>
         </div>
       </div>
-
-      {/* EXPANDED BODY */}
-      {expanded && (
-        <div className="px-3 lg:px-4 pb-3 lg:pb-4 pt-2 lg:pt-3 border-t border-slate-600 space-y-3">
-          {previewMode ? (
-            <div className="flex flex-wrap items-center gap-2">
-              {(skill.advanced
-                ? (["trained", "+10", "+20"] as const)
-                : (["untrained", "trained", "+10", "+20"] as const)
-              ).map((value) => (
-                <button type="button"
-                  key={value}
-                  aria-pressed={skill.level === value}
-                  aria-label={`Set skill level to ${value}`}
-                  className={`flex-1 px-3 lg:px-4 py-2 rounded border text-sm lg:text-base cursor-default ${
-                    skill.level === value
-                      ? `${LEVEL_BADGE[value]} font-semibold`
-                      : "border-slate-500 bg-slate-800 text-slate-100"
-                  }`}
-                >
-                  {value === "trained" ? "Trained" : value === "untrained" ? "Untrained" : value}
-                </button>
-              ))}
-            </div>
-          ) : (
-            editable &&
-            nextTierAccess &&
-            nextTierAccess.status !== "maxed" && (
-              <div className="flex flex-wrap gap-2">
-                {nextTierAccess.status === "unlocked" && (
-                  <Button size="sm" onClick={() => setUpgradeArmed(true)}>
-                    Upgrade to {nextTierAccess.level} ({nextTierAccess.cost} XP)
-                  </Button>
-                )}
-                {nextTierAccess.status === "not-on-career" && (
-                  <Button size="sm" variant="ghost" onClick={() => setManualUpgradeArmed(true)}>
-                    Upgrade to {nextTierAccess.level} (type your own cost)
-                  </Button>
-                )}
-              </div>
-            )
-          )}
-        </div>
-      )}
 
       {upgradeArmed && nextTierAccess?.status === "unlocked" && (
         <PickerModal

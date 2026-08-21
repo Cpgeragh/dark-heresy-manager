@@ -254,20 +254,6 @@ describe("SkillsTab", () => {
     expect(screen.queryByRole("button", { name: "Add advanced skill" })).not.toBeInTheDocument();
   });
 
-  it("allows details without selection feedback in the read-only Skill picker", async () => {
-    const user = userEvent.setup();
-    renderTab({
-      editable: false,
-      skills: [skill({ id: "tech-use", name: "Tech-Use", characteristic: "int", advanced: true, level: "untrained" })],
-    });
-    await user.click(screen.getAllByRole("button", { name: "View advanced skills" })[0]);
-
-    const details = screen.getByRole("button", { name: "Expand Tech-Use details" });
-    expect(details).not.toHaveClass("active:!bg-slate-700", "active:!border-red-400");
-    await user.click(details);
-    expect(screen.getByRole("button", { name: "Collapse Tech-Use details" })).toBeInTheDocument();
-  });
-
   it("shows the empty message when there are no trained skills", () => {
     renderTab({ skills: [skill({ level: "untrained" })] });
     expect(screen.getAllByText("No advanced skills trained yet.").length).toBeGreaterThan(0);
@@ -278,8 +264,7 @@ describe("SkillsTab", () => {
     const { onUpdate } = renderTab();
     // No career/rank configured, so the next tier (+10) has no real cost — the
     // manual-cost upgrade path is what should appear.
-    await user.click(screen.getAllByRole("button", { name: "Expand Awareness details" })[0]);
-    await user.click(screen.getByRole("button", { name: "Upgrade to +10 (type your own cost)" }));
+    await user.click(screen.getAllByRole("button", { name: "Upgrade to +10 (type your own cost)" })[0]);
 
     const costInput = screen.getByRole("textbox");
     await user.type(costInput, "150");
@@ -301,8 +286,7 @@ describe("SkillsTab", () => {
       rank: "Scout",
       skills: [skill({ id: "awareness" })],
     });
-    await user.click(screen.getAllByRole("button", { name: "Expand Awareness details" })[0]);
-    await user.click(screen.getByRole("button", { name: "Upgrade to +10 (100 XP)" }));
+    await user.click(screen.getAllByRole("button", { name: "Upgrade to +10 (100 XP)" })[0]);
     await user.click(screen.getByRole("button", { name: "Upgrade" }));
 
     expect(onUpdate).toHaveBeenCalledTimes(1);
@@ -321,7 +305,6 @@ describe("SkillsTab", () => {
       rank: "Conscript",
       skills: [skill({ id: "awareness" })],
     });
-    await user.click(screen.getAllByRole("button", { name: "Expand Awareness details" })[0]);
     expect(screen.queryByRole("button", { name: /Upgrade/ })).not.toBeInTheDocument();
   });
 

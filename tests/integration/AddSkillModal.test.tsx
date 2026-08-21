@@ -44,42 +44,6 @@ describe("AddSkillModal skill row", () => {
     expect(onAdd).toHaveBeenCalledWith("s1");
   });
 
-  it("expands the row to preview it without selecting, when the expand icon is clicked", async () => {
-    const user = userEvent.setup();
-    const { onAdd } = setup();
-    await user.click(screen.getAllByRole("button", { name: "Expand skill details" })[0]);
-    expect(onAdd).not.toHaveBeenCalled();
-    expect(screen.getAllByRole("button", { name: "Collapse skill details" }).length).toBeGreaterThan(0);
-  });
-
-  it("expands the row to preview it via keyboard (Enter) without selecting", async () => {
-    const user = userEvent.setup();
-    const { onAdd } = setup();
-    const expandIcon = screen.getAllByRole("button", { name: "Expand skill details" })[0];
-    expandIcon.focus();
-    await user.keyboard("{Enter}");
-    expect(onAdd).not.toHaveBeenCalled();
-    expect(screen.getAllByRole("button", { name: "Collapse skill details" }).length).toBeGreaterThan(0);
-  });
-
-  it("expands the row to preview it via keyboard (Space) without selecting", async () => {
-    const user = userEvent.setup();
-    const { onAdd } = setup();
-    const expandIcon = screen.getAllByRole("button", { name: "Expand skill details" })[0];
-    expandIcon.focus();
-    await user.keyboard(" ");
-    expect(onAdd).not.toHaveBeenCalled();
-    expect(screen.getAllByRole("button", { name: "Collapse skill details" }).length).toBeGreaterThan(0);
-  });
-
-  it("shows the level options (read-only) when expanded in the picker", async () => {
-    const user = userEvent.setup();
-    setup();
-    await user.click(screen.getAllByRole("button", { name: "Expand skill details" })[0]);
-    expect(screen.getByLabelText("Set skill level to untrained")).toBeInTheDocument();
-    expect(screen.getByLabelText("Set skill level to trained")).toBeInTheDocument();
-  });
-
   it("ignores leading and trailing spaces in search", async () => {
     const user = userEvent.setup();
     setup();
@@ -187,11 +151,9 @@ describe("AddSkillModal with a career-restricted list", () => {
 });
 
 describe("AddSkillModal in read-only View Skills mode", () => {
-  it("expands the row on click (no separate select action exists, so the row itself toggles)", async () => {
-    const user = userEvent.setup();
+  it("renders skill rows with no click target, since there's nothing left to reveal", () => {
     const { onAdd } = setup({ editable: false });
-    await user.click(screen.getAllByRole("button", { name: /Awareness/ })[0]);
+    expect(screen.queryByRole("button", { name: "Select Awareness" })).not.toBeInTheDocument();
     expect(onAdd).not.toHaveBeenCalled();
-    expect(screen.getByLabelText("Set skill level to untrained")).toBeInTheDocument();
   });
 });
