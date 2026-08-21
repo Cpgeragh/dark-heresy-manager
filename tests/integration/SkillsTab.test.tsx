@@ -261,7 +261,9 @@ describe("SkillsTab", () => {
 
   it("upgrades a skill's level through onUpdate, with a manual cost when it's not on any career table", async () => {
     const user = userEvent.setup();
-    const { onUpdate } = renderTab();
+    // Manual-cost entry is DM-only, see the "disables the manual-upgrade
+    // trigger for a non-DM player" test below for that gating itself.
+    const { onUpdate } = renderTab({ isDM: true });
     // No career/rank configured, so the next tier (+10) has no real cost — the
     // manual-cost upgrade path is what should appear.
     await user.click(screen.getAllByRole("button", { name: "Upgrade to +10 (type your own cost)" })[0]);
@@ -279,7 +281,7 @@ describe("SkillsTab", () => {
 
   it("accepts 0 as a valid manual upgrade cost, blocking only a blank field", async () => {
     const user = userEvent.setup();
-    const { onUpdate } = renderTab();
+    const { onUpdate } = renderTab({ isDM: true });
     await user.click(screen.getAllByRole("button", { name: "Upgrade to +10 (type your own cost)" })[0]);
 
     const confirmButton = screen.getByRole("button", { name: "Upgrade" });
@@ -292,6 +294,16 @@ describe("SkillsTab", () => {
     const next = onUpdate.mock.calls[0][0] as SkillEntry[];
     const updated = next.find((s) => s.id === "s1");
     expect(updated?.manualCosts?.["+10"]).toBe(0);
+  });
+
+  it("disables the manual-upgrade trigger for a non-DM player, since it's a DM-only purchase path", () => {
+    renderTab();
+    expect(screen.getAllByRole("button", { name: "Upgrade to +10 (type your own cost)" })[0]).toBeDisabled();
+  });
+
+  it("keeps the manual-upgrade trigger enabled for a DM", () => {
+    renderTab({ isDM: true });
+    expect(screen.getAllByRole("button", { name: "Upgrade to +10 (type your own cost)" })[0]).toBeEnabled();
   });
 
   it("upgrades using the real career cost when the next tier is actually unlocked, no manual cost stored", async () => {

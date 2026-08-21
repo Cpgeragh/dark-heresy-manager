@@ -22,6 +22,7 @@ interface SkillGroupRowProps {
   updateLevel: (id: string, level: SkillAdvanceLevel) => void;
   getNextTierAccess?: (skillId: string, level: SkillAdvanceLevel) => SkillTierAccess;
   onManualUpgrade?: (id: string, level: SkillAdvanceLevel, cost: number) => void;
+  isDM?: boolean;
 }
 
 export function SkillGroupRow({
@@ -31,6 +32,7 @@ export function SkillGroupRow({
   updateLevel,
   getNextTierAccess,
   onManualUpgrade,
+  isDM,
 }: SkillGroupRowProps) {
   const [expanded, setExpanded] = useState(false);
   const toggle = useCallback(() => setExpanded((p) => !p), []);
@@ -76,6 +78,7 @@ export function SkillGroupRow({
               updateLevel={updateLevel}
               nextTierAccess={getNextTierAccess?.(skill.id, skill.level)}
               onManualUpgrade={onManualUpgrade}
+              isDM={isDM}
             />
           ))}
         </div>

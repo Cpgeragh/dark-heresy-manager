@@ -23,6 +23,7 @@ import {
 import { uiPickerPressFeedback } from "../../../ui/buttonStyles";
 import { colourPurple, colourTeal, colourValue } from "../../../ui/colourTokens";
 import { sanitizeNonNegativeIntegerInput } from "../../../utils/formInput";
+import { canConfirmManualCostPurchase } from "../../../utils/dmGatedPurchase";
 
 interface SkillRowProps {
   skill: SkillWithComputed;
@@ -37,6 +38,7 @@ interface SkillRowProps {
   /** What buying this skill's next tier looks like right now. Owned rows only, not previewMode. */
   nextTierAccess?: SkillTierAccess;
   onManualUpgrade?: (id: string, level: SkillAdvanceLevel, cost: number) => void;
+  isDM?: boolean;
 }
 
 const LEVEL_BADGE: Record<string, string> = {
@@ -57,6 +59,7 @@ export function SkillRow({
   cost,
   nextTierAccess,
   onManualUpgrade,
+  isDM = false,
 }: SkillRowProps) {
   const [deleteArmed, setDeleteArmed] = useState(false);
   const [upgradeArmed, setUpgradeArmed] = useState(false);
@@ -162,7 +165,12 @@ export function SkillRow({
                   </Button>
                 )}
                 {nextTierAccess.status === "not-on-career" && (
-                  <Button size="xs" variant="ghost" onClick={() => setManualUpgradeArmed(true)}>
+                  <Button
+                    size="xs"
+                    variant="ghost"
+                    disabled={!canConfirmManualCostPurchase(isDM)}
+                    onClick={() => setManualUpgradeArmed(true)}
+                  >
                     Upgrade to {nextTierAccess.level} (type your own cost)
                   </Button>
                 )}
@@ -245,7 +253,12 @@ export function SkillRow({
                   </Button>
                 )}
                 {nextTierAccess.status === "not-on-career" && (
-                  <Button size="xs" variant="ghost" onClick={() => setManualUpgradeArmed(true)}>
+                  <Button
+                    size="xs"
+                    variant="ghost"
+                    disabled={!canConfirmManualCostPurchase(isDM)}
+                    onClick={() => setManualUpgradeArmed(true)}
+                  >
                     Upgrade to {nextTierAccess.level} (type your own cost)
                   </Button>
                 )}

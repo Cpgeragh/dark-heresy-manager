@@ -566,6 +566,7 @@ export default function CharacterSheet({
               talents={character.talentsAndTraits}
               career={character.header.career}
               rank={character.header.rank}
+              isDM={isDM}
             />
           )}
 

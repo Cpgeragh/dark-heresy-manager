@@ -37,6 +37,7 @@ interface SkillsTabProps {
   talents?: TalentsAndTraitsBlock;
   career?: string;
   rank?: string;
+  isDM?: boolean;
 }
 
 type DisplayItem =
@@ -84,7 +85,7 @@ function SkillTypeHeading({ type }: { type: SkillsView }) {
 }
 const SKILLS_TABS_ID = "skill-type";
 
-export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption, talents, career, rank }: SkillsTabProps) {
+export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption, talents, career, rank, isDM = false }: SkillsTabProps) {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isUntrainedBasicOpen, setIsUntrainedBasicOpen] = useState(false);
   // undefined (not an empty Map) when no career is set, so AddSkillModal knows
@@ -215,6 +216,7 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
           updateLevel={updateLevel}
           nextTierAccess={getNextTierAccess(item.skill.id, item.skill.level)}
           onManualUpgrade={handleManualUpgrade}
+          isDM={isDM}
         />
       ) : (
         <SkillGroupRow
@@ -225,6 +227,7 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
           updateLevel={updateLevel}
           getNextTierAccess={getNextTierAccess}
           onManualUpgrade={handleManualUpgrade}
+          isDM={isDM}
         />
       )
     );
