@@ -61,7 +61,7 @@ describe("Talent behaviour metadata", () => {
   });
 
   it.each([
-    ["peer", ["Academics", "Adeptus Arbites", "Adeptus Mechanicus", "Administratum", "Astropaths", "Ecclesiarchy", "Feral Worlders", "Government", "Hivers", "Inquisition", "Middle Classes", "Military", "Nobility", "The Insane", "Underworld", "Void Born", "Workers"]],
+    ["peer", ["Academics", "Adeptus Arbites", "Adeptus Mechanicus", "Administratum", "Astropaths", "Ecclesiarchy", "Feral Worlders", "Government", "Hivers", "Imperial Navy", "Inquisition", "Middle Classes", "Military", "Nobility", "The Insane", "Underworld", "Void Born", "Workers"]],
     ["good-reputation", ["Administratum", "Ecclesiarchy", "Imperial Guard", "Imperial Navy", "Inquisition", "Underworld"]],
     ["heightened-senses", ["Sight", "Sound", "Smell", "Taste", "Touch"]],
     ["mechadendrite-use", ["Gun", "Manipulator", "Medicae", "Optical", "Utility"]],
