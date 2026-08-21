@@ -321,6 +321,7 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
         onAdd={handleAdd}
         hideLevelChip
         unlockedCosts={unlockedSkillTrainingCosts}
+        isDM={isDM}
       />
       <AddSkillModal
         title="Untrained Basic Skills"
@@ -330,6 +331,7 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
         untrainedSkills={untrainedBasicSkills}
         onAdd={handleAdd}
         unlockedCosts={unlockedSkillTrainingCosts}
+        isDM={isDM}
       />
     </div>
   );

@@ -118,17 +118,21 @@ describe("AddSkillModal with a career-restricted list", () => {
     expect(onAdd).toHaveBeenCalledWith("s1");
   });
 
-  it("reveals every skill via the show-all toggle", async () => {
+  it("reveals every skill on a separate overflow screen, reached via Show all skills", async () => {
     const user = userEvent.setup();
-    setup({ untrainedSkills: twoSkills, unlockedCosts: new Map([["s1", 100]]) });
+    setup({ untrainedSkills: twoSkills, unlockedCosts: new Map([["s1", 100]]), isDM: true });
     expect(screen.queryByRole("button", { name: "Select Dodge" })).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Show all skills" }));
     expect(screen.getByRole("button", { name: "Select Dodge" })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Back" }));
+    expect(screen.queryByRole("button", { name: "Select Dodge" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Select Awareness" })).toBeInTheDocument();
   });
 
   it("selecting a skill with no known cost opens a manual cost entry step instead of calling onAdd directly", async () => {
     const user = userEvent.setup();
-    const { onAdd } = setup({ untrainedSkills: twoSkills, unlockedCosts: new Map([["s1", 100]]) });
+    const { onAdd } = setup({ untrainedSkills: twoSkills, unlockedCosts: new Map([["s1", 100]]), isDM: true });
     await user.click(screen.getByRole("button", { name: "Show all skills" }));
     await user.click(screen.getByRole("button", { name: "Select Dodge" }));
 
@@ -144,7 +148,7 @@ describe("AddSkillModal with a career-restricted list", () => {
 
   it("accepts 0 as a valid manual cost, blocking only a blank field", async () => {
     const user = userEvent.setup();
-    const { onAdd } = setup({ untrainedSkills: twoSkills, unlockedCosts: new Map([["s1", 100]]) });
+    const { onAdd } = setup({ untrainedSkills: twoSkills, unlockedCosts: new Map([["s1", 100]]), isDM: true });
     await user.click(screen.getByRole("button", { name: "Show all skills" }));
     await user.click(screen.getByRole("button", { name: "Select Dodge" }));
 
@@ -156,6 +160,56 @@ describe("AddSkillModal with a career-restricted list", () => {
     await user.click(confirmButton);
 
     expect(onAdd).toHaveBeenCalledWith("s2", 0);
+  });
+
+  it("shows a category's full skill list on the overflow screen, always going to manual entry even for a skill with a real known cost", async () => {
+    const user = userEvent.setup();
+    const tradeSkills: SkillWithComputed[] = [
+      { ...untrainedSkills[0], id: "trade-agri", name: "Trade (Agri)", category: "Trade", advanced: true },
+      { ...untrainedSkills[0], id: "trade-cook", name: "Trade (Cook)", category: "Trade", advanced: true },
+    ];
+    const { onAdd } = setup({
+      untrainedSkills: tradeSkills,
+      unlockedCosts: new Map([["trade-agri", 100]]),
+      isDM: true,
+    });
+
+    await user.click(screen.getByRole("button", { name: "Show all skills" }));
+    await user.click(screen.getByRole("button", { name: /Trade/ }));
+    expect(screen.getByRole("button", { name: "Select Trade (Agri)" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Select Trade (Cook)" })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Select Trade (Agri)" }));
+    expect(onAdd).not.toHaveBeenCalled();
+    expect(screen.getByRole("dialog", { name: "Train Trade (Agri)" })).toBeInTheDocument();
+  });
+
+  it("does not let a non-DM select a skill on the overflow screen, since manual-cost purchases are DM only", async () => {
+    const user = userEvent.setup();
+    const { onAdd } = setup({ untrainedSkills: twoSkills, unlockedCosts: new Map([["s1", 100]]) });
+    await user.click(screen.getByRole("button", { name: "Show all skills" }));
+    expect(screen.queryByRole("button", { name: "Select Dodge" })).not.toBeInTheDocument();
+    expect(onAdd).not.toHaveBeenCalled();
+  });
+
+  it("always opens manual cost entry from the overflow screen, even for a skill that also has a real known cost", async () => {
+    const user = userEvent.setup();
+    const { onAdd } = setup({ untrainedSkills: twoSkills, unlockedCosts: new Map([["s1", 100]]), isDM: true });
+    await user.click(screen.getByRole("button", { name: "Show all skills" }));
+    await user.click(screen.getByRole("button", { name: "Select Awareness" }));
+
+    expect(onAdd).not.toHaveBeenCalled();
+    expect(screen.getByRole("dialog", { name: "Train Awareness" })).toBeInTheDocument();
+  });
+
+  it("returns to the overflow screen, not the main list, when Back is pressed from manual cost entry reached that way", async () => {
+    const user = userEvent.setup();
+    setup({ untrainedSkills: twoSkills, unlockedCosts: new Map([["s1", 100]]), isDM: true });
+    await user.click(screen.getByRole("button", { name: "Show all skills" }));
+    await user.click(screen.getByRole("button", { name: "Select Dodge" }));
+    await user.click(screen.getByRole("button", { name: "Back" }));
+
+    expect(screen.getByRole("button", { name: "Select Dodge" })).toBeInTheDocument();
   });
 
   it("does not restrict or show cost chips when unlockedCosts isn't provided at all", () => {
