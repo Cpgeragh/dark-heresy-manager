@@ -593,7 +593,9 @@ export default function CharacterSheet({
               weaponTraining={character.weaponTraining}
               talents={character.talentsAndTraits}
               career={character.header.career}
+              rank={character.header.rank}
               editable={allowedToEdit}
+              isDM={isDM}
               onUpdate={handleUpdateWeaponTraining}
             />
           )}

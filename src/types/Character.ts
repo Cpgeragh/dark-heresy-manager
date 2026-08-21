@@ -599,7 +599,16 @@ export type WeaponTrainingTalentId =
 
 export interface WeaponTrainingBlock {
   trained: WeaponTrainingTalentId[];
-  exoticWeapons: string[]; // one entry per exotic weapon e.g. ["Needle Pistol"]
+  exoticWeapons: WeaponTrainingExoticEntry[];
+  /** DM-entered cost for a fixed group trained off the real career table. */
+  manualCosts?: Partial<Record<WeaponTrainingTalentId, number>>;
+}
+
+export interface WeaponTrainingExoticEntry {
+  name: string;
+  cost: number;
+  /** True if a DM granted this as a bonus, outside the character's unlocked slot count. */
+  bonus?: boolean;
 }
 
 /**
