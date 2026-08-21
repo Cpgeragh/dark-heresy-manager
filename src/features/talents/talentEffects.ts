@@ -20,6 +20,8 @@ export interface TalentModifierSource {
   name: string;
   type: "Talent" | "Trait";
   amount: number;
+  /** Qualitative effect description (e.g. "counts as Basic", "Trained"), shown instead of the amount when present. */
+  detail?: string;
 }
 
 export type TalentCharacteristicTotals = Partial<Record<keyof Characteristics, number>>;
@@ -206,7 +208,7 @@ export function getTalentSkillEffects(
 
   if (skill.level === "untrained" && getDerivedCareerSkillIds(career, talents.careerStartingChoices).includes(skill.id)) {
     effects.minimumLevel = "trained";
-    effects.sources.push({ name: `Career: ${career}`, type: "Talent", amount: 0 });
+    effects.sources.push({ name: `Career: ${career}`, type: "Talent", amount: 0, detail: `counts ${skill.name} as trained` });
   }
 
   for (const entry of activeEntriesFor(talents, "talented")) {
@@ -222,26 +224,26 @@ export function getTalentSkillEffects(
 
   if (skill.category === "Common Lore" && cultEntry(talents, "Political")) {
     effects.countsAsBasic = true;
-    effects.sources.push({ name: "Cult Briefing (Political): counts as Basic", type: "Talent", amount: 0 });
+    effects.sources.push({ name: "Cult Briefing (Political)", type: "Talent", amount: 0, detail: "counts as Basic" });
   }
 
   if (skill.id === "tech-use" && skill.level === "untrained" && cultEntry(talents, "Heretek")) {
     effects.minimumLevel = "trained";
-    effects.sources.push({ name: "Cult Briefing (Heretek): Trained", type: "Talent", amount: 0 });
+    effects.sources.push({ name: "Cult Briefing (Heretek)", type: "Talent", amount: 0, detail: `counts ${skill.name} as trained` });
   }
 
   if (skill.id === "medicae" && skill.level === "untrained" && cultEntry(talents, "Infestation")) {
     effects.minimumLevel = "trained";
-    effects.sources.push({ name: "Cult Briefing (Infestation): Trained", type: "Talent", amount: 0 });
+    effects.sources.push({ name: "Cult Briefing (Infestation)", type: "Talent", amount: 0, detail: `counts ${skill.name} as trained` });
   }
 
   if (skill.id === "deceive" && sicariusEntry(talents, "Adept")) {
     effects.characteristic = "int";
-    effects.sources.push({ name: "Sicarius Tutoring (Adept): uses Intelligence", type: "Talent", amount: 0 });
+    effects.sources.push({ name: "Sicarius Tutoring (Adept)", type: "Talent", amount: 0, detail: "uses Intelligence" });
   }
   if (skill.id === "inquiry" && sicariusEntry(talents, "Tech-Priest")) {
     effects.characteristic = "int";
-    effects.sources.push({ name: "Sicarius Tutoring (Tech-Priest): uses Intelligence", type: "Talent", amount: 0 });
+    effects.sources.push({ name: "Sicarius Tutoring (Tech-Priest)", type: "Talent", amount: 0, detail: "uses Intelligence" });
   }
   if (skill.id === "shadowing" && sicariusEntry(talents, "Arbitrator")) {
     effects.modifier += 10;
@@ -273,7 +275,8 @@ function virtualGrant(
   origin: TalentEntry,
   talentId: string,
   name: string,
-  specialisation?: string
+  specialisation?: string,
+  type: "Talent" | "Trait" = "Talent"
 ): TalentEntry {
   return {
     uid: `grant:${origin.uid}:${talentId}:${specialisation ?? ""}`,
@@ -282,6 +285,7 @@ function virtualGrant(
     ...(specialisation ? { specialisation } : {}),
     grantedByTalentEntryUid: origin.uid,
     grantedByTalentName: origin.name,
+    grantedByType: type,
   };
 }
 
@@ -319,7 +323,7 @@ export function getGrantedTalentEntries(talents: TalentsAndTraitsBlock, career?:
     }
   }
   for (const grant of getTraitGrantedTalentSpecs(talents)) {
-    grants.push(virtualGrant(grant.origin, grant.id, grant.name, grant.specialisation));
+    grants.push(virtualGrant(grant.origin, grant.id, grant.name, grant.specialisation, "Trait"));
   }
   for (const grant of getDerivedCareerTalentGrants(career, talents.careerStartingChoices)) {
     if (weaponTrainingIdFor(grant.talentId, grant.specialisation)) continue;
@@ -331,7 +335,8 @@ export function getGrantedTalentEntries(talents: TalentsAndTraitsBlock, career?:
       name: grant.specialisation ? `${name} (${grant.specialisation})` : name,
       ...(grant.specialisation ? { specialisation: grant.specialisation } : {}),
       grantedByTalentEntryUid: `career:${career}`,
-      grantedByTalentName: `Career: ${career}`,
+      grantedByTalentName: career,
+      grantedByType: "Career",
     });
   }
   return grants;
@@ -380,6 +385,7 @@ export function getGrantedTraitEntries(talents: TalentsAndTraitsBlock): TalentEn
         notes: `${trait.effectLabel}: ${trait.effect}`,
         grantedByTalentEntryUid: origin.uid,
         grantedByTalentName: `Cult Briefing (Culture: ${homeworld?.name})`,
+        grantedByType: "Talent",
       });
     }
   }

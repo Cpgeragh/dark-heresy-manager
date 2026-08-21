@@ -69,7 +69,13 @@ export function SkillRow({
   const levelBadgeClass = LEVEL_BADGE[skill.level] ?? "";
   const talentSourceSummary = skill.talentSources
     ?.map((source) =>
-      `${source.name}${source.amount !== 0 ? `: ${source.amount > 0 ? "+" : ""}${source.amount}` : ""}`
+      `${source.name} (${source.type})${
+        source.detail
+          ? `: ${source.detail}`
+          : source.amount !== 0
+            ? `: ${source.amount > 0 ? "+" : ""}${source.amount}`
+            : ""
+      }`
     )
     .join(" · ");
 
@@ -135,7 +141,7 @@ export function SkillRow({
             </div>
             {talentSourceSummary && (
               <p className="text-xs leading-snug text-amber-300">
-                Talent effect: {talentSourceSummary}
+                {talentSourceSummary}
               </p>
             )}
           </div>
@@ -144,12 +150,12 @@ export function SkillRow({
             {(skill.talentSources?.length ?? 0) > 0 && (
               <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
                 <InfoModal
-                  title={`${skill.name} Talent Adjustments`}
+                  title={`${skill.name} Adjustments`}
                   content={
                     <ul className="space-y-1 text-sm leading-relaxed text-slate-300 lg:text-base">
                       {skill.talentSources?.map((source, index) => (
                         <li key={index}>
-                          {source.name}{source.amount !== 0 ? `: ${source.amount > 0 ? "+" : ""}${source.amount}` : ""}
+                          {source.name} ({source.type}){source.detail ? `: ${source.detail}` : source.amount !== 0 ? `: ${source.amount > 0 ? "+" : ""}${source.amount}` : ""}
                         </li>
                       ))}
                     </ul>
@@ -161,7 +167,7 @@ export function SkillRow({
               <div className="relative z-20 pointer-events-auto">
                 {nextTierAccess.status === "unlocked" && (
                   <Button size="xs" onClick={() => setUpgradeArmed(true)}>
-                    Upgrade to {nextTierAccess.level} ({nextTierAccess.cost} XP)
+                    Upgrade to {nextTierAccess.level}
                   </Button>
                 )}
                 {nextTierAccess.status === "not-on-career" && (
@@ -171,7 +177,7 @@ export function SkillRow({
                     disabled={!canConfirmManualCostPurchase(isDM)}
                     onClick={() => setManualUpgradeArmed(true)}
                   >
-                    Upgrade to {nextTierAccess.level} (type your own cost)
+                    Upgrade to {nextTierAccess.level}
                   </Button>
                 )}
               </div>
@@ -223,7 +229,7 @@ export function SkillRow({
             </div>
             {talentSourceSummary && (
               <p className="text-xs leading-snug text-amber-300">
-                Talent effect: {talentSourceSummary}
+                {talentSourceSummary}
               </p>
             )}
           </div>
@@ -232,12 +238,12 @@ export function SkillRow({
             {(skill.talentSources?.length ?? 0) > 0 && (
               <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
                 <InfoModal
-                  title={`${skill.name} Talent Adjustments`}
+                  title={`${skill.name} Adjustments`}
                   content={
                     <ul className="space-y-1 text-sm leading-relaxed text-slate-300 lg:text-base">
                       {skill.talentSources?.map((source, index) => (
                         <li key={index}>
-                          {source.name}{source.amount !== 0 ? `: ${source.amount > 0 ? "+" : ""}${source.amount}` : ""}
+                          {source.name} ({source.type}){source.detail ? `: ${source.detail}` : source.amount !== 0 ? `: ${source.amount > 0 ? "+" : ""}${source.amount}` : ""}
                         </li>
                       ))}
                     </ul>
@@ -249,7 +255,7 @@ export function SkillRow({
               <div className="relative z-20 pointer-events-auto">
                 {nextTierAccess.status === "unlocked" && (
                   <Button size="xs" onClick={() => setUpgradeArmed(true)}>
-                    Upgrade to {nextTierAccess.level} ({nextTierAccess.cost} XP)
+                    Upgrade to {nextTierAccess.level}
                   </Button>
                 )}
                 {nextTierAccess.status === "not-on-career" && (
@@ -259,7 +265,7 @@ export function SkillRow({
                     disabled={!canConfirmManualCostPurchase(isDM)}
                     onClick={() => setManualUpgradeArmed(true)}
                   >
-                    Upgrade to {nextTierAccess.level} (type your own cost)
+                    Upgrade to {nextTierAccess.level}
                   </Button>
                 )}
               </div>

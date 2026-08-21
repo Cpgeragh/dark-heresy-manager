@@ -16,6 +16,8 @@ export interface TraitModifierSource {
   name: string;
   type: "Trait";
   amount: number;
+  /** Qualitative effect description (e.g. "counts as Basic", "Trained"), shown instead of the amount when present. */
+  detail?: string;
 }
 
 export interface TraitSkillEffects {
@@ -45,7 +47,8 @@ function homeworldEntries(
   homeworld: HomeworldData,
   choices: HomeworldTraitChoices | undefined,
   originUid: string,
-  originName: string
+  originName: string,
+  originType: "Homeworld" | "Talent"
 ): TalentEntry[] {
   return homeworld.traits.map((trait, index) => {
     const reference = traitReference(trait.name, homeworld.source);
@@ -56,6 +59,7 @@ function homeworldEntries(
       acquisition: { homeworldTraitChoices: choices },
       grantedByTalentEntryUid: originUid,
       grantedByTalentName: originName,
+      grantedByType: originType,
     };
   });
 }
@@ -71,7 +75,8 @@ export function getDerivedTraitEntries(
       selectedHomeworld,
       talents.homeworldTraitChoices,
       `homeworld:${selectedHomeworld.id}`,
-      `Homeworld: ${selectedHomeworld.name}`
+      selectedHomeworld.name,
+      "Homeworld"
     ));
   }
 
@@ -84,7 +89,8 @@ export function getDerivedTraitEntries(
       homeworld,
       origin.acquisition?.homeworldTraitChoices,
       `culture:${origin.uid}`,
-      `Cult Briefing (Culture: ${homeworld.name})`
+      `Cult Briefing (Culture: ${homeworld.name})`,
+      "Talent"
     ));
   }
 
@@ -98,6 +104,7 @@ export function getDerivedTraitEntries(
       specialisation: String(fleshRank),
       grantedByTalentEntryUid: origin.uid,
       grantedByTalentName: origin.name,
+      grantedByType: "Talent",
     });
   }
 
@@ -112,6 +119,7 @@ export function getDerivedTraitEntries(
       name: "Blind",
       grantedByTalentEntryUid: origin.uid,
       grantedByTalentName: "Soul-bound",
+      grantedByType: "Trait",
     });
   }
 
@@ -125,7 +133,8 @@ export function getDerivedTraitEntries(
         ? notesForSanctioning(talents.careerTraitAcquisition.sanctioning)
         : undefined,
       grantedByTalentEntryUid: "career:imperial-psyker",
-      grantedByTalentName: "Career: Imperial Psyker",
+      grantedByTalentName: "Imperial Psyker",
+      grantedByType: "Career",
     });
   }
   if (career === "Tech-Priest") {
@@ -134,7 +143,8 @@ export function getDerivedTraitEntries(
       talentId: "mechanicus-implants",
       name: "Mechanicus Implants",
       grantedByTalentEntryUid: "career:tech-priest",
-      grantedByTalentName: "Career: Tech-Priest",
+      grantedByTalentName: "Tech-Priest",
+      grantedByType: "Career",
     });
   }
   return grants;
@@ -242,13 +252,12 @@ export function getTraitSkillEffects(
   const effects: TraitSkillEffects = { modifier: 0, sources: [] };
   const entries = getActiveTraitEntries(talents, career);
   const applyBasic = (name: string) => {
-    if (skill.level !== "untrained") return;
     effects.countsAsBasic = true;
-    effects.sources.push({ name: `${name}: counts as Basic`, type: "Trait", amount: 0 });
+    effects.sources.push({ name, type: "Trait", amount: 0, detail: "counts as Basic" });
   };
   const applyTrained = (name: string) => {
     effects.minimumLevel = "trained";
-    effects.sources.push({ name: `${name}: Trained`, type: "Trait", amount: 0 });
+    effects.sources.push({ name, type: "Trait", amount: 0, detail: `counts ${skill.name} as trained` });
   };
   const applyModifier = (name: string, amount: number) => {
     effects.modifier += amount;
@@ -456,7 +465,8 @@ export function getTraitGrantedTalentSpecs(
         name: "Sanctioned Psyker",
         acquisition: { trait: talents.careerTraitAcquisition },
         grantedByTalentEntryUid: "career:imperial-psyker",
-        grantedByTalentName: "Career: Imperial Psyker",
+        grantedByTalentName: "Imperial Psyker",
+        grantedByType: "Career",
       },
     });
   }

@@ -145,8 +145,8 @@ describe("Talent cross-page effects", () => {
     );
     expect(untrainedTechUse.minimumLevel).toBe("trained");
     expect(untrainedTechUse.sources).toEqual(expect.arrayContaining([
-      expect.objectContaining({ name: "Cult Briefing (Heretek): Trained" }),
-      expect.objectContaining({ name: "Caves of Steel: counts as Basic" }),
+      expect.objectContaining({ name: "Cult Briefing (Heretek)", detail: "counts Tech-Use as trained" }),
+      expect.objectContaining({ name: "Caves of Steel", detail: "counts as Basic" }),
     ]));
 
     for (const level of ["trained", "+10", "+20"] as const) {
@@ -155,7 +155,12 @@ describe("Talent cross-page effects", () => {
         skill({ id: "tech-use", name: "Tech-Use", advanced: true, level })
       );
       expect(trainedTechUse.minimumLevel).toBeUndefined();
-      expect(trainedTechUse.sources).toEqual([]);
+      // Caves of Steel's Basic reclassification is permanent (matches the real rule), so it
+      // keeps contributing once trained; Cult Briefing (Heretek)'s own trained-forcing effect
+      // correctly stops, it has its own separate untrained-only condition.
+      expect(trainedTechUse.sources).toEqual([
+        expect.objectContaining({ name: "Caves of Steel", detail: "counts as Basic" }),
+      ]);
     }
 
     const untrainedMedicae = getTalentSkillEffects(
@@ -164,7 +169,7 @@ describe("Talent cross-page effects", () => {
     );
     expect(untrainedMedicae.minimumLevel).toBe("trained");
     expect(untrainedMedicae.sources).toEqual([
-      expect.objectContaining({ name: "Cult Briefing (Infestation): Trained" }),
+      expect.objectContaining({ name: "Cult Briefing (Infestation)", detail: "counts Medicae as trained" }),
     ]);
     expect(
       getTalentSkillEffects(
@@ -192,6 +197,21 @@ describe("Talent cross-page effects", () => {
     expect(getMachineArmourSource(talents)?.amount).toBe(2);
     expect(getGrantedWeaponTrainingIds(talents)).toEqual(["melee-chain"]);
     expect(getGrantedExoticWeapons(talents)).toEqual(["Needle Pistol"]);
+  });
+
+  it("tags a Trait-sourced grant as Trait, not Talent (Chem Geld via Sanctioned Psyker's Throne-Wed result)", () => {
+    const talents: TalentsAndTraitsBlock = {
+      homeworld: "hive-world",
+      talents: [],
+      traits: [
+        entry("sp", "sanctioned-psyker", "Sanctioned Psyker", undefined, {
+          trait: { sanctioning: { resultId: "throne-wed", resultName: "Throne-Wed" } },
+        }),
+      ],
+    };
+    const chemGeld = getGrantedTalentEntries(talents).find((grant) => grant.talentId === "chem-geld");
+    expect(chemGeld?.grantedByTalentName).toBe("Sanctioned Psyker");
+    expect(chemGeld?.grantedByType).toBe("Trait");
   });
 
   it("hides a manually-added duplicate once the same talent is granted independently", () => {

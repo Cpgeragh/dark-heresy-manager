@@ -266,7 +266,7 @@ describe("SkillsTab", () => {
     const { onUpdate } = renderTab({ isDM: true });
     // No career/rank configured, so the next tier (+10) has no real cost — the
     // manual-cost upgrade path is what should appear.
-    await user.click(screen.getAllByRole("button", { name: "Upgrade to +10 (type your own cost)" })[0]);
+    await user.click(screen.getAllByRole("button", { name: "Upgrade to +10" })[0]);
 
     const costInput = screen.getByRole("textbox");
     await user.type(costInput, "150");
@@ -282,7 +282,7 @@ describe("SkillsTab", () => {
   it("accepts 0 as a valid manual upgrade cost, blocking only a blank field", async () => {
     const user = userEvent.setup();
     const { onUpdate } = renderTab({ isDM: true });
-    await user.click(screen.getAllByRole("button", { name: "Upgrade to +10 (type your own cost)" })[0]);
+    await user.click(screen.getAllByRole("button", { name: "Upgrade to +10" })[0]);
 
     const confirmButton = screen.getByRole("button", { name: "Upgrade" });
     expect(confirmButton).toBeDisabled();
@@ -298,12 +298,12 @@ describe("SkillsTab", () => {
 
   it("disables the manual-upgrade trigger for a non-DM player, since it's a DM-only purchase path", () => {
     renderTab();
-    expect(screen.getAllByRole("button", { name: "Upgrade to +10 (type your own cost)" })[0]).toBeDisabled();
+    expect(screen.getAllByRole("button", { name: "Upgrade to +10" })[0]).toBeDisabled();
   });
 
   it("keeps the manual-upgrade trigger enabled for a DM", () => {
     renderTab({ isDM: true });
-    expect(screen.getAllByRole("button", { name: "Upgrade to +10 (type your own cost)" })[0]).toBeEnabled();
+    expect(screen.getAllByRole("button", { name: "Upgrade to +10" })[0]).toBeEnabled();
   });
 
   it("upgrades using the real career cost when the next tier is actually unlocked, no manual cost stored", async () => {
@@ -315,7 +315,7 @@ describe("SkillsTab", () => {
       rank: "Scout",
       skills: [skill({ id: "awareness" })],
     });
-    await user.click(screen.getAllByRole("button", { name: "Upgrade to +10 (100 XP)" })[0]);
+    await user.click(screen.getAllByRole("button", { name: "Upgrade to +10" })[0]);
     await user.click(screen.getByRole("button", { name: "Upgrade" }));
 
     expect(onUpdate).toHaveBeenCalledTimes(1);
@@ -356,14 +356,16 @@ describe("SkillsTab", () => {
     expect(screen.getAllByText("40").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Tech-Use").length).toBeGreaterThan(0);
     expect(
-      screen.getAllByText("Talent effect: Cult Briefing (Heretek): Trained").length
+      screen.getAllByText("Cult Briefing (Heretek) (Talent): counts Tech-Use as trained").length
     ).toBeGreaterThan(0);
     expect(
-      screen.getAllByText("Talent effect: Talented (Awareness): +10").length
+      screen.getAllByText("Talented (Awareness) (Talent): +10").length
     ).toBeGreaterThan(0);
     expect(screen.queryByRole("button", { name: "Delete Tech-Use" })).not.toBeInTheDocument();
-    await user.click(screen.getAllByRole("button", { name: "Show information about Awareness Talent Adjustments" })[0]);
-    expect(screen.getByText("Talented (Awareness): +10")).toBeInTheDocument();
+    await user.click(screen.getAllByRole("button", { name: "Show information about Awareness Adjustments" })[0]);
+    expect(
+      within(screen.getByRole("dialog", { name: "Awareness Adjustments" })).getByText("Talented (Awareness) (Talent): +10")
+    ).toBeInTheDocument();
   });
 
   it("hides redundant Cult Briefing training until it actually supplies the Skill", async () => {
@@ -390,14 +392,14 @@ describe("SkillsTab", () => {
       />
     );
 
-    expect(screen.queryByText(/Talent effect: Cult Briefing \(Heretek\): Trained/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Cult Briefing \(Heretek\) \(Talent\): Trained/)).not.toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: "Delete Tech-Use" }).length).toBeGreaterThan(0);
 
     await user.click(screen.getAllByRole("button", { name: "Delete Tech-Use" })[0]);
     await user.click(screen.getByRole("button", { name: "Delete" }));
 
     expect(
-      screen.getAllByText("Talent effect: Cult Briefing (Heretek): Trained").length
+      screen.getAllByText("Cult Briefing (Heretek) (Talent): counts Tech-Use as trained").length
     ).toBeGreaterThan(0);
     expect(screen.queryByRole("button", { name: "Delete Tech-Use" })).not.toBeInTheDocument();
   });
