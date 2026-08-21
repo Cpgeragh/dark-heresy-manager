@@ -1,6 +1,6 @@
 # Manual Test Checklist — Complete App
 
-Thirty pages and cross-cutting sections, containing 208 checks. Every item
+Thirty pages and cross-cutting sections, containing 524 checks. Every item
 comes from reading the actual logic, not a generic "does it load" pass.
 Check items off as you verify them; anything under **Watch for** is the
 likeliest place a real bug hides. Coverage notes are at the bottom — read
@@ -355,14 +355,46 @@ below deliberately change several of those pages.
 
 ## 7. Weapon Training
 
-Weapon-group training toggles plus a free-text Exotic Weapon list.
+Weapon-group training pills across five fixed categories (Basic, Heavy, Melee, Pistol, Thrown), plus a slot-limited Exotic Weapon Training list. Every purchase spends real XP from the character's career/rank cost tables, the same way Characteristics, Skills, Talents, and Traits already do.
 
 ### How to test this page
 
-Record the initial state, toggle several non-adjacent groups in a recognisable pattern, navigate away, and refresh. Add two distinct Exotic Weapon names, try blank/whitespace and duplicate names, remove one, and confirm the other and all toggles are unchanged.
+Use a character with a career/rank that has real cost data (e.g. Guardsman) and test as both the owning player and as DM — several paths here are DM-only. Record spent XP before starting, train a pill and add an exotic weapon, refresh, and confirm both the pill/chip state and the XP total persist. Then remove each and confirm XP falls back down by the exact amount it cost. Find at least one pill that's on the career's table but not yet unlocked at the current rank (or not on the table at all) to test the Locked path as both a player and a DM.
 
-- [ ] Each weapon group toggles on/off independently and persists after leaving the tab
-- [ ] Adding and removing a custom Exotic Weapon entry works and doesn't affect the toggle list
+**Fixed weapon groups:**
+
+- [ ] An Unlocked pill (real cost exists for this career/rank, not yet owned) pulses with a coloured glow matching its group's hue, and shows hover feedback
+- [ ] Tapping an Unlocked pill opens "Train [group] ([weapon]) for [cost] XP?" with Train/Cancel; Cancel changes nothing
+- [ ] Confirming Train makes the pill Owned (solid-fill colour, no glow) and increases spent XP by exactly that cost
+- [ ] An Owned, non-granted pill is clickable and shows the same hover feedback as an Unlocked one; tapping it opens "Remove [group] ([weapon])?" with Remove/Cancel
+- [ ] Confirming Remove drops the pill back to Locked or Unlocked (whichever is correct for this rank) and spent XP falls by the same amount it cost; Cancel changes nothing
+- [ ] A Locked pill (not on this career's table, or not yet reached at this rank) is disabled for a player — no hover, no click, cursor shows not-allowed
+- [ ] As DM, that same Locked pill is clickable and opens "XP Cost to train [group] ([weapon])" with a blank numeric field, a Train button disabled until a value is entered, and 0 accepted as a valid cost
+- [ ] A DM's manually-costed purchase records the exact entered cost against spent XP, not a table cost
+- [ ] A pill granted by a Talent, Trait, or Career effect shows Owned styling but is always disabled (no hover, no click), and the group shows a caption below it: "Granted by a Talent, Trait, or Career effect: [weapon, weapon, ...]" listing every granted weapon in that group by name
+- [ ] Changing Career or Rank updates which pills are Unlocked vs Locked live, without needing a refresh
+- [ ] On a phone-width viewport, pills wrap onto multiple lines within their group without clipping or overlapping
+
+**Exotic Weapon Training:**
+
+- [ ] Owned exotic weapons show as solid-fill chips with just the weapon name — no cost shown on the chip itself
+- [ ] Tapping an owned exotic chip opens "Remove [name]?" with Remove/Cancel; confirming removes it and drops spent XP by that weapon's recorded cost
+- [ ] In read-only mode, owned exotic chips are disabled — no hover, no click
+- [ ] A weapon granted by a Talent (e.g. Sicarius Tutoring) shows the same solid-fill chip style but is always disabled and not independently removable
+- [ ] A blank, dashed-border trigger chip always sits at the end of the row — it's never hidden, only ever enabled or disabled
+- [ ] For a player with an available training slot, the trigger pulses; tapping it opens the add form directly (Weapon Name and XP Cost, both required before Add enables) and adding it consumes one slot
+- [ ] For a player with no available slot, the trigger has no pulse, no hover, and cannot be tapped
+- [ ] For a DM with an available slot, tapping the (still pulsing) trigger opens a choice screen: "Use an available training slot" or "Add as a bonus (doesn't use a slot)"
+- [ ] For a DM with no available slot, the trigger stays enabled (no pulse) and tapping it skips straight to the add form in bonus mode
+- [ ] Completing a bonus-mode addition does not count against the slot limit — confirm adding one doesn't reduce the count of slots still available afterwards
+- [ ] The number of available slots comes from the career/rank table's Exotic Weapon Training entries, the same source used for the fixed groups' costs, and updates live if Career or Rank changes
+
+**Watch for:** the granted-exotic caption is still hardcoded to read "Granted by
+Sicarius Tutoring (Guardsman)" rather than naming whatever Talent/specialisation
+actually granted it, unlike the fixed groups' generic wording above. This is
+accurate today because Sicarius Tutoring is the only real source of a granted
+Exotic Weapon — it's a known gap, not a new bug, so don't file it as one unless
+a second granting source has been added since this was written.
 
 ## 8. Traits
 
@@ -644,24 +676,30 @@ Add and remove a reference drug, then create a uniquely named custom drug. In th
 
 ## 16. Experience
 
-XP total, spend history, and the player-proposal / DM-approval workflow.
+Total/Spent/Remaining XP summary, plus a DM-only manual advance ledger for advances that don't come from a structured page.
 
 ### How to test this page
 
-Use two signed-in profiles: the owning player on Experience and the DM on Admin. Record Total, itemised advances, `spent`, and Remaining XP before each operation. Submit one proposal for approval and another for rejection; refresh both profiles after resolution. Then reproduce the exact approve-then-manual-advance sequence in **Watch for** and compare the arithmetic line by line.
+Use two profiles: the owning player and the DM. Spent XP is fully derived, not something either role enters directly — it's the sum of every real purchase made on Characteristics, Skills, Talents, Traits, and Weapon Training, plus whatever the DM has added manually here. Record Total/Spent/Remaining, then make and undo a purchase on one of those other pages without touching this one, returning here each time to confirm the numbers moved correctly.
 
-- [ ] Remaining XP = Total − the sum of every advance's cost across every rank, recalculated correctly as advances are added
-- [ ] As a player: submit a spend proposal, confirm it shows as Pending
-- [ ] History toggle reveals previously resolved proposals without losing the pending ones
+- [ ] Total XP is editable only as DM (plain number input); a player sees the same figure as read-only text
+- [ ] Spent XP has no input anywhere on this page — it's always a plain read-only number
+- [ ] Remaining XP = Total − Spent, recalculated live whenever either changes
+- [ ] Remaining XP turns red when it goes negative (Spent exceeds Total)
+- [ ] Buy something on Characteristics, Skills, Talents, Traits, or Weapon Training, then return here without refreshing — Spent and Remaining both move to reflect it immediately
+- [ ] Undo that same purchase on its own page — Spent and Remaining move back by the exact opposite amount
+- [ ] Refresh after purchases across several different pages — Total/Spent/Remaining still agree with what's actually owned
+- [ ] As DM, add a manual advance (Rank, Advance Name, XP Cost, optional Notes) — it appears under the correct Rank heading and Spent increases by its cost
+- [ ] Add stays disabled until both Advance Name and a positive XP Cost are entered
+- [ ] As DM, remove a manual advance — it disappears and Spent falls by its cost
+- [ ] A player sees no Add Advance form and no Remove control on any advance — the entire Purchased Advances list is read-only for them
+- [ ] With no manual advances, "No advances purchased yet." shows in place of the Rank list; making a structured purchase elsewhere does **not** add an entry here — this list only ever holds the DM's own manual entries, it is not an itemised history of every purchase on the character
 
-**Watch for:** approving a proposal (on Admin) increments `experience.spent`
-directly; adding or removing a manual advance recalculates `experience.spent`
-from the sum of every itemised advance plus every already-approved
-proposal's cost. These are two different write paths to the same field, so
-test the interaction directly: approve a proposal, note the new Remaining
-XP, then add or remove any manual advance. Remaining XP should stay
-consistent throughout and never jump backward as though the approved
-proposal had never happened. Test that exact sequence, in that order.
+**Watch for:** there is no player-submitted proposal or DM-approval workflow
+on this page any more — that system was removed earlier in the XP rework. If
+anything in the app still references submitting a spend for approval, or a
+Pending/History toggle here, that's a leftover pointing at the old system,
+not current behaviour, and is worth flagging on its own.
 
 ## 17. Notes
 
