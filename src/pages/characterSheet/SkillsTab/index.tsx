@@ -204,6 +204,16 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
         }
       }
 
+      const returnsToUnpaidGrantedTraining =
+        level === "trained" &&
+        displayed?.talentMinimumLevel === "trained" &&
+        !xpPurchases.trained &&
+        manualCosts.trained === undefined;
+      if (returnsToUnpaidGrantedTraining) {
+        onUpdate(skills.filter((skill) => skill.id !== id));
+        return;
+      }
+
       const updated: SkillEntry = {
         ...definition,
         ...owned,

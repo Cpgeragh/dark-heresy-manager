@@ -164,10 +164,10 @@ describe("Talent cross-page effects", () => {
         heretek,
         skill({ id: "tech-use", name: "Tech-Use", advanced: true, level })
       );
-      expect(trainedTechUse.minimumLevel).toBeUndefined();
-      // Caves of Steel's Basic reclassification is permanent (matches the real rule), so it
-      // keeps contributing once trained; Cult Briefing (Heretek)'s own trained-forcing effect
-      // correctly stops, it has its own separate untrained-only condition.
+      // The minimum remains available internally so owned-only Skill storage can recognise
+      // that a downgrade has returned to free granted training. Its redundant display source
+      // remains hidden once the saved Skill is already trained.
+      expect(trainedTechUse.minimumLevel).toBe("trained");
       expect(trainedTechUse.sources).toEqual([
         expect.objectContaining({ name: "Caves of Steel", type: "Homeworld", detail: "counts Tech-Use as Basic" }),
       ]);

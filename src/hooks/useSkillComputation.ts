@@ -87,11 +87,13 @@ export function useSkillComputation({
           level: effectiveLevel,
           baseLevel: s.level,
           total,
+          ...(effects?.minimumLevel
+            ? { talentMinimumLevel: effects.minimumLevel }
+            : {}),
           ...(effects && effects.sources.length > 0
             ? {
                 talentAdjustment: effects.modifier,
                 talentSources: effects.sources,
-                talentMinimumLevel: effects.minimumLevel,
               }
             : {}),
         };

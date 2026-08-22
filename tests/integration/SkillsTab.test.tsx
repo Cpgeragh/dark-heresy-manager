@@ -71,6 +71,13 @@ const HAGIOGRAPHY = {
   traits: [],
 };
 
+const GUARDSMAN_DRIVE_GRANT = {
+  homeworld: "",
+  talents: [],
+  traits: [],
+  careerStartingChoices: { skillChoices: { 1: 0 } },
+};
+
 const COMMON_LORE = [
   skill({
     id: "common-imperial-creed",
@@ -600,6 +607,114 @@ describe("SkillsTab", () => {
     expect(
       within(awarenessInfo).getByText("Talented (Awareness) (Talent): +10")
     ).toBeInTheDocument();
+  });
+
+  it("derives a Career-granted Skill from the catalogue without saving or duplicating it", () => {
+    renderTab({
+      skills: [],
+      career: "Guardsman",
+      rank: "Scout",
+      talents: GUARDSMAN_DRIVE_GRANT,
+    });
+
+    // The mobile and desktop layouts coexist in the DOM, with one card in each.
+    expect(screen.getAllByText("Drive (Ground Vehicle)")).toHaveLength(2);
+    expect(
+      screen.getAllByText(
+        "Career: Guardsman (Career): counts Drive (Ground Vehicle) as trained"
+      )
+    ).toHaveLength(2);
+    expect(
+      screen.queryByRole("button", { name: "Delete Drive (Ground Vehicle)" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("derives Trait-granted training from the catalogue without creating owned progress", async () => {
+    const user = userEvent.setup();
+    renderTab({
+      skills: [],
+      talents: {
+        homeworld: "",
+        talents: [],
+        traits: [
+          {
+            uid: "blank-slate",
+            talentId: "blank-slate",
+            name: "Blank Slate",
+            acquisition: { trait: { blankSlateSkillIds: ["common-war"] } },
+          },
+        ],
+      },
+    });
+
+    await user.click(screen.getAllByRole("button", { name: /Common Lore/ })[0]);
+    expect(screen.getAllByText("Common Lore (War)").length).toBeGreaterThan(0);
+    expect(
+      screen.getAllByText("Blank Slate (Trait): counts Common Lore (War) as trained").length
+    ).toBeGreaterThan(0);
+    expect(
+      screen.queryByRole("button", { name: "Delete Common Lore (War)" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("stores only the paid +10 tier when upgrading a free Career-granted Skill", async () => {
+    const user = userEvent.setup();
+    const { onUpdate } = renderTab({
+      skills: [],
+      career: "Guardsman",
+      rank: "Scout",
+      talents: GUARDSMAN_DRIVE_GRANT,
+    });
+
+    await user.click(screen.getAllByRole("button", { name: "Upgrade to +10" })[0]);
+    await user.click(screen.getByRole("button", { name: "Upgrade" }));
+
+    const next = onUpdate.mock.calls[0][0] as SkillEntry[];
+    expect(next).toHaveLength(1);
+    expect(next[0]).toMatchObject({
+      id: "drive-ground",
+      level: "+10",
+      xpPurchases: {
+        "+10": {
+          cost: 100,
+          careerId: "guardsman",
+          sourceRankId: "guard",
+        },
+      },
+    });
+    expect(next[0].xpPurchases?.trained).toBeUndefined();
+  });
+
+  it("removes owned progress when downgrading to free granted training", async () => {
+    const user = userEvent.setup();
+    const { onUpdate } = renderTab({
+      skills: [
+        skill({
+          id: "drive-ground",
+          name: "Drive (Ground Vehicle)",
+          characteristic: "ag",
+          advanced: true,
+          level: "+10",
+          xpPurchases: {
+            "+10": { cost: 100, careerId: "guardsman", sourceRankId: "guard" },
+          },
+        }),
+      ],
+      career: "Guardsman",
+      rank: "Scout",
+      talents: GUARDSMAN_DRIVE_GRANT,
+    });
+
+    await user.click(
+      screen.getAllByRole("button", { name: "Delete Drive (Ground Vehicle)" })[0]
+    );
+    await user.click(
+      within(screen.getByRole("dialog", { name: "Manage Skill" })).getByRole("button", {
+        name: "Downgrade to Trained",
+      })
+    );
+
+    expect(onUpdate).toHaveBeenCalledWith([]);
   });
 
   it("hides redundant Cult Briefing training until it actually supplies the Skill", async () => {

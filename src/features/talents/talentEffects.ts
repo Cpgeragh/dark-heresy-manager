@@ -206,9 +206,11 @@ export function getTalentSkillEffects(
 ): TalentSkillEffects {
   const effects: TalentSkillEffects = { modifier: 0, sources: [] };
 
-  if (skill.level === "untrained" && getDerivedCareerSkillIds(career, talents.careerStartingChoices).includes(skill.id)) {
+  if (getDerivedCareerSkillIds(career, talents.careerStartingChoices).includes(skill.id)) {
     effects.minimumLevel = "trained";
-    effects.sources.push({ name: `Career: ${career}`, type: "Talent", amount: 0, detail: `counts ${skill.name} as trained` });
+    if (skill.level === "untrained") {
+      effects.sources.push({ name: `Career: ${career}`, type: "Career", amount: 0, detail: `counts ${skill.name} as trained` });
+    }
   }
 
   for (const entry of activeEntriesFor(talents, "talented")) {
@@ -227,14 +229,18 @@ export function getTalentSkillEffects(
     effects.sources.push({ name: "Cult Briefing (Political)", type: "Talent", amount: 0, detail: `counts ${skill.name} as Basic` });
   }
 
-  if (skill.id === "tech-use" && skill.level === "untrained" && cultEntry(talents, "Heretek")) {
+  if (skill.id === "tech-use" && cultEntry(talents, "Heretek")) {
     effects.minimumLevel = "trained";
-    effects.sources.push({ name: "Cult Briefing (Heretek)", type: "Talent", amount: 0, detail: `counts ${skill.name} as trained` });
+    if (skill.level === "untrained") {
+      effects.sources.push({ name: "Cult Briefing (Heretek)", type: "Talent", amount: 0, detail: `counts ${skill.name} as trained` });
+    }
   }
 
-  if (skill.id === "medicae" && skill.level === "untrained" && cultEntry(talents, "Infestation")) {
+  if (skill.id === "medicae" && cultEntry(talents, "Infestation")) {
     effects.minimumLevel = "trained";
-    effects.sources.push({ name: "Cult Briefing (Infestation)", type: "Talent", amount: 0, detail: `counts ${skill.name} as trained` });
+    if (skill.level === "untrained") {
+      effects.sources.push({ name: "Cult Briefing (Infestation)", type: "Talent", amount: 0, detail: `counts ${skill.name} as trained` });
+    }
   }
 
   if (skill.id === "deceive" && sicariusEntry(talents, "Adept")) {
