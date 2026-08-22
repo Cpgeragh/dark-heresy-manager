@@ -1,6 +1,6 @@
 // Shared picker and card components used by TalentsTab and TraitsTab.
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { TalentEntry } from "../../types/Character";
 import type { TalentData } from "../../data/talentData";
 import type { TraitData } from "../../data/traitData";
@@ -91,7 +91,11 @@ export function TalentPickerModal({
   const [specialisation, setSpecialisation] = useState("");
   const [showChoicePicker, setShowChoicePicker] = useState(false);
   const [detailChoice, setDetailChoice] = useState<DetailChoice>(null);
-  const [pendingManualCost, setPendingManualCost] = useState<{ talent: AnyListItem; specialisation?: string } | null>(null);
+  const [pendingManualCost, setPendingManualCost] = useState<{
+    talent: AnyListItem;
+    specialisation?: string;
+    returnToChoicePicker?: boolean;
+  } | null>(null);
   const [manualCostInput, setManualCostInput] = useState("");
   const listScrollPositionRef = useRef(0);
   const detailScrollPositionRef = useRef(0);
@@ -188,15 +192,26 @@ export function TalentPickerModal({
             .filter((option) => showOverflow || option.cost !== undefined);
         })()
       : (() => {
-          const base = (traitData?.specialisationOptions ?? []).map((option) => {
+          if (!traitData) return [];
+          const atPurchaseLimit =
+            (!traitData.repeatable && ownedForPicked.length > 0) ||
+            (traitData.maxPurchases !== undefined && ownedForPicked.length >= traitData.maxPurchases);
+          if (atPurchaseLimit) return [];
+          const base = (traitData.specialisationOptions ?? [])
+            .filter((option) => {
+              if (traitData.repeatableSpecialisation) return true;
+              const value = typeof option === "string" ? option : option.value;
+              return !hasTalentChoice(ownedForPicked, value);
+            })
+            .map((option) => {
             const value = typeof option === "string" ? option : option.value;
             const label = typeof option === "string" ? option : option.label;
-            if (!traitData?.repeatableSpecialisation) return option;
+            if (!traitData.repeatableSpecialisation) return option;
             const ownedCount = ownedForPicked.filter(
               (entry) => entry.specialisation?.trim().toLocaleLowerCase() === value.toLocaleLowerCase()
             ).length;
             return { value, label, ownedCount };
-          });
+            });
           if (!career) return base;
           return base
             .map((option) => {
@@ -241,26 +256,56 @@ export function TalentPickerModal({
     setShowChoicePicker(false);
   };
 
-  const attemptOverflowAdd = (item: AnyListItem, itemSpecialisation?: string) => {
-    setPendingManualCost({ talent: item, specialisation: itemSpecialisation });
+  useEffect(() => {
+    if (!showChoicePicker || !picked || choiceOptions.length > 0) return;
+    resetPicked();
+  }, [choiceOptions.length, picked, showChoicePicker]);
+
+  const returnToChoicePicker = () => {
+    setSpecialisation("");
+    setDetailChoice(null);
+    setShowChoicePicker(true);
+  };
+
+  const attemptOverflowAdd = (
+    item: AnyListItem,
+    itemSpecialisation?: string,
+    shouldReturnToChoicePicker = false
+  ) => {
+    setPendingManualCost({
+      talent: item,
+      specialisation: itemSpecialisation,
+      returnToChoicePicker: shouldReturnToChoicePicker,
+    });
     setManualCostInput("");
   };
 
-  const attemptRealAdd = (item: AnyListItem, itemSpecialisation?: string) => {
+  const attemptRealAdd = (
+    item: AnyListItem,
+    itemSpecialisation?: string,
+    shouldReturnToChoicePicker = false
+  ) => {
     if (!career) {
       onAdd(makeTalentEntry(item as TalentData, itemSpecialisation));
-      resetPicked();
+      if (shouldReturnToChoicePicker) returnToChoicePicker();
+      else resetPicked();
       return;
     }
     const cost = getNextTalentCost(career, rank, item.id, itemSpecialisation, entries);
     if (cost === undefined) return;
     onAdd(makeTalentEntry(item as TalentData, itemSpecialisation));
-    resetPicked();
+    if (shouldReturnToChoicePicker) returnToChoicePicker();
+    else resetPicked();
   };
 
   const handleSpecAdd = () => {
     if (!talentData || !canAdd) return;
-    (showOverflow ? attemptOverflowAdd : attemptRealAdd)(talentData, composedSpecialisation);
+    const shouldReturnToChoicePicker = behaviour?.kind === "hybrid" && detailChoice !== null;
+    (showOverflow ? attemptOverflowAdd : attemptRealAdd)(
+      talentData,
+      composedSpecialisation,
+      shouldReturnToChoicePicker
+    );
   };
 
   const handleChoiceSelect = (value: string) => {
@@ -270,7 +315,7 @@ export function TalentPickerModal({
       const option = behaviour.options.find((entry) => entry.label === value);
       if (!option) return;
       if ("value" in option) {
-        add(talentData, option.value);
+        add(talentData, option.value, true);
         return;
       }
       setDetailChoice({
@@ -281,7 +326,7 @@ export function TalentPickerModal({
       setShowChoicePicker(false);
       return;
     }
-    add(talentData, value);
+    add(talentData, value, true);
   };
 
   if (pendingManualCost) {
@@ -302,9 +347,11 @@ export function TalentPickerModal({
             className="w-full"
             disabled={!canConfirm}
             onClick={() => {
+              const shouldReturnToChoicePicker = pendingManualCost.returnToChoicePicker === true;
               onAdd(makeTalentEntry(pendingManualCost.talent as TalentData, pendingManualCost.specialisation, cost));
               setPendingManualCost(null);
-              resetPicked();
+              if (shouldReturnToChoicePicker) returnToChoicePicker();
+              else resetPicked();
             }}
           >
             Buy {pendingManualCost.talent.name}

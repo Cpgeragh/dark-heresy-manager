@@ -261,6 +261,24 @@ describe("TalentsTab", () => {
     );
   });
 
+  it("keeps a fixed-choice Talent screen open until its final choice is added", async () => {
+    const user = userEvent.setup();
+    render(<StatefulTalentsTab />);
+    await user.click(screen.getAllByRole("button", { name: "Add Talent" })[0]);
+    await user.click(screen.getByText("Resistance"));
+
+    let dialog = screen.getByRole("dialog", { name: "Choice" });
+    await user.click(within(dialog).getByText("Cold"));
+
+    dialog = screen.getByRole("dialog", { name: "Choice" });
+    expect(within(dialog).queryByText("Cold")).not.toBeInTheDocument();
+    expect(within(dialog).getByText("Fear")).toBeInTheDocument();
+    await user.click(within(dialog).getByText("Fear"));
+
+    expect(await screen.findByRole("dialog", { name: "Add Talent" })).toBeInTheDocument();
+    expect(screen.queryByRole("dialog", { name: "Choice" })).not.toBeInTheDocument();
+  });
+
   it("supports Hatred fixed, Cult-specific, and Xeno-specific choices", async () => {
     const user = userEvent.setup();
     const fixed = renderTab();

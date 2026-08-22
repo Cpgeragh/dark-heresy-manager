@@ -123,6 +123,12 @@ describe("Talent purchase calculations", () => {
     expect(isTalentAvailableInPicker(resistance, all)).toBe(false);
   });
 
+  it("removes every remaining option after a fixed-single Talent is purchased", () => {
+    const cultBriefing = talent("cult-briefing");
+    expect(getAvailableTalentChoices(cultBriefing, [])).toContain("Blood");
+    expect(getAvailableTalentChoices(cultBriefing, [purchase("cb1", cultBriefing.id, "Blood")])).toEqual([]);
+  });
+
   it("trims and formats a purchase without changing the one-entry-per-purchase model", () => {
     expect(makeTalentEntry(talent("reformed-skin"), "  Left arm  ")).toEqual({
       uid: "generated-uid",

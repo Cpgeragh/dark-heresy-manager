@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
+import { useState } from "react";
 import { TalentPickerModal, type AnyListItem } from "../../src/pages/characterSheet/talentComponents";
 import { TALENT_LIST } from "../../src/data/talentData";
 import type { TalentEntry } from "../../src/types/Character";
@@ -36,6 +37,23 @@ function renderPicker(overrides: Partial<React.ComponentProps<typeof TalentPicke
     />
   );
   return { onAdd, onClose };
+}
+
+function StatefulOverflowPicker() {
+  const [entries, setEntries] = useState<TalentEntry[]>([]);
+  return (
+    <TalentPickerModal
+      title="Add Talent"
+      listData={listData}
+      entries={entries}
+      useTalentBehaviours
+      editable
+      onAdd={(entry) => setEntries((current) => [...current, entry])}
+      onClose={() => undefined}
+      career="Guardsman"
+      rank="Conscript"
+    />
+  );
 }
 
 describe("TalentPickerModal, career-aware overflow screen", () => {
@@ -92,6 +110,20 @@ describe("TalentPickerModal, career-aware overflow screen", () => {
     await user.click(within(dialog).getByText("Optical"));
     expect(screen.getByText("XP Cost")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Buy Mechadendrite Use" })).toBeInTheDocument();
+  });
+
+  it("returns a completed manual-cost choice to the same refreshed choice screen", async () => {
+    const user = userEvent.setup();
+    render(<StatefulOverflowPicker />);
+    await user.click(screen.getByRole("button", { name: "Show all" }));
+    await user.click(screen.getByText("Mechadendrite Use"));
+    await user.click(within(screen.getByRole("dialog", { name: "Type" })).getByText("Optical"));
+    await user.type(screen.getByPlaceholderText("0"), "100");
+    await user.click(screen.getByRole("button", { name: "Buy Mechadendrite Use" }));
+
+    const dialog = await screen.findByRole("dialog", { name: "Type" });
+    expect(within(dialog).queryByText("Optical")).not.toBeInTheDocument();
+    expect(within(dialog).getByText("Manipulator")).toBeInTheDocument();
   });
 
   it("removes an already-owned one-time talent from the overflow screen entirely", async () => {

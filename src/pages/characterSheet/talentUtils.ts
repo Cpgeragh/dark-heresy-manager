@@ -64,7 +64,10 @@ export function getAvailableTalentChoices(
   entries: readonly TalentEntry[]
 ): readonly string[] {
   const behaviour = getTalentBehaviour(talent);
-  if (behaviour.kind === "fixed-repeatable" || behaviour.kind === "fixed-single") {
+  if (behaviour.kind === "fixed-single") {
+    return entries.length > 0 ? [] : behaviour.options;
+  }
+  if (behaviour.kind === "fixed-repeatable") {
     return behaviour.options.filter((option) => !hasTalentChoice(entries, option));
   }
   if (behaviour.kind === "hybrid") {

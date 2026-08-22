@@ -3,6 +3,7 @@ import { describe, it, expect, vi } from "vitest";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
+import { useState } from "react";
 
 const { MOCK_TRAIT_LIST } = vi.hoisted(() => {
   const traits = [
@@ -103,6 +104,15 @@ function renderTab(props: Partial<React.ComponentProps<typeof TraitsTab>> = {}) 
     </ToastProvider>
   );
   return { onUpdateTalents };
+}
+
+function StatefulTraitsTab() {
+  const [talents, setTalents] = useState(makeTalents());
+  return (
+    <ToastProvider>
+      <TraitsTab talents={talents} editable onUpdateTalents={setTalents} />
+    </ToastProvider>
+  );
 }
 
 describe("TraitsTab", () => {
@@ -291,6 +301,32 @@ describe("TraitsTab", () => {
     await user.click(screen.getByText("2 — Frightening (−10)"));
     const next = onUpdateTalents.mock.calls[0][0] as TalentsAndTraitsBlock;
     expect(next.traits[0]).toEqual(expect.objectContaining({ name: "Fear (2)", specialisation: "2" }));
+  });
+
+  it("returns to the Trait list after a non-repeatable choice is added", async () => {
+    const user = userEvent.setup();
+    render(<StatefulTraitsTab />);
+    await user.click(screen.getByRole("button", { name: "Add Trait" }));
+    await user.click(screen.getByText("Fear"));
+    await user.click(screen.getByText("2 — Frightening (−10)"));
+
+    expect(await screen.findByRole("dialog", { name: "Add Trait" })).toBeInTheDocument();
+    expect(screen.queryByText("Fear Rating")).not.toBeInTheDocument();
+    expect(screen.queryByText("Fear")).not.toBeInTheDocument();
+  });
+
+  it("keeps a repeatable Trait choice screen open and refreshes its Owned count", async () => {
+    const user = userEvent.setup();
+    render(<StatefulTraitsTab />);
+    await user.click(screen.getByRole("button", { name: "Add Trait" }));
+    await user.click(screen.getByText("Unnatural Characteristic"));
+
+    let dialog = screen.getByRole("dialog", { name: "Characteristic" });
+    await user.click(within(dialog).getByText("Weapon Skill"));
+
+    dialog = screen.getByRole("dialog", { name: "Characteristic" });
+    expect(within(dialog).getByText("Weapon Skill")).toBeInTheDocument();
+    expect(within(dialog).getByText("Owned: 1")).toBeInTheDocument();
   });
 
   it("labels Natural Armour as Armour Points and accepts only positive whole numbers", async () => {
