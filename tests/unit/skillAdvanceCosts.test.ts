@@ -93,30 +93,65 @@ describe("getSkillsSpent", () => {
     expect(getSkillsSpent(makeCharacter({ career: "Guardsman", rank: "Conscript" }))).toBe(0);
   });
 
-  it("sums the real cost of every tier reached", () => {
-    // Awareness Trained (Conscript, 100) + Awareness +10 (Scout, 100) = 200
+  it("sums the persisted purchase cost of every paid tier reached", () => {
     const char = makeCharacter({
       career: "Guardsman",
       rank: "Scout",
-      skills: [skill({ level: "+10" })],
+      skills: [
+        skill({
+          level: "+10",
+          xpPurchases: {
+            trained: { cost: 100, careerId: "guardsman", sourceRankId: "conscript" },
+            "+10": { cost: 100, careerId: "guardsman", sourceRankId: "scout" },
+          },
+        }),
+      ],
     });
     expect(getSkillsSpent(char)).toBe(200);
   });
 
-  it("falls back to a manually-entered cost when a tier isn't on the career table", () => {
+  it("uses the persisted purchase for a manually-priced off-career tier", () => {
     const char = makeCharacter({
       career: "Guardsman",
       rank: "Conscript",
-      skills: [skill({ id: "wrangling", name: "Wrangling", level: "trained", manualCosts: { trained: 250 } })],
+      skills: [
+        skill({
+          id: "wrangling",
+          name: "Wrangling",
+          level: "trained",
+          manualCosts: { trained: 250 },
+          xpPurchases: {
+            trained: { cost: 250, careerId: "guardsman", purchasedAtRankId: "conscript" },
+          },
+        }),
+      ],
     });
     expect(getSkillsSpent(char)).toBe(250);
   });
 
-  it("prefers the real cost over a stored manual one when both exist for the same tier", () => {
+  it("does not invent a purchase from the current career table or manual-cost metadata", () => {
     const char = makeCharacter({
       career: "Guardsman",
       rank: "Conscript",
       skills: [skill({ level: "trained", manualCosts: { trained: 9999 } })],
+    });
+    expect(getSkillsSpent(char)).toBe(0);
+  });
+
+  it("does not charge a free granted tier beneath a paid upgrade", () => {
+    const char = makeCharacter({
+      career: "Guardsman",
+      rank: "Scout",
+      skills: [
+        skill({
+          id: "drive-ground",
+          name: "Drive (Ground Vehicle)",
+          level: "+10",
+          xpPurchases: {
+            "+10": { cost: 100, careerId: "guardsman", sourceRankId: "scout" },
+          },
+        }),
+      ],
     });
     expect(getSkillsSpent(char)).toBe(100);
   });

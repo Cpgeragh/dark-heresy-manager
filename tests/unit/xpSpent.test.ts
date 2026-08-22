@@ -78,7 +78,18 @@ describe("getSpentXp", () => {
       header: { ...data.header, career: "Guardsman", rank: "Conscript" },
       characteristics: { ...data.characteristics, ws: { base: 30, advances: 1 } },
       skills: [
-        { id: "awareness", name: "Awareness", characteristic: "per", level: "trained", category: "General", advanced: false, source: "CR" },
+        {
+          id: "awareness",
+          name: "Awareness",
+          characteristic: "per",
+          level: "trained",
+          category: "General",
+          advanced: false,
+          source: "CR",
+          xpPurchases: {
+            trained: { cost: 100, careerId: "guardsman", sourceRankId: "conscript" },
+          },
+        },
       ],
       experience: {
         total: 1000,
@@ -98,7 +109,18 @@ describe("getSpentXp", () => {
       header: { ...data.header, career: "Guardsman", rank: "Conscript" },
       characteristics: { ...data.characteristics, ws: { base: 30, advances: 1 } },
       skills: [
-        { id: "awareness", name: "Awareness", characteristic: "per", level: "trained", category: "General", advanced: false, source: "CR" },
+        {
+          id: "awareness",
+          name: "Awareness",
+          characteristic: "per",
+          level: "trained",
+          category: "General",
+          advanced: false,
+          source: "CR",
+          xpPurchases: {
+            trained: { cost: 100, careerId: "guardsman", sourceRankId: "conscript" },
+          },
+        },
       ],
       talentsAndTraits: {
         ...data.talentsAndTraits,
@@ -122,7 +144,18 @@ describe("getSpentXp", () => {
       header: { ...data.header, career: "Guardsman", rank: "Conscript" },
       characteristics: { ...data.characteristics, ws: { base: 30, advances: 1 } },
       skills: [
-        { id: "awareness", name: "Awareness", characteristic: "per", level: "trained", category: "General", advanced: false, source: "CR" },
+        {
+          id: "awareness",
+          name: "Awareness",
+          characteristic: "per",
+          level: "trained",
+          category: "General",
+          advanced: false,
+          source: "CR",
+          xpPurchases: {
+            trained: { cost: 100, careerId: "guardsman", sourceRankId: "conscript" },
+          },
+        },
       ],
       talentsAndTraits: {
         ...data.talentsAndTraits,

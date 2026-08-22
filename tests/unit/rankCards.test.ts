@@ -42,15 +42,6 @@ function makeCharacter(): Character {
           "+10": { cost: 100, careerId: "guardsman", sourceRankId: "scout" },
         },
       },
-      {
-        id: "legacy",
-        name: "Legacy Unattributed Skill",
-        characteristic: "int",
-        level: "trained",
-        category: "General",
-        advanced: false,
-        source: "CR",
-      },
     ],
     talentsAndTraits: {
       ...data.talentsAndTraits,
@@ -131,13 +122,37 @@ describe("buildRankCards", () => {
     expect(scout.isCurrent).toBe(true);
   });
 
-  it("excludes granted and legacy unattributed entries rather than guessing their rank", () => {
+  it("excludes granted entries rather than treating them as purchases", () => {
     const names = buildRankCards(makeCharacter()).flatMap((card) => [
       ...card.careerPurchases,
       ...card.rankUpXpSpent,
     ]).map((entry) => entry.name);
     expect(names).not.toContain("Granted Chem Geld");
-    expect(names).not.toContain("Legacy Unattributed Skill — Trained");
+  });
+
+  it("records only the paid Skill tier when the lower tier was granted for free", () => {
+    const character = makeCharacter();
+    character.skills = [
+      {
+        id: "drive-ground",
+        name: "Drive (Ground Vehicle)",
+        characteristic: "ag",
+        level: "+10",
+        category: "Drive",
+        advanced: true,
+        source: "CR",
+        xpPurchases: {
+          "+10": { cost: 100, careerId: "guardsman", sourceRankId: "scout" },
+        },
+      },
+    ];
+
+    const names = buildRankCards(character).flatMap((card) => [
+      ...card.careerPurchases,
+      ...card.rankUpXpSpent,
+    ]).map((entry) => entry.name);
+    expect(names).toContain("Drive (Ground Vehicle) — +10");
+    expect(names).not.toContain("Drive (Ground Vehicle) — Trained");
   });
 
   it("places DM spending under Rank Up XP Spent for its recorded rank", () => {

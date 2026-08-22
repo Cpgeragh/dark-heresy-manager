@@ -82,19 +82,14 @@ export function getNextSkillTierAccess(
   return existsAnywhere ? { status: "locked", level: nextTier } : { status: "not-on-career", level: nextTier };
 }
 
-/** Total XP currently spent training Skills — real cost first, falling back to a manually-entered one. */
+/** Total XP currently spent training Skills, using only persisted purchase records. */
 export function getSkillsSpent(character: Character): number {
-  const unlocked = getUnlockedCareerAdvances(character.header.career, character.header.rank);
   let total = 0;
   for (const skill of character.skills) {
     const owned = tierIndex(skill.level);
     for (let i = 0; i <= owned; i++) {
       const tier = SKILL_TIERS[i];
-      total +=
-        skill.xpPurchases?.[tier]?.cost ??
-        findSkillCost(unlocked, skill.id, tier) ??
-        skill.manualCosts?.[tier] ??
-        0;
+      total += skill.xpPurchases?.[tier]?.cost ?? 0;
     }
   }
   return total;

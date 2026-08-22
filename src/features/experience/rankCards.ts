@@ -85,8 +85,8 @@ function total(entries: readonly RankCardEntry[]): number {
 
 /**
  * Generate the reached named-rank ledger from the character's persisted
- * purchase attribution. Legacy purchases without attribution are deliberately
- * omitted rather than guessed onto an incorrect Rank Card.
+ * purchase attribution. Entries without purchase attribution are omitted
+ * rather than guessed onto an incorrect Rank Card.
  */
 export function buildRankCards(character: Character): RankCard[] {
   const progression = getCareerRankProgression(

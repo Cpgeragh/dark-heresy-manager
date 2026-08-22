@@ -120,7 +120,9 @@ Talent-supplied adjustments.
 Use a disposable character. Record its Characteristics before starting. Test
 one flat Basic Skill, one grouped Basic Skill, one flat Advanced Skill, and
 one grouped Advanced Skill. Keep this character for the Talent cross-page
-checks below.
+checks below. A fresh character owns no Skills: the complete rules catalogue
+must still be available in the pickers, while only purchased or derived Skills
+appear on the main page.
 
 **Page, rules, and totals:**
 
@@ -129,6 +131,7 @@ checks below.
 - [ ] The information button beside **Advanced Skills** explains that an Untrained Advanced Skill cannot be attempted; the number shown in its picker is the Total it will use after becoming Trained
 - [ ] An Untrained Basic Skill is absent from the main Basic page and remains available through the appropriate picker; making it count as Basic changes how it can be attempted but does not, by itself, put the Untrained Skill on the main page
 - [ ] An Untrained Advanced Skill is absent from the main Advanced page but is present in the Advanced picker with its future Trained Total
+- [ ] On a fresh character, the main Basic and Advanced pages contain no independently owned Skills, but their pickers still contain the complete external Skill catalogue
 - [ ] Training a Skill uses the full governing Characteristic; subsequent acquisitions/level changes produce **+10** and then **+20**
 - [ ] The available levels stop at **Trained / +10 / +20** — there is no +30 tier
 - [ ] Changing the governing Characteristic updates the Skill Total immediately
@@ -147,6 +150,7 @@ checks below.
 - [ ] A group displays every Characteristic used by its children rather than incorrectly showing only one
 - [ ] Open a group after scrolling down, press Back, and confirm the parent picker returns to the same scroll position
 - [ ] Add one child from a group — only that Skill becomes Trained, appears on the main page, and disappears from the untrained picker; unpurchased siblings neither appear on the main page nor disappear from the picker with it
+- [ ] Buy several Skills, refresh or reopen the character, and confirm every purchased tier remains present with its original XP cost and Rank attribution; the catalogue is not copied into the character as owned data
 - [ ] Every grouped child is evaluated independently for ownership and current career/rank availability — one Common Lore child becoming available, being purchased, or being deleted must not add, remove, or unlock its siblings
 - [ ] The grouped picker stays open after adding while another valid child remains; add a second Skill without closing and reopening it, then confirm selecting the final valid child automatically returns to the parent picker instead of leaving an empty `No matches` screen
 - [ ] Expand a picker card using its chevron — this previews its information without selecting it
@@ -178,6 +182,9 @@ checks below.
 
 - [ ] Create a fresh character and pick Guardsman as Career — the starting-choice screen shows a Drive (Ground Vehicle)/Swim pick; once resolved, whichever was picked shows as Trained on Skills without spending any XP
 - [ ] The Speak Language (Low Gothic) skill Guardsman always grants shows as Trained immediately, no choice screen needed for it
+- [ ] A Career-, Talent-, Trait-, or Homeworld-granted Trained Skill spends no XP and creates no removable independent purchase; removing the source removes only the derived training
+- [ ] Upgrade a freely granted Trained Skill to **+10** — only the paid **+10** tier increases Spent XP and appears on its source Rank card; the free Trained tier is never charged or listed as a purchase
+- [ ] Downgrade that Skill from **+10** — the paid upgrade and its Rank-card entry disappear, while the source-derived Trained Skill remains without a Delete action
 - [ ] Change Career away from Guardsman to a career with no starting-benefit data yet — the granted Skill reverts to Untrained
 - [ ] Re-pick Guardsman after changing away — the choice screen appears again; picking differently this time updates which Skill is granted
 
@@ -684,28 +691,30 @@ Add and remove a reference drug, then create a uniquely named custom drug. In th
 
 ## 16. Experience
 
-Total/Spent/Remaining XP summary, a read-only named Career Rank ledger, DM XP adjustments, and confirmed Career progression.
+Total/Spent/Remaining XP summary, a read-only named Career Rank ledger, XP awards and corrections, and confirmed Career progression.
 
 ### How to test this page
 
-Use two profiles: the owning player and the DM. Begin on a character with enough Total XP to make purchases across multiple ranks, including one Career branch. Spent XP is derived from persisted purchases on Characteristics, Skills, Talents, Traits, and Weapon Training plus explicit DM Spend XP transactions. Exercise Add XP, Spend XP, normal purchases and undo operations, then rank up one step at a time and refresh after every confirmation.
+Use two profiles: the owning player and the DM. Begin on a character with enough Total XP to make purchases across multiple ranks, including one Career branch. Spent XP is derived from persisted purchases on Characteristics, Skills, Talents, Traits, and Weapon Training plus an optional DM-applied Rank Up XP cost. Exercise Add XP, DM Remove XP, normal purchases and undo operations, then rank up one step at a time and refresh after every confirmation.
 
 - [ ] Total, Spent, and Remaining XP are all read-only summary figures; there is no direct Total or Spent number input for either role
 - [ ] Remaining XP = Total − Spent and recalculates live whenever either changes; it turns red if legacy/other data leaves Spent above Total
-- [ ] DM Add XP requires a positive whole-number amount, accepts an optional reason, increases Total only, and leaves Spent unchanged
-- [ ] DM Spend XP requires a positive whole-number amount, accepts an optional reason, cannot exceed Remaining XP, increases Spent only, and leaves Total unchanged
-- [ ] A DM Spend XP transaction appears on the current named Rank Card under **Rank Up XP Spent**, using its reason (or the fallback "DM XP Spend") and exact cost
+- [ ] In Edit mode, both the owning player and DM can Add XP; it requires positive whole-number Amount and non-blank Reason, increases Total only, and leaves Spent unchanged
+- [ ] In Edit mode, only the DM can Remove XP; it requires positive whole-number Amount and non-blank Reason, cannot remove more than Remaining XP, decreases Total only, and leaves Spent unchanged
+- [ ] In the Rank Up confirmation, the DM may apply one XP cost with required Amount and Reason, then change that same cost rather than stacking another; cancelling the Rank Up clears the unconfirmed cost and choices
+- [ ] A confirmed Rank Up XP cost appears on the current named Rank Card under **Additional XP Spent**, using its recorded reason and exact cost
 - [ ] Add XP awards never appear as purchases on a Rank Card
 - [ ] Buy something on Characteristics, Skills, Talents, Traits, or Weapon Training, then return here without refreshing — Spent and Remaining move immediately; undoing it on its source page reverses the exact paid cost
-- [ ] A Career-table purchase appears under **Advances from this Rank** on the rank whose table supplied it, even if the character bought it later
-- [ ] A Characteristic Advance, manual/off-Career purchase, Exotic Weapon Training purchase, or DM Spend XP appears under **Rank Up XP Spent** on the rank active when it was bought
-- [ ] Every reached named rank on the character's actual Career path has one card; the current card is marked Current, and untaken branches never appear
+- [ ] A Career-table Skill, Talent, Trait, or Weapon Training purchase appears under **Career Purchases from This Rank** on the rank whose table supplied it, even if the character bought it later
+- [ ] Skill spending is counted and placed only from its persisted tier purchase records — a free granted tier is never reconstructed as a paid purchase from the Career table
+- [ ] A Characteristic Advance, manual/off-Career purchase, Exotic Weapon Training purchase, or Rank Up XP cost appears under **Additional XP Spent** on the rank active when it was bought
+- [ ] Every reached named rank on the character's actual Career path has one collapsible card; the current card appears first and is expanded by default, older ranks follow in descending order, and untaken branches never appear
 - [ ] Rank Up remains disabled until Spent XP reaches the next rank band's minimum; Total XP alone never unlocks it
 - [ ] Confirming Rank Up advances exactly one named rank and updates the Background page's read-only Rank automatically
 - [ ] At a Career split, the confirmation requires one valid next path; after choosing it, later reached cards and next ranks remain on that path (including Adept's shared Scholar rank)
-- [ ] The final rank-up review offers Add XP and Spend XP before confirmation, with the same validation and accounting as the main-page actions
-- [ ] At the final Career rank, no further Rank Up action appears, but the DM can still Add XP or Spend XP
-- [ ] A player sees the summary, progression state, and complete Rank ledger but no Add XP, Spend XP, or Rank Up controls
+- [ ] The Rank Up review offers one optional **Spend XP** action for the Rank Up cost; once applied, the card shows Amount, Reason, and a compact **Change XP Cost** action
+- [ ] At the final Career rank, no further Rank Up action appears; Add XP remains available in Edit mode and the DM can still Remove XP
+- [ ] In player Edit mode, the player sees Add XP but never Remove XP or Rank Up; in View mode no XP or Rank actions are interactive for either role
 - [ ] Refresh after several purchases, DM transactions, and a branch Rank Up — totals, transaction attribution, current Rank, and Career path all persist unchanged
 
 **Watch for:** there is no player-submitted proposal or DM-approval workflow
