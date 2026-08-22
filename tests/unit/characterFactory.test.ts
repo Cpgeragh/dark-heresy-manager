@@ -57,10 +57,9 @@ describe("createEmptyCharacterData", () => {
     expect(char.experience.ranks).toHaveLength(0);
   });
 
-  it("populates default skills", () => {
+  it("starts with no owned skills", () => {
     const char = createEmptyCharacterData(base);
-    expect(Array.isArray(char.skills)).toBe(true);
-    expect(char.skills.length).toBeGreaterThan(0);
+    expect(char.skills).toEqual([]);
   });
 
   it("initialises empty arrays for weapons and gear", () => {

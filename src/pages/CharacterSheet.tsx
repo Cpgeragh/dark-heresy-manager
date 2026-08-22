@@ -59,7 +59,6 @@ import type {
 import { exportCharacterJson } from "../utils/exportCharacter";
 import { isBackgroundComplete } from "../utils/characterFactory";
 import { getSpentXp } from "../features/experience/xpSpent";
-import { normaliseSkills, skillsNeedNormalisation } from "../utils/skillUtils";
 import { SectionDrawer } from "../components/SectionDrawer";
 import { useUserProfile } from "../hooks/useUserProfile";
 import { ErrorState } from "../ui/ErrorState";
@@ -127,13 +126,6 @@ export default function CharacterSheet({
     character?.userId
   );
   const ownerName = ownerFirstName ?? character?.header.playerName?.trim() ?? null;
-  const hasCharacter = Boolean(character);
-  const savedSkills = character?.skills;
-  const normalisedSkills = useMemo(
-    () => (hasCharacter ? normaliseSkills(savedSkills) : []),
-    [hasCharacter, savedSkills]
-  );
-
   const psyRating = useMemo(
     () =>
       (character?.talentsAndTraits.talents ?? []).reduce((max, entry) => {
@@ -142,13 +134,6 @@ export default function CharacterSheet({
       }, 0),
     [character?.talentsAndTraits.talents]
   );
-
-  useEffect(() => {
-    if (!character || !allowedToEdit) return;
-    if (skillsNeedNormalisation(character.skills, normalisedSkills)) {
-      updateField("skills", normalisedSkills);
-    }
-  }, [character, allowedToEdit, normalisedSkills, updateField]);
 
   const handleTabChange = useCallback(
     (tab: TabId) => {
@@ -559,7 +544,7 @@ export default function CharacterSheet({
 
           {activeTab === "skills" && (
             <SkillsTab
-              skills={normalisedSkills}
+              skills={character.skills}
               editable={allowedToEdit}
               onUpdate={handleUpdateSkills}
               getCharField={getCharField}

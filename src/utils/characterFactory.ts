@@ -1,7 +1,6 @@
 // src/utils/characterFactory.ts
 
 import type { Character, CharField } from "../types/Character";
-import { DEFAULT_SKILLS } from "../data/defaultSkills";
 
 function char(base = 0, advances = 0): CharField {
   return { base, advances };
@@ -57,7 +56,7 @@ export function createEmptyCharacterData(params: {
       fel: char(),
     },
 
-    skills: DEFAULT_SKILLS,
+    skills: [],
 
     wounds: {
       total: 0,

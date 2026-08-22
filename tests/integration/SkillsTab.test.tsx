@@ -262,7 +262,7 @@ describe("SkillsTab", () => {
 
     expect(onUpdate).toHaveBeenCalledTimes(1);
     const next = onUpdate.mock.calls[0][0] as SkillEntry[];
-    expect(next.find((entry) => entry.id === "s1")?.level).toBe("untrained");
+    expect(next.find((entry) => entry.id === "s1")).toBeUndefined();
     expect(screen.queryByRole("dialog", { name: "Delete Skill" })).not.toBeInTheDocument();
   });
 
@@ -297,11 +297,7 @@ describe("SkillsTab", () => {
 
   it("keeps the Skill picker open and uses separated source-labelled cards", async () => {
     const user = userEvent.setup();
-    const skills = [
-      skill({ id: "awareness", name: "Awareness", level: "untrained" }),
-      skill({ id: "dodge", name: "Dodge", characteristic: "ag", level: "untrained" }),
-    ];
-    render(<StatefulSkillsTab initialSkills={skills} />);
+    render(<StatefulSkillsTab initialSkills={[]} />);
     await user.click(screen.getAllByRole("button", { name: "Add basic skill" })[0]);
     const dialog = screen.getByRole("dialog", { name: "Available Untrained Basic Skills" });
     const list = within(dialog).getByTestId("skill-picker-card-list");
@@ -323,10 +319,7 @@ describe("SkillsTab", () => {
     const user = userEvent.setup();
     render(
       <StatefulSkillsTab
-        initialSkills={[
-          skill({ id: "ciphers-acolyte", name: "Ciphers (Acolyte)", characteristic: "int", level: "untrained", category: "Ciphers", advanced: true }),
-          skill({ id: "ciphers-war-cant", name: "Ciphers (War Cant)", characteristic: "int", level: "untrained", category: "Ciphers", advanced: true }),
-        ]}
+        initialSkills={[]}
       />
     );
     await user.click(screen.getByRole("button", { name: "Add advanced skill" }));
@@ -350,7 +343,7 @@ describe("SkillsTab", () => {
     const user = userEvent.setup();
     render(
       <StatefulSkillsTab
-        initialSkills={COMMON_LORE}
+        initialSkills={[]}
         talents={HAGIOGRAPHY}
         career="Imperial Psyker"
         rank="Sanctionite"
@@ -405,7 +398,7 @@ describe("SkillsTab", () => {
     const user = userEvent.setup();
     render(
       <StatefulSkillsTab
-        initialSkills={COMMON_LORE}
+        initialSkills={[]}
         talents={HAGIOGRAPHY}
         career="Imperial Psyker"
         rank="Sanctionite"
@@ -425,9 +418,10 @@ describe("SkillsTab", () => {
     const user = userEvent.setup();
     render(
       <StatefulSkillsTab
-        initialSkills={COMMON_LORE.map((entry) =>
-          entry.id === "common-war" ? entry : { ...entry, level: "trained" as const }
-        )}
+        initialSkills={COMMON_LORE.filter((entry) => entry.id !== "common-war").map((entry) => ({
+          ...entry,
+          level: "trained" as const,
+        }))}
         talents={HAGIOGRAPHY}
       />
     );
@@ -580,7 +574,6 @@ describe("SkillsTab", () => {
     renderTab({
       skills: [
         skill({ id: "awareness", name: "Awareness", level: "trained" }),
-        skill({ id: "tech-use", name: "Tech-Use", characteristic: "int", level: "untrained", advanced: true }),
       ],
       talents: {
         homeworld: "",

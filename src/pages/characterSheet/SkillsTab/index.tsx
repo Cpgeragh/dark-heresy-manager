@@ -8,6 +8,7 @@ import { useSwipeableTabs } from "../../../hooks/useSwipeableTabs";
 import { getCharacteristicModifierTotals } from "../../../features/corruption/characteristicModifierTotals";
 import { getNextSkillTierAccess, getUnlockedSkillTrainingCosts } from "../../../features/experience/skillAdvanceCosts";
 import { makeCurrentRankPurchase } from "../../../features/experience/purchaseAttribution";
+import { buildSkillCatalogue, getSkillDefinition } from "../../../utils/skillUtils";
 import { AddButton } from "../../../ui/AddButton";
 import { ViewButton } from "../../../ui/ViewButton";
 import { SectionHeader } from "../../../ui/SectionHeader";
@@ -109,7 +110,14 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
   );
 
   const modifierTotals = getCharacteristicModifierTotals(corruption, talents);
-  const computedSkills = useSkillComputation({ skills, getCharField, modifierTotals, talents, career });
+  const catalogueSkills = useMemo(() => buildSkillCatalogue(skills), [skills]);
+  const computedSkills = useSkillComputation({
+    skills: catalogueSkills,
+    getCharField,
+    modifierTotals,
+    talents,
+    career,
+  });
 
   const trainedSkills = useMemo(
     () =>
@@ -167,63 +175,74 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
 
   const updateLevel = useCallback(
     (id: string, level: SkillEntry["level"]) => {
+      if (level === "untrained") {
+        onUpdate(skills.filter((skill) => skill.id !== id));
+        return;
+      }
+
+      const owned = skills.find((skill) => skill.id === id);
+      const definition = getSkillDefinition(id) ?? owned;
+      if (!definition) return;
+
+      const displayed = computedSkills.find((skill) => skill.id === id);
+      const currentLevel = displayed?.level ?? owned?.level ?? "untrained";
+      const currentIndex = skillTierIndex(currentLevel);
+      const nextIndex = skillTierIndex(level);
+      const xpPurchases = { ...owned?.xpPurchases };
+      const manualCosts = { ...owned?.manualCosts };
+
+      if (nextIndex > currentIndex) {
+        const access = getNextSkillTierAccess(career, rank, id, currentLevel);
+        if (access.status === "unlocked" && access.level === level) {
+          xpPurchases[level] = access.purchase;
+        }
+      } else if (nextIndex < currentIndex) {
+        for (let index = nextIndex + 1; index < PURCHASED_SKILL_TIERS.length; index += 1) {
+          const tier = PURCHASED_SKILL_TIERS[index];
+          delete xpPurchases[tier];
+          delete manualCosts[tier];
+        }
+      }
+
+      const updated: SkillEntry = {
+        ...definition,
+        ...owned,
+        level,
+        xpPurchases: Object.keys(xpPurchases).length > 0 ? xpPurchases : undefined,
+        manualCosts: Object.keys(manualCosts).length > 0 ? manualCosts : undefined,
+      };
       onUpdate(
-        skills.map((skill) => {
-          if (skill.id !== id) return skill;
-          const currentIndex = skillTierIndex(skill.level);
-          const nextIndex = skillTierIndex(level);
-          const xpPurchases = { ...skill.xpPurchases };
-          const manualCosts = { ...skill.manualCosts };
-
-          if (nextIndex > currentIndex) {
-            const access = getNextSkillTierAccess(career, rank, skill.id, skill.level);
-            if (access.status === "unlocked" && access.level === level) {
-              xpPurchases[level] = access.purchase;
-            }
-          } else if (nextIndex < currentIndex) {
-            for (let index = nextIndex + 1; index < PURCHASED_SKILL_TIERS.length; index += 1) {
-              const tier = PURCHASED_SKILL_TIERS[index];
-              delete xpPurchases[tier];
-              delete manualCosts[tier];
-            }
-          }
-
-          return {
-            ...skill,
-            level,
-            xpPurchases: Object.keys(xpPurchases).length > 0 ? xpPurchases : undefined,
-            manualCosts: Object.keys(manualCosts).length > 0 ? manualCosts : undefined,
-          };
-        })
+        owned
+          ? skills.map((skill) => (skill.id === id ? updated : skill))
+          : [...skills, updated]
       );
     },
-    [career, onUpdate, rank, skills]
+    [career, computedSkills, onUpdate, rank, skills]
   );
 
   const handleAdd = useCallback(
-    (id: string, manualCost?: number) =>
-      onUpdate(
-        skills.map((skill) => {
-          if (skill.id !== id) return skill;
-          const access = getNextSkillTierAccess(career, rank, skill.id, "untrained");
-          const purchase =
-            manualCost !== undefined
-              ? makeCurrentRankPurchase(career, rank, manualCost)
-              : access.status === "unlocked"
-                ? access.purchase
-                : undefined;
-          return {
-                ...skill,
-                level: "trained",
-                ...(manualCost !== undefined
-                  ? { manualCosts: { ...skill.manualCosts, trained: manualCost } }
-                  : {}),
-                ...(purchase
-                  ? { xpPurchases: { ...skill.xpPurchases, trained: purchase } }
-                  : {}),
-              };
-        })
-      ),
+    (id: string, manualCost?: number) => {
+      if (skills.some((skill) => skill.id === id)) return;
+      const definition = getSkillDefinition(id);
+      if (!definition) return;
+
+      const access = getNextSkillTierAccess(career, rank, id, "untrained");
+      const purchase =
+        manualCost !== undefined
+          ? makeCurrentRankPurchase(career, rank, manualCost)
+          : access.status === "unlocked"
+            ? access.purchase
+            : undefined;
+      onUpdate([
+        ...skills,
+        {
+          ...definition,
+          level: "trained",
+          ...(manualCost !== undefined ? { manualCosts: { trained: manualCost } } : {}),
+          ...(purchase ? { xpPurchases: { trained: purchase } } : {}),
+        },
+      ]);
+    },
     [career, onUpdate, rank, skills]
   );
 
@@ -233,22 +252,26 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
   );
 
   const handleManualUpgrade = useCallback(
-    (id: string, level: SkillEntry["level"], cost: number) =>
+    (id: string, level: SkillEntry["level"], cost: number) => {
+      const owned = skills.find((skill) => skill.id === id);
+      const definition = getSkillDefinition(id) ?? owned;
+      if (!definition) return;
+      const updated: SkillEntry = {
+        ...definition,
+        ...owned,
+        level,
+        manualCosts: { ...owned?.manualCosts, [level]: cost },
+        xpPurchases: {
+          ...owned?.xpPurchases,
+          [level]: makeCurrentRankPurchase(career, rank, cost),
+        },
+      };
       onUpdate(
-        skills.map((skill) =>
-          skill.id === id
-            ? {
-                ...skill,
-                level,
-                manualCosts: { ...skill.manualCosts, [level]: cost },
-                xpPurchases: {
-                  ...skill.xpPurchases,
-                  [level]: makeCurrentRankPurchase(career, rank, cost),
-                },
-              }
-            : skill
-        )
-      ),
+        owned
+          ? skills.map((skill) => (skill.id === id ? updated : skill))
+          : [...skills, updated]
+      );
+    },
     [career, onUpdate, rank, skills]
   );
 

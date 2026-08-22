@@ -4,51 +4,32 @@ import { DEFAULT_SKILLS } from "../data/defaultSkills";
 import type { SkillEntry } from "../types/Character";
 
 /**
- * Merges a character's saved skills with the current DEFAULT_SKILLS list.
- * Preserves the player's trained level and notes for each skill,
- * while picking up any metadata changes (name, characteristic, category, source)
- * and any new skills added to DEFAULT_SKILLS.
+ * Builds the complete Skill catalogue used by the Skills page without changing
+ * the character's saved data. Character.skills contains owned Skill progress;
+ * DEFAULT_SKILLS supplies every untrained picker option and canonical metadata.
  */
-export function normaliseSkills(raw: unknown): SkillEntry[] {
-  if (!Array.isArray(raw)) return DEFAULT_SKILLS;
+export function buildSkillCatalogue(ownedSkills: readonly SkillEntry[]): SkillEntry[] {
+  const ownedById = new Map(ownedSkills.map((skill) => [skill.id, skill]));
+  const referenceIds = new Set(DEFAULT_SKILLS.map((skill) => skill.id));
 
-  const savedById = new Map((raw as SkillEntry[]).map((skill) => [skill.id, skill]));
-
-  return DEFAULT_SKILLS.map((skill) => {
-    const saved = savedById.get(skill.id);
-    if (!saved) return skill;
+  const catalogue = DEFAULT_SKILLS.map((definition) => {
+    const owned = ownedById.get(definition.id);
+    if (!owned) return definition;
 
     return {
-      ...skill,
-      level: saved.level ?? skill.level,
-      notes: saved.notes,
+      ...definition,
+      level: owned.level,
+      notes: owned.notes,
+      manualCosts: owned.manualCosts,
+      xpPurchases: owned.xpPurchases,
     };
   });
+
+  // Keep an explicitly owned entry visible if its reference definition is ever
+  // removed or renamed. It must not be silently discarded from character data.
+  return [...catalogue, ...ownedSkills.filter((skill) => !referenceIds.has(skill.id))];
 }
 
-/**
- * Returns true if the character's saved skills differ from the normalised version,
- * indicating a Firestore write is needed to sync them with DEFAULT_SKILLS.
- * Detects: new skills added, metadata changes, ordering changes.
- */
-export function skillsNeedNormalisation(raw: unknown, normalised = normaliseSkills(raw)): boolean {
-  if (!Array.isArray(raw)) return true;
-
-  const current = raw as SkillEntry[];
-  if (current.length !== normalised.length) return true;
-
-  return normalised.some((skill, index) => {
-    const saved = current[index];
-    return (
-      !saved ||
-      saved.id !== skill.id ||
-      saved.name !== skill.name ||
-      saved.characteristic !== skill.characteristic ||
-      saved.level !== skill.level ||
-      saved.category !== skill.category ||
-      saved.advanced !== skill.advanced ||
-      saved.source !== skill.source ||
-      saved.notes !== skill.notes
-    );
-  });
+export function getSkillDefinition(skillId: string): SkillEntry | undefined {
+  return DEFAULT_SKILLS.find((skill) => skill.id === skillId);
 }

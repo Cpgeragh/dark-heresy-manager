@@ -1,9 +1,7 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { SkillEntry } from "../../src/types/Character";
 import { SkillSource } from "../../src/types/SkillSource";
 
-// vi.hoisted ensures these values are available inside the vi.mock factory,
-// which is hoisted to the top of the file by Vitest before any imports run.
 const { MOCK_DEFAULT_SKILLS } = vi.hoisted(() => {
   const skills: SkillEntry[] = [
     {
@@ -41,166 +39,87 @@ vi.mock("../../src/data/defaultSkills", () => ({
   DEFAULT_SKILLS: MOCK_DEFAULT_SKILLS,
 }));
 
-import { normaliseSkills, skillsNeedNormalisation } from "../../src/utils/skillUtils";
+import { buildSkillCatalogue, getSkillDefinition } from "../../src/utils/skillUtils";
 
-// ============================================================
-// normaliseSkills
-// ============================================================
-
-describe("normaliseSkills", () => {
-  it("returns DEFAULT_SKILLS when input is null", () => {
-    expect(normaliseSkills(null)).toEqual(MOCK_DEFAULT_SKILLS);
+describe("buildSkillCatalogue", () => {
+  it("uses the external catalogue when the character owns no Skills", () => {
+    expect(buildSkillCatalogue([])).toEqual(MOCK_DEFAULT_SKILLS);
   });
 
-  it("returns DEFAULT_SKILLS when input is undefined", () => {
-    expect(normaliseSkills(undefined)).toEqual(MOCK_DEFAULT_SKILLS);
-  });
-
-  it("returns DEFAULT_SKILLS when input is a plain object (not an array)", () => {
-    expect(normaliseSkills({ id: "acrobatics" })).toEqual(MOCK_DEFAULT_SKILLS);
-  });
-
-  it("returns DEFAULT_SKILLS when input is an empty array (no saved data preserving)", () => {
-    // No saved skills → all three from DEFAULT_SKILLS returned at their defaults
-    const result = normaliseSkills([]);
-    expect(result).toHaveLength(3);
-    expect(result[0].id).toBe("acrobatics");
-  });
-
-  it("preserves the saved level for a known skill", () => {
-    const saved = [{ ...MOCK_DEFAULT_SKILLS[0], level: "+10" as const }];
-    const result = normaliseSkills(saved);
-    expect(result[0].level).toBe("+10");
-  });
-
-  it("preserves the saved notes", () => {
-    const saved = [{ ...MOCK_DEFAULT_SKILLS[0], notes: "Trained under Arbites" }];
-    const result = normaliseSkills(saved);
-    expect(result[0].notes).toBe("Trained under Arbites");
-  });
-
-  it("picks up new DEFAULT_SKILLS skills not present in the saved array", () => {
-    // Only acrobatics was saved; result should still include all 3 from DEFAULT_SKILLS
-    const saved = [{ ...MOCK_DEFAULT_SKILLS[0] }];
-    const result = normaliseSkills(saved);
-    expect(result).toHaveLength(3);
-    expect(result.some((s) => s.id === "logic")).toBe(true);
-  });
-
-  it("drops obsolete saved skills whose ids are no longer in DEFAULT_SKILLS", () => {
-    const saved = [
-      { ...MOCK_DEFAULT_SKILLS[0] },
+  it("overlays all character-owned progress without changing the saved array", () => {
+    const owned: SkillEntry[] = [
       {
-        id: "obsolete-skill",
-        name: "Old Skill",
-        characteristic: "ag" as const,
-        level: "trained" as const,
-        category: "X",
-        advanced: false,
-        source: "CR" as SkillSource,
+        ...MOCK_DEFAULT_SKILLS[0],
+        level: "+10",
+        notes: "Trained under Arbites",
+        manualCosts: { trained: 75 },
+        xpPurchases: {
+          trained: { cost: 75, purchasedAtRankId: "recruit" },
+          "+10": { cost: 100, purchasedAtRankId: "trooper" },
+        },
       },
     ];
-    const result = normaliseSkills(saved);
+
+    const result = buildSkillCatalogue(owned);
+
+    expect(result[0]).toMatchObject({
+      level: "+10",
+      notes: "Trained under Arbites",
+      manualCosts: { trained: 75 },
+      xpPurchases: {
+        trained: { cost: 75, purchasedAtRankId: "recruit" },
+        "+10": { cost: 100, purchasedAtRankId: "trooper" },
+      },
+    });
+    expect(owned).toHaveLength(1);
+  });
+
+  it("keeps unowned catalogue Skills untrained and available to pick", () => {
+    const result = buildSkillCatalogue([{ ...MOCK_DEFAULT_SKILLS[0], level: "trained" }]);
+
     expect(result).toHaveLength(3);
-    expect(result.every((s) => s.id !== "obsolete-skill")).toBe(true);
+    expect(result.find((skill) => skill.id === "athletics")?.level).toBe("untrained");
+    expect(result.find((skill) => skill.id === "logic")?.level).toBe("untrained");
   });
 
-  it("overrides stale metadata (name, characteristic) with the DEFAULT_SKILLS version", () => {
-    // The saved copy has an outdated name and characteristic from a previous version
-    const saved = [{ ...MOCK_DEFAULT_SKILLS[0], name: "Old Name", characteristic: "wp" as const }];
-    const result = normaliseSkills(saved);
-    expect(result[0].name).toBe("Acrobatics");
-    expect(result[0].characteristic).toBe("ag");
+  it("uses current catalogue metadata while retaining owned progress", () => {
+    const result = buildSkillCatalogue([
+      {
+        ...MOCK_DEFAULT_SKILLS[0],
+        name: "Old Acrobatics",
+        characteristic: "wp",
+        level: "trained",
+      },
+    ]);
+
+    expect(result[0]).toMatchObject({
+      name: "Acrobatics",
+      characteristic: "ag",
+      level: "trained",
+    });
   });
 
-  it("returns skills in DEFAULT_SKILLS order regardless of saved order", () => {
-    const savedReversed = [
-      { ...MOCK_DEFAULT_SKILLS[2] }, // logic (originally third)
-      { ...MOCK_DEFAULT_SKILLS[1] }, // athletics (originally second)
-      { ...MOCK_DEFAULT_SKILLS[0] }, // acrobatics (originally first)
-    ];
-    const result = normaliseSkills(savedReversed);
-    expect(result.map((s) => s.id)).toEqual(["acrobatics", "athletics", "logic"]);
-  });
+  it("does not silently hide an explicitly owned Skill missing from the catalogue", () => {
+    const removedSkill: SkillEntry = {
+      id: "removed-skill",
+      name: "Removed Skill",
+      characteristic: "wp",
+      level: "trained",
+      category: "Legacy",
+      advanced: true,
+      source: "CR",
+    };
 
-  it("falls back to DEFAULT_SKILLS level when saved level is undefined", () => {
-    const saved = [{ ...MOCK_DEFAULT_SKILLS[0], level: undefined as unknown as "untrained" }];
-    const result = normaliseSkills(saved);
-    expect(result[0].level).toBe("untrained"); // DEFAULT_SKILLS default
+    expect(buildSkillCatalogue([removedSkill])).toContainEqual(removedSkill);
   });
 });
 
-// ============================================================
-// skillsNeedNormalisation
-// ============================================================
-
-describe("skillsNeedNormalisation", () => {
-  it("returns true when input is not an array", () => {
-    expect(skillsNeedNormalisation(null)).toBe(true);
-    expect(skillsNeedNormalisation(undefined)).toBe(true);
-    expect(skillsNeedNormalisation("string")).toBe(true);
-    expect(skillsNeedNormalisation({})).toBe(true);
+describe("getSkillDefinition", () => {
+  it("reads a Skill from the external catalogue", () => {
+    expect(getSkillDefinition("logic")).toEqual(MOCK_DEFAULT_SKILLS[2]);
   });
 
-  it("returns false when saved skills exactly match the normalised result", () => {
-    // MOCK_DEFAULT_SKILLS is already normalised — no changes needed
-    expect(skillsNeedNormalisation([...MOCK_DEFAULT_SKILLS])).toBe(false);
-  });
-
-  it("returns true when lengths differ (a new skill was added to DEFAULT_SKILLS)", () => {
-    const onlyTwo = MOCK_DEFAULT_SKILLS.slice(0, 2);
-    expect(skillsNeedNormalisation(onlyTwo)).toBe(true);
-  });
-
-  it("returns true when skill id order has changed", () => {
-    const reordered = [
-      MOCK_DEFAULT_SKILLS[1], // athletics first instead of acrobatics
-      MOCK_DEFAULT_SKILLS[0],
-      MOCK_DEFAULT_SKILLS[2],
-    ];
-    expect(skillsNeedNormalisation(reordered)).toBe(true);
-  });
-
-  it("returns true when a skill name differs from DEFAULT_SKILLS (stale cached name)", () => {
-    const withStaleName = MOCK_DEFAULT_SKILLS.map((s, i) =>
-      i === 0 ? { ...s, name: "Old Acrobatics" } : s
-    );
-    expect(skillsNeedNormalisation(withStaleName)).toBe(true);
-  });
-
-  it("returns true when a skill characteristic differs from DEFAULT_SKILLS", () => {
-    const withStaleChar = MOCK_DEFAULT_SKILLS.map((s, i) =>
-      i === 1 ? { ...s, characteristic: "wp" as const } : s
-    );
-    expect(skillsNeedNormalisation(withStaleChar)).toBe(true);
-  });
-
-  it("returns true when a skill category differs from DEFAULT_SKILLS", () => {
-    const withStaleCategory = MOCK_DEFAULT_SKILLS.map((s, i) =>
-      i === 2 ? { ...s, category: "OldCategory" } : s
-    );
-    expect(skillsNeedNormalisation(withStaleCategory)).toBe(true);
-  });
-
-  it("returns true when a skill advanced flag differs from DEFAULT_SKILLS", () => {
-    const withFlippedAdvanced = MOCK_DEFAULT_SKILLS.map((s, i) =>
-      i === 2 ? { ...s, advanced: !s.advanced } : s
-    );
-    expect(skillsNeedNormalisation(withFlippedAdvanced)).toBe(true);
-  });
-
-  it("returns true when a skill source differs from DEFAULT_SKILLS", () => {
-    const withStaleSource = MOCK_DEFAULT_SKILLS.map((s, i) =>
-      i === 0 ? { ...s, source: "IH" as SkillSource } : s
-    );
-    expect(skillsNeedNormalisation(withStaleSource)).toBe(true);
-  });
-
-  it("returns true when a skill level is undefined (needs normalisation to set default)", () => {
-    const withUndefinedLevel = MOCK_DEFAULT_SKILLS.map((s, i) =>
-      i === 0 ? { ...s, level: undefined as unknown as "untrained" } : s
-    );
-    // normalised sets level to "untrained", but saved has undefined → mismatch
-    expect(skillsNeedNormalisation(withUndefinedLevel)).toBe(true);
+  it("returns undefined for an unknown Skill", () => {
+    expect(getSkillDefinition("missing")).toBeUndefined();
   });
 });
