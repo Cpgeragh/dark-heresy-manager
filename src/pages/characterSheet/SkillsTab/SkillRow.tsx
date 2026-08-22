@@ -109,6 +109,14 @@ export function SkillRow({
     [skill.id, updateLevel]
   );
 
+  const purchasedLevel = skill.baseLevel ?? skill.level;
+  const downgradeLevel: SkillAdvanceLevel | undefined =
+    purchasedLevel === "+20" ? "+10" : purchasedLevel === "+10" ? "trained" : undefined;
+  const downgradeLabel = downgradeLevel === "trained" ? "Trained" : downgradeLevel;
+  const handleDowngrade = useCallback(() => {
+    if (downgradeLevel) updateLevel(skill.id, downgradeLevel);
+  }, [downgradeLevel, skill.id, updateLevel]);
+
   const manualUpgradeCostNumber = Number(manualUpgradeCost);
   const canConfirmManualUpgrade = manualUpgradeCost.trim() !== "";
   const canDelete = editable && skill.level !== "untrained" && !(skill.talentMinimumLevel && skill.baseLevel === "untrained");
@@ -346,7 +354,7 @@ export function SkillRow({
 
       {deleteArmed && (
         <PickerModal
-          title="Delete Skill"
+          title={downgradeLevel ? "Manage Skill" : "Delete Skill"}
           query=""
           onQueryChange={() => undefined}
           onClose={() => setDeleteArmed(false)}
@@ -354,25 +362,53 @@ export function SkillRow({
           hideSearch
           maxWidth="max-w-sm"
           footer={
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                variant="primary"
-                onClick={() => {
-                  handleRemove();
-                  setDeleteArmed(false);
-                }}
-              >
-                Delete
-              </Button>
-              <Button variant="ghost" onClick={() => setDeleteArmed(false)}>
-                Cancel
-              </Button>
-            </div>
+            downgradeLevel ? (
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant="warningOutline"
+                  onClick={() => {
+                    handleDowngrade();
+                    setDeleteArmed(false);
+                  }}
+                >
+                  Downgrade to {downgradeLabel}
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    handleRemove();
+                    setDeleteArmed(false);
+                  }}
+                >
+                  Delete Skill
+                </Button>
+                <Button className="col-span-2" variant="ghost" onClick={() => setDeleteArmed(false)}>
+                  Cancel
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    handleRemove();
+                    setDeleteArmed(false);
+                  }}
+                >
+                  Delete
+                </Button>
+                <Button variant="ghost" onClick={() => setDeleteArmed(false)}>
+                  Cancel
+                </Button>
+              </div>
+            )
           }
         >
           <PickerBody>
             <p className={`text-sm lg:text-base ${uiTextBody} text-center`}>
-              Delete {skill.name} from this character?
+              {downgradeLevel
+                ? `Downgrade ${skill.name} to ${downgradeLabel}, or delete it from this character?`
+                : `Delete ${skill.name} from this character?`}
             </p>
           </PickerBody>
         </PickerModal>

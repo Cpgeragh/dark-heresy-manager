@@ -14,6 +14,7 @@ export type ButtonVariant =
   | "danger"
   | "dangerGhost"
   | "warning"
+  | "warningOutline"
   | "warningGhost"
   | "success";
 
@@ -34,6 +35,7 @@ const VARIANTS: Record<ButtonVariant, string> = {
   danger: "border border-transparent bg-red-700 text-white enabled:hover:bg-red-600",
   dangerGhost: "border border-transparent bg-red-900/40 text-red-400 enabled:hover:bg-red-900/70",
   warning: "border border-transparent bg-amber-600 text-slate-950 enabled:hover:bg-amber-500",
+  warningOutline: "border border-amber-500 text-amber-400 enabled:hover:bg-amber-500/10",
   warningGhost: "border border-transparent bg-amber-900/40 text-amber-400 enabled:hover:bg-amber-900/70",
   success: "border border-transparent bg-green-700 text-white enabled:hover:bg-green-600",
 };

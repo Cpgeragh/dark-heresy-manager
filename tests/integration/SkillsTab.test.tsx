@@ -249,6 +249,7 @@ describe("SkillsTab", () => {
     expect(
       screen.getByText("Delete Awareness from this character?")
     ).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Downgrade to/ })).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Cancel" }));
     expect(onUpdate).not.toHaveBeenCalled();
@@ -263,6 +264,29 @@ describe("SkillsTab", () => {
     const next = onUpdate.mock.calls[0][0] as SkillEntry[];
     expect(next.find((entry) => entry.id === "s1")?.level).toBe("untrained");
     expect(screen.queryByRole("dialog", { name: "Delete Skill" })).not.toBeInTheDocument();
+  });
+
+  it.each([
+    { level: "+10" as const, target: "trained" as const, label: "Trained" },
+    { level: "+20" as const, target: "+10" as const, label: "+10" },
+  ])("offers Downgrade to $label or full deletion from $level", async ({ level, target, label }) => {
+    const user = userEvent.setup();
+    const { onUpdate } = renderTab({ skills: [skill({ level })] });
+
+    await user.click(screen.getAllByRole("button", { name: "Delete Awareness" })[0]);
+    const dialog = screen.getByRole("dialog", { name: "Manage Skill" });
+    const downgradeButton = within(dialog).getByRole("button", { name: `Downgrade to ${label}` });
+    expect(downgradeButton).toHaveClass("border-amber-500", "text-amber-400");
+    expect(downgradeButton).not.toHaveClass("bg-amber-900/40");
+    expect(within(dialog).getByRole("button", { name: "Delete Skill" })).toBeInTheDocument();
+    expect(within(dialog).getByRole("button", { name: "Cancel" })).toBeInTheDocument();
+
+    await user.click(within(dialog).getByRole("button", { name: `Downgrade to ${label}` }));
+
+    expect(onUpdate).toHaveBeenCalledTimes(1);
+    const next = onUpdate.mock.calls[0][0] as SkillEntry[];
+    expect(next.find((entry) => entry.id === "s1")?.level).toBe(target);
+    expect(screen.queryByRole("dialog", { name: "Manage Skill" })).not.toBeInTheDocument();
   });
 
   it("shows the add affordance when editable", () => {
