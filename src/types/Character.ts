@@ -653,10 +653,21 @@ export interface RankAdvances {
   advances: AdvanceEntry[];
 }
 
+export interface XpTransaction {
+  id: string;
+  type: "add" | "spend";
+  amount: number;
+  reason?: string;
+  /** Named Career rank active when the DM recorded this transaction. */
+  rankId: string;
+}
+
 export interface ExperienceBlock {
   ranks: RankAdvances[];
   total: number;
   spent: number;
+  /** DM-entered XP awards and manual spending, retained as an auditable ledger. */
+  transactions?: XpTransaction[];
 }
 
 /**

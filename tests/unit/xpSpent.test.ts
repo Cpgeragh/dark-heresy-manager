@@ -55,6 +55,21 @@ describe("getSpentXp", () => {
     expect(getSpentXp(makeCharacter())).toBe(0);
   });
 
+  it("includes DM spending but not DM XP awards", () => {
+    const char = makeCharacter({
+      experience: {
+        total: 1_000,
+        spent: 0,
+        ranks: [],
+        transactions: [
+          { id: "award", type: "add", amount: 200, rankId: "conscript" },
+          { id: "spend", type: "spend", amount: 150, rankId: "conscript" },
+        ],
+      },
+    });
+    expect(getSpentXp(char)).toBe(150);
+  });
+
   it("sums manual rank advances, Characteristic Advances, and Skills together", () => {
     const data = createEmptyCharacterData({ campaignId: "c", recoveryCode: "r" });
     const char: Character = {

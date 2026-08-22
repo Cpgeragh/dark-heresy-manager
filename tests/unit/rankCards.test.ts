@@ -140,6 +140,34 @@ describe("buildRankCards", () => {
     expect(names).not.toContain("Legacy Unattributed Skill — Trained");
   });
 
+  it("places DM spending under Rank Up XP Spent for its recorded rank", () => {
+    const character = makeCharacter();
+    character.experience.transactions = [
+      {
+        id: "manual-spend",
+        type: "spend",
+        amount: 75,
+        reason: "Elite advance",
+        rankId: "scout",
+      },
+      {
+        id: "award",
+        type: "add",
+        amount: 200,
+        reason: "Session award",
+        rankId: "scout",
+      },
+    ];
+    const scout = buildRankCards(character).find((card) => card.rankId === "scout")!;
+    expect(scout.rankUpXpSpent).toContainEqual({
+      id: "xp-transaction:manual-spend",
+      name: "Elite advance",
+      cost: 75,
+      kind: "xp-spend",
+    });
+    expect(scout.rankUpXpSpent.map((entry) => entry.name)).not.toContain("Session award");
+  });
+
   it("has card totals that reconcile to attributed Spent XP exactly once", () => {
     const spent = buildRankCards(makeCharacter()).reduce((sum, card) => sum + card.spentTotal, 0);
     expect(spent).toBe(750);

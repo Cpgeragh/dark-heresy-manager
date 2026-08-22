@@ -1,10 +1,23 @@
-import { useCallback } from "react";
-import type { Character, ExperienceBlock } from "../../types/Character";
+import { useState } from "react";
+import type {
+  Character,
+  CharacterHeader,
+  ExperienceBlock,
+  XpTransaction,
+} from "../../types/Character";
 import {
   buildRankCards,
   type RankCardEntry,
   type RankCardEntryKind,
 } from "../../features/experience/rankCards";
+import {
+  getCareerRankProgression,
+  type CareerRankProgression,
+} from "../../features/experience/careerRankProgression";
+import {
+  applyCareerRankUp,
+  applyXpTransaction,
+} from "../../features/experience/xpTransactions";
 import {
   editableInputClass,
   readOnlyBadgeClass,
@@ -16,11 +29,15 @@ import {
 } from "../../ui/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { Chip } from "../../ui/Chip";
+import { Button } from "../../ui/Button";
+import { ModalShell } from "../../ui/ModalShell";
+import { ModalHeader } from "../../ui/ModalHeader";
 
 interface ExperienceTabProps {
   character: Character;
   isDM: boolean;
   onUpdate: (next: ExperienceBlock) => void;
+  onUpdateHeader: (next: CharacterHeader) => void;
 }
 
 const ENTRY_KIND_LABELS: Record<RankCardEntryKind, string> = {
@@ -29,6 +46,7 @@ const ENTRY_KIND_LABELS: Record<RankCardEntryKind, string> = {
   talent: "Talent",
   trait: "Trait",
   "weapon-training": "Weapon Training",
+  "xp-spend": "XP Spend",
 };
 
 const ENTRY_KIND_CLASSES: Record<RankCardEntryKind, string> = {
@@ -37,7 +55,230 @@ const ENTRY_KIND_CLASSES: Record<RankCardEntryKind, string> = {
   talent: "border-amber-700/60 bg-amber-950/30 text-amber-300",
   trait: "border-violet-700/60 bg-violet-950/30 text-violet-300",
   "weapon-training": "border-emerald-700/60 bg-emerald-950/30 text-emerald-300",
+  "xp-spend": "border-red-700/60 bg-red-950/30 text-red-300",
 };
+
+type XpAction = XpTransaction["type"];
+
+function XpTransactionModal({
+  action,
+  experience,
+  rankId,
+  onApply,
+  onClose,
+}: {
+  action: XpAction;
+  experience: ExperienceBlock;
+  rankId: string;
+  onApply: (next: ExperienceBlock) => void;
+  onClose: () => void;
+}) {
+  const [amountDraft, setAmountDraft] = useState("");
+  const [reason, setReason] = useState("");
+  const amount = Number(amountDraft);
+  const remaining = experience.total - experience.spent;
+  const isSpend = action === "spend";
+  const validAmount =
+    /^\d+$/.test(amountDraft) &&
+    Number.isInteger(amount) &&
+    amount > 0 &&
+    (!isSpend || amount <= remaining);
+
+  const title = isSpend ? "Spend XP" : "Add XP";
+
+  const submit = () => {
+    if (!validAmount) return;
+    onApply(
+      applyXpTransaction(experience, {
+        id: crypto.randomUUID(),
+        type: action,
+        amount,
+        reason,
+        rankId,
+      })
+    );
+    onClose();
+  };
+
+  return (
+    <ModalShell ariaLabel={title} onClose={onClose} className="max-w-md overflow-y-auto">
+      <ModalHeader title={title} onClose={onClose} />
+      <div className="space-y-4 p-4 lg:p-5">
+        <p className="text-sm text-slate-300 lg:text-base">
+          {isSpend
+            ? "Charge XP outside the normal purchase controls. It will appear under Rank Up XP Spent for the current rank."
+            : "Award XP to the character. This increases Total XP without changing Spent XP."}
+        </p>
+
+        <label className="block space-y-1">
+          <span className={uiFormLabel}>Amount</span>
+          <input
+            type="text"
+            inputMode="numeric"
+            name={`${action}-xp-amount`}
+            value={amountDraft}
+            onChange={(event) => {
+              if (/^\d*$/.test(event.target.value)) setAmountDraft(event.target.value);
+            }}
+            className={editableInputClass(true)}
+            aria-label={`${title} amount`}
+          />
+        </label>
+
+        <label className="block space-y-1">
+          <span className={uiFormLabel}>Reason (optional)</span>
+          <input
+            type="text"
+            name={`${action}-xp-reason`}
+            value={reason}
+            onChange={(event) => setReason(event.target.value)}
+            placeholder={isSpend ? "e.g. Elite advance" : "e.g. Session award"}
+            className={editableInputClass(true)}
+            aria-label={`${title} reason`}
+          />
+        </label>
+
+        {isSpend && amountDraft !== "" && amount > remaining && (
+          <p className="text-sm text-red-400 lg:text-base" role="alert">
+            Only {remaining} XP remains available.
+          </p>
+        )}
+
+        <div className="grid grid-cols-2 gap-3 border-t border-slate-700 pt-4">
+          <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          <Button onClick={submit} disabled={!validAmount}>
+            Confirm {title}
+          </Button>
+        </div>
+      </div>
+    </ModalShell>
+  );
+}
+
+function RankUpModal({
+  character,
+  progression,
+  onUpdate,
+  onConfirm,
+  onClose,
+}: {
+  character: Character;
+  progression: CareerRankProgression;
+  onUpdate: (next: ExperienceBlock) => void;
+  onConfirm: (next: CharacterHeader) => void;
+  onClose: () => void;
+}) {
+  const [selectedRankId, setSelectedRankId] = useState(
+    progression.nextRanks.length === 1 ? progression.nextRanks[0].id : ""
+  );
+  const [xpAction, setXpAction] = useState<XpAction | null>(null);
+  const selectedRank = progression.nextRanks.find((rank) => rank.id === selectedRankId);
+  const remaining = character.experience.total - character.experience.spent;
+
+  const confirm = () => {
+    if (!selectedRank) return;
+    onConfirm(
+      applyCareerRankUp(character.header, character.experience.spent, selectedRank.id)
+    );
+    onClose();
+  };
+
+  return (
+    <>
+      <ModalShell
+        ariaLabel="Confirm Rank Up"
+        onClose={onClose}
+        className="max-w-lg overflow-y-auto"
+        suspended={xpAction !== null}
+      >
+        <ModalHeader title="Confirm Rank Up" onClose={onClose} />
+        <div className="space-y-4 p-4 lg:p-5">
+          <div className={`${uiSectionShell} grid grid-cols-3 gap-2 p-3 text-center`}>
+            <div>
+              <div className="text-xs text-slate-500 lg:text-sm">Total</div>
+              <div className="font-code text-lg text-slate-100 lg:text-xl">
+                {character.experience.total}
+              </div>
+            </div>
+            <div>
+              <div className="text-xs text-slate-500 lg:text-sm">Spent</div>
+              <div className="font-code text-lg text-slate-100 lg:text-xl">
+                {character.experience.spent}
+              </div>
+            </div>
+            <div>
+              <div className="text-xs text-slate-500 lg:text-sm">Remaining</div>
+              <div className="font-code text-lg text-slate-100 lg:text-xl">{remaining}</div>
+            </div>
+          </div>
+
+          <div>
+            <div className={uiFormLabel}>Current Rank</div>
+            <div className="mt-1 text-lg text-slate-100 lg:text-xl">
+              {progression.currentRank.name}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className={uiFormLabel}>
+              {progression.requiresBranchChoice ? "Choose the next Career path" : "Next Rank"}
+            </div>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {progression.nextRanks.map((rank) => (
+                <Button
+                  key={rank.id}
+                  variant={selectedRankId === rank.id ? "primary" : "ghost"}
+                  onClick={() => setSelectedRankId(rank.id)}
+                  aria-pressed={selectedRankId === rank.id}
+                >
+                  {rank.name}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          <section className={`${uiSectionShell} space-y-3 p-3`}>
+            <div>
+              <div className="text-sm font-semibold text-red-500 lg:text-base">
+                Final XP adjustments
+              </div>
+              <p className="mt-1 text-sm text-slate-400 lg:text-base">
+                The DM may award or spend XP before confirming this rank.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Button variant="ghost" onClick={() => setXpAction("add")}>Add XP</Button>
+              <Button
+                variant="ghost"
+                onClick={() => setXpAction("spend")}
+                disabled={remaining <= 0}
+              >
+                Spend XP
+              </Button>
+            </div>
+          </section>
+
+          <div className="grid grid-cols-2 gap-3 border-t border-slate-700 pt-4">
+            <Button variant="ghost" onClick={onClose}>Cancel</Button>
+            <Button onClick={confirm} disabled={!selectedRank}>
+              Confirm Rank Up
+            </Button>
+          </div>
+        </div>
+      </ModalShell>
+
+      {xpAction && (
+        <XpTransactionModal
+          action={xpAction}
+          experience={character.experience}
+          rankId={progression.currentRank.id}
+          onApply={onUpdate}
+          onClose={() => setXpAction(null)}
+        />
+      )}
+    </>
+  );
+}
 
 function RankEntryList({
   entries,
@@ -72,17 +313,23 @@ function RankEntryList({
   );
 }
 
-export function ExperienceTab({ character, isDM, onUpdate }: ExperienceTabProps) {
+export function ExperienceTab({
+  character,
+  isDM,
+  onUpdate,
+  onUpdateHeader,
+}: ExperienceTabProps) {
   const { experience } = character;
   const remaining = experience.total - experience.spent;
   const rankCards = buildRankCards(character);
-
-  const handleTotalChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      onUpdate({ ...experience, total: Math.max(0, Number(event.target.value)) });
-    },
-    [experience, onUpdate]
+  const progression = getCareerRankProgression(
+    character.header.career,
+    character.header.rank,
+    experience.spent,
+    character.header.careerPath
   );
+  const [xpAction, setXpAction] = useState<XpAction | null>(null);
+  const [rankUpOpen, setRankUpOpen] = useState(false);
 
   return (
     <div className="space-y-6">
@@ -90,26 +337,10 @@ export function ExperienceTab({ character, isDM, onUpdate }: ExperienceTabProps)
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className={`${uiSection} text-center`}>
-          {isDM ? (
-            <label className="flex flex-col gap-0.5">
-              <span className={uiFormLabel}>Total XP</span>
-              <input
-                type="number"
-                min={0}
-                value={experience.total}
-                onChange={handleTotalChange}
-                className={`${editableInputClass(true)} mt-2 text-center font-code text-xl font-semibold lg:text-2xl`}
-                aria-label="Total XP"
-              />
-            </label>
-          ) : (
-            <>
-              <div className="mb-1 text-xs text-slate-400 lg:text-sm">Total XP</div>
-              <div className="font-code text-2xl font-semibold text-slate-100 lg:text-3xl">
-                {experience.total}
-              </div>
-            </>
-          )}
+          <div className="mb-1 text-xs text-slate-400 lg:text-sm">Total XP</div>
+          <div className="font-code text-2xl font-semibold text-slate-100 lg:text-3xl">
+            {experience.total}
+          </div>
         </div>
 
         <div className={`${uiSection} text-center`}>
@@ -130,6 +361,64 @@ export function ExperienceTab({ character, isDM, onUpdate }: ExperienceTabProps)
           </div>
         </div>
       </section>
+
+      {progression && (
+        <section className="space-y-3">
+          <SectionHeader>Rank Progression</SectionHeader>
+          <div className={`${uiSection} space-y-4`}>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <div className="text-xs uppercase tracking-wide text-slate-500 lg:text-sm">
+                  Current Rank
+                </div>
+                <div className="mt-1 text-lg text-slate-100 lg:text-xl">
+                  {progression.currentRank.name}
+                </div>
+              </div>
+              <div className="sm:text-right">
+                <div className="text-xs uppercase tracking-wide text-slate-500 lg:text-sm">
+                  {progression.nextBand ? "Next Rank unlocks at" : "Career Progression"}
+                </div>
+                <div className="mt-1 font-code text-lg text-slate-100 lg:text-xl">
+                  {progression.nextBand
+                    ? `${progression.nextBand.min} Spent XP`
+                    : "Final Rank reached"}
+                </div>
+              </div>
+            </div>
+
+            {progression.nextBand && (
+              <p className="text-sm text-slate-400 lg:text-base">
+                {progression.canRankUp
+                  ? "The required Spent XP has been reached. The DM can now confirm one Rank Up."
+                  : `${progression.nextBand.min - experience.spent} more Spent XP is required.`}
+              </p>
+            )}
+
+            {isDM && (
+              <div className="grid grid-cols-2 gap-2 border-t border-slate-700 pt-4 sm:grid-cols-3">
+                <Button variant="ghost" onClick={() => setXpAction("add")}>Add XP</Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => setXpAction("spend")}
+                  disabled={remaining <= 0}
+                >
+                  Spend XP
+                </Button>
+                {progression.nextBand && (
+                  <Button
+                    className="col-span-2 sm:col-span-1"
+                    onClick={() => setRankUpOpen(true)}
+                    disabled={!progression.canRankUp}
+                  >
+                    Rank Up
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
       <section className="space-y-3">
         <SectionHeader>Career Rank Ledger</SectionHeader>
@@ -211,6 +500,26 @@ export function ExperienceTab({ character, isDM, onUpdate }: ExperienceTabProps)
           </div>
         )}
       </section>
+
+      {xpAction && progression && (
+        <XpTransactionModal
+          action={xpAction}
+          experience={experience}
+          rankId={progression.currentRank.id}
+          onApply={onUpdate}
+          onClose={() => setXpAction(null)}
+        />
+      )}
+
+      {rankUpOpen && progression && (
+        <RankUpModal
+          character={character}
+          progression={progression}
+          onUpdate={onUpdate}
+          onConfirm={onUpdateHeader}
+          onClose={() => setRankUpOpen(false)}
+        />
+      )}
     </div>
   );
 }

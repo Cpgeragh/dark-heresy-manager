@@ -741,6 +741,7 @@ export default function CharacterSheet({
               character={character}
               isDM={isDM}
               onUpdate={handleUpdateExperience}
+              onUpdateHeader={handleUpdateHeader}
             />
           )}
 

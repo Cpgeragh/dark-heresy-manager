@@ -13,10 +13,19 @@ function getRanksSpent(character: Character): number {
   );
 }
 
+function getDmSpent(character: Character): number {
+  return (character.experience.transactions ?? []).reduce(
+    (total, transaction) =>
+      transaction.type === "spend" ? total + transaction.amount : total,
+    0
+  );
+}
+
 /** The single source of truth for how much XP a character has spent. */
 export function getSpentXp(character: Character): number {
   return (
     getRanksSpent(character) +
+    getDmSpent(character) +
     getCharacteristicAdvancesSpent(character) +
     getSkillsSpent(character) +
     getTalentsSpent(character) +

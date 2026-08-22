@@ -19,7 +19,8 @@ export type RankCardEntryKind =
   | "skill"
   | "talent"
   | "trait"
-  | "weapon-training";
+  | "weapon-training"
+  | "xp-spend";
 
 export interface RankCardEntry {
   id: string;
@@ -189,6 +190,16 @@ export function buildRankCards(character: Character): RankCard[] {
       name: `Exotic Weapon Training (${weapon.name})`,
       cost: weapon.xpPurchase?.cost ?? 0,
       kind: "weapon-training",
+    });
+  }
+
+  for (const transaction of character.experience.transactions ?? []) {
+    if (transaction.type !== "spend") continue;
+    cardsByRankId.get(transaction.rankId)?.rankUpXpSpent.push({
+      id: `xp-transaction:${transaction.id}`,
+      name: transaction.reason?.trim() || "DM XP Spend",
+      cost: transaction.amount,
+      kind: "xp-spend",
     });
   }
 

@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
 import { ExperienceTab } from "../../src/pages/characterSheet/ExperienceTab";
@@ -77,21 +78,23 @@ function renderTab(
   props: Partial<React.ComponentProps<typeof ExperienceTab>> = {}
 ) {
   const onUpdate = vi.fn();
+  const onUpdateHeader = vi.fn();
   render(
     <ExperienceTab
       character={makeCharacter()}
       isDM
       onUpdate={onUpdate}
+      onUpdateHeader={onUpdateHeader}
       {...props}
     />
   );
-  return { onUpdate };
+  return { onUpdate, onUpdateHeader };
 }
 
 describe("ExperienceTab named Career Rank ledger", () => {
   it("shows the Total, Spent, and Remaining XP summary", () => {
     renderTab();
-    expect(screen.getByRole("spinbutton", { name: "Total XP" })).toHaveValue(1_000);
+    expect(screen.getByText("1000")).toBeInTheDocument();
     expect(screen.getByText("550")).toBeInTheDocument();
     expect(screen.getByText("450")).toBeInTheDocument();
   });
@@ -131,19 +134,107 @@ describe("ExperienceTab named Career Rank ledger", () => {
     expect(screen.queryByRole("button", { name: /Rank 1/ })).not.toBeInTheDocument();
   });
 
-  it("temporarily preserves the DM Total XP editor until Add XP replaces it", () => {
+  it("lets the DM add XP without changing Spent XP", async () => {
+    const user = userEvent.setup();
     const { onUpdate } = renderTab();
-    const input = screen.getByRole("spinbutton", { name: "Total XP" });
-    fireEvent.change(input, { target: { value: "1200" } });
+    await user.click(screen.getByRole("button", { name: "Add XP" }));
+    const dialog = within(screen.getByRole("dialog", { name: "Add XP" }));
+    await user.type(dialog.getByRole("textbox", { name: "Add XP amount" }), "200");
+    await user.type(dialog.getByRole("textbox", { name: "Add XP reason" }), "Session award");
+    await user.click(dialog.getByRole("button", { name: "Confirm Add XP" }));
     expect(onUpdate).toHaveBeenLastCalledWith(
-      expect.objectContaining({ total: 1_200, spent: 550 })
+      expect.objectContaining({
+        total: 1_200,
+        spent: 550,
+        transactions: [
+          expect.objectContaining({
+            type: "add",
+            amount: 200,
+            reason: "Session award",
+            rankId: "scout",
+          }),
+        ],
+      })
     );
+  });
+
+  it("lets the DM spend available XP against the current Rank Card", async () => {
+    const user = userEvent.setup();
+    const { onUpdate } = renderTab();
+    await user.click(screen.getByRole("button", { name: "Spend XP" }));
+    const dialog = within(screen.getByRole("dialog", { name: "Spend XP" }));
+    await user.type(dialog.getByRole("textbox", { name: "Spend XP amount" }), "100");
+    await user.type(dialog.getByRole("textbox", { name: "Spend XP reason" }), "Elite advance");
+    await user.click(dialog.getByRole("button", { name: "Confirm Spend XP" }));
+    expect(onUpdate).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        total: 1_000,
+        spent: 650,
+        transactions: [
+          expect.objectContaining({
+            type: "spend",
+            amount: 100,
+            reason: "Elite advance",
+            rankId: "scout",
+          }),
+        ],
+      })
+    );
+  });
+
+  it("blocks Rank Up until the next Spent XP threshold", () => {
+    renderTab();
+    expect(screen.getByRole("button", { name: "Rank Up" })).toBeDisabled();
+    expect(screen.getByText("7450 more Spent XP is required.")).toBeInTheDocument();
+  });
+
+  it("requires a valid branch choice and confirms exactly one Rank Up", async () => {
+    const user = userEvent.setup();
+    const current = makeCharacter();
+    const { onUpdateHeader } = renderTab({
+      character: {
+        ...current,
+        header: { ...current.header, rank: "Veteran", careerPath: undefined },
+        experience: { total: 7_000, spent: 6_000, ranks: [] },
+      },
+    });
+
+    await user.click(screen.getByRole("button", { name: "Rank Up" }));
+    const dialog = within(screen.getByRole("dialog", { name: "Confirm Rank Up" }));
+    expect(dialog.getByRole("button", { name: "Assault Veteran" })).toBeInTheDocument();
+    expect(dialog.getByRole("button", { name: "Lieutenant" })).toBeInTheDocument();
+    expect(dialog.getByRole("button", { name: "Scout" })).toBeInTheDocument();
+    expect(dialog.getByRole("button", { name: "Confirm Rank Up" })).toBeDisabled();
+
+    await user.click(dialog.getByRole("button", { name: "Scout" }));
+    await user.click(dialog.getByRole("button", { name: "Confirm Rank Up" }));
+    expect(onUpdateHeader).toHaveBeenLastCalledWith(
+      expect.objectContaining({ rank: "Scout", careerPath: "Scout" })
+    );
+  });
+
+  it("offers Add XP and Spend XP in the final rank-up review", async () => {
+    const user = userEvent.setup();
+    const current = makeCharacter();
+    renderTab({
+      character: {
+        ...current,
+        header: { ...current.header, rank: "Guard", careerPath: undefined },
+        experience: { total: 1_500, spent: 1_000, ranks: [] },
+      },
+    });
+    await user.click(screen.getByRole("button", { name: "Rank Up" }));
+    const dialog = within(screen.getByRole("dialog", { name: "Confirm Rank Up" }));
+    expect(dialog.getByRole("button", { name: "Add XP" })).toBeInTheDocument();
+    expect(dialog.getByRole("button", { name: "Spend XP" })).toBeInTheDocument();
   });
 
   it("shows the summary and cards read-only to a player", () => {
     renderTab({ isDM: false });
     expect(screen.getByText("Read-only")).toBeInTheDocument();
-    expect(screen.queryByRole("spinbutton", { name: "Total XP" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Add XP" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Spend XP" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Rank Up" })).not.toBeInTheDocument();
     expect(screen.getByRole("article", { name: "Scout Rank Card" })).toBeInTheDocument();
   });
 
