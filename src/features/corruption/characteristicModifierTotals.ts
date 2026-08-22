@@ -54,7 +54,7 @@ export function getCharacteristicModifierTotals(
 
 export interface CharacteristicModifierSource {
   name: string;
-  type: "Malignancy" | "Minor Mutation" | "Major Mutation" | "Talent" | "Trait";
+  type: "Malignancy" | "Minor Mutation" | "Major Mutation" | "Talent" | "Trait" | "Career" | "Homeworld";
   amount: number;
 }
 

@@ -45,6 +45,11 @@ describe("Trait cross-page effects", () => {
     expect(getTraitCharacteristicModifierSources(talents, "t", "Adept").map((source) => source.amount)).toEqual([10, 3]);
     expect(getTraitCharacteristicModifierSources(talents, "int", "Adept")).toEqual([]);
 
+    const forgeHomeworld = block({ homeworld: "forge-world" });
+    expect(getTraitCharacteristicModifierSources(forgeHomeworld, "int", "Adept")).toEqual([
+      expect.objectContaining({ name: "Fit For Purpose", amount: 3, type: "Homeworld" }),
+    ]);
+
     const soulBound = block({ traits: [trait("soul-bound", undefined, {
       acquisition: { trait: { soulBound: { entity: "The Emperor", consequence: "characteristic", characteristic: "wp", rolledValue: 7 } } },
     })] });
@@ -53,26 +58,47 @@ describe("Trait cross-page effects", () => {
     ]);
   });
 
-  it("applies Homeworld and Blank Slate Skill rules with named Trait sources", () => {
+  it("labels selected-Homeworld Skill rules as Homeworld while preserving other origins", () => {
     const techUse = DEFAULT_SKILLS.find((skill) => skill.id === "tech-use")!;
     const hive = block({ homeworld: "hive-world" });
-    expect(getTraitSkillEffects(hive, techUse).countsAsBasic).toBe(true);
+    const hiveTechUse = getTraitSkillEffects(hive, techUse);
+    expect(hiveTechUse.countsAsBasic).toBe(true);
+    expect(hiveTechUse.sources).toEqual([
+      expect.objectContaining({ name: "Caves of Steel", type: "Homeworld" }),
+    ]);
 
     const commonTech = DEFAULT_SKILLS.find((skill) => skill.id === "common-tech")!;
     const machineCult = DEFAULT_SKILLS.find((skill) => skill.id === "common-machine-cult")!;
     const forge = block({ homeworld: "forge-world" });
-    expect(getTraitSkillEffects(forge, commonTech).countsAsBasic).toBe(true);
-    expect(getTraitSkillEffects(forge, machineCult).countsAsBasic).toBe(true);
+    expect(getTraitSkillEffects(forge, commonTech)).toEqual(expect.objectContaining({
+      countsAsBasic: true,
+      sources: [expect.objectContaining({ name: "Forge World", type: "Homeworld" })],
+    }));
+    expect(getTraitSkillEffects(forge, machineCult)).toEqual(expect.objectContaining({
+      countsAsBasic: true,
+      sources: [expect.objectContaining({ name: "Forge World", type: "Homeworld" })],
+    }));
     expect(getTraitSkillEffects(hive, machineCult).countsAsBasic).toBeUndefined();
+
+    const cultureTalent = block({
+      talents: [trait("cult-briefing", "Culture", {
+        acquisition: { homeworldId: "hive-world" },
+      })],
+    });
+    expect(getTraitSkillEffects(cultureTalent, techUse).sources).toEqual([
+      expect.objectContaining({ name: "Caves of Steel", type: "Talent" }),
+    ]);
 
     const lore = DEFAULT_SKILLS.find((skill) => skill.category === "Common Lore")!;
     const blank = block({ traits: [trait("blank-slate", undefined, {
       acquisition: { trait: { blankSlateSkillIds: [lore.id, "trade-copyist", "forbidden-inquisition"] } },
     })] });
-    expect(getTraitSkillEffects(blank, lore)).toEqual(expect.objectContaining({
+    const blankEffects = getTraitSkillEffects(blank, lore);
+    expect(blankEffects).toEqual(expect.objectContaining({
       minimumLevel: "trained",
       modifier: 10,
     }));
+    expect(blankEffects.sources.every((source) => source.type === "Trait")).toBe(true);
   });
 
   it("records starting and acquisition Insanity separately from the base value", () => {
@@ -83,9 +109,10 @@ describe("Trait cross-page effects", () => {
         acquisition: { trait: { soulBound: { entity: "The Emperor", consequence: "insanity", rolledValue: 4 } } },
       })],
     });
-    expect(getTraitInsanityModifierSources(talents).map((source) => source.amount)).toEqual(
-      expect.arrayContaining([6, 4])
-    );
+    expect(getTraitInsanityModifierSources(talents)).toEqual(expect.arrayContaining([
+      expect.objectContaining({ name: "Through a Mirror Darkly", amount: 6, type: "Homeworld" }),
+      expect.objectContaining({ name: "Soul-bound", amount: 4, type: "Trait" }),
+    ]));
   });
 
   it("counts a manually-purchased Sanctioned Psyker only once when the same career also derives it", () => {

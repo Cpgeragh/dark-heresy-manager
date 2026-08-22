@@ -126,7 +126,17 @@ describe("Talent cross-page effects", () => {
     ]);
     expect(getTalentSkillEffects(talents, skill({ name: "Awareness" })).modifier).toBe(10);
     expect(getTalentSkillEffects(talents, skill({ id: "silent-move", name: "Silent Move" })).modifier).toBe(-10);
-    expect(getTalentSkillEffects(talents, skill({ id: "common-lore-imperium", name: "Common Lore (Imperium)", category: "Common Lore", advanced: true })).countsAsBasic).toBe(true);
+    const politicalCommonLore = getTalentSkillEffects(
+      talents,
+      skill({ id: "common-lore-imperium", name: "Common Lore (Imperium)", category: "Common Lore", advanced: true })
+    );
+    expect(politicalCommonLore.countsAsBasic).toBe(true);
+    expect(politicalCommonLore.sources).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        name: "Cult Briefing (Political)",
+        detail: "counts Common Lore (Imperium) as Basic",
+      }),
+    ]));
     expect(getTalentSkillEffects(talents, skill({ id: "tech-use", name: "Tech-Use", advanced: true })).minimumLevel).toBe("trained");
     expect(getTalentSkillEffects(talents, skill({ id: "deceive", name: "Deceive", characteristic: "fel" })).characteristic).toBe("int");
   });
@@ -146,7 +156,7 @@ describe("Talent cross-page effects", () => {
     expect(untrainedTechUse.minimumLevel).toBe("trained");
     expect(untrainedTechUse.sources).toEqual(expect.arrayContaining([
       expect.objectContaining({ name: "Cult Briefing (Heretek)", detail: "counts Tech-Use as trained" }),
-      expect.objectContaining({ name: "Caves of Steel", detail: "counts as Basic" }),
+      expect.objectContaining({ name: "Caves of Steel", type: "Homeworld", detail: "counts Tech-Use as Basic" }),
     ]));
 
     for (const level of ["trained", "+10", "+20"] as const) {
@@ -159,7 +169,7 @@ describe("Talent cross-page effects", () => {
       // keeps contributing once trained; Cult Briefing (Heretek)'s own trained-forcing effect
       // correctly stops, it has its own separate untrained-only condition.
       expect(trainedTechUse.sources).toEqual([
-        expect.objectContaining({ name: "Caves of Steel", detail: "counts as Basic" }),
+        expect.objectContaining({ name: "Caves of Steel", type: "Homeworld", detail: "counts Tech-Use as Basic" }),
       ]);
     }
 

@@ -18,9 +18,9 @@ import { getDerivedCareerSkillIds, getDerivedCareerTalentGrants } from "../caree
 
 export interface TalentModifierSource {
   name: string;
-  type: "Talent" | "Trait";
+  type: NonNullable<TalentEntry["grantedByType"]>;
   amount: number;
-  /** Qualitative effect description (e.g. "counts as Basic", "Trained"), shown instead of the amount when present. */
+  /** Qualitative effect description (e.g. "counts Tech-Use as Basic", "Trained"), shown instead of the amount when present. */
   detail?: string;
 }
 
@@ -224,7 +224,7 @@ export function getTalentSkillEffects(
 
   if (skill.category === "Common Lore" && cultEntry(talents, "Political")) {
     effects.countsAsBasic = true;
-    effects.sources.push({ name: "Cult Briefing (Political)", type: "Talent", amount: 0, detail: "counts as Basic" });
+    effects.sources.push({ name: "Cult Briefing (Political)", type: "Talent", amount: 0, detail: `counts ${skill.name} as Basic` });
   }
 
   if (skill.id === "tech-use" && skill.level === "untrained" && cultEntry(talents, "Heretek")) {
