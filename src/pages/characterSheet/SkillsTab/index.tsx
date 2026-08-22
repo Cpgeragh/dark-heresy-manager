@@ -107,7 +107,7 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
   const trainedSkills = useMemo(
     () =>
       computedSkills
-        .filter((s) => s.level !== "untrained" || !s.advanced)
+        .filter((s) => s.level !== "untrained")
         .sort((a, b) => a.name.localeCompare(b.name)),
     [computedSkills]
   );
@@ -153,12 +153,6 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
   const basicItems = useMemo(() => buildItems("basic"), [buildItems]);
   const advancedItems = useMemo(() => buildItems("advanced"), [buildItems]);
 
-  const trainedBasicItems = useMemo(
-    () => basicItems.filter((item) =>
-      item.type === "skill" ? item.skill.level !== "untrained" : item.skills.some((s) => s.level !== "untrained")
-    ),
-    [basicItems]
-  );
   const untrainedBasicSkills = useMemo(
     () => computedSkills.filter((s) => s.level === "untrained" && !s.advanced),
     [computedSkills]
@@ -230,7 +224,7 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
     );
 
   const renderBasicSection = () => (
-    <div className="space-y-2">{renderItems(trainedBasicItems)}</div>
+    <div className="space-y-2">{renderItems(basicItems)}</div>
   );
 
   return (
@@ -311,6 +305,9 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
       </div>
 
       <AddSkillModal
+        title="Available Untrained Advanced Skills"
+        allSkillsTitle="All Untrained Advanced Skills"
+        showAllLabel="Show All Untrained Advanced Skills"
         isOpen={isAddOpen}
         editable={editable}
         onClose={() => setIsAddOpen(false)}
@@ -321,7 +318,9 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
         isDM={isDM}
       />
       <AddSkillModal
-        title="Untrained Basic Skills"
+        title="Available Untrained Basic Skills"
+        allSkillsTitle="All Untrained Basic Skills"
+        showAllLabel="Show All Untrained Basic Skills"
         isOpen={isUntrainedBasicOpen}
         editable={editable}
         onClose={() => setIsUntrainedBasicOpen(false)}

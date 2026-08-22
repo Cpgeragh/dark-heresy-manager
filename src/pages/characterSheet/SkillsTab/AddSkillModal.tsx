@@ -1,6 +1,6 @@
 // src/pages/characterSheet/SkillsTab/AddSkillModal.tsx
 
-import { useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import {
   CHAR_LABEL,
   getSkillGroupCharacteristics,
@@ -21,6 +21,8 @@ import { canConfirmManualCostPurchase } from "../../../utils/dmGatedPurchase";
 interface AddSkillModalProps {
   isOpen: boolean;
   title?: string;
+  allSkillsTitle?: string;
+  showAllLabel?: string;
   editable?: boolean;
   onClose: () => void;
   untrainedSkills: SkillWithComputed[];
@@ -69,6 +71,8 @@ function groupSkills(skills: SkillWithComputed[], search: string): ListItem[] {
 export function AddSkillModal({
   isOpen,
   title,
+  allSkillsTitle,
+  showAllLabel = "Show all skills",
   editable = true,
   onClose,
   untrainedSkills,
@@ -108,6 +112,15 @@ export function AddSkillModal({
 
   const listItems = useMemo(() => groupSkills(visibleSkills, search), [visibleSkills, search]);
   const overflowListItems = useMemo(() => groupSkills(untrainedSkills, search), [untrainedSkills, search]);
+
+  useEffect(() => {
+    if (!isOpen || !openCategory) return;
+    const sourceItems = showOverflow ? overflowListItems : listItems;
+    const categoryStillHasSkills = sourceItems.some(
+      (item) => item.type === "group" && item.category === openCategory && item.skills.length > 0
+    );
+    if (!categoryStillHasSkills) setOpenCategory(null);
+  }, [isOpen, listItems, openCategory, overflowListItems, showOverflow]);
 
   if (!isOpen) return null;
 
@@ -240,7 +253,7 @@ export function AddSkillModal({
     const canSelect = editable && canConfirmManualCostPurchase(isDM);
     return (
       <PickerModal
-        title={modalTitle}
+        title={allSkillsTitle ?? modalTitle}
         titleClassName="text-red-500"
         placeholder="Search skills…"
         query={search}
@@ -292,7 +305,7 @@ export function AddSkillModal({
             onClick={() => setShowOverflow(true)}
             className="w-full rounded border border-slate-500 bg-slate-900 px-2 py-1 text-xs lg:text-sm text-slate-200 text-left"
           >
-            Show all skills
+            {showAllLabel}
           </button>
         )
       }
