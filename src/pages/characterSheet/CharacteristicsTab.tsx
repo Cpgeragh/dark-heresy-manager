@@ -18,7 +18,11 @@ import {
   MOVEMENT_RUN_MULTIPLIER,
 } from "../../constants/gameRules";
 import { calculateCharacteristicTotal } from "../../utils/stats";
-import { getCharacteristicTierCosts } from "../../features/experience/characteristicAdvanceCosts";
+import {
+  CHARACTERISTIC_ADVANCE_TIERS,
+  getCharacteristicTierCosts,
+} from "../../features/experience/characteristicAdvanceCosts";
+import { makeCurrentRankPurchase } from "../../features/experience/purchaseAttribution";
 import {
   uiSection,
   uiCell,
@@ -139,6 +143,7 @@ interface CharacteristicsTabProps {
   corruption: CorruptionBlock;
   talents?: TalentsAndTraitsBlock;
   career?: string;
+  rank?: string;
   updateCharacteristic: (statKey: keyof Characteristics, value: CharField) => void;
 }
 
@@ -150,6 +155,7 @@ export function CharacteristicsTab({
   corruption,
   talents,
   career,
+  rank,
   updateCharacteristic,
 }: CharacteristicsTabProps) {
   const modifierTotals = getCharacteristicModifierTotals(corruption, talents, career);
@@ -318,6 +324,34 @@ export function CharacteristicsTab({
   const movementAB = movementEffects.agilityBonus;
   const waryInitiative = talents ? getWaryInitiativeBonus(talents, career) : 0;
 
+  const updateCharacteristicWithPurchase = useCallback(
+    (statKey: keyof Characteristics, next: CharField) => {
+      const current = getCharField(statKey);
+      const purchases = { ...current.advancePurchases };
+      const tierCosts = getCharacteristicTierCosts(career, statKey);
+
+      if (next.advances > current.advances) {
+        for (let index = current.advances; index < next.advances; index += 1) {
+          const tier = CHARACTERISTIC_ADVANCE_TIERS[index];
+          const cost = tierCosts[index];
+          if (tier && typeof cost === "number") {
+            purchases[tier] = makeCurrentRankPurchase(career, rank, cost);
+          }
+        }
+      } else if (next.advances < current.advances) {
+        for (let index = next.advances; index < CHARACTERISTIC_ADVANCE_TIERS.length; index += 1) {
+          delete purchases[CHARACTERISTIC_ADVANCE_TIERS[index]];
+        }
+      }
+
+      updateCharacteristic(statKey, {
+        ...next,
+        ...(Object.keys(purchases).length > 0 ? { advancePurchases: purchases } : { advancePurchases: undefined }),
+      });
+    },
+    [career, getCharField, rank, updateCharacteristic]
+  );
+
   return (
     <div className="space-y-6 text-slate-100">
       {/* Stats */}
@@ -459,7 +493,7 @@ export function CharacteristicsTab({
               sources={getCharacteristicModifierSources(corruption, prevStat, talents, career)}
               tierCosts={getCharacteristicTierCosts(career, prevStat)}
               getCharField={getCharField}
-              updateCharacteristic={updateCharacteristic}
+              updateCharacteristic={updateCharacteristicWithPurchase}
             />
           </div>
           <div className="rounded-lg shadow-[0_0_10px_1px_rgba(203,213,225,0.25)]" style={{ flex: `0 0 ${slideWidth}px`, minWidth: 0, marginRight: GAP_PX }}>
@@ -472,7 +506,7 @@ export function CharacteristicsTab({
               sources={getCharacteristicModifierSources(corruption, activeStat, talents, career)}
               tierCosts={getCharacteristicTierCosts(career, activeStat)}
               getCharField={getCharField}
-              updateCharacteristic={updateCharacteristic}
+              updateCharacteristic={updateCharacteristicWithPurchase}
             />
           </div>
           <div
@@ -489,7 +523,7 @@ export function CharacteristicsTab({
               sources={getCharacteristicModifierSources(corruption, nextStat, talents, career)}
               tierCosts={getCharacteristicTierCosts(career, nextStat)}
               getCharField={getCharField}
-              updateCharacteristic={updateCharacteristic}
+              updateCharacteristic={updateCharacteristicWithPurchase}
             />
           </div>
         </div>
@@ -507,7 +541,7 @@ export function CharacteristicsTab({
             sources={getCharacteristicModifierSources(corruption, key, talents, career)}
             tierCosts={getCharacteristicTierCosts(career, key)}
             getCharField={getCharField}
-            updateCharacteristic={updateCharacteristic}
+              updateCharacteristic={updateCharacteristicWithPurchase}
           />
         ))}
       </div>

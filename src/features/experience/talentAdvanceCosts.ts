@@ -1,8 +1,9 @@
 // src/features/experience/talentAdvanceCosts.ts
 
-import type { Character, TalentEntry } from "../../types/Character";
+import type { Character, TalentEntry, XpPurchaseRecord } from "../../types/Character";
 import { getAllCareerAdvances, getUnlockedCareerAdvances } from "./careerAdvanceAccess";
 import { findCareerByName } from "../../data/careerData";
+import { makeSourceRankPurchase } from "./purchaseAttribution";
 
 function matches(
   advance: { talentId?: string; traitId?: string; specialisation?: string },
@@ -21,6 +22,28 @@ function isTalentOrTraitAdvance(advance: { kind: string }): boolean {
   return advance.kind === "talent" || advance.kind === "trait";
 }
 
+/** Exact Career-table slot consumed by the next real purchase. */
+export function getNextTalentPurchase(
+  career: string | undefined,
+  rank: string | undefined,
+  talentId: string,
+  specialisation: string | undefined,
+  ownedEntries: readonly TalentEntry[]
+): XpPurchaseRecord | undefined {
+  const slots = getUnlockedCareerAdvances(career, rank)
+    .filter((entry) => isTalentOrTraitAdvance(entry.advance) && matches(entry.advance, talentId, specialisation))
+    .flatMap((entry) =>
+      Array.from({ length: entry.advance.repeatableAtThisRank ?? 1 }, () => ({
+        cost: entry.advance.cost,
+        rankId: entry.rankId,
+      }))
+    )
+    .sort((a, b) => a.cost - b.cost);
+  const owned = ownedEntries.filter((entry) => matches(entry, talentId, specialisation)).length;
+  const slot = slots[owned];
+  return slot ? makeSourceRankPurchase(career, slot.rankId, slot.cost) : undefined;
+}
+
 /** Real cost of the next copy of this talent, only if a currently-unlocked slot is still unbought. */
 export function getNextTalentCost(
   career: string | undefined,
@@ -29,12 +52,7 @@ export function getNextTalentCost(
   specialisation: string | undefined,
   ownedEntries: readonly TalentEntry[]
 ): number | undefined {
-  const slots = getUnlockedCareerAdvances(career, rank)
-    .filter((entry) => isTalentOrTraitAdvance(entry.advance) && matches(entry.advance, talentId, specialisation))
-    .flatMap((entry) => Array(entry.advance.repeatableAtThisRank ?? 1).fill(entry.advance.cost))
-    .sort((a, b) => a - b);
-  const owned = ownedEntries.filter((entry) => matches(entry, talentId, specialisation)).length;
-  return slots[owned];
+  return getNextTalentPurchase(career, rank, talentId, specialisation, ownedEntries)?.cost;
 }
 
 /** True if this talent has real career-table entries within reached ranks, but every one of those slots is already owned. */
@@ -105,8 +123,8 @@ export function getTalentsSpent(character: Character): number {
   let total = 0;
   for (const entry of [...character.talentsAndTraits.talents, ...character.talentsAndTraits.traits]) {
     if (entry.grantedByTalentEntryUid) continue;
-    const realCost = getNextTalentCost(career, rank, entry.talentId, entry.specialisation, counted);
-    total += realCost ?? entry.manualCost ?? 0;
+    const legacyRealCost = getNextTalentCost(career, rank, entry.talentId, entry.specialisation, counted);
+    total += entry.xpPurchase?.cost ?? legacyRealCost ?? entry.manualCost ?? 0;
     counted.push(entry);
   }
   return total;

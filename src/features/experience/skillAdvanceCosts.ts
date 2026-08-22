@@ -1,11 +1,12 @@
 // src/features/experience/skillAdvanceCosts.ts
 
-import type { Character, SkillEntry } from "../../types/Character";
+import type { Character, SkillEntry, XpPurchaseRecord } from "../../types/Character";
 import {
   getAllCareerAdvances,
   getUnlockedCareerAdvances,
   type AccessibleCareerAdvance,
 } from "./careerAdvanceAccess";
+import { makeSourceRankPurchase } from "./purchaseAttribution";
 
 const SKILL_TIERS = ["trained", "+10", "+20"] as const;
 type SkillTier = (typeof SKILL_TIERS)[number];
@@ -46,7 +47,7 @@ export function getUnlockedSkillTrainingCosts(
 }
 
 export type SkillTierAccess =
-  | { status: "unlocked"; level: SkillTier; cost: number }
+  | { status: "unlocked"; level: SkillTier; cost: number; purchase: XpPurchaseRecord }
   | { status: "locked"; level: SkillTier }
   | { status: "not-on-career"; level: SkillTier }
   | { status: "maxed" };
@@ -62,8 +63,20 @@ export function getNextSkillTierAccess(
   if (nextIndex >= SKILL_TIERS.length) return { status: "maxed" };
   const nextTier = SKILL_TIERS[nextIndex];
 
-  const unlockedCost = findSkillCost(getUnlockedCareerAdvances(career, rank), skillId, nextTier);
-  if (unlockedCost !== undefined) return { status: "unlocked", level: nextTier, cost: unlockedCost };
+  const unlockedEntry = getUnlockedCareerAdvances(career, rank).find(
+    (entry) =>
+      entry.advance.kind === "skill" &&
+      entry.advance.skillId === skillId &&
+      (entry.advance.level ?? "trained") === nextTier
+  );
+  if (unlockedEntry) {
+    return {
+      status: "unlocked",
+      level: nextTier,
+      cost: unlockedEntry.advance.cost,
+      purchase: makeSourceRankPurchase(career, unlockedEntry.rankId, unlockedEntry.advance.cost),
+    };
+  }
 
   const existsAnywhere = findSkillCost(getAllCareerAdvances(career), skillId, nextTier) !== undefined;
   return existsAnywhere ? { status: "locked", level: nextTier } : { status: "not-on-career", level: nextTier };
@@ -77,7 +90,11 @@ export function getSkillsSpent(character: Character): number {
     const owned = tierIndex(skill.level);
     for (let i = 0; i <= owned; i++) {
       const tier = SKILL_TIERS[i];
-      total += findSkillCost(unlocked, skill.id, tier) ?? skill.manualCosts?.[tier] ?? 0;
+      total +=
+        skill.xpPurchases?.[tier]?.cost ??
+        findSkillCost(unlocked, skill.id, tier) ??
+        skill.manualCosts?.[tier] ??
+        0;
     }
   }
   return total;

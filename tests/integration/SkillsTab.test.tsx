@@ -455,9 +455,12 @@ describe("SkillsTab", () => {
     const user = userEvent.setup();
     // Manual-cost entry is DM-only, see the player visibility test below for
     // that gating itself.
-    const { onUpdate } = renderTab({ isDM: true });
-    // No career/rank configured, so the next tier (+10) has no real cost — the
-    // manual-cost upgrade path is what should appear.
+    const { onUpdate } = renderTab({
+      isDM: true,
+      career: "Guardsman",
+      rank: "Conscript",
+      skills: [skill({ id: "off-career-awareness" })],
+    });
     await user.click(screen.getAllByRole("button", { name: "Upgrade to +10" })[0]);
 
     const costInput = screen.getByRole("textbox");
@@ -466,9 +469,14 @@ describe("SkillsTab", () => {
 
     expect(onUpdate).toHaveBeenCalledTimes(1);
     const next = onUpdate.mock.calls[0][0] as SkillEntry[];
-    const updated = next.find((s) => s.id === "s1");
+    const updated = next.find((s) => s.id === "off-career-awareness");
     expect(updated?.level).toBe("+10");
     expect(updated?.manualCosts?.["+10"]).toBe(150);
+    expect(updated?.xpPurchases?.["+10"]).toEqual({
+      cost: 150,
+      careerId: "guardsman",
+      purchasedAtRankId: "conscript",
+    });
   });
 
   it("accepts 0 as a valid manual upgrade cost, blocking only a blank field", async () => {
@@ -518,10 +526,45 @@ describe("SkillsTab", () => {
     const updated = next.find((s) => s.id === "awareness");
     expect(updated?.level).toBe("+10");
     expect(updated?.manualCosts).toBeUndefined();
+    expect(updated?.xpPurchases?.["+10"]).toEqual({
+      cost: 100,
+      careerId: "guardsman",
+      sourceRankId: "scout",
+    });
+  });
+
+  it("removes refunded tier metadata when a Skill is downgraded", async () => {
+    const user = userEvent.setup();
+    const { onUpdate } = renderTab({
+      skills: [
+        skill({
+          level: "+20",
+          manualCosts: { trained: 50, "+10": 75, "+20": 100 },
+          xpPurchases: {
+            trained: { cost: 50, purchasedAtRankId: "conscript" },
+            "+10": { cost: 75, purchasedAtRankId: "guard" },
+            "+20": { cost: 100, purchasedAtRankId: "armsman" },
+          },
+        }),
+      ],
+    });
+
+    await user.click(screen.getAllByRole("button", { name: "Delete Awareness" })[0]);
+    await user.click(within(screen.getByRole("dialog", { name: "Manage Skill" })).getByRole(
+      "button",
+      { name: "Downgrade to +10" }
+    ));
+
+    const updated = (onUpdate.mock.calls[0][0] as SkillEntry[])[0];
+    expect(updated.level).toBe("+10");
+    expect(updated.manualCosts).toEqual({ trained: 50, "+10": 75 });
+    expect(updated.xpPurchases).toEqual({
+      trained: { cost: 50, purchasedAtRankId: "conscript" },
+      "+10": { cost: 75, purchasedAtRankId: "guard" },
+    });
   });
 
   it("shows no upgrade option at all when the next tier exists for the career but hasn't been reached yet", async () => {
-    const user = userEvent.setup();
     // Awareness +10 only appears at Scout; at Conscript it's real but locked, not
     // a manual-cost case.
     renderTab({

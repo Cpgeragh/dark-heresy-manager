@@ -59,6 +59,11 @@ describe("getNextSkillTierAccess", () => {
       status: "unlocked",
       level: "+10",
       cost: 100,
+      purchase: {
+        cost: 100,
+        careerId: "guardsman",
+        sourceRankId: "scout",
+      },
     });
   });
 

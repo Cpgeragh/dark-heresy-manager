@@ -67,7 +67,10 @@ describe("TalentPickerModal, career-aware overflow screen", () => {
     const user = userEvent.setup();
     const { onAdd } = renderPicker();
     await user.click(screen.getByText("Sound Constitution"));
-    expect(onAdd).toHaveBeenCalledWith(expect.objectContaining({ talentId: "sound-constitution" }));
+    expect(onAdd).toHaveBeenCalledWith(expect.objectContaining({
+      talentId: "sound-constitution",
+      xpPurchase: { cost: 100, careerId: "guardsman", sourceRankId: "conscript" },
+    }));
     expect(screen.queryByText("XP Cost")).not.toBeInTheDocument();
   });
 
@@ -98,7 +101,11 @@ describe("TalentPickerModal, career-aware overflow screen", () => {
     await user.type(screen.getByPlaceholderText("0"), "0");
     expect(confirm).toBeEnabled();
     await user.click(confirm);
-    expect(onAdd).toHaveBeenCalledWith(expect.objectContaining({ talentId: "sound-constitution", manualCost: 0 }));
+    expect(onAdd).toHaveBeenCalledWith(expect.objectContaining({
+      talentId: "sound-constitution",
+      manualCost: 0,
+      xpPurchase: { cost: 0, careerId: "guardsman", purchasedAtRankId: "conscript" },
+    }));
   });
 
   it("still opens the choice screen first for a grouped talent on the overflow screen, then manual-cost after choosing", async () => {

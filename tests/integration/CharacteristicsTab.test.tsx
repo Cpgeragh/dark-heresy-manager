@@ -52,6 +52,53 @@ function renderTab(
 }
 
 describe("CharacteristicsTab", () => {
+  it("records Characteristic Advance cost against the current named rank", async () => {
+    const user = userEvent.setup();
+    const updateCharacteristic = vi.fn();
+    const fields: Characteristics = {
+      ws: { base: 30, advances: 0 },
+      bs: BLANK_FIELD,
+      s: BLANK_FIELD,
+      t: BLANK_FIELD,
+      ag: BLANK_FIELD,
+      int: BLANK_FIELD,
+      per: BLANK_FIELD,
+      wp: BLANK_FIELD,
+      fel: BLANK_FIELD,
+    };
+    render(
+      <CharacteristicsTab
+        getCharField={(key) => fields[key]}
+        getEffectiveCharTotal={(key) => fields[key].base}
+        getCharBonus={(key) => Math.floor(fields[key].base / CHARACTERISTIC_BONUS_DIVISOR)}
+        editable
+        corruption={{ points: 0, malignancies: [] }}
+        career="Guardsman"
+        rank="Conscript"
+        updateCharacteristic={updateCharacteristic}
+      />
+    );
+
+    const advance = screen
+      .getAllByRole("button", { name: "Weapon Skill (WS) advance 1 of 4, 100 XP" })
+      .find((button) => !button.hasAttribute("disabled"));
+    expect(advance).toBeDefined();
+    await user.click(advance!);
+    await user.click(screen.getByRole("button", { name: "Upgrade" }));
+
+    expect(updateCharacteristic).toHaveBeenCalledWith("ws", {
+      base: 30,
+      advances: 1,
+      advancePurchases: {
+        simple: {
+          cost: 100,
+          careerId: "guardsman",
+          purchasedAtRankId: "conscript",
+        },
+      },
+    });
+  });
+
   it("renders all nine characteristic labels", () => {
     renderTab();
 

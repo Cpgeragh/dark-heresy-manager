@@ -100,6 +100,11 @@ describe("WeaponTrainingTab", () => {
     const next = onUpdate.mock.calls[0][0] as WeaponTrainingBlock;
     expect(next.trained).toContain("basic-las");
     expect(next.manualCosts).toBeUndefined();
+    expect(next.xpPurchases?.["basic-las"]).toEqual({
+      cost: 100,
+      careerId: "guardsman",
+      sourceRankId: "conscript",
+    });
   });
 
   it("does not call onUpdate if the confirm dialog is cancelled", async () => {
@@ -135,6 +140,11 @@ describe("WeaponTrainingTab", () => {
     const next = onUpdate.mock.calls[0][0] as WeaponTrainingBlock;
     expect(next.trained).toContain("basic-bolt");
     expect(next.manualCosts).toEqual({ "basic-bolt": 0 });
+    expect(next.xpPurchases?.["basic-bolt"]).toEqual({
+      cost: 0,
+      careerId: "guardsman",
+      purchasedAtRankId: "conscript",
+    });
   });
 
   it("shows exotic weapons as chips", () => {
@@ -200,7 +210,15 @@ describe("WeaponTrainingTab", () => {
 
     expect(onUpdate).toHaveBeenCalledTimes(1);
     const next = onUpdate.mock.calls[0][0] as WeaponTrainingBlock;
-    expect(next.exoticWeapons).toEqual([{ name: "Needle Pistol", cost: 200 }]);
+    expect(next.exoticWeapons).toEqual([{
+      name: "Needle Pistol",
+      cost: 200,
+      xpPurchase: {
+        cost: 200,
+        careerId: "guardsman",
+        purchasedAtRankId: "captain",
+      },
+    }]);
   });
 
   it("gives a DM a choice between using a slot and adding a bonus, when a slot is available", async () => {
@@ -224,7 +242,16 @@ describe("WeaponTrainingTab", () => {
 
     expect(onUpdate).toHaveBeenCalledTimes(1);
     const next = onUpdate.mock.calls[0][0] as WeaponTrainingBlock;
-    expect(next.exoticWeapons).toEqual([{ name: "Web Pistol", cost: 0, bonus: true }]);
+    expect(next.exoticWeapons).toEqual([{
+      name: "Web Pistol",
+      cost: 0,
+      bonus: true,
+      xpPurchase: {
+        cost: 0,
+        careerId: "guardsman",
+        purchasedAtRankId: "captain",
+      },
+    }]);
   });
 
   it("skips straight to the bonus form for a DM when no slots remain", async () => {

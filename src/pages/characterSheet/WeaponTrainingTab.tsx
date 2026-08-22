@@ -6,6 +6,7 @@ import type {
   WeaponTrainingBlock,
   WeaponTrainingExoticEntry,
   WeaponTrainingTalentId,
+  XpPurchaseRecord,
 } from "../../types/Character";
 import { WEAPON_TRAINING_GROUPS } from "../../data/weaponTrainingData";
 import { Button } from "../../ui/Button";
@@ -27,7 +28,11 @@ import {
   getGrantedExoticWeapons,
   getGrantedWeaponTrainingIds,
 } from "../../features/talents/talentEffects";
-import { getUnlockedExoticWeaponSlots, getWeaponTrainingCost } from "../../features/experience/weaponTrainingAdvanceCosts";
+import {
+  getUnlockedExoticWeaponSlots,
+  getWeaponTrainingPurchase,
+} from "../../features/experience/weaponTrainingAdvanceCosts";
+import { makeCurrentRankPurchase } from "../../features/experience/purchaseAttribution";
 
 interface WeaponTrainingTabProps {
   weaponTraining: WeaponTrainingBlock;
@@ -54,7 +59,9 @@ export function WeaponTrainingTab({
   rank,
   isDM = false,
 }: WeaponTrainingTabProps) {
-  const [pendingTrain, setPendingTrain] = useState<(PendingTrain & { cost: number }) | null>(null);
+  const [pendingTrain, setPendingTrain] = useState<
+    (PendingTrain & { purchase: XpPurchaseRecord }) | null
+  >(null);
   const [pendingManualTrain, setPendingManualTrain] = useState<PendingTrain | null>(null);
   const [manualTrainCost, setManualTrainCost] = useState("");
   const [pendingRemoveTraining, setPendingRemoveTraining] = useState<PendingTrain | null>(null);
@@ -70,7 +77,16 @@ export function WeaponTrainingTab({
 
   const handleRemoveTraining = useCallback(
     (id: WeaponTrainingTalentId) => {
-      onUpdate({ ...weaponTraining, trained: weaponTraining.trained.filter((t) => t !== id) });
+      const xpPurchases = { ...weaponTraining.xpPurchases };
+      const manualCosts = { ...weaponTraining.manualCosts };
+      delete xpPurchases[id];
+      delete manualCosts[id];
+      onUpdate({
+        ...weaponTraining,
+        trained: weaponTraining.trained.filter((t) => t !== id),
+        xpPurchases: Object.keys(xpPurchases).length > 0 ? xpPurchases : undefined,
+        manualCosts: Object.keys(manualCosts).length > 0 ? manualCosts : undefined,
+      });
     },
     [weaponTraining, onUpdate]
   );
@@ -83,7 +99,14 @@ export function WeaponTrainingTab({
 
   const confirmTrain = useCallback(() => {
     if (!pendingTrain) return;
-    onUpdate({ ...weaponTraining, trained: [...weaponTraining.trained, pendingTrain.id] });
+    onUpdate({
+      ...weaponTraining,
+      trained: [...weaponTraining.trained, pendingTrain.id],
+      xpPurchases: {
+        ...weaponTraining.xpPurchases,
+        [pendingTrain.id]: pendingTrain.purchase,
+      },
+    });
     setPendingTrain(null);
   }, [pendingTrain, weaponTraining, onUpdate]);
 
@@ -96,10 +119,14 @@ export function WeaponTrainingTab({
       ...weaponTraining,
       trained: [...weaponTraining.trained, pendingManualTrain.id],
       manualCosts: { ...weaponTraining.manualCosts, [pendingManualTrain.id]: manualTrainCostNumber },
+      xpPurchases: {
+        ...weaponTraining.xpPurchases,
+        [pendingManualTrain.id]: makeCurrentRankPurchase(career, rank, manualTrainCostNumber),
+      },
     });
     setPendingManualTrain(null);
     setManualTrainCost("");
-  }, [pendingManualTrain, canConfirmManualTrain, manualTrainCostNumber, weaponTraining, onUpdate]);
+  }, [pendingManualTrain, canConfirmManualTrain, manualTrainCostNumber, weaponTraining, career, rank, onUpdate]);
 
   const nonBonusExoticCount = weaponTraining.exoticWeapons.filter((weapon) => !weapon.bonus).length;
   const unlockedExoticSlots = getUnlockedExoticWeaponSlots(career, rank);
@@ -139,11 +166,12 @@ export function WeaponTrainingTab({
     const entry: WeaponTrainingExoticEntry = {
       name: newExoticName.trim(),
       cost: Number(newExoticCost),
+      xpPurchase: makeCurrentRankPurchase(career, rank, Number(newExoticCost)),
       ...(exoticFormMode === "bonus" ? { bonus: true } : {}),
     };
     onUpdate({ ...weaponTraining, exoticWeapons: [...weaponTraining.exoticWeapons, entry] });
     closeExoticForm();
-  }, [canConfirmExotic, exoticFormMode, newExoticName, newExoticCost, weaponTraining, onUpdate, closeExoticForm]);
+  }, [canConfirmExotic, exoticFormMode, newExoticName, newExoticCost, weaponTraining, career, rank, onUpdate, closeExoticForm]);
 
   const handleRemoveExotic = useCallback(
     (index: number) => {
@@ -172,9 +200,10 @@ export function WeaponTrainingTab({
               const granted = grantedTraining.includes(trainingId);
               const owned = weaponTraining.trained.includes(trainingId);
               const active = owned || granted;
-              const cost = active ? undefined : getWeaponTrainingCost(career, rank, trainingId);
-              const pulsing = !active && cost !== undefined;
-              const clickable = editable && !granted && (active || cost !== undefined || canConfirmManualCostPurchase(isDM));
+              const purchase = active ? undefined : getWeaponTrainingPurchase(career, rank, trainingId);
+              const cost = purchase?.cost;
+              const pulsing = !active && purchase !== undefined;
+              const clickable = editable && !granted && (active || purchase !== undefined || canConfirmManualCostPurchase(isDM));
 
               const handleClick = () => {
                 if (!clickable) return;
@@ -182,8 +211,8 @@ export function WeaponTrainingTab({
                   setPendingRemoveTraining({ id: trainingId, display, group: group.label });
                   return;
                 }
-                if (cost !== undefined) {
-                  setPendingTrain({ id: trainingId, display, group: group.label, cost });
+                if (purchase) {
+                  setPendingTrain({ id: trainingId, display, group: group.label, purchase });
                   return;
                 }
                 setPendingManualTrain({ id: trainingId, display, group: group.label });
@@ -283,7 +312,7 @@ export function WeaponTrainingTab({
         >
           <PickerBody>
             <p className={`text-sm lg:text-base ${uiTextBody} text-center`}>
-              Train {pendingTrain.group} ({pendingTrain.display}) for {pendingTrain.cost} XP?
+              Train {pendingTrain.group} ({pendingTrain.display}) for {pendingTrain.purchase.cost} XP?
             </p>
           </PickerBody>
         </PickerModal>

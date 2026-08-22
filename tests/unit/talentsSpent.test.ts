@@ -1,5 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { getTalentsSpent } from "../../src/features/experience/talentAdvanceCosts";
+import {
+  getNextTalentPurchase,
+  getTalentsSpent,
+} from "../../src/features/experience/talentAdvanceCosts";
 import { createEmptyCharacterData } from "../../src/utils/characterFactory";
 import type { Character, TalentEntry } from "../../src/types/Character";
 
@@ -32,6 +35,12 @@ function makeCharacter(overrides: {
 }
 
 describe("getTalentsSpent", () => {
+  it("returns the exact source-rank slot consumed by a real purchase", () => {
+    expect(
+      getNextTalentPurchase("Guardsman", "Conscript", "sound-constitution", undefined, [])
+    ).toEqual({ cost: 100, careerId: "guardsman", sourceRankId: "conscript" });
+  });
+
   it("is zero for a character with no talents or traits", () => {
     expect(getTalentsSpent(makeCharacter({ career: "Guardsman", rank: "Conscript" }))).toBe(0);
   });
@@ -62,6 +71,20 @@ describe("getTalentsSpent", () => {
       talents: [talentEntry({ uid: "s1", manualCost: 9999 })],
     });
     expect(getTalentsSpent(char)).toBe(100);
+  });
+
+  it("prefers the immutable paid cost over recalculating from the current career table", () => {
+    const char = makeCharacter({
+      career: "Guardsman",
+      rank: "Conscript",
+      talents: [
+        talentEntry({
+          uid: "s1",
+          xpPurchase: { cost: 175, careerId: "guardsman", sourceRankId: "conscript" },
+        }),
+      ],
+    });
+    expect(getTalentsSpent(char)).toBe(175);
   });
 
   it("charges nothing for an entry granted by another talent purchase", () => {

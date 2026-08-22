@@ -126,4 +126,64 @@ describe("getSpentXp", () => {
     // 100 (manual advance) + 100 (WS Simple) + 100 (Awareness Trained) + 100 (Sound Constitution) + 100 (Basic Weapon Training Las)
     expect(getSpentXp(char)).toBe(500);
   });
+
+  it("uses persisted paid costs instead of repricing owned advances from the current table", () => {
+    const data = createEmptyCharacterData({ campaignId: "c", recoveryCode: "r" });
+    const char: Character = {
+      ...data,
+      id: "test-char",
+      header: { ...data.header, career: "Guardsman", rank: "Scout" },
+      characteristics: {
+        ...data.characteristics,
+        ws: {
+          base: 30,
+          advances: 1,
+          advancePurchases: {
+            simple: { cost: 125, careerId: "guardsman", purchasedAtRankId: "conscript" },
+          },
+        },
+      },
+      skills: [
+        {
+          id: "awareness",
+          name: "Awareness",
+          characteristic: "per",
+          level: "+10",
+          category: "General",
+          advanced: false,
+          source: "CR",
+          xpPurchases: {
+            trained: { cost: 110, careerId: "guardsman", sourceRankId: "conscript" },
+            "+10": { cost: 115, careerId: "guardsman", sourceRankId: "scout" },
+          },
+        },
+      ],
+      talentsAndTraits: {
+        ...data.talentsAndTraits,
+        talents: [
+          {
+            uid: "sound",
+            talentId: "sound-constitution",
+            name: "Sound Constitution",
+            xpPurchase: { cost: 120, careerId: "guardsman", sourceRankId: "conscript" },
+          },
+        ],
+      },
+      weaponTraining: {
+        trained: ["basic-las"],
+        xpPurchases: {
+          "basic-las": { cost: 130, careerId: "guardsman", sourceRankId: "conscript" },
+        },
+        exoticWeapons: [
+          {
+            name: "Needle Pistol",
+            cost: 999,
+            xpPurchase: { cost: 140, careerId: "guardsman", purchasedAtRankId: "scout" },
+          },
+        ],
+      },
+    };
+
+    expect(getSpentXp(char)).toBe(740);
+  });
 });

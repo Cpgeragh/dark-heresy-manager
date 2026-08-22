@@ -2,8 +2,9 @@
 
 import { TALENT_LIST } from "../../data/talentData";
 import { WEAPON_TRAINING_GROUPS } from "../../data/weaponTrainingData";
-import type { Character, WeaponTrainingTalentId } from "../../types/Character";
+import type { Character, WeaponTrainingTalentId, XpPurchaseRecord } from "../../types/Character";
 import { getUnlockedCareerAdvances } from "./careerAdvanceAccess";
+import { makeSourceRankPurchase } from "./purchaseAttribution";
 
 function findWeaponTrainingMeta(
   id: WeaponTrainingTalentId
@@ -17,12 +18,12 @@ function findWeaponTrainingMeta(
   return undefined;
 }
 
-/** Real cost to train this weapon group, only if currently unlocked for this character's career/rank. */
-export function getWeaponTrainingCost(
+/** Exact Career-table slot consumed when training this fixed weapon group. */
+export function getWeaponTrainingPurchase(
   career: string | undefined,
   rank: string | undefined,
   id: WeaponTrainingTalentId
-): number | undefined {
+): XpPurchaseRecord | undefined {
   const meta = findWeaponTrainingMeta(id);
   if (!meta) return undefined;
   const match = getUnlockedCareerAdvances(career, rank).find(
@@ -31,7 +32,16 @@ export function getWeaponTrainingCost(
       entry.advance.talentId === meta.talentId &&
       (entry.advance.specialisation ?? "").toLocaleLowerCase() === meta.specialisation.toLocaleLowerCase()
   );
-  return match?.advance.cost;
+  return match ? makeSourceRankPurchase(career, match.rankId, match.advance.cost) : undefined;
+}
+
+/** Real cost to train this weapon group, only if currently unlocked for this character's career/rank. */
+export function getWeaponTrainingCost(
+  career: string | undefined,
+  rank: string | undefined,
+  id: WeaponTrainingTalentId
+): number | undefined {
+  return getWeaponTrainingPurchase(career, rank, id)?.cost;
 }
 
 /** Total number of Exotic Weapon Training slots currently unlocked for this character's career/rank. */
@@ -44,11 +54,15 @@ export function getUnlockedExoticWeaponSlots(career: string | undefined, rank: s
 /** Total XP currently spent on Weapon Training — the five fixed groups (real cost, or a DM's manual override) plus manually-costed Exotic weapons. */
 export function getWeaponTrainingSpent(character: Character): number {
   const { career, rank } = character.header;
-  const { trained, manualCosts, exoticWeapons } = character.weaponTraining;
+  const { trained, manualCosts, xpPurchases, exoticWeapons } = character.weaponTraining;
   const fixedGroupsSpent = trained.reduce(
-    (total, id) => total + (getWeaponTrainingCost(career, rank, id) ?? manualCosts?.[id] ?? 0),
+    (total, id) =>
+      total + (xpPurchases?.[id]?.cost ?? getWeaponTrainingCost(career, rank, id) ?? manualCosts?.[id] ?? 0),
     0
   );
-  const exoticSpent = exoticWeapons.reduce((total, weapon) => total + weapon.cost, 0);
+  const exoticSpent = exoticWeapons.reduce(
+    (total, weapon) => total + (weapon.xpPurchase?.cost ?? weapon.cost),
+    0
+  );
   return fixedGroupsSpent + exoticSpent;
 }

@@ -29,9 +29,11 @@ import { sourceColour } from "../../ui/sourceStyles";
 import { colourAmberFaint, colourValue } from "../../ui/colourTokens";
 import {
   getNextTalentCost,
+  getNextTalentPurchase,
   getTalentRankChips,
   hasAnyUnlockedTalentOption,
 } from "../../features/experience/talentAdvanceCosts";
+import { makeCurrentRankPurchase } from "../../features/experience/purchaseAttribution";
 import type { CampaignCustomItem } from "../../types/CustomItems";
 import type { CustomItemLibraryActionProps } from "../../types/CustomItemActions";
 import { CustomItemActionButtons } from "../../ui/CustomItemActionButtons";
@@ -291,9 +293,12 @@ export function TalentPickerModal({
       else resetPicked();
       return;
     }
-    const cost = getNextTalentCost(career, rank, item.id, itemSpecialisation, entries);
-    if (cost === undefined) return;
-    onAdd(makeTalentEntry(item as TalentData, itemSpecialisation));
+    const purchase = getNextTalentPurchase(career, rank, item.id, itemSpecialisation, entries);
+    if (!purchase) return;
+    onAdd({
+      ...makeTalentEntry(item as TalentData, itemSpecialisation),
+      xpPurchase: purchase,
+    });
     if (shouldReturnToChoicePicker) returnToChoicePicker();
     else resetPicked();
   };
@@ -348,7 +353,14 @@ export function TalentPickerModal({
             disabled={!canConfirm}
             onClick={() => {
               const shouldReturnToChoicePicker = pendingManualCost.returnToChoicePicker === true;
-              onAdd(makeTalentEntry(pendingManualCost.talent as TalentData, pendingManualCost.specialisation, cost));
+              onAdd({
+                ...makeTalentEntry(
+                  pendingManualCost.talent as TalentData,
+                  pendingManualCost.specialisation,
+                  cost
+                ),
+                xpPurchase: makeCurrentRankPurchase(career, rank, cost),
+              });
               setPendingManualCost(null);
               if (shouldReturnToChoicePicker) returnToChoicePicker();
               else resetPicked();

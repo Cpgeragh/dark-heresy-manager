@@ -552,6 +552,7 @@ export default function CharacterSheet({
               corruption={character.corruption}
               talents={character.talentsAndTraits}
               career={character.header.career}
+              rank={character.header.rank}
               updateCharacteristic={updateCharacteristic}
             />
           )}

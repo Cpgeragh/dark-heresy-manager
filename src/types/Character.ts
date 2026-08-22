@@ -10,6 +10,22 @@ import type { CustomItemOrigin } from "../constants/customItems";
 export interface CharField {
   base: number;
   advances: number;
+  /** Paid XP and rank attribution for each purchased Characteristic Advance tier. */
+  advancePurchases?: Partial<Record<CharacteristicAdvanceTier, XpPurchaseRecord>>;
+}
+
+export type CharacteristicAdvanceTier = "simple" | "intermediate" | "trained" | "expert";
+
+/**
+ * Immutable accounting metadata captured when an XP purchase is confirmed.
+ * Career-table purchases use sourceRankId; purchases without a named table
+ * source use purchasedAtRankId.
+ */
+export interface XpPurchaseRecord {
+  cost: number;
+  careerId?: string;
+  sourceRankId?: string;
+  purchasedAtRankId?: string;
 }
 
 export interface Characteristics {
@@ -53,6 +69,8 @@ export interface SkillEntry {
 
   /** XP cost paid for tiers bought off the career table, keyed by the tier reached. */
   manualCosts?: Partial<Record<Exclude<SkillAdvanceLevel, "untrained">, number>>;
+  /** Exact paid cost and rank attribution for each purchased tier. */
+  xpPurchases?: Partial<Record<Exclude<SkillAdvanceLevel, "untrained">, XpPurchaseRecord>>;
 }
 
 /**
@@ -548,6 +566,8 @@ export interface TalentEntry extends CustomLibraryLinkFields {
   acquisition?: TalentAcquisitionDetails;
   /** Hand-typed XP cost, only used when this entry has no real cost on the character's career table. */
   manualCost?: number;
+  /** Exact paid cost and source/current-rank attribution for this purchase. */
+  xpPurchase?: XpPurchaseRecord;
   /** Display-only provenance for a grant calculated from another purchase; never saved as a purchase. */
   grantedByTalentEntryUid?: string;
   grantedByTalentName?: string;
@@ -605,11 +625,15 @@ export interface WeaponTrainingBlock {
   exoticWeapons: WeaponTrainingExoticEntry[];
   /** DM-entered cost for a fixed group trained off the real career table. */
   manualCosts?: Partial<Record<WeaponTrainingTalentId, number>>;
+  /** Exact paid cost and rank attribution for each purchased fixed group. */
+  xpPurchases?: Partial<Record<WeaponTrainingTalentId, XpPurchaseRecord>>;
 }
 
 export interface WeaponTrainingExoticEntry {
   name: string;
   cost: number;
+  /** Exotic training is manually priced, so it is attributed to the current rank. */
+  xpPurchase?: XpPurchaseRecord;
   /** True if a DM granted this as a bonus, outside the character's unlocked slot count. */
   bonus?: boolean;
 }
