@@ -7,20 +7,32 @@ import {
   CHARACTERISTIC_ADVANCE_INCREMENT,
 } from "../constants/gameRules";
 import { validateCharacteristicBase, validateCharacteristicTotal } from "../utils/validation";
+import { Button } from "../ui/Button";
+import { PickerBody, PickerModal } from "../ui/PickerModal";
+import { uiTextBody } from "../ui/editableStyles";
 
 interface Props {
   label: string;
   value: CharField;
   editable: boolean;
   onChange: (newValue: CharField) => void;
+  hideLabel?: boolean;
   /** XP cost of each of the 4 advance tiers, in order. Undefined entries show no cost. */
   tierCosts?: (number | null | undefined)[];
 }
 
-export default function CharacteristicField({ label, value, editable, onChange, tierCosts }: Props) {
+export default function CharacteristicField({
+  label,
+  value,
+  editable,
+  onChange,
+  hideLabel = false,
+  tierCosts,
+}: Props) {
   const { base, advances } = value;
   const [error, setError] = useState<string | undefined>();
   const [draft, setDraft] = useState(String(base));
+  const [pendingAdvances, setPendingAdvances] = useState<number | null>(null);
   const isFocused = useRef(false);
 
   // ── Base input handlers ────────────────────────────────────────────────────
@@ -100,87 +112,147 @@ export default function CharacteristicField({ label, value, editable, onChange, 
       }
 
       setError(undefined);
-      onChange({ base, advances: newAdvances });
+      setPendingAdvances(newAdvances);
     },
-    [editable, base, advances, onChange, tierCosts]
+    [editable, base, advances, tierCosts]
   );
 
   const total = base + advances * CHARACTERISTIC_ADVANCE_INCREMENT;
+  const isUpgrade = pendingAdvances !== null && pendingAdvances > advances;
+  const changedTierCosts = pendingAdvances === null
+    ? []
+    : isUpgrade
+      ? tierCosts?.slice(advances, pendingAdvances) ?? []
+      : tierCosts?.slice(pendingAdvances, advances) ?? [];
+  const hasCompleteCost =
+    changedTierCosts.length === Math.abs((pendingAdvances ?? advances) - advances) &&
+    changedTierCosts.every((cost): cost is number => typeof cost === "number");
+  const changedXp = hasCompleteCost
+    ? changedTierCosts.reduce((sum, cost) => sum + cost, 0)
+    : undefined;
+
+  const confirmAdvanceChange = useCallback(() => {
+    if (pendingAdvances === null) return;
+    onChange({ base, advances: pendingAdvances });
+    setPendingAdvances(null);
+  }, [base, onChange, pendingAdvances]);
 
   return (
-    <div className="mb-4 p-3 lg:p-4 border border-slate-700 rounded-md bg-slate-900/60">
-      <div className="font-semibold lg:text-lg mb-1">{label}</div>
+    <>
+      <div className="mb-4 p-3 lg:p-4 border border-slate-700 rounded-md bg-slate-900/60">
+        {!hideLabel && <div className="font-semibold lg:text-lg mb-1">{label}</div>}
 
-      {/* Base value */}
-      <div className="flex items-center gap-2 mb-2">
-        <span className="text-sm lg:text-base text-slate-400">Base:</span>
-        <input
-          type="text"
-          inputMode="numeric"
-          value={draft}
-          disabled={!editable}
-          onFocus={handleBaseFocus}
-          onChange={handleBaseChange}
-          onBlur={handleBaseBlur}
-          onKeyDown={handleBaseKeyDown}
-          aria-label={`${label} base value`}
-          aria-invalid={!!error}
-          aria-describedby={error ? `${label}-error` : undefined}
-          className={`w-20 lg:w-24 px-2 lg:px-3 py-1 lg:py-1.5 rounded text-sm lg:text-base text-slate-100 ${
-            error && editable
-              ? "bg-slate-800 border border-red-700 focus:border-red-600"
-              : "bg-slate-800 border border-slate-600 focus:border-red-500"
-          } focus:outline-none`}
-        />
-      </div>
-
-      {/* Advances */}
-      <div className="flex items-center gap-2 mb-2">
-        <span className="text-sm lg:text-base text-slate-400">Advances:</span>
-        {Array.from({ length: MAX_CHARACTERISTIC_ADVANCES }).map((_, idx) => {
-          const filled = idx < advances;
-          const cost = tierCosts?.[idx];
-          const locked = cost === null;
-          const clickable = editable && !locked;
-          return (
-            <div key={idx} className="flex flex-col items-center gap-0.5">
-              <button
-                type="button"
-                onClick={() => toggleAdvance(idx)}
-                disabled={!clickable}
-                aria-label={`${label} advance ${idx + 1} of ${MAX_CHARACTERISTIC_ADVANCES}${
-                  typeof cost === "number" ? `, ${cost} XP` : locked ? ", not available for this career" : ""
-                }`}
-                aria-pressed={filled}
-                tabIndex={clickable ? 0 : -1}
-                className={`h-8 w-8 sm:h-6 sm:w-6 lg:h-8 lg:w-8 border rounded flex items-center justify-center
-                  ${filled ? "bg-red-700 border-red-500" : "bg-slate-900 border-slate-600"}
-                  ${
-                    clickable
-                      ? "cursor-pointer hover:bg-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
-                      : "opacity-50 cursor-not-allowed"
-                  }`}
-              />
-              {typeof cost === "number" && (
-                <span className="text-[10px] leading-none text-slate-500 font-code">{cost}</span>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Total */}
-      <div className="text-sm lg:text-base">
-        <span className="text-slate-400">Total:</span>
-        <span className="ml-2 font-bold">{total}</span>
-      </div>
-
-      {/* Error message */}
-      {error && editable && (
-        <div id={`${label}-error`} className="text-xs lg:text-sm text-red-600 mt-2" role="alert">
-          {error}
+        {/* Base value */}
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-sm lg:text-base text-slate-400">Base:</span>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={draft}
+            disabled={!editable}
+            onFocus={handleBaseFocus}
+            onChange={handleBaseChange}
+            onBlur={handleBaseBlur}
+            onKeyDown={handleBaseKeyDown}
+            aria-label={`${label} base value`}
+            aria-invalid={!!error}
+            aria-describedby={error ? `${label}-error` : undefined}
+            className={`w-20 lg:w-24 px-2 lg:px-3 py-1 lg:py-1.5 rounded text-sm lg:text-base text-slate-100 ${
+              error && editable
+                ? "bg-slate-800 border border-red-700 focus:border-red-600"
+                : "bg-slate-800 border border-slate-600 focus:border-red-500"
+            } focus:outline-none`}
+          />
         </div>
+
+        {/* Advances */}
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-sm lg:text-base text-slate-400">Advances:</span>
+          {Array.from({ length: MAX_CHARACTERISTIC_ADVANCES }).map((_, idx) => {
+            const filled = idx < advances;
+            const cost = tierCosts?.[idx];
+            const locked = cost === null;
+            const clickable = editable && !locked;
+            return (
+              <div key={idx} className="flex flex-col items-center gap-0.5">
+                <button
+                  type="button"
+                  onClick={() => toggleAdvance(idx)}
+                  disabled={!clickable}
+                  aria-label={`${label} advance ${idx + 1} of ${MAX_CHARACTERISTIC_ADVANCES}${
+                    typeof cost === "number" ? `, ${cost} XP` : locked ? ", not available for this career" : ""
+                  }`}
+                  aria-pressed={filled}
+                  tabIndex={clickable ? 0 : -1}
+                  className={`h-8 w-8 sm:h-6 sm:w-6 lg:h-8 lg:w-8 border rounded flex items-center justify-center
+                    ${filled ? "bg-red-700 border-red-500" : "bg-slate-900 border-slate-600"}
+                    ${
+                      clickable
+                        ? "cursor-pointer hover:border-red-600 hover:bg-red-900/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
+                        : editable && locked
+                          ? "opacity-50 cursor-not-allowed"
+                          : "cursor-default"
+                    }`}
+                />
+                {typeof cost === "number" && (
+                  <span className="text-[10px] leading-none text-slate-500 font-code">{cost}</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Total */}
+        <div className="text-sm lg:text-base">
+          <span className="text-slate-400">Total:</span>
+          <span className="ml-2 font-bold">{total}</span>
+        </div>
+
+        {/* Error message */}
+        {error && editable && (
+          <div id={`${label}-error`} className="text-xs lg:text-sm text-red-600 mt-2" role="alert">
+            {error}
+          </div>
+        )}
+      </div>
+
+      {pendingAdvances !== null && (
+        <PickerModal
+          title={isUpgrade ? "Upgrade Characteristic" : "Downgrade Characteristic"}
+          query=""
+          onQueryChange={() => undefined}
+          onClose={() => setPendingAdvances(null)}
+          isEmpty={false}
+          hideSearch
+          maxWidth="max-w-sm"
+          footer={
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                variant={isUpgrade ? "primary" : "warningOutline"}
+                onClick={confirmAdvanceChange}
+              >
+                {isUpgrade ? "Upgrade" : "Downgrade"}
+              </Button>
+              <Button variant="ghost" onClick={() => setPendingAdvances(null)}>
+                Cancel
+              </Button>
+            </div>
+          }
+        >
+          <PickerBody>
+            <p className={`text-sm lg:text-base ${uiTextBody} text-center`}>
+              {isUpgrade ? "Upgrade" : "Downgrade"} {label} from {advances} to {pendingAdvances}{" "}
+              {pendingAdvances === 1 ? "advance" : "advances"}
+              {changedXp !== undefined
+                ? isUpgrade
+                  ? ` for ${changedXp} XP`
+                  : ` and refund ${changedXp} XP`
+                : ""}
+              ?
+            </p>
+          </PickerBody>
+        </PickerModal>
       )}
-    </div>
+    </>
   );
 }

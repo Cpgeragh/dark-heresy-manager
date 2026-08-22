@@ -99,7 +99,8 @@ function StatBlock({
 
       {/* Base / Advances */}
       <CharacteristicField
-        label=""
+        label={label}
+        hideLabel
         value={value}
         editable={editable}
         onChange={handleChange}

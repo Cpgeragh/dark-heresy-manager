@@ -33,6 +33,23 @@ describe("CharacteristicField", () => {
     expect(screen.getByText("45")).toBeInTheDocument();
   });
 
+  it("keeps advance colours at full opacity in read-only mode", () => {
+    render(
+      <CharacteristicField
+        label="Weapon Skill"
+        value={{ base: 30, advances: 2 }}
+        editable={false}
+        onChange={() => {}}
+        tierCosts={[100, 250, 500, 750]}
+      />
+    );
+
+    for (const advance of screen.getAllByRole("button")) {
+      expect(advance).toBeDisabled();
+      expect(advance).not.toHaveClass("opacity-50");
+    }
+  });
+
   it("calls onChange when values change", () => {
     const value = { base: 30, advances: 3 };
     const onChange = vi.fn();
@@ -69,6 +86,74 @@ describe("CharacteristicField", () => {
     for (const cost of ["100", "250", "500", "750"]) {
       expect(screen.getByText(cost)).toBeInTheDocument();
     }
+  });
+
+  it("requires confirmation before purchasing a Characteristic advance", () => {
+    const onChange = vi.fn();
+    render(
+      <CharacteristicField
+        label="Weapon Skill"
+        value={{ base: 30, advances: 0 }}
+        editable
+        onChange={onChange}
+        tierCosts={[100, 250, 500, 750]}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /weapon skill advance 1 of 4/i }));
+    expect(onChange).not.toHaveBeenCalled();
+    const dialog = screen.getByRole("dialog", { name: "Upgrade Characteristic" });
+    expect(dialog).toHaveTextContent("Upgrade Weapon Skill from 0 to 1 advance for 100 XP?");
+
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.queryByRole("dialog", { name: "Upgrade Characteristic" })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /weapon skill advance 1 of 4/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Upgrade" }));
+    expect(onChange).toHaveBeenCalledWith({ base: 30, advances: 1 });
+  });
+
+  it("confirms the combined cost when purchasing several tiers at once", () => {
+    const onChange = vi.fn();
+    render(
+      <CharacteristicField
+        label="Ballistic Skill"
+        value={{ base: 30, advances: 0 }}
+        editable
+        onChange={onChange}
+        tierCosts={[250, 500, 750, 1000]}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /ballistic skill advance 4 of 4/i }));
+    const dialog = screen.getByRole("dialog", { name: "Upgrade Characteristic" });
+    expect(dialog).toHaveTextContent("Upgrade Ballistic Skill from 0 to 4 advances for 2500 XP?");
+    expect(onChange).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Upgrade" }));
+    expect(onChange).toHaveBeenCalledWith({ base: 30, advances: 4 });
+  });
+
+  it("requires confirmation and shows the refund before reducing advances", () => {
+    const onChange = vi.fn();
+    render(
+      <CharacteristicField
+        label="Ballistic Skill"
+        value={{ base: 30, advances: 4 }}
+        editable
+        onChange={onChange}
+        tierCosts={[250, 500, 750, 1000]}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /ballistic skill advance 1 of 4/i }));
+    expect(onChange).not.toHaveBeenCalled();
+    const dialog = screen.getByRole("dialog", { name: "Downgrade Characteristic" });
+    expect(dialog).toHaveTextContent("Downgrade Ballistic Skill from 4 to 0 advances and refund 2500 XP?");
+
+    fireEvent.click(screen.getByRole("button", { name: "Downgrade" }));
+    expect(onChange).toHaveBeenCalledWith({ base: 30, advances: 0 });
   });
 
   it("shows no cost labels when tierCosts is omitted", () => {
