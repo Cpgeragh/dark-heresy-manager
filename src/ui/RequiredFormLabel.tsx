@@ -1,10 +1,12 @@
 import type { ReactNode } from "react";
-import { uiFormLabel } from "./editableStyles";
+import { uiFormLabel, uiFormLabelBlue } from "./editableStyles";
+import { colourRequiredText } from "./colourTokens";
 
 interface SharedRequiredFormLabelProps {
   children: ReactNode;
   className?: string;
   supportingText?: ReactNode;
+  tone?: "default" | "blue";
 }
 
 type RequiredFormLabelProps = SharedRequiredFormLabelProps &
@@ -25,7 +27,7 @@ function RequiredLabelContent({
 }: Pick<SharedRequiredFormLabelProps, "children" | "supportingText">) {
   return (
     <>
-      {children} <span className="text-red-500" aria-hidden="true">*</span>
+      {children} <span className={colourRequiredText} aria-hidden="true">*</span>
       {supportingText && (
         <span className="ml-1 normal-case tracking-normal text-slate-500">
           {supportingText}
@@ -43,7 +45,7 @@ function RequiredLabelContent({
  * use the native required attribute or aria-required as appropriate.
  */
 export function RequiredFormLabel(props: RequiredFormLabelProps) {
-  const className = `${uiFormLabel} ${props.className ?? ""}`.trim();
+  const className = `${props.tone === "blue" ? uiFormLabelBlue : uiFormLabel} ${props.className ?? ""}`.trim();
   const content = (
     <RequiredLabelContent supportingText={props.supportingText}>
       {props.children}

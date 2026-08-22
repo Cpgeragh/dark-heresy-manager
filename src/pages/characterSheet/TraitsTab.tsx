@@ -369,6 +369,7 @@ export function TraitsTab({
               career={career}
               rank={rank}
               editable={editable}
+              isDM={isDM}
               onAdd={handleAddTrait}
               onClose={() => setShowPicker(false)}
               suspended={!!pendingAcquisition}

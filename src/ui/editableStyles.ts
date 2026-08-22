@@ -76,6 +76,7 @@ export const uiTextGMNote = "text-amber-400/70 italic";
 // ─── Form tokens ──────────────────────────────────────────────────────────────
 
 export const uiFormLabel = "text-xs lg:text-sm font-medium uppercase tracking-wide text-slate-100";
+export const uiFormLabelBlue = "text-xs lg:text-sm font-medium uppercase tracking-wide text-sky-300/85";
 export const uiFormLabelSecondary = "block text-xs lg:text-sm text-slate-400 mb-1";
 export const uiInfoModalWrapper = "inline-flex items-center -translate-y-[1.4px]";
 export const uiSubheading = "text-xs lg:text-sm font-semibold text-slate-100 uppercase tracking-wide";

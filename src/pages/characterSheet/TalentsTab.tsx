@@ -54,6 +54,7 @@ interface TalentsTabProps {
   insanity?: InsanityBlock;
   willpowerBonus?: number;
   weaponTraining?: WeaponTrainingBlock;
+  isDM?: boolean;
   editable: boolean;
   onUpdateTalents: (next: TalentsAndTraitsBlock) => void;
   onUpdateCharacter?: (partial: Partial<Character>) => void;
@@ -96,6 +97,7 @@ function getFaithGroup(talentId: string): string | undefined {
 function FaithTalentSection({
   entries,
   editable,
+  isDM,
   onAdd,
   onRemove,
   pickerSuspended = false,
@@ -104,6 +106,7 @@ function FaithTalentSection({
 }: {
   entries: TalentEntry[];
   editable: boolean;
+  isDM: boolean;
   onAdd: (entry: TalentEntry) => void;
   onRemove: (uid: string) => void;
   pickerSuspended?: boolean;
@@ -154,6 +157,7 @@ function FaithTalentSection({
             entries={entries}
             useTalentBehaviours
             editable={editable}
+            isDM={isDM}
             onAdd={onAdd}
             onClose={() => setShowPicker(false)}
             suspended={pickerSuspended}
@@ -281,6 +285,7 @@ function RegularTalentSection({
   entries,
   psychic,
   editable,
+  isDM,
   onAdd,
   onRemove,
   columns = 1,
@@ -291,6 +296,7 @@ function RegularTalentSection({
   entries: TalentEntry[];
   psychic: PsychicBlock;
   editable: boolean;
+  isDM: boolean;
   onAdd: (entry: TalentEntry) => void;
   onRemove: (uid: string) => void;
   columns?: 1 | 2;
@@ -323,6 +329,7 @@ function RegularTalentSection({
             entries={entries}
             useTalentBehaviours
             editable={editable}
+            isDM={isDM}
             onAdd={onAdd}
             onClose={() => setShowPicker(false)}
             suspended={pickerSuspended}
@@ -347,6 +354,7 @@ export function TalentsTab({
   insanity = { points: 0, disorders: [] },
   willpowerBonus = 0,
   weaponTraining = { trained: [], exoticWeapons: [] },
+  isDM = false,
   editable,
   onUpdateTalents,
   onUpdateCharacter,
@@ -603,6 +611,7 @@ export function TalentsTab({
                   entries={regularEntries}
                   psychic={psychic}
                   editable={editable}
+                  isDM={isDM}
                   onAdd={handleAddTalent}
                   onRemove={handleRemoveTalent}
                   pickerSuspended={pendingAcquisition !== null}
@@ -613,6 +622,7 @@ export function TalentsTab({
                 <FaithTalentSection
                   entries={faithEntries}
                   editable={editable}
+                  isDM={isDM}
                   onAdd={handleAddTalent}
                   onRemove={handleRemoveTalent}
                   pickerSuspended={pendingAcquisition !== null}
@@ -627,6 +637,7 @@ export function TalentsTab({
             entries={regularEntries}
             psychic={psychic}
             editable={editable}
+            isDM={isDM}
             onAdd={handleAddTalent}
             onRemove={handleRemoveTalent}
             pickerSuspended={pendingAcquisition !== null}
@@ -641,6 +652,7 @@ export function TalentsTab({
           entries={regularEntries}
           psychic={psychic}
           editable={editable}
+          isDM={isDM}
           onAdd={handleAddTalent}
           onRemove={handleRemoveTalent}
           columns={showFaith ? 1 : 2}
@@ -652,6 +664,7 @@ export function TalentsTab({
           <FaithTalentSection
             entries={faithEntries}
             editable={editable}
+            isDM={isDM}
             onAdd={handleAddTalent}
             onRemove={handleRemoveTalent}
             pickerSuspended={pendingAcquisition !== null}

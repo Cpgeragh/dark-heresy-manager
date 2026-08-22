@@ -57,6 +57,7 @@ describe("TalentsTab and TraitsTab, career/rank wiring into the picker", () => {
           career="Adept"
           rank="Sage Logister"
           editable
+          isDM
           onUpdateTalents={vi.fn()}
         />
       </ToastProvider>
@@ -76,6 +77,7 @@ describe("TalentsTab and TraitsTab, career/rank wiring into the picker", () => {
           career="Adept"
           rank="Sage Logister"
           editable
+          isDM
           onUpdateTalents={vi.fn()}
         />
       </ToastProvider>
@@ -102,6 +104,7 @@ describe("TalentsTab and TraitsTab, career/rank wiring into the picker", () => {
           career="Adept"
           rank="Sage Logister"
           editable
+          isDM
           onUpdateTalents={vi.fn()}
         />
       </ToastProvider>

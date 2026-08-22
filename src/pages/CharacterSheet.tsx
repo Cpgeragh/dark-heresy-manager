@@ -584,6 +584,7 @@ export default function CharacterSheet({
               insanity={character.insanity}
               willpowerBonus={getCharBonus("wp")}
               weaponTraining={character.weaponTraining}
+              isDM={isDM}
               editable={allowedToEdit}
               onUpdateTalents={handleUpdateTalents}
               onUpdateCharacter={updateFields}
@@ -740,6 +741,7 @@ export default function CharacterSheet({
             <ExperienceTab
               character={character}
               isDM={isDM}
+              editable={allowedToEdit}
               onUpdate={handleUpdateExperience}
               onUpdateHeader={handleUpdateHeader}
             />

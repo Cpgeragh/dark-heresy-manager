@@ -26,7 +26,12 @@ import { InfoModal } from "../../components/InfoModal";
 import { TALENT_DESCRIPTIONS } from "../../data/talentDescriptions";
 import { TRAIT_DESCRIPTIONS } from "../../data/traitDescriptions";
 import { sourceColour } from "../../ui/sourceStyles";
-import { colourAmberFaint, colourValue } from "../../ui/colourTokens";
+import {
+  colourAmberFaint,
+  colourAmberPlain,
+  colourRank,
+  colourValue,
+} from "../../ui/colourTokens";
 import {
   getNextTalentCost,
   getNextTalentPurchase,
@@ -62,6 +67,7 @@ export function TalentPickerModal({
   entries,
   useTalentBehaviours = false,
   editable = true,
+  isDM = false,
   onAdd,
   onClose,
   suspended = false,
@@ -77,6 +83,7 @@ export function TalentPickerModal({
   entries: readonly TalentEntry[];
   useTalentBehaviours?: boolean;
   editable?: boolean;
+  isDM?: boolean;
   onAdd: (entry: TalentEntry) => void;
   onClose: () => void;
   suspended?: boolean;
@@ -103,6 +110,7 @@ export function TalentPickerModal({
   const detailScrollPositionRef = useRef(0);
   const overflowScrollPositionRef = useRef(0);
   const modalTitle = editable ? title : title.replace(/^Add\b/, "View");
+  const canMakeManualPurchase = editable && isDM;
 
   const filtered = useMemo(() => {
     const seen = new Set<string>();
@@ -274,6 +282,7 @@ export function TalentPickerModal({
     itemSpecialisation?: string,
     shouldReturnToChoicePicker = false
   ) => {
+    if (!canMakeManualPurchase) return;
     setPendingManualCost({
       talent: item,
       specialisation: itemSpecialisation,
@@ -334,7 +343,7 @@ export function TalentPickerModal({
     add(talentData, value, true);
   };
 
-  if (pendingManualCost) {
+  if (pendingManualCost && canMakeManualPurchase) {
     const cost = Number(manualCostInput);
     const canConfirm = manualCostInput.trim() !== "";
     return (
@@ -406,8 +415,16 @@ export function TalentPickerModal({
       >
         <div className="space-y-3 p-3 lg:p-4">
           {filteredCustom.map((item) => (
-            <PickerRow key={item.id} onClick={() => onSelectCustomItem?.(item)}>
-              <span className={`${uiItemName} truncate block group-hover:text-white`}>{item.name}</span>
+            <PickerRow
+              key={item.id}
+              interactive={editable}
+              onClick={() => {
+                if (editable) onSelectCustomItem?.(item);
+              }}
+            >
+              <span className={`${uiItemName} truncate block ${editable ? "group-hover:text-white" : ""}`}>
+                {item.name}
+              </span>
               <div className="mt-1 flex flex-wrap items-center gap-1.5">
                 <Chip className={colourAmberFaint}>{item.status === "draft" ? "Draft" : "Custom"}</Chip>
               </div>
@@ -435,9 +452,9 @@ export function TalentPickerModal({
                 key={item.id}
                 card
                 className={`${uiSectionShell} flex items-center gap-3 overflow-hidden`}
-                interactive={editable}
+                interactive={canMakeManualPurchase}
                 onClick={() => {
-                  if (!editable) return;
+                  if (!canMakeManualPurchase) return;
                   if (usesChoicePicker) {
                     setPicked(item);
                     setShowChoicePicker(true);
@@ -450,7 +467,7 @@ export function TalentPickerModal({
               >
                 <div className="flex-1 min-w-0 space-y-1.5">
                   <div className="flex items-center gap-1.5">
-                    <span className={`${uiItemName} truncate ${editable ? "group-hover:text-white" : ""}`}>
+                    <span className={`${uiItemName} truncate ${canMakeManualPurchase ? "group-hover:text-white" : ""}`}>
                       {item.name}
                     </span>
                     {(TALENT_DESCRIPTIONS[item.id] ?? TRAIT_DESCRIPTIONS[item.id]) && (
@@ -711,7 +728,7 @@ export function TalentPickerModal({
               {rankChips && rankChips.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
                   {rankChips.map((rankName) => (
-                    <Chip key={rankName} size="sm" className="bg-slate-800/40 font-code text-slate-400">
+                    <Chip key={rankName} size="sm" className={`${colourRank} font-code`}>
                       {rankName}
                     </Chip>
                   ))}
@@ -815,9 +832,9 @@ export function EntryCard({
             </span>
           )}
         </div>
-        {!statusAfterSource && secondaryText && <p className="text-sm text-amber-300">{secondaryText}</p>}
+        {!statusAfterSource && secondaryText && <p className={`text-sm ${colourAmberPlain}`}>{secondaryText}</p>}
         {!statusAfterSource && isGranted && (
-          <p className="text-sm text-amber-300">{entry.grantedByTalentName} ({entry.grantedByType}): Granted</p>
+          <p className={`text-sm ${colourAmberPlain}`}>{entry.grantedByTalentName} ({entry.grantedByType}): Granted</p>
         )}
         <div className="flex flex-wrap items-center gap-1.5">
           {refSources.map((source) => (
@@ -831,9 +848,9 @@ export function EntryCard({
             </Chip>
           )}
         </div>
-        {statusAfterSource && secondaryText && <p className="text-sm text-amber-300">{secondaryText}</p>}
+        {statusAfterSource && secondaryText && <p className={`text-sm ${colourAmberPlain}`}>{secondaryText}</p>}
         {statusAfterSource && isGranted && (
-          <p className="text-sm text-amber-300">{entry.grantedByTalentName} ({entry.grantedByType}): Granted</p>
+          <p className={`text-sm ${colourAmberPlain}`}>{entry.grantedByTalentName} ({entry.grantedByType}): Granted</p>
         )}
         {libraryItem && (
           <CustomItemActionButtons

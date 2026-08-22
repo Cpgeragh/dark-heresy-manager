@@ -3,6 +3,8 @@ import type { CharacterHeader, ExperienceBlock } from "../../src/types/Character
 import {
   applyCareerRankUp,
   applyXpTransaction,
+  clearRankUpXpCost,
+  setRankUpXpCost,
 } from "../../src/features/experience/xpTransactions";
 
 const experience: ExperienceBlock = { total: 700, spent: 500, ranks: [] };
@@ -58,6 +60,31 @@ describe("XP transactions", () => {
     });
   });
 
+  it("removes unspent XP from Total without changing Spent", () => {
+    expect(
+      applyXpTransaction(experience, {
+        id: "remove-1",
+        type: "remove",
+        amount: 150,
+        reason: "  Accidental award  ",
+        rankId: "guard",
+      })
+    ).toEqual({
+      total: 550,
+      spent: 500,
+      ranks: [],
+      transactions: [
+        {
+          id: "remove-1",
+          type: "remove",
+          amount: 150,
+          reason: "Accidental award",
+          rankId: "guard",
+        },
+      ],
+    });
+  });
+
   it("rejects invalid and unaffordable spending", () => {
     expect(() =>
       applyXpTransaction(experience, {
@@ -75,6 +102,57 @@ describe("XP transactions", () => {
         rankId: "guard",
       })
     ).toThrow("positive whole number");
+  });
+
+  it("does not remove XP that has already been spent", () => {
+    expect(() =>
+      applyXpTransaction(experience, {
+        id: "remove-1",
+        type: "remove",
+        amount: 201,
+        rankId: "guard",
+      })
+    ).toThrow("Cannot remove XP that has already been spent");
+  });
+
+  it("replaces the existing Rank Up XP cost instead of adding a second cost", () => {
+    const withCost = setRankUpXpCost(experience, {
+      id: "cost-1",
+      amount: 100,
+      reason: "First cost",
+      rankId: "guard",
+    });
+    expect(
+      setRankUpXpCost(withCost, {
+        id: "cost-2",
+        amount: 150,
+        reason: "Changed cost",
+        rankId: "guard",
+      })
+    ).toEqual({
+      total: 700,
+      spent: 650,
+      ranks: [],
+      transactions: [
+        {
+          id: "cost-1",
+          type: "spend",
+          amount: 150,
+          reason: "Changed cost",
+          rankId: "guard",
+        },
+      ],
+    });
+  });
+
+  it("clears an unconfirmed Rank Up XP cost from the still-current rank", () => {
+    const withCost = setRankUpXpCost(experience, {
+      id: "cost-1",
+      amount: 100,
+      reason: "Draft cost",
+      rankId: "guard",
+    });
+    expect(clearRankUpXpCost(withCost, "guard")).toEqual(experience);
   });
 });
 

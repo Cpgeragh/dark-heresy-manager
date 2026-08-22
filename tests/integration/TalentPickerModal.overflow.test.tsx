@@ -29,6 +29,7 @@ function renderPicker(overrides: Partial<React.ComponentProps<typeof TalentPicke
       entries={[]}
       useTalentBehaviours
       editable
+      isDM
       onAdd={onAdd}
       onClose={onClose}
       career="Guardsman"
@@ -48,6 +49,7 @@ function StatefulOverflowPicker() {
       entries={entries}
       useTalentBehaviours
       editable
+      isDM
       onAdd={(entry) => setEntries((current) => [...current, entry])}
       onClose={() => undefined}
       career="Guardsman"
@@ -80,6 +82,16 @@ describe("TalentPickerModal, career-aware overflow screen", () => {
     await user.click(screen.getByRole("button", { name: "Show all" }));
     expect(screen.getByText("Sound Constitution")).toBeInTheDocument();
     expect(screen.getByText("Mechadendrite Use")).toBeInTheDocument();
+  });
+
+  it("keeps Show all informational but blocks manual-cost purchases for a non-DM", async () => {
+    const user = userEvent.setup();
+    const { onAdd } = renderPicker({ isDM: false });
+    await user.click(screen.getByRole("button", { name: "Show all" }));
+    expect(screen.getByText("Mechadendrite Use")).toBeInTheDocument();
+    await user.click(screen.getByText("Mechadendrite Use"));
+    expect(screen.queryByText("XP Cost")).not.toBeInTheDocument();
+    expect(onAdd).not.toHaveBeenCalled();
   });
 
   it("always opens manual-cost for a plain talent clicked on the overflow screen", async () => {

@@ -655,7 +655,7 @@ export interface RankAdvances {
 
 export interface XpTransaction {
   id: string;
-  type: "add" | "spend";
+  type: "add" | "remove" | "spend";
   amount: number;
   reason?: string;
   /** Named Career rank active when the DM recorded this transaction. */
@@ -666,7 +666,7 @@ export interface ExperienceBlock {
   ranks: RankAdvances[];
   total: number;
   spent: number;
-  /** DM-entered XP awards and manual spending, retained as an auditable ledger. */
+  /** XP awards plus DM-entered removals and manual spending, retained as an auditable ledger. */
   transactions?: XpTransaction[];
 }
 

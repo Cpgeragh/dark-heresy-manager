@@ -21,7 +21,7 @@ import {
   uiTextBody,
 } from "../../../ui/editableStyles";
 import { uiPickerPressFeedback } from "../../../ui/buttonStyles";
-import { colourPurple, colourTeal, colourValue } from "../../../ui/colourTokens";
+import { colourAmberPlain, colourPurple, colourTeal, colourValue } from "../../../ui/colourTokens";
 import { sanitizeNonNegativeIntegerInput } from "../../../utils/formInput";
 
 interface SkillRowProps {
@@ -202,7 +202,7 @@ export function SkillRow({
             <StatChip label="Total" value={skill.total ?? "—"} />
           </div>
           {talentSourceSummary && (
-            <p className="text-xs leading-snug text-amber-300">
+            <p className={`text-xs leading-snug ${colourAmberPlain}`}>
               {talentSourceSummary}
             </p>
           )}
@@ -267,7 +267,7 @@ export function SkillRow({
             <StatChip label="Total" value={skill.total ?? "—"} />
           </div>
           {talentSourceSummary && (
-            <p className="text-xs leading-snug text-amber-300">
+            <p className={`text-xs leading-snug ${colourAmberPlain}`}>
               {talentSourceSummary}
             </p>
           )}

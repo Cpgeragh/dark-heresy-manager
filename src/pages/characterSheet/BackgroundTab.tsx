@@ -21,7 +21,7 @@ import { findDivinationByResult, type DivinationData } from "../../data/divinati
 import { EYE_OPTIONS, HAIR_OPTIONS, SKIN_OPTIONS } from "../../data/appearanceData";
 import { Button } from "../../ui/Button";
 import { Chip } from "../../ui/Chip";
-import { colourActiveRose, colourActiveSky, colourMeta } from "../../ui/colourTokens";
+import { colourActiveRose, colourActiveSky, colourMeta, colourRank } from "../../ui/colourTokens";
 import { RollChip } from "../../ui/RollChip";
 import { sourceColour } from "../../ui/sourceStyles";
 import { useSwipeableTabs } from "../../hooks/useSwipeableTabs";
@@ -578,7 +578,7 @@ export function BackgroundTab({
                   <div className="flex min-w-0 flex-col gap-1.5">
                     <span className={`${uiItemName} truncate`}>{selectedRank.name}</span>
                     <div className="flex flex-wrap items-center gap-1.5">
-                      <Chip className={colourMeta}>Rank {selectedRank.tier}</Chip>
+                      <Chip className={colourRank}>Rank {selectedRank.tier}</Chip>
                       <Chip className={colourMeta}>{selectedRank.xpLevel} XP</Chip>
                       {selectedRank.paths?.length && (
                         <Chip className={colourMeta}>

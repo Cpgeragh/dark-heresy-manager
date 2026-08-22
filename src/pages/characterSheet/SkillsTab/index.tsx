@@ -92,6 +92,7 @@ function skillTierIndex(level: SkillEntry["level"]): number {
 }
 
 export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption, talents, career, rank, isDM = false }: SkillsTabProps) {
+  const canUseDmActions = isDM && editable;
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isUntrainedBasicOpen, setIsUntrainedBasicOpen] = useState(false);
   // undefined (not an empty Map) when no career is set, so AddSkillModal knows
@@ -261,7 +262,7 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
           updateLevel={updateLevel}
           nextTierAccess={getNextTierAccess(item.skill.id, item.skill.level)}
           onManualUpgrade={handleManualUpgrade}
-          isDM={isDM}
+          isDM={canUseDmActions}
         />
       ) : (
         <SkillGroupRow
@@ -272,7 +273,7 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
           updateLevel={updateLevel}
           getNextTierAccess={getNextTierAccess}
           onManualUpgrade={handleManualUpgrade}
-          isDM={isDM}
+          isDM={canUseDmActions}
         />
       )
     );
@@ -369,7 +370,7 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
         onAdd={handleAdd}
         hideLevelChip
         unlockedCosts={unlockedSkillTrainingCosts}
-        isDM={isDM}
+        isDM={canUseDmActions}
       />
       <AddSkillModal
         title="Available Untrained Basic Skills"
@@ -381,7 +382,7 @@ export function SkillsTab({ skills, editable, onUpdate, getCharField, corruption
         untrainedSkills={untrainedBasicSkills}
         onAdd={handleAdd}
         unlockedCosts={unlockedSkillTrainingCosts}
-        isDM={isDM}
+        isDM={canUseDmActions}
       />
     </div>
   );

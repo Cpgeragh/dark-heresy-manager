@@ -4,7 +4,7 @@ import { PickerModal, PickerRow } from "./PickerModal";
 import { ArrowLeft } from "./PickerArrows";
 import { uiItemName } from "./editableStyles";
 import { Chip } from "./Chip";
-import { colourAmberFaint, colourValue } from "./colourTokens";
+import { colourAmberFaint, colourRank, colourValue } from "./colourTokens";
 
 export type PickerOption = string | {
   value: string;
@@ -69,7 +69,7 @@ export function OptionPickerScreen({
               {rankChips && rankChips.length > 0 && (
                 <span className="flex flex-wrap gap-1.5">
                   {rankChips.map((rank) => (
-                    <Chip key={rank} size="sm" className="bg-slate-800/40 font-code text-slate-400">
+                    <Chip key={rank} size="sm" className={`${colourRank} font-code`}>
                       {rank}
                     </Chip>
                   ))}
