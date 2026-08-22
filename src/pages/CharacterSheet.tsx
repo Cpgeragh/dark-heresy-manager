@@ -738,9 +738,7 @@ export default function CharacterSheet({
 
           {activeTab === "xp" && (
             <ExperienceTab
-              experience={character.experience}
-              campaignId={path.campaignId}
-              characterId={character.id}
+              character={character}
               isDM={isDM}
               onUpdate={handleUpdateExperience}
             />

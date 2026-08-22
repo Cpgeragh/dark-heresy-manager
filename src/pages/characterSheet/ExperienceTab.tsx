@@ -1,259 +1,216 @@
-// src/pages/characterSheet/ExperienceTab.tsx
-
-import { useState, useCallback } from "react";
-import type { ExperienceBlock, RankAdvances } from "../../types/Character";
+import { useCallback } from "react";
+import type { Character, ExperienceBlock } from "../../types/Character";
+import {
+  buildRankCards,
+  type RankCardEntry,
+  type RankCardEntryKind,
+} from "../../features/experience/rankCards";
 import {
   editableInputClass,
-  uiSection,
   readOnlyBadgeClass,
-  uiTextMuted,
-  uiTextPlaceholder,
   uiFormLabel,
+  uiItemName,
+  uiSection,
+  uiSectionShell,
+  uiTextPlaceholder,
 } from "../../ui/editableStyles";
-import { RemoveButton } from "../../ui/RemoveButton";
-import { Button } from "../../ui/Button";
 import { SectionHeader } from "../../ui/SectionHeader";
-import { OptionPickerScreen } from "../../ui/OptionPickerScreen";
-import { ArrowRight } from "../../ui/PickerArrows";
-
-// All valid rank values in display order.
-const RANK_OPTIONS: RankAdvances["rank"][] = [1, 2, 3, 4, 5, 6, 7, 8, "elite"];
+import { Chip } from "../../ui/Chip";
 
 interface ExperienceTabProps {
-  experience: ExperienceBlock;
-  campaignId: string;
-  characterId: string;
+  character: Character;
   isDM: boolean;
   onUpdate: (next: ExperienceBlock) => void;
 }
 
-export function ExperienceTab({
-  experience,
-  isDM,
-  onUpdate,
-}: ExperienceTabProps) {
+const ENTRY_KIND_LABELS: Record<RankCardEntryKind, string> = {
+  characteristic: "Characteristic",
+  skill: "Skill",
+  talent: "Talent",
+  trait: "Trait",
+  "weapon-training": "Weapon Training",
+};
+
+const ENTRY_KIND_CLASSES: Record<RankCardEntryKind, string> = {
+  characteristic: "border-sky-700/60 bg-sky-950/30 text-sky-300",
+  skill: "border-blue-700/60 bg-blue-950/30 text-blue-300",
+  talent: "border-amber-700/60 bg-amber-950/30 text-amber-300",
+  trait: "border-violet-700/60 bg-violet-950/30 text-violet-300",
+  "weapon-training": "border-emerald-700/60 bg-emerald-950/30 text-emerald-300",
+};
+
+function RankEntryList({
+  entries,
+  emptyText,
+}: {
+  entries: readonly RankCardEntry[];
+  emptyText: string;
+}) {
+  if (entries.length === 0) {
+    return <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>{emptyText}</p>;
+  }
+
+  return (
+    <ul className="space-y-2">
+      {entries.map((entry) => (
+        <li
+          key={entry.id}
+          className="flex items-start justify-between gap-3 border-b border-slate-700/60 pb-2 last:border-b-0 last:pb-0"
+        >
+          <div className="min-w-0 space-y-1">
+            <div className="text-sm text-slate-100 lg:text-base">{entry.name}</div>
+            <Chip size="sm" className={ENTRY_KIND_CLASSES[entry.kind]}>
+              {ENTRY_KIND_LABELS[entry.kind]}
+            </Chip>
+          </div>
+          <span className="shrink-0 font-code text-sm text-slate-300 lg:text-base">
+            {entry.cost} XP
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+export function ExperienceTab({ character, isDM, onUpdate }: ExperienceTabProps) {
+  const { experience } = character;
   const remaining = experience.total - experience.spent;
+  const rankCards = buildRankCards(character);
 
-  // ── DM add-advance form state ──────────────────────────────────────────────
-  const [newRank, setNewRank] = useState<RankAdvances["rank"]>(1);
-  const [newName, setNewName] = useState("");
-  const [newCost, setNewCost] = useState(0);
-  const [newNotes, setNewNotes] = useState("");
-  const [showRankPicker, setShowRankPicker] = useState(false);
-
-  // ── DM handlers ───────────────────────────────────────────────────────────
   const handleTotalChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      onUpdate({ ...experience, total: Math.max(0, Number(e.target.value)) });
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      onUpdate({ ...experience, total: Math.max(0, Number(event.target.value)) });
     },
     [experience, onUpdate]
   );
 
-  const handleAddAdvance = useCallback(() => {
-    if (!newName.trim() || newCost <= 0) return;
-
-    const entry = {
-      id: crypto.randomUUID(),
-      name: newName.trim(),
-      cost: newCost,
-      notes: newNotes.trim() || undefined,
-    };
-
-    const existing = experience.ranks.find((r) => r.rank === newRank);
-    const updatedRanks: RankAdvances[] = existing
-      ? experience.ranks.map((r) =>
-          r.rank === newRank ? { ...r, advances: [...r.advances, entry] } : r
-        )
-      : [...experience.ranks, { rank: newRank, advances: [entry] }].sort(
-          (a, b) => RANK_OPTIONS.indexOf(a.rank) - RANK_OPTIONS.indexOf(b.rank)
-        );
-
-    onUpdate({ ...experience, ranks: updatedRanks });
-    setNewName("");
-    setNewCost(0);
-    setNewNotes("");
-  }, [experience, newRank, newName, newCost, newNotes, onUpdate]);
-
-  const handleRemoveAdvance = useCallback(
-    (rank: RankAdvances["rank"], advanceId: string) => {
-      const updatedRanks = experience.ranks
-        .map((r) =>
-          r.rank === rank ? { ...r, advances: r.advances.filter((a) => a.id !== advanceId) } : r
-        )
-        .filter((r) => r.advances.length > 0);
-
-      onUpdate({ ...experience, ranks: updatedRanks });
-    },
-    [experience, onUpdate]
-  );
-
-  // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className="space-y-6">
-      {!isDM && (
-        <div>
-          <span className={readOnlyBadgeClass}>Read-only</span>
-        </div>
-      )}
+      {!isDM && <span className={readOnlyBadgeClass}>Read-only</span>}
 
-      {/* SUMMARY */}
-      <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {/* Total XP — editable by DM */}
-        <div className={uiSection + " text-center"}>
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className={`${uiSection} text-center`}>
           {isDM ? (
             <label className="flex flex-col gap-0.5">
-              <span className={uiFormLabel}>
-                Total XP
-              </span>
+              <span className={uiFormLabel}>Total XP</span>
               <input
                 type="number"
                 min={0}
                 value={experience.total}
                 onChange={handleTotalChange}
-                className={editableInputClass(true) + " mt-2 text-center text-xl lg:text-2xl font-semibold font-code"}
+                className={`${editableInputClass(true)} mt-2 text-center font-code text-xl font-semibold lg:text-2xl`}
                 aria-label="Total XP"
               />
             </label>
           ) : (
             <>
-              <div className="text-xs lg:text-sm text-slate-400 mb-1">Total XP</div>
-              <div className="text-2xl lg:text-3xl font-semibold font-code text-slate-100">
+              <div className="mb-1 text-xs text-slate-400 lg:text-sm">Total XP</div>
+              <div className="font-code text-2xl font-semibold text-slate-100 lg:text-3xl">
                 {experience.total}
               </div>
             </>
           )}
         </div>
 
-        <div className={uiSection + " text-center"}>
-          <div className="text-xs lg:text-sm text-slate-400 mb-1">Spent XP</div>
-          <div className="text-2xl lg:text-3xl font-semibold font-code text-slate-100">{experience.spent}</div>
+        <div className={`${uiSection} text-center`}>
+          <div className="mb-1 text-xs text-slate-400 lg:text-sm">Spent XP</div>
+          <div className="font-code text-2xl font-semibold text-slate-100 lg:text-3xl">
+            {experience.spent}
+          </div>
         </div>
 
-        <div className={uiSection + " text-center"}>
-          <div className="text-xs lg:text-sm text-slate-400 mb-1">Remaining XP</div>
+        <div className={`${uiSection} text-center`}>
+          <div className="mb-1 text-xs text-slate-400 lg:text-sm">Remaining XP</div>
           <div
-            className={`text-2xl lg:text-3xl font-semibold font-code ${remaining < 0 ? "text-red-400" : "text-slate-100"}`}
+            className={`font-code text-2xl font-semibold lg:text-3xl ${
+              remaining < 0 ? "text-red-400" : "text-slate-100"
+            }`}
           >
             {remaining}
           </div>
         </div>
       </section>
 
-      {/* PURCHASED ADVANCES */}
       <section className="space-y-3">
-        <SectionHeader>Purchased Advances</SectionHeader>
+        <SectionHeader>Career Rank Ledger</SectionHeader>
 
-        {experience.ranks.length === 0 && (
-          <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No advances purchased yet.</p>
-        )}
-
-        <div className="space-y-4">
-          {experience.ranks.map((rankBlock) => (
-            <div key={rankBlock.rank} className={uiSection}>
-              <h4 className="text-sm lg:text-base font-semibold text-slate-100 mb-2">Rank {rankBlock.rank}</h4>
-              <ul className="space-y-2">
-                {rankBlock.advances.map((adv) => (
-                  <li key={adv.id} className={uiSection}>
-                    <div className="flex items-baseline justify-between gap-4">
-                    <div className="font-code text-sm lg:text-base text-slate-100">{adv.name}</div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-xs lg:text-sm text-slate-400">{adv.cost} XP</span>
-                        {isDM && (
-                          <RemoveButton
-                            onClick={() => handleRemoveAdvance(rankBlock.rank, adv.id)}
-                            label="Remove"
-                          />
-                        )}
-                      </div>
-                    </div>
-                    {adv.notes && <div className={`mt-1 text-xs lg:text-sm ${uiTextMuted}`}>{adv.notes}</div>}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-
-        {/* ADD ADVANCE FORM — DM only */}
-        {isDM && (
-          <div className={uiSection + " space-y-3"}>
-            <p className="text-xs lg:text-sm font-semibold text-red-500 uppercase tracking-wide">
-              Add Advance
+        {rankCards.length === 0 ? (
+          <div className={uiSection}>
+            <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>
+              Select a Career and Rank to begin the Rank ledger.
             </p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              <div>
-                <label className={uiFormLabel}>
-                  Rank
-                </label>
-                <button
-                  type="button"
-                  onClick={() => setShowRankPicker(true)}
-                  className={editableInputClass(true) + " mt-0.5 text-left flex items-center justify-between"}
-                >
-                  <span>{newRank === "elite" ? "Elite" : `Rank ${newRank}`}</span>
-                  <ArrowRight />
-                </button>
-              </div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {rankCards.map((card) => (
+              <article
+                key={card.rankId}
+                aria-label={`${card.name} Rank Card`}
+                className={`${uiSection} space-y-4 ${
+                  card.isCurrent ? "border-red-500/70 bg-red-950/10" : ""
+                }`}
+              >
+                <header className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
+                    <h3 className={`${uiItemName} text-lg text-red-500 lg:text-xl`}>{card.name}</h3>
+                    <div className="mt-1 flex flex-wrap gap-1.5">
+                      <Chip className="border-slate-600 bg-slate-900/60 font-code text-slate-300">
+                        Rank {card.tier}
+                      </Chip>
+                      <Chip className="border-slate-600 bg-slate-900/60 font-code text-slate-300">
+                        {card.xpLevel} XP
+                      </Chip>
+                      {card.isCurrent && (
+                        <Chip className="border-red-500/70 bg-red-950/40 text-red-300">Current</Chip>
+                      )}
+                    </div>
+                  </div>
+                  <div className="sm:text-right">
+                    <div className="text-xs uppercase tracking-wide text-slate-500 lg:text-sm">
+                      Card Spent
+                    </div>
+                    <div className="font-code text-xl text-slate-100 lg:text-2xl">
+                      {card.spentTotal} XP
+                    </div>
+                  </div>
+                </header>
 
-              <div className="col-span-2 sm:col-span-2">
-                <label className={uiFormLabel}>
-                  Advance Name
-                </label>
-                <input
-                  type="text"
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  placeholder="e.g. +10 Weapon Skill"
-                  className={editableInputClass(true) + " mt-0.5"}
-                />
-              </div>
+                <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+                  <section className={`${uiSectionShell} space-y-3 p-3 lg:p-4`}>
+                    <div className="flex items-baseline justify-between gap-3">
+                      <h4 className="text-sm font-semibold uppercase tracking-wide text-red-500 lg:text-base">
+                        Advances from this Rank
+                      </h4>
+                      <span className="shrink-0 font-code text-sm text-slate-300">
+                        {card.careerPurchasesTotal} XP
+                      </span>
+                    </div>
+                    <RankEntryList
+                      entries={card.careerPurchases}
+                      emptyText="No advances purchased from this rank."
+                    />
+                  </section>
 
-              <div>
-                <label className={uiFormLabel}>
-                  XP Cost
-                </label>
-                <input
-                  type="number"
-                  min={0}
-                  value={newCost}
-                  onChange={(e) => setNewCost(Math.max(0, Number(e.target.value)))}
-                  className={editableInputClass(true) + " mt-0.5"}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className={uiFormLabel}>
-                Notes (optional)
-              </label>
-              <input
-                type="text"
-                value={newNotes}
-                onChange={(e) => setNewNotes(e.target.value)}
-                placeholder="e.g. Approved session 3"
-                className={editableInputClass(true) + " mt-0.5"}
-              />
-            </div>
-
-            <Button onClick={handleAddAdvance} disabled={!newName.trim() || newCost <= 0}>
-              Add
-            </Button>
+                  <section className={`${uiSectionShell} space-y-3 p-3 lg:p-4`}>
+                    <div className="flex items-baseline justify-between gap-3">
+                      <h4 className="text-sm font-semibold uppercase tracking-wide text-red-500 lg:text-base">
+                        Rank Up XP Spent
+                      </h4>
+                      <span className="shrink-0 font-code text-sm text-slate-300">
+                        {card.rankUpXpSpentTotal} XP
+                      </span>
+                    </div>
+                    <RankEntryList
+                      entries={card.rankUpXpSpent}
+                      emptyText="No additional XP spent during this rank."
+                    />
+                  </section>
+                </div>
+              </article>
+            ))}
           </div>
         )}
       </section>
-
-      {showRankPicker && (
-        <OptionPickerScreen
-          title="Rank"
-          options={RANK_OPTIONS.map((r) => ({ value: String(r), label: r === "elite" ? "Elite" : `Rank ${r}` }))}
-          selected={String(newRank)}
-          onSelect={(value) => {
-            setNewRank(value === "elite" ? "elite" : (Number(value) as RankAdvances["rank"]));
-            setShowRankPicker(false);
-          }}
-          onClose={() => setShowRankPicker(false)}
-        />
-      )}
     </div>
   );
 }
