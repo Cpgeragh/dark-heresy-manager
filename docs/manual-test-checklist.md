@@ -684,27 +684,32 @@ Add and remove a reference drug, then create a uniquely named custom drug. In th
 
 ## 16. Experience
 
-Total/Spent/Remaining XP summary, plus a DM-only manual advance ledger for advances that don't come from a structured page.
+Total/Spent/Remaining XP summary, a read-only named Career Rank ledger, DM XP adjustments, and confirmed Career progression.
 
 ### How to test this page
 
-Use two profiles: the owning player and the DM. Spent XP is fully derived, not something either role enters directly — it's the sum of every real purchase made on Characteristics, Skills, Talents, Traits, and Weapon Training, plus whatever the DM has added manually here. Record Total/Spent/Remaining, then make and undo a purchase on one of those other pages without touching this one, returning here each time to confirm the numbers moved correctly.
+Use two profiles: the owning player and the DM. Begin on a character with enough Total XP to make purchases across multiple ranks, including one Career branch. Spent XP is derived from persisted purchases on Characteristics, Skills, Talents, Traits, and Weapon Training plus explicit DM Spend XP transactions. Exercise Add XP, Spend XP, normal purchases and undo operations, then rank up one step at a time and refresh after every confirmation.
 
-- [ ] Total XP is editable only as DM (plain number input); a player sees the same figure as read-only text
-- [ ] Spent XP has no input anywhere on this page — it's always a plain read-only number
-- [ ] Remaining XP = Total − Spent, recalculated live whenever either changes
-- [ ] Remaining XP turns red when it goes negative (Spent exceeds Total)
-- [ ] Buy something on Characteristics, Skills, Talents, Traits, or Weapon Training, then return here without refreshing — Spent and Remaining both move to reflect it immediately
-- [ ] Undo that same purchase on its own page — Spent and Remaining move back by the exact opposite amount
-- [ ] Refresh after purchases across several different pages — Total/Spent/Remaining still agree with what's actually owned
-- [ ] As DM, add a manual advance (Rank, Advance Name, XP Cost, optional Notes) — it appears under the correct Rank heading and Spent increases by its cost
-- [ ] Add stays disabled until both Advance Name and a positive XP Cost are entered
-- [ ] As DM, remove a manual advance — it disappears and Spent falls by its cost
-- [ ] A player sees no Add Advance form and no Remove control on any advance — the entire Purchased Advances list is read-only for them
-- [ ] With no manual advances, "No advances purchased yet." shows in place of the Rank list; making a structured purchase elsewhere does **not** add an entry here — this list only ever holds the DM's own manual entries, it is not an itemised history of every purchase on the character
+- [ ] Total, Spent, and Remaining XP are all read-only summary figures; there is no direct Total or Spent number input for either role
+- [ ] Remaining XP = Total − Spent and recalculates live whenever either changes; it turns red if legacy/other data leaves Spent above Total
+- [ ] DM Add XP requires a positive whole-number amount, accepts an optional reason, increases Total only, and leaves Spent unchanged
+- [ ] DM Spend XP requires a positive whole-number amount, accepts an optional reason, cannot exceed Remaining XP, increases Spent only, and leaves Total unchanged
+- [ ] A DM Spend XP transaction appears on the current named Rank Card under **Rank Up XP Spent**, using its reason (or the fallback "DM XP Spend") and exact cost
+- [ ] Add XP awards never appear as purchases on a Rank Card
+- [ ] Buy something on Characteristics, Skills, Talents, Traits, or Weapon Training, then return here without refreshing — Spent and Remaining move immediately; undoing it on its source page reverses the exact paid cost
+- [ ] A Career-table purchase appears under **Advances from this Rank** on the rank whose table supplied it, even if the character bought it later
+- [ ] A Characteristic Advance, manual/off-Career purchase, Exotic Weapon Training purchase, or DM Spend XP appears under **Rank Up XP Spent** on the rank active when it was bought
+- [ ] Every reached named rank on the character's actual Career path has one card; the current card is marked Current, and untaken branches never appear
+- [ ] Rank Up remains disabled until Spent XP reaches the next rank band's minimum; Total XP alone never unlocks it
+- [ ] Confirming Rank Up advances exactly one named rank and updates the Background page's read-only Rank automatically
+- [ ] At a Career split, the confirmation requires one valid next path; after choosing it, later reached cards and next ranks remain on that path (including Adept's shared Scholar rank)
+- [ ] The final rank-up review offers Add XP and Spend XP before confirmation, with the same validation and accounting as the main-page actions
+- [ ] At the final Career rank, no further Rank Up action appears, but the DM can still Add XP or Spend XP
+- [ ] A player sees the summary, progression state, and complete Rank ledger but no Add XP, Spend XP, or Rank Up controls
+- [ ] Refresh after several purchases, DM transactions, and a branch Rank Up — totals, transaction attribution, current Rank, and Career path all persist unchanged
 
 **Watch for:** there is no player-submitted proposal or DM-approval workflow
-on this page any more — that system was removed earlier in the XP rework. If
+on this page — XP changes are either real purchases or direct DM actions. If
 anything in the app still references submitting a spend for approval, or a
 Pending/History toggle here, that's a leftover pointing at the old system,
 not current behaviour, and is worth flagging on its own.
@@ -732,17 +737,18 @@ Start on a character with old-style plain-text notes (a legacy fixture, `notes` 
 
 ## 18. Background
 
-Identity (Character Name, Player Name), Appearance (Age, Gender, Skin, Hair, Eyes, Height, Weight, Quirks, Description), and Background (Homeworld, Career, Rank, Divination, Background Notes) — the cascading-selection page. On mobile, Appearance and Background are a swipeable tab pair below the fixed Identity section; on desktop they sit side by side.
+Identity (Character Name, Player Name), Appearance (Age, Gender, Skin, Hair, Eyes, Height, Weight, Quirks, Description), and Background (Homeworld, Career, read-only Rank, Divination, Background Notes) — the cascading-selection page. On mobile, Appearance and Background are a swipeable tab pair below the fixed Identity section; on desktop they sit side by side.
 
 ### How to test this page
 
-Use a fresh character and record the header plus stored Background state before opening the page. Select valid Homeworld/Career/Rank combinations, then deliberately invalidate the cascade by changing each parent. Refresh after every cascade. Inspect the picker metadata and Divination modal, then compare Skills, Traits, Talents, Weapon Training, Characteristics, Insanity, and Cybernetics to confirm the recorded starting benefits. Test the Appearance fields at both a mobile width (swipe/tap between Appearance and Background) and a desktop width (both shown side by side, each of Career/Sanctioning Effect/Rank on its own full-width row).
+Use a fresh character and record the header plus stored Background state before opening the page. Select a valid Homeworld and Career, then deliberately invalidate the cascade by changing each parent. Refresh after every cascade. Inspect the Career, read-only Rank, and Divination information modals, then compare Skills, Traits, Talents, Weapon Training, Characteristics, Insanity, and Cybernetics to confirm the recorded starting benefits. Test the Appearance fields at both a mobile width (swipe/tap between Appearance and Background) and a desktop width (both shown side by side, each of Career/Sanctioning Effect/Rank on its own full-width row).
 
-- [ ] Pick a Homeworld, then a Career it supports, then a Rank — all three stay set
-- [ ] Switch to a Homeworld that does *not* support the current Career — Career and Rank both clear automatically
-- [ ] Switch Career while a Rank is set — if the current rank name doesn't exist in the new career, it resets to that career's starting rank; if it does exist (e.g. both have "Rank 1"), it's kept
+- [ ] Pick a Homeworld and supported Career — the Career automatically assigns its starting Rank
+- [ ] Rank shows its name, tier, XP band, path metadata, and information modal, but has no Select or Change action for either DM or player
+- [ ] Rank can change only through confirmed Rank Up on Experience; returning to Background immediately shows the newly confirmed Rank
+- [ ] Switch to a Homeworld that does *not* support the current Career — Career, Rank, and any stored Career path all clear automatically
+- [ ] Switch to a different Career — it assigns the new Career's starting Rank and clears the old Career path; reselecting the same Career does not reset a legitimately progressed Rank
 - [ ] The Career picker only ever lists careers the currently-selected Homeworld actually supports
-- [ ] Rank picker shows tier, XP level, and path (if the rank branches into named paths) for each rank
 - [ ] Divination picker sets the result text and info modal correctly
 
 **Expected:** Homeworld Traits are calculated from the selected Homeworld and

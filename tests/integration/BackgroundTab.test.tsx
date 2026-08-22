@@ -68,9 +68,8 @@ describe("BackgroundTab", () => {
     );
   });
 
-  it("selects a rank from the selected career progression", async () => {
-    const user = userEvent.setup();
-    const { onUpdateHeader } = renderTab({
+  it("shows the XP-managed Rank as read-only even while Background is editable", () => {
+    renderTab({
       header: {
         characterName: "Brother Corvus",
         career: "Guardsman",
@@ -78,12 +77,32 @@ describe("BackgroundTab", () => {
       },
       talents: { homeworld: "feral-world", talents: [], traits: [] },
     });
+    expect(screen.getAllByText("Conscript").length).toBeGreaterThan(0);
+    expect(screen.queryByRole("button", { name: "Change Rank" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Select Rank" })).not.toBeInTheDocument();
+  });
 
-    await user.click(screen.getByRole("button", { name: "Change Rank" }));
-    await user.click(screen.getByText("Storm Trooper"));
+  it("assigns a new Career's starting Rank and clears the old Career path", async () => {
+    const user = userEvent.setup();
+    const { onUpdateHeader } = renderTab({
+      header: {
+        characterName: "Brother Corvus",
+        career: "Guardsman",
+        rank: "Scout",
+        careerPath: "Scout",
+      },
+      talents: { homeworld: "feral-world", talents: [], traits: [] },
+    });
+
+    await user.click(screen.getByRole("button", { name: "Change Career" }));
+    await user.click(screen.getByText("Assassin"));
 
     expect(onUpdateHeader).toHaveBeenCalledWith(
-      expect.objectContaining({ career: "Guardsman", rank: "Storm Trooper" })
+      expect.objectContaining({
+        career: "Assassin",
+        rank: "Sell-Steel",
+        careerPath: undefined,
+      })
     );
   });
 
@@ -123,10 +142,10 @@ describe("BackgroundTab", () => {
     expect(within(modal).getByText(/Forge world Adepts toil among the gathered wisdom/)).toBeInTheDocument();
   });
 
-  it("keeps the career and rank selectors unavailable until a homeworld is selected", () => {
+  it("keeps the Career selector unavailable until a Homeworld is selected", () => {
     renderTab();
     expect(screen.getByRole("button", { name: "Select Career" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Select Rank" })).toBeDisabled();
+    expect(screen.queryByRole("button", { name: "Select Rank" })).not.toBeInTheDocument();
   });
 
   it("selects a divination from the reference list", async () => {
@@ -189,7 +208,9 @@ describe("BackgroundTab", () => {
     });
     await user.click(screen.getByRole("button", { name: "Change Homeworld" }));
     await user.click(screen.getByText("Forge World"));
-    expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ career: "", rank: "" }));
+    expect(onUpdateHeader).toHaveBeenCalledWith(
+      expect.objectContaining({ career: "", rank: "", careerPath: undefined })
+    );
     expect(onUpdateCybernetics).toHaveBeenCalledWith([
       expect.objectContaining({ id: "independent" }),
     ]);
@@ -231,9 +252,9 @@ describe("BackgroundTab", () => {
     expect(screen.queryByText("Arbitrator")).not.toBeInTheDocument();
   });
 
-  it("disables the homeworld field when not editable", () => {
+  it("hides the homeworld action when not editable", () => {
     renderTab({ editable: false });
-    expect(screen.getByRole("button", { name: "Select Homeworld" })).toBeDisabled();
+    expect(screen.queryByRole("button", { name: "Select Homeworld" })).not.toBeInTheDocument();
   });
 
   it("selects a skin option", async () => {

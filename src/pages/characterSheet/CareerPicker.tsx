@@ -3,7 +3,6 @@ import { InfoModal } from "../../components/InfoModal";
 import { CAREER_LIST, type CareerData, type CareerRankData } from "../../data/careerData";
 import type { HomeworldData } from "../../data/homeworldData";
 import { Chip } from "../../ui/Chip";
-import { colourMeta } from "../../ui/colourTokens";
 import {
   uiInfoModalWrapper,
   uiItemName,
@@ -143,67 +142,6 @@ export function CareerPicker({
             </span>
           </div>
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
-            <Chip className={`bg-slate-800/40 font-code ${sourceColour(career.source)}`}>
-              {career.source}
-            </Chip>
-          </div>
-        </PickerRow>
-      ))}
-    </PickerModal>
-  );
-}
-
-export function RankPicker({
-  career,
-  selected,
-  onSelect,
-  onClose,
-}: {
-  career: CareerData;
-  selected?: string;
-  onSelect: (rank: CareerRankData) => void;
-  onClose: () => void;
-}) {
-  const [query, setQuery] = useState("");
-  const normalizedQuery = query.trim().toLowerCase();
-  const ranks = career.ranks
-    .filter(
-      (rank) =>
-        rank.name.toLowerCase().includes(normalizedQuery) ||
-        rank.xpLevel.toLowerCase().includes(normalizedQuery) ||
-        rank.paths?.some((path) => path.toLowerCase().includes(normalizedQuery))
-    )
-    .sort((a, b) => a.tier - b.tier || a.name.localeCompare(b.name));
-
-  return (
-    <PickerModal
-      title={`${career.name} Rank`}
-      placeholder="Search ranks…"
-      query={query}
-      onQueryChange={setQuery}
-      onClose={onClose}
-      isEmpty={ranks.length === 0}
-    >
-      {ranks.map((rank) => (
-        <PickerRow key={rank.id} selected={rank.name === selected} onClick={() => onSelect(rank)}>
-          <div className="flex items-center gap-1.5 min-w-0">
-            <span className={`${uiItemName} group-hover:text-white`}>{rank.name}</span>
-            <span className={uiInfoModalWrapper} onClick={(event) => event.stopPropagation()}>
-              <InfoModal
-                title={rank.name}
-                content={<RankInfoContent career={career} rank={rank} />}
-                as="span"
-              />
-            </span>
-          </div>
-          <div className="mt-1 flex flex-wrap items-center gap-1.5">
-            <Chip className={colourMeta}>Rank {rank.tier}</Chip>
-            <Chip className={colourMeta}>{rank.xpLevel} XP</Chip>
-            {rank.paths?.length && (
-              <Chip className={colourMeta}>
-                {rank.paths.length > 1 ? "Paths" : "Path"}: {rank.paths.join(" / ")}
-              </Chip>
-            )}
             <Chip className={`bg-slate-800/40 font-code ${sourceColour(career.source)}`}>
               {career.source}
             </Chip>

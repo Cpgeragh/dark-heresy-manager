@@ -16,7 +16,7 @@ import {
 } from "../../ui/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { HOMEWORLD_LIST } from "../../data/homeworldData";
-import { findCareerByName, type CareerData, type CareerRankData } from "../../data/careerData";
+import { findCareerByName, type CareerData } from "../../data/careerData";
 import { findDivinationByResult, type DivinationData } from "../../data/divinationData";
 import { EYE_OPTIONS, HAIR_OPTIONS, SKIN_OPTIONS } from "../../data/appearanceData";
 import { Button } from "../../ui/Button";
@@ -31,7 +31,7 @@ import {
   segmentedTabPanelId,
   uiSwipeableTabPanel,
 } from "../../ui/segmentedTabStyles";
-import { CareerInfoContent, CareerPicker, RankInfoContent, RankPicker } from "./CareerPicker";
+import { CareerInfoContent, CareerPicker, RankInfoContent } from "./CareerPicker";
 import { SANCTIONING_RESULTS } from "../../features/traits/sanctioningReference";
 import { DivinationInfoContent, DivinationPicker } from "./DivinationPicker";
 import { HomeworldInfoContent, HomeworldPicker } from "./HomeworldPicker";
@@ -93,15 +93,17 @@ function BackgroundPickerField({
           <span className={uiFormLabel}>{label}</span>
           {info}
         </div>
-        <Button
-          size="xs"
-          disabled={disabled}
-          onClick={onClick}
-          aria-label={`${selected ? "Change" : "Select"} ${label}`}
-          className={`shrink-0 ${showAction ? "" : "invisible"}`}
-        >
-          {selected ? "Change" : "Select"}
-        </Button>
+        {showAction && (
+          <Button
+            size="xs"
+            disabled={disabled}
+            onClick={onClick}
+            aria-label={`${selected ? "Change" : "Select"} ${label}`}
+            className="shrink-0"
+          >
+            {selected ? "Change" : "Select"}
+          </Button>
+        )}
       </div>
       <div className={uiSectionShell + " overflow-hidden"}>
         <div className={compact ? "min-h-9 px-2.5 py-1.5 lg:px-3 lg:py-2" : "min-h-11 px-3 py-2.5 lg:px-4 lg:py-3"}>
@@ -147,7 +149,6 @@ export function BackgroundTab({
 }: BackgroundTabProps) {
   const [showHomeworldPicker, setShowHomeworldPicker] = useState(false);
   const [showCareerPicker, setShowCareerPicker] = useState(false);
-  const [showRankPicker, setShowRankPicker] = useState(false);
   const [showDivinationPicker, setShowDivinationPicker] = useState(false);
   const [showGenderPicker, setShowGenderPicker] = useState(false);
   const [showSkinPicker, setShowSkinPicker] = useState(false);
@@ -174,6 +175,25 @@ export function BackgroundTab({
     (rank) => rank.name.toLowerCase() === header.rank?.toLowerCase()
   );
   const selectedDivination = findDivinationByResult(header.divination);
+
+  const headerForCareer = useCallback(
+    (career: CareerData): CharacterHeader => {
+      const sameCareer = header.career?.toLowerCase() === career.name.toLowerCase();
+      const currentRankBelongsToCareer = career.ranks.some(
+        (rank) => rank.name.toLowerCase() === header.rank?.toLowerCase()
+      );
+      return {
+        ...header,
+        career: career.name,
+        rank:
+          sameCareer && currentRankBelongsToCareer
+            ? header.rank
+            : career.startingRank,
+        careerPath: sameCareer ? header.careerPath : undefined,
+      };
+    },
+    [header]
+  );
 
   // ── Header field helpers ───────────────────────────────────────────────────
   const updateHeaderField = useCallback(
@@ -214,7 +234,7 @@ export function BackgroundTab({
         ...(currentCareerIsAllowed ? {} : { careerTraitAcquisition: undefined }),
       });
       if (!currentCareerIsAllowed) {
-        onUpdateHeader({ ...header, career: "", rank: "" });
+        onUpdateHeader({ ...header, career: "", rank: "", careerPath: undefined });
         if (onUpdateCybernetics) {
           void onUpdateCybernetics(cybernetics.filter(
             (item) => item.grantedByTalentEntryUid !== "career:imperial-psyker:sanctioned-psyker"
@@ -238,14 +258,7 @@ export function BackgroundTab({
         setPendingStartingChoiceCareer(career);
         return;
       }
-      const currentRankBelongsToCareer = career.ranks.some(
-        (rank) => rank.name.toLowerCase() === header.rank?.toLowerCase()
-      );
-      onUpdateHeader({
-        ...header,
-        career: career.name,
-        rank: currentRankBelongsToCareer ? header.rank : career.startingRank,
-      });
+      onUpdateHeader(headerForCareer(career));
       onUpdateTalents({ ...talents, careerTraitAcquisition: undefined, careerStartingChoices: undefined });
       if (onUpdateCybernetics) {
         void onUpdateCybernetics(
@@ -259,15 +272,7 @@ export function BackgroundTab({
       }
       setShowCareerPicker(false);
     },
-    [cybernetics, header, onUpdateCybernetics, onUpdateHeader, onUpdateTalents, talents]
-  );
-
-  const handleRankSelect = useCallback(
-    (rank: CareerRankData) => {
-      updateHeaderField("rank", rank.name);
-      setShowRankPicker(false);
-    },
-    [updateHeaderField]
+    [cybernetics, headerForCareer, onUpdateCybernetics, onUpdateHeader, onUpdateTalents, talents]
   );
 
   const handleDivinationSelect = useCallback(
@@ -587,16 +592,10 @@ export function BackgroundTab({
                   </div>
                 )
               }
-              emptyText={
-                selectedHomeworld
-                  ? selectedCareer
-                    ? "— Select rank —"
-                    : "Select a career first"
-                  : "Select a homeworld first"
-              }
-              showAction={editable}
-              disabled={!editable || !selectedHomeworld || !selectedCareer}
-              onClick={() => setShowRankPicker(true)}
+              emptyText={selectedCareer ? "Assigned by Career progression" : "Select a career first"}
+              showAction={false}
+              disabled
+              onClick={() => {}}
               info={
                 selectedCareer &&
                 selectedRank && (
@@ -812,7 +811,7 @@ export function BackgroundTab({
               ...(currentCareerIsAllowed ? {} : { careerTraitAcquisition: undefined }),
             });
             if (!currentCareerIsAllowed) {
-              onUpdateHeader({ ...header, career: "", rank: "" });
+              onUpdateHeader({ ...header, career: "", rank: "", careerPath: undefined });
               if (onUpdateCybernetics) {
                 void onUpdateCybernetics(cybernetics.filter(
                   (item) => item.grantedByTalentEntryUid !== "career:imperial-psyker:sanctioned-psyker"
@@ -842,14 +841,7 @@ export function BackgroundTab({
             cybernetics={cybernetics}
             gear={gear}
             onComplete={(result) => {
-              const currentRankBelongsToCareer = pendingCareer.ranks.some(
-                (rank) => rank.name.toLowerCase() === header.rank?.toLowerCase()
-              );
-              onUpdateHeader({
-                ...header,
-                career: pendingCareer.name,
-                rank: currentRankBelongsToCareer ? header.rank : pendingCareer.startingRank,
-              });
+              onUpdateHeader(headerForCareer(pendingCareer));
               onUpdateTalents({
                 ...talents,
                 careerTraitAcquisition: result.entry.acquisition?.trait,
@@ -877,14 +869,7 @@ export function BackgroundTab({
         <CareerStartingChoiceModal
           career={pendingStartingChoiceCareer}
           onComplete={(choices) => {
-            const currentRankBelongsToCareer = pendingStartingChoiceCareer.ranks.some(
-              (rank) => rank.name.toLowerCase() === header.rank?.toLowerCase()
-            );
-            onUpdateHeader({
-              ...header,
-              career: pendingStartingChoiceCareer.name,
-              rank: currentRankBelongsToCareer ? header.rank : pendingStartingChoiceCareer.startingRank,
-            });
+            onUpdateHeader(headerForCareer(pendingStartingChoiceCareer));
             onUpdateTalents({
               ...talents,
               careerTraitAcquisition: undefined,
@@ -909,14 +894,6 @@ export function BackgroundTab({
         />
       )}
 
-      {showRankPicker && selectedCareer && (
-        <RankPicker
-          career={selectedCareer}
-          selected={header.rank}
-          onSelect={handleRankSelect}
-          onClose={() => setShowRankPicker(false)}
-        />
-      )}
 
       {showDivinationPicker && (
         <DivinationPicker
