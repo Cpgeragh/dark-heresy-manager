@@ -1,6 +1,6 @@
 # Manual Test Checklist — Complete App
 
-Thirty pages and cross-cutting sections, containing 524 checks. Every item
+Thirty pages and cross-cutting sections, containing 532 checks. Every item
 comes from reading the actual logic, not a generic "does it load" pass.
 Check items off as you verify them; anything under **Watch for** is the
 likeliest place a real bug hides. Coverage notes are at the bottom — read
@@ -127,7 +127,7 @@ checks below.
 - [ ] On a phone, the **Basic / Advanced** switch changes the visible section and a horizontal swipe changes it in the same direction
 - [ ] The information button beside **Basic Skills** explains that an Untrained Basic Skill is attempted using half its governing Characteristic, rounded down
 - [ ] The information button beside **Advanced Skills** explains that an Untrained Advanced Skill cannot be attempted; the number shown in its picker is the Total it will use after becoming Trained
-- [ ] An Untrained Basic Skill is visible on the Basic page and its Total is the governing Characteristic ÷ 2, rounded down
+- [ ] An Untrained Basic Skill is absent from the main Basic page and remains available through the appropriate picker; making it count as Basic changes how it can be attempted but does not, by itself, put the Untrained Skill on the main page
 - [ ] An Untrained Advanced Skill is absent from the main Advanced page but is present in the Advanced picker with its future Trained Total
 - [ ] Training a Skill uses the full governing Characteristic; subsequent acquisitions/level changes produce **+10** and then **+20**
 - [ ] The available levels stop at **Trained / +10 / +20** — there is no +30 tier
@@ -146,18 +146,24 @@ checks below.
 - [ ] Multi-entry categories such as Ciphers, Common Lore, Forbidden Lore, Performer, and Trade appear as grouped cards
 - [ ] A group displays every Characteristic used by its children rather than incorrectly showing only one
 - [ ] Open a group after scrolling down, press Back, and confirm the parent picker returns to the same scroll position
-- [ ] Add one child from a group — only that Skill becomes Trained and disappears from the untrained picker
-- [ ] The picker stays open after adding; add a second Skill without closing and reopening it
+- [ ] Add one child from a group — only that Skill becomes Trained, appears on the main page, and disappears from the untrained picker; unpurchased siblings neither appear on the main page nor disappear from the picker with it
+- [ ] Every grouped child is evaluated independently for ownership and current career/rank availability — one Common Lore child becoming available, being purchased, or being deleted must not add, remove, or unlock its siblings
+- [ ] The grouped picker stays open after adding while another valid child remains; add a second Skill without closing and reopening it, then confirm selecting the final valid child automatically returns to the parent picker instead of leaving an empty `No matches` screen
 - [ ] Expand a picker card using its chevron — this previews its information without selecting it
-- [ ] Source, Characteristic, Basic/Advanced, current level, and Total chips are readable and do not overlap on a phone
-- [ ] Delete a trained Skill: the first tap opens **Delete Skill**, Cancel changes nothing, and Delete returns it to Untrained and to the appropriate picker
+- [ ] On a phone, each owned Skill card keeps name/info/delete on its first row, metadata and Total on its second row, the Upgrade action at the far right of that second row, and generated source text below; desktop uses the same structure with Upgrade immediately left of Delete — neither layout clips, overlaps, or turns Upgrade into a metadata chip
+- [ ] Main-page Skill cards do not receive whole-card hover/pressed styling; only their actual controls respond, while selectable cards inside pickers retain the shared whole-card interaction feedback
+- [ ] A Skill card has one information control containing both its rules and any generated effect details — no second information button appears beside Total
+- [ ] Every DM-only Skill Upgrade action uses the same red outline styling, including the manual-cost path; an owning player never sees the off-career manual-cost action
+- [ ] Open the trash action on a **+20** Skill — the confirmation offers amber-outline **Downgrade to +10**, red-outline **Delete Skill**, and Cancel/close; downgrading removes only the latest level while deleting removes every independent purchase
+- [ ] Repeat at **+10** — the downgrade target is **Trained**; at **Trained**, no downgrade action is offered and Delete returns the Skill to Untrained and to the appropriate picker
 
 **Talent-supplied Skill effects:**
 
 - [ ] Add **Talented (Awareness)** — Awareness gains +10 and its card says `Talent effect: Talented (Awareness): +10`
 - [ ] Repeat Talented with a Skill that was not independently trained — the +10 is still shown, but Talented does not falsely record an extra Skill acquisition
 - [ ] Add **Machinator Array** — Silent Move receives −10 and names Machinator Array as the source
-- [ ] Add **Cult Briefing (Political)** — every Common Lore Skill counts as Basic while the Talent is owned
+- [ ] Add **Cult Briefing (Political)** — every Common Lore Skill counts as Basic while the Talent is owned, but an otherwise Untrained Common Lore Skill is not injected onto the main Skills page
+- [ ] Every generated `counts as Basic` message includes the full affected Skill name and identifies the source type correctly — Homeworld effects say **Homeworld**, Talent effects say **Talent**, and Trait effects say **Trait** (for example Forge World, Cult Briefing, and Hagiography)
 - [ ] With Tech-Use Untrained, add **Cult Briefing (Heretek)** — Tech-Use becomes Trained, cannot be deleted as if independently purchased, and names the Talent source
 - [ ] Independently train Tech-Use first, then add Cult Briefing (Heretek) — the Skill does not gain another level and the redundant training source is not displayed
 - [ ] Remove Cult Briefing (Heretek) from both preparations: a solely granted Tech-Use returns to Untrained, while independently trained Tech-Use remains Trained
@@ -198,8 +204,10 @@ below deliberately change several of those pages.
 - [ ] Picker cards show the Talent name, information button, source chip, prerequisites where present, and a forward arrow only when another step is required
 - [ ] Prerequisites are informational: the app displays them but does not silently enforce them
 - [ ] The picker stays open after adding a Talent; finite Talents disappear while repeatable Talents remain
-- [ ] Enter and cancel a choice/acquisition screen — it returns to the still-open Talent picker at the same scroll position
-- [ ] Complete a choice/acquisition screen — it also returns to the same still-open picker position
+- [ ] Enter and back out of a choice/acquisition screen — it returns to the still-open Talent picker at the same scroll position
+- [ ] Complete a repeatable or multi-choice screen — the selected option disappears, the same choice screen remains open while another valid option exists, and selecting its final valid option automatically returns to the still-open Talent picker
+- [ ] Complete a single-purchase choice or an acquisition screen — it returns to the still-open Talent picker at the same scroll position and the now-unavailable Talent is absent
+- [ ] From **Show all**, complete a manual-cost purchase belonging to a choice-based Talent — if choices remain, it returns to that same refreshed choice screen rather than the main or rank-filtered picker
 - [ ] All six Weapon Training entries are absent: Basic, Heavy, Melee, Pistol, Thrown, and Exotic Weapon Training
 - [ ] Every normal Talent deletion uses a two-step **Delete / Cancel** confirmation
 - [ ] Refresh after several additions and deletions and confirm the same cards, ranks, choices, and sources remain
@@ -226,9 +234,9 @@ below deliberately change several of those pages.
 - [ ] **Resistance** offers exactly: Cold, Fear, Heat, Poisons, and Psychic Powers
 - [ ] **Two-Weapon Wielder** offers exactly: Melee and Ballistic
 - [ ] **Talented** uses the current Skills reference catalogue rather than an unrelated hand-written list
-- [ ] Buy one choice — the Talent displays as one normal named card, for example `Resistance (Fear)`
-- [ ] Reopen its choice picker — the owned choice is absent and cannot be duplicated with different capitalisation
-- [ ] Buy a second choice — the entries become one expandable parent with separately listed children
+- [ ] Buy one choice — the Talent displays as one normal named card, for example `Resistance (Fear)`, while its choice picker remains open if another valid option exists
+- [ ] In that still-open choice picker, the owned choice is absent and cannot be duplicated with different capitalisation
+- [ ] Buy a second choice without returning to the main picker — the entries become one expandable parent with separately listed children
 - [ ] Expand and collapse the parent, then delete one child — only that purchase is removed and the surviving child returns to a normal card when only one remains
 - [ ] Exhaust every finite option — the whole Talent disappears from the Add Talent picker
 
@@ -237,7 +245,7 @@ below deliberately change several of those pages.
 - [ ] **Discipline Focus** and **Psychic Supremacy** each offer Biomancy, Divination, Pyromancy, Telekinetics, and Telepathy
 - [ ] **Cult Briefing** offers Political, Heretek, Pleasure, Infestation, Blood, and Culture
 - [ ] **Sicarius Tutoring** offers Adept, Arbitrator, Assassin, Battle Sister, Cleric, Guardsman, Imperial Psyker, Scum, and Tech-Priest
-- [ ] After choosing one option, the entire single-purchase Talent disappears rather than offering the remaining choices as separate purchases
+- [ ] After choosing one option, the choice screen returns to the main Talent picker and the entire single-purchase Talent disappears rather than offering the remaining choices as separate purchases
 
 **Hatred and open text:**
 
@@ -412,10 +420,10 @@ cross-checking permanent effects and their named sources.
 
 - [ ] Add and remove an ordinary Trait; deletion uses the same Delete/Cancel confirmation as Talents
 - [ ] In view-only mode, picker rows do not activate; in edit mode, each pressed row alone shows the shared touch feedback
-- [ ] Secondary choice screens use a forward arrow to enter and a back arrow to return, preserving the parent picker position
-- [ ] Fear uses the four labelled ratings; Size uses Minuscule through Massive; both disappear after one selection
+- [ ] Secondary choice screens use a forward arrow to enter and a back arrow to return, preserving the parent picker position; after a purchase they remain open only while another valid choice exists
+- [ ] Fear uses the four labelled ratings; Size uses Minuscule through Massive; selecting either Trait's one permitted choice automatically returns to the main Trait picker and removes that entire Trait from it
 - [ ] Natural Armour accepts digits only and requires 1+; Machine accepts only 1–5; Burrower, Flyer, Hoverer, and Unnatural Senses require a positive whole-number speed/range
-- [ ] Unnatural Characteristic groups different Characteristics under one expandable card; repeated copies of the same Characteristic show **Owned: N** and deleting lowers that count by one
+- [ ] Unnatural Characteristic's choice screen remains open after a selection, keeps every repeatable Characteristic available, and updates that option's **Owned: N** immediately; on the main page, different Characteristics group under one expandable card and deleting one acquisition lowers only its count by one
 - [ ] Add 10+ mixed Traits: two natural-height columns remain aligned without stretched cards, blank gaps, overlap, or clipping
 - [ ] Natural Armour and Armour Plating add named Misc AP sources; only the strongest Machine value applies, including Machine granted by The Flesh is Weak
 - [ ] Multiple Arms, Labourer Build, Fit For Purpose, Superior Origins, Soul-bound, and Sanctioning changes appear on the affected Characteristic with the Trait named as the source; deletion reverses them
