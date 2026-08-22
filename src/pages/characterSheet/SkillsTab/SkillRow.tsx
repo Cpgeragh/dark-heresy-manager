@@ -23,7 +23,6 @@ import {
 import { uiPickerPressFeedback } from "../../../ui/buttonStyles";
 import { colourPurple, colourTeal, colourValue } from "../../../ui/colourTokens";
 import { sanitizeNonNegativeIntegerInput } from "../../../utils/formInput";
-import { canConfirmManualCostPurchase } from "../../../utils/dmGatedPurchase";
 
 interface SkillRowProps {
   skill: SkillWithComputed;
@@ -67,8 +66,9 @@ export function SkillRow({
   const [manualUpgradeCost, setManualUpgradeCost] = useState("");
 
   const levelBadgeClass = LEVEL_BADGE[skill.level] ?? "";
-  const talentSourceSummary = skill.talentSources
-    ?.map((source) =>
+  const talentSources = skill.talentSources ?? [];
+  const talentSourceSummary = talentSources
+    .map((source) =>
       `${source.name} (${source.type})${
         source.detail
           ? `: ${source.detail}`
@@ -78,6 +78,27 @@ export function SkillRow({
       }`
     )
     .join(" · ");
+  const skillDescription = SKILL_DESCRIPTIONS[skill.name];
+  const hasSkillInfo = Boolean(skillDescription) || talentSources.length > 0;
+  const skillInfoContent = (
+    <div className="space-y-3">
+      {skillDescription && (
+        <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>{skillDescription}</p>
+      )}
+      {talentSources.length > 0 && (
+        <div>
+          <p className={`${uiFormLabel} mb-1`}>Effects</p>
+          <ul className="space-y-1 text-sm leading-relaxed text-slate-300 lg:text-base">
+            {talentSources.map((source, index) => (
+              <li key={index}>
+                {source.name} ({source.type}){source.detail ? `: ${source.detail}` : source.amount !== 0 ? `: ${source.amount > 0 ? "+" : ""}${source.amount}` : ""}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
 
   const displayName = indented
     ? skill.name.slice(skill.category.length).trim().replace(/^\(|\)$/g, "").trim() || skill.name
@@ -90,11 +111,15 @@ export function SkillRow({
 
   const manualUpgradeCostNumber = Number(manualUpgradeCost);
   const canConfirmManualUpgrade = manualUpgradeCost.trim() !== "";
+  const canDelete = editable && skill.level !== "untrained" && !(skill.talentMinimumLevel && skill.baseLevel === "untrained");
+  const hasCareerUpgrade = editable && nextTierAccess?.status === "unlocked";
+  const hasManualUpgrade = editable && isDM && nextTierAccess?.status === "not-on-career";
+  const hasUpgrade = hasCareerUpgrade || hasManualUpgrade;
 
   return (
     <div className={uiSectionShell + " overflow-hidden"}>
       {/* COLLAPSED ROW */}
-      <div className={`relative w-full text-left hover:bg-slate-700/40 transition group ${
+      <div className={`relative w-full text-left group ${onSelect ? "hover:bg-slate-700/40 transition" : ""} ${
         previewMode ? "p-3 lg:p-4" : "px-3 lg:px-4 py-2.5 lg:py-3"
       }`}>
         {onSelect && (
@@ -105,18 +130,45 @@ export function SkillRow({
             className={`absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 ${uiPickerPressFeedback(previewMode)}`}
           />
         )}
-        {/* Mobile: name+chips in a left column, total in its own centered column, chevron last */}
-        <div className="relative pointer-events-none lg:hidden flex items-center gap-3">
-          <div className="flex-1 min-w-0 space-y-1.5">
-            <div className="flex items-center gap-1.5">
-              <span className={`${uiItemName} truncate ${onSelect ? "group-hover:text-white" : ""}`}>{displayName}</span>
-              {SKILL_DESCRIPTIONS[skill.name] && (
+        {/* Mobile: header, right-aligned upgrade, metadata with an isolated Total, then the full-width effect. */}
+        <div className="relative pointer-events-none lg:hidden space-y-2.5">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-1.5">
+              <span className={`${uiItemName} break-words ${onSelect ? "group-hover:text-white" : ""}`}>{displayName}</span>
+              {hasSkillInfo && (
                 <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
-                  <InfoModal title={skill.name} content={SKILL_DESCRIPTIONS[skill.name]} as="span" />
+                  <InfoModal title={skill.name} content={skillInfoContent} as="span" />
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-1.5">
+            {canDelete && (
+              <div className="relative z-20 shrink-0 pointer-events-auto">
+                <RemoveButton
+                  onClick={() => setDeleteArmed(true)}
+                  label={`Delete ${skill.name}`}
+                />
+              </div>
+            )}
+          </div>
+          {hasUpgrade && (
+            <div className="relative z-20 flex justify-end pointer-events-auto">
+              {hasCareerUpgrade && nextTierAccess?.status === "unlocked" && (
+                <Button size="xs" onClick={() => setUpgradeArmed(true)}>
+                  Upgrade to {nextTierAccess.level}
+                </Button>
+              )}
+              {hasManualUpgrade && nextTierAccess?.status === "not-on-career" && (
+                <Button
+                  size="xs"
+                  onClick={() => setManualUpgradeArmed(true)}
+                >
+                  Upgrade to {nextTierAccess.level}
+                </Button>
+              )}
+            </div>
+          )}
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+            <div className="flex flex-wrap items-center gap-1.5">
               {previewMode && skill.source && (
                 <Chip size="sm" className={`bg-slate-800/40 font-code shrink-0 ${sourceColour(skill.source)}`}>
                   {skill.source}
@@ -139,72 +191,49 @@ export function SkillRow({
                 </Chip>
               )}
             </div>
-            {talentSourceSummary && (
-              <p className="text-xs leading-snug text-amber-300">
-                {talentSourceSummary}
-              </p>
-            )}
-          </div>
-          <div className="relative pointer-events-none flex items-center gap-4 shrink-0">
             <StatChip label="Total" value={skill.total ?? "—"} />
-            {(skill.talentSources?.length ?? 0) > 0 && (
-              <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
-                <InfoModal
-                  title={`${skill.name} Adjustments`}
-                  content={
-                    <ul className="space-y-1 text-sm leading-relaxed text-slate-300 lg:text-base">
-                      {skill.talentSources?.map((source, index) => (
-                        <li key={index}>
-                          {source.name} ({source.type}){source.detail ? `: ${source.detail}` : source.amount !== 0 ? `: ${source.amount > 0 ? "+" : ""}${source.amount}` : ""}
-                        </li>
-                      ))}
-                    </ul>
-                  }
-                />
-              </span>
-            )}
-            {editable && nextTierAccess && nextTierAccess.status !== "maxed" && (
-              <div className="relative z-20 pointer-events-auto">
-                {nextTierAccess.status === "unlocked" && (
+          </div>
+          {talentSourceSummary && (
+            <p className="text-xs leading-snug text-amber-300">
+              {talentSourceSummary}
+            </p>
+          )}
+        </div>
+
+        {/* Desktop uses its extra width to keep Upgrade immediately left of Delete. */}
+        <div className="relative pointer-events-none hidden lg:block lg:space-y-2.5">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-1.5">
+              <span className={`${uiItemName} truncate ${onSelect ? "group-hover:text-white" : ""}`}>{displayName}</span>
+              {hasSkillInfo && (
+                <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
+                  <InfoModal title={skill.name} content={skillInfoContent} as="span" />
+                </span>
+              )}
+            </div>
+            {(hasUpgrade || canDelete) && (
+              <div className="relative z-20 flex shrink-0 items-center gap-3 pointer-events-auto">
+                {hasCareerUpgrade && nextTierAccess?.status === "unlocked" && (
                   <Button size="xs" onClick={() => setUpgradeArmed(true)}>
                     Upgrade to {nextTierAccess.level}
                   </Button>
                 )}
-                {nextTierAccess.status === "not-on-career" && (
-                  <Button
-                    size="xs"
-                    variant="ghost"
-                    disabled={!canConfirmManualCostPurchase(isDM)}
-                    onClick={() => setManualUpgradeArmed(true)}
-                  >
+                {hasManualUpgrade && nextTierAccess?.status === "not-on-career" && (
+                  <Button size="xs" onClick={() => setManualUpgradeArmed(true)}>
                     Upgrade to {nextTierAccess.level}
                   </Button>
                 )}
-              </div>
-            )}
-            {editable && skill.level !== "untrained" && !(skill.talentMinimumLevel && skill.baseLevel === "untrained") && (
-              <div className="relative z-20 pointer-events-auto">
-                <RemoveButton
-                  onClick={() => setDeleteArmed(true)}
-                  label={`Delete ${skill.name}`}
-                />
+                {canDelete && (
+                  <RemoveButton
+                    onClick={() => setDeleteArmed(true)}
+                    label={`Delete ${skill.name}`}
+                  />
+                )}
               </div>
             )}
           </div>
-        </div>
-
-        {/* Desktop: name+chips in a left column, total in its own centered column, chevron last */}
-        <div className="relative pointer-events-none hidden lg:flex lg:items-center lg:gap-3">
-          <div className="flex-1 min-w-0 space-y-1.5">
-            <div className="flex items-center gap-1.5">
-              <span className={`${uiItemName} truncate ${onSelect ? "group-hover:text-white" : ""}`}>{displayName}</span>
-              {SKILL_DESCRIPTIONS[skill.name] && (
-                <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
-                  <InfoModal title={skill.name} content={SKILL_DESCRIPTIONS[skill.name]} as="span" />
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-1.5">
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+            <div className="flex flex-wrap items-center gap-1.5">
               {previewMode && skill.source && (
                 <Chip className={`bg-slate-800/40 font-code shrink-0 ${sourceColour(skill.source)}`}>
                   {skill.source}
@@ -227,58 +256,13 @@ export function SkillRow({
                 </Chip>
               )}
             </div>
-            {talentSourceSummary && (
-              <p className="text-xs leading-snug text-amber-300">
-                {talentSourceSummary}
-              </p>
-            )}
-          </div>
-          <div className="relative pointer-events-none flex items-center gap-4 shrink-0">
             <StatChip label="Total" value={skill.total ?? "—"} />
-            {(skill.talentSources?.length ?? 0) > 0 && (
-              <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
-                <InfoModal
-                  title={`${skill.name} Adjustments`}
-                  content={
-                    <ul className="space-y-1 text-sm leading-relaxed text-slate-300 lg:text-base">
-                      {skill.talentSources?.map((source, index) => (
-                        <li key={index}>
-                          {source.name} ({source.type}){source.detail ? `: ${source.detail}` : source.amount !== 0 ? `: ${source.amount > 0 ? "+" : ""}${source.amount}` : ""}
-                        </li>
-                      ))}
-                    </ul>
-                  }
-                />
-              </span>
-            )}
-            {editable && nextTierAccess && nextTierAccess.status !== "maxed" && (
-              <div className="relative z-20 pointer-events-auto">
-                {nextTierAccess.status === "unlocked" && (
-                  <Button size="xs" onClick={() => setUpgradeArmed(true)}>
-                    Upgrade to {nextTierAccess.level}
-                  </Button>
-                )}
-                {nextTierAccess.status === "not-on-career" && (
-                  <Button
-                    size="xs"
-                    variant="ghost"
-                    disabled={!canConfirmManualCostPurchase(isDM)}
-                    onClick={() => setManualUpgradeArmed(true)}
-                  >
-                    Upgrade to {nextTierAccess.level}
-                  </Button>
-                )}
-              </div>
-            )}
-            {editable && skill.level !== "untrained" && !(skill.talentMinimumLevel && skill.baseLevel === "untrained") && (
-              <div className="relative z-20 pointer-events-auto">
-                <RemoveButton
-                  onClick={() => setDeleteArmed(true)}
-                  label={`Delete ${skill.name}`}
-                />
-              </div>
-            )}
           </div>
+          {talentSourceSummary && (
+            <p className="text-xs leading-snug text-amber-300">
+              {talentSourceSummary}
+            </p>
+          )}
         </div>
       </div>
 
@@ -316,7 +300,7 @@ export function SkillRow({
         </PickerModal>
       )}
 
-      {manualUpgradeArmed && nextTierAccess?.status === "not-on-career" && (
+      {isDM && manualUpgradeArmed && nextTierAccess?.status === "not-on-career" && (
         <PickerModal
           title="Upgrade Skill"
           query=""
@@ -371,7 +355,13 @@ export function SkillRow({
           maxWidth="max-w-sm"
           footer={
             <div className="grid grid-cols-2 gap-2">
-              <Button variant="primary" onClick={handleRemove}>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  handleRemove();
+                  setDeleteArmed(false);
+                }}
+              >
                 Delete
               </Button>
               <Button variant="ghost" onClick={() => setDeleteArmed(false)}>
