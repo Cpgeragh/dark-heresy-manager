@@ -697,6 +697,8 @@ export interface CharacterHeader {
   playerName?: string;
   career?: string;
   rank?: string;
+  /** Stable branch label selected when this Career first splits. */
+  careerPath?: string;
   homeWorld?: string;
   divination?: string;
   description?: string;
