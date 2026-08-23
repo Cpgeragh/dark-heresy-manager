@@ -67,6 +67,7 @@ export type ClaimLogDocument = ClaimLog;
  */
 export interface CharacterListItem {
   id: string;
+  campaignId: string;
   userId: string | null;
   isEditableByPlayer: boolean;
   recoveryCode: string;

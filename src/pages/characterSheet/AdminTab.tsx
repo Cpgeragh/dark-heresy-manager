@@ -2,16 +2,18 @@
 
 import { useState } from "react";
 import type { Character } from "../../types/Character";
-import type { ClaimLog } from "../../types/ClaimLog";
+import { useClaimLogs } from "../../hooks/useClaimLogs";
 import { Button } from "../../ui/Button";
+import { ErrorState } from "../../ui/ErrorState";
+import { LoadingState } from "../../ui/LoadingState";
 import { uiSection, readOnlyBadgeClass } from "../../ui/editableStyles";
 import { PlayerPicker } from "./PlayerPicker";
 
 interface AdminTabProps {
+  campaignId: string;
   character: Character;
   /** Current owner's first name, derived from their account profile. */
   ownerName: string | null;
-  claimLog: ClaimLog[];
   onDMForceRelease: () => void;
   onDMForceAssign: (targetUid: string) => void;
   onDMToggleEdit: () => void;
@@ -22,9 +24,9 @@ interface AdminTabProps {
 }
 
 export function AdminTab({
+  campaignId,
   character,
   ownerName,
-  claimLog,
   onDMForceRelease,
   onDMForceAssign,
   onDMToggleEdit,
@@ -34,6 +36,12 @@ export function AdminTab({
   memberIds,
 }: AdminTabProps) {
   const [showPlayerPicker, setShowPlayerPicker] = useState(false);
+  const [showClaimHistory, setShowClaimHistory] = useState(false);
+  const {
+    logs: claimLog,
+    loading: claimLogLoading,
+    error: claimLogError,
+  } = useClaimLogs(campaignId, character.id, showClaimHistory);
 
   const latest = claimLog.length > 0 ? claimLog[0] : null;
   // Show the current owner's real name when the character is claimed; fall back
@@ -47,8 +55,8 @@ export function AdminTab({
         DM-only controls. Changes here immediately affect player access.
       </p>
 
-      {/* LATEST EVENT */}
-      {latest && (
+      {/* LATEST EVENT — available only after the DM deliberately opens History. */}
+      {showClaimHistory && latest && (
         <p className="text-xs lg:text-sm text-slate-400">
           Last ownership event:{" "}
           <span className="font-code text-slate-300">
@@ -89,19 +97,11 @@ export function AdminTab({
 
         {/* ACTIONS */}
         <div className="flex flex-wrap gap-2 mt-4">
-          <Button
-            variant="danger"
-            onClick={onDMForceRelease}
-            disabled={isDmForceReleasing}
-          >
+          <Button variant="danger" onClick={onDMForceRelease} disabled={isDmForceReleasing}>
             {isDmForceReleasing ? "Releasing…" : "Force Release Ownership"}
           </Button>
 
-          <Button
-            variant="warning"
-            onClick={onDMToggleEdit}
-            disabled={isDmTogglingEdit}
-          >
+          <Button variant="warning" onClick={onDMToggleEdit} disabled={isDmTogglingEdit}>
             {isDmTogglingEdit ? "Updating…" : "Toggle Player Edit Permission"}
           </Button>
 
@@ -133,33 +133,43 @@ export function AdminTab({
           <span className={readOnlyBadgeClass}>Immutable</span>
         </div>
 
-        {claimLog.length === 0 && (
-          <p className="text-sm lg:text-base text-slate-400">No claim events recorded yet.</p>
+        <Button
+          variant="secondary"
+          size="sm"
+          aria-expanded={showClaimHistory}
+          onClick={() => setShowClaimHistory((visible) => !visible)}
+        >
+          {showClaimHistory ? "Close History" : "Open History"}
+        </Button>
+
+        {showClaimHistory && (
+          <div className="mt-3">
+            {claimLogError ? (
+              <ErrorState>Unable to load claim history.</ErrorState>
+            ) : claimLogLoading ? (
+              <LoadingState>Loading claim history…</LoadingState>
+            ) : claimLog.length === 0 ? (
+              <p className="text-sm lg:text-base text-slate-400">No claim events recorded yet.</p>
+            ) : (
+              <ul className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                {claimLog.map((entry, index) => (
+                  <li key={entry.id ?? index} className={uiSection + " text-xs lg:text-sm"}>
+                    <div className="font-code text-slate-200">
+                      {entry.action} @
+                      {entry.timestamp && "toDate" in entry.timestamp
+                        ? ` ${entry.timestamp.toDate().toLocaleString()}`
+                        : " Unknown time"}
+                    </div>
+
+                    <div className="text-slate-400">
+                      Actor: <span className="font-code break-all">{entry.actorUid}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         )}
-
-        <ul className="space-y-2 max-h-64 overflow-y-auto pr-1">
-          {claimLog.map((entry, i) => {
-            const when =
-              typeof entry.timestamp === "number"
-                ? new Date(entry.timestamp).toLocaleString()
-                : "Unknown time";
-
-            return (
-              <li
-                key={entry.id ?? i}
-                className={uiSection + " text-xs lg:text-sm"}
-              >
-                <div className="font-code text-slate-200">
-                  {entry.action} @ {when}
-                </div>
-
-                <div className="text-slate-400">
-                  Actor: <span className="font-code break-all">{entry.actorUid}</span>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
       </section>
     </div>
   );

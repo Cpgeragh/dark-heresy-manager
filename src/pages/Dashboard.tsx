@@ -133,14 +133,16 @@ function CharacterCard({
 function PlayerCampaignRow({
   campaignId,
   campaignName,
-  userId,
+  characters,
+  loading,
+  error,
 }: {
   campaignId: string;
   campaignName: string;
-  userId: string;
+  characters: CharacterListItem[];
+  loading: boolean;
+  error: Error | null;
 }) {
-  const { characters, loading, error } = usePlayerCharacters(campaignId, userId);
-
   return (
     <div>
       <SectionHeader className="mb-3">{campaignName}</SectionHeader>
@@ -576,6 +578,11 @@ export default function Dashboard({ user, effectiveUserId, isLinked, firstName }
   const { dmCampaigns, playerCampaigns, dmLoading, playerLoading, dmError, playerError } =
     useCampaignsContext();
   const installMode = useInstallMode();
+  const {
+    characters: playerCharacters,
+    loading: playerCharactersLoading,
+    error: playerCharactersError,
+  } = usePlayerCharacters(effectiveUserId);
 
   return (
     <PageShell title={firstName ? `${firstName}'s Dashboard` : "Dashboard"}>
@@ -622,7 +629,11 @@ export default function Dashboard({ user, effectiveUserId, isLinked, firstName }
                 key={campaign.id}
                 campaignId={campaign.id}
                 campaignName={campaign.name}
-                userId={effectiveUserId}
+                characters={playerCharacters.filter(
+                  (character) => character.campaignId === campaign.id
+                )}
+                loading={playerCharactersLoading}
+                error={playerCharactersError}
               />
             ))}
           </div>

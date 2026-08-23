@@ -35,7 +35,8 @@ function ThreadView({
   label: string;
   hasUnread: boolean;
 }) {
-  const { messages, loading, error } = useThreadMessages(campaignId, characterId);
+  const { messages, loading, error, loadOlder, loadingOlder, olderError, hasOlderMessages } =
+    useThreadMessages(campaignId, characterId);
   const toast = useToast();
   const [clearing, setClearing] = useState(false);
 
@@ -74,7 +75,15 @@ function ThreadView({
       {error ? (
         <ErrorState>Unable to load this conversation.</ErrorState>
       ) : (
-        <MessageThread messages={messages} currentUid={dmUid} loading={loading} />
+        <MessageThread
+          messages={messages}
+          currentUid={dmUid}
+          loading={loading}
+          onLoadOlder={() => void loadOlder()}
+          loadingOlder={loadingOlder}
+          olderError={olderError}
+          hasOlderMessages={hasOlderMessages}
+        />
       )}
       <MessageInput onSend={handleSend} placeholder={`Reply to ${label}…`} />
 

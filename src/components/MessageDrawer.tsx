@@ -21,7 +21,8 @@ function PlayerThread({
   characterId: string;
   playerUid: string;
 }) {
-  const { messages, loading, error } = useThreadMessages(campaignId, characterId);
+  const { messages, loading, error, loadOlder, loadingOlder, olderError, hasOlderMessages } =
+    useThreadMessages(campaignId, characterId);
   const toast = useToast();
 
   const handleSend = useCallback(
@@ -44,7 +45,15 @@ function PlayerThread({
             Unable to load messages. Please try again later.
           </ErrorState>
         ) : (
-          <MessageThread messages={messages} currentUid={playerUid} loading={loading} />
+          <MessageThread
+            messages={messages}
+            currentUid={playerUid}
+            loading={loading}
+            onLoadOlder={() => void loadOlder()}
+            loadingOlder={loadingOlder}
+            olderError={olderError}
+            hasOlderMessages={hasOlderMessages}
+          />
         )}
       </div>
       <MessageInput onSend={handleSend} placeholder="Message your DM…" />

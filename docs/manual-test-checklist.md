@@ -1,6 +1,6 @@
 # Manual Test Checklist — Complete App
 
-Thirty-one pages and cross-cutting sections, containing 580 checks. Every item
+Thirty-one pages and cross-cutting sections, containing 582 checks. Every item
 comes from reading the actual logic, not a generic "does it load" pass.
 Check items off as you verify them; anything under **Watch for** is the
 likeliest place a real bug hides. Coverage notes are at the bottom — read
@@ -826,7 +826,7 @@ Keep the DM on Admin and the owning player on the same character in a second pro
 
 - [ ] Approve a pending proposal from Experience — the player's Remaining XP drops by that amount (then see the Experience §16 Watch for — do this test in combination with adding a manual advance)
 - [ ] Reject a pending proposal — Remaining XP is untouched, proposal moves out of Pending
-- [ ] Claim log shows the correct owner name (not just a raw ID) for the most recent claim
+- [ ] Claim history stays closed initially; pressing Open History loads at most the latest 50 events, shows the correct owner name (not just a raw ID) for the most recent claim, and Close History removes the list without stale content when reopened
 - [ ] Force Release Ownership actually unclaims the character (owner becomes "None") separately from Toggle Player Edit Permission, which only flips whether the _current_ owner can edit — confirm these are doing two different things, not the same thing twice
 - [ ] Force Assign To… opens a picker listing every campaign member by resolved first name (falling back to their raw UID for a member with no profile name yet); selecting one immediately assigns the character to them and turns Player Edit Permission on
 - [ ] Force Assign To… is disabled when the campaign has no members yet
@@ -855,6 +855,7 @@ Use three profiles: creator/player A, unrelated player B, and the DM. Give at le
 - [ ] "Update All Copies" on an item that currently has an unpublished draft also publishes that draft as part of the same click — confirm the item's status flips to Published and the "pending draft" state clears, you shouldn't need to press Publish separately first or afterwards
 - [ ] A weapon/armour/gear card for a custom item you didn't create shows no edit-definition controls at all unless you're the DM — you can still see and equip/use it, just not edit its underlying definition
 - [ ] For a non-repeatable item (e.g. a Trait), once you've added a copy of a specific custom item from the library, that same item no longer appears in the add picker — confirm you can't select it again and end up with two copies of the same one
+- [ ] On Gear/Consumables, Cybernetics/integrated Weapons, and Weapons/Shields, create one visible custom item in each paired category — both appear on the correct sub-tab once, neither leaks into the other category, and switching between the paired views does not duplicate rows
 
 ## 22. Offline & Account Sync
 
@@ -926,6 +927,7 @@ Use a DM with active and archived campaigns, an owning player with multiple clai
 
 - [ ] Each campaign you belong to lists only characters claimed by you (not every character in the campaign), as cards showing portrait, career/rank, current/total Wounds (red at ≤2), XP remaining (red if negative), and the recovery code
 - [ ] With two players in the same campaign, create or update a character owned by the other player — it must never appear in this player's Dashboard list
+- [ ] Claim characters in several different campaigns with the same account — every owned character appears under its correct campaign, including a DM-owned character in the DM's own campaign, without duplicating a campaign or character card
 - [ ] Tapping a character card opens that character's sheet directly
 
 **Claim a Character (inline, bottom of the page):**
@@ -987,7 +989,7 @@ Open the same character thread as player and DM in separate profiles. Start empt
 - [ ] New messages auto-scroll the thread to the bottom on arrival
 - [ ] Empty/whitespace-only messages cannot be sent, and message entry stops at 2,000 characters
 - [ ] Close the player Messages drawer, send a message from the DM, then reopen it — the new message appears when reopened and the closed drawer has not shown stale loading/error content
-- [ ] In a thread with more than 100 messages, opening the thread shows the latest 100 in chronological order; older messages are outside the live window until history pagination is added
+- [ ] In a thread with more than 200 messages, opening the thread shows the latest 100 in chronological order; each explicit Load older messages press prepends at most 100 earlier messages with no gaps or duplicates, does not jump back to the bottom, and new arrivals still auto-scroll normally
 
 ## 28. Settings & Device Linking
 
@@ -1107,7 +1109,7 @@ sub-components, `CampaignOverview.tsx` plus every file under
 `messageService.ts`, `useThreads`, `useThreadMessages`, `useClaimLogs`,
 `AppHeader.tsx`, `SectionDrawer.tsx`, `RecoveryBackupBanner.tsx`,
 `useInstallMode`, `CampaignsContext.tsx`, `useCampaign`, `usePlayerCharacters`,
-`useArchivedCampaigns`, `useCampaignCharacters`, `useCharacterSummaries`,
+`useArchivedCampaigns`, `useCampaignCharacters`,
 `useXpProposals`, `useUserProfile`, `firestore.rules` in full (622 lines —
 the source for the permission-boundary checks in §29), `firebase.ts`
 (including explicit multi-tab persistent offline-cache configuration),

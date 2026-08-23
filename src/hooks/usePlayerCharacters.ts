@@ -2,27 +2,28 @@
 
 import { limit, query, where } from "firebase/firestore";
 import { FIRESTORE_QUERY_LIMITS } from "../constants/firestoreLimits";
-import { charactersCollectionRef } from "../firebase/converters";
+import { charactersCollectionGroupRef } from "../firebase/converters";
 import type { CharacterListItem } from "../types/Firestore";
 import { useQuerySubscription } from "./useFirestoreSubscription";
 
-export function usePlayerCharacters(
-  campaignId: string | null,
-  userId: string
-): { characters: CharacterListItem[]; loading: boolean; error: Error | null } {
+export function usePlayerCharacters(userId: string): {
+  characters: CharacterListItem[];
+  loading: boolean;
+  error: Error | null;
+} {
   const {
     data: characters,
     loading,
     error,
   } = useQuerySubscription(
-    campaignId && userId
+    userId
       ? query(
-          charactersCollectionRef(campaignId),
+          charactersCollectionGroupRef(),
           where("userId", "==", userId),
-          limit(FIRESTORE_QUERY_LIMITS.playerCharactersPerCampaign)
+          limit(FIRESTORE_QUERY_LIMITS.playerCharactersPerUser)
         )
       : null,
-    campaignId && userId ? `player-characters:${campaignId}:${userId}` : null,
+    userId ? `player-characters:${userId}` : null,
     (snapshot) => snapshot.docs.map((characterDocument) => characterDocument.data())
   );
 

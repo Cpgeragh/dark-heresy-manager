@@ -69,10 +69,7 @@ import {
   segmentedTabPanelId,
   uiSwipeableTabPanel,
 } from "../../ui/segmentedTabStyles";
-import {
-  createDraftCustomItem,
-  saveDraftCustomItem,
-} from "../../services/customItemService";
+import { createDraftCustomItem, saveDraftCustomItem } from "../../services/customItemService";
 import { useToast } from "../../components/Toast";
 import {
   toCustomRangedWeaponData,
@@ -199,11 +196,7 @@ export function WeaponsTab({
     containerRef,
     transitionClass: mobileSectionTransition,
     switchTo: showWeaponSection,
-  } = useSwipeableTabs(
-    MOBILE_WEAPON_SECTION_IDS,
-    activeWeaponSection,
-    setActiveWeaponSection
-  );
+  } = useSwipeableTabs(MOBILE_WEAPON_SECTION_IDS, activeWeaponSection, setActiveWeaponSection);
   const [editingWeaponDefinition, setEditingWeaponDefinition] =
     useState<EditingWeaponDefinition | null>(null);
   const [editingShieldDefinition, setEditingShieldDefinition] =
@@ -223,20 +216,23 @@ export function WeaponsTab({
   } = useCustomItemLibraryActions<"armour">({ campaignId, userId, itemLabel: "shield" });
 
   const {
-    items: campaignCustomWeaponItems,
-    loading: weaponsLoading,
-    error: weaponsError,
+    items: campaignCustomItems,
+    loading: customItemsLoading,
+    error: customItemsError,
   } = useCampaignCustomItems({
     campaignId,
-    category: "weapon",
+    categories: ["weapon", "armour"],
     mode: isDM ? "admin" : "picker",
     userId,
     characterId,
     includeArchived: isDM,
   });
   const campaignCustomWeapons = useMemo(
-    () => campaignCustomWeaponItems as CampaignCustomItem<"weapon">[],
-    [campaignCustomWeaponItems]
+    () =>
+      campaignCustomItems.filter(
+        (item) => item.category === "weapon"
+      ) as CampaignCustomItem<"weapon">[],
+    [campaignCustomItems]
   );
   const campaignCustomWeaponsById = useMemo(
     () => new Map(campaignCustomWeapons.map((item) => [item.id, item])),
@@ -246,21 +242,12 @@ export function WeaponsTab({
     () => campaignCustomWeapons.filter((item) => item.data.weaponKind === "grenade"),
     [campaignCustomWeapons]
   );
-  const {
-    items: campaignCustomArmourItems,
-    loading: armoursLoading,
-    error: armoursError,
-  } = useCampaignCustomItems({
-    campaignId,
-    category: "armour",
-    mode: isDM ? "admin" : "picker",
-    userId,
-    characterId,
-    includeArchived: isDM,
-  });
   const campaignCustomArmour = useMemo(
-    () => campaignCustomArmourItems as CampaignCustomItem<"armour">[],
-    [campaignCustomArmourItems]
+    () =>
+      campaignCustomItems.filter(
+        (item) => item.category === "armour"
+      ) as CampaignCustomItem<"armour">[],
+    [campaignCustomItems]
   );
   const campaignCustomArmourById = useMemo(
     () => new Map(campaignCustomArmour.map((item) => [item.id, item])),
@@ -275,7 +262,9 @@ export function WeaponsTab({
   const archeotechGrenadeItems = (archeotech ?? []).filter((a) => a.type === "Grenade");
   const archeotechMineItems = (archeotech ?? []).filter((a) => a.type === "Mine");
   const archeotechWeaponItems = (archeotech ?? []).filter((a) => a.type === "Weapon");
-  const archeotechIntegratedWeaponItems = (archeotech ?? []).filter((a) => a.type === "Integrated Weapon");
+  const archeotechIntegratedWeaponItems = (archeotech ?? []).filter(
+    (a) => a.type === "Integrated Weapon"
+  );
   const archeotechShieldItems = (archeotech ?? []).filter((a) => a.type === "Shield");
   const archeotechRangedItems = archeotechWeaponItems.filter((a) => {
     const ref = ARCHEOTECH_REFERENCE.find((r) => r.id === a.referenceId);
@@ -614,9 +603,13 @@ export function WeaponsTab({
   const updateRangedProfileLoadedAmmo = useCallback(
     (weaponId: string, profile: string, entryId: string) => {
       if (!editable) return;
-      onUpdateRanged(rangedWeapons.map((w) => w.id === weaponId
-        ? { ...w, loadedAmmoByProfile: { ...w.loadedAmmoByProfile, [profile]: entryId } }
-        : w));
+      onUpdateRanged(
+        rangedWeapons.map((w) =>
+          w.id === weaponId
+            ? { ...w, loadedAmmoByProfile: { ...w.loadedAmmoByProfile, [profile]: entryId } }
+            : w
+        )
+      );
     },
     [editable, rangedWeapons, onUpdateRanged]
   );
@@ -624,9 +617,11 @@ export function WeaponsTab({
   const updateRangedMagazineSlots = useCallback(
     (weaponId: string, magazineSlots: WeaponMagazineSlot[], activeMagazineSlotId?: string) => {
       if (!editable) return;
-      onUpdateRanged(rangedWeapons.map((weapon) => weapon.id === weaponId
-        ? { ...weapon, magazineSlots, activeMagazineSlotId }
-        : weapon));
+      onUpdateRanged(
+        rangedWeapons.map((weapon) =>
+          weapon.id === weaponId ? { ...weapon, magazineSlots, activeMagazineSlotId } : weapon
+        )
+      );
     },
     [editable, rangedWeapons, onUpdateRanged]
   );
@@ -709,7 +704,7 @@ export function WeaponsTab({
       const versionId =
         libraryItem.status === "published"
           ? libraryItem.publishedVersionId
-          : libraryItem.draftVersionId ?? libraryItem.latestVersionId;
+          : (libraryItem.draftVersionId ?? libraryItem.latestVersionId);
 
       if (!versionId) {
         toast.error("This custom weapon has no usable version.");
@@ -733,17 +728,38 @@ export function WeaponsTab({
       if (libraryItem.data.weaponKind === "grenade") {
         onUpdateGrenades([
           ...grenades,
-          buildGrenadeSnapshot(crypto.randomUUID(), {}, libraryItem.data, libraryItem.id, versionId),
+          buildGrenadeSnapshot(
+            crypto.randomUUID(),
+            {},
+            libraryItem.data,
+            libraryItem.id,
+            versionId
+          ),
         ]);
         return;
       }
 
       onUpdateMelee([
         ...meleeWeapons,
-        buildMeleeWeaponSnapshot(crypto.randomUUID(), {}, libraryItem.data, libraryItem.id, versionId),
+        buildMeleeWeaponSnapshot(
+          crypto.randomUUID(),
+          {},
+          libraryItem.data,
+          libraryItem.id,
+          versionId
+        ),
       ]);
     },
-    [editable, grenades, meleeWeapons, onUpdateGrenades, onUpdateMelee, onUpdateRanged, rangedWeapons, toast]
+    [
+      editable,
+      grenades,
+      meleeWeapons,
+      onUpdateGrenades,
+      onUpdateMelee,
+      onUpdateRanged,
+      rangedWeapons,
+      toast,
+    ]
   );
 
   const addShieldFromLibrary = useCallback(
@@ -753,7 +769,7 @@ export function WeaponsTab({
       const versionId =
         libraryItem.status === "published"
           ? libraryItem.publishedVersionId
-          : libraryItem.draftVersionId ?? libraryItem.latestVersionId;
+          : (libraryItem.draftVersionId ?? libraryItem.latestVersionId);
 
       if (!versionId) {
         toast.error("This custom shield has no usable version.");
@@ -951,12 +967,21 @@ export function WeaponsTab({
   );
 
   const updateMeleeAlternateRangedAmmoEntries = useCallback(
-    (weaponId: string, alternateRangedAmmoEntries: WeaponAmmoEntry[], loadedAlternateRangedAmmoId?: string) => {
+    (
+      weaponId: string,
+      alternateRangedAmmoEntries: WeaponAmmoEntry[],
+      loadedAlternateRangedAmmoId?: string
+    ) => {
       if (!editable) return;
       onUpdateMelee(
         meleeWeapons.map((weapon) =>
           weapon.id === weaponId
-            ? { ...weapon, alternateRangedAmmoEntries, loadedAlternateRangedAmmoId, alternateRangedAmmoReferenceId: undefined }
+            ? {
+                ...weapon,
+                alternateRangedAmmoEntries,
+                loadedAlternateRangedAmmoId,
+                alternateRangedAmmoReferenceId: undefined,
+              }
             : weapon
         )
       );
@@ -1020,16 +1045,7 @@ export function WeaponsTab({
         toast.error("Failed to save custom shield.");
       }
     },
-    [
-      campaignId,
-      characterId,
-      characterName,
-      editable,
-      onUpdateShields,
-      shields,
-      toast,
-      userId,
-    ]
+    [campaignId, characterId, characterName, editable, onUpdateShields, shields, toast, userId]
   );
 
   const removeShield = useCallback(
@@ -1134,9 +1150,7 @@ export function WeaponsTab({
     (weapon: RangedWeapon | MeleeWeapon, kind: "ranged" | "melee") => {
       const libraryItem = getLibraryItemForWeapon(weapon, kind);
       const canEditDefinition =
-        !!libraryItem &&
-        editable &&
-        (isDM || (!!userId && libraryItem.creator.userId === userId));
+        !!libraryItem && editable && (isDM || (!!userId && libraryItem.creator.userId === userId));
       const rowBusyAction = libraryItem ? getWeaponBusyAction(libraryItem.id) : null;
 
       return {
@@ -1193,9 +1207,7 @@ export function WeaponsTab({
     (grenade: GrenadeItem) => {
       const libraryItem = getLibraryItemForGrenade(grenade);
       const canEditDefinition =
-        !!libraryItem &&
-        editable &&
-        (isDM || (!!userId && libraryItem.creator.userId === userId));
+        !!libraryItem && editable && (isDM || (!!userId && libraryItem.creator.userId === userId));
       const rowBusyAction = libraryItem ? getWeaponBusyAction(libraryItem.id) : null;
 
       return {
@@ -1204,7 +1216,8 @@ export function WeaponsTab({
         canEditDefinition,
         busyAction: rowBusyAction,
         onEditDefinition: () =>
-          libraryItem && setEditingWeaponDefinition({ kind: "grenade", weapon: grenade, libraryItem }),
+          libraryItem &&
+          setEditingWeaponDefinition({ kind: "grenade", weapon: grenade, libraryItem }),
         onPublish: () => libraryItem && publishWeaponDefinition(libraryItem),
         onArchive: () => libraryItem && archiveWeaponDefinition(libraryItem),
         onUpdateAllCopies: () => libraryItem && updateAllWeaponCopies(libraryItem),
@@ -1247,9 +1260,7 @@ export function WeaponsTab({
     (shield: ShieldItem) => {
       const libraryItem = getLibraryItemForShield(shield);
       const canEditDefinition =
-        !!libraryItem &&
-        editable &&
-        (isDM || (!!userId && libraryItem.creator.userId === userId));
+        !!libraryItem && editable && (isDM || (!!userId && libraryItem.creator.userId === userId));
       const rowBusyAction = libraryItem ? getShieldBusyAction(libraryItem.id) : null;
 
       return {
@@ -1257,8 +1268,7 @@ export function WeaponsTab({
         isDM: isDM && editable,
         canEditDefinition,
         busyAction: rowBusyAction,
-        onEditDefinition: () =>
-          libraryItem && setEditingShieldDefinition({ shield, libraryItem }),
+        onEditDefinition: () => libraryItem && setEditingShieldDefinition({ shield, libraryItem }),
         onPublish: () => libraryItem && publishShieldDefinition(libraryItem),
         onArchive: () => libraryItem && archiveShieldDefinition(libraryItem),
         onUpdateAllCopies: () => libraryItem && updateAllShieldCopies(libraryItem),
@@ -1276,19 +1286,16 @@ export function WeaponsTab({
     ]
   );
 
-  if (weaponsError || armoursError) {
+  if (customItemsError) {
     return <ErrorState>Unable to load custom weapons.</ErrorState>;
   }
 
-  if (weaponsLoading || armoursLoading) {
+  if (customItemsLoading) {
     return <LoadingState>Loading custom weapons…</LoadingState>;
   }
 
   return (
-    <div
-      ref={containerRef}
-      className="space-y-8"
-    >
+    <div ref={containerRef} className="space-y-8">
       <div className="lg:hidden">
         <SegmentedTabs
           id={WEAPON_TABS_ID}
@@ -1309,13 +1316,12 @@ export function WeaponsTab({
         >
           <div className="flex items-center justify-between">
             <SectionHeader>Ranged</SectionHeader>
-            {!showCustomRanged && (
-              editable ? (
+            {!showCustomRanged &&
+              (editable ? (
                 <AddButton label="Add ranged weapon" onClick={() => setPicker("ranged")} />
               ) : (
                 <ViewButton label="View ranged weapons" onClick={() => setPicker("ranged")} />
-              )
-            )}
+              ))}
           </div>
 
           {allRangedEntries.length === 0 && !showCustomRanged && (
@@ -1341,11 +1347,16 @@ export function WeaponsTab({
                   strengthBonus={strengthBonus}
                   editable={editable}
                   isEquipped={entry.item.equipped ?? false}
-                  onToggleEquip={entry.item.type !== "Integrated Weapon"
-                    ? () => toggleEquipArcheotech(entry.item.id)
-                    : undefined}
-                  slotsDisabled={entry.item.type !== "Integrated Weapon"
-                    && !entry.item.equipped && slotsRemaining < 1}
+                  onToggleEquip={
+                    entry.item.type !== "Integrated Weapon"
+                      ? () => toggleEquipArcheotech(entry.item.id)
+                      : undefined
+                  }
+                  slotsDisabled={
+                    entry.item.type !== "Integrated Weapon" &&
+                    !entry.item.equipped &&
+                    slotsRemaining < 1
+                  }
                 />
               );
             if (entry.kind === "integrated")
@@ -1362,9 +1373,15 @@ export function WeaponsTab({
                   onRemove={() => {}}
                   onAddUpgrade={() => {}}
                   onRemoveUpgrade={() => {}}
-                  onUpdateAmmoEntries={(entries) => updateRangedAmmoEntries(entry.weapon.id, entries)}
-                  onUpdateLoadedAmmoByProfile={(profile, entryId) => updateRangedProfileLoadedAmmo(entry.weapon.id, profile, entryId)}
-                  onUpdateMagazineSlots={(slots, activeSlotId) => updateRangedMagazineSlots(entry.weapon.id, slots, activeSlotId)}
+                  onUpdateAmmoEntries={(entries) =>
+                    updateRangedAmmoEntries(entry.weapon.id, entries)
+                  }
+                  onUpdateLoadedAmmoByProfile={(profile, entryId) =>
+                    updateRangedProfileLoadedAmmo(entry.weapon.id, profile, entryId)
+                  }
+                  onUpdateMagazineSlots={(slots, activeSlotId) =>
+                    updateRangedMagazineSlots(entry.weapon.id, slots, activeSlotId)
+                  }
                   onUpdateQuantity={(qty) => updateRangedQuantity(entry.weapon.id, qty)}
                   grenades={grenades}
                   onUpdateGrenades={onUpdateGrenades}
@@ -1380,12 +1397,14 @@ export function WeaponsTab({
                 {...getWeaponLibraryProps(entry.weapon, "ranged")}
                 onRemove={() => removeRanged(entry.index)}
                 onAddUpgrade={(upgradeId) => addUpgradeToRanged(entry.weapon.id, upgradeId)}
-                onRemoveUpgrade={(upgradeId) =>
-                  removeUpgradeFromRanged(entry.weapon.id, upgradeId)
-                }
+                onRemoveUpgrade={(upgradeId) => removeUpgradeFromRanged(entry.weapon.id, upgradeId)}
                 onUpdateAmmoEntries={(entries) => updateRangedAmmoEntries(entry.weapon.id, entries)}
-                onUpdateLoadedAmmoByProfile={(profile, entryId) => updateRangedProfileLoadedAmmo(entry.weapon.id, profile, entryId)}
-                onUpdateMagazineSlots={(slots, activeSlotId) => updateRangedMagazineSlots(entry.weapon.id, slots, activeSlotId)}
+                onUpdateLoadedAmmoByProfile={(profile, entryId) =>
+                  updateRangedProfileLoadedAmmo(entry.weapon.id, profile, entryId)
+                }
+                onUpdateMagazineSlots={(slots, activeSlotId) =>
+                  updateRangedMagazineSlots(entry.weapon.id, slots, activeSlotId)
+                }
                 onUpdateQuantity={(qty) => updateRangedQuantity(entry.weapon.id, qty)}
                 grenades={grenades}
                 onUpdateGrenades={onUpdateGrenades}
@@ -1419,13 +1438,12 @@ export function WeaponsTab({
         >
           <div className="flex items-center justify-between">
             <SectionHeader>Melee</SectionHeader>
-            {!showCustomMelee && (
-              editable ? (
+            {!showCustomMelee &&
+              (editable ? (
                 <AddButton label="Add melee weapon" onClick={() => setPicker("melee")} />
               ) : (
                 <ViewButton label="View melee weapons" onClick={() => setPicker("melee")} />
-              )
-            )}
+              ))}
           </div>
 
           {allMeleeEntries.length === 0 && !showCustomMelee && (
@@ -1451,11 +1469,16 @@ export function WeaponsTab({
                   strengthBonus={strengthBonus}
                   editable={editable}
                   isEquipped={entry.item.equipped ?? false}
-                  onToggleEquip={entry.item.type !== "Integrated Weapon"
-                    ? () => toggleEquipArcheotech(entry.item.id)
-                    : undefined}
-                  slotsDisabled={entry.item.type !== "Integrated Weapon"
-                    && !entry.item.equipped && slotsRemaining < 1}
+                  onToggleEquip={
+                    entry.item.type !== "Integrated Weapon"
+                      ? () => toggleEquipArcheotech(entry.item.id)
+                      : undefined
+                  }
+                  slotsDisabled={
+                    entry.item.type !== "Integrated Weapon" &&
+                    !entry.item.equipped &&
+                    slotsRemaining < 1
+                  }
                 />
               );
             if (entry.kind === "integrated")
@@ -1487,9 +1510,7 @@ export function WeaponsTab({
                 {...getWeaponLibraryProps(entry.weapon, "melee")}
                 onRemove={() => removeMelee(entry.index)}
                 onAddUpgrade={(upgradeId) => addUpgradeToMelee(entry.weapon.id, upgradeId)}
-                onRemoveUpgrade={(upgradeId) =>
-                  removeUpgradeFromMelee(entry.weapon.id, upgradeId)
-                }
+                onRemoveUpgrade={(upgradeId) => removeUpgradeFromMelee(entry.weapon.id, upgradeId)}
                 onUpdateQuantity={(qty) => updateMeleeQuantity(entry.weapon.id, qty)}
                 onUpdateAlternateRangedAmmoEntries={(entries, loadedAmmoId) =>
                   updateMeleeAlternateRangedAmmoEntries(entry.weapon.id, entries, loadedAmmoId)
@@ -1524,15 +1545,17 @@ export function WeaponsTab({
       >
         <div className="flex items-center justify-between">
           <SectionHeader>Explosives</SectionHeader>
-            {editable ? (
-              <AddButton label="Add explosive" onClick={() => setPicker("grenades")} />
-            ) : (
-              <ViewButton label="View explosives" onClick={() => setPicker("grenades")} />
-            )}
+          {editable ? (
+            <AddButton label="Add explosive" onClick={() => setPicker("grenades")} />
+          ) : (
+            <ViewButton label="View explosives" onClick={() => setPicker("grenades")} />
+          )}
         </div>
 
         {allGrenadeEntries.length === 0 && (
-          <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No grenades or mines carried.</p>
+          <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>
+            No grenades or mines carried.
+          </p>
         )}
 
         <IndependentCardGrid
@@ -1589,11 +1612,11 @@ export function WeaponsTab({
       >
         <div className="flex items-center justify-between">
           <SectionHeader>Shields</SectionHeader>
-        {editable ? (
-          <AddButton label="Add shield" onClick={() => setPicker("shields")} />
-        ) : (
-          <ViewButton label="View shields" onClick={() => setPicker("shields")} />
-        )}
+          {editable ? (
+            <AddButton label="Add shield" onClick={() => setPicker("shields")} />
+          ) : (
+            <ViewButton label="View shields" onClick={() => setPicker("shields")} />
+          )}
         </div>
 
         {(shields ?? []).length === 0 && archeotechShieldItems.length === 0 && (

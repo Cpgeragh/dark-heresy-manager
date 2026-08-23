@@ -11,12 +11,20 @@ import type {
 } from "../../../types/Character";
 import type { CyberneticRef } from "../../../data/reference/cyberneticsReference";
 import type { RangedWeaponRef, MeleeWeaponRef } from "../../../data/reference/weaponReference";
-import type { CampaignCustomItem, CustomCyberneticData, CustomWeaponData } from "../../../types/CustomItems";
+import type {
+  CampaignCustomItem,
+  CustomCyberneticData,
+  CustomWeaponData,
+} from "../../../types/CustomItems";
 import type { ArcheotechItem } from "../../../types/Character";
 import { ImplantPicker } from "./ImplantPicker";
 import { ImplantRow } from "./ImplantRow";
 import { CustomImplantForm } from "./CustomImplantForm";
-import { craftsmanshipAvailability, craftsmanshipValue, nextAvailableCraftsmanship } from "./cyberneticsHelpers";
+import {
+  craftsmanshipAvailability,
+  craftsmanshipValue,
+  nextAvailableCraftsmanship,
+} from "./cyberneticsHelpers";
 import { Button } from "../../../ui/Button";
 import { SectionHeader } from "../../../ui/SectionHeader";
 import { ErrorState } from "../../../ui/ErrorState";
@@ -125,47 +133,43 @@ export function CyberneticsTab({
   });
 
   const {
-    items: campaignCustomCyberneticItems,
-    loading: cyberneticsLoading,
-    error: cyberneticsError,
+    items: campaignCustomItems,
+    loading: customItemsLoading,
+    error: customItemsError,
   } = useCampaignCustomItems({
     campaignId,
-    category: "cybernetic",
+    categories: ["cybernetic", "weapon"],
     mode: isDM ? "admin" : "picker",
     userId,
     characterId,
     includeArchived: isDM,
   });
   const campaignCustomCybernetics = useMemo(
-    () => campaignCustomCyberneticItems as CampaignCustomItem<"cybernetic">[],
-    [campaignCustomCyberneticItems]
+    () =>
+      campaignCustomItems.filter(
+        (item) => item.category === "cybernetic"
+      ) as CampaignCustomItem<"cybernetic">[],
+    [campaignCustomItems]
   );
   const campaignCustomCyberneticsById = useMemo(
     () => new Map(campaignCustomCybernetics.map((item) => [item.id, item])),
     [campaignCustomCybernetics]
   );
-  const {
-    items: campaignCustomWeaponItems,
-    loading: customWeaponsLoading,
-    error: customWeaponsError,
-  } = useCampaignCustomItems({
-    campaignId,
-    category: "weapon",
-    mode: isDM ? "admin" : "picker",
-    userId,
-    characterId,
-    includeArchived: isDM,
-  });
   const campaignCustomIntegratedWeapons = useMemo(
-    () => (campaignCustomWeaponItems as CampaignCustomItem<"weapon">[]).filter((item) => {
-      const data = item.data;
-      return (
-        item.status !== "archived" &&
-        (data.weaponKind === "ranged" || data.weaponKind === "melee") &&
-        !!data.integrated
-      );
-    }),
-    [campaignCustomWeaponItems]
+    () =>
+      (
+        campaignCustomItems.filter(
+          (item) => item.category === "weapon"
+        ) as CampaignCustomItem<"weapon">[]
+      ).filter((item) => {
+        const data = item.data;
+        return (
+          item.status !== "archived" &&
+          (data.weaponKind === "ranged" || data.weaponKind === "melee") &&
+          !!data.integrated
+        );
+      }),
+    [campaignCustomItems]
   );
   const sortedCybernetics = useMemo(
     () => [...cybernetics].sort((a, b) => a.name.localeCompare(b.name)),
@@ -226,18 +230,35 @@ export function CyberneticsTab({
         },
       ]);
       if (weapon.type === "ranged") {
-        onUpdateRanged(rangedWeapons.map((item) =>
-          item.id === weapon.id ? { ...item, concealedBionic: { cyberneticId, craftsmanship } } : item
-        ));
+        onUpdateRanged(
+          rangedWeapons.map((item) =>
+            item.id === weapon.id
+              ? { ...item, concealedBionic: { cyberneticId, craftsmanship } }
+              : item
+          )
+        );
       } else {
-        onUpdateMelee(meleeWeapons.map((item) =>
-          item.id === weapon.id ? { ...item, concealedBionic: { cyberneticId, craftsmanship } } : item
-        ));
+        onUpdateMelee(
+          meleeWeapons.map((item) =>
+            item.id === weapon.id
+              ? { ...item, concealedBionic: { cyberneticId, craftsmanship } }
+              : item
+          )
+        );
       }
       setInstallingConcealedWeapon(null);
       setShowPicker(true);
     },
-    [cybernetics, editable, installingConcealedWeapon, meleeWeapons, onUpdate, onUpdateMelee, onUpdateRanged, rangedWeapons]
+    [
+      cybernetics,
+      editable,
+      installingConcealedWeapon,
+      meleeWeapons,
+      onUpdate,
+      onUpdateMelee,
+      onUpdateRanged,
+      rangedWeapons,
+    ]
   );
 
   const cycleQuality = useCallback(
@@ -248,17 +269,21 @@ export function CyberneticsTab({
       const craftsmanship = nextAvailableCraftsmanship(current?.craftsmanship ?? "Common", ref);
       if (current?.concealedWeapon) {
         if (current.concealedWeapon.weaponType === "ranged") {
-          onUpdateRanged(rangedWeapons.map((item) =>
-            item.id === current.concealedWeapon?.weaponId && item.concealedBionic
-              ? { ...item, concealedBionic: { ...item.concealedBionic, craftsmanship } }
-              : item
-          ));
+          onUpdateRanged(
+            rangedWeapons.map((item) =>
+              item.id === current.concealedWeapon?.weaponId && item.concealedBionic
+                ? { ...item, concealedBionic: { ...item.concealedBionic, craftsmanship } }
+                : item
+            )
+          );
         } else {
-          onUpdateMelee(meleeWeapons.map((item) =>
-            item.id === current.concealedWeapon?.weaponId && item.concealedBionic
-              ? { ...item, concealedBionic: { ...item.concealedBionic, craftsmanship } }
-              : item
-          ));
+          onUpdateMelee(
+            meleeWeapons.map((item) =>
+              item.id === current.concealedWeapon?.weaponId && item.concealedBionic
+                ? { ...item, concealedBionic: { ...item.concealedBionic, craftsmanship } }
+                : item
+            )
+          );
         }
       }
       onUpdate(
@@ -267,11 +292,15 @@ export function CyberneticsTab({
           const ref = CYBERNETICS_REFERENCE.find((r) => r.id === c.referenceId);
           const craftsmanship = nextAvailableCraftsmanship(c.craftsmanship ?? "Common", ref);
           const hasQualitySpecificCost = Boolean(ref?.poorValue || ref?.goodValue);
-          const hasQualitySpecificAvailability = Boolean(ref?.poorAvailability || ref?.goodAvailability);
+          const hasQualitySpecificAvailability = Boolean(
+            ref?.poorAvailability || ref?.goodAvailability
+          );
           return {
             ...c,
             craftsmanship,
-            ...(hasQualitySpecificCost && ref ? { value: craftsmanshipValue(ref, craftsmanship) } : {}),
+            ...(hasQualitySpecificCost && ref
+              ? { value: craftsmanshipValue(ref, craftsmanship) }
+              : {}),
             ...(hasQualitySpecificAvailability && ref
               ? { availability: craftsmanshipAvailability(ref, craftsmanship) }
               : {}),
@@ -301,13 +330,7 @@ export function CyberneticsTab({
 
         await onUpdate([
           ...cybernetics,
-          buildCyberneticSnapshot(
-            item.id,
-            item.bodyLocation,
-            data,
-            customItemId,
-            versionId
-          ),
+          buildCyberneticSnapshot(item.id, item.bodyLocation, data, customItemId, versionId),
         ]);
         setShowCustomForm(false);
         setShowPicker(true);
@@ -337,7 +360,7 @@ export function CyberneticsTab({
       const versionId =
         libraryItem.status === "published"
           ? libraryItem.publishedVersionId
-          : libraryItem.draftVersionId ?? libraryItem.latestVersionId;
+          : (libraryItem.draftVersionId ?? libraryItem.latestVersionId);
 
       if (!versionId) {
         toast.error("This custom cybernetic has no usable version.");
@@ -407,12 +430,16 @@ export function CyberneticsTab({
   const removeImplant = useCallback(
     (id: string) => {
       if (!editable) return;
-      onUpdateRanged(rangedWeapons.map((item) =>
-        item.concealedBionic?.cyberneticId === id ? { ...item, concealedBionic: undefined } : item
-      ));
-      onUpdateMelee(meleeWeapons.map((item) =>
-        item.concealedBionic?.cyberneticId === id ? { ...item, concealedBionic: undefined } : item
-      ));
+      onUpdateRanged(
+        rangedWeapons.map((item) =>
+          item.concealedBionic?.cyberneticId === id ? { ...item, concealedBionic: undefined } : item
+        )
+      );
+      onUpdateMelee(
+        meleeWeapons.map((item) =>
+          item.concealedBionic?.cyberneticId === id ? { ...item, concealedBionic: undefined } : item
+        )
+      );
       onUpdate(cybernetics.filter((c) => c.id !== id));
     },
     [editable, cybernetics, meleeWeapons, onUpdate, onUpdateMelee, onUpdateRanged, rangedWeapons]
@@ -421,7 +448,8 @@ export function CyberneticsTab({
   // ── Integrated weapons ─────────────────────────────────────────────────────
 
   const integratedRanged = useMemo(
-    () => rangedWeapons.filter(isIntegratedRangedWeapon).sort((a, b) => a.name.localeCompare(b.name)),
+    () =>
+      rangedWeapons.filter(isIntegratedRangedWeapon).sort((a, b) => a.name.localeCompare(b.name)),
     [rangedWeapons]
   );
   const integratedMelee = useMemo(
@@ -429,13 +457,17 @@ export function CyberneticsTab({
     [meleeWeapons]
   );
   const archeotechCyberneticItems = useMemo(
-    () => (archeotech ?? []).filter((a) => a.type === "Cybernetic")
-      .sort((a, b) => a.name.localeCompare(b.name)),
+    () =>
+      (archeotech ?? [])
+        .filter((a) => a.type === "Cybernetic")
+        .sort((a, b) => a.name.localeCompare(b.name)),
     [archeotech]
   );
   const archeotechIntegratedItems = useMemo(
-    () => (archeotech ?? []).filter((a) => a.type === "Integrated Weapon")
-      .sort((a, b) => a.name.localeCompare(b.name)),
+    () =>
+      (archeotech ?? [])
+        .filter((a) => a.type === "Integrated Weapon")
+        .sort((a, b) => a.name.localeCompare(b.name)),
     [archeotech]
   );
 
@@ -520,7 +552,7 @@ export function CyberneticsTab({
       const versionId =
         libraryItem.status === "published"
           ? libraryItem.publishedVersionId
-          : libraryItem.draftVersionId ?? libraryItem.latestVersionId;
+          : (libraryItem.draftVersionId ?? libraryItem.latestVersionId);
       if (!versionId) {
         toast.error("This custom integrated weapon has no usable version.");
         return;
@@ -655,11 +687,12 @@ export function CyberneticsTab({
     const linkedArm = item.concealedWeapon
       ? cybernetics.find((candidate) => candidate.id === item.concealedWeapon?.armId)
       : undefined;
-    const linkedWeapon = item.concealedWeapon?.weaponType === "ranged"
-      ? rangedWeapons.find((candidate) => candidate.id === item.concealedWeapon?.weaponId)
-      : item.concealedWeapon?.weaponType === "melee"
-        ? meleeWeapons.find((candidate) => candidate.id === item.concealedWeapon?.weaponId)
-        : undefined;
+    const linkedWeapon =
+      item.concealedWeapon?.weaponType === "ranged"
+        ? rangedWeapons.find((candidate) => candidate.id === item.concealedWeapon?.weaponId)
+        : item.concealedWeapon?.weaponType === "melee"
+          ? meleeWeapons.find((candidate) => candidate.id === item.concealedWeapon?.weaponId)
+          : undefined;
     const linkedLibraryItem = item.customLibraryId
       ? campaignCustomCyberneticsById.get(item.customLibraryId)
       : undefined;
@@ -675,9 +708,7 @@ export function CyberneticsTab({
           })
         : undefined);
     const canEditDefinition =
-      !!libraryItem &&
-      editable &&
-      (isDM || (!!userId && libraryItem.creator.userId === userId));
+      !!libraryItem && editable && (isDM || (!!userId && libraryItem.creator.userId === userId));
     const rowBusyAction = libraryItem ? getBusyAction(libraryItem.id) : null;
 
     return (
@@ -692,7 +723,9 @@ export function CyberneticsTab({
         isDM={isDM && editable}
         canEditDefinition={canEditDefinition}
         busyAction={rowBusyAction}
-        onEditDefinition={() => libraryItem && setEditingCyberneticDefinition({ item, libraryItem })}
+        onEditDefinition={() =>
+          libraryItem && setEditingCyberneticDefinition({ item, libraryItem })
+        }
         onPublish={() => libraryItem && publishCyberneticDefinition(libraryItem)}
         onArchive={() => libraryItem && archiveCyberneticDefinition(libraryItem)}
         onUpdateAllCopies={() => libraryItem && updateAllCyberneticCopies(libraryItem)}
@@ -702,11 +735,11 @@ export function CyberneticsTab({
     );
   };
 
-  if (cyberneticsError || customWeaponsError) {
+  if (customItemsError) {
     return <ErrorState>Unable to load custom cybernetic or integrated weapon items.</ErrorState>;
   }
 
-  if (cyberneticsLoading || customWeaponsLoading) {
+  if (customItemsLoading) {
     return <LoadingState>Loading custom cybernetic items…</LoadingState>;
   }
 
@@ -716,73 +749,88 @@ export function CyberneticsTab({
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <SectionHeader>Integrated Weapons</SectionHeader>
-        <Button
-          size="sm"
-          onClick={() => setShowIntegratedPicker(true)}
-        >
-          {editable ? "+ Install" : "View"}
-        </Button>
+          <Button size="sm" onClick={() => setShowIntegratedPicker(true)}>
+            {editable ? "+ Install" : "View"}
+          </Button>
         </div>
 
-        {integratedRanged.length === 0 && integratedMelee.length === 0 && archeotechIntegratedItems.length === 0 && (
-          <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No integrated weapons installed.</p>
-        )}
+        {integratedRanged.length === 0 &&
+          integratedMelee.length === 0 &&
+          archeotechIntegratedItems.length === 0 && (
+            <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>
+              No integrated weapons installed.
+            </p>
+          )}
 
         <IndependentCardGrid
           items={[
             ...integratedRanged.map((weapon) => ({
               name: weapon.name,
-              card: <RangedCard
-                key={weapon.id}
-                weapon={weapon}
-                editable={editable}
-                strengthBonus={strengthBonus}
-                integrated
-                allowUpgrades={false}
-                forceExpanded
-                isEquipped={weapon.equipped ?? false}
-                onToggleEquip={() => toggleEquipIntegratedRanged(weapon.id)}
-                onRemove={() => removeIntegratedRanged(weapon.id)}
-                onAddUpgrade={() => {}}
-                onRemoveUpgrade={() => {}}
-                onUpdateAmmoEntries={(entries) =>
-                  onUpdateRanged(rangedWeapons.map((w) => (w.id === weapon.id ? { ...w, ammoEntries: entries } : w)))
-                }
-                onUpdateQuantity={(qty) =>
-                  onUpdateRanged(rangedWeapons.map((w) => (w.id === weapon.id ? { ...w, quantity: qty } : w)))
-                }
-              />,
+              card: (
+                <RangedCard
+                  key={weapon.id}
+                  weapon={weapon}
+                  editable={editable}
+                  strengthBonus={strengthBonus}
+                  integrated
+                  allowUpgrades={false}
+                  forceExpanded
+                  isEquipped={weapon.equipped ?? false}
+                  onToggleEquip={() => toggleEquipIntegratedRanged(weapon.id)}
+                  onRemove={() => removeIntegratedRanged(weapon.id)}
+                  onAddUpgrade={() => {}}
+                  onRemoveUpgrade={() => {}}
+                  onUpdateAmmoEntries={(entries) =>
+                    onUpdateRanged(
+                      rangedWeapons.map((w) =>
+                        w.id === weapon.id ? { ...w, ammoEntries: entries } : w
+                      )
+                    )
+                  }
+                  onUpdateQuantity={(qty) =>
+                    onUpdateRanged(
+                      rangedWeapons.map((w) => (w.id === weapon.id ? { ...w, quantity: qty } : w))
+                    )
+                  }
+                />
+              ),
             })),
             ...integratedMelee.map((weapon) => ({
               name: weapon.name,
-              card: <MeleeCard
-                key={weapon.id}
-                weapon={weapon}
-                editable={editable}
-                strengthBonus={strengthBonus}
-                integrated
-                allowUpgrades={false}
-                forceExpanded
-                isEquipped={weapon.equipped ?? false}
-                onToggleEquip={() => toggleEquipIntegratedMelee(weapon.id)}
-                onRemove={() => removeIntegratedMelee(weapon.id)}
-                onAddUpgrade={() => {}}
-                onRemoveUpgrade={() => {}}
-                onUpdateQuantity={(qty) =>
-                  onUpdateMelee(meleeWeapons.map((w) => (w.id === weapon.id ? { ...w, quantity: qty } : w)))
-                }
-              />,
+              card: (
+                <MeleeCard
+                  key={weapon.id}
+                  weapon={weapon}
+                  editable={editable}
+                  strengthBonus={strengthBonus}
+                  integrated
+                  allowUpgrades={false}
+                  forceExpanded
+                  isEquipped={weapon.equipped ?? false}
+                  onToggleEquip={() => toggleEquipIntegratedMelee(weapon.id)}
+                  onRemove={() => removeIntegratedMelee(weapon.id)}
+                  onAddUpgrade={() => {}}
+                  onRemoveUpgrade={() => {}}
+                  onUpdateQuantity={(qty) =>
+                    onUpdateMelee(
+                      meleeWeapons.map((w) => (w.id === weapon.id ? { ...w, quantity: qty } : w))
+                    )
+                  }
+                />
+              ),
             })),
             ...archeotechIntegratedItems.map((item) => ({
               name: item.name,
-              card: <ArcheotechWeaponCard
-                key={item.id}
-                item={item}
-                editable={editable}
-                isEquipped={item.equipped ?? false}
-                onToggleEquip={() => toggleEquipArcheotech(item.id)}
-                onRemove={() => removeArcheotech(item.id)}
-              />,
+              card: (
+                <ArcheotechWeaponCard
+                  key={item.id}
+                  item={item}
+                  editable={editable}
+                  isEquipped={item.equipped ?? false}
+                  onToggleEquip={() => toggleEquipArcheotech(item.id)}
+                  onRemove={() => removeArcheotech(item.id)}
+                />
+              ),
             })),
           ]
             .sort((a, b) => a.name.localeCompare(b.name))
@@ -795,12 +843,21 @@ export function CyberneticsTab({
         <section className="space-y-3">
           <SectionHeader>Mechanicus Implants</SectionHeader>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {["Electro-Graft", "Electoo Inductors", "Respirator Unit", "Cyber-Mantle", "Potentia Coil", "Cranial Circuitry"].map((name) => (
+            {[
+              "Electro-Graft",
+              "Electoo Inductors",
+              "Respirator Unit",
+              "Cyber-Mantle",
+              "Potentia Coil",
+              "Cranial Circuitry",
+            ].map((name) => (
               <div key={name} className={uiSection}>
                 <div className={uiItemName}>{name}</div>
                 <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                   <Chip className={`bg-slate-800/40 font-code ${sourceColour("CR")}`}>CR</Chip>
-                  <Chip className="border-amber-500/60 bg-amber-950/30 text-amber-300">Granted by Mechanicus Implants</Chip>
+                  <Chip className="border-amber-500/60 bg-amber-950/30 text-amber-300">
+                    Granted by Mechanicus Implants
+                  </Chip>
                 </div>
               </div>
             ))}
@@ -811,21 +868,16 @@ export function CyberneticsTab({
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <SectionHeader>Installed Implants</SectionHeader>
-        <Button
-          size="sm"
-          onClick={() => setShowPicker(true)}
-        >
-          {editable ? "+ Install" : "View"}
-        </Button>
+          <Button size="sm" onClick={() => setShowPicker(true)}>
+            {editable ? "+ Install" : "View"}
+          </Button>
         </div>
 
         {cybernetics.length === 0 && archeotechCyberneticItems.length === 0 && (
           <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No cybernetics installed.</p>
         )}
 
-        <div className="space-y-3 sm:hidden">
-          {sortedCybernetics.map(renderImplantRow)}
-        </div>
+        <div className="space-y-3 sm:hidden">{sortedCybernetics.map(renderImplantRow)}</div>
 
         <div className="hidden sm:grid sm:grid-cols-2 sm:gap-3 sm:items-start">
           {cyberneticColumns.map((column, index) => (

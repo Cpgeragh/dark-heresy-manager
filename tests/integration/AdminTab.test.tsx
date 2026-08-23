@@ -1,16 +1,19 @@
 // tests/integration/AdminTab.test.tsx
 //
-// Focused on the Force Assign wiring added to AdminTab (button + PlayerPicker).
-// Not a full retrofit of AdminTab's pre-existing behaviour (ownership display,
-// claim history), which had no prior test coverage.
+// Focused on Force Assign wiring and the on-demand claim-history lifecycle.
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-const { mockGetFirstName } = vi.hoisted(() => ({
+const { mockGetFirstName, mockUseClaimLogs } = vi.hoisted(() => ({
   mockGetFirstName: vi.fn(),
+  mockUseClaimLogs: vi.fn(() => ({ logs: [], loading: false, error: null })),
+}));
+
+vi.mock("../../src/hooks/useClaimLogs", () => ({
+  useClaimLogs: (...args: unknown[]) => mockUseClaimLogs(...args),
 }));
 
 vi.mock("../../src/services/profileService", () => ({
@@ -30,9 +33,9 @@ function renderAdminTab(overrides: Partial<React.ComponentProps<typeof AdminTab>
   render(
     <ToastProvider>
       <AdminTab
+        campaignId="campaign-1"
         character={character}
         ownerName="Alice"
-        claimLog={[]}
         onDMForceRelease={onDMForceRelease}
         onDMForceAssign={onDMForceAssign}
         onDMToggleEdit={onDMToggleEdit}
@@ -99,5 +102,17 @@ describe("AdminTab Force Assign", () => {
     const button = screen.getByRole("button", { name: "Assigning…" });
     expect(button).toBeDisabled();
   });
+});
 
+describe("AdminTab claim-history listener", () => {
+  it("keeps claim history disabled until the DM opens History", async () => {
+    const user = userEvent.setup();
+    renderAdminTab();
+
+    expect(mockUseClaimLogs).toHaveBeenLastCalledWith("campaign-1", "char-1", false);
+
+    await user.click(screen.getByRole("button", { name: "Open History" }));
+
+    expect(mockUseClaimLogs).toHaveBeenLastCalledWith("campaign-1", "char-1", true);
+  });
 });

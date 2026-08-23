@@ -3,15 +3,20 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
-import type { UseCampaignCustomItemsResult } from "../../src/hooks/useCampaignCustomItems";
+import type {
+  UseCampaignCustomItemsArgs,
+  UseCampaignCustomItemsResult,
+} from "../../src/hooks/useCampaignCustomItems";
 
-const useCampaignCustomItemsMock = vi.fn<() => UseCampaignCustomItemsResult>(() => ({
+const useCampaignCustomItemsMock = vi.fn<
+  (args: UseCampaignCustomItemsArgs) => UseCampaignCustomItemsResult
+>(() => ({
   items: [],
   loading: false,
   error: null,
 }));
 vi.mock("../../src/hooks/useCampaignCustomItems", () => ({
-  useCampaignCustomItems: () => useCampaignCustomItemsMock(),
+  useCampaignCustomItems: (args: UseCampaignCustomItemsArgs) => useCampaignCustomItemsMock(args),
 }));
 
 const publishCustomItemMock = vi.fn();
@@ -72,6 +77,17 @@ function renderTab(props: Partial<React.ComponentProps<typeof WeaponsTab>> = {})
 }
 
 describe("WeaponsTab", () => {
+  it("uses one combined subscription for weapon and armour library items", () => {
+    useCampaignCustomItemsMock.mockClear();
+    renderTab();
+
+    expect(useCampaignCustomItemsMock).toHaveBeenCalled();
+    for (const [args] of useCampaignCustomItemsMock.mock.calls) {
+      expect(args).toEqual(expect.objectContaining({ categories: ["weapon", "armour"] }));
+      expect(args.category).toBeUndefined();
+    }
+  });
+
   it("renders the Ranged and Melee sections", () => {
     renderTab();
     expect(screen.getAllByText("Ranged").length).toBeGreaterThanOrEqual(1);
@@ -224,7 +240,9 @@ describe("WeaponsTab add from reference", () => {
     await user.click(screen.getByRole("button", { name: "Best" }));
     await user.click(screen.getByRole("button", { name: "Add Weapon" }));
     expect(noop).toHaveBeenCalledWith(
-      expect.arrayContaining([expect.objectContaining({ name: "Chainsword", craftsmanship: "Best" })])
+      expect.arrayContaining([
+        expect.objectContaining({ name: "Chainsword", craftsmanship: "Best" }),
+      ])
     );
     const addedWeapon = noop.mock.calls[0][0][0];
     expect(addedWeapon.damage).not.toBe(""); // sanity: damage was computed, not left blank
@@ -294,7 +312,13 @@ describe("WeaponsTab custom-item library actions", () => {
       updatedBy: { userId: "u1" },
       draftVersionId: "v1",
       publishedVersionId: null,
-      data: { weaponKind: "ranged", name: "Custom Lasgun", class: "Basic", damage: "1d10+3", pen: "0" },
+      data: {
+        weaponKind: "ranged",
+        name: "Custom Lasgun",
+        class: "Basic",
+        damage: "1d10+3",
+        pen: "0",
+      },
     };
   }
 
@@ -309,7 +333,11 @@ describe("WeaponsTab custom-item library actions", () => {
 
   it("calls publishCustomItem when a DM clicks Publish on a draft library weapon", async () => {
     const user = userEvent.setup();
-    useCampaignCustomItemsMock.mockReturnValue({ items: [makeLibraryItem()], loading: false, error: null });
+    useCampaignCustomItemsMock.mockReturnValue({
+      items: [makeLibraryItem()],
+      loading: false,
+      error: null,
+    });
 
     renderTab({ isDM: true, rangedWeapons: [linkedWeapon], meleeWeapons: [] });
     await user.click(screen.getByRole("button", { name: "Expand Custom Lasgun details" }));
@@ -323,7 +351,11 @@ describe("WeaponsTab custom-item library actions", () => {
 
   it("calls archiveCustomItem when a DM clicks Archive on a library weapon", async () => {
     const user = userEvent.setup();
-    useCampaignCustomItemsMock.mockReturnValue({ items: [makeLibraryItem()], loading: false, error: null });
+    useCampaignCustomItemsMock.mockReturnValue({
+      items: [makeLibraryItem()],
+      loading: false,
+      error: null,
+    });
 
     renderTab({ isDM: true, rangedWeapons: [linkedWeapon], meleeWeapons: [] });
     await user.click(screen.getByRole("button", { name: "Expand Custom Lasgun details" }));

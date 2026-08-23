@@ -86,7 +86,6 @@ export default function CharacterSheet({
     allowedToEdit,
     isOwner,
     canPlayerRelease,
-    claimLog,
     isDM,
     isDMLoading,
     memberIds,
@@ -124,9 +123,7 @@ export default function CharacterSheet({
   // The owner's player name is derived live from their public profile so it
   // stays in sync with their account first name (falls back to the legacy
   // header.playerName for characters claimed before profiles existed).
-  const { firstName: ownerFirstName, error: ownerProfileError } = useUserProfile(
-    character?.userId
-  );
+  const { firstName: ownerFirstName, error: ownerProfileError } = useUserProfile(character?.userId);
   const ownerName = ownerFirstName ?? character?.header.playerName?.trim() ?? null;
   const psyRating = useMemo(
     () =>
@@ -439,7 +436,8 @@ export default function CharacterSheet({
         <div className="flex items-center justify-between mb-4 p-2 rounded border border-slate-700 bg-slate-900/60">
           <span className="text-xs lg:text-sm text-slate-400">DM View</span>
 
-          <button type="button"
+          <button
+            type="button"
             onClick={toggleDmReadOnly}
             aria-label={dmReadOnly ? "Enable editing mode" : "Disable editing mode"}
             aria-pressed={!dmReadOnly}
@@ -456,11 +454,7 @@ export default function CharacterSheet({
 
       {/* Balanced page toolbar: navigation, centred title, matching spacer */}
       <div className="mb-4 grid grid-cols-[2.75rem_minmax(0,1fr)_2.75rem] items-center rounded-lg border border-slate-700 bg-slate-900/60 p-2">
-        <SectionDrawer
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-          isDM={isDM}
-        />
+        <SectionDrawer activeTab={activeTab} onTabChange={handleTabChange} isDM={isDM} />
         <h1 className="px-2 text-center font-cinzel text-sm font-bold leading-tight text-red-500 sm:text-base lg:text-lg">
           {TAB_TITLES[activeTab]}
         </h1>
@@ -498,10 +492,7 @@ export default function CharacterSheet({
                   An error occurred while displaying this content.
                 </p>
               </div>
-              <Button
-                variant="secondary"
-                onClick={() => handleTabChange("vitals")}
-              >
+              <Button variant="secondary" onClick={() => handleTabChange("vitals")}>
                 Back to Overview
               </Button>
             </div>
@@ -778,9 +769,9 @@ export default function CharacterSheet({
 
           {activeTab === "admin" && isDM && (
             <AdminTab
+              campaignId={path.campaignId}
               character={character}
               ownerName={ownerName}
-              claimLog={claimLog}
               onDMForceRelease={dmForceRelease}
               onDMForceAssign={dmForceAssign}
               onDMToggleEdit={dmToggleEdit}
@@ -794,7 +785,8 @@ export default function CharacterSheet({
       </div>
 
       {showScrollTop && (
-        <button type="button"
+        <button
+          type="button"
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           aria-label="Scroll to top"
           className="fixed bottom-6 right-4 z-50 w-9 h-9 rounded bg-slate-800/85 border border-slate-600 flex items-center justify-center text-slate-300 hover:bg-slate-700/90 transition shadow-lg"

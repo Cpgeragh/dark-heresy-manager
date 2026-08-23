@@ -13,6 +13,7 @@ export type CustomItemsSubscriptionMode = "admin" | "picker";
 export interface UseCampaignCustomItemsArgs {
   campaignId?: string | null;
   category?: CustomItemCategory;
+  categories?: readonly CustomItemCategory[];
   mode: CustomItemsSubscriptionMode;
   userId?: string | null;
   characterId?: string | null;
@@ -28,65 +29,61 @@ export interface UseCampaignCustomItemsResult {
 export function useCampaignCustomItems({
   campaignId,
   category,
+  categories,
   mode,
   userId,
   includeArchived = mode === "admin",
 }: UseCampaignCustomItemsArgs): UseCampaignCustomItemsResult {
   const baseRef = campaignId ? customItemsCollectionRef(campaignId) : null;
+  const selectedCategories = useMemo(
+    () => [...new Set(categories?.length ? categories : category ? [category] : [])].sort(),
+    [categories, category]
+  );
+  const categoryKey = selectedCategories.join("+") || "all";
+  const categoryConstraint =
+    selectedCategories.length === 0
+      ? null
+      : selectedCategories.length === 1
+        ? where("category", "==", selectedCategories[0])
+        : where("category", "in", selectedCategories);
   const adminActive = mode === "admin" && baseRef !== null;
   const pickerActive = mode === "picker" && baseRef !== null;
 
   const adminSubscription = useQuerySubscription(
     adminActive
-      ? category
-        ? query(
-            baseRef,
-            where("category", "==", category),
-            limit(FIRESTORE_QUERY_LIMITS.customItemsPerQuery)
-          )
-        : query(baseRef, limit(FIRESTORE_QUERY_LIMITS.customItemsPerQuery))
+      ? query(
+          baseRef,
+          ...(categoryConstraint ? [categoryConstraint] : []),
+          limit(FIRESTORE_QUERY_LIMITS.customItemsPerQuery)
+        )
       : null,
-    adminActive ? `custom-items:admin:${campaignId}:${category ?? "all"}` : null,
+    adminActive ? `custom-items:admin:${campaignId}:${categoryKey}` : null,
     mapCustomItemSnapshot
   );
 
   const publishedSubscription = useQuerySubscription(
     pickerActive
-      ? category
-        ? query(
-            baseRef,
-            where("status", "==", "published"),
-            where("category", "==", category),
-            limit(FIRESTORE_QUERY_LIMITS.customItemsPerQuery)
-          )
-        : query(
-            baseRef,
-            where("status", "==", "published"),
-            limit(FIRESTORE_QUERY_LIMITS.customItemsPerQuery)
-          )
+      ? query(
+          baseRef,
+          where("status", "==", "published"),
+          ...(categoryConstraint ? [categoryConstraint] : []),
+          limit(FIRESTORE_QUERY_LIMITS.customItemsPerQuery)
+        )
       : null,
-    pickerActive ? `custom-items:published:${campaignId}:${category ?? "all"}` : null,
+    pickerActive ? `custom-items:published:${campaignId}:${categoryKey}` : null,
     mapCustomItemSnapshot
   );
 
   const creatorSubscription = useQuerySubscription(
     pickerActive && userId
-      ? category
-        ? query(
-            baseRef,
-            where("creator.userId", "==", userId),
-            where("category", "==", category),
-            limit(FIRESTORE_QUERY_LIMITS.customItemsPerQuery)
-          )
-        : query(
-            baseRef,
-            where("creator.userId", "==", userId),
-            limit(FIRESTORE_QUERY_LIMITS.customItemsPerQuery)
-          )
+      ? query(
+          baseRef,
+          where("creator.userId", "==", userId),
+          ...(categoryConstraint ? [categoryConstraint] : []),
+          limit(FIRESTORE_QUERY_LIMITS.customItemsPerQuery)
+        )
       : null,
-    pickerActive && userId
-      ? `custom-items:creator:${campaignId}:${userId}:${category ?? "all"}`
-      : null,
+    pickerActive && userId ? `custom-items:creator:${campaignId}:${userId}:${categoryKey}` : null,
     mapCustomItemSnapshot
   );
 
@@ -107,14 +104,18 @@ export function useCampaignCustomItems({
         ? adminSubscription.data
         : mergeCustomItems(publishedSubscription.data, creatorSubscription.data);
 
-    return sortCustomItems(sourceItems.filter((item) => !category || item.category === category));
+    return sortCustomItems(
+      sourceItems.filter(
+        (item) => selectedCategories.length === 0 || selectedCategories.includes(item.category)
+      )
+    );
   }, [
     adminSubscription.data,
-    category,
     creatorSubscription.data,
     error,
     mode,
     publishedSubscription.data,
+    selectedCategories,
   ]);
 
   const visibleItems = useMemo(

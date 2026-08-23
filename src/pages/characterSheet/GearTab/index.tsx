@@ -93,19 +93,21 @@ export function GearTab({
   onUpdate,
   onUpdateConsumables,
 }: GearTabProps) {
-  const [showGearPicker, setShowGearPicker]               = useState(false);
-  const [showCustomForm, setShowCustomForm]               = useState(false);
-  const [showConsumablePicker, setShowConsumablePicker]   = useState(false);
+  const [showGearPicker, setShowGearPicker] = useState(false);
+  const [showCustomForm, setShowCustomForm] = useState(false);
+  const [showConsumablePicker, setShowConsumablePicker] = useState(false);
   const [showCustomConsumableForm, setShowCustomConsumableForm] = useState(false);
-  const [editingGearDefinition, setEditingGearDefinition] = useState<EditingGearDefinition | null>(null);
+  const [editingGearDefinition, setEditingGearDefinition] = useState<EditingGearDefinition | null>(
+    null
+  );
   const [editingConsumableDefinition, setEditingConsumableDefinition] =
     useState<EditingConsumableDefinition | null>(null);
-  const [activeGearSection, setActiveGearSection]         = useState<GearSection>("items");
-  const { containerRef, transitionClass, switchTo: switchGearSection } = useSwipeableTabs(
-    GEAR_SECTIONS,
-    activeGearSection,
-    setActiveGearSection
-  );
+  const [activeGearSection, setActiveGearSection] = useState<GearSection>("items");
+  const {
+    containerRef,
+    transitionClass,
+    switchTo: switchGearSection,
+  } = useSwipeableTabs(GEAR_SECTIONS, activeGearSection, setActiveGearSection);
   const toast = useToast();
   const {
     publishDefinition: publishGearDefinition,
@@ -126,18 +128,21 @@ export function GearTab({
 
   const {
     items: campaignCustomItems,
-    loading: gearLoading,
-    error: gearError,
+    loading: customItemsLoading,
+    error: customItemsError,
   } = useCampaignCustomItems({
     campaignId,
-    category: "gear",
+    categories: ["gear", "consumable"],
     mode: isDM ? "admin" : "picker",
     userId,
     characterId,
     includeArchived: isDM,
   });
   const campaignCustomGear = useMemo(
-    () => campaignCustomItems as CampaignCustomItem<"gear">[],
+    () =>
+      campaignCustomItems.filter(
+        (item) => item.category === "gear"
+      ) as CampaignCustomItem<"gear">[],
     [campaignCustomItems]
   );
 
@@ -146,31 +151,19 @@ export function GearTab({
     [campaignCustomGear]
   );
 
-  const {
-    items: campaignCustomConsumableItems,
-    loading: consumableLoading,
-    error: consumableError,
-  } = useCampaignCustomItems({
-    campaignId,
-    category: "consumable",
-    mode: isDM ? "admin" : "picker",
-    userId,
-    characterId,
-    includeArchived: isDM,
-  });
   const campaignCustomConsumables = useMemo(
-    () => campaignCustomConsumableItems as CampaignCustomItem<"consumable">[],
-    [campaignCustomConsumableItems]
+    () =>
+      campaignCustomItems.filter(
+        (item) => item.category === "consumable"
+      ) as CampaignCustomItem<"consumable">[],
+    [campaignCustomItems]
   );
 
   const campaignCustomConsumablesById = useMemo(
     () => new Map(campaignCustomConsumables.map((item) => [item.id, item])),
     [campaignCustomConsumables]
   );
-  const sortedGear = useMemo(
-    () => [...gear].sort((a, b) => a.name.localeCompare(b.name)),
-    [gear]
-  );
+  const sortedGear = useMemo(() => [...gear].sort((a, b) => a.name.localeCompare(b.name)), [gear]);
   const sortedConsumables = useMemo(
     () => [...consumables].sort((a, b) => a.name.localeCompare(b.name)),
     [consumables]
@@ -202,9 +195,7 @@ export function GearTab({
   const updateConsumableQty = useCallback(
     (id: string, qty: number) => {
       if (!editable) return;
-      onUpdateConsumables(
-        consumables.map((c) => (c.id === id ? { ...c, quantity: qty } : c))
-      );
+      onUpdateConsumables(consumables.map((c) => (c.id === id ? { ...c, quantity: qty } : c)));
     },
     [editable, consumables, onUpdateConsumables]
   );
@@ -266,7 +257,7 @@ export function GearTab({
       const versionId =
         libraryItem.status === "published"
           ? libraryItem.publishedVersionId
-          : libraryItem.draftVersionId ?? libraryItem.latestVersionId;
+          : (libraryItem.draftVersionId ?? libraryItem.latestVersionId);
 
       if (!versionId) {
         toast.error("This custom consumable has no usable version.");
@@ -275,7 +266,13 @@ export function GearTab({
 
       await onUpdateConsumables([
         ...consumables,
-        buildConsumableSnapshot(crypto.randomUUID(), 1, libraryItem.data, libraryItem.id, versionId),
+        buildConsumableSnapshot(
+          crypto.randomUUID(),
+          1,
+          libraryItem.data,
+          libraryItem.id,
+          versionId
+        ),
       ]);
     },
     [consumables, editable, onUpdateConsumables, toast]
@@ -364,10 +361,7 @@ export function GearTab({
           data,
         });
 
-        await onUpdate([
-          ...gear,
-          buildGearSnapshot(item.id, data, customItemId, versionId),
-        ]);
+        await onUpdate([...gear, buildGearSnapshot(item.id, data, customItemId, versionId)]);
         setShowCustomForm(false);
         setShowGearPicker(true);
         setActiveGearSection("items");
@@ -387,7 +381,7 @@ export function GearTab({
       const versionId =
         libraryItem.status === "published"
           ? libraryItem.publishedVersionId
-          : libraryItem.draftVersionId ?? libraryItem.latestVersionId;
+          : (libraryItem.draftVersionId ?? libraryItem.latestVersionId);
 
       if (!versionId) {
         toast.error("This custom gear has no usable version.");
@@ -416,12 +410,7 @@ export function GearTab({
         });
         const updatedGear = gear.map((gearItem) =>
           gearItem.id === editingGearDefinition.item.id
-            ? buildGearSnapshot(
-                gearItem.id,
-                data,
-                editingGearDefinition.libraryItem.id,
-                versionId
-              )
+            ? buildGearSnapshot(gearItem.id, data, editingGearDefinition.libraryItem.id, versionId)
             : gearItem
         );
 
@@ -433,16 +422,7 @@ export function GearTab({
         toast.error("Failed to update custom gear definition.");
       }
     },
-    [
-      campaignId,
-      characterId,
-      characterName,
-      editingGearDefinition,
-      gear,
-      onUpdate,
-      toast,
-      userId,
-    ]
+    [campaignId, characterId, characterName, editingGearDefinition, gear, onUpdate, toast, userId]
   );
 
   const removeItem = useCallback(
@@ -461,11 +441,11 @@ export function GearTab({
         : "hidden lg:block",
     ].join(" ");
 
-  if (gearError || consumableError) {
+  if (customItemsError) {
     return <ErrorState>Unable to load custom gear.</ErrorState>;
   }
 
-  if (gearLoading || consumableLoading) {
+  if (customItemsLoading) {
     return <LoadingState>Loading custom gear…</LoadingState>;
   }
 
@@ -482,152 +462,166 @@ export function GearTab({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-      <section
-        id={segmentedTabPanelId(GEAR_TABS_ID, "items")}
-        aria-labelledby={segmentedTabId(GEAR_TABS_ID, "items")}
-        className={visibleGearSectionClass("items")}
-        role="tabpanel"
-      >
-        <div className="flex items-center justify-between">
-          <SectionHeader>Items</SectionHeader>
-          {!showCustomForm && (
-            editable ? (
-              <AddButton label="Add item" onClick={() => setShowGearPicker(true)} />
-            ) : (
-              <ViewButton label="View items" onClick={() => setShowGearPicker(true)} />
-            )
+        <section
+          id={segmentedTabPanelId(GEAR_TABS_ID, "items")}
+          aria-labelledby={segmentedTabId(GEAR_TABS_ID, "items")}
+          className={visibleGearSectionClass("items")}
+          role="tabpanel"
+        >
+          <div className="flex items-center justify-between">
+            <SectionHeader>Items</SectionHeader>
+            {!showCustomForm &&
+              (editable ? (
+                <AddButton label="Add item" onClick={() => setShowGearPicker(true)} />
+              ) : (
+                <ViewButton label="View items" onClick={() => setShowGearPicker(true)} />
+              ))}
+          </div>
+
+          {gear.length === 0 && !showCustomForm && (
+            <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No items recorded.</p>
           )}
-        </div>
 
-        {gear.length === 0 && !showCustomForm && (
-          <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No items recorded.</p>
-        )}
+          <div className="space-y-3">
+            {sortedGear.map((item) =>
+              (() => {
+                const linkedLibraryItem = item.customLibraryId
+                  ? campaignCustomGearById.get(item.customLibraryId)
+                  : undefined;
+                const libraryItem =
+                  linkedLibraryItem ??
+                  (item.customLibraryId
+                    ? buildFallbackGearLibraryItem({
+                        campaignId,
+                        item,
+                        userId,
+                        characterId,
+                        characterName,
+                      })
+                    : undefined);
+                const canEditDefinition =
+                  !!libraryItem &&
+                  editable &&
+                  ((!!userId && libraryItem.creator.userId === userId) ||
+                    (isDM &&
+                      (characterId === libraryItem.creator.characterId ||
+                        userId === libraryItem.creator.userId)));
+                const rowBusyAction = libraryItem ? getGearBusyAction(libraryItem.id) : null;
 
-        <div className="space-y-3">
-          {sortedGear.map((item) => (
-            (() => {
-              const linkedLibraryItem = item.customLibraryId
-                ? campaignCustomGearById.get(item.customLibraryId)
-                : undefined;
-              const libraryItem =
-                linkedLibraryItem ??
-                (item.customLibraryId
-                  ? buildFallbackGearLibraryItem({
-                      campaignId,
-                      item,
-                      userId,
-                      characterId,
-                      characterName,
-                    })
-                  : undefined);
-              const canEditDefinition =
-                !!libraryItem &&
-                editable &&
-                (
-                  (!!userId && libraryItem.creator.userId === userId) ||
-                  (isDM && (characterId === libraryItem.creator.characterId || userId === libraryItem.creator.userId))
+                return (
+                  <ItemRow
+                    key={item.id}
+                    item={item}
+                    editable={editable}
+                    libraryItem={libraryItem}
+                    isDM={
+                      isDM &&
+                      editable &&
+                      !!libraryItem &&
+                      (characterId === libraryItem.creator.characterId ||
+                        userId === libraryItem.creator.userId)
+                    }
+                    canEditDefinition={canEditDefinition}
+                    busyAction={rowBusyAction}
+                    onEditDefinition={() =>
+                      libraryItem && setEditingGearDefinition({ item, libraryItem })
+                    }
+                    onPublish={() => libraryItem && publishGearDefinition(libraryItem)}
+                    onArchive={() => libraryItem && archiveGearDefinition(libraryItem)}
+                    onUpdateAllCopies={() => libraryItem && updateAllGearCopies(libraryItem)}
+                    onRemove={() => removeItem(item.id)}
+                  />
                 );
-              const rowBusyAction = libraryItem ? getGearBusyAction(libraryItem.id) : null;
+              })()
+            )}
+          </div>
+        </section>
+        {/* CONSUMABLES ──────────────────────────────────────────────────────── */}
+        <section
+          id={segmentedTabPanelId(GEAR_TABS_ID, "consumables")}
+          aria-labelledby={segmentedTabId(GEAR_TABS_ID, "consumables")}
+          className={visibleGearSectionClass("consumables")}
+          role="tabpanel"
+        >
+          <div className="flex items-center justify-between">
+            <SectionHeader>Consumables</SectionHeader>
+            {editable ? (
+              <AddButton label="Add consumable" onClick={() => setShowConsumablePicker(true)} />
+            ) : (
+              <ViewButton label="View consumables" onClick={() => setShowConsumablePicker(true)} />
+            )}
+          </div>
 
-              return (
-                <ItemRow
-                  key={item.id}
-                  item={item}
-                  editable={editable}
-                  libraryItem={libraryItem}
-                  isDM={isDM && editable && !!libraryItem && (characterId === libraryItem.creator.characterId || userId === libraryItem.creator.userId)}
-                  canEditDefinition={canEditDefinition}
-                  busyAction={rowBusyAction}
-                  onEditDefinition={() =>
-                    libraryItem && setEditingGearDefinition({ item, libraryItem })
-                  }
-                  onPublish={() => libraryItem && publishGearDefinition(libraryItem)}
-                  onArchive={() => libraryItem && archiveGearDefinition(libraryItem)}
-                  onUpdateAllCopies={() => libraryItem && updateAllGearCopies(libraryItem)}
-                  onRemove={() => removeItem(item.id)}
-                />
-              );
-            })()
-          ))}
-        </div>
-      </section>
-      {/* CONSUMABLES ──────────────────────────────────────────────────────── */}
-      <section
-        id={segmentedTabPanelId(GEAR_TABS_ID, "consumables")}
-        aria-labelledby={segmentedTabId(GEAR_TABS_ID, "consumables")}
-        className={visibleGearSectionClass("consumables")}
-        role="tabpanel"
-      >
-        <div className="flex items-center justify-between">
-          <SectionHeader>Consumables</SectionHeader>
-        {editable ? (
-          <AddButton label="Add consumable" onClick={() => setShowConsumablePicker(true)} />
-        ) : (
-          <ViewButton label="View consumables" onClick={() => setShowConsumablePicker(true)} />
-        )}
-        </div>
+          {consumables.length === 0 && (
+            <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No consumables recorded.</p>
+          )}
 
-        {consumables.length === 0 && (
-          <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No consumables recorded.</p>
-        )}
+          <div className="space-y-3">
+            {sortedConsumables.map((item) =>
+              (() => {
+                const linkedLibraryItem = item.customLibraryId
+                  ? campaignCustomConsumablesById.get(item.customLibraryId)
+                  : undefined;
+                const libraryItem =
+                  linkedLibraryItem ??
+                  (item.customLibraryId
+                    ? buildFallbackConsumableLibraryItem({
+                        campaignId,
+                        item,
+                        userId,
+                        characterId,
+                        characterName,
+                      })
+                    : undefined);
+                const canEditDefinition =
+                  !!libraryItem &&
+                  editable &&
+                  ((!!userId && libraryItem.creator.userId === userId) ||
+                    (isDM &&
+                      (characterId === libraryItem.creator.characterId ||
+                        userId === libraryItem.creator.userId)));
+                const rowBusyAction = libraryItem ? getConsumableBusyAction(libraryItem.id) : null;
 
-        <div className="space-y-3">
-          {sortedConsumables.map((item) => (
-            (() => {
-              const linkedLibraryItem = item.customLibraryId
-                ? campaignCustomConsumablesById.get(item.customLibraryId)
-                : undefined;
-              const libraryItem =
-                linkedLibraryItem ??
-                (item.customLibraryId
-                  ? buildFallbackConsumableLibraryItem({
-                      campaignId,
-                      item,
-                      userId,
-                      characterId,
-                      characterName,
-                    })
-                  : undefined);
-              const canEditDefinition =
-                !!libraryItem &&
-                editable &&
-                (
-                  (!!userId && libraryItem.creator.userId === userId) ||
-                  (isDM && (characterId === libraryItem.creator.characterId || userId === libraryItem.creator.userId))
+                return (
+                  <ConsumableRow
+                    key={item.id}
+                    item={item}
+                    editable={editable}
+                    libraryItem={libraryItem}
+                    isDM={
+                      isDM &&
+                      editable &&
+                      !!libraryItem &&
+                      (characterId === libraryItem.creator.characterId ||
+                        userId === libraryItem.creator.userId)
+                    }
+                    canEditDefinition={canEditDefinition}
+                    busyAction={rowBusyAction}
+                    onEditDefinition={() =>
+                      libraryItem && setEditingConsumableDefinition({ item, libraryItem })
+                    }
+                    onPublish={() => libraryItem && publishConsumableDefinition(libraryItem)}
+                    onArchive={() => libraryItem && archiveConsumableDefinition(libraryItem)}
+                    onUpdateAllCopies={() => libraryItem && updateAllConsumableCopies(libraryItem)}
+                    onUpdateQty={updateConsumableQty}
+                    onRemove={removeConsumable}
+                  />
                 );
-              const rowBusyAction = libraryItem ? getConsumableBusyAction(libraryItem.id) : null;
-
-              return (
-                <ConsumableRow
-                  key={item.id}
-                  item={item}
-                  editable={editable}
-                  libraryItem={libraryItem}
-                  isDM={isDM && editable && !!libraryItem && (characterId === libraryItem.creator.characterId || userId === libraryItem.creator.userId)}
-                  canEditDefinition={canEditDefinition}
-                  busyAction={rowBusyAction}
-                  onEditDefinition={() =>
-                    libraryItem && setEditingConsumableDefinition({ item, libraryItem })
-                  }
-                  onPublish={() => libraryItem && publishConsumableDefinition(libraryItem)}
-                  onArchive={() => libraryItem && archiveConsumableDefinition(libraryItem)}
-                  onUpdateAllCopies={() => libraryItem && updateAllConsumableCopies(libraryItem)}
-                  onUpdateQty={updateConsumableQty}
-                  onRemove={removeConsumable}
-                />
-              );
-            })()
-          ))}
-        </div>
-      </section>
+              })()
+            )}
+          </div>
+        </section>
       </div>
 
       {showConsumablePicker && (
         <ConsumablePicker
           editable={editable}
-          customItems={campaignCustomConsumables.filter((item) =>
-            item.status !== "archived" &&
-            (item.status === "published" || item.creator.userId === userId || item.creator.characterId === characterId)
+          customItems={campaignCustomConsumables.filter(
+            (item) =>
+              item.status !== "archived" &&
+              (item.status === "published" ||
+                item.creator.userId === userId ||
+                item.creator.characterId === characterId)
           )}
           onSelect={addConsumableFromRef}
           onSelectCustomItem={addConsumableFromLibrary}
@@ -653,9 +647,12 @@ export function GearTab({
       {showGearPicker && (
         <GearPicker
           editable={editable}
-          customItems={campaignCustomGear.filter((item) =>
-            item.status !== "archived" &&
-            (item.status === "published" || item.creator.userId === userId || item.creator.characterId === characterId)
+          customItems={campaignCustomGear.filter(
+            (item) =>
+              item.status !== "archived" &&
+              (item.status === "published" ||
+                item.creator.userId === userId ||
+                item.creator.characterId === characterId)
           )}
           onSelect={addFromRef}
           onSelectCustomItem={addCustomFromLibrary}

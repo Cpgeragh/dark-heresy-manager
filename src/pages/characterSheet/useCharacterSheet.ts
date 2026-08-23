@@ -44,13 +44,11 @@ export function useCharacterSheet({
   // ================================================================
   const {
     character,
-    claimLog,
     loading: characterLoading,
     error: characterError,
   } = useCharacterData({
     campaignId: path?.campaignId,
     characterId: path?.characterId,
-    isDM,
   });
 
   // ================================================================
@@ -87,7 +85,6 @@ export function useCharacterSheet({
     // Path & data
     path,
     character,
-    claimLog,
     characterLoading: characterLoading || campaignLoading,
     characterError: characterError ?? campaignError,
 

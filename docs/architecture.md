@@ -214,14 +214,14 @@ The GM inbox reuses the thread and input components inside page content. The dra
 - snapshot-error handling;
 - stale-data and stale-callback protection.
 
-Domain hooks retain their query construction and snapshot mapping. The shared lifecycle is used by campaign, archived-campaign, character, character-summary, session, thread, message, XP-proposal, claim-log, profile and custom-item subscriptions.
+Domain hooks retain their query construction and snapshot mapping. The shared lifecycle is used by campaign, archived-campaign, character, session, thread, message, XP-proposal, claim-log, profile and custom-item subscriptions.
 
 Live collection queries must also have an explicit upper bound. The central client-side values in `constants/firestoreLimits.ts` currently cap:
 
 - active DM and player campaign results at 50 per role, and archived campaigns at 100;
-- campaign rosters at 100 characters and a player's owned-character result at 20;
+- campaign rosters at 100 characters and a player's collection-group owned-character result at 1,000;
 - session history at 200 records and the DM inbox at 100 thread summaries;
-- the live message window at the latest 100 messages and claim history at the latest 50 entries;
+- the live message window and each explicitly requested older page at 100 messages, and claim history at the latest 50 entries;
 - each custom-item query at 200 results.
 
 These limits are cost and abuse circuit-breakers, not substitutes for write-time product limits. A screen that could legitimately outgrow its live window must add deliberate pagination before increasing a cap.
@@ -261,10 +261,10 @@ UI constraints provide immediate feedback, services reject invalid work before c
 Compound consumers remain explicit:
 
 - `CampaignsProvider` coordinates the DM and member views of active campaigns;
-- `useCampaignCustomItems` merges bounded, server-filtered category/status queries;
-- `useCharacterData` coordinates the character and a bounded DM-only claim history.
+- `useCampaignCustomItems` merges bounded, server-filtered category/status queries and accepts a small category set so a multi-category tab does not open duplicate subscriptions;
+- `useCharacterData` subscribes only to the character document; claim history has its own deliberately enabled hook.
 
-Expensive listeners follow the visible UI lifecycle. `MessageDrawer` mounts its thread only while open, and Campaign Overview starts a character's claim-history listener only while the DM has that History dialog open. Campaign Overview derives the small name/owner summaries needed by sessions from its existing roster result instead of opening a second listener on the same character collection.
+Expensive listeners follow the visible UI lifecycle. `MessageDrawer` mounts its thread only while open, DM Inbox mounts messages only for the expanded thread, and both Campaign Overview and the character-sheet Admin tab start claim history only while the DM has explicitly opened History. Campaign Overview derives the small name/owner summaries needed by sessions from its existing bounded roster result instead of opening a second listener on the same character collection; the obsolete full-character summary hook has been removed.
 
 ### Campaign state
 
@@ -279,7 +279,7 @@ Campaign-specific hooks provide narrower contracts:
 
 They share subscription semantics but retain the queries and domain mapping that explain their data.
 
-`usePlayerCharacters` applies `userId == current user` in Firestore rather than downloading the entire campaign roster and filtering it in the browser. Custom-item picker queries likewise apply a requested category in Firestore. This reduces both disclosed data and billed document reads; security rules remain the authority for access control.
+`usePlayerCharacters` uses the indexed `characters` collection group and applies `userId == current user` in Firestore. Dashboard therefore opens one bounded ownership listener for the user, groups only those authorised results by their stored campaign ID, and never downloads another player's campaign characters. Custom-item picker queries likewise apply one category or a small `in` category set in Firestore. This reduces both disclosed data and billed document reads; security rules remain the authority for access control.
 
 ### Authentication, roles and permissions
 
@@ -337,7 +337,7 @@ This keeps conversion, calculation, filtering and ordering independent from `Ski
 
 `useSessions` exposes subscribed session state and service-backed mutations. `useXpProposals` exposes proposal state while `xpService` owns proposal, approval and rejection writes.
 
-`useThreads` and `useThreadMessages` provide bounded subscribed messaging state. Thread selection and drawer visibility remain local presentation state, and closing the player drawer tears down its message listener.
+`useThreads` provides a bounded thread-summary subscription. `useThreadMessages` keeps only the latest 100 messages live, ordered by timestamp and document ID for a stable cursor; pressing Load older messages performs a bounded one-shot read for the preceding page and merges it without duplicates. Thread expansion and drawer visibility remain local presentation state, closing the player drawer tears down its message listener, and prepending history does not trigger the new-message auto-scroll.
 
 The DM inbox only resets an unread counter when that counter is non-zero. User-account synchronisation creates a missing account document but performs no recurring `lastSeen` heartbeat write for an existing account. Both decisions remove automatic writes that had no necessary product outcome.
 

@@ -12,7 +12,7 @@ export const FIRESTORE_QUERY_LIMITS = {
   activeCampaignsPerRole: 50,
   archivedCampaigns: 100,
   charactersPerCampaign: PRODUCT_LIMITS.charactersPerCampaign,
-  playerCharactersPerCampaign: 20,
+  playerCharactersPerUser: 1_000,
   sessionsPerCampaign: 200,
   threadSummariesPerCampaign: 100,
   messagesPerThread: PRODUCT_LIMITS.messagesPerPage,
