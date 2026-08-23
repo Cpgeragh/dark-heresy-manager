@@ -15,15 +15,29 @@
         { "fieldPath": "memberIds", "arrayConfig": "CONTAINS" },
         { "fieldPath": "archivedAt", "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "customItems",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "category", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "customItems",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "creator.userId", "order": "ASCENDING" },
+        { "fieldPath": "category", "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": [
     {
       "collectionGroup": "characters",
       "fieldPath": "userId",
-      "indexes": [
-        { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" }
-      ]
+      "indexes": [{ "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" }]
     }
   ]
 }
