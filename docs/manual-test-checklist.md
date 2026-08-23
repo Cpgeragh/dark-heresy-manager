@@ -1,6 +1,6 @@
 # Manual Test Checklist — Complete App
 
-Thirty-two pages and cross-cutting sections, containing 619 checks. Every item
+Thirty-three pages and cross-cutting sections, containing 625 checks. Every item
 comes from reading the actual logic, not a generic "does it load" pass.
 Check items off as you verify them; anything under **Watch for** is the
 likeliest place a real bug hides. Coverage notes are at the bottom — read
@@ -1108,13 +1108,28 @@ Run each focused command from the project folder. Restore every temporary synthe
 - [ ] Run `npm run check:lockfile`, then create disposable direct-dependency drift or a second lockfile — the current lock passes offline, while either inconsistent fixture fails before a build begins
 - [ ] After Stage 4 removes the service-account blocker, run `npm run check:deployment:local` — it completes the local safety checks, production build, application tests and Firestore emulator rules tests; no online vulnerability audit runs unless network access is separately approved, and no source or secret is uploaded to an external scanner
 
+## 33. Stage 2 Completion Verification
+
+These checks close Stage 2 without contacting or changing production Firebase. Run them from the project folder against the checked-in configuration and the local `dh-test` emulator project. A focused run is useful for diagnosing a failure, but the completion result comes from the production build and both complete suites.
+
+### How to test this system
+
+Do not deploy between these checks. Confirm the Firebase project remains on Spark before and after verification. The known local service-account-file finding from §32 remains scheduled for Stage 4 and is not a failed application or Firestore-rules test.
+
+- [ ] Run the focused bounded-query, subscription and message-drawer tests — disabled queries create no listener, enabling creates one listener, changing/disabling/unmounting cleans it up, a closed drawer has no thread consumer, and older messages or claim history are fetched only after their explicit activation
+- [ ] Run the focused input-boundary tests — imports, portraits, messages, sessions, character arrays, custom-item values and bulk counts accept their exact maximum valid values, while the first oversized value is rejected before a Firebase write
+- [ ] Run the focused Firestore rules tests — unexpected campaign, character, session, message, thread, custom-item and version fields are rejected; campaign members may create drafts, outsiders cannot, and only the authorised creator/DM transitions remain available
+- [ ] Run the duplicate-submission, batch/preflight and XP-reconciliation tests — identical in-flight mutations share one operation, 440-document atomic work succeeds while 441 is stopped before a batch, and stale `experience.spent` converges after one committed correction
+- [ ] Run the Firebase configuration test — the CSP still permits the app's required Firebase/Auth, image, frame and worker destinations without unsafe script execution; the build hook, SPA rewrite, service-worker revalidation and immutable hashed-asset caching remain intact
+- [ ] Run `npm run build`, `npm run test:run` and `npm run test:rules` once after all Stage 2 test edits — all complete successfully using only the local project and Firestore emulator, no production deployment occurs, and the Firebase billing plan remains Spark
+
 ---
 
 ## Coverage notes
 
 This checklist covers the 20 character-sheet sections, the cross-cutting
 systems, and the app-shell pages outside the character sheet. Sections
-21–32 cover systems and pages such as Dashboard, Onboarding, Settings,
+21–33 cover systems and pages such as Dashboard, Onboarding, Settings,
 Campaign Overview, and Messages.
 
 **Character-sheet source review (§1–20):** The reviewed scope includes every
@@ -1138,7 +1153,7 @@ reference pickers, both row components, and the
 static roll-range label rather than an interactive roller; no
 manual roll-button test is therefore required.
 
-**App-shell and account-system source review (§23–32):** The reviewed scope
+**App-shell and account-system source review (§23–33):** The reviewed scope
 includes `App.tsx` (route shell, auth gate, onboarding gate, NameGate),
 `useAuth`, `useDeviceLink`,
 `useLinkDevice`, `identityService.ts`, `deviceLinkService.ts`,

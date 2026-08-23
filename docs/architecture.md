@@ -453,6 +453,24 @@ The safety gate currently fails closed because `serviceAccountKey.json` is still
 
 An online dependency-vulnerability audit is deliberately absent from the local gate. It may contact a package registry and disclose dependency metadata, so it requires separate network approval and must never be represented as part of an offline check. No source or secrets may be submitted to any external scanning service.
 
+### Stage 2 automated verification
+
+Stage 2 security and cost controls are protected by behavioural tests rather than by source-text assertions. The test responsibilities are deliberately split so each boundary is exercised at the layer that enforces it:
+
+| Stage 2 contract | Primary automated coverage |
+| ---------------- | -------------------------- |
+| Bounded live queries and on-demand older history | `boundedFirestoreQueries.test.tsx`, `firestoreQueryPages.test.ts`, and the bounded-query Firestore rules tests verify server-side filters, hard limits, stable pagination, disabled history queries and explicit older-message loading |
+| Listener activation, source changes and cleanup | `useFirestoreSubscription.test.tsx` covers disabled, enabled, changed, disabled-again and unmounted document/query subscriptions; `messageDrawer.test.tsx` proves a closed drawer does not retain its thread consumer |
+| Duplicate submissions | `singleFlight.test.ts` verifies the shared primitive, while campaign, character, portrait, session, recovery, identity and device-link service tests lock the feature-specific operation keys and retry behaviour |
+| Maximum-valid and rejected input boundaries | `firebaseValidation.test.ts`, `messageService.test.ts`, `sessionService.test.ts`, `portraitService.test.ts` and `productLimits.test.ts` cover exact accepted maxima and the first rejected value for imports, portraits, messages, sessions, character arrays, custom items and bulk counts |
+| Exact Firestore shapes and custom-item permissions | `fieldValidation.test.ts`, `messageRules.test.ts`, `sessionRules.test.ts`, `customItemRules.test.ts` and the remaining rules suite cover unexpected fields, primitive types, parent/version coupling, campaign membership, creator permissions and DM-only transitions |
+| Atomic and campaign-wide boundaries | `firestoreBatchDelete.test.ts`, `destructiveOperationPreflight.test.ts`, `campaignService.test.ts`, `characterService.test.ts`, `customItemBulkService.test.ts` and `sessionService.test.ts` prove the exact 440-document boundary, fail-closed preflights and no partial fallback |
+| Automatic XP reconciliation | `characterService.test.ts` proves one nested-field correction, no write when already settled, one committed correction across two tab attempts, and safe handling of a disappeared character |
+| Hosting policy compatibility | `firebaseConfiguration.test.ts` verifies the build hook, SPA rewrite, Firebase/Auth network destinations, PWA image/worker requirements, restrictive directives, response headers and cache policy from `firebase.json` |
+| Existing DM and player workflows | Campaign, character, ownership, session, message and custom-item rules tests preserve self-service campaign creation, player-owned editing, DM administration and the agreed DM-as-genuine-character-owner workflow |
+
+Stage 2 completion uses one production build, the complete application suite and the complete Firestore emulator rules suite. Focused tests are used while editing, then each complete suite is run once after the final Stage 2 test changes. These commands remain local and the emulator project is `dh-test`; they do not deploy rules, indexes or hosting, enable Cloud Functions, change the production plan or require Blaze. The project therefore remains on Spark throughout this verification.
+
 ### Service responsibilities
 
 | Service                 | Responsibility                                                                                                   |

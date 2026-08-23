@@ -133,6 +133,16 @@ describe("sendMessage", () => {
     expect(summaryData.lastMessage).toHaveLength(500);
   });
 
+  it("accepts a message at the exact 2,000-character boundary", async () => {
+    const text = "x".repeat(2_000);
+
+    await sendMessage("c1", "char-1", "p1", text, true);
+
+    const [, messageData] = mockBatchSet.mock.calls[0];
+    expect(messageData.text).toHaveLength(2_000);
+    expect(mockBatchCommit).toHaveBeenCalledOnce();
+  });
+
   it("commits the batch exactly once", async () => {
     await sendMessage("c1", "char-1", "p1", "Hello", true);
     expect(mockBatchCommit).toHaveBeenCalledOnce();

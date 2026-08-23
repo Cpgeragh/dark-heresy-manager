@@ -107,6 +107,22 @@ describe("Firestore Rules: Campaign Custom Items", () => {
     await expect(batch.commit()).resolves.toBeUndefined();
   });
 
+  it("accepts custom-item names and text at their exact maximum lengths", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await createCustomItemCampaign(env);
+    const playerDb = dbAs(env, "player-1");
+    const maximumName = "n".repeat(100);
+    const maximumData = {
+      ...gearData(maximumName),
+      description: "x".repeat(4_000),
+    };
+    const batch = playerDb.batch();
+    batch.set(playerDb.doc(customItemPath()), draftItem({ name: maximumName, data: maximumData }));
+    batch.set(playerDb.doc(versionPath()), draftVersion({ data: maximumData }));
+
+    await expect(batch.commit()).resolves.toBeUndefined();
+  });
+
   it("rejects custom-item creation by an authenticated user outside the campaign", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, campaignId, "dm-1");
@@ -126,10 +142,7 @@ describe("Firestore Rules: Campaign Custom Items", () => {
     for (const [badItem, badVersion] of [
       [draftItem({ unexpected: true }), draftVersion()],
       [draftItem({ data: { ...gearData(), unexpected: true } }), draftVersion()],
-      [
-        draftItem({ data: { ...gearData(), description: "x".repeat(4001) } }),
-        draftVersion(),
-      ],
+      [draftItem({ data: { ...gearData(), description: "x".repeat(4001) } }), draftVersion()],
       [draftItem({ name: "Mismatched name" }), draftVersion()],
       [draftItem({ updatedBy: { userId: "player-2" } }), draftVersion()],
       [draftItem(), draftVersion({ unexpected: true })],
@@ -148,9 +161,15 @@ describe("Firestore Rules: Campaign Custom Items", () => {
     const dmDb = dbAs(env, "dm-1");
 
     await expect(
-      dmDb.doc(versionPath("missing-item")).set(
-        draftVersion({ customItemId: "missing-item", createdBy: { userId: "dm-1" }, updatedBy: { userId: "dm-1" } })
-      )
+      dmDb
+        .doc(versionPath("missing-item"))
+        .set(
+          draftVersion({
+            customItemId: "missing-item",
+            createdBy: { userId: "dm-1" },
+            updatedBy: { userId: "dm-1" },
+          })
+        )
     ).rejects.toThrow();
   });
 
@@ -207,13 +226,15 @@ describe("Firestore Rules: Campaign Custom Items", () => {
 
     const playerDb = dbAs(env, "player-1");
     await expect(
-      playerDb.collection(`campaigns/${campaignId}/customItems`)
+      playerDb
+        .collection(`campaigns/${campaignId}/customItems`)
         .where("creator.userId", "==", "player-1")
         .limit(200)
         .get()
     ).resolves.toBeDefined();
     await expect(
-      playerDb.collection(`campaigns/${campaignId}/customItems`)
+      playerDb
+        .collection(`campaigns/${campaignId}/customItems`)
         .where("status", "==", "published")
         .limit(200)
         .get()
@@ -291,19 +312,25 @@ describe("Firestore Rules: Campaign Custom Items", () => {
   it("creator can transition a published item back to draft when saving an edit", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCustomItemCampaign(env);
-    await seedCustomItem(env, { status: "published", publishedVersionId: versionId, draftVersionId: null });
+    await seedCustomItem(env, {
+      status: "published",
+      publishedVersionId: versionId,
+      draftVersionId: null,
+    });
 
     await expect(
-      dbAs(env, "player-1").doc(customItemPath()).update({
-        name: "Revised Auspex",
-        data: gearData("Revised Auspex"),
-        status: "draft",
-        draftVersionId: "version-2",
-        latestVersionId: "version-2",
-        latestVersionNumber: 2,
-        updatedAt: new Date(),
-        updatedBy: { userId: "player-1", characterId: "char-1", characterName: "Acolyte" },
-      })
+      dbAs(env, "player-1")
+        .doc(customItemPath())
+        .update({
+          name: "Revised Auspex",
+          data: gearData("Revised Auspex"),
+          status: "draft",
+          draftVersionId: "version-2",
+          latestVersionId: "version-2",
+          latestVersionNumber: 2,
+          updatedAt: new Date(),
+          updatedBy: { userId: "player-1", characterId: "char-1", characterName: "Acolyte" },
+        })
     ).resolves.toBeUndefined();
   });
 
@@ -313,29 +340,37 @@ describe("Firestore Rules: Campaign Custom Items", () => {
     await seedCustomItem(env);
 
     await expect(
-      dbAs(env, "player-1").doc(customItemPath()).update({
-        status: "published",
-        publishedVersionId: versionId,
-        draftVersionId: null,
-        updatedAt: new Date(),
-        updatedBy: { userId: "player-1", characterId: "char-1", characterName: "Acolyte" },
-      })
+      dbAs(env, "player-1")
+        .doc(customItemPath())
+        .update({
+          status: "published",
+          publishedVersionId: versionId,
+          draftVersionId: null,
+          updatedAt: new Date(),
+          updatedBy: { userId: "player-1", characterId: "char-1", characterName: "Acolyte" },
+        })
     ).rejects.toThrow();
   });
 
   it("creator cannot transition to archived", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCustomItemCampaign(env);
-    await seedCustomItem(env, { status: "published", publishedVersionId: versionId, draftVersionId: null });
+    await seedCustomItem(env, {
+      status: "published",
+      publishedVersionId: versionId,
+      draftVersionId: null,
+    });
 
     await expect(
-      dbAs(env, "player-1").doc(customItemPath()).update({
-        status: "archived",
-        archivedAt: new Date(),
-        archivedByUserId: "player-1",
-        updatedAt: new Date(),
-        updatedBy: { userId: "player-1", characterId: "char-1", characterName: "Acolyte" },
-      })
+      dbAs(env, "player-1")
+        .doc(customItemPath())
+        .update({
+          status: "archived",
+          archivedAt: new Date(),
+          archivedByUserId: "player-1",
+          updatedAt: new Date(),
+          updatedBy: { userId: "player-1", characterId: "char-1", characterName: "Acolyte" },
+        })
     ).rejects.toThrow();
   });
 
@@ -368,7 +403,9 @@ describe("Firestore Rules: Campaign Custom Items", () => {
 
     const dmDb = dbAs(env, "dm-1");
     await expect(
-      dmDb.doc(customItemPath()).update({ status: "published", archivedAt: null, archivedByUserId: null })
+      dmDb
+        .doc(customItemPath())
+        .update({ status: "published", archivedAt: null, archivedByUserId: null })
     ).resolves.not.toThrow();
   });
 
@@ -383,7 +420,9 @@ describe("Firestore Rules: Campaign Custom Items", () => {
 
     const playerDb = dbAs(env, "player-1");
     await expect(
-      playerDb.doc(customItemPath()).update({ status: "draft", archivedAt: null, archivedByUserId: null })
+      playerDb
+        .doc(customItemPath())
+        .update({ status: "draft", archivedAt: null, archivedByUserId: null })
     ).rejects.toThrow();
   });
 

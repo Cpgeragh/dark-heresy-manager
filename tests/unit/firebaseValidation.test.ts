@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { PRODUCT_LIMITS } from "../../src/constants/productLimits";
 import { createEmptyCharacterData } from "../../src/utils/characterFactory";
 import {
   assertBulkOperationCount,
@@ -8,6 +9,7 @@ import {
   assertEncodedPortrait,
   assertFirestoreDocumentId,
   assertPortraitSource,
+  encodedByteLength,
   readCharacterImportFile,
 } from "../../src/utils/firebaseValidation";
 
@@ -17,6 +19,29 @@ function validImport() {
     recoveryCode: "DH-ABCD-1234",
     characterName: "Acolyte",
   });
+}
+
+function maximumSizedValidImportText() {
+  const gear = Array.from({ length: PRODUCT_LIMITS.characterArrayEntries }, (_, index) => ({
+    id: `gear-${index}`,
+    name: `Gear ${index}`,
+    description: "",
+  }));
+  const data = { ...validImport(), gear };
+  const baseText = JSON.stringify(data);
+  let remaining = PRODUCT_LIMITS.characterImportBytes - encodedByteLength(baseText);
+
+  expect(remaining).toBeGreaterThan(0);
+  for (const item of gear) {
+    const characters = Math.min(remaining, PRODUCT_LIMITS.customItemTextCharacters);
+    item.description = "x".repeat(characters);
+    remaining -= characters;
+  }
+
+  const text = JSON.stringify(data);
+  expect(remaining).toBe(0);
+  expect(encodedByteLength(text)).toBe(PRODUCT_LIMITS.characterImportBytes);
+  return text;
 }
 
 describe("character import validation", () => {
@@ -43,6 +68,24 @@ describe("character import validation", () => {
     expect(text).not.toHaveBeenCalled();
   });
 
+  it("accepts an exactly maximum-sized valid import and rejects larger file content", async () => {
+    const text = maximumSizedValidImportText();
+
+    await expect(
+      readCharacterImportFile({
+        size: PRODUCT_LIMITS.characterImportBytes,
+        text: async () => text,
+      })
+    ).resolves.toMatchObject({ campaignId: "campaign-1" });
+
+    await expect(
+      readCharacterImportFile({
+        size: PRODUCT_LIMITS.characterImportBytes,
+        text: async () => `${text} `,
+      })
+    ).rejects.toThrow("too large to import");
+  });
+
   it("rejects malformed JSON and structurally invalid parsed data", async () => {
     await expect(
       readCharacterImportFile({ size: 8, text: async () => "not json" })
@@ -63,6 +106,16 @@ describe("character import validation", () => {
       "Character data.gear[0].id is invalid"
     );
   });
+
+  it("accepts a character array at the exact entry boundary", () => {
+    expect(() =>
+      assertCharacterPayload({
+        gear: Array.from({ length: PRODUCT_LIMITS.characterArrayEntries }, (_, index) => ({
+          id: `gear-${index}`,
+        })),
+      })
+    ).not.toThrow();
+  });
 });
 
 describe("custom-item validation", () => {
@@ -72,6 +125,17 @@ describe("custom-item validation", () => {
         weaponKind: "ranged",
         name: "Acolyte Pattern Lasgun",
         description: "A campaign weapon.",
+      })
+    ).not.toThrow();
+  });
+
+  it("accepts exact maximum custom-item strings and arrays", () => {
+    expect(() =>
+      assertCustomItemData("armour", {
+        armourKind: "worn",
+        name: "N".repeat(PRODUCT_LIMITS.customItemNameCharacters),
+        notes: "x".repeat(PRODUCT_LIMITS.customItemTextCharacters),
+        locations: Array.from({ length: PRODUCT_LIMITS.customItemArrayEntries }, () => "body"),
       })
     ).not.toThrow();
   });
@@ -124,6 +188,16 @@ describe("portrait, ID, and bulk validation", () => {
     expect(() => assertEncodedPortrait(`data:image/jpeg;base64,${"A".repeat(350_000)}`)).toThrow(
       "cannot exceed 350000 encoded bytes"
     );
+  });
+
+  it("accepts a final encoded portrait at the exact byte boundary", () => {
+    const prefix = "data:image/webp;base64,";
+    const portrait = `${prefix}${"A".repeat(
+      PRODUCT_LIMITS.portraitEncodedBytes - encodedByteLength(prefix)
+    )}`;
+
+    expect(encodedByteLength(portrait)).toBe(PRODUCT_LIMITS.portraitEncodedBytes);
+    expect(() => assertEncodedPortrait(portrait)).not.toThrow();
   });
 
   it("rejects unsafe IDs before they can become Firestore paths", () => {

@@ -16,8 +16,10 @@ async function createThread(
   await env.withSecurityRulesDisabled(async (ctx: RulesTestContext) => {
     await ctx
       .firestore()
-      .collection("campaigns").doc(campaignId)
-      .collection("threads").doc(characterId)
+      .collection("campaigns")
+      .doc(campaignId)
+      .collection("threads")
+      .doc(characterId)
       .set({
         characterId,
         lastMessage: null,
@@ -38,24 +40,28 @@ async function createMessage(
   await env.withSecurityRulesDisabled(async (ctx: RulesTestContext) => {
     await ctx
       .firestore()
-      .collection("campaigns").doc(campaignId)
-      .collection("threads").doc(characterId)
-      .collection("messages").doc(messageId)
+      .collection("campaigns")
+      .doc(campaignId)
+      .collection("threads")
+      .doc(characterId)
+      .collection("messages")
+      .doc(messageId)
       .set({ fromUid, text: "hello", timestamp: null, read: false });
   });
 }
 
 function messages(env: RulesTestEnvironment, uid: string, campaignId: string, characterId: string) {
   return dbAs(env, uid)
-    .collection("campaigns").doc(campaignId)
-    .collection("threads").doc(characterId)
+    .collection("campaigns")
+    .doc(campaignId)
+    .collection("threads")
+    .doc(characterId)
     .collection("messages");
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 describe("Firestore Rules: Messages", () => {
-
   afterEach(async () => {
     const env = await getTestEnv();
     await env.clearFirestore();
@@ -64,67 +70,82 @@ describe("Firestore Rules: Messages", () => {
   // ── Thread summaries ──────────────────────────────────────────────────────
 
   it("DM can read any thread summary in their campaign", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, "c1", "dm-1");
     await createCharacter(env, "c1", "char-1", { userId: "player-1" });
     await createThread(env, "c1", "char-1");
 
     await expect(
-      dbAs(env, "dm-1").collection("campaigns").doc("c1")
-        .collection("threads").doc("char-1").get()
+      dbAs(env, "dm-1").collection("campaigns").doc("c1").collection("threads").doc("char-1").get()
     ).resolves.toBeDefined();
   });
 
   it("player can read their own character's thread summary", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, "c1", "dm-1");
     await createCharacter(env, "c1", "char-1", { userId: "player-1" });
     await createThread(env, "c1", "char-1");
 
     await expect(
-      dbAs(env, "player-1").collection("campaigns").doc("c1")
-        .collection("threads").doc("char-1").get()
+      dbAs(env, "player-1")
+        .collection("campaigns")
+        .doc("c1")
+        .collection("threads")
+        .doc("char-1")
+        .get()
     ).resolves.toBeDefined();
   });
 
   it("player cannot read another player's character thread summary", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, "c1", "dm-1");
     await createCharacter(env, "c1", "char-1", { userId: "player-1" });
     await createThread(env, "c1", "char-1");
 
     await expect(
-      dbAs(env, "player-2").collection("campaigns").doc("c1")
-        .collection("threads").doc("char-1").get()
+      dbAs(env, "player-2")
+        .collection("campaigns")
+        .doc("c1")
+        .collection("threads")
+        .doc("char-1")
+        .get()
     ).rejects.toThrow();
   });
 
   it("DM can delete a thread summary (clear chat)", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, "c1", "dm-1");
     await createCharacter(env, "c1", "char-1", { userId: "player-1" });
     await createThread(env, "c1", "char-1");
 
     await expect(
-      dbAs(env, "dm-1").collection("campaigns").doc("c1")
-        .collection("threads").doc("char-1").delete()
+      dbAs(env, "dm-1")
+        .collection("campaigns")
+        .doc("c1")
+        .collection("threads")
+        .doc("char-1")
+        .delete()
     ).resolves.toBeUndefined();
   });
 
   it("player cannot delete a thread summary", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, "c1", "dm-1");
     await createCharacter(env, "c1", "char-1", { userId: "player-1" });
     await createThread(env, "c1", "char-1");
 
     await expect(
-      dbAs(env, "player-1").collection("campaigns").doc("c1")
-        .collection("threads").doc("char-1").delete()
+      dbAs(env, "player-1")
+        .collection("campaigns")
+        .doc("c1")
+        .collection("threads")
+        .doc("char-1")
+        .delete()
     ).rejects.toThrow();
   });
 
   it("requires bounded thread-summary queries", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, "c1", "dm-1");
     await createCharacter(env, "c1", "char-1", { userId: "player-1" });
     await createThread(env, "c1", "char-1");
@@ -136,22 +157,24 @@ describe("Firestore Rules: Messages", () => {
   });
 
   it("allows only a complete player summary transition with one unread increment", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, "c1", "dm-1");
     await createCharacter(env, "c1", "char-1", { userId: "player-1" });
     await createThread(env, "c1", "char-1");
 
     const thread = dbAs(env, "player-1").collection("campaigns/c1/threads").doc("char-1");
-    await expect(thread.update({
-      lastMessage: "Hello DM",
-      lastTimestamp: new Date(),
-      unreadForDM: 1,
-    })).resolves.toBeUndefined();
+    await expect(
+      thread.update({
+        lastMessage: "Hello DM",
+        lastTimestamp: new Date(),
+        unreadForDM: 1,
+      })
+    ).resolves.toBeUndefined();
     await expect(thread.update({ unreadForDM: 2 })).rejects.toThrow();
   });
 
   it("restricts DM summary writes to reply, mark-read, and clear transitions", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, "c1", "dm-1");
     await createCharacter(env, "c1", "char-1", { userId: "player-1" });
     await createThread(env, "c1", "char-1", {
@@ -162,43 +185,51 @@ describe("Firestore Rules: Messages", () => {
 
     const thread = dbAs(env, "dm-1").collection("campaigns/c1/threads").doc("char-1");
     await expect(thread.update({ unreadForDM: 0 })).resolves.toBeUndefined();
-    await expect(thread.update({
-      lastMessage: "DM reply",
-      lastTimestamp: new Date(),
-    })).resolves.toBeUndefined();
+    await expect(
+      thread.update({
+        lastMessage: "DM reply",
+        lastTimestamp: new Date(),
+      })
+    ).resolves.toBeUndefined();
     await expect(thread.update({ unreadForDM: 500 })).rejects.toThrow();
-    await expect(thread.update({
-      lastMessage: null,
-      lastTimestamp: null,
-      unreadForDM: 0,
-    })).resolves.toBeUndefined();
+    await expect(
+      thread.update({
+        lastMessage: null,
+        lastTimestamp: null,
+        unreadForDM: 0,
+      })
+    ).resolves.toBeUndefined();
   });
 
   it("rejects oversized previews and unexpected thread-summary fields", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, "c1", "dm-1");
     await createCharacter(env, "c1", "char-1", { userId: "player-1" });
     const thread = dbAs(env, "player-1").collection("campaigns/c1/threads").doc("char-1");
 
-    await expect(thread.set({
-      characterId: "char-1",
-      lastMessage: "x".repeat(501),
-      lastTimestamp: new Date(),
-      unreadForDM: 1,
-    })).rejects.toThrow();
-    await expect(thread.set({
-      characterId: "char-1",
-      lastMessage: "Hello",
-      lastTimestamp: new Date(),
-      unreadForDM: 1,
-      unexpected: true,
-    })).rejects.toThrow();
+    await expect(
+      thread.set({
+        characterId: "char-1",
+        lastMessage: "x".repeat(501),
+        lastTimestamp: new Date(),
+        unreadForDM: 1,
+      })
+    ).rejects.toThrow();
+    await expect(
+      thread.set({
+        characterId: "char-1",
+        lastMessage: "Hello",
+        lastTimestamp: new Date(),
+        unreadForDM: 1,
+        unexpected: true,
+      })
+    ).rejects.toThrow();
   });
 
   // ── Messages ──────────────────────────────────────────────────────────────
 
   it("requires bounded message queries", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, "c1", "dm-1");
     await createCharacter(env, "c1", "char-1", { userId: "player-1" });
     await createMessage(env, "c1", "char-1", "msg-1", "player-1");
@@ -210,7 +241,7 @@ describe("Firestore Rules: Messages", () => {
   });
 
   it("player can create a message in their own character's thread with correct fromUid", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, "c1", "dm-1");
     await createCharacter(env, "c1", "char-1", { userId: "player-1" });
 
@@ -222,7 +253,7 @@ describe("Firestore Rules: Messages", () => {
   });
 
   it("player cannot create a message with a spoofed fromUid", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, "c1", "dm-1");
     await createCharacter(env, "c1", "char-1", { userId: "player-1" });
 
@@ -234,7 +265,7 @@ describe("Firestore Rules: Messages", () => {
   });
 
   it("player cannot create a message in another player's character thread", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, "c1", "dm-1");
     await createCharacter(env, "c1", "char-1", { userId: "player-1" });
 
@@ -246,7 +277,7 @@ describe("Firestore Rules: Messages", () => {
   });
 
   it("DM can create a message in any character's thread", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, "c1", "dm-1");
     await createCharacter(env, "c1", "char-1", { userId: "player-1" });
 
@@ -254,6 +285,23 @@ describe("Firestore Rules: Messages", () => {
       messages(env, "dm-1", "c1", "char-1")
         .doc("msg-4")
         .set({ fromUid: "dm-1", text: "Hello player", timestamp: null, read: false })
+    ).resolves.toBeUndefined();
+  });
+
+  it("accepts a message at the exact maximum length", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await createCampaign(env, "c1", "dm-1");
+    await createCharacter(env, "c1", "char-1", { userId: "player-1" });
+
+    await expect(
+      messages(env, "player-1", "c1", "char-1")
+        .doc("msg-maximum")
+        .set({
+          fromUid: "player-1",
+          text: "x".repeat(2_000),
+          timestamp: null,
+          read: false,
+        })
     ).resolves.toBeUndefined();
   });
 
@@ -302,7 +350,7 @@ describe("Firestore Rules: Messages", () => {
   });
 
   it("DM can delete a message (clear chat)", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, "c1", "dm-1");
     await createCharacter(env, "c1", "char-1", { userId: "player-1" });
     await createMessage(env, "c1", "char-1", "msg-1", "player-1");
@@ -313,18 +361,16 @@ describe("Firestore Rules: Messages", () => {
   });
 
   it("player cannot delete a message", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, "c1", "dm-1");
     await createCharacter(env, "c1", "char-1", { userId: "player-1" });
     await createMessage(env, "c1", "char-1", "msg-1", "player-1");
 
-    await expect(
-      messages(env, "player-1", "c1", "char-1").doc("msg-1").delete()
-    ).rejects.toThrow();
+    await expect(messages(env, "player-1", "c1", "char-1").doc("msg-1").delete()).rejects.toThrow();
   });
 
   it("DM cannot update a message", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, "c1", "dm-1");
     await createCharacter(env, "c1", "char-1", { userId: "player-1" });
     await createMessage(env, "c1", "char-1", "msg-1", "player-1");
@@ -335,7 +381,7 @@ describe("Firestore Rules: Messages", () => {
   });
 
   it("player cannot update a message", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, "c1", "dm-1");
     await createCharacter(env, "c1", "char-1", { userId: "player-1" });
     await createMessage(env, "c1", "char-1", "msg-1", "player-1");

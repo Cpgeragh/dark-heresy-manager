@@ -82,6 +82,19 @@ describe("session write operations", () => {
     expect(mockUpdateDoc).toHaveBeenCalledWith("campaigns/camp-1/sessions/session-1", update);
   });
 
+  it("accepts every editable session field at its exact maximum", async () => {
+    const update = {
+      summary: "s".repeat(4_000),
+      dmNotes: "n".repeat(4_000),
+      xpAwarded: 100_000,
+      attendees: Array.from({ length: 100 }, (_, index) => `char-${index}`),
+    };
+
+    await updateSession("camp-1", "session-max", update);
+
+    expect(mockUpdateDoc).toHaveBeenCalledWith("campaigns/camp-1/sessions/session-max", update);
+  });
+
   it("deletes the requested session", async () => {
     await deleteSession("camp-2", "session-2");
 

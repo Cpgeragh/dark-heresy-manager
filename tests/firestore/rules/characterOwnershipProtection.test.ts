@@ -24,77 +24,108 @@ describe("Firestore Rules: Character Ownership Protection", () => {
   }
 
   it("player CANNOT change userId", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
     await setup(env);
 
     const playerDb = dbAs(env, "player-1");
 
     await expect(
-      playerDb.collection(`campaigns/${campaignId}/characters`)
+      playerDb
+        .collection(`campaigns/${campaignId}/characters`)
         .doc(characterId)
         .update({ userId: "hacker" })
     ).rejects.toThrow();
   });
 
   it("player CANNOT change isEditableByPlayer", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
     await setup(env);
 
     const playerDb = dbAs(env, "player-1");
 
     await expect(
-      playerDb.collection(`campaigns/${campaignId}/characters`)
+      playerDb
+        .collection(`campaigns/${campaignId}/characters`)
         .doc(characterId)
         .update({ isEditableByPlayer: false })
     ).rejects.toThrow();
   });
 
   it("player CANNOT change recoveryCode", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
     await setup(env);
 
     const playerDb = dbAs(env, "player-1");
 
     await expect(
-      playerDb.collection(`campaigns/${campaignId}/characters`)
+      playerDb
+        .collection(`campaigns/${campaignId}/characters`)
         .doc(characterId)
         .update({ recoveryCode: "NEWCODE" })
     ).rejects.toThrow();
   });
 
   it("player CAN change normal editable fields", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
     await setup(env);
 
     const playerDb = dbAs(env, "player-1");
 
     await expect(
-      playerDb.collection(`campaigns/${campaignId}/characters`)
+      playerDb
+        .collection(`campaigns/${campaignId}/characters`)
         .doc(characterId)
         .update({ "header.characterName": "Updated Name" })
     ).resolves.toBeUndefined();
   });
 
   it("DM can change ownership flags but cannot silently replace the Recovery Code", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
     await setup(env);
 
     const dmDb = dbAs(env, "dm-1");
 
     await expect(
-      dmDb.collection(`campaigns/${campaignId}/characters`)
-        .doc(characterId)
-        .update({
-          userId: "newplayer",
-          isEditableByPlayer: false,
-          recoveryCode: "DH-TEST-0001",
-        })
+      dmDb.collection(`campaigns/${campaignId}/characters`).doc(characterId).update({
+        userId: "newplayer",
+        isEditableByPlayer: false,
+        recoveryCode: "DH-TEST-0001",
+      })
     ).resolves.toBeUndefined();
 
     await expect(
-      dmDb.collection(`campaigns/${campaignId}/characters`)
+      dmDb
+        .collection(`campaigns/${campaignId}/characters`)
         .doc(characterId)
         .update({ recoveryCode: "DH-NEWW-0001" })
     ).rejects.toThrow();
+  });
+
+  it("allows a DM to genuinely claim a character in their own campaign and become a member", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, characterId, {
+      userId: null,
+      isEditableByPlayer: false,
+    });
+    const dmDb = dbAs(env, "dm-1");
+    const batch = dmDb.batch();
+    batch.update(dmDb.doc(`campaigns/${campaignId}/characters/${characterId}`), {
+      userId: "dm-1",
+    });
+    batch.update(dmDb.doc(`campaigns/${campaignId}`), { memberIds: ["dm-1"] });
+    batch.set(dmDb.doc(`campaigns/${campaignId}/characters/${characterId}/claimLog/dm-claim`), {
+      action: "claim",
+      actorUid: "dm-1",
+      previousOwnerUid: null,
+      newOwnerUid: "dm-1",
+      timestamp: new Date(),
+    });
+
+    await expect(batch.commit()).resolves.toBeUndefined();
+    const character = await dmDb.doc(`campaigns/${campaignId}/characters/${characterId}`).get();
+    expect(character.data()?.userId).toBe("dm-1");
+    const campaign = await dmDb.doc(`campaigns/${campaignId}`).get();
+    expect(campaign.data()?.memberIds).toContain("dm-1");
   });
 });

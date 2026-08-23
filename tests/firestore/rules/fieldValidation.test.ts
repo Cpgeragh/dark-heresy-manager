@@ -1,12 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
 import { getTestEnv } from "../setup";
-import {
-  createCampaign,
-  dbAs,
-  validCampaignDocument,
-  validCharacterDocument,
-} from "../helpers";
+import { createCampaign, dbAs, validCampaignDocument, validCharacterDocument } from "../helpers";
 
 describe("Firestore Rules: bounded field validation", () => {
   afterEach(async () => {
@@ -24,31 +19,66 @@ describe("Firestore Rules: bounded field validation", () => {
     ).resolves.toBeUndefined();
   });
 
+  it("accepts campaign and character collection fields at their exact maxima", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const dmDb = dbAs(env, "dm-1");
+    await dmDb
+      .collection("campaigns")
+      .doc("maximum")
+      .set(validCampaignDocument("dm-1", "c".repeat(100)));
+    await expect(
+      dmDb
+        .collection("campaigns")
+        .doc("maximum")
+        .update({ memberIds: Array.from({ length: 100 }, (_, index) => `player-${index}`) })
+    ).resolves.toBeUndefined();
+
+    const code = "DH-MAXX-0001";
+    const batch = dmDb.batch();
+    batch.set(
+      dmDb.collection("campaigns/maximum/characters").doc("maximum-character"),
+      validCharacterDocument("maximum", code, {
+        skills: Array.from({ length: 200 }, (_, index) => ({ id: `skill-${index}` })),
+      })
+    );
+    batch.set(dmDb.collection("recoveryIndex").doc(code), {
+      campaignId: "maximum",
+      characterId: "maximum-character",
+    });
+    await expect(batch.commit()).resolves.toBeUndefined();
+  });
+
   it("rejects campaign names, member arrays, types, and unexpected fields outside bounds", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
     const dmDb = dbAs(env, "dm-1");
 
     await expect(
-      dmDb.collection("campaigns").doc("long").set(
-        validCampaignDocument("dm-1", "x".repeat(101))
-      )
+      dmDb
+        .collection("campaigns")
+        .doc("long")
+        .set(validCampaignDocument("dm-1", "x".repeat(101)))
     ).rejects.toThrow();
     await expect(
-      dmDb.collection("campaigns").doc("members").set(
-        validCampaignDocument("dm-1", "Members", {
-          memberIds: Array.from({ length: 101 }, (_, index) => `p-${index}`),
-        })
-      )
+      dmDb
+        .collection("campaigns")
+        .doc("members")
+        .set(
+          validCampaignDocument("dm-1", "Members", {
+            memberIds: Array.from({ length: 101 }, (_, index) => `p-${index}`),
+          })
+        )
     ).rejects.toThrow();
     await expect(
-      dmDb.collection("campaigns").doc("type").set(
-        validCampaignDocument("dm-1", "Type", { dmId: 42 })
-      )
+      dmDb
+        .collection("campaigns")
+        .doc("type")
+        .set(validCampaignDocument("dm-1", "Type", { dmId: 42 }))
     ).rejects.toThrow();
     await expect(
-      dmDb.collection("campaigns").doc("extra").set(
-        validCampaignDocument("dm-1", "Extra", { unexpected: true })
-      )
+      dmDb
+        .collection("campaigns")
+        .doc("extra")
+        .set(validCampaignDocument("dm-1", "Extra", { unexpected: true }))
     ).rejects.toThrow();
   });
 

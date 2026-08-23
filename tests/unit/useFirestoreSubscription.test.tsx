@@ -154,6 +154,43 @@ describe("useQuerySubscription", () => {
     expect(mockOnSnapshot).not.toHaveBeenCalled();
   });
 
+  it("activates only when enabled and cleans up when disabled again", () => {
+    const sourceQuery = makeQuery("alpha");
+    const { result, rerender } = renderHook(
+      ({ enabled }: { enabled: boolean }) =>
+        useQuerySubscription(
+          enabled ? sourceQuery : null,
+          enabled ? "campaigns:alpha" : null,
+          mapQuerySnapshot
+        ),
+      { initialProps: { enabled: false } }
+    );
+
+    expect(mockOnSnapshot).not.toHaveBeenCalled();
+    expect(result.current).toEqual({ data: [], loading: false, error: null });
+
+    rerender({ enabled: true });
+    expect(mockOnSnapshot).toHaveBeenCalledOnce();
+    expect(result.current).toEqual({ data: [], loading: true, error: null });
+
+    const { unsubscribe } = subscriptions[0];
+    rerender({ enabled: false });
+
+    expect(unsubscribe).toHaveBeenCalledOnce();
+    expect(result.current).toEqual({ data: [], loading: false, error: null });
+  });
+
+  it("unsubscribes an active query when its consumer unmounts", () => {
+    const { unmount } = renderHook(() =>
+      useQuerySubscription(makeQuery("alpha"), "campaigns:alpha", mapQuerySnapshot)
+    );
+
+    const { unsubscribe } = subscriptions[0];
+    unmount();
+
+    expect(unsubscribe).toHaveBeenCalledOnce();
+  });
+
   it("maps a successful query snapshot", () => {
     const sourceQuery = makeQuery("alpha");
     const { result } = renderHook(() =>

@@ -5,12 +5,36 @@ import { describe, expect, it } from "vitest";
 type Header = { key: string; value: string };
 type FirebaseConfiguration = {
   firestore?: { rules?: string; indexes?: string };
-  hosting?: { headers?: Array<{ source: string; headers: Header[] }> };
+  hosting?: {
+    public?: string;
+    predeploy?: string[];
+    ignore?: string[];
+    rewrites?: Array<{ source: string; destination: string }>;
+    headers?: Array<{ source: string; headers: Header[] }>;
+  };
 };
 
 const configuration = JSON.parse(
   readFileSync(resolve(process.cwd(), "firebase.json"), "utf8")
 ) as FirebaseConfiguration;
+
+function headersFor(source: string): Map<string, string> {
+  return new Map<string, string>(
+    configuration.hosting?.headers
+      ?.find((entry) => entry.source === source)
+      ?.headers.map((header) => [header.key, header.value] as const) ?? []
+  );
+}
+
+function contentSecurityPolicy(): Map<string, string[]> {
+  return new Map<string, string[]>(
+    (headersFor("**").get("Content-Security-Policy") ?? "")
+      .split(";")
+      .map((directive) => directive.trim().split(/\s+/u))
+      .filter(([name]) => name)
+      .map(([name, ...values]) => [name, values] as const)
+  );
+}
 
 describe("Firebase configuration", () => {
   it("deploys the reviewed Firestore rules and index definitions together", () => {
@@ -21,10 +45,7 @@ describe("Firebase configuration", () => {
   });
 
   it("applies the required security headers to every hosted response", () => {
-    const globalHeaders = configuration.hosting?.headers?.find(
-      (entry) => entry.source === "**"
-    )?.headers;
-    const headersByName = new Map(globalHeaders?.map((header) => [header.key, header.value]) ?? []);
+    const headersByName = headersFor("**");
 
     expect(headersByName.get("Content-Security-Policy")).toContain("default-src 'self'");
     expect(headersByName.get("Content-Security-Policy")).toContain("object-src 'none'");
@@ -35,5 +56,44 @@ describe("Firebase configuration", () => {
     expect(headersByName.get("Permissions-Policy")).toContain("camera=()");
     expect(headersByName.get("Cross-Origin-Opener-Policy")).toBe("same-origin");
     expect(headersByName.get("Cross-Origin-Resource-Policy")).toBe("same-origin");
+  });
+
+  it("keeps Firebase browser connections and PWA resources compatible with the CSP", () => {
+    const policy = contentSecurityPolicy();
+
+    expect(policy.get("script-src")).toEqual(["'self'"]);
+    expect(policy.get("script-src")).not.toContain("'unsafe-eval'");
+    expect(policy.get("connect-src")).toEqual(
+      expect.arrayContaining([
+        "'self'",
+        "https://*.googleapis.com",
+        "https://*.firebaseio.com",
+        "wss://*.firebaseio.com",
+        "https://*.firebaseapp.com",
+      ])
+    );
+    expect(policy.get("frame-src")).toEqual(
+      expect.arrayContaining(["'self'", "https://*.firebaseapp.com"])
+    );
+    expect(policy.get("img-src")).toEqual(expect.arrayContaining(["'self'", "data:", "blob:"]));
+    expect(policy.get("worker-src")).toEqual(expect.arrayContaining(["'self'", "blob:"]));
+    expect(policy.get("object-src")).toEqual(["'none'"]);
+    expect(policy.get("frame-ancestors")).toEqual(["'none'"]);
+  });
+
+  it("builds before hosting, preserves SPA routes, and applies safe PWA caching", () => {
+    expect(configuration.hosting?.public).toBe("dist");
+    expect(configuration.hosting?.predeploy).toContain("npm run build");
+    expect(configuration.hosting?.rewrites).toContainEqual({
+      source: "**",
+      destination: "/index.html",
+    });
+    expect(headersFor("/index.html").get("Cache-Control")).toContain("no-cache");
+    expect(headersFor("/sw.js").get("Cache-Control")).toContain("no-cache");
+    expect(headersFor("/registerSW.js").get("Cache-Control")).toContain("no-cache");
+    expect(headersFor("/manifest.webmanifest").get("Cache-Control")).toBe("no-cache");
+    expect(headersFor("/assets/**").get("Cache-Control")).toBe(
+      "public, max-age=31536000, immutable"
+    );
   });
 });

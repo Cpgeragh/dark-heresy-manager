@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { User } from "firebase/auth";
 
@@ -61,5 +61,33 @@ describe("MessageDrawer listener lifecycle", () => {
     );
 
     expect(mockUseThreadMessages).toHaveBeenCalledWith("campaign-1", "character-1");
+  });
+
+  it("removes the thread consumer immediately when an open drawer closes", () => {
+    const { rerender } = render(
+      <MessageDrawer
+        user={user}
+        isOpen
+        onClose={vi.fn()}
+        campaignId="campaign-1"
+        characterId="character-1"
+      />
+    );
+
+    expect(screen.getByText("Thread")).toBeInTheDocument();
+    expect(mockUseThreadMessages).toHaveBeenCalledOnce();
+
+    rerender(
+      <MessageDrawer
+        user={user}
+        isOpen={false}
+        onClose={vi.fn()}
+        campaignId="campaign-1"
+        characterId="character-1"
+      />
+    );
+
+    expect(screen.queryByText("Thread")).not.toBeInTheDocument();
+    expect(mockUseThreadMessages).toHaveBeenCalledOnce();
   });
 });

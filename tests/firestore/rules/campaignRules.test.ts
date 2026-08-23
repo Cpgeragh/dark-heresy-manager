@@ -84,6 +84,23 @@ describe("Firestore Rules: Campaigns", () => {
     ).resolves.toBeUndefined();
   });
 
+  it("an authenticated player may create a campaign and thereby become its DM", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const userDb = dbAs(env, "player-creator");
+
+    await expect(
+      userDb.collection("campaigns").doc("player-created").set({
+        dmId: "player-creator",
+        name: "Player-created campaign",
+        gmName: "New GM",
+        inquisitorName: "",
+        memberIds: [],
+        createdAt: new Date(),
+        archivedAt: null,
+      })
+    ).resolves.toBeUndefined();
+  });
+
   it("DM cannot create a campaign with unrecognised fields", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
 
