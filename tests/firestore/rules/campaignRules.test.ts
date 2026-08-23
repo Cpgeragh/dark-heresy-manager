@@ -43,6 +43,31 @@ describe("Firestore Rules: Campaigns", () => {
     await expect(campaigns.limit(101).get()).rejects.toThrow();
   });
 
+  it("player membership query returns only active campaigns containing that player", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await createCampaign(env, "active-member", "dm-1", {
+      memberIds: ["player-1"],
+      archivedAt: null,
+    });
+    await createCampaign(env, "archived-member", "dm-1", {
+      memberIds: ["player-1"],
+      archivedAt: new Date(),
+    });
+    await createCampaign(env, "active-other", "dm-1", {
+      memberIds: ["player-2"],
+      archivedAt: null,
+    });
+
+    const snapshot = await dbAs(env, "player-1")
+      .collection("campaigns")
+      .where("memberIds", "array-contains", "player-1")
+      .where("archivedAt", "==", null)
+      .limit(100)
+      .get();
+
+    expect(snapshot.docs.map((document) => document.id)).toEqual(["active-member"]);
+  });
+
   it("DM may create a campaign when dmId matches their uid", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
 

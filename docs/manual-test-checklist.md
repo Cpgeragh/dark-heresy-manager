@@ -1,6 +1,6 @@
 # Manual Test Checklist — Complete App
 
-Thirty-one pages and cross-cutting sections, containing 608 checks. Every item
+Thirty-one pages and cross-cutting sections, containing 611 checks. Every item
 comes from reading the actual logic, not a generic "does it load" pass.
 Check items off as you verify them; anything under **Watch for** is the
 likeliest place a real bug hides. Coverage notes are at the bottom — read
@@ -1087,6 +1087,9 @@ For each boundary, try the largest valid value and then one unit over it. For ro
 - [ ] Open Archive or Update All Copies for a custom item — the confirmation reports affected character documents and linked copies before enabling the action, and the committed changes match that count
 - [ ] Seed more than 100 character documents in a campaign — custom-item propagation and removal are disabled before any definition or character write begins, pending the protected bulk job
 - [ ] Permanently delete an archived custom item — the preflight includes its definition and every version, and a forced commit failure leaves all documents intact
+- [ ] Sign in as a player belonging to one active and one archived campaign — the Dashboard membership query returns the active campaign only and does not display an index-required error
+- [ ] Give the same player characters in two different campaigns — the Dashboard collection-group ownership query returns both owned characters and no character owned by another user
+- [ ] Before an approved production index deployment, confirm `firebase.json` points to `firestore.indexes.json`, the reviewed file contains `memberIds CONTAINS` plus `archivedAt ASC`, and the deployment is limited to indexes rather than rules or hosting
 
 ---
 

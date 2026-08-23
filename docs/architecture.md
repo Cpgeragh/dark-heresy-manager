@@ -414,7 +414,21 @@ These ceilings are safety boundaries rather than product entitlements. They prev
 
 ### Firebase deployment configuration
 
-`firebase.json` binds both `firestore.rules` and `firestore.indexes.json` so reviewed rules and index definitions are deployed from the same configuration. The index file includes the active/archived campaign lookups, collection-group character ownership lookup and category-filtered custom-item lookups used by the application.
+`firebase.json` binds both `firestore.rules` and `firestore.indexes.json` so a future approved Firebase deployment reads the reviewed rules and index definitions from the same configuration. No production deployment is performed merely by editing or testing these files.
+
+The local index file is the reviewed production correction. Its complete non-automatic index inventory is:
+
+| Query surface                            | Required index                                        | Reason                                                                                                                                |
+| ---------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Active and archived DM campaigns         | `campaigns`: `dmId ASC`, `archivedAt ASC`             | Combines DM equality with active equality or archived inequality                                                                      |
+| Active player campaigns                  | `campaigns`: `memberIds CONTAINS`, `archivedAt ASC`   | Supports the Dashboard's membership `array-contains` query while excluding archived campaigns; this is the formerly missing composite |
+| Published custom items by category       | `customItems`: `status ASC`, `category ASC`           | Combines publication status with one-category equality or multi-category `in` filtering                                               |
+| Creator-visible custom items by category | `customItems`: `creator.userId ASC`, `category ASC`   | Combines creator ownership with the same category filters                                                                             |
+| Player-owned characters across campaigns | `characters.userId ASC` with `COLLECTION_GROUP` scope | Supports the Dashboard ownership lookup across every campaign character subcollection                                                 |
+
+All other current local queries use Firestore's automatic single-field indexes or document-ID ordering and do not need a composite definition. Unit tests lock this exact reviewed inventory and the `firebase.json` binding. Emulator tests separately exercise the player membership query and a collection-group ownership query spanning multiple campaigns. The emulator verifies query shape, results and rules; the configuration test is what proves the production composite is present because the emulator does not reliably reproduce production missing-index failures.
+
+When deployment is separately approved, the prepared index-only correction is applied with `firebase deploy --only firestore:indexes` and then verified in the Firebase console before relying on the affected production queries. That command has not been run during this stage.
 
 Hosting responses are configured with a restrictive Content Security Policy, clickjacking protection, MIME sniffing protection, a no-referrer policy, disabled camera/geolocation/microphone permissions and same-origin isolation headers. HTML, service-worker and manifest files retain revalidation-oriented caching, while hashed assets remain immutable. These are repository settings only until an approved deployment; deployed-header verification belongs to the deployment checks and restore/test stage.
 
