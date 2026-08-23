@@ -353,6 +353,8 @@ describe("BackgroundTab", () => {
     fireEvent.change(weightInput, { target: { value: "65.5" } });
     expect(onUpdateHeader).not.toHaveBeenCalled();
     fireEvent.change(weightInput, { target: { value: "65" } });
+    expect(onUpdateHeader).not.toHaveBeenCalled();
+    fireEvent.blur(weightInput);
     expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ weight: 65 }));
   });
 
@@ -363,7 +365,26 @@ describe("BackgroundTab", () => {
     expect(onUpdateHeader).not.toHaveBeenCalled();
     expect(heightInput).toHaveValue("");
     fireEvent.change(heightInput, { target: { value: "1.9" } });
+    expect(onUpdateHeader).not.toHaveBeenCalled();
+    fireEvent.blur(heightInput);
     expect(onUpdateHeader).toHaveBeenCalledWith(expect.objectContaining({ height: 1.9 }));
+  });
+
+  it("coalesces long description typing and flushes the final value on blur", () => {
+    vi.useFakeTimers();
+    const { onUpdateHeader } = renderTab();
+    const description = screen.getAllByLabelText("Description")[0];
+
+    fireEvent.change(description, { target: { value: "A" } });
+    fireEvent.change(description, { target: { value: "A long description" } });
+    expect(onUpdateHeader).not.toHaveBeenCalled();
+
+    fireEvent.blur(description);
+    expect(onUpdateHeader).toHaveBeenCalledOnce();
+    expect(onUpdateHeader).toHaveBeenCalledWith(
+      expect.objectContaining({ description: "A long description" })
+    );
+    vi.useRealTimers();
   });
 
   it("sets gender directly for Male and Female", async () => {

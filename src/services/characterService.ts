@@ -30,6 +30,7 @@ import { validateCharacterName } from "../utils/validation";
 import { deleteQueryDocsInPages } from "../utils/firestoreQueryPages";
 import { stripUndefined } from "../utils/stripUndefined";
 import { runSingleFlight } from "../utils/singleFlight";
+import { getSpentXp } from "../features/experience/xpSpent";
 import {
   assertBulkOperationCount,
   assertCharacterImportData,
@@ -105,6 +106,35 @@ export async function updateCharacter(
     const ref = characterDocRef(campaignId, characterId);
     return updateDoc(ref, cleanPartial as UpdateData<Character>);
   });
+}
+
+/**
+ * Repairs the derived XP-spent total from a fresh transactional snapshot.
+ * Updating only the nested total avoids overwriting concurrent XP changes.
+ */
+export async function reconcileCharacterSpentXp(
+  campaignId: string,
+  characterId: string
+): Promise<boolean> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(characterId, "Character ID");
+
+  return runSingleFlight("character:reconcile-spent-xp", [campaignId, characterId], () =>
+    runTransaction(db, async (transaction) => {
+      const reference = characterDocRef(campaignId, characterId);
+      const snapshot = await transaction.get(reference);
+      if (!snapshot.exists()) return false;
+
+      const character = snapshot.data();
+      const computedSpent = getSpentXp(character);
+      if (character.experience.spent === computedSpent) return false;
+
+      transaction.update(reference, {
+        "experience.spent": computedSpent,
+      } as UpdateData<Character>);
+      return true;
+    })
+  );
 }
 
 /**

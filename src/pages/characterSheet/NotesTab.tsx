@@ -19,6 +19,7 @@ import {
   uiTextPlaceholder,
 } from "../../ui/editableStyles";
 import { createLocalId } from "../../utils/createLocalId";
+import { useDebouncedDraft } from "../../hooks/useDebouncedDraft";
 
 interface NotesTabProps {
   notes: string | NoteEntry[];
@@ -43,6 +44,7 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
   const [title, setTitle] = useState("");
   const [text, setText] = useState("");
   const formScrollPositionRef = useRef(0);
+  const legacyDraft = useDebouncedDraft(legacyText, onSave, 600);
 
   const canSubmit = Boolean(title.trim()) && Boolean(text.trim());
 
@@ -138,8 +140,9 @@ export function NotesTab({ notes, editable, onSave }: NotesTabProps) {
       {entries.length === 0 && legacyText.trim() ? (
         editable ? (
           <textarea
-            value={legacyText}
-            onChange={(event) => onSave(event.target.value)}
+            value={legacyDraft.draft}
+            onChange={(event) => legacyDraft.updateDraft(event.target.value)}
+            onBlur={legacyDraft.flush}
             placeholder="Campaign notes, reminders, character details, or anything else…"
             className={editableTextareaClass(true) + " min-h-[240px] p-4 leading-relaxed"}
           />

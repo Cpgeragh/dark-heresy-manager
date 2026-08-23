@@ -355,7 +355,23 @@ This keeps conversion, calculation, filtering and ordering independent from `Ski
 
 `useThreads` provides a bounded thread-summary subscription. `useThreadMessages` keeps only the latest 100 messages live, ordered by timestamp and document ID for a stable cursor; pressing Load older messages performs a bounded one-shot read for the preceding page and merges it without duplicates. Thread expansion and drawer visibility remain local presentation state, closing the player drawer tears down its message listener, and prepending history does not trigger the new-message auto-scroll.
 
-The DM inbox only resets an unread counter when that counter is non-zero. User-account synchronisation creates a missing account document but performs no recurring `lastSeen` heartbeat write for an existing account. Both decisions remove automatic writes that had no necessary product outcome.
+The DM inbox only resets an unread counter when that counter is non-zero. The count is passed into the service, which also returns before constructing a Firestore write when it is already zero. User-account synchronisation creates a missing account document with one `setDoc` call but performs no follow-up update and no recurring `lastSeen` heartbeat write for an existing account.
+
+Long-form live character text is held as a local draft and written after a 600 ms pause; blur and unmount flush the final draft. Height and weight are committed on blur or Enter rather than on every valid intermediate keystroke. Discrete controls and explicit Save/Confirm actions remain immediate because delaying them would add failure and navigation ambiguity for little cost benefit.
+
+`experience.spent` remains a stored derived value for inexpensive display and rules checks. A local equality check avoids a Firestore transaction in the normal case. If stale data is observed, `characterService` recomputes from a fresh transaction snapshot and updates only `experience.spent`. Firestore retries a transaction after a concurrent edit, so two tabs converge after one committed correction without overwriting the rest of the `experience` object.
+
+### Remaining automatic Firestore writes
+
+Every write that can start without a dedicated Save, Confirm or action-button press is listed here:
+
+| Trigger | Stored write | Suppression | Why it remains justified |
+| --- | --- | --- | --- |
+| First authenticated launch with no `users/{uid}` document | Create the user document once with onboarding incomplete | Existing users are read-only at startup; there is no `lastSeen` write and no second creation update | The durable account record is required to route a genuinely new user through recovery setup |
+| DM opens a thread whose observed `unreadForDM` is above zero | Reset `unreadForDM` to zero | Both the inbox and service skip zero; subsequent snapshots therefore settle without another write | Clearing a visible unread badge is necessary message state and attributable to opening that conversation |
+| An editable character snapshot has a stale derived `experience.spent` | Transactionally update only `experience.spent` | Local equality check avoids normal reads; the transaction rechecks current data and writes only when still stale; same-tab calls share one in-flight promise | Repairing legacy or interrupted XP state preserves correct remaining-XP and rank behaviour, and concurrency produces at most one committed correction |
+
+Subscriptions, route effects, offline indicators, recovery-backup checks and onboarding code rehydration are read-only. Recovery-code generation, backup confirmation, messages, sessions, ownership changes, custom-item propagation, portraits and ordinary character edits all require an explicit user action and are therefore not automatic writes.
 
 ## Service and persistence layer
 

@@ -3,6 +3,7 @@
 import { useCallback } from "react";
 import { uiFormLabel } from "../ui/editableStyles";
 import { fieldControlClass } from "../ui/fieldStyles";
+import { useDebouncedDraft } from "../hooks/useDebouncedDraft";
 
 interface FormFieldProps {
   label: string;
@@ -16,6 +17,7 @@ interface FormFieldProps {
   className?: string;
   error?: string;
   onBlur?: () => void;
+  debounceMs?: number;
 }
 
 export function FormField({
@@ -30,6 +32,7 @@ export function FormField({
   className = "",
   error,
   onBlur,
+  debounceMs = 0,
 }: FormFieldProps) {
   const hasError = !!error && editable;
   const controlClass = fieldControlClass({
@@ -40,12 +43,22 @@ export function FormField({
 
   const inputId = `field-${label.toLowerCase().replace(/\s+/g, "-")}`;
 
+  const { draft, updateDraft, flush } = useDebouncedDraft(value, onChange, debounceMs);
+
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      onChange(e.target.value);
+      if (debounceMs > 0) updateDraft(e.target.value);
+      else onChange(e.target.value);
     },
-    [onChange]
+    [debounceMs, onChange, updateDraft]
   );
+
+  const handleBlur = useCallback(() => {
+    if (debounceMs > 0) flush();
+    onBlur?.();
+  }, [debounceMs, flush, onBlur]);
+
+  const displayedValue = debounceMs > 0 ? draft : value;
 
   return (
     <label htmlFor={inputId} className={`flex flex-col gap-0.5 ${className}`}>
@@ -55,9 +68,9 @@ export function FormField({
         <textarea
           id={inputId}
           disabled={!editable}
-          value={value}
+          value={displayedValue}
           onChange={handleChange}
-          onBlur={onBlur}
+          onBlur={handleBlur}
           placeholder={placeholder}
           rows={rows}
           aria-label={label}
@@ -72,9 +85,9 @@ export function FormField({
           id={inputId}
           disabled={!editable}
           type={type}
-          value={value}
+          value={displayedValue}
           onChange={handleChange}
-          onBlur={onBlur}
+          onBlur={handleBlur}
           placeholder={placeholder}
           aria-label={label}
           aria-describedby={

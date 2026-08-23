@@ -27,13 +27,13 @@ function ThreadView({
   characterId,
   dmUid,
   label,
-  hasUnread,
+  unreadForDM,
 }: {
   campaignId: string;
   characterId: string;
   dmUid: string;
   label: string;
-  hasUnread: boolean;
+  unreadForDM: number;
 }) {
   const { messages, loading, error, loadOlder, loadingOlder, olderError, hasOlderMessages } =
     useThreadMessages(campaignId, characterId);
@@ -42,8 +42,8 @@ function ThreadView({
 
   // Mark thread as read when DM opens it
   useEffect(() => {
-    if (hasUnread) void markThreadRead(campaignId, characterId);
-  }, [campaignId, characterId, hasUnread]);
+    if (unreadForDM > 0) void markThreadRead(campaignId, characterId, unreadForDM);
+  }, [campaignId, characterId, unreadForDM]);
 
   const handleSend = useCallback(
     async (text: string) => {
@@ -171,7 +171,7 @@ export function DMInbox({
                 characterId={thread.characterId}
                 dmUid={dmUid}
                 label={label}
-                hasUnread={hasUnread}
+                unreadForDM={thread.unreadForDM}
               />
             )}
           </div>

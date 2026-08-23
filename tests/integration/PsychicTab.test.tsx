@@ -208,7 +208,7 @@ describe("PsychicTab", () => {
 
     expect(screen.getByLabelText("Biomancy: known")).not.toHaveClass("text-emerald-400/50");
     expect(screen.getByLabelText("Telepathy: not known"))
-      .toHaveClass("border-fuchsia-800/45", "bg-fuchsia-950/15", "text-fuchsia-400/50");
+      .toHaveClass("border-fuchsia-700/50", "bg-fuchsia-950/15", "text-fuchsia-400/50");
     expect(screen.queryByRole("button", { name: "Biomancy" })).not.toBeInTheDocument();
   });
 

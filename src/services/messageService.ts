@@ -73,9 +73,17 @@ export async function sendMessage(
 /**
  * Resets the unread counter on a thread — called when the DM opens a conversation.
  */
-export async function markThreadRead(campaignId: string, characterId: string): Promise<void> {
+export async function markThreadRead(
+  campaignId: string,
+  characterId: string,
+  unreadForDM: number
+): Promise<void> {
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   assertFirestoreDocumentId(characterId, "Character ID");
+  if (!Number.isInteger(unreadForDM) || unreadForDM < 0) {
+    throw new Error("Unread count must be a non-negative whole number.");
+  }
+  if (unreadForDM === 0) return;
   const threadRef = doc(db, "campaigns", campaignId, "threads", characterId);
   await updateDoc(threadRef, { unreadForDM: 0 });
 }

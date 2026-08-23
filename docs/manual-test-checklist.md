@@ -1,6 +1,6 @@
 # Manual Test Checklist — Complete App
 
-Thirty-one pages and cross-cutting sections, containing 589 checks. Every item
+Thirty-one pages and cross-cutting sections, containing 595 checks. Every item
 comes from reading the actual logic, not a generic "does it load" pass.
 Check items off as you verify them; anything under **Watch for** is the
 likeliest place a real bug hides. Coverage notes are at the bottom — read
@@ -1068,6 +1068,12 @@ For each boundary, try the largest valid value and then one unit over it. For ro
 - [ ] Submit the same character or portrait update twice while its first write is pending, then submit a genuinely different character update — the duplicate is collapsed, the distinct update is not discarded, and both final values refresh correctly
 - [ ] Repeat rapid confirmation for session creation, editing, XP application and deletion, plus custom-item publication and propagation — each action produces one Firebase request sequence and unlocks after either success or failure
 - [ ] Rapidly repeat Recovery Code rotation, identity reclaim and device linking while their first request is pending — one code, reclaim or link sequence runs; all callers receive the same result, and a failed operation can be retried
+- [ ] Launch with a brand-new anonymous identity — exactly one user document is created with onboarding incomplete; launch again as the same identity and confirm startup performs no user write and never adds or refreshes `lastSeen`
+- [ ] Open a DM thread whose unread badge is already zero — no reset write occurs; then receive one player message, open the thread and confirm one reset is written and no second reset follows the zero snapshot
+- [ ] Type continuously for several seconds in Description, Background Notes and a legacy plain-text Notes field — the text remains responsive locally, Firebase receives coalesced writes after pauses rather than one write per keystroke, and blur/navigation preserves the final text
+- [ ] Type multi-digit Height and Weight values — no write occurs for intermediate digits, blur or Enter commits once, and focusing then blurring an unchanged value performs no write
+- [ ] Deliberately store an incorrect `experience.spent`, open the editable character and observe one correction of only that nested field; leave the sheet open after the corrected snapshot and confirm it does not loop or write again
+- [ ] Open the same stale-XP character in two editable tabs at once — after both reconciliation attempts settle, the computed Spent XP is correct, unrelated XP fields are unchanged, and Firestore records only one committed correction
 
 ---
 

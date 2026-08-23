@@ -167,14 +167,28 @@ describe("sendMessage", () => {
 
 describe("markThreadRead", () => {
   it("calls updateDoc with unreadForDM: 0 on the correct thread ref", async () => {
-    await markThreadRead("c1", "char-1");
+    await markThreadRead("c1", "char-1", 3);
 
     expect(mockUpdateDoc).toHaveBeenCalledWith("campaigns/c1/threads/char-1", { unreadForDM: 0 });
   });
 
   it("calls updateDoc exactly once", async () => {
-    await markThreadRead("c1", "char-1");
+    await markThreadRead("c1", "char-1", 1);
     expect(mockUpdateDoc).toHaveBeenCalledOnce();
+  });
+
+  it("does not write when the unread counter is already zero", async () => {
+    await markThreadRead("c1", "char-1", 0);
+
+    expect(mockDoc).not.toHaveBeenCalled();
+    expect(mockUpdateDoc).not.toHaveBeenCalled();
+  });
+
+  it("rejects an invalid unread counter before constructing a document ref", async () => {
+    await expect(markThreadRead("c1", "char-1", -1)).rejects.toThrow(
+      "Unread count must be a non-negative whole number."
+    );
+    expect(mockDoc).not.toHaveBeenCalled();
   });
 });
 

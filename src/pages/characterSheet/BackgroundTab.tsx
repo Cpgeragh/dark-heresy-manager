@@ -87,9 +87,14 @@ export function BackgroundTab({
   const [showHairPicker, setShowHairPicker] = useState(false);
   const [showEyesPicker, setShowEyesPicker] = useState(false);
   const [showQuirkPicker, setShowQuirkPicker] = useState(false);
-  const [heightDraft, setHeightDraft] = useState(() =>
-    header.height !== undefined ? String(header.height) : ""
-  );
+  const [heightInput, setHeightInput] = useState(() => ({
+    source: header.height,
+    draft: header.height !== undefined ? String(header.height) : "",
+  }));
+  const [weightInput, setWeightInput] = useState(() => ({
+    source: header.weight,
+    draft: header.weight !== undefined ? String(header.weight) : "",
+  }));
   const [activeSectionGroup, setActiveSectionGroup] = useState<BackgroundSectionGroup>("appearance");
 
   const { containerRef, transitionClass, switchTo } = useSwipeableTabs(
@@ -99,6 +104,18 @@ export function BackgroundTab({
   );
 
   const selectedDivination = findDivinationByResult(header.divination);
+  const heightDraft =
+    heightInput.source === header.height
+      ? heightInput.draft
+      : header.height !== undefined
+        ? String(header.height)
+        : "";
+  const weightDraft =
+    weightInput.source === header.weight
+      ? weightInput.draft
+      : header.weight !== undefined
+        ? String(header.weight)
+        : "";
 
   // ── Header field helpers ───────────────────────────────────────────────────
   const updateHeaderField = useCallback(
@@ -139,25 +156,36 @@ export function BackgroundTab({
   const handleWeight = useCallback(
     (raw: string) => {
       if (raw === "" || /^[1-9]\d*$/.test(raw)) {
-        updateHeaderField("weight", raw === "" ? undefined : Number(raw));
+        setWeightInput({ source: header.weight, draft: raw });
       }
     },
-    [updateHeaderField]
+    [header.weight]
   );
 
   const handleHeight = useCallback(
     (raw: string) => {
       if (raw !== "" && !/^\d*(?:\.\d{0,2})?$/.test(raw)) return;
-      setHeightDraft(raw);
-      const parsed = Number(raw);
-      if (raw === "") {
-        updateHeaderField("height", undefined);
-      } else if (Number.isFinite(parsed) && parsed > 0) {
-        updateHeaderField("height", parsed);
-      }
+      setHeightInput({ source: header.height, draft: raw });
     },
-    [updateHeaderField]
+    [header.height]
   );
+
+  const commitHeight = useCallback(() => {
+    const parsed = Number(heightDraft);
+    const next = heightDraft === "" ? undefined : parsed;
+    if (next === header.height) return;
+    if (next === undefined || (Number.isFinite(next) && next > 0)) {
+      updateHeaderField("height", next);
+    }
+  }, [header.height, heightDraft, updateHeaderField]);
+
+  const commitWeight = useCallback(() => {
+    const next = weightDraft === "" ? undefined : Number(weightDraft);
+    if (next === header.weight) return;
+    if (next === undefined || (/^[1-9]\d*$/.test(weightDraft) && Number.isFinite(next))) {
+      updateHeaderField("weight", next);
+    }
+  }, [header.weight, updateHeaderField, weightDraft]);
 
   const handleRemoveQuirk = useCallback(
     (quirk: string) => {
@@ -242,6 +270,10 @@ export function BackgroundTab({
                 aria-label="Height"
                 value={heightDraft}
                 onChange={(e) => handleHeight(e.target.value)}
+                onBlur={commitHeight}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") event.currentTarget.blur();
+                }}
                 placeholder="e.g. 1.90"
                 className={editableInputClass(editable) + " font-code"}
               />
@@ -256,8 +288,12 @@ export function BackgroundTab({
                 inputMode="numeric"
                 disabled={!editable}
                 aria-label="Weight"
-                value={header.weight !== undefined ? String(header.weight) : ""}
+                value={weightDraft}
                 onChange={(e) => handleWeight(e.target.value)}
+                onBlur={commitWeight}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") event.currentTarget.blur();
+                }}
                 placeholder="e.g. 65"
                 className={editableInputClass(editable) + " font-code"}
               />
@@ -361,6 +397,7 @@ export function BackgroundTab({
           editable={editable}
           type="textarea"
           rows={4}
+          debounceMs={600}
           placeholder="Physical appearance, mannerisms, distinguishing features…"
         />
       </section>
@@ -426,6 +463,7 @@ export function BackgroundTab({
           editable={editable}
           type="textarea"
           rows={3}
+          debounceMs={600}
           placeholder="Origin story, connections, history…"
         />
       </section>

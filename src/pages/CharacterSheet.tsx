@@ -60,6 +60,7 @@ import type {
 import { exportCharacterJson } from "../utils/exportCharacter";
 import { isBackgroundComplete } from "../utils/characterFactory";
 import { getSpentXp } from "../features/experience/xpSpent";
+import { reconcileCharacterSpentXp } from "../services/characterService";
 import { SectionDrawer } from "../components/SectionDrawer";
 import { useUserProfile } from "../hooks/useUserProfile";
 import { ErrorState } from "../ui/ErrorState";
@@ -150,15 +151,17 @@ export default function CharacterSheet({
   const backgroundSatisfied = character ? isBackgroundComplete(character) : true;
 
   // Single source of truth for experience.spent — recalculated from what's
-  // actually owned (manual advances, Characteristic Advances, and later
-  // Skills/Talents/Traits) and written here only, so nothing else ever needs
-  // to compute or save this number itself.
+  // actually owned. The local comparison avoids a transaction read in the
+  // normal case; the service rechecks a fresh snapshot before correcting only
+  // the derived nested field, making concurrent tabs settle after one write.
   useEffect(() => {
     if (!character || !allowedToEdit) return;
     const computedSpent = getSpentXp(character);
     if (character.experience.spent === computedSpent) return;
-    updateField("experience", { ...character.experience, spent: computedSpent });
-  }, [character, allowedToEdit, updateField]);
+    void reconcileCharacterSpentXp(character.campaignId, character.id).catch((error) => {
+      console.error("Failed to reconcile XP spent:", error);
+    });
+  }, [character, allowedToEdit]);
 
   useEffect(() => {
     window.history.pushState(null, "", window.location.href);
