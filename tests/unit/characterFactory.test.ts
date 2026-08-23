@@ -33,8 +33,8 @@ describe("createEmptyCharacterData", () => {
     expect(createEmptyCharacterData(base).isEditableByPlayer).toBe(false);
   });
 
-  it("starts without a preselected Homeworld", () => {
-    expect(createEmptyCharacterData(base).talentsAndTraits.homeworld).toBe("");
+  it("starts with Feral World selected", () => {
+    expect(createEmptyCharacterData(base).talentsAndTraits.homeworld).toBe("feral-world");
   });
 
   it("initialises all characteristics to zero", () => {

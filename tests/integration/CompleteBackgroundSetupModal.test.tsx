@@ -28,7 +28,7 @@ describe("CompleteBackgroundSetupModal", () => {
 
     expect(screen.getByRole("dialog", { name: "Complete Background" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Close" })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Continue to Character Sheet" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Continue" })).toBeDisabled();
     expect(screen.queryByRole("button", { name: "Select Rank" })).not.toBeInTheDocument();
 
     const complete = modalProps({
@@ -37,7 +37,7 @@ describe("CompleteBackgroundSetupModal", () => {
     });
     view.rerender(<CompleteBackgroundSetupModal {...complete} />);
 
-    await user.click(screen.getByRole("button", { name: "Continue to Character Sheet" }));
+    await user.click(screen.getByRole("button", { name: "Continue" }));
     expect(complete.onComplete).toHaveBeenCalledOnce();
   });
 
@@ -46,7 +46,7 @@ describe("CompleteBackgroundSetupModal", () => {
     const props = modalProps();
     render(<CompleteBackgroundSetupModal {...props} />);
 
-    await user.click(screen.getByRole("button", { name: "Return to Dashboard" }));
+    await user.click(screen.getByRole("button", { name: "Return" }));
     expect(props.onReturnToDashboard).toHaveBeenCalledOnce();
   });
 
@@ -68,6 +68,6 @@ describe("CompleteBackgroundSetupModal", () => {
     expect(
       screen.getByText("The DM must enable character editing before you can complete this setup.")
     ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Continue to Character Sheet" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Continue" })).toBeDisabled();
   });
 });

@@ -94,7 +94,7 @@ export function createEmptyCharacterData(params: {
     armour: [],
 
     talentsAndTraits: {
-      homeworld: "",
+      homeworld: "feral-world",
       homeworldNotes: "",
       talents: [],
       traits: [],

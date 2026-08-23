@@ -79,15 +79,15 @@ export function CompleteBackgroundSetupModal({
         )}
       </div>
 
-      <div className="grid grid-cols-1 gap-2 border-t border-slate-700 px-4 py-4 sm:grid-cols-2 lg:px-6 lg:py-5">
+      <div className="grid grid-cols-2 gap-2 border-t border-slate-700 px-4 py-4 lg:px-6 lg:py-5">
         <Button variant="neutral" onClick={onReturnToDashboard} disabled={saving}>
-          Return to Dashboard
+          Return
         </Button>
         <Button
           onClick={onComplete}
           disabled={!editable || !canContinue || saving}
         >
-          {saving ? "Saving…" : "Continue to Character Sheet"}
+          {saving ? "Saving…" : "Continue"}
         </Button>
       </div>
     </ModalShell>
