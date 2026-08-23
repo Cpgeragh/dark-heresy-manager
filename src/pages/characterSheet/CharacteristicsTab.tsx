@@ -344,10 +344,12 @@ export function CharacteristicsTab({
         }
       }
 
-      updateCharacteristic(statKey, {
-        ...next,
-        ...(Object.keys(purchases).length > 0 ? { advancePurchases: purchases } : { advancePurchases: undefined }),
-      });
+      updateCharacteristic(
+        statKey,
+        Object.keys(purchases).length > 0
+          ? { ...next, advancePurchases: purchases }
+          : next
+      );
     },
     [career, getCharField, rank, updateCharacteristic]
   );

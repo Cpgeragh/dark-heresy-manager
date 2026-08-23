@@ -10,6 +10,7 @@ import { validateCharacteristicBase, validateCharacteristicTotal } from "../util
 import { Button } from "../ui/Button";
 import { PickerBody, PickerModal } from "../ui/PickerModal";
 import { uiTextBody } from "../ui/editableStyles";
+import { colourAmberPlain } from "../ui/colourTokens";
 
 interface Props {
   label: string;
@@ -166,40 +167,44 @@ export default function CharacteristicField({
         </div>
 
         {/* Advances */}
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-sm lg:text-base text-slate-400">Advances:</span>
-          {Array.from({ length: MAX_CHARACTERISTIC_ADVANCES }).map((_, idx) => {
-            const filled = idx < advances;
-            const cost = tierCosts?.[idx];
-            const locked = cost === null;
-            const clickable = editable && !locked;
-            return (
-              <div key={idx} className="flex flex-col items-center gap-0.5">
-                <button
-                  type="button"
-                  onClick={() => toggleAdvance(idx)}
-                  disabled={!clickable}
-                  aria-label={`${label} advance ${idx + 1} of ${MAX_CHARACTERISTIC_ADVANCES}${
-                    typeof cost === "number" ? `, ${cost} XP` : locked ? ", not available for this career" : ""
-                  }`}
-                  aria-pressed={filled}
-                  tabIndex={clickable ? 0 : -1}
-                  className={`h-8 w-8 sm:h-6 sm:w-6 lg:h-8 lg:w-8 border rounded flex items-center justify-center
-                    ${filled ? "bg-red-700 border-red-500" : "bg-slate-900 border-slate-600"}
-                    ${
-                      clickable
-                        ? "cursor-pointer hover:border-red-600 hover:bg-red-900/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
-                        : editable && locked
-                          ? "opacity-50 cursor-not-allowed"
-                          : "cursor-default"
+        <div className="flex min-w-0 items-start gap-2 mb-2">
+          <span className="shrink-0 pt-1 text-sm lg:text-base text-slate-400">Advances:</span>
+          <div className="grid min-w-0 flex-1 grid-cols-4 gap-1">
+            {Array.from({ length: MAX_CHARACTERISTIC_ADVANCES }).map((_, idx) => {
+              const filled = idx < advances;
+              const cost = tierCosts?.[idx];
+              const locked = cost === null;
+              const clickable = editable && !locked;
+              return (
+                <div key={idx} className="flex min-w-0 flex-col items-center gap-0.5">
+                  <button
+                    type="button"
+                    onClick={() => toggleAdvance(idx)}
+                    disabled={!clickable}
+                    aria-label={`${label} advance ${idx + 1} of ${MAX_CHARACTERISTIC_ADVANCES}${
+                      typeof cost === "number" ? `, ${cost} XP` : locked ? ", not available for this career" : ""
                     }`}
-                />
-                {typeof cost === "number" && (
-                  <span className="text-[10px] leading-none text-slate-500 font-code">{cost}</span>
-                )}
-              </div>
-            );
-          })}
+                    aria-pressed={filled}
+                    tabIndex={clickable ? 0 : -1}
+                    className={`aspect-square w-full max-w-7 sm:max-w-6 lg:max-w-8 border rounded flex items-center justify-center
+                      ${filled ? "bg-red-700 border-red-500" : "bg-slate-900 border-slate-600"}
+                      ${
+                        clickable
+                          ? "cursor-pointer hover:border-red-600 hover:bg-red-900/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
+                          : editable && locked
+                            ? "opacity-50 cursor-not-allowed"
+                            : "cursor-default"
+                      }`}
+                  />
+                  {typeof cost === "number" && (
+                    <span className={`text-[10px] leading-none font-code ${colourAmberPlain}`}>
+                      {cost}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* Total */}
@@ -228,7 +233,7 @@ export default function CharacteristicField({
           footer={
             <div className="grid grid-cols-2 gap-2">
               <Button
-                variant={isUpgrade ? "primary" : "warningOutline"}
+                variant="primary"
                 onClick={confirmAdvanceChange}
               >
                 {isUpgrade ? "Upgrade" : "Downgrade"}

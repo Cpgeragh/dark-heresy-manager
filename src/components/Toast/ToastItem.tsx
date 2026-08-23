@@ -36,7 +36,7 @@ export function ToastItem({ toast }: ToastItemProps) {
 
   const icons = {
     success: "✓",
-    error: "✕",
+    error: "!",
     warning: "⚠",
     info: "ℹ",
   };
@@ -76,7 +76,7 @@ export function ToastItem({ toast }: ToastItemProps) {
 
         <button type="button"
           onClick={handleDismiss}
-          className="p-1 hover:bg-white/10 rounded transition text-xs"
+          className="inline-flex h-8 w-8 items-center justify-center rounded text-xl transition hover:bg-white/10 lg:h-9 lg:w-9 lg:text-2xl"
           aria-label="Dismiss notification"
           title="Dismiss"
         >

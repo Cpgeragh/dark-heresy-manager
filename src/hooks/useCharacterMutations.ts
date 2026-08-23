@@ -82,10 +82,10 @@ export function useCharacterMutations({
 
       setIsUpdating(true);
       try {
-        const updated = {
-          ...character.characteristics,
-          [statKey]: value,
-        };
+      const updated = stripUndefined({
+        ...character.characteristics,
+        [statKey]: value,
+      });
 
         await updateCharacter(campaignId, characterId, { characteristics: updated });
       } catch (err) {
