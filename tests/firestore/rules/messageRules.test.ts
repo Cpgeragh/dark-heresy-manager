@@ -166,6 +166,41 @@ describe("Firestore Rules: Messages", () => {
     ).resolves.toBeUndefined();
   });
 
+  it("rejects an empty or oversized message", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await createCampaign(env, "c1", "dm-1");
+    await createCharacter(env, "c1", "char-1", { userId: "player-1" });
+
+    const playerMessages = messages(env, "player-1", "c1", "char-1");
+    await expect(
+      playerMessages
+        .doc("msg-empty")
+        .set({ fromUid: "player-1", text: "", timestamp: null, read: false })
+    ).rejects.toThrow();
+    await expect(
+      playerMessages.doc("msg-large").set({
+        fromUid: "player-1",
+        text: "x".repeat(2_001),
+        timestamp: null,
+        read: false,
+      })
+    ).rejects.toThrow();
+  });
+
+  it("player cannot reset or arbitrarily change the DM unread counter", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await createCampaign(env, "c1", "dm-1");
+    await createCharacter(env, "c1", "char-1", { userId: "player-1" });
+    await createThread(env, "c1", "char-1");
+
+    await expect(
+      dbAs(env, "player-1")
+        .collection("campaigns/c1/threads")
+        .doc("char-1")
+        .update({ unreadForDM: 500 })
+    ).rejects.toThrow();
+  });
+
   it("DM can delete a message (clear chat)", async () => {
     const env = await getTestEnv() as RulesTestEnvironment;
     await createCampaign(env, "c1", "dm-1");

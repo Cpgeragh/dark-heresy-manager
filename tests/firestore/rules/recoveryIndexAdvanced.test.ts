@@ -101,7 +101,7 @@ describe("Firestore Rules: RecoveryIndex Advanced Tests", () => {
     ).resolves.toBeUndefined();
   });
 
-  it("recoveryIndex can include additional metadata fields", async () => {
+  it("recoveryIndex rejects unrecognised metadata fields", async () => {
     const env = await getTestEnv() as RulesTestEnvironment;
     
     const timestamp = Date.now();
@@ -117,10 +117,10 @@ describe("Firestore Rules: RecoveryIndex Advanced Tests", () => {
         expiresAt: Date.now() + 86400000,
         usedCount: 0
       })
-    ).resolves.toBeUndefined();
+    ).rejects.toThrow();
   });
 
-  it("authenticated users can query recoveryIndex by campaignId", async () => {
+  it("authenticated users cannot query recoveryIndex by campaignId", async () => {
     const env = await getTestEnv() as RulesTestEnvironment;
     
     const timestamp = Date.now();
@@ -138,12 +138,9 @@ describe("Firestore Rules: RecoveryIndex Advanced Tests", () => {
     
     const playerDb = dbAs(env, "player-1");
     
-    const snapshot = await playerDb
-      .collection("recoveryIndex")
-      .where("campaignId", "==", campaignId)
-      .get();
-    
-    expect(snapshot.docs.length).toBe(2);
+    await expect(
+      playerDb.collection("recoveryIndex").where("campaignId", "==", campaignId).get()
+    ).rejects.toThrow();
   });
 
   it("DM can delete their own campaign's recoveryIndex entries", async () => {

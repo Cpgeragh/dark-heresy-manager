@@ -6,14 +6,13 @@ import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
 import { dbAs, createCampaign, createIdentityReclaimEntry } from "../helpers";
 
 describe("Firestore Rules: Campaigns", () => {
-
   afterEach(async () => {
     const env = await getTestEnv();
     await env.clearFirestore();
   });
 
   it("authenticated users may read campaign documents", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, "c1", "dm-1", {
       name: "Sample Campaign",
@@ -21,26 +20,22 @@ describe("Firestore Rules: Campaigns", () => {
 
     const playerDb = dbAs(env, "player-1");
 
-    await expect(
-      playerDb.collection("campaigns").doc("c1").get()
-    ).resolves.toBeDefined();
+    await expect(playerDb.collection("campaigns").doc("c1").get()).resolves.toBeDefined();
   });
 
   it("authenticated users may list campaigns", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, "c1", "dm-1", { name: "One" });
     await createCampaign(env, "c2", "dm-2", { name: "Two" });
 
     const playerDb = dbAs(env, "player-1");
 
-    await expect(
-      playerDb.collection("campaigns").get()
-    ).resolves.toBeDefined();
+    await expect(playerDb.collection("campaigns").get()).resolves.toBeDefined();
   });
 
   it("DM may create a campaign when dmId matches their uid", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     const dmDb = dbAs(env, "dm-1");
 
@@ -52,8 +47,8 @@ describe("Firestore Rules: Campaigns", () => {
     ).resolves.toBeUndefined();
   });
 
-  it("DM may create a campaign with extra fields", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+  it("DM cannot create a campaign with unrecognised fields", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     const dmDb = dbAs(env, "dm-1");
 
@@ -64,11 +59,11 @@ describe("Firestore Rules: Campaigns", () => {
         description: "Extra field should be allowed",
         system: "Dark Heresy",
       })
-    ).resolves.toBeUndefined();
+    ).rejects.toThrow();
   });
 
   it("cannot create a campaign without dmId", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     const dmDb = dbAs(env, "dm-1");
 
@@ -80,7 +75,7 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("non-DM cannot create campaign with mismatched dmId", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     const playerDb = dbAs(env, "player-1");
 
@@ -93,7 +88,7 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("non-DM cannot write campaign metadata", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, "c1", "dm-1", { name: "Original" });
 
@@ -107,7 +102,7 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("DM may write campaign metadata when dmId matches them (even if dmId not in update payload)", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, "c1", "dm-1", { name: "Original" });
 
@@ -122,7 +117,7 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("DM cannot change campaign dmId to someone else", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, "c1", "dm-1", { name: "Sample" });
 
@@ -136,19 +131,17 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("DM can delete their own campaign", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, "c1", "dm-1", { name: "Sample" });
 
     const dmDb = dbAs(env, "dm-1");
 
-    await expect(
-      dmDb.collection("campaigns").doc("c1").delete()
-    ).resolves.toBeUndefined();
+    await expect(dmDb.collection("campaigns").doc("c1").delete()).resolves.toBeUndefined();
   });
 
   it("DM can archive their own campaign", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, "c1", "dm-1", { name: "Sample" });
 
@@ -160,7 +153,7 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("non-DM cannot archive a campaign", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, "c1", "dm-1", { name: "Sample" });
 
@@ -172,7 +165,7 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("DM can restore their own archived campaign", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, "c1", "dm-1", { name: "Sample", archivedAt: new Date() });
 
@@ -184,7 +177,7 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("non-DM cannot restore someone else's archived campaign", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, "c1", "dm-1", { name: "Sample", archivedAt: new Date() });
 
@@ -196,7 +189,7 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("reclaimer can transfer dmId to their uid when a valid reclaim doc exists", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, "c1", "dm-old", { name: "Sample" });
     await createIdentityReclaimEntry(env, "dm-new", { oldUid: "dm-old", code: "DH-CODE" });
 
@@ -206,7 +199,7 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("user without a reclaim doc cannot use the reclaim path to change dmId", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, "c1", "dm-old", { name: "Sample" });
 
     await expect(
@@ -215,7 +208,7 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("reclaimer can swap memberIds (old uid out, new uid in) with a valid reclaim doc", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, "c1", "dm-1", {
       name: "Sample",
       memberIds: ["player-old", "player-other"],
@@ -234,7 +227,7 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("user without a reclaim doc cannot use the reclaim path to change memberIds", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, "c1", "dm-1", {
       name: "Sample",
       memberIds: ["player-old", "player-other"],
@@ -248,4 +241,43 @@ describe("Firestore Rules: Campaigns", () => {
     ).rejects.toThrow();
   });
 
+  it("reclaimer can atomically transfer both DM and member ownership", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await createCampaign(env, "c1", "owner-old", {
+      name: "Sample",
+      memberIds: ["owner-old", "player-other"],
+    });
+    await createIdentityReclaimEntry(env, "owner-new", {
+      oldUid: "owner-old",
+      code: "DH-CODE",
+    });
+
+    await expect(
+      dbAs(env, "owner-new")
+        .collection("campaigns")
+        .doc("c1")
+        .update({
+          dmId: "owner-new",
+          memberIds: ["player-other", "owner-new"],
+        })
+    ).resolves.toBeUndefined();
+  });
+
+  it("cannot transfer both DM and member ownership without a reclaim proof", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await createCampaign(env, "c1", "owner-old", {
+      name: "Sample",
+      memberIds: ["owner-old", "player-other"],
+    });
+
+    await expect(
+      dbAs(env, "owner-new")
+        .collection("campaigns")
+        .doc("c1")
+        .update({
+          dmId: "owner-new",
+          memberIds: ["player-other", "owner-new"],
+        })
+    ).rejects.toThrow();
+  });
 });

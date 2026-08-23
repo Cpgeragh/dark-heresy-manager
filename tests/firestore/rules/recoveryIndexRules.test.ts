@@ -28,7 +28,7 @@ describe("Firestore Rules: recoveryIndex", () => {
     ).resolves.toBeDefined();
   });
 
-  it("authenticated users may list recoveryIndex entries", async () => {
+  it("authenticated users cannot enumerate recoveryIndex entries", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createRecoveryIndexEntry(env, "CODE1", {
@@ -44,7 +44,7 @@ describe("Firestore Rules: recoveryIndex", () => {
 
     await expect(
       userDb.collection("recoveryIndex").get()
-    ).resolves.toBeDefined();
+    ).rejects.toThrow();
   });
 
   it("unauthenticated users cannot read recoveryIndex", async () => {

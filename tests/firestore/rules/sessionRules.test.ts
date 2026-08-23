@@ -98,6 +98,38 @@ describe("Firestore Rules: Sessions", () => {
     ).rejects.toThrow();
   });
 
+  it("DM cannot create a session with oversized private notes", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await createCampaign(env, "c1", "dm-1");
+
+    await expect(
+      dbAs(env, "dm-1").collection("campaigns/c1/sessions").doc("s-large").set({
+        date: new Date(),
+        summary: "Summary",
+        dmNotes: "x".repeat(4_001),
+        xpAwarded: 50,
+        attendees: [],
+        createdAt: new Date(),
+      })
+    ).rejects.toThrow();
+  });
+
+  it("DM cannot create a session outside the XP range", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await createCampaign(env, "c1", "dm-1");
+
+    await expect(
+      dbAs(env, "dm-1").collection("campaigns/c1/sessions").doc("s-xp").set({
+        date: new Date(),
+        summary: "Summary",
+        dmNotes: "",
+        xpAwarded: 100_001,
+        attendees: [],
+        createdAt: new Date(),
+      })
+    ).rejects.toThrow();
+  });
+
   it("DM can update a session", async () => {
     const env = await getTestEnv() as RulesTestEnvironment;
     await createCampaign(env, "c1", "dm-1");

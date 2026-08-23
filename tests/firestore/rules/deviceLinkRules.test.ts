@@ -94,7 +94,7 @@ describe("Firestore Rules: userLinks", () => {
 
     await expect(
       dbAs(env, "device-1").collection("userLinks").doc("device-1")
-        .set({ primaryUid: "primary-1", linkedAt: 1 })
+        .set({ primaryUid: "primary-1", linkedAt: new Date() })
     ).resolves.toBeUndefined();
   });
 
@@ -131,7 +131,7 @@ describe("Firestore Rules: userLinks", () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
     await createLinkProof(env, "device-1", { primaryUid: "primary-1", code: "DH-CORRECT" });
     await dbAs(env, "device-1").collection("userLinks").doc("device-1")
-      .set({ primaryUid: "primary-1", linkedAt: 1 });
+      .set({ primaryUid: "primary-1", linkedAt: new Date() });
 
     await expect(
       dbAs(env, "device-1").collection("userLinks").doc("device-1").delete()

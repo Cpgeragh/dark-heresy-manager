@@ -32,9 +32,7 @@ describe("Firestore Rules: Edge Cases", () => {
     await expect(
       dmDb.collection("campaigns").doc("c-special-chars").set({
         dmId: "dm-1",
-        name: "Test's \"Campaign\" & More! <script>alert('xss')</script>",
-        description: "Special chars: @#$%^&*()",
-        notes: "Unicode: 你好 мир 🎮"
+        name: "Test's \"Campaign\" & More! 你好 мир 🎮"
       })
     ).resolves.toBeUndefined();
   });
@@ -48,9 +46,8 @@ describe("Firestore Rules: Edge Cases", () => {
       dmDb.collection("campaigns").doc("c-timestamps").set({
         dmId: "dm-1",
         name: "Campaign with Timestamps",
-        createdAt: Date.now(),
-        lastSession: new Date("2024-01-15"),
-        nextSession: new Date("2024-02-01")
+        createdAt: new Date("2024-01-15"),
+        archivedAt: new Date("2024-02-01")
       })
     ).resolves.toBeUndefined();
   });
@@ -77,14 +74,12 @@ describe("Firestore Rules: Edge Cases", () => {
       dmDb.collection("campaigns").doc("c-nulls").set({
         dmId: "dm-1",
         name: "Campaign with Nulls",
-        description: null,
-        notes: null,
-        imageUrl: null
+        archivedAt: null
       })
     ).resolves.toBeUndefined();
   });
 
-  it("user can create their own user document with special characters", async () => {
+  it("user cannot add profile or email fields to their private account document", async () => {
     const env = await getTestEnv() as RulesTestEnvironment;
     
     const userDb = dbAs(env, "user-special-123");
@@ -95,6 +90,6 @@ describe("Firestore Rules: Edge Cases", () => {
         displayName: "Player's \"Name\" & More!",
         email: "test+special@example.com"
       })
-    ).resolves.toBeUndefined();
+    ).rejects.toThrow();
   });
 });

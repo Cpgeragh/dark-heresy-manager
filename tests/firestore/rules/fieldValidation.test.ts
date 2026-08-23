@@ -7,6 +7,26 @@ import { dbAs, createCampaign } from "../helpers";
 
 describe("Firestore Rules: Field Validation", () => {
 
+  it("campaign name and membership sizes are bounded", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+    const dmDb = dbAs(env, "dm-1");
+
+    await expect(
+      dmDb.collection("campaigns").doc("long-name").set({
+        dmId: "dm-1",
+        name: "x".repeat(101),
+      })
+    ).rejects.toThrow();
+
+    await expect(
+      dmDb.collection("campaigns").doc("too-many-members").set({
+        dmId: "dm-1",
+        name: "Bounded campaign",
+        memberIds: Array.from({ length: 101 }, (_, index) => `player-${index}`),
+      })
+    ).rejects.toThrow();
+  });
+
   it("campaign dmId must be a string", async () => {
     const env = await getTestEnv() as RulesTestEnvironment;
     
