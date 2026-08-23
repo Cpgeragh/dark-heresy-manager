@@ -60,10 +60,10 @@ describe("forEachQueryPage", () => {
     expect(mockStartAfter).toHaveBeenCalledWith(expect.objectContaining({ id: "doc-100" }));
   });
 
-  it.each([0, 451, 1.5])("rejects unsafe page size %s before reading", async (pageSize) => {
+  it.each([0, 441, 1.5])("rejects unsafe page size %s before reading", async (pageSize) => {
     await expect(
       forEachQueryPage("source-query" as never, async () => undefined, pageSize)
-    ).rejects.toThrow("whole number from 1 to 450");
+    ).rejects.toThrow("whole number from 1 to 440");
 
     expect(mockGetDocs).not.toHaveBeenCalled();
   });

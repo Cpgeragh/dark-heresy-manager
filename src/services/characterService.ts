@@ -28,8 +28,19 @@ import { batchDeleteRefs } from "../utils/firestoreBatchDelete";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
 import { validateCharacterName } from "../utils/validation";
 import { deleteQueryDocsInPages } from "../utils/firestoreQueryPages";
+import { stripUndefined } from "../utils/stripUndefined";
+import {
+  assertBulkOperationCount,
+  assertCharacterImportData,
+  assertCharacterPayload,
+  assertFirestoreDocumentId,
+  assertRecoveryCode,
+  assertString,
+} from "../utils/firebaseValidation";
 
-const CHARACTER_ATOMIC_DELETE_CHILD_LIMIT = 440;
+const CHARACTER_DELETE_FIXED_DOCUMENTS = 3;
+const CHARACTER_ATOMIC_DELETE_CHILD_LIMIT =
+  PRODUCT_LIMITS.bulkOperationDocuments - CHARACTER_DELETE_FIXED_DOCUMENTS;
 
 /**
  * Load a single character with full typing.
@@ -44,6 +55,8 @@ export async function loadCharacter(
   campaignId: string,
   characterId: string
 ): Promise<Character | undefined> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(characterId, "Character ID");
   const snap = await getDoc(characterDocRef(campaignId, characterId));
   return snap.data() ?? undefined;
 }
@@ -62,6 +75,7 @@ export async function saveCharacter(character: Character): Promise<void> {
   if (!character.id) {
     throw new Error("saveCharacter: Character must have an id");
   }
+  assertCharacterPayload(character, true);
 
   const ref = characterDocRef(character.campaignId, character.id);
 
@@ -81,8 +95,12 @@ export async function updateCharacter(
   characterId: string,
   partial: Partial<Character>
 ): Promise<void> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(characterId, "Character ID");
+  const cleanPartial = stripUndefined(partial);
+  assertCharacterPayload(cleanPartial);
   const ref = characterDocRef(campaignId, characterId);
-  await updateDoc(ref, partial as UpdateData<Character>);
+  await updateDoc(ref, cleanPartial as UpdateData<Character>);
 }
 
 /**
@@ -97,6 +115,8 @@ export async function createCharacter(
   campaignId: string,
   data: Omit<Character, "id" | "campaignId">
 ): Promise<Character> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertCharacterPayload({ ...data, campaignId }, true);
   const colRef = charactersCollectionRef(campaignId);
 
   // Build a full Character object for TypeScript,
@@ -106,7 +126,6 @@ export async function createCharacter(
     campaignId,
     id: "", // placeholder, ignored by converter.toFirestore
   };
-
   const docRef = await addDoc(colRef, toStore);
 
   // Re-fetch to get the typed document (with real id)
@@ -125,6 +144,9 @@ export async function claimCharacter(
   characterId: string,
   ownerId: string
 ): Promise<void> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(characterId, "Character ID");
+  assertFirestoreDocumentId(ownerId, "Owner ID");
   const user = auth.currentUser;
   if (!user) throw new Error("Not signed in.");
 
@@ -154,6 +176,9 @@ export async function releaseCharacter(
   characterId: string,
   previousOwner: string | null
 ): Promise<void> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(characterId, "Character ID");
+  if (previousOwner !== null) assertFirestoreDocumentId(previousOwner, "Previous owner ID");
   const user = auth.currentUser;
   if (!user) throw new Error("Not signed in.");
 
@@ -172,6 +197,10 @@ export async function forceAssignCharacter(
   previousOwner: string | null,
   targetUid: string
 ): Promise<void> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(characterId, "Character ID");
+  if (previousOwner !== null) assertFirestoreDocumentId(previousOwner, "Previous owner ID");
+  assertFirestoreDocumentId(targetUid, "Target owner ID");
   const user = auth.currentUser;
   if (!user) throw new Error("Not signed in.");
 
@@ -191,6 +220,9 @@ export async function forceReleaseCharacter(
   characterId: string,
   previousOwner: string | null
 ): Promise<void> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(characterId, "Character ID");
+  if (previousOwner !== null) assertFirestoreDocumentId(previousOwner, "Previous owner ID");
   const user = auth.currentUser;
   if (!user) throw new Error("Not signed in.");
 
@@ -213,6 +245,9 @@ export async function deleteCharacter(
   characterId: string,
   recoveryCode?: string
 ): Promise<void> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(characterId, "Character ID");
+  if (recoveryCode !== undefined) assertRecoveryCode(recoveryCode);
   const claimLogSnap = await getDocs(
     query(
       collection(db, "campaigns", campaignId, "characters", characterId, "claimLog"),
@@ -235,6 +270,13 @@ export async function deleteCharacter(
     );
   }
 
+  const deletionCount =
+    claimLogSnap.docs.length +
+    xpProposalsSnap.docs.length +
+    2 +
+    (recoveryCode === undefined ? 0 : 1);
+  assertBulkOperationCount(deletionCount, "Character deletion");
+
   const messagesRef = collection(db, "campaigns", campaignId, "threads", characterId, "messages");
   await deleteQueryDocsInPages(db, messagesRef);
 
@@ -245,7 +287,7 @@ export async function deleteCharacter(
     threadRef,
   ];
 
-  if (recoveryCode) refs.push(doc(db, "recoveryIndex", recoveryCode));
+  if (recoveryCode) refs.push(doc(db, "recoveryIndex", recoveryCode.trim()));
   refs.push(characterDocRef(campaignId, characterId));
 
   await batchDeleteRefs(db, refs);
@@ -260,13 +302,11 @@ export async function importCharacter(
   campaignId: string,
   data: Record<string, unknown>
 ): Promise<string> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertCharacterImportData(data);
   const serialisedData = JSON.stringify(data);
   if (new TextEncoder().encode(serialisedData).byteLength > PRODUCT_LIMITS.characterImportBytes) {
     throw new Error("Character file is too large to import.");
-  }
-
-  if (typeof data.recoveryCode !== "string" || typeof data.isEditableByPlayer !== "boolean") {
-    throw new Error("Character file is missing required fields.");
   }
 
   const importedName = (data.header as Record<string, unknown> | undefined)?.characterName;
@@ -277,8 +317,9 @@ export async function importCharacter(
   if (!nameValidation.isValid) throw new Error(nameValidation.error);
 
   const recoveryCode = generateRecoveryCode();
+  const { createdAt: _createdAt, updatedAt: _updatedAt, ...portableData } = data;
   const importData = {
-    ...data,
+    ...portableData,
     campaignId,
     userId: null,
     isEditableByPlayer: false,
@@ -288,6 +329,7 @@ export async function importCharacter(
       characterName: importedName.trim(),
     },
   };
+  assertCharacterPayload(importData, true);
   // Imported JSON is deliberately written through a plain reference because it is
   // only structurally known after import validation, not as a compile-time Character.
   const charRef = doc(collection(db, "campaigns", campaignId, "characters"));
@@ -304,6 +346,8 @@ export async function importCharacter(
  * Returns the recovery code so the caller can display it to the DM.
  */
 export async function createNewCharacter(campaignId: string, name: string): Promise<string> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertString(name, "Character name");
   const trimmedName = name.trim();
   const validation = validateCharacterName(trimmedName);
   if (!validation.isValid) throw new Error(validation.error);
@@ -317,6 +361,7 @@ export async function createNewCharacter(campaignId: string, name: string): Prom
   });
   const charRef = doc(charactersCollectionRef(campaignId));
   const character: Character = { ...characterData, id: charRef.id };
+  assertCharacterPayload(character, true);
   const recoveryRef = doc(db, "recoveryIndex", recoveryCode);
   const batch = writeBatch(db);
   batch.set(charRef, character);

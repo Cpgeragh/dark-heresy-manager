@@ -3,6 +3,7 @@ import { db } from "../firebase";
 import { campaignDocRef, characterDocRef } from "../firebase/converters";
 import type { RecoveryIndexDocument } from "../types/Firestore";
 import type { OwnershipState, RecoveryLookupResult } from "../types/Recovery";
+import { assertFirestoreDocumentId, assertRecoveryCode } from "../utils/firebaseValidation";
 
 export type RecoveryLookupOutcome =
   | { status: "found"; result: RecoveryLookupResult }
@@ -14,10 +15,15 @@ export async function lookupRecoveryCharacter(
   code: string,
   currentUserId: string | null
 ): Promise<RecoveryLookupOutcome> {
-  const indexSnapshot = await getDoc(doc(db, "recoveryIndex", code));
+  assertRecoveryCode(code);
+  if (currentUserId !== null) assertFirestoreDocumentId(currentUserId, "Current user ID");
+  const normalisedCode = code.trim();
+  const indexSnapshot = await getDoc(doc(db, "recoveryIndex", normalisedCode));
   if (!indexSnapshot.exists()) return { status: "not-found" };
 
   const { campaignId, characterId } = indexSnapshot.data() as RecoveryIndexDocument;
+  assertFirestoreDocumentId(campaignId, "Recovered campaign ID");
+  assertFirestoreDocumentId(characterId, "Recovered character ID");
   const [campaignSnapshot, characterSnapshot] = await Promise.all([
     getDoc(campaignDocRef(campaignId)),
     getDoc(characterDocRef(campaignId, characterId)),

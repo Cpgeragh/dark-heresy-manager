@@ -14,6 +14,7 @@ import { CustomItemLibraryAdmin } from "./CampaignOverview/CustomItemLibraryAdmi
 import { applySessionXp } from "../services/sessionService";
 import { createNewCharacter, importCharacter } from "../services/characterService";
 import { validateCharacterName } from "../utils/validation";
+import { readCharacterImportFile } from "../utils/firebaseValidation";
 import { useToast } from "../components/Toast";
 import { IMPORTANT_TOAST_DURATION } from "../constants/ui";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
@@ -96,16 +97,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
       const file = e.target.files?.[0];
       if (!file || !campaignId) return;
       try {
-        if (file.size > PRODUCT_LIMITS.characterImportBytes) {
-          toast.error("Character file is too large to import.");
-          return;
-        }
-        const text = await file.text();
-        const data = JSON.parse(text);
-        if (typeof data.recoveryCode !== "string" || typeof data.isEditableByPlayer !== "boolean") {
-          toast.error("Invalid character file.");
-          return;
-        }
+        const data = await readCharacterImportFile(file);
         const characterName = await importCharacter(campaignId, data);
         toast.success(`Imported "${characterName}" successfully`, IMPORTANT_TOAST_DURATION);
       } catch (err) {

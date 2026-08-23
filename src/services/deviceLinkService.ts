@@ -1,24 +1,22 @@
-import {
-  deleteDoc,
-  doc,
-  getDoc,
-  serverTimestamp,
-  setDoc,
-} from "firebase/firestore";
+import { deleteDoc, doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { db } from "../firebase";
+import { assertFirestoreDocumentId, assertRecoveryCode } from "../utils/firebaseValidation";
 
 /**
  * Links a secondary device to the account identified by a recovery code.
  * The temporary proof document is always removed after the link write.
  */
 export async function linkDeviceToAccount(currentUid: string, recoveryCode: string): Promise<void> {
+  assertFirestoreDocumentId(currentUid, "Current user ID");
+  assertRecoveryCode(recoveryCode);
   const code = recoveryCode.trim();
   const recoverySnapshot = await getDoc(doc(db, "identityRecovery", code));
   if (!recoverySnapshot.exists()) {
     throw new Error("No account found with that recovery code.");
   }
 
-  const primaryUid = recoverySnapshot.data().uid as string;
+  const primaryUid = recoverySnapshot.data().uid as unknown;
+  assertFirestoreDocumentId(primaryUid, "Primary user ID");
   if (primaryUid === currentUid) {
     throw new Error("This recovery code belongs to this device.");
   }
@@ -38,5 +36,6 @@ export async function linkDeviceToAccount(currentUid: string, recoveryCode: stri
 
 /** Removes the current device's link to its primary account. */
 export async function unlinkDevice(uid: string): Promise<void> {
+  assertFirestoreDocumentId(uid, "User ID");
   await deleteDoc(doc(db, "userLinks", uid));
 }

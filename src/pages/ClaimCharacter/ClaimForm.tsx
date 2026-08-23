@@ -2,8 +2,7 @@
 
 import { useCallback } from "react";
 import { Button } from "../../ui/Button";
-
-const RECOVERY_CODE_REGEX = /^DH-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
+import { validateRecoveryCode } from "../../utils/validation";
 
 function normalizeRecoveryCode(input: string) {
   return input.toUpperCase().trim().replace(/\s+/g, "");
@@ -18,7 +17,7 @@ interface ClaimFormProps {
 
 export function ClaimForm({ code, onCodeChange, onSubmit, loading }: ClaimFormProps) {
   const normalized = normalizeRecoveryCode(code);
-  const isValid = RECOVERY_CODE_REGEX.test(normalized);
+  const isValid = validateRecoveryCode(normalized).isValid;
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {

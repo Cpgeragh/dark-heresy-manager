@@ -18,12 +18,18 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase";
 import { generateRecoveryCode } from "../utils/recoveryCode";
+import { PRODUCT_LIMITS } from "../constants/productLimits";
+import {
+  assertBulkOperationCount,
+  assertFirestoreDocumentId,
+  assertRecoveryCode,
+} from "../utils/firebaseValidation";
 
 type Role = "dm" | "player";
 
 const IDENTITY_RECLAIM_CAMPAIGN_LIMIT = 50;
 const IDENTITY_RECLAIM_CHARACTERS_PER_CAMPAIGN_LIMIT = 20;
-const IDENTITY_RECLAIM_WRITE_LIMIT = 440;
+const IDENTITY_RECLAIM_WRITE_LIMIT = PRODUCT_LIMITS.bulkOperationDocuments;
 
 function protectedReclaimError(): Error {
   return new Error(
@@ -46,12 +52,15 @@ export async function registerIdentityRecovery(
   role: Role = "player",
   existingCode?: string
 ): Promise<string> {
+  assertFirestoreDocumentId(uid, "User ID");
+  if (role !== "dm" && role !== "player") throw new Error("Recovery role is invalid.");
+  if (existingCode !== undefined) assertRecoveryCode(existingCode);
   const code = generateRecoveryCode();
   const batch = writeBatch(db);
 
   // Remove old reverse-lookup entry if rotating the code
   if (existingCode) {
-    batch.delete(doc(db, "identityRecovery", existingCode));
+    batch.delete(doc(db, "identityRecovery", existingCode.trim()));
   }
 
   batch.set(doc(db, "identityRecovery", code), { uid, role });
@@ -76,8 +85,11 @@ export async function registerIdentityRecovery(
  * Returns the reclaimed role so the caller can update local app state.
  */
 export async function reclaimIdentity(uid: string, code: string): Promise<"dm" | "player"> {
+  assertFirestoreDocumentId(uid, "User ID");
+  assertRecoveryCode(code);
+  const normalisedCode = code.trim();
   // 1. Look up the recovery entry
-  const recoveryRef = doc(db, "identityRecovery", code);
+  const recoveryRef = doc(db, "identityRecovery", normalisedCode);
   const recoverySnap = await getDoc(recoveryRef);
 
   if (!recoverySnap.exists()) {
@@ -85,6 +97,10 @@ export async function reclaimIdentity(uid: string, code: string): Promise<"dm" |
   }
 
   const { uid: oldUid, role } = recoverySnap.data() as { uid: string; role?: "dm" | "player" };
+  assertFirestoreDocumentId(oldUid, "Recovered user ID");
+  if (role !== undefined && role !== "dm" && role !== "player") {
+    throw new Error("Recovery role is invalid.");
+  }
 
   if (oldUid === uid) {
     throw new Error("This code is already registered to your account.");
@@ -92,7 +108,7 @@ export async function reclaimIdentity(uid: string, code: string): Promise<"dm" |
 
   // 2. Write the reclaim proof — Firestore rule verifies code against identitySecret
   const reclaimRef = doc(db, "identityReclaims", uid);
-  await setDoc(reclaimRef, { oldUid, code });
+  await setDoc(reclaimRef, { oldUid, code: normalisedCode });
 
   try {
     // Read everything first, then apply ALL ownership migrations in a single
@@ -171,6 +187,7 @@ export async function reclaimIdentity(uid: string, code: string): Promise<"dm" |
     if (ownershipWriteCount > IDENTITY_RECLAIM_WRITE_LIMIT) {
       throw protectedReclaimError();
     }
+    assertBulkOperationCount(ownershipWriteCount, "Identity recovery");
 
     const batch = writeBatch(db);
 
@@ -185,7 +202,7 @@ export async function reclaimIdentity(uid: string, code: string): Promise<"dm" |
 
     // Transfer the recovery entry + secret to the new uid, and mark it onboarded.
     await updateDoc(recoveryRef, { uid });
-    await setDoc(doc(db, "identitySecret", uid), { code });
+    await setDoc(doc(db, "identitySecret", uid), { code: normalisedCode });
     await setDoc(doc(db, "users", uid), { onboarded: true }, { merge: true });
   } finally {
     // 6. Always clean up the proof document regardless of success or failure
@@ -201,9 +218,12 @@ export async function reclaimIdentity(uid: string, code: string): Promise<"dm" |
  * Returns null if no code exists (e.g. user hasn't completed onboarding).
  */
 export async function getRecoveryCode(uid: string): Promise<string | null> {
+  assertFirestoreDocumentId(uid, "User ID");
   const snap = await getDoc(doc(db, "identitySecret", uid));
   if (!snap.exists()) return null;
-  return (snap.data() as { code: string }).code;
+  const code = (snap.data() as { code: unknown }).code;
+  assertRecoveryCode(code);
+  return code.trim();
 }
 
 /**
@@ -216,6 +236,8 @@ export async function rotateRecoveryCode(
   uid: string,
   role: "dm" | "player" = "player"
 ): Promise<string> {
+  assertFirestoreDocumentId(uid, "User ID");
+  if (role !== "dm" && role !== "player") throw new Error("Recovery role is invalid.");
   const existingCode = await getRecoveryCode(uid);
   return registerIdentityRecovery(uid, role, existingCode ?? undefined);
 }
@@ -225,8 +247,10 @@ export async function rotateRecoveryCode(
  * Called when a user explicitly opts out of recovery, or before re-registering.
  */
 export async function clearIdentityRecovery(uid: string, code: string): Promise<void> {
+  assertFirestoreDocumentId(uid, "User ID");
+  assertRecoveryCode(code);
   const batch = writeBatch(db);
-  batch.delete(doc(db, "identityRecovery", code));
+  batch.delete(doc(db, "identityRecovery", code.trim()));
   batch.delete(doc(db, "identitySecret", uid));
   await batch.commit();
 }

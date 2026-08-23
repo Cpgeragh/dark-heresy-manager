@@ -8,16 +8,18 @@ import { batchDeleteRefs } from "../utils/firestoreBatchDelete";
 import { validateCampaignName } from "../utils/validation";
 import { deleteQueryDocsInPages, forEachQueryPage } from "../utils/firestoreQueryPages";
 import { deleteCharacter } from "./characterService";
+import { assertFirestoreDocumentId, assertString } from "../utils/firebaseValidation";
 
 /**
  * Creates a new campaign owned by the given DM.
  * Returns the new campaign's Firestore document ID.
  */
 export async function createCampaign(name: string, dmId: string): Promise<string> {
+  assertString(name, "Campaign name");
   const trimmedName = name.trim();
   const validation = validateCampaignName(trimmedName);
   if (!validation.isValid) throw new Error(validation.error);
-  if (!dmId) throw new Error("A campaign owner is required.");
+  assertFirestoreDocumentId(dmId, "Campaign owner ID");
 
   const newRef = doc(collection(db, "campaigns"));
 
@@ -37,6 +39,8 @@ export async function createCampaign(name: string, dmId: string): Promise<string
  * Updates the name of an existing campaign.
  */
 export async function updateCampaignName(campaignId: string, name: string): Promise<void> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertString(name, "Campaign name");
   const trimmedName = name.trim();
   const validation = validateCampaignName(trimmedName);
   if (!validation.isValid) throw new Error(validation.error);
@@ -49,6 +53,7 @@ export async function updateCampaignName(campaignId: string, name: string): Prom
  * Archived campaigns are excluded from active campaign subscriptions.
  */
 export async function archiveCampaign(campaignId: string): Promise<void> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
   await updateDoc(doc(db, "campaigns", campaignId), {
     archivedAt: serverTimestamp(),
   });
@@ -58,6 +63,7 @@ export async function archiveCampaign(campaignId: string): Promise<void> {
  * Restores an archived campaign so it reappears in active subscriptions.
  */
 export async function restoreCampaign(campaignId: string): Promise<void> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
   await updateDoc(doc(db, "campaigns", campaignId), {
     archivedAt: null,
   });
@@ -70,6 +76,7 @@ export async function restoreCampaign(campaignId: string): Promise<void> {
  * history), recoveryIndex entries, and the campaign document itself.
  */
 export async function deleteCampaign(campaignId: string): Promise<void> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
   const charactersRef = collection(db, "campaigns", campaignId, "characters");
   await forEachQueryPage(charactersRef, async (characters) => {
     for (const character of characters) {

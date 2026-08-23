@@ -79,7 +79,9 @@ vi.mock("../../src/utils/firestoreBatchDelete", () => ({
 
 import {
   claimCharacter,
+  createNewCharacter,
   deleteCharacter,
+  importCharacter,
   releaseCharacter,
 } from "../../src/services/characterService";
 
@@ -104,6 +106,21 @@ beforeEach(() => {
 });
 
 describe("character claiming operations", () => {
+  it("rejects a non-text new-character name before creating a Firestore reference", async () => {
+    await expect(createNewCharacter("camp-1", 42 as unknown as string)).rejects.toThrow(
+      "Character name must be text"
+    );
+    expect(mockDoc).not.toHaveBeenCalled();
+    expect(mockBatch.set).not.toHaveBeenCalled();
+  });
+
+  it("rejects invalid path IDs before starting a transaction", async () => {
+    await expect(claimCharacter("bad/campaign", "char-1", "owner-1")).rejects.toThrow(
+      "Campaign ID is invalid"
+    );
+    expect(mockRunTransaction).not.toHaveBeenCalled();
+  });
+
   it("claims the character, joins the campaign and records the action atomically", async () => {
     await claimCharacter("camp-1", "char-1", "owner-1");
 
@@ -216,5 +233,18 @@ describe("deleteCharacter", () => {
     mockBatchDeleteRefs.mockRejectedValueOnce(error);
 
     await expect(deleteCharacter("camp-3", "char-3", "DH-CCCC-3333")).rejects.toBe(error);
+  });
+});
+
+describe("importCharacter", () => {
+  it("rejects an unsupported import structure before constructing a batch", async () => {
+    await expect(
+      importCharacter("camp-1", {
+        recoveryCode: "DH-ABCD-1234",
+        isEditableByPlayer: false,
+        unexpected: true,
+      })
+    ).rejects.toThrow("unsupported field: unexpected");
+    expect(mockBatch.commit).not.toHaveBeenCalled();
   });
 });

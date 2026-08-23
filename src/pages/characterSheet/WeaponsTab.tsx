@@ -800,6 +800,7 @@ export function WeaponsTab({
         const versionId = await saveDraftCustomItem({
           campaignId,
           customItemId: editingWeaponDefinition.libraryItem.id,
+          category: "weapon",
           editor: { userId, characterId, characterName },
           data,
         });
@@ -880,6 +881,7 @@ export function WeaponsTab({
         const versionId = await saveDraftCustomItem({
           campaignId,
           customItemId: editingShieldDefinition.libraryItem.id,
+          category: "armour",
           editor: { userId, characterId, characterName },
           data,
         });

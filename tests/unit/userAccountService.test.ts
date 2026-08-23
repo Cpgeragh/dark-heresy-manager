@@ -32,6 +32,19 @@ beforeEach(() => {
 });
 
 describe("user account recovery state", () => {
+  it.each([
+    [synchroniseUserAccount, ""],
+    [needsRecoveryCodeBackup, "bad/id"],
+    [markRecoveryCodeBackedUp, ".."],
+    [completeOnboarding, "bad\nuid"],
+  ])("rejects an invalid user ID before contacting Firestore", async (operation, uid) => {
+    await expect(operation(uid)).rejects.toThrow("User ID is invalid");
+    expect(mockDoc).not.toHaveBeenCalled();
+    expect(mockGetDoc).not.toHaveBeenCalled();
+    expect(mockSetDoc).not.toHaveBeenCalled();
+    expect(mockUpdateDoc).not.toHaveBeenCalled();
+  });
+
   it("creates a missing user account and reports onboarding as incomplete", async () => {
     mockGetDoc.mockResolvedValue({ exists: () => false });
 

@@ -228,7 +228,7 @@ These limits are cost and abuse circuit-breakers, not substitutes for write-time
 
 ### Hard product limits
 
-`constants/productLimits.ts` is the authoritative numerical policy for user-created data and costly operations. Stage 2 records the complete policy before adding its remaining client, rules, throttling and bulk-operation enforcement. A value appearing in this table therefore means “must be enforced by the end of the relevant Stage 2 section,” not that every layer already enforces it today.
+`constants/productLimits.ts` is the authoritative numerical policy for user-created data and costly operations. Stage 2 records the complete policy before adding its remaining rules, throttling and bulk-operation enforcement. A value appearing in this table therefore means “must be enforced by the end of the relevant Stage 2 section,” not that every layer already enforces it today.
 
 | Area                      |                                                                                      Limit | Rationale                                                                        |
 | ------------------------- | -----------------------------------------------------------------------------------------: | -------------------------------------------------------------------------------- |
@@ -257,6 +257,14 @@ These limits are cost and abuse circuit-breakers, not substitutes for write-time
 Limits use decimal bytes because browser `File.size`, encoded strings and Firestore document budgeting are compared as byte counts rather than marketed storage units. Rate and attempt windows are rolling windows. Server-authoritative enforcement that cannot be made abuse-resistant on Spark remains explicitly identified for Stage 3; Stage 2 still applies the strongest safe local and rules-based containment available.
 
 UI constraints provide immediate feedback, services reject invalid work before contacting Firebase, and Firestore rules mirror every security-relevant limit they can evaluate. None of those layers substitutes for another.
+
+### Client validation boundary
+
+`utils/firebaseValidation.ts` provides the shared request-boundary checks used by Firebase-facing services and import or upload entry points. Character imports are size-checked before their text is read, parsed only after that check, and then restricted to the exact supported top-level structure, required fields, field types and bounded nested data. Imported timestamps and IDs are not trusted, and the service issues the new character's own ID, timestamps and recovery code.
+
+Portraits accept only JPEG, PNG or WebP input, reject an oversized source before it is read, and reject an oversized encoded data URL before the character document is written. Messages and thread previews, session values and attendees, campaign and character names, custom-item fields and nested content, character arrays and maps, recovery-code syntax, Firestore document IDs, and client bulk counts are likewise checked before their Firebase operation begins. Service checks cover callers that bypass a particular form, while form constraints provide earlier feedback where practical.
+
+These checks are usability and cost-control measures. They reduce accidental reads, writes and oversized payloads, but they are not a security boundary: a modified client can bypass them, so Firestore rules and the later protected backend remain authoritative.
 
 Compound consumers remain explicit:
 
@@ -365,7 +373,7 @@ Client-side bulk work reads documents in stable document-ID pages of 100 and com
 
 Operations that must preserve one atomic ownership or audit boundary fail closed before staging writes if they cannot remain safely below Firestore's 500-write batch ceiling:
 
-- character deletion accepts at most 440 combined claim-log and XP-proposal documents, leaving room for its thread, recovery-index and character documents;
+- character deletion accepts at most 437 combined claim-log and XP-proposal documents, reserving three writes for its thread, recovery-index and character documents within the 440-operation client ceiling;
 - identity reclaim reads at most 50 DM campaigns, 50 member campaigns and 20 owned characters per member campaign, then permits at most 440 ownership writes in total;
 - exceeding a ceiling produces a protected-operation error, performs no ownership migration, and leaves the larger resumable workflow to the protected bulk-job design in Stage 3.
 

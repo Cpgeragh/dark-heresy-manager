@@ -94,6 +94,16 @@ describe("session write operations", () => {
     ).rejects.toThrow("A character cannot be listed as a session attendee more than once.");
     expect(mockUpdateDoc).not.toHaveBeenCalled();
   });
+
+  it("rejects invalid session field types and attendee IDs before writing", async () => {
+    await expect(updateSession("camp-1", "session-1", { summary: 42 as never })).rejects.toThrow(
+      "Session summary must be text"
+    );
+    await expect(updateSession("camp-1", "session-1", { attendees: ["bad/id"] })).rejects.toThrow(
+      "Session attendee ID is invalid"
+    );
+    expect(mockUpdateDoc).not.toHaveBeenCalled();
+  });
 });
 
 describe("applySessionXp", () => {
@@ -134,9 +144,11 @@ describe("applySessionXp", () => {
     expect(mockTransaction.update).not.toHaveBeenCalled();
   });
 
-  it("does nothing for zero or negative XP without starting a transaction", async () => {
+  it("does nothing for zero XP and rejects negative XP without starting a transaction", async () => {
     await applySessionXp("camp-1", "sess-1", ["char-1"], 0);
-    await applySessionXp("camp-1", "sess-1", ["char-1"], -50);
+    await expect(applySessionXp("camp-1", "sess-1", ["char-1"], -50)).rejects.toThrow(
+      "XP awarded must be a whole number from 0 to 100000."
+    );
 
     expect(mockRunTransaction).not.toHaveBeenCalled();
   });

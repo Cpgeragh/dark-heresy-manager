@@ -1,7 +1,12 @@
 // src/pages/characterSheet/TraitsTab.tsx
 
 import { useCallback, useMemo, useState } from "react";
-import type { CyberneticItem, GearItem, TalentsAndTraitsBlock, TalentEntry } from "../../types/Character";
+import type {
+  CyberneticItem,
+  GearItem,
+  TalentsAndTraitsBlock,
+  TalentEntry,
+} from "../../types/Character";
 import { TRAIT_LIST } from "../../data/traitData";
 import { EntryCard, TalentPickerModal } from "./talentComponents";
 import { getActiveTraitEntries } from "../../features/traits/traitEffects";
@@ -159,7 +164,13 @@ export function TraitsTab({
         ...talents,
         traits: [
           ...talents.traits,
-          buildTraitSnapshot(crypto.randomUUID(), `custom-trait:${customItemId}`, data, customItemId, versionId),
+          buildTraitSnapshot(
+            crypto.randomUUID(),
+            `custom-trait:${customItemId}`,
+            data,
+            customItemId,
+            versionId
+          ),
         ],
       });
       setCustomTraitOpen(false);
@@ -182,7 +193,13 @@ export function TraitsTab({
         ...talents,
         traits: [
           ...talents.traits,
-          buildTraitSnapshot(crypto.randomUUID(), `custom-trait:${item.id}`, item.data, item.id, versionId),
+          buildTraitSnapshot(
+            crypto.randomUUID(),
+            `custom-trait:${item.id}`,
+            item.data,
+            item.id,
+            versionId
+          ),
         ],
       });
       setShowPicker(false);
@@ -197,6 +214,7 @@ export function TraitsTab({
         const versionId = await saveDraftCustomItem({
           campaignId,
           customItemId: editingCustomTrait.customLibraryId,
+          category: "trait",
           editor: { userId, characterId, characterName },
           data,
         });
@@ -215,19 +233,23 @@ export function TraitsTab({
         toast.error("Failed to update custom trait definition.");
       }
     },
-    [userId, campaignId, characterId, characterName, editingCustomTrait, talents, onUpdateTalents, toast]
+    [
+      userId,
+      campaignId,
+      characterId,
+      characterName,
+      editingCustomTrait,
+      talents,
+      onUpdateTalents,
+      toast,
+    ]
   );
 
-  const displayTraits = useMemo(
-    () => getActiveTraitEntries(talents, career),
-    [talents, career]
-  );
+  const displayTraits = useMemo(() => getActiveTraitEntries(talents, career), [talents, career]);
   const unnaturalEntries = displayTraits.filter(
     (entry) => entry.talentId === "unnatural-characteristic"
   );
-  const skinOfIronEntries = displayTraits.filter(
-    (entry) => entry.talentId === "skin-of-iron"
-  );
+  const skinOfIronEntries = displayTraits.filter((entry) => entry.talentId === "skin-of-iron");
   const ordinaryEntries = displayTraits.filter(
     (entry) => !["unnatural-characteristic", "skin-of-iron"].includes(entry.talentId)
   );
@@ -248,9 +270,7 @@ export function TraitsTab({
     (uid: string) => {
       const removed = talents.traits.find((entry) => entry.uid === uid);
       if (onUpdateCybernetics) {
-        let nextCybernetics = cybernetics.filter(
-          (item) => item.grantedByTalentEntryUid !== uid
-        );
+        let nextCybernetics = cybernetics.filter((item) => item.grantedByTalentEntryUid !== uid);
         for (const grant of removed?.acquisition?.trait?.skinOfIronGrants ?? []) {
           if (grant.kind === "upgrade" && grant.previousCraftsmanship) {
             nextCybernetics = nextCybernetics.map((item) =>
@@ -303,34 +323,38 @@ export function TraitsTab({
       };
     }),
     ...(unnaturalEntries.length > 0
-      ? [{
-          key: "unnatural-characteristic-group",
-          sortName: "Unnatural Characteristic",
-          node: (
-            <UnnaturalCharacteristicCards
-              entries={unnaturalEntries}
-              editable={editable}
-              onRemove={handleRemoveTrait}
-            />
-          ),
-        }]
+      ? [
+          {
+            key: "unnatural-characteristic-group",
+            sortName: "Unnatural Characteristic",
+            node: (
+              <UnnaturalCharacteristicCards
+                entries={unnaturalEntries}
+                editable={editable}
+                onRemove={handleRemoveTrait}
+              />
+            ),
+          },
+        ]
       : []),
     ...(skinOfIronEntries.length > 0
-      ? [{
-          key: "skin-of-iron-group",
-          sortName: "Skin of Iron",
-          node: (
-            <EntryCard
-              entry={skinOfIronEntries[skinOfIronEntries.length - 1]}
-              editable={editable}
-              onRemove={handleRemoveTrait}
-              confirmDeletion
-              deletionNoun="Trait"
-              displayName="Skin of Iron"
-              statusChip={`Owned: ${skinOfIronEntries.length}/4`}
-            />
-          ),
-        }]
+      ? [
+          {
+            key: "skin-of-iron-group",
+            sortName: "Skin of Iron",
+            node: (
+              <EntryCard
+                entry={skinOfIronEntries[skinOfIronEntries.length - 1]}
+                editable={editable}
+                onRemove={handleRemoveTrait}
+                confirmDeletion
+                deletionNoun="Trait"
+                displayName="Skin of Iron"
+                statusChip={`Owned: ${skinOfIronEntries.length}/4`}
+              />
+            ),
+          },
+        ]
       : []),
   ].sort((a, b) => a.sortName.localeCompare(b.sortName));
   const columnSplit = Math.ceil(cards.length / 2);
@@ -357,7 +381,9 @@ export function TraitsTab({
           >
             {cardColumns.map((column, index) => (
               <div key={index} className="space-y-2" data-testid="trait-card-column">
-                {column.map((card) => <div key={card.key}>{card.node}</div>)}
+                {column.map((card) => (
+                  <div key={card.key}>{card.node}</div>
+                ))}
               </div>
             ))}
           </div>
@@ -402,35 +428,36 @@ export function TraitsTab({
               onCancel={() => setEditingCustomTrait(null)}
             />
           )}
-          {pendingAcquisition && (() => {
-            const trait = TRAIT_LIST.find((item) => item.id === pendingAcquisition.talentId);
-            if (!trait?.acquisition) return null;
-            return (
-              <TraitAcquisitionModal
-                trait={trait}
-                entry={pendingAcquisition}
-                cybernetics={cybernetics}
-                gear={gear}
-                ownedTraitEntries={talents.traits.filter(
-                  (entry) => entry.talentId === pendingAcquisition.talentId
-                )}
-                onComplete={(result) => {
-                  onUpdateTalents({
-                    ...talents,
-                    traits: [...talents.traits, result.entry],
-                  });
-                  if (result.cybernetics && onUpdateCybernetics) {
-                    void onUpdateCybernetics(result.cybernetics);
-                  }
-                  if (result.gear && onUpdateGear) {
-                    void onUpdateGear(result.gear);
-                  }
-                  setPendingAcquisition(null);
-                }}
-                onClose={() => setPendingAcquisition(null)}
-              />
-            );
-          })()}
+          {pendingAcquisition &&
+            (() => {
+              const trait = TRAIT_LIST.find((item) => item.id === pendingAcquisition.talentId);
+              if (!trait?.acquisition) return null;
+              return (
+                <TraitAcquisitionModal
+                  trait={trait}
+                  entry={pendingAcquisition}
+                  cybernetics={cybernetics}
+                  gear={gear}
+                  ownedTraitEntries={talents.traits.filter(
+                    (entry) => entry.talentId === pendingAcquisition.talentId
+                  )}
+                  onComplete={(result) => {
+                    onUpdateTalents({
+                      ...talents,
+                      traits: [...talents.traits, result.entry],
+                    });
+                    if (result.cybernetics && onUpdateCybernetics) {
+                      void onUpdateCybernetics(result.cybernetics);
+                    }
+                    if (result.gear && onUpdateGear) {
+                      void onUpdateGear(result.gear);
+                    }
+                    setPendingAcquisition(null);
+                  }}
+                  onClose={() => setPendingAcquisition(null)}
+                />
+              );
+            })()}
         </section>
       </div>
     </div>

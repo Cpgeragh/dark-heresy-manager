@@ -287,6 +287,7 @@ export function GearTab({
         const versionId = await saveDraftCustomItem({
           campaignId,
           customItemId: editingConsumableDefinition.libraryItem.id,
+          category: "consumable",
           editor: { userId, characterId, characterName },
           data,
         });
@@ -405,6 +406,7 @@ export function GearTab({
         const versionId = await saveDraftCustomItem({
           campaignId,
           customItemId: editingGearDefinition.libraryItem.id,
+          category: "gear",
           editor: { userId, characterId, characterName },
           data,
         });

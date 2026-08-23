@@ -26,6 +26,12 @@ import type {
 } from "../types/CustomItems";
 import { stripUndefined } from "../utils/stripUndefined";
 import { deleteQueryDocsInPages, forEachQueryPage } from "../utils/firestoreQueryPages";
+import {
+  assertBulkOperationCount,
+  assertCustomItemCreator,
+  assertCustomItemData,
+  assertFirestoreDocumentId,
+} from "../utils/firebaseValidation";
 
 export interface CreateDraftCustomItemArgs<TCategory extends CustomItemCategory> {
   campaignId: string;
@@ -37,6 +43,7 @@ export interface CreateDraftCustomItemArgs<TCategory extends CustomItemCategory>
 export interface SaveDraftCustomItemArgs<TCategory extends CustomItemCategory> {
   campaignId: string;
   customItemId: string;
+  category: TCategory;
   editor: CustomItemCreator;
   data: CustomItemDataByCategory[TCategory];
 }
@@ -84,10 +91,14 @@ export async function createDraftCustomItem<TCategory extends CustomItemCategory
   customItemId: string;
   versionId: string;
 }> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertCustomItemCreator(creator);
+  const cleanData = stripUndefined(data) as CustomItemDataByCategory[TCategory];
+  assertCustomItemData(category, cleanData);
   const itemRef = doc(customItemsCollectionRef(campaignId));
   const versionRef = doc(customItemVersionsCollectionRef(campaignId, itemRef.id));
   const timestamp = serverTimestamp();
-  const name = data.name.trim();
+  const name = cleanData.name.trim();
 
   const item: CampaignCustomItem<TCategory> = {
     id: itemRef.id,
@@ -106,7 +117,7 @@ export async function createDraftCustomItem<TCategory extends CustomItemCategory
     latestVersionNumber: 1,
     archivedAt: null,
     archivedByUserId: null,
-    data,
+    data: cleanData,
   };
 
   const version: CampaignCustomItemVersion<TCategory> = {
@@ -116,7 +127,7 @@ export async function createDraftCustomItem<TCategory extends CustomItemCategory
     category,
     versionNumber: 1,
     status: "draft",
-    data,
+    data: cleanData,
     createdAt: timestamp,
     updatedAt: timestamp,
     createdBy: creator,
@@ -136,9 +147,15 @@ export async function createDraftCustomItem<TCategory extends CustomItemCategory
 export async function saveDraftCustomItem<TCategory extends CustomItemCategory>({
   campaignId,
   customItemId,
+  category,
   editor,
   data,
 }: SaveDraftCustomItemArgs<TCategory>): Promise<string> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(customItemId, "Custom-item ID");
+  assertCustomItemCreator(editor, "Custom-item editor");
+  const cleanData = stripUndefined(data) as CustomItemDataByCategory[TCategory];
+  assertCustomItemData(category, cleanData);
   const itemRef = customItemDocRef(campaignId, customItemId);
 
   return runTransaction(db, async (transaction) => {
@@ -146,6 +163,7 @@ export async function saveDraftCustomItem<TCategory extends CustomItemCategory>(
     if (!itemSnap.exists()) throw new Error("Custom item not found.");
 
     const item = itemSnap.data() as CampaignCustomItem<TCategory>;
+    if (item.category !== category) throw new Error("Custom-item category does not match.");
     if (item.status === "archived") throw new Error("Archived custom items cannot be edited.");
 
     const timestamp = serverTimestamp();
@@ -154,11 +172,11 @@ export async function saveDraftCustomItem<TCategory extends CustomItemCategory>(
       item.draftVersionId ?? doc(customItemVersionsCollectionRef(campaignId, customItemId)).id;
     const draftVersionRef = customItemVersionDocRef(campaignId, customItemId, draftVersionId);
     const versionNumber = isExistingDraft ? item.latestVersionNumber : item.latestVersionNumber + 1;
-    const name = data.name.trim();
+    const name = cleanData.name.trim();
 
     if (isExistingDraft) {
       transaction.update(draftVersionRef, {
-        data: stripUndefined(data) as CampaignCustomItemVersion<TCategory>["data"],
+        data: cleanData as CampaignCustomItemVersion<TCategory>["data"],
         updatedAt: timestamp,
         updatedBy: editor,
       });
@@ -170,7 +188,7 @@ export async function saveDraftCustomItem<TCategory extends CustomItemCategory>(
         category: item.category,
         versionNumber,
         status: "draft",
-        data,
+        data: cleanData,
         createdAt: timestamp,
         updatedAt: timestamp,
         createdBy: editor,
@@ -182,7 +200,7 @@ export async function saveDraftCustomItem<TCategory extends CustomItemCategory>(
     }
     transaction.update(itemRef, {
       name,
-      data: stripUndefined(data),
+      data: cleanData,
       draftVersionId,
       latestVersionId: draftVersionId,
       latestVersionNumber: versionNumber,
@@ -201,6 +219,10 @@ export async function publishCustomItem({
   actorUserId,
   versionId,
 }: PublishCustomItemArgs): Promise<string> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(customItemId, "Custom-item ID");
+  assertFirestoreDocumentId(actorUserId, "Actor user ID");
+  if (versionId !== undefined) assertFirestoreDocumentId(versionId, "Version ID");
   const itemRef = customItemDocRef(campaignId, customItemId);
 
   return runTransaction(db, async (transaction) => {
@@ -216,6 +238,7 @@ export async function publishCustomItem({
     if (!versionSnap.exists()) throw new Error("Custom item version not found.");
 
     const version = versionSnap.data() as CampaignCustomItemVersion;
+    assertCustomItemData(version.category, stripUndefined(version.data));
     const timestamp = serverTimestamp();
 
     transaction.update(versionRef, {
@@ -248,6 +271,9 @@ export async function archiveCustomItem({
   customItemId,
   actorUserId,
 }: CustomItemActorArgs): Promise<void> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(customItemId, "Custom-item ID");
+  assertFirestoreDocumentId(actorUserId, "Actor user ID");
   await updateDoc(customItemDocRef(campaignId, customItemId), {
     status: "archived",
     archivedAt: serverTimestamp(),
@@ -262,6 +288,9 @@ export async function restoreCustomItem({
   customItemId,
   actorUserId,
 }: CustomItemActorArgs): Promise<void> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(customItemId, "Custom-item ID");
+  assertFirestoreDocumentId(actorUserId, "Actor user ID");
   const itemSnap = await getDoc(customItemDocRef(campaignId, customItemId));
   if (!itemSnap.exists()) throw new Error("Custom item not found.");
   const item = itemSnap.data() as CampaignCustomItem;
@@ -282,6 +311,8 @@ export async function permanentlyDeleteCustomItem({
   campaignId: string;
   customItemId: string;
 }): Promise<void> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(customItemId, "Custom-item ID");
   const itemRef = customItemDocRef(campaignId, customItemId);
   const itemSnap = await getDoc(itemRef);
   if (!itemSnap.exists()) throw new Error("Custom item not found.");
@@ -297,6 +328,9 @@ export async function publishAndUpdateAllCopies({
   customItemId,
   actorUserId,
 }: CustomItemActorArgs): Promise<number> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(customItemId, "Custom-item ID");
+  assertFirestoreDocumentId(actorUserId, "Actor user ID");
   const itemSnap = await getDoc(customItemDocRef(campaignId, customItemId));
   if (!itemSnap.exists()) throw new Error("Custom item not found.");
   const item = itemSnap.data() as CampaignCustomItem;
@@ -311,6 +345,9 @@ export async function updateAllCustomItemCopies({
   customItemId,
   versionId,
 }: UpdateAllCopiesArgs): Promise<number> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(customItemId, "Custom-item ID");
+  if (versionId !== undefined) assertFirestoreDocumentId(versionId, "Version ID");
   const itemSnap = await getDoc(customItemDocRef(campaignId, customItemId));
   if (!itemSnap.exists()) throw new Error("Custom item not found.");
 
@@ -324,9 +361,11 @@ export async function updateAllCustomItemCopies({
   if (!versionSnap.exists()) throw new Error("Custom item version not found.");
 
   const version = versionSnap.data() as CampaignCustomItemVersion;
+  assertCustomItemData(version.category, stripUndefined(version.data));
   let updatedCopies = 0;
 
   await forEachQueryPage(charactersCollectionRef(campaignId), async (documents) => {
+    assertBulkOperationCount(documents.length, "Custom-item propagation page");
     const batch = writeBatch(db);
     let operations = 0;
 
@@ -492,9 +531,12 @@ export async function removeAllCustomItemCopies({
   campaignId,
   customItemId,
 }: Pick<CustomItemActorArgs, "campaignId" | "customItemId">): Promise<number> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(customItemId, "Custom-item ID");
   let removedCopies = 0;
 
   await forEachQueryPage(charactersCollectionRef(campaignId), async (documents) => {
+    assertBulkOperationCount(documents.length, "Custom-item removal page");
     const batch = writeBatch(db);
     let operations = 0;
 

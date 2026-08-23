@@ -14,6 +14,11 @@ import {
 import { db } from "../firebase";
 import type { SessionDocument } from "../types/Firestore";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
+import {
+  assertBoolean,
+  assertFirestoreDocumentId,
+  assertString,
+} from "../utils/firebaseValidation";
 
 interface SessionData {
   date: Date;
@@ -32,6 +37,7 @@ export type SessionUpdateData = Partial<
  * If xpAwarded is 0, no character documents are updated.
  */
 export async function createSession(campaignId: string, session: SessionData): Promise<void> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
   validateSessionData(session);
 
   const batch = writeBatch(db);
@@ -59,6 +65,8 @@ export async function updateSession(
   sessionId: string,
   data: SessionUpdateData
 ): Promise<void> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(sessionId, "Session ID");
   validateSessionUpdate(data);
 
   await updateDoc(
@@ -68,6 +76,12 @@ export async function updateSession(
 }
 
 function validateSessionData(session: SessionData): void {
+  if (typeof session !== "object" || session === null) {
+    throw new Error("Session data must be an object.");
+  }
+  assertString(session.summary, "Session summary");
+  assertString(session.dmNotes, "DM notes");
+  if (!Array.isArray(session.attendees)) throw new Error("Session attendees must be an array.");
   if (!(session.date instanceof Date) || Number.isNaN(session.date.getTime())) {
     throw new Error("A valid session date is required.");
   }
@@ -98,21 +112,36 @@ function validateSessionData(session: SessionData): void {
   if (new Set(session.attendees).size !== session.attendees.length) {
     throw new Error("A character cannot be listed as a session attendee more than once.");
   }
+  session.attendees.forEach((attendeeId) =>
+    assertFirestoreDocumentId(attendeeId, "Session attendee ID")
+  );
 }
 
 function validateSessionUpdate(data: SessionUpdateData): void {
-  if (data.date instanceof Date && Number.isNaN(data.date.getTime())) {
+  if (typeof data !== "object" || data === null || Array.isArray(data)) {
+    throw new Error("Session update must be an object.");
+  }
+  if (
+    data.date !== undefined &&
+    (!(data.date instanceof Date) || Number.isNaN(data.date.getTime()))
+  ) {
     throw new Error("A valid session date is required.");
   }
-  if (data.summary !== undefined && data.summary.length > PRODUCT_LIMITS.sessionSummaryCharacters) {
-    throw new Error(
-      `Session summary cannot exceed ${PRODUCT_LIMITS.sessionSummaryCharacters} characters.`
-    );
+  if (data.summary !== undefined) {
+    assertString(data.summary, "Session summary");
+    if (data.summary.length > PRODUCT_LIMITS.sessionSummaryCharacters) {
+      throw new Error(
+        `Session summary cannot exceed ${PRODUCT_LIMITS.sessionSummaryCharacters} characters.`
+      );
+    }
   }
-  if (data.dmNotes !== undefined && data.dmNotes.length > PRODUCT_LIMITS.sessionDmNotesCharacters) {
-    throw new Error(
-      `DM notes cannot exceed ${PRODUCT_LIMITS.sessionDmNotesCharacters} characters.`
-    );
+  if (data.dmNotes !== undefined) {
+    assertString(data.dmNotes, "DM notes");
+    if (data.dmNotes.length > PRODUCT_LIMITS.sessionDmNotesCharacters) {
+      throw new Error(
+        `DM notes cannot exceed ${PRODUCT_LIMITS.sessionDmNotesCharacters} characters.`
+      );
+    }
   }
   if (
     data.xpAwarded !== undefined &&
@@ -125,6 +154,7 @@ function validateSessionUpdate(data: SessionUpdateData): void {
     );
   }
   if (data.attendees !== undefined) {
+    if (!Array.isArray(data.attendees)) throw new Error("Session attendees must be an array.");
     if (data.attendees.length > PRODUCT_LIMITS.sessionAttendees) {
       throw new Error(
         `A session cannot have more than ${PRODUCT_LIMITS.sessionAttendees} attendees.`
@@ -133,6 +163,9 @@ function validateSessionUpdate(data: SessionUpdateData): void {
     if (new Set(data.attendees).size !== data.attendees.length) {
       throw new Error("A character cannot be listed as a session attendee more than once.");
     }
+    data.attendees.forEach((attendeeId) =>
+      assertFirestoreDocumentId(attendeeId, "Session attendee ID")
+    );
   }
 }
 
@@ -146,6 +179,9 @@ export async function deleteSession(
   sessionId: string,
   reverseXp = false
 ): Promise<void> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(sessionId, "Session ID");
+  assertBoolean(reverseXp, "Reverse-XP flag");
   const sessionRef = doc(db, "campaigns", campaignId, "sessions", sessionId);
 
   if (!reverseXp) {
@@ -183,7 +219,24 @@ export async function applySessionXp(
   attendeeIds: string[],
   xpAmount: number
 ): Promise<void> {
-  if (xpAmount <= 0 || attendeeIds.length === 0) return;
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(sessionId, "Session ID");
+  if (!Array.isArray(attendeeIds)) throw new Error("Session attendees must be an array.");
+  if (!Number.isInteger(xpAmount) || xpAmount < 0 || xpAmount > PRODUCT_LIMITS.sessionXpAward) {
+    throw new Error(
+      `XP awarded must be a whole number from 0 to ${PRODUCT_LIMITS.sessionXpAward}.`
+    );
+  }
+  if (attendeeIds.length > PRODUCT_LIMITS.sessionAttendees) {
+    throw new Error(
+      `A session cannot have more than ${PRODUCT_LIMITS.sessionAttendees} attendees.`
+    );
+  }
+  if (new Set(attendeeIds).size !== attendeeIds.length) {
+    throw new Error("A character cannot be listed as a session attendee more than once.");
+  }
+  attendeeIds.forEach((attendeeId) => assertFirestoreDocumentId(attendeeId, "Session attendee ID"));
+  if (xpAmount === 0 || attendeeIds.length === 0) return;
 
   const sessionRef = doc(db, "campaigns", campaignId, "sessions", sessionId);
 

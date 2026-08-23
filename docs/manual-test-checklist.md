@@ -1,6 +1,6 @@
 # Manual Test Checklist — Complete App
 
-Thirty-one pages and cross-cutting sections, containing 582 checks. Every item
+Thirty-one pages and cross-cutting sections, containing 584 checks. Every item
 comes from reading the actual logic, not a generic "does it load" pass.
 Check items off as you verify them; anything under **Watch for** is the
 likeliest place a real bug hides. Coverage notes are at the bottom — read
@@ -1055,10 +1055,12 @@ For each boundary, try the largest valid value and then one unit over it. For ro
 - [ ] Campaign/character names stop at 100 characters, first names at 50, messages at 2,000, thread previews at 500, and session summaries/DM notes at 4,000 each
 - [ ] A message thread retains at most 5,000 messages, returns at most 100 per page, and claim history returns at most 50 entries per page without gaps or duplicates between pages
 - [ ] A character accepts at most 50 XP proposals; a campaign accepts at most 200 custom items; and a custom item accepts at most 50 versions
-- [ ] Custom-item definitions reject names over 100 characters, text over 4,000 characters, encoded data over 100,000 bytes, arrays/maps over 100 entries, and nesting deeper than 8 levels
-- [ ] Character import rejects a file over 750,000 bytes before parsing, and no accepted import produces a character document over 900,000 encoded bytes
+- [ ] Custom-item definitions reject unexpected fields, wrong field types, names over 100 characters, text over 4,000 characters, encoded data over 100,000 bytes, arrays/maps over 100 entries, and nesting deeper than 8 levels before opening a Firebase write
+- [ ] Character import rejects a file over 750,000 bytes before reading or parsing it, rejects missing, unexpected or wrongly typed top-level fields, and no accepted import produces a character document over 900,000 encoded bytes
 - [ ] Character data rejects arrays over 200 entries, objects over 100 keys and nesting deeper than 8 levels without altering the saved character
-- [ ] Portrait selection rejects a source over 5,000,000 bytes before reading it and rejects an encoded result over 350,000 bytes before writing the character
+- [ ] Portrait selection accepts only JPEG, PNG or WebP, rejects a source over 5,000,000 bytes before reading it and rejects an encoded result over 350,000 bytes before writing the character
+- [ ] Malformed recovery codes, empty or slash-containing document IDs, and unexpected primitive field types are rejected before any Firebase read or write; after surrounding whitespace is removed, the accepted recovery form is exactly `DH-XXXX-XXXX` using uppercase letters or digits
+- [ ] Message, session, custom-item and character service calls still reject invalid values when invoked without their normal form, proving that form controls are not the only client-side cost boundary
 - [ ] Recovery and device-link code entry allow at most 5 attempts of each kind per device in a rolling 15-minute window, with a clear retry time and no Firebase request after the ceiling
 - [ ] A client bulk invocation never accepts more than 440 affected documents, reports the count before confirmation and performs no partial mutation when the preflight exceeds the ceiling
 

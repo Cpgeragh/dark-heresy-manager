@@ -2,6 +2,11 @@
 
 import { updateDoc } from "firebase/firestore";
 import { characterDocRef } from "../firebase/converters";
+import {
+  assertEncodedPortrait,
+  assertFirestoreDocumentId,
+  assertPortraitSource,
+} from "../utils/firebaseValidation";
 
 function blobToBase64(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -26,7 +31,11 @@ export async function uploadPortrait(
   characterId: string,
   blob: Blob
 ): Promise<string> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(characterId, "Character ID");
+  assertPortraitSource(blob);
   const base64 = await blobToBase64(blob);
+  assertEncodedPortrait(base64);
 
   const characterRef = characterDocRef(campaignId, characterId);
   await updateDoc(characterRef, { portraitUrl: base64 });

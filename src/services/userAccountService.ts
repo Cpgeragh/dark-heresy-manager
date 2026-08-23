@@ -1,6 +1,7 @@
 import { doc, getDoc, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import type { UserDocument } from "../types/Firestore";
+import { assertFirestoreDocumentId } from "../utils/firebaseValidation";
 
 /**
  * Ensures the anonymous-auth user has an account document and returns whether
@@ -8,6 +9,7 @@ import type { UserDocument } from "../types/Firestore";
  * routine app launches must not create a billed heartbeat write.
  */
 export async function synchroniseUserAccount(uid: string): Promise<boolean> {
+  assertFirestoreDocumentId(uid, "User ID");
   const reference = doc(db, "users", uid);
   const snapshot = await getDoc(reference);
 
@@ -31,6 +33,7 @@ export async function synchroniseUserAccount(uid: string): Promise<boolean> {
  * code backed up. Missing user documents do not produce a backup prompt.
  */
 export async function needsRecoveryCodeBackup(uid: string): Promise<boolean> {
+  assertFirestoreDocumentId(uid, "User ID");
   const snapshot = await getDoc(doc(db, "users", uid));
   if (!snapshot.exists()) return false;
 
@@ -40,11 +43,13 @@ export async function needsRecoveryCodeBackup(uid: string): Promise<boolean> {
 
 /** Marks the current device user's recovery code as safely backed up. */
 export async function markRecoveryCodeBackedUp(uid: string): Promise<void> {
+  assertFirestoreDocumentId(uid, "User ID");
   await updateDoc(doc(db, "users", uid), { recoveryBackedUp: true });
 }
 
 /** Completes first-run onboarding after the recovery code is saved. */
 export async function completeOnboarding(uid: string): Promise<void> {
+  assertFirestoreDocumentId(uid, "User ID");
   await updateDoc(doc(db, "users", uid), {
     onboarded: true,
     recoveryBackedUp: true,

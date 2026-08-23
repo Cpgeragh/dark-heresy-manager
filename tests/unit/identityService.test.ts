@@ -35,7 +35,7 @@ const {
 } = vi.hoisted(() => ({
   mockWriteBatch: vi.fn(),
   mockDoc: vi.fn((...args: unknown[]) => `${args[1]}/${args[2]}`),
-  mockGenerateRecoveryCode: vi.fn(() => "DH-GENERATED-CODE"),
+  mockGenerateRecoveryCode: vi.fn(() => "DH-GENE-CODE"),
   mockGetDoc: vi.fn(),
   mockGetDocs: vi.fn(),
   mockQuery: vi.fn((...args: unknown[]) => args),
@@ -93,7 +93,7 @@ describe("registerIdentityRecovery", () => {
   it("writes identityRecovery entry with uid and role", async () => {
     await registerIdentityRecovery("uid-1", "dm");
 
-    expect(mockBatchSet).toHaveBeenCalledWith("identityRecovery/DH-GENERATED-CODE", {
+    expect(mockBatchSet).toHaveBeenCalledWith("identityRecovery/DH-GENE-CODE", {
       uid: "uid-1",
       role: "dm",
     });
@@ -103,20 +103,20 @@ describe("registerIdentityRecovery", () => {
     await registerIdentityRecovery("uid-1", "dm");
 
     expect(mockBatchSet).toHaveBeenCalledWith("identitySecret/uid-1", {
-      code: "DH-GENERATED-CODE",
+      code: "DH-GENE-CODE",
     });
   });
 
   it("returns the generated code", async () => {
     const result = await registerIdentityRecovery("uid-1", "player");
 
-    expect(result).toBe("DH-GENERATED-CODE");
+    expect(result).toBe("DH-GENE-CODE");
   });
 
   it("deletes the old identityRecovery entry when existingCode is provided", async () => {
-    await registerIdentityRecovery("uid-1", "dm", "DH-OLD-CODE");
+    await registerIdentityRecovery("uid-1", "dm", "DH-0OLD-C0DE");
 
-    expect(mockBatchDelete).toHaveBeenCalledWith("identityRecovery/DH-OLD-CODE");
+    expect(mockBatchDelete).toHaveBeenCalledWith("identityRecovery/DH-0OLD-C0DE");
   });
 
   it("does not call delete when existingCode is not provided", async () => {
@@ -136,19 +136,19 @@ describe("registerIdentityRecovery", () => {
 
 describe("clearIdentityRecovery", () => {
   it("deletes the identityRecovery entry by code", async () => {
-    await clearIdentityRecovery("uid-1", "DH-CODE-TO-CLEAR");
+    await clearIdentityRecovery("uid-1", "DH-CODE-CLER");
 
-    expect(mockBatchDelete).toHaveBeenCalledWith("identityRecovery/DH-CODE-TO-CLEAR");
+    expect(mockBatchDelete).toHaveBeenCalledWith("identityRecovery/DH-CODE-CLER");
   });
 
   it("deletes the identitySecret entry by uid", async () => {
-    await clearIdentityRecovery("uid-1", "DH-CODE-TO-CLEAR");
+    await clearIdentityRecovery("uid-1", "DH-CODE-CLER");
 
     expect(mockBatchDelete).toHaveBeenCalledWith("identitySecret/uid-1");
   });
 
   it("commits the batch exactly once", async () => {
-    await clearIdentityRecovery("uid-1", "DH-CODE-TO-CLEAR");
+    await clearIdentityRecovery("uid-1", "DH-CODE-CLER");
 
     expect(mockBatchCommit).toHaveBeenCalledOnce();
   });
@@ -178,7 +178,7 @@ describe("reclaimIdentity", () => {
   it("throws when recovery code is not found", async () => {
     mockGetDoc.mockResolvedValue(makeEmptySnap());
 
-    await expect(reclaimIdentity("uid-new", "DH-BAD-CODE")).rejects.toThrow(
+    await expect(reclaimIdentity("uid-new", "DH-BADD-C0DE")).rejects.toThrow(
       "Recovery code not found."
     );
   });
@@ -186,7 +186,7 @@ describe("reclaimIdentity", () => {
   it("throws when the code already belongs to the current user", async () => {
     mockGetDoc.mockResolvedValue(makeRecoverySnap("uid-same", "dm"));
 
-    await expect(reclaimIdentity("uid-same", "DH-CODE")).rejects.toThrow(
+    await expect(reclaimIdentity("uid-same", "DH-C0DE-0001")).rejects.toThrow(
       "already registered to your account"
     );
   });
@@ -195,7 +195,7 @@ describe("reclaimIdentity", () => {
     mockGetDoc.mockResolvedValue(makeRecoverySnap("uid-old", "dm"));
     mockGetDocs.mockResolvedValue(makeQuerySnap([]));
 
-    const role = await reclaimIdentity("uid-new", "DH-CODE");
+    const role = await reclaimIdentity("uid-new", "DH-C0DE-0001");
 
     expect(role).toBe("dm");
   });
@@ -204,11 +204,11 @@ describe("reclaimIdentity", () => {
     mockGetDoc.mockResolvedValue(makeRecoverySnap("uid-old", "dm"));
     mockGetDocs.mockResolvedValue(makeQuerySnap([]));
 
-    await reclaimIdentity("uid-new", "DH-CODE");
+    await reclaimIdentity("uid-new", "DH-C0DE-0001");
 
     expect(mockSetDoc).toHaveBeenCalledWith("identityReclaims/uid-new", {
       oldUid: "uid-old",
-      code: "DH-CODE",
+      code: "DH-C0DE-0001",
     });
   });
 
@@ -220,7 +220,7 @@ describe("reclaimIdentity", () => {
       // Second call: campaigns where uid-old is a member (none for a DM-only account)
       .mockResolvedValueOnce(makeQuerySnap([]));
 
-    await reclaimIdentity("uid-new", "DH-CODE");
+    await reclaimIdentity("uid-new", "DH-C0DE-0001");
 
     expect(mockBatchUpdate).toHaveBeenCalledWith("campaigns/camp-1", { dmId: "uid-new" });
     expect(mockBatchUpdate).toHaveBeenCalledWith("campaigns/camp-2", { dmId: "uid-new" });
@@ -242,7 +242,7 @@ describe("reclaimIdentity", () => {
       // Third call: characters in that campaign owned by uid-old
       .mockResolvedValueOnce(makeQuerySnap(["campaigns/camp-1/characters/char-1"]));
 
-    await reclaimIdentity("uid-new", "DH-CODE");
+    await reclaimIdentity("uid-new", "DH-C0DE-0001");
 
     // memberIds: uid-old replaced with uid-new, other members preserved
     expect(mockBatchUpdate).toHaveBeenCalledWith("campaigns/camp-1", {
@@ -263,7 +263,7 @@ describe("reclaimIdentity", () => {
       )
       .mockResolvedValueOnce(makeQuerySnap(["campaigns/camp-1/characters/char-1"]));
 
-    await reclaimIdentity("uid-new", "DH-CODE");
+    await reclaimIdentity("uid-new", "DH-C0DE-0001");
 
     expect(mockBatchUpdate).toHaveBeenCalledWith("campaigns/camp-1", {
       dmId: "uid-new",
@@ -278,17 +278,17 @@ describe("reclaimIdentity", () => {
     mockGetDoc.mockResolvedValue(makeRecoverySnap("uid-old", "dm"));
     mockGetDocs.mockResolvedValue(makeQuerySnap([]));
 
-    await reclaimIdentity("uid-new", "DH-CODE");
+    await reclaimIdentity("uid-new", "DH-C0DE-0001");
 
-    expect(mockUpdateDoc).toHaveBeenCalledWith("identityRecovery/DH-CODE", { uid: "uid-new" });
-    expect(mockSetDoc).toHaveBeenCalledWith("identitySecret/uid-new", { code: "DH-CODE" });
+    expect(mockUpdateDoc).toHaveBeenCalledWith("identityRecovery/DH-C0DE-0001", { uid: "uid-new" });
+    expect(mockSetDoc).toHaveBeenCalledWith("identitySecret/uid-new", { code: "DH-C0DE-0001" });
   });
 
   it("deletes the reclaim proof document after completion", async () => {
     mockGetDoc.mockResolvedValue(makeRecoverySnap("uid-old", "dm"));
     mockGetDocs.mockResolvedValue(makeQuerySnap([]));
 
-    await reclaimIdentity("uid-new", "DH-CODE");
+    await reclaimIdentity("uid-new", "DH-C0DE-0001");
 
     expect(mockDeleteDoc).toHaveBeenCalledWith("identityReclaims/uid-new");
   });
@@ -301,7 +301,7 @@ describe("reclaimIdentity", () => {
       )
       .mockResolvedValueOnce(makeQuerySnap([]));
 
-    await expect(reclaimIdentity("uid-new", "DH-CODE")).rejects.toThrow(
+    await expect(reclaimIdentity("uid-new", "DH-C0DE-0001")).rejects.toThrow(
       "protected recovery process"
     );
 
@@ -323,7 +323,7 @@ describe("reclaimIdentity", () => {
         )
       );
 
-    await expect(reclaimIdentity("uid-new", "DH-CODE")).rejects.toThrow(
+    await expect(reclaimIdentity("uid-new", "DH-C0DE-0001")).rejects.toThrow(
       "protected recovery process"
     );
 
@@ -338,12 +338,12 @@ describe("getRecoveryCode", () => {
   it("returns the code when identitySecret document exists", async () => {
     mockGetDoc.mockResolvedValue({
       exists: () => true,
-      data: () => ({ code: "DH-MY-CODE" }),
+      data: () => ({ code: "DH-MY00-CODE" }),
     });
 
     const result = await getRecoveryCode("uid-1");
 
-    expect(result).toBe("DH-MY-CODE");
+    expect(result).toBe("DH-MY00-CODE");
     expect(mockDoc).toHaveBeenCalledWith("mock-db", "identitySecret", "uid-1");
   });
 
@@ -363,31 +363,31 @@ describe("rotateRecoveryCode", () => {
     // getRecoveryCode returns the current code
     mockGetDoc.mockResolvedValue({
       exists: () => true,
-      data: () => ({ code: "DH-OLD-CODE" }),
+      data: () => ({ code: "DH-0OLD-C0DE" }),
     });
 
     await rotateRecoveryCode("uid-1", "dm");
 
     // The batch delete should remove the OLD identityRecovery entry
-    expect(mockBatchDelete).toHaveBeenCalledWith("identityRecovery/DH-OLD-CODE");
+    expect(mockBatchDelete).toHaveBeenCalledWith("identityRecovery/DH-0OLD-C0DE");
   });
 
   it("returns the newly generated code", async () => {
     mockGetDoc.mockResolvedValue({
       exists: () => true,
-      data: () => ({ code: "DH-OLD-CODE" }),
+      data: () => ({ code: "DH-0OLD-C0DE" }),
     });
 
     const result = await rotateRecoveryCode("uid-1", "player");
 
-    expect(result).toBe("DH-GENERATED-CODE");
+    expect(result).toBe("DH-GENE-CODE");
   });
 
   it("handles no existing code gracefully (first-time rotate)", async () => {
     mockGetDoc.mockResolvedValue({ exists: () => false, data: () => null });
 
     // Should not throw; registerIdentityRecovery called without existingCode
-    await expect(rotateRecoveryCode("uid-1", "dm")).resolves.toBe("DH-GENERATED-CODE");
+    await expect(rotateRecoveryCode("uid-1", "dm")).resolves.toBe("DH-GENE-CODE");
     expect(mockBatchDelete).not.toHaveBeenCalled();
   });
 });

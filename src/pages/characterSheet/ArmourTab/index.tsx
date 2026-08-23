@@ -278,7 +278,18 @@ export function ArmourTab({
         toast.error("Failed to save custom armour.");
       }
     },
-    [armour, campaignId, characterId, characterName, customFormForceField, editable, onUpdate, pickerMode, toast, userId]
+    [
+      armour,
+      campaignId,
+      characterId,
+      characterName,
+      customFormForceField,
+      editable,
+      onUpdate,
+      pickerMode,
+      toast,
+      userId,
+    ]
   );
 
   const addArmourFromLibrary = useCallback(
@@ -319,6 +330,7 @@ export function ArmourTab({
         const versionId = await saveDraftCustomItem({
           campaignId,
           customItemId: editingArmourDefinition.libraryItem.id,
+          category: "armour",
           editor: { userId, characterId, characterName },
           data,
         });
@@ -424,7 +436,9 @@ export function ArmourTab({
   );
 
   const regularArmour = armour.filter((p) => !p.isForceField);
-  const forceFields = armour.filter((p) => p.isForceField).sort((a, b) => a.name.localeCompare(b.name));
+  const forceFields = armour
+    .filter((p) => p.isForceField)
+    .sort((a, b) => a.name.localeCompare(b.name));
   const worn = regularArmour.filter((p) => p.worn).sort((a, b) => a.name.localeCompare(b.name));
   const stowed = regularArmour.filter((p) => !p.worn).sort((a, b) => a.name.localeCompare(b.name));
 
@@ -595,7 +609,8 @@ export function ArmourTab({
                               <>
                                 {traitArmourSources.map((source) => (
                                   <p key={`${source.kind}:${source.name}`}>
-                                    {source.name} ({source.type}): +{source.amount} to all locations.
+                                    {source.name} ({source.type}): +{source.amount} to all
+                                    locations.
                                   </p>
                                 ))}
                                 {bionicLocations.length > 0 && (

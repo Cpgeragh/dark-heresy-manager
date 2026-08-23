@@ -392,6 +392,7 @@ export function CyberneticsTab({
         const versionId = await saveDraftCustomItem({
           campaignId,
           customItemId: editingCyberneticDefinition.libraryItem.id,
+          category: "cybernetic",
           editor: { userId, characterId, characterName },
           data,
         });

@@ -12,6 +12,8 @@ import {
   type QueryDocumentSnapshot,
   type QuerySnapshot,
 } from "firebase/firestore";
+import { PRODUCT_LIMITS } from "../constants/productLimits";
+import { assertBulkOperationCount } from "./firebaseValidation";
 
 export const BULK_READ_PAGE_SIZE = 100;
 
@@ -28,8 +30,14 @@ export async function forEachQueryPage<
   processPage: (documents: QueryDocumentSnapshot<AppModelType, DbModelType>[]) => Promise<void>,
   pageSize = BULK_READ_PAGE_SIZE
 ): Promise<number> {
-  if (!Number.isInteger(pageSize) || pageSize < 1 || pageSize > 450) {
-    throw new Error("Firestore page size must be a whole number from 1 to 450.");
+  if (
+    !Number.isInteger(pageSize) ||
+    pageSize < 1 ||
+    pageSize > PRODUCT_LIMITS.bulkOperationDocuments
+  ) {
+    throw new Error(
+      `Firestore page size must be a whole number from 1 to ${PRODUCT_LIMITS.bulkOperationDocuments}.`
+    );
   }
 
   let cursor: QueryDocumentSnapshot<AppModelType, DbModelType> | null = null;
@@ -41,6 +49,7 @@ export async function forEachQueryPage<
       : query(source, orderBy(documentId()), limit(pageSize));
     const snapshot: QuerySnapshot<AppModelType, DbModelType> = await getDocs(pageQuery);
     if (snapshot.empty) break;
+    assertBulkOperationCount(snapshot.docs.length, "Firestore query page");
 
     await processPage(snapshot.docs);
     processed += snapshot.docs.length;

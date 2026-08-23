@@ -8,6 +8,7 @@ const {
   mockDoc,
   mockGetDocs,
   mockServerTimestamp,
+  mockSetDoc,
   mockUpdateDoc,
 } = vi.hoisted(() => ({
   mockBatch: {
@@ -20,6 +21,7 @@ const {
   mockDoc: vi.fn((...args: unknown[]) => args.slice(1).join("/")),
   mockGetDocs: vi.fn(),
   mockServerTimestamp: vi.fn(() => "server-timestamp"),
+  mockSetDoc: vi.fn().mockResolvedValue(undefined),
   mockUpdateDoc: vi.fn().mockResolvedValue(undefined),
 }));
 
@@ -34,7 +36,7 @@ vi.mock("firebase/firestore", () => ({
   orderBy: (...args: unknown[]) => ({ type: "orderBy", args }),
   query: (source: unknown) => source,
   serverTimestamp: () => mockServerTimestamp(),
-  setDoc: vi.fn(),
+  setDoc: (...args: unknown[]) => mockSetDoc(...args),
   startAfter: (...args: unknown[]) => ({ type: "startAfter", args }),
   updateDoc: (...args: unknown[]) => mockUpdateDoc(...args),
   writeBatch: () => mockBatch,
@@ -54,8 +56,10 @@ vi.mock("../../src/services/characterService", () => ({
 
 import {
   archiveCampaign,
+  createCampaign,
   deleteCampaign,
   restoreCampaign,
+  updateCampaignName,
 } from "../../src/services/campaignService";
 
 // A fake QuerySnapshot: `getDocs` is stubbed per collection path below.
@@ -75,6 +79,25 @@ beforeEach(() => {
   mockDeleteCharacter.mockResolvedValue(undefined);
   mockDeleteDoc.mockResolvedValue(undefined);
   mockBatch.commit.mockResolvedValue(undefined);
+  mockSetDoc.mockResolvedValue(undefined);
+});
+
+describe("campaign input validation", () => {
+  it("rejects a non-text campaign name before creating a Firestore reference", async () => {
+    await expect(createCampaign(42 as unknown as string, "dm-1")).rejects.toThrow(
+      "Campaign name must be text"
+    );
+    expect(mockDoc).not.toHaveBeenCalled();
+    expect(mockSetDoc).not.toHaveBeenCalled();
+  });
+
+  it("rejects a non-text renamed campaign value before writing", async () => {
+    await expect(updateCampaignName("camp-1", false as unknown as string)).rejects.toThrow(
+      "Campaign name must be text"
+    );
+    expect(mockDoc).not.toHaveBeenCalled();
+    expect(mockUpdateDoc).not.toHaveBeenCalled();
+  });
 });
 
 describe("campaign archive operations", () => {

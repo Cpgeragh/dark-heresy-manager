@@ -123,6 +123,16 @@ describe("sendMessage", () => {
     expect(summaryData.lastMessage).toBe("spaces");
   });
 
+  it("keeps the full message while bounding the thread preview to 500 characters", async () => {
+    const text = "x".repeat(600);
+    await sendMessage("c1", "char-1", "p1", text, true);
+
+    const [, messageData] = mockBatchSet.mock.calls[0];
+    const [, summaryData] = mockBatchSet.mock.calls[1];
+    expect(messageData.text).toHaveLength(600);
+    expect(summaryData.lastMessage).toHaveLength(500);
+  });
+
   it("commits the batch exactly once", async () => {
     await sendMessage("c1", "char-1", "p1", "Hello", true);
     expect(mockBatchCommit).toHaveBeenCalledOnce();
@@ -138,6 +148,16 @@ describe("sendMessage", () => {
   it("rejects messages over 2,000 characters before creating a batch", async () => {
     await expect(sendMessage("c1", "char-1", "p1", "x".repeat(2_001), true)).rejects.toThrow(
       "Message cannot exceed 2000 characters."
+    );
+    expect(mockWriteBatch).not.toHaveBeenCalled();
+  });
+
+  it("rejects invalid IDs and runtime field types before creating a batch", async () => {
+    await expect(sendMessage("bad/campaign", "char-1", "p1", "Hello", true)).rejects.toThrow(
+      "Campaign ID is invalid"
+    );
+    await expect(sendMessage("c1", "char-1", "p1", 42 as never, true)).rejects.toThrow(
+      "Message must be text"
     );
     expect(mockWriteBatch).not.toHaveBeenCalled();
   });

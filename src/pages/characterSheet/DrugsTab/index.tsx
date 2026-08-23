@@ -50,8 +50,9 @@ export function DrugsTab({
 }: DrugsTabProps) {
   const [showPicker, setShowPicker] = useState(false);
   const [showCustomForm, setShowCustomForm] = useState(false);
-  const [editingDrugDefinition, setEditingDrugDefinition] =
-    useState<EditingDrugDefinition | null>(null);
+  const [editingDrugDefinition, setEditingDrugDefinition] = useState<EditingDrugDefinition | null>(
+    null
+  );
   const toast = useToast();
   const {
     publishDefinition: publishDrugDefinition,
@@ -152,7 +153,7 @@ export function DrugsTab({
       const versionId =
         libraryItem.status === "published"
           ? libraryItem.publishedVersionId
-          : libraryItem.draftVersionId ?? libraryItem.latestVersionId;
+          : (libraryItem.draftVersionId ?? libraryItem.latestVersionId);
 
       if (!versionId) {
         toast.error("This custom drug has no usable version.");
@@ -176,6 +177,7 @@ export function DrugsTab({
         const versionId = await saveDraftCustomItem({
           campaignId,
           customItemId: editingDrugDefinition.libraryItem.id,
+          category: "drug",
           editor: { userId, characterId, characterName },
           data,
         });
@@ -199,16 +201,7 @@ export function DrugsTab({
         toast.error("Failed to update custom drug definition.");
       }
     },
-    [
-      campaignId,
-      characterId,
-      characterName,
-      drugs,
-      editingDrugDefinition,
-      onUpdate,
-      toast,
-      userId,
-    ]
+    [campaignId, characterId, characterName, drugs, editingDrugDefinition, onUpdate, toast, userId]
   );
 
   const removeDrug = useCallback(
@@ -240,9 +233,7 @@ export function DrugsTab({
           })
         : undefined);
     const canEditDefinition =
-      !!libraryItem &&
-      editable &&
-      (isDM || (!!userId && libraryItem.creator.userId === userId));
+      !!libraryItem && editable && (isDM || (!!userId && libraryItem.creator.userId === userId));
     const rowBusyAction = libraryItem ? getBusyAction(libraryItem.id) : null;
 
     return (
@@ -275,14 +266,14 @@ export function DrugsTab({
   return (
     <div className="space-y-6">
       {/* Excessive Drug Use rule */}
-      <div className={`rounded-lg border border-violet-700/40 bg-violet-900/10 px-4 lg:px-5 py-3 lg:py-4 text-center text-xs lg:text-sm ${uiTextBody} leading-relaxed`}>
-        <p className="font-semibold text-violet-400 uppercase tracking-wide">
-          Excessive Drug Use
-        </p>
+      <div
+        className={`rounded-lg border border-violet-700/40 bg-violet-900/10 px-4 lg:px-5 py-3 lg:py-4 text-center text-xs lg:text-sm ${uiTextBody} leading-relaxed`}
+      >
+        <p className="font-semibold text-violet-400 uppercase tracking-wide">Excessive Drug Use</p>
         <p className="mt-1">
-          Using more than one dose of the same drug within a 24-hour period requires a Toughness Test
-          for each use after the first, with a cumulative -20 penalty. On a failure, the drug has no
-          effect and further doses do not affect the character for a full 24 hours.
+          Using more than one dose of the same drug within a 24-hour period requires a Toughness
+          Test for each use after the first, with a cumulative -20 penalty. On a failure, the drug
+          has no effect and further doses do not affect the character for a full 24 hours.
         </p>
       </div>
 
@@ -290,18 +281,18 @@ export function DrugsTab({
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <SectionHeader>Carried</SectionHeader>
-        {editable ? (
-          <AddButton label="Add drug" onClick={() => setShowPicker(true)} />
-        ) : (
-          <ViewButton label="View drugs" onClick={() => setShowPicker(true)} />
+          {editable ? (
+            <AddButton label="Add drug" onClick={() => setShowPicker(true)} />
+          ) : (
+            <ViewButton label="View drugs" onClick={() => setShowPicker(true)} />
+          )}
+        </div>
+
+        {drugs.length === 0 && (
+          <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No drugs carried.</p>
         )}
-        </div>
 
-        {drugs.length === 0 && <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No drugs carried.</p>}
-
-        <div className="space-y-3 sm:hidden">
-          {sortedDrugs.map(renderDrugRow)}
-        </div>
+        <div className="space-y-3 sm:hidden">{sortedDrugs.map(renderDrugRow)}</div>
 
         <div className="hidden sm:grid sm:grid-cols-2 sm:gap-3 sm:items-start">
           {drugColumns.map((column, index) => (

@@ -48,10 +48,10 @@ describe("batchDeleteRefs", () => {
 
     await batchDeleteRefs("mock-db" as never, refs);
 
-    // 450-per-chunk limit: 900 refs → 2 full batches
-    expect(mockWriteBatch).toHaveBeenCalledTimes(2);
+    // 440-per-chunk limit: 900 refs → 440 + 440 + 20
+    expect(mockWriteBatch).toHaveBeenCalledTimes(3);
     expect(mockBatch.delete).toHaveBeenCalledTimes(900);
-    expect(mockBatch.commit).toHaveBeenCalledTimes(2);
+    expect(mockBatch.commit).toHaveBeenCalledTimes(3);
   });
 
   it("commits each chunk before starting the next", async () => {
@@ -66,6 +66,6 @@ describe("batchDeleteRefs", () => {
 
     await batchDeleteRefs("mock-db" as never, fakeRefs(900));
 
-    expect(order).toEqual(["writeBatch", "commit", "writeBatch", "commit"]);
+    expect(order).toEqual(["writeBatch", "commit", "writeBatch", "commit", "writeBatch", "commit"]);
   });
 });

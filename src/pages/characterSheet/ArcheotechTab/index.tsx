@@ -149,7 +149,7 @@ export function ArcheotechTab({
       const versionId =
         libraryItem.status === "published"
           ? libraryItem.publishedVersionId
-          : libraryItem.draftVersionId ?? libraryItem.latestVersionId;
+          : (libraryItem.draftVersionId ?? libraryItem.latestVersionId);
 
       if (!versionId) {
         toast.error("This custom archeotech has no usable version.");
@@ -158,7 +158,13 @@ export function ArcheotechTab({
 
       await onUpdate([
         ...archeotech,
-        buildArcheotechSnapshot(crypto.randomUUID(), undefined, libraryItem.data, libraryItem.id, versionId),
+        buildArcheotechSnapshot(
+          crypto.randomUUID(),
+          undefined,
+          libraryItem.data,
+          libraryItem.id,
+          versionId
+        ),
       ]);
     },
     [archeotech, editable, onUpdate, toast]
@@ -173,6 +179,7 @@ export function ArcheotechTab({
         const versionId = await saveDraftCustomItem({
           campaignId,
           customItemId: editingArcheotechDefinition.libraryItem.id,
+          category: "archeotech",
           editor: { userId, characterId, characterName },
           data,
         });
@@ -249,9 +256,7 @@ export function ArcheotechTab({
           })
         : undefined);
     const canEditDefinition =
-      !!libraryItem &&
-      editable &&
-      (isDM || (!!userId && libraryItem.creator.userId === userId));
+      !!libraryItem && editable && (isDM || (!!userId && libraryItem.creator.userId === userId));
     const rowBusyAction = libraryItem ? getBusyAction(libraryItem.id) : null;
 
     const sharedAdminProps = {
@@ -267,7 +272,9 @@ export function ArcheotechTab({
       onRemove: () => removeItem(item.id),
     };
 
-    const isWeaponType = ["Weapon", "Integrated Weapon", "Grenade", "Mine"].includes(item.type ?? "");
+    const isWeaponType = ["Weapon", "Integrated Weapon", "Grenade", "Mine"].includes(
+      item.type ?? ""
+    );
     if (isWeaponType)
       return (
         <ArcheotechWeaponCard
@@ -280,13 +287,7 @@ export function ArcheotechTab({
         />
       );
 
-    return (
-      <ItemCard
-        key={item.id}
-        item={item}
-        {...sharedAdminProps}
-      />
-    );
+    return <ItemCard key={item.id} item={item} {...sharedAdminProps} />;
   };
 
   if (archeotechError) {
@@ -314,9 +315,7 @@ export function ArcheotechTab({
           <p className={`text-sm lg:text-base ${uiTextPlaceholder}`}>No archeotech recorded.</p>
         )}
 
-        <div className="space-y-3 sm:hidden">
-          {sortedArcheotech.map(renderItemCard)}
-        </div>
+        <div className="space-y-3 sm:hidden">{sortedArcheotech.map(renderItemCard)}</div>
 
         <div className="hidden sm:grid sm:grid-cols-2 sm:gap-3 sm:items-start">
           {archeotechColumns.map((column, index) => (
@@ -333,7 +332,10 @@ export function ArcheotechTab({
               setShowCustomForm(false);
               setShowPicker(true);
             }}
-            onBack={() => { setShowCustomForm(false); setShowPicker(true); }}
+            onBack={() => {
+              setShowCustomForm(false);
+              setShowPicker(true);
+            }}
           />
         )}
 

@@ -213,17 +213,7 @@ export function validateRecoveryCode(code: string): ValidationResult {
     return { isValid: false, error: "Recovery code is required" };
   }
 
-  // Simple format check: should start with DH- and have dashes
-  if (!trimmed.startsWith("DH-")) {
-    return {
-      isValid: false,
-      error: "Recovery code must start with 'DH-'",
-    };
-  }
-
-  // Check has at least 2 segments after DH-
-  const segments = trimmed.split("-");
-  if (segments.length < 3) {
+  if (!/^DH-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(trimmed)) {
     return {
       isValid: false,
       error: "Recovery code format: DH-XXXX-YYYY",

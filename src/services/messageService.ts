@@ -12,6 +12,11 @@ import {
 import { db } from "../firebase";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
 import { deleteQueryDocsInPages } from "../utils/firestoreQueryPages";
+import {
+  assertBoolean,
+  assertFirestoreDocumentId,
+  assertString,
+} from "../utils/firebaseValidation";
 
 /**
  * Sends a message in a character-DM thread and updates the thread summary.
@@ -26,6 +31,11 @@ export async function sendMessage(
   text: string,
   isFromPlayer: boolean
 ): Promise<void> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(characterId, "Character ID");
+  assertFirestoreDocumentId(fromUid, "Sender ID");
+  assertString(text, "Message");
+  assertBoolean(isFromPlayer, "Player-message flag");
   const trimmedText = text.trim();
   if (!trimmedText) throw new Error("Message cannot be empty.");
   if (trimmedText.length > PRODUCT_LIMITS.messageCharacters) {
@@ -50,7 +60,7 @@ export async function sendMessage(
     threadRef,
     {
       characterId,
-      lastMessage: trimmedText,
+      lastMessage: trimmedText.slice(0, PRODUCT_LIMITS.threadSummaryPreviewCharacters),
       lastTimestamp: serverTimestamp(),
       ...(isFromPlayer ? { unreadForDM: increment(1) } : {}),
     },
@@ -64,6 +74,8 @@ export async function sendMessage(
  * Resets the unread counter on a thread — called when the DM opens a conversation.
  */
 export async function markThreadRead(campaignId: string, characterId: string): Promise<void> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(characterId, "Character ID");
   const threadRef = doc(db, "campaigns", campaignId, "threads", characterId);
   await updateDoc(threadRef, { unreadForDM: 0 });
 }
@@ -73,6 +85,8 @@ export async function markThreadRead(campaignId: string, characterId: string): P
  * after deletion completes. Retrying after an interruption is safe.
  */
 export async function clearThread(campaignId: string, characterId: string): Promise<void> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(characterId, "Character ID");
   const messagesRef = collection(db, "campaigns", campaignId, "threads", characterId, "messages");
   const threadRef = doc(db, "campaigns", campaignId, "threads", characterId);
   await deleteQueryDocsInPages(db, messagesRef);

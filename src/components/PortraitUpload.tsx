@@ -8,6 +8,7 @@ import { Button } from "../ui/Button";
 import { ModalHeader } from "../ui/ModalHeader";
 import { ModalShell } from "../ui/ModalShell";
 import { useToast } from "./Toast";
+import { ACCEPTED_PORTRAIT_MIME_TYPES, assertPortraitSource } from "../utils/firebaseValidation";
 
 // ── Canvas helper ─────────────────────────────────────────────────────────────
 
@@ -83,14 +84,26 @@ export function PortraitUpload({
     setCroppedAreaPixels(croppedPixels);
   }, []);
 
-  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => setImageSrc(reader.result as string);
-    reader.readAsDataURL(file);
-    e.target.value = "";
-  }, []);
+  const handleFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      e.target.value = "";
+      if (!file) return;
+
+      try {
+        assertPortraitSource(file);
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Invalid portrait file.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => setImageSrc(reader.result as string);
+      reader.onerror = () => toast.error("Portrait file could not be read.");
+      reader.readAsDataURL(file);
+    },
+    [toast]
+  );
 
   const handleSave = useCallback(async () => {
     if (!imageSrc || !croppedAreaPixels) return;
@@ -141,8 +154,13 @@ export function PortraitUpload({
         </div>
 
         {canEdit && (
-          <button type="button"
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); fileInputRef.current?.click(); }}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              fileInputRef.current?.click();
+            }}
             className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border border-red-500 text-red-500 flex items-center justify-center hover:bg-red-500/10 transition"
             aria-label="Upload portrait"
           >
@@ -162,7 +180,7 @@ export function PortraitUpload({
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/*"
+          accept={ACCEPTED_PORTRAIT_MIME_TYPES.join(",")}
           className="hidden"
           onChange={handleFileChange}
         />
@@ -177,7 +195,6 @@ export function PortraitUpload({
         >
           <ModalHeader title="Position Portrait" onClose={handleCancel} />
           <div className="p-4 lg:p-5 space-y-4">
-
             {/* Cropper */}
             <div className="relative h-64 rounded-lg overflow-hidden bg-slate-800">
               <Cropper
@@ -208,21 +225,17 @@ export function PortraitUpload({
             </div>
 
             <div className="flex gap-2">
-              <Button
-                className="flex-1"
-                onClick={handleSave}
-                disabled={uploading}
-              >
+              <Button className="flex-1" onClick={handleSave} disabled={uploading}>
                 {uploading ? "Uploading…" : "Save"}
               </Button>
-                <Button
-                  variant="secondary"
-                  className="flex-1"
-                  onClick={handleCancel}
-                  disabled={uploading}
-                >
-                  Cancel
-                </Button>
+              <Button
+                variant="secondary"
+                className="flex-1"
+                onClick={handleCancel}
+                disabled={uploading}
+              >
+                Cancel
+              </Button>
             </div>
           </div>
         </ModalShell>
