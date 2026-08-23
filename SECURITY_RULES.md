@@ -1,340 +1,67 @@
-# Dark Heresy Manager – Firestore Security Rules Overview
+# Dark Heresy Manager — Firestore security boundary
 
-This document describes all Firestore security rules used in the Dark Heresy Manager system.
-It explains the intent, permissions model, and invariants that the unit tests enforce.
+This document describes the current `firestore.rules` contract. The rules file is authoritative; this overview explains its intent and the behaviours covered by the emulator suite.
 
-## Table of Contents
+## Shared identity model
 
-1. [Users Collection](#1-users-collection)
-2. [Recovery Index](#2-recovery-index)
-3. [Campaigns](#3-campaigns)
-4. [Characters](#4-characters)
-5. [Claim Logs](#5-claim-logs)
-6. [DM Privileges & Ownership Model](#6-dm-privileges--ownership-model)
-7. [Invariants Required for Correctness](#7-invariants-required-for-correctness)
-8. [Testing Strategy Summary](#8-testing-strategy-summary)
+Every request must be authenticated unless a rule explicitly says otherwise. No current application path permits unauthenticated Firestore access.
 
----
+`playerOwnsOrLinked(ownerId)` and `dmOwnsOrLinked(dmId)` treat a signed-in primary identity and a secondary device with a matching `userLinks` document as the same effective account. This is used consistently for character ownership, DM authority, profiles, messaging and recovery-code management.
 
-## 1. Users Collection (`/users/{userId}`)
+## Users and profiles
 
-### Intent
+`/users/{uid}` is readable and writable only by that exact authenticated UID. Writes allow only the recognised account-state fields and validate their types.
 
-Each Firebase user may store profile and settings data.
-This collection must never allow:
+`/userProfiles/{uid}` is an authenticated first-name directory. Any authenticated user may read a profile so names can be shown in campaign UI. Only that profile's effective owner may create or update it, the document may contain only one non-empty `firstName` of at most 50 characters, and client deletion is denied.
 
-- Reading another user's document
-- Writing another user's document
-- Listing all users
+## Campaigns
 
-### Rule Summary
+Any authenticated user may read campaign metadata. Any user may create a campaign when its `dmId` is their own UID and the document has the approved shape. Campaign names are limited to 100 characters, member lists to 100 entries, and optional GM/Inquisitor names to 100 characters.
 
-- A user may read/write their own document only
-- No user may affect another user's document
-- Unauthenticated users have no access
+The DM or a linked DM device may edit campaign metadata without transferring `dmId`, and may delete the campaign. A claimant may only add their effective identity to `memberIds`; they cannot remove existing members or change another field. Identity-reclaim updates may replace the old DM/member UID only while a valid temporary reclaim proof exists.
 
-### Rationale
+## Characters and audit history
 
-User documents may contain email addresses, preferences, or sensitive metadata.
-We treat these as strictly private.
+Any authenticated user may read campaign character documents. Only the DM may create a character, and a new character must be unclaimed, player editing must be disabled, and a recovery code must exist.
 
----
+The DM may update or delete a character. An owning player or linked device may edit only while `isEditableByPlayer` is true and cannot change `userId`, `isEditableByPlayer` or `recoveryCode`. A claim may only move `userId` from null to the claimant's effective identity. Identity reclaim may replace only the proven old owner UID.
 
-## 2. Recovery Index (`/recoveryIndex/{code}`)
+Claim-log entries are DM-readable only and immutable after creation. Players may add their own valid claim/release events; DMs may add their own force-assign/force-release events. A log may be deleted only by the DM in the same atomic operation that deletes its parent character.
 
-### Intent
+XP proposals are readable by the DM and effective character owner. The owner may create only their own pending proposal; only the DM may update or delete it.
 
-This maps a short recovery code → a character within a campaign, allowing a player to reclaim access to their character.
+The collection-group character rule permits a user to query only characters owned by their effective identity.
 
-### Rule Summary
+## Custom-item library
 
-- Anyone authenticated can read recoveryIndex (needed to claim characters)
-- Only the DM of the referenced campaign may create or update an entry
-- DM must own **both** the campaign being written AND any existing campaign (prevents overwriting another DM's entries)
-- No delete permissions exist (recovery codes are permanent)
+Published custom items and versions are authenticated-readable. A draft or archived item is additionally visible to its creator and the campaign DM. New items must be drafts in a recognised category and must be tied to their effective creator.
 
-### Security Fix (Critical)
+Creators may edit only the approved draft/version fields and cannot change immutable ownership, campaign, category or published-version identity. The DM has full campaign-library control. A custom item may be deleted only by the DM after it is archived, or as part of removing the campaign; version documents are DM-deletable.
 
-**Previous vulnerability:** A DM could overwrite another DM's recovery index entry by using the same code.
+## Character recovery and account/device recovery
 
-**Current protection:** Update operations verify that both:
-- The new `campaignId` belongs to the requesting DM
-- The existing `campaignId` (if any) belongs to the requesting DM
+`/recoveryIndex/{code}` currently allows an authenticated client to fetch one exact document. Listing and filtered queries are denied. Only the campaign DM may create or update the exact `{campaignId, characterId}` mapping, including ownership checks against an existing mapping. The campaign DM may delete it. This exact-get exception is transitional and recorded in [ADR 0008](./docs/adr/0008-keep-exact-recovery-lookup-temporarily.md); Stage 3 replaces it with HMAC-derived lookup identifiers.
 
-This prevents recovery code hijacking between campaigns.
+`/identityRecovery/{code}` follows the same exact-get/no-list boundary. Its effective owner may create or delete a strictly shaped `{uid, role}` record. A successful reclaim may transfer only its UID.
 
-### Rationale
+`/identitySecret/{uid}` contains only a bounded recovery code and is readable/writable by that effective account so Settings and linked devices can reveal or rotate it. `/identityReclaims/{uid}` and `/linkProofs/{uid}` are temporary, owner-scoped proof documents whose creation is accepted only when the supplied code matches the target account's secret. Proof updates are denied.
 
-The recovery index connects public recovery codes to internal game data.
-It must be readable by players to reclaim characters, but writable only by the DM to avoid:
+`/userLinks/{uid}` is readable/deletable only by that secondary UID. Creating or changing a link requires a matching temporary proof, a different primary UID and a valid timestamp.
 
-- Hijacking characters
-- Linking codes to incorrect campaigns
-- Unauthorized claim operations
-- Cross-campaign recovery code conflicts
+## Sessions and messaging
 
----
+Sessions are authenticated-readable and DM-writable. The rules enforce exact recognised fields, timestamps, 4,000-character summary/private-note ceilings, whole XP from 0 to 100,000 and at most 100 attendees.
 
-## 3. Campaigns Collection (`/campaigns/{campaignId}`)
+Thread summaries and messages are visible only to the campaign DM or effective character owner. Thread data has an exact shape; message previews and bodies are limited to 2,000 characters and unread counts are bounded. A player's send transition may change only the preview/timestamp/unread fields and must increment the DM unread count by exactly one. A message's `fromUid` must be the sender's effective identity. Messages cannot be edited; only the DM may clear messages or their thread summary.
 
-### Intent
+## Deployment and verification
 
-Campaigns define a game instance and the DM who controls it.
+`firebase.json` references both `firestore.rules` and `firestore.indexes.json`, preventing a normal reviewed deployment from silently omitting the index configuration. Nothing in this repository configuration deploys automatically.
 
-### Rule Summary
+The emulator suite under `tests/firestore` verifies allowed and denied operations, field/type/size validation, query boundaries, linked identities, ownership transitions, immutable audit records and batch behaviour. Run it with:
 
-- Authenticated users can read and list campaigns
-- Only the DM listed in `dmId` may create or update the campaign metadata
-- `dmId` must always match the UID of the caller
-- No delete permissions exist for campaigns
-
-### Rationale
-
-Campaign metadata changes must remain under DM control.
-Listing is allowed because campaigns are inherently visible to all players involved.
-
----
-
-## 4. Characters (`/campaigns/{campaignId}/characters/{characterId}`)
-
-### Intent
-
-A character belongs to a player but is ultimately under DM authority.
-Players can edit their characters only when allowed.
-
-### Concepts
-
-- **Owner** = user whose UID matches the character's `userId`
-- **DM** = user whose UID matches the campaign's `dmId`
-- **Editable flag** (`isEditableByPlayer`) controls whether the owner can make updates
-
-### Rule Summary
-
-#### Read
-- Any authenticated user may read or list characters
-
-#### Player Update (Safe Mode)
-A character's owner may update only when:
-- `isEditableByPlayer == true`
-- They do not modify:
-  - `userId`
-  - `isEditableByPlayer`
-  - `recoveryCode`
-
-#### Defensive Null Handling
-**Critical for subcollection operations:** When subcollections (like claimLog) are created, Firestore evaluates parent character update rules with potentially null contexts. The rules include defensive checks:
-```javascript
-resource != null &&
-resource.data != null &&
-(
-  request.resource.data == null ||
-  !("userId" in request.resource.data) ||
-  request.resource.data.userId == resource.data.userId
-)
+```text
+npm run test:rules
 ```
 
-This prevents:
-- Rule evaluation errors during subcollection creation
-- False permission denials
-- Test failures with "Service call error"
-
-#### DM Permissions
-The DM may:
-- Create
-- Update  
-- Delete
-
-ANY character in their campaign.
-
-#### Players Cannot Create or Delete Characters
-Creation & deletion are DM-only operations.
-
-### Rationale
-
-This supports a balance:
-- Players can modify their character sheet during "editing mode"
-- DM retains total authority and can lock character editing at any time
-- Protected fields prevent ownership theft or bypassing recovery mechanisms
-- Defensive null checks prevent rule evaluation errors in edge cases
-
----
-
-## 5. Claim Logs
-
-(`/campaigns/{campaignId}/characters/{characterId}/claimLog/{logId}`)
-
-### Intent
-
-Record a permanent, auditable history of:
-- Players claiming characters
-- Releasing characters
-- DM overrides (force-assign / force-release)
-
-### Rule Summary
-
-#### Read
-- Only DM can read claim logs (players must not see audit history)
-
-#### Allowed Actions
-Valid actions:
-- `claim`
-- `release`
-- `force-assign`
-- `force-release`
-
-#### Create
-- DM may create ANY valid log
-- Players may create logs only for themselves and only with `claim`/`release`
-- Action must be valid
-- `actorUid` must match caller's UID for players
-
-#### Update/Delete
-- No one may update or delete logs
-- Claim logs are **immutable**
-
-### Rationale
-
-Logs are intended to be a permanent audit trail.
-Immutability and restricted visibility protect game integrity.
-
----
-
-## 6. DM Privileges & Ownership Model
-
-Across all collections:
-
-- The **DM is the ultimate authority** for everything within a campaign
-- Players have **restricted, self-only** access
-- Unauthenticated users have **no rights** anywhere
-
-This model ensures:
-- Campaign-level consistency
-- Secure delegation of character control
-- No cross-player editing or impersonation
-
----
-
-## 7. Invariants Required for Correctness
-
-These conditions must always hold true; the test suite enforces them.
-
-### Campaign Invariants
-- `dmId` is always the UID of the DM performing writes
-- No user may alter `dmId` to another UID
-
-### Character Invariants
-- Players cannot change ownership (`userId`)
-- Editing is allowed only when explicitly unlocked (`isEditableByPlayer`)
-- Recovery codes cannot be altered by players
-- Rules handle null contexts gracefully during subcollection operations
-
-### RecoveryIndex Invariants
-- `campaignId` must refer to a real, DM-owned campaign
-- Only the DM may write entries
-- Updates verify ownership of both old and new campaigns (prevents hijacking)
-- No deletes allowed (recovery codes are permanent)
-
-### ClaimLog Invariants
-- Logs are immutable
-- Only valid actions are accepted
-- Players may only log actions for themselves
-
-### General Invariants
-- Unauthenticated users have zero read/write permissions
-
----
-
-## 8. Testing Strategy Summary
-
-### Test Suite Statistics
-- **128 total tests** - all passing
-- **18 test files** covering all security boundaries
-- **Sequential execution** prevents test interference
-- **Selective cleanup** only where proven necessary
-
-### Core Test Files (79 tests)
-- `campaignRules.test.ts` - Campaign CRUD permissions
-- `characterRules.test.ts` - Character access control
-- `characterOwnershipProtection.test.ts` - Protected field validation
-- `claimLogRules.test.ts` - Immutable audit log (with cleanup)
-- `recoveryIndexRules.test.ts` - Recovery code management
-- `usersRules.test.ts` - User document isolation
-- `unauthenticatedRules.test.ts` - Anonymous access denial
-- `dmPrivilegeRules.test.ts` - DM-specific permissions
-- `playerEdit.test.ts` - Player editing boundaries
-
-### Advanced Test Files (49 tests)
-**High Priority:**
-- `advancedQueryTests.test.ts` - Query operations (where, orderBy, limit)
-- `batchOperations.test.ts` - Batch write validation
-- `recoveryIndexAdvanced.test.ts` - Edge cases and security validation
-
-**Medium Priority:**
-- `characterQueryTests.test.ts` - Character query operations
-- `protectedFieldsSameValues.test.ts` - Field protection with unchanged values
-
-**Low Priority:**
-- `edgeCases.test.ts` - Special characters, long strings, nested objects
-- `fieldValidation.test.ts` - Data type validation
-
-### Test Infrastructure
-
-#### Helpers (`tests/firestore/helpers.ts`)
-- `dbAs(env, uid)` - Get authenticated Firestore client
-- `dbAnon(env)` - Get unauthenticated client
-- `createCampaign()` - Create campaign with verification read (prevents race conditions)
-- `createCharacter()` - Create character with complete schema
-- `createClaimLog()` - Create claim log entry
-- `createRecoveryIndexEntry()` - Create recovery index entry
-
-#### Setup (`tests/firestore/setup.ts`)
-- Singleton test environment
-- Sequential file execution (`fileParallelism: false`)
-- Minimal cleanup strategy (only claimLogRules needs it)
-
-### Coverage Validation
-
-Our test suite achieves near-complete behavioral coverage by validating:
-
-- All allowed actions succeed
-- All forbidden actions fail
-- All invariants remain true
-- All authenticated/unauthenticated distinctions work
-- All DM/player differences are enforced
-- All read/list/write/delete permissions behave as intended
-- Defensive null handling prevents edge case failures
-- Recovery index security prevents cross-campaign hijacking
-- Query operations respect security boundaries
-- Batch operations validate atomically
-
-### Running Tests
-```bash
-# Start emulator
-firebase emulators:start --only firestore
-
-# Run all tests (33 seconds, sequential)
-npm run test
-
-# Run specific test file
-npm run test -- characterRules.test.ts
-
-# Run in UI mode
-npm run test:ui
-```
-
-### Test Reliability
-
-**Strategy:** Sequential file execution prevents test interference without complex cleanup code.
-
-**Trade-offs:**
-- Slower execution (33s vs 9s parallel)
-- 100% reliable (no flaky tests)
-- Simple infrastructure
-- Easy to maintain
-
-**When to Optimize:**
-If the test suite grows significantly (200+ tests) or execution time becomes a bottleneck, consider implementing per-test isolation with unique Firestore roots and parallel execution.
-
----
-
-This ensures your Firestore rules enforce the exact security model required for Dark Heresy Manager.
+All paths not granted by an explicit rule are denied by default.

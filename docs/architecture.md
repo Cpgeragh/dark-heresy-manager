@@ -216,11 +216,25 @@ The GM inbox reuses the thread and input components inside page content. The dra
 
 Domain hooks retain their query construction and snapshot mapping. The shared lifecycle is used by campaign, archived-campaign, character, character-summary, session, thread, message, XP-proposal, claim-log, profile and custom-item subscriptions.
 
+Live collection queries must also have an explicit upper bound. The central client-side values in `constants/firestoreLimits.ts` currently cap:
+
+- active DM and player campaign results at 50 per role, and archived campaigns at 100;
+- campaign rosters at 100 characters and a player's owned-character result at 20;
+- session history at 200 records and the DM inbox at 100 thread summaries;
+- the live message window at the latest 100 messages and claim history at the latest 50 entries;
+- each custom-item query at 200 results.
+
+These limits are cost and abuse circuit-breakers, not substitutes for write-time product limits. A screen that could legitimately outgrow its live window must add deliberate pagination before increasing a cap.
+
+Write boundaries independently validate stored input sizes. Current limits are 100 characters for campaign and character names, 50 for a first name, 2,000 for a message, 4,000 each for a session summary and private notes, 100 attendees and 100,000 XP per session, and 750,000 bytes for a character import. UI `maxLength` and numeric constraints provide immediate feedback, while services repeat validation so callers cannot bypass it accidentally. Firestore rules mirror security-relevant limits.
+
 Compound consumers remain explicit:
 
-- `CampaignsProvider` coordinates active and archived campaigns;
-- `useCampaignCustomItems` merges category/status queries;
-- `useCharacterData` coordinates the character and claim history.
+- `CampaignsProvider` coordinates the DM and member views of active campaigns;
+- `useCampaignCustomItems` merges bounded, server-filtered category/status queries;
+- `useCharacterData` coordinates the character and a bounded DM-only claim history.
+
+Expensive listeners follow the visible UI lifecycle. `MessageDrawer` mounts its thread only while open, and Campaign Overview starts a character's claim-history listener only while the DM has that History dialog open. Campaign Overview derives the small name/owner summaries needed by sessions from its existing roster result instead of opening a second listener on the same character collection.
 
 ### Campaign state
 
@@ -231,10 +245,11 @@ Campaign-specific hooks provide narrower contracts:
 - `useCampaign`;
 - `useArchivedCampaigns`;
 - `useCampaignCharacters`;
-- `useCharacterSummaries`;
 - `useCampaignCustomItems`.
 
 They share subscription semantics but retain the queries and domain mapping that explain their data.
+
+`usePlayerCharacters` applies `userId == current user` in Firestore rather than downloading the entire campaign roster and filtering it in the browser. Custom-item picker queries likewise apply a requested category in Firestore. This reduces both disclosed data and billed document reads; security rules remain the authority for access control.
 
 ### Authentication, roles and permissions
 
@@ -292,7 +307,9 @@ This keeps conversion, calculation, filtering and ordering independent from `Ski
 
 `useSessions` exposes subscribed session state and service-backed mutations. `useXpProposals` exposes proposal state while `xpService` owns proposal, approval and rejection writes.
 
-`useThreads` and `useThreadMessages` provide subscribed messaging state. Thread selection and drawer visibility remain local presentation state.
+`useThreads` and `useThreadMessages` provide bounded subscribed messaging state. Thread selection and drawer visibility remain local presentation state, and closing the player drawer tears down its message listener.
+
+The DM inbox only resets an unread counter when that counter is non-zero. User-account synchronisation creates a missing account document but performs no recurring `lastSeen` heartbeat write for an existing account. Both decisions remove automatic writes that had no necessary product outcome.
 
 ## Service and persistence layer
 
@@ -304,12 +321,38 @@ This keeps conversion, calculation, filtering and ordering independent from `Ski
 
 Services and subscription hooks reuse these references where they make the stored shape and path clearer. One-off domain queries may remain local when an extracted helper would obscure the query.
 
+### Firestore security boundary
+
+Firestore rules are the authoritative boundary for client access. In addition to ownership checks, current rules validate the permitted keys, primitive types and relevant size limits for user accounts, campaign metadata, recovery records, device-link records, sessions, message-thread summaries and individual messages. Client validation improves feedback but does not replace these checks.
+
+Recovery lookup is intentionally transitional. Authenticated clients may fetch one exact `recoveryIndex/{code}` document so the current claim flow remains usable, but collection listing and filtered queries are denied. [ADR 0008](./adr/0008-keep-exact-recovery-lookup-temporarily.md) records this boundary until Stage 3 moves lookup behind HMAC-derived server-side identifiers.
+
+Message owners may update a thread summary only through the send-message state transition: the last message and timestamp change and the unread count rises by exactly one. A DM may reply or reset the unread count. Linked devices may identify the effective primary account, while unrelated sender identities are rejected.
+
+### Bounded bulk operations
+
+Client-side bulk work reads documents in stable document-ID pages of 100 and commits each independent page separately. Message clearing, campaign child cleanup, custom-item version deletion and propagation across character copies use this shared boundary. Campaign deletion removes children before the campaign document and can be safely restarted after an interruption; already-removed documents are harmless on a retry.
+
+Operations that must preserve one atomic ownership or audit boundary fail closed before staging writes if they cannot remain safely below Firestore's 500-write batch ceiling:
+
+- character deletion accepts at most 440 combined claim-log and XP-proposal documents, leaving room for its thread, recovery-index and character documents;
+- identity reclaim reads at most 50 DM campaigns, 50 member campaigns and 20 owned characters per member campaign, then permits at most 440 ownership writes in total;
+- exceeding a ceiling produces a protected-operation error, performs no ownership migration, and leaves the larger resumable workflow to the protected bulk-job design in Stage 3.
+
+These ceilings are safety boundaries rather than product entitlements. They prevent a browser from issuing an unbounded read or constructing an invalid oversized batch while preserving retryable normal operations.
+
+### Firebase deployment configuration
+
+`firebase.json` binds both `firestore.rules` and `firestore.indexes.json` so reviewed rules and index definitions are deployed from the same configuration. The index file includes the active/archived campaign lookups, collection-group character ownership lookup and category-filtered custom-item lookups used by the application.
+
+Hosting responses are configured with a restrictive Content Security Policy, clickjacking protection, MIME sniffing protection, a no-referrer policy, disabled camera/geolocation/microphone permissions and same-origin isolation headers. HTML, service-worker and manifest files retain revalidation-oriented caching, while hashed assets remain immutable. These are repository settings only until an approved deployment; deployed-header verification belongs to the deployment checks and restore/test stage.
+
 ### Service responsibilities
 
 | Service                 | Responsibility                                                                                                   |
 | ----------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | `campaignService`       | Create, rename, archive, restore and delete campaigns                                                            |
-| `characterService`      | Load, save, create, clone, import, claim, release, assign and delete characters                                  |
+| `characterService`      | Load, save, create, import, claim, release, assign and delete characters                                         |
 | `customItemService`     | Create, save, publish, archive, restore and delete custom-item definitions and update or remove character copies |
 | `deviceLinkService`     | Link and unlink devices and manage link proof                                                                    |
 | `identityService`       | Register, reclaim, rotate and clear recovery identities                                                          |
@@ -349,6 +392,8 @@ Neutral values with the same meaning across features have one source:
 - armour location order and labels in `constants/locations.ts`;
 - characteristic, movement, skill, wounds and fate rules in `constants/gameRules.ts`;
 - route definitions in `constants/routes.ts`;
+- bounded Firestore read windows in `constants/firestoreLimits.ts`;
+- stored-input and import ceilings in `constants/productLimits.ts`;
 - toast, search and recovery-code timing or formatting values in `constants/ui.ts`;
 - craftsmanship options and mappings in `ui/craftsmanship.ts`.
 

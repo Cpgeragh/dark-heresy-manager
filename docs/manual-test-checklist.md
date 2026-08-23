@@ -1,6 +1,6 @@
 # Manual Test Checklist — Complete App
 
-Thirty pages and cross-cutting sections, containing 532 checks. Every item
+Thirty pages and cross-cutting sections, containing 568 checks. Every item
 comes from reading the actual logic, not a generic "does it load" pass.
 Check items off as you verify them; anything under **Watch for** is the
 likeliest place a real bug hides. Coverage notes are at the bottom — read
@@ -52,7 +52,7 @@ Start at 0 and set Points to one below, exactly on, and one above every document
 - [ ] Disorder/Trauma picker rows are boxed cards, matching Talents/Traits/Skills/Psychic
 - [ ] Custom Disorder form requires Type, Name, Origin (Custom/2nd Ed), Severity, and Rules Text; custom Trauma form requires Name, Origin, and Rules Text — Add stays disabled until every required field is filled
 - [ ] Once added, a custom disorder/trauma shows its Origin as a source chip on the entry
-- [ ] Custom Disorder/Trauma form's "* Required" hint stays visible even after every field is filled in, not just while incomplete
+- [ ] Custom Disorder/Trauma form's "\* Required" hint stays visible even after every field is filled in, not just while incomplete
 - [ ] On phone: swiping between Temporary Trauma and Disorders tabs works both directions
 
 **Watch for:** a character with old free-text disorder notes (from before the
@@ -70,14 +70,14 @@ Use the same boundary method as Insanity: one below, on, and one above every thr
 - [ ] Points stepper 0–100; Degree chip, timeline, and "pts until Malignancy Test" / "pts until [Degree]" all track correctly
 - [ ] Top of track shows "Character removed from play" and hides the Status/Thresholds grid
 - [ ] Add a Malignancy that rolls a characteristic modifier — "Edit Rolls" button appears, entering values saves them
-- [ ] A Malignancy with no rollable modifiers does *not* show an "Edit Rolls" button
+- [ ] A Malignancy with no rollable modifiers does _not_ show an "Edit Rolls" button
 - [ ] Add a Minor and a Major Mutation independently — they stay in separate groups, don't cross-contaminate
 - [ ] On phone: three-way tab switch (Malignancies / Minor / Major) swipes correctly; on desktop, all three show side by side
 - [ ] Editable mode shows an icon Add button beside each group header; read-only mode shows a View icon button instead, which opens the picker in browse-only mode — rows don't respond to clicks and there's no custom-add action
 - [ ] Malignancy/Mutation picker rows are boxed cards, matching Talents/Traits/Skills/Psychic
 - [ ] Custom Malignancy/Mutation form requires Name, Origin (Custom/2nd Ed), and Rules Text — Add stays disabled until all three are filled
 - [ ] Once added, a custom malignancy/mutation shows its Origin as a source chip on the entry
-- [ ] Custom Malignancy/Mutation form's "* Required" hint stays visible even after every field is filled in, not just while incomplete
+- [ ] Custom Malignancy/Mutation form's "\* Required" hint stays visible even after every field is filled in, not just while incomplete
 - [ ] Removing a Malignancy, Minor Mutation, or Major Mutation arms a confirm step ("Delete [name] from this character?" with Delete/Cancel) instead of deleting on the first tap
 
 **Watch for:** this is the one page that writes to another page — a rolled
@@ -218,7 +218,7 @@ below deliberately change several of those pages.
 - [ ] All six Weapon Training entries are absent: Basic, Heavy, Melee, Pistol, Thrown, and Exotic Weapon Training
 - [ ] Every normal Talent deletion uses a two-step **Delete / Cancel** confirmation
 - [ ] Refresh after several additions and deletions and confirm the same cards, ranks, choices, and sources remain
-- [ ] Any acquisition screen showing a "* Required" hint keeps it visible even once every required field is filled, not just while incomplete
+- [ ] Any acquisition screen showing a "\* Required" hint keeps it visible even once every required field is filled, not just while incomplete
 
 **Ranked Talents:**
 
@@ -451,7 +451,7 @@ cross-checking permanent effects and their named sources.
 - [ ] With that same manual-plus-career-derived Sanctioned Psyker duplicate present, confirm its Sanctioning side-effect (whatever it rolled — an Insanity Points gain or a Characteristic change) only applies once on Characteristics/Insanity, not twice, even though only one card is visible — this was a real bug (the hidden copy still counted) fixed this session
 - [ ] Custom trait creation — Name, Rules Text, and Origin (Custom/2nd Ed) are all required before Add enables; the saved rules text and Origin both actually appear on the character's own card afterwards, not just in the library definition
 - [ ] Custom trait creation and publishing — see §21, Custom Item Library
-- [ ] Custom trait creation's and every Trait acquisition screen's (Soul-bound, Sanctioning, Blank Slate, etc.) "* Required" hint stays visible once all fields are filled, not just while incomplete
+- [ ] Custom trait creation's and every Trait acquisition screen's (Soul-bound, Sanctioning, Blank Slate, etc.) "\* Required" hint stays visible once all fields are filled, not just while incomplete
 
 ## 9. Weapons
 
@@ -464,6 +464,7 @@ This page is much bigger than it looks; go through it deliberately.
 Use a disposable character and create a small labelled test inventory: one normal ranged weapon, one Heavy weapon, one one-handed melee weapon, one Two-Handed weapon, one shield, three grenade types, a clip-fed weapon, a loose-ammunition weapon, and a multi-magazine weapon. Record slot use and ammunition before every action. Work through equip limits first, then grenades, firing/reloading, alternate profiles, upgrades, cybernetic links, and finally custom forms. Refresh after each group and cross-check Armour, Archeotech, and Cybernetics where links exist.
 
 **Equip slots (this applies across Ranged, Melee, and Shields together):**
+
 - [ ] You can equip up to 4 slots' worth of gear in total — confirm the app actually stops you at the limit rather than just visually suggesting one
 - [ ] A **Heavy**-class ranged weapon takes up 2 slots, not 1 — equipping one leaves only 2 slots for everything else
 - [ ] A **Two-Handed** melee weapon likewise takes 2 slots
@@ -472,12 +473,14 @@ Use a disposable character and create a small labelled test inventory: one norma
 - [ ] Stowing an equipped item frees its slot(s) back up immediately
 
 **Grenades — a separate, independent limit:**
-- [ ] Up to 2 *distinct grenade types* can be equipped/readied at once, independent of the weapon slot count above (confirm equipping grenades doesn't consume weapon slots)
+
+- [ ] Up to 2 _distinct grenade types_ can be equipped/readied at once, independent of the weapon slot count above (confirm equipping grenades doesn't consume weapon slots)
 - [ ] Quantity of a single grenade type is not capped, only the count of different types readied at once
 - [ ] A grenade or mine added via Archeotech counts toward this same 2-type limit
 - [ ] Equip a grenade/mine type with quantity above 3 — a second, read-only "stowed" card appears showing the overflow amount (quantity − 3); confirm the two numbers read sensibly together and don't look like the same grenades are being counted twice
 
 **Ranged and Melee:**
+
 - [ ] Add a weapon that tracks ammo by clip (spare clips + partial rounds) and one that tracks loose rounds — both count down correctly on fire/reload
 - [ ] Switching the loaded ammo type on a weapon updates its displayed Damage/Special Rules to match that ammo
 - [ ] A weapon with an alternate fire profile (e.g. Puritan-14 or Spectre's shotgun mode) shows correct, separate stats for each mode
@@ -487,16 +490,18 @@ Use a disposable character and create a small labelled test inventory: one norma
 - [ ] A weapon granted directly by a cybernetic implant (e.g. a Ballistic Mechadendrite's built-in gun) shows as a distinct, **read-only** pink-bordered card with "Gained From [implant name]" — it has no remove/equip controls of its own and should not consume a weapon slot, its craftsmanship follows the parent implant's
 
 **Shields:**
+
 - [ ] Add and equip a shield — it occupies a slot the same as a one-handed weapon
 - [ ] Shields have their own required AP field on the custom form, separate from Damage — this is the shield's block/parry AP, confirm it's not being added into the character's worn Armour AP total anywhere (it shouldn't be, they're unrelated systems)
 - [ ] Custom shield creation and publishing — see §21
 
 **Custom weapon/grenade/shield forms (Ranged, Melee, Grenade, Shield each have their own):**
+
 - [ ] Rate of Fire input (Single/Semi-Auto/Full-Auto, e.g. "S/2/–") is parsed and re-displayed correctly for a few different combinations
 - [ ] Damage entered as dice notation (e.g. "1d10+3") plus a damage type (I/R/E/X) round-trips correctly, including editing an existing custom weapon and seeing the same values pre-filled
 - [ ] Reload entered as an amount + type (e.g. "2 Full") parses and re-displays correctly, and the special-case values ("Full", "Special", "—") all work
 - [ ] Custom weapon/grenade/shield creation and publishing — see §21, Custom Item Library
-- [ ] Custom weapon/grenade/shield forms' "* Required" hint stays visible once all fields are filled, not just while incomplete
+- [ ] Custom weapon/grenade/shield forms' "\* Required" hint stays visible once all fields are filled, not just while incomplete
 
 **Watch for:** weapons with a fixed number of internal magazine slots (e.g.
 Panoptic, Spectre) — confirm each magazine tracks its own rounds
@@ -518,7 +523,7 @@ Add the five named armour fixtures and inspect their picker summaries before add
 - [ ] Refractor Field shows a Spare Cells counter that goes up/down and persists; Amulet of Warding and Rosarius do not show one
 - [ ] Craftsmanship (Poor/Common/Good/Best) is chosen at the moment you add a piece, both for worn armour and Force Fields — confirm the default is Common and cycling afterwards updates AP/weight/value where the rules say it should
 - [ ] Custom armour and custom Force Field creation and publishing — see §21
-- [ ] Custom armour and Force Field forms' "* Required" hint stays visible once all fields are filled, not just while incomplete
+- [ ] Custom armour and Force Field forms' "\* Required" hint stays visible once all fields are filled, not just while incomplete
 
 ## 11. Cybernetics
 
@@ -528,14 +533,14 @@ Implants, bionics, and the Concealed Weapon Bionic install flow.
 
 Use a character with enough funds/context to install the Concealed Weapon Bionic at Poor, Common, and Good craftsmanship, recording cost and availability before and after cycling. Add one common-only implant, one Good-only Mechadendrite, and one location-assigned bionic. Refresh after installation, then cross-check granted weapons on Weapons and Toughness contributions on Armour before removing the parent implant.
 
-- [ ] Install a Concealed Weapon Bionic at Good craftsmanship — cost shows 750 Thrones *and* availability shows Rare (not Scarce)
+- [ ] Install a Concealed Weapon Bionic at Good craftsmanship — cost shows 750 Thrones _and_ availability shows Rare (not Scarce)
 - [ ] Install the same at Poor and Common — cost changes (150 / 300) but availability stays Scarce at both
 - [ ] Cycling craftsmanship on an already-installed Concealed Weapon Bionic updates cost and availability together, every time, not just cost
 - [ ] Most other implants have **no craftsmanship choice at all** (only Common exists for them) — confirm those don't show a pointless cycle control
 - [ ] Mechadendrites specifically are locked to **Good** craftsmanship only, never Common/Poor/Best
-- [ ] For the handful of other implants that *do* list Poor/Common/Good text, cycling still only changes cost, not availability — confirm the new availability logic from §11's first item didn't leak onto them
+- [ ] For the handful of other implants that _do_ list Poor/Common/Good text, cycling still only changes cost, not availability — confirm the new availability logic from §11's first item didn't leak onto them
 - [ ] A bionic implant assigned a body location shows up as a Toughness Bonus contribution on the relevant Armour location
-- [ ] Custom implant form's "* Required" hint stays visible once all fields are filled, not just while incomplete
+- [ ] Custom implant form's "\* Required" hint stays visible once all fields are filled, not just while incomplete
 
 **Tech-Priest Mechanicus Implants and assign-cost fixes (new):**
 
@@ -654,7 +659,7 @@ Add one fixed-price item, one variable-price item, one normal consumable, and Lu
 - [ ] An item with a listed "Varies" price (Cognomen, Forgery Kit) shows a "Cost assigned on add" note directly in the picker list, then prompts for a manually entered cost and rarity before it can actually be added
 - [ ] Lumenmould specifically (no fixed listed price) shows the same note and prompt
 - [ ] Custom gear and custom consumable creation and publishing — see §21, Custom Item Library
-- [ ] Custom gear/consumable forms' "* Required" hint stays visible once all fields are filled, not just while incomplete
+- [ ] Custom gear/consumable forms' "\* Required" hint stays visible once all fields are filled, not just while incomplete
 
 ## 14. Companions
 
@@ -687,7 +692,7 @@ Add and remove a reference drug, then create a uniquely named custom drug. In th
 - [ ] Add/remove from the reference list
 - [ ] Custom drug creation — Name, quantity (positive whole number), Origin, Availability, Weight, and Value are all required before Add enables
 - [ ] Custom drug creation and publishing — see §21, Custom Item Library
-- [ ] Custom drug form's "* Required" hint stays visible once all fields are filled, not just while incomplete
+- [ ] Custom drug form's "\* Required" hint stays visible once all fields are filled, not just while incomplete
 
 ## 16. Experience
 
@@ -764,7 +769,7 @@ Use a fresh character claimed by a player. Confirm the mandatory setup appears b
 - [ ] Pick a Homeworld and supported Career — the Career automatically assigns its starting Rank
 - [ ] Rank shows its name, tier, XP band, path metadata, and information modal, but has no Select or Change action for either DM or player
 - [ ] Rank can change only through confirmed Rank Up on Experience; returning to Background immediately shows the newly confirmed Rank
-- [ ] Switch to a Homeworld that does *not* support the current Career — Career, Rank, and any stored Career path all clear automatically
+- [ ] Switch to a Homeworld that does _not_ support the current Career — Career, Rank, and any stored Career path all clear automatically
 - [ ] Switch to a different Career — it assigns the new Career's starting Rank and clears the old Career path; reselecting the same Career does not reset a legitimately progressed Rank
 - [ ] The Career picker only ever lists careers the currently-selected Homeworld actually supports
 - [ ] Divination picker sets the result text and info modal correctly
@@ -788,7 +793,7 @@ Trait rules that explicitly change Skill use are applied automatically.
 - [ ] Career, Sanctioning Effect, and Rank each get their own full-width row on desktop — never squeezed into a shared 2-column grid, even when Sanctioning Effect isn't present
 - [ ] Selecting Imperial Psyker as Career and completing the Sanctioned Psyker acquisition (rolling 3d10 for the starting age increase) actually adds that roll to Age — the Age field shows the combined total (base + roll), and its info icon shows a "Modifiers" breakdown listing "Sanctioned Psyker: +X"
 - [ ] After completing Sanctioned Psyker, click Age to edit it — the input shows the raw base (not the combined total); typing a new base and committing (blur/Enter) re-adds the Sanctioned Psyker roll on top of the new value, so the modifier keeps applying no matter how many times Age is edited afterward
-- [ ] The Sanctioning Effect picker's "* Required" hint (when a roll is still needed) stays visible once every field is filled, not just while incomplete
+- [ ] The Sanctioning Effect picker's "\* Required" hint (when a roll is still needed) stays visible once every field is filled, not just while incomplete
 
 **Career starting-benefit choices (new):**
 
@@ -809,7 +814,7 @@ Add one fixture of each type: Armour, Weapon, Grenade/Mine, and plain item. Keep
 - [ ] Same check for one typed as a Weapon (Weapons tab) and one typed as a Grenade/Mine (counts toward the 2-type grenade limit in §9)
 - [ ] A plain (non-armour, non-weapon) Archeotech item behaves like a normal gear-style entry
 - [ ] Custom archeotech creation and publishing — see §21, Custom Item Library
-- [ ] Custom archeotech form's "* Required" hint stays visible once all fields are filled, not just while incomplete
+- [ ] Custom archeotech form's "\* Required" hint stays visible once all fields are filled, not just while incomplete
 
 ## 20. Admin (DM only)
 
@@ -822,7 +827,7 @@ Keep the DM on Admin and the owning player on the same character in a second pro
 - [ ] Approve a pending proposal from Experience — the player's Remaining XP drops by that amount (then see the Experience §16 Watch for — do this test in combination with adding a manual advance)
 - [ ] Reject a pending proposal — Remaining XP is untouched, proposal moves out of Pending
 - [ ] Claim log shows the correct owner name (not just a raw ID) for the most recent claim
-- [ ] Force Release Ownership actually unclaims the character (owner becomes "None") separately from Toggle Player Edit Permission, which only flips whether the *current* owner can edit — confirm these are doing two different things, not the same thing twice
+- [ ] Force Release Ownership actually unclaims the character (owner becomes "None") separately from Toggle Player Edit Permission, which only flips whether the _current_ owner can edit — confirm these are doing two different things, not the same thing twice
 - [ ] Force Assign To… opens a picker listing every campaign member by resolved first name (falling back to their raw UID for a member with no profile name yet); selecting one immediately assigns the character to them and turns Player Edit Permission on
 - [ ] Force Assign To… is disabled when the campaign has no members yet
 - [ ] Force-assigning a character that already has a different owner reassigns it directly with no release step in between — confirm the previous owner loses access and the new owner gains it immediately
@@ -878,6 +883,7 @@ Use three environments: a clean browser profile, an already-installed PWA on the
 - [ ] Immediately after that auto-update, the app should skip straight past the splash on that specific load — no double-splash flash
 - [ ] Simulate a stalled update (start the update, then kill connectivity before it finishes) — after roughly 30 seconds it should give up waiting and fall back to the previously-cached version rather than hanging on "Updating…" forever, and a "Couldn't download the latest update" toast should appear once it lands
 - [ ] In a plain dev/browser tab (no service worker registered) the app should simply load directly with no splash-related hang at all
+- [ ] After an approved deployment, inspect the main document and a hashed asset: the document has the configured CSP, clickjacking, MIME, referrer, permissions and same-origin headers; HTML/service-worker files are not long-cached, while the hashed asset is immutable
 
 ## 24. Onboarding & First Launch
 
@@ -893,6 +899,7 @@ Use a new disposable browser profile for each path: new user, reclaim, refresh-o
 - [ ] Browser Back/Forward moves correctly between Welcome → Show Code and Welcome → Reclaim, matching whichever path you took
 - [ ] Refresh the page while sitting on the show-code step — the code is re-fetched from the server rather than lost (it was never only in local state); if no code exists server-side for some reason, it quietly falls back to the Welcome step instead of showing a blank code
 - [ ] "Returning user? Reclaim your identity" path — entering a previously-issued recovery code from another device migrates every DM-owned campaign and every player-owned character over to this device's account in one go
+- [ ] With a deliberately seeded account above a Stage 2 reclaim ceiling, recovery stops with the protected-recovery message before any campaign or character changes owner; retrying a normal-sized recovery afterwards still works, proving the temporary proof record was cleaned up
 - [ ] After onboarding completes once, closing and reopening the app never shows onboarding again — an existing user who was onboarded before first names existed gets sent to the shorter NameGate screen instead (name field only, no recovery code step) rather than back through full onboarding
 
 ## 25. Dashboard
@@ -904,23 +911,30 @@ The landing page after onboarding — separate DM and Player sections on one scr
 Use a DM with active and archived campaigns, an owning player with multiple claimed characters, a linked secondary device, and a player-invite-only device. Work through DM actions first, then player cards and claim states. Refresh after every mutation.
 
 **DM section** (hidden entirely on a device installed via the player-only QR invite — see the QR bullet below):
+
 - [ ] Create a campaign; blank/whitespace-only names are rejected
+- [ ] Campaign names stop at 100 characters, and rapidly pressing Create still produces only one campaign
 - [ ] Rename a campaign inline; Edit/Save/Cancel all behave
 - [ ] Archive a campaign — it moves out of the active list into a collapsed "Archived (N)" disclosure, collapsed by default
 - [ ] Restore an archived campaign — it reappears in the active list
 - [ ] Delete a campaign (active or archived) — requires literally typing DELETE, and actually removes it rather than just archiving it again
+- [ ] Delete a disposable campaign containing enough messages, sessions and custom-item versions to require multiple 100-document pages; if the operation is deliberately interrupted, retrying finishes cleanup and removes the campaign without an oversized-batch error
 - [ ] The QR "Share App" panel only appears once you have at least one DM campaign, and never appears at all on a device that is itself a linked secondary device
 - [ ] "Share full app" and "Share player invite" produce genuinely different URLs (different `?invite=` value) — scanning the player one on a separate fresh device/profile should permanently hide that device's DM section (until the full-app QR is scanned there instead)
 
 **Player section:**
+
 - [ ] Each campaign you belong to lists only characters claimed by you (not every character in the campaign), as cards showing portrait, career/rank, current/total Wounds (red at ≤2), XP remaining (red if negative), and the recovery code
+- [ ] With two players in the same campaign, create or update a character owned by the other player — it must never appear in this player's Dashboard list
 - [ ] Tapping a character card opens that character's sheet directly
 
 **Claim a Character (inline, bottom of the page):**
+
 - [ ] The code field validates the DH-XXXX-XXXX shape before "Look Up Character" enables at all
 - [ ] Looking up a valid code shows character name, campaign name, and one of four distinct ownership states: unclaimed (green, claimable) / already yours / claimed by another player / claimed and locked by the DM — confirm the last two show different explanatory text even though both are equally un-claimable right now
 - [ ] Claiming an unclaimed character navigates straight to its character sheet afterwards
 - [ ] Recovery backup banner appears only under its intended account/device conditions; copying the code works, and rotating the code replaces any stale code shown by the banner
+- [ ] Entering an exact valid character recovery code still resolves normally after the Stage 2 rules update; automated rule tests separately confirm that listing or querying the recovery index is denied
 
 ## 26. Campaign Overview
 
@@ -933,14 +947,19 @@ Use a disposable campaign with at least two players, several characters, one app
 
 - [ ] Character search box filters the character list live, by name substring
 - [ ] DM: create a new character — get back a recovery code in a toast that includes a copy button, distinct from the normal toast style
+- [ ] Character names stop at 100 characters, and rapidly pressing Create still produces only one character
 - [ ] DM: Import JSON (header kebab menu) — rejects any file missing `recoveryCode` or `isEditableByPlayer` with an error toast rather than importing a malformed character; a valid import is issued a **fresh** recovery code, it does not reuse whatever was in the file
 - [ ] Export JSON from a character sheet's kebab menu (available to the DM or the owning player), then re-import that same file — confirm the re-imported copy gets its own new recovery code rather than colliding with the original's
-- [ ] DM: Clone a character — the copy is named "Copy of [original name]", starts unclaimed and edit-locked, and gets its own independent recovery code; editing the clone afterwards must not touch the original
+- [ ] There is no Clone Character action; export and import remain available for deliberate copying, and an imported character receives a fresh recovery code
 - [ ] DM: Delete a character — confirm the old recovery code genuinely stops resolving anywhere afterwards (claim lookup, reclaim, etc.), not just that the character vanishes from this list
+- [ ] With a deliberately seeded character above the 440-document claim-log/XP-proposal safety ceiling, deletion refuses before removing the character or its audit history and directs the DM to the protected bulk job
 - [ ] Per-character "History" modal lists claim/release/force-assign/force-release events newest-first, with a readable date on each
+- [ ] Only the DM sees the per-character History action; opening and closing it repeatedly loads normally each time without leaving a stale loading or error state
+- [ ] Leave Campaign Overview open while another profile edits a character — the roster, session attendee names and DM inbox character names all update together from the same roster state
 - [ ] Session History: create a session with a date, XP awarded, a public summary, and private DM-only notes, plus an attendee checklist — XP is **not** applied automatically on save
+- [ ] Session summary and DM notes stop at 4,000 characters, XP accepts only a whole number from 0 to 100,000, and an attendee cannot appear twice
 - [ ] "Apply XP" appears once per session while unapplied; after applying, it becomes a permanent "XP Applied ✓" badge — confirm there's no way to re-apply or undo it from the UI afterwards
-- [ ] Edit a session's XP value after it's already been applied — the in-app note says this does *not* retroactively adjust characters' totals; confirm that's actually true (Remaining XP on the affected characters shouldn't move just from editing the session record)
+- [ ] Edit a session's XP value after it's already been applied — the in-app note says this does _not_ retroactively adjust characters' totals; confirm that's actually true (Remaining XP on the affected characters shouldn't move just from editing the session record)
 - [ ] Delete a session that has **not** had XP applied — plain Yes/No confirmation, removes it from the list, no XP warning shown
 - [ ] Delete a session that **has** had XP applied — shows a warning ("This session's XP was already applied…") and an "Also remove {N} XP from attendees" checkbox instead of the plain confirm
 - [ ] Confirm that delete with the checkbox left unchecked — session is removed, every attendee's Remaining XP is unchanged
@@ -960,10 +979,15 @@ Open the same character thread as player and DM in separate profiles. Start empt
 - [ ] As a player, opening Messages with no character context (i.e. not on a character sheet) shows a prompt to open a character sheet first rather than an empty/broken drawer
 - [ ] As DM, the inbox (inside Campaign Overview, §26) lists every character's thread at once, each with a live unread count and a last-message preview, ordered most-recent-first
 - [ ] Sending a message as the player increments the DM's unread badge for that specific character's thread; opening that thread as DM clears its badge back to zero
+- [ ] Send from a linked player or DM device — the message succeeds as the linked primary identity; an unrelated identity cannot spoof the sender or alter the unread count
 - [ ] DM "Clear chat" requires literally typing DELETE, permanently deletes every message in that thread, and resets the thread's last-message preview back to empty — confirm there is no way to recover a cleared thread
+- [ ] Clear a disposable thread containing more than 200 messages; all pages are removed and the thread summary resets without hitting Firestore's batch-write ceiling
 - [ ] Neither side can edit or delete an individual message once sent — confirm there's genuinely no such control, only the DM's all-or-nothing "Clear chat"
 - [ ] A thread with no messages yet shows "No messages yet" rather than a blank gap
 - [ ] New messages auto-scroll the thread to the bottom on arrival
+- [ ] Empty/whitespace-only messages cannot be sent, and message entry stops at 2,000 characters
+- [ ] Close the player Messages drawer, send a message from the DM, then reopen it — the new message appears when reopened and the closed drawer has not shown stale loading/error content
+- [ ] In a thread with more than 100 messages, opening the thread shows the latest 100 in chronological order; older messages are outside the live window until history pagination is added
 
 ## 28. Settings & Device Linking
 
@@ -975,7 +999,7 @@ Use a disposable primary account and several linkable secondary profiles. Record
 
 - [ ] Reveal Recovery Code — on a device that's never generated one, revealing it creates one on the spot rather than erroring
 - [ ] Rotate Code — displays a new code once; the old code should stop working immediately afterwards (try it in a fresh Link/Reclaim attempt to confirm)
-- [ ] Link This Device — entering another account's recovery code switches this device onto that account's data; this is a *switch*, not a merge, so confirm you understand which account's campaigns/characters you're looking at afterwards, especially if this device already had its own separate data before linking
+- [ ] Link This Device — entering another account's recovery code switches this device onto that account's data; this is a _switch_, not a merge, so confirm you understand which account's campaigns/characters you're looking at afterwards, especially if this device already had its own separate data before linking
 - [ ] There is deliberately no limit on how many devices can be linked to one account — linking a 4th, 5th, etc. device should succeed the same as any other
 - [ ] Unlink This Device — reverts this device back to its own separate identity; campaigns/characters that only existed on the (now former) primary account disappear from view here afterwards, and this device's own pre-linking data (if any) reappears
 - [ ] Recovery backup banner and Settings always show the same current recovery code after reveal or rotation; an old code disappears from all visible surfaces and fails on a fresh device
