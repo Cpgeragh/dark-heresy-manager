@@ -1,6 +1,6 @@
 # Manual Test Checklist — Complete App
 
-Thirty pages and cross-cutting sections, containing 568 checks. Every item
+Thirty-one pages and cross-cutting sections, containing 580 checks. Every item
 comes from reading the actual logic, not a generic "does it load" pass.
 Check items off as you verify them; anything under **Watch for** is the
 likeliest place a real bug hides. Coverage notes are at the bottom — read
@@ -1039,13 +1039,34 @@ Use one editable character and one read-only character. Open the sheet on phone 
 - [ ] Directly open valid Dashboard, Campaign, Character, onboarding-step, and invite URLs in a new tab and after PWA relaunch — each lands on the intended screen after authentication/onboarding gates complete
 - [ ] Header actions appear only on their intended routes and roles; Settings, Messages, export, release, edit-enable, and navigation controls all target the currently visible campaign/character after rapid route changes
 
+## 31. Hard Product Limits
+
+These are the authoritative Stage 2 ceilings from `constants/productLimits.ts`. Complete the checks as the corresponding client, rules, throttling and bulk-operation enforcement is added. Use disposable data and verify that a rejected boundary attempt performs no Firebase write.
+
+### How to test this system
+
+For each boundary, try the largest valid value and then one unit over it. For rolling-window limits, use controlled timestamps or fake timers rather than waiting in real time. For encoded and nested limits, use generated local fixtures whose byte count, entry count and depth are known before upload.
+
+- [ ] A user can create 10 campaigns in a rolling 24-hour window; attempt 11 is rejected before creation, and capacity returns only as the oldest qualifying creation leaves the window
+- [ ] A campaign accepts at most 100 distinct members and 100 characters; the next addition is rejected without changing the existing roster
+- [ ] A session accepts at most 100 distinct attendees and 100,000 whole XP; 101 attendees, duplicate attendees, fractional XP and 100,001 XP are rejected
+- [ ] Campaign/character names stop at 100 characters, first names at 50, messages at 2,000, thread previews at 500, and session summaries/DM notes at 4,000 each
+- [ ] A message thread retains at most 5,000 messages, returns at most 100 per page, and claim history returns at most 50 entries per page without gaps or duplicates between pages
+- [ ] A character accepts at most 50 XP proposals; a campaign accepts at most 200 custom items; and a custom item accepts at most 50 versions
+- [ ] Custom-item definitions reject names over 100 characters, text over 4,000 characters, encoded data over 100,000 bytes, arrays/maps over 100 entries, and nesting deeper than 8 levels
+- [ ] Character import rejects a file over 750,000 bytes before parsing, and no accepted import produces a character document over 900,000 encoded bytes
+- [ ] Character data rejects arrays over 200 entries, objects over 100 keys and nesting deeper than 8 levels without altering the saved character
+- [ ] Portrait selection rejects a source over 5,000,000 bytes before reading it and rejects an encoded result over 350,000 bytes before writing the character
+- [ ] Recovery and device-link code entry allow at most 5 attempts of each kind per device in a rolling 15-minute window, with a clear retry time and no Firebase request after the ceiling
+- [ ] A client bulk invocation never accepts more than 440 affected documents, reports the count before confirmation and performs no partial mutation when the preflight exceeds the ceiling
+
 ---
 
 ## Coverage notes
 
 This checklist covers the 20 character-sheet sections, the cross-cutting
 systems, and the app-shell pages outside the character sheet. Sections
-21–30 cover systems and pages such as Dashboard, Onboarding, Settings,
+21–31 cover systems and pages such as Dashboard, Onboarding, Settings,
 Campaign Overview, and Messages.
 
 **Character-sheet source review (§1–20):** The reviewed scope includes every
@@ -1069,7 +1090,7 @@ reference pickers, both row components, and the
 static roll-range label rather than an interactive roller; no
 manual roll-button test is therefore required.
 
-**App-shell and account-system source review (§23–30):** The reviewed scope
+**App-shell and account-system source review (§23–31):** The reviewed scope
 includes `App.tsx` (route shell, auth gate, onboarding gate, NameGate),
 `useAuth`, `useDeviceLink`,
 `useLinkDevice`, `identityService.ts`, `deviceLinkService.ts`,

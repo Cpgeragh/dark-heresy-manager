@@ -1,3 +1,5 @@
+import { PRODUCT_LIMITS } from "./productLimits";
+
 /**
  * Client-side safety bounds for live Firestore queries.
  *
@@ -9,11 +11,11 @@
 export const FIRESTORE_QUERY_LIMITS = {
   activeCampaignsPerRole: 50,
   archivedCampaigns: 100,
-  charactersPerCampaign: 100,
+  charactersPerCampaign: PRODUCT_LIMITS.charactersPerCampaign,
   playerCharactersPerCampaign: 20,
   sessionsPerCampaign: 200,
   threadSummariesPerCampaign: 100,
-  messagesPerThread: 100,
-  claimLogEntries: 50,
-  customItemsPerQuery: 200,
+  messagesPerThread: PRODUCT_LIMITS.messagesPerPage,
+  claimLogEntries: PRODUCT_LIMITS.claimHistoryEntriesPerPage,
+  customItemsPerQuery: PRODUCT_LIMITS.customItemsPerCampaign,
 } as const;

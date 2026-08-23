@@ -226,7 +226,37 @@ Live collection queries must also have an explicit upper bound. The central clie
 
 These limits are cost and abuse circuit-breakers, not substitutes for write-time product limits. A screen that could legitimately outgrow its live window must add deliberate pagination before increasing a cap.
 
-Write boundaries independently validate stored input sizes. Current limits are 100 characters for campaign and character names, 50 for a first name, 2,000 for a message, 4,000 each for a session summary and private notes, 100 attendees and 100,000 XP per session, and 750,000 bytes for a character import. UI `maxLength` and numeric constraints provide immediate feedback, while services repeat validation so callers cannot bypass it accidentally. Firestore rules mirror security-relevant limits.
+### Hard product limits
+
+`constants/productLimits.ts` is the authoritative numerical policy for user-created data and costly operations. Stage 2 records the complete policy before adding its remaining client, rules, throttling and bulk-operation enforcement. A value appearing in this table therefore means “must be enforced by the end of the relevant Stage 2 section,” not that every layer already enforces it today.
+
+| Area                      |                                                                                      Limit | Rationale                                                                        |
+| ------------------------- | -----------------------------------------------------------------------------------------: | -------------------------------------------------------------------------------- |
+| Campaign creation         |                                                           10 per user per rolling 24 hours | Allows setup and testing while stopping rapid document creation                  |
+| Campaign membership       |                                                                   100 members per campaign | Far above a normal Dark Heresy group while bounding arrays and fan-out           |
+| Campaign characters       |                                                                100 characters per campaign | Supports long-running campaigns and NPC rosters without unbounded collections    |
+| Campaign/character name   |                                                                             100 characters | Supports descriptive names without oversized indexed/display strings             |
+| User first name           |                                                                              50 characters | Matches the deliberately minimal public profile contract                         |
+| Session attendance        |                                                                          100 character IDs | Bounds XP fan-out and the stored attendee array                                  |
+| Session XP                |                                                              100,000 whole XP per attendee | Permits exceptional awards while rejecting accidental extreme values             |
+| Session summary/DM notes  |                                                                      4,000 characters each | Allows detailed notes while bounding document growth                             |
+| Message body              |                                                                           2,000 characters | Supports normal conversation without large chat writes                           |
+| Thread preview            |                                                                             500 characters | Keeps frequently read inbox summaries small                                      |
+| Message history           |                                           5,000 retained per thread; 100 returned per page | Bounds long-term growth and every live/history read                              |
+| Claim history             |                                                                       50 returned per page | Keeps the DM-only audit view bounded                                             |
+| XP proposals              |                                                                           50 per character | Prevents proposal spam while leaving ample pending/history capacity              |
+| Custom items              |                                                                           200 per campaign | Supports extensive homebrew libraries while matching the bounded library query   |
+| Custom-item versions      |                                                                                50 per item | Preserves useful history without unlimited version growth                        |
+| Custom-item content       | 100-character name; 4,000-character text; 100,000 encoded bytes; 100 entries/keys; depth 8 | Bounds user-controlled nested definitions independently of document limits       |
+| Character import/document |                                         750,000-byte import; 900,000-byte encoded document | Leaves safety headroom below Firestore's 1 MiB document limit                    |
+| Character collections     |                                        200 entries per array; 100 keys per object; depth 8 | Supports large inventories and histories while stopping structural amplification |
+| Portrait                  |                                         5,000,000-byte source; 350,000-byte encoded output | Allows ordinary phone images while keeping the character document bounded        |
+| Recovery/link attempts    |                                                5 of each per device per rolling 15 minutes | Slows code guessing without blocking ordinary correction of typing mistakes      |
+| Bulk operation            |                                                      440 affected documents per invocation | Leaves explicit headroom below Firestore's 500-write batch ceiling               |
+
+Limits use decimal bytes because browser `File.size`, encoded strings and Firestore document budgeting are compared as byte counts rather than marketed storage units. Rate and attempt windows are rolling windows. Server-authoritative enforcement that cannot be made abuse-resistant on Spark remains explicitly identified for Stage 3; Stage 2 still applies the strongest safe local and rules-based containment available.
+
+UI constraints provide immediate feedback, services reject invalid work before contacting Firebase, and Firestore rules mirror every security-relevant limit they can evaluate. None of those layers substitutes for another.
 
 Compound consumers remain explicit:
 
