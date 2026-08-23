@@ -27,6 +27,7 @@ import { NotesTab } from "./characterSheet/NotesTab";
 import { AdminTab } from "./characterSheet/AdminTab";
 import { ArcheotechTab } from "./characterSheet/ArcheotechTab";
 import { BackgroundTab } from "./characterSheet/BackgroundTab";
+import { CompleteBackgroundSetupModal } from "./characterSheet/CompleteBackgroundSetupModal";
 import { WeaponTrainingTab } from "./characterSheet/WeaponTrainingTab";
 import { CompanionsTab } from "./characterSheet/CompanionsTab";
 
@@ -109,6 +110,7 @@ export default function CharacterSheet({
     isDmForceReleasing,
     isDmForceAssigning,
     isDmTogglingEdit,
+    isUpdating,
   } = useCharacterSheet({
     campaignIdParam: params.campaignId,
     characterIdParam: params.characterId,
@@ -145,23 +147,10 @@ export default function CharacterSheet({
 
   const basePath = `/campaign/${params.campaignId}/character/${params.characterId}`;
 
-  // New characters must finish Background (Homeworld, Career, Rank) before a
-  // player can leave it. DM browsing is never gated. Once complete, this
-  // never re-locks even if a field is cleared later, since it checks the
-  // persisted flag first.
+  // Players must explicitly confirm their required Background setup before
+  // entering the sheet. DM browsing is never gated, and confirmation is
+  // permanent even if a field is changed later.
   const backgroundSatisfied = character ? isBackgroundComplete(character) : true;
-
-  useEffect(() => {
-    if (!character || character.backgroundComplete || !backgroundSatisfied) return;
-    updateField("backgroundComplete", true);
-  }, [character, backgroundSatisfied, updateField]);
-
-  useEffect(() => {
-    if (!character || isDM || backgroundSatisfied) return;
-    if (activeTab !== "background") {
-      navigate(`${basePath}?tab=background`, { replace: true });
-    }
-  }, [character, isDM, backgroundSatisfied, activeTab, basePath, navigate]);
 
   // Single source of truth for experience.spent — recalculated from what's
   // actually owned (manual advances, Characteristic Advances, and later
@@ -385,6 +374,27 @@ export default function CharacterSheet({
     );
   }
 
+  if (!isDM && !backgroundSatisfied) {
+    return (
+      <CompleteBackgroundSetupModal
+        header={character.header}
+        talents={character.talentsAndTraits}
+        editable={allowedToEdit}
+        saving={isUpdating}
+        onUpdateHeader={handleUpdateHeader}
+        onUpdateTalents={handleUpdateTalents}
+        cybernetics={character.cybernetics ?? []}
+        onUpdateCybernetics={handleUpdateCybernetics}
+        gear={character.gear ?? []}
+        onUpdateGear={handleUpdateGear}
+        onReturnToDashboard={() => navigate("/player")}
+        onComplete={() => {
+          void updateField("backgroundComplete", true);
+        }}
+      />
+    );
+  }
+
   // Visual cue for DM override mode
   const dmOverrideActive = isDM && !dmReadOnly;
 
@@ -446,13 +456,11 @@ export default function CharacterSheet({
 
       {/* Balanced page toolbar: navigation, centred title, matching spacer */}
       <div className="mb-4 grid grid-cols-[2.75rem_minmax(0,1fr)_2.75rem] items-center rounded-lg border border-slate-700 bg-slate-900/60 p-2">
-        {(isDM || backgroundSatisfied) && (
-          <SectionDrawer
-            activeTab={activeTab}
-            onTabChange={handleTabChange}
-            isDM={isDM}
-          />
-        )}
+        <SectionDrawer
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          isDM={isDM}
+        />
         <h1 className="px-2 text-center font-cinzel text-sm font-bold leading-tight text-red-500 sm:text-base lg:text-lg">
           {TAB_TITLES[activeTab]}
         </h1>

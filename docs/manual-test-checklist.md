@@ -750,7 +750,16 @@ Identity (Character Name, Player Name), Appearance (Age, Gender, Skin, Hair, Eye
 
 ### How to test this page
 
-Use a fresh character and record the header plus stored Background state before opening the page. Select a valid Homeworld and Career, then deliberately invalidate the cascade by changing each parent. Refresh after every cascade. Inspect the Career, read-only Rank, and Divination information modals, then compare Skills, Traits, Talents, Weapon Training, Characteristics, Insanity, and Cybernetics to confirm the recorded starting benefits. Test the Appearance fields at both a mobile width (swipe/tap between Appearance and Background) and a desktop width (both shown side by side, each of Career/Sanctioning Effect/Rank on its own full-width row).
+Use a fresh character claimed by a player. Confirm the mandatory setup appears before the sheet, then select a valid Homeworld and Career and enter the sheet. Record the header plus stored Background state before deliberately invalidating the cascade by changing each parent. Refresh after every cascade. Inspect the Career, read-only Rank, and Divination information modals, then compare Skills, Traits, Talents, Weapon Training, Characteristics, Insanity, and Cybernetics to confirm the recorded starting benefits. Test the Appearance fields at both a mobile width (swipe/tap between Appearance and Background) and a desktop width (both shown side by side, each of Career/Sanctioning Effect/Rank on its own full-width row).
+
+- [ ] A player opening a fresh claimed character sees **Complete Background** before any character-sheet page; the normal sheet menu and Appearance fields are not shown behind it
+- [ ] The setup has no close control and cannot be dismissed with the backdrop or Escape; **Return to Dashboard** is the explicit exit
+- [ ] A fresh character has no Homeworld silently preselected; **Continue to Character Sheet** remains disabled until Homeworld and Career are complete and Career has automatically assigned Rank
+- [ ] Careers with starting choices, Imperial Psyker sanctioning, Homeworld choices, and Tech-Priest implants use the same follow-up screens and apply the same results here as on the normal Background page
+- [ ] If character editing is disabled, the setup explains that the DM must enable editing and leaves its selection and Continue actions disabled
+- [ ] Returning to the Dashboard preserves completed selections and unfinished follow-up results; reopening the character resumes from the persisted setup state
+- [ ] Confirming Continue persists Background completion and opens the full character sheet; refreshing or revisiting never shows the setup again
+- [ ] A DM can open an incomplete character normally without being forced through the player setup
 
 - [ ] Pick a Homeworld and supported Career — the Career automatically assigns its starting Rank
 - [ ] Rank shows its name, tier, XP band, path metadata, and information modal, but has no Select or Change action for either DM or player
@@ -765,8 +774,6 @@ shown as read-only entries on Traits. Their permanent mechanical effects and
 grants apply across the relevant pages without saving duplicate Trait entries.
 Starting Skills that are merely listed by the Homeworld remain informational;
 Trait rules that explicitly change Skill use are applied automatically.
-
-- [ ] Open a brand-new character (freshly created by the DM, never opened before) straight to Background — the character factory sets its internal homeworld to Feral World even though the header's homeworld text starts blank. Confirm what actually displays (blank, or Feral World pre-selected) and that the picker and the header text agree with each other rather than contradicting
 
 - [ ] Player Name is always read-only, shows "Set from the player's account" while unclaimed, and fills in automatically once a player claims the character
 - [ ] Age only accepts whole numbers 1 and up — typing 0 or a non-numeric value is rejected outright, no error message, the field just doesn't change

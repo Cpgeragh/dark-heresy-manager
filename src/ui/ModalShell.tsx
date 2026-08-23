@@ -83,6 +83,7 @@ interface ModalShellProps {
   children: ReactNode;
   className?: string;
   closeOnBackdrop?: boolean;
+  closeOnEscape?: boolean;
   onClose: () => void;
   suspended?: boolean;
   style?: CSSProperties;
@@ -94,6 +95,7 @@ export function ModalShell({
   children,
   className = "",
   closeOnBackdrop = true,
+  closeOnEscape = true,
   onClose,
   suspended = false,
   style,
@@ -144,6 +146,11 @@ export function ModalShell({
       aria-modal="true"
       onClick={(event) => {
         if (closeOnBackdrop && event.target === event.currentTarget) onClose();
+      }}
+      onCancel={(event) => {
+        if (!closeOnEscape) {
+          event.preventDefault();
+        }
       }}
       onClose={() => {
         if (!unmountingRef.current) onClose();

@@ -33,6 +33,10 @@ describe("createEmptyCharacterData", () => {
     expect(createEmptyCharacterData(base).isEditableByPlayer).toBe(false);
   });
 
+  it("starts without a preselected Homeworld", () => {
+    expect(createEmptyCharacterData(base).talentsAndTraits.homeworld).toBe("");
+  });
+
   it("initialises all characteristics to zero", () => {
     const { characteristics } = createEmptyCharacterData(base);
     for (const key of Object.keys(characteristics)) {
@@ -95,12 +99,12 @@ describe("isBackgroundComplete", () => {
     expect(isBackgroundComplete(makeCharacter({ homeworld: "hive-world", career: "Guardsman" }))).toBe(false);
   });
 
-  it("is true once all three are set, even without the flag persisted", () => {
+  it("remains false until the player confirms, even when all required selections exist", () => {
     expect(
       isBackgroundComplete(
         makeCharacter({ homeworld: "hive-world", career: "Guardsman", rank: "Conscript" })
       )
-    ).toBe(true);
+    ).toBe(false);
   });
 
   it("is true when the flag is already set, regardless of the live fields", () => {

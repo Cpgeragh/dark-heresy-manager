@@ -776,6 +776,6 @@ export interface Character {
   notes?: string | NoteEntry[];
   portraitUrl?: string;
 
-  /** True once Homeworld, Career, and Rank have all been set at least once. */
+  /** True after the player confirms the required Homeworld/Career setup. */
   backgroundComplete?: boolean;
 }

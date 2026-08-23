@@ -94,7 +94,7 @@ export function createEmptyCharacterData(params: {
     armour: [],
 
     talentsAndTraits: {
-      homeworld: "feral-world",
+      homeworld: "",
       homeworldNotes: "",
       talents: [],
       traits: [],
@@ -125,15 +125,7 @@ export function createEmptyCharacterData(params: {
   };
 }
 
-/**
- * True once Homeworld, Career, and Rank have all been set at least once.
- * Checks the live fields too (not just the flag), so a character that
- * already has all three filled counts as complete immediately, even before
- * the flag itself has been persisted.
- */
+/** True after the player has confirmed the required Background setup. */
 export function isBackgroundComplete(character: Character): boolean {
-  return Boolean(
-    character.backgroundComplete ||
-      (character.talentsAndTraits.homeworld && character.header.career && character.header.rank)
-  );
+  return character.backgroundComplete === true;
 }
