@@ -1,10 +1,9 @@
 import { useCallback, useRef, useState } from "react";
 import { useToast } from "../components/Toast";
 import {
-  archiveCustomItem,
+  archiveAndRemoveAllCustomItemCopies,
   publishAndUpdateAllCopies,
   publishCustomItem,
-  removeAllCustomItemCopies,
 } from "../services/customItemService";
 import type {
   BusyCustomItemLibraryAction,
@@ -55,8 +54,7 @@ export function useCustomItemLibraryActions<TCategory extends CustomItemCategory
         inFlightItemIds.current.delete(libraryItem.id);
         setBusyActions((current) =>
           current.filter(
-            (busyAction) =>
-              busyAction.itemId !== libraryItem.id || busyAction.action !== action
+            (busyAction) => busyAction.itemId !== libraryItem.id || busyAction.action !== action
           )
         );
       }
@@ -83,12 +81,11 @@ export function useCustomItemLibraryActions<TCategory extends CustomItemCategory
   const archiveDefinition = useCallback(
     (libraryItem: CampaignCustomItem<TCategory>) =>
       runAction(libraryItem, "archive", async (actorUserId) => {
-        await archiveCustomItem({
+        await archiveAndRemoveAllCustomItemCopies({
           campaignId,
           customItemId: libraryItem.id,
           actorUserId,
         });
-        await removeAllCustomItemCopies({ campaignId, customItemId: libraryItem.id });
         return messageStyle === "namedItem"
           ? `${itemLabel} archived and removed from all characters.`
           : `Custom ${itemLabel} archived and removed from all characters.`;

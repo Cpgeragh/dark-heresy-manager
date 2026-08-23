@@ -6,12 +6,37 @@ import { Button } from "../../ui/Button";
 import { uiSection } from "../../ui/editableStyles";
 import { ConfirmInline } from "../../ui/ConfirmInline";
 import { useToast } from "../../components/Toast";
-import { permanentlyDeleteCustomItem, restoreCustomItem } from "../../services/customItemService";
+import {
+  permanentlyDeleteCustomItem,
+  preflightCustomItemArchive,
+  preflightCustomItemUpdateAllCopies,
+  preflightPermanentCustomItemDeletion,
+  restoreCustomItem,
+  type CustomItemOperationPreflight,
+} from "../../services/customItemService";
 import { StatusBadge } from "../../ui/StatusBadge";
 import { useCustomItemLibraryActions } from "../../hooks/useCustomItemLibraryActions";
 import { CUSTOM_ITEM_CATEGORY_LABELS } from "../../constants/customItems";
 
 type ManagementBusyAction = "restore" | "delete";
+type PreflightState = {
+  loading: boolean;
+  result?: CustomItemOperationPreflight;
+  error?: string;
+};
+
+function impactDetails(state: PreflightState) {
+  if (state.loading) return <span className="text-xs text-slate-500">Checking impact…</span>;
+  if (state.error) return <span className="text-xs text-red-400">{state.error}</span>;
+  if (!state.result) return null;
+  return (
+    <span className={state.result.safe ? "text-xs text-slate-500" : "text-xs text-red-400"}>
+      {state.result.safe
+        ? `Affects ${state.result.affectedDocuments} document${state.result.affectedDocuments === 1 ? "" : "s"}${state.result.affectedCopies ? ` (${state.result.affectedCopies} linked copies)` : ""}.`
+        : (state.result.reason ?? "This operation is not safe to start.")}
+    </span>
+  );
+}
 
 export function CustomItemAdminRow({
   item,
@@ -25,6 +50,9 @@ export function CustomItemAdminRow({
   const [managementBusyAction, setManagementBusyAction] = useState<ManagementBusyAction | null>(
     null
   );
+  const [archivePreflight, setArchivePreflight] = useState<PreflightState>({ loading: false });
+  const [updatePreflight, setUpdatePreflight] = useState<PreflightState>({ loading: false });
+  const [deletePreflight, setDeletePreflight] = useState<PreflightState>({ loading: false });
   const toast = useToast();
   const { publishDefinition, archiveDefinition, updateAllCopies, getBusyAction } =
     useCustomItemLibraryActions<CustomItemCategory>({
@@ -35,6 +63,21 @@ export function CustomItemAdminRow({
     });
   const busyAction = getBusyAction(item.id) ?? managementBusyAction;
   const busy = busyAction !== null;
+
+  const loadPreflight = async (
+    setter: (state: PreflightState) => void,
+    operation: () => Promise<CustomItemOperationPreflight>
+  ) => {
+    setter({ loading: true });
+    try {
+      setter({ loading: false, result: await operation() });
+    } catch (error) {
+      setter({
+        loading: false,
+        error: error instanceof Error ? error.message : "Unable to check this operation.",
+      });
+    }
+  };
 
   const handleRestore = async () => {
     setManagementBusyAction("restore");
@@ -84,14 +127,42 @@ export function CustomItemAdminRow({
             </Button>
           )}
           {item.status !== "archived" && (
-            <Button size="xs" onClick={() => archiveDefinition(item)} disabled={busy}>
-              {busyAction === "archive" ? "Archiving…" : "Archive"}
-            </Button>
+            <ConfirmInline
+              triggerLabel={busyAction === "archive" ? "Archiving…" : "Archive"}
+              question="Archive and remove copies?"
+              variant="warning"
+              size="xs"
+              busy={busy}
+              onArm={() =>
+                loadPreflight(setArchivePreflight, () =>
+                  preflightCustomItemArchive({ campaignId, customItemId: item.id })
+                )
+              }
+              details={impactDetails(archivePreflight)}
+              confirmDisabled={!archivePreflight.result?.safe}
+              onConfirm={() => archiveDefinition(item)}
+            />
           )}
           {item.status === "published" && !!item.draftVersionId && (
-            <Button size="xs" onClick={() => updateAllCopies(item)} disabled={busy}>
-              {busyAction === "updateAll" ? "Updating…" : "Update All Copies"}
-            </Button>
+            <ConfirmInline
+              triggerLabel={busyAction === "updateAll" ? "Updating…" : "Update All Copies"}
+              question="Publish and update copies?"
+              variant="warning"
+              size="xs"
+              busy={busy}
+              onArm={() =>
+                loadPreflight(setUpdatePreflight, () =>
+                  preflightCustomItemUpdateAllCopies({
+                    campaignId,
+                    customItemId: item.id,
+                    versionId: item.draftVersionId ?? undefined,
+                  })
+                )
+              }
+              details={impactDetails(updatePreflight)}
+              confirmDisabled={!updatePreflight.result?.safe}
+              onConfirm={() => updateAllCopies(item)}
+            />
           )}
           {item.status === "archived" && (
             <Button size="xs" onClick={handleRestore} disabled={busy}>
@@ -107,6 +178,16 @@ export function CustomItemAdminRow({
               busyLabel="Deleting…"
               variant="danger"
               size="sm"
+              onArm={() =>
+                loadPreflight(setDeletePreflight, () =>
+                  preflightPermanentCustomItemDeletion({
+                    campaignId,
+                    customItemId: item.id,
+                  })
+                )
+              }
+              details={impactDetails(deletePreflight)}
+              confirmDisabled={!deletePreflight.result?.safe}
             />
           )}
         </div>

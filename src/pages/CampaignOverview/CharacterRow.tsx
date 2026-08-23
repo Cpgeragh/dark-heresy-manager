@@ -5,7 +5,8 @@ import { Link } from "react-router-dom";
 import type { Timestamp } from "firebase/firestore";
 import { useClaimLogs } from "../../hooks/useClaimLogs";
 import { useToast } from "../../components/Toast";
-import { deleteCharacter } from "../../services/characterService";
+import { deleteCharacter, preflightCharacterDeletion } from "../../services/characterService";
+import type { DestructiveOperationPreflight } from "../../utils/destructiveOperationPreflight";
 import { uiSection } from "../../ui/editableStyles";
 import { Button } from "../../ui/Button";
 import { ConfirmInline } from "../../ui/ConfirmInline";
@@ -60,6 +61,11 @@ export function CharacterRow({
   isDM: boolean;
 }) {
   const [showHistory, setShowHistory] = useState(false);
+  const [deletePreflight, setDeletePreflight] = useState<{
+    loading: boolean;
+    result?: DestructiveOperationPreflight;
+    error?: string;
+  }>({ loading: false });
   const {
     logs,
     loading: logsLoading,
@@ -68,14 +74,41 @@ export function CharacterRow({
   const toast = useToast();
 
   const handleDelete = useCallback(async () => {
-    if (!recoveryCode) return;
     try {
       await deleteCharacter(campaignId, characterId, recoveryCode);
     } catch (err) {
       console.error("Character deletion error:", err);
-      toast.error("Failed to delete character.");
+      toast.error(err instanceof Error ? err.message : "Failed to delete character.");
     }
   }, [campaignId, characterId, recoveryCode, toast]);
+
+  const loadDeletePreflight = useCallback(async () => {
+    setDeletePreflight({ loading: true });
+    try {
+      const result = await preflightCharacterDeletion(campaignId, characterId, recoveryCode);
+      setDeletePreflight({ loading: false, result });
+    } catch (error) {
+      setDeletePreflight({
+        loading: false,
+        error: error instanceof Error ? error.message : "Unable to check this deletion.",
+      });
+    }
+  }, [campaignId, characterId, recoveryCode]);
+
+  const deleteDetails = deletePreflight.loading ? (
+    <span className="text-xs text-slate-500">Checking affected documents…</span>
+  ) : deletePreflight.error ? (
+    <span className="text-xs text-red-400">{deletePreflight.error}</span>
+  ) : deletePreflight.result ? (
+    <span
+      className={deletePreflight.result.safe ? "text-xs text-slate-500" : "text-xs text-red-400"}
+    >
+      {deletePreflight.result.safe
+        ? `This permanently deletes ${deletePreflight.result.affectedDocuments} document${deletePreflight.result.affectedDocuments === 1 ? "" : "s"}.`
+        : (deletePreflight.result.reason ??
+          `This affects more than ${deletePreflight.result.limit} documents and is disabled until the protected bulk job is available.`)}
+    </span>
+  ) : null;
 
   return (
     <>
@@ -128,6 +161,9 @@ export function CharacterRow({
                   triggerLabel="Delete"
                   question="Delete?"
                   size="sm"
+                  onArm={loadDeletePreflight}
+                  details={deleteDetails}
+                  confirmDisabled={!deletePreflight.result?.safe}
                   onConfirm={handleDelete}
                 />
               </>

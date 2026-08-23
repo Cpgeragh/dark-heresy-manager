@@ -15,7 +15,7 @@ vi.mock("firebase/firestore", () => ({
   writeBatch: (...args: unknown[]) => mockWriteBatch(...args),
 }));
 
-import { batchDeleteRefs } from "../../src/utils/firestoreBatchDelete";
+import { batchDeleteRefs, deleteRefsAtomically } from "../../src/utils/firestoreBatchDelete";
 
 function fakeRefs(count: number) {
   return Array.from({ length: count }, (_, i) => `ref-${i}` as unknown as never);
@@ -67,5 +67,24 @@ describe("batchDeleteRefs", () => {
     await batchDeleteRefs("mock-db" as never, fakeRefs(900));
 
     expect(order).toEqual(["writeBatch", "commit", "writeBatch", "commit", "writeBatch", "commit"]);
+  });
+});
+
+describe("deleteRefsAtomically", () => {
+  it("commits every preflighted ref in one batch", async () => {
+    await deleteRefsAtomically("mock-db" as never, fakeRefs(440));
+
+    expect(mockWriteBatch).toHaveBeenCalledOnce();
+    expect(mockBatch.delete).toHaveBeenCalledTimes(440);
+    expect(mockBatch.commit).toHaveBeenCalledOnce();
+  });
+
+  it("stops before creating a batch when the atomic limit is exceeded", async () => {
+    await expect(deleteRefsAtomically("mock-db" as never, fakeRefs(441))).rejects.toThrow(
+      "cannot affect more than 440 documents"
+    );
+
+    expect(mockWriteBatch).not.toHaveBeenCalled();
+    expect(mockBatch.commit).not.toHaveBeenCalled();
   });
 });

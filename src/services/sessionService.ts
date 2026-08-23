@@ -15,6 +15,7 @@ import { db } from "../firebase";
 import type { SessionDocument } from "../types/Firestore";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
 import {
+  assertBulkOperationCount,
   assertBoolean,
   assertFirestoreDocumentId,
   assertString,
@@ -27,6 +28,16 @@ interface SessionData {
   dmNotes: string;
   xpAwarded: number;
   attendees: string[];
+}
+
+const SESSION_XP_FIXED_DOCUMENTS = 1;
+export const SESSION_XP_FAN_OUT_LIMIT = Math.min(
+  PRODUCT_LIMITS.sessionAttendees,
+  PRODUCT_LIMITS.bulkOperationDocuments - SESSION_XP_FIXED_DOCUMENTS
+);
+
+export function getSessionXpAffectedDocumentCount(attendeeCount: number): number {
+  return attendeeCount + SESSION_XP_FIXED_DOCUMENTS;
 }
 
 export type SessionUpdateData = Partial<
@@ -109,10 +120,8 @@ function validateSessionData(session: SessionData): void {
       `XP awarded must be a whole number from 0 to ${PRODUCT_LIMITS.sessionXpAward}.`
     );
   }
-  if (session.attendees.length > PRODUCT_LIMITS.sessionAttendees) {
-    throw new Error(
-      `A session cannot have more than ${PRODUCT_LIMITS.sessionAttendees} attendees.`
-    );
+  if (session.attendees.length > SESSION_XP_FAN_OUT_LIMIT) {
+    throw new Error(`A session cannot have more than ${SESSION_XP_FAN_OUT_LIMIT} attendees.`);
   }
   if (new Set(session.attendees).size !== session.attendees.length) {
     throw new Error("A character cannot be listed as a session attendee more than once.");
@@ -160,10 +169,8 @@ function validateSessionUpdate(data: SessionUpdateData): void {
   }
   if (data.attendees !== undefined) {
     if (!Array.isArray(data.attendees)) throw new Error("Session attendees must be an array.");
-    if (data.attendees.length > PRODUCT_LIMITS.sessionAttendees) {
-      throw new Error(
-        `A session cannot have more than ${PRODUCT_LIMITS.sessionAttendees} attendees.`
-      );
+    if (data.attendees.length > SESSION_XP_FAN_OUT_LIMIT) {
+      throw new Error(`A session cannot have more than ${SESSION_XP_FAN_OUT_LIMIT} attendees.`);
     }
     if (new Set(data.attendees).size !== data.attendees.length) {
       throw new Error("A character cannot be listed as a session attendee more than once.");
@@ -200,6 +207,26 @@ export async function deleteSession(
       if (sessionSnap.exists()) {
         const session = sessionSnap.data() as SessionDocument;
         if (session.xpApplied === true) {
+          if (!Array.isArray(session.attendees)) {
+            throw new Error("Stored session attendees are invalid; XP reversal was stopped.");
+          }
+          if (session.attendees.length > SESSION_XP_FAN_OUT_LIMIT) {
+            throw new Error(
+              `XP reversal has more than ${SESSION_XP_FAN_OUT_LIMIT} attendees and was stopped before any write.`
+            );
+          }
+          if (new Set(session.attendees).size !== session.attendees.length) {
+            throw new Error(
+              "Stored session attendees contain duplicates; XP reversal was stopped."
+            );
+          }
+          session.attendees.forEach((characterId) =>
+            assertFirestoreDocumentId(characterId, "Stored session attendee ID")
+          );
+          assertBulkOperationCount(
+            getSessionXpAffectedDocumentCount(session.attendees.length),
+            "Session XP reversal"
+          );
           for (const characterId of session.attendees) {
             transaction.update(doc(db, "campaigns", campaignId, "characters", characterId), {
               "experience.total": increment(-session.xpAwarded),
@@ -234,16 +261,18 @@ export async function applySessionXp(
       `XP awarded must be a whole number from 0 to ${PRODUCT_LIMITS.sessionXpAward}.`
     );
   }
-  if (attendeeIds.length > PRODUCT_LIMITS.sessionAttendees) {
-    throw new Error(
-      `A session cannot have more than ${PRODUCT_LIMITS.sessionAttendees} attendees.`
-    );
+  if (attendeeIds.length > SESSION_XP_FAN_OUT_LIMIT) {
+    throw new Error(`A session cannot have more than ${SESSION_XP_FAN_OUT_LIMIT} attendees.`);
   }
   if (new Set(attendeeIds).size !== attendeeIds.length) {
     throw new Error("A character cannot be listed as a session attendee more than once.");
   }
   attendeeIds.forEach((attendeeId) => assertFirestoreDocumentId(attendeeId, "Session attendee ID"));
   if (xpAmount === 0 || attendeeIds.length === 0) return;
+  assertBulkOperationCount(
+    getSessionXpAffectedDocumentCount(attendeeIds.length),
+    "Session XP application"
+  );
 
   await runSingleFlight("session:apply-xp", [campaignId, sessionId], async () => {
     const sessionRef = doc(db, "campaigns", campaignId, "sessions", sessionId);

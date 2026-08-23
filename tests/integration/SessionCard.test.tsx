@@ -80,6 +80,14 @@ describe("SessionCard", () => {
     renderWithToast(<SessionCard session={session} characters={characters} isDM={false} />);
     expect(screen.queryByText("The acolytes investigated the underhive.")).not.toBeInTheDocument();
   });
+
+  it("shows the total documents affected by applying XP", () => {
+    const session = { ...baseSession, xpApplied: false };
+    renderWithToast(
+      <SessionCard session={session} characters={characters} isDM={true} onApplyXp={vi.fn()} />
+    );
+    expect(screen.getByRole("button", { name: "Apply XP (3 docs)" })).toBeInTheDocument();
+  });
 });
 
 describe("SessionCard delete confirmation", () => {
@@ -111,6 +119,10 @@ describe("SessionCard delete confirmation", () => {
 
     expect(screen.getByText(/already applied/)).toBeInTheDocument();
     expect(screen.getByText(/Also remove 200 XP from attendees/)).toBeInTheDocument();
+    expect(screen.getByText("This will affect 1 document.")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("checkbox"));
+    expect(screen.getByText("This will affect 3 documents.")).toBeInTheDocument();
   });
 
   it("calls onDelete(false) when confirmed without checking the reversal box", async () => {

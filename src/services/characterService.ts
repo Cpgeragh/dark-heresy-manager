@@ -3,9 +3,6 @@
 import {
   arrayUnion,
   getDoc,
-  getDocs,
-  limit,
-  query,
   runTransaction,
   setDoc,
   updateDoc,
@@ -24,25 +21,24 @@ import type { Character } from "../types/Character";
 import { buildClaimLogPayload } from "../utils/claimLog";
 import { generateRecoveryCode } from "../utils/recoveryCode";
 import { createEmptyCharacterData } from "../utils/characterFactory";
-import { batchDeleteRefs } from "../utils/firestoreBatchDelete";
+import { deleteRefsAtomically } from "../utils/firestoreBatchDelete";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
 import { validateCharacterName } from "../utils/validation";
-import { deleteQueryDocsInPages } from "../utils/firestoreQueryPages";
 import { stripUndefined } from "../utils/stripUndefined";
 import { runSingleFlight } from "../utils/singleFlight";
 import { getSpentXp } from "../features/experience/xpSpent";
 import {
-  assertBulkOperationCount,
+  assertSafeDestructivePreflight,
+  BoundedDeletionCollector,
+  type DestructiveOperationPreflight,
+} from "../utils/destructiveOperationPreflight";
+import {
   assertCharacterImportData,
   assertCharacterPayload,
   assertFirestoreDocumentId,
   assertRecoveryCode,
   assertString,
 } from "../utils/firebaseValidation";
-
-const CHARACTER_DELETE_FIXED_DOCUMENTS = 3;
-const CHARACTER_ATOMIC_DELETE_CHILD_LIMIT =
-  PRODUCT_LIMITS.bulkOperationDocuments - CHARACTER_DELETE_FIXED_DOCUMENTS;
 
 /**
  * Load a single character with full typing.
@@ -282,10 +278,84 @@ export async function forceReleaseCharacter(
   });
 }
 
+interface CharacterDeletionPlan {
+  preflight: DestructiveOperationPreflight;
+  references: DocumentReference[];
+}
+
+async function buildCharacterDeletionPlan(
+  campaignId: string,
+  characterId: string,
+  recoveryCode?: string
+): Promise<CharacterDeletionPlan> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(characterId, "Character ID");
+  if (recoveryCode !== undefined) assertRecoveryCode(recoveryCode);
+
+  const collector = new BoundedDeletionCollector();
+  const characterRef = characterDocRef(campaignId, characterId);
+  const characterSnapshot = await getDoc(characterRef);
+  collector.addSnapshot(characterSnapshot, "characters");
+
+  if (!characterSnapshot.exists()) {
+    return { preflight: collector.result(false), references: [] };
+  }
+
+  if (!recoveryCode) {
+    return {
+      preflight: collector.result(
+        true,
+        "This character has no usable Recovery Code, so its Recovery Index cannot be removed safely."
+      ),
+      references: [],
+    };
+  }
+
+  await collector.addQuery(
+    collection(db, "campaigns", campaignId, "characters", characterId, "claimLog"),
+    "claimLogs"
+  );
+  if (!collector.exceeded) {
+    await collector.addQuery(
+      collection(db, "campaigns", campaignId, "characters", characterId, "xpProposals"),
+      "xpProposals"
+    );
+  }
+  if (!collector.exceeded) {
+    await collector.addQuery(
+      collection(db, "campaigns", campaignId, "threads", characterId, "messages"),
+      "messages"
+    );
+  }
+
+  const threadRef = doc(db, "campaigns", campaignId, "threads", characterId);
+  if (!collector.exceeded) collector.addSnapshot(await getDoc(threadRef), "threads");
+  if (!collector.exceeded) {
+    collector.addSnapshot(
+      await getDoc(doc(db, "recoveryIndex", recoveryCode.trim())),
+      "recoveryIndex"
+    );
+  }
+
+  const preflight = collector.result(true);
+  return {
+    preflight,
+    references: preflight.safe ? collector.references() : [],
+  };
+}
+
+export async function preflightCharacterDeletion(
+  campaignId: string,
+  characterId: string,
+  recoveryCode?: string
+): Promise<DestructiveOperationPreflight> {
+  return (await buildCharacterDeletionPlan(campaignId, characterId, recoveryCode)).preflight;
+}
+
 /**
- * Deletes a character and everything tied to it: its claim log, XP
- * proposals, message thread (+ messages), recovery index entry, and the
- * character document itself.
+ * Deletes a character and every known dependent document in one atomic,
+ * preflighted batch. Oversized or unindexable deletions wait for Stage 3's
+ * protected resumable bulk job instead of leaving partial data behind.
  */
 export async function deleteCharacter(
   campaignId: string,
@@ -295,50 +365,11 @@ export async function deleteCharacter(
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   assertFirestoreDocumentId(characterId, "Character ID");
   if (recoveryCode !== undefined) assertRecoveryCode(recoveryCode);
+
   await runSingleFlight("character:delete", [campaignId, characterId], async () => {
-    const claimLogSnap = await getDocs(
-      query(
-        collection(db, "campaigns", campaignId, "characters", characterId, "claimLog"),
-        limit(CHARACTER_ATOMIC_DELETE_CHILD_LIMIT + 1)
-      )
-    );
-    const xpProposalsSnap = await getDocs(
-      query(
-        collection(db, "campaigns", campaignId, "characters", characterId, "xpProposals"),
-        limit(CHARACTER_ATOMIC_DELETE_CHILD_LIMIT + 1)
-      )
-    );
-
-    if (
-      claimLogSnap.docs.length + xpProposalsSnap.docs.length >
-      CHARACTER_ATOMIC_DELETE_CHILD_LIMIT
-    ) {
-      throw new Error(
-        "This character has too much audit history for safe client deletion. Use the protected bulk job."
-      );
-    }
-
-    const deletionCount =
-      claimLogSnap.docs.length +
-      xpProposalsSnap.docs.length +
-      2 +
-      (recoveryCode === undefined ? 0 : 1);
-    assertBulkOperationCount(deletionCount, "Character deletion");
-
-    const messagesRef = collection(db, "campaigns", campaignId, "threads", characterId, "messages");
-    await deleteQueryDocsInPages(db, messagesRef);
-
-    const threadRef = doc(db, "campaigns", campaignId, "threads", characterId);
-    const refs: DocumentReference[] = [
-      ...claimLogSnap.docs.map((document) => document.ref),
-      ...xpProposalsSnap.docs.map((document) => document.ref),
-      threadRef,
-    ];
-
-    if (recoveryCode) refs.push(doc(db, "recoveryIndex", recoveryCode.trim()));
-    refs.push(characterDocRef(campaignId, characterId));
-
-    await batchDeleteRefs(db, refs);
+    const plan = await buildCharacterDeletionPlan(campaignId, characterId, recoveryCode);
+    assertSafeDestructivePreflight(plan.preflight, "Character");
+    await deleteRefsAtomically(db, plan.references);
   });
 }
 

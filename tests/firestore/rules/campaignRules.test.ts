@@ -3,7 +3,13 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { getTestEnv } from "../setup";
 import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
-import { dbAs, createCampaign, createIdentityReclaimEntry } from "../helpers";
+import {
+  dbAs,
+  createCampaign,
+  createCharacter,
+  createIdentityReclaimEntry,
+  createRecoveryIndexEntry,
+} from "../helpers";
 
 describe("Firestore Rules: Campaigns", () => {
   afterEach(async () => {
@@ -144,6 +150,47 @@ describe("Firestore Rules: Campaigns", () => {
     const dmDb = dbAs(env, "dm-1");
 
     await expect(dmDb.collection("campaigns").doc("c1").delete()).resolves.toBeUndefined();
+  });
+
+  it("DM can atomically delete a campaign and its known descendant tree", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const recoveryCode = "DH-TEST-0001";
+    await createCampaign(env, "c1", "dm-1", { name: "Sample" });
+    await createCharacter(env, "c1", "char-1", { recoveryCode });
+    await createRecoveryIndexEntry(env, recoveryCode, {
+      campaignId: "c1",
+      characterId: "char-1",
+    });
+    await env.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await Promise.all([
+        db.doc("campaigns/c1/characters/char-1/claimLog/log-1").set({ seeded: true }),
+        db.doc("campaigns/c1/characters/char-1/xpProposals/proposal-1").set({ seeded: true }),
+        db.doc("campaigns/c1/sessions/session-1").set({ seeded: true }),
+        db.doc("campaigns/c1/threads/char-1").set({ seeded: true }),
+        db.doc("campaigns/c1/threads/char-1/messages/message-1").set({ seeded: true }),
+        db.doc("campaigns/c1/customItems/item-1").set({ status: "published" }),
+        db.doc("campaigns/c1/customItems/item-1/versions/version-1").set({ seeded: true }),
+      ]);
+    });
+
+    const dmDb = dbAs(env, "dm-1");
+    const paths = [
+      "campaigns/c1/characters/char-1/claimLog/log-1",
+      "campaigns/c1/characters/char-1/xpProposals/proposal-1",
+      "campaigns/c1/threads/char-1/messages/message-1",
+      "campaigns/c1/threads/char-1",
+      "recoveryIndex/DH-TEST-0001",
+      "campaigns/c1/characters/char-1",
+      "campaigns/c1/sessions/session-1",
+      "campaigns/c1/customItems/item-1/versions/version-1",
+      "campaigns/c1/customItems/item-1",
+      "campaigns/c1",
+    ];
+    const batch = dmDb.batch();
+    paths.forEach((path) => batch.delete(dmDb.doc(path)));
+
+    await expect(batch.commit()).resolves.toBeUndefined();
   });
 
   it("DM can archive their own campaign", async () => {

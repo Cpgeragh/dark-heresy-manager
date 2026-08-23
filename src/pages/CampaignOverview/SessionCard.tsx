@@ -3,7 +3,10 @@
 import { useState, useCallback, useRef } from "react";
 import type { Timestamp } from "firebase/firestore";
 import type { SessionDocument } from "../../types/Firestore";
-import type { SessionUpdateData } from "../../services/sessionService";
+import {
+  getSessionXpAffectedDocumentCount,
+  type SessionUpdateData,
+} from "../../services/sessionService";
 import { useToast } from "../../components/Toast";
 import { Button } from "../../ui/Button";
 import { ConfirmInline } from "../../ui/ConfirmInline";
@@ -66,6 +69,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
     month: "long",
     day: "numeric",
   });
+  const xpAffectedDocuments = getSessionXpAffectedDocumentCount(session.attendees.length);
 
   const toggleAttendee = useCallback((id: string) => {
     setAttendees((prev) => {
@@ -244,7 +248,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
               </span>
             ) : (
               <Button size="sm" onClick={handleApplyXp} disabled={applyingXp}>
-                {applyingXp ? "Applying…" : "Apply XP"}
+                {applyingXp ? "Applying…" : `Apply XP (${xpAffectedDocuments} docs)`}
               </Button>
             ))}
           {isDM && onSave && (
@@ -273,6 +277,10 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
                     />
                     Also remove {session.xpAwarded} XP from attendees
                   </label>
+                  <span className="text-xs lg:text-sm text-slate-500">
+                    This will affect {reverseXp ? xpAffectedDocuments : 1} document
+                    {(reverseXp ? xpAffectedDocuments : 1) === 1 ? "" : "s"}.
+                  </span>
                   <div className="flex items-center gap-1">
                     <Button
                       variant="danger"

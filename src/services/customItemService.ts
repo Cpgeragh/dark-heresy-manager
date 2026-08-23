@@ -2,13 +2,13 @@
 
 import {
   collection,
-  deleteDoc,
   doc,
   getDoc,
   runTransaction,
   serverTimestamp,
   updateDoc,
   writeBatch,
+  type DocumentReference,
 } from "firebase/firestore";
 import { db } from "../firebase";
 import { charactersCollectionRef } from "../firebase/converters";
@@ -26,13 +26,18 @@ import type {
 } from "../types/CustomItems";
 import { stripUndefined } from "../utils/stripUndefined";
 import { runSingleFlight } from "../utils/singleFlight";
-import { deleteQueryDocsInPages, forEachQueryPage } from "../utils/firestoreQueryPages";
 import {
-  assertBulkOperationCount,
   assertCustomItemCreator,
   assertCustomItemData,
   assertFirestoreDocumentId,
 } from "../utils/firebaseValidation";
+import { PRODUCT_LIMITS } from "../constants/productLimits";
+import {
+  assertSafeDestructivePreflight,
+  BoundedDeletionCollector,
+  type DestructiveOperationPreflight,
+} from "../utils/destructiveOperationPreflight";
+import { deleteRefsAtomically } from "../utils/firestoreBatchDelete";
 
 export interface CreateDraftCustomItemArgs<TCategory extends CustomItemCategory> {
   campaignId: string;
@@ -60,6 +65,25 @@ export interface PublishCustomItemArgs extends CustomItemActorArgs {
 }
 
 export interface UpdateAllCopiesArgs extends CustomItemActorArgs {
+  versionId?: string;
+}
+
+export interface CustomItemOperationPreflight extends DestructiveOperationPreflight {
+  affectedCharacterDocuments: number;
+  affectedCopies: number;
+  scannedCharacters: number;
+}
+
+interface CharacterMutation {
+  reference: DocumentReference;
+  fields: Partial<Character>;
+}
+
+interface CustomItemMutationPlan {
+  preflight: CustomItemOperationPreflight;
+  mutations: CharacterMutation[];
+  item?: CampaignCustomItem;
+  version?: CampaignCustomItemVersion;
   versionId?: string;
 }
 
@@ -307,6 +331,209 @@ export async function restoreCustomItem({
   });
 }
 
+function customItemPreflight(
+  affectedDocuments: number,
+  targetExists: boolean,
+  affectedCharacterDocuments: number,
+  affectedCopies: number,
+  scannedCharacters: number,
+  reason?: string
+): CustomItemOperationPreflight {
+  const overWriteLimit = affectedDocuments > PRODUCT_LIMITS.bulkOperationDocuments;
+  return {
+    affectedDocuments,
+    limit: PRODUCT_LIMITS.bulkOperationDocuments,
+    safe: targetExists && !reason && !overWriteLimit,
+    targetExists,
+    counts: {
+      customItems: targetExists ? 1 : 0,
+      characters: affectedCharacterDocuments,
+    },
+    affectedCharacterDocuments,
+    affectedCopies,
+    scannedCharacters,
+    ...(reason
+      ? { reason }
+      : overWriteLimit
+        ? {
+            reason: `This operation affects more than ${PRODUCT_LIMITS.bulkOperationDocuments} documents and requires the protected bulk job.`,
+          }
+        : {}),
+  };
+}
+
+async function buildCustomItemMutationPlan({
+  campaignId,
+  customItemId,
+  mode,
+  versionId,
+  fixedDocuments,
+}: {
+  campaignId: string;
+  customItemId: string;
+  mode: "update" | "remove";
+  versionId?: string;
+  fixedDocuments: number;
+}): Promise<CustomItemMutationPlan> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(customItemId, "Custom-item ID");
+  if (versionId !== undefined) assertFirestoreDocumentId(versionId, "Version ID");
+
+  const itemSnap = await getDoc(customItemDocRef(campaignId, customItemId));
+  if (!itemSnap.exists()) {
+    return {
+      preflight: customItemPreflight(0, false, 0, 0, 0),
+      mutations: [],
+    };
+  }
+
+  const item = itemSnap.data() as CampaignCustomItem;
+  let version: CampaignCustomItemVersion | undefined;
+  let targetVersionId: string | undefined;
+  if (mode === "update") {
+    targetVersionId =
+      versionId ?? item.draftVersionId ?? item.publishedVersionId ?? item.latestVersionId;
+    if (!targetVersionId) {
+      return {
+        preflight: customItemPreflight(
+          fixedDocuments,
+          true,
+          0,
+          0,
+          0,
+          "Custom item has no version to apply."
+        ),
+        mutations: [],
+        item,
+      };
+    }
+    const versionSnap = await getDoc(
+      customItemVersionDocRef(campaignId, customItemId, targetVersionId)
+    );
+    if (!versionSnap.exists()) {
+      return {
+        preflight: customItemPreflight(
+          fixedDocuments,
+          true,
+          0,
+          0,
+          0,
+          "Custom item version no longer exists."
+        ),
+        mutations: [],
+        item,
+        versionId: targetVersionId,
+      };
+    }
+    version = versionSnap.data() as CampaignCustomItemVersion;
+    assertCustomItemData(version.category, stripUndefined(version.data));
+  }
+
+  const characterCollector = new BoundedDeletionCollector(PRODUCT_LIMITS.charactersPerCampaign);
+  const characterDocuments = await characterCollector.addQuery(
+    charactersCollectionRef(campaignId),
+    "characters"
+  );
+  if (characterCollector.exceeded) {
+    return {
+      preflight: customItemPreflight(
+        fixedDocuments + characterCollector.affectedDocuments,
+        true,
+        0,
+        0,
+        characterCollector.affectedDocuments,
+        `This campaign has more than ${PRODUCT_LIMITS.charactersPerCampaign} characters. The operation is disabled until the protected bulk job is available.`
+      ),
+      mutations: [],
+      item,
+      version,
+      versionId: targetVersionId,
+    };
+  }
+
+  const mutations: CharacterMutation[] = [];
+  let affectedCopies = 0;
+  for (const characterDocument of characterDocuments) {
+    if (mode === "update") {
+      const result = buildCharacterCopyUpdate(
+        characterDocument.data(),
+        item.category,
+        customItemId,
+        targetVersionId!,
+        version!.data
+      );
+      if (!result) continue;
+      const { updatedCopies, ...fields } = result;
+      affectedCopies += updatedCopies;
+      mutations.push({ reference: characterDocument.ref, fields });
+    } else {
+      const result = buildCharacterCopyRemoval(characterDocument.data(), customItemId);
+      if (!result) continue;
+      const { removedCopies, ...fields } = result;
+      affectedCopies += removedCopies;
+      mutations.push({ reference: characterDocument.ref, fields });
+    }
+  }
+
+  const affectedDocuments = fixedDocuments + mutations.length;
+  return {
+    preflight: customItemPreflight(
+      affectedDocuments,
+      true,
+      mutations.length,
+      affectedCopies,
+      characterDocuments.length
+    ),
+    mutations,
+    item,
+    version,
+    versionId: targetVersionId,
+  };
+}
+
+async function commitCharacterMutations(mutations: CharacterMutation[]): Promise<void> {
+  if (mutations.length === 0) return;
+  const batch = writeBatch(db);
+  mutations.forEach(({ reference, fields }) => batch.update(reference, stripUndefined(fields)));
+  await batch.commit();
+}
+
+export async function preflightCustomItemUpdateAllCopies({
+  campaignId,
+  customItemId,
+  versionId,
+}: Pick<
+  UpdateAllCopiesArgs,
+  "campaignId" | "customItemId" | "versionId"
+>): Promise<CustomItemOperationPreflight> {
+  return (
+    await buildCustomItemMutationPlan({
+      campaignId,
+      customItemId,
+      mode: "update",
+      versionId,
+      fixedDocuments: 2,
+    })
+  ).preflight;
+}
+
+export async function preflightCustomItemArchive({
+  campaignId,
+  customItemId,
+}: Pick<
+  CustomItemActorArgs,
+  "campaignId" | "customItemId"
+>): Promise<CustomItemOperationPreflight> {
+  return (
+    await buildCustomItemMutationPlan({
+      campaignId,
+      customItemId,
+      mode: "remove",
+      fixedDocuments: 1,
+    })
+  ).preflight;
+}
+
 export async function permanentlyDeleteCustomItem({
   campaignId,
   customItemId,
@@ -316,14 +543,64 @@ export async function permanentlyDeleteCustomItem({
 }): Promise<void> {
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   assertFirestoreDocumentId(customItemId, "Custom-item ID");
+  await runSingleFlight("custom-item:permanent-delete", [campaignId, customItemId], async () => {
+    const plan = await buildPermanentCustomItemDeletionPlan(campaignId, customItemId);
+    assertSafeDestructivePreflight(plan.preflight, "Custom item");
+    await deleteRefsAtomically(db, plan.references);
+  });
+}
+
+async function buildPermanentCustomItemDeletionPlan(
+  campaignId: string,
+  customItemId: string
+): Promise<{ preflight: CustomItemOperationPreflight; references: DocumentReference[] }> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(customItemId, "Custom-item ID");
+  const collector = new BoundedDeletionCollector();
   const itemRef = customItemDocRef(campaignId, customItemId);
   const itemSnap = await getDoc(itemRef);
-  if (!itemSnap.exists()) throw new Error("Custom item not found.");
-  if ((itemSnap.data() as CampaignCustomItem).status !== "archived")
-    throw new Error("Only archived items can be permanently deleted.");
+  collector.addSnapshot(itemSnap, "customItems");
+  if (!itemSnap.exists()) {
+    return {
+      preflight: customItemPreflight(0, false, 0, 0, 0),
+      references: [],
+    };
+  }
+  if ((itemSnap.data() as CampaignCustomItem).status !== "archived") {
+    return {
+      preflight: customItemPreflight(
+        1,
+        true,
+        0,
+        0,
+        0,
+        "Only archived items can be permanently deleted."
+      ),
+      references: [],
+    };
+  }
+  await collector.addQuery(collection(itemRef, "versions"), "customItemVersions");
+  const base = collector.result(true);
+  const preflight: CustomItemOperationPreflight = {
+    ...base,
+    affectedCharacterDocuments: 0,
+    affectedCopies: 0,
+    scannedCharacters: 0,
+  };
+  return {
+    preflight,
+    references: preflight.safe ? collector.references() : [],
+  };
+}
 
-  await deleteQueryDocsInPages(db, collection(itemRef, "versions"));
-  await deleteDoc(itemRef);
+export async function preflightPermanentCustomItemDeletion({
+  campaignId,
+  customItemId,
+}: {
+  campaignId: string;
+  customItemId: string;
+}): Promise<CustomItemOperationPreflight> {
+  return (await buildPermanentCustomItemDeletionPlan(campaignId, customItemId)).preflight;
 }
 
 export async function publishAndUpdateAllCopies({
@@ -335,13 +612,22 @@ export async function publishAndUpdateAllCopies({
   assertFirestoreDocumentId(customItemId, "Custom-item ID");
   assertFirestoreDocumentId(actorUserId, "Actor user ID");
   return runSingleFlight("custom-item:publish-propagate", [campaignId, customItemId], async () => {
-    const itemSnap = await getDoc(customItemDocRef(campaignId, customItemId));
-    if (!itemSnap.exists()) throw new Error("Custom item not found.");
-    const item = itemSnap.data() as CampaignCustomItem;
-    const versionId = item.draftVersionId ?? item.publishedVersionId ?? item.latestVersionId;
-    if (!versionId) throw new Error("Custom item has no version to publish.");
-    await publishCustomItem({ campaignId, customItemId, actorUserId, versionId });
-    return updateAllCustomItemCopies({ campaignId, customItemId, actorUserId, versionId });
+    const plan = await buildCustomItemMutationPlan({
+      campaignId,
+      customItemId,
+      mode: "update",
+      fixedDocuments: 2,
+    });
+    assertSafeDestructivePreflight(plan.preflight, "Custom-item propagation");
+    if (!plan.versionId) throw new Error("Custom item has no version to publish.");
+    await publishCustomItem({
+      campaignId,
+      customItemId,
+      actorUserId,
+      versionId: plan.versionId,
+    });
+    await commitCharacterMutations(plan.mutations);
+    return plan.preflight.affectedCopies;
   });
 }
 
@@ -354,45 +640,16 @@ export async function updateAllCustomItemCopies({
   assertFirestoreDocumentId(customItemId, "Custom-item ID");
   if (versionId !== undefined) assertFirestoreDocumentId(versionId, "Version ID");
   return runSingleFlight("custom-item:propagate", [campaignId, customItemId], async () => {
-    const itemSnap = await getDoc(customItemDocRef(campaignId, customItemId));
-    if (!itemSnap.exists()) throw new Error("Custom item not found.");
-
-    const item = itemSnap.data() as CampaignCustomItem;
-    const targetVersionId = versionId ?? item.publishedVersionId ?? item.latestVersionId;
-    if (!targetVersionId) throw new Error("Custom item has no version to apply.");
-
-    const versionSnap = await getDoc(
-      customItemVersionDocRef(campaignId, customItemId, targetVersionId)
-    );
-    if (!versionSnap.exists()) throw new Error("Custom item version not found.");
-
-    const version = versionSnap.data() as CampaignCustomItemVersion;
-    assertCustomItemData(version.category, stripUndefined(version.data));
-    let updatedCopies = 0;
-
-    await forEachQueryPage(charactersCollectionRef(campaignId), async (documents) => {
-      assertBulkOperationCount(documents.length, "Custom-item propagation page");
-      const batch = writeBatch(db);
-      let operations = 0;
-
-      for (const characterDoc of documents) {
-        const update = buildCharacterCopyUpdate(
-          characterDoc.data(),
-          item.category,
-          customItemId,
-          targetVersionId,
-          version.data
-        );
-        if (!update) continue;
-
-        batch.update(characterDoc.ref, stripUndefined(update));
-        operations += 1;
-        updatedCopies += update.updatedCopies;
-      }
-
-      if (operations > 0) await batch.commit();
+    const plan = await buildCustomItemMutationPlan({
+      campaignId,
+      customItemId,
+      mode: "update",
+      versionId,
+      fixedDocuments: 0,
     });
-    return updatedCopies;
+    assertSafeDestructivePreflight(plan.preflight, "Custom-item propagation");
+    await commitCharacterMutations(plan.mutations);
+    return plan.preflight.affectedCopies;
   });
 }
 
@@ -540,25 +797,50 @@ export async function removeAllCustomItemCopies({
 }: Pick<CustomItemActorArgs, "campaignId" | "customItemId">): Promise<number> {
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   assertFirestoreDocumentId(customItemId, "Custom-item ID");
-  let removedCopies = 0;
-
-  await forEachQueryPage(charactersCollectionRef(campaignId), async (documents) => {
-    assertBulkOperationCount(documents.length, "Custom-item removal page");
-    const batch = writeBatch(db);
-    let operations = 0;
-
-    for (const characterDoc of documents) {
-      const update = buildCharacterCopyRemoval(characterDoc.data(), customItemId);
-      if (!update) continue;
-      const { removedCopies: count, ...fields } = update;
-      batch.update(characterDoc.ref, fields);
-      operations += 1;
-      removedCopies += count;
-    }
-
-    if (operations > 0) await batch.commit();
+  return runSingleFlight("custom-item:remove-copies", [campaignId, customItemId], async () => {
+    const plan = await buildCustomItemMutationPlan({
+      campaignId,
+      customItemId,
+      mode: "remove",
+      fixedDocuments: 0,
+    });
+    assertSafeDestructivePreflight(plan.preflight, "Custom-item copy removal");
+    await commitCharacterMutations(plan.mutations);
+    return plan.preflight.affectedCopies;
   });
-  return removedCopies;
+}
+
+export async function archiveAndRemoveAllCustomItemCopies({
+  campaignId,
+  customItemId,
+  actorUserId,
+}: CustomItemActorArgs): Promise<number> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(customItemId, "Custom-item ID");
+  assertFirestoreDocumentId(actorUserId, "Actor user ID");
+  return runSingleFlight("custom-item:archive-remove", [campaignId, customItemId], async () => {
+    const plan = await buildCustomItemMutationPlan({
+      campaignId,
+      customItemId,
+      mode: "remove",
+      fixedDocuments: 1,
+    });
+    assertSafeDestructivePreflight(plan.preflight, "Custom-item archive");
+
+    const batch = writeBatch(db);
+    batch.update(customItemDocRef(campaignId, customItemId), {
+      status: "archived",
+      archivedAt: serverTimestamp(),
+      archivedByUserId: actorUserId,
+      updatedAt: serverTimestamp(),
+      updatedBy: { userId: actorUserId },
+    });
+    plan.mutations.forEach(({ reference, fields }) =>
+      batch.update(reference, stripUndefined(fields))
+    );
+    await batch.commit();
+    return plan.preflight.affectedCopies;
+  });
 }
 
 export function buildCharacterCopyRemoval(

@@ -17,3 +17,20 @@ export async function batchDeleteRefs(db: Firestore, refs: DocumentReference[]):
     await batch.commit();
   }
 }
+
+/**
+ * Deletes one already-preflighted reference set in a single atomic batch.
+ * Destructive client operations use this instead of chunking so a failure
+ * cannot leave half of the approved document set deleted.
+ */
+export async function deleteRefsAtomically(
+  db: Firestore,
+  refs: DocumentReference[]
+): Promise<void> {
+  assertBulkOperationCount(refs.length, "Atomic deletion");
+  if (refs.length === 0) return;
+
+  const batch = writeBatch(db);
+  refs.forEach((ref) => batch.delete(ref));
+  await batch.commit();
+}

@@ -1,6 +1,6 @@
 # Manual Test Checklist — Complete App
 
-Thirty-one pages and cross-cutting sections, containing 598 checks. Every item
+Thirty-one pages and cross-cutting sections, containing 608 checks. Every item
 comes from reading the actual logic, not a generic "does it load" pass.
 Check items off as you verify them; anything under **Watch for** is the
 likeliest place a real bug hides. Coverage notes are at the bottom — read
@@ -1077,6 +1077,16 @@ For each boundary, try the largest valid value and then one unit over it. For ro
 - [ ] Type multi-digit Height and Weight values — no write occurs for intermediate digits, blur or Enter commits once, and focusing then blurring an unchanged value performs no write
 - [ ] Deliberately store an incorrect `experience.spent`, open the editable character and observe one correction of only that nested field; leave the sheet open after the corrected snapshot and confirm it does not loop or write again
 - [ ] Open the same stale-XP character in two editable tabs at once — after both reconciliation attempts settle, the computed Spent XP is correct, unrelated XP fields are unchanged, and Firestore records only one committed correction
+- [ ] Open character deletion as a DM — confirmation remains unavailable while the preflight runs, then shows the exact total for the character, Recovery Index, thread, messages, claim logs and XP proposals before enabling deletion
+- [ ] Seed a character deletion with more than 440 total documents, or remove its usable Recovery Code — the interface explains why deletion is disabled and no document is removed
+- [ ] Delete a normal character while forcing the atomic batch to fail — the character and every dependent document remain present; retrying succeeds as one operation without orphaned records
+- [ ] Open permanent campaign deletion for both an active and archived campaign — the exact combined count for the campaign and all known descendants appears before typed confirmation can complete
+- [ ] Seed a campaign deletion above 440 documents — confirmation stays disabled, the protected-bulk-job explanation appears and no descendant or campaign document is removed
+- [ ] Apply session XP with two attendees — the button reports 3 affected documents; after application, delete the session and toggle XP reversal to see the impact change from 1 to 3 before confirming
+- [ ] Corrupt a stored applied session with duplicate, invalid or over-limit attendees, then request XP reversal — the transaction stops before updating a character or deleting the session
+- [ ] Open Archive or Update All Copies for a custom item — the confirmation reports affected character documents and linked copies before enabling the action, and the committed changes match that count
+- [ ] Seed more than 100 character documents in a campaign — custom-item propagation and removal are disabled before any definition or character write begins, pending the protected bulk job
+- [ ] Permanently delete an archived custom item — the preflight includes its definition and every version, and a forced commit failure leaves all documents intact
 
 ---
 

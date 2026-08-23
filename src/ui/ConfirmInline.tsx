@@ -5,7 +5,7 @@
 //
 // Internal clicks call preventDefault so the component is safe inside a <Link>.
 
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { Button } from "./Button";
 
 interface ConfirmInlineProps {
@@ -14,11 +14,14 @@ interface ConfirmInlineProps {
   /** Short question shown when armed (simple confirm), e.g. "Delete?". */
   question?: string;
   onConfirm: () => void | Promise<void>;
+  onArm?: () => void | Promise<void>;
+  details?: ReactNode;
+  confirmDisabled?: boolean;
   /** Red (destructive, default) or amber (reversible, e.g. Archive). */
   variant?: "danger" | "warning";
   /** Shows the busy label and disables the buttons while an action runs. */
   busy?: boolean;
-  size?: "sm" | "md";
+  size?: "xs" | "sm" | "md";
   /** When set, the user must type this exact text before Yes is enabled. */
   requireText?: string;
   /** Prompt shown above the input in type-to-confirm mode. */
@@ -32,6 +35,9 @@ export function ConfirmInline({
   triggerLabel,
   question,
   onConfirm,
+  onArm,
+  details,
+  confirmDisabled: externallyDisabled = false,
   variant = "danger",
   busy = false,
   size = "sm",
@@ -60,6 +66,11 @@ export function ConfirmInline({
     setText("");
   };
 
+  const arm = () => {
+    setArmed(true);
+    if (onArm) void Promise.resolve(onArm()).catch(() => undefined);
+  };
+
   // Run the action, then collapse back to the resting trigger. Disarming in
   // finally keeps stay-mounted cases (e.g. "Clear chat") from staying armed;
   // for cases where the row unmounts on success the state update is a no-op.
@@ -78,14 +89,15 @@ export function ConfirmInline({
 
   if (!armed) {
     return (
-      <Button variant={triggerVariant} size={size} onClick={handle(() => setArmed(true))}>
+      <Button variant={triggerVariant} size={size} onClick={handle(arm)}>
         {triggerLabel}
       </Button>
     );
   }
 
   const effectiveBusy = busy || submitting;
-  const confirmDisabled = effectiveBusy || (requireText !== undefined && text !== requireText);
+  const confirmDisabled =
+    effectiveBusy || externallyDisabled || (requireText !== undefined && text !== requireText);
 
   if (requireText !== undefined) {
     return (
@@ -93,6 +105,7 @@ export function ConfirmInline({
         <span className={`text-xs lg:text-sm ${accent}`}>
           {requirePrompt ?? `Type ${requireText} to confirm`}
         </span>
+        {details}
         <div className="flex items-center gap-1">
           <input
             type="text"
@@ -120,19 +133,22 @@ export function ConfirmInline({
   }
 
   return (
-    <div className="flex items-center gap-1" onClick={(e) => e.preventDefault()}>
-      {question && <span className={`text-xs lg:text-sm ${accent}`}>{question}</span>}
-      <Button
-        variant={confirmVariant}
-        size={size}
-        disabled={effectiveBusy}
-        onClick={handle(runConfirm)}
-      >
-        {effectiveBusy ? busyLabel : confirmLabel}
-      </Button>
-      <Button variant="secondary" size={size} disabled={effectiveBusy} onClick={handle(disarm)}>
-        {cancelLabel}
-      </Button>
+    <div className="flex flex-col items-start gap-1" onClick={(e) => e.preventDefault()}>
+      <div className="flex items-center gap-1">
+        {question && <span className={`text-xs lg:text-sm ${accent}`}>{question}</span>}
+        <Button
+          variant={confirmVariant}
+          size={size}
+          disabled={confirmDisabled}
+          onClick={handle(runConfirm)}
+        >
+          {effectiveBusy ? busyLabel : confirmLabel}
+        </Button>
+        <Button variant="secondary" size={size} disabled={effectiveBusy} onClick={handle(disarm)}>
+          {cancelLabel}
+        </Button>
+      </div>
+      {details}
     </div>
   );
 }

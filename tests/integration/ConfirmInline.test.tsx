@@ -65,4 +65,36 @@ describe("ConfirmInline", () => {
     await user.click(yes);
     expect(onConfirm).toHaveBeenCalledTimes(1);
   });
+
+  it("starts a preflight when armed and keeps confirmation disabled until it is safe", async () => {
+    const user = userEvent.setup();
+    const onArm = vi.fn();
+    const onConfirm = vi.fn();
+    const { rerender } = render(
+      <ConfirmInline
+        triggerLabel="Delete"
+        question="Delete?"
+        onArm={onArm}
+        details={<span>Checking affected documents…</span>}
+        confirmDisabled
+        onConfirm={onConfirm}
+      />
+    );
+
+    await user.click(screen.getByText("Delete"));
+    expect(onArm).toHaveBeenCalledOnce();
+    expect(screen.getByText("Checking affected documents…")).toBeInTheDocument();
+    expect(screen.getByText("Yes")).toBeDisabled();
+
+    rerender(
+      <ConfirmInline
+        triggerLabel="Delete"
+        question="Delete?"
+        details={<span>Affects 4 documents.</span>}
+        onConfirm={onConfirm}
+      />
+    );
+    expect(screen.getByText("Affects 4 documents.")).toBeInTheDocument();
+    expect(screen.getByText("Yes")).toBeEnabled();
+  });
 });

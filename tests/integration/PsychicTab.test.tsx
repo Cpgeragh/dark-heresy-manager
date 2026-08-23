@@ -31,8 +31,12 @@ vi.mock("../../src/services/customItemService", async () => {
     createDraftCustomItem: (...args: unknown[]) => createDraftCustomItemMock(...args),
     saveDraftCustomItem: (...args: unknown[]) => saveDraftCustomItemMock(...args),
     publishCustomItem: (...args: unknown[]) => publishCustomItemMock(...args),
-    archiveCustomItem: (...args: unknown[]) => archiveCustomItemMock(...args),
-    removeAllCustomItemCopies: vi.fn(),
+    archiveAndRemoveAllCustomItemCopies: (...args: unknown[]) => archiveCustomItemMock(...args),
+    preflightCustomItemArchive: vi.fn().mockResolvedValue({
+      safe: true,
+      affectedDocuments: 1,
+      affectedCopies: 0,
+    }),
     publishAndUpdateAllCopies: vi.fn(),
   };
 });
@@ -207,8 +211,11 @@ describe("PsychicTab", () => {
     renderTab({ psychic: { ...emptyPsychic, disciplines: ["Biomancy"] } });
 
     expect(screen.getByLabelText("Biomancy: known")).not.toHaveClass("text-emerald-400/50");
-    expect(screen.getByLabelText("Telepathy: not known"))
-      .toHaveClass("border-fuchsia-700/50", "bg-fuchsia-950/15", "text-fuchsia-400/50");
+    expect(screen.getByLabelText("Telepathy: not known")).toHaveClass(
+      "border-fuchsia-700/50",
+      "bg-fuchsia-950/15",
+      "text-fuchsia-400/50"
+    );
     expect(screen.queryByRole("button", { name: "Biomancy" })).not.toBeInTheDocument();
   });
 
@@ -232,11 +239,21 @@ describe("PsychicTab", () => {
     await user.click(screen.getAllByRole("button", { name: "View Minor Powers" })[0]);
     expect(screen.getByRole("dialog", { name: "View Psychic Powers" })).toBeInTheDocument();
     expect(screen.queryByRole("dialog", { name: "Add Minor Power" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Use Minor Psychic Power selection" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Use Psy Rating selection" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Add independent Minor power" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Select Fake Minor Power" })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Expand Fake Minor Power details" })).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Use Minor Psychic Power selection" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Use Psy Rating selection" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Add independent Minor power" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Select Fake Minor Power" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Expand Fake Minor Power details" })
+    ).toBeInTheDocument();
   });
 
   it("renders Minor and Major sections", () => {
@@ -274,7 +291,7 @@ describe("PsychicTab", () => {
     await user.click(await screen.findByRole("button", { name: "Select Fake Major Power" }));
 
     expect(onUpdate.mock.calls[0][0].majorPowers[0].description).toContain(
-      "Discipline rule: If a Psyker uses a telepathic power",
+      "Discipline rule: If a Psyker uses a telepathic power"
     );
     expect(onUpdate.mock.calls[0][0].majorPowers[0].description).toContain("psychic rot");
   });
@@ -318,7 +335,9 @@ describe("PsychicTab", () => {
     const user = userEvent.setup();
     const talents: TalentsAndTraitsBlock = {
       ...emptyTalents,
-      talents: [{ uid: "minor-purchase-1", talentId: "minor-psychic-power", name: "Minor Psychic Power" }],
+      talents: [
+        { uid: "minor-purchase-1", talentId: "minor-psychic-power", name: "Minor Psychic Power" },
+      ],
     };
     const { onUpdate } = renderTab({ talents });
     await user.click(screen.getAllByRole("button", { name: "Add Minor Power" })[0]);
@@ -368,7 +387,11 @@ describe("PsychicTab", () => {
     const user = userEvent.setup();
     useCampaignCustomItemsMock.mockReturnValue({
       items: [
-        libraryPower({ status: "draft", publishedVersionId: null, draftVersionId: "lib-version-1" }),
+        libraryPower({
+          status: "draft",
+          publishedVersionId: null,
+          draftVersionId: "lib-version-1",
+        }),
       ],
       loading: false,
       error: null,
@@ -533,7 +556,9 @@ describe("PsychicTab", () => {
     const user = userEvent.setup();
     const talents: TalentsAndTraitsBlock = {
       ...emptyTalents,
-      talents: [{ uid: "minor-purchase-1", talentId: "minor-psychic-power", name: "Minor Psychic Power" }],
+      talents: [
+        { uid: "minor-purchase-1", talentId: "minor-psychic-power", name: "Minor Psychic Power" },
+      ],
     };
     const { onUpdate } = renderTab({ talents });
 
@@ -550,7 +575,9 @@ describe("PsychicTab", () => {
     expect(within(powerPicker).queryByRole("button", { name: "Close" })).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Back" }));
     expect(screen.getByRole("dialog", { name: "Add Minor Power" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Use Minor Psychic Power selection" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Use Minor Psychic Power selection" })
+    ).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Use Minor Psychic Power selection" }));
     await user.click(await screen.findByRole("button", { name: "Select Fake Minor Power" }));
 
@@ -578,15 +605,21 @@ describe("PsychicTab", () => {
 
     const activePowerPicker = screen.getByRole("dialog", { name: "Add Psychic Power" });
     expect(activePowerPicker).toBeInTheDocument();
-    expect(within(activePowerPicker).queryByRole("button", { name: "Use Minor Psychic Power selection" })).not.toBeInTheDocument();
+    expect(
+      within(activePowerPicker).queryByRole("button", { name: "Use Minor Psychic Power selection" })
+    ).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Select Second Fake Minor Power" }));
 
     expect(screen.getByRole("dialog", { name: "Add Minor Power" })).toBeInTheDocument();
     expect(screen.queryByRole("dialog", { name: "Add Psychic Power" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Use Minor Psychic Power selection" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Use Minor Psychic Power selection" })
+    ).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Add independent Minor power" })).toBeInTheDocument();
     expect(screen.queryByText("All selections used")).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Select Third Fake Minor Power" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Select Third Fake Minor Power" })
+    ).not.toBeInTheDocument();
     expect(screen.queryByText("Available: 1")).not.toBeInTheDocument();
     expect(screen.getAllByText("Minor Psychic Power")).toHaveLength(4);
     expect(screen.queryByText("Talent purchase")).not.toBeInTheDocument();
@@ -635,7 +668,9 @@ describe("PsychicTab", () => {
     const user = userEvent.setup();
     const talents: TalentsAndTraitsBlock = {
       ...emptyTalents,
-      talents: [{ uid: "minor-purchase-1", talentId: "minor-psychic-power", name: "Minor Psychic Power" }],
+      talents: [
+        { uid: "minor-purchase-1", talentId: "minor-psychic-power", name: "Minor Psychic Power" },
+      ],
     };
     const { unmount } = render(<StatefulPsychicTab talents={talents} />);
     expect(screen.getAllByText("Available: 1").length).toBeGreaterThan(0);
@@ -650,13 +685,15 @@ describe("PsychicTab", () => {
         talents={talents}
         initialPsychic={{
           ...emptyPsychic,
-          minorPowers: [{
-            id: "linked-minor",
-            name: "Linked Minor",
-            known: true,
-            isMinor: true,
-            talentEntryUid: "minor-purchase-1",
-          }],
+          minorPowers: [
+            {
+              id: "linked-minor",
+              name: "Linked Minor",
+              known: true,
+              isMinor: true,
+              talentEntryUid: "minor-purchase-1",
+            },
+          ],
         }}
       />
     );
@@ -670,7 +707,9 @@ describe("PsychicTab", () => {
     const user = userEvent.setup();
     const talents: TalentsAndTraitsBlock = {
       ...emptyTalents,
-      talents: [{ uid: "minor-purchase-1", talentId: "minor-psychic-power", name: "Minor Psychic Power" }],
+      talents: [
+        { uid: "minor-purchase-1", talentId: "minor-psychic-power", name: "Minor Psychic Power" },
+      ],
     };
     const { onUpdate } = renderTab({ talents });
 
@@ -708,17 +747,21 @@ describe("PsychicTab", () => {
     const user = userEvent.setup();
     const talents: TalentsAndTraitsBlock = {
       ...emptyTalents,
-      talents: [{ uid: "minor-purchase-1", talentId: "minor-psychic-power", name: "Minor Psychic Power" }],
+      talents: [
+        { uid: "minor-purchase-1", talentId: "minor-psychic-power", name: "Minor Psychic Power" },
+      ],
     };
     const psychic: PsychicBlock = {
       ...emptyPsychic,
-      minorPowers: [{
-        id: "linked-minor",
-        name: "Linked Minor",
-        known: true,
-        isMinor: true,
-        talentEntryUid: "minor-purchase-1",
-      }],
+      minorPowers: [
+        {
+          id: "linked-minor",
+          name: "Linked Minor",
+          known: true,
+          isMinor: true,
+          talentEntryUid: "minor-purchase-1",
+        },
+      ],
     };
     const { onUpdate } = renderTab({ talents, psychic });
     await user.click(screen.getAllByRole("button", { name: "Delete Linked Minor" })[0]);
@@ -731,15 +774,17 @@ describe("PsychicTab", () => {
     const user = userEvent.setup();
     const talents: TalentsAndTraitsBlock = {
       ...emptyTalents,
-      talents: [{
-        uid: "psy-rating-purchase",
-        talentId: "psy-rating-1",
-        name: "Psy Rating 1",
-        acquisition: {
-          psyRatingWillpowerBonus: 4,
-          psyRatingMinorPowerGrants: 2,
+      talents: [
+        {
+          uid: "psy-rating-purchase",
+          talentId: "psy-rating-1",
+          name: "Psy Rating 1",
+          acquisition: {
+            psyRatingWillpowerBonus: 4,
+            psyRatingMinorPowerGrants: 2,
+          },
         },
-      }],
+      ],
     };
     const { onUpdate } = renderTab({ talents });
 
@@ -767,15 +812,17 @@ describe("PsychicTab", () => {
     const user = userEvent.setup();
     const talents: TalentsAndTraitsBlock = {
       ...emptyTalents,
-      talents: [{
-        uid: "psy-rating-purchase",
-        talentId: "psy-rating-1",
-        name: "Psy Rating 1",
-        acquisition: {
-          psyRatingWillpowerBonus: 4,
-          psyRatingMinorPowerGrants: 2,
+      talents: [
+        {
+          uid: "psy-rating-purchase",
+          talentId: "psy-rating-1",
+          name: "Psy Rating 1",
+          acquisition: {
+            psyRatingWillpowerBonus: 4,
+            psyRatingMinorPowerGrants: 2,
+          },
         },
-      }],
+      ],
     };
     render(<StatefulPsychicTab talents={talents} />);
 
@@ -786,10 +833,14 @@ describe("PsychicTab", () => {
 
     expect(screen.getByRole("dialog", { name: "Add Minor Power" })).toBeInTheDocument();
     expect(screen.queryByRole("dialog", { name: "Add Psychic Power" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Use Psy Rating selection" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Use Psy Rating selection" })
+    ).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Add independent Minor power" })).toBeInTheDocument();
     expect(screen.queryByText("All selections used")).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Select Third Fake Minor Power" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Select Third Fake Minor Power" })
+    ).not.toBeInTheDocument();
     expect(screen.getAllByText("Psy Rating 1")).toHaveLength(4);
     expect(screen.queryByText("Psy Rating grant")).not.toBeInTheDocument();
   });
@@ -798,16 +849,20 @@ describe("PsychicTab", () => {
     const user = userEvent.setup();
     const talents: TalentsAndTraitsBlock = {
       ...emptyTalents,
-      talents: [{
-        uid: "psy-rating-purchase",
-        talentId: "psy-rating-3",
-        name: "Psy Rating 3",
-        acquisition: { psyRatingMajorPowerGrants: 1, psyRatingDiscipline: "Telepathy" },
-      }],
+      talents: [
+        {
+          uid: "psy-rating-purchase",
+          talentId: "psy-rating-3",
+          name: "Psy Rating 3",
+          acquisition: { psyRatingMajorPowerGrants: 1, psyRatingDiscipline: "Telepathy" },
+        },
+      ],
     };
     const psychic: PsychicBlock = {
       ...emptyPsychic,
-      majorPowers: [{ id: "existing", name: "Existing Major", discipline: "Telepathy", known: true }],
+      majorPowers: [
+        { id: "existing", name: "Existing Major", discipline: "Telepathy", known: true },
+      ],
     };
     const { onUpdate } = renderTab({ talents, psychic });
     await user.click(screen.getAllByRole("button", { name: "Expand Existing Major details" })[0]);

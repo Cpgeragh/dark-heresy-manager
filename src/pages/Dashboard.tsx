@@ -26,9 +26,11 @@ import {
   archiveCampaign,
   createCampaign,
   deleteCampaign,
+  preflightCampaignDeletion,
   restoreCampaign,
   updateCampaignName,
 } from "../services/campaignService";
+import type { DestructiveOperationPreflight } from "../utils/destructiveOperationPreflight";
 import type { CampaignWithId, CharacterListItem } from "../types/Firestore";
 import { uiSection, editableInputClass, uiTextError } from "../ui/editableStyles";
 import { Button } from "../ui/Button";
@@ -51,6 +53,27 @@ interface Props {
   effectiveUserId: string;
   isLinked: boolean;
   firstName: string | null;
+}
+
+interface DeletePreflightState {
+  loading: boolean;
+  result?: DestructiveOperationPreflight;
+  error?: string;
+}
+
+function deleteImpactDetails(state?: DeletePreflightState) {
+  if (!state || state.loading)
+    return <span className="text-xs text-slate-500">Checking affected documents…</span>;
+  if (state.error) return <span className="text-xs text-red-400">{state.error}</span>;
+  if (!state.result) return null;
+  return (
+    <span className={state.result.safe ? "text-xs text-slate-500" : "text-xs text-red-400"}>
+      {state.result.safe
+        ? `This permanently deletes ${state.result.affectedDocuments} document${state.result.affectedDocuments === 1 ? "" : "s"}.`
+        : (state.result.reason ??
+          `This affects more than ${state.result.limit} documents and is disabled until the protected bulk job is available.`)}
+    </span>
+  );
 }
 
 // ─── Player character card ────────────────────────────────────────────────────
@@ -196,6 +219,9 @@ function DmCampaignList({
   const [editing, setEditing] = useState(false);
   const editingRef = useRef(false);
   const [deleting, setDeleting] = useState(false);
+  const [deletePreflights, setDeletePreflights] = useState<Record<string, DeletePreflightState>>(
+    {}
+  );
   const [archiving, setArchiving] = useState(false);
   const [restoring, setRestoring] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
@@ -287,13 +313,37 @@ function DmCampaignList({
         toast.success("Campaign deleted.");
       } catch (err) {
         console.error("Failed to delete campaign:", err);
-        toast.error("Failed to delete campaign. Please try again.");
+        toast.error(
+          err instanceof Error ? err.message : "Failed to delete campaign. Please try again."
+        );
       } finally {
         setDeleting(false);
       }
     },
     [toast]
   );
+
+  const loadDeletePreflight = useCallback(async (campaignId: string) => {
+    setDeletePreflights((current) => ({
+      ...current,
+      [campaignId]: { loading: true },
+    }));
+    try {
+      const result = await preflightCampaignDeletion(campaignId);
+      setDeletePreflights((current) => ({
+        ...current,
+        [campaignId]: { loading: false, result },
+      }));
+    } catch (error) {
+      setDeletePreflights((current) => ({
+        ...current,
+        [campaignId]: {
+          loading: false,
+          error: error instanceof Error ? error.message : "Unable to check this deletion.",
+        },
+      }));
+    }
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -395,6 +445,9 @@ function DmCampaignList({
                     requirePrompt="Type DELETE to confirm"
                     size="sm"
                     busy={deleting}
+                    onArm={() => loadDeletePreflight(campaign.id)}
+                    details={deleteImpactDetails(deletePreflights[campaign.id])}
+                    confirmDisabled={!deletePreflights[campaign.id]?.result?.safe}
                     onConfirm={() => handleDeleteConfirm(campaign.id)}
                   />
                 </Link>
@@ -446,6 +499,9 @@ function DmCampaignList({
                       requirePrompt="Type DELETE to confirm"
                       size="sm"
                       busy={deleting}
+                      onArm={() => loadDeletePreflight(campaign.id)}
+                      details={deleteImpactDetails(deletePreflights[campaign.id])}
+                      confirmDisabled={!deletePreflights[campaign.id]?.result?.safe}
                       onConfirm={() => handleDeleteConfirm(campaign.id)}
                     />
                   </div>

@@ -224,4 +224,32 @@ describe("deleteSession with XP reversal", () => {
     expect(mockTransaction.update).not.toHaveBeenCalled();
     expect(mockTransaction.delete).toHaveBeenCalledWith("campaigns/camp-1/sessions/sess-1");
   });
+
+  it("stops an over-limit stored XP reversal before staging any write or delete", async () => {
+    mockTransaction.get.mockResolvedValue({
+      exists: () => true,
+      data: () => ({
+        xpApplied: true,
+        xpAwarded: 200,
+        attendees: Array.from({ length: 101 }, (_, index) => `char-${index}`),
+      }),
+    });
+
+    await expect(deleteSession("camp-1", "sess-1", true)).rejects.toThrow(
+      "more than 100 attendees"
+    );
+    expect(mockTransaction.update).not.toHaveBeenCalled();
+    expect(mockTransaction.delete).not.toHaveBeenCalled();
+  });
+
+  it("stops duplicate stored attendees before staging XP reversal", async () => {
+    mockTransaction.get.mockResolvedValue({
+      exists: () => true,
+      data: () => ({ xpApplied: true, xpAwarded: 200, attendees: ["char-1", "char-1"] }),
+    });
+
+    await expect(deleteSession("camp-1", "sess-1", true)).rejects.toThrow("contain duplicates");
+    expect(mockTransaction.update).not.toHaveBeenCalled();
+    expect(mockTransaction.delete).not.toHaveBeenCalled();
+  });
 });

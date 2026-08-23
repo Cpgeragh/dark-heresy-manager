@@ -28,8 +28,12 @@ vi.mock("../../src/services/customItemService", async () => {
   return {
     ...actual,
     publishCustomItem: (...args: unknown[]) => publishCustomItemMock(...args),
-    archiveCustomItem: (...args: unknown[]) => archiveCustomItemMock(...args),
-    removeAllCustomItemCopies: vi.fn(),
+    archiveAndRemoveAllCustomItemCopies: (...args: unknown[]) => archiveCustomItemMock(...args),
+    preflightCustomItemArchive: vi.fn().mockResolvedValue({
+      safe: true,
+      affectedDocuments: 2,
+      affectedCopies: 1,
+    }),
     publishAndUpdateAllCopies: vi.fn(),
   };
 });
@@ -349,7 +353,7 @@ describe("WeaponsTab custom-item library actions", () => {
     useCampaignCustomItemsMock.mockReturnValue({ items: [], loading: false, error: null });
   });
 
-  it("calls archiveCustomItem when a DM clicks Archive on a library weapon", async () => {
+  it("preflights and archives a library weapon when a DM confirms", async () => {
     const user = userEvent.setup();
     useCampaignCustomItemsMock.mockReturnValue({
       items: [makeLibraryItem()],
@@ -360,6 +364,7 @@ describe("WeaponsTab custom-item library actions", () => {
     renderTab({ isDM: true, rangedWeapons: [linkedWeapon], meleeWeapons: [] });
     await user.click(screen.getByRole("button", { name: "Expand Custom Lasgun details" }));
     await user.click(screen.getByRole("button", { name: "Archive" }));
+    await user.click(await screen.findByRole("button", { name: "Yes" }));
     expect(archiveCustomItemMock).toHaveBeenCalledWith(
       expect.objectContaining({ customItemId: "lib1" })
     );

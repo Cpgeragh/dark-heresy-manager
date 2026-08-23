@@ -6,11 +6,19 @@ import "@testing-library/jest-dom";
 
 vi.mock("../../src/services/customItemService", () => ({
   publishCustomItem: vi.fn(),
-  archiveCustomItem: vi.fn(),
-  removeAllCustomItemCopies: vi.fn(),
+  archiveAndRemoveAllCustomItemCopies: vi.fn(),
   publishAndUpdateAllCopies: vi.fn(),
   restoreCustomItem: vi.fn(),
   permanentlyDeleteCustomItem: vi.fn(),
+  preflightCustomItemArchive: vi
+    .fn()
+    .mockResolvedValue({ safe: true, affectedDocuments: 1, affectedCopies: 0 }),
+  preflightCustomItemUpdateAllCopies: vi
+    .fn()
+    .mockResolvedValue({ safe: true, affectedDocuments: 2, affectedCopies: 0 }),
+  preflightPermanentCustomItemDeletion: vi
+    .fn()
+    .mockResolvedValue({ safe: true, affectedDocuments: 2, affectedCopies: 0 }),
 }));
 
 import { CustomItemAdminRow } from "../../src/pages/CampaignOverview/CustomItemAdminRow";
@@ -35,7 +43,14 @@ function makeItem(overrides: Partial<CampaignCustomItem> = {}): CampaignCustomIt
     latestVersionNumber: 1,
     archivedAt: null,
     archivedByUserId: null,
-    data: { name: "Custom Auspex", description: "", weight: "1 kg", value: "50 Thrones", availability: "Rare", source: "Custom" },
+    data: {
+      name: "Custom Auspex",
+      description: "",
+      weight: "1 kg",
+      value: "50 Thrones",
+      availability: "Rare",
+      source: "Custom",
+    },
     ...overrides,
   } as CampaignCustomItem;
 }

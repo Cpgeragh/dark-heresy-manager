@@ -5,6 +5,7 @@ const {
   mockBatch,
   mockBatchDeleteRefs,
   mockDoc,
+  mockGetDoc,
   mockGetDocs,
   mockRunTransaction,
   mockTransaction,
@@ -34,6 +35,7 @@ const {
     mockDoc: vi.fn((...args: unknown[]) =>
       args.length <= 1 ? "claim-log-ref" : args.slice(1).join("/")
     ),
+    mockGetDoc: vi.fn(),
     mockGetDocs: vi.fn(),
     mockRunTransaction: vi.fn(async (_db: unknown, operation: (transaction: unknown) => unknown) =>
       operation(mockTransaction)
@@ -48,7 +50,7 @@ vi.mock("firebase/firestore", () => ({
   collection: (...args: unknown[]) => args.slice(1).join("/"),
   documentId: () => "__name__",
   doc: (...args: unknown[]) => mockDoc(...args),
-  getDoc: vi.fn(),
+  getDoc: (...args: unknown[]) => mockGetDoc(...args),
   getDocs: (...args: unknown[]) => mockGetDocs(...args),
   limit: (value: number) => ({ type: "limit", value }),
   orderBy: (...args: unknown[]) => ({ type: "orderBy", args }),
@@ -74,7 +76,7 @@ vi.mock("../../src/firebase/converters", () => ({
 }));
 
 vi.mock("../../src/utils/firestoreBatchDelete", () => ({
-  batchDeleteRefs: (...args: unknown[]) => mockBatchDeleteRefs(...args),
+  deleteRefsAtomically: (...args: unknown[]) => mockBatchDeleteRefs(...args),
 }));
 
 import {
@@ -102,6 +104,11 @@ beforeEach(() => {
   mockAuth.currentUser = { uid: "actor-1" };
   mockBatch.commit.mockResolvedValue(undefined);
   mockBatchDeleteRefs.mockResolvedValue(undefined);
+  mockGetDoc.mockImplementation(async (reference: string) => ({
+    ref: reference,
+    exists: () => true,
+    data: () => ({}),
+  }));
   mockTransaction.get.mockResolvedValue({
     exists: () => true,
     data: () => ({ userId: null }),
@@ -265,7 +272,7 @@ describe("XP-spent reconciliation", () => {
 });
 
 describe("deleteCharacter", () => {
-  it("deletes messages in pages and atomically removes audit children, recovery entry, thread, and character", async () => {
+  it("preflights messages and atomically removes audit children, recovery entry, thread, and character", async () => {
     mockGetDocs.mockImplementation(async (path: string) => {
       switch (path) {
         case "campaigns/camp-1/characters/char-1/claimLog":
@@ -292,13 +299,14 @@ describe("deleteCharacter", () => {
       expect.arrayContaining([
         "campaigns/camp-1/characters/char-1/claimLog/log-1",
         "campaigns/camp-1/characters/char-1/xpProposals/prop-1",
+        "campaigns/camp-1/threads/char-1/messages/msg-1",
         "campaigns/camp-1/threads/char-1",
         "recoveryIndex/DH-AAAA-1111",
         "character:camp-1:char-1",
       ])
     );
-    expect(refs).toHaveLength(5);
-    expect(mockBatch.delete).toHaveBeenCalledWith("campaigns/camp-1/threads/char-1/messages/msg-1");
+    expect(refs).toHaveLength(6);
+    expect(mockBatch.commit).not.toHaveBeenCalled();
   });
 
   it("pushes the thread ref even when the character never had any messages", async () => {
