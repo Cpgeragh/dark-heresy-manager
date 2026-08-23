@@ -23,6 +23,22 @@ beforeEach(() => {
 });
 
 describe("portrait write validation", () => {
+  it("performs one character write for duplicate in-flight portrait uploads", async () => {
+    let finish!: () => void;
+    const pending = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    mockUpdateDoc.mockReturnValueOnce(pending);
+    const image = new Blob([new Uint8Array(100)], { type: "image/jpeg" });
+
+    const first = uploadPortrait("campaign-duplicate", "character-duplicate", image);
+    const duplicate = uploadPortrait("campaign-duplicate", "character-duplicate", image);
+
+    await vi.waitFor(() => expect(mockUpdateDoc).toHaveBeenCalledOnce());
+    finish();
+    await Promise.all([first, duplicate]);
+  });
+
   it("rejects an unsupported MIME type before reading or writing", async () => {
     const svg = new Blob(["<svg></svg>"], { type: "image/svg+xml" });
 

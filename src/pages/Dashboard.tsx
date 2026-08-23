@@ -8,7 +8,7 @@
 // opened with ?invite=player in the URL. Player-only installs never see the
 // DM section and can never become a DM.
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
 import type { User } from "firebase/auth";
@@ -190,8 +190,11 @@ function DmCampaignList({
   } = useArchivedCampaigns(userUid);
   const [newCampaignName, setNewCampaignName] = useState("");
   const [creating, setCreating] = useState(false);
+  const creatingRef = useRef(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
+  const [editing, setEditing] = useState(false);
+  const editingRef = useRef(false);
   const [deleting, setDeleting] = useState(false);
   const [archiving, setArchiving] = useState(false);
   const [restoring, setRestoring] = useState(false);
@@ -199,13 +202,14 @@ function DmCampaignList({
   const toast = useToast();
 
   const handleCreate = useCallback(async () => {
-    if (creating) return;
+    if (creatingRef.current) return;
     const name = newCampaignName.trim();
     const validation = validateCampaignName(name);
     if (!validation.isValid) {
       toast.warning(validation.error ?? "Invalid campaign name");
       return;
     }
+    creatingRef.current = true;
     setCreating(true);
     try {
       await createCampaign(name, userUid);
@@ -215,18 +219,21 @@ function DmCampaignList({
       console.error("Failed to create campaign:", error);
       toast.error("Failed to create campaign");
     } finally {
+      creatingRef.current = false;
       setCreating(false);
     }
-  }, [creating, newCampaignName, userUid, toast]);
+  }, [newCampaignName, userUid, toast]);
 
   const handleEditSave = useCallback(async () => {
-    if (!editingId) return;
+    if (!editingId || editingRef.current) return;
     const name = editName.trim();
     const validation = validateCampaignName(name);
     if (!validation.isValid) {
       toast.warning(validation.error ?? "Invalid campaign name");
       return;
     }
+    editingRef.current = true;
+    setEditing(true);
     try {
       await updateCampaignName(editingId, name);
       setEditingId(null);
@@ -234,6 +241,9 @@ function DmCampaignList({
     } catch (err) {
       console.error("Failed to update campaign name:", err);
       toast.error("Failed to update campaign name");
+    } finally {
+      editingRef.current = false;
+      setEditing(false);
     }
   }, [editingId, editName, toast]);
 
@@ -331,12 +341,13 @@ function DmCampaignList({
                     autoFocus
                     aria-label="Edit campaign name"
                   />
-                  <Button size="sm" onClick={handleEditSave}>
-                    Save
+                  <Button size="sm" onClick={handleEditSave} disabled={editing}>
+                    {editing ? "Saving…" : "Save"}
                   </Button>
                   <Button
                     variant="secondary"
                     size="sm"
+                    disabled={editing}
                     onClick={() => {
                       setEditingId(null);
                       setEditName("");

@@ -25,6 +25,7 @@ import type {
   CustomWeaponData,
 } from "../types/CustomItems";
 import { stripUndefined } from "../utils/stripUndefined";
+import { runSingleFlight } from "../utils/singleFlight";
 import { deleteQueryDocsInPages, forEachQueryPage } from "../utils/firestoreQueryPages";
 import {
   assertBulkOperationCount,
@@ -223,46 +224,48 @@ export async function publishCustomItem({
   assertFirestoreDocumentId(customItemId, "Custom-item ID");
   assertFirestoreDocumentId(actorUserId, "Actor user ID");
   if (versionId !== undefined) assertFirestoreDocumentId(versionId, "Version ID");
-  const itemRef = customItemDocRef(campaignId, customItemId);
+  return runSingleFlight("custom-item:publish", [campaignId, customItemId], async () => {
+    const itemRef = customItemDocRef(campaignId, customItemId);
 
-  return runTransaction(db, async (transaction) => {
-    const itemSnap = await transaction.get(itemRef);
-    if (!itemSnap.exists()) throw new Error("Custom item not found.");
+    return runTransaction(db, async (transaction) => {
+      const itemSnap = await transaction.get(itemRef);
+      if (!itemSnap.exists()) throw new Error("Custom item not found.");
 
-    const item = itemSnap.data() as CampaignCustomItem;
-    const targetVersionId = versionId ?? item.draftVersionId ?? item.latestVersionId;
-    if (!targetVersionId) throw new Error("Custom item has no version to publish.");
+      const item = itemSnap.data() as CampaignCustomItem;
+      const targetVersionId = versionId ?? item.draftVersionId ?? item.latestVersionId;
+      if (!targetVersionId) throw new Error("Custom item has no version to publish.");
 
-    const versionRef = customItemVersionDocRef(campaignId, customItemId, targetVersionId);
-    const versionSnap = await transaction.get(versionRef);
-    if (!versionSnap.exists()) throw new Error("Custom item version not found.");
+      const versionRef = customItemVersionDocRef(campaignId, customItemId, targetVersionId);
+      const versionSnap = await transaction.get(versionRef);
+      if (!versionSnap.exists()) throw new Error("Custom item version not found.");
 
-    const version = versionSnap.data() as CampaignCustomItemVersion;
-    assertCustomItemData(version.category, stripUndefined(version.data));
-    const timestamp = serverTimestamp();
+      const version = versionSnap.data() as CampaignCustomItemVersion;
+      assertCustomItemData(version.category, stripUndefined(version.data));
+      const timestamp = serverTimestamp();
 
-    transaction.update(versionRef, {
-      status: "published",
-      publishedAt: timestamp,
-      publishedByUserId: actorUserId,
-      updatedAt: timestamp,
-      updatedBy: { userId: actorUserId },
+      transaction.update(versionRef, {
+        status: "published",
+        publishedAt: timestamp,
+        publishedByUserId: actorUserId,
+        updatedAt: timestamp,
+        updatedBy: { userId: actorUserId },
+      });
+      transaction.update(itemRef, {
+        status: "published",
+        name: version.data.name.trim(),
+        data: stripUndefined(version.data),
+        publishedVersionId: targetVersionId,
+        draftVersionId: null,
+        latestVersionId: targetVersionId,
+        latestVersionNumber: version.versionNumber,
+        archivedAt: null,
+        archivedByUserId: null,
+        updatedAt: timestamp,
+        updatedBy: { userId: actorUserId },
+      });
+
+      return targetVersionId;
     });
-    transaction.update(itemRef, {
-      status: "published",
-      name: version.data.name.trim(),
-      data: stripUndefined(version.data),
-      publishedVersionId: targetVersionId,
-      draftVersionId: null,
-      latestVersionId: targetVersionId,
-      latestVersionNumber: version.versionNumber,
-      archivedAt: null,
-      archivedByUserId: null,
-      updatedAt: timestamp,
-      updatedBy: { userId: actorUserId },
-    });
-
-    return targetVersionId;
   });
 }
 
@@ -331,13 +334,15 @@ export async function publishAndUpdateAllCopies({
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   assertFirestoreDocumentId(customItemId, "Custom-item ID");
   assertFirestoreDocumentId(actorUserId, "Actor user ID");
-  const itemSnap = await getDoc(customItemDocRef(campaignId, customItemId));
-  if (!itemSnap.exists()) throw new Error("Custom item not found.");
-  const item = itemSnap.data() as CampaignCustomItem;
-  const versionId = item.draftVersionId ?? item.publishedVersionId ?? item.latestVersionId;
-  if (!versionId) throw new Error("Custom item has no version to publish.");
-  await publishCustomItem({ campaignId, customItemId, actorUserId, versionId });
-  return updateAllCustomItemCopies({ campaignId, customItemId, actorUserId, versionId });
+  return runSingleFlight("custom-item:publish-propagate", [campaignId, customItemId], async () => {
+    const itemSnap = await getDoc(customItemDocRef(campaignId, customItemId));
+    if (!itemSnap.exists()) throw new Error("Custom item not found.");
+    const item = itemSnap.data() as CampaignCustomItem;
+    const versionId = item.draftVersionId ?? item.publishedVersionId ?? item.latestVersionId;
+    if (!versionId) throw new Error("Custom item has no version to publish.");
+    await publishCustomItem({ campaignId, customItemId, actorUserId, versionId });
+    return updateAllCustomItemCopies({ campaignId, customItemId, actorUserId, versionId });
+  });
 }
 
 export async function updateAllCustomItemCopies({
@@ -348,45 +353,47 @@ export async function updateAllCustomItemCopies({
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   assertFirestoreDocumentId(customItemId, "Custom-item ID");
   if (versionId !== undefined) assertFirestoreDocumentId(versionId, "Version ID");
-  const itemSnap = await getDoc(customItemDocRef(campaignId, customItemId));
-  if (!itemSnap.exists()) throw new Error("Custom item not found.");
+  return runSingleFlight("custom-item:propagate", [campaignId, customItemId], async () => {
+    const itemSnap = await getDoc(customItemDocRef(campaignId, customItemId));
+    if (!itemSnap.exists()) throw new Error("Custom item not found.");
 
-  const item = itemSnap.data() as CampaignCustomItem;
-  const targetVersionId = versionId ?? item.publishedVersionId ?? item.latestVersionId;
-  if (!targetVersionId) throw new Error("Custom item has no version to apply.");
+    const item = itemSnap.data() as CampaignCustomItem;
+    const targetVersionId = versionId ?? item.publishedVersionId ?? item.latestVersionId;
+    if (!targetVersionId) throw new Error("Custom item has no version to apply.");
 
-  const versionSnap = await getDoc(
-    customItemVersionDocRef(campaignId, customItemId, targetVersionId)
-  );
-  if (!versionSnap.exists()) throw new Error("Custom item version not found.");
+    const versionSnap = await getDoc(
+      customItemVersionDocRef(campaignId, customItemId, targetVersionId)
+    );
+    if (!versionSnap.exists()) throw new Error("Custom item version not found.");
 
-  const version = versionSnap.data() as CampaignCustomItemVersion;
-  assertCustomItemData(version.category, stripUndefined(version.data));
-  let updatedCopies = 0;
+    const version = versionSnap.data() as CampaignCustomItemVersion;
+    assertCustomItemData(version.category, stripUndefined(version.data));
+    let updatedCopies = 0;
 
-  await forEachQueryPage(charactersCollectionRef(campaignId), async (documents) => {
-    assertBulkOperationCount(documents.length, "Custom-item propagation page");
-    const batch = writeBatch(db);
-    let operations = 0;
+    await forEachQueryPage(charactersCollectionRef(campaignId), async (documents) => {
+      assertBulkOperationCount(documents.length, "Custom-item propagation page");
+      const batch = writeBatch(db);
+      let operations = 0;
 
-    for (const characterDoc of documents) {
-      const update = buildCharacterCopyUpdate(
-        characterDoc.data(),
-        item.category,
-        customItemId,
-        targetVersionId,
-        version.data
-      );
-      if (!update) continue;
+      for (const characterDoc of documents) {
+        const update = buildCharacterCopyUpdate(
+          characterDoc.data(),
+          item.category,
+          customItemId,
+          targetVersionId,
+          version.data
+        );
+        if (!update) continue;
 
-      batch.update(characterDoc.ref, stripUndefined(update));
-      operations += 1;
-      updatedCopies += update.updatedCopies;
-    }
+        batch.update(characterDoc.ref, stripUndefined(update));
+        operations += 1;
+        updatedCopies += update.updatedCopies;
+      }
 
-    if (operations > 0) await batch.commit();
+      if (operations > 0) await batch.commit();
+    });
+    return updatedCopies;
   });
-  return updatedCopies;
 }
 
 export function buildCharacterCopyUpdate(

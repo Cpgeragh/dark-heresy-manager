@@ -1,6 +1,6 @@
 // src/pages/CampaignOverview/SessionCard.tsx
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import type { Timestamp } from "firebase/firestore";
 import type { SessionDocument } from "../../types/Firestore";
 import type { SessionUpdateData } from "../../services/sessionService";
@@ -46,10 +46,13 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
   const toast = useToast();
   const [mode, setMode] = useState<"view" | "edit">("view");
   const [saving, setSaving] = useState(false);
+  const savingRef = useRef(false);
   const [deleting, setDeleting] = useState(false);
+  const deletingRef = useRef(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [reverseXp, setReverseXp] = useState(false);
   const [applyingXp, setApplyingXp] = useState(false);
+  const applyingXpRef = useRef(false);
 
   const [date, setDate] = useState(toInputDate(session.date));
   const [summary, setSummary] = useState(session.summary);
@@ -74,7 +77,8 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
   }, []);
 
   const handleSave = useCallback(async () => {
-    if (!onSave) return;
+    if (!onSave || savingRef.current) return;
+    savingRef.current = true;
     setSaving(true);
     try {
       await onSave({
@@ -89,6 +93,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
       console.error("Failed to save session:", err);
       toast.error("Failed to save session. Please try again.");
     } finally {
+      savingRef.current = false;
       setSaving(false);
     }
   }, [onSave, date, summary, dmNotes, xpAwarded, attendees, toast]);
@@ -103,7 +108,8 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
   }, [session]);
 
   const handleDelete = useCallback(async () => {
-    if (!onDelete) return;
+    if (!onDelete || deletingRef.current) return;
+    deletingRef.current = true;
     setDeleting(true);
     try {
       await onDelete(reverseXp);
@@ -111,6 +117,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
       console.error("Failed to delete session:", err);
       toast.error("Failed to delete session. Please try again.");
     } finally {
+      deletingRef.current = false;
       setDeleting(false);
       setConfirmingDelete(false);
       setReverseXp(false);
@@ -118,7 +125,8 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
   }, [onDelete, reverseXp, toast]);
 
   const handleApplyXp = useCallback(async () => {
-    if (!onApplyXp) return;
+    if (!onApplyXp || applyingXpRef.current) return;
+    applyingXpRef.current = true;
     setApplyingXp(true);
     try {
       await onApplyXp();
@@ -129,6 +137,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
       console.error("Failed to apply XP:", err);
       toast.error("Failed to apply XP. Please try again.");
     } finally {
+      applyingXpRef.current = false;
       setApplyingXp(false);
     }
   }, [onApplyXp, session.xpAwarded, session.attendees.length, toast]);
@@ -184,7 +193,10 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
           <p className="text-xs lg:text-sm text-slate-400 mb-2">Attendees</p>
           <div className="flex flex-wrap gap-3">
             {characters.map((char) => (
-              <label key={char.id} className="flex items-center gap-1 text-sm lg:text-base cursor-pointer">
+              <label
+                key={char.id}
+                className="flex items-center gap-1 text-sm lg:text-base cursor-pointer"
+              >
                 <input
                   type="checkbox"
                   checked={attendees.has(char.id)}
@@ -201,17 +213,10 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
         </p>
 
         <div className="flex gap-2">
-          <Button
-            onClick={handleSave}
-            disabled={saving}
-          >
+          <Button onClick={handleSave} disabled={saving}>
             {saving ? "Saving…" : "Save"}
           </Button>
-          <Button
-            variant="secondary"
-            onClick={handleCancelEdit}
-            disabled={saving}
-          >
+          <Button variant="secondary" onClick={handleCancelEdit} disabled={saving}>
             Cancel
           </Button>
         </div>
@@ -238,29 +243,26 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
                 XP Applied ✓
               </span>
             ) : (
-            <Button
-              size="sm"
-              onClick={handleApplyXp}
-              disabled={applyingXp}
-            >
-              {applyingXp ? "Applying…" : "Apply XP"}
-            </Button>
+              <Button size="sm" onClick={handleApplyXp} disabled={applyingXp}>
+                {applyingXp ? "Applying…" : "Apply XP"}
+              </Button>
             ))}
           {isDM && onSave && (
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setMode("edit")}
-            >
+            <Button variant="secondary" size="sm" onClick={() => setMode("edit")}>
               Edit
             </Button>
           )}
-          {isDM && onDelete && (
-            session.xpApplied === true ? (
+          {isDM &&
+            onDelete &&
+            (session.xpApplied === true ? (
               confirmingDelete ? (
-                <div className="flex flex-col items-start gap-1.5" onClick={(e) => e.preventDefault()}>
+                <div
+                  className="flex flex-col items-start gap-1.5"
+                  onClick={(e) => e.preventDefault()}
+                >
                   <span className="text-xs lg:text-sm text-red-400">
-                    This session's XP was already applied. Deleting it won't remove that XP unless checked below.
+                    This session's XP was already applied. Deleting it won't remove that XP unless
+                    checked below.
                   </span>
                   <label className="flex items-center gap-1.5 text-xs lg:text-sm text-slate-300 cursor-pointer">
                     <input
@@ -272,14 +274,22 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
                     Also remove {session.xpAwarded} XP from attendees
                   </label>
                   <div className="flex items-center gap-1">
-                    <Button variant="danger" size="sm" disabled={deleting} onClick={() => handleDelete()}>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      disabled={deleting}
+                      onClick={() => handleDelete()}
+                    >
                       {deleting ? "…" : "Yes"}
                     </Button>
                     <Button
                       variant="secondary"
                       size="sm"
                       disabled={deleting}
-                      onClick={() => { setConfirmingDelete(false); setReverseXp(false); }}
+                      onClick={() => {
+                        setConfirmingDelete(false);
+                        setReverseXp(false);
+                      }}
                     >
                       No
                     </Button>
@@ -298,8 +308,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
                 busy={deleting}
                 onConfirm={() => handleDelete()}
               />
-            )
-          )}
+            ))}
         </div>
       </div>
 

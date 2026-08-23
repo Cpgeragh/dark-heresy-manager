@@ -1,12 +1,32 @@
 // tests/integration/ConfirmInline.test.tsx
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
 import { ConfirmInline } from "../../src/ui/ConfirmInline";
 
 describe("ConfirmInline", () => {
+  it("runs a rapid repeated confirmation only once while the action is pending", async () => {
+    let finish!: () => void;
+    const pending = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    const onConfirm = vi.fn(() => pending);
+    const user = userEvent.setup();
+    render(<ConfirmInline triggerLabel="Delete" question="Delete?" onConfirm={onConfirm} />);
+
+    await user.click(screen.getByText("Delete"));
+    const confirm = screen.getByText("Yes");
+    fireEvent.click(confirm);
+    fireEvent.click(confirm);
+
+    expect(onConfirm).toHaveBeenCalledOnce();
+    expect(confirm).toBeDisabled();
+    finish();
+    await pending;
+  });
+
   it("arms from the trigger and confirms (simple)", async () => {
     const user = userEvent.setup();
     const onConfirm = vi.fn();

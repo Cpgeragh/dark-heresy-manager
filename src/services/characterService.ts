@@ -29,6 +29,7 @@ import { PRODUCT_LIMITS } from "../constants/productLimits";
 import { validateCharacterName } from "../utils/validation";
 import { deleteQueryDocsInPages } from "../utils/firestoreQueryPages";
 import { stripUndefined } from "../utils/stripUndefined";
+import { runSingleFlight } from "../utils/singleFlight";
 import {
   assertBulkOperationCount,
   assertCharacterImportData,
@@ -77,10 +78,11 @@ export async function saveCharacter(character: Character): Promise<void> {
   }
   assertCharacterPayload(character, true);
 
-  const ref = characterDocRef(character.campaignId, character.id);
-
-  // Converter will ignore `id` and keep `campaignId` in the stored data.
-  await setDoc(ref, character);
+  await runSingleFlight("character:save", [character.campaignId, character.id, character], () => {
+    const ref = characterDocRef(character.campaignId, character.id);
+    // Converter will ignore `id` and keep `campaignId` in the stored data.
+    return setDoc(ref, character);
+  });
 }
 
 /**
@@ -99,8 +101,10 @@ export async function updateCharacter(
   assertFirestoreDocumentId(characterId, "Character ID");
   const cleanPartial = stripUndefined(partial);
   assertCharacterPayload(cleanPartial);
-  const ref = characterDocRef(campaignId, characterId);
-  await updateDoc(ref, cleanPartial as UpdateData<Character>);
+  await runSingleFlight("character:update", [campaignId, characterId, cleanPartial], () => {
+    const ref = characterDocRef(campaignId, characterId);
+    return updateDoc(ref, cleanPartial as UpdateData<Character>);
+  });
 }
 
 /**
@@ -117,26 +121,28 @@ export async function createCharacter(
 ): Promise<Character> {
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   assertCharacterPayload({ ...data, campaignId }, true);
-  const colRef = charactersCollectionRef(campaignId);
+  return runSingleFlight("character:create", [campaignId, data], async () => {
+    const colRef = charactersCollectionRef(campaignId);
 
-  // Build a full Character object for TypeScript,
-  // but use a dummy id; converter will strip it.
-  const toStore: Character = {
-    ...data,
-    campaignId,
-    id: "", // placeholder, ignored by converter.toFirestore
-  };
-  const docRef = await addDoc(colRef, toStore);
+    // Build a full Character object for TypeScript,
+    // but use a dummy id; converter will strip it.
+    const toStore: Character = {
+      ...data,
+      campaignId,
+      id: "", // placeholder, ignored by converter.toFirestore
+    };
+    const docRef = await addDoc(colRef, toStore);
 
-  // Re-fetch to get the typed document (with real id)
-  const snap = await getDoc(docRef);
-  const stored = snap.data();
+    // Re-fetch to get the typed document (with real id)
+    const snap = await getDoc(docRef);
+    const stored = snap.data();
 
-  if (!stored) {
-    throw new Error("Failed to create character");
-  }
+    if (!stored) {
+      throw new Error("Failed to create character");
+    }
 
-  return stored;
+    return stored;
+  });
 }
 
 export async function claimCharacter(
@@ -150,24 +156,26 @@ export async function claimCharacter(
   const user = auth.currentUser;
   if (!user) throw new Error("Not signed in.");
 
-  const charRef = characterDocRef(campaignId, characterId);
-  const campaignRef = campaignDocRef(campaignId);
-  const logsRef = collection(db, "campaigns", campaignId, "characters", characterId, "claimLog");
+  await runSingleFlight("character:ownership", [campaignId, characterId], async () => {
+    const charRef = characterDocRef(campaignId, characterId);
+    const campaignRef = campaignDocRef(campaignId);
+    const logsRef = collection(db, "campaigns", campaignId, "characters", characterId, "claimLog");
 
-  await runTransaction(db, async (transaction) => {
-    const charDoc = await transaction.get(charRef);
+    await runTransaction(db, async (transaction) => {
+      const charDoc = await transaction.get(charRef);
 
-    if (!charDoc.exists()) {
-      throw new Error("Character does not exist.");
-    }
+      if (!charDoc.exists()) {
+        throw new Error("Character does not exist.");
+      }
 
-    if (charDoc.data().userId) {
-      throw new Error("Character is already claimed.");
-    }
+      if (charDoc.data().userId) {
+        throw new Error("Character is already claimed.");
+      }
 
-    transaction.update(charRef, { userId: ownerId });
-    transaction.update(campaignRef, { memberIds: arrayUnion(ownerId) });
-    transaction.set(doc(logsRef), buildClaimLogPayload("claim", user.uid, null, ownerId));
+      transaction.update(charRef, { userId: ownerId });
+      transaction.update(campaignRef, { memberIds: arrayUnion(ownerId) });
+      transaction.set(doc(logsRef), buildClaimLogPayload("claim", user.uid, null, ownerId));
+    });
   });
 }
 
@@ -182,13 +190,15 @@ export async function releaseCharacter(
   const user = auth.currentUser;
   if (!user) throw new Error("Not signed in.");
 
-  const charRef = characterDocRef(campaignId, characterId);
-  const logsRef = collection(db, "campaigns", campaignId, "characters", characterId, "claimLog");
+  await runSingleFlight("character:ownership", [campaignId, characterId], async () => {
+    const charRef = characterDocRef(campaignId, characterId);
+    const logsRef = collection(db, "campaigns", campaignId, "characters", characterId, "claimLog");
 
-  const batch = writeBatch(db);
-  batch.update(charRef, { userId: null, isEditableByPlayer: false });
-  batch.set(doc(logsRef), buildClaimLogPayload("release", user.uid, previousOwner, null));
-  await batch.commit();
+    const batch = writeBatch(db);
+    batch.update(charRef, { userId: null, isEditableByPlayer: false });
+    batch.set(doc(logsRef), buildClaimLogPayload("release", user.uid, previousOwner, null));
+    await batch.commit();
+  });
 }
 
 export async function forceAssignCharacter(
@@ -204,15 +214,20 @@ export async function forceAssignCharacter(
   const user = auth.currentUser;
   if (!user) throw new Error("Not signed in.");
 
-  const charRef = characterDocRef(campaignId, characterId);
-  const campaignRef = campaignDocRef(campaignId);
-  const logsRef = collection(db, "campaigns", campaignId, "characters", characterId, "claimLog");
+  await runSingleFlight("character:ownership", [campaignId, characterId], async () => {
+    const charRef = characterDocRef(campaignId, characterId);
+    const campaignRef = campaignDocRef(campaignId);
+    const logsRef = collection(db, "campaigns", campaignId, "characters", characterId, "claimLog");
 
-  const batch = writeBatch(db);
-  batch.update(charRef, { userId: targetUid, isEditableByPlayer: true });
-  batch.update(campaignRef, { memberIds: arrayUnion(targetUid) });
-  batch.set(doc(logsRef), buildClaimLogPayload("force-assign", user.uid, previousOwner, targetUid));
-  await batch.commit();
+    const batch = writeBatch(db);
+    batch.update(charRef, { userId: targetUid, isEditableByPlayer: true });
+    batch.update(campaignRef, { memberIds: arrayUnion(targetUid) });
+    batch.set(
+      doc(logsRef),
+      buildClaimLogPayload("force-assign", user.uid, previousOwner, targetUid)
+    );
+    await batch.commit();
+  });
 }
 
 export async function forceReleaseCharacter(
@@ -226,13 +241,15 @@ export async function forceReleaseCharacter(
   const user = auth.currentUser;
   if (!user) throw new Error("Not signed in.");
 
-  const charRef = characterDocRef(campaignId, characterId);
-  const logsRef = collection(db, "campaigns", campaignId, "characters", characterId, "claimLog");
+  await runSingleFlight("character:ownership", [campaignId, characterId], async () => {
+    const charRef = characterDocRef(campaignId, characterId);
+    const logsRef = collection(db, "campaigns", campaignId, "characters", characterId, "claimLog");
 
-  const batch = writeBatch(db);
-  batch.update(charRef, { userId: null, isEditableByPlayer: false });
-  batch.set(doc(logsRef), buildClaimLogPayload("force-release", user.uid, previousOwner, null));
-  await batch.commit();
+    const batch = writeBatch(db);
+    batch.update(charRef, { userId: null, isEditableByPlayer: false });
+    batch.set(doc(logsRef), buildClaimLogPayload("force-release", user.uid, previousOwner, null));
+    await batch.commit();
+  });
 }
 
 /**
@@ -248,49 +265,51 @@ export async function deleteCharacter(
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   assertFirestoreDocumentId(characterId, "Character ID");
   if (recoveryCode !== undefined) assertRecoveryCode(recoveryCode);
-  const claimLogSnap = await getDocs(
-    query(
-      collection(db, "campaigns", campaignId, "characters", characterId, "claimLog"),
-      limit(CHARACTER_ATOMIC_DELETE_CHILD_LIMIT + 1)
-    )
-  );
-  const xpProposalsSnap = await getDocs(
-    query(
-      collection(db, "campaigns", campaignId, "characters", characterId, "xpProposals"),
-      limit(CHARACTER_ATOMIC_DELETE_CHILD_LIMIT + 1)
-    )
-  );
-
-  if (
-    claimLogSnap.docs.length + xpProposalsSnap.docs.length >
-    CHARACTER_ATOMIC_DELETE_CHILD_LIMIT
-  ) {
-    throw new Error(
-      "This character has too much audit history for safe client deletion. Use the protected bulk job."
+  await runSingleFlight("character:delete", [campaignId, characterId], async () => {
+    const claimLogSnap = await getDocs(
+      query(
+        collection(db, "campaigns", campaignId, "characters", characterId, "claimLog"),
+        limit(CHARACTER_ATOMIC_DELETE_CHILD_LIMIT + 1)
+      )
     );
-  }
+    const xpProposalsSnap = await getDocs(
+      query(
+        collection(db, "campaigns", campaignId, "characters", characterId, "xpProposals"),
+        limit(CHARACTER_ATOMIC_DELETE_CHILD_LIMIT + 1)
+      )
+    );
 
-  const deletionCount =
-    claimLogSnap.docs.length +
-    xpProposalsSnap.docs.length +
-    2 +
-    (recoveryCode === undefined ? 0 : 1);
-  assertBulkOperationCount(deletionCount, "Character deletion");
+    if (
+      claimLogSnap.docs.length + xpProposalsSnap.docs.length >
+      CHARACTER_ATOMIC_DELETE_CHILD_LIMIT
+    ) {
+      throw new Error(
+        "This character has too much audit history for safe client deletion. Use the protected bulk job."
+      );
+    }
 
-  const messagesRef = collection(db, "campaigns", campaignId, "threads", characterId, "messages");
-  await deleteQueryDocsInPages(db, messagesRef);
+    const deletionCount =
+      claimLogSnap.docs.length +
+      xpProposalsSnap.docs.length +
+      2 +
+      (recoveryCode === undefined ? 0 : 1);
+    assertBulkOperationCount(deletionCount, "Character deletion");
 
-  const threadRef = doc(db, "campaigns", campaignId, "threads", characterId);
-  const refs: DocumentReference[] = [
-    ...claimLogSnap.docs.map((document) => document.ref),
-    ...xpProposalsSnap.docs.map((document) => document.ref),
-    threadRef,
-  ];
+    const messagesRef = collection(db, "campaigns", campaignId, "threads", characterId, "messages");
+    await deleteQueryDocsInPages(db, messagesRef);
 
-  if (recoveryCode) refs.push(doc(db, "recoveryIndex", recoveryCode.trim()));
-  refs.push(characterDocRef(campaignId, characterId));
+    const threadRef = doc(db, "campaigns", campaignId, "threads", characterId);
+    const refs: DocumentReference[] = [
+      ...claimLogSnap.docs.map((document) => document.ref),
+      ...xpProposalsSnap.docs.map((document) => document.ref),
+      threadRef,
+    ];
 
-  await batchDeleteRefs(db, refs);
+    if (recoveryCode) refs.push(doc(db, "recoveryIndex", recoveryCode.trim()));
+    refs.push(characterDocRef(campaignId, characterId));
+
+    await batchDeleteRefs(db, refs);
+  });
 }
 
 /**
@@ -316,29 +335,31 @@ export async function importCharacter(
   const nameValidation = validateCharacterName(importedName);
   if (!nameValidation.isValid) throw new Error(nameValidation.error);
 
-  const recoveryCode = generateRecoveryCode();
-  const { createdAt: _createdAt, updatedAt: _updatedAt, ...portableData } = data;
-  const importData = {
-    ...portableData,
-    campaignId,
-    userId: null,
-    isEditableByPlayer: false,
-    recoveryCode,
-    header: {
-      ...(data.header as Record<string, unknown>),
-      characterName: importedName.trim(),
-    },
-  };
-  assertCharacterPayload(importData, true);
-  // Imported JSON is deliberately written through a plain reference because it is
-  // only structurally known after import validation, not as a compile-time Character.
-  const charRef = doc(collection(db, "campaigns", campaignId, "characters"));
-  const batch = writeBatch(db);
-  batch.set(charRef, importData);
-  batch.set(doc(db, "recoveryIndex", recoveryCode), { campaignId, characterId: charRef.id });
-  await batch.commit();
+  return runSingleFlight("character:import", [campaignId, serialisedData], async () => {
+    const recoveryCode = generateRecoveryCode();
+    const { createdAt: _createdAt, updatedAt: _updatedAt, ...portableData } = data;
+    const importData = {
+      ...portableData,
+      campaignId,
+      userId: null,
+      isEditableByPlayer: false,
+      recoveryCode,
+      header: {
+        ...(data.header as Record<string, unknown>),
+        characterName: importedName.trim(),
+      },
+    };
+    assertCharacterPayload(importData, true);
+    // Imported JSON is deliberately written through a plain reference because it is
+    // only structurally known after import validation, not as a compile-time Character.
+    const charRef = doc(collection(db, "campaigns", campaignId, "characters"));
+    const batch = writeBatch(db);
+    batch.set(charRef, importData);
+    batch.set(doc(db, "recoveryIndex", recoveryCode), { campaignId, characterId: charRef.id });
+    await batch.commit();
 
-  return importedName.trim();
+    return importedName.trim();
+  });
 }
 
 /**
@@ -352,21 +373,23 @@ export async function createNewCharacter(campaignId: string, name: string): Prom
   const validation = validateCharacterName(trimmedName);
   if (!validation.isValid) throw new Error(validation.error);
 
-  const recoveryCode = generateRecoveryCode();
-  const characterData = createEmptyCharacterData({
-    campaignId,
-    recoveryCode,
-    userId: null,
-    characterName: trimmedName,
-  });
-  const charRef = doc(charactersCollectionRef(campaignId));
-  const character: Character = { ...characterData, id: charRef.id };
-  assertCharacterPayload(character, true);
-  const recoveryRef = doc(db, "recoveryIndex", recoveryCode);
-  const batch = writeBatch(db);
-  batch.set(charRef, character);
-  batch.set(recoveryRef, { campaignId, characterId: charRef.id });
-  await batch.commit();
+  return runSingleFlight("character:create-empty", [campaignId, trimmedName], async () => {
+    const recoveryCode = generateRecoveryCode();
+    const characterData = createEmptyCharacterData({
+      campaignId,
+      recoveryCode,
+      userId: null,
+      characterName: trimmedName,
+    });
+    const charRef = doc(charactersCollectionRef(campaignId));
+    const character: Character = { ...characterData, id: charRef.id };
+    assertCharacterPayload(character, true);
+    const recoveryRef = doc(db, "recoveryIndex", recoveryCode);
+    const batch = writeBatch(db);
+    batch.set(charRef, character);
+    batch.set(recoveryRef, { campaignId, characterId: charRef.id });
+    await batch.commit();
 
-  return recoveryCode;
+    return recoveryCode;
+  });
 }

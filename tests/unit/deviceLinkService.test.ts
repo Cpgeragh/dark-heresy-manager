@@ -30,6 +30,23 @@ beforeEach(() => {
 });
 
 describe("device link operations", () => {
+  it("reuses one recovery lookup for a duplicate in-flight device link", async () => {
+    let finish!: (value: unknown) => void;
+    const pending = new Promise((resolve) => {
+      finish = resolve;
+    });
+    mockGetDoc.mockReturnValueOnce(pending);
+
+    const first = linkDeviceToAccount("duplicate-device", "DH-VALI-CODE");
+    const duplicate = linkDeviceToAccount("duplicate-device", "DH-VALI-CODE");
+    await Promise.resolve();
+
+    expect(mockGetDoc).toHaveBeenCalledOnce();
+    finish({ exists: () => true, data: () => ({ uid: "primary-uid" }) });
+    await Promise.all([first, duplicate]);
+    expect(mockSetDoc).toHaveBeenCalledTimes(2);
+  });
+
   it("rejects a malformed recovery code before reading Firestore", async () => {
     await expect(linkDeviceToAccount("device-uid", "not-a-code")).rejects.toThrow("DH-XXXX-YYYY");
     expect(mockGetDoc).not.toHaveBeenCalled();

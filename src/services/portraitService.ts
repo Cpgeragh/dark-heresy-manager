@@ -7,6 +7,7 @@ import {
   assertFirestoreDocumentId,
   assertPortraitSource,
 } from "../utils/firebaseValidation";
+import { runSingleFlight } from "../utils/singleFlight";
 
 function blobToBase64(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -34,11 +35,13 @@ export async function uploadPortrait(
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   assertFirestoreDocumentId(characterId, "Character ID");
   assertPortraitSource(blob);
-  const base64 = await blobToBase64(blob);
-  assertEncodedPortrait(base64);
+  return runSingleFlight("character:portrait", [campaignId, characterId], async () => {
+    const base64 = await blobToBase64(blob);
+    assertEncodedPortrait(base64);
 
-  const characterRef = characterDocRef(campaignId, characterId);
-  await updateDoc(characterRef, { portraitUrl: base64 });
+    const characterRef = characterDocRef(campaignId, characterId);
+    await updateDoc(characterRef, { portraitUrl: base64 });
 
-  return base64;
+    return base64;
+  });
 }

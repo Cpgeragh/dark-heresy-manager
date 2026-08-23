@@ -266,6 +266,14 @@ Portraits accept only JPEG, PNG or WebP input, reject an oversized source before
 
 These checks are usability and cost-control measures. They reduce accidental reads, writes and oversized payloads, but they are not a security boundary: a modified client can bypass them, so Firestore rules and the later protected backend remain authoritative.
 
+### Duplicate-submission boundary
+
+`utils/singleFlight.ts` keeps an in-memory promise for each mutation scope and operation identity. If the same campaign, character, session, ownership, custom-item, recovery or device-link operation is submitted again before the first promise settles, every caller receives the first operation's result and only one Firebase request sequence runs. The entry is removed after either success or failure so an intentional retry remains possible.
+
+Campaign creation and renaming include their submitted names in the operation identity. Character and session edits include their validated payloads, so an identical repeated update is collapsed without discarding a different update made while the first is pending. Destructive and security-sensitive actions use their stable target IDs. Portrait uploads allow one pending write per character. Custom-item publish and propagation actions retain their existing synchronous per-item UI guard and also use the shared service boundary.
+
+Buttons and forms continue to expose busy states, and synchronous refs close the same-render click gap for shared confirmations, campaign and character creation, imports, session actions, recovery screens and device linking. These protections exist within one running client only. They cannot deduplicate retries from another tab, device, process or modified client; Stage 3 therefore adds server-side idempotency for expensive and security-sensitive operations.
+
 Compound consumers remain explicit:
 
 - `CampaignsProvider` coordinates the DM and member views of active campaigns;

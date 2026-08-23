@@ -19,6 +19,7 @@ import {
   assertFirestoreDocumentId,
   assertString,
 } from "../utils/firebaseValidation";
+import { runSingleFlight } from "../utils/singleFlight";
 
 interface SessionData {
   date: Date;
@@ -40,23 +41,25 @@ export async function createSession(campaignId: string, session: SessionData): P
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   validateSessionData(session);
 
-  const batch = writeBatch(db);
-  const sessionRef = doc(collection(db, "campaigns", campaignId, "sessions"));
+  await runSingleFlight("session:create", [campaignId, session], async () => {
+    const batch = writeBatch(db);
+    const sessionRef = doc(collection(db, "campaigns", campaignId, "sessions"));
 
-  batch.set(sessionRef, {
-    date: session.date,
-    summary: session.summary,
-    dmNotes: session.dmNotes,
-    xpAwarded: session.xpAwarded,
-    attendees: session.attendees,
-    createdAt: serverTimestamp(),
-    // XP is not auto-applied at creation — the DM uses the Apply XP button.
-    // xpApplied: false means "ready to apply"; undefined means "created before
-    // this tracking existed and XP state is unknown — don't show the button."
-    ...(session.xpAwarded > 0 ? { xpApplied: false } : {}),
+    batch.set(sessionRef, {
+      date: session.date,
+      summary: session.summary,
+      dmNotes: session.dmNotes,
+      xpAwarded: session.xpAwarded,
+      attendees: session.attendees,
+      createdAt: serverTimestamp(),
+      // XP is not auto-applied at creation — the DM uses the Apply XP button.
+      // xpApplied: false means "ready to apply"; undefined means "created before
+      // this tracking existed and XP state is unknown — don't show the button."
+      ...(session.xpAwarded > 0 ? { xpApplied: false } : {}),
+    });
+
+    await batch.commit();
   });
-
-  await batch.commit();
 }
 
 /** Updates the editable fields on an existing campaign session. */
@@ -69,9 +72,11 @@ export async function updateSession(
   assertFirestoreDocumentId(sessionId, "Session ID");
   validateSessionUpdate(data);
 
-  await updateDoc(
-    doc(db, "campaigns", campaignId, "sessions", sessionId),
-    data as Record<string, unknown>
+  await runSingleFlight("session:update", [campaignId, sessionId, data], () =>
+    updateDoc(
+      doc(db, "campaigns", campaignId, "sessions", sessionId),
+      data as Record<string, unknown>
+    )
   );
 }
 
@@ -182,26 +187,28 @@ export async function deleteSession(
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   assertFirestoreDocumentId(sessionId, "Session ID");
   assertBoolean(reverseXp, "Reverse-XP flag");
-  const sessionRef = doc(db, "campaigns", campaignId, "sessions", sessionId);
+  await runSingleFlight("session:delete", [campaignId, sessionId], async () => {
+    const sessionRef = doc(db, "campaigns", campaignId, "sessions", sessionId);
 
-  if (!reverseXp) {
-    await deleteDoc(sessionRef);
-    return;
-  }
+    if (!reverseXp) {
+      await deleteDoc(sessionRef);
+      return;
+    }
 
-  await runTransaction(db, async (transaction) => {
-    const sessionSnap = await transaction.get(sessionRef);
-    if (sessionSnap.exists()) {
-      const session = sessionSnap.data() as SessionDocument;
-      if (session.xpApplied === true) {
-        for (const characterId of session.attendees) {
-          transaction.update(doc(db, "campaigns", campaignId, "characters", characterId), {
-            "experience.total": increment(-session.xpAwarded),
-          });
+    await runTransaction(db, async (transaction) => {
+      const sessionSnap = await transaction.get(sessionRef);
+      if (sessionSnap.exists()) {
+        const session = sessionSnap.data() as SessionDocument;
+        if (session.xpApplied === true) {
+          for (const characterId of session.attendees) {
+            transaction.update(doc(db, "campaigns", campaignId, "characters", characterId), {
+              "experience.total": increment(-session.xpAwarded),
+            });
+          }
         }
       }
-    }
-    transaction.delete(sessionRef);
+      transaction.delete(sessionRef);
+    });
   });
 }
 
@@ -238,23 +245,25 @@ export async function applySessionXp(
   attendeeIds.forEach((attendeeId) => assertFirestoreDocumentId(attendeeId, "Session attendee ID"));
   if (xpAmount === 0 || attendeeIds.length === 0) return;
 
-  const sessionRef = doc(db, "campaigns", campaignId, "sessions", sessionId);
+  await runSingleFlight("session:apply-xp", [campaignId, sessionId], async () => {
+    const sessionRef = doc(db, "campaigns", campaignId, "sessions", sessionId);
 
-  await runTransaction(db, async (transaction) => {
-    const sessionSnap = await transaction.get(sessionRef);
-    if (!sessionSnap.exists()) {
-      throw new Error("Session does not exist.");
-    }
-    if (sessionSnap.data().xpApplied === true) {
-      throw new Error("XP has already been applied for this session.");
-    }
+    await runTransaction(db, async (transaction) => {
+      const sessionSnap = await transaction.get(sessionRef);
+      if (!sessionSnap.exists()) {
+        throw new Error("Session does not exist.");
+      }
+      if (sessionSnap.data().xpApplied === true) {
+        throw new Error("XP has already been applied for this session.");
+      }
 
-    transaction.update(sessionRef, { xpApplied: true });
+      transaction.update(sessionRef, { xpApplied: true });
 
-    for (const characterId of attendeeIds) {
-      transaction.update(doc(db, "campaigns", campaignId, "characters", characterId), {
-        "experience.total": increment(xpAmount),
-      });
-    }
+      for (const characterId of attendeeIds) {
+        transaction.update(doc(db, "campaigns", campaignId, "characters", characterId), {
+          "experience.total": increment(xpAmount),
+        });
+      }
+    });
   });
 }

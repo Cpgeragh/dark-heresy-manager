@@ -5,7 +5,7 @@
 //
 // Internal clicks call preventDefault so the component is safe inside a <Link>.
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button } from "./Button";
 
 interface ConfirmInlineProps {
@@ -43,6 +43,8 @@ export function ConfirmInline({
 }: ConfirmInlineProps) {
   const [armed, setArmed] = useState(false);
   const [text, setText] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const submittingRef = useRef(false);
 
   const triggerVariant = variant === "warning" ? "warningGhost" : "dangerGhost";
   const confirmVariant = variant === "warning" ? "primary" : "danger";
@@ -62,9 +64,14 @@ export function ConfirmInline({
   // finally keeps stay-mounted cases (e.g. "Clear chat") from staying armed;
   // for cases where the row unmounts on success the state update is a no-op.
   const runConfirm = async () => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
+    setSubmitting(true);
     try {
       await onConfirm();
     } finally {
+      submittingRef.current = false;
+      setSubmitting(false);
       disarm();
     }
   };
@@ -77,7 +84,8 @@ export function ConfirmInline({
     );
   }
 
-  const confirmDisabled = busy || (requireText !== undefined && text !== requireText);
+  const effectiveBusy = busy || submitting;
+  const confirmDisabled = effectiveBusy || (requireText !== undefined && text !== requireText);
 
   if (requireText !== undefined) {
     return (
@@ -92,7 +100,7 @@ export function ConfirmInline({
             onChange={(e) => setText(e.target.value)}
             placeholder={requireText}
             autoFocus
-            disabled={busy}
+            disabled={effectiveBusy}
             className="px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-700 border border-slate-500 rounded text-xs lg:text-sm text-slate-100 w-24 lg:w-32 font-code placeholder:text-slate-600 disabled:opacity-50"
           />
           <Button
@@ -101,9 +109,9 @@ export function ConfirmInline({
             disabled={confirmDisabled}
             onClick={handle(runConfirm)}
           >
-            {busy ? busyLabel : confirmLabel}
+            {effectiveBusy ? busyLabel : confirmLabel}
           </Button>
-          <Button variant="secondary" size={size} disabled={busy} onClick={handle(disarm)}>
+          <Button variant="secondary" size={size} disabled={effectiveBusy} onClick={handle(disarm)}>
             {cancelLabel}
           </Button>
         </div>
@@ -114,10 +122,15 @@ export function ConfirmInline({
   return (
     <div className="flex items-center gap-1" onClick={(e) => e.preventDefault()}>
       {question && <span className={`text-xs lg:text-sm ${accent}`}>{question}</span>}
-      <Button variant={confirmVariant} size={size} disabled={busy} onClick={handle(runConfirm)}>
-        {busy ? busyLabel : confirmLabel}
+      <Button
+        variant={confirmVariant}
+        size={size}
+        disabled={effectiveBusy}
+        onClick={handle(runConfirm)}
+      >
+        {effectiveBusy ? busyLabel : confirmLabel}
       </Button>
-      <Button variant="secondary" size={size} disabled={busy} onClick={handle(disarm)}>
+      <Button variant="secondary" size={size} disabled={effectiveBusy} onClick={handle(disarm)}>
         {cancelLabel}
       </Button>
     </div>

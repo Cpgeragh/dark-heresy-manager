@@ -3,7 +3,7 @@
 // identity. Only shown once — after completion the user doc is marked
 // onboarded: true and this screen is never shown again.
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import type { User } from "firebase/auth";
 import { rotateRecoveryCode, reclaimIdentity, getRecoveryCode } from "../services/identityService";
@@ -35,6 +35,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
 
   const [code, setCode] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const busyRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
   const [reclaimCode, setReclaimCode] = useState("");
   const [name, setName] = useState("");
@@ -63,6 +64,8 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
   }, [step, code, user.uid, setSearchParams]);
 
   async function handleFinish() {
+    if (busyRef.current) return;
+    busyRef.current = true;
     setBusy(true);
     setError(null);
     try {
@@ -73,16 +76,19 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
       console.error("Failed to complete onboarding:", err);
       setError("Couldn't complete onboarding. Please try again.");
     } finally {
+      busyRef.current = false;
       setBusy(false);
     }
   }
 
   async function handleGetStarted() {
+    if (busyRef.current) return;
     const trimmedName = name.trim();
     if (!trimmedName) {
       setError("Please enter your first name.");
       return;
     }
+    busyRef.current = true;
     setBusy(true);
     setError(null);
     try {
@@ -96,13 +102,16 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
       console.error("Onboarding error:", err);
       setError("Something went wrong. Please try again.");
     } finally {
+      busyRef.current = false;
       setBusy(false);
     }
   }
 
   async function handleReclaim() {
+    if (busyRef.current) return;
     const trimmed = reclaimCode.trim().toUpperCase();
     if (!trimmed) return;
+    busyRef.current = true;
     setBusy(true);
     setError(null);
     try {
@@ -117,6 +126,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
           : "Something went wrong. Please check your code and try again."
       );
     } finally {
+      busyRef.current = false;
       setBusy(false);
     }
   }
@@ -124,7 +134,6 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
   return (
     <div className="min-h-svh bg-slate-950 text-slate-100 flex items-center justify-center p-6">
       <div className="max-w-sm lg:max-w-md w-full">
-
         {/* ── Welcome ── */}
         {step === "welcome" && (
           <div className="space-y-6 text-slate-100">
@@ -163,8 +172,12 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
 
               {error && <p className={`${uiTextError} text-center`}>{error}</p>}
 
-              <button type="button"
-                onClick={() => { setError(null); goToStep("reclaim"); }}
+              <button
+                type="button"
+                onClick={() => {
+                  setError(null);
+                  goToStep("reclaim");
+                }}
                 className="w-full text-sm lg:text-base text-slate-300 hover:text-slate-100 transition flex items-center justify-center gap-2"
               >
                 <span>Returning user? Reclaim your identity</span>
@@ -178,14 +191,20 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
         {step === "reclaim" && (
           <div className="space-y-6 text-slate-100">
             <div className="relative flex items-center justify-center">
-              <button type="button"
-                onClick={() => { setError(null); goToStep("welcome"); }}
+              <button
+                type="button"
+                onClick={() => {
+                  setError(null);
+                  goToStep("welcome");
+                }}
                 className="absolute left-0 text-sm lg:text-base text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5"
               >
                 <ArrowLeft />
                 <span>Back</span>
               </button>
-              <h1 className="text-lg lg:text-xl font-semibold text-slate-100 text-center">Returning User</h1>
+              <h1 className="text-lg lg:text-xl font-semibold text-slate-100 text-center">
+                Returning User
+              </h1>
             </div>
 
             <Panel spacing="compact">
@@ -227,20 +246,23 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
         {step === "show-code" && code && (
           <div className="space-y-6 text-slate-100">
             <div className="relative flex items-center justify-center">
-              <button type="button"
+              <button
+                type="button"
                 onClick={() => goToStep("welcome")}
                 className="absolute left-0 text-sm lg:text-base text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5"
               >
                 <ArrowLeft />
                 <span>Back</span>
               </button>
-              <h1 className="text-lg lg:text-xl font-semibold text-slate-100 text-center">Data Recovery Code</h1>
+              <h1 className="text-lg lg:text-xl font-semibold text-slate-100 text-center">
+                Data Recovery Code
+              </h1>
             </div>
 
             <Panel spacing="compact">
               <p className="text-slate-300 text-sm lg:text-base text-center">
-                If you ever lose access to this device, use this code to reclaim your campaigns
-                and characters.
+                If you ever lose access to this device, use this code to reclaim your campaigns and
+                characters.
               </p>
               <p className="text-slate-100 text-sm lg:text-base text-center font-semibold">
                 Write it down somewhere safe.
@@ -256,18 +278,20 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
               </div>
 
               <p className="text-sm lg:text-base text-amber-300 text-center">
-                This code is shown only once and cannot be retrieved again without rotating it
-                in Settings.
+                This code is shown only once and cannot be retrieved again without rotating it in
+                Settings.
               </p>
 
               <div className="flex justify-center">
                 <Button
-                  onClick={() => { navigator.clipboard?.writeText(code); setCopied(true); }}
+                  onClick={() => {
+                    navigator.clipboard?.writeText(code);
+                    setCopied(true);
+                  }}
                   disabled={copied}
                 >
                   {copied ? "Copied" : "Copy code"}
                 </Button>
-
               </div>
 
               <label className="flex items-center justify-center gap-2 text-sm lg:text-base text-slate-300 cursor-pointer">
@@ -300,7 +324,6 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
             </Panel>
           </div>
         )}
-
       </div>
     </div>
   );

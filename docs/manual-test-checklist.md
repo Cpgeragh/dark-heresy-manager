@@ -1,6 +1,6 @@
 # Manual Test Checklist — Complete App
 
-Thirty-one pages and cross-cutting sections, containing 584 checks. Every item
+Thirty-one pages and cross-cutting sections, containing 589 checks. Every item
 comes from reading the actual logic, not a generic "does it load" pass.
 Check items off as you verify them; anything under **Watch for** is the
 likeliest place a real bug hides. Coverage notes are at the bottom — read
@@ -1063,6 +1063,11 @@ For each boundary, try the largest valid value and then one unit over it. For ro
 - [ ] Message, session, custom-item and character service calls still reject invalid values when invoked without their normal form, proving that form controls are not the only client-side cost boundary
 - [ ] Recovery and device-link code entry allow at most 5 attempts of each kind per device in a rolling 15-minute window, with a clear retry time and no Firebase request after the ceiling
 - [ ] A client bulk invocation never accepts more than 440 affected documents, reports the count before confirmation and performs no partial mutation when the preflight exceeds the ceiling
+- [ ] With a Firebase write deliberately held pending, rapidly click or press Enter on campaign create, rename, archive, restore and delete controls — only one request sequence starts, the relevant controls remain busy, and a failed first attempt can be retried
+- [ ] Repeat the pending-request test for character creation, import, deletion, claim, release, force assignment and edit-permission changes — only one ownership/audit mutation is produced for the repeated action
+- [ ] Submit the same character or portrait update twice while its first write is pending, then submit a genuinely different character update — the duplicate is collapsed, the distinct update is not discarded, and both final values refresh correctly
+- [ ] Repeat rapid confirmation for session creation, editing, XP application and deletion, plus custom-item publication and propagation — each action produces one Firebase request sequence and unlocks after either success or failure
+- [ ] Rapidly repeat Recovery Code rotation, identity reclaim and device linking while their first request is pending — one code, reclaim or link sequence runs; all callers receive the same result, and a failed operation can be retried
 
 ---
 

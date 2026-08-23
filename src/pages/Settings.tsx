@@ -1,7 +1,7 @@
 // src/pages/Settings.tsx
 // User settings: recovery code management and device linking.
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { User } from "firebase/auth";
 import { getRecoveryCode, rotateRecoveryCode } from "../services/identityService";
 import { useLinkDevice } from "../hooks/useLinkDevice";
@@ -26,14 +26,19 @@ export default function Settings({ user: _user, effectiveUserId, isLinked, unlin
   // ── Recovery code state ──────────────────────────────────────────────────
   const [revealedCode, setRevealedCode] = useState<string | null>(null);
   const [revealing, setRevealing] = useState(false);
+  const revealingRef = useRef(false);
   const [rotating, setRotating] = useState(false);
+  const rotatingRef = useRef(false);
 
   // ── Device link state ────────────────────────────────────────────────────
   const { linkDevice, loading: linking, error: linkError } = useLinkDevice();
   const [linkCode, setLinkCode] = useState("");
   const [unlinking, setUnlinking] = useState(false);
+  const unlinkingRef = useRef(false);
 
   async function handleReveal() {
+    if (revealingRef.current) return;
+    revealingRef.current = true;
     setRevealing(true);
     try {
       let code = await getRecoveryCode(effectiveUserId);
@@ -46,11 +51,14 @@ export default function Settings({ user: _user, effectiveUserId, isLinked, unlin
       console.error("Failed to reveal recovery code:", err);
       toast.error("Failed to load recovery code.");
     } finally {
+      revealingRef.current = false;
       setRevealing(false);
     }
   }
 
   async function handleRotate() {
+    if (rotatingRef.current) return;
+    rotatingRef.current = true;
     setRotating(true);
     try {
       const newCode = await rotateRecoveryCode(effectiveUserId);
@@ -60,6 +68,7 @@ export default function Settings({ user: _user, effectiveUserId, isLinked, unlin
       console.error("Failed to rotate recovery code:", err);
       toast.error("Failed to rotate recovery code. Please try again.");
     } finally {
+      rotatingRef.current = false;
       setRotating(false);
     }
   }
@@ -75,6 +84,8 @@ export default function Settings({ user: _user, effectiveUserId, isLinked, unlin
   }
 
   async function handleUnlink() {
+    if (unlinkingRef.current) return;
+    unlinkingRef.current = true;
     setUnlinking(true);
     try {
       await unlink();
@@ -82,6 +93,7 @@ export default function Settings({ user: _user, effectiveUserId, isLinked, unlin
     } catch {
       toast.error("Failed to unlink device. Please try again.");
     } finally {
+      unlinkingRef.current = false;
       setUnlinking(false);
     }
   }

@@ -83,6 +83,22 @@ beforeEach(() => {
 });
 
 describe("campaign input validation", () => {
+  it("reuses one Firebase write for a duplicate in-flight campaign creation", async () => {
+    let finish!: () => void;
+    const pending = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    mockSetDoc.mockReturnValueOnce(pending);
+
+    const first = createCampaign("The same campaign", "dm-1");
+    const duplicate = createCampaign("The same campaign", "dm-1");
+    await Promise.resolve();
+
+    expect(mockSetDoc).toHaveBeenCalledOnce();
+    finish();
+    await Promise.all([first, duplicate]);
+  });
+
   it("rejects a non-text campaign name before creating a Firestore reference", async () => {
     await expect(createCampaign(42 as unknown as string, "dm-1")).rejects.toThrow(
       "Campaign name must be text"

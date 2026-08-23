@@ -1,6 +1,6 @@
 // src/pages/CampaignOverview/SessionForm.tsx
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useToast } from "../../components/Toast";
 import { createSession } from "../../services/sessionService";
 import { Button } from "../../ui/Button";
@@ -32,6 +32,7 @@ export function SessionForm({ campaignId, characters, onClose }: Props) {
   const [xpAwarded, setXpAwarded] = useState(0);
   const [attendees, setAttendees] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
+  const savingRef = useRef(false);
 
   const toggleAttendee = useCallback((id: string) => {
     setAttendees((prev) => {
@@ -43,11 +44,13 @@ export function SessionForm({ campaignId, characters, onClose }: Props) {
   }, []);
 
   const handleSave = useCallback(async () => {
+    if (savingRef.current) return;
     if (!date) {
       toast.warning("Please enter a session date");
       return;
     }
 
+    savingRef.current = true;
     setSaving(true);
     try {
       await createSession(campaignId, {
@@ -63,6 +66,7 @@ export function SessionForm({ campaignId, characters, onClose }: Props) {
       console.error("Session save error:", err);
       toast.error("Failed to save session");
     } finally {
+      savingRef.current = false;
       setSaving(false);
     }
   }, [campaignId, date, summary, dmNotes, xpAwarded, attendees, toast, onClose]);

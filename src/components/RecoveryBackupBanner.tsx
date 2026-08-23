@@ -4,12 +4,9 @@
 // self-only), so each device confirms once. The revealed code is the shared
 // account code (works on linked devices via effectiveUserId).
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getRecoveryCode, rotateRecoveryCode } from "../services/identityService";
-import {
-  markRecoveryCodeBackedUp,
-  needsRecoveryCodeBackup,
-} from "../services/userAccountService";
+import { markRecoveryCodeBackedUp, needsRecoveryCodeBackup } from "../services/userAccountService";
 import { useToast } from "./Toast";
 import { Button } from "../ui/Button";
 
@@ -22,6 +19,8 @@ export function RecoveryBackupBanner({ ownUid, effectiveUserId }: Props) {
   const [needsBackup, setNeedsBackup] = useState(false);
   const [code, setCode] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const busyRef = useRef(false);
+  const confirmingRef = useRef(false);
   const [copied, setCopied] = useState(false);
   const toast = useToast();
   const showError = toast.error;
@@ -43,29 +42,40 @@ export function RecoveryBackupBanner({ ownUid, effectiveUserId }: Props) {
   if (!needsBackup) return null;
 
   async function reveal() {
+    if (busyRef.current) return;
+    busyRef.current = true;
     setBusy(true);
     try {
-      setCode((await getRecoveryCode(effectiveUserId)) ?? (await rotateRecoveryCode(effectiveUserId)));
+      setCode(
+        (await getRecoveryCode(effectiveUserId)) ?? (await rotateRecoveryCode(effectiveUserId))
+      );
     } catch {
       toast.error("Couldn't load your recovery code.");
     } finally {
+      busyRef.current = false;
       setBusy(false);
     }
   }
 
   async function confirm() {
+    if (confirmingRef.current) return;
+    confirmingRef.current = true;
     try {
       await markRecoveryCodeBackedUp(ownUid);
       setNeedsBackup(false);
       toast.success("Recovery code backed up.");
     } catch {
       toast.error("Couldn't save. Try again.");
+    } finally {
+      confirmingRef.current = false;
     }
   }
 
   return (
     <div className="border border-amber-500/60 bg-amber-500/10 rounded-lg p-4 lg:p-5 space-y-3">
-      <p className="text-sm lg:text-base font-semibold text-amber-200">⚠ Back up your recovery code</p>
+      <p className="text-sm lg:text-base font-semibold text-amber-200">
+        ⚠ Back up your recovery code
+      </p>
       <p className="text-xs lg:text-sm text-amber-100/80">
         It's the only way to restore your account on a new device or if your browser data is
         cleared.

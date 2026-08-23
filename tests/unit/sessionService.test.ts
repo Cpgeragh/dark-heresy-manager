@@ -51,6 +51,23 @@ beforeEach(() => {
 });
 
 describe("session write operations", () => {
+  it("reuses one Firebase write for a duplicate in-flight session edit", async () => {
+    let finish!: () => void;
+    const pending = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    mockUpdateDoc.mockReturnValueOnce(pending);
+    const update = { summary: "One edit" };
+
+    const first = updateSession("camp-1", "session-duplicate", update);
+    const duplicate = updateSession("camp-1", "session-duplicate", update);
+    await Promise.resolve();
+
+    expect(mockUpdateDoc).toHaveBeenCalledOnce();
+    finish();
+    await Promise.all([first, duplicate]);
+  });
+
   it("updates the requested session with the supplied editable fields", async () => {
     const update = {
       summary: "The acolytes survived.",

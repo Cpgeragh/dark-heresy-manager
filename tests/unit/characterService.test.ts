@@ -106,6 +106,22 @@ beforeEach(() => {
 });
 
 describe("character claiming operations", () => {
+  it("starts only one transaction for a duplicate in-flight ownership action", async () => {
+    let finish!: () => void;
+    const pending = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    mockRunTransaction.mockReturnValueOnce(pending);
+
+    const first = claimCharacter("camp-duplicate", "char-duplicate", "owner-1");
+    const duplicate = claimCharacter("camp-duplicate", "char-duplicate", "owner-1");
+    await Promise.resolve();
+
+    expect(mockRunTransaction).toHaveBeenCalledOnce();
+    finish();
+    await Promise.all([first, duplicate]);
+  });
+
   it("rejects a non-text new-character name before creating a Firestore reference", async () => {
     await expect(createNewCharacter("camp-1", 42 as unknown as string)).rejects.toThrow(
       "Character name must be text"

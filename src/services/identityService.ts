@@ -24,6 +24,7 @@ import {
   assertFirestoreDocumentId,
   assertRecoveryCode,
 } from "../utils/firebaseValidation";
+import { runSingleFlight } from "../utils/singleFlight";
 
 type Role = "dm" | "player";
 
@@ -88,129 +89,131 @@ export async function reclaimIdentity(uid: string, code: string): Promise<"dm" |
   assertFirestoreDocumentId(uid, "User ID");
   assertRecoveryCode(code);
   const normalisedCode = code.trim();
-  // 1. Look up the recovery entry
-  const recoveryRef = doc(db, "identityRecovery", normalisedCode);
-  const recoverySnap = await getDoc(recoveryRef);
+  return runSingleFlight("identity:reclaim", [uid, normalisedCode], async () => {
+    // 1. Look up the recovery entry
+    const recoveryRef = doc(db, "identityRecovery", normalisedCode);
+    const recoverySnap = await getDoc(recoveryRef);
 
-  if (!recoverySnap.exists()) {
-    throw new Error("Recovery code not found.");
-  }
-
-  const { uid: oldUid, role } = recoverySnap.data() as { uid: string; role?: "dm" | "player" };
-  assertFirestoreDocumentId(oldUid, "Recovered user ID");
-  if (role !== undefined && role !== "dm" && role !== "player") {
-    throw new Error("Recovery role is invalid.");
-  }
-
-  if (oldUid === uid) {
-    throw new Error("This code is already registered to your account.");
-  }
-
-  // 2. Write the reclaim proof — Firestore rule verifies code against identitySecret
-  const reclaimRef = doc(db, "identityReclaims", uid);
-  await setDoc(reclaimRef, { oldUid, code: normalisedCode });
-
-  try {
-    // Read everything first, then apply ALL ownership migrations in a single
-    // atomic batch, so a failure can't leave the account half-migrated.
-    const dmCampaignsSnap = await getDocs(
-      query(
-        collection(db, "campaigns"),
-        where("dmId", "==", oldUid),
-        limit(IDENTITY_RECLAIM_CAMPAIGN_LIMIT + 1)
-      )
-    );
-    const playerCampaignsSnap = await getDocs(
-      query(
-        collection(db, "campaigns"),
-        where("memberIds", "array-contains", oldUid),
-        limit(IDENTITY_RECLAIM_CAMPAIGN_LIMIT + 1)
-      )
-    );
-
-    if (
-      dmCampaignsSnap.docs.length > IDENTITY_RECLAIM_CAMPAIGN_LIMIT ||
-      playerCampaignsSnap.docs.length > IDENTITY_RECLAIM_CAMPAIGN_LIMIT
-    ) {
-      throw protectedReclaimError();
+    if (!recoverySnap.exists()) {
+      throw new Error("Recovery code not found.");
     }
 
-    const campaignMigrations = new Map<
-      string,
-      {
-        campaignRef: DocumentReference;
-        changes: { dmId?: string; memberIds?: string[] };
-        characterRefs: DocumentReference[];
-      }
-    >();
+    const { uid: oldUid, role } = recoverySnap.data() as { uid: string; role?: "dm" | "player" };
+    assertFirestoreDocumentId(oldUid, "Recovered user ID");
+    if (role !== undefined && role !== "dm" && role !== "player") {
+      throw new Error("Recovery role is invalid.");
+    }
 
-    dmCampaignsSnap.docs.forEach((campaignDoc) => {
-      campaignMigrations.set(campaignDoc.id, {
-        campaignRef: campaignDoc.ref,
-        changes: { dmId: uid },
-        characterRefs: [],
-      });
-    });
+    if (oldUid === uid) {
+      throw new Error("This code is already registered to your account.");
+    }
 
-    // Read and validate all player-owned data before staging any ownership write.
-    for (const campDoc of playerCampaignsSnap.docs) {
-      const campData = campDoc.data() as { memberIds: string[] };
-      const newMemberIds = campData.memberIds.filter((id) => id !== oldUid).concat(uid);
+    // 2. Write the reclaim proof — Firestore rule verifies code against identitySecret
+    const reclaimRef = doc(db, "identityReclaims", uid);
+    await setDoc(reclaimRef, { oldUid, code: normalisedCode });
 
-      const charsSnap = await getDocs(
+    try {
+      // Read everything first, then apply ALL ownership migrations in a single
+      // atomic batch, so a failure can't leave the account half-migrated.
+      const dmCampaignsSnap = await getDocs(
         query(
-          collection(db, "campaigns", campDoc.id, "characters"),
-          where("userId", "==", oldUid),
-          limit(IDENTITY_RECLAIM_CHARACTERS_PER_CAMPAIGN_LIMIT + 1)
+          collection(db, "campaigns"),
+          where("dmId", "==", oldUid),
+          limit(IDENTITY_RECLAIM_CAMPAIGN_LIMIT + 1)
+        )
+      );
+      const playerCampaignsSnap = await getDocs(
+        query(
+          collection(db, "campaigns"),
+          where("memberIds", "array-contains", oldUid),
+          limit(IDENTITY_RECLAIM_CAMPAIGN_LIMIT + 1)
         )
       );
 
-      if (charsSnap.docs.length > IDENTITY_RECLAIM_CHARACTERS_PER_CAMPAIGN_LIMIT) {
+      if (
+        dmCampaignsSnap.docs.length > IDENTITY_RECLAIM_CAMPAIGN_LIMIT ||
+        playerCampaignsSnap.docs.length > IDENTITY_RECLAIM_CAMPAIGN_LIMIT
+      ) {
         throw protectedReclaimError();
       }
 
-      const existingMigration = campaignMigrations.get(campDoc.id);
-      campaignMigrations.set(campDoc.id, {
-        campaignRef: campDoc.ref,
-        changes: { ...existingMigration?.changes, memberIds: newMemberIds },
-        characterRefs: charsSnap.docs.map((characterDoc) => characterDoc.ref),
+      const campaignMigrations = new Map<
+        string,
+        {
+          campaignRef: DocumentReference;
+          changes: { dmId?: string; memberIds?: string[] };
+          characterRefs: DocumentReference[];
+        }
+      >();
+
+      dmCampaignsSnap.docs.forEach((campaignDoc) => {
+        campaignMigrations.set(campaignDoc.id, {
+          campaignRef: campaignDoc.ref,
+          changes: { dmId: uid },
+          characterRefs: [],
+        });
       });
+
+      // Read and validate all player-owned data before staging any ownership write.
+      for (const campDoc of playerCampaignsSnap.docs) {
+        const campData = campDoc.data() as { memberIds: string[] };
+        const newMemberIds = campData.memberIds.filter((id) => id !== oldUid).concat(uid);
+
+        const charsSnap = await getDocs(
+          query(
+            collection(db, "campaigns", campDoc.id, "characters"),
+            where("userId", "==", oldUid),
+            limit(IDENTITY_RECLAIM_CHARACTERS_PER_CAMPAIGN_LIMIT + 1)
+          )
+        );
+
+        if (charsSnap.docs.length > IDENTITY_RECLAIM_CHARACTERS_PER_CAMPAIGN_LIMIT) {
+          throw protectedReclaimError();
+        }
+
+        const existingMigration = campaignMigrations.get(campDoc.id);
+        campaignMigrations.set(campDoc.id, {
+          campaignRef: campDoc.ref,
+          changes: { ...existingMigration?.changes, memberIds: newMemberIds },
+          characterRefs: charsSnap.docs.map((characterDoc) => characterDoc.ref),
+        });
+      }
+
+      const ownershipWriteCount =
+        campaignMigrations.size +
+        [...campaignMigrations.values()].reduce(
+          (count, migration) => count + migration.characterRefs.length,
+          0
+        );
+
+      if (ownershipWriteCount > IDENTITY_RECLAIM_WRITE_LIMIT) {
+        throw protectedReclaimError();
+      }
+      assertBulkOperationCount(ownershipWriteCount, "Identity recovery");
+
+      const batch = writeBatch(db);
+
+      campaignMigrations.forEach((migration) => {
+        batch.update(migration.campaignRef, migration.changes);
+        migration.characterRefs.forEach((characterRef) =>
+          batch.update(characterRef, { userId: uid })
+        );
+      });
+
+      await batch.commit();
+
+      // Transfer the recovery entry + secret to the new uid, and mark it onboarded.
+      await updateDoc(recoveryRef, { uid });
+      await setDoc(doc(db, "identitySecret", uid), { code: normalisedCode });
+      await setDoc(doc(db, "users", uid), { onboarded: true }, { merge: true });
+    } finally {
+      // 6. Always clean up the proof document regardless of success or failure
+      await deleteDoc(reclaimRef);
     }
 
-    const ownershipWriteCount =
-      campaignMigrations.size +
-      [...campaignMigrations.values()].reduce(
-        (count, migration) => count + migration.characterRefs.length,
-        0
-      );
-
-    if (ownershipWriteCount > IDENTITY_RECLAIM_WRITE_LIMIT) {
-      throw protectedReclaimError();
-    }
-    assertBulkOperationCount(ownershipWriteCount, "Identity recovery");
-
-    const batch = writeBatch(db);
-
-    campaignMigrations.forEach((migration) => {
-      batch.update(migration.campaignRef, migration.changes);
-      migration.characterRefs.forEach((characterRef) =>
-        batch.update(characterRef, { userId: uid })
-      );
-    });
-
-    await batch.commit();
-
-    // Transfer the recovery entry + secret to the new uid, and mark it onboarded.
-    await updateDoc(recoveryRef, { uid });
-    await setDoc(doc(db, "identitySecret", uid), { code: normalisedCode });
-    await setDoc(doc(db, "users", uid), { onboarded: true }, { merge: true });
-  } finally {
-    // 6. Always clean up the proof document regardless of success or failure
-    await deleteDoc(reclaimRef);
-  }
-
-  // Recovery entries created before roles were stored default to player.
-  return role ?? "player";
+    // Recovery entries created before roles were stored default to player.
+    return role ?? "player";
+  });
 }
 
 /**
@@ -238,8 +241,10 @@ export async function rotateRecoveryCode(
 ): Promise<string> {
   assertFirestoreDocumentId(uid, "User ID");
   if (role !== "dm" && role !== "player") throw new Error("Recovery role is invalid.");
-  const existingCode = await getRecoveryCode(uid);
-  return registerIdentityRecovery(uid, role, existingCode ?? undefined);
+  return runSingleFlight("identity:rotate-recovery", [uid, role], async () => {
+    const existingCode = await getRecoveryCode(uid);
+    return registerIdentityRecovery(uid, role, existingCode ?? undefined);
+  });
 }
 
 /**

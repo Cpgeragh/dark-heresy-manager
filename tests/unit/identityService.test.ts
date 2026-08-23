@@ -175,6 +175,26 @@ function makeQuerySnap(refs: string[], getData?: (ref: string) => Record<string,
 }
 
 describe("reclaimIdentity", () => {
+  it("starts one recovery lookup for a duplicate in-flight reclaim", async () => {
+    let finish!: (value: unknown) => void;
+    const pending = new Promise((resolve) => {
+      finish = resolve;
+    });
+    mockGetDoc.mockReturnValueOnce(pending);
+
+    const first = reclaimIdentity("uid-duplicate", "DH-DUPE-CODE");
+    const duplicate = reclaimIdentity("uid-duplicate", "DH-DUPE-CODE");
+    const outcomes = Promise.allSettled([first, duplicate]);
+    await Promise.resolve();
+
+    expect(mockGetDoc).toHaveBeenCalledOnce();
+    finish({ exists: () => false });
+    await expect(outcomes).resolves.toEqual([
+      expect.objectContaining({ status: "rejected" }),
+      expect.objectContaining({ status: "rejected" }),
+    ]);
+  });
+
   it("throws when recovery code is not found", async () => {
     mockGetDoc.mockResolvedValue(makeEmptySnap());
 
@@ -359,6 +379,27 @@ describe("getRecoveryCode", () => {
 // ── rotateRecoveryCode ────────────────────────────────────────────────────
 
 describe("rotateRecoveryCode", () => {
+  it("generates only one code for a duplicate in-flight rotation", async () => {
+    let finish!: (value: unknown) => void;
+    const pending = new Promise((resolve) => {
+      finish = resolve;
+    });
+    mockGetDoc.mockReturnValueOnce(pending);
+
+    const first = rotateRecoveryCode("uid-duplicate", "dm");
+    const duplicate = rotateRecoveryCode("uid-duplicate", "dm");
+    await Promise.resolve();
+
+    expect(mockGetDoc).toHaveBeenCalledOnce();
+    finish({ exists: () => false, data: () => null });
+    await expect(Promise.all([first, duplicate])).resolves.toEqual([
+      "DH-GENE-CODE",
+      "DH-GENE-CODE",
+    ]);
+    expect(mockGenerateRecoveryCode).toHaveBeenCalledOnce();
+    expect(mockBatchCommit).toHaveBeenCalledOnce();
+  });
+
   it("fetches the current code and passes it as existingCode to registerIdentityRecovery", async () => {
     // getRecoveryCode returns the current code
     mockGetDoc.mockResolvedValue({

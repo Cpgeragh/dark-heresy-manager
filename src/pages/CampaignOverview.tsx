@@ -1,6 +1,6 @@
 // src/pages/CampaignOverview.tsx
 
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useParams } from "react-router-dom";
 
 import { useCampaign } from "../hooks/useCampaign";
@@ -65,9 +65,12 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
   const [search, setSearch] = useState("");
   const [newCharacterName, setNewCharacterName] = useState("");
   const [creatingCharacter, setCreatingCharacter] = useState(false);
+  const creatingCharacterRef = useRef(false);
+  const [importingCharacter, setImportingCharacter] = useState(false);
+  const importingCharacterRef = useRef(false);
 
   const handleCreate = useCallback(async () => {
-    if (creatingCharacter) return;
+    if (creatingCharacterRef.current) return;
     const name = newCharacterName.trim();
     const validation = validateCharacterName(name);
     if (!validation.isValid) {
@@ -75,6 +78,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
       return;
     }
     if (!campaignId) return;
+    creatingCharacterRef.current = true;
     setCreatingCharacter(true);
     try {
       const recoveryCode = await createNewCharacter(campaignId, name);
@@ -88,14 +92,22 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
       console.error("Character creation error:", err);
       toast.error("Failed to create character.");
     } finally {
+      creatingCharacterRef.current = false;
       setCreatingCharacter(false);
     }
-  }, [campaignId, creatingCharacter, newCharacterName, toast]);
+  }, [campaignId, newCharacterName, toast]);
 
   const handleImport = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const input = e.currentTarget;
       const file = e.target.files?.[0];
       if (!file || !campaignId) return;
+      if (importingCharacterRef.current) {
+        input.value = "";
+        return;
+      }
+      importingCharacterRef.current = true;
+      setImportingCharacter(true);
       try {
         const data = await readCharacterImportFile(file);
         const characterName = await importCharacter(campaignId, data);
@@ -103,8 +115,11 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
       } catch (err) {
         console.error("Failed to import character:", err);
         toast.error("Failed to import character. Check the file and try again.");
+      } finally {
+        importingCharacterRef.current = false;
+        setImportingCharacter(false);
+        input.value = "";
       }
-      e.target.value = "";
     },
     [campaignId, toast]
   );
@@ -118,14 +133,22 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
     setKebabContent(
       <div className="space-y-2">
         <p className={uiSubheading}>Character Data</p>
-        <label className="block px-2 lg:px-3 py-1 lg:py-1.5 text-xs lg:text-sm rounded bg-slate-700 border border-slate-500 text-slate-100 hover:bg-slate-600 cursor-pointer">
-          Import JSON
-          <input type="file" accept=".json" className="hidden" onChange={handleImport} />
+        <label
+          className={`block px-2 lg:px-3 py-1 lg:py-1.5 text-xs lg:text-sm rounded bg-slate-700 border border-slate-500 text-slate-100 ${importingCharacter ? "opacity-50 cursor-not-allowed" : "hover:bg-slate-600 cursor-pointer"}`}
+        >
+          {importingCharacter ? "Importing…" : "Import JSON"}
+          <input
+            type="file"
+            accept=".json"
+            className="hidden"
+            onChange={handleImport}
+            disabled={importingCharacter}
+          />
         </label>
       </div>
     );
     return () => clearKebabContent();
-  }, [isDM, handleImport, setKebabContent, clearKebabContent]);
+  }, [isDM, importingCharacter, handleImport, setKebabContent, clearKebabContent]);
 
   if (!campaignId) {
     return <div className="text-slate-300 text-center py-10">No campaign selected.</div>;
