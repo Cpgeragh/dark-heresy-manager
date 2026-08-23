@@ -7,7 +7,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // ── Mocks ─────────────────────────────────────────────────────────────────────
 
-const mockBatchSet    = vi.fn();
+const mockBatchSet = vi.fn();
 const mockBatchDelete = vi.fn();
 const mockBatchCommit = vi.fn().mockResolvedValue(undefined);
 const mockBatch = { set: mockBatchSet, delete: mockBatchDelete, commit: mockBatchCommit };
@@ -22,30 +22,33 @@ const {
   mockUpdateDoc,
   mockIncrement,
 } = vi.hoisted(() => ({
-  mockWriteBatch:      vi.fn(),
+  mockWriteBatch: vi.fn(),
   // doc(db, ...path) → join path segments; doc(collectionRef) → append "/auto-id"
   mockDoc: vi.fn((...args: unknown[]) =>
-    args.length === 1
-      ? `${String(args[0])}/auto-id`
-      : (args.slice(1) as string[]).join("/")
+    args.length === 1 ? `${String(args[0])}/auto-id` : (args.slice(1) as string[]).join("/")
   ),
-  mockCollection:      vi.fn((...args: unknown[]) => args.slice(1).join("/")),
-  mockGetDocs:         vi.fn(),
+  mockCollection: vi.fn((...args: unknown[]) => args.slice(1).join("/")),
+  mockGetDocs: vi.fn(),
   mockServerTimestamp: vi.fn(() => "SERVER_TIMESTAMP"),
-  mockSetDoc:          vi.fn().mockResolvedValue(undefined),
-  mockUpdateDoc:       vi.fn().mockResolvedValue(undefined),
-  mockIncrement:       vi.fn((n: number) => ({ _increment: n })),
+  mockSetDoc: vi.fn().mockResolvedValue(undefined),
+  mockUpdateDoc: vi.fn().mockResolvedValue(undefined),
+  mockIncrement: vi.fn((n: number) => ({ _increment: n })),
 }));
 
 vi.mock("firebase/firestore", () => ({
-  writeBatch:      (...args: unknown[]) => mockWriteBatch(...args),
-  doc:             (...args: unknown[]) => mockDoc(...args),
-  collection:      (...args: unknown[]) => mockCollection(...args),
-  getDocs:         (...args: unknown[]) => mockGetDocs(...args),
+  documentId: () => "__name__",
+  writeBatch: (...args: unknown[]) => mockWriteBatch(...args),
+  doc: (...args: unknown[]) => mockDoc(...args),
+  collection: (...args: unknown[]) => mockCollection(...args),
+  getDocs: (...args: unknown[]) => mockGetDocs(...args),
+  limit: (value: number) => ({ type: "limit", value }),
+  orderBy: (...args: unknown[]) => ({ type: "orderBy", args }),
+  query: (source: unknown) => source,
+  startAfter: (...args: unknown[]) => ({ type: "startAfter", args }),
   serverTimestamp: () => mockServerTimestamp(),
-  setDoc:          (...args: unknown[]) => mockSetDoc(...args),
-  updateDoc:       (...args: unknown[]) => mockUpdateDoc(...args),
-  increment:       (n: number) => mockIncrement(n),
+  setDoc: (...args: unknown[]) => mockSetDoc(...args),
+  updateDoc: (...args: unknown[]) => mockUpdateDoc(...args),
+  increment: (n: number) => mockIncrement(n),
 }));
 
 vi.mock("../../src/firebase", () => ({ db: "mock-db" }));
@@ -66,7 +69,7 @@ beforeEach(() => {
 
 function makeDocs(refs: string[]) {
   return {
-    docs:  refs.map((ref) => ({ ref, id: ref.split("/").pop() as string })),
+    docs: refs.map((ref) => ({ ref, id: ref.split("/").pop() as string })),
     empty: refs.length === 0,
   };
 }
@@ -74,7 +77,6 @@ function makeDocs(refs: string[]) {
 // ── sendMessage ───────────────────────────────────────────────────────────────
 
 describe("sendMessage", () => {
-
   it("writes the message doc with correct fields", async () => {
     await sendMessage("c1", "char-1", "p1", "Hello", true);
 
@@ -125,19 +127,29 @@ describe("sendMessage", () => {
     await sendMessage("c1", "char-1", "p1", "Hello", true);
     expect(mockBatchCommit).toHaveBeenCalledOnce();
   });
+
+  it("rejects empty messages before creating a batch", async () => {
+    await expect(sendMessage("c1", "char-1", "p1", "   ", true)).rejects.toThrow(
+      "Message cannot be empty."
+    );
+    expect(mockWriteBatch).not.toHaveBeenCalled();
+  });
+
+  it("rejects messages over 2,000 characters before creating a batch", async () => {
+    await expect(sendMessage("c1", "char-1", "p1", "x".repeat(2_001), true)).rejects.toThrow(
+      "Message cannot exceed 2000 characters."
+    );
+    expect(mockWriteBatch).not.toHaveBeenCalled();
+  });
 });
 
 // ── markThreadRead ────────────────────────────────────────────────────────────
 
 describe("markThreadRead", () => {
-
   it("calls updateDoc with unreadForDM: 0 on the correct thread ref", async () => {
     await markThreadRead("c1", "char-1");
 
-    expect(mockUpdateDoc).toHaveBeenCalledWith(
-      "campaigns/c1/threads/char-1",
-      { unreadForDM: 0 }
-    );
+    expect(mockUpdateDoc).toHaveBeenCalledWith("campaigns/c1/threads/char-1", { unreadForDM: 0 });
   });
 
   it("calls updateDoc exactly once", async () => {
@@ -149,7 +161,6 @@ describe("markThreadRead", () => {
 // ── clearThread ───────────────────────────────────────────────────────────────
 
 describe("clearThread", () => {
-
   it("batch-deletes all messages and resets the thread summary", async () => {
     mockGetDocs.mockResolvedValue(
       makeDocs([
@@ -162,10 +173,12 @@ describe("clearThread", () => {
 
     expect(mockBatchDelete).toHaveBeenCalledWith("campaigns/c1/threads/char-1/messages/m1");
     expect(mockBatchDelete).toHaveBeenCalledWith("campaigns/c1/threads/char-1/messages/m2");
-    expect(mockBatchSet).toHaveBeenCalledWith(
-      "campaigns/c1/threads/char-1",
-      { characterId: "char-1", lastMessage: null, lastTimestamp: null, unreadForDM: 0 }
-    );
+    expect(mockSetDoc).toHaveBeenCalledWith("campaigns/c1/threads/char-1", {
+      characterId: "char-1",
+      lastMessage: null,
+      lastTimestamp: null,
+      unreadForDM: 0,
+    });
     expect(mockBatchCommit).toHaveBeenCalledOnce();
   });
 
@@ -176,9 +189,11 @@ describe("clearThread", () => {
 
     expect(mockBatchDelete).not.toHaveBeenCalled();
     expect(mockBatchCommit).not.toHaveBeenCalled();
-    expect(mockSetDoc).toHaveBeenCalledWith(
-      "campaigns/c1/threads/char-1",
-      { characterId: "char-1", lastMessage: null, lastTimestamp: null, unreadForDM: 0 }
-    );
+    expect(mockSetDoc).toHaveBeenCalledWith("campaigns/c1/threads/char-1", {
+      characterId: "char-1",
+      lastMessage: null,
+      lastTimestamp: null,
+      unreadForDM: 0,
+    });
   });
 });

@@ -1,21 +1,43 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockBatchDeleteRefs, mockDoc, mockGetDocs, mockServerTimestamp, mockUpdateDoc } =
-  vi.hoisted(() => ({
-    mockBatchDeleteRefs: vi.fn().mockResolvedValue(undefined),
-    mockDoc: vi.fn((...args: unknown[]) => args.slice(1).join("/")),
-    mockGetDocs: vi.fn(),
-    mockServerTimestamp: vi.fn(() => "server-timestamp"),
-    mockUpdateDoc: vi.fn().mockResolvedValue(undefined),
-  }));
+const {
+  mockBatch,
+  mockBatchDeleteRefs,
+  mockDeleteCharacter,
+  mockDeleteDoc,
+  mockDoc,
+  mockGetDocs,
+  mockServerTimestamp,
+  mockUpdateDoc,
+} = vi.hoisted(() => ({
+  mockBatch: {
+    commit: vi.fn().mockResolvedValue(undefined),
+    delete: vi.fn(),
+  },
+  mockBatchDeleteRefs: vi.fn().mockResolvedValue(undefined),
+  mockDeleteCharacter: vi.fn().mockResolvedValue(undefined),
+  mockDeleteDoc: vi.fn().mockResolvedValue(undefined),
+  mockDoc: vi.fn((...args: unknown[]) => args.slice(1).join("/")),
+  mockGetDocs: vi.fn(),
+  mockServerTimestamp: vi.fn(() => "server-timestamp"),
+  mockUpdateDoc: vi.fn().mockResolvedValue(undefined),
+}));
 
 vi.mock("firebase/firestore", () => ({
-  collection: (...args: unknown[]) => args.slice(1).join("/"),
+  collection: (...args: unknown[]) =>
+    args.length === 2 ? args.join("/") : args.slice(1).join("/"),
+  deleteDoc: (...args: unknown[]) => mockDeleteDoc(...args),
+  documentId: () => "__name__",
   doc: (...args: unknown[]) => mockDoc(...args),
   getDocs: (...args: unknown[]) => mockGetDocs(...args),
+  limit: (value: number) => ({ type: "limit", value }),
+  orderBy: (...args: unknown[]) => ({ type: "orderBy", args }),
+  query: (source: unknown) => source,
   serverTimestamp: () => mockServerTimestamp(),
   setDoc: vi.fn(),
+  startAfter: (...args: unknown[]) => ({ type: "startAfter", args }),
   updateDoc: (...args: unknown[]) => mockUpdateDoc(...args),
+  writeBatch: () => mockBatch,
 }));
 
 vi.mock("../../src/firebase", () => ({
@@ -26,12 +48,21 @@ vi.mock("../../src/utils/firestoreBatchDelete", () => ({
   batchDeleteRefs: (...args: unknown[]) => mockBatchDeleteRefs(...args),
 }));
 
-import { archiveCampaign, deleteCampaign, restoreCampaign } from "../../src/services/campaignService";
+vi.mock("../../src/services/characterService", () => ({
+  deleteCharacter: (...args: unknown[]) => mockDeleteCharacter(...args),
+}));
+
+import {
+  archiveCampaign,
+  deleteCampaign,
+  restoreCampaign,
+} from "../../src/services/campaignService";
 
 // A fake QuerySnapshot: `getDocs` is stubbed per collection path below.
 function snapshot(docs: { id: string; ref: string; data?: Record<string, unknown> }[]) {
   return {
     docs: docs.map((d) => ({ id: d.id, ref: d.ref, data: () => d.data ?? {} })),
+    empty: docs.length === 0,
   };
 }
 
@@ -41,6 +72,9 @@ beforeEach(() => {
   vi.clearAllMocks();
   mockUpdateDoc.mockResolvedValue(undefined);
   mockBatchDeleteRefs.mockResolvedValue(undefined);
+  mockDeleteCharacter.mockResolvedValue(undefined);
+  mockDeleteDoc.mockResolvedValue(undefined);
+  mockBatch.commit.mockResolvedValue(undefined);
 });
 
 describe("campaign archive operations", () => {
@@ -73,17 +107,17 @@ describe("campaign archive operations", () => {
 });
 
 describe("deleteCampaign", () => {
-  it("gathers every character's claim log, XP proposals, and recovery index entry, every session, every message thread and its messages, every custom item and its version history, and the campaign itself", async () => {
+  it("processes characters, sessions, threads, messages, custom items, versions, and the campaign in bounded steps", async () => {
     mockGetDocs.mockImplementation(async (path: string) => {
       switch (path) {
         case "campaigns/camp-1/characters":
           return snapshot([
-            { id: "char-1", ref: "campaigns/camp-1/characters/char-1", data: { recoveryCode: "DH-AAAA-1111" } },
+            {
+              id: "char-1",
+              ref: "campaigns/camp-1/characters/char-1",
+              data: { recoveryCode: "DH-AAAA-1111" },
+            },
           ]);
-        case "campaigns/camp-1/characters/char-1/claimLog":
-          return snapshot([{ id: "log-1", ref: "campaigns/camp-1/characters/char-1/claimLog/log-1" }]);
-        case "campaigns/camp-1/characters/char-1/xpProposals":
-          return snapshot([{ id: "prop-1", ref: "campaigns/camp-1/characters/char-1/xpProposals/prop-1" }]);
         case "campaigns/camp-1/sessions":
           return snapshot([{ id: "sess-1", ref: "campaigns/camp-1/sessions/sess-1" }]);
         case "campaigns/camp-1/threads":
@@ -93,7 +127,9 @@ describe("deleteCampaign", () => {
         case "campaigns/camp-1/customItems":
           return snapshot([{ id: "item-1", ref: "campaigns/camp-1/customItems/item-1" }]);
         case "campaigns/camp-1/customItems/item-1/versions":
-          return snapshot([{ id: "ver-1", ref: "campaigns/camp-1/customItems/item-1/versions/ver-1" }]);
+          return snapshot([
+            { id: "ver-1", ref: "campaigns/camp-1/customItems/item-1/versions/ver-1" },
+          ]);
         default:
           return emptySnapshot;
       }
@@ -101,24 +137,21 @@ describe("deleteCampaign", () => {
 
     await deleteCampaign("camp-1");
 
-    expect(mockBatchDeleteRefs).toHaveBeenCalledOnce();
-    const [dbArg, refs] = mockBatchDeleteRefs.mock.calls[0];
-    expect(dbArg).toBe("mock-db");
-    expect(refs).toEqual(
-      expect.arrayContaining([
-        "campaigns/camp-1/characters/char-1/claimLog/log-1",
-        "campaigns/camp-1/characters/char-1/xpProposals/prop-1",
-        "recoveryIndex/DH-AAAA-1111",
-        "campaigns/camp-1/characters/char-1",
-        "campaigns/camp-1/sessions/sess-1",
-        "campaigns/camp-1/threads/char-1/messages/msg-1",
-        "campaigns/camp-1/threads/char-1",
-        "campaigns/camp-1/customItems/item-1/versions/ver-1",
-        "campaigns/camp-1/customItems/item-1",
-        "campaigns/camp-1",
-      ])
+    expect(mockDeleteCharacter).toHaveBeenCalledWith("camp-1", "char-1", "DH-AAAA-1111");
+    expect(mockBatch.delete).toHaveBeenCalledWith("campaigns/camp-1/sessions/sess-1");
+    expect(mockBatch.delete).toHaveBeenCalledWith("campaigns/camp-1/threads/char-1/messages/msg-1");
+    expect(mockBatch.delete).toHaveBeenCalledWith(
+      "campaigns/camp-1/customItems/item-1/versions/ver-1"
     );
-    expect(refs).toHaveLength(10);
+    expect(mockBatchDeleteRefs).toHaveBeenCalledWith("mock-db", [
+      "campaigns/camp-1/threads/char-1",
+    ]);
+    expect(mockUpdateDoc).toHaveBeenCalledWith(
+      "campaigns/camp-1/customItems/item-1",
+      expect.objectContaining({ status: "archived" })
+    );
+    expect(mockDeleteDoc).toHaveBeenCalledWith("campaigns/camp-1/customItems/item-1");
+    expect(mockDeleteDoc).toHaveBeenCalledWith("campaigns/camp-1");
   });
 
   it("skips the recovery index entry for a character with no recorded recovery code", async () => {
@@ -131,14 +164,17 @@ describe("deleteCampaign", () => {
 
     await deleteCampaign("camp-2");
 
-    const [, refs] = mockBatchDeleteRefs.mock.calls[0];
-    expect(refs).not.toEqual(expect.arrayContaining([expect.stringContaining("recoveryIndex")]));
+    expect(mockDeleteCharacter).toHaveBeenCalledWith("camp-2", "char-1", undefined);
   });
 
-  it("propagates failures from the batch delete", async () => {
-    mockGetDocs.mockResolvedValue(emptySnapshot);
+  it("propagates failures from a character cleanup step", async () => {
+    mockGetDocs.mockImplementation(async (path: string) =>
+      path === "campaigns/camp-3/characters"
+        ? snapshot([{ id: "char-3", ref: "character-ref", data: { recoveryCode: "CODE" } }])
+        : emptySnapshot
+    );
     const error = new Error("delete failed");
-    mockBatchDeleteRefs.mockRejectedValueOnce(error);
+    mockDeleteCharacter.mockRejectedValueOnce(error);
 
     await expect(deleteCampaign("camp-3")).rejects.toBe(error);
   });

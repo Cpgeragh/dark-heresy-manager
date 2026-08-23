@@ -1,7 +1,8 @@
 // src/hooks/useThreadMessages.ts
 // Real-time listener for messages in a single character-DM thread.
 
-import { collection, orderBy, query } from "firebase/firestore";
+import { collection, limitToLast, orderBy, query } from "firebase/firestore";
+import { FIRESTORE_QUERY_LIMITS } from "../constants/firestoreLimits";
 import { db } from "../firebase";
 import type { ThreadMessage } from "../types/Firestore";
 import { useQuerySubscription } from "./useFirestoreSubscription";
@@ -15,7 +16,8 @@ export function useThreadMessages(campaignId: string | null, characterId: string
     campaignId && characterId
       ? query(
           collection(db, "campaigns", campaignId, "threads", characterId, "messages"),
-          orderBy("timestamp", "asc")
+          orderBy("timestamp", "asc"),
+          limitToLast(FIRESTORE_QUERY_LIMITS.messagesPerThread)
         )
       : null,
     campaignId && characterId ? `thread-messages:${campaignId}:${characterId}` : null,

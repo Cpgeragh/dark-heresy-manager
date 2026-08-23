@@ -27,11 +27,13 @@ function ThreadView({
   characterId,
   dmUid,
   label,
+  hasUnread,
 }: {
   campaignId: string;
   characterId: string;
   dmUid: string;
   label: string;
+  hasUnread: boolean;
 }) {
   const { messages, loading, error } = useThreadMessages(campaignId, characterId);
   const toast = useToast();
@@ -39,8 +41,8 @@ function ThreadView({
 
   // Mark thread as read when DM opens it
   useEffect(() => {
-    void markThreadRead(campaignId, characterId);
-  }, [campaignId, characterId]);
+    if (hasUnread) void markThreadRead(campaignId, characterId);
+  }, [campaignId, characterId, hasUnread]);
 
   const handleSend = useCallback(
     async (text: string) => {
@@ -110,11 +112,7 @@ export function DMInbox({
   }, []);
 
   if (error) {
-    return (
-      <ErrorState>
-        Unable to load messages. Please refresh the page.
-      </ErrorState>
-    );
+    return <ErrorState>Unable to load messages. Please refresh the page.</ErrorState>;
   }
 
   if (loading) {
@@ -134,7 +132,8 @@ export function DMInbox({
 
         return (
           <div key={thread.characterId}>
-            <button type="button"
+            <button
+              type="button"
               onClick={() => toggleThread(thread.characterId)}
               aria-expanded={isExpanded}
               className="w-full flex items-center gap-3 px-3 lg:px-4 py-2 lg:py-2.5 rounded border border-slate-700 bg-slate-900/40 hover:bg-slate-800 transition text-left"
@@ -149,7 +148,9 @@ export function DMInbox({
                   )}
                 </div>
                 {thread.lastMessage && (
-                  <p className="text-xs lg:text-sm text-slate-500 truncate mt-0.5">{thread.lastMessage}</p>
+                  <p className="text-xs lg:text-sm text-slate-500 truncate mt-0.5">
+                    {thread.lastMessage}
+                  </p>
                 )}
               </div>
               <ExpandChevron expanded={isExpanded} />
@@ -161,6 +162,7 @@ export function DMInbox({
                 characterId={thread.characterId}
                 dmUid={dmUid}
                 label={label}
+                hasUnread={hasUnread}
               />
             )}
           </div>

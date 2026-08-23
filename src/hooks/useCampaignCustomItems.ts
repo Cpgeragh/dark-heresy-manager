@@ -1,7 +1,8 @@
 // src/hooks/useCampaignCustomItems.ts
 
 import { useMemo } from "react";
-import { query, where, type DocumentData, type QuerySnapshot } from "firebase/firestore";
+import { limit, query, where, type DocumentData, type QuerySnapshot } from "firebase/firestore";
+import { FIRESTORE_QUERY_LIMITS } from "../constants/firestoreLimits";
 import { customItemsCollectionRef } from "../services/customItemService";
 import type { CampaignCustomItem, CustomItemCategory } from "../types/CustomItems";
 import { useQuerySubscription } from "./useFirestoreSubscription";
@@ -36,20 +37,56 @@ export function useCampaignCustomItems({
   const pickerActive = mode === "picker" && baseRef !== null;
 
   const adminSubscription = useQuerySubscription(
-    adminActive ? (category ? query(baseRef, where("category", "==", category)) : baseRef) : null,
+    adminActive
+      ? category
+        ? query(
+            baseRef,
+            where("category", "==", category),
+            limit(FIRESTORE_QUERY_LIMITS.customItemsPerQuery)
+          )
+        : query(baseRef, limit(FIRESTORE_QUERY_LIMITS.customItemsPerQuery))
+      : null,
     adminActive ? `custom-items:admin:${campaignId}:${category ?? "all"}` : null,
     mapCustomItemSnapshot
   );
 
   const publishedSubscription = useQuerySubscription(
-    pickerActive ? query(baseRef, where("status", "==", "published")) : null,
-    pickerActive ? `custom-items:published:${campaignId}` : null,
+    pickerActive
+      ? category
+        ? query(
+            baseRef,
+            where("status", "==", "published"),
+            where("category", "==", category),
+            limit(FIRESTORE_QUERY_LIMITS.customItemsPerQuery)
+          )
+        : query(
+            baseRef,
+            where("status", "==", "published"),
+            limit(FIRESTORE_QUERY_LIMITS.customItemsPerQuery)
+          )
+      : null,
+    pickerActive ? `custom-items:published:${campaignId}:${category ?? "all"}` : null,
     mapCustomItemSnapshot
   );
 
   const creatorSubscription = useQuerySubscription(
-    pickerActive && userId ? query(baseRef, where("creator.userId", "==", userId)) : null,
-    pickerActive && userId ? `custom-items:creator:${campaignId}:${userId}` : null,
+    pickerActive && userId
+      ? category
+        ? query(
+            baseRef,
+            where("creator.userId", "==", userId),
+            where("category", "==", category),
+            limit(FIRESTORE_QUERY_LIMITS.customItemsPerQuery)
+          )
+        : query(
+            baseRef,
+            where("creator.userId", "==", userId),
+            limit(FIRESTORE_QUERY_LIMITS.customItemsPerQuery)
+          )
+      : null,
+    pickerActive && userId
+      ? `custom-items:creator:${campaignId}:${userId}:${category ?? "all"}`
+      : null,
     mapCustomItemSnapshot
   );
 

@@ -2,9 +2,9 @@
 
 import {
   collection,
+  deleteDoc,
   doc,
   getDoc,
-  getDocs,
   runTransaction,
   serverTimestamp,
   updateDoc,
@@ -25,8 +25,7 @@ import type {
   CustomWeaponData,
 } from "../types/CustomItems";
 import { stripUndefined } from "../utils/stripUndefined";
-
-const BATCH_WRITE_LIMIT = 450;
+import { deleteQueryDocsInPages, forEachQueryPage } from "../utils/firestoreQueryPages";
 
 export interface CreateDraftCustomItemArgs<TCategory extends CustomItemCategory> {
   campaignId: string;
@@ -151,7 +150,8 @@ export async function saveDraftCustomItem<TCategory extends CustomItemCategory>(
 
     const timestamp = serverTimestamp();
     const isExistingDraft = !!item.draftVersionId;
-    const draftVersionId = item.draftVersionId ?? doc(customItemVersionsCollectionRef(campaignId, customItemId)).id;
+    const draftVersionId =
+      item.draftVersionId ?? doc(customItemVersionsCollectionRef(campaignId, customItemId)).id;
     const draftVersionRef = customItemVersionDocRef(campaignId, customItemId, draftVersionId);
     const versionNumber = isExistingDraft ? item.latestVersionNumber : item.latestVersionNumber + 1;
     const name = data.name.trim();
@@ -288,11 +288,8 @@ export async function permanentlyDeleteCustomItem({
   if ((itemSnap.data() as CampaignCustomItem).status !== "archived")
     throw new Error("Only archived items can be permanently deleted.");
 
-  const versionsSnap = await getDocs(collection(itemRef, "versions"));
-  const batch = writeBatch(db);
-  versionsSnap.docs.forEach((d) => batch.delete(d.ref));
-  batch.delete(itemRef);
-  await batch.commit();
+  await deleteQueryDocsInPages(db, collection(itemRef, "versions"));
+  await deleteDoc(itemRef);
 }
 
 export async function publishAndUpdateAllCopies({
@@ -309,7 +306,6 @@ export async function publishAndUpdateAllCopies({
   return updateAllCustomItemCopies({ campaignId, customItemId, actorUserId, versionId });
 }
 
-
 export async function updateAllCustomItemCopies({
   campaignId,
   customItemId,
@@ -322,39 +318,35 @@ export async function updateAllCustomItemCopies({
   const targetVersionId = versionId ?? item.publishedVersionId ?? item.latestVersionId;
   if (!targetVersionId) throw new Error("Custom item has no version to apply.");
 
-  const versionSnap = await getDoc(customItemVersionDocRef(campaignId, customItemId, targetVersionId));
+  const versionSnap = await getDoc(
+    customItemVersionDocRef(campaignId, customItemId, targetVersionId)
+  );
   if (!versionSnap.exists()) throw new Error("Custom item version not found.");
 
   const version = versionSnap.data() as CampaignCustomItemVersion;
-  const charactersSnap = await getDocs(charactersCollectionRef(campaignId));
-  let batch = writeBatch(db);
-  let ops = 0;
   let updatedCopies = 0;
 
-  for (const characterDoc of charactersSnap.docs) {
-    const character = characterDoc.data();
-    const update = buildCharacterCopyUpdate(
-      character,
-      item.category,
-      customItemId,
-      targetVersionId,
-      version.data
-    );
+  await forEachQueryPage(charactersCollectionRef(campaignId), async (documents) => {
+    const batch = writeBatch(db);
+    let operations = 0;
 
-    if (!update) continue;
+    for (const characterDoc of documents) {
+      const update = buildCharacterCopyUpdate(
+        characterDoc.data(),
+        item.category,
+        customItemId,
+        targetVersionId,
+        version.data
+      );
+      if (!update) continue;
 
-    batch.update(characterDoc.ref, stripUndefined(update));
-    ops += 1;
-    updatedCopies += update.updatedCopies;
-
-    if (ops >= BATCH_WRITE_LIMIT) {
-      await batch.commit();
-      batch = writeBatch(db);
-      ops = 0;
+      batch.update(characterDoc.ref, stripUndefined(update));
+      operations += 1;
+      updatedCopies += update.updatedCopies;
     }
-  }
 
-  if (ops > 0) await batch.commit();
+    if (operations > 0) await batch.commit();
+  });
   return updatedCopies;
 }
 
@@ -397,8 +389,20 @@ export function buildCharacterCopyUpdate(
   if (category === "armour") {
     const armourData = data as CustomArmourData;
     return armourData.armourKind === "shield"
-      ? updateLinkedArray("shields", character.shields, customItemId, customLibraryVersionId, stripKindFields(armourData))
-      : updateLinkedArray("armour", character.armour, customItemId, customLibraryVersionId, stripKindFields(armourData));
+      ? updateLinkedArray(
+          "shields",
+          character.shields,
+          customItemId,
+          customLibraryVersionId,
+          stripKindFields(armourData)
+        )
+      : updateLinkedArray(
+          "armour",
+          character.armour,
+          customItemId,
+          customLibraryVersionId,
+          stripKindFields(armourData)
+        );
   }
 
   if (category === "power") {
@@ -421,19 +425,45 @@ export function buildCharacterCopyUpdate(
     case "gear":
       return updateLinkedArray("gear", character.gear, customItemId, customLibraryVersionId, data);
     case "consumable":
-      return updateLinkedArray("consumables", character.consumables, customItemId, customLibraryVersionId, data);
+      return updateLinkedArray(
+        "consumables",
+        character.consumables,
+        customItemId,
+        customLibraryVersionId,
+        data
+      );
     case "drug":
-      return updateLinkedArray("drugs", character.drugs, customItemId, customLibraryVersionId, data);
+      return updateLinkedArray(
+        "drugs",
+        character.drugs,
+        customItemId,
+        customLibraryVersionId,
+        data
+      );
     case "cybernetic":
-      return updateLinkedArray("cybernetics", character.cybernetics, customItemId, customLibraryVersionId, data);
+      return updateLinkedArray(
+        "cybernetics",
+        character.cybernetics,
+        customItemId,
+        customLibraryVersionId,
+        data
+      );
     case "archeotech":
-      return updateLinkedArray("archeotech", character.archeotech, customItemId, customLibraryVersionId, data);
+      return updateLinkedArray(
+        "archeotech",
+        character.archeotech,
+        customItemId,
+        customLibraryVersionId,
+        data
+      );
     default:
       return null;
   }
 }
 
-function updateLinkedArray<TItem extends { customLibraryId?: string; customLibraryVersionId?: string }>(
+function updateLinkedArray<
+  TItem extends { customLibraryId?: string; customLibraryVersionId?: string },
+>(
   field: keyof Character,
   items: TItem[] | undefined,
   customLibraryId: string,
@@ -462,27 +492,23 @@ export async function removeAllCustomItemCopies({
   campaignId,
   customItemId,
 }: Pick<CustomItemActorArgs, "campaignId" | "customItemId">): Promise<number> {
-  const charactersSnap = await getDocs(charactersCollectionRef(campaignId));
-  let batch = writeBatch(db);
-  let ops = 0;
   let removedCopies = 0;
 
-  for (const characterDoc of charactersSnap.docs) {
-    const character = characterDoc.data();
-    const update = buildCharacterCopyRemoval(character, customItemId);
-    if (!update) continue;
-    const { removedCopies: count, ...fields } = update;
-    batch.update(characterDoc.ref, fields);
-    ops += 1;
-    removedCopies += count;
-    if (ops >= BATCH_WRITE_LIMIT) {
-      await batch.commit();
-      batch = writeBatch(db);
-      ops = 0;
-    }
-  }
+  await forEachQueryPage(charactersCollectionRef(campaignId), async (documents) => {
+    const batch = writeBatch(db);
+    let operations = 0;
 
-  if (ops > 0) await batch.commit();
+    for (const characterDoc of documents) {
+      const update = buildCharacterCopyRemoval(characterDoc.data(), customItemId);
+      if (!update) continue;
+      const { removedCopies: count, ...fields } = update;
+      batch.update(characterDoc.ref, fields);
+      operations += 1;
+      removedCopies += count;
+    }
+
+    if (operations > 0) await batch.commit();
+  });
   return removedCopies;
 }
 
@@ -491,8 +517,16 @@ export function buildCharacterCopyRemoval(
   customItemId: string
 ): ({ removedCopies: number } & Partial<Character>) | null {
   const fields = [
-    "gear", "consumables", "drugs", "cybernetics", "archeotech",
-    "rangedWeapons", "meleeWeapons", "grenades", "armour", "shields",
+    "gear",
+    "consumables",
+    "drugs",
+    "cybernetics",
+    "archeotech",
+    "rangedWeapons",
+    "meleeWeapons",
+    "grenades",
+    "armour",
+    "shields",
   ] as const;
 
   let removedCopies = 0;

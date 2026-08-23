@@ -6,6 +6,7 @@
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import type { UserProfileDocument } from "../types/Firestore";
+import { PRODUCT_LIMITS } from "../constants/productLimits";
 
 export async function getFirstName(uid: string): Promise<string | null> {
   const snap = await getDoc(doc(db, "userProfiles", uid));
@@ -15,5 +16,11 @@ export async function getFirstName(uid: string): Promise<string | null> {
 }
 
 export async function saveFirstName(uid: string, firstName: string): Promise<void> {
-  await setDoc(doc(db, "userProfiles", uid), { firstName: firstName.trim() });
+  const trimmedName = firstName.trim();
+  if (!trimmedName) throw new Error("First name is required.");
+  if (trimmedName.length > PRODUCT_LIMITS.firstNameCharacters) {
+    throw new Error(`First name cannot exceed ${PRODUCT_LIMITS.firstNameCharacters} characters.`);
+  }
+
+  await setDoc(doc(db, "userProfiles", uid), { firstName: trimmedName });
 }

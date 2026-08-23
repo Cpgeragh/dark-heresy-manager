@@ -90,20 +90,15 @@ export function MessageDrawer({
       >
         {/* Panel header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700 shrink-0">
-          <h2 id="message-drawer-title" className="font-semibold text-slate-100">Messages</h2>
-          <CloseButton
-            onClick={onClose}
-            ariaLabel="Close messages"
-          />
+          <h2 id="message-drawer-title" className="font-semibold text-slate-100">
+            Messages
+          </h2>
+          <CloseButton onClick={onClose} ariaLabel="Close messages" />
         </div>
 
         {/* Panel content */}
-        {campaignId && characterId ? (
-          <PlayerThread
-            campaignId={campaignId}
-            characterId={characterId}
-            playerUid={user.uid}
-          />
+        {isOpen && campaignId && characterId ? (
+          <PlayerThread campaignId={campaignId} characterId={characterId} playerUid={user.uid} />
         ) : (
           <p className="text-sm text-slate-500 text-center py-10 px-6">
             Open a character sheet to message your DM.

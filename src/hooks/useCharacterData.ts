@@ -1,6 +1,7 @@
 // src/hooks/useCharacterData.ts
 
-import { collection, orderBy, query } from "firebase/firestore";
+import { collection, limit, orderBy, query } from "firebase/firestore";
+import { FIRESTORE_QUERY_LIMITS } from "../constants/firestoreLimits";
 import { db } from "../firebase";
 import { characterDocRef } from "../firebase/converters";
 import type { CharacterDocument, ClaimLogDocument } from "../types/Firestore";
@@ -47,7 +48,8 @@ export function useCharacterData({
     claimLogActive
       ? query(
           collection(db, "campaigns", campaignId, "characters", characterId, "claimLog"),
-          orderBy("timestamp", "desc")
+          orderBy("timestamp", "desc"),
+          limit(FIRESTORE_QUERY_LIMITS.claimLogEntries)
         )
       : null,
     claimLogActive ? `character-claim-log:${campaignId}:${characterId}` : null,

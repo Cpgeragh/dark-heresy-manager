@@ -13,20 +13,28 @@ import type { CampaignWithId } from "../../src/types/Firestore";
 
 // ── Mocks ──────────────────────────────────────────────────────────────────
 
-const { mockOnSnapshot, mockWhere, mockQuery, mockUnsubscribeDm, mockUnsubscribePlayer } =
-  vi.hoisted(() => ({
-    mockOnSnapshot: vi.fn(),
-    mockWhere: vi.fn((..._args: unknown[]) => "where-clause"),
-    mockQuery: vi.fn((..._args: unknown[]) => "query-ref"),
-    mockUnsubscribeDm: vi.fn(),
-    mockUnsubscribePlayer: vi.fn(),
-  }));
+const {
+  mockLimit,
+  mockOnSnapshot,
+  mockWhere,
+  mockQuery,
+  mockUnsubscribeDm,
+  mockUnsubscribePlayer,
+} = vi.hoisted(() => ({
+  mockLimit: vi.fn((value: number) => ({ type: "limit", value })),
+  mockOnSnapshot: vi.fn(),
+  mockWhere: vi.fn((..._args: unknown[]) => "where-clause"),
+  mockQuery: vi.fn((..._args: unknown[]) => "query-ref"),
+  mockUnsubscribeDm: vi.fn(),
+  mockUnsubscribePlayer: vi.fn(),
+}));
 
 vi.mock("../../src/firebase/converters", () => ({
   campaignsCollectionRef: vi.fn(() => "campaigns-ref"),
 }));
 
 vi.mock("firebase/firestore", () => ({
+  limit: (value: number) => mockLimit(value),
   onSnapshot: (...args: unknown[]) => mockOnSnapshot(...args),
   query: (...args: unknown[]) => mockQuery(...args),
   where: (...args: unknown[]) => mockWhere(...args),
@@ -107,10 +115,15 @@ describe("CampaignsProvider — Firestore queries", () => {
 
   it("filters out archived campaigns in both queries", () => {
     renderHook(() => useCampaignsContext(), { wrapper: makeWrapper("uid-1") });
-    const archivedCalls = mockWhere.mock.calls.filter(
-      (call) => call[0] === "archivedAt"
-    );
+    const archivedCalls = mockWhere.mock.calls.filter((call) => call[0] === "archivedAt");
     expect(archivedCalls).toHaveLength(2);
+  });
+
+  it("caps both active campaign listeners", () => {
+    renderHook(() => useCampaignsContext(), { wrapper: makeWrapper("uid-1") });
+    expect(mockLimit).toHaveBeenCalledTimes(2);
+    expect(mockLimit).toHaveBeenNthCalledWith(1, 50);
+    expect(mockLimit).toHaveBeenNthCalledWith(2, 50);
   });
 });
 
@@ -122,10 +135,7 @@ describe("CampaignsProvider — snapshot handling", () => {
 
     act(() => {
       capturedDmOnNext!({
-        docs: [
-          makeDoc("c1", { name: "Campaign Alpha" }),
-          makeDoc("c2", { name: "Campaign Beta" }),
-        ],
+        docs: [makeDoc("c1", { name: "Campaign Alpha" }), makeDoc("c2", { name: "Campaign Beta" })],
       });
     });
 
@@ -156,11 +166,15 @@ describe("CampaignsProvider — snapshot handling", () => {
     });
 
     // Only DM snapshot fires
-    act(() => { capturedDmOnNext!({ docs: [] }); });
+    act(() => {
+      capturedDmOnNext!({ docs: [] });
+    });
     expect(result.current.loading).toBe(true); // player still pending
 
     // Player snapshot fires
-    act(() => { capturedPlayerOnNext!({ docs: [] }); });
+    act(() => {
+      capturedPlayerOnNext!({ docs: [] });
+    });
     expect(result.current.loading).toBe(false);
   });
 
@@ -168,7 +182,9 @@ describe("CampaignsProvider — snapshot handling", () => {
     const { result } = renderHook(() => useCampaignsContext(), {
       wrapper: makeWrapper("uid-1"),
     });
-    act(() => { capturedDmOnNext!({ docs: [] }); });
+    act(() => {
+      capturedDmOnNext!({ docs: [] });
+    });
     expect(result.current.dmCampaigns).toEqual([]);
   });
 
@@ -177,7 +193,9 @@ describe("CampaignsProvider — snapshot handling", () => {
       wrapper: makeWrapper("uid-1"),
     });
 
-    act(() => { capturedDmOnNext!({ docs: [makeDoc("c1", { name: "Alpha" })] }); });
+    act(() => {
+      capturedDmOnNext!({ docs: [makeDoc("c1", { name: "Alpha" })] });
+    });
     expect(result.current.dmCampaigns).toHaveLength(1);
 
     act(() => {
@@ -195,7 +213,9 @@ describe("CampaignsProvider — error handling", () => {
       wrapper: makeWrapper("uid-1"),
     });
 
-    act(() => { capturedDmOnError!(new Error("permission-denied")); });
+    act(() => {
+      capturedDmOnError!(new Error("permission-denied"));
+    });
 
     expect(result.current.error).toBeInstanceOf(Error);
     expect(result.current.error?.message).toBe("permission-denied");
@@ -207,7 +227,9 @@ describe("CampaignsProvider — error handling", () => {
       wrapper: makeWrapper("uid-1"),
     });
 
-    act(() => { capturedPlayerOnError!(new Error("permission-denied")); });
+    act(() => {
+      capturedPlayerOnError!(new Error("permission-denied"));
+    });
 
     expect(result.current.error).toBeInstanceOf(Error);
     expect(result.current.error?.message).toBe("permission-denied");

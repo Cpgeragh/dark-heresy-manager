@@ -13,11 +13,23 @@ import {
   setDoc,
   updateDoc,
   deleteDoc,
+  limit,
+  type DocumentReference,
 } from "firebase/firestore";
 import { db } from "../firebase";
 import { generateRecoveryCode } from "../utils/recoveryCode";
 
 type Role = "dm" | "player";
+
+const IDENTITY_RECLAIM_CAMPAIGN_LIMIT = 50;
+const IDENTITY_RECLAIM_CHARACTERS_PER_CAMPAIGN_LIMIT = 20;
+const IDENTITY_RECLAIM_WRITE_LIMIT = 440;
+
+function protectedReclaimError(): Error {
+  return new Error(
+    "This account has too much data for a safe on-device recovery. No ownership was changed. Please use the protected recovery process."
+  );
+}
 
 /**
  * Generates a recovery code for the given user and writes it atomically to:
@@ -86,31 +98,88 @@ export async function reclaimIdentity(uid: string, code: string): Promise<"dm" |
     // Read everything first, then apply ALL ownership migrations in a single
     // atomic batch, so a failure can't leave the account half-migrated.
     const dmCampaignsSnap = await getDocs(
-      query(collection(db, "campaigns"), where("dmId", "==", oldUid))
+      query(
+        collection(db, "campaigns"),
+        where("dmId", "==", oldUid),
+        limit(IDENTITY_RECLAIM_CAMPAIGN_LIMIT + 1)
+      )
     );
     const playerCampaignsSnap = await getDocs(
-      query(collection(db, "campaigns"), where("memberIds", "array-contains", oldUid))
+      query(
+        collection(db, "campaigns"),
+        where("memberIds", "array-contains", oldUid),
+        limit(IDENTITY_RECLAIM_CAMPAIGN_LIMIT + 1)
+      )
     );
 
-    const batch = writeBatch(db);
+    if (
+      dmCampaignsSnap.docs.length > IDENTITY_RECLAIM_CAMPAIGN_LIMIT ||
+      playerCampaignsSnap.docs.length > IDENTITY_RECLAIM_CAMPAIGN_LIMIT
+    ) {
+      throw protectedReclaimError();
+    }
 
-    // DM data: campaigns owned by the old uid
-    dmCampaignsSnap.docs.forEach((d) => batch.update(d.ref, { dmId: uid }));
+    const campaignMigrations = new Map<
+      string,
+      {
+        campaignRef: DocumentReference;
+        changes: { dmId?: string; memberIds?: string[] };
+        characterRefs: DocumentReference[];
+      }
+    >();
 
-    // Player data: swap old uid → new uid in memberIds, and migrate owned characters
+    dmCampaignsSnap.docs.forEach((campaignDoc) => {
+      campaignMigrations.set(campaignDoc.id, {
+        campaignRef: campaignDoc.ref,
+        changes: { dmId: uid },
+        characterRefs: [],
+      });
+    });
+
+    // Read and validate all player-owned data before staging any ownership write.
     for (const campDoc of playerCampaignsSnap.docs) {
       const campData = campDoc.data() as { memberIds: string[] };
       const newMemberIds = campData.memberIds.filter((id) => id !== oldUid).concat(uid);
-      batch.update(campDoc.ref, { memberIds: newMemberIds });
 
       const charsSnap = await getDocs(
         query(
           collection(db, "campaigns", campDoc.id, "characters"),
-          where("userId", "==", oldUid)
+          where("userId", "==", oldUid),
+          limit(IDENTITY_RECLAIM_CHARACTERS_PER_CAMPAIGN_LIMIT + 1)
         )
       );
-      charsSnap.docs.forEach((d) => batch.update(d.ref, { userId: uid }));
+
+      if (charsSnap.docs.length > IDENTITY_RECLAIM_CHARACTERS_PER_CAMPAIGN_LIMIT) {
+        throw protectedReclaimError();
+      }
+
+      const existingMigration = campaignMigrations.get(campDoc.id);
+      campaignMigrations.set(campDoc.id, {
+        campaignRef: campDoc.ref,
+        changes: { ...existingMigration?.changes, memberIds: newMemberIds },
+        characterRefs: charsSnap.docs.map((characterDoc) => characterDoc.ref),
+      });
     }
+
+    const ownershipWriteCount =
+      campaignMigrations.size +
+      [...campaignMigrations.values()].reduce(
+        (count, migration) => count + migration.characterRefs.length,
+        0
+      );
+
+    if (ownershipWriteCount > IDENTITY_RECLAIM_WRITE_LIMIT) {
+      throw protectedReclaimError();
+    }
+
+    const batch = writeBatch(db);
+
+    campaignMigrations.forEach((migration) => {
+      batch.update(migration.campaignRef, migration.changes);
+      migration.characterRefs.forEach((characterRef) =>
+        batch.update(characterRef, { userId: uid })
+      );
+    });
 
     await batch.commit();
 
@@ -143,7 +212,10 @@ export async function getRecoveryCode(uid: string): Promise<string | null> {
  * old identityRecovery entry is cleaned up atomically.
  * Returns the new code so the UI can display it.
  */
-export async function rotateRecoveryCode(uid: string, role: "dm" | "player" = "player"): Promise<string> {
+export async function rotateRecoveryCode(
+  uid: string,
+  role: "dm" | "player" = "player"
+): Promise<string> {
   const existingCode = await getRecoveryCode(uid);
   return registerIdentityRecovery(uid, role, existingCode ?? undefined);
 }

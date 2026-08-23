@@ -1,23 +1,29 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockDeleteDoc, mockDoc, mockIncrement, mockRunTransaction, mockTransaction, mockUpdateDoc } =
-  vi.hoisted(() => {
-    const mockTransaction = {
-      get: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-    };
-    return {
-      mockDeleteDoc: vi.fn().mockResolvedValue(undefined),
-      mockDoc: vi.fn((...args: unknown[]) => args.slice(1).join("/")),
-      mockIncrement: vi.fn((amount: number) => `increment:${amount}`),
-      mockRunTransaction: vi.fn(
-        async (_db: unknown, operation: (transaction: unknown) => unknown) => operation(mockTransaction)
-      ),
-      mockTransaction,
-      mockUpdateDoc: vi.fn().mockResolvedValue(undefined),
-    };
-  });
+const {
+  mockDeleteDoc,
+  mockDoc,
+  mockIncrement,
+  mockRunTransaction,
+  mockTransaction,
+  mockUpdateDoc,
+} = vi.hoisted(() => {
+  const mockTransaction = {
+    get: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
+  };
+  return {
+    mockDeleteDoc: vi.fn().mockResolvedValue(undefined),
+    mockDoc: vi.fn((...args: unknown[]) => args.slice(1).join("/")),
+    mockIncrement: vi.fn((amount: number) => `increment:${amount}`),
+    mockRunTransaction: vi.fn(async (_db: unknown, operation: (transaction: unknown) => unknown) =>
+      operation(mockTransaction)
+    ),
+    mockTransaction,
+    mockUpdateDoc: vi.fn().mockResolvedValue(undefined),
+  };
+});
 
 vi.mock("firebase/firestore", () => ({
   collection: vi.fn(),
@@ -73,6 +79,20 @@ describe("session write operations", () => {
     await expect(updateSession("camp-3", "session-3", { summary: "No change" })).rejects.toBe(
       error
     );
+  });
+
+  it("rejects oversized notes before writing", async () => {
+    await expect(
+      updateSession("camp-1", "session-1", { dmNotes: "x".repeat(4_001) })
+    ).rejects.toThrow("DM notes cannot exceed 4000 characters.");
+    expect(mockUpdateDoc).not.toHaveBeenCalled();
+  });
+
+  it("rejects duplicate attendees before writing", async () => {
+    await expect(
+      updateSession("camp-1", "session-1", { attendees: ["char-1", "char-1"] })
+    ).rejects.toThrow("A character cannot be listed as a session attendee more than once.");
+    expect(mockUpdateDoc).not.toHaveBeenCalled();
   });
 });
 

@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import type { Timestamp } from "firebase/firestore";
 import { useClaimLogs } from "../../hooks/useClaimLogs";
 import { useToast } from "../../components/Toast";
-import { cloneCharacter, deleteCharacter } from "../../services/characterService";
+import { deleteCharacter } from "../../services/characterService";
 import { uiSection } from "../../ui/editableStyles";
 import { Button } from "../../ui/Button";
 import { ConfirmInline } from "../../ui/ConfirmInline";
@@ -16,10 +16,14 @@ import { PortraitUpload } from "../../components/PortraitUpload";
 
 function formatAction(action: ClaimLogAction): string {
   switch (action) {
-    case "claim": return "Claimed";
-    case "release": return "Released";
-    case "force-assign": return "Force assigned";
-    case "force-release": return "Force released";
+    case "claim":
+      return "Claimed";
+    case "release":
+      return "Released";
+    case "force-assign":
+      return "Force assigned";
+    case "force-release":
+      return "Force released";
   }
 }
 
@@ -27,7 +31,9 @@ function formatTimestamp(ts: unknown): string {
   if (!ts) return "";
   if (ts && typeof (ts as Timestamp).toDate === "function") {
     return (ts as Timestamp).toDate().toLocaleDateString(undefined, {
-      day: "numeric", month: "short", year: "numeric",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
     });
   }
   if (ts instanceof Date) {
@@ -53,20 +59,13 @@ export function CharacterRow({
   portraitUrl?: string;
   isDM: boolean;
 }) {
-  const { logs, loading: logsLoading, error: logsError } = useClaimLogs(campaignId, characterId);
-  const toast = useToast();
   const [showHistory, setShowHistory] = useState(false);
-
-  const handleClone = useCallback(async (e: React.MouseEvent) => {
-    e.preventDefault();
-    try {
-      const cloneName = await cloneCharacter(campaignId, characterId);
-      toast.success(`Character cloned as "${cloneName}"`);
-    } catch (err) {
-      console.error("Character clone error:", err);
-      toast.error("Failed to clone character.");
-    }
-  }, [campaignId, characterId, toast]);
+  const {
+    logs,
+    loading: logsLoading,
+    error: logsError,
+  } = useClaimLogs(campaignId, characterId, showHistory && isDM);
+  const toast = useToast();
 
   const handleDelete = useCallback(async () => {
     if (!recoveryCode) return;
@@ -93,31 +92,38 @@ export function CharacterRow({
               canEdit={false}
             />
             <div>
-              <span className="font-semibold text-slate-100 text-sm lg:text-base leading-tight">{characterName}</span>
-              <p className="text-xs lg:text-sm text-slate-500 font-code [font-feature-settings:'zero'] mt-0.5">Recovery: {recoveryCode ?? "—"}</p>
+              <span className="font-semibold text-slate-100 text-sm lg:text-base leading-tight">
+                {characterName}
+              </span>
+              <p className="text-xs lg:text-sm text-slate-500 font-code [font-feature-settings:'zero'] mt-0.5">
+                Recovery: {recoveryCode ?? "—"}
+              </p>
               <p className="text-xs lg:text-sm mt-0.5">
-                {userId
-                  ? <span className="text-green-400">Claimed</span>
-                  : <span className="text-slate-500">Unclaimed</span>
-                }
+                {userId ? (
+                  <span className="text-green-400">Claimed</span>
+                ) : (
+                  <span className="text-slate-500">Unclaimed</span>
+                )}
               </p>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 sm:shrink-0 justify-center sm:justify-start">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={(e) => { e.preventDefault(); setShowHistory(true); }}
-            >
-              History
-            </Button>
+            {isDM && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowHistory(true);
+                }}
+              >
+                History
+              </Button>
+            )}
 
             {isDM && (
               <>
-                <Button variant="warningGhost" size="sm" onClick={handleClone}>
-                  Clone
-                </Button>
                 <ConfirmInline
                   triggerLabel="Delete"
                   question="Delete?"

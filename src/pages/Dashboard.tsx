@@ -21,6 +21,7 @@ import { PortraitUpload } from "../components/PortraitUpload";
 import { RecoveryBackupBanner } from "../components/RecoveryBackupBanner";
 import { validateCampaignName } from "../utils/validation";
 import { buildRoute } from "../constants/routes";
+import { PRODUCT_LIMITS } from "../constants/productLimits";
 import {
   archiveCampaign,
   createCampaign,
@@ -110,9 +111,7 @@ function CharacterCard({
               {xpLeft !== null && (
                 <span>
                   ✦{" "}
-                  <span
-                    className={xpLeft < 0 ? "text-red-400 font-semibold" : "text-slate-200"}
-                  >
+                  <span className={xpLeft < 0 ? "text-red-400 font-semibold" : "text-slate-200"}>
                     {xpLeft}
                   </span>{" "}
                   XP remaining
@@ -147,15 +146,15 @@ function PlayerCampaignRow({
       <SectionHeader className="mb-3">{campaignName}</SectionHeader>
 
       {error ? (
-        <ErrorState>
-          Unable to load characters. Please refresh the page.
-        </ErrorState>
+        <ErrorState>Unable to load characters. Please refresh the page.</ErrorState>
       ) : loading ? (
         <LoadingState>Loading characters…</LoadingState>
       ) : null}
 
       {!error && !loading && characters.length === 0 && (
-        <p className="text-sm lg:text-base text-slate-500">No characters claimed in this campaign.</p>
+        <p className="text-sm lg:text-base text-slate-500">
+          No characters claimed in this campaign.
+        </p>
       )}
 
       {!error && !loading && characters.length > 0 && (
@@ -188,6 +187,7 @@ function DmCampaignList({
     error: archivedError,
   } = useArchivedCampaigns(userUid);
   const [newCampaignName, setNewCampaignName] = useState("");
+  const [creating, setCreating] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [deleting, setDeleting] = useState(false);
@@ -197,12 +197,14 @@ function DmCampaignList({
   const toast = useToast();
 
   const handleCreate = useCallback(async () => {
+    if (creating) return;
     const name = newCampaignName.trim();
     const validation = validateCampaignName(name);
     if (!validation.isValid) {
       toast.warning(validation.error ?? "Invalid campaign name");
       return;
     }
+    setCreating(true);
     try {
       await createCampaign(name, userUid);
       setNewCampaignName("");
@@ -210,8 +212,10 @@ function DmCampaignList({
     } catch (error) {
       console.error("Failed to create campaign:", error);
       toast.error("Failed to create campaign");
+    } finally {
+      setCreating(false);
     }
-  }, [newCampaignName, userUid, toast]);
+  }, [creating, newCampaignName, userUid, toast]);
 
   const handleEditSave = useCallback(async () => {
     if (!editingId) return;
@@ -289,11 +293,16 @@ function DmCampaignList({
             className={editableInputClass(true) + " flex-1"}
             placeholder="Campaign Name"
             value={newCampaignName}
+            maxLength={PRODUCT_LIMITS.campaignNameCharacters}
             onChange={(e) => setNewCampaignName(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter") void handleCreate(); }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") void handleCreate();
+            }}
             aria-label="New campaign name"
           />
-          <Button onClick={handleCreate}>Create</Button>
+          <Button onClick={handleCreate} disabled={creating}>
+            {creating ? "Creating…" : "Create"}
+          </Button>
         </div>
       </div>
 
@@ -302,9 +311,7 @@ function DmCampaignList({
         <SectionHeader className="mb-3">Your Campaigns</SectionHeader>
 
         {error ? (
-          <ErrorState>
-            Unable to load campaigns. Please refresh the page.
-          </ErrorState>
+          <ErrorState>Unable to load campaigns. Please refresh the page.</ErrorState>
         ) : loading ? (
           <LoadingState>Loading campaigns…</LoadingState>
         ) : campaigns.length === 0 ? (
@@ -317,6 +324,7 @@ function DmCampaignList({
                   <input
                     className={editableInputClass(true) + " flex-1"}
                     value={editName}
+                    maxLength={PRODUCT_LIMITS.campaignNameCharacters}
                     onChange={(e) => setEditName(e.target.value)}
                     autoFocus
                     aria-label="Edit campaign name"
@@ -327,7 +335,10 @@ function DmCampaignList({
                   <Button
                     variant="secondary"
                     size="sm"
-                    onClick={() => { setEditingId(null); setEditName(""); }}
+                    onClick={() => {
+                      setEditingId(null);
+                      setEditName("");
+                    }}
                   >
                     Cancel
                   </Button>
@@ -336,14 +347,22 @@ function DmCampaignList({
                 <Link
                   key={campaign.id}
                   to={buildRoute.campaignOverview(campaign.id)}
-                  className={uiSection + " flex items-center gap-2 hover:bg-slate-800 transition-colors"}
+                  className={
+                    uiSection + " flex items-center gap-2 hover:bg-slate-800 transition-colors"
+                  }
                 >
-                  <span className="flex-1 font-medium text-slate-200 lg:text-lg">{campaign.name}</span>
+                  <span className="flex-1 font-medium text-slate-200 lg:text-lg">
+                    {campaign.name}
+                  </span>
 
                   <Button
                     variant="secondary"
                     size="sm"
-                    onClick={(e) => { e.preventDefault(); setEditingId(campaign.id); setEditName(campaign.name); }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setEditingId(campaign.id);
+                      setEditName(campaign.name);
+                    }}
                   >
                     Edit
                   </Button>
@@ -380,7 +399,8 @@ function DmCampaignList({
           <p className="mt-4 text-slate-500 text-sm lg:text-base">No archived campaigns.</p>
         ) : (
           <div className="mt-4">
-            <button type="button"
+            <button
+              type="button"
               onClick={() => setShowArchived((v) => !v)}
               aria-expanded={showArchived}
               className="inline-flex items-center gap-1 text-sm lg:text-base text-slate-500 hover:text-slate-300 transition-colors"
@@ -392,7 +412,10 @@ function DmCampaignList({
             {showArchived && (
               <div className="flex flex-col gap-2 mt-2">
                 {archivedCampaigns.map((campaign) => (
-                  <div key={campaign.id} className={uiSection + " flex items-center gap-2 opacity-60"}>
+                  <div
+                    key={campaign.id}
+                    className={uiSection + " flex items-center gap-2 opacity-60"}
+                  >
                     <span className="flex-1 text-slate-400 italic lg:text-lg">{campaign.name}</span>
 
                     <Button
@@ -463,9 +486,7 @@ function QrPanel() {
         </div>
       </div>
 
-      {open === "full" && (
-        <QrModal title="Full App" url={fullUrl} onClose={() => setOpen(null)} />
-      )}
+      {open === "full" && <QrModal title="Full App" url={fullUrl} onClose={() => setOpen(null)} />}
       {open === "player" && (
         <QrModal title="Player Invite" url={playerUrl} onClose={() => setOpen(null)} />
       )}
@@ -541,7 +562,9 @@ function ClaimCharacterSection({ effectiveUserId }: { effectiveUserId: string })
           />
         )}
 
-        {claiming && <p className="text-xs lg:text-sm text-slate-400 text-center">Claiming character…</p>}
+        {claiming && (
+          <p className="text-xs lg:text-sm text-slate-400 text-center">Claiming character…</p>
+        )}
       </div>
     </div>
   );
@@ -559,7 +582,6 @@ export default function Dashboard({ user, effectiveUserId, isLinked, firstName }
       <RecoveryBackupBanner ownUid={user.uid} effectiveUserId={effectiveUserId} />
 
       <Panel>
-
         {/* ── DM section ───────────────────────────────────────────────── */}
         {installMode === "full" && (
           <>
@@ -581,17 +603,15 @@ export default function Dashboard({ user, effectiveUserId, isLinked, firstName }
         <SectionHeader>Campaigns You Play In</SectionHeader>
 
         {playerError ? (
-          <ErrorState>
-            Unable to load campaigns. Please refresh the page.
-          </ErrorState>
+          <ErrorState>Unable to load campaigns. Please refresh the page.</ErrorState>
         ) : playerLoading ? (
           <LoadingState>Loading campaigns…</LoadingState>
         ) : null}
 
         {!playerError && !playerLoading && playerCampaigns.length === 0 && (
           <p className="text-slate-400 text-sm lg:text-base">
-            You are not part of any campaigns yet. Ask your DM for a recovery code to claim
-            your character.
+            You are not part of any campaigns yet. Ask your DM for a recovery code to claim your
+            character.
           </p>
         )}
 
@@ -612,7 +632,6 @@ export default function Dashboard({ user, effectiveUserId, isLinked, firstName }
 
         {/* ── Claim a character ────────────────────────────────────────── */}
         <ClaimCharacterSection effectiveUserId={effectiveUserId} />
-
       </Panel>
     </PageShell>
   );

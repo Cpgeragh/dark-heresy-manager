@@ -3,7 +3,6 @@
 import {
   collection,
   doc,
-  getDocs,
   serverTimestamp,
   writeBatch,
   setDoc,
@@ -11,6 +10,8 @@ import {
   increment,
 } from "firebase/firestore";
 import { db } from "../firebase";
+import { PRODUCT_LIMITS } from "../constants/productLimits";
+import { deleteQueryDocsInPages } from "../utils/firestoreQueryPages";
 
 /**
  * Sends a message in a character-DM thread and updates the thread summary.
@@ -25,6 +26,12 @@ export async function sendMessage(
   text: string,
   isFromPlayer: boolean
 ): Promise<void> {
+  const trimmedText = text.trim();
+  if (!trimmedText) throw new Error("Message cannot be empty.");
+  if (trimmedText.length > PRODUCT_LIMITS.messageCharacters) {
+    throw new Error(`Message cannot exceed ${PRODUCT_LIMITS.messageCharacters} characters.`);
+  }
+
   const batch = writeBatch(db);
 
   const messagesRef = collection(db, "campaigns", campaignId, "threads", characterId, "messages");
@@ -32,7 +39,7 @@ export async function sendMessage(
 
   batch.set(messageRef, {
     fromUid,
-    text: text.trim(),
+    text: trimmedText,
     timestamp: serverTimestamp(),
     read: false,
   });
@@ -43,7 +50,7 @@ export async function sendMessage(
     threadRef,
     {
       characterId,
-      lastMessage: text.trim(),
+      lastMessage: trimmedText,
       lastTimestamp: serverTimestamp(),
       ...(isFromPlayer ? { unreadForDM: increment(1) } : {}),
     },
@@ -56,56 +63,23 @@ export async function sendMessage(
 /**
  * Resets the unread counter on a thread — called when the DM opens a conversation.
  */
-export async function markThreadRead(
-  campaignId: string,
-  characterId: string
-): Promise<void> {
+export async function markThreadRead(campaignId: string, characterId: string): Promise<void> {
   const threadRef = doc(db, "campaigns", campaignId, "threads", characterId);
   await updateDoc(threadRef, { unreadForDM: 0 });
 }
 
 /**
- * Deletes all messages in a thread and resets the thread summary.
- * Splits into chunks of 499 to stay under Firestore's 500-op batch limit.
+ * Deletes all messages in bounded pages and resets the thread summary only
+ * after deletion completes. Retrying after an interruption is safe.
  */
-export async function clearThread(
-  campaignId: string,
-  characterId: string
-): Promise<void> {
-  const messagesRef = collection(
-    db, "campaigns", campaignId, "threads", characterId, "messages"
-  );
-  const snap = await getDocs(messagesRef);
-  const docs = snap.docs;
+export async function clearThread(campaignId: string, characterId: string): Promise<void> {
+  const messagesRef = collection(db, "campaigns", campaignId, "threads", characterId, "messages");
   const threadRef = doc(db, "campaigns", campaignId, "threads", characterId);
-
-  const CHUNK = 499; // leave 1 slot for the summary reset in the final batch
-
-  if (docs.length === 0) {
-    // No messages — just reset the summary
-    await setDoc(threadRef, {
-      characterId,
-      lastMessage: null,
-      lastTimestamp: null,
-      unreadForDM: 0,
-    });
-    return;
-  }
-
-  for (let i = 0; i < docs.length; i += CHUNK) {
-    const batch = writeBatch(db);
-    docs.slice(i, i + CHUNK).forEach((d) => batch.delete(d.ref));
-
-    // Reset summary on the final batch
-    if (i + CHUNK >= docs.length) {
-      batch.set(threadRef, {
-        characterId,
-        lastMessage: null,
-        lastTimestamp: null,
-        unreadForDM: 0,
-      });
-    }
-
-    await batch.commit();
-  }
+  await deleteQueryDocsInPages(db, messagesRef);
+  await setDoc(threadRef, {
+    characterId,
+    lastMessage: null,
+    lastTimestamp: null,
+    unreadForDM: 0,
+  });
 }

@@ -1,7 +1,8 @@
 // src/hooks/useClaimLogs.ts
 
-import { collection, orderBy, query } from "firebase/firestore";
+import { collection, limit, orderBy, query } from "firebase/firestore";
 
+import { FIRESTORE_QUERY_LIMITS } from "../constants/firestoreLimits";
 import { db } from "../firebase";
 import type { ClaimLogEntry } from "../utils/claimLog";
 import { validateClaimLogPayload } from "../utils/claimLog";
@@ -21,7 +22,8 @@ export function useClaimLogs(
     active
       ? query(
           collection(db, "campaigns", campaignId, "characters", characterId, "claimLog"),
-          orderBy("timestamp", "desc")
+          orderBy("timestamp", "desc"),
+          limit(FIRESTORE_QUERY_LIMITS.claimLogEntries)
         )
       : null,
     active ? `claim-logs:${campaignId}:${characterId}` : null,

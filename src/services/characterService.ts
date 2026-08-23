@@ -4,6 +4,8 @@ import {
   arrayUnion,
   getDoc,
   getDocs,
+  limit,
+  query,
   runTransaction,
   setDoc,
   updateDoc,
@@ -23,6 +25,11 @@ import { buildClaimLogPayload } from "../utils/claimLog";
 import { generateRecoveryCode } from "../utils/recoveryCode";
 import { createEmptyCharacterData } from "../utils/characterFactory";
 import { batchDeleteRefs } from "../utils/firestoreBatchDelete";
+import { PRODUCT_LIMITS } from "../constants/productLimits";
+import { validateCharacterName } from "../utils/validation";
+import { deleteQueryDocsInPages } from "../utils/firestoreQueryPages";
+
+const CHARACTER_ATOMIC_DELETE_CHILD_LIMIT = 440;
 
 /**
  * Load a single character with full typing.
@@ -204,64 +211,44 @@ export async function forceReleaseCharacter(
 export async function deleteCharacter(
   campaignId: string,
   characterId: string,
-  recoveryCode: string
+  recoveryCode?: string
 ): Promise<void> {
-  const refs: DocumentReference[] = [];
-
   const claimLogSnap = await getDocs(
-    collection(db, "campaigns", campaignId, "characters", characterId, "claimLog")
+    query(
+      collection(db, "campaigns", campaignId, "characters", characterId, "claimLog"),
+      limit(CHARACTER_ATOMIC_DELETE_CHILD_LIMIT + 1)
+    )
   );
-  claimLogSnap.docs.forEach((d) => refs.push(d.ref));
-
   const xpProposalsSnap = await getDocs(
-    collection(db, "campaigns", campaignId, "characters", characterId, "xpProposals")
+    query(
+      collection(db, "campaigns", campaignId, "characters", characterId, "xpProposals"),
+      limit(CHARACTER_ATOMIC_DELETE_CHILD_LIMIT + 1)
+    )
   );
-  xpProposalsSnap.docs.forEach((d) => refs.push(d.ref));
 
-  const messagesSnap = await getDocs(
-    collection(db, "campaigns", campaignId, "threads", characterId, "messages")
-  );
-  messagesSnap.docs.forEach((d) => refs.push(d.ref));
-  refs.push(doc(db, "campaigns", campaignId, "threads", characterId));
+  if (
+    claimLogSnap.docs.length + xpProposalsSnap.docs.length >
+    CHARACTER_ATOMIC_DELETE_CHILD_LIMIT
+  ) {
+    throw new Error(
+      "This character has too much audit history for safe client deletion. Use the protected bulk job."
+    );
+  }
 
-  refs.push(doc(db, "recoveryIndex", recoveryCode));
+  const messagesRef = collection(db, "campaigns", campaignId, "threads", characterId, "messages");
+  await deleteQueryDocsInPages(db, messagesRef);
+
+  const threadRef = doc(db, "campaigns", campaignId, "threads", characterId);
+  const refs: DocumentReference[] = [
+    ...claimLogSnap.docs.map((document) => document.ref),
+    ...xpProposalsSnap.docs.map((document) => document.ref),
+    threadRef,
+  ];
+
+  if (recoveryCode) refs.push(doc(db, "recoveryIndex", recoveryCode));
   refs.push(characterDocRef(campaignId, characterId));
 
   await batchDeleteRefs(db, refs);
-}
-
-/**
- * Clones a character within a campaign.
- * Generates a new recovery code, copies all data, and registers the clone
- * in the recovery index atomically.
- * Returns the clone's character name.
- */
-export async function cloneCharacter(campaignId: string, characterId: string): Promise<string> {
-  const sourceRef = characterDocRef(campaignId, characterId);
-  const sourceSnap = await getDoc(sourceRef);
-  if (!sourceSnap.exists()) throw new Error("Source character not found.");
-
-  const sourceData = sourceSnap.data()!; // typed as Character
-  const originalName = sourceData.header?.characterName ?? "Unnamed Character";
-  const cloneName = `Copy of ${originalName}`;
-  const recoveryCode = generateRecoveryCode();
-
-  const newCharRef = doc(charactersCollectionRef(campaignId));
-  const cloneData: Character = {
-    ...sourceData,
-    id: newCharRef.id,
-    userId: null,
-    isEditableByPlayer: false,
-    recoveryCode,
-    header: { ...sourceData.header, characterName: cloneName },
-  };
-
-  const batch = writeBatch(db);
-  batch.set(newCharRef, cloneData); // converter strips id on write
-  batch.set(doc(db, "recoveryIndex", recoveryCode), { campaignId, characterId: newCharRef.id });
-  await batch.commit();
-
-  return cloneName;
 }
 
 /**
@@ -273,8 +260,34 @@ export async function importCharacter(
   campaignId: string,
   data: Record<string, unknown>
 ): Promise<string> {
+  const serialisedData = JSON.stringify(data);
+  if (new TextEncoder().encode(serialisedData).byteLength > PRODUCT_LIMITS.characterImportBytes) {
+    throw new Error("Character file is too large to import.");
+  }
+
+  if (typeof data.recoveryCode !== "string" || typeof data.isEditableByPlayer !== "boolean") {
+    throw new Error("Character file is missing required fields.");
+  }
+
+  const importedName = (data.header as Record<string, unknown> | undefined)?.characterName;
+  if (typeof importedName !== "string") {
+    throw new Error("Character file is missing a character name.");
+  }
+  const nameValidation = validateCharacterName(importedName);
+  if (!nameValidation.isValid) throw new Error(nameValidation.error);
+
   const recoveryCode = generateRecoveryCode();
-  const importData = { ...data, userId: null, isEditableByPlayer: false, recoveryCode };
+  const importData = {
+    ...data,
+    campaignId,
+    userId: null,
+    isEditableByPlayer: false,
+    recoveryCode,
+    header: {
+      ...(data.header as Record<string, unknown>),
+      characterName: importedName.trim(),
+    },
+  };
   // Imported JSON is deliberately written through a plain reference because it is
   // only structurally known after import validation, not as a compile-time Character.
   const charRef = doc(collection(db, "campaigns", campaignId, "characters"));
@@ -283,8 +296,7 @@ export async function importCharacter(
   batch.set(doc(db, "recoveryIndex", recoveryCode), { campaignId, characterId: charRef.id });
   await batch.commit();
 
-  const name = (data.header as Record<string, unknown>)?.characterName;
-  return typeof name === "string" ? name : "character";
+  return importedName.trim();
 }
 
 /**
@@ -292,12 +304,16 @@ export async function importCharacter(
  * Returns the recovery code so the caller can display it to the DM.
  */
 export async function createNewCharacter(campaignId: string, name: string): Promise<string> {
+  const trimmedName = name.trim();
+  const validation = validateCharacterName(trimmedName);
+  if (!validation.isValid) throw new Error(validation.error);
+
   const recoveryCode = generateRecoveryCode();
   const characterData = createEmptyCharacterData({
     campaignId,
     recoveryCode,
     userId: null,
-    characterName: name,
+    characterName: trimmedName,
   });
   const charRef = doc(charactersCollectionRef(campaignId));
   const character: Character = { ...characterData, id: charRef.id };

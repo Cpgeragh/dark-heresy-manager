@@ -38,12 +38,9 @@ describe("user account recovery state", () => {
     await expect(synchroniseUserAccount("user-new")).resolves.toBe(false);
     expect(mockSetDoc).toHaveBeenCalledWith("user-ref", {
       createdAt: "server-time",
-      lastSeen: "server-time",
       onboarded: false,
     });
-    expect(mockUpdateDoc).toHaveBeenCalledWith("user-ref", {
-      lastSeen: "server-time",
-    });
+    expect(mockUpdateDoc).not.toHaveBeenCalled();
   });
 
   it.each([
@@ -55,9 +52,7 @@ describe("user account recovery state", () => {
 
     await expect(synchroniseUserAccount("user-existing")).resolves.toBe(expected);
     expect(mockSetDoc).not.toHaveBeenCalled();
-    expect(mockUpdateDoc).toHaveBeenCalledWith("user-ref", {
-      lastSeen: "server-time",
-    });
+    expect(mockUpdateDoc).not.toHaveBeenCalled();
   });
 
   it("does not request backup when the user document is missing", async () => {

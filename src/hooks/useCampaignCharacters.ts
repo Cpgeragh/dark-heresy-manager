@@ -2,6 +2,8 @@
 // Real-time subscription to characters in the active campaign.
 
 import { useEffect } from "react";
+import { limit, query } from "firebase/firestore";
+import { FIRESTORE_QUERY_LIMITS } from "../constants/firestoreLimits";
 import { charactersCollectionRef } from "../firebase/converters";
 import { useToast } from "../components/Toast/ToastContext";
 import { useQuerySubscription } from "./useFirestoreSubscription";
@@ -13,7 +15,12 @@ export function useCampaignCharacters(campaignId: string | null) {
     loading,
     error,
   } = useQuerySubscription(
-    campaignId ? charactersCollectionRef(campaignId) : null,
+    campaignId
+      ? query(
+          charactersCollectionRef(campaignId),
+          limit(FIRESTORE_QUERY_LIMITS.charactersPerCampaign)
+        )
+      : null,
     campaignId ? `campaign-characters:${campaignId}` : null,
     (snapshot) => snapshot.docs.map((characterDocument) => characterDocument.data())
   );

@@ -7,13 +7,13 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // ── Mocks ──────────────────────────────────────────────────────────────────
 
-const mockBatchSet    = vi.fn();
+const mockBatchSet = vi.fn();
 const mockBatchDelete = vi.fn();
 const mockBatchCommit = vi.fn().mockResolvedValue(undefined);
 const mockBatchUpdate = vi.fn();
 
 const mockBatch = {
-  set:    mockBatchSet,
+  set: mockBatchSet,
   delete: mockBatchDelete,
   commit: mockBatchCommit,
   update: mockBatchUpdate,
@@ -31,31 +31,34 @@ const {
   mockSetDoc,
   mockUpdateDoc,
   mockDeleteDoc,
+  mockLimit,
 } = vi.hoisted(() => ({
-  mockWriteBatch:           vi.fn(),
-  mockDoc:                  vi.fn((...args: unknown[]) => `${args[1]}/${args[2]}`),
+  mockWriteBatch: vi.fn(),
+  mockDoc: vi.fn((...args: unknown[]) => `${args[1]}/${args[2]}`),
   mockGenerateRecoveryCode: vi.fn(() => "DH-GENERATED-CODE"),
-  mockGetDoc:               vi.fn(),
-  mockGetDocs:              vi.fn(),
-  mockQuery:                vi.fn((...args: unknown[]) => args),
-  mockCollection:           vi.fn((...args: unknown[]) => args.slice(1).join("/")),
-  mockWhere:                vi.fn(),
-  mockSetDoc:               vi.fn(),
-  mockUpdateDoc:            vi.fn(),
-  mockDeleteDoc:            vi.fn(),
+  mockGetDoc: vi.fn(),
+  mockGetDocs: vi.fn(),
+  mockQuery: vi.fn((...args: unknown[]) => args),
+  mockCollection: vi.fn((...args: unknown[]) => args.slice(1).join("/")),
+  mockWhere: vi.fn(),
+  mockSetDoc: vi.fn(),
+  mockUpdateDoc: vi.fn(),
+  mockDeleteDoc: vi.fn(),
+  mockLimit: vi.fn((value: number) => ({ limit: value })),
 }));
 
 vi.mock("firebase/firestore", () => ({
-  writeBatch:  (...args: unknown[]) => mockWriteBatch(...args),
-  doc:         (...args: unknown[]) => mockDoc(...args),
-  getDoc:      (...args: unknown[]) => mockGetDoc(...args),
-  getDocs:     (...args: unknown[]) => mockGetDocs(...args),
-  query:       (...args: unknown[]) => mockQuery(...args),
-  collection:  (...args: unknown[]) => mockCollection(...args),
-  where:       (...args: unknown[]) => mockWhere(...args),
-  setDoc:      (...args: unknown[]) => mockSetDoc(...args),
-  updateDoc:   (...args: unknown[]) => mockUpdateDoc(...args),
-  deleteDoc:   (...args: unknown[]) => mockDeleteDoc(...args),
+  writeBatch: (...args: unknown[]) => mockWriteBatch(...args),
+  doc: (...args: unknown[]) => mockDoc(...args),
+  getDoc: (...args: unknown[]) => mockGetDoc(...args),
+  getDocs: (...args: unknown[]) => mockGetDocs(...args),
+  query: (...args: unknown[]) => mockQuery(...args),
+  collection: (...args: unknown[]) => mockCollection(...args),
+  where: (...args: unknown[]) => mockWhere(...args),
+  setDoc: (...args: unknown[]) => mockSetDoc(...args),
+  updateDoc: (...args: unknown[]) => mockUpdateDoc(...args),
+  deleteDoc: (...args: unknown[]) => mockDeleteDoc(...args),
+  limit: (...args: unknown[]) => mockLimit(...args),
 }));
 
 vi.mock("../../src/firebase", () => ({
@@ -87,23 +90,21 @@ beforeEach(() => {
 // ── registerIdentityRecovery ───────────────────────────────────────────────
 
 describe("registerIdentityRecovery", () => {
-
   it("writes identityRecovery entry with uid and role", async () => {
     await registerIdentityRecovery("uid-1", "dm");
 
-    expect(mockBatchSet).toHaveBeenCalledWith(
-      "identityRecovery/DH-GENERATED-CODE",
-      { uid: "uid-1", role: "dm" }
-    );
+    expect(mockBatchSet).toHaveBeenCalledWith("identityRecovery/DH-GENERATED-CODE", {
+      uid: "uid-1",
+      role: "dm",
+    });
   });
 
   it("writes identitySecret entry with the generated code", async () => {
     await registerIdentityRecovery("uid-1", "dm");
 
-    expect(mockBatchSet).toHaveBeenCalledWith(
-      "identitySecret/uid-1",
-      { code: "DH-GENERATED-CODE" }
-    );
+    expect(mockBatchSet).toHaveBeenCalledWith("identitySecret/uid-1", {
+      code: "DH-GENERATED-CODE",
+    });
   });
 
   it("returns the generated code", async () => {
@@ -134,13 +135,10 @@ describe("registerIdentityRecovery", () => {
 // ── clearIdentityRecovery ─────────────────────────────────────────────────
 
 describe("clearIdentityRecovery", () => {
-
   it("deletes the identityRecovery entry by code", async () => {
     await clearIdentityRecovery("uid-1", "DH-CODE-TO-CLEAR");
 
-    expect(mockBatchDelete).toHaveBeenCalledWith(
-      "identityRecovery/DH-CODE-TO-CLEAR"
-    );
+    expect(mockBatchDelete).toHaveBeenCalledWith("identityRecovery/DH-CODE-TO-CLEAR");
   });
 
   it("deletes the identitySecret entry by uid", async () => {
@@ -165,22 +163,18 @@ function makeRecoverySnap(uid: string, role: string) {
 function makeEmptySnap() {
   return { exists: () => false, data: () => null };
 }
-function makeQuerySnap(
-  refs: string[],
-  getData?: (ref: string) => Record<string, unknown>
-) {
+function makeQuerySnap(refs: string[], getData?: (ref: string) => Record<string, unknown>) {
   return {
     empty: refs.length === 0,
-    docs:  refs.map((ref) => ({
+    docs: refs.map((ref) => ({
       ref,
-      id:   ref.split("/").pop(),
+      id: ref.split("/").pop(),
       data: getData ? () => getData(ref) : () => ({}),
     })),
   };
 }
 
 describe("reclaimIdentity", () => {
-
   it("throws when recovery code is not found", async () => {
     mockGetDoc.mockResolvedValue(makeEmptySnap());
 
@@ -212,10 +206,10 @@ describe("reclaimIdentity", () => {
 
     await reclaimIdentity("uid-new", "DH-CODE");
 
-    expect(mockSetDoc).toHaveBeenCalledWith(
-      "identityReclaims/uid-new",
-      { oldUid: "uid-old", code: "DH-CODE" }
-    );
+    expect(mockSetDoc).toHaveBeenCalledWith("identityReclaims/uid-new", {
+      oldUid: "uid-old",
+      code: "DH-CODE",
+    });
   });
 
   it("queries campaigns by dmId and batch-updates each dmId for DM reclaim", async () => {
@@ -231,6 +225,7 @@ describe("reclaimIdentity", () => {
     expect(mockBatchUpdate).toHaveBeenCalledWith("campaigns/camp-1", { dmId: "uid-new" });
     expect(mockBatchUpdate).toHaveBeenCalledWith("campaigns/camp-2", { dmId: "uid-new" });
     expect(mockBatchCommit).toHaveBeenCalledOnce();
+    expect(mockLimit).toHaveBeenCalledWith(51);
   });
 
   it("queries member campaigns then swaps memberIds and character userId for player reclaim", async () => {
@@ -245,9 +240,7 @@ describe("reclaimIdentity", () => {
         }))
       )
       // Third call: characters in that campaign owned by uid-old
-      .mockResolvedValueOnce(
-        makeQuerySnap(["campaigns/camp-1/characters/char-1"])
-      );
+      .mockResolvedValueOnce(makeQuerySnap(["campaigns/camp-1/characters/char-1"]));
 
     await reclaimIdentity("uid-new", "DH-CODE");
 
@@ -256,10 +249,29 @@ describe("reclaimIdentity", () => {
       memberIds: ["player-other", "uid-new"],
     });
     // character userId transferred
-    expect(mockBatchUpdate).toHaveBeenCalledWith(
-      "campaigns/camp-1/characters/char-1",
-      { userId: "uid-new" }
-    );
+    expect(mockBatchUpdate).toHaveBeenCalledWith("campaigns/camp-1/characters/char-1", {
+      userId: "uid-new",
+    });
+  });
+
+  it("combines DM and member migration when the DM owns a character in their campaign", async () => {
+    mockGetDoc.mockResolvedValue(makeRecoverySnap("uid-old", "dm"));
+    mockGetDocs
+      .mockResolvedValueOnce(makeQuerySnap(["campaigns/camp-1"]))
+      .mockResolvedValueOnce(
+        makeQuerySnap(["campaigns/camp-1"], () => ({ memberIds: ["uid-old"] }))
+      )
+      .mockResolvedValueOnce(makeQuerySnap(["campaigns/camp-1/characters/char-1"]));
+
+    await reclaimIdentity("uid-new", "DH-CODE");
+
+    expect(mockBatchUpdate).toHaveBeenCalledWith("campaigns/camp-1", {
+      dmId: "uid-new",
+      memberIds: ["uid-new"],
+    });
+    expect(
+      mockBatchUpdate.mock.calls.filter(([reference]) => reference === "campaigns/camp-1")
+    ).toHaveLength(1);
   });
 
   it("updates identityRecovery uid and writes identitySecret for new uid", async () => {
@@ -280,12 +292,49 @@ describe("reclaimIdentity", () => {
 
     expect(mockDeleteDoc).toHaveBeenCalledWith("identityReclaims/uid-new");
   });
+
+  it("stops before ownership writes when the campaign safety ceiling is exceeded", async () => {
+    mockGetDoc.mockResolvedValue(makeRecoverySnap("uid-old", "dm"));
+    mockGetDocs
+      .mockResolvedValueOnce(
+        makeQuerySnap(Array.from({ length: 51 }, (_, index) => `campaigns/camp-${index + 1}`))
+      )
+      .mockResolvedValueOnce(makeQuerySnap([]));
+
+    await expect(reclaimIdentity("uid-new", "DH-CODE")).rejects.toThrow(
+      "protected recovery process"
+    );
+
+    expect(mockWriteBatch).not.toHaveBeenCalled();
+    expect(mockBatchUpdate).not.toHaveBeenCalled();
+    expect(mockDeleteDoc).toHaveBeenCalledWith("identityReclaims/uid-new");
+  });
+
+  it("stops before ownership writes when a campaign exceeds the character ceiling", async () => {
+    mockGetDoc.mockResolvedValue(makeRecoverySnap("uid-old", "player"));
+    mockGetDocs
+      .mockResolvedValueOnce(makeQuerySnap([]))
+      .mockResolvedValueOnce(
+        makeQuerySnap(["campaigns/camp-1"], () => ({ memberIds: ["uid-old"] }))
+      )
+      .mockResolvedValueOnce(
+        makeQuerySnap(
+          Array.from({ length: 21 }, (_, index) => `campaigns/camp-1/characters/char-${index + 1}`)
+        )
+      );
+
+    await expect(reclaimIdentity("uid-new", "DH-CODE")).rejects.toThrow(
+      "protected recovery process"
+    );
+
+    expect(mockWriteBatch).not.toHaveBeenCalled();
+    expect(mockBatchUpdate).not.toHaveBeenCalled();
+  });
 });
 
 // ── getRecoveryCode ───────────────────────────────────────────────────────
 
 describe("getRecoveryCode", () => {
-
   it("returns the code when identitySecret document exists", async () => {
     mockGetDoc.mockResolvedValue({
       exists: () => true,
@@ -310,7 +359,6 @@ describe("getRecoveryCode", () => {
 // ── rotateRecoveryCode ────────────────────────────────────────────────────
 
 describe("rotateRecoveryCode", () => {
-
   it("fetches the current code and passes it as existingCode to registerIdentityRecovery", async () => {
     // getRecoveryCode returns the current code
     mockGetDoc.mockResolvedValue({

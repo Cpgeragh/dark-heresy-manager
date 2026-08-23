@@ -5,6 +5,7 @@ import { useToast } from "../../components/Toast";
 import { createSession } from "../../services/sessionService";
 import { Button } from "../../ui/Button";
 import { SectionHeader } from "../../ui/SectionHeader";
+import { PRODUCT_LIMITS } from "../../constants/productLimits";
 import {
   editableInputClass,
   editableTextareaClass,
@@ -85,6 +86,7 @@ export function SessionForm({ campaignId, characters, onClose }: Props) {
           <input
             type="number"
             min={0}
+            max={PRODUCT_LIMITS.sessionXpAward}
             value={xpAwarded}
             onChange={(e) => setXpAwarded(Math.max(0, Number(e.target.value)))}
             className={editableInputClass(true)}
@@ -96,6 +98,7 @@ export function SessionForm({ campaignId, characters, onClose }: Props) {
         <label className={uiFormLabelSecondary}>Summary</label>
         <textarea
           value={summary}
+          maxLength={PRODUCT_LIMITS.sessionSummaryCharacters}
           onChange={(e) => setSummary(e.target.value)}
           rows={3}
           className={editableTextareaClass(true, "none")}
@@ -106,6 +109,7 @@ export function SessionForm({ campaignId, characters, onClose }: Props) {
         <label className={uiFormLabelSecondary}>DM Notes (private)</label>
         <textarea
           value={dmNotes}
+          maxLength={PRODUCT_LIMITS.sessionDmNotesCharacters}
           onChange={(e) => setDmNotes(e.target.value)}
           rows={2}
           className={editableTextareaClass(true, "none")}
@@ -116,7 +120,10 @@ export function SessionForm({ campaignId, characters, onClose }: Props) {
         <p className="text-xs lg:text-sm text-slate-400 mb-2">Attendees</p>
         <div className="flex flex-wrap gap-3">
           {characters.map((char) => (
-            <label key={char.id} className="flex items-center gap-1 text-sm lg:text-base cursor-pointer">
+            <label
+              key={char.id}
+              className="flex items-center gap-1 text-sm lg:text-base cursor-pointer"
+            >
               <input
                 type="checkbox"
                 checked={attendees.has(char.id)}
@@ -129,17 +136,10 @@ export function SessionForm({ campaignId, characters, onClose }: Props) {
       </div>
 
       <div className="flex gap-2">
-        <Button
-          onClick={handleSave}
-          disabled={saving}
-        >
+        <Button onClick={handleSave} disabled={saving}>
           {saving ? "Saving…" : "Save Session"}
         </Button>
-        <Button
-          variant="secondary"
-          onClick={onClose}
-          disabled={saving}
-        >
+        <Button variant="secondary" onClick={onClose} disabled={saving}>
           Cancel
         </Button>
       </div>

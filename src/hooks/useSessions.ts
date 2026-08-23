@@ -1,7 +1,8 @@
 // src/hooks/useSessions.ts
 
 import { useCallback } from "react";
-import { collection, orderBy, query } from "firebase/firestore";
+import { collection, limit, orderBy, query } from "firebase/firestore";
+import { FIRESTORE_QUERY_LIMITS } from "../constants/firestoreLimits";
 import { db } from "../firebase";
 import type { SessionDocument } from "../types/Firestore";
 import { useQuerySubscription } from "./useFirestoreSubscription";
@@ -26,7 +27,11 @@ export function useSessions(campaignId: string | undefined): {
     error,
   } = useQuerySubscription(
     campaignId
-      ? query(collection(db, "campaigns", campaignId, "sessions"), orderBy("date", "desc"))
+      ? query(
+          collection(db, "campaigns", campaignId, "sessions"),
+          orderBy("date", "desc"),
+          limit(FIRESTORE_QUERY_LIMITS.sessionsPerCampaign)
+        )
       : null,
     campaignId ? `sessions:${campaignId}` : null,
     (snapshot) =>

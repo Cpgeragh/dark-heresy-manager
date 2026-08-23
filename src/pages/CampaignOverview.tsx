@@ -1,11 +1,10 @@
 // src/pages/CampaignOverview.tsx
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 
 import { useCampaign } from "../hooks/useCampaign";
 import { useSessions } from "../hooks/useSessions";
-import { useCharacterSummaries } from "../hooks/useCharacterSummaries";
 import { useCampaignCharacters } from "../hooks/useCampaignCharacters";
 import { SessionForm } from "./CampaignOverview/SessionForm";
 import { SessionCard } from "./CampaignOverview/SessionCard";
@@ -17,6 +16,7 @@ import { createNewCharacter, importCharacter } from "../services/characterServic
 import { validateCharacterName } from "../utils/validation";
 import { useToast } from "../components/Toast";
 import { IMPORTANT_TOAST_DURATION } from "../constants/ui";
+import { PRODUCT_LIMITS } from "../constants/productLimits";
 import { editableInputClass, uiSubheading } from "../ui/editableStyles";
 import { Button } from "../ui/Button";
 import { PageShell } from "../ui/PageShell";
@@ -44,23 +44,29 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
     updateSession,
   } = useSessions(campaignId);
   const {
-    characters: summaries,
-    loading: summariesLoading,
-    error: summariesError,
-  } = useCharacterSummaries(campaignId);
-  const {
     characters,
     loading: charactersLoading,
     error: charactersError,
   } = useCampaignCharacters(campaignId ?? null);
+  const summaries = useMemo(
+    () =>
+      characters.map((character) => ({
+        id: character.id,
+        characterName: character.header?.characterName ?? "Unnamed Character",
+        userId: character.userId ?? null,
+      })),
+    [characters]
+  );
   const toast = useToast();
   const { setKebabContent, clearKebabContent } = useHeaderExtensionSetters();
 
   const [showSessionForm, setShowSessionForm] = useState(false);
   const [search, setSearch] = useState("");
   const [newCharacterName, setNewCharacterName] = useState("");
+  const [creatingCharacter, setCreatingCharacter] = useState(false);
 
   const handleCreate = useCallback(async () => {
+    if (creatingCharacter) return;
     const name = newCharacterName.trim();
     const validation = validateCharacterName(name);
     if (!validation.isValid) {
@@ -68,6 +74,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
       return;
     }
     if (!campaignId) return;
+    setCreatingCharacter(true);
     try {
       const recoveryCode = await createNewCharacter(campaignId, name);
       toast.success(
@@ -79,27 +86,36 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
     } catch (err) {
       console.error("Character creation error:", err);
       toast.error("Failed to create character.");
+    } finally {
+      setCreatingCharacter(false);
     }
-  }, [campaignId, newCharacterName, toast]);
+  }, [campaignId, creatingCharacter, newCharacterName, toast]);
 
-  const handleImport = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !campaignId) return;
-    try {
-      const text = await file.text();
-      const data = JSON.parse(text);
-      if (typeof data.recoveryCode !== "string" || typeof data.isEditableByPlayer !== "boolean") {
-        toast.error("Invalid character file.");
-        return;
+  const handleImport = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file || !campaignId) return;
+      try {
+        if (file.size > PRODUCT_LIMITS.characterImportBytes) {
+          toast.error("Character file is too large to import.");
+          return;
+        }
+        const text = await file.text();
+        const data = JSON.parse(text);
+        if (typeof data.recoveryCode !== "string" || typeof data.isEditableByPlayer !== "boolean") {
+          toast.error("Invalid character file.");
+          return;
+        }
+        const characterName = await importCharacter(campaignId, data);
+        toast.success(`Imported "${characterName}" successfully`, IMPORTANT_TOAST_DURATION);
+      } catch (err) {
+        console.error("Failed to import character:", err);
+        toast.error("Failed to import character. Check the file and try again.");
       }
-      const characterName = await importCharacter(campaignId, data);
-      toast.success(`Imported "${characterName}" successfully`, IMPORTANT_TOAST_DURATION);
-    } catch (err) {
-      console.error("Failed to import character:", err);
-      toast.error("Failed to import character. Check the file and try again.");
-    }
-    e.target.value = "";
-  }, [campaignId, toast]);
+      e.target.value = "";
+    },
+    [campaignId, toast]
+  );
 
   // Inject Import JSON into header kebab for DMs
   useEffect(() => {
@@ -123,7 +139,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
     return <div className="text-slate-300 text-center py-10">No campaign selected.</div>;
   }
 
-  if (campaignError || summariesError || charactersError) {
+  if (campaignError || charactersError) {
     return (
       <ErrorState className="text-center py-10">
         Unable to load this campaign. Please refresh the page.
@@ -131,7 +147,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
     );
   }
 
-  if (campaignLoading || summariesLoading || charactersLoading) {
+  if (campaignLoading || charactersLoading) {
     return <LoadingState className="text-center py-10">Loading campaign…</LoadingState>;
   }
 
@@ -165,7 +181,10 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
               placeholder="Search…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className={editableInputClass(true) + " w-full sm:w-36 lg:w-48 text-xs lg:text-sm py-1 lg:py-1.5"}
+              className={
+                editableInputClass(true) +
+                " w-full sm:w-36 lg:w-48 text-xs lg:text-sm py-1 lg:py-1.5"
+              }
             />
           </div>
 
@@ -175,10 +194,15 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
                 className={editableInputClass(true) + " flex-1"}
                 placeholder="Character Name"
                 value={newCharacterName}
+                maxLength={PRODUCT_LIMITS.characterNameCharacters}
                 onChange={(e) => setNewCharacterName(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") void handleCreate(); }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") void handleCreate();
+                }}
               />
-              <Button onClick={handleCreate}>Create</Button>
+              <Button onClick={handleCreate} disabled={creatingCharacter}>
+                {creatingCharacter ? "Creating…" : "Create"}
+              </Button>
             </div>
           )}
 
@@ -208,11 +232,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
         {isDM && (
           <div>
             <SectionHeader className="mb-3">Messages</SectionHeader>
-            <DMInbox
-              campaignId={campaignId}
-              dmUid={campaign?.dmId ?? ""}
-              characters={characters}
-            />
+            <DMInbox campaignId={campaignId} dmUid={campaign?.dmId ?? ""} characters={characters} />
           </div>
         )}
 
@@ -236,9 +256,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
           </div>
 
           {sessionsError ? (
-            <ErrorState>
-              Unable to load sessions. Please refresh the page.
-            </ErrorState>
+            <ErrorState>Unable to load sessions. Please refresh the page.</ErrorState>
           ) : sessionsLoading ? (
             <LoadingState>Loading sessions…</LoadingState>
           ) : sessions.length === 0 ? (
@@ -255,7 +273,13 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
                   onSave={isDM ? (data) => updateSession(session.id, data) : undefined}
                   onApplyXp={
                     isDM
-                      ? () => applySessionXp(campaignId, session.id, session.attendees, session.xpAwarded)
+                      ? () =>
+                          applySessionXp(
+                            campaignId,
+                            session.id,
+                            session.attendees,
+                            session.xpAwarded
+                          )
                       : undefined
                   }
                 />

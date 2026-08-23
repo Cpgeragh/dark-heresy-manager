@@ -5,6 +5,7 @@ import {
   MIN_CHARACTERISTIC_VALUE,
   MAX_CHARACTERISTIC_ADVANCES,
 } from "../constants/gameRules";
+import { PRODUCT_LIMITS } from "../constants/productLimits";
 
 /**
  * Validation result with error message
@@ -239,7 +240,7 @@ export function validateCampaignName(name: string): ValidationResult {
   const requiredCheck = validateRequired(name, "Campaign name");
   if (!requiredCheck.isValid) return requiredCheck;
 
-  return validateStringLength(name, 1, 100, "Campaign name");
+  return validateStringLength(name, 1, PRODUCT_LIMITS.campaignNameCharacters, "Campaign name");
 }
 
 /**
@@ -249,7 +250,7 @@ export function validateCharacterName(name: string): ValidationResult {
   const requiredCheck = validateRequired(name, "Character name");
   if (!requiredCheck.isValid) return requiredCheck;
 
-  return validateStringLength(name, 1, 100, "Character name");
+  return validateStringLength(name, 1, PRODUCT_LIMITS.characterNameCharacters, "Character name");
 }
 
 // ============================================

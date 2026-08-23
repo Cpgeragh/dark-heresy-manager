@@ -46,12 +46,17 @@ vi.mock("firebase/firestore", () => ({
   addDoc: vi.fn(),
   arrayUnion: (value: string) => `array-union:${value}`,
   collection: (...args: unknown[]) => args.slice(1).join("/"),
+  documentId: () => "__name__",
   doc: (...args: unknown[]) => mockDoc(...args),
   getDoc: vi.fn(),
   getDocs: (...args: unknown[]) => mockGetDocs(...args),
+  limit: (value: number) => ({ type: "limit", value }),
+  orderBy: (...args: unknown[]) => ({ type: "orderBy", args }),
+  query: (source: unknown) => source,
   runTransaction: mockRunTransaction,
   serverTimestamp: () => "server-timestamp",
   setDoc: vi.fn(),
+  startAfter: (...args: unknown[]) => ({ type: "startAfter", args }),
   updateDoc: vi.fn(),
   writeBatch: () => mockBatch,
 }));
@@ -72,10 +77,17 @@ vi.mock("../../src/utils/firestoreBatchDelete", () => ({
   batchDeleteRefs: (...args: unknown[]) => mockBatchDeleteRefs(...args),
 }));
 
-import { claimCharacter, deleteCharacter, releaseCharacter } from "../../src/services/characterService";
+import {
+  claimCharacter,
+  deleteCharacter,
+  releaseCharacter,
+} from "../../src/services/characterService";
 
 function snapshot(docs: { id: string; ref: string }[]) {
-  return { docs: docs.map((d) => ({ id: d.id, ref: d.ref, data: () => ({}) })) };
+  return {
+    docs: docs.map((d) => ({ id: d.id, ref: d.ref, data: () => ({}) })),
+    empty: docs.length === 0,
+  };
 }
 
 const emptySnapshot = snapshot([]);
@@ -151,13 +163,17 @@ describe("character claiming operations", () => {
 });
 
 describe("deleteCharacter", () => {
-  it("gathers the character's claim log, XP proposals, message thread and its messages, recovery index entry, and the character itself", async () => {
+  it("deletes messages in pages and atomically removes audit children, recovery entry, thread, and character", async () => {
     mockGetDocs.mockImplementation(async (path: string) => {
       switch (path) {
         case "campaigns/camp-1/characters/char-1/claimLog":
-          return snapshot([{ id: "log-1", ref: "campaigns/camp-1/characters/char-1/claimLog/log-1" }]);
+          return snapshot([
+            { id: "log-1", ref: "campaigns/camp-1/characters/char-1/claimLog/log-1" },
+          ]);
         case "campaigns/camp-1/characters/char-1/xpProposals":
-          return snapshot([{ id: "prop-1", ref: "campaigns/camp-1/characters/char-1/xpProposals/prop-1" }]);
+          return snapshot([
+            { id: "prop-1", ref: "campaigns/camp-1/characters/char-1/xpProposals/prop-1" },
+          ]);
         case "campaigns/camp-1/threads/char-1/messages":
           return snapshot([{ id: "msg-1", ref: "campaigns/camp-1/threads/char-1/messages/msg-1" }]);
         default:
@@ -174,13 +190,13 @@ describe("deleteCharacter", () => {
       expect.arrayContaining([
         "campaigns/camp-1/characters/char-1/claimLog/log-1",
         "campaigns/camp-1/characters/char-1/xpProposals/prop-1",
-        "campaigns/camp-1/threads/char-1/messages/msg-1",
         "campaigns/camp-1/threads/char-1",
         "recoveryIndex/DH-AAAA-1111",
         "character:camp-1:char-1",
       ])
     );
-    expect(refs).toHaveLength(6);
+    expect(refs).toHaveLength(5);
+    expect(mockBatch.delete).toHaveBeenCalledWith("campaigns/camp-1/threads/char-1/messages/msg-1");
   });
 
   it("pushes the thread ref even when the character never had any messages", async () => {

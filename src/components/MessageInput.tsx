@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "../ui/Button";
+import { PRODUCT_LIMITS } from "../constants/productLimits";
 
 export function MessageInput({
   onSend,
@@ -33,6 +34,7 @@ export function MessageInput({
         className="flex-1 px-3 lg:px-4 py-2 lg:py-2.5 bg-slate-800 border border-slate-600 rounded text-sm lg:text-base text-slate-100 placeholder:text-slate-500 disabled:opacity-50"
         placeholder={placeholder}
         value={text}
+        maxLength={PRODUCT_LIMITS.messageCharacters}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === "Enter" && !e.shiftKey) {
@@ -42,10 +44,7 @@ export function MessageInput({
         }}
         disabled={disabled || sending}
       />
-      <Button
-        onClick={handleSend}
-        disabled={disabled || sending || !text.trim()}
-      >
+      <Button onClick={handleSend} disabled={disabled || sending || !text.trim()}>
         {sending ? "…" : "Send"}
       </Button>
     </div>

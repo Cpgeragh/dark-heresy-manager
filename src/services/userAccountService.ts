@@ -3,8 +3,9 @@ import { db } from "../firebase";
 import type { UserDocument } from "../types/Firestore";
 
 /**
- * Ensures the anonymous-auth user has an account document, records its latest
- * activity, and returns whether onboarding has been completed.
+ * Ensures the anonymous-auth user has an account document and returns whether
+ * onboarding has been completed. Existing accounts are read-only on startup;
+ * routine app launches must not create a billed heartbeat write.
  */
 export async function synchroniseUserAccount(uid: string): Promise<boolean> {
   const reference = doc(db, "users", uid);
@@ -14,7 +15,6 @@ export async function synchroniseUserAccount(uid: string): Promise<boolean> {
   if (!snapshot.exists()) {
     const newUserDocument: UserDocument = {
       createdAt: serverTimestamp(),
-      lastSeen: serverTimestamp(),
       onboarded: false,
     };
     await setDoc(reference, newUserDocument);
@@ -23,8 +23,6 @@ export async function synchroniseUserAccount(uid: string): Promise<boolean> {
     // Missing means a legacy user created before onboarding existed.
     onboarded = (snapshot.data() as UserDocument).onboarded !== false;
   }
-
-  await updateDoc(reference, { lastSeen: serverTimestamp() });
   return onboarded;
 }
 
