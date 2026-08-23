@@ -38,6 +38,7 @@ describe("Firestore Rules: Character Query Operations", () => {
       .where("name", ">=", uniquePrefix)
       .where("name", "<=", uniquePrefix + "\uf8ff")
       .orderBy("name")
+      .limit(100)
       .get();
     
     expect(snapshot.docs.length).toBe(3);
@@ -103,10 +104,11 @@ describe("Firestore Rules: Character Query Operations", () => {
       .collection(`campaigns/${campaignId}/characters`)
       .where("userId", "==", testUserId)
       .where("isEditableByPlayer", "==", true)
+      .limit(100)
       .get();
     
     expect(snapshot.docs.length).toBe(1);
-    expect(snapshot.docs[0].data().characterId).toBe("char1");
+    expect(snapshot.docs[0].id).toBe("char1");
   });
 
   it("DM can query all characters regardless of userId", async () => {
@@ -131,6 +133,7 @@ describe("Firestore Rules: Character Query Operations", () => {
     
     const snapshot = await dmDb
       .collection(`campaigns/${campaignId}/characters`)
+      .limit(100)
       .get();
     
     expect(snapshot.docs.length).toBe(3);
@@ -166,8 +169,27 @@ describe("Firestore Rules: Character Query Operations", () => {
       .orderBy("name")
       .startAt(`${prefix}-Beta`)
       .endAt(`${prefix}-Gamma`)
+      .limit(100)
       .get();
     
     expect(snapshot.docs.length).toBe(2);
+  });
+
+  it("requires an owner filter and a 1,000-document ceiling for collection-group reads", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+    const campaignId = `camp-owned-${Date.now()}`;
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, "char1", { userId: "player-1" });
+    await createCharacter(env, campaignId, "char2", { userId: "player-2" });
+
+    const characters = dbAs(env, "player-1")
+      .collectionGroup("characters")
+      .where("userId", "==", "player-1");
+    await expect(characters.limit(1_000).get()).resolves.toBeDefined();
+    await expect(characters.get()).rejects.toThrow();
+    await expect(characters.limit(1_001).get()).rejects.toThrow();
+    await expect(
+      dbAs(env, "player-1").collectionGroup("characters").limit(1_000).get()
+    ).rejects.toThrow();
   });
 });

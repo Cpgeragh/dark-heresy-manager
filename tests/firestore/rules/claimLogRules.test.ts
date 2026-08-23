@@ -1,370 +1,162 @@
-// tests/firestore/rules/claimLogRules.test.ts
-
-import { describe, it, expect, afterEach } from "vitest";
-import { getTestEnv } from "../setup";
+import { afterEach, describe, expect, it } from "vitest";
 import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
-import {
-  dbAs,
-  dbAnon,
-  createCampaign,
-  createCharacter,
-  createClaimLog,
-} from "../helpers";
+import { getTestEnv } from "../setup";
+import { createCampaign, createCharacter, createClaimLog, dbAs } from "../helpers";
+
+const campaignId = "camp1";
+const characterId = "char1";
+const characterPath = `campaigns/${campaignId}/characters/${characterId}`;
+const logPath = `${characterPath}/claimLog`;
+
+function logPayload(
+  action: "claim" | "release" | "force-assign" | "force-release",
+  actorUid: string,
+  previousOwnerUid: string | null,
+  newOwnerUid: string | null
+) {
+  return { action, actorUid, previousOwnerUid, newOwnerUid, timestamp: new Date() };
+}
 
 describe("Firestore Rules: ClaimLog Rules", () => {
-  const campaignId = "camp1";
-  const characterId = "char1";
-
-  // Keep cleanup ONLY in this file
   afterEach(async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
+    const env = (await getTestEnv()) as RulesTestEnvironment;
     await env.clearFirestore();
   });
 
-  async function setupCampaignAndCharacter(env: RulesTestEnvironment) {
+  it("allows only the DM to get and bounded-list claim history", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, campaignId, "dm-1");
-    await createCharacter(env, campaignId, characterId, {
-      userId: "player-1",
-      isEditableByPlayer: true,
-    });
-  }
-
-  it("DM may read claim logs", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    await setupCampaignAndCharacter(env);
-
-    await createClaimLog(env, campaignId, characterId, "log1", {
-      action: "claim",
-      actorUid: "player-1",
-    });
+    await createCharacter(env, campaignId, characterId, { userId: "player-1" });
+    await createClaimLog(
+      env,
+      campaignId,
+      characterId,
+      "log1",
+      logPayload("claim", "player-1", null, "player-1")
+    );
 
     const dmDb = dbAs(env, "dm-1");
-
-    await expect(
-      dmDb
-        .collection(
-          `campaigns/${campaignId}/characters/${characterId}/claimLog`
-        )
-        .doc("log1")
-        .get()
-    ).resolves.toBeDefined();
-  });
-
-  it("DM may list all claim logs", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    await setupCampaignAndCharacter(env);
-
-    await createClaimLog(env, campaignId, characterId, "log1", {
-      action: "claim",
-      actorUid: "player-1",
-    });
-    await createClaimLog(env, campaignId, characterId, "log2", {
-      action: "release",
-      actorUid: "player-1",
-    });
-
-    const dmDb = dbAs(env, "dm-1");
-
-    await expect(
-      dmDb
-        .collection(
-          `campaigns/${campaignId}/characters/${characterId}/claimLog`
-        )
-        .get()
-    ).resolves.toBeDefined();
-  });
-
-  it("player cannot read claim logs", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    await setupCampaignAndCharacter(env);
-
-    await createClaimLog(env, campaignId, characterId, "log1", {
-      action: "claim",
-      actorUid: "player-1",
-    });
-
     const playerDb = dbAs(env, "player-1");
-
-    await expect(
-      playerDb
-        .collection(
-          `campaigns/${campaignId}/characters/${characterId}/claimLog`
-        )
-        .doc("log1")
-        .get()
-    ).rejects.toThrow();
+    await expect(dmDb.collection(logPath).doc("log1").get()).resolves.toBeDefined();
+    await expect(dmDb.collection(logPath).limit(440).get()).resolves.toBeDefined();
+    await expect(dmDb.collection(logPath).get()).rejects.toThrow();
+    await expect(playerDb.collection(logPath).doc("log1").get()).rejects.toThrow();
   });
 
-  it("player cannot list claim logs", async () => {
+  it("rejects a standalone claim-log create even when its fields look valid", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
-    await setupCampaignAndCharacter(env);
-
-    await createClaimLog(env, campaignId, characterId, "log1", {
-      action: "claim",
-      actorUid: "player-1",
-    });
-
-    const playerDb = dbAs(env, "player-1");
-
-    await expect(
-      playerDb
-        .collection(
-          `campaigns/${campaignId}/characters/${characterId}/claimLog`
-        )
-        .get()
-    ).rejects.toThrow();
-  });
-
-  it("unauthenticated users cannot read claim logs", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    await setupCampaignAndCharacter(env);
-
-    await createClaimLog(env, campaignId, characterId, "log1", {
-      action: "claim",
-      actorUid: "player-1",
-    });
-
-    const anonDb = dbAnon(env);
-
-    await expect(
-      anonDb
-        .collection(
-          `campaigns/${campaignId}/characters/${characterId}/claimLog`
-        )
-        .doc("log1")
-        .get()
-    ).rejects.toThrow();
-  });
-
-  it("player may create claim logs for themselves (claim)", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    // Character must be unclaimed for a "claim" log to pass rules
     await createCampaign(env, campaignId, "dm-1");
-    await createCharacter(env, campaignId, characterId, {
-      userId: null,
-      isEditableByPlayer: false,
-    });
-
-    const playerDb = dbAs(env, "player-1");
+    await createCharacter(env, campaignId, characterId, { userId: null });
 
     await expect(
-      playerDb
-        .collection(
-          `campaigns/${campaignId}/characters/${characterId}/claimLog`
-        )
-        .doc("log2")
-        .set({
-          action: "claim",
-          actorUid: "player-1",
-        })
-    ).resolves.toBeUndefined();
-  });
-
-  it("player may create claim logs for themselves (release)", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    await setupCampaignAndCharacter(env);
-
-    const playerDb = dbAs(env, "player-1");
-
-    await expect(
-      playerDb
-        .collection(
-          `campaigns/${campaignId}/characters/${characterId}/claimLog`
-        )
-        .doc("log3")
-        .set({
-          action: "release",
-          actorUid: "player-1",
-        })
-    ).resolves.toBeUndefined();
-  });
-
-  it("player cannot create logs for OTHER users", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    await setupCampaignAndCharacter(env);
-
-    const playerDb = dbAs(env, "player-2");
-
-    await expect(
-      playerDb
-        .collection(
-          `campaigns/${campaignId}/characters/${characterId}/claimLog`
-        )
-        .doc("log4")
-        .set({
-          action: "claim",
-          actorUid: "player-1", // mismatched
-        })
+      dbAs(env, "player-1")
+        .collection(logPath)
+        .doc("standalone")
+        .set(logPayload("claim", "player-1", null, "player-1"))
     ).rejects.toThrow();
   });
 
-  it("player cannot create force-assign or force-release logs", async () => {
+  it("allows a player claim log only with the matching ownership transition", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
-    await setupCampaignAndCharacter(env);
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, characterId, { userId: null });
 
     const playerDb = dbAs(env, "player-1");
-
-    await expect(
-      playerDb
-        .collection(
-          `campaigns/${campaignId}/characters/${characterId}/claimLog`
-        )
-        .doc("log5")
-        .set({
-          action: "force-assign",
-          actorUid: "player-1",
-        })
-    ).rejects.toThrow();
-
-    await expect(
-      playerDb
-        .collection(
-          `campaigns/${campaignId}/characters/${characterId}/claimLog`
-        )
-        .doc("log6")
-        .set({
-          action: "force-release",
-          actorUid: "player-1",
-        })
-    ).rejects.toThrow();
-  });
-
-  it("DM can write force-assign and force-release logs", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    await setupCampaignAndCharacter(env);
-
-    const dmDb = dbAs(env, "dm-1");
-    const col = dmDb.collection(
-      `campaigns/${campaignId}/characters/${characterId}/claimLog`
+    const batch = playerDb.batch();
+    batch.update(playerDb.doc(characterPath), { userId: "player-1" });
+    batch.update(playerDb.doc(`campaigns/${campaignId}`), { memberIds: ["player-1"] });
+    batch.set(
+      playerDb.collection(logPath).doc("claim"),
+      logPayload("claim", "player-1", null, "player-1")
     );
-
-    for (const action of ["force-assign", "force-release"]) {
-      await expect(
-        col.doc(`dm-${action}`).set({ action, actorUid: "dm-1" })
-      ).resolves.toBeUndefined();
-    }
-  });
-
-  it("DM cannot write claim or release logs", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    await setupCampaignAndCharacter(env);
-
-    const dmDb = dbAs(env, "dm-1");
-    const col = dmDb.collection(
-      `campaigns/${campaignId}/characters/${characterId}/claimLog`
-    );
-
-    for (const action of ["claim", "release"]) {
-      await expect(
-        col.doc(`dm-${action}`).set({ action, actorUid: "dm-1" })
-      ).rejects.toThrow();
-    }
-  });
-
-  it("DM cannot create a log without an action field (invalidAction)", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    await setupCampaignAndCharacter(env);
-
-    const dmDb = dbAs(env, "dm-1");
-
-    // No "action" key; validAction() will fail or be false → rules deny
-    await expect(
-      dmDb
-        .collection(
-          `campaigns/${campaignId}/characters/${characterId}/claimLog`
-        )
-        .doc("no-action")
-        .set({
-          actorUid: "dm-1",
-        })
-    ).rejects.toThrow();
-  });
-
-  it("invalid actions are rejected even for DM", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    await setupCampaignAndCharacter(env);
-
-    const dmDb = dbAs(env, "dm-1");
-
-    await expect(
-      dmDb
-        .collection(
-          `campaigns/${campaignId}/characters/${characterId}/claimLog`
-        )
-        .doc("invalid-log")
-        .set({
-          action: "invalid-action",
-          actorUid: "dm-1",
-        })
-    ).rejects.toThrow();
-  });
-
-  it("claim logs are immutable: no one can update or delete logs", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    await setupCampaignAndCharacter(env);
-
-    await createClaimLog(env, campaignId, characterId, "immutable-log", {
-      action: "claim",
-      actorUid: "player-1",
-    });
-
-    const dmDb = dbAs(env, "dm-1");
-    const playerDb = dbAs(env, "player-1");
-
-    const dmDoc = dmDb
-      .collection(
-        `campaigns/${campaignId}/characters/${characterId}/claimLog`
-      )
-      .doc("immutable-log");
-    const playerDoc = playerDb
-      .collection(
-        `campaigns/${campaignId}/characters/${characterId}/claimLog`
-      )
-      .doc("immutable-log");
-
-    // DM cannot update or delete
-    await expect(dmDoc.update({ action: "release" })).rejects.toThrow();
-    await expect(dmDoc.delete()).rejects.toThrow();
-
-    // Player cannot update or delete
-    await expect(playerDoc.update({ action: "release" })).rejects.toThrow();
-    await expect(playerDoc.delete()).rejects.toThrow();
-  });
-
-  it("DM can delete a claim log as part of deleting the character in the same batch", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    await setupCampaignAndCharacter(env);
-    await createClaimLog(env, campaignId, characterId, "batch-delete-log", {
-      action: "claim",
-      actorUid: "player-1",
-    });
-
-    const dmDb = dbAs(env, "dm-1");
-    const batch = dmDb.batch();
-    batch.delete(
-      dmDb
-        .collection(`campaigns/${campaignId}/characters/${characterId}/claimLog`)
-        .doc("batch-delete-log")
-    );
-    batch.delete(dmDb.collection(`campaigns/${campaignId}/characters`).doc(characterId));
 
     await expect(batch.commit()).resolves.toBeUndefined();
   });
 
-  it("DM cannot delete a claim log on its own while the character still exists", async () => {
+  it("allows a player release log only with the matching ownership transition", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
-    await setupCampaignAndCharacter(env);
-    await createClaimLog(env, campaignId, characterId, "solo-delete-log", {
-      action: "claim",
-      actorUid: "player-1",
+    await createCampaign(env, campaignId, "dm-1", { memberIds: ["player-1"] });
+    await createCharacter(env, campaignId, characterId, {
+      userId: "player-1",
+      isEditableByPlayer: true,
+    });
+
+    const playerDb = dbAs(env, "player-1");
+    const batch = playerDb.batch();
+    batch.update(playerDb.doc(characterPath), { userId: null, isEditableByPlayer: false });
+    batch.set(
+      playerDb.collection(logPath).doc("release"),
+      logPayload("release", "player-1", "player-1", null)
+    );
+
+    await expect(batch.commit()).resolves.toBeUndefined();
+  });
+
+  it("allows DM force ownership logs only with matching transitions", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await createCampaign(env, campaignId, "dm-1", { memberIds: ["player-1"] });
+    await createCharacter(env, campaignId, characterId, {
+      userId: "player-1",
+      isEditableByPlayer: true,
     });
 
     const dmDb = dbAs(env, "dm-1");
+    const assign = dmDb.batch();
+    assign.update(dmDb.doc(characterPath), { userId: "player-2", isEditableByPlayer: true });
+    assign.update(dmDb.doc(`campaigns/${campaignId}`), {
+      memberIds: ["player-1", "player-2"],
+    });
+    assign.set(
+      dmDb.collection(logPath).doc("assign"),
+      logPayload("force-assign", "dm-1", "player-1", "player-2")
+    );
+    await expect(assign.commit()).resolves.toBeUndefined();
+
+    const release = dmDb.batch();
+    release.update(dmDb.doc(characterPath), { userId: null, isEditableByPlayer: false });
+    release.set(
+      dmDb.collection(logPath).doc("force-release"),
+      logPayload("force-release", "dm-1", "player-2", null)
+    );
+    await expect(release.commit()).resolves.toBeUndefined();
+  });
+
+  it("rejects spoofed actors, unexpected fields, and mismatched transitions", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, characterId, { userId: null });
+
+    const playerDb = dbAs(env, "player-1");
+    const batch = playerDb.batch();
+    batch.update(playerDb.doc(characterPath), { userId: "player-1" });
+    batch.set(playerDb.collection(logPath).doc("bad"), {
+      ...logPayload("claim", "player-2", null, "player-1"),
+      unexpected: true,
+    });
+    await expect(batch.commit()).rejects.toThrow();
+  });
+
+  it("keeps logs immutable and permits deletion only with character deletion", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, characterId, { userId: "player-1" });
+    await createClaimLog(
+      env,
+      campaignId,
+      characterId,
+      "log1",
+      logPayload("claim", "player-1", null, "player-1")
+    );
+
+    const dmDb = dbAs(env, "dm-1");
     await expect(
-      dmDb
-        .collection(`campaigns/${campaignId}/characters/${characterId}/claimLog`)
-        .doc("solo-delete-log")
-        .delete()
+      dmDb.collection(logPath).doc("log1").update({ action: "release" })
     ).rejects.toThrow();
+    await expect(dmDb.collection(logPath).doc("log1").delete()).rejects.toThrow();
+
+    const batch = dmDb.batch();
+    batch.delete(dmDb.collection(logPath).doc("log1"));
+    batch.delete(dmDb.doc(characterPath));
+    await expect(batch.commit()).resolves.toBeUndefined();
   });
 });

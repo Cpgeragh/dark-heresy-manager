@@ -14,8 +14,6 @@ describe("Firestore Rules: Protected Fields with Same Values", () => {
     await createCharacter(env, campaignId, characterId, {
       userId: "player-1",
       isEditableByPlayer: true,
-      recoveryCode: "RCODE",
-      name: "Original Name",
     });
   }
 
@@ -30,10 +28,10 @@ describe("Firestore Rules: Protected Fields with Same Values", () => {
       playerDb.collection(`campaigns/${campaignId}/characters`)
         .doc(characterId)
         .update({
-          name: "New Name",
+          "header.characterName": "New Name",
           userId: "player-1", // same as before
           isEditableByPlayer: true, // same as before
-          recoveryCode: "RCODE" // same as before
+          recoveryCode: "DH-TEST-0001" // same as before
         })
     ).resolves.toBeUndefined();
   });
@@ -51,7 +49,7 @@ describe("Firestore Rules: Protected Fields with Same Values", () => {
         .update({
           userId: "player-1",
           isEditableByPlayer: true,
-          recoveryCode: "RCODE"
+          recoveryCode: "DH-TEST-0001"
         })
     ).resolves.toBeUndefined();
   });
@@ -68,7 +66,7 @@ describe("Firestore Rules: Protected Fields with Same Values", () => {
         .update({
           userId: "player-1", // same
           isEditableByPlayer: false, // CHANGED - should fail
-          recoveryCode: "RCODE" // same
+          recoveryCode: "DH-TEST-0001" // same
         })
     ).rejects.toThrow();
   });
@@ -83,17 +81,17 @@ describe("Firestore Rules: Protected Fields with Same Values", () => {
       playerDb.collection(`campaigns/${campaignId}/characters`)
         .doc(characterId)
         .update({
-          name: "New Name",
-          career: "New Career",
-          rank: "New Rank",
+          "header.characterName": "New Name",
+          "header.career": "New Career",
+          "header.rank": "New Rank",
           userId: "player-1", // protected but same
           isEditableByPlayer: true, // protected but same
-          recoveryCode: "RCODE" // protected but same
+          recoveryCode: "DH-TEST-0001" // protected but same
         })
     ).resolves.toBeUndefined();
   });
 
-  it("DM can change protected fields to new values", async () => {
+  it("DM can change ownership fields while the Recovery Code remains stable", async () => {
     const env = await getTestEnv() as RulesTestEnvironment;
     
     // Use a unique campaign for this test
@@ -105,8 +103,6 @@ describe("Firestore Rules: Protected Fields with Same Values", () => {
     await createCharacter(env, dmCampaignId, "char-dm", {
       userId: "player-1",
       isEditableByPlayer: true,
-      recoveryCode: "RCODE",
-      name: "Original Name",
     });
     
     const dmDb = dbAs(env, "dm-1");
@@ -117,7 +113,7 @@ describe("Firestore Rules: Protected Fields with Same Values", () => {
         .update({
           userId: "player-2", // changed
           isEditableByPlayer: false, // changed
-          recoveryCode: "NEWCODE" // changed
+          recoveryCode: "DH-TEST-0001" // unchanged
         })
     ).resolves.toBeUndefined();
   });
@@ -133,7 +129,7 @@ describe("Firestore Rules: Protected Fields with Same Values", () => {
       playerDb.collection(`campaigns/${campaignId}/characters`)
         .doc(characterId)
         .update({
-          name: "New Name",
+          "header.characterName": "New Name",
           userId: "player-1",
           isEditableByPlayer: true,
           recoveryCode: "RCODE " // extra space - should fail

@@ -103,4 +103,23 @@ describe("Firestore Rules: Users", () => {
       anonDb.collection("users").doc("u1").get()
     ).rejects.toThrow();
   });
+
+  it("allows authenticated exact profile reads but denies profile listing", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await env.withSecurityRulesDisabled(async (ctx: RulesTestContext) => {
+      await ctx.firestore().collection("userProfiles").doc("u1").set({ firstName: "Iona" });
+    });
+
+    const profiles = dbAs(env, "u2").collection("userProfiles");
+    await expect(profiles.doc("u1").get()).resolves.toBeDefined();
+    await expect(profiles.get()).rejects.toThrow();
+    await expect(profiles.limit(1).get()).rejects.toThrow();
+  });
+
+  it("rejects unexpected or oversized public-profile fields", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const profile = dbAs(env, "u1").collection("userProfiles").doc("u1");
+    await expect(profile.set({ firstName: "x".repeat(51) })).rejects.toThrow();
+    await expect(profile.set({ firstName: "Iona", email: "private@example.test" })).rejects.toThrow();
+  });
 });

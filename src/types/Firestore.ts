@@ -28,7 +28,6 @@ export interface UserDocument {
   role?: "player" | "dm";
   activeCampaignId?: string | null;
   createdAt: Timestamp | Date | FieldValue;
-  lastSeen?: Timestamp | Date | FieldValue;
   onboarded?: boolean;
   recoveryBackedUp?: boolean;
 }

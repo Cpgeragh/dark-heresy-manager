@@ -4,6 +4,7 @@ import { describe, it, expect, afterEach } from "vitest";
 import { getTestEnv } from "../setup";
 import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
 import { dbAs, createCampaign, createCharacter } from "../helpers";
+import { createEmptyCharacterData } from "../../../src/utils/characterFactory";
 
 describe("Firestore Rules: Character Rules", () => {
   const campaignId = "camp1";
@@ -44,9 +45,10 @@ describe("Firestore Rules: Character Rules", () => {
 
     const readerDb = dbAs(env, "reader");
 
-    await expect(
-      readerDb.collection(`campaigns/${campaignId}/characters`).get()
-    ).resolves.toBeDefined();
+    const characters = readerDb.collection(`campaigns/${campaignId}/characters`);
+    await expect(characters.limit(100).get()).resolves.toBeDefined();
+    await expect(characters.get()).rejects.toThrow();
+    await expect(characters.limit(101).get()).rejects.toThrow();
   });
 
   it("player may update their own character when editable", async () => {
@@ -56,8 +58,6 @@ describe("Firestore Rules: Character Rules", () => {
     await createCharacter(env, campaignId, "char1", {
       userId: "player-1",
       isEditableByPlayer: true,
-      name: "Original",
-      recoveryCode: "RCODE",
     });
 
     const playerDb = dbAs(env, "player-1");
@@ -66,7 +66,7 @@ describe("Firestore Rules: Character Rules", () => {
       playerDb
         .collection(`campaigns/${campaignId}/characters`)
         .doc("char1")
-        .update({ name: "Updated" })
+        .update({ "header.characterName": "Updated" })
     ).resolves.toBeUndefined();
   });
 
@@ -77,9 +77,6 @@ describe("Firestore Rules: Character Rules", () => {
     await createCharacter(env, campaignId, "char1", {
       userId: "player-1",
       isEditableByPlayer: true,
-      recoveryCode: "RCODE",
-      name: "Original",
-      career: "Adept",
     });
 
     const playerDb = dbAs(env, "player-1");
@@ -89,8 +86,8 @@ describe("Firestore Rules: Character Rules", () => {
         .collection(`campaigns/${campaignId}/characters`)
         .doc("char1")
         .update({
-          name: "Updated",
-          career: "Guardsman",
+          "header.characterName": "Updated",
+          "header.career": "Guardsman",
         })
     ).resolves.toBeUndefined();
   });
@@ -102,8 +99,6 @@ describe("Firestore Rules: Character Rules", () => {
     await createCharacter(env, campaignId, "char1", {
       userId: "player-1",
       isEditableByPlayer: false,
-      name: "Original",
-      recoveryCode: "RCODE",
     });
 
     const playerDb = dbAs(env, "player-1");
@@ -112,7 +107,7 @@ describe("Firestore Rules: Character Rules", () => {
       playerDb
         .collection(`campaigns/${campaignId}/characters`)
         .doc("char1")
-        .update({ name: "NewName" })
+        .update({ "header.characterName": "NewName" })
     ).rejects.toThrow();
   });
 
@@ -123,7 +118,6 @@ describe("Firestore Rules: Character Rules", () => {
     await createCharacter(env, campaignId, "char1", {
       userId: "player-1",
       isEditableByPlayer: true,
-      recoveryCode: "RCODE",
     });
 
     const otherPlayerDb = dbAs(env, "player-2");
@@ -132,7 +126,7 @@ describe("Firestore Rules: Character Rules", () => {
       otherPlayerDb
         .collection(`campaigns/${campaignId}/characters`)
         .doc("char1")
-        .update({ name: "Illegal update" })
+        .update({ "header.characterName": "Illegal update" })
     ).rejects.toThrow();
   });
 
@@ -151,7 +145,7 @@ describe("Firestore Rules: Character Rules", () => {
       dmDb
         .collection(`campaigns/${campaignId}/characters`)
         .doc("char1")
-        .update({ name: "DM update" })
+        .update({ "header.characterName": "DM update" })
     ).resolves.toBeUndefined();
   });
 
@@ -162,16 +156,17 @@ describe("Firestore Rules: Character Rules", () => {
 
     const dmDb = dbAs(env, "dm-1");
 
-    await expect(
-      dmDb
-        .collection(`campaigns/${campaignId}/characters`)
-        .doc("dm-char")
-        .set({
-          userId: null,
-          isEditableByPlayer: false,
-          recoveryCode: "RCODE",
-        })
-    ).resolves.toBeUndefined();
+    const recoveryCode = "DH-NEWW-0001";
+    const batch = dmDb.batch();
+    batch.set(
+      dmDb.collection(`campaigns/${campaignId}/characters`).doc("dm-char"),
+      createEmptyCharacterData({ campaignId, recoveryCode, characterName: "New Acolyte" })
+    );
+    batch.set(dmDb.collection("recoveryIndex").doc(recoveryCode), {
+      campaignId,
+      characterId: "dm-char",
+    });
+    await expect(batch.commit()).resolves.toBeUndefined();
   });
 
   it("DM cannot create a character in a non-existent campaign", async () => {

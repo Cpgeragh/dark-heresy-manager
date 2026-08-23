@@ -3,7 +3,7 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { getTestEnv } from "../setup";
 import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
-import { dbAs } from "../helpers";
+import { dbAs, validCampaignDocument } from "../helpers";
 
 describe("Firestore Rules: Edge Cases", () => {
 
@@ -30,10 +30,9 @@ describe("Firestore Rules: Edge Cases", () => {
     const dmDb = dbAs(env, "dm-1");
     
     await expect(
-      dmDb.collection("campaigns").doc("c-special-chars").set({
-        dmId: "dm-1",
-        name: "Test's \"Campaign\" & More! 你好 мир 🎮"
-      })
+      dmDb.collection("campaigns").doc("c-special-chars").set(
+        validCampaignDocument("dm-1", "Test's \"Campaign\" & More! 你好 мир 🎮")
+      )
     ).resolves.toBeUndefined();
   });
 
@@ -43,12 +42,12 @@ describe("Firestore Rules: Edge Cases", () => {
     const dmDb = dbAs(env, "dm-1");
     
     await expect(
-      dmDb.collection("campaigns").doc("c-timestamps").set({
-        dmId: "dm-1",
-        name: "Campaign with Timestamps",
+      dmDb.collection("campaigns").doc("c-timestamps").set(
+        validCampaignDocument("dm-1", "Campaign with Timestamps", {
         createdAt: new Date("2024-01-15"),
         archivedAt: new Date("2024-02-01")
-      })
+        })
+      )
     ).resolves.toBeUndefined();
   });
 
@@ -58,10 +57,9 @@ describe("Firestore Rules: Edge Cases", () => {
     const dmDb = dbAs(env, "dm-1");
     
     await expect(
-      dmDb.collection("campaigns").doc("random-id-12345").set({
-        dmId: "dm-1",
-        name: "Actual Campaign Name"
-      })
+      dmDb.collection("campaigns").doc("random-id-12345").set(
+        validCampaignDocument("dm-1", "Actual Campaign Name")
+      )
     ).resolves.toBeUndefined();
   });
 
@@ -71,11 +69,9 @@ describe("Firestore Rules: Edge Cases", () => {
     const dmDb = dbAs(env, "dm-1");
     
     await expect(
-      dmDb.collection("campaigns").doc("c-nulls").set({
-        dmId: "dm-1",
-        name: "Campaign with Nulls",
-        archivedAt: null
-      })
+      dmDb.collection("campaigns").doc("c-nulls").set(
+        validCampaignDocument("dm-1", "Campaign with Nulls")
+      )
     ).resolves.toBeUndefined();
   });
 

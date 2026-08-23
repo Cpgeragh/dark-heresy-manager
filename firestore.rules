@@ -31,19 +31,246 @@ service cloud.firestore {
       );
     }
 
+    function boundedQuery(maximum) {
+      return request.query.limit != null &&
+             request.query.limit > 0 &&
+             request.query.limit <= maximum;
+    }
+
+    function validOptionalString(data, key, maximum) {
+      return data.get(key, '') is string && data.get(key, '').size() <= maximum;
+    }
+
+    function validOptionalList(data, key, maximum) {
+      return data.get(key, []) is list && data.get(key, []).size() <= maximum;
+    }
+
+    function validOptionalNumber(data, key, minimum, maximum) {
+      return !(key in data) ||
+             (data[key] is number && data[key] >= minimum && data[key] <= maximum);
+    }
+
+    function validDocumentId(value) {
+      return value is string && value.size() > 0 && value.size() <= 1500;
+    }
+
+    function validRecoveryCode(value) {
+      return value is string && value.matches('^DH-[A-Z0-9]{4}-[A-Z0-9]{4}$');
+    }
+
+    function validCreator(data) {
+      return data is map &&
+             data.keys().hasOnly(['userId', 'characterId', 'characterName']) &&
+             validDocumentId(data.userId) &&
+             validOptionalString(data, 'characterId', 1500) &&
+             validOptionalString(data, 'characterName', 100);
+    }
+
+    function validCharacteristic(data) {
+      return data is map &&
+             data.keys().hasOnly(['base', 'advances', 'advancePurchases']) &&
+             data.keys().hasAll(['base', 'advances']) &&
+             data.base is number &&
+             data.base >= -100000 &&
+             data.base <= 100000 &&
+             data.advances is int &&
+             data.advances >= 0 &&
+             data.advances <= 100000 &&
+             (!('advancePurchases' in data) ||
+               (data.advancePurchases is map && data.advancePurchases.size() <= 10));
+    }
+
+    function validCharacterHeader(data) {
+      return data is map &&
+             data.keys().hasOnly([
+               'characterName',
+               'playerName',
+               'career',
+               'rank',
+               'careerPath',
+               'homeWorld',
+               'divination',
+               'description',
+               'age',
+               'gender',
+               'skin',
+               'hair',
+               'eyes',
+               'height',
+               'weight',
+               'quirks'
+             ]) &&
+             data.keys().hasAll(['characterName']) &&
+             data.characterName is string &&
+             data.characterName.size() > 0 &&
+             data.characterName.size() <= 100 &&
+             validOptionalString(data, 'playerName', 50) &&
+             validOptionalString(data, 'career', 100) &&
+             validOptionalString(data, 'rank', 100) &&
+             validOptionalString(data, 'careerPath', 100) &&
+             validOptionalString(data, 'homeWorld', 100) &&
+             validOptionalString(data, 'divination', 4000) &&
+             validOptionalString(data, 'description', 4000) &&
+             validOptionalNumber(data, 'age', 0, 100000) &&
+             validOptionalString(data, 'gender', 100) &&
+             validOptionalString(data, 'skin', 100) &&
+             validOptionalString(data, 'hair', 100) &&
+             validOptionalString(data, 'eyes', 100) &&
+             validOptionalNumber(data, 'height', 0, 100000) &&
+             validOptionalNumber(data, 'weight', 0, 100000) &&
+             validOptionalList(data, 'quirks', 200);
+    }
+
+    function validCharacteristics(data) {
+      return data is map &&
+             data.keys().hasOnly(['ws', 'bs', 's', 't', 'ag', 'int', 'per', 'wp', 'fel']) &&
+             data.keys().hasAll(['ws', 'bs', 's', 't', 'ag', 'int', 'per', 'wp', 'fel']) &&
+             validCharacteristic(data.ws) &&
+             validCharacteristic(data.bs) &&
+             validCharacteristic(data.s) &&
+             validCharacteristic(data.t) &&
+             validCharacteristic(data.ag) &&
+             validCharacteristic(data.int) &&
+             validCharacteristic(data.per) &&
+             validCharacteristic(data.wp) &&
+             validCharacteristic(data.fel);
+    }
+
+    function validWounds(data) {
+      return data is map &&
+             data.keys().hasOnly(['total', 'current', 'criticalDamage', 'fatigue']) &&
+             data.keys().hasAll(['total', 'current', 'criticalDamage', 'fatigue']) &&
+             data.total is number && data.total >= -100000 && data.total <= 100000 &&
+             data.current is number && data.current >= -100000 && data.current <= 100000 &&
+             data.criticalDamage is number &&
+             data.criticalDamage >= -100000 && data.criticalDamage <= 100000 &&
+             data.fatigue is number && data.fatigue >= -100000 && data.fatigue <= 100000;
+    }
+
+    function validFate(data) {
+      return data is map &&
+             data.keys().hasOnly(['total', 'current']) &&
+             data.keys().hasAll(['total', 'current']) &&
+             data.total is number && data.total >= -100000 && data.total <= 100000 &&
+             data.current is number && data.current >= -100000 && data.current <= 100000;
+    }
+
+    function validMovement(data) {
+      return data is map &&
+             data.keys().hasOnly(['half', 'full', 'charge', 'run']) &&
+             data.keys().hasAll(['half', 'full', 'charge', 'run']) &&
+             data.half is number && data.half >= 0 && data.half <= 100000 &&
+             data.full is number && data.full >= 0 && data.full <= 100000 &&
+             data.charge is number && data.charge >= 0 && data.charge <= 100000 &&
+             data.run is number && data.run >= 0 && data.run <= 100000;
+    }
+
+    function validExperience(data) {
+      return data is map &&
+             data.keys().hasOnly(['ranks', 'total', 'spent', 'transactions']) &&
+             data.keys().hasAll(['ranks', 'total', 'spent']) &&
+             data.ranks is list &&
+             data.ranks.size() <= 200 &&
+             data.total is int &&
+             data.total >= 0 &&
+             data.total <= 10000000 &&
+             data.spent is int &&
+             data.spent >= 0 &&
+             data.spent <= 10000000 &&
+             validOptionalList(data, 'transactions', 200);
+    }
+
+    function validCharacterData(data, campaignId) {
+      return data.keys().hasOnly([
+               'campaignId',
+               'userId',
+               'recoveryCode',
+               'isEditableByPlayer',
+               'createdAt',
+               'updatedAt',
+               'header',
+               'characteristics',
+               'skills',
+               'wounds',
+               'fate',
+               'insanity',
+               'corruption',
+               'movement',
+               'rangedWeapons',
+               'meleeWeapons',
+               'armour',
+               'talentsAndTraits',
+               'gear',
+               'consumables',
+               'drugs',
+               'grenades',
+               'shields',
+               'cybernetics',
+               'archeotech',
+               'companions',
+               'weaponTraining',
+               'experience',
+               'psychic',
+               'notes',
+               'portraitUrl',
+               'backgroundComplete'
+             ]) &&
+             data.campaignId == campaignId &&
+             (data.userId == null || (data.userId is string && data.userId.size() > 0)) &&
+             validRecoveryCode(data.recoveryCode) &&
+             data.isEditableByPlayer is bool &&
+             (!('createdAt' in data) || data.createdAt is timestamp) &&
+             (!('updatedAt' in data) || data.updatedAt is timestamp) &&
+             data.header is map &&
+             data.header.characterName is string &&
+             data.header.characterName.size() > 0 &&
+             data.header.characterName.size() <= 100 &&
+             data.characteristics is map && data.characteristics.size() == 9 &&
+             data.wounds is map && data.wounds.size() <= 10 &&
+             data.fate is map && data.fate.size() <= 10 &&
+             data.movement is map && data.movement.size() <= 10 &&
+             data.experience is map && data.experience.size() <= 10 &&
+             data.experience.total is int && data.experience.total >= 0 &&
+             data.experience.total <= 10000000 &&
+             data.experience.spent is int && data.experience.spent >= 0 &&
+             data.experience.spent <= 10000000 &&
+             data.insanity is map && data.insanity.size() <= 100 &&
+             data.corruption is map && data.corruption.size() <= 100 &&
+             data.talentsAndTraits is map && data.talentsAndTraits.size() <= 100 &&
+             data.weaponTraining is map && data.weaponTraining.size() <= 100 &&
+             data.psychic is map && data.psychic.size() <= 100 &&
+             data.skills is list && data.skills.size() <= 200 &&
+             data.rangedWeapons is list && data.rangedWeapons.size() <= 200 &&
+             data.meleeWeapons is list && data.meleeWeapons.size() <= 200 &&
+             data.armour is list && data.armour.size() <= 200 &&
+             data.gear is list && data.gear.size() <= 200 &&
+             validOptionalList(data, 'consumables', 200) &&
+             validOptionalList(data, 'drugs', 200) &&
+             validOptionalList(data, 'grenades', 200) &&
+             validOptionalList(data, 'shields', 200) &&
+             validOptionalList(data, 'cybernetics', 200) &&
+             validOptionalList(data, 'archeotech', 200) &&
+             validOptionalList(data, 'companions', 200) &&
+             (!('notes' in data) ||
+               (data.notes is string && data.notes.size() <= 4000) ||
+               (data.notes is list && data.notes.size() <= 200)) &&
+             (!('portraitUrl' in data) ||
+               (data.portraitUrl is string && data.portraitUrl.size() <= 350000)) &&
+             (!('backgroundComplete' in data) || data.backgroundComplete is bool);
+    }
+
     function validUserData(data) {
       return data.keys().hasOnly([
                'role',
                'activeCampaignId',
                'createdAt',
-               'lastSeen',
                'onboarded',
                'recoveryBackedUp'
              ]) &&
              (!('role' in data) || data.role in ['player', 'dm']) &&
-             (!('activeCampaignId' in data) || data.activeCampaignId == null || data.activeCampaignId is string) &&
+             (!('activeCampaignId' in data) || data.activeCampaignId == null ||
+               validDocumentId(data.activeCampaignId)) &&
              (!('createdAt' in data) || data.createdAt is timestamp) &&
-             (!('lastSeen' in data) || data.lastSeen is timestamp) &&
              (!('onboarded' in data) || data.onboarded is bool) &&
              (!('recoveryBackedUp' in data) || data.recoveryBackedUp is bool);
     }
@@ -61,10 +288,10 @@ service cloud.firestore {
              data.name is string &&
              data.name.size() > 0 &&
              data.name.size() <= 100 &&
-             data.dmId is string &&
-             data.dmId.size() > 0 &&
+             validDocumentId(data.dmId) &&
              data.get('memberIds', []) is list &&
              data.get('memberIds', []).size() <= 100 &&
+             data.get('memberIds', []).toSet().size() == data.get('memberIds', []).size() &&
              (!('createdAt' in data) || data.createdAt is timestamp) &&
              (!('archivedAt' in data) || data.archivedAt == null || data.archivedAt is timestamp) &&
              (!('gmName' in data) || (data.gmName is string && data.gmName.size() <= 100)) &&
@@ -93,7 +320,8 @@ service cloud.firestore {
     // and only a single non-empty firstName field — first name only, by design,
     // for data protection.
     match /userProfiles/{userId} {
-      allow read: if request.auth != null;
+      allow get: if request.auth != null;
+      allow list: if false;
       allow create, update:
         if playerOwnsOrLinked(userId) &&
            request.resource.data.keys().hasOnly(['firstName']) &&
@@ -110,12 +338,15 @@ service cloud.firestore {
 
       // Any authenticated user can read campaign metadata (name, dmId, memberIds).
       // Sensitive data lives in characters and sessions, which are separately restricted.
-      allow read: if request.auth != null;
+      allow get: if request.auth != null;
+      allow list: if request.auth != null && boundedQuery(100);
 
       allow create:
         if request.auth != null &&
            request.resource.data.dmId == request.auth.uid &&
-           validCampaignData(request.resource.data);
+           validCampaignData(request.resource.data) &&
+           request.resource.data.keys().hasAll(['memberIds', 'createdAt', 'archivedAt']) &&
+           request.resource.data.memberIds.size() == 0;
 
       // DM (or a linked device) can update any campaign field (except transferring ownership).
       allow update:
@@ -211,14 +442,125 @@ service cloud.firestore {
           return camp != null && dmOwnsOrLinked(camp.data.dmId);
         }
 
+        function campaignUser(userId) {
+          let camp = get(/databases/$(database)/documents/campaigns/$(campaignId));
+          return camp != null &&
+                 (userId == camp.data.dmId || userId in camp.data.get('memberIds', []));
+        }
+
         function hasCreator(data) {
-          return ("creator" in data) &&
-                 ("userId" in data.creator) &&
-                 data.creator.userId is string;
+          return ("creator" in data) && validCreator(data.creator);
         }
 
         function userOwnsCreator(data) {
           return hasCreator(data) && playerOwnsOrLinked(data.creator.userId);
+        }
+
+        function validCustomItemData(data, category) {
+          return data is map &&
+                 data.size() <= 100 &&
+                 data.name is string &&
+                 data.name.size() > 0 &&
+                 data.name.size() <= 100 &&
+                 (
+                   (category == 'gear' && data.keys().hasOnly([
+                     'name', 'description', 'weight', 'value', 'availability', 'source',
+                     'grantedByTalentEntryUid', 'grantedByTalentName', 'grantedByType'
+                   ])) ||
+                   (category == 'consumable' && data.keys().hasOnly([
+                     'name', 'description', 'weight', 'value', 'availability', 'source'
+                   ])) ||
+                   (category == 'drug' && data.keys().hasOnly([
+                     'name', 'weight', 'value', 'availability', 'source', 'notes'
+                   ])) ||
+                   (category == 'cybernetic' && data.keys().hasOnly([
+                     'name', 'craftsmanship', 'notes', 'value', 'availability', 'source',
+                     'concealedWeapon', 'grantedByTalentEntryUid', 'grantedByTalentName',
+                     'grantedByType'
+                   ])) ||
+                   (category == 'weapon' && data.keys().hasOnly([
+                     'weaponKind', 'name', 'class', 'damage', 'pen', 'range', 'rof', 'clip',
+                     'rld', 'specialRules', 'strengthBonusMultiplier', 'weight', 'value',
+                     'availability', 'source', 'custom', 'craftsmanship', 'ammoTracking',
+                     'ammoType', 'loadedAmmoByProfile', 'magazineSlots', 'activeMagazineSlotId',
+                     'alternateRangedAmmoEntries', 'loadedAlternateRangedAmmoId',
+                     'alternateRangedAmmoReferenceId', 'description', 'integrated',
+                     'concealedBionic', 'type'
+                   ])) ||
+                   (category == 'armour' && data.keys().hasOnly([
+                     'armourKind', 'name', 'locations', 'ap', 'apOverrides', 'notes', 'weight',
+                     'value', 'availability', 'source', 'craftsmanship', 'qualities', 'custom',
+                     'isForceField', 'protectionRating', 'spareCells', 'damage', 'pen',
+                     'specialRules'
+                   ])) ||
+                   (category == 'archeotech' && data.keys().hasOnly([
+                     'name', 'type', 'description', 'notes', 'weight', 'value', 'availability',
+                     'source', 'weaponClass', 'damage', 'range', 'rof', 'pen', 'clip', 'rld',
+                     'specialRules', 'ap', 'locations', 'stacks', 'craftsmanship', 'bodyLocation',
+                     'protectionRating'
+                   ])) ||
+                   (category == 'power' && data.keys().hasOnly([
+                     'name', 'psyRatingTalentEntryUid', 'discipline', 'threshold', 'focusTime',
+                     'sustained', 'range', 'description', 'source', 'origin', 'isMinor', 'custom'
+                   ])) ||
+                   (category == 'trait' && data.keys().hasOnly([
+                     'name', 'description', 'source'
+                   ]))
+                 ) &&
+                 (category != 'weapon' || data.weaponKind in ['ranged', 'melee', 'grenade']) &&
+                 (category != 'armour' || data.armourKind in ['worn', 'shield']) &&
+                  validOptionalString(data, 'description', 4000) &&
+                  validOptionalString(data, 'notes', 4000) &&
+                  validOptionalString(data, 'specialRules', 4000) &&
+                  validOptionalString(data, 'source', 4000) &&
+                  (!('locations' in data) ||
+                    (data.locations is list && data.locations.size() <= 100) ||
+                    (data.locations is string && data.locations.size() <= 4000)) &&
+                 (!('qualities' in data) ||
+                   (data.qualities is list && data.qualities.size() <= 100)) &&
+                 (!('magazineSlots' in data) ||
+                   (data.magazineSlots is list && data.magazineSlots.size() <= 100)) &&
+                 (!('alternateRangedAmmoEntries' in data) ||
+                   (data.alternateRangedAmmoEntries is list &&
+                    data.alternateRangedAmmoEntries.size() <= 100)) &&
+                 (!('loadedAmmoByProfile' in data) ||
+                   (data.loadedAmmoByProfile is map && data.loadedAmmoByProfile.size() <= 100)) &&
+                  (!('apOverrides' in data) ||
+                    (data.apOverrides is map && data.apOverrides.size() <= 100)) &&
+                  validOptionalNumber(data, 'strengthBonusMultiplier', -100000, 100000) &&
+                  validOptionalNumber(data, 'ap', -100000, 100000) &&
+                  validOptionalNumber(data, 'protectionRating', -100000, 100000) &&
+                 validOptionalNumber(data, 'spareCells', 0, 100000);
+        }
+
+        function validCustomItem(data) {
+          return data.keys().hasOnly([
+                   'id', 'campaignId', 'category', 'status', 'name', 'creator', 'createdAt',
+                   'updatedAt', 'createdBy', 'updatedBy', 'publishedVersionId', 'draftVersionId',
+                   'latestVersionId', 'latestVersionNumber', 'archivedAt', 'archivedByUserId', 'data'
+                 ]) &&
+                 data.id == customItemId &&
+                 data.campaignId == campaignId &&
+                 data.category in [
+                   'gear', 'consumable', 'drug', 'cybernetic', 'weapon', 'armour',
+                   'archeotech', 'power', 'trait'
+                 ] &&
+                 data.status in ['draft', 'published', 'archived'] &&
+                 data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+                 validCreator(data.creator) && validCreator(data.createdBy) &&
+                 validCreator(data.updatedBy) &&
+                 data.createdAt is timestamp && data.updatedAt is timestamp &&
+                  (data.get('publishedVersionId', null) == null ||
+                    validDocumentId(data.publishedVersionId)) &&
+                  (data.get('draftVersionId', null) == null ||
+                    validDocumentId(data.draftVersionId)) &&
+                  validDocumentId(data.latestVersionId) &&
+                 data.latestVersionNumber is int && data.latestVersionNumber > 0 &&
+                 data.latestVersionNumber <= 50 &&
+                 (data.get('archivedAt', null) == null || data.archivedAt is timestamp) &&
+                  (data.get('archivedByUserId', null) == null ||
+                    validDocumentId(data.archivedByUserId)) &&
+                 validCustomItemData(data.data, data.category);
         }
 
         function canReadCustomItem(data) {
@@ -243,30 +585,25 @@ service cloud.firestore {
           ]);
         }
 
-        allow read, list:
-          if canReadCustomItem(resource.data);
+        allow get: if canReadCustomItem(resource.data);
+        allow list: if canReadCustomItem(resource.data) && boundedQuery(200);
 
         allow create:
           if request.auth != null &&
              request.resource.data.status == "draft" &&
-             request.resource.data.category in [
-               "gear",
-               "consumable",
-               "drug",
-               "cybernetic",
-               "weapon",
-               "armour",
-               "archeotech",
-               "power",
-               "trait"
-             ] &&
-             userOwnsCreator(request.resource.data) &&
+              validCustomItem(request.resource.data) &&
+              userOwnsCreator(request.resource.data) &&
+              playerOwnsOrLinked(request.resource.data.createdBy.userId) &&
+              playerOwnsOrLinked(request.resource.data.updatedBy.userId) &&
+              campaignUser(request.resource.data.creator.userId) &&
+              request.resource.data.name == request.resource.data.data.name &&
              request.resource.data.publishedVersionId == null &&
              request.resource.data.draftVersionId is string &&
              request.resource.data.latestVersionId == request.resource.data.draftVersionId;
 
         allow update:
-          if dmOwnsCampaign() ||
+          if validCustomItem(request.resource.data) &&
+             (dmOwnsCampaign() ||
              (
                userOwnsCreator(resource.data) &&
                resource.data.status != "archived" &&
@@ -276,8 +613,8 @@ service cloud.firestore {
                request.resource.data.campaignId == resource.data.campaignId &&
                request.resource.data.category == resource.data.category &&
                request.resource.data.publishedVersionId == resource.data.publishedVersionId &&
-               creatorEditKeysOnly()
-             );
+                creatorEditKeysOnly()
+              ));
 
         allow delete:
           if dmOwnsCampaign() &&
@@ -331,6 +668,30 @@ service cloud.firestore {
                    userOwnsParentCreator(parent);
           }
 
+          function validVersion(data) {
+            return data.keys().hasOnly([
+                     'id', 'campaignId', 'customItemId', 'category', 'versionNumber', 'status',
+                     'data', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy', 'publishedAt',
+                     'publishedByUserId'
+                   ]) &&
+                   data.id == versionId &&
+                   data.campaignId == campaignId &&
+                   data.customItemId == customItemId &&
+                   data.category in [
+                     'gear', 'consumable', 'drug', 'cybernetic', 'weapon', 'armour',
+                     'archeotech', 'power', 'trait'
+                   ] &&
+                   data.versionNumber is int && data.versionNumber > 0 &&
+                   data.versionNumber <= 50 &&
+                   data.status in ['draft', 'published'] &&
+                   validCustomItemData(data.data, data.category) &&
+                   data.createdAt is timestamp && data.updatedAt is timestamp &&
+                   validCreator(data.createdBy) && validCreator(data.updatedBy) &&
+                   (data.get('publishedAt', null) == null || data.publishedAt is timestamp) &&
+                    (data.get('publishedByUserId', null) == null ||
+                      validDocumentId(data.publishedByUserId));
+          }
+
           function creatorVersionEditKeysOnly() {
             return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
               "data",
@@ -339,20 +700,29 @@ service cloud.firestore {
             ]);
           }
 
-          allow read, list:
-            if canReadParentVersion();
+          allow get: if canReadParentVersion();
+          allow list: if canReadParentVersion() && boundedQuery(100);
 
           allow create:
-            if dmOwnsCampaign() || canCreateDraftVersion();
+            if validVersion(request.resource.data) &&
+               parentItemAfter() != null &&
+               request.resource.data.category == parentItemAfter().data.category &&
+               playerOwnsOrLinked(request.resource.data.createdBy.userId) &&
+               playerOwnsOrLinked(request.resource.data.updatedBy.userId) &&
+               (dmOwnsCampaign() || canCreateDraftVersion());
 
           allow update:
-            if dmOwnsCampaign() ||
+            if validVersion(request.resource.data) &&
+               parentItem() != null &&
+               request.resource.data.category == parentItem().data.category &&
+               playerOwnsOrLinked(request.resource.data.updatedBy.userId) &&
+               (dmOwnsCampaign() ||
                (
                  resource.data.status == "draft" &&
                  request.resource.data.status == "draft" &&
                  userOwnsParentCreator(parentItem()) &&
-                 creatorVersionEditKeysOnly()
-               );
+                  creatorVersionEditKeysOnly()
+                ));
 
           allow delete:
             if dmOwnsCampaign();
@@ -371,54 +741,54 @@ service cloud.firestore {
 
         // Any authenticated user can read characters (needed for party overview
         // and claim preview before membership is established).
-        allow read, list: if request.auth != null;
+        allow get: if request.auth != null;
+        allow list: if request.auth != null && boundedQuery(100);
 
         allow create:
           if dmOwnsCampaign() &&
+             validCharacterData(request.resource.data, campaignId) &&
              request.resource.data.userId == null &&
              request.resource.data.isEditableByPlayer == false &&
-             request.resource.data.recoveryCode is string;
+             getAfter(
+               /databases/$(database)/documents/recoveryIndex/$(request.resource.data.recoveryCode)
+             ).data.campaignId == campaignId &&
+             getAfter(
+               /databases/$(database)/documents/recoveryIndex/$(request.resource.data.recoveryCode)
+             ).data.characterId == characterId;
 
         allow update:
-          if (
-            dmOwnsCampaign()
-          ) ||
-          (
-            request.auth != null &&
-            resource != null &&
-            resource.data != null &&
-            playerOwnsOrLinked(resource.data.userId) &&
-            resource.data.isEditableByPlayer == true &&
-            (
-              !("userId" in request.resource.data) ||
-              request.resource.data.userId == resource.data.userId
-            ) &&
-            (
-              !("isEditableByPlayer" in request.resource.data) ||
-              request.resource.data.isEditableByPlayer == resource.data.isEditableByPlayer
-            ) &&
-            (
-              !("recoveryCode" in request.resource.data) ||
-              request.resource.data.recoveryCode == resource.data.recoveryCode
-            )
-          );
-
-        // Players can claim an unclaimed character (set userId to their own
-        // account, or the primary their device is linked to, nothing else).
-        allow update:
-          if resource.data.userId == null &&
-             request.resource.data.diff(resource.data).affectedKeys().hasOnly(['userId']) &&
-             playerOwnsOrLinked(request.resource.data.userId);
-
-        // Identity reclaim: allow transferring userId to the reclaimer's new uid
-        // when a valid reclaim document confirms they're taking over the old userId.
-        allow update:
-          if request.auth != null &&
-             request.resource.data.diff(resource.data).affectedKeys().hasOnly(['userId']) &&
-             request.resource.data.userId == request.auth.uid &&
-             exists(/databases/$(database)/documents/identityReclaims/$(request.auth.uid)) &&
-             resource.data.userId ==
-               get(/databases/$(database)/documents/identityReclaims/$(request.auth.uid)).data.oldUid;
+          if validCharacterData(request.resource.data, campaignId) &&
+             request.resource.data.recoveryCode == resource.data.recoveryCode &&
+             (
+               dmOwnsCampaign() ||
+               (
+                 playerOwnsOrLinked(resource.data.userId) &&
+                 resource.data.isEditableByPlayer == true &&
+                 request.resource.data.userId == resource.data.userId &&
+                 request.resource.data.isEditableByPlayer == resource.data.isEditableByPlayer
+               ) ||
+               (
+                 resource.data.userId == null &&
+                 request.resource.data.diff(resource.data).affectedKeys().hasOnly(['userId']) &&
+                 playerOwnsOrLinked(request.resource.data.userId)
+               ) ||
+               (
+                 playerOwnsOrLinked(resource.data.userId) &&
+                 request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+                   'userId', 'isEditableByPlayer'
+                 ]) &&
+                 request.resource.data.userId == null &&
+                 request.resource.data.isEditableByPlayer == false
+               ) ||
+               (
+                 request.auth != null &&
+                 request.resource.data.diff(resource.data).affectedKeys().hasOnly(['userId']) &&
+                 request.resource.data.userId == request.auth.uid &&
+                 exists(/databases/$(database)/documents/identityReclaims/$(request.auth.uid)) &&
+                 resource.data.userId ==
+                   get(/databases/$(database)/documents/identityReclaims/$(request.auth.uid)).data.oldUid
+               )
+             );
 
         allow delete: if dmOwnsCampaign();
 
@@ -432,36 +802,98 @@ service cloud.firestore {
             return camp != null && dmOwnsOrLinked(camp.data.dmId);
           }
 
-          allow read, list: if dmOwnsCampaign();
+          function characterBefore() {
+            return get(
+              /databases/$(database)/documents/campaigns/$(campaignId)/characters/$(characterId)
+            );
+          }
+
+          function characterAfter() {
+            return getAfter(
+              /databases/$(database)/documents/campaigns/$(campaignId)/characters/$(characterId)
+            );
+          }
+
+          function validClaimLog(data) {
+            return data.keys().hasOnly([
+                     'action', 'actorUid', 'previousOwnerUid', 'newOwnerUid', 'timestamp'
+                   ]) &&
+                   data.keys().hasAll([
+                     'action', 'actorUid', 'previousOwnerUid', 'newOwnerUid', 'timestamp'
+                   ]) &&
+                   data.action in ['claim', 'release', 'force-assign', 'force-release'] &&
+                   data.actorUid is string && data.actorUid.size() > 0 &&
+                   data.actorUid.size() <= 1500 &&
+                   (data.previousOwnerUid == null ||
+                     (data.previousOwnerUid is string && data.previousOwnerUid.size() > 0 &&
+                      data.previousOwnerUid.size() <= 1500)) &&
+                   (data.newOwnerUid == null ||
+                     (data.newOwnerUid is string && data.newOwnerUid.size() > 0 &&
+                      data.newOwnerUid.size() <= 1500)) &&
+                   data.timestamp is timestamp;
+          }
+
+          function matchesClaimTransition(data) {
+            let before = characterBefore();
+            let after = characterAfter();
+            return before != null && after != null &&
+                   before.data.userId == null &&
+                   after.data.userId != null &&
+                   data.previousOwnerUid == null &&
+                   data.newOwnerUid == after.data.userId &&
+                   playerOwnsOrLinked(after.data.userId);
+          }
+
+          function matchesReleaseTransition(data) {
+            let before = characterBefore();
+            let after = characterAfter();
+            return before != null && after != null &&
+                   before.data.userId != null &&
+                   playerOwnsOrLinked(before.data.userId) &&
+                   after.data.userId == null &&
+                   data.previousOwnerUid == before.data.userId &&
+                   data.newOwnerUid == null;
+          }
+
+          function matchesForceAssignTransition(data) {
+            let before = characterBefore();
+            let after = characterAfter();
+            return before != null && after != null &&
+                   after.data.userId != null &&
+                   after.data.userId != before.data.userId &&
+                   data.previousOwnerUid == before.data.userId &&
+                   data.newOwnerUid == after.data.userId;
+          }
+
+          function matchesForceReleaseTransition(data) {
+            let before = characterBefore();
+            let after = characterAfter();
+            return before != null && after != null &&
+                   before.data.userId != null &&
+                   after.data.userId == null &&
+                   data.previousOwnerUid == before.data.userId &&
+                   data.newOwnerUid == null;
+          }
+
+          allow get: if dmOwnsCampaign();
+          allow list: if dmOwnsCampaign() && boundedQuery(440);
 
           allow create:
-            if (
-              // DM writes force-assign / force-release only
-              dmOwnsCampaign() &&
-              ("actorUid" in request.resource.data) &&
-              request.resource.data.actorUid == request.auth.uid &&
-              ("action" in request.resource.data) &&
-              request.resource.data.action in ["force-assign", "force-release"]
-            )
-            ||
-            (
-              // Player writes claim / release, scoped to their own character
-              request.auth != null &&
-              ("actorUid" in request.resource.data) &&
-              request.resource.data.actorUid == request.auth.uid &&
-              (
-                (
-                  request.resource.data.action == "claim" &&
-                  get(/databases/$(database)/documents/campaigns/$(campaignId)/characters/$(characterId)).data.userId == null
-                ) ||
-                (
-                  request.resource.data.action == "release" &&
-                  playerOwnsOrLinked(
-                    get(/databases/$(database)/documents/campaigns/$(campaignId)/characters/$(characterId)).data.userId
-                  )
-                )
-              )
-            );
+            if request.auth != null &&
+               validClaimLog(request.resource.data) &&
+               request.resource.data.actorUid == request.auth.uid &&
+               (
+                 (request.resource.data.action == 'claim' &&
+                   matchesClaimTransition(request.resource.data)) ||
+                 (request.resource.data.action == 'release' &&
+                   matchesReleaseTransition(request.resource.data)) ||
+                 (dmOwnsCampaign() &&
+                   request.resource.data.action == 'force-assign' &&
+                   matchesForceAssignTransition(request.resource.data)) ||
+                 (dmOwnsCampaign() &&
+                   request.resource.data.action == 'force-release' &&
+                   matchesForceReleaseTransition(request.resource.data))
+               );
 
           allow update: if false;
 
@@ -470,7 +902,6 @@ service cloud.firestore {
           allow delete:
             if dmOwnsCampaign() &&
                !existsAfter(/databases/$(database)/documents/campaigns/$(campaignId)/characters/$(characterId));
-          allow delete: if false;
         }
       }
     }
@@ -480,35 +911,40 @@ service cloud.firestore {
     // ============================
     match /recoveryIndex/{code} {
 
-      // Any authenticated user can read or query recovery codes.
+      // Temporary exact-code lookup used by the existing claim flow.
       allow get: if request.auth != null;
       allow list: if false;
 
-      allow create, update:
-        if request.auth != null &&
-           request.resource.data.keys().hasOnly(['campaignId', 'characterId']) &&
-           ("campaignId" in request.resource.data) &&
-           ("characterId" in request.resource.data) &&
-           request.resource.data.campaignId is string &&
-           request.resource.data.characterId is string &&
-           exists(/databases/$(database)/documents/campaigns/$(request.resource.data.campaignId)) &&
-           dmOwnsOrLinked(
-             get(/databases/$(database)/documents/campaigns/$(request.resource.data.campaignId))
-               .data.dmId
-           ) &&
-           (request.method == "create" ||
-            (exists(/databases/$(database)/documents/campaigns/$(resource.data.campaignId)) &&
-             dmOwnsOrLinked(
-               get(/databases/$(database)/documents/campaigns/$(resource.data.campaignId))
-                 .data.dmId
-             )));
+      allow create:
+         if request.auth != null &&
+            code.matches('^DH-[A-Z0-9]{4}-[A-Z0-9]{4}$') &&
+            request.resource.data.keys().hasOnly(['campaignId', 'characterId']) &&
+            request.resource.data.keys().hasAll(['campaignId', 'characterId']) &&
+             request.resource.data.campaignId is string &&
+             request.resource.data.campaignId.size() > 0 &&
+             request.resource.data.campaignId.size() <= 1500 &&
+             request.resource.data.characterId is string &&
+             request.resource.data.characterId.size() > 0 &&
+             request.resource.data.characterId.size() <= 1500 &&
+            getAfter(
+              /databases/$(database)/documents/campaigns/$(request.resource.data.campaignId)/characters/$(request.resource.data.characterId)
+            ).data.recoveryCode == code &&
+            dmOwnsOrLinked(
+              get(/databases/$(database)/documents/campaigns/$(request.resource.data.campaignId))
+                .data.dmId
+            );
+
+      allow update: if false;
 
       allow delete:
-        if exists(/databases/$(database)/documents/campaigns/$(resource.data.campaignId)) &&
-           dmOwnsOrLinked(
-             get(/databases/$(database)/documents/campaigns/$(resource.data.campaignId))
-               .data.dmId
-           );
+         if exists(/databases/$(database)/documents/campaigns/$(resource.data.campaignId)) &&
+            dmOwnsOrLinked(
+              get(/databases/$(database)/documents/campaigns/$(resource.data.campaignId))
+                .data.dmId
+            ) &&
+            !existsAfter(
+              /databases/$(database)/documents/campaigns/$(resource.data.campaignId)/characters/$(resource.data.characterId)
+            );
     }
 
     // ============================
@@ -520,8 +956,10 @@ service cloud.firestore {
       allow get:    if request.auth != null;
       allow list:   if false;
       allow create: if request.auth != null &&
+                       validRecoveryCode(code) &&
                        request.resource.data.keys().hasOnly(['uid', 'role']) &&
-                       request.resource.data.uid is string &&
+                       request.resource.data.keys().hasAll(['uid', 'role']) &&
+                       validDocumentId(request.resource.data.uid) &&
                        request.resource.data.role in ['dm', 'player'] &&
                        playerOwnsOrLinked(request.resource.data.uid);
       allow delete: if request.auth != null &&
@@ -530,6 +968,11 @@ service cloud.firestore {
       // new uid when a valid reclaim document confirms the handshake.
       allow update:
         if request.auth != null &&
+           validRecoveryCode(code) &&
+           request.resource.data.keys().hasOnly(['uid', 'role']) &&
+           request.resource.data.keys().hasAll(['uid', 'role']) &&
+           validDocumentId(request.resource.data.uid) &&
+           request.resource.data.role in ['dm', 'player'] &&
            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['uid']) &&
            request.resource.data.uid == request.auth.uid &&
            get(/databases/$(database)/documents/identityReclaims/$(request.auth.uid)).data.oldUid
@@ -546,9 +989,9 @@ service cloud.firestore {
       // reveal and rotate the primary account's recovery code from Settings.
       allow read:  if playerOwnsOrLinked(uid);
       allow create, update: if playerOwnsOrLinked(uid) &&
-                               request.resource.data.keys().hasOnly(['code']) &&
-                               request.resource.data.code is string &&
-                               request.resource.data.code.size() <= 64;
+                                request.resource.data.keys().hasOnly(['code']) &&
+                                request.resource.data.keys().hasAll(['code']) &&
+                                validRecoveryCode(request.resource.data.code);
       allow delete: if playerOwnsOrLinked(uid);
     }
 
@@ -567,8 +1010,10 @@ service cloud.firestore {
         if request.auth != null &&
            uid == request.auth.uid &&
            request.resource.data.keys().hasOnly(['oldUid', 'code']) &&
-           request.resource.data.oldUid is string &&
-           request.resource.data.code is string &&
+           request.resource.data.keys().hasAll(['oldUid', 'code']) &&
+           validDocumentId(request.resource.data.oldUid) &&
+           request.resource.data.oldUid != uid &&
+           validRecoveryCode(request.resource.data.code) &&
            get(/databases/$(database)/documents/identitySecret/$(request.resource.data.oldUid)).data.code
              == request.resource.data.code;
       // Owner can delete once migration is done.
@@ -589,7 +1034,8 @@ service cloud.firestore {
         if request.auth != null &&
            uid == request.auth.uid &&
            request.resource.data.keys().hasOnly(['primaryUid', 'linkedAt']) &&
-           request.resource.data.primaryUid is string &&
+           request.resource.data.keys().hasAll(['primaryUid', 'linkedAt']) &&
+           validDocumentId(request.resource.data.primaryUid) &&
            request.resource.data.primaryUid != request.auth.uid &&
            request.resource.data.linkedAt is timestamp &&
            exists(/databases/$(database)/documents/linkProofs/$(request.auth.uid)) &&
@@ -609,6 +1055,10 @@ service cloud.firestore {
         if request.auth != null &&
            uid == request.auth.uid &&
            request.resource.data.keys().hasOnly(['primaryUid', 'code']) &&
+           request.resource.data.keys().hasAll(['primaryUid', 'code']) &&
+           validDocumentId(request.resource.data.primaryUid) &&
+           request.resource.data.primaryUid != uid &&
+           validRecoveryCode(request.resource.data.code) &&
            get(/databases/$(database)/documents/identitySecret/$(request.resource.data.primaryUid)).data.code
              == request.resource.data.code;
       allow delete: if request.auth != null && uid == request.auth.uid;
@@ -646,12 +1096,14 @@ service cloud.firestore {
                data.xpAwarded <= 100000 &&
                data.attendees is list &&
                data.attendees.size() <= 100 &&
+               data.attendees.toSet().size() == data.attendees.size() &&
                data.createdAt is timestamp &&
                (!('xpApplied' in data) || data.xpApplied is bool);
       }
 
       // Any authenticated user can read sessions.
-      allow read, list: if request.auth != null;
+      allow get: if request.auth != null;
+      allow list: if request.auth != null && boundedQuery(200);
       allow create, update: if dmOwnsCampaign() && validSessionData(request.resource.data);
       allow delete: if dmOwnsCampaign();
     }
@@ -686,7 +1138,8 @@ service cloud.firestore {
                ]) &&
                data.characterId == characterId &&
                (data.get('lastMessage', null) == null ||
-                 (data.lastMessage is string && data.lastMessage.size() <= 2000)) &&
+                  (data.lastMessage is string && data.lastMessage.size() > 0 &&
+                   data.lastMessage.size() <= 500)) &&
                (data.get('lastTimestamp', null) == null || data.lastTimestamp is timestamp) &&
                data.get('unreadForDM', 0) is int &&
                data.get('unreadForDM', 0) >= 0 &&
@@ -694,27 +1147,79 @@ service cloud.firestore {
       }
 
       // DM reads all thread summaries; player reads only their own character's thread
-      allow read: if dmOwnsMessagingCampaign() || playerOwnsCharacter();
+      allow get: if dmOwnsMessagingCampaign() || playerOwnsCharacter();
+      allow list:
+        if (dmOwnsMessagingCampaign() || playerOwnsCharacter()) && boundedQuery(100);
 
       allow create:
         if validThreadData(request.resource.data) &&
            (
-             dmOwnsMessagingCampaign() ||
-             (playerOwnsCharacter() && request.resource.data.get('unreadForDM', 0) == 1)
-           );
+              (dmOwnsMessagingCampaign() &&
+                request.resource.data.get('unreadForDM', 0) == 0 &&
+                request.resource.data.get('lastMessage', null) is string &&
+                request.resource.data.lastTimestamp is timestamp) ||
+              (playerOwnsCharacter() &&
+                request.resource.data.get('unreadForDM', 0) == 1 &&
+                request.resource.data.get('lastMessage', null) is string &&
+                request.resource.data.lastTimestamp is timestamp)
+            );
 
       allow update:
         if validThreadData(request.resource.data) &&
            (
-             dmOwnsMessagingCampaign() ||
-             (
-               playerOwnsCharacter() &&
-               request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+              (dmOwnsMessagingCampaign() &&
+                (
+                  (
+                    request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+                      'lastMessage', 'lastTimestamp'
+                    ]) &&
+                    request.resource.data.diff(resource.data).affectedKeys().hasAll([
+                      'lastMessage', 'lastTimestamp'
+                    ]) &&
+                    request.resource.data.lastMessage is string &&
+                    request.resource.data.lastTimestamp is timestamp &&
+                    request.resource.data.get('unreadForDM', 0) ==
+                      resource.data.get('unreadForDM', 0)
+                  ) ||
+                  (
+                    request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+                      'unreadForDM'
+                    ]) &&
+                    request.resource.data.diff(resource.data).affectedKeys().hasAll([
+                      'unreadForDM'
+                    ]) &&
+                    resource.data.get('unreadForDM', 0) > 0 &&
+                    request.resource.data.unreadForDM == 0
+                  ) ||
+                  (
+                    request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+                      'lastMessage', 'lastTimestamp', 'unreadForDM'
+                    ]) &&
+                    request.resource.data.get('lastMessage', null) == null &&
+                    request.resource.data.get('lastTimestamp', null) == null &&
+                    request.resource.data.get('unreadForDM', 0) == 0 &&
+                    (
+                      resource.data.get('lastMessage', null) != null ||
+                      resource.data.get('lastTimestamp', null) != null ||
+                      resource.data.get('unreadForDM', 0) > 0
+                    )
+                  )
+                )) ||
+              (
+                playerOwnsCharacter() &&
+                request.resource.data.diff(resource.data).affectedKeys().hasOnly([
                  'lastMessage',
                  'lastTimestamp',
                  'unreadForDM'
-               ]) &&
-               request.resource.data.get('unreadForDM', 0) ==
+                ]) &&
+                request.resource.data.diff(resource.data).affectedKeys().hasAll([
+                  'lastMessage',
+                  'lastTimestamp',
+                  'unreadForDM'
+                ]) &&
+                request.resource.data.lastMessage is string &&
+                request.resource.data.lastTimestamp is timestamp &&
+                request.resource.data.get('unreadForDM', 0) ==
                  resource.data.get('unreadForDM', 0) + 1
              )
            );
@@ -724,7 +1229,9 @@ service cloud.firestore {
 
       match /messages/{messageId} {
         // DM reads all; player reads only their own character's thread messages
-        allow read: if dmOwnsMessagingCampaign() || playerOwnsCharacter();
+        allow get: if dmOwnsMessagingCampaign() || playerOwnsCharacter();
+        allow list:
+          if (dmOwnsMessagingCampaign() || playerOwnsCharacter()) && boundedQuery(100);
 
         // DM or the character owner can send messages; fromUid must match sender
         allow create:
@@ -736,6 +1243,8 @@ service cloud.firestore {
                'read'
              ]) &&
              request.resource.data.fromUid is string &&
+             request.resource.data.fromUid.size() > 0 &&
+             request.resource.data.fromUid.size() <= 1500 &&
              playerOwnsOrLinked(request.resource.data.fromUid) &&
              request.resource.data.text is string &&
              request.resource.data.text.size() > 0 &&
@@ -760,28 +1269,32 @@ service cloud.firestore {
         );
       }
 
-      allow read, list:
-        if dmOwnsCampaign() ||
-        playerOwnsOrLinked(
-          get(/databases/$(database)/documents/campaigns/$(campaignId)/characters/$(characterId))
-            .data.userId
-        );
+      function canReadProposal() {
+        return dmOwnsCampaign() ||
+               playerOwnsOrLinked(
+                 get(/databases/$(database)/documents/campaigns/$(campaignId)/characters/$(characterId))
+                   .data.userId
+               );
+      }
 
-      allow create:
-        if request.auth != null &&
-           request.resource.data.playerId == request.auth.uid &&
-           request.resource.data.status == "pending" &&
-           playerOwnsOrLinked(
-             get(/databases/$(database)/documents/campaigns/$(campaignId)/characters/$(characterId))
-               .data.userId
+      allow get: if canReadProposal();
+      allow list: if canReadProposal() && boundedQuery(440);
+
+      // The application has no live XP-proposal workflow. Closing direct writes
+      // prevents standalone proposal spam while retaining bounded legacy reads
+      // and DM cleanup during character deletion.
+      allow create, update: if false;
+      allow delete:
+        if dmOwnsCampaign() &&
+           !existsAfter(
+             /databases/$(database)/documents/campaigns/$(campaignId)/characters/$(characterId)
            );
-
-      allow update, delete: if dmOwnsCampaign();
     }
 
     // Required for collectionGroup("characters") queries — restricted to own characters only.
     match /{path=**}/characters/{characterId} {
-      allow read: if playerOwnsOrLinked(resource.data.userId);
+      allow get: if playerOwnsOrLinked(resource.data.userId);
+      allow list: if playerOwnsOrLinked(resource.data.userId) && boundedQuery(1000);
     }
 
     // All unlisted paths are denied by default.

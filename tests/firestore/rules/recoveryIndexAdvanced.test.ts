@@ -1,164 +1,48 @@
-// tests/firestore/rules/recoveryIndexAdvanced.test.ts
-
-import { describe, it, expect } from "vitest";
-import { getTestEnv } from "../setup";
+import { afterEach, describe, expect, it } from "vitest";
 import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
-import { dbAs, createCampaign, createRecoveryIndexEntry } from "../helpers";
+import { getTestEnv } from "../setup";
+import { createCampaign, createCharacter, createRecoveryIndexEntry, dbAs } from "../helpers";
 
-describe("Firestore Rules: RecoveryIndex Advanced Tests", () => {
-
-  it("can create multiple recoveryIndex entries with different codes for same character", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
-    
-    const timestamp = Date.now();
-    await createCampaign(env, "camp1", "dm-1");
-    
-    const dmDb = dbAs(env, "dm-1");
-    
-    await expect(
-      dmDb.collection("recoveryIndex").doc(`CODE1-${timestamp}`).set({
-        campaignId: "camp1",
-        characterId: "char1"
-      })
-    ).resolves.toBeUndefined();
-    
-    await expect(
-      dmDb.collection("recoveryIndex").doc(`CODE2-${timestamp}`).set({
-        campaignId: "camp1",
-        characterId: "char1" // same character, different code
-      })
-    ).resolves.toBeUndefined();
+describe("Firestore Rules: Recovery Index abuse resistance", () => {
+  afterEach(async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await env.clearFirestore();
   });
 
-  it("can create recoveryIndex entries for multiple characters in same campaign", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
-    
-    const timestamp = Date.now();
-    await createCampaign(env, "camp1", "dm-1");
-    
-    const dmDb = dbAs(env, "dm-1");
-    
-    await expect(
-      dmDb.collection("recoveryIndex").doc(`CODE-CHAR1-${timestamp}`).set({
-        campaignId: "camp1",
-        characterId: "char1"
-      })
-    ).resolves.toBeUndefined();
-    
-    await expect(
-      dmDb.collection("recoveryIndex").doc(`CODE-CHAR2-${timestamp}`).set({
-        campaignId: "camp1",
-        characterId: "char2"
-      })
-    ).resolves.toBeUndefined();
+  it("does not allow a second code to be attached to the same character", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await createCampaign(env, "c1", "dm-1");
+    await createCharacter(env, "c1", "char1", { recoveryCode: "DH-ONEE-0001" });
+
+    const index = dbAs(env, "dm-1").collection("recoveryIndex");
+    await expect(index.doc("DH-ONEE-0001").set({ campaignId: "c1", characterId: "char1" })).resolves.toBeUndefined();
+    await expect(index.doc("DH-TWOO-0002").set({ campaignId: "c1", characterId: "char1" })).rejects.toThrow();
   });
 
-  it("DM cannot overwrite another DM's recoveryIndex entry", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
-    
-    const timestamp = Date.now();
-    const sharedCode = `SHARED-CODE-${timestamp}`;
-    
-    await createCampaign(env, "camp1", "dm-1");
-    await createCampaign(env, "camp2", "dm-2");
-    
-    // DM-1 creates a recovery index
-    await createRecoveryIndexEntry(env, sharedCode, {
-      campaignId: "camp1",
-      characterId: "char1"
-    });
-    
-    // DM-2 tries to overwrite it with their campaign
-    const dm2Db = dbAs(env, "dm-2");
-    
-    // A DM cannot overwrite another campaign's recovery index entry.
+  it("does not allow one DM to repoint another campaign's code", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await createCampaign(env, "c1", "dm-1");
+    await createCharacter(env, "c1", "char1", { recoveryCode: "DH-LOCK-0001" });
+    await createRecoveryIndexEntry(env, "DH-LOCK-0001", { campaignId: "c1", characterId: "char1" });
+
     await expect(
-      dm2Db.collection("recoveryIndex").doc(sharedCode).set({
-        campaignId: "camp2",
-        characterId: "char2"
+      dbAs(env, "dm-2").collection("recoveryIndex").doc("DH-LOCK-0001").set({
+        campaignId: "c2",
+        characterId: "char2",
       })
     ).rejects.toThrow();
   });
 
-  it("DM can update their own recoveryIndex to point to different character", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
-    
-    const timestamp = Date.now();
-    const updateCode = `UPDATE-CODE-${timestamp}`;
-    
-    await createCampaign(env, "camp1", "dm-1");
-    await createRecoveryIndexEntry(env, updateCode, {
-      campaignId: "camp1",
-      characterId: "char1"
-    });
-    
-    const dmDb = dbAs(env, "dm-1");
-    
-    await expect(
-      dmDb.collection("recoveryIndex").doc(updateCode).update({
-        characterId: "char2"
-      })
-    ).resolves.toBeUndefined();
-  });
+  it("denies all Recovery Index queries, including filtered or bounded queries", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await createRecoveryIndexEntry(env, "DH-LIST-0001", { campaignId: "c1", characterId: "char1" });
 
-  it("recoveryIndex rejects unrecognised metadata fields", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
-    
-    const timestamp = Date.now();
-    await createCampaign(env, "camp1", "dm-1");
-    
-    const dmDb = dbAs(env, "dm-1");
-    
     await expect(
-      dmDb.collection("recoveryIndex").doc(`META-CODE-${timestamp}`).set({
-        campaignId: "camp1",
-        characterId: "char1",
-        createdAt: Date.now(),
-        expiresAt: Date.now() + 86400000,
-        usedCount: 0
-      })
+      dbAs(env, "user-1")
+        .collection("recoveryIndex")
+        .where("campaignId", "==", "c1")
+        .limit(1)
+        .get()
     ).rejects.toThrow();
-  });
-
-  it("authenticated users cannot query recoveryIndex by campaignId", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
-    
-    const timestamp = Date.now();
-    const campaignId = `camp-query-${timestamp}`;
-    
-    await createCampaign(env, campaignId, "dm-1");
-    await createRecoveryIndexEntry(env, `CODE1-${timestamp}`, {
-      campaignId: campaignId,
-      characterId: "char1"
-    });
-    await createRecoveryIndexEntry(env, `CODE2-${timestamp}`, {
-      campaignId: campaignId,
-      characterId: "char2"
-    });
-    
-    const playerDb = dbAs(env, "player-1");
-    
-    await expect(
-      playerDb.collection("recoveryIndex").where("campaignId", "==", campaignId).get()
-    ).rejects.toThrow();
-  });
-
-  it("DM can delete their own campaign's recoveryIndex entries", async () => {
-    const env = await getTestEnv() as RulesTestEnvironment;
-    
-    const timestamp = Date.now();
-    const deleteCode = `DELETE-CODE-${timestamp}`;
-    
-    await createCampaign(env, "camp1", "dm-1");
-    await createRecoveryIndexEntry(env, deleteCode, {
-      campaignId: "camp1",
-      characterId: "char1"
-    });
-    
-    const dmDb = dbAs(env, "dm-1");
-    
-    await expect(
-      dmDb.collection("recoveryIndex").doc(deleteCode).delete()
-    ).resolves.toBeUndefined();
   });
 });

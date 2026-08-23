@@ -20,6 +20,7 @@ describe("Firestore Rules: Advanced Query Operations", () => {
     
     const snapshot = await playerDb.collection("campaigns")
       .where("system", "==", "Dark Heresy")
+      .limit(100)
       .get();
     
     // Verify our specific documents are present
@@ -53,6 +54,7 @@ describe("Firestore Rules: Advanced Query Operations", () => {
       .where("name", ">=", prefix)
       .where("name", "<=", prefix + "\uf8ff")
       .orderBy("name")
+      .limit(100)
       .get();
     
     expect(snapshot.docs.length).toBe(3);
@@ -119,6 +121,7 @@ describe("Firestore Rules: Advanced Query Operations", () => {
     const snapshot = await playerDb
       .collection(`campaigns/${campaignId}/characters`)
       .where("userId", "==", "player-query-test")
+      .limit(100)
       .get();
     
     expect(snapshot.docs.length).toBe(2);
@@ -147,6 +150,7 @@ describe("Firestore Rules: Advanced Query Operations", () => {
     const snapshot = await playerDb
       .collection(`campaigns/${campaignId}/characters`)
       .where("isEditableByPlayer", "==", true)
+      .limit(100)
       .get();
     
     expect(snapshot.docs.length).toBe(2);
@@ -179,6 +183,7 @@ describe("Firestore Rules: Advanced Query Operations", () => {
       .collection(`campaigns/${campaignId}/characters`)
       .where("userId", "==", "player-complex-test")
       .orderBy("name")
+      .limit(100)
       .get();
     
     expect(snapshot.docs.length).toBe(2);

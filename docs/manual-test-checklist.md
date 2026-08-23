@@ -1,6 +1,6 @@
 # Manual Test Checklist — Complete App
 
-Thirty-one pages and cross-cutting sections, containing 595 checks. Every item
+Thirty-one pages and cross-cutting sections, containing 598 checks. Every item
 comes from reading the actual logic, not a generic "does it load" pass.
 Check items off as you verify them; anything under **Watch for** is the
 likeliest place a real bug hides. Coverage notes are at the bottom — read
@@ -818,14 +818,13 @@ Add one fixture of each type: Armour, Weapon, Grenade/Mine, and plain item. Keep
 
 ## 20. Admin (DM only)
 
-DM controls: XP proposal approval, claim log, and access overrides.
+DM controls: claim history and access overrides. There is no current XP-proposal workflow.
 
 ### How to test this page
 
-Keep the DM on Admin and the owning player on the same character in a second profile. Submit proposals and ownership/edit changes from their respective screens while observing both sessions live. Refresh after every action and inspect the claim log.
+Keep the DM on Admin and the owning player on the same character in a second profile. Perform ownership/edit changes from their respective screens while observing both sessions live. Refresh after every action and inspect the claim log.
 
-- [ ] Approve a pending proposal from Experience — the player's Remaining XP drops by that amount (then see the Experience §16 Watch for — do this test in combination with adding a manual advance)
-- [ ] Reject a pending proposal — Remaining XP is untouched, proposal moves out of Pending
+- [ ] No XP-proposal approval or rejection controls appear: the current product has no proposal workflow, and legacy proposal documents cannot be created or changed by the client
 - [ ] Claim history stays closed initially; pressing Open History loads at most the latest 50 events, shows the correct owner name (not just a raw ID) for the most recent claim, and Close History removes the list without stale content when reopened
 - [ ] Force Release Ownership actually unclaims the character (owner becomes "None") separately from Toggle Player Edit Permission, which only flips whether the _current_ owner can edit — confirm these are doing two different things, not the same thing twice
 - [ ] Force Assign To… opens a picker listing every campaign member by resolved first name (falling back to their raw UID for a member with no profile name yet); selecting one immediately assigns the character to them and turns Player Edit Permission on
@@ -1024,6 +1023,10 @@ Use at least two identities: a plain player who doesn't own the character, and t
 - [ ] Releasing a character (player-initiated, from the kebab menu) clears ownership **and** the player-edit-permission flag together — if the DM immediately reassigns/re-enables it for a new claimant, confirm editing was actually off in between, i.e. it doesn't silently carry over from the previous owner
 - [ ] Force-releasing a character (DM, from Admin) behaves the same way — ownership and edit permission clear together, not just ownership
 - [ ] The claim history log (§26) is append-only — there is no edit or delete control for an individual past entry anywhere in the UI
+- [ ] Every successful claim, release, force-assign, and force-release produces exactly one matching History entry; a failed or cancelled ownership action produces none
+- [ ] A player who is not a campaign member cannot create a custom-item draft for that campaign; becoming a genuine character owner adds membership and then allows the normal draft flow
+- [ ] A player message is the only player action that changes the inbox preview/timestamp and increments unread by one; opening the thread as DM changes only a non-zero unread count to zero, and Clear chat produces an empty preview with zero unread
+- [ ] Recovery lookup accepts one exact `DH-XXXX-XXXX` code and never exposes a browse/list/search-all interface; deleting that character makes the exact code fail immediately
 
 ## 30. Character Sheet Shell, Portrait & Navigation
 
@@ -1054,7 +1057,7 @@ For each boundary, try the largest valid value and then one unit over it. For ro
 - [ ] A session accepts at most 100 distinct attendees and 100,000 whole XP; 101 attendees, duplicate attendees, fractional XP and 100,001 XP are rejected
 - [ ] Campaign/character names stop at 100 characters, first names at 50, messages at 2,000, thread previews at 500, and session summaries/DM notes at 4,000 each
 - [ ] A message thread retains at most 5,000 messages, returns at most 100 per page, and claim history returns at most 50 entries per page without gaps or duplicates between pages
-- [ ] A character accepts at most 50 XP proposals; a campaign accepts at most 200 custom items; and a custom item accepts at most 50 versions
+- [ ] Direct XP-proposal creation and editing are unavailable; a campaign accepts at most 200 custom items, and a custom item accepts at most 50 versions
 - [ ] Custom-item definitions reject unexpected fields, wrong field types, names over 100 characters, text over 4,000 characters, encoded data over 100,000 bytes, arrays/maps over 100 entries, and nesting deeper than 8 levels before opening a Firebase write
 - [ ] Character import rejects a file over 750,000 bytes before reading or parsing it, rejects missing, unexpected or wrongly typed top-level fields, and no accepted import produces a character document over 900,000 encoded bytes
 - [ ] Character data rejects arrays over 200 entries, objects over 100 keys and nesting deeper than 8 levels without altering the saved character
@@ -1122,9 +1125,9 @@ sub-components, `CampaignOverview.tsx` plus every file under
 `messageService.ts`, `useThreads`, `useThreadMessages`, `useClaimLogs`,
 `AppHeader.tsx`, `SectionDrawer.tsx`, `RecoveryBackupBanner.tsx`,
 `useInstallMode`, `CampaignsContext.tsx`, `useCampaign`, `usePlayerCharacters`,
-`useArchivedCampaigns`, `useCampaignCharacters`,
-`useXpProposals`, `useUserProfile`, `firestore.rules` in full (622 lines —
-the source for the permission-boundary checks in §29), `firebase.ts`
+`useArchivedCampaigns`, `useCampaignCharacters`, `useUserProfile`,
+`firestore.rules` in full (the source for the permission-boundary checks in
+§29), `firebase.ts`
 (including explicit multi-tab persistent offline-cache configuration),
 `main.tsx`/`pwaUpdateState.ts` (the service-worker install and update flow
 behind §23), `PortraitUpload.tsx`/`portraitService.ts` (crop to 256 px and

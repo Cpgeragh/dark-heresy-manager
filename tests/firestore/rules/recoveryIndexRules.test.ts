@@ -1,170 +1,85 @@
-// tests/firestore/rules/recoveryIndexRules.test.ts
-
-import { describe, it, expect } from "vitest";
-import { getTestEnv } from "../setup";
+import { afterEach, describe, expect, it } from "vitest";
 import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
+import { getTestEnv } from "../setup";
 import {
-  dbAs,
-  dbAnon,
   createCampaign,
+  createCharacter,
   createRecoveryIndexEntry,
+  dbAnon,
+  dbAs,
 } from "../helpers";
 
-describe("Firestore Rules: recoveryIndex", () => {
-  const recoveryCode = "DH-TEST-1234";
+const campaignId = "c1";
+const characterId = "char1";
+const recoveryCode = "DH-TEST-0001";
 
-  it("authenticated users may read recoveryIndex", async () => {
+describe("Firestore Rules: Recovery Index", () => {
+  afterEach(async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
-
-    await createRecoveryIndexEntry(env, recoveryCode, {
-      campaignId: "camp1",
-      characterId: "char1",
-    });
-
-    const userDb = dbAs(env, "player-1");
-
-    await expect(
-      userDb.collection("recoveryIndex").doc(recoveryCode).get()
-    ).resolves.toBeDefined();
+    await env.clearFirestore();
   });
 
-  it("authenticated users cannot enumerate recoveryIndex entries", async () => {
+  it("allows authenticated exact-code reads but denies enumeration and anonymous reads", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
+    await createRecoveryIndexEntry(env, recoveryCode, { campaignId, characterId });
 
-    await createRecoveryIndexEntry(env, "CODE1", {
-      campaignId: "camp1",
-      characterId: "char1",
-    });
-    await createRecoveryIndexEntry(env, "CODE2", {
-      campaignId: "camp1",
-      characterId: "char2",
-    });
-
-    const userDb = dbAs(env, "player-1");
-
-    await expect(
-      userDb.collection("recoveryIndex").get()
-    ).rejects.toThrow();
+    await expect(dbAs(env, "user-1").collection("recoveryIndex").doc(recoveryCode).get()).resolves.toBeDefined();
+    await expect(dbAs(env, "user-1").collection("recoveryIndex").get()).rejects.toThrow();
+    await expect(dbAnon(env).collection("recoveryIndex").doc(recoveryCode).get()).rejects.toThrow();
   });
 
-  it("unauthenticated users cannot read recoveryIndex", async () => {
+  it("allows the campaign DM to repair a missing matching index entry", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
-
-    await createRecoveryIndexEntry(env, recoveryCode, {
-      campaignId: "camp1",
-      characterId: "char1",
-    });
-
-    const anonDb = dbAnon(env);
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, characterId, { recoveryCode });
 
     await expect(
-      anonDb.collection("recoveryIndex").doc(recoveryCode).get()
-    ).rejects.toThrow();
-  });
-
-  it("authenticated non-DM users cannot write recoveryIndex entries", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-
-    const userDb = dbAs(env, "player-1");
-
-    await expect(
-      userDb.collection("recoveryIndex").doc("NEWCODE").set({
-        campaignId: "campX",
-        characterId: "charX",
-      })
-    ).rejects.toThrow();
-  });
-
-  it("DM can write recoveryIndex entries when they own the campaign", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-
-    await createCampaign(env, "camp1", "dm-1");
-
-    const dmDb = dbAs(env, "dm-1");
-
-    await expect(
-      dmDb.collection("recoveryIndex").doc("DMCODE").set({
-        campaignId: "camp1",
-        characterId: "char1",
+      dbAs(env, "dm-1").collection("recoveryIndex").doc(recoveryCode).set({
+        campaignId,
+        characterId,
       })
     ).resolves.toBeUndefined();
   });
 
-  it("DM can update an existing recoveryIndex entry they own", async () => {
+  it("rejects non-DM, malformed, mismatched, and unexpected index creates", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, characterId, { recoveryCode });
 
-    await createCampaign(env, "camp1", "dm-1");
-    await createRecoveryIndexEntry(env, "UPDATECODE", {
-      campaignId: "camp1",
-      characterId: "char1",
-    });
-
-    const dmDb = dbAs(env, "dm-1");
-
-    await expect(
-      dmDb.collection("recoveryIndex").doc("UPDATECODE").update({
-        campaignId: "camp1",
-        characterId: "char2",
-      })
-    ).resolves.toBeUndefined();
+    const playerIndex = dbAs(env, "player-1").collection("recoveryIndex");
+    const dmIndex = dbAs(env, "dm-1").collection("recoveryIndex");
+    const value = { campaignId, characterId };
+    await expect(playerIndex.doc(recoveryCode).set(value)).rejects.toThrow();
+    await expect(dmIndex.doc("INVALID").set(value)).rejects.toThrow();
+    await expect(dmIndex.doc("DH-WRNG-0001").set(value)).rejects.toThrow();
+    await expect(dmIndex.doc(recoveryCode).set({ ...value, createdAt: new Date() })).rejects.toThrow();
   });
 
-  it("DM cannot write recoveryIndex entries if campaign does not exist", async () => {
+  it("makes index records immutable", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
-
-    const dmDb = dbAs(env, "dm-1");
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, characterId, { recoveryCode });
+    await createRecoveryIndexEntry(env, recoveryCode, { campaignId, characterId });
 
     await expect(
-      dmDb.collection("recoveryIndex").doc("NO-CAMP").set({
-        campaignId: "nonexistent",
-        characterId: "char1",
+      dbAs(env, "dm-1").collection("recoveryIndex").doc(recoveryCode).update({
+        characterId: "other",
       })
     ).rejects.toThrow();
   });
 
-  it("DM cannot write recoveryIndex for campaigns they do NOT own", async () => {
+  it("allows deletion only with deletion of the indexed character", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
-
-    // Campaign owned by other DM
-    await createCampaign(env, "campX", "other-dm");
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, characterId, { recoveryCode });
+    await createRecoveryIndexEntry(env, recoveryCode, { campaignId, characterId });
 
     const dmDb = dbAs(env, "dm-1");
+    await expect(dmDb.collection("recoveryIndex").doc(recoveryCode).delete()).rejects.toThrow();
 
-    await expect(
-      dmDb.collection("recoveryIndex").doc("WRONG-DM").set({
-        campaignId: "campX",
-        characterId: "charX",
-      })
-    ).rejects.toThrow();
-  });
-
-  it("DM cannot write recoveryIndex if campaignId is missing", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-
-    await createCampaign(env, "camp1", "dm-1");
-
-    const dmDb = dbAs(env, "dm-1");
-
-    await expect(
-      dmDb.collection("recoveryIndex").doc("MISSING-CAMPID").set({
-        // campaignId missing
-        characterId: "char1",
-      })
-    ).rejects.toThrow();
-  });
-
-  it("DM cannot write recoveryIndex if characterId is missing", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-
-    await createCampaign(env, "camp1", "dm-1");
-
-    const dmDb = dbAs(env, "dm-1");
-
-    await expect(
-      dmDb.collection("recoveryIndex").doc("NO-CHARID").set({
-        campaignId: "camp1",
-        // characterId omitted
-      })
-    ).rejects.toThrow();
+    const batch = dmDb.batch();
+    batch.delete(dmDb.collection("recoveryIndex").doc(recoveryCode));
+    batch.delete(dmDb.collection(`campaigns/${campaignId}/characters`).doc(characterId));
+    await expect(batch.commit()).resolves.toBeUndefined();
   });
 });

@@ -48,9 +48,10 @@ describe("Firestore Rules: Sessions", () => {
     await createSession(env, "c1", "s1");
 
     const playerDb = dbAs(env, "player-1");
-    await expect(
-      playerDb.collection("campaigns/c1/sessions").get()
-    ).resolves.toBeDefined();
+    const sessions = playerDb.collection("campaigns/c1/sessions");
+    await expect(sessions.limit(200).get()).resolves.toBeDefined();
+    await expect(sessions.get()).rejects.toThrow();
+    await expect(sessions.limit(201).get()).rejects.toThrow();
   });
 
   it("unauthenticated user cannot read sessions", async () => {
@@ -127,6 +128,27 @@ describe("Firestore Rules: Sessions", () => {
         attendees: [],
         createdAt: new Date(),
       })
+    ).rejects.toThrow();
+  });
+
+  it("DM cannot create a session with duplicate attendees or unexpected fields", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await createCampaign(env, "c1", "dm-1");
+    const sessions = dbAs(env, "dm-1").collection("campaigns/c1/sessions");
+    const valid = {
+      date: new Date(),
+      summary: "Summary",
+      dmNotes: "",
+      xpAwarded: 50,
+      attendees: ["char-1"],
+      createdAt: new Date(),
+    };
+
+    await expect(
+      sessions.doc("duplicates").set({ ...valid, attendees: ["char-1", "char-1"] })
+    ).rejects.toThrow();
+    await expect(
+      sessions.doc("extra").set({ ...valid, unexpected: true })
     ).rejects.toThrow();
   });
 

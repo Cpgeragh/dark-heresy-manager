@@ -20,8 +20,6 @@ describe("Firestore Rules: Character Ownership Protection", () => {
     await createCharacter(env, campaignId, characterId, {
       userId: "player-1",
       isEditableByPlayer: true,
-      recoveryCode: "RCODE",
-      name: "Original Name",
     });
   }
 
@@ -73,11 +71,11 @@ describe("Firestore Rules: Character Ownership Protection", () => {
     await expect(
       playerDb.collection(`campaigns/${campaignId}/characters`)
         .doc(characterId)
-        .update({ name: "Updated Name" })
+        .update({ "header.characterName": "Updated Name" })
     ).resolves.toBeUndefined();
   });
 
-  it("DM CAN change all protected fields", async () => {
+  it("DM can change ownership flags but cannot silently replace the Recovery Code", async () => {
     const env = await getTestEnv() as RulesTestEnvironment;
     await setup(env);
 
@@ -89,8 +87,14 @@ describe("Firestore Rules: Character Ownership Protection", () => {
         .update({
           userId: "newplayer",
           isEditableByPlayer: false,
-          recoveryCode: "NEWCODE",
+          recoveryCode: "DH-TEST-0001",
         })
     ).resolves.toBeUndefined();
+
+    await expect(
+      dmDb.collection(`campaigns/${campaignId}/characters`)
+        .doc(characterId)
+        .update({ recoveryCode: "DH-NEWW-0001" })
+    ).rejects.toThrow();
   });
 });

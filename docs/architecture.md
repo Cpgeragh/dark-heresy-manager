@@ -214,7 +214,7 @@ The GM inbox reuses the thread and input components inside page content. The dra
 - snapshot-error handling;
 - stale-data and stale-callback protection.
 
-Domain hooks retain their query construction and snapshot mapping. The shared lifecycle is used by campaign, archived-campaign, character, session, thread, message, XP-proposal, claim-log, profile and custom-item subscriptions.
+Domain hooks retain their query construction and snapshot mapping. The shared lifecycle is used by campaign, archived-campaign, character, session, thread, message, claim-log, profile and custom-item subscriptions.
 
 Live collection queries must also have an explicit upper bound. The central client-side values in `constants/firestoreLimits.ts` currently cap:
 
@@ -244,7 +244,7 @@ These limits are cost and abuse circuit-breakers, not substitutes for write-time
 | Thread preview            |                                                                             500 characters | Keeps frequently read inbox summaries small                                      |
 | Message history           |                                           5,000 retained per thread; 100 returned per page | Bounds long-term growth and every live/history read                              |
 | Claim history             |                                                                       50 returned per page | Keeps the DM-only audit view bounded                                             |
-| XP proposals              |                                                                           50 per character | Prevents proposal spam while leaving ample pending/history capacity              |
+| Legacy XP proposals       |                                Direct create and update disabled; cleanup reads capped at 440 | The current product has no XP-proposal workflow, so the obsolete write surface is closed while bounded deletion compatibility remains |
 | Custom items              |                                                                           200 per campaign | Supports extensive homebrew libraries while matching the bounded library query   |
 | Custom-item versions      |                                                                                50 per item | Preserves useful history without unlimited version growth                        |
 | Custom-item content       | 100-character name; 4,000-character text; 100,000 encoded bytes; 100 entries/keys; depth 8 | Bounds user-controlled nested definitions independently of document limits       |
@@ -351,7 +351,7 @@ This keeps conversion, calculation, filtering and ordering independent from `Ski
 
 ### Sessions, XP and messaging
 
-`useSessions` exposes subscribed session state and service-backed mutations. `useXpProposals` exposes proposal state while `xpService` owns proposal, approval and rejection writes.
+`useSessions` exposes subscribed session state and service-backed mutations. There is no current XP-proposal UI, hook or service. The legacy `xpProposals` path remains readable only to the campaign DM or character owner through a bounded query, and direct create/update writes are denied until a real workflow is designed behind an appropriate protected boundary.
 
 `useThreads` provides a bounded thread-summary subscription. `useThreadMessages` keeps only the latest 100 messages live, ordered by timestamp and document ID for a stable cursor; pressing Load older messages performs a bounded one-shot read for the preceding page and merges it without duplicates. Thread expansion and drawer visibility remain local presentation state, closing the player drawer tears down its message listener, and prepending history does not trigger the new-message auto-scroll.
 
@@ -385,11 +385,17 @@ Services and subscription hooks reuse these references where they make the store
 
 ### Firestore security boundary
 
-Firestore rules are the authoritative boundary for client access. In addition to ownership checks, current rules validate the permitted keys, primitive types and relevant size limits for user accounts, campaign metadata, recovery records, device-link records, sessions, message-thread summaries and individual messages. Client validation improves feedback but does not replace these checks.
+Firestore rules are the authoritative boundary for client access. In addition to ownership checks, current rules reject unexpected document fields and validate the stored shape, primitive types and relevant size limits for user accounts, public profiles, campaign metadata, characters, custom items and versions, recovery records, device-link records, sessions, claim logs, message-thread summaries and individual messages. Identity recovery, reclaim, secret and link-proof documents also require exact `DH-XXXX-XXXX` codes and bounded identity fields. Deep polymorphic character and custom-item content is additionally checked by the exact client validator because Firestore's 1,000-expression evaluation ceiling prevents recursively reproducing the complete TypeScript schema in one rule evaluation; the rules still enforce exact top-level document fields, critical nested discriminators, collection sizes and Firestore's own document-size ceiling. Client validation improves feedback but does not replace the rule boundary.
 
-Recovery lookup is intentionally transitional. Authenticated clients may fetch one exact `recoveryIndex/{code}` document so the current claim flow remains usable, but collection listing and filtered queries are denied. [ADR 0008](./adr/0008-keep-exact-recovery-lookup-temporarily.md) records this boundary until Stage 3 moves lookup behind HMAC-derived server-side identifiers.
+Recovery lookup is intentionally transitional. Authenticated clients may fetch one exact `recoveryIndex/{code}` document so the current claim flow remains usable, but collection listing and filtered queries are denied. A character can be created only when the same atomic write creates the matching index record. An index record must use the exact Recovery Code format and point to a character storing that same code; it cannot be repointed, and it can be deleted only when the indexed character is deleted in the same atomic operation. [ADR 0008](./adr/0008-keep-exact-recovery-lookup-temporarily.md) records this boundary until Stage 3 moves lookup behind HMAC-derived server-side identifiers.
 
-Message owners may update a thread summary only through the send-message state transition: the last message and timestamp change and the unread count rises by exactly one. A DM may reply or reset the unread count. Linked devices may identify the effective primary account, while unrelated sender identities are rejected.
+Message owners may update a thread summary only through the send-message state transition: the last message and timestamp change and the unread count rises by exactly one. A DM summary write must be one of three shapes: a reply changing only preview/timestamp, a non-zero unread count changing to zero, or a clear operation producing an empty preview/timestamp and zero unread count. Preview text is capped at 500 characters. Linked devices may identify the effective primary account, while unrelated sender identities are rejected.
+
+Claim-log documents are exact-schema, append-only audit records. A create is allowed only when `getAfter()` observes the matching character ownership transition in the same atomic operation; a plausible-looking standalone log therefore fails. Log deletion is allowed only as part of deletion of the parent character. The broad direct claim and campaign-membership transitions remain temporarily available for the existing claim interface and are replaced by the protected Stage 3 operation.
+
+Custom-item drafts may be created only by the campaign DM or a user present in the campaign membership array, with linked devices acting as their primary identity. Item and version documents have exact top-level schemas, bounded names, text, maps, arrays and version numbers. Only the DM may publish, archive, restore or permanently remove library definitions.
+
+Firestore list operations must carry a compatible explicit limit. Current rule ceilings are 100 campaigns, 100 characters in one campaign, 1,000 owned characters through the collection group, 200 sessions, 100 thread summaries, 100 messages, 200 custom items, 100 versions, and 440 claim-log or legacy XP-proposal records for protected cleanup compatibility. Public user profiles and both Recovery Index collections are exact-document lookup surfaces and cannot be listed.
 
 ### Bounded bulk operations
 
@@ -424,7 +430,6 @@ Hosting responses are configured with a restrictive Content Security Policy, cli
 | `recoveryLookupService` | Resolve recovery lookups into typed outcomes                                                                     |
 | `sessionService`        | Create, update and delete sessions and apply session XP                                                          |
 | `userAccountService`    | Synchronise account state, track recovery backup and complete onboarding                                         |
-| `xpService`             | Propose, approve and reject XP expenditure                                                                       |
 
 Services throw useful errors. Hooks and components decide how those errors are presented. A failure must not be logged or translated repeatedly at several layers.
 

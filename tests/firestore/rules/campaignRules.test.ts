@@ -31,7 +31,10 @@ describe("Firestore Rules: Campaigns", () => {
 
     const playerDb = dbAs(env, "player-1");
 
-    await expect(playerDb.collection("campaigns").get()).resolves.toBeDefined();
+    const campaigns = playerDb.collection("campaigns");
+    await expect(campaigns.limit(100).get()).resolves.toBeDefined();
+    await expect(campaigns.get()).rejects.toThrow();
+    await expect(campaigns.limit(101).get()).rejects.toThrow();
   });
 
   it("DM may create a campaign when dmId matches their uid", async () => {
@@ -43,6 +46,9 @@ describe("Firestore Rules: Campaigns", () => {
       dmDb.collection("campaigns").doc("c-new").set({
         dmId: "dm-1",
         name: "Created by DM",
+        memberIds: [],
+        createdAt: new Date(),
+        archivedAt: null,
       })
     ).resolves.toBeUndefined();
   });

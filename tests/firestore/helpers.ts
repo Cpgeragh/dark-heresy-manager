@@ -4,6 +4,7 @@ import type {
   RulesTestEnvironment,
   RulesTestContext
 } from "@firebase/rules-unit-testing";
+import { createEmptyCharacterData } from "../../src/utils/characterFactory";
 
 /**
  * Get an authenticated Firestore client for a user id.
@@ -19,6 +20,32 @@ export function dbAnon(env: RulesTestEnvironment) {
   return env.unauthenticatedContext().firestore();
 }
 
+export function validCampaignDocument(
+  dmId: string,
+  name = "Test Campaign",
+  overrides: Record<string, unknown> = {}
+) {
+  return {
+    dmId,
+    name,
+    memberIds: [],
+    createdAt: new Date(),
+    archivedAt: null,
+    ...overrides,
+  };
+}
+
+export function validCharacterDocument(
+  campaignId: string,
+  recoveryCode: string,
+  overrides: Record<string, unknown> = {}
+) {
+  return {
+    ...createEmptyCharacterData({ campaignId, recoveryCode, characterName: "Test Acolyte" }),
+    ...overrides,
+  };
+}
+
 /**
  * Create a campaign document bypassing security rules.
  * 
@@ -32,11 +59,9 @@ export async function createCampaign(
   extra: Record<string, unknown> = {}
 ) {
   await env.withSecurityRulesDisabled(async (ctx: RulesTestContext) => {
-    await ctx.firestore().collection("campaigns").doc(campaignId).set({
-      dmId,
-      name: `Campaign ${campaignId}`,
-      ...extra,
-    });
+    await ctx.firestore().collection("campaigns").doc(campaignId).set(
+      validCampaignDocument(dmId, `Campaign ${campaignId}`, extra)
+    );
   });
   
   // CRITICAL: Wait for the campaign to be readable by verifying with an authenticated read
@@ -60,19 +85,12 @@ export async function createCharacter(
   overrides: Record<string, unknown> = {}
 ) {
   await env.withSecurityRulesDisabled(async (ctx: RulesTestContext) => {
-    const base = {
-      characterId,
+    const base = createEmptyCharacterData({
       campaignId,
-      name: `Character ${characterId}`,
-
-      // VALID defaults — never null
+      recoveryCode: "DH-TEST-0001",
       userId: "UNASSIGNED",
-      isEditableByPlayer: false,
-      recoveryCode: "none",
-
-      createdAt: 1,
-      updatedAt: 1,
-    };
+      characterName: `Character ${characterId}`,
+    });
 
     await ctx.firestore()
       .collection(`campaigns/${campaignId}/characters`)

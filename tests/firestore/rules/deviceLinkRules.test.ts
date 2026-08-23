@@ -40,41 +40,58 @@ describe("Firestore Rules: linkProofs", () => {
 
   it("can create a proof when the code matches the target's identitySecret", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
-    await createIdentitySecretEntry(env, "primary-1", { code: "DH-CORRECT" });
+    await createIdentitySecretEntry(env, "primary-1", { code: "DH-LINK-0001" });
 
     await expect(
       dbAs(env, "device-1").collection("linkProofs").doc("device-1")
-        .set({ primaryUid: "primary-1", code: "DH-CORRECT" })
+        .set({ primaryUid: "primary-1", code: "DH-LINK-0001" })
     ).resolves.toBeUndefined();
   });
 
   it("cannot create a proof with the wrong code", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
-    await createIdentitySecretEntry(env, "primary-1", { code: "DH-CORRECT" });
+    await createIdentitySecretEntry(env, "primary-1", { code: "DH-LINK-0001" });
 
     await expect(
       dbAs(env, "device-1").collection("linkProofs").doc("device-1")
-        .set({ primaryUid: "primary-1", code: "DH-WRONG" })
+        .set({ primaryUid: "primary-1", code: "DH-WRNG-0001" })
     ).rejects.toThrow();
   });
 
   it("cannot create a proof under a doc id that isn't your uid", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
-    await createIdentitySecretEntry(env, "primary-1", { code: "DH-CORRECT" });
+    await createIdentitySecretEntry(env, "primary-1", { code: "DH-LINK-0001" });
 
     await expect(
       dbAs(env, "device-1").collection("linkProofs").doc("device-2")
-        .set({ primaryUid: "primary-1", code: "DH-CORRECT" })
+        .set({ primaryUid: "primary-1", code: "DH-LINK-0001" })
     ).rejects.toThrow();
   });
 
   it("unauthenticated user cannot create a proof", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
-    await createIdentitySecretEntry(env, "primary-1", { code: "DH-CORRECT" });
+    await createIdentitySecretEntry(env, "primary-1", { code: "DH-LINK-0001" });
 
     await expect(
       dbAnon(env).collection("linkProofs").doc("device-1")
-        .set({ primaryUid: "primary-1", code: "DH-CORRECT" })
+        .set({ primaryUid: "primary-1", code: "DH-LINK-0001" })
+    ).rejects.toThrow();
+  });
+
+  it("rejects malformed codes, self-targets, and unexpected proof fields", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await createIdentitySecretEntry(env, "primary-1", { code: "DH-LINK-0001" });
+    await createIdentitySecretEntry(env, "device-1", { code: "DH-SELF-0001" });
+    const proof = dbAs(env, "device-1").collection("linkProofs").doc("device-1");
+
+    await expect(
+      proof.set({ primaryUid: "primary-1", code: "bad" })
+    ).rejects.toThrow();
+    await expect(
+      proof.set({ primaryUid: "device-1", code: "DH-SELF-0001" })
+    ).rejects.toThrow();
+    await expect(
+      proof.set({ primaryUid: "primary-1", code: "DH-LINK-0001", unexpected: true })
     ).rejects.toThrow();
   });
 });
@@ -90,7 +107,7 @@ describe("Firestore Rules: userLinks", () => {
 
   it("can create a link when a matching proof exists", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
-    await createLinkProof(env, "device-1", { primaryUid: "primary-1", code: "DH-CORRECT" });
+    await createLinkProof(env, "device-1", { primaryUid: "primary-1", code: "DH-LINK-0001" });
 
     await expect(
       dbAs(env, "device-1").collection("userLinks").doc("device-1")
@@ -109,7 +126,7 @@ describe("Firestore Rules: userLinks", () => {
 
   it("cannot create a link to a different primary than the proof names", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
-    await createLinkProof(env, "device-1", { primaryUid: "primary-1", code: "DH-CORRECT" });
+    await createLinkProof(env, "device-1", { primaryUid: "primary-1", code: "DH-LINK-0001" });
 
     await expect(
       dbAs(env, "device-1").collection("userLinks").doc("device-1")
@@ -119,7 +136,7 @@ describe("Firestore Rules: userLinks", () => {
 
   it("cannot link a device to itself", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
-    await createLinkProof(env, "device-1", { primaryUid: "device-1", code: "DH-CORRECT" });
+    await createLinkProof(env, "device-1", { primaryUid: "device-1", code: "DH-LINK-0001" });
 
     await expect(
       dbAs(env, "device-1").collection("userLinks").doc("device-1")
@@ -127,9 +144,22 @@ describe("Firestore Rules: userLinks", () => {
     ).rejects.toThrow();
   });
 
+  it("rejects oversized and unexpected device-link fields", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await createLinkProof(env, "device-1", { primaryUid: "primary-1", code: "DH-LINK-0001" });
+    const link = dbAs(env, "device-1").collection("userLinks").doc("device-1");
+
+    await expect(
+      link.set({ primaryUid: "x".repeat(1501), linkedAt: new Date() })
+    ).rejects.toThrow();
+    await expect(
+      link.set({ primaryUid: "primary-1", linkedAt: new Date(), unexpected: true })
+    ).rejects.toThrow();
+  });
+
   it("can delete your own link", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
-    await createLinkProof(env, "device-1", { primaryUid: "primary-1", code: "DH-CORRECT" });
+    await createLinkProof(env, "device-1", { primaryUid: "primary-1", code: "DH-LINK-0001" });
     await dbAs(env, "device-1").collection("userLinks").doc("device-1")
       .set({ primaryUid: "primary-1", linkedAt: new Date() });
 
