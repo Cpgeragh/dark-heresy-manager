@@ -1,6 +1,6 @@
 # Manual Test Checklist — Complete App
 
-Thirty-one pages and cross-cutting sections, containing 611 checks. Every item
+Thirty-two pages and cross-cutting sections, containing 619 checks. Every item
 comes from reading the actual logic, not a generic "does it load" pass.
 Check items off as you verify them; anything under **Watch for** is the
 likeliest place a real bug hides. Coverage notes are at the bottom — read
@@ -1091,13 +1091,30 @@ For each boundary, try the largest valid value and then one unit over it. For ro
 - [ ] Give the same player characters in two different campaigns — the Dashboard collection-group ownership query returns both owned characters and no character owned by another user
 - [ ] Before an approved production index deployment, confirm `firebase.json` points to `firestore.indexes.json`, the reviewed file contains `memberIds CONTAINS` plus `archivedAt ASC`, and the deployment is limited to indexes rather than rules or hosting
 
+## 32. Local Deployment Safety
+
+These checks exercise the repository's offline dependency, credential and build gate. Use only synthetic values when deliberately triggering a failure; never copy a real credential into a fixture. The checker must remain local and must not print the value that caused a match.
+
+### How to test this system
+
+Run each focused command from the project folder. Restore every temporary synthetic fixture after confirming the expected failure. The existing `serviceAccountKey.json` remains an expected blocker until Stage 4 replaces and revokes that credential, so distinguish that deliberate finding from a checker malfunction.
+
+- [ ] Run `npm run check:secrets` with the current project — it states that it performs no network request or upload, prints only the approved `VITE_FIREBASE_API_KEY` variable name (not its value), and fails closed on the existing service-account file without exposing any credential field value
+- [ ] Add a temporary ignored environment fixture containing only `VITE_FIREBASE_API_KEY`, then try an unapproved or secret-named variable — the public setting is accepted when ignored, while the other variable is rejected by name without its value appearing in output
+- [ ] In a disposable fixture directory, add synthetic service-account fields, a synthetic private-key marker and credential-like filenames — each is rejected locally, and neither the synthetic key body nor field values are printed
+- [ ] Exercise the supported synthetic GitHub, AWS, Slack and live Stripe token shapes — each produces a blocking path/type finding without echoing the matched token
+- [ ] Put a synthetic `DH-XXXX-XXXX`-shaped non-placeholder value in `tests/` and then in production source — the test fixture is allowed, the production copy is rejected, and the code itself is not printed
+- [ ] Reference a secret-named `VITE_` variable or expose the complete `import.meta.env` object from production source — the checker rejects the browser exposure; the approved Firebase public key and Vite's built-in environment flags continue to pass
+- [ ] Run `npm run check:lockfile`, then create disposable direct-dependency drift or a second lockfile — the current lock passes offline, while either inconsistent fixture fails before a build begins
+- [ ] After Stage 4 removes the service-account blocker, run `npm run check:deployment:local` — it completes the local safety checks, production build, application tests and Firestore emulator rules tests; no online vulnerability audit runs unless network access is separately approved, and no source or secret is uploaded to an external scanner
+
 ---
 
 ## Coverage notes
 
 This checklist covers the 20 character-sheet sections, the cross-cutting
 systems, and the app-shell pages outside the character sheet. Sections
-21–31 cover systems and pages such as Dashboard, Onboarding, Settings,
+21–32 cover systems and pages such as Dashboard, Onboarding, Settings,
 Campaign Overview, and Messages.
 
 **Character-sheet source review (§1–20):** The reviewed scope includes every
@@ -1121,7 +1138,7 @@ reference pickers, both row components, and the
 static roll-range label rather than an interactive roller; no
 manual roll-button test is therefore required.
 
-**App-shell and account-system source review (§23–31):** The reviewed scope
+**App-shell and account-system source review (§23–32):** The reviewed scope
 includes `App.tsx` (route shell, auth gate, onboarding gate, NameGate),
 `useAuth`, `useDeviceLink`,
 `useLinkDevice`, `identityService.ts`, `deviceLinkService.ts`,

@@ -11,7 +11,9 @@ node_modules
 dist
 dist-ssr
 *.local
-.env
+.env*
+!.env.example
+!.env.sample
 firebase-debug.log
 .firebase/
 
@@ -26,7 +28,14 @@ firebase-debug.log
 *.sln
 *.sw?
 
-serviceAccountKey.json
+serviceAccount*.json
+service-account*.json
+*serviceAccount*.json
+*service-account*.json
+*.key
+*.pem
+*.p12
+*.pfx
 
 # Reference screenshots (local only)
 reference-images/

@@ -432,6 +432,27 @@ When deployment is separately approved, the prepared index-only correction is ap
 
 Hosting responses are configured with a restrictive Content Security Policy, clickjacking protection, MIME sniffing protection, a no-referrer policy, disabled camera/geolocation/microphone permissions and same-origin isolation headers. HTML, service-worker and manifest files retain revalidation-oriented caching, while hashed assets remain immutable. These are repository settings only until an approved deployment; deployed-header verification belongs to the deployment checks and restore/test stage.
 
+### Local dependency and secret safety
+
+`scripts/checkLocalSafety.mjs` is a deterministic, local-only deployment guard. It reads files inside the selected project directory and does not make network requests, invoke an external scanner or upload source, dependency data or matched values. Its output reports only the affected path and type of finding; secret values are never echoed.
+
+The secret scope checks environment-file names and variable names, credential/private-key filenames and content markers, common provider-token shapes, Recovery Code-shaped values outside approved tests and documentation, and unsafe Vite environment exposure. Generated dependency, build, emulator and reference-image directories are excluded, while ordinary source, configuration, documentation, tests and local text artefacts remain covered. Recovery Codes in `tests/` and `docs/` are recognised as deliberate fixtures; production source is not exempt.
+
+Only `VITE_FIREBASE_API_KEY` is approved as a public build-time setting. Firebase web configuration is sent to every browser by design and is protected by Authentication, App Check when introduced, and Firestore rules rather than by treating its API key as a server secret. The local `.env` remains ignored and the checker prints its approved variable name but never its value. Other environment variables are rejected because any `VITE_` value referenced by application code is embedded in the browser bundle.
+
+The lockfile scope requires one npm version-3 `package-lock.json`, exact agreement between its root direct dependency maps and `package.json`, and a locked package entry for every direct production and development dependency. This detects local manifest/lock drift without contacting the npm registry; it is not a vulnerability-database audit.
+
+The repeatable commands are:
+
+- `npm run check:secrets` for secret, environment and browser-exposure checks;
+- `npm run check:lockfile` for offline dependency consistency;
+- `npm run check:safety` for both local scopes;
+- `npm run check:deployment:local` for the safety checks followed by the production build and both existing automated test suites.
+
+The safety gate currently fails closed because `serviceAccountKey.json` is still stored in the project folder and contains a service-account private key. The file is ignored and the guard leaves it untouched, but ignore rules do not remove the credential or prevent OneDrive synchronisation and local copies. Stage 4 replaces and revokes that credential, removes the JSON from the project workspace, and switches local administration to credentials held outside the repository; until then, a failed secret check is the intended safe result.
+
+An online dependency-vulnerability audit is deliberately absent from the local gate. It may contact a package registry and disclose dependency metadata, so it requires separate network approval and must never be represented as part of an offline check. No source or secrets may be submitted to any external scanning service.
+
 ### Service responsibilities
 
 | Service                 | Responsibility                                                                                                   |
