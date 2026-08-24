@@ -17,6 +17,7 @@ import {
   assertFirestoreDocumentId,
   assertString,
 } from "../utils/firebaseValidation";
+import { runSingleFlight } from "../utils/singleFlight";
 
 /**
  * Sends a message in a character-DM thread and updates the thread summary.
@@ -42,32 +43,45 @@ export async function sendMessage(
     throw new Error(`Message cannot exceed ${PRODUCT_LIMITS.messageCharacters} characters.`);
   }
 
-  const batch = writeBatch(db);
+  await runSingleFlight(
+    "message:send",
+    [campaignId, characterId, fromUid, trimmedText, isFromPlayer],
+    async () => {
+      const batch = writeBatch(db);
 
-  const messagesRef = collection(db, "campaigns", campaignId, "threads", characterId, "messages");
-  const messageRef = doc(messagesRef);
+      const messagesRef = collection(
+        db,
+        "campaigns",
+        campaignId,
+        "threads",
+        characterId,
+        "messages"
+      );
+      const messageRef = doc(messagesRef);
 
-  batch.set(messageRef, {
-    fromUid,
-    text: trimmedText,
-    timestamp: serverTimestamp(),
-    read: false,
-  });
+      batch.set(messageRef, {
+        fromUid,
+        text: trimmedText,
+        timestamp: serverTimestamp(),
+        read: false,
+      });
 
-  const threadRef = doc(db, "campaigns", campaignId, "threads", characterId);
+      const threadRef = doc(db, "campaigns", campaignId, "threads", characterId);
 
-  batch.set(
-    threadRef,
-    {
-      characterId,
-      lastMessage: trimmedText.slice(0, PRODUCT_LIMITS.threadSummaryPreviewCharacters),
-      lastTimestamp: serverTimestamp(),
-      ...(isFromPlayer ? { unreadForDM: increment(1) } : {}),
-    },
-    { merge: true }
+      batch.set(
+        threadRef,
+        {
+          characterId,
+          lastMessage: trimmedText.slice(0, PRODUCT_LIMITS.threadSummaryPreviewCharacters),
+          lastTimestamp: serverTimestamp(),
+          ...(isFromPlayer ? { unreadForDM: increment(1) } : {}),
+        },
+        { merge: true }
+      );
+
+      await batch.commit();
+    }
   );
-
-  await batch.commit();
 }
 
 /**

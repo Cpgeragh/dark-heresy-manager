@@ -171,6 +171,28 @@ describe("sendMessage", () => {
     );
     expect(mockWriteBatch).not.toHaveBeenCalled();
   });
+
+  it("collapses an identical duplicate send while the first is in flight", async () => {
+    let finish!: () => void;
+    const pending = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    mockBatchCommit.mockReturnValueOnce(pending);
+
+    const first = sendMessage("c1", "char-1", "p1", "Hello", true);
+    const duplicate = sendMessage("c1", "char-1", "p1", "Hello", true);
+
+    await vi.waitFor(() => expect(mockWriteBatch).toHaveBeenCalledOnce());
+    finish();
+    await Promise.all([first, duplicate]);
+    expect(mockBatchCommit).toHaveBeenCalledOnce();
+  });
+
+  it("does not collapse two different messages sent back to back", async () => {
+    await sendMessage("c1", "char-1", "p1", "First", true);
+    await sendMessage("c1", "char-1", "p1", "Second", true);
+    expect(mockBatchCommit).toHaveBeenCalledTimes(2);
+  });
 });
 
 // ── markThreadRead ────────────────────────────────────────────────────────────

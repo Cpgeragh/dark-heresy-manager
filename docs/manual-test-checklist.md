@@ -980,6 +980,7 @@ Open the same character thread as player and DM in separate profiles. Start empt
 - [ ] As a player, opening Messages with no character context (i.e. not on a character sheet) shows a prompt to open a character sheet first rather than an empty/broken drawer
 - [ ] As DM, the inbox (inside Campaign Overview, §26) lists every character's thread at once, each with a live unread count and a last-message preview, ordered most-recent-first
 - [ ] Sending a message as the player increments the DM's unread badge for that specific character's thread; opening that thread as DM clears its badge back to zero
+- [ ] Double-clicking Send, or a rapid duplicate submit, writes only one message and increments the DM's unread badge only once, not two identical messages
 - [ ] Send from a linked player or DM device — the message succeeds as the linked primary identity; an unrelated identity cannot spoof the sender or alter the unread count
 - [ ] DM "Clear chat" requires literally typing DELETE, permanently deletes every message in that thread, and resets the thread's last-message preview back to empty — confirm there is no way to recover a cleared thread
 - [ ] Clear a disposable thread containing more than 200 messages; all pages are removed and the thread summary resets without hitting Firestore's batch-write ceiling
