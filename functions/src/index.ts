@@ -26,6 +26,18 @@ import {
   type ClaimCharacterInput,
   type ClaimCharacterResult,
 } from "./operations/claimCharacter.js";
+import {
+  releaseCharacter as runReleaseCharacter,
+  type ReleaseCharacterInput,
+} from "./operations/releaseCharacter.js";
+import {
+  forceReleaseCharacter as runForceReleaseCharacter,
+  type ForceReleaseCharacterInput,
+} from "./operations/forceReleaseCharacter.js";
+import {
+  forceAssignCharacter as runForceAssignCharacter,
+  type ForceAssignCharacterInput,
+} from "./operations/forceAssignCharacter.js";
 
 export const ping = onCall(() => {
   return { ok: true };
@@ -112,3 +124,46 @@ export const claimCharacter = onCall<ClaimCharacterInput>(
     });
   }
 );
+
+export const releaseCharacter = onCall<ReleaseCharacterInput>((request) => {
+  const callerUid = request.auth?.uid ?? "anonymous";
+  return protectedCallable<ReleaseCharacterInput, void>({
+    request,
+    operation: "release-character",
+    allowedFields: ["campaignId", "characterId"],
+    requiredFields: ["campaignId", "characterId"],
+    rateLimits: [{ key: `release-character:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 }],
+    idempotencyKey: `release-character:${callerUid}:${request.data?.campaignId ?? ""}:${request.data?.characterId ?? ""}`,
+    handler: ({ uid, data }) => runReleaseCharacter(data, uid),
+  });
+});
+
+export const forceReleaseCharacter = onCall<ForceReleaseCharacterInput>((request) => {
+  const callerUid = request.auth?.uid ?? "anonymous";
+  return protectedCallable<ForceReleaseCharacterInput, void>({
+    request,
+    operation: "force-release-character",
+    allowedFields: ["campaignId", "characterId"],
+    requiredFields: ["campaignId", "characterId"],
+    rateLimits: [
+      { key: `force-release-character:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 },
+    ],
+    idempotencyKey: `force-release-character:${callerUid}:${request.data?.campaignId ?? ""}:${request.data?.characterId ?? ""}`,
+    handler: ({ uid, data }) => runForceReleaseCharacter(data, uid),
+  });
+});
+
+export const forceAssignCharacter = onCall<ForceAssignCharacterInput>((request) => {
+  const callerUid = request.auth?.uid ?? "anonymous";
+  return protectedCallable<ForceAssignCharacterInput, void>({
+    request,
+    operation: "force-assign-character",
+    allowedFields: ["campaignId", "characterId", "targetUid"],
+    requiredFields: ["campaignId", "characterId", "targetUid"],
+    rateLimits: [
+      { key: `force-assign-character:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 },
+    ],
+    idempotencyKey: `force-assign-character:${callerUid}:${request.data?.campaignId ?? ""}:${request.data?.characterId ?? ""}:${request.data?.targetUid ?? ""}`,
+    handler: ({ uid, data }) => runForceAssignCharacter(data, uid),
+  });
+});

@@ -67,6 +67,16 @@ describe("withIdempotency", () => {
     expect(handler).not.toHaveBeenCalled();
   });
 
+  it("caches a void handler's result as null, since Firestore rejects storing undefined", async () => {
+    mockTransactionGet.mockResolvedValue({ exists: false });
+
+    await withIdempotency("key-1", async () => undefined);
+
+    expect(mockRefSet).toHaveBeenCalledWith(
+      expect.objectContaining({ status: "completed", result: null })
+    );
+  });
+
   it("clears the record on failure so a genuine retry can proceed", async () => {
     mockTransactionGet.mockResolvedValue({ exists: false });
     const failure = new Error("handler failed");

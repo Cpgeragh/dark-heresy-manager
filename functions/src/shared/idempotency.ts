@@ -37,7 +37,7 @@ export async function withIdempotency<T>(key: string, handler: () => Promise<T>)
 
   try {
     const result = await handler();
-    await ref.set({ status: "completed", result, completedAt: Date.now() });
+    await ref.set({ status: "completed", result: result ?? null, completedAt: Date.now() });
     return result;
   } catch (error) {
     await ref.delete();
