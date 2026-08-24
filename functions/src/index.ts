@@ -22,6 +22,10 @@ import {
   type LookupRecoveryCodeResult,
 } from "./operations/lookupRecoveryCode.js";
 import {
+  revokeRecoveryCode as runRevokeRecoveryCode,
+  type RevokeRecoveryCodeInput,
+} from "./operations/revokeRecoveryCode.js";
+import {
   claimCharacter as runClaimCharacter,
   type ClaimCharacterInput,
   type ClaimCharacterResult,
@@ -132,6 +136,25 @@ export const lookupRecoveryCode = onCall<LookupRecoveryCodeInput>(
       ],
       handler: ({ uid, data }) => runLookupRecoveryCode(data.code, uid, recoveryCodeHmacSecret.value()),
     })
+);
+
+export const revokeRecoveryCode = onCall<RevokeRecoveryCodeInput>(
+  { secrets: [recoveryCodeHmacSecret], timeoutSeconds: 30 },
+  (request) => {
+    const callerUid = request.auth?.uid ?? "anonymous";
+    return protectedCallable<RevokeRecoveryCodeInput, void>({
+      request,
+      operation: "revoke-recovery-code",
+      allowedFields: ["campaignId", "characterId"],
+      requiredFields: ["campaignId", "characterId"],
+      fieldShapes: { campaignId: "string", characterId: "string" },
+      rateLimits: [
+        { key: `revoke-recovery-code:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 },
+      ],
+      idempotencyKey: `revoke-recovery-code:${callerUid}:${request.data?.campaignId ?? ""}:${request.data?.characterId ?? ""}`,
+      handler: ({ uid, data }) => runRevokeRecoveryCode(data, uid, recoveryCodeHmacSecret.value()),
+    });
+  }
 );
 
 export const claimCharacter = onCall<ClaimCharacterInput>(
