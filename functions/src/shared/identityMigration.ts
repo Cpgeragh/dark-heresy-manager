@@ -1,29 +1,30 @@
 // functions/src/shared/identityMigration.ts
 //
-// Stage 3.3: computes and applies the bulk ownership migration used by
-// identity reclaim — every campaign the old identity was DM or a member of,
-// and every character it owned within those campaigns, moved to the new
-// identity. Mirrors src/services/identityService.ts's reclaimIdentity
-// migration step exactly (same bounds, same two-phase read-then-write
-// shape), factored so the reclaim operation can add its own other writes
-// (identity document transfer, proof cleanup) around it in the same batch.
+// Stage 3: computes the ownership-migration plan used by identity reclaim,
+// and applies it one campaign at a time. Split into a cheap "which campaigns,
+// how many total writes" plan (computeOwnershipMigrationPlan) and a per-
+// campaign apply step (migrateCampaignOwnership) so a resumable bulk job can
+// chunk the writes instead of requiring everything to fit one batch.
 
 import type { Firestore, WriteBatch, DocumentReference } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 
-const CAMPAIGN_LIMIT = 50;
-const CHARACTERS_PER_CAMPAIGN_LIMIT = 20;
-const WRITE_LIMIT = 440;
+const CAMPAIGN_LIMIT = 200;
+// Mirrors PRODUCT_LIMITS.charactersPerCampaign (src/constants/productLimits.ts) —
+// a single user can never own more characters in one campaign than the campaign
+// itself can ever hold. Duplicated, not imported: functions/ cannot import from src/.
+const CHARACTERS_PER_CAMPAIGN_LIMIT = 100;
 
-interface CampaignMigration {
-  campaignRef: DocumentReference;
-  changes: { dmId?: string; memberIds?: string[] };
-  characterRefs: DocumentReference[];
+export type CampaignMigrationRole = "dm" | "member" | "both";
+
+export interface CampaignMigrationEntry {
+  campaignId: string;
+  role: CampaignMigrationRole;
 }
 
 export interface OwnershipMigrationPlan {
-  campaignMigrations: CampaignMigration[];
-  writeCount: number;
+  campaigns: CampaignMigrationEntry[];
+  totalWriteCount: number;
 }
 
 function tooLargeError(): HttpsError {
@@ -33,10 +34,15 @@ function tooLargeError(): HttpsError {
   );
 }
 
+/**
+ * Reads which campaigns the old identity DMs or is a member of, and how many
+ * writes migrating each will need, without reading every character document
+ * up front — only a count per campaign, so the plan itself stays small
+ * regardless of how much data the account has.
+ */
 export async function computeOwnershipMigrationPlan(
   db: Firestore,
-  oldUid: string,
-  newUid: string
+  oldUid: string
 ): Promise<OwnershipMigrationPlan> {
   const dmCampaignsSnap = await db
     .collection("campaigns")
@@ -56,60 +62,84 @@ export async function computeOwnershipMigrationPlan(
     throw tooLargeError();
   }
 
-  const migrations = new Map<string, CampaignMigration>();
-
-  for (const campaignDoc of dmCampaignsSnap.docs) {
-    migrations.set(campaignDoc.id, {
-      campaignRef: campaignDoc.ref,
-      changes: { dmId: newUid },
-      characterRefs: [],
-    });
+  const roles = new Map<string, CampaignMigrationRole>();
+  for (const doc of dmCampaignsSnap.docs) {
+    roles.set(doc.id, "dm");
+  }
+  for (const doc of playerCampaignsSnap.docs) {
+    roles.set(doc.id, roles.has(doc.id) ? "both" : "member");
   }
 
-  for (const campaignDoc of playerCampaignsSnap.docs) {
-    const memberIds = (campaignDoc.data().memberIds as string[] | undefined) ?? [];
-    const newMemberIds = memberIds.filter((id) => id !== oldUid).concat(newUid);
+  const memberCampaignIds = [...roles.entries()]
+    .filter(([, role]) => role !== "dm")
+    .map(([campaignId]) => campaignId);
 
-    const charactersSnap = await campaignDoc.ref
+  const characterCounts = await Promise.all(
+    memberCampaignIds.map((campaignId) =>
+      db
+        .collection("campaigns")
+        .doc(campaignId)
+        .collection("characters")
+        .where("userId", "==", oldUid)
+        .count()
+        .get()
+    )
+  );
+
+  let characterWriteCount = 0;
+  for (const snap of characterCounts) {
+    const count = snap.data().count;
+    if (count > CHARACTERS_PER_CAMPAIGN_LIMIT) {
+      throw tooLargeError();
+    }
+    characterWriteCount += count;
+  }
+
+  const campaigns = [...roles.entries()].map(([campaignId, role]) => ({ campaignId, role }));
+
+  return { campaigns, totalWriteCount: campaigns.length + characterWriteCount };
+}
+
+/**
+ * Migrates one campaign's ownership into an already-open batch: the campaign
+ * document's dmId/memberIds (a single merged update, never two separate
+ * writes to the same doc) and every character the old identity owns in it.
+ * Reads the campaign's current memberIds and character list fresh rather
+ * than trusting the plan, so a chunk is safe to retry and naturally picks up
+ * any membership change that happened since the plan was computed. Returns
+ * how many writes it added, so the caller can budget how many campaigns fit
+ * in one chunk.
+ */
+export async function migrateCampaignOwnership(
+  db: Firestore,
+  batch: WriteBatch,
+  entry: CampaignMigrationEntry,
+  oldUid: string,
+  newUid: string
+): Promise<number> {
+  const campaignRef = db.collection("campaigns").doc(entry.campaignId);
+  const changes: { dmId?: string; memberIds?: string[] } = {};
+  const characterRefs: DocumentReference[] = [];
+
+  if (entry.role === "dm" || entry.role === "both") {
+    changes.dmId = newUid;
+  }
+
+  if (entry.role === "member" || entry.role === "both") {
+    const campaignSnap = await campaignRef.get();
+    const memberIds = (campaignSnap.data()?.memberIds as string[] | undefined) ?? [];
+    changes.memberIds = memberIds.filter((id) => id !== oldUid).concat(newUid);
+
+    const charactersSnap = await campaignRef
       .collection("characters")
       .where("userId", "==", oldUid)
       .limit(CHARACTERS_PER_CAMPAIGN_LIMIT + 1)
       .get();
-
-    if (charactersSnap.docs.length > CHARACTERS_PER_CAMPAIGN_LIMIT) {
-      throw tooLargeError();
-    }
-
-    const existing = migrations.get(campaignDoc.id);
-    migrations.set(campaignDoc.id, {
-      campaignRef: campaignDoc.ref,
-      changes: { ...existing?.changes, memberIds: newMemberIds },
-      characterRefs: charactersSnap.docs.map((characterDoc) => characterDoc.ref),
-    });
+    charactersSnap.docs.forEach((doc) => characterRefs.push(doc.ref));
   }
 
-  const campaignMigrations = [...migrations.values()];
-  const writeCount = campaignMigrations.reduce(
-    (count, migration) => count + 1 + migration.characterRefs.length,
-    0
-  );
+  batch.update(campaignRef, changes);
+  characterRefs.forEach((ref) => batch.update(ref, { userId: newUid }));
 
-  if (writeCount > WRITE_LIMIT) {
-    throw tooLargeError();
-  }
-
-  return { campaignMigrations, writeCount };
-}
-
-export function applyOwnershipMigrationPlan(
-  batch: WriteBatch,
-  plan: OwnershipMigrationPlan,
-  newUid: string
-): void {
-  for (const migration of plan.campaignMigrations) {
-    batch.update(migration.campaignRef, migration.changes);
-    for (const characterRef of migration.characterRefs) {
-      batch.update(characterRef, { userId: newUid });
-    }
-  }
+  return 1 + characterRefs.length;
 }

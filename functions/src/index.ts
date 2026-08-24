@@ -44,9 +44,12 @@ import {
   type ForceAssignCharacterInput,
 } from "./operations/forceAssignCharacter.js";
 import {
-  reclaimIdentity as runReclaimIdentity,
-  type ReclaimIdentityInput,
-} from "./operations/reclaimIdentity.js";
+  startIdentityReclaimJob as runStartIdentityReclaimJob,
+  processIdentityReclaimChunk as runProcessIdentityReclaimChunk,
+  type StartIdentityReclaimJobInput,
+  type ProcessIdentityReclaimChunkInput,
+  type ProcessIdentityReclaimChunkResult,
+} from "./operations/identityReclaimJob.js";
 import {
   linkDevice as runLinkDevice,
   type LinkDeviceInput,
@@ -237,24 +240,48 @@ export const forceAssignCharacter = onCall<ForceAssignCharacterInput>(
   }
 );
 
-export const reclaimIdentity = onCall<ReclaimIdentityInput>({ timeoutSeconds: 30 }, (request) => {
-  const callerUid = request.auth?.uid ?? "anonymous";
-  const codeHash = hashForKey(request.data?.code ?? "");
+export const startIdentityReclaimJob = onCall<StartIdentityReclaimJobInput>(
+  { timeoutSeconds: 30 },
+  (request) => {
+    const callerUid = request.auth?.uid ?? "anonymous";
+    const codeHash = hashForKey(request.data?.code ?? "");
 
-  return protectedCallable<ReclaimIdentityInput, { role: "dm" | "player" }>({
-    request,
-    operation: "reclaim-identity",
-    allowedFields: ["code"],
-    requiredFields: ["code"],
-    fieldShapes: { code: "string" },
-    rateLimits: [
-      { key: `reclaim-identity:user:${callerUid}`, limit: 20, windowMs: 15 * 60 * 1000 },
-      { key: `reclaim-identity:code:${codeHash}`, limit: 5, windowMs: 15 * 60 * 1000 },
-    ],
-    idempotencyKey: `reclaim-identity:${callerUid}:${codeHash}`,
-    handler: ({ uid, data }) => runReclaimIdentity(data, uid),
-  });
-});
+    return protectedCallable<
+      StartIdentityReclaimJobInput,
+      { jobId: string; totalCount: number; role: "dm" | "player" }
+    >({
+      request,
+      operation: "start-identity-reclaim-job",
+      allowedFields: ["code"],
+      requiredFields: ["code"],
+      fieldShapes: { code: "string" },
+      rateLimits: [
+        { key: `start-identity-reclaim-job:user:${callerUid}`, limit: 20, windowMs: 15 * 60 * 1000 },
+        { key: `start-identity-reclaim-job:code:${codeHash}`, limit: 5, windowMs: 15 * 60 * 1000 },
+      ],
+      idempotencyKey: `start-identity-reclaim-job:${callerUid}:${codeHash}`,
+      handler: ({ uid, data }) => runStartIdentityReclaimJob(data, uid),
+    });
+  }
+);
+
+export const processIdentityReclaimChunk = onCall<ProcessIdentityReclaimChunkInput>(
+  { timeoutSeconds: 30 },
+  (request) => {
+    const callerUid = request.auth?.uid ?? "anonymous";
+    return protectedCallable<ProcessIdentityReclaimChunkInput, ProcessIdentityReclaimChunkResult>({
+      request,
+      operation: "process-identity-reclaim-chunk",
+      allowedFields: ["jobId"],
+      requiredFields: ["jobId"],
+      fieldShapes: { jobId: "string" },
+      rateLimits: [
+        { key: `process-identity-reclaim-chunk:${callerUid}`, limit: 300, windowMs: 60 * 60 * 1000 },
+      ],
+      handler: ({ uid, data }) => runProcessIdentityReclaimChunk(data, uid),
+    });
+  }
+);
 
 export const linkDevice = onCall<LinkDeviceInput>({ timeoutSeconds: 30 }, (request) => {
   const callerUid = request.auth?.uid ?? "anonymous";
