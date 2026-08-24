@@ -42,6 +42,10 @@ import {
   reclaimIdentity as runReclaimIdentity,
   type ReclaimIdentityInput,
 } from "./operations/reclaimIdentity.js";
+import {
+  linkDevice as runLinkDevice,
+  type LinkDeviceInput,
+} from "./operations/linkDevice.js";
 
 export const ping = onCall(() => {
   return { ok: true };
@@ -187,5 +191,22 @@ export const reclaimIdentity = onCall<ReclaimIdentityInput>((request) => {
     ],
     idempotencyKey: `reclaim-identity:${callerUid}:${codeHash}`,
     handler: ({ uid, data }) => runReclaimIdentity(data, uid),
+  });
+});
+
+export const linkDevice = onCall<LinkDeviceInput>((request) => {
+  const callerUid = request.auth?.uid ?? "anonymous";
+  const codeHash = hashForKey(request.data?.code ?? "");
+
+  return protectedCallable<LinkDeviceInput, void>({
+    request,
+    operation: "link-device",
+    allowedFields: ["code"],
+    requiredFields: ["code"],
+    rateLimits: [
+      { key: `link-device:user:${callerUid}`, limit: 20, windowMs: 15 * 60 * 1000 },
+      { key: `link-device:code:${codeHash}`, limit: 5, windowMs: 15 * 60 * 1000 },
+    ],
+    handler: ({ uid, data }) => runLinkDevice(data, uid),
   });
 });
