@@ -10,6 +10,10 @@ import { hashRecoveryCode } from "../shared/recoveryCode.js";
 
 const RECOVERY_INDEX_COLLECTION = "recoveryIndex";
 
+export interface LookupRecoveryCodeInput {
+  code: string;
+}
+
 export type OwnershipState = "unclaimed" | "claimed-by-you" | "claimed-by-other" | "locked";
 
 export interface RecoveryPreview {

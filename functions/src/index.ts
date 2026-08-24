@@ -11,10 +11,16 @@ initializeApp();
 import { onCall } from "firebase-functions/v2/https";
 import { protectedCallable } from "./shared/protectedCallable.js";
 import { recoveryCodeHmacSecret } from "./shared/secrets.js";
+import { hashRecoveryCode } from "./shared/recoveryCode.js";
 import {
   registerRecoveryCode as runRegisterRecoveryCode,
   type RegisterRecoveryCodeInput,
 } from "./operations/registerRecoveryCode.js";
+import {
+  lookupRecoveryCode as runLookupRecoveryCode,
+  type LookupRecoveryCodeInput,
+  type LookupRecoveryCodeResult,
+} from "./operations/lookupRecoveryCode.js";
 
 export const ping = onCall(() => {
   return { ok: true };
@@ -45,5 +51,37 @@ export const registerRecoveryCode = onCall<RegisterRecoveryCodeInput>(
         },
       ],
       handler: ({ uid, data }) => runRegisterRecoveryCode(data, uid, recoveryCodeHmacSecret.value()),
+    })
+);
+
+export const lookupRecoveryCode = onCall<LookupRecoveryCodeInput>(
+  { secrets: [recoveryCodeHmacSecret] },
+  (request) =>
+    protectedCallable<LookupRecoveryCodeInput, LookupRecoveryCodeResult>({
+      request,
+      operation: "lookup-recovery-code",
+      allowedFields: ["code"],
+      requiredFields: ["code"],
+      rateLimits: [
+        {
+          key: `recovery-lookup:user:${request.auth?.uid ?? "anonymous"}`,
+          limit: 20,
+          windowMs: 15 * 60 * 1000,
+        },
+        {
+          // Matches recoveryCodeAttemptsPerWindow / codeAttemptWindowMs,
+          // already recorded in src/constants/productLimits.ts since Stage 2
+          // but never enforced anywhere until now.
+          key: `recovery-lookup:code:${hashRecoveryCode(request.data?.code ?? "", recoveryCodeHmacSecret.value())}`,
+          limit: 5,
+          windowMs: 15 * 60 * 1000,
+        },
+        {
+          key: "recovery-lookup:global",
+          limit: 500,
+          windowMs: 60 * 60 * 1000,
+        },
+      ],
+      handler: ({ uid, data }) => runLookupRecoveryCode(data.code, uid, recoveryCodeHmacSecret.value()),
     })
 );
