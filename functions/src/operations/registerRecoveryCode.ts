@@ -3,13 +3,13 @@
 // Stage 3.2a: (re)generates a character's Recovery Code and registers its
 // HMAC-derived lookup entry. The raw code is never chosen by the client —
 // only this operation mints one, which is what makes the derived lookup ID
-// real protection rather than a hash of something the client controls.
+// real protection rather than a hash of something the client controls. The
+// character is read inside the transaction, not as a pre-read, so two
+// racing regenerate calls can't leave an orphaned, still-valid index entry.
 
 import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
-import { generateRecoveryCode, hashRecoveryCode } from "../shared/recoveryCode.js";
-
-const RECOVERY_INDEX_COLLECTION = "recoveryIndex";
+import { rotateRecoveryCodeInTransaction } from "../shared/recoveryCodeRotation.js";
 
 export interface RegisterRecoveryCodeInput {
   campaignId: string;
@@ -33,25 +33,24 @@ export async function registerRecoveryCode(
     throw new HttpsError("permission-denied", "Only the campaign DM can generate a Recovery Code.");
   }
 
-  const characterSnapshot = await characterRef.get();
-  if (!characterSnapshot.exists) {
-    throw new HttpsError("not-found", "Character not found.");
-  }
-
-  const previousCode = characterSnapshot.data()?.recoveryCode as string | undefined;
-  const newCode = generateRecoveryCode();
-  const newHash = hashRecoveryCode(newCode, hmacSecret);
+  let newCode = "";
 
   await db.runTransaction(async (transaction) => {
-    if (previousCode) {
-      const previousHash = hashRecoveryCode(previousCode, hmacSecret);
-      transaction.delete(db.collection(RECOVERY_INDEX_COLLECTION).doc(previousHash));
+    const characterSnapshot = await transaction.get(characterRef);
+    if (!characterSnapshot.exists) {
+      throw new HttpsError("not-found", "Character not found.");
     }
-    transaction.set(db.collection(RECOVERY_INDEX_COLLECTION).doc(newHash), {
-      campaignId: input.campaignId,
-      characterId: input.characterId,
-    });
-    transaction.update(characterRef, { recoveryCode: newCode });
+
+    const previousCode = characterSnapshot.data()?.recoveryCode as string | undefined;
+    newCode = rotateRecoveryCodeInTransaction(
+      transaction,
+      db,
+      characterRef,
+      input.campaignId,
+      input.characterId,
+      previousCode,
+      hmacSecret
+    );
   });
 
   return { code: newCode };

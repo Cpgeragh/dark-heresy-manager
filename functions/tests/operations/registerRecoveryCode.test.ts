@@ -3,19 +3,20 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { registerRecoveryCode } from "../../src/operations/registerRecoveryCode";
 
 const mockCampaignGet = vi.fn();
-const mockCharacterGet = vi.fn();
+const mockTransactionGet = vi.fn();
 const mockTransactionDelete = vi.fn();
 const mockTransactionSet = vi.fn();
 const mockTransactionUpdate = vi.fn();
 const mockRunTransaction = vi.fn(async (callback: (transaction: unknown) => Promise<void>) => {
   await callback({
+    get: mockTransactionGet,
     delete: mockTransactionDelete,
     set: mockTransactionSet,
     update: mockTransactionUpdate,
   });
 });
 
-const mockCharacterRef = { get: mockCharacterGet };
+const mockCharacterRef = {};
 const mockCharactersCollection = { doc: vi.fn(() => mockCharacterRef) };
 const mockCampaignRef = { get: mockCampaignGet, collection: vi.fn(() => mockCharactersCollection) };
 const mockCampaignsCollection = { doc: vi.fn(() => mockCampaignRef) };
@@ -58,7 +59,7 @@ describe("registerRecoveryCode", () => {
 
   it("rejects when the character does not exist", async () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
-    mockCharacterGet.mockResolvedValue({ exists: false });
+    mockTransactionGet.mockResolvedValue({ exists: false });
 
     await expect(
       registerRecoveryCode({ campaignId: "c1", characterId: "char-1" }, "dm-1", "secret")
@@ -67,7 +68,7 @@ describe("registerRecoveryCode", () => {
 
   it("generates a new code, stores its index entry, and updates the character when there was no previous code", async () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
-    mockCharacterGet.mockResolvedValue({ exists: true, data: () => ({}) });
+    mockTransactionGet.mockResolvedValue({ exists: true, data: () => ({}) });
 
     const result = await registerRecoveryCode(
       { campaignId: "c1", characterId: "char-1" },
@@ -86,7 +87,7 @@ describe("registerRecoveryCode", () => {
 
   it("deletes the previous index entry when rotating an existing code", async () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
-    mockCharacterGet.mockResolvedValue({
+    mockTransactionGet.mockResolvedValue({
       exists: true,
       data: () => ({ recoveryCode: "DH-OLDC-ODE1" }),
     });
@@ -95,5 +96,14 @@ describe("registerRecoveryCode", () => {
 
     expect(mockTransactionDelete).toHaveBeenCalledOnce();
     expect(mockIndexDoc).toHaveBeenCalled();
+  });
+
+  it("reads the character fresh inside the transaction, not from a pre-read, so a racing update is picked up", async () => {
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
+    mockTransactionGet.mockResolvedValue({ exists: true, data: () => ({}) });
+
+    await registerRecoveryCode({ campaignId: "c1", characterId: "char-1" }, "dm-1", "secret");
+
+    expect(mockTransactionGet).toHaveBeenCalledWith(mockCharacterRef);
   });
 });
