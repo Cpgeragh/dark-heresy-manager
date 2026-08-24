@@ -37,11 +37,13 @@ export const registerRecoveryCode = onCall<RegisterRecoveryCodeInput>(
       operation: "register-recovery-code",
       allowedFields: ["campaignId", "characterId"],
       requiredFields: ["campaignId", "characterId"],
-      rateLimit: {
-        key: `register-recovery-code:${request.auth?.uid ?? "anonymous"}`,
-        limit: 20,
-        windowMs: 60 * 60 * 1000,
-      },
+      rateLimits: [
+        {
+          key: `register-recovery-code:${request.auth?.uid ?? "anonymous"}`,
+          limit: 20,
+          windowMs: 60 * 60 * 1000,
+        },
+      ],
       handler: ({ uid, data }) => runRegisterRecoveryCode(data, uid, recoveryCodeHmacSecret.value()),
     })
 );

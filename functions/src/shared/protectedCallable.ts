@@ -26,7 +26,7 @@ export interface ProtectedCallableOptions<TData, TResult> {
   operation: string;
   allowedFields: readonly string[];
   requiredFields?: readonly string[];
-  rateLimit?: { key: string; limit: number; windowMs: number };
+  rateLimits?: readonly { key: string; limit: number; windowMs: number }[];
   idempotencyKey?: string;
   handler: (context: { uid: string; appCheckVerified: boolean; data: TData }) => Promise<TResult>;
 }
@@ -51,8 +51,10 @@ export async function protectedCallable<TData, TResult>(
     const { uid, appCheckVerified } = requireAuth(options.request);
     assertRequestFields(options.request.data, options.allowedFields, options.requiredFields ?? []);
 
-    if (options.rateLimit) {
-      await enforceRateLimit(options.rateLimit);
+    if (options.rateLimits) {
+      for (const rateLimit of options.rateLimits) {
+        await enforceRateLimit(rateLimit);
+      }
     }
 
     const run = () => options.handler({ uid, appCheckVerified, data: options.request.data });

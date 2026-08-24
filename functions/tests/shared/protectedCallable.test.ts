@@ -59,19 +59,23 @@ describe("protectedCallable", () => {
     expect(recordUsageMetric).toHaveBeenCalledWith("test-op");
   });
 
-  it("enforces the rate limit before running the handler, when configured", async () => {
+  it("enforces every configured rate limit, in order, before running the handler", async () => {
     await protectedCallable({
       request: makeRequest(),
       operation: "test-op",
       allowedFields: [],
-      rateLimit: { key: "test-key", limit: 5, windowMs: 900_000 },
+      rateLimits: [
+        { key: "key-a", limit: 5, windowMs: 900_000 },
+        { key: "key-b", limit: 10, windowMs: 60_000 },
+      ],
       handler: async () => "ok",
     });
 
-    expect(enforceRateLimit).toHaveBeenCalledWith({ key: "test-key", limit: 5, windowMs: 900_000 });
+    expect(enforceRateLimit).toHaveBeenNthCalledWith(1, { key: "key-a", limit: 5, windowMs: 900_000 });
+    expect(enforceRateLimit).toHaveBeenNthCalledWith(2, { key: "key-b", limit: 10, windowMs: 60_000 });
   });
 
-  it("does not enforce a rate limit when none is configured", async () => {
+  it("does not enforce any rate limit when none are configured", async () => {
     await protectedCallable({
       request: makeRequest(),
       operation: "test-op",
