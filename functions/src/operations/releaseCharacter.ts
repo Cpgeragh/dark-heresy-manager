@@ -32,5 +32,5 @@ export async function releaseCharacter(
     }
 
     applyOwnershipTransition(transaction, characterRef, null, "release", callerUid, currentOwner, null);
-  });
+  }, { maxAttempts: 5 });
 }

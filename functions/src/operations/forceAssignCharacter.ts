@@ -47,5 +47,5 @@ export async function forceAssignCharacter(
       currentOwner,
       input.targetUid
     );
-  });
+  }, { maxAttempts: 5 });
 }

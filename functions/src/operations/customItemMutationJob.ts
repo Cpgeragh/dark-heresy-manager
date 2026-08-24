@@ -119,7 +119,7 @@ async function publishTargetVersion(
     });
 
     return targetVersionId;
-  });
+  }, { maxAttempts: 5 });
 }
 
 async function resolveUpdateTargetVersionId(

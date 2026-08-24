@@ -45,5 +45,5 @@ export async function forceReleaseCharacter(
       currentOwner,
       null
     );
-  });
+  }, { maxAttempts: 5 });
 }

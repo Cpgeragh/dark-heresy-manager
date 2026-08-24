@@ -36,5 +36,5 @@ export async function enforceRateLimit({ key, limit, windowMs }: RateLimitOption
 
     recent.push(now);
     transaction.set(ref, { attempts: recent });
-  });
+  }, { maxAttempts: 5 });
 }

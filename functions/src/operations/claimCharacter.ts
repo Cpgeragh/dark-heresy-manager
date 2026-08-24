@@ -83,7 +83,7 @@ export async function claimCharacter(
       input.code,
       hmacSecret
     );
-  });
+  }, { maxAttempts: 5 });
 
   return { campaignId, characterId };
 }

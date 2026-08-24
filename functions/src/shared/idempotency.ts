@@ -29,7 +29,7 @@ export async function withIdempotency<T>(key: string, handler: () => Promise<T>)
 
     transaction.set(ref, { status: "in-progress", startedAt: Date.now() });
     return { alreadyCompleted: false, result: undefined as T };
-  });
+  }, { maxAttempts: 5 });
 
   if (claim.alreadyCompleted) {
     return claim.result;

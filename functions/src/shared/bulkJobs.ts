@@ -96,7 +96,7 @@ export async function acquireJobLease(
     });
 
     return { job, leaseId };
-  });
+  }, { maxAttempts: 5 });
 }
 
 export async function advanceJobCheckpoint(
@@ -123,7 +123,7 @@ export async function advanceJobCheckpoint(
       leaseExpiresAt: null,
       updatedAt: Date.now(),
     });
-  });
+  }, { maxAttempts: 5 });
 }
 
 export async function completeJob(jobId: string, leaseId: string): Promise<void> {
@@ -140,7 +140,7 @@ export async function completeJob(jobId: string, leaseId: string): Promise<void>
       leaseExpiresAt: null,
       updatedAt: Date.now(),
     });
-  });
+  }, { maxAttempts: 5 });
 }
 
 export async function failJob(jobId: string, leaseId: string, error: string): Promise<void> {
@@ -158,5 +158,5 @@ export async function failJob(jobId: string, leaseId: string, error: string): Pr
       leaseExpiresAt: null,
       updatedAt: Date.now(),
     });
-  });
+  }, { maxAttempts: 5 });
 }

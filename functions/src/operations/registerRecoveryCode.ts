@@ -51,7 +51,7 @@ export async function registerRecoveryCode(
       previousCode,
       hmacSecret
     );
-  });
+  }, { maxAttempts: 5 });
 
   return { code: newCode };
 }
