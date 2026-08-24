@@ -53,7 +53,8 @@ export interface ProcessIdentityReclaimChunkResult {
 
 export async function startIdentityReclaimJob(
   input: StartIdentityReclaimJobInput,
-  callerUid: string
+  callerUid: string,
+  idempotencyKey: string | null
 ): Promise<{ jobId: string; totalCount: number; role: "dm" | "player" }> {
   const db = getFirestore();
   const code = input.code.trim();
@@ -92,7 +93,8 @@ export async function startIdentityReclaimJob(
     "identity-reclaim",
     callerUid,
     { oldUid, newUid: callerUid, campaigns: plan.campaigns } satisfies IdentityReclaimJobData,
-    plan.totalWriteCount
+    plan.totalWriteCount,
+    idempotencyKey
   );
 
   return { jobId, totalCount: plan.totalWriteCount, role: role ?? "player" };

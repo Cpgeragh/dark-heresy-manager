@@ -203,7 +203,7 @@ describe("startCampaignDeletionJob", () => {
   it("rejects when the campaign does not exist", async () => {
     mockCampaignGet.mockResolvedValue({ exists: false });
 
-    await expect(startCampaignDeletionJob({ campaignId: CAMPAIGN_ID }, DM_UID)).rejects.toThrow(
+    await expect(startCampaignDeletionJob({ campaignId: CAMPAIGN_ID }, DM_UID, "idem-key")).rejects.toThrow(
       expect.objectContaining({ code: "not-found" })
     );
   });
@@ -211,7 +211,7 @@ describe("startCampaignDeletionJob", () => {
   it("rejects when the caller is not the campaign DM", async () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "someone-else" }) });
 
-    await expect(startCampaignDeletionJob({ campaignId: CAMPAIGN_ID }, DM_UID)).rejects.toThrow(
+    await expect(startCampaignDeletionJob({ campaignId: CAMPAIGN_ID }, DM_UID, "idem-key")).rejects.toThrow(
       expect.objectContaining({ code: "permission-denied" })
     );
   });
@@ -222,7 +222,7 @@ describe("startCampaignDeletionJob", () => {
       docs: [makeCharacterDoc("char-1", "not-a-code", 0, 0)],
     });
 
-    await expect(startCampaignDeletionJob({ campaignId: CAMPAIGN_ID }, DM_UID)).rejects.toThrow(
+    await expect(startCampaignDeletionJob({ campaignId: CAMPAIGN_ID }, DM_UID, "idem-key")).rejects.toThrow(
       expect.objectContaining({ code: "failed-precondition" })
     );
   });
@@ -247,7 +247,7 @@ describe("startCampaignDeletionJob", () => {
     );
     mockCreateBulkJob.mockResolvedValue("job-1");
 
-    const result = await startCampaignDeletionJob({ campaignId: CAMPAIGN_ID }, DM_UID);
+    const result = await startCampaignDeletionJob({ campaignId: CAMPAIGN_ID }, DM_UID, "idem-key");
 
     // 2 characters + (2+1 claimLog/xp for char-1) + (0+0 for char-2)
     // + 1 recoveryIndex entry (only char-1's exists) + 1 thread + 5 messages
@@ -257,7 +257,8 @@ describe("startCampaignDeletionJob", () => {
       "campaign-deletion",
       DM_UID,
       { campaignId: CAMPAIGN_ID },
-      21
+      21,
+      "idem-key"
     );
   });
 });

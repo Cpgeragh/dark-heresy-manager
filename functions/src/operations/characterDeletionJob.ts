@@ -56,7 +56,8 @@ export interface StartCharacterDeletionJobInput {
 
 export async function startCharacterDeletionJob(
   input: StartCharacterDeletionJobInput,
-  callerUid: string
+  callerUid: string,
+  idempotencyKey: string | null
 ): Promise<{ jobId: string; totalCount: number }> {
   const db = getFirestore();
   const campaignRef = db.collection("campaigns").doc(input.campaignId);
@@ -107,7 +108,8 @@ export async function startCharacterDeletionJob(
     "character-deletion",
     callerUid,
     { campaignId: input.campaignId, characterId: input.characterId, recoveryCode },
-    totalCount
+    totalCount,
+    idempotencyKey
   );
 
   return { jobId, totalCount };

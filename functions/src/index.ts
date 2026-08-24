@@ -245,6 +245,7 @@ export const startIdentityReclaimJob = onCall<StartIdentityReclaimJobInput>(
   (request) => {
     const callerUid = request.auth?.uid ?? "anonymous";
     const codeHash = hashForKey(request.data?.code ?? "");
+    const idempotencyKey = `start-identity-reclaim-job:${callerUid}:${codeHash}`;
 
     return protectedCallable<
       StartIdentityReclaimJobInput,
@@ -259,8 +260,8 @@ export const startIdentityReclaimJob = onCall<StartIdentityReclaimJobInput>(
         { key: `start-identity-reclaim-job:user:${callerUid}`, limit: 20, windowMs: 15 * 60 * 1000 },
         { key: `start-identity-reclaim-job:code:${codeHash}`, limit: 5, windowMs: 15 * 60 * 1000 },
       ],
-      idempotencyKey: `start-identity-reclaim-job:${callerUid}:${codeHash}`,
-      handler: ({ uid, data }) => runStartIdentityReclaimJob(data, uid),
+      idempotencyKey,
+      handler: ({ uid, data }) => runStartIdentityReclaimJob(data, uid, idempotencyKey),
     });
   }
 );
@@ -305,6 +306,7 @@ export const startCharacterDeletionJob = onCall<StartCharacterDeletionJobInput>(
   { timeoutSeconds: 30 },
   (request) => {
     const callerUid = request.auth?.uid ?? "anonymous";
+    const idempotencyKey = `start-character-deletion-job:${callerUid}:${request.data?.campaignId ?? ""}:${request.data?.characterId ?? ""}`;
     return protectedCallable<StartCharacterDeletionJobInput, { jobId: string; totalCount: number }>({
       request,
       operation: "start-character-deletion-job",
@@ -314,8 +316,8 @@ export const startCharacterDeletionJob = onCall<StartCharacterDeletionJobInput>(
       rateLimits: [
         { key: `start-character-deletion-job:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 },
       ],
-      idempotencyKey: `start-character-deletion-job:${callerUid}:${request.data?.campaignId ?? ""}:${request.data?.characterId ?? ""}`,
-      handler: ({ uid, data }) => runStartCharacterDeletionJob(data, uid),
+      idempotencyKey,
+      handler: ({ uid, data }) => runStartCharacterDeletionJob(data, uid, idempotencyKey),
     });
   }
 );
@@ -342,6 +344,7 @@ export const startCampaignDeletionJob = onCall<StartCampaignDeletionJobInput>(
   { timeoutSeconds: 30 },
   (request) => {
     const callerUid = request.auth?.uid ?? "anonymous";
+    const idempotencyKey = `start-campaign-deletion-job:${callerUid}:${request.data?.campaignId ?? ""}`;
     return protectedCallable<StartCampaignDeletionJobInput, { jobId: string; totalCount: number }>({
       request,
       operation: "start-campaign-deletion-job",
@@ -351,8 +354,8 @@ export const startCampaignDeletionJob = onCall<StartCampaignDeletionJobInput>(
       rateLimits: [
         { key: `start-campaign-deletion-job:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 },
       ],
-      idempotencyKey: `start-campaign-deletion-job:${callerUid}:${request.data?.campaignId ?? ""}`,
-      handler: ({ uid, data }) => runStartCampaignDeletionJob(data, uid),
+      idempotencyKey,
+      handler: ({ uid, data }) => runStartCampaignDeletionJob(data, uid, idempotencyKey),
     });
   }
 );
@@ -379,6 +382,7 @@ export const startCustomItemMutationJob = onCall<StartCustomItemMutationJobInput
   { timeoutSeconds: 30 },
   (request) => {
     const callerUid = request.auth?.uid ?? "anonymous";
+    const idempotencyKey = `start-custom-item-mutation-job:${callerUid}:${request.data?.campaignId ?? ""}:${request.data?.customItemId ?? ""}:${request.data?.mode ?? ""}`;
     return protectedCallable<StartCustomItemMutationJobInput, { jobId: string; totalCount: number }>({
       request,
       operation: "start-custom-item-mutation-job",
@@ -394,8 +398,8 @@ export const startCustomItemMutationJob = onCall<StartCustomItemMutationJobInput
       rateLimits: [
         { key: `start-custom-item-mutation-job:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 },
       ],
-      idempotencyKey: `start-custom-item-mutation-job:${callerUid}:${request.data?.campaignId ?? ""}:${request.data?.customItemId ?? ""}:${request.data?.mode ?? ""}`,
-      handler: ({ uid, data }) => runStartCustomItemMutationJob(data, uid),
+      idempotencyKey,
+      handler: ({ uid, data }) => runStartCustomItemMutationJob(data, uid, idempotencyKey),
     });
   }
 );

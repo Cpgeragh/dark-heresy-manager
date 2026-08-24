@@ -12,6 +12,7 @@
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import { randomUUID } from "node:crypto";
+import { IDEMPOTENCY_COLLECTION } from "./idempotency.js";
 
 const BULK_JOBS_COLLECTION = "bulkJobs";
 const LEASE_DURATION_MS = 60 * 1000;
@@ -29,6 +30,7 @@ export interface BulkJobRecord {
   leaseOwner: string | null;
   leaseExpiresAt: number | null;
   error: string | null;
+  idempotencyKey: string | null;
   createdAt: number;
   updatedAt: number;
 }
@@ -37,7 +39,8 @@ export async function createBulkJob(
   type: string,
   actorUid: string,
   data: Record<string, unknown>,
-  totalCount: number
+  totalCount: number,
+  idempotencyKey: string | null
 ): Promise<string> {
   const db = getFirestore();
   const jobId = randomUUID();
@@ -53,6 +56,7 @@ export async function createBulkJob(
     leaseOwner: null,
     leaseExpiresAt: null,
     error: null,
+    idempotencyKey,
     createdAt: now,
     updatedAt: now,
   };
@@ -158,5 +162,8 @@ export async function failJob(jobId: string, leaseId: string, error: string): Pr
       leaseExpiresAt: null,
       updatedAt: Date.now(),
     });
+    if (job.idempotencyKey) {
+      transaction.delete(db.collection(IDEMPOTENCY_COLLECTION).doc(job.idempotencyKey));
+    }
   }, { maxAttempts: 5 });
 }

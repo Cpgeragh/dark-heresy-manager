@@ -10,7 +10,7 @@
 import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 
-const IDEMPOTENCY_COLLECTION = "idempotencyKeys";
+export const IDEMPOTENCY_COLLECTION = "idempotencyKeys";
 
 export async function withIdempotency<T>(key: string, handler: () => Promise<T>): Promise<T> {
   const db = getFirestore();

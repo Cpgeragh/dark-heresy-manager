@@ -106,7 +106,7 @@ describe("startIdentityReclaimJob", () => {
   it("rejects when the code does not resolve", async () => {
     mockRecoveryGet.mockResolvedValue({ exists: false });
 
-    await expect(startIdentityReclaimJob({ code: "DH-NOPE-0000" }, "new-uid")).rejects.toThrow(
+    await expect(startIdentityReclaimJob({ code: "DH-NOPE-0000" }, "new-uid", "idem-key")).rejects.toThrow(
       expect.objectContaining({ code: "not-found" })
     );
   });
@@ -114,7 +114,7 @@ describe("startIdentityReclaimJob", () => {
   it("rejects reclaiming your own already-registered code", async () => {
     mockRecoveryGet.mockResolvedValue({ exists: true, data: () => ({ uid: "new-uid" }) });
 
-    await expect(startIdentityReclaimJob({ code: "DH-SAME-0000" }, "new-uid")).rejects.toThrow(
+    await expect(startIdentityReclaimJob({ code: "DH-SAME-0000" }, "new-uid", "idem-key")).rejects.toThrow(
       expect.objectContaining({ code: "failed-precondition" })
     );
   });
@@ -123,7 +123,7 @@ describe("startIdentityReclaimJob", () => {
     mockRecoveryGet.mockResolvedValue({ exists: true, data: () => ({ uid: "old-uid" }) });
     mockSecretGet.mockResolvedValue({ exists: true, data: () => ({ code: "DH-DIFF-0000" }) });
 
-    await expect(startIdentityReclaimJob({ code: "DH-SAME-0000" }, "new-uid")).rejects.toThrow(
+    await expect(startIdentityReclaimJob({ code: "DH-SAME-0000" }, "new-uid", "idem-key")).rejects.toThrow(
       expect.objectContaining({ code: "not-found" })
     );
   });
@@ -137,7 +137,7 @@ describe("startIdentityReclaimJob", () => {
     });
     mockCreateBulkJob.mockResolvedValue("job-1");
 
-    const result = await startIdentityReclaimJob({ code: "DH-SAME-0000" }, "new-uid");
+    const result = await startIdentityReclaimJob({ code: "DH-SAME-0000" }, "new-uid", "idem-key");
 
     expect(result).toEqual({ jobId: "job-1", totalCount: 1, role: "dm" });
     expect(mockBatchUpdate).toHaveBeenCalledWith(expect.objectContaining({ id: "DH-SAME-0000" }), {
@@ -152,7 +152,8 @@ describe("startIdentityReclaimJob", () => {
       "identity-reclaim",
       "new-uid",
       { oldUid: "old-uid", newUid: "new-uid", campaigns: [{ campaignId: "c1", role: "dm" }] },
-      1
+      1,
+      "idem-key"
     );
   });
 
@@ -161,7 +162,7 @@ describe("startIdentityReclaimJob", () => {
     mockSecretGet.mockResolvedValue({ exists: true, data: () => ({ code: "DH-SAME-0000" }) });
     mockCreateBulkJob.mockResolvedValue("job-1");
 
-    const result = await startIdentityReclaimJob({ code: "DH-SAME-0000" }, "new-uid");
+    const result = await startIdentityReclaimJob({ code: "DH-SAME-0000" }, "new-uid", "idem-key");
 
     expect(result.role).toBe("player");
   });

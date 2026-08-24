@@ -12,11 +12,13 @@ import {
 const mockSet = vi.fn();
 const mockTransactionGet = vi.fn();
 const mockTransactionUpdate = vi.fn();
+const mockTransactionDelete = vi.fn();
 const mockRunTransaction = vi.fn(async (callback: (transaction: unknown) => Promise<unknown>) =>
-  callback({ get: mockTransactionGet, update: mockTransactionUpdate })
+  callback({ get: mockTransactionGet, update: mockTransactionUpdate, delete: mockTransactionDelete })
 );
-const mockDoc = vi.fn(() => ({ set: mockSet }));
-const mockCollection = vi.fn(() => ({ doc: mockDoc }));
+const mockCollection = vi.fn((collectionName: string) => ({
+  doc: (id: string) => ({ id, collectionName, set: mockSet }),
+}));
 
 vi.mock("firebase-admin/firestore", () => ({
   getFirestore: () => ({ collection: mockCollection, runTransaction: mockRunTransaction }),
@@ -35,6 +37,7 @@ function makeJob(overrides: Partial<BulkJobRecord> = {}): BulkJobRecord {
     leaseOwner: null,
     leaseExpiresAt: null,
     error: null,
+    idempotencyKey: null,
     createdAt: 0,
     updatedAt: 0,
     ...overrides,
@@ -42,10 +45,10 @@ function makeJob(overrides: Partial<BulkJobRecord> = {}): BulkJobRecord {
 }
 
 describe("createBulkJob", () => {
-  it("creates a pending job record with the given type, actor, data, and count", async () => {
+  it("creates a pending job record with the given type, actor, data, count, and idempotency key", async () => {
     mockSet.mockResolvedValue(undefined);
 
-    await createBulkJob("test-job", "user-1", { campaignId: "c1" }, 10);
+    await createBulkJob("test-job", "user-1", { campaignId: "c1" }, 10, "start-test-job:user-1:c1");
 
     expect(mockSet).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -54,8 +57,17 @@ describe("createBulkJob", () => {
         actorUid: "user-1",
         data: { campaignId: "c1" },
         totalCount: 10,
+        idempotencyKey: "start-test-job:user-1:c1",
       })
     );
+  });
+
+  it("stores a null idempotency key when none is given", async () => {
+    mockSet.mockResolvedValue(undefined);
+
+    await createBulkJob("test-job", "user-1", {}, 10, null);
+
+    expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({ idempotencyKey: null }));
   });
 });
 
@@ -170,7 +182,7 @@ describe("completeJob / failJob", () => {
     );
   });
 
-  it("marks the job failed with the given error when the lease matches", async () => {
+  it("marks the job failed with the given error when the lease matches, and leaves other jobs' idempotency records alone when it has none", async () => {
     mockTransactionGet.mockResolvedValue({
       exists: true,
       data: () => makeJob({ leaseOwner: "lease-1" }),
@@ -181,6 +193,20 @@ describe("completeJob / failJob", () => {
     expect(mockTransactionUpdate).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({ status: "failed", error: "boom" })
+    );
+    expect(mockTransactionDelete).not.toHaveBeenCalled();
+  });
+
+  it("also deletes the job's recorded idempotency key, so a fresh start call can create a new job instead of replaying the dead one", async () => {
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () => makeJob({ leaseOwner: "lease-1", idempotencyKey: "start-test-job:user-1:c1" }),
+    });
+
+    await failJob("job-1", "lease-1", "boom");
+
+    expect(mockTransactionDelete).toHaveBeenCalledWith(
+      expect.objectContaining({ collectionName: "idempotencyKeys", id: "start-test-job:user-1:c1" })
     );
   });
 });

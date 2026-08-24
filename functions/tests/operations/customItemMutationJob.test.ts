@@ -163,7 +163,8 @@ describe("startCustomItemMutationJob", () => {
     await expect(
       startCustomItemMutationJob(
         { campaignId: CAMPAIGN_ID, customItemId: CUSTOM_ITEM_ID, mode: "remove", actorUserId: DM_UID },
-        DM_UID
+        DM_UID,
+        "idem-key"
       )
     ).rejects.toThrow(expect.objectContaining({ code: "not-found" }));
   });
@@ -174,7 +175,8 @@ describe("startCustomItemMutationJob", () => {
     await expect(
       startCustomItemMutationJob(
         { campaignId: CAMPAIGN_ID, customItemId: CUSTOM_ITEM_ID, mode: "remove", actorUserId: DM_UID },
-        DM_UID
+        DM_UID,
+        "idem-key"
       )
     ).rejects.toThrow(expect.objectContaining({ code: "permission-denied" }));
   });
@@ -186,7 +188,8 @@ describe("startCustomItemMutationJob", () => {
     await expect(
       startCustomItemMutationJob(
         { campaignId: CAMPAIGN_ID, customItemId: CUSTOM_ITEM_ID, mode: "remove", actorUserId: DM_UID },
-        DM_UID
+        DM_UID,
+        "idem-key"
       )
     ).rejects.toThrow(expect.objectContaining({ code: "not-found" }));
   });
@@ -199,7 +202,8 @@ describe("startCustomItemMutationJob", () => {
 
     const result = await startCustomItemMutationJob(
       { campaignId: CAMPAIGN_ID, customItemId: CUSTOM_ITEM_ID, mode: "remove", actorUserId: DM_UID },
-      DM_UID
+      DM_UID,
+      "idem-key"
     );
 
     expect(mockItemUpdate).not.toHaveBeenCalled();
@@ -215,7 +219,8 @@ describe("startCustomItemMutationJob", () => {
         targetVersionId: null,
         actorUserId: DM_UID,
       },
-      250
+      250,
+      "idem-key"
     );
   });
 
@@ -232,7 +237,8 @@ describe("startCustomItemMutationJob", () => {
         mode: "archive-and-remove",
         actorUserId: DM_UID,
       },
-      DM_UID
+      DM_UID,
+      "idem-key"
     );
 
     expect(mockItemUpdate).toHaveBeenCalledWith(
@@ -252,7 +258,8 @@ describe("startCustomItemMutationJob", () => {
 
     const result = await startCustomItemMutationJob(
       { campaignId: CAMPAIGN_ID, customItemId: CUSTOM_ITEM_ID, mode: "update", actorUserId: DM_UID },
-      DM_UID
+      DM_UID,
+      "idem-key"
     );
 
     expect(mockItemUpdate).not.toHaveBeenCalled();
@@ -261,7 +268,8 @@ describe("startCustomItemMutationJob", () => {
       "custom-item-mutation",
       DM_UID,
       expect.objectContaining({ mode: "update", targetVersionId: "v1" }),
-      3
+      3,
+      "idem-key"
     );
   });
 
@@ -275,7 +283,8 @@ describe("startCustomItemMutationJob", () => {
     await expect(
       startCustomItemMutationJob(
         { campaignId: CAMPAIGN_ID, customItemId: CUSTOM_ITEM_ID, mode: "update", actorUserId: DM_UID },
-        DM_UID
+        DM_UID,
+        "idem-key"
       )
     ).rejects.toThrow(expect.objectContaining({ code: "failed-precondition" }));
   });
@@ -299,7 +308,8 @@ describe("startCustomItemMutationJob", () => {
         mode: "publish-and-update",
         actorUserId: DM_UID,
       },
-      DM_UID
+      DM_UID,
+      "idem-key"
     );
 
     expect(mockTransactionUpdate).toHaveBeenCalledWith(
@@ -315,7 +325,8 @@ describe("startCustomItemMutationJob", () => {
       "custom-item-mutation",
       DM_UID,
       expect.objectContaining({ mode: "publish-and-update", targetVersionId: "v2" }),
-      7
+      7,
+      "idem-key"
     );
   });
 });

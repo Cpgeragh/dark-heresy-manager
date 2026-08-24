@@ -161,7 +161,7 @@ describe("startCharacterDeletionJob", () => {
     mockCampaignGet.mockResolvedValue({ exists: false });
 
     await expect(
-      startCharacterDeletionJob({ campaignId: CAMPAIGN_ID, characterId: CHARACTER_ID }, DM_UID)
+      startCharacterDeletionJob({ campaignId: CAMPAIGN_ID, characterId: CHARACTER_ID }, DM_UID, "idem-key")
     ).rejects.toThrow(expect.objectContaining({ code: "not-found" }));
   });
 
@@ -169,7 +169,7 @@ describe("startCharacterDeletionJob", () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "someone-else" }) });
 
     await expect(
-      startCharacterDeletionJob({ campaignId: CAMPAIGN_ID, characterId: CHARACTER_ID }, DM_UID)
+      startCharacterDeletionJob({ campaignId: CAMPAIGN_ID, characterId: CHARACTER_ID }, DM_UID, "idem-key")
     ).rejects.toThrow(expect.objectContaining({ code: "permission-denied" }));
   });
 
@@ -178,7 +178,7 @@ describe("startCharacterDeletionJob", () => {
     mockCharacterGet.mockResolvedValue({ exists: false });
 
     await expect(
-      startCharacterDeletionJob({ campaignId: CAMPAIGN_ID, characterId: CHARACTER_ID }, DM_UID)
+      startCharacterDeletionJob({ campaignId: CAMPAIGN_ID, characterId: CHARACTER_ID }, DM_UID, "idem-key")
     ).rejects.toThrow(expect.objectContaining({ code: "not-found" }));
   });
 
@@ -187,7 +187,7 @@ describe("startCharacterDeletionJob", () => {
     mockCharacterGet.mockResolvedValue({ exists: true, data: () => ({}) });
 
     await expect(
-      startCharacterDeletionJob({ campaignId: CAMPAIGN_ID, characterId: CHARACTER_ID }, DM_UID)
+      startCharacterDeletionJob({ campaignId: CAMPAIGN_ID, characterId: CHARACTER_ID }, DM_UID, "idem-key")
     ).rejects.toThrow(expect.objectContaining({ code: "failed-precondition" }));
   });
 
@@ -203,7 +203,8 @@ describe("startCharacterDeletionJob", () => {
 
     const result = await startCharacterDeletionJob(
       { campaignId: CAMPAIGN_ID, characterId: CHARACTER_ID },
-      DM_UID
+      DM_UID,
+      "idem-key"
     );
 
     expect(result).toEqual({ jobId: "job-1", totalCount: 256 });
@@ -211,7 +212,8 @@ describe("startCharacterDeletionJob", () => {
       "character-deletion",
       DM_UID,
       { campaignId: CAMPAIGN_ID, characterId: CHARACTER_ID, recoveryCode: RECOVERY_CODE },
-      256
+      256,
+      "idem-key"
     );
   });
 });

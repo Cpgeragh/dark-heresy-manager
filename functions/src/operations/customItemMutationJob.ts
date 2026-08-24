@@ -147,7 +147,8 @@ async function resolveUpdateTargetVersionId(
 
 export async function startCustomItemMutationJob(
   input: StartCustomItemMutationJobInput,
-  callerUid: string
+  callerUid: string,
+  idempotencyKey: string | null
 ): Promise<{ jobId: string; totalCount: number }> {
   const db = getFirestore();
   const campaignRef = db.collection("campaigns").doc(input.campaignId);
@@ -194,7 +195,8 @@ export async function startCustomItemMutationJob(
       targetVersionId,
       actorUserId: input.actorUserId,
     },
-    totalCount
+    totalCount,
+    idempotencyKey
   );
 
   return { jobId, totalCount };

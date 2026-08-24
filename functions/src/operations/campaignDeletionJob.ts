@@ -74,7 +74,8 @@ export interface StartCampaignDeletionJobInput {
 
 export async function startCampaignDeletionJob(
   input: StartCampaignDeletionJobInput,
-  callerUid: string
+  callerUid: string,
+  idempotencyKey: string | null
 ): Promise<{ jobId: string; totalCount: number }> {
   const db = getFirestore();
   const campaignRef = db.collection("campaigns").doc(input.campaignId);
@@ -139,7 +140,8 @@ export async function startCampaignDeletionJob(
     "campaign-deletion",
     callerUid,
     { campaignId: input.campaignId },
-    totalCount
+    totalCount,
+    idempotencyKey
   );
 
   return { jobId, totalCount };
