@@ -21,6 +21,11 @@ import {
   type LookupRecoveryCodeInput,
   type LookupRecoveryCodeResult,
 } from "./operations/lookupRecoveryCode.js";
+import {
+  claimCharacter as runClaimCharacter,
+  type ClaimCharacterInput,
+  type ClaimCharacterResult,
+} from "./operations/claimCharacter.js";
 
 export const ping = onCall(() => {
   return { ok: true };
@@ -84,4 +89,26 @@ export const lookupRecoveryCode = onCall<LookupRecoveryCodeInput>(
       ],
       handler: ({ uid, data }) => runLookupRecoveryCode(data.code, uid, recoveryCodeHmacSecret.value()),
     })
+);
+
+export const claimCharacter = onCall<ClaimCharacterInput>(
+  { secrets: [recoveryCodeHmacSecret] },
+  (request) => {
+    const callerUid = request.auth?.uid ?? "anonymous";
+    const codeHash = hashRecoveryCode(request.data?.code ?? "", recoveryCodeHmacSecret.value());
+
+    return protectedCallable<ClaimCharacterInput, ClaimCharacterResult>({
+      request,
+      operation: "claim-character",
+      allowedFields: ["code"],
+      requiredFields: ["code"],
+      rateLimits: [
+        { key: `claim-character:user:${callerUid}`, limit: 20, windowMs: 15 * 60 * 1000 },
+        { key: `claim-character:code:${codeHash}`, limit: 5, windowMs: 15 * 60 * 1000 },
+        { key: "claim-character:global", limit: 500, windowMs: 60 * 60 * 1000 },
+      ],
+      idempotencyKey: `claim-character:${callerUid}:${codeHash}`,
+      handler: ({ uid, data }) => runClaimCharacter(data, uid, recoveryCodeHmacSecret.value()),
+    });
+  }
 );

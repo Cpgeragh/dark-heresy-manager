@@ -1,7 +1,7 @@
 // tests/functions/setup.ts
 import { initializeApp, deleteApp } from "firebase/app";
 import { getFunctions, connectFunctionsEmulator } from "firebase/functions";
-import { getAuth, connectAuthEmulator, signInAnonymously } from "firebase/auth";
+import { getAuth, connectAuthEmulator, signInAnonymously, signOut } from "firebase/auth";
 import type { FirebaseApp } from "firebase/app";
 import type { Functions } from "firebase/functions";
 import type { Auth } from "firebase/auth";
@@ -34,7 +34,9 @@ export function getTestAuth(): Auth {
 }
 
 export async function signInTestUser(): Promise<string> {
-  const credential = await signInAnonymously(getTestAuth());
+  const auth = getTestAuth();
+  await signOut(auth);
+  const credential = await signInAnonymously(auth);
   return credential.user.uid;
 }
 
