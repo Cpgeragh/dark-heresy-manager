@@ -97,4 +97,20 @@ describe("device link operations", () => {
 
     expect(mockDeleteDoc).toHaveBeenCalledWith("userLinks/device-uid");
   });
+
+  it("collapses a duplicate in-flight unlink", async () => {
+    let finish!: () => void;
+    const pending = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    mockDeleteDoc.mockReturnValueOnce(pending);
+
+    const first = unlinkDevice("device-uid");
+    const duplicate = unlinkDevice("device-uid");
+
+    await vi.waitFor(() => expect(mockDeleteDoc).toHaveBeenCalledOnce());
+    finish();
+    await Promise.all([first, duplicate]);
+    expect(mockDeleteDoc).toHaveBeenCalledOnce();
+  });
 });

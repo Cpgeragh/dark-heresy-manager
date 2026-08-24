@@ -40,5 +40,5 @@ export async function linkDeviceToAccount(currentUid: string, recoveryCode: stri
 /** Removes the current device's link to its primary account. */
 export async function unlinkDevice(uid: string): Promise<void> {
   assertFirestoreDocumentId(uid, "User ID");
-  await deleteDoc(doc(db, "userLinks", uid));
+  await runSingleFlight("device:unlink", [uid], () => deleteDoc(doc(db, "userLinks", uid)));
 }

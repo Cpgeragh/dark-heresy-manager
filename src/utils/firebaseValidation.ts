@@ -457,6 +457,7 @@ export function assertCharacterPayload(value: unknown, requireComplete = false):
     maxArrayEntries: PRODUCT_LIMITS.characterArrayEntries,
     maxObjectKeys: PRODUCT_LIMITS.characterObjectKeys,
     maxDepth: PRODUCT_LIMITS.characterNestingDepth,
+    maxStringCharacters: PRODUCT_LIMITS.characterFieldCharacters,
   });
   assertExpectedIdFields(value, "Character data");
 }

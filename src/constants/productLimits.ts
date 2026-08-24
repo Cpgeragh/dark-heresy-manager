@@ -41,6 +41,7 @@ export const PRODUCT_LIMITS = {
   characterArrayEntries: 200,
   characterObjectKeys: 100,
   characterNestingDepth: 8,
+  characterFieldCharacters: 4_000,
 
   portraitInputBytes: 5_000_000,
   portraitEncodedBytes: 350_000,
