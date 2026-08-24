@@ -27,3 +27,24 @@ export function assertRequestFields(
     throw new HttpsError("invalid-argument", `Missing required field: ${missingKey}.`);
   }
 }
+
+export type FieldShape = "string" | { enum: readonly string[] };
+
+export function assertFieldShapes(
+  data: Record<string, unknown>,
+  shapes: Record<string, FieldShape>
+): void {
+  for (const [key, shape] of Object.entries(shapes)) {
+    if (!(key in data)) continue;
+    const value = data[key];
+    if (typeof value !== "string" || value.length === 0) {
+      throw new HttpsError("invalid-argument", `Field "${key}" must be a non-empty string.`);
+    }
+    if (typeof shape === "object" && !shape.enum.includes(value)) {
+      throw new HttpsError(
+        "invalid-argument",
+        `Field "${key}" must be one of: ${shape.enum.join(", ")}.`
+      );
+    }
+  }
+}

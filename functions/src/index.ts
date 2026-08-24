@@ -89,6 +89,7 @@ export const registerRecoveryCode = onCall<RegisterRecoveryCodeInput>(
       operation: "register-recovery-code",
       allowedFields: ["campaignId", "characterId"],
       requiredFields: ["campaignId", "characterId"],
+      fieldShapes: { campaignId: "string", characterId: "string" },
       rateLimits: [
         {
           key: `register-recovery-code:${request.auth?.uid ?? "anonymous"}`,
@@ -108,6 +109,7 @@ export const lookupRecoveryCode = onCall<LookupRecoveryCodeInput>(
       operation: "lookup-recovery-code",
       allowedFields: ["code"],
       requiredFields: ["code"],
+      fieldShapes: { code: "string" },
       rateLimits: [
         {
           key: `recovery-lookup:user:${request.auth?.uid ?? "anonymous"}`,
@@ -143,6 +145,7 @@ export const claimCharacter = onCall<ClaimCharacterInput>(
       operation: "claim-character",
       allowedFields: ["code"],
       requiredFields: ["code"],
+      fieldShapes: { code: "string" },
       rateLimits: [
         { key: `claim-character:user:${callerUid}`, limit: 20, windowMs: 15 * 60 * 1000 },
         { key: `claim-character:code:${codeHash}`, limit: 5, windowMs: 15 * 60 * 1000 },
@@ -161,6 +164,7 @@ export const releaseCharacter = onCall<ReleaseCharacterInput>((request) => {
     operation: "release-character",
     allowedFields: ["campaignId", "characterId"],
     requiredFields: ["campaignId", "characterId"],
+    fieldShapes: { campaignId: "string", characterId: "string" },
     rateLimits: [{ key: `release-character:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 }],
     idempotencyKey: `release-character:${callerUid}:${request.data?.campaignId ?? ""}:${request.data?.characterId ?? ""}`,
     handler: ({ uid, data }) => runReleaseCharacter(data, uid),
@@ -174,6 +178,7 @@ export const forceReleaseCharacter = onCall<ForceReleaseCharacterInput>((request
     operation: "force-release-character",
     allowedFields: ["campaignId", "characterId"],
     requiredFields: ["campaignId", "characterId"],
+    fieldShapes: { campaignId: "string", characterId: "string" },
     rateLimits: [
       { key: `force-release-character:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 },
     ],
@@ -189,6 +194,7 @@ export const forceAssignCharacter = onCall<ForceAssignCharacterInput>((request) 
     operation: "force-assign-character",
     allowedFields: ["campaignId", "characterId", "targetUid"],
     requiredFields: ["campaignId", "characterId", "targetUid"],
+    fieldShapes: { campaignId: "string", characterId: "string", targetUid: "string" },
     rateLimits: [
       { key: `force-assign-character:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 },
     ],
@@ -206,6 +212,7 @@ export const reclaimIdentity = onCall<ReclaimIdentityInput>((request) => {
     operation: "reclaim-identity",
     allowedFields: ["code"],
     requiredFields: ["code"],
+    fieldShapes: { code: "string" },
     rateLimits: [
       { key: `reclaim-identity:user:${callerUid}`, limit: 20, windowMs: 15 * 60 * 1000 },
       { key: `reclaim-identity:code:${codeHash}`, limit: 5, windowMs: 15 * 60 * 1000 },
@@ -224,6 +231,7 @@ export const linkDevice = onCall<LinkDeviceInput>((request) => {
     operation: "link-device",
     allowedFields: ["code"],
     requiredFields: ["code"],
+    fieldShapes: { code: "string" },
     rateLimits: [
       { key: `link-device:user:${callerUid}`, limit: 20, windowMs: 15 * 60 * 1000 },
       { key: `link-device:code:${codeHash}`, limit: 5, windowMs: 15 * 60 * 1000 },
@@ -239,6 +247,7 @@ export const startCharacterDeletionJob = onCall<StartCharacterDeletionJobInput>(
     operation: "start-character-deletion-job",
     allowedFields: ["campaignId", "characterId"],
     requiredFields: ["campaignId", "characterId"],
+    fieldShapes: { campaignId: "string", characterId: "string" },
     rateLimits: [
       { key: `start-character-deletion-job:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 },
     ],
@@ -254,6 +263,7 @@ export const processCharacterDeletionChunk = onCall<ProcessCharacterDeletionChun
     operation: "process-character-deletion-chunk",
     allowedFields: ["jobId"],
     requiredFields: ["jobId"],
+    fieldShapes: { jobId: "string" },
     rateLimits: [
       { key: `process-character-deletion-chunk:${callerUid}`, limit: 300, windowMs: 60 * 60 * 1000 },
     ],
@@ -268,6 +278,7 @@ export const startCampaignDeletionJob = onCall<StartCampaignDeletionJobInput>((r
     operation: "start-campaign-deletion-job",
     allowedFields: ["campaignId"],
     requiredFields: ["campaignId"],
+    fieldShapes: { campaignId: "string" },
     rateLimits: [
       { key: `start-campaign-deletion-job:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 },
     ],
@@ -283,6 +294,7 @@ export const processCampaignDeletionChunk = onCall<ProcessCampaignDeletionChunkI
     operation: "process-campaign-deletion-chunk",
     allowedFields: ["jobId"],
     requiredFields: ["jobId"],
+    fieldShapes: { jobId: "string" },
     rateLimits: [
       { key: `process-campaign-deletion-chunk:${callerUid}`, limit: 300, windowMs: 60 * 60 * 1000 },
     ],
@@ -297,6 +309,13 @@ export const startCustomItemMutationJob = onCall<StartCustomItemMutationJobInput
     operation: "start-custom-item-mutation-job",
     allowedFields: ["campaignId", "customItemId", "mode", "versionId", "actorUserId"],
     requiredFields: ["campaignId", "customItemId", "mode", "actorUserId"],
+    fieldShapes: {
+      campaignId: "string",
+      customItemId: "string",
+      mode: { enum: ["publish-and-update", "update", "remove", "archive-and-remove"] },
+      versionId: "string",
+      actorUserId: "string",
+    },
     rateLimits: [
       { key: `start-custom-item-mutation-job:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 },
     ],
@@ -312,6 +331,7 @@ export const processCustomItemMutationChunk = onCall<ProcessCustomItemMutationCh
     operation: "process-custom-item-mutation-chunk",
     allowedFields: ["jobId"],
     requiredFields: ["jobId"],
+    fieldShapes: { jobId: "string" },
     rateLimits: [
       { key: `process-custom-item-mutation-chunk:${callerUid}`, limit: 300, windowMs: 60 * 60 * 1000 },
     ],

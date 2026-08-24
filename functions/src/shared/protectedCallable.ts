@@ -15,7 +15,7 @@ import type { CallableRequest } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions";
 import { withSafeErrors } from "./errors.js";
 import { requireAuth } from "./auth.js";
-import { assertRequestFields } from "./validation.js";
+import { assertRequestFields, assertFieldShapes, type FieldShape } from "./validation.js";
 import { enforceRateLimit } from "./rateLimit.js";
 import { withIdempotency } from "./idempotency.js";
 import { recordAuditEntry } from "./audit.js";
@@ -26,6 +26,7 @@ export interface ProtectedCallableOptions<TData, TResult> {
   operation: string;
   allowedFields: readonly string[];
   requiredFields?: readonly string[];
+  fieldShapes?: Record<string, FieldShape>;
   rateLimits?: readonly { key: string; limit: number; windowMs: number }[];
   idempotencyKey?: string;
   handler: (context: { uid: string; appCheckVerified: boolean; data: TData }) => Promise<TResult>;
@@ -50,6 +51,9 @@ export async function protectedCallable<TData, TResult>(
   return withSafeErrors(options.operation, async () => {
     const { uid, appCheckVerified } = requireAuth(options.request);
     assertRequestFields(options.request.data, options.allowedFields, options.requiredFields ?? []);
+    if (options.fieldShapes) {
+      assertFieldShapes(options.request.data, options.fieldShapes);
+    }
 
     if (options.rateLimits) {
       for (const rateLimit of options.rateLimits) {
