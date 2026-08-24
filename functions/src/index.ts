@@ -53,6 +53,13 @@ import {
   type ProcessCharacterDeletionChunkInput,
   type ProcessCharacterDeletionChunkResult,
 } from "./operations/characterDeletionJob.js";
+import {
+  startCampaignDeletionJob as runStartCampaignDeletionJob,
+  processCampaignDeletionChunk as runProcessCampaignDeletionChunk,
+  type StartCampaignDeletionJobInput,
+  type ProcessCampaignDeletionChunkInput,
+  type ProcessCampaignDeletionChunkResult,
+} from "./operations/campaignDeletionJob.js";
 
 export const ping = onCall(() => {
   return { ok: true };
@@ -244,5 +251,34 @@ export const processCharacterDeletionChunk = onCall<ProcessCharacterDeletionChun
       { key: `process-character-deletion-chunk:${callerUid}`, limit: 300, windowMs: 60 * 60 * 1000 },
     ],
     handler: ({ uid, data }) => runProcessCharacterDeletionChunk(data, uid),
+  });
+});
+
+export const startCampaignDeletionJob = onCall<StartCampaignDeletionJobInput>((request) => {
+  const callerUid = request.auth?.uid ?? "anonymous";
+  return protectedCallable<StartCampaignDeletionJobInput, { jobId: string; totalCount: number }>({
+    request,
+    operation: "start-campaign-deletion-job",
+    allowedFields: ["campaignId"],
+    requiredFields: ["campaignId"],
+    rateLimits: [
+      { key: `start-campaign-deletion-job:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 },
+    ],
+    idempotencyKey: `start-campaign-deletion-job:${callerUid}:${request.data?.campaignId ?? ""}`,
+    handler: ({ uid, data }) => runStartCampaignDeletionJob(data, uid),
+  });
+});
+
+export const processCampaignDeletionChunk = onCall<ProcessCampaignDeletionChunkInput>((request) => {
+  const callerUid = request.auth?.uid ?? "anonymous";
+  return protectedCallable<ProcessCampaignDeletionChunkInput, ProcessCampaignDeletionChunkResult>({
+    request,
+    operation: "process-campaign-deletion-chunk",
+    allowedFields: ["jobId"],
+    requiredFields: ["jobId"],
+    rateLimits: [
+      { key: `process-campaign-deletion-chunk:${callerUid}`, limit: 300, windowMs: 60 * 60 * 1000 },
+    ],
+    handler: ({ uid, data }) => runProcessCampaignDeletionChunk(data, uid),
   });
 });
