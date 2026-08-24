@@ -121,24 +121,26 @@ export default function Settings({ user: _user, effectiveUserId, isLinked, unlin
                   </span>
                 </div>
 
-                <div className="flex gap-3">
-                  <Button variant="ghost" onClick={() => setRevealedCode(null)}>
-                    Hide
-                  </Button>
-                  <ConfirmInline
-                    triggerLabel="Rotate Code"
-                    question="Rotate code?"
-                    onConfirm={handleRotate}
-                    variant="warning"
-                    busy={rotating}
-                    confirmLabel="Yes, rotate"
-                    cancelLabel="Cancel"
-                    busyLabel="Rotating…"
-                  />
+                <div className="border border-amber-500/60 bg-amber-500/10 rounded-lg p-3 space-y-2">
+                  <p className="text-xs lg:text-sm text-amber-200">
+                    If anyone else may have seen this code, rotate it now to invalidate it.
+                  </p>
+                  <div className="flex gap-3">
+                    <Button variant="ghost" onClick={() => setRevealedCode(null)}>
+                      Hide
+                    </Button>
+                    <ConfirmInline
+                      triggerLabel="Rotate Code"
+                      question="Rotate code?"
+                      onConfirm={handleRotate}
+                      variant="warning"
+                      busy={rotating}
+                      confirmLabel="Yes, rotate"
+                      cancelLabel="Cancel"
+                      busyLabel="Rotating…"
+                    />
+                  </div>
                 </div>
-                <p className="text-xs lg:text-sm text-slate-600">
-                  Rotating generates a new code and invalidates the old one.
-                </p>
               </>
             ) : (
               <Button onClick={handleReveal} disabled={revealing}>

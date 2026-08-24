@@ -32,6 +32,7 @@ describe("hard product limits", () => {
       customItemNestingDepth: 8,
       characterImportBytes: 750_000,
       characterDocumentBytes: 900_000,
+      characterFieldCharacters: 4_000,
       characterArrayEntries: 200,
       characterObjectKeys: 100,
       characterNestingDepth: 8,
