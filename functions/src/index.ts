@@ -10,6 +10,7 @@ initializeApp();
 
 import { onCall } from "firebase-functions/v2/https";
 import { protectedCallable } from "./shared/protectedCallable.js";
+import { withMinimumDuration } from "./shared/timingSafety.js";
 import { recoveryCodeHmacSecret } from "./shared/secrets.js";
 import { hashRecoveryCode, hashForKey } from "./shared/recoveryCode.js";
 import {
@@ -134,7 +135,10 @@ export const lookupRecoveryCode = onCall<LookupRecoveryCodeInput>(
           windowMs: 60 * 60 * 1000,
         },
       ],
-      handler: ({ uid, data }) => runLookupRecoveryCode(data.code, uid, recoveryCodeHmacSecret.value()),
+      handler: ({ uid, data }) =>
+        withMinimumDuration(250, () =>
+          runLookupRecoveryCode(data.code, uid, recoveryCodeHmacSecret.value())
+        ),
     })
 );
 
@@ -175,7 +179,8 @@ export const claimCharacter = onCall<ClaimCharacterInput>(
         { key: "claim-character:global", limit: 500, windowMs: 60 * 60 * 1000 },
       ],
       idempotencyKey: `claim-character:${callerUid}:${codeHash}`,
-      handler: ({ uid, data }) => runClaimCharacter(data, uid, recoveryCodeHmacSecret.value()),
+      handler: ({ uid, data }) =>
+        withMinimumDuration(250, () => runClaimCharacter(data, uid, recoveryCodeHmacSecret.value())),
     });
   }
 );
