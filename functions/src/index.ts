@@ -46,6 +46,13 @@ import {
   linkDevice as runLinkDevice,
   type LinkDeviceInput,
 } from "./operations/linkDevice.js";
+import {
+  startCharacterDeletionJob as runStartCharacterDeletionJob,
+  processCharacterDeletionChunk as runProcessCharacterDeletionChunk,
+  type StartCharacterDeletionJobInput,
+  type ProcessCharacterDeletionChunkInput,
+  type ProcessCharacterDeletionChunkResult,
+} from "./operations/characterDeletionJob.js";
 
 export const ping = onCall(() => {
   return { ok: true };
@@ -208,5 +215,34 @@ export const linkDevice = onCall<LinkDeviceInput>((request) => {
       { key: `link-device:code:${codeHash}`, limit: 5, windowMs: 15 * 60 * 1000 },
     ],
     handler: ({ uid, data }) => runLinkDevice(data, uid),
+  });
+});
+
+export const startCharacterDeletionJob = onCall<StartCharacterDeletionJobInput>((request) => {
+  const callerUid = request.auth?.uid ?? "anonymous";
+  return protectedCallable<StartCharacterDeletionJobInput, { jobId: string; totalCount: number }>({
+    request,
+    operation: "start-character-deletion-job",
+    allowedFields: ["campaignId", "characterId"],
+    requiredFields: ["campaignId", "characterId"],
+    rateLimits: [
+      { key: `start-character-deletion-job:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 },
+    ],
+    idempotencyKey: `start-character-deletion-job:${callerUid}:${request.data?.campaignId ?? ""}:${request.data?.characterId ?? ""}`,
+    handler: ({ uid, data }) => runStartCharacterDeletionJob(data, uid),
+  });
+});
+
+export const processCharacterDeletionChunk = onCall<ProcessCharacterDeletionChunkInput>((request) => {
+  const callerUid = request.auth?.uid ?? "anonymous";
+  return protectedCallable<ProcessCharacterDeletionChunkInput, ProcessCharacterDeletionChunkResult>({
+    request,
+    operation: "process-character-deletion-chunk",
+    allowedFields: ["jobId"],
+    requiredFields: ["jobId"],
+    rateLimits: [
+      { key: `process-character-deletion-chunk:${callerUid}`, limit: 300, windowMs: 60 * 60 * 1000 },
+    ],
+    handler: ({ uid, data }) => runProcessCharacterDeletionChunk(data, uid),
   });
 });
