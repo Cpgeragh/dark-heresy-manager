@@ -6,7 +6,17 @@
 // the shared foundation is built.
 
 import { onCall } from "firebase-functions/v2/https";
+import { protectedCallable } from "./shared/protectedCallable.js";
 
 export const ping = onCall(() => {
   return { ok: true };
 });
+
+export const protectedPing = onCall((request) =>
+  protectedCallable({
+    request,
+    operation: "protected-ping",
+    allowedFields: [],
+    handler: async () => ({ ok: true }),
+  })
+);
