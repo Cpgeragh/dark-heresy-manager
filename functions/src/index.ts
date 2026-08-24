@@ -60,6 +60,13 @@ import {
   type ProcessCampaignDeletionChunkInput,
   type ProcessCampaignDeletionChunkResult,
 } from "./operations/campaignDeletionJob.js";
+import {
+  startCustomItemMutationJob as runStartCustomItemMutationJob,
+  processCustomItemMutationChunk as runProcessCustomItemMutationChunk,
+  type StartCustomItemMutationJobInput,
+  type ProcessCustomItemMutationChunkInput,
+  type ProcessCustomItemMutationChunkResult,
+} from "./operations/customItemMutationJob.js";
 
 export const ping = onCall(() => {
   return { ok: true };
@@ -280,5 +287,34 @@ export const processCampaignDeletionChunk = onCall<ProcessCampaignDeletionChunkI
       { key: `process-campaign-deletion-chunk:${callerUid}`, limit: 300, windowMs: 60 * 60 * 1000 },
     ],
     handler: ({ uid, data }) => runProcessCampaignDeletionChunk(data, uid),
+  });
+});
+
+export const startCustomItemMutationJob = onCall<StartCustomItemMutationJobInput>((request) => {
+  const callerUid = request.auth?.uid ?? "anonymous";
+  return protectedCallable<StartCustomItemMutationJobInput, { jobId: string; totalCount: number }>({
+    request,
+    operation: "start-custom-item-mutation-job",
+    allowedFields: ["campaignId", "customItemId", "mode", "versionId", "actorUserId"],
+    requiredFields: ["campaignId", "customItemId", "mode", "actorUserId"],
+    rateLimits: [
+      { key: `start-custom-item-mutation-job:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 },
+    ],
+    idempotencyKey: `start-custom-item-mutation-job:${callerUid}:${request.data?.campaignId ?? ""}:${request.data?.customItemId ?? ""}:${request.data?.mode ?? ""}`,
+    handler: ({ uid, data }) => runStartCustomItemMutationJob(data, uid),
+  });
+});
+
+export const processCustomItemMutationChunk = onCall<ProcessCustomItemMutationChunkInput>((request) => {
+  const callerUid = request.auth?.uid ?? "anonymous";
+  return protectedCallable<ProcessCustomItemMutationChunkInput, ProcessCustomItemMutationChunkResult>({
+    request,
+    operation: "process-custom-item-mutation-chunk",
+    allowedFields: ["jobId"],
+    requiredFields: ["jobId"],
+    rateLimits: [
+      { key: `process-custom-item-mutation-chunk:${callerUid}`, limit: 300, windowMs: 60 * 60 * 1000 },
+    ],
+    handler: ({ uid, data }) => runProcessCustomItemMutationChunk(data, uid),
   });
 });
