@@ -1,6 +1,10 @@
 // functions/tests/shared/validation.test.ts
 import { describe, it, expect } from "vitest";
-import { assertRequestFields, assertFieldShapes } from "../../src/shared/validation";
+import {
+  assertRequestFields,
+  assertFieldShapes,
+  assertRequestPayloadBounds,
+} from "../../src/shared/validation";
 
 describe("assertRequestFields", () => {
   it("accepts data containing only allowed fields", () => {
@@ -70,6 +74,35 @@ describe("assertFieldShapes", () => {
   it("rejects a value not in the enum shape", () => {
     expect(() =>
       assertFieldShapes({ mode: "delete-everything" }, { mode: { enum: ["update", "remove"] } })
+    ).toThrow(expect.objectContaining({ code: "invalid-argument" }));
+  });
+});
+
+describe("assertRequestPayloadBounds", () => {
+  it("accepts a small, ordinary payload", () => {
+    expect(() =>
+      assertRequestPayloadBounds(
+        { campaignId: "campaign-1", characterId: "character-1" },
+        { maxBytes: 4_000, maxStringCharacters: 500 }
+      )
+    ).not.toThrow();
+  });
+
+  it("rejects a payload whose serialised size exceeds the byte cap", () => {
+    expect(() =>
+      assertRequestPayloadBounds(
+        { note: "x".repeat(5_000) },
+        { maxBytes: 4_000, maxStringCharacters: 10_000 }
+      )
+    ).toThrow(expect.objectContaining({ code: "invalid-argument" }));
+  });
+
+  it("rejects a single field exceeding the per-field character cap even when total bytes are small", () => {
+    expect(() =>
+      assertRequestPayloadBounds(
+        { code: "x".repeat(600) },
+        { maxBytes: 4_000, maxStringCharacters: 500 }
+      )
     ).toThrow(expect.objectContaining({ code: "invalid-argument" }));
   });
 });

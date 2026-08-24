@@ -14,7 +14,11 @@ vi.mock("../../src/shared/errors", () => ({
   withSafeErrors: vi.fn((_operation: string, handler: () => Promise<unknown>) => handler()),
 }));
 vi.mock("../../src/shared/auth", () => ({ requireAuth: vi.fn() }));
-vi.mock("../../src/shared/validation", () => ({ assertRequestFields: vi.fn() }));
+vi.mock("../../src/shared/validation", () => ({
+  assertRequestFields: vi.fn(),
+  assertFieldShapes: vi.fn(),
+  assertRequestPayloadBounds: vi.fn(),
+}));
 vi.mock("../../src/shared/rateLimit", () => ({ enforceRateLimit: vi.fn() }));
 vi.mock("../../src/shared/idempotency", () => ({
   withIdempotency: vi.fn((_key: string, handler: () => Promise<unknown>) => handler()),

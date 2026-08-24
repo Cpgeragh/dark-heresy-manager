@@ -15,7 +15,12 @@ import type { CallableRequest } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions";
 import { withSafeErrors } from "./errors.js";
 import { requireAuth } from "./auth.js";
-import { assertRequestFields, assertFieldShapes, type FieldShape } from "./validation.js";
+import {
+  assertRequestFields,
+  assertFieldShapes,
+  assertRequestPayloadBounds,
+  type FieldShape,
+} from "./validation.js";
 import { enforceRateLimit } from "./rateLimit.js";
 import { withIdempotency } from "./idempotency.js";
 import { recordAuditEntry } from "./audit.js";
@@ -54,6 +59,7 @@ export async function protectedCallable<TData, TResult>(
     if (options.fieldShapes) {
       assertFieldShapes(options.request.data, options.fieldShapes);
     }
+    assertRequestPayloadBounds(options.request.data, { maxBytes: 4_000, maxStringCharacters: 500 });
 
     if (options.rateLimits) {
       for (const rateLimit of options.rateLimits) {

@@ -28,6 +28,33 @@ export function assertRequestFields(
   }
 }
 
+export function assertRequestPayloadBounds(
+  data: Record<string, unknown>,
+  options: { maxBytes: number; maxStringCharacters: number }
+): void {
+  let serialised: string;
+  try {
+    serialised = JSON.stringify(data);
+  } catch {
+    throw new HttpsError("invalid-argument", "Request data must be serialisable.");
+  }
+  if (Buffer.byteLength(serialised, "utf8") > options.maxBytes) {
+    throw new HttpsError(
+      "invalid-argument",
+      `Request payload exceeds its ${options.maxBytes}-byte limit.`
+    );
+  }
+
+  for (const [key, value] of Object.entries(data)) {
+    if (typeof value === "string" && value.length > options.maxStringCharacters) {
+      throw new HttpsError(
+        "invalid-argument",
+        `Field "${key}" cannot exceed ${options.maxStringCharacters} characters.`
+      );
+    }
+  }
+}
+
 export type FieldShape = "string" | { enum: readonly string[] };
 
 export function assertFieldShapes(
