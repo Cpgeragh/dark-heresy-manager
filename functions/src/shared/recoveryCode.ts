@@ -6,7 +6,7 @@
 // two projects are independent (functions/ can't import from src/), so if
 // that format ever changes, this needs updating to match.
 
-import { randomInt, createHmac } from "node:crypto";
+import { randomInt, createHmac, createHash } from "node:crypto";
 
 const ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const PREFIX = "DH";
@@ -27,4 +27,8 @@ export function generateRecoveryCode(): string {
 
 export function hashRecoveryCode(code: string, secret: string): string {
   return createHmac("sha256", secret).update(code).digest("hex");
+}
+
+export function hashForKey(value: string): string {
+  return createHash("sha256").update(value).digest("hex");
 }

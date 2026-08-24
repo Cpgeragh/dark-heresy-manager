@@ -11,7 +11,7 @@ initializeApp();
 import { onCall } from "firebase-functions/v2/https";
 import { protectedCallable } from "./shared/protectedCallable.js";
 import { recoveryCodeHmacSecret } from "./shared/secrets.js";
-import { hashRecoveryCode } from "./shared/recoveryCode.js";
+import { hashRecoveryCode, hashForKey } from "./shared/recoveryCode.js";
 import {
   registerRecoveryCode as runRegisterRecoveryCode,
   type RegisterRecoveryCodeInput,
@@ -38,6 +38,10 @@ import {
   forceAssignCharacter as runForceAssignCharacter,
   type ForceAssignCharacterInput,
 } from "./operations/forceAssignCharacter.js";
+import {
+  reclaimIdentity as runReclaimIdentity,
+  type ReclaimIdentityInput,
+} from "./operations/reclaimIdentity.js";
 
 export const ping = onCall(() => {
   return { ok: true };
@@ -165,5 +169,23 @@ export const forceAssignCharacter = onCall<ForceAssignCharacterInput>((request) 
     ],
     idempotencyKey: `force-assign-character:${callerUid}:${request.data?.campaignId ?? ""}:${request.data?.characterId ?? ""}:${request.data?.targetUid ?? ""}`,
     handler: ({ uid, data }) => runForceAssignCharacter(data, uid),
+  });
+});
+
+export const reclaimIdentity = onCall<ReclaimIdentityInput>((request) => {
+  const callerUid = request.auth?.uid ?? "anonymous";
+  const codeHash = hashForKey(request.data?.code ?? "");
+
+  return protectedCallable<ReclaimIdentityInput, { role: "dm" | "player" }>({
+    request,
+    operation: "reclaim-identity",
+    allowedFields: ["code"],
+    requiredFields: ["code"],
+    rateLimits: [
+      { key: `reclaim-identity:user:${callerUid}`, limit: 20, windowMs: 15 * 60 * 1000 },
+      { key: `reclaim-identity:code:${codeHash}`, limit: 5, windowMs: 15 * 60 * 1000 },
+    ],
+    idempotencyKey: `reclaim-identity:${callerUid}:${codeHash}`,
+    handler: ({ uid, data }) => runReclaimIdentity(data, uid),
   });
 });
