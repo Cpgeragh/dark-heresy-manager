@@ -43,7 +43,7 @@ function makeJob(overrides: Partial<BulkJobRecord> = {}): BulkJobRecord {
     idempotencyKey: null,
     retryCount: 0,
     lastError: null,
-    createdAt: 0,
+    createdAt: Date.now(),
     updatedAt: 0,
     ...overrides,
   };
@@ -138,6 +138,42 @@ describe("acquireJobLease", () => {
     mockTransactionGet.mockResolvedValue({
       exists: true,
       data: () => makeJob({ leaseOwner: "stale-lease", leaseExpiresAt: Date.now() - 1000 }),
+    });
+
+    await expect(acquireJobLease("job-1", "user-1")).resolves.toBeDefined();
+  });
+
+  it("expires and fails a job that's been open too long, clearing its idempotency key, instead of leasing it", async () => {
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () =>
+        makeJob({
+          createdAt: Date.now() - 25 * 60 * 60 * 1000, // 25 hours ago
+          idempotencyKey: "start-test-job:user-1:c1",
+        }),
+    });
+
+    await expect(acquireJobLease("job-1", "user-1")).rejects.toThrow(
+      expect.objectContaining({ code: "failed-precondition" })
+    );
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ status: "failed", error: "Job expired without completing." })
+    );
+    expect(mockTransactionDelete).toHaveBeenCalledWith(
+      expect.objectContaining({ collectionName: "idempotencyKeys", id: "start-test-job:user-1:c1" })
+    );
+  });
+
+  it("does not expire a job well within the window, even with an unrelated stale lease", async () => {
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () =>
+        makeJob({
+          createdAt: Date.now() - 60 * 60 * 1000, // 1 hour ago
+          leaseOwner: "stale-lease",
+          leaseExpiresAt: Date.now() - 1000,
+        }),
     });
 
     await expect(acquireJobLease("job-1", "user-1")).resolves.toBeDefined();

@@ -16,6 +16,12 @@ import { IDEMPOTENCY_COLLECTION } from "./idempotency.js";
 
 const BULK_JOBS_COLLECTION = "bulkJobs";
 const LEASE_DURATION_MS = 60 * 1000;
+// A job untouched this long since creation is treated as abandoned the next
+// time anything tries to access it. Lazy, access-triggered expiry only, not
+// a proactive sweep — a real sweep (scheduled function or Firestore TTL
+// policy) needs configuring against the actual deployed project, which is
+// out of scope until this app is actually deployed.
+const JOB_EXPIRY_MS = 24 * 60 * 60 * 1000;
 
 export type BulkJobStatus = "pending" | "running" | "completed" | "failed";
 
@@ -91,6 +97,15 @@ export async function acquireJobLease(
     }
 
     const now = Date.now();
+
+    if (now - job.createdAt > JOB_EXPIRY_MS) {
+      markJobFailedInTransaction(db, transaction, ref, job, "Job expired without completing.");
+      throw new HttpsError(
+        "failed-precondition",
+        "This job expired without completing. Start a new one."
+      );
+    }
+
     const leaseHeld = job.leaseExpiresAt !== null && job.leaseExpiresAt > now;
     if (leaseHeld) {
       throw new HttpsError("aborted", "This job is already being processed.");
@@ -153,6 +168,29 @@ export async function completeJob(jobId: string, leaseId: string): Promise<void>
   }, { maxAttempts: 5 });
 }
 
+// Shared by failJob and acquireJobLease's expiry check: marks a job failed
+// and clears its recorded idempotency key (if any) within an already-open
+// transaction, so a future start call with the same deterministic key
+// creates a genuinely fresh job instead of replaying the dead one.
+function markJobFailedInTransaction(
+  db: FirebaseFirestore.Firestore,
+  transaction: FirebaseFirestore.Transaction,
+  ref: FirebaseFirestore.DocumentReference,
+  job: BulkJobRecord,
+  error: string
+): void {
+  transaction.update(ref, {
+    status: "failed",
+    error,
+    leaseOwner: null,
+    leaseExpiresAt: null,
+    updatedAt: Date.now(),
+  });
+  if (job.idempotencyKey) {
+    transaction.delete(db.collection(IDEMPOTENCY_COLLECTION).doc(job.idempotencyKey));
+  }
+}
+
 export async function failJob(jobId: string, leaseId: string, error: string): Promise<void> {
   const db = getFirestore();
   const ref = db.collection(BULK_JOBS_COLLECTION).doc(jobId);
@@ -161,16 +199,7 @@ export async function failJob(jobId: string, leaseId: string, error: string): Pr
     if (!snapshot.exists) return;
     const job = snapshot.data() as BulkJobRecord;
     if (job.leaseOwner !== leaseId) return;
-    transaction.update(ref, {
-      status: "failed",
-      error,
-      leaseOwner: null,
-      leaseExpiresAt: null,
-      updatedAt: Date.now(),
-    });
-    if (job.idempotencyKey) {
-      transaction.delete(db.collection(IDEMPOTENCY_COLLECTION).doc(job.idempotencyKey));
-    }
+    markJobFailedInTransaction(db, transaction, ref, job, error);
   }, { maxAttempts: 5 });
 }
 
