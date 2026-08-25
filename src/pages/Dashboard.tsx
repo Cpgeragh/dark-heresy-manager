@@ -565,7 +565,7 @@ function QrPanel() {
 
 // ─── Claim a character (inline) ───────────────────────────────────────────────
 
-function ClaimCharacterSection({ effectiveUserId }: { effectiveUserId: string }) {
+function ClaimCharacterSection() {
   const [code, setCode] = useState("");
   const [claiming, setClaiming] = useState(false);
   const [claimError, setClaimError] = useState<string | null>(null);
@@ -573,7 +573,7 @@ function ClaimCharacterSection({ effectiveUserId }: { effectiveUserId: string })
   const navigate = useNavigate();
   const toast = useToast();
 
-  const { loading, error, data, lookup } = useRecoveryLookup(effectiveUserId);
+  const { loading, error, data, lookup } = useRecoveryLookup();
   const { claimCharacter } = useClaimActions();
 
   const handleLookup = useCallback(() => {
@@ -589,8 +589,8 @@ function ClaimCharacterSection({ effectiveUserId }: { effectiveUserId: string })
     try {
       setClaiming(true);
       setClaimError(null);
-      await claimCharacter(data.campaignId, data.character, effectiveUserId);
-      navigate(buildRoute.characterSheet(data.campaignId, data.characterId));
+      const result = await claimCharacter(code);
+      navigate(buildRoute.characterSheet(result.campaignId, result.characterId));
     } catch (err: unknown) {
       const message =
         err instanceof Error
@@ -601,7 +601,7 @@ function ClaimCharacterSection({ effectiveUserId }: { effectiveUserId: string })
     } finally {
       setClaiming(false);
     }
-  }, [data, claiming, claimCharacter, navigate, toast, effectiveUserId]);
+  }, [data, claiming, claimCharacter, navigate, toast, code]);
 
   return (
     <div>
@@ -624,8 +624,8 @@ function ClaimCharacterSection({ effectiveUserId }: { effectiveUserId: string })
 
         {data && (
           <ClaimPreview
-            character={data.character}
-            campaign={data.campaign}
+            characterName={data.characterName}
+            campaignName={data.campaignName}
             ownership={data.ownership}
             onClaim={handleClaim}
           />
@@ -709,7 +709,7 @@ export default function Dashboard({ user, effectiveUserId, isLinked, firstName }
         <hr className="border-slate-700" />
 
         {/* ── Claim a character ────────────────────────────────────────── */}
-        <ClaimCharacterSection effectiveUserId={effectiveUserId} />
+        <ClaimCharacterSection />
       </Panel>
     </PageShell>
   );

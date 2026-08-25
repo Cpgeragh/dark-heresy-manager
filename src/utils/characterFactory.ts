@@ -15,14 +15,14 @@ function char(base = 0, advances = 0): CharField {
  */
 export function createEmptyCharacterData(params: {
   campaignId: string;
-  recoveryCode: string;
+  recoveryCode?: string;
   userId?: string | null;
   characterName?: string;
   playerName?: string;
 }): Omit<Character, "id"> {
   const {
     campaignId,
-    recoveryCode,
+    recoveryCode = "",
     userId = null,
     characterName = "New Acolyte",
     playerName = "",

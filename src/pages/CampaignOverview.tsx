@@ -90,7 +90,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
       setNewCharacterName("");
     } catch (err) {
       console.error("Character creation error:", err);
-      toast.error("Failed to create character.");
+      toast.error(err instanceof Error ? err.message : "Failed to create character.");
     } finally {
       creatingCharacterRef.current = false;
       setCreatingCharacter(false);
@@ -114,7 +114,9 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
         toast.success(`Imported "${characterName}" successfully`, IMPORTANT_TOAST_DURATION);
       } catch (err) {
         console.error("Failed to import character:", err);
-        toast.error("Failed to import character. Check the file and try again.");
+        toast.error(
+          err instanceof Error ? err.message : "Failed to import character. Check the file and try again."
+        );
       } finally {
         importingCharacterRef.current = false;
         setImportingCharacter(false);

@@ -4,6 +4,8 @@ const {
   mockAuth,
   mockBatch,
   mockBatchDeleteRefs,
+  mockCallClaimCharacter,
+  mockCallRegisterRecoveryCode,
   mockDoc,
   mockGetDoc,
   mockGetDocs,
@@ -28,13 +30,25 @@ const {
     },
     mockBatch,
     mockBatchDeleteRefs: vi.fn().mockResolvedValue(undefined),
+    mockCallClaimCharacter: vi.fn(),
+    mockCallRegisterRecoveryCode: vi.fn(),
     // Single-arg calls are the auto-ID form used by doc(collectionRef); keep
     // returning the old constant there. Multi-arg calls (doc(db, "a", "b"))
     // are the explicit-path form deleteCharacter uses — join into a path so
     // different refs are distinguishable in assertions.
-    mockDoc: vi.fn((...args: unknown[]) =>
-      args.length <= 1 ? "claim-log-ref" : args.slice(1).join("/")
-    ),
+    mockDoc: vi.fn((...args: unknown[]) => {
+      if (args.length <= 1) {
+        const ref = args[0];
+        if (
+          typeof ref === "string" &&
+          (ref.startsWith("characters-collection:") || ref.endsWith("/characters"))
+        ) {
+          return { id: "new-char-id" };
+        }
+        return "claim-log-ref";
+      }
+      return args.slice(1).join("/");
+    }),
     mockGetDoc: vi.fn(),
     mockGetDocs: vi.fn(),
     mockRunTransaction: vi.fn(async (_db: unknown, operation: (transaction: unknown) => unknown) =>
@@ -63,16 +77,25 @@ vi.mock("firebase/firestore", () => ({
   writeBatch: () => mockBatch,
 }));
 
+vi.mock("firebase/functions", () => ({
+  httpsCallable: vi.fn((_functions: unknown, name: string) => {
+    if (name === "claimCharacter") return mockCallClaimCharacter;
+    if (name === "registerRecoveryCode") return mockCallRegisterRecoveryCode;
+    throw new Error(`Unexpected callable: ${name}`);
+  }),
+}));
+
 vi.mock("../../src/firebase", () => ({
   auth: mockAuth,
   db: "mock-db",
+  functions: "mock-functions",
 }));
 
 vi.mock("../../src/firebase/converters", () => ({
   campaignDocRef: (campaignId: string) => `campaign:${campaignId}`,
   characterDocRef: (campaignId: string, characterId: string) =>
     `character:${campaignId}:${characterId}`,
-  charactersCollectionRef: vi.fn(),
+  charactersCollectionRef: (campaignId: string) => `characters-collection:${campaignId}`,
 }));
 
 vi.mock("../../src/utils/firestoreBatchDelete", () => ({
@@ -85,6 +108,7 @@ import {
   deleteCharacter,
   importCharacter,
   reconcileCharacterSpentXp,
+  registerRecoveryCode,
   releaseCharacter,
 } from "../../src/services/characterService";
 import { createEmptyCharacterData } from "../../src/utils/characterFactory";
@@ -116,19 +140,19 @@ beforeEach(() => {
 });
 
 describe("character claiming operations", () => {
-  it("starts only one transaction for a duplicate in-flight ownership action", async () => {
-    let finish!: () => void;
-    const pending = new Promise<void>((resolve) => {
+  it("starts only one Function call for a duplicate in-flight claim", async () => {
+    let finish!: (value: { data: { campaignId: string; characterId: string } }) => void;
+    const pending = new Promise<{ data: { campaignId: string; characterId: string } }>((resolve) => {
       finish = resolve;
     });
-    mockRunTransaction.mockReturnValueOnce(pending);
+    mockCallClaimCharacter.mockReturnValueOnce(pending);
 
-    const first = claimCharacter("camp-duplicate", "char-duplicate", "owner-1");
-    const duplicate = claimCharacter("camp-duplicate", "char-duplicate", "owner-1");
+    const first = claimCharacter("DH-TEST-0001");
+    const duplicate = claimCharacter("DH-TEST-0001");
     await Promise.resolve();
 
-    expect(mockRunTransaction).toHaveBeenCalledOnce();
-    finish();
+    expect(mockCallClaimCharacter).toHaveBeenCalledOnce();
+    finish({ data: { campaignId: "camp-1", characterId: "char-1" } });
     await Promise.all([first, duplicate]);
   });
 
@@ -140,51 +164,64 @@ describe("character claiming operations", () => {
     expect(mockBatch.set).not.toHaveBeenCalled();
   });
 
-  it("rejects invalid path IDs before starting a transaction", async () => {
-    await expect(claimCharacter("bad/campaign", "char-1", "owner-1")).rejects.toThrow(
-      "Campaign ID is invalid"
+  it("creates the character with no code yet, then registers one", async () => {
+    mockCallRegisterRecoveryCode.mockResolvedValue({ data: { code: "DH-NEWC-0DE1" } });
+
+    const code = await createNewCharacter("camp-1", "Brother Corvus");
+
+    expect(mockCallRegisterRecoveryCode).toHaveBeenCalledOnce();
+    expect(code).toBe("DH-NEWC-0DE1");
+  });
+
+  it("retries registering the code up to 3 times before giving up", async () => {
+    mockCallRegisterRecoveryCode.mockRejectedValue(new Error("network blip"));
+
+    await expect(createNewCharacter("camp-1", "Brother Corvus")).rejects.toThrow(
+      "Character was created, but generating its Recovery Code failed."
     );
-    expect(mockRunTransaction).not.toHaveBeenCalled();
+    expect(mockCallRegisterRecoveryCode).toHaveBeenCalledTimes(3);
   });
 
-  it("claims the character, joins the campaign and records the action atomically", async () => {
-    await claimCharacter("camp-1", "char-1", "owner-1");
+  it("succeeds if a retry recovers after an initial transient failure", async () => {
+    mockCallRegisterRecoveryCode
+      .mockRejectedValueOnce(new Error("network blip"))
+      .mockResolvedValueOnce({ data: { code: "DH-NEWC-0DE2" } });
 
-    expect(mockRunTransaction).toHaveBeenCalledWith("mock-db", expect.any(Function));
-    expect(mockTransaction.get).toHaveBeenCalledWith("character:camp-1:char-1");
-    expect(mockTransaction.update).toHaveBeenNthCalledWith(1, "character:camp-1:char-1", {
-      userId: "owner-1",
-    });
-    expect(mockTransaction.update).toHaveBeenNthCalledWith(2, "campaign:camp-1", {
-      memberIds: "array-union:owner-1",
-    });
-    expect(mockTransaction.set).toHaveBeenCalledWith("claim-log-ref", {
-      action: "claim",
-      actorUid: "actor-1",
-      previousOwnerUid: null,
-      newOwnerUid: "owner-1",
-      timestamp: "server-timestamp",
-    });
+    const code = await createNewCharacter("camp-1", "Brother Corvus");
+
+    expect(mockCallRegisterRecoveryCode).toHaveBeenCalledTimes(2);
+    expect(code).toBe("DH-NEWC-0DE2");
   });
 
-  it("does not write when the character is already claimed", async () => {
-    mockTransaction.get.mockResolvedValue({
-      exists: () => true,
-      data: () => ({ userId: "existing-owner" }),
+  it("rejects invalid recovery codes before calling the Function", async () => {
+    await expect(claimCharacter("not-a-code")).rejects.toThrow();
+    expect(mockCallClaimCharacter).not.toHaveBeenCalled();
+  });
+
+  it("calls the claimCharacter Function with the trimmed code and returns its result", async () => {
+    mockCallClaimCharacter.mockResolvedValue({
+      data: { campaignId: "camp-1", characterId: "char-1" },
     });
 
-    await expect(claimCharacter("camp-1", "char-1", "owner-1")).rejects.toThrow(
-      "Character is already claimed."
+    const result = await claimCharacter(" DH-TEST-0002 ");
+
+    expect(mockCallClaimCharacter).toHaveBeenCalledWith({ code: "DH-TEST-0002" });
+    expect(result).toEqual({ campaignId: "camp-1", characterId: "char-1" });
+  });
+
+  it("propagates the Function's rejection when the character is already claimed", async () => {
+    mockCallClaimCharacter.mockRejectedValue(new Error("This character has already been claimed."));
+
+    await expect(claimCharacter("DH-TEST-0003")).rejects.toThrow(
+      "This character has already been claimed."
     );
-    expect(mockTransaction.update).not.toHaveBeenCalled();
-    expect(mockTransaction.set).not.toHaveBeenCalled();
   });
 
-  it("does not start a transaction when no user is signed in", async () => {
+  it("does not call the Function when no user is signed in", async () => {
     mockAuth.currentUser = null;
 
-    await expect(claimCharacter("camp-1", "char-1", "owner-1")).rejects.toThrow("Not signed in.");
-    expect(mockRunTransaction).not.toHaveBeenCalled();
+    await expect(claimCharacter("DH-TEST-0004")).rejects.toThrow("Not signed in.");
+    expect(mockCallClaimCharacter).not.toHaveBeenCalled();
   });
 
   it("releases the character and records the action in one batch", async () => {
@@ -329,8 +366,22 @@ describe("deleteCharacter", () => {
   });
 });
 
+describe("registerRecoveryCode", () => {
+  it("calls the Function and returns the new code", async () => {
+    mockCallRegisterRecoveryCode.mockResolvedValue({ data: { code: "DH-NEWC-0DE1" } });
+
+    const code = await registerRecoveryCode("camp-1", "char-1");
+
+    expect(mockCallRegisterRecoveryCode).toHaveBeenCalledWith({
+      campaignId: "camp-1",
+      characterId: "char-1",
+    });
+    expect(code).toBe("DH-NEWC-0DE1");
+  });
+});
+
 describe("importCharacter", () => {
-  it("rejects an unsupported import structure before constructing a batch", async () => {
+  it("rejects an unsupported import structure before registering a code", async () => {
     await expect(
       importCharacter("camp-1", {
         recoveryCode: "DH-ABCD-1234",
@@ -338,6 +389,16 @@ describe("importCharacter", () => {
         unexpected: true,
       })
     ).rejects.toThrow("unsupported field: unexpected");
-    expect(mockBatch.commit).not.toHaveBeenCalled();
+    expect(mockCallRegisterRecoveryCode).not.toHaveBeenCalled();
+  });
+
+  it("imports the character with no code yet, then registers one", async () => {
+    mockCallRegisterRecoveryCode.mockResolvedValue({ data: { code: "DH-IMPC-0DE1" } });
+    const payload = createEmptyCharacterData({ campaignId: "camp-1", characterName: "Brother Corvus" });
+
+    const name = await importCharacter("camp-1", payload);
+
+    expect(mockCallRegisterRecoveryCode).toHaveBeenCalledOnce();
+    expect(name).toBe("Brother Corvus");
   });
 });

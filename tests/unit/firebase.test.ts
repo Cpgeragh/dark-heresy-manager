@@ -20,6 +20,9 @@ vi.mock("firebase/firestore", () => ({
 vi.mock("firebase/auth", () => ({
   getAuth: vi.fn(() => ({})),
 }));
+vi.mock("firebase/functions", () => ({
+  getFunctions: vi.fn(() => ({})),
+}));
 
 function stubAllEnvVars() {
   for (const key of REQUIRED_ENV_VARS) {

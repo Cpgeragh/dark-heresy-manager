@@ -5,6 +5,7 @@ import {
   persistentMultipleTabManager,
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import { getFunctions } from "firebase/functions";
 
 const requiredEnvVars = {
   VITE_FIREBASE_API_KEY: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -40,3 +41,4 @@ export const db = initializeFirestore(app, {
   }),
 });
 export const auth = getAuth(app);
+export const functions = getFunctions(app);

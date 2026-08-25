@@ -7,6 +7,8 @@ import { uiSubheading } from "../../ui/editableStyles";
 
 interface Props {
   recoveryCode?: string;
+  canGenerateRecoveryCode: boolean;
+  onGenerateRecoveryCode: () => Promise<void>;
   canExport: boolean;
   onExport: () => void;
   canPlayerRelease: boolean;
@@ -16,6 +18,8 @@ interface Props {
 
 export function CharacterKebabContent({
   recoveryCode,
+  canGenerateRecoveryCode,
+  onGenerateRecoveryCode,
   canExport,
   onExport,
   canPlayerRelease,
@@ -23,6 +27,8 @@ export function CharacterKebabContent({
   isReleasing,
 }: Props) {
   const [copied, setCopied] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [generateError, setGenerateError] = useState<string | null>(null);
 
   const copyCode = useCallback(async () => {
     if (!recoveryCode) return;
@@ -35,10 +41,22 @@ export function CharacterKebabContent({
     }
   }, [recoveryCode]);
 
+  const handleGenerate = useCallback(async () => {
+    setGenerating(true);
+    setGenerateError(null);
+    try {
+      await onGenerateRecoveryCode();
+    } catch (err) {
+      setGenerateError(err instanceof Error ? err.message : "Failed to generate Recovery Code.");
+    } finally {
+      setGenerating(false);
+    }
+  }, [onGenerateRecoveryCode]);
+
   return (
     <div className="space-y-4">
       {/* Recovery Code */}
-      {recoveryCode && (
+      {recoveryCode ? (
         <div className="space-y-2">
           <p className={uiSubheading}>
             Recovery Code
@@ -57,6 +75,23 @@ export function CharacterKebabContent({
             </Button>
           </div>
         </div>
+      ) : (
+        canGenerateRecoveryCode && (
+          <div className="space-y-2">
+            <p className={uiSubheading}>
+              Recovery Code
+            </p>
+            <p className="text-xs lg:text-sm text-slate-400">
+              This character has no Recovery Code yet.
+            </p>
+            <Button variant="secondary" size="sm" onClick={handleGenerate} disabled={generating}>
+              {generating ? "Generating…" : "Generate Recovery Code"}
+            </Button>
+            {generateError && (
+              <p className="text-xs lg:text-sm text-red-400">{generateError}</p>
+            )}
+          </div>
+        )
       )}
 
       {/* Export */}

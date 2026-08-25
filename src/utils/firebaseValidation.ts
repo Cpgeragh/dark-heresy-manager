@@ -378,7 +378,7 @@ function assertCharacterCoreTypes(data: UnknownRecord, requireComplete: boolean)
   if ("id" in data) assertFirestoreDocumentId(data.id, "Character ID");
   if ("campaignId" in data) assertFirestoreDocumentId(data.campaignId, "Campaign ID");
   if ("userId" in data && data.userId !== null) assertFirestoreDocumentId(data.userId, "Owner ID");
-  if ("recoveryCode" in data) assertRecoveryCode(data.recoveryCode);
+  if ("recoveryCode" in data && data.recoveryCode !== "") assertRecoveryCode(data.recoveryCode);
   if ("isEditableByPlayer" in data)
     assertBoolean(data.isEditableByPlayer, "Player edit permission");
   if ("backgroundComplete" in data)

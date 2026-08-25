@@ -2,20 +2,17 @@
 
 import { useCallback } from "react";
 import type { OwnershipState } from "../../types/Recovery";
-import type { CharacterDocument, CampaignDocument } from "../../types/Firestore";
 import { Button } from "../../ui/Button";
 import { uiTextError } from "../../ui/editableStyles";
 
 interface ClaimPreviewProps {
-  character: CharacterDocument & { id: string };
-  campaign: CampaignDocument;
+  characterName: string;
+  campaignName: string;
   ownership: OwnershipState;
   onClaim: () => Promise<void> | void;
 }
 
-export function ClaimPreview({ character, campaign, ownership, onClaim }: ClaimPreviewProps) {
-  const name = character.header?.characterName ?? "Unnamed Character";
-
+export function ClaimPreview({ characterName, campaignName, ownership, onClaim }: ClaimPreviewProps) {
   function renderStatus() {
     switch (ownership) {
       case "unclaimed":
@@ -50,12 +47,12 @@ export function ClaimPreview({ character, campaign, ownership, onClaim }: ClaimP
       <div className="text-slate-300 text-sm lg:text-base space-y-1">
         <p>
           <span className="text-slate-400">Character:</span>{" "}
-          <span className="font-semibold">{name}</span>
+          <span className="font-semibold">{characterName}</span>
         </p>
 
         <p>
           <span className="text-slate-400">Campaign:</span>{" "}
-          <span className="font-semibold">{campaign.name ?? "Unnamed Campaign"}</span>
+          <span className="font-semibold">{campaignName}</span>
         </p>
       </div>
 

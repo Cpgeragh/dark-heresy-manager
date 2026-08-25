@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import { lookupRecoveryCharacter } from "../../../services/recoveryLookupService";
 import type { RecoveryLookupResult } from "../../../types/Recovery";
 
-export function useRecoveryLookup(currentUserId: string | null) {
+export function useRecoveryLookup() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<RecoveryLookupResult | null>(null);
@@ -16,7 +16,7 @@ export function useRecoveryLookup(currentUserId: string | null) {
       setData(null);
 
       try {
-        const outcome = await lookupRecoveryCharacter(code, currentUserId);
+        const outcome = await lookupRecoveryCharacter(code);
         if (outcome.status === "not-found") {
           setError("No character found with this recovery code.");
           return;
@@ -33,7 +33,7 @@ export function useRecoveryLookup(currentUserId: string | null) {
         setLoading(false);
       }
     },
-    [currentUserId]
+    []
   );
 
   return { loading, error, data, lookup };

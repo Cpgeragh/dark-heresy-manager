@@ -1,116 +1,64 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useRecoveryLookup } from "../../src/pages/ClaimCharacter/hooks/useRecoveryLookup";
+import { lookupRecoveryCharacter } from "../../src/services/recoveryLookupService";
 
-/* -----------------------------
-   MOCK AUTH
------------------------------- */
-vi.mock("../../src/firebase", () => {
-  return {
-    auth: {
-      get currentUser() {
-        return { uid: "device-user" };
-      },
-    },
-    db: {},
-  };
-});
+vi.mock("../../src/services/recoveryLookupService", () => ({
+  lookupRecoveryCharacter: vi.fn(),
+}));
 
-let mockUid: string | null = null;
+const mockLookup = vi.mocked(lookupRecoveryCharacter);
 
-/* -----------------------------
-   MOCK FIRESTORE
------------------------------- */
-vi.mock("firebase/firestore", async () => {
-  const actual = await vi.importActual<typeof import("firebase/firestore")>(
-    "firebase/firestore"
-  );
-  return {
-    ...actual,
-    // doc() must return an object with withConverter() so characterDocRef doesn't throw
-    doc: vi.fn(() => ({ withConverter: vi.fn().mockReturnThis() })),
-    getDoc: vi.fn(),
-  };
-});
-
-import { getDoc } from "firebase/firestore";
-
-type MockGetDocResult = Awaited<ReturnType<typeof getDoc>>;
-
-function mockGetDocSequence(docs: unknown[]) {
-  let call = 0;
-  vi.mocked(getDoc).mockImplementation(() => {
-    return Promise.resolve(docs[call++] as MockGetDocResult);
-  });
-}
-
-describe("useRecoveryLookup ownership derivation", () => {
+describe("useRecoveryLookup", () => {
   beforeEach(() => {
-    vi.resetAllMocks();
-    mockUid = null;
+    vi.clearAllMocks();
   });
 
-  it("returns unclaimed when character has no userId", async () => {
-    mockUid = "A";
+  it("sets data on a found result", async () => {
+    const found = {
+      campaignId: "c1",
+      characterId: "ch1",
+      characterName: "Brother Corvus",
+      campaignName: "The Calixis Conspiracy",
+      ownership: "unclaimed" as const,
+    };
+    mockLookup.mockResolvedValue({ status: "found", result: found });
 
-    mockGetDocSequence([
-      { exists: () => true, data: () => ({ campaignId: "c1", characterId: "ch1" }) },
-      { exists: () => true, data: () => ({ name: "Campaign" }) },
-      { exists: () => true, data: () => ({ userId: null }) },
-    ]);
-
-    const { result } = renderHook(() => useRecoveryLookup(mockUid));
-
+    const { result } = renderHook(() => useRecoveryLookup());
     await act(() => result.current.lookup("DH-TEST-0001"));
 
-    expect(result.current.data?.ownership).toBe("unclaimed");
+    expect(result.current.data).toEqual(found);
+    expect(result.current.error).toBeNull();
+    expect(mockLookup).toHaveBeenCalledWith("DH-TEST-0001");
   });
 
-  it("returns claimed-by-you when owned by current user", async () => {
-    mockUid = "A";
+  it("sets a not-found error and leaves data null", async () => {
+    mockLookup.mockResolvedValue({ status: "not-found" });
 
-    mockGetDocSequence([
-      { exists: () => true, data: () => ({ campaignId: "c1", characterId: "ch1" }) },
-      { exists: () => true, data: () => ({}) },
-      { exists: () => true, data: () => ({ userId: "A", isEditableByPlayer: true }) },
-    ]);
-
-    const { result } = renderHook(() => useRecoveryLookup(mockUid));
-
+    const { result } = renderHook(() => useRecoveryLookup());
     await act(() => result.current.lookup("DH-TEST-0002"));
 
-    expect(result.current.data?.ownership).toBe("claimed-by-you");
+    expect(result.current.data).toBeNull();
+    expect(result.current.error).toBe("No character found with this recovery code.");
   });
 
-  it("returns claimed-by-other when owned by another user", async () => {
-    mockUid = "B";
+  it("sets a missing-data error and leaves data null", async () => {
+    mockLookup.mockResolvedValue({ status: "missing-data" });
 
-    mockGetDocSequence([
-      { exists: () => true, data: () => ({ campaignId: "c1", characterId: "ch1" }) },
-      { exists: () => true, data: () => ({}) },
-      { exists: () => true, data: () => ({ userId: "A", isEditableByPlayer: true }) },
-    ]);
-
-    const { result } = renderHook(() => useRecoveryLookup(mockUid));
-
+    const { result } = renderHook(() => useRecoveryLookup());
     await act(() => result.current.lookup("DH-TEST-0003"));
 
-    expect(result.current.data?.ownership).toBe("claimed-by-other");
+    expect(result.current.data).toBeNull();
+    expect(result.current.error).toBe("Recovery code points to missing data.");
   });
 
-  it("returns locked when owned and editing disabled", async () => {
-    mockUid = "B";
+  it("sets a generic error when the lookup throws", async () => {
+    mockLookup.mockRejectedValue(new Error("network error"));
 
-    mockGetDocSequence([
-      { exists: () => true, data: () => ({ campaignId: "c1", characterId: "ch1" }) },
-      { exists: () => true, data: () => ({}) },
-      { exists: () => true, data: () => ({ userId: "A", isEditableByPlayer: false }) },
-    ]);
-
-    const { result } = renderHook(() => useRecoveryLookup(mockUid));
-
+    const { result } = renderHook(() => useRecoveryLookup());
     await act(() => result.current.lookup("DH-TEST-0004"));
 
-    expect(result.current.data?.ownership).toBe("locked");
+    expect(result.current.data).toBeNull();
+    expect(result.current.error).toBe("Unexpected error during lookup.");
   });
 });

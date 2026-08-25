@@ -13,13 +13,13 @@ import {
   type DocumentReference,
   type UpdateData,
 } from "firebase/firestore";
+import { httpsCallable } from "firebase/functions";
 
-import { db, auth } from "../firebase";
+import { db, auth, functions } from "../firebase";
 import { campaignDocRef, characterDocRef, charactersCollectionRef } from "../firebase/converters";
 
 import type { Character } from "../types/Character";
 import { buildClaimLogPayload } from "../utils/claimLog";
-import { generateRecoveryCode } from "../utils/recoveryCode";
 import { createEmptyCharacterData } from "../utils/characterFactory";
 import { deleteRefsAtomically } from "../utils/firestoreBatchDelete";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
@@ -171,37 +171,21 @@ export async function createCharacter(
   });
 }
 
+const callClaimCharacter = httpsCallable<{ code: string }, { campaignId: string; characterId: string }>(
+  functions,
+  "claimCharacter"
+);
+
 export async function claimCharacter(
-  campaignId: string,
-  characterId: string,
-  ownerId: string
-): Promise<void> {
-  assertFirestoreDocumentId(campaignId, "Campaign ID");
-  assertFirestoreDocumentId(characterId, "Character ID");
-  assertFirestoreDocumentId(ownerId, "Owner ID");
+  code: string
+): Promise<{ campaignId: string; characterId: string }> {
+  assertRecoveryCode(code);
   const user = auth.currentUser;
   if (!user) throw new Error("Not signed in.");
 
-  await runSingleFlight("character:ownership", [campaignId, characterId], async () => {
-    const charRef = characterDocRef(campaignId, characterId);
-    const campaignRef = campaignDocRef(campaignId);
-    const logsRef = collection(db, "campaigns", campaignId, "characters", characterId, "claimLog");
-
-    await runTransaction(db, async (transaction) => {
-      const charDoc = await transaction.get(charRef);
-
-      if (!charDoc.exists()) {
-        throw new Error("Character does not exist.");
-      }
-
-      if (charDoc.data().userId) {
-        throw new Error("Character is already claimed.");
-      }
-
-      transaction.update(charRef, { userId: ownerId });
-      transaction.update(campaignRef, { memberIds: arrayUnion(ownerId) });
-      transaction.set(doc(logsRef), buildClaimLogPayload("claim", user.uid, null, ownerId));
-    });
+  return runSingleFlight("character:claim", [code], async () => {
+    const { data } = await callClaimCharacter({ code: code.trim() });
+    return data;
   });
 }
 
@@ -373,10 +357,48 @@ export async function deleteCharacter(
   });
 }
 
+const callRegisterRecoveryCode = httpsCallable<
+  { campaignId: string; characterId: string },
+  { code: string }
+>(functions, "registerRecoveryCode");
+
+/** Generates (or regenerates) a character's Recovery Code via the protected server-side operation. */
+export async function registerRecoveryCode(campaignId: string, characterId: string): Promise<string> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(characterId, "Character ID");
+  const { data } = await callRegisterRecoveryCode({ campaignId, characterId });
+  return data.code;
+}
+
+const REGISTER_CODE_RETRY_ATTEMPTS = 3;
+
 /**
- * Imports a character from a parsed JSON object into a campaign.
- * Assigns a fresh recovery code and registers it in the recovery index.
- * Returns the imported character's name.
+ * Character creation and code registration are no longer atomic (the code is
+ * generated server-side). Retries a few times to smooth over a transient
+ * Function failure right after creation; if every attempt fails, the caller
+ * can still generate a code later from the character's own menu.
+ */
+async function registerRecoveryCodeAfterCreate(
+  campaignId: string,
+  characterId: string
+): Promise<string> {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= REGISTER_CODE_RETRY_ATTEMPTS; attempt++) {
+    try {
+      return await registerRecoveryCode(campaignId, characterId);
+    } catch (err) {
+      lastError = err;
+    }
+  }
+  throw new Error(
+    "Character was created, but generating its Recovery Code failed. Open the character's menu to generate one.",
+    { cause: lastError }
+  );
+}
+
+/**
+ * Imports a character from a parsed JSON object into a campaign, then
+ * registers its Recovery Code. Returns the imported character's name.
  */
 export async function importCharacter(
   campaignId: string,
@@ -397,14 +419,13 @@ export async function importCharacter(
   if (!nameValidation.isValid) throw new Error(nameValidation.error);
 
   return runSingleFlight("character:import", [campaignId, serialisedData], async () => {
-    const recoveryCode = generateRecoveryCode();
     const { createdAt: _createdAt, updatedAt: _updatedAt, ...portableData } = data;
     const importData = {
       ...portableData,
       campaignId,
       userId: null,
       isEditableByPlayer: false,
-      recoveryCode,
+      recoveryCode: "",
       header: {
         ...(data.header as Record<string, unknown>),
         characterName: importedName.trim(),
@@ -414,18 +435,16 @@ export async function importCharacter(
     // Imported JSON is deliberately written through a plain reference because it is
     // only structurally known after import validation, not as a compile-time Character.
     const charRef = doc(collection(db, "campaigns", campaignId, "characters"));
-    const batch = writeBatch(db);
-    batch.set(charRef, importData);
-    batch.set(doc(db, "recoveryIndex", recoveryCode), { campaignId, characterId: charRef.id });
-    await batch.commit();
+    await setDoc(charRef, importData);
 
+    await registerRecoveryCodeAfterCreate(campaignId, charRef.id);
     return importedName.trim();
   });
 }
 
 /**
- * Creates a new empty character in a campaign with a recovery code.
- * Returns the recovery code so the caller can display it to the DM.
+ * Creates a new empty character in a campaign, then registers its Recovery
+ * Code. Returns the recovery code so the caller can display it to the DM.
  */
 export async function createNewCharacter(campaignId: string, name: string): Promise<string> {
   assertFirestoreDocumentId(campaignId, "Campaign ID");
@@ -435,22 +454,16 @@ export async function createNewCharacter(campaignId: string, name: string): Prom
   if (!validation.isValid) throw new Error(validation.error);
 
   return runSingleFlight("character:create-empty", [campaignId, trimmedName], async () => {
-    const recoveryCode = generateRecoveryCode();
     const characterData = createEmptyCharacterData({
       campaignId,
-      recoveryCode,
       userId: null,
       characterName: trimmedName,
     });
     const charRef = doc(charactersCollectionRef(campaignId));
     const character: Character = { ...characterData, id: charRef.id };
     assertCharacterPayload(character, true);
-    const recoveryRef = doc(db, "recoveryIndex", recoveryCode);
-    const batch = writeBatch(db);
-    batch.set(charRef, character);
-    batch.set(recoveryRef, { campaignId, characterId: charRef.id });
-    await batch.commit();
+    await setDoc(charRef, character);
 
-    return recoveryCode;
+    return registerRecoveryCodeAfterCreate(campaignId, charRef.id);
   });
 }
