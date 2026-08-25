@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "dark-heresy-manager"
+    "default": "dark-heresy-manager",
+    "staging": "dark-heresy-manager-staging"
   }
 }
