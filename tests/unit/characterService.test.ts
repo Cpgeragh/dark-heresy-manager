@@ -5,7 +5,10 @@ const {
   mockBatch,
   mockBatchDeleteRefs,
   mockCallClaimCharacter,
+  mockCallForceAssignCharacter,
+  mockCallForceReleaseCharacter,
   mockCallRegisterRecoveryCode,
+  mockCallReleaseCharacter,
   mockDoc,
   mockGetDoc,
   mockGetDocs,
@@ -31,7 +34,10 @@ const {
     mockBatch,
     mockBatchDeleteRefs: vi.fn().mockResolvedValue(undefined),
     mockCallClaimCharacter: vi.fn(),
+    mockCallForceAssignCharacter: vi.fn(),
+    mockCallForceReleaseCharacter: vi.fn(),
     mockCallRegisterRecoveryCode: vi.fn(),
+    mockCallReleaseCharacter: vi.fn(),
     // Single-arg calls are the auto-ID form used by doc(collectionRef); keep
     // returning the old constant there. Multi-arg calls (doc(db, "a", "b"))
     // are the explicit-path form deleteCharacter uses — join into a path so
@@ -81,6 +87,9 @@ vi.mock("firebase/functions", () => ({
   httpsCallable: vi.fn((_functions: unknown, name: string) => {
     if (name === "claimCharacter") return mockCallClaimCharacter;
     if (name === "registerRecoveryCode") return mockCallRegisterRecoveryCode;
+    if (name === "releaseCharacter") return mockCallReleaseCharacter;
+    if (name === "forceReleaseCharacter") return mockCallForceReleaseCharacter;
+    if (name === "forceAssignCharacter") return mockCallForceAssignCharacter;
     throw new Error(`Unexpected callable: ${name}`);
   }),
 }));
@@ -106,6 +115,8 @@ import {
   claimCharacter,
   createNewCharacter,
   deleteCharacter,
+  forceAssignCharacter,
+  forceReleaseCharacter,
   importCharacter,
   reconcileCharacterSpentXp,
   registerRecoveryCode,
@@ -224,21 +235,68 @@ describe("character claiming operations", () => {
     expect(mockCallClaimCharacter).not.toHaveBeenCalled();
   });
 
-  it("releases the character and records the action in one batch", async () => {
-    await releaseCharacter("camp-1", "char-1", "owner-1");
+});
 
-    expect(mockBatch.update).toHaveBeenCalledWith("character:camp-1:char-1", {
-      userId: null,
-      isEditableByPlayer: false,
+describe("releaseCharacter", () => {
+  it("calls the Function with campaignId and characterId", async () => {
+    mockCallReleaseCharacter.mockResolvedValue({ data: undefined });
+
+    await releaseCharacter("camp-1", "char-1");
+
+    expect(mockCallReleaseCharacter).toHaveBeenCalledWith({
+      campaignId: "camp-1",
+      characterId: "char-1",
     });
-    expect(mockBatch.set).toHaveBeenCalledWith("claim-log-ref", {
-      action: "release",
-      actorUid: "actor-1",
-      previousOwnerUid: "owner-1",
-      newOwnerUid: null,
-      timestamp: "server-timestamp",
+  });
+
+  it("does not call the Function when no user is signed in", async () => {
+    mockAuth.currentUser = null;
+
+    await expect(releaseCharacter("camp-1", "char-1")).rejects.toThrow("Not signed in.");
+    expect(mockCallReleaseCharacter).not.toHaveBeenCalled();
+  });
+});
+
+describe("forceReleaseCharacter", () => {
+  it("calls the Function with campaignId and characterId", async () => {
+    mockCallForceReleaseCharacter.mockResolvedValue({ data: undefined });
+
+    await forceReleaseCharacter("camp-1", "char-1");
+
+    expect(mockCallForceReleaseCharacter).toHaveBeenCalledWith({
+      campaignId: "camp-1",
+      characterId: "char-1",
     });
-    expect(mockBatch.commit).toHaveBeenCalledOnce();
+  });
+
+  it("does not call the Function when no user is signed in", async () => {
+    mockAuth.currentUser = null;
+
+    await expect(forceReleaseCharacter("camp-1", "char-1")).rejects.toThrow("Not signed in.");
+    expect(mockCallForceReleaseCharacter).not.toHaveBeenCalled();
+  });
+});
+
+describe("forceAssignCharacter", () => {
+  it("calls the Function with campaignId, characterId, and targetUid", async () => {
+    mockCallForceAssignCharacter.mockResolvedValue({ data: undefined });
+
+    await forceAssignCharacter("camp-1", "char-1", "target-uid");
+
+    expect(mockCallForceAssignCharacter).toHaveBeenCalledWith({
+      campaignId: "camp-1",
+      characterId: "char-1",
+      targetUid: "target-uid",
+    });
+  });
+
+  it("does not call the Function when no user is signed in", async () => {
+    mockAuth.currentUser = null;
+
+    await expect(forceAssignCharacter("camp-1", "char-1", "target-uid")).rejects.toThrow(
+      "Not signed in."
+    );
+    expect(mockCallForceAssignCharacter).not.toHaveBeenCalled();
   });
 });
 

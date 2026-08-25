@@ -107,7 +107,7 @@ export function useCharacterMutations({
 
     setIsReleasing(true);
     try {
-      await releaseCharacterInService(campaignId, characterId, character.userId);
+      await releaseCharacterInService(campaignId, characterId);
 
       toast.success("Character released successfully");
     } catch (err) {
@@ -127,7 +127,7 @@ export function useCharacterMutations({
 
     setIsDmForceReleasing(true);
     try {
-      await forceReleaseCharacter(campaignId, characterId, character.userId);
+      await forceReleaseCharacter(campaignId, characterId);
       toast.success("Character force-released");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to force release";
@@ -147,7 +147,7 @@ export function useCharacterMutations({
 
       setIsDmForceAssigning(true);
       try {
-        await forceAssignCharacter(campaignId, characterId, character.userId, targetUid);
+        await forceAssignCharacter(campaignId, characterId, targetUid);
         toast.success("Character assigned successfully");
       } catch (err) {
         const message = err instanceof Error ? err.message : "Failed to assign character";

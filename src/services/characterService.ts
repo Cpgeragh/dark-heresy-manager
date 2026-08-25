@@ -1,13 +1,11 @@
 // src/services/characterService.ts
 
 import {
-  arrayUnion,
   getDoc,
   runTransaction,
   setDoc,
   updateDoc,
   addDoc,
-  writeBatch,
   collection,
   doc,
   type DocumentReference,
@@ -16,10 +14,9 @@ import {
 import { httpsCallable } from "firebase/functions";
 
 import { db, auth, functions } from "../firebase";
-import { campaignDocRef, characterDocRef, charactersCollectionRef } from "../firebase/converters";
+import { characterDocRef, charactersCollectionRef } from "../firebase/converters";
 
 import type { Character } from "../types/Character";
-import { buildClaimLogPayload } from "../utils/claimLog";
 import { createEmptyCharacterData } from "../utils/characterFactory";
 import { deleteRefsAtomically } from "../utils/firestoreBatchDelete";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
@@ -189,76 +186,56 @@ export async function claimCharacter(
   });
 }
 
-export async function releaseCharacter(
-  campaignId: string,
-  characterId: string,
-  previousOwner: string | null
-): Promise<void> {
+const callReleaseCharacter = httpsCallable<{ campaignId: string; characterId: string }, void>(
+  functions,
+  "releaseCharacter"
+);
+
+export async function releaseCharacter(campaignId: string, characterId: string): Promise<void> {
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   assertFirestoreDocumentId(characterId, "Character ID");
-  if (previousOwner !== null) assertFirestoreDocumentId(previousOwner, "Previous owner ID");
   const user = auth.currentUser;
   if (!user) throw new Error("Not signed in.");
 
-  await runSingleFlight("character:ownership", [campaignId, characterId], async () => {
-    const charRef = characterDocRef(campaignId, characterId);
-    const logsRef = collection(db, "campaigns", campaignId, "characters", characterId, "claimLog");
-
-    const batch = writeBatch(db);
-    batch.update(charRef, { userId: null, isEditableByPlayer: false });
-    batch.set(doc(logsRef), buildClaimLogPayload("release", user.uid, previousOwner, null));
-    await batch.commit();
+  await runSingleFlight("character:release", [campaignId, characterId], async () => {
+    await callReleaseCharacter({ campaignId, characterId });
   });
 }
+
+const callForceReleaseCharacter = httpsCallable<{ campaignId: string; characterId: string }, void>(
+  functions,
+  "forceReleaseCharacter"
+);
+
+export async function forceReleaseCharacter(campaignId: string, characterId: string): Promise<void> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(characterId, "Character ID");
+  const user = auth.currentUser;
+  if (!user) throw new Error("Not signed in.");
+
+  await runSingleFlight("character:force-release", [campaignId, characterId], async () => {
+    await callForceReleaseCharacter({ campaignId, characterId });
+  });
+}
+
+const callForceAssignCharacter = httpsCallable<
+  { campaignId: string; characterId: string; targetUid: string },
+  void
+>(functions, "forceAssignCharacter");
 
 export async function forceAssignCharacter(
   campaignId: string,
   characterId: string,
-  previousOwner: string | null,
   targetUid: string
 ): Promise<void> {
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   assertFirestoreDocumentId(characterId, "Character ID");
-  if (previousOwner !== null) assertFirestoreDocumentId(previousOwner, "Previous owner ID");
   assertFirestoreDocumentId(targetUid, "Target owner ID");
   const user = auth.currentUser;
   if (!user) throw new Error("Not signed in.");
 
-  await runSingleFlight("character:ownership", [campaignId, characterId], async () => {
-    const charRef = characterDocRef(campaignId, characterId);
-    const campaignRef = campaignDocRef(campaignId);
-    const logsRef = collection(db, "campaigns", campaignId, "characters", characterId, "claimLog");
-
-    const batch = writeBatch(db);
-    batch.update(charRef, { userId: targetUid, isEditableByPlayer: true });
-    batch.update(campaignRef, { memberIds: arrayUnion(targetUid) });
-    batch.set(
-      doc(logsRef),
-      buildClaimLogPayload("force-assign", user.uid, previousOwner, targetUid)
-    );
-    await batch.commit();
-  });
-}
-
-export async function forceReleaseCharacter(
-  campaignId: string,
-  characterId: string,
-  previousOwner: string | null
-): Promise<void> {
-  assertFirestoreDocumentId(campaignId, "Campaign ID");
-  assertFirestoreDocumentId(characterId, "Character ID");
-  if (previousOwner !== null) assertFirestoreDocumentId(previousOwner, "Previous owner ID");
-  const user = auth.currentUser;
-  if (!user) throw new Error("Not signed in.");
-
-  await runSingleFlight("character:ownership", [campaignId, characterId], async () => {
-    const charRef = characterDocRef(campaignId, characterId);
-    const logsRef = collection(db, "campaigns", campaignId, "characters", characterId, "claimLog");
-
-    const batch = writeBatch(db);
-    batch.update(charRef, { userId: null, isEditableByPlayer: false });
-    batch.set(doc(logsRef), buildClaimLogPayload("force-release", user.uid, previousOwner, null));
-    await batch.commit();
+  await runSingleFlight("character:force-assign", [campaignId, characterId, targetUid], async () => {
+    await callForceAssignCharacter({ campaignId, characterId, targetUid });
   });
 }
 
