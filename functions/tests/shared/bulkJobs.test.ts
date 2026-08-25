@@ -6,6 +6,7 @@ import {
   advanceJobCheckpoint,
   completeJob,
   failJob,
+  cancelBulkJob,
   handleChunkFailure,
   isRetriableChunkError,
   MAX_CHUNK_RETRIES,
@@ -162,6 +163,17 @@ describe("acquireJobLease", () => {
     );
     expect(mockTransactionDelete).toHaveBeenCalledWith(
       expect.objectContaining({ collectionName: "idempotencyKeys", id: "start-test-job:user-1:c1" })
+    );
+  });
+
+  it("rejects when the job is already cancelled", async () => {
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () => makeJob({ status: "cancelled" }),
+    });
+
+    await expect(acquireJobLease("job-1", "user-1")).rejects.toThrow(
+      expect.objectContaining({ code: "failed-precondition" })
     );
   });
 
@@ -351,4 +363,49 @@ describe("handleChunkFailure", () => {
       expect.objectContaining({ status: "failed", error: "Only the campaign DM can do this." })
     );
   });
+});
+
+describe("cancelBulkJob", () => {
+  it("rejects when the job does not exist", async () => {
+    mockTransactionGet.mockResolvedValue({ exists: false });
+
+    await expect(cancelBulkJob("job-1", "user-1")).rejects.toThrow(
+      expect.objectContaining({ code: "not-found" })
+    );
+  });
+
+  it("rejects when the caller did not start the job", async () => {
+    mockTransactionGet.mockResolvedValue({ exists: true, data: () => makeJob({ actorUid: "other" }) });
+
+    await expect(cancelBulkJob("job-1", "user-1")).rejects.toThrow(
+      expect.objectContaining({ code: "permission-denied" })
+    );
+  });
+
+  it("marks a live job cancelled and clears its recorded idempotency key", async () => {
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () => makeJob({ idempotencyKey: "start-test-job:user-1:c1" }),
+    });
+
+    await cancelBulkJob("job-1", "user-1");
+
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ status: "cancelled", error: "Cancelled by the user." })
+    );
+    expect(mockTransactionDelete).toHaveBeenCalledWith(
+      expect.objectContaining({ collectionName: "idempotencyKeys", id: "start-test-job:user-1:c1" })
+    );
+  });
+
+  it.each(["completed", "failed", "cancelled"] as const)(
+    "is a safe no-op when the job is already %s",
+    async (status) => {
+      mockTransactionGet.mockResolvedValue({ exists: true, data: () => makeJob({ status }) });
+
+      await expect(cancelBulkJob("job-1", "user-1")).resolves.toBeUndefined();
+      expect(mockTransactionUpdate).not.toHaveBeenCalled();
+    }
+  );
 });

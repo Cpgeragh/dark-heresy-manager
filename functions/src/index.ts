@@ -75,6 +75,10 @@ import {
   type ProcessCustomItemMutationChunkInput,
   type ProcessCustomItemMutationChunkResult,
 } from "./operations/customItemMutationJob.js";
+import {
+  cancelBulkJob as runCancelBulkJob,
+  type CancelBulkJobInput,
+} from "./operations/cancelBulkJob.js";
 
 export const ping = onCall({ timeoutSeconds: 30 }, () => {
   return { ok: true };
@@ -421,3 +425,16 @@ export const processCustomItemMutationChunk = onCall<ProcessCustomItemMutationCh
     });
   }
 );
+
+export const cancelBulkJob = onCall<CancelBulkJobInput>({ timeoutSeconds: 30 }, (request) => {
+  const callerUid = request.auth?.uid ?? "anonymous";
+  return protectedCallable<CancelBulkJobInput, void>({
+    request,
+    operation: "cancel-bulk-job",
+    allowedFields: ["jobId"],
+    requiredFields: ["jobId"],
+    fieldShapes: { jobId: "string" },
+    rateLimits: [{ key: `cancel-bulk-job:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 }],
+    handler: ({ uid, data }) => runCancelBulkJob(data, uid),
+  });
+});

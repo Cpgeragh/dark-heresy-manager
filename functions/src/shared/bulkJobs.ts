@@ -23,7 +23,7 @@ const LEASE_DURATION_MS = 60 * 1000;
 // out of scope until this app is actually deployed.
 const JOB_EXPIRY_MS = 24 * 60 * 60 * 1000;
 
-export type BulkJobStatus = "pending" | "running" | "completed" | "failed";
+export type BulkJobStatus = "pending" | "running" | "completed" | "failed" | "cancelled";
 
 export interface BulkJobRecord {
   type: string;
@@ -92,14 +92,14 @@ export async function acquireJobLease(
     if (job.actorUid !== actorUid) {
       throw new HttpsError("permission-denied", "This job belongs to a different caller.");
     }
-    if (job.status === "completed" || job.status === "failed") {
+    if (job.status === "completed" || job.status === "failed" || job.status === "cancelled") {
       throw new HttpsError("failed-precondition", `Job already ${job.status}.`);
     }
 
     const now = Date.now();
 
     if (now - job.createdAt > JOB_EXPIRY_MS) {
-      markJobFailedInTransaction(db, transaction, ref, job, "Job expired without completing.");
+      markJobTerminalInTransaction(db, transaction, ref, job, "failed", "Job expired without completing.");
       throw new HttpsError(
         "failed-precondition",
         "This job expired without completing. Start a new one."
@@ -168,19 +168,21 @@ export async function completeJob(jobId: string, leaseId: string): Promise<void>
   }, { maxAttempts: 5 });
 }
 
-// Shared by failJob and acquireJobLease's expiry check: marks a job failed
-// and clears its recorded idempotency key (if any) within an already-open
-// transaction, so a future start call with the same deterministic key
-// creates a genuinely fresh job instead of replaying the dead one.
-function markJobFailedInTransaction(
+// Shared by failJob, cancelBulkJob, and acquireJobLease's expiry check: marks
+// a job terminal (failed or cancelled) and clears its recorded idempotency
+// key (if any) within an already-open transaction, so a future start call
+// with the same deterministic key creates a genuinely fresh job instead of
+// replaying the dead one.
+function markJobTerminalInTransaction(
   db: FirebaseFirestore.Firestore,
   transaction: FirebaseFirestore.Transaction,
   ref: FirebaseFirestore.DocumentReference,
   job: BulkJobRecord,
+  status: "failed" | "cancelled",
   error: string
 ): void {
   transaction.update(ref, {
-    status: "failed",
+    status,
     error,
     leaseOwner: null,
     leaseExpiresAt: null,
@@ -199,7 +201,37 @@ export async function failJob(jobId: string, leaseId: string, error: string): Pr
     if (!snapshot.exists) return;
     const job = snapshot.data() as BulkJobRecord;
     if (job.leaseOwner !== leaseId) return;
-    markJobFailedInTransaction(db, transaction, ref, job, error);
+    markJobTerminalInTransaction(db, transaction, ref, job, "failed", error);
+  }, { maxAttempts: 5 });
+}
+
+/**
+ * Deliberately stops a job the caller started, so a future process*Chunk
+ * call refuses to hand out a lease for it (the same "already terminal" check
+ * acquireJobLease already does). A chunk already in flight at the moment of
+ * cancellation still finishes normally, its writes have already happened in
+ * Firestore by the time any code could observe the cancellation, this only
+ * guarantees no *new* chunk starts afterward. Cancelling an already-terminal
+ * job (completed, failed, or already cancelled) is a safe no-op, matching
+ * this codebase's existing "deliberately permissive" convention rather than
+ * erroring on a harmless double-cancel.
+ */
+export async function cancelBulkJob(jobId: string, actorUid: string): Promise<void> {
+  const db = getFirestore();
+  const ref = db.collection(BULK_JOBS_COLLECTION).doc(jobId);
+  await db.runTransaction(async (transaction) => {
+    const snapshot = await transaction.get(ref);
+    if (!snapshot.exists) {
+      throw new HttpsError("not-found", "Job not found.");
+    }
+    const job = snapshot.data() as BulkJobRecord;
+    if (job.actorUid !== actorUid) {
+      throw new HttpsError("permission-denied", "This job belongs to a different caller.");
+    }
+    if (job.status === "completed" || job.status === "failed" || job.status === "cancelled") {
+      return;
+    }
+    markJobTerminalInTransaction(db, transaction, ref, job, "cancelled", "Cancelled by the user.");
   }, { maxAttempts: 5 });
 }
 
