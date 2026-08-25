@@ -40,6 +40,21 @@ export async function signInTestUser(): Promise<string> {
   return credential.user.uid;
 }
 
+// A genuine concurrency test needs two independently-authenticated clients
+// racing at the same instant, which the shared getTestFunctions()/
+// signInTestUser() above can't do (one shared auth session, signing in as a
+// new user signs the previous one out first). Callers are responsible for
+// calling deleteApp() on the returned app once done with it.
+export async function createIndependentClient(name: string) {
+  const app = initializeApp({ projectId: "dh-test", apiKey: "test-api-key" }, name);
+  const auth = getAuth(app);
+  connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
+  const functions = getFunctions(app);
+  connectFunctionsEmulator(functions, "127.0.0.1", 5001);
+  const credential = await signInAnonymously(auth);
+  return { app, functions, uid: credential.user.uid };
+}
+
 export async function teardownTestFunctions(): Promise<void> {
   if (app) {
     await deleteApp(app);

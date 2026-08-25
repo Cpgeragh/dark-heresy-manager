@@ -1,9 +1,10 @@
 // tests/functions/ownershipOperations.test.ts
 import { describe, it, expect, afterAll } from "vitest";
 import { httpsCallable } from "firebase/functions";
+import { deleteApp } from "firebase/app";
 import { initializeApp as initializeAdminApp, getApps } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
-import { getTestFunctions, signInTestUser, teardownTestFunctions } from "./setup";
+import { getTestFunctions, signInTestUser, teardownTestFunctions, createIndependentClient } from "./setup";
 
 process.env.FIRESTORE_EMULATOR_HOST = "127.0.0.1:8080";
 if (!getApps().length) {
@@ -82,6 +83,54 @@ describe("Functions: ownership operations", () => {
 
       const campaignSnapshot = await campaignRef.get();
       expect(campaignSnapshot.data()?.memberIds).toContain("target-player");
+    },
+    15000
+  );
+
+  it(
+    "a player's release and a DM's force-assign racing on the same character both resolve safely to one consistent final owner",
+    async () => {
+      const player = await createIndependentClient("release-race-player");
+      const dm = await createIndependentClient("release-race-dm");
+      const campaignRef = adminDb.collection("campaigns").doc();
+      const characterRef = campaignRef.collection("characters").doc();
+      await campaignRef.set({ dmId: dm.uid, name: "Test Campaign", memberIds: [player.uid] });
+      await characterRef.set({ campaignId: campaignRef.id, userId: player.uid });
+
+      try {
+        const releaseCharacter = httpsCallable<{ campaignId: string; characterId: string }, void>(
+          player.functions,
+          "releaseCharacter"
+        );
+        const forceAssignCharacter = httpsCallable<
+          { campaignId: string; characterId: string; targetUid: string },
+          void
+        >(dm.functions, "forceAssignCharacter");
+
+        const [releaseResult] = await Promise.allSettled([
+          releaseCharacter({ campaignId: campaignRef.id, characterId: characterRef.id }),
+          forceAssignCharacter({
+            campaignId: campaignRef.id,
+            characterId: characterRef.id,
+            targetUid: "target-player",
+          }),
+        ]);
+
+        // force-assign is unconditional, so the character always ends up
+        // owned by the target regardless of which call actually commits
+        // first — the only thing that varies with timing is whether the
+        // player's release call itself succeeds (it won the race) or is
+        // correctly rejected for no longer owning the character (it lost).
+        const characterSnapshot = await characterRef.get();
+        expect(characterSnapshot.data()?.userId).toBe("target-player");
+
+        if (releaseResult.status === "rejected") {
+          expect(releaseResult.reason).toMatchObject({ code: "functions/permission-denied" });
+        }
+      } finally {
+        await deleteApp(player.app);
+        await deleteApp(dm.app);
+      }
     },
     15000
   );

@@ -3,30 +3,14 @@ import { describe, it, expect, afterAll } from "vitest";
 import { httpsCallable } from "firebase/functions";
 import { initializeApp as initializeAdminApp, getApps } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
-import { initializeApp, deleteApp } from "firebase/app";
-import { getAuth, connectAuthEmulator, signInAnonymously } from "firebase/auth";
-import { getFunctions, connectFunctionsEmulator } from "firebase/functions";
-import { getTestFunctions, signInTestUser, teardownTestFunctions } from "./setup";
+import { deleteApp } from "firebase/app";
+import { getTestFunctions, signInTestUser, teardownTestFunctions, createIndependentClient } from "./setup";
 
 process.env.FIRESTORE_EMULATOR_HOST = "127.0.0.1:8080";
 if (!getApps().length) {
   initializeAdminApp({ projectId: "dh-test" });
 }
 const adminDb = getFirestore();
-
-// A genuine concurrency test needs two independently-authenticated clients
-// racing at the same instant, which the shared getTestFunctions()/
-// signInTestUser() helpers can't do (one shared auth session, signing in as
-// a new user signs the previous one out first). Scoped to this file only.
-async function createIndependentClient(name: string) {
-  const app = initializeApp({ projectId: "dh-test", apiKey: "test-api-key" }, name);
-  const auth = getAuth(app);
-  connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
-  const functions = getFunctions(app);
-  connectFunctionsEmulator(functions, "127.0.0.1", 5001);
-  const credential = await signInAnonymously(auth);
-  return { app, functions, uid: credential.user.uid };
-}
 
 describe("Functions: claimCharacter", () => {
   afterAll(async () => {
