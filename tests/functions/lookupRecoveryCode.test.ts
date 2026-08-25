@@ -72,4 +72,32 @@ describe("Functions: lookupRecoveryCode", () => {
     },
     15000
   );
+
+  it(
+    "exhausts the real per-code rate limit after repeated lookups, simulating a brute-force guess sequence",
+    async () => {
+      await signInTestUser();
+      const lookupRecoveryCode = httpsCallable<{ code: string }, { status: string }>(
+        getTestFunctions(),
+        "lookupRecoveryCode"
+      );
+      const code = "DH-RATE-0001"; // deliberately made-up, never registered
+
+      // The per-code limit is 5 attempts per 15 minutes. Each of the first 5
+      // calls resolves normally with "not-found" (a real business outcome,
+      // not a rejection) since the code was never registered — it still
+      // counts as a real attempt against the limit.
+      for (let i = 0; i < 5; i++) {
+        const result = await lookupRecoveryCode({ code });
+        expect(result.data).toEqual({ status: "not-found" });
+      }
+
+      // The 6th attempt is rejected by the rate limiter itself, before ever
+      // reaching the lookup logic.
+      await expect(lookupRecoveryCode({ code })).rejects.toMatchObject({
+        code: "functions/resource-exhausted",
+      });
+    },
+    15000
+  );
 });
