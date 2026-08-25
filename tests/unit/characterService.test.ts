@@ -9,6 +9,7 @@ const {
   mockCallForceReleaseCharacter,
   mockCallRegisterRecoveryCode,
   mockCallReleaseCharacter,
+  mockCallRevokeRecoveryCode,
   mockDoc,
   mockGetDoc,
   mockGetDocs,
@@ -38,6 +39,7 @@ const {
     mockCallForceReleaseCharacter: vi.fn(),
     mockCallRegisterRecoveryCode: vi.fn(),
     mockCallReleaseCharacter: vi.fn(),
+    mockCallRevokeRecoveryCode: vi.fn(),
     // Single-arg calls are the auto-ID form used by doc(collectionRef); keep
     // returning the old constant there. Multi-arg calls (doc(db, "a", "b"))
     // are the explicit-path form deleteCharacter uses — join into a path so
@@ -90,6 +92,7 @@ vi.mock("firebase/functions", () => ({
     if (name === "releaseCharacter") return mockCallReleaseCharacter;
     if (name === "forceReleaseCharacter") return mockCallForceReleaseCharacter;
     if (name === "forceAssignCharacter") return mockCallForceAssignCharacter;
+    if (name === "revokeRecoveryCode") return mockCallRevokeRecoveryCode;
     throw new Error(`Unexpected callable: ${name}`);
   }),
 }));
@@ -121,6 +124,7 @@ import {
   reconcileCharacterSpentXp,
   registerRecoveryCode,
   releaseCharacter,
+  revokeRecoveryCode,
 } from "../../src/services/characterService";
 import { createEmptyCharacterData } from "../../src/utils/characterFactory";
 import type { Character } from "../../src/types/Character";
@@ -458,5 +462,18 @@ describe("importCharacter", () => {
 
     expect(mockCallRegisterRecoveryCode).toHaveBeenCalledOnce();
     expect(name).toBe("Brother Corvus");
+  });
+});
+
+describe("revokeRecoveryCode", () => {
+  it("calls the Function with campaignId and characterId", async () => {
+    mockCallRevokeRecoveryCode.mockResolvedValue({ data: undefined });
+
+    await revokeRecoveryCode("camp-1", "char-1");
+
+    expect(mockCallRevokeRecoveryCode).toHaveBeenCalledWith({
+      campaignId: "camp-1",
+      characterId: "char-1",
+    });
   });
 });

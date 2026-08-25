@@ -60,7 +60,11 @@ import type {
 import { exportCharacterJson } from "../utils/exportCharacter";
 import { isBackgroundComplete } from "../utils/characterFactory";
 import { getSpentXp } from "../features/experience/xpSpent";
-import { reconcileCharacterSpentXp, registerRecoveryCode } from "../services/characterService";
+import {
+  reconcileCharacterSpentXp,
+  registerRecoveryCode,
+  revokeRecoveryCode,
+} from "../services/characterService";
 import { SectionDrawer } from "../components/SectionDrawer";
 import { useUserProfile } from "../hooks/useUserProfile";
 import { ErrorState } from "../ui/ErrorState";
@@ -200,6 +204,11 @@ export default function CharacterSheet({
     await registerRecoveryCode(params.campaignId, params.characterId);
   }, [params.campaignId, params.characterId]);
 
+  const handleRevokeRecoveryCode = useCallback(async () => {
+    if (!params.campaignId || !params.characterId) return;
+    await revokeRecoveryCode(params.campaignId, params.characterId);
+  }, [params.campaignId, params.characterId]);
+
   useEffect(() => {
     if (!character || isDMLoading) return;
 
@@ -208,8 +217,9 @@ export default function CharacterSheet({
     setKebabContent(
       <CharacterKebabContent
         recoveryCode={character.recoveryCode}
-        canGenerateRecoveryCode={isDM}
+        canManageRecoveryCode={isDM}
         onGenerateRecoveryCode={handleGenerateRecoveryCode}
+        onRevokeRecoveryCode={handleRevokeRecoveryCode}
         canExport={isDM || isOwner}
         onExport={() => exportCharacterJson(character)}
         canPlayerRelease={canPlayerRelease}
@@ -230,6 +240,7 @@ export default function CharacterSheet({
     canPlayerRelease,
     releaseCharacter,
     handleGenerateRecoveryCode,
+    handleRevokeRecoveryCode,
     isReleasing,
     setBackHref,
     clearBackHref,

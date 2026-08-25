@@ -347,6 +347,18 @@ export async function registerRecoveryCode(campaignId: string, characterId: stri
   return data.code;
 }
 
+const callRevokeRecoveryCode = httpsCallable<{ campaignId: string; characterId: string }, void>(
+  functions,
+  "revokeRecoveryCode"
+);
+
+/** Invalidates a character's current Recovery Code without issuing a replacement. */
+export async function revokeRecoveryCode(campaignId: string, characterId: string): Promise<void> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(characterId, "Character ID");
+  await callRevokeRecoveryCode({ campaignId, characterId });
+}
+
 const REGISTER_CODE_RETRY_ATTEMPTS = 3;
 
 /**

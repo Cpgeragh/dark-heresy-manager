@@ -7,8 +7,9 @@ import { uiSubheading } from "../../ui/editableStyles";
 
 interface Props {
   recoveryCode?: string;
-  canGenerateRecoveryCode: boolean;
+  canManageRecoveryCode: boolean;
   onGenerateRecoveryCode: () => Promise<void>;
+  onRevokeRecoveryCode: () => Promise<void>;
   canExport: boolean;
   onExport: () => void;
   canPlayerRelease: boolean;
@@ -18,8 +19,9 @@ interface Props {
 
 export function CharacterKebabContent({
   recoveryCode,
-  canGenerateRecoveryCode,
+  canManageRecoveryCode,
   onGenerateRecoveryCode,
+  onRevokeRecoveryCode,
   canExport,
   onExport,
   canPlayerRelease,
@@ -29,6 +31,8 @@ export function CharacterKebabContent({
   const [copied, setCopied] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
+  const [revoking, setRevoking] = useState(false);
+  const [revokeError, setRevokeError] = useState<string | null>(null);
 
   const copyCode = useCallback(async () => {
     if (!recoveryCode) return;
@@ -53,6 +57,18 @@ export function CharacterKebabContent({
     }
   }, [onGenerateRecoveryCode]);
 
+  const handleRevoke = useCallback(async () => {
+    setRevoking(true);
+    setRevokeError(null);
+    try {
+      await onRevokeRecoveryCode();
+    } catch (err) {
+      setRevokeError(err instanceof Error ? err.message : "Failed to revoke Recovery Code.");
+    } finally {
+      setRevoking(false);
+    }
+  }, [onRevokeRecoveryCode]);
+
   return (
     <div className="space-y-4">
       {/* Recovery Code */}
@@ -73,10 +89,24 @@ export function CharacterKebabContent({
             >
               {copied ? "Copied" : "Copy"}
             </Button>
+            {canManageRecoveryCode && (
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={handleRevoke}
+                disabled={revoking}
+                className="shrink-0"
+              >
+                {revoking ? "Revoking…" : "Revoke"}
+              </Button>
+            )}
           </div>
+          {revokeError && (
+            <p className="text-xs lg:text-sm text-red-400">{revokeError}</p>
+          )}
         </div>
       ) : (
-        canGenerateRecoveryCode && (
+        canManageRecoveryCode && (
           <div className="space-y-2">
             <p className={uiSubheading}>
               Recovery Code
