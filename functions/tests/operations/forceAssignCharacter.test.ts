@@ -15,8 +15,12 @@ const mockRunTransaction = vi.fn(async (callback: (transaction: unknown) => Prom
 });
 
 const mockClaimLogDoc = vi.fn(() => ({}));
-const mockCharacterRef = { collection: vi.fn(() => ({ doc: mockClaimLogDoc })) };
-const mockCharactersCollection = { doc: vi.fn(() => mockCharacterRef) };
+const mockCharacterRef = { id: "char-1", collection: vi.fn(() => ({ doc: mockClaimLogDoc })) };
+const mockMembershipQuery = { __membershipQuery: true };
+const mockCharactersCollection = {
+  doc: vi.fn(() => mockCharacterRef),
+  where: vi.fn(() => mockMembershipQuery),
+};
 const mockCampaignRef = { get: mockCampaignGet, collection: vi.fn(() => mockCharactersCollection) };
 const mockCampaignsCollection = { doc: vi.fn(() => mockCampaignRef) };
 
@@ -32,9 +36,29 @@ vi.mock("firebase-admin/firestore", () => ({
   }),
   FieldValue: {
     arrayUnion: (v: unknown) => ({ __arrayUnion: v }),
+    arrayRemove: (v: unknown) => ({ __arrayRemove: v }),
     serverTimestamp: () => "server-timestamp",
   },
 }));
+
+function setupTransactionGet(options: {
+  character: { exists: boolean; userId?: string | null };
+  otherOwnedCharacterIds?: string[];
+  campaignMemberIds?: string[];
+}) {
+  mockTransactionGet.mockImplementation((ref: unknown) => {
+    if (ref === mockMembershipQuery) {
+      return Promise.resolve({ docs: (options.otherOwnedCharacterIds ?? []).map((id) => ({ id })) });
+    }
+    if (ref === mockCampaignRef) {
+      return Promise.resolve({ data: () => ({ memberIds: options.campaignMemberIds ?? [] }) });
+    }
+    return Promise.resolve({
+      exists: options.character.exists,
+      data: () => ({ userId: options.character.userId }),
+    });
+  });
+}
 
 describe("forceAssignCharacter", () => {
   beforeEach(() => {
@@ -59,16 +83,16 @@ describe("forceAssignCharacter", () => {
 
   it("rejects when the character does not exist", async () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
-    mockTransactionGet.mockResolvedValue({ exists: false });
+    setupTransactionGet({ character: { exists: false } });
 
     await expect(
       forceAssignCharacter({ campaignId: "c1", characterId: "char-1", targetUid: "player-1" }, "dm-1")
     ).rejects.toThrow(expect.objectContaining({ code: "not-found" }));
   });
 
-  it("assigns the character to the target, adds them to membership, and logs the force-assign", async () => {
+  it("assigns an unclaimed character to the target, adds them to membership, and logs the force-assign", async () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
-    mockTransactionGet.mockResolvedValue({ exists: true, data: () => ({ userId: null }) });
+    setupTransactionGet({ character: { exists: true, userId: null } });
 
     await forceAssignCharacter(
       { campaignId: "c1", characterId: "char-1", targetUid: "player-1" },
@@ -93,18 +117,42 @@ describe("forceAssignCharacter", () => {
     );
   });
 
-  it("overrides an existing owner when reassigning, since force-assign is deliberately permissive", async () => {
+  it("reassigns from an existing owner who still owns another character, adds the target, and leaves the old owner's membership alone", async () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
-    mockTransactionGet.mockResolvedValue({ exists: true, data: () => ({ userId: "old-player" }) });
+    setupTransactionGet({
+      character: { exists: true, userId: "old-player" },
+      otherOwnedCharacterIds: ["char-2"],
+    });
 
     await forceAssignCharacter(
       { campaignId: "c1", characterId: "char-1", targetUid: "new-player" },
       "dm-1"
     );
 
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCampaignRef, {
+      memberIds: { __arrayUnion: "new-player" },
+    });
     expect(mockTransactionSet).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({ previousOwnerUid: "old-player", newOwnerUid: "new-player" })
     );
+  });
+
+  it("reassigns the old owner's last character, removing them and adding the new owner in one combined write", async () => {
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
+    setupTransactionGet({
+      character: { exists: true, userId: "old-player" },
+      otherOwnedCharacterIds: [],
+      campaignMemberIds: ["old-player", "someone-else"],
+    });
+
+    await forceAssignCharacter(
+      { campaignId: "c1", characterId: "char-1", targetUid: "new-player" },
+      "dm-1"
+    );
+
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCampaignRef, {
+      memberIds: ["someone-else", "new-player"],
+    });
   });
 });

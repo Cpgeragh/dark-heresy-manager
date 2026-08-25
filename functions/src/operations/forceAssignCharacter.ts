@@ -38,14 +38,16 @@ export async function forceAssignCharacter(
     }
     const currentOwner = (characterSnapshot.data()?.userId as string | null | undefined) ?? null;
 
-    applyOwnershipTransition(
+    await applyOwnershipTransition(
       transaction,
-      characterRef,
       campaignRef,
+      characterRef,
       "force-assign",
       callerUid,
       currentOwner,
       input.targetUid
     );
-  }, { maxAttempts: 5 });
+  // See releaseCharacter.ts: Stage 5.3's membership-removal check widens this
+  // transaction's read set, so it gets the same extra retry headroom.
+  }, { maxAttempts: 10 });
 }

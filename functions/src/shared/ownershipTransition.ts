@@ -4,26 +4,58 @@
 // force-assign, and force-release. Each caller does its own permission
 // check and its own fresh-inside-transaction precondition check; this only
 // bundles the write shape once that's verified.
+//
+// Stage 5.3: also removes the previous owner from the campaign's memberIds
+// when this transition takes away their last character in the campaign,
+// covering release, force-release, and force-assign, since any of the
+// three can leave someone with no characters left here.
 
 import { FieldValue } from "firebase-admin/firestore";
 import type { Transaction, DocumentReference } from "firebase-admin/firestore";
 import { buildClaimLogPayload, type ClaimLogAction } from "./claimLog.js";
 
-export function applyOwnershipTransition(
+export async function applyOwnershipTransition(
   transaction: Transaction,
+  campaignRef: DocumentReference,
   characterRef: DocumentReference,
-  campaignRef: DocumentReference | null,
   action: ClaimLogAction,
   actorUid: string,
   previousOwnerUid: string | null,
   newOwnerUid: string | null
-): void {
+): Promise<void> {
+  const losingOwner = previousOwnerUid !== null && previousOwnerUid !== newOwnerUid;
+
+  let removeFromMembership = false;
+  if (losingOwner) {
+    const remainingSnapshot = await transaction.get(
+      campaignRef.collection("characters").where("userId", "==", previousOwnerUid)
+    );
+    removeFromMembership = !remainingSnapshot.docs.some((doc) => doc.id !== characterRef.id);
+  }
+
+  let membershipUpdate: { memberIds: unknown } | null = null;
+  if (newOwnerUid !== null && removeFromMembership) {
+    // Firestore can't apply arrayUnion and arrayRemove to the same field in
+    // one write, so this combined case (force-assign taking someone's last
+    // character straight to a new owner) reads the current list and writes
+    // the replacement directly instead.
+    const campaignSnapshot = await transaction.get(campaignRef);
+    const currentMemberIds = (campaignSnapshot.data()?.memberIds as string[] | undefined) ?? [];
+    const nextMemberIds = currentMemberIds.filter((id) => id !== previousOwnerUid);
+    if (!nextMemberIds.includes(newOwnerUid)) nextMemberIds.push(newOwnerUid);
+    membershipUpdate = { memberIds: nextMemberIds };
+  } else if (newOwnerUid !== null) {
+    membershipUpdate = { memberIds: FieldValue.arrayUnion(newOwnerUid) };
+  } else if (removeFromMembership) {
+    membershipUpdate = { memberIds: FieldValue.arrayRemove(previousOwnerUid) };
+  }
+
   transaction.update(characterRef, {
     userId: newOwnerUid,
     isEditableByPlayer: newOwnerUid !== null,
   });
-  if (newOwnerUid !== null && campaignRef) {
-    transaction.update(campaignRef, { memberIds: FieldValue.arrayUnion(newOwnerUid) });
+  if (membershipUpdate) {
+    transaction.update(campaignRef, membershipUpdate);
   }
   transaction.set(
     characterRef.collection("claimLog").doc(),

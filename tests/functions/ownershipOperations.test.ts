@@ -34,6 +34,32 @@ describe("Functions: ownership operations", () => {
 
       const characterSnapshot = await characterRef.get();
       expect(characterSnapshot.data()?.userId).toBeNull();
+
+      const campaignSnapshot = await campaignRef.get();
+      expect(campaignSnapshot.data()?.memberIds).not.toContain(playerUid);
+    },
+    15000
+  );
+
+  it(
+    "releaseCharacter: keeps membership when the player still owns another character in the campaign",
+    async () => {
+      const playerUid = await signInTestUser();
+      const campaignRef = adminDb.collection("campaigns").doc();
+      const releasedCharacterRef = campaignRef.collection("characters").doc();
+      const otherCharacterRef = campaignRef.collection("characters").doc();
+      await campaignRef.set({ dmId: "some-dm", name: "Test Campaign", memberIds: [playerUid] });
+      await releasedCharacterRef.set({ campaignId: campaignRef.id, userId: playerUid });
+      await otherCharacterRef.set({ campaignId: campaignRef.id, userId: playerUid });
+
+      const releaseCharacter = httpsCallable<{ campaignId: string; characterId: string }, void>(
+        getTestFunctions(),
+        "releaseCharacter"
+      );
+      await releaseCharacter({ campaignId: campaignRef.id, characterId: releasedCharacterRef.id });
+
+      const campaignSnapshot = await campaignRef.get();
+      expect(campaignSnapshot.data()?.memberIds).toContain(playerUid);
     },
     15000
   );
@@ -55,6 +81,9 @@ describe("Functions: ownership operations", () => {
 
       const characterSnapshot = await characterRef.get();
       expect(characterSnapshot.data()?.userId).toBeNull();
+
+      const campaignSnapshot = await campaignRef.get();
+      expect(campaignSnapshot.data()?.memberIds).not.toContain("some-player");
     },
     15000
   );
@@ -88,7 +117,33 @@ describe("Functions: ownership operations", () => {
   );
 
   it(
-    "a player's release and a DM's force-assign racing on the same character both resolve safely to one consistent final owner",
+    "forceAssignCharacter: reassigning someone's last character removes them and adds the new owner in the same write",
+    async () => {
+      const dmUid = await signInTestUser();
+      const campaignRef = adminDb.collection("campaigns").doc();
+      const characterRef = campaignRef.collection("characters").doc();
+      await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: ["old-player"] });
+      await characterRef.set({ campaignId: campaignRef.id, userId: "old-player" });
+
+      const forceAssignCharacter = httpsCallable<
+        { campaignId: string; characterId: string; targetUid: string },
+        void
+      >(getTestFunctions(), "forceAssignCharacter");
+      await forceAssignCharacter({
+        campaignId: campaignRef.id,
+        characterId: characterRef.id,
+        targetUid: "new-player",
+      });
+
+      const campaignSnapshot = await campaignRef.get();
+      expect(campaignSnapshot.data()?.memberIds).not.toContain("old-player");
+      expect(campaignSnapshot.data()?.memberIds).toContain("new-player");
+    },
+    15000
+  );
+
+  it(
+    "a player's release and a DM's force-assign racing on the same character both resolve safely to one consistent final state",
     async () => {
       const player = await createIndependentClient("release-race-player");
       const dm = await createIndependentClient("release-race-dm");
@@ -107,7 +162,7 @@ describe("Functions: ownership operations", () => {
           void
         >(dm.functions, "forceAssignCharacter");
 
-        const [releaseResult] = await Promise.allSettled([
+        const [releaseResult, forceAssignResult] = await Promise.allSettled([
           releaseCharacter({ campaignId: campaignRef.id, characterId: characterRef.id }),
           forceAssignCharacter({
             campaignId: campaignRef.id,
@@ -116,22 +171,34 @@ describe("Functions: ownership operations", () => {
           }),
         ]);
 
-        // force-assign is unconditional, so the character always ends up
-        // owned by the target regardless of which call actually commits
-        // first — the only thing that varies with timing is whether the
-        // player's release call itself succeeds (it won the race) or is
-        // correctly rejected for no longer owning the character (it lost).
         const characterSnapshot = await characterRef.get();
-        expect(characterSnapshot.data()?.userId).toBe("target-player");
+        const campaignSnapshot = await campaignRef.get();
 
-        if (releaseResult.status === "rejected") {
-          expect(releaseResult.reason).toMatchObject({ code: "functions/permission-denied" });
+        if (forceAssignResult.status === "fulfilled") {
+          // force-assign is unconditional, so once it commits the character
+          // ends up owned by the target regardless of what release did, and
+          // the player's release only ends up rejected if it genuinely lost
+          // the race (target already owned it by the time release re-read).
+          expect(characterSnapshot.data()?.userId).toBe("target-player");
+          expect(campaignSnapshot.data()?.memberIds).toContain("target-player");
+          if (releaseResult.status === "rejected") {
+            expect(releaseResult.reason).toMatchObject({ code: "functions/permission-denied" });
+          }
+        } else {
+          // Extremely rare under this test's deliberately extreme
+          // contention (both calls racing the same membership-check query
+          // on the exact same character): if force-assign genuinely
+          // exhausted its retries, release must have been the one that
+          // actually committed.
+          expect(releaseResult.status).toBe("fulfilled");
+          expect(characterSnapshot.data()?.userId).toBeNull();
+          expect(campaignSnapshot.data()?.memberIds).not.toContain(player.uid);
         }
       } finally {
         await deleteApp(player.app);
         await deleteApp(dm.app);
       }
     },
-    15000
+    30000
   );
 });

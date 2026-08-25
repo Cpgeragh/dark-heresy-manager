@@ -31,6 +31,19 @@ export async function releaseCharacter(
       throw new HttpsError("permission-denied", "You do not own this character.");
     }
 
-    applyOwnershipTransition(transaction, characterRef, null, "release", callerUid, currentOwner, null);
-  }, { maxAttempts: 5 });
+    await applyOwnershipTransition(
+      transaction,
+      campaignRef,
+      characterRef,
+      "release",
+      callerUid,
+      currentOwner,
+      null
+    );
+  // Stage 5.3's membership-removal check queries the characters subcollection,
+  // widening this transaction's read set beyond the single document it used
+  // to touch, and racing against another ownership-transition on the same
+  // character (which runs the same query) increases retry contention.
+  // Padding maxAttempts beyond the SDK's own default of 5 accounts for that.
+  }, { maxAttempts: 10 });
 }
