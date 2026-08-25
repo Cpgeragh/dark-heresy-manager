@@ -116,6 +116,7 @@ vi.mock("../../src/shared/bulkJobs", () => ({
   completeJob: mockCompleteJob,
   failJob: mockFailJob,
   handleChunkFailure: mockHandleChunkFailure,
+  MAX_JOB_TOTAL_COUNT: 10_000,
 }));
 
 vi.mock("firebase-admin/firestore", () => ({
@@ -199,6 +200,27 @@ describe("startCustomItemMutationJob", () => {
         "idem-key"
       )
     ).rejects.toThrow(expect.objectContaining({ code: "not-found" }));
+  });
+
+  it("rejects starting a mutation job whose character count exceeds the size ceiling, without mutating the item first", async () => {
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: DM_UID }) });
+    mockItemGet.mockResolvedValue({ exists: true });
+    characters.countGet.mockResolvedValue({ data: () => ({ count: 20_000 }) });
+
+    await expect(
+      startCustomItemMutationJob(
+        {
+          campaignId: CAMPAIGN_ID,
+          customItemId: CUSTOM_ITEM_ID,
+          mode: "archive-and-remove",
+          actorUserId: DM_UID,
+        },
+        DM_UID,
+        "idem-key"
+      )
+    ).rejects.toThrow(expect.objectContaining({ code: "resource-exhausted" }));
+    expect(mockItemUpdate).not.toHaveBeenCalled();
+    expect(mockCreateBulkJob).not.toHaveBeenCalled();
   });
 
   it("mode remove: creates the job without any item-level mutation", async () => {

@@ -157,6 +157,7 @@ vi.mock("../../src/shared/bulkJobs", () => ({
   completeJob: mockCompleteJob,
   failJob: mockFailJob,
   handleChunkFailure: mockHandleChunkFailure,
+  MAX_JOB_TOTAL_COUNT: 10_000,
 }));
 
 vi.mock("firebase-admin/firestore", () => ({
@@ -267,6 +268,19 @@ describe("startCampaignDeletionJob", () => {
       21,
       "idem-key"
     );
+  });
+
+  it("rejects starting a deletion job whose preflight total exceeds the size ceiling", async () => {
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: DM_UID }) });
+    characters.pageGet.mockResolvedValue({ docs: [] });
+    threads.pageGet.mockResolvedValue({ docs: [] });
+    customItems.pageGet.mockResolvedValue({ docs: [] });
+    sessions.countGet.mockResolvedValue({ data: () => ({ count: 20_000 }) });
+
+    await expect(
+      startCampaignDeletionJob({ campaignId: CAMPAIGN_ID }, DM_UID, "idem-key")
+    ).rejects.toThrow(expect.objectContaining({ code: "resource-exhausted" }));
+    expect(mockCreateBulkJob).not.toHaveBeenCalled();
   });
 });
 

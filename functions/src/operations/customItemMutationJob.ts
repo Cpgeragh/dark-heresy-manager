@@ -35,6 +35,7 @@ import {
   completeJob,
   createBulkJob,
   handleChunkFailure,
+  MAX_JOB_TOTAL_COUNT,
 } from "../shared/bulkJobs.js";
 import {
   buildCharacterCopyRemoval,
@@ -166,6 +167,15 @@ export async function startCustomItemMutationJob(
     throw new HttpsError("not-found", "Custom item not found.");
   }
 
+  const charactersCountSnapshot = await campaignRef.collection("characters").count().get();
+  const totalCount = charactersCountSnapshot.data().count;
+  if (totalCount > MAX_JOB_TOTAL_COUNT) {
+    throw new HttpsError(
+      "resource-exhausted",
+      `This operation would affect more than ${MAX_JOB_TOTAL_COUNT} documents, which is too large to process safely right now.`
+    );
+  }
+
   let targetVersionId: string | null = null;
 
   if (input.mode === "publish-and-update") {
@@ -181,9 +191,6 @@ export async function startCustomItemMutationJob(
       updatedBy: { userId: input.actorUserId },
     });
   }
-
-  const charactersCountSnapshot = await campaignRef.collection("characters").count().get();
-  const totalCount = charactersCountSnapshot.data().count;
 
   const jobId = await createBulkJob(
     "custom-item-mutation",

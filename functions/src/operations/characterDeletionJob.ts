@@ -21,6 +21,7 @@ import {
   completeJob,
   createBulkJob,
   handleChunkFailure,
+  MAX_JOB_TOTAL_COUNT,
 } from "../shared/bulkJobs.js";
 
 const CHUNK_SIZE = 400;
@@ -103,6 +104,13 @@ export async function startCharacterDeletionJob(
     (threadSnapshot.exists ? 1 : 0) +
     (recoverySnapshot.exists ? 1 : 0) +
     1;
+
+  if (totalCount > MAX_JOB_TOTAL_COUNT) {
+    throw new HttpsError(
+      "resource-exhausted",
+      `This operation would affect more than ${MAX_JOB_TOTAL_COUNT} documents, which is too large to process safely right now.`
+    );
+  }
 
   const jobId = await createBulkJob(
     "character-deletion",

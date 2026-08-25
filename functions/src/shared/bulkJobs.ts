@@ -23,6 +23,12 @@ const LEASE_DURATION_MS = 60 * 1000;
 // out of scope until this app is actually deployed.
 const JOB_EXPIRY_MS = 24 * 60 * 60 * 1000;
 
+// Spark-plan safety limit: the whole app shares one daily Firestore write/
+// delete quota (~20,000 of each), so a single job must not be able to
+// consume it alone. No override — a job over this ceiling is refused
+// outright at creation. Revisit once real billing/budget protections exist.
+export const MAX_JOB_TOTAL_COUNT = 10_000;
+
 export type BulkJobStatus = "pending" | "running" | "completed" | "failed" | "cancelled";
 
 export interface BulkJobRecord {
