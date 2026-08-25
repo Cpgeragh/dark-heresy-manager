@@ -9,6 +9,7 @@
 
 import type { Firestore, Transaction, DocumentReference } from "firebase-admin/firestore";
 import { generateRecoveryCode, hashRecoveryCode } from "./recoveryCode.js";
+import { RECOVERY_CODE_HISTORY_COLLECTION, buildRecoveryCodeHistoryPayload } from "./recoveryCodeHistory.js";
 
 const RECOVERY_INDEX_COLLECTION = "recoveryIndex";
 
@@ -27,6 +28,10 @@ export function rotateRecoveryCodeInTransaction(
   if (previousCode) {
     const previousHash = hashRecoveryCode(previousCode, hmacSecret);
     transaction.delete(db.collection(RECOVERY_INDEX_COLLECTION).doc(previousHash));
+    transaction.set(
+      characterRef.collection(RECOVERY_CODE_HISTORY_COLLECTION).doc(),
+      buildRecoveryCodeHistoryPayload("rotated")
+    );
   }
   transaction.set(db.collection(RECOVERY_INDEX_COLLECTION).doc(newHash), {
     campaignId,

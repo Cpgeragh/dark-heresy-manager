@@ -48,6 +48,10 @@ describe("Functions: revokeRecoveryCode", () => {
       await expect(claimCharacter({ code: registered.code })).rejects.toMatchObject({
         code: "functions/not-found",
       });
+
+      const historySnapshot = await characterRef.collection("recoveryCodeHistory").get();
+      expect(historySnapshot.docs).toHaveLength(1);
+      expect(historySnapshot.docs[0].data()).toMatchObject({ status: "revoked" });
     },
     20000
   );

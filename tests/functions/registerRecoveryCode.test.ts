@@ -44,6 +44,34 @@ describe("Functions: registerRecoveryCode", () => {
   );
 
   it(
+    "logs a history entry when rotating an existing code, but not on first registration",
+    async () => {
+      const dmUid = await signInTestUser();
+      const campaignRef = adminDb.collection("campaigns").doc();
+      const characterRef = campaignRef.collection("characters").doc();
+      await campaignRef.set({ dmId: dmUid, name: "Test Campaign" });
+      await characterRef.set({ campaignId: campaignRef.id });
+
+      const registerRecoveryCode = httpsCallable<
+        { campaignId: string; characterId: string },
+        { code: string }
+      >(getTestFunctions(), "registerRecoveryCode");
+
+      await registerRecoveryCode({ campaignId: campaignRef.id, characterId: characterRef.id });
+
+      const historyAfterFirstRegister = await characterRef.collection("recoveryCodeHistory").get();
+      expect(historyAfterFirstRegister.docs).toHaveLength(0);
+
+      await registerRecoveryCode({ campaignId: campaignRef.id, characterId: characterRef.id });
+
+      const historyAfterRotation = await characterRef.collection("recoveryCodeHistory").get();
+      expect(historyAfterRotation.docs).toHaveLength(1);
+      expect(historyAfterRotation.docs[0].data()).toMatchObject({ status: "rotated" });
+    },
+    15000
+  );
+
+  it(
     "rejects a caller who is not the campaign's DM",
     async () => {
       await signInTestUser();

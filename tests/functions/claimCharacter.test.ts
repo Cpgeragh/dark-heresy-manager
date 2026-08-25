@@ -18,7 +18,7 @@ describe("Functions: claimCharacter", () => {
   });
 
   it(
-    "claims an unclaimed character for the calling player and rotates its code",
+    "claims an unclaimed character for the calling player, leaving the code valid",
     async () => {
       const dmUid = await signInTestUser();
       const campaignRef = adminDb.collection("campaigns").doc();
@@ -46,7 +46,7 @@ describe("Functions: claimCharacter", () => {
 
       const characterSnapshot = await characterRef.get();
       expect(characterSnapshot.data()?.userId).toBe(playerUid);
-      expect(characterSnapshot.data()?.recoveryCode).not.toBe(registered.code);
+      expect(characterSnapshot.data()?.recoveryCode).toBe(registered.code);
 
       const campaignSnapshot = await campaignRef.get();
       expect(campaignSnapshot.data()?.memberIds).toContain(playerUid);
@@ -64,7 +64,7 @@ describe("Functions: claimCharacter", () => {
   );
 
   it(
-    "rejects reusing an already-consumed code, since claiming rotates it",
+    "rejects reclaiming an already-claimed character, even though the code itself is still valid",
     async () => {
       const dmUid = await signInTestUser();
       const campaignRef = adminDb.collection("campaigns").doc();
@@ -90,7 +90,7 @@ describe("Functions: claimCharacter", () => {
 
       await signInTestUser();
       await expect(claimCharacter({ code: registered.code })).rejects.toMatchObject({
-        code: "functions/not-found",
+        code: "functions/failed-precondition",
       });
     },
     15000

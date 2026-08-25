@@ -16,7 +16,9 @@ const mockRunTransaction = vi.fn(async (callback: (transaction: unknown) => Prom
   });
 });
 
-const mockCharacterRef = {};
+const mockHistoryDoc = vi.fn(() => ({}));
+const mockHistoryCollection = vi.fn(() => ({ doc: mockHistoryDoc }));
+const mockCharacterRef = { collection: mockHistoryCollection };
 const mockCharactersCollection = { doc: vi.fn(() => mockCharacterRef) };
 const mockCampaignRef = { get: mockCampaignGet, collection: vi.fn(() => mockCharactersCollection) };
 const mockCampaignsCollection = { doc: vi.fn(() => mockCampaignRef) };
@@ -34,6 +36,9 @@ vi.mock("firebase-admin/firestore", () => ({
     collection: mockCollection,
     runTransaction: mockRunTransaction,
   }),
+  FieldValue: {
+    serverTimestamp: () => "server-timestamp",
+  },
 }));
 
 describe("registerRecoveryCode", () => {
@@ -83,9 +88,10 @@ describe("registerRecoveryCode", () => {
       characterId: "char-1",
     });
     expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, { recoveryCode: result.code });
+    expect(mockHistoryCollection).not.toHaveBeenCalled();
   });
 
-  it("deletes the previous index entry when rotating an existing code", async () => {
+  it("deletes the previous index entry and logs a history entry when rotating an existing code", async () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
     mockTransactionGet.mockResolvedValue({
       exists: true,
@@ -96,6 +102,11 @@ describe("registerRecoveryCode", () => {
 
     expect(mockTransactionDelete).toHaveBeenCalledOnce();
     expect(mockIndexDoc).toHaveBeenCalled();
+    expect(mockHistoryCollection).toHaveBeenCalledWith("recoveryCodeHistory");
+    expect(mockTransactionSet).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ status: "rotated" })
+    );
   });
 
   it("reads the character fresh inside the transaction, not from a pre-read, so a racing update is picked up", async () => {

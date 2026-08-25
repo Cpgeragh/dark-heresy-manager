@@ -112,7 +112,7 @@ describe("claimCharacter", () => {
     expect(mockTransactionUpdate).not.toHaveBeenCalled();
   });
 
-  it("claims an unclaimed character: sets ownership, adds membership, logs the claim, and rotates the code", async () => {
+  it("claims an unclaimed character: sets ownership, adds membership, and logs the claim", async () => {
     mockIndexGet.mockResolvedValue({
       exists: true,
       data: () => ({ campaignId: "c1", characterId: "char-1" }),

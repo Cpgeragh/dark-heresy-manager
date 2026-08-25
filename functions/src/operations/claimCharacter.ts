@@ -12,7 +12,6 @@
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import { hashRecoveryCode } from "../shared/recoveryCode.js";
-import { rotateRecoveryCodeInTransaction } from "../shared/recoveryCodeRotation.js";
 import { buildClaimLogPayload } from "../shared/claimLog.js";
 
 const RECOVERY_INDEX_COLLECTION = "recoveryIndex";
@@ -73,15 +72,6 @@ export async function claimCharacter(
     transaction.set(
       characterRef.collection("claimLog").doc(),
       buildClaimLogPayload("claim", callerUid, null, callerUid)
-    );
-    rotateRecoveryCodeInTransaction(
-      transaction,
-      db,
-      characterRef,
-      campaignId,
-      characterId,
-      input.code,
-      hmacSecret
     );
   }, { maxAttempts: 5 });
 

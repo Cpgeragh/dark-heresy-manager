@@ -12,6 +12,7 @@
 import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import { hashRecoveryCode } from "../shared/recoveryCode.js";
+import { RECOVERY_CODE_HISTORY_COLLECTION, buildRecoveryCodeHistoryPayload } from "../shared/recoveryCodeHistory.js";
 
 const RECOVERY_INDEX_COLLECTION = "recoveryIndex";
 const CODE_FORMAT = /^DH-[0-9A-Z]{4}-[0-9A-Z]{4}$/;
@@ -48,6 +49,10 @@ export async function revokeRecoveryCode(
     if (currentCode && CODE_FORMAT.test(currentCode)) {
       const hash = hashRecoveryCode(currentCode, hmacSecret);
       transaction.delete(db.collection(RECOVERY_INDEX_COLLECTION).doc(hash));
+      transaction.set(
+        characterRef.collection(RECOVERY_CODE_HISTORY_COLLECTION).doc(),
+        buildRecoveryCodeHistoryPayload("revoked")
+      );
     }
     transaction.update(characterRef, { recoveryCode: "" });
   }, { maxAttempts: 5 });
