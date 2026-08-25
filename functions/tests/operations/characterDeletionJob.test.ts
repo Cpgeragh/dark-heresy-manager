@@ -17,6 +17,7 @@ const {
   mockAdvanceJobCheckpoint,
   mockCompleteJob,
   mockFailJob,
+  mockHandleChunkFailure,
   mockCollection,
   mockBatch,
   mockCampaignGet,
@@ -98,6 +99,7 @@ const {
     mockAdvanceJobCheckpoint: vi.fn(),
     mockCompleteJob: vi.fn(),
     mockFailJob: vi.fn(),
+    mockHandleChunkFailure: vi.fn(),
     mockCollection,
     mockBatch,
     mockCampaignGet,
@@ -122,6 +124,7 @@ vi.mock("../../src/shared/bulkJobs", () => ({
   advanceJobCheckpoint: mockAdvanceJobCheckpoint,
   completeJob: mockCompleteJob,
   failJob: mockFailJob,
+  handleChunkFailure: mockHandleChunkFailure,
 }));
 
 vi.mock("firebase-admin/firestore", () => ({
@@ -146,6 +149,9 @@ function makeJob(overrides: Partial<BulkJobRecord> = {}): BulkJobRecord {
     leaseOwner: "lease-1",
     leaseExpiresAt: Date.now() + 60_000,
     error: null,
+    idempotencyKey: null,
+    retryCount: 0,
+    lastError: null,
     createdAt: 0,
     updatedAt: 0,
     ...overrides,
@@ -240,9 +246,11 @@ describe("processCharacterDeletionChunk", () => {
     await expect(processCharacterDeletionChunk({ jobId: "job-1" }, DM_UID)).rejects.toThrow(
       expect.objectContaining({ code: "permission-denied" })
     );
-    expect(mockFailJob).toHaveBeenCalledWith(
+    expect(mockHandleChunkFailure).toHaveBeenCalledWith(
       "job-1",
       "lease-1",
+      expect.anything(),
+      expect.anything(),
       "Only the campaign DM can delete this character."
     );
   });
@@ -372,6 +380,22 @@ describe("processCharacterDeletionChunk", () => {
     await expect(processCharacterDeletionChunk({ jobId: "job-1" }, DM_UID)).rejects.toThrow(
       "firestore is down"
     );
-    expect(mockFailJob).toHaveBeenCalledWith("job-1", "lease-1", "Unexpected error.");
+    expect(mockHandleChunkFailure).toHaveBeenCalledWith(
+      "job-1",
+      "lease-1",
+      expect.anything(),
+      expect.anything(),
+      "Unexpected error."
+    );
+  });
+
+  it("returns an in-progress result instead of throwing when handleChunkFailure signals a retry", async () => {
+    mockAcquireJobLease.mockResolvedValue({ job: makeJob({ processedCount: 3 }), leaseId: "lease-1" });
+    mockCampaignGet.mockRejectedValue(new Error("transient"));
+    mockHandleChunkFailure.mockResolvedValueOnce(true);
+
+    const result = await processCharacterDeletionChunk({ jobId: "job-1" }, DM_UID);
+
+    expect(result).toEqual({ done: false, processedCount: 3, totalCount: 10 });
   });
 });

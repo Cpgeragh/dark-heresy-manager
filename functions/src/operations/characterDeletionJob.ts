@@ -20,7 +20,7 @@ import {
   advanceJobCheckpoint,
   completeJob,
   createBulkJob,
-  failJob,
+  handleChunkFailure,
 } from "../shared/bulkJobs.js";
 
 const CHUNK_SIZE = 400;
@@ -226,7 +226,9 @@ export async function processCharacterDeletionChunk(
     return { done: false, processedCount: job.processedCount + processed, totalCount: job.totalCount };
   } catch (error) {
     const message = error instanceof HttpsError ? error.message : "Unexpected error.";
-    await failJob(input.jobId, leaseId, message);
+    if (await handleChunkFailure(input.jobId, leaseId, job, error, message)) {
+      return { done: false, processedCount: job.processedCount, totalCount: job.totalCount };
+    }
     throw error;
   }
 }

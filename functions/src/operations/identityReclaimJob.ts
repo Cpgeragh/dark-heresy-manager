@@ -17,7 +17,7 @@ import {
   acquireJobLease,
   advanceJobCheckpoint,
   completeJob,
-  failJob,
+  handleChunkFailure,
 } from "../shared/bulkJobs.js";
 import {
   computeOwnershipMigrationPlan,
@@ -139,7 +139,10 @@ export async function processIdentityReclaimChunk(
       totalCount: job.totalCount,
     };
   } catch (error) {
-    await failJob(input.jobId, leaseId, error instanceof Error ? error.message : "Unknown error.");
+    const message = error instanceof Error ? error.message : "Unknown error.";
+    if (await handleChunkFailure(input.jobId, leaseId, job, error, message)) {
+      return { done: false, processedCount: job.processedCount, totalCount: job.totalCount };
+    }
     throw error;
   }
 }

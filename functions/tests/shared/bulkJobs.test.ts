@@ -1,11 +1,14 @@
 // functions/tests/shared/bulkJobs.test.ts
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   createBulkJob,
   acquireJobLease,
   advanceJobCheckpoint,
   completeJob,
   failJob,
+  handleChunkFailure,
+  isRetriableChunkError,
+  MAX_CHUNK_RETRIES,
   type BulkJobRecord,
 } from "../../src/shared/bulkJobs";
 
@@ -38,11 +41,17 @@ function makeJob(overrides: Partial<BulkJobRecord> = {}): BulkJobRecord {
     leaseExpiresAt: null,
     error: null,
     idempotencyKey: null,
+    retryCount: 0,
+    lastError: null,
     createdAt: 0,
     updatedAt: 0,
     ...overrides,
   };
 }
+
+beforeEach(() => {
+  vi.clearAllMocks();
+});
 
 describe("createBulkJob", () => {
   it("creates a pending job record with the given type, actor, data, count, and idempotency key", async () => {
@@ -151,6 +160,8 @@ describe("advanceJobCheckpoint", () => {
         processedCount: { __increment: 5 },
         leaseOwner: null,
         leaseExpiresAt: null,
+        retryCount: 0,
+        lastError: null,
       })
     );
   });
@@ -207,6 +218,101 @@ describe("completeJob / failJob", () => {
 
     expect(mockTransactionDelete).toHaveBeenCalledWith(
       expect.objectContaining({ collectionName: "idempotencyKeys", id: "start-test-job:user-1:c1" })
+    );
+  });
+});
+
+describe("isRetriableChunkError", () => {
+  it("treats known numeric gRPC transient codes as retriable", () => {
+    expect(isRetriableChunkError({ code: 14 })).toBe(true); // UNAVAILABLE
+    expect(isRetriableChunkError({ code: 4 })).toBe(true); // DEADLINE_EXCEEDED
+    expect(isRetriableChunkError({ code: 10 })).toBe(true); // ABORTED
+    expect(isRetriableChunkError({ code: 13 })).toBe(true); // INTERNAL
+  });
+
+  it("treats the equivalent HttpsError string codes as retriable", () => {
+    expect(isRetriableChunkError({ code: "unavailable" })).toBe(true);
+    expect(isRetriableChunkError({ code: "deadline-exceeded" })).toBe(true);
+  });
+
+  it("treats permanent codes, and errors with no code at all, as not retriable", () => {
+    expect(isRetriableChunkError({ code: "permission-denied" })).toBe(false);
+    expect(isRetriableChunkError({ code: "not-found" })).toBe(false);
+    expect(isRetriableChunkError(new Error("plain error"))).toBe(false);
+    expect(isRetriableChunkError(null)).toBe(false);
+  });
+});
+
+describe("handleChunkFailure", () => {
+  it("retries a transient error under the cap: releases the lease and bumps retryCount without failing the job", async () => {
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () => makeJob({ leaseOwner: "lease-1", retryCount: 2 }),
+    });
+
+    const retried = await handleChunkFailure(
+      "job-1",
+      "lease-1",
+      makeJob({ leaseOwner: "lease-1", retryCount: 2 }),
+      { code: 14 },
+      "unavailable"
+    );
+
+    expect(retried).toBe(true);
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        retryCount: { __increment: 1 },
+        lastError: "unavailable",
+        leaseOwner: null,
+        leaseExpiresAt: null,
+      })
+    );
+    expect(mockTransactionUpdate).not.toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ status: "failed" })
+    );
+  });
+
+  it("permanently fails once the retry cap is exhausted, even for a transient-looking error", async () => {
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () => makeJob({ leaseOwner: "lease-1", retryCount: MAX_CHUNK_RETRIES - 1 }),
+    });
+
+    const retried = await handleChunkFailure(
+      "job-1",
+      "lease-1",
+      makeJob({ leaseOwner: "lease-1", retryCount: MAX_CHUNK_RETRIES - 1 }),
+      { code: 14 },
+      "unavailable"
+    );
+
+    expect(retried).toBe(false);
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ status: "failed", error: "unavailable" })
+    );
+  });
+
+  it("fails immediately for a non-retriable error, regardless of retry count", async () => {
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () => makeJob({ leaseOwner: "lease-1", retryCount: 0 }),
+    });
+
+    const retried = await handleChunkFailure(
+      "job-1",
+      "lease-1",
+      makeJob({ leaseOwner: "lease-1", retryCount: 0 }),
+      { code: "permission-denied" },
+      "Only the campaign DM can do this."
+    );
+
+    expect(retried).toBe(false);
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ status: "failed", error: "Only the campaign DM can do this." })
     );
   });
 });

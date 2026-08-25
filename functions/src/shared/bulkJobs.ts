@@ -31,6 +31,8 @@ export interface BulkJobRecord {
   leaseExpiresAt: number | null;
   error: string | null;
   idempotencyKey: string | null;
+  retryCount: number;
+  lastError: string | null;
   createdAt: number;
   updatedAt: number;
 }
@@ -57,6 +59,8 @@ export async function createBulkJob(
     leaseExpiresAt: null,
     error: null,
     idempotencyKey,
+    retryCount: 0,
+    lastError: null,
     createdAt: now,
     updatedAt: now,
   };
@@ -125,6 +129,8 @@ export async function advanceJobCheckpoint(
       processedCount: FieldValue.increment(processedIncrement),
       leaseOwner: null,
       leaseExpiresAt: null,
+      retryCount: 0,
+      lastError: null,
       updatedAt: Date.now(),
     });
   }, { maxAttempts: 5 });
@@ -166,4 +172,68 @@ export async function failJob(jobId: string, leaseId: string, error: string): Pr
       transaction.delete(db.collection(IDEMPOTENCY_COLLECTION).doc(job.idempotencyKey));
     }
   }, { maxAttempts: 5 });
+}
+
+// A chunk failure is retried automatically, rather than permanently failing
+// the job, when it looks transient (a Firestore/gRPC blip) and the job
+// hasn't already used up its retry budget. Everything else, a deliberate
+// HttpsError like permission-denied/not-found/failed-precondition, or any
+// error with no recognisable code, is treated as permanent, matching the
+// behaviour before retries existed.
+export const MAX_CHUNK_RETRIES = 5;
+
+// Numeric: raw @google-cloud/firestore/gRPC errors (batch.commit, transactions,
+// plain reads) carry a numeric status code. String: HttpsError uses the
+// equivalent kebab-case names for the same statuses.
+const RETRIABLE_NUMERIC_CODES = new Set([4, 10, 13, 14]); // DEADLINE_EXCEEDED, ABORTED, INTERNAL, UNAVAILABLE
+const RETRIABLE_STRING_CODES = new Set(["deadline-exceeded", "aborted", "internal", "unavailable"]);
+
+export function isRetriableChunkError(error: unknown): boolean {
+  const code = (error as { code?: unknown } | null)?.code;
+  if (typeof code === "number") return RETRIABLE_NUMERIC_CODES.has(code);
+  if (typeof code === "string") return RETRIABLE_STRING_CODES.has(code);
+  return false;
+}
+
+async function releaseLeaseForRetry(jobId: string, leaseId: string, error: string): Promise<void> {
+  const db = getFirestore();
+  const ref = db.collection(BULK_JOBS_COLLECTION).doc(jobId);
+  await db.runTransaction(async (transaction) => {
+    const snapshot = await transaction.get(ref);
+    if (!snapshot.exists) return;
+    const current = snapshot.data() as BulkJobRecord;
+    if (current.leaseOwner !== leaseId) return;
+    transaction.update(ref, {
+      retryCount: FieldValue.increment(1),
+      lastError: error,
+      leaseOwner: null,
+      leaseExpiresAt: null,
+      updatedAt: Date.now(),
+    });
+  }, { maxAttempts: 5 });
+}
+
+/**
+ * Called from a process*Chunk operation's catch block in place of calling
+ * failJob directly. A retriable-looking error under the retry cap releases
+ * the lease and leaves the job resumable (checkpoint untouched) instead of
+ * failing it, returning true so the caller can return its normal in-progress
+ * result rather than throwing. Anything else, a non-retriable error or one
+ * that's exhausted the cap, permanently fails the job via failJob (unchanged)
+ * and returns false so the caller rethrows exactly as before this existed.
+ */
+export async function handleChunkFailure(
+  jobId: string,
+  leaseId: string,
+  job: BulkJobRecord,
+  error: unknown,
+  message: string
+): Promise<boolean> {
+  if (isRetriableChunkError(error) && job.retryCount + 1 < MAX_CHUNK_RETRIES) {
+    await releaseLeaseForRetry(jobId, leaseId, message);
+    return true;
+  }
+
+  await failJob(jobId, leaseId, message);
+  return false;
 }
