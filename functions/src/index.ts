@@ -11,12 +11,16 @@ initializeApp();
 import { onCall } from "firebase-functions/v2/https";
 import { protectedCallable } from "./shared/protectedCallable.js";
 import { withMinimumDuration } from "./shared/timingSafety.js";
-import { recoveryCodeHmacSecret } from "./shared/secrets.js";
+import { recoveryCodeHmacSecret, identityCodeHmacSecret } from "./shared/secrets.js";
 import { hashRecoveryCode, hashForKey } from "./shared/recoveryCode.js";
 import {
   registerRecoveryCode as runRegisterRecoveryCode,
   type RegisterRecoveryCodeInput,
 } from "./operations/registerRecoveryCode.js";
+import {
+  registerIdentityCode as runRegisterIdentityCode,
+  type RegisterIdentityCodeInput,
+} from "./operations/registerIdentityCode.js";
 import {
   lookupRecoveryCode as runLookupRecoveryCode,
   type LookupRecoveryCodeInput,
@@ -111,6 +115,24 @@ export const registerRecoveryCode = onCall<RegisterRecoveryCodeInput>(
       ],
       handler: ({ uid, data }) => runRegisterRecoveryCode(data, uid, recoveryCodeHmacSecret.value()),
     })
+);
+
+export const registerIdentityCode = onCall<RegisterIdentityCodeInput>(
+  { secrets: [identityCodeHmacSecret], timeoutSeconds: 30 },
+  (request) => {
+    const callerUid = request.auth?.uid ?? "anonymous";
+    return protectedCallable<RegisterIdentityCodeInput, { code: string }>({
+      request,
+      operation: "register-identity-code",
+      allowedFields: ["role"],
+      requiredFields: ["role"],
+      fieldShapes: { role: { enum: ["dm", "player"] } },
+      rateLimits: [
+        { key: `register-identity-code:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 },
+      ],
+      handler: ({ uid, data }) => runRegisterIdentityCode(data, uid, identityCodeHmacSecret.value()),
+    });
+  }
 );
 
 export const lookupRecoveryCode = onCall<LookupRecoveryCodeInput>(
@@ -245,7 +267,7 @@ export const forceAssignCharacter = onCall<ForceAssignCharacterInput>(
 );
 
 export const startIdentityReclaimJob = onCall<StartIdentityReclaimJobInput>(
-  { timeoutSeconds: 30 },
+  { secrets: [identityCodeHmacSecret], timeoutSeconds: 30 },
   (request) => {
     const callerUid = request.auth?.uid ?? "anonymous";
     const codeHash = hashForKey(request.data?.code ?? "");
@@ -265,7 +287,8 @@ export const startIdentityReclaimJob = onCall<StartIdentityReclaimJobInput>(
         { key: `start-identity-reclaim-job:code:${codeHash}`, limit: 5, windowMs: 15 * 60 * 1000 },
       ],
       idempotencyKey,
-      handler: ({ uid, data }) => runStartIdentityReclaimJob(data, uid, idempotencyKey),
+      handler: ({ uid, data }) =>
+        runStartIdentityReclaimJob(data, uid, idempotencyKey, identityCodeHmacSecret.value()),
     });
   }
 );
@@ -288,23 +311,26 @@ export const processIdentityReclaimChunk = onCall<ProcessIdentityReclaimChunkInp
   }
 );
 
-export const linkDevice = onCall<LinkDeviceInput>({ timeoutSeconds: 30 }, (request) => {
-  const callerUid = request.auth?.uid ?? "anonymous";
-  const codeHash = hashForKey(request.data?.code ?? "");
+export const linkDevice = onCall<LinkDeviceInput>(
+  { secrets: [identityCodeHmacSecret], timeoutSeconds: 30 },
+  (request) => {
+    const callerUid = request.auth?.uid ?? "anonymous";
+    const codeHash = hashForKey(request.data?.code ?? "");
 
-  return protectedCallable<LinkDeviceInput, void>({
-    request,
-    operation: "link-device",
-    allowedFields: ["code"],
-    requiredFields: ["code"],
-    fieldShapes: { code: "string" },
-    rateLimits: [
-      { key: `link-device:user:${callerUid}`, limit: 20, windowMs: 15 * 60 * 1000 },
-      { key: `link-device:code:${codeHash}`, limit: 5, windowMs: 15 * 60 * 1000 },
-    ],
-    handler: ({ uid, data }) => runLinkDevice(data, uid),
-  });
-});
+    return protectedCallable<LinkDeviceInput, void>({
+      request,
+      operation: "link-device",
+      allowedFields: ["code"],
+      requiredFields: ["code"],
+      fieldShapes: { code: "string" },
+      rateLimits: [
+        { key: `link-device:user:${callerUid}`, limit: 20, windowMs: 15 * 60 * 1000 },
+        { key: `link-device:code:${codeHash}`, limit: 5, windowMs: 15 * 60 * 1000 },
+      ],
+      handler: ({ uid, data }) => runLinkDevice(data, uid, identityCodeHmacSecret.value()),
+    });
+  }
+);
 
 export const startCharacterDeletionJob = onCall<StartCharacterDeletionJobInput>(
   { timeoutSeconds: 30 },

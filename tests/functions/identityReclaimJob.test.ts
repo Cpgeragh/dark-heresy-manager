@@ -38,12 +38,12 @@ describe("Functions: identity reclaim job", () => {
   it(
     "migrates a DM campaign and a member campaign's owned characters across chunked calls, and transfers the identity documents immediately",
     async () => {
-      const oldUid = "old-identity-uid";
-      await adminDb.collection("identityRecovery").doc("DH-RCLM-0001").set({
-        uid: oldUid,
-        role: "dm",
-      });
-      await adminDb.collection("identitySecret").doc(oldUid).set({ code: "DH-RCLM-0001" });
+      const oldUid = await signInTestUser();
+      const registerIdentityCode = httpsCallable<{ role: "dm" | "player" }, { code: string }>(
+        getTestFunctions(),
+        "registerIdentityCode"
+      );
+      const { data: registered } = await registerIdentityCode({ role: "dm" });
 
       const dmCampaignRef = adminDb.collection("campaigns").doc();
       await dmCampaignRef.set({ dmId: oldUid, name: "DM Campaign", memberIds: [] });
@@ -62,7 +62,7 @@ describe("Functions: identity reclaim job", () => {
         { code: string },
         { jobId: string; totalCount: number; role: string }
       >(getTestFunctions(), "startIdentityReclaimJob");
-      const { data: started } = await startJob({ code: "DH-RCLM-0001" });
+      const { data: started } = await startJob({ code: registered.code });
 
       expect(started.role).toBe("dm");
       expect(started.totalCount).toBe(3);
@@ -78,11 +78,9 @@ describe("Functions: identity reclaim job", () => {
 
       expect((await characterRef.get()).data()?.userId).toBe(newUid);
 
-      const recoverySnapshot = await adminDb.collection("identityRecovery").doc("DH-RCLM-0001").get();
-      expect(recoverySnapshot.data()?.uid).toBe(newUid);
       expect(
         (await adminDb.collection("identitySecret").doc(newUid).get()).data()?.code
-      ).toBe("DH-RCLM-0001");
+      ).toBe(registered.code);
       expect((await adminDb.collection("identitySecret").doc(oldUid).get()).exists).toBe(false);
     },
     15000

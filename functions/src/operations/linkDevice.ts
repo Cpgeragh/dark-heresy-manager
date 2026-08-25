@@ -1,33 +1,37 @@
 // functions/src/operations/linkDevice.ts
 //
-// Stage 3.3: links a secondary device to a primary account using an
-// identity recovery code, same verification as reclaimIdentity but no
-// ownership migration, just the link record.
+// Stage 3.3, updated in Stage 5.4c-i: links a secondary device to a primary
+// account using an identity recovery code. Looks the code up by its
+// HMAC-derived hash in identityRecoveryIndex — the same trust boundary
+// claimCharacter already relies on for character codes, a hash match alone
+// is proof the caller knew the real code, so the old second identitySecret
+// plaintext cross-check is no longer needed and has been removed.
 
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
+import { hashRecoveryCode } from "../shared/recoveryCode.js";
 
 export interface LinkDeviceInput {
   code: string;
 }
 
-export async function linkDevice(input: LinkDeviceInput, callerUid: string): Promise<void> {
+export async function linkDevice(
+  input: LinkDeviceInput,
+  callerUid: string,
+  hmacSecret: string
+): Promise<void> {
   const db = getFirestore();
   const code = input.code.trim();
+  const hash = hashRecoveryCode(code, hmacSecret);
 
-  const recoverySnapshot = await db.collection("identityRecovery").doc(code).get();
-  if (!recoverySnapshot.exists) {
+  const indexSnapshot = await db.collection("identityRecoveryIndex").doc(hash).get();
+  if (!indexSnapshot.exists) {
     throw new HttpsError("not-found", "Recovery code not found.");
   }
 
-  const primaryUid = recoverySnapshot.data()?.uid as string;
+  const primaryUid = indexSnapshot.data()?.uid as string;
   if (primaryUid === callerUid) {
     throw new HttpsError("failed-precondition", "This code belongs to this device.");
-  }
-
-  const secretSnapshot = await db.collection("identitySecret").doc(primaryUid).get();
-  if (!secretSnapshot.exists || secretSnapshot.data()?.code !== code) {
-    throw new HttpsError("not-found", "Recovery code not found.");
   }
 
   await db.collection("userLinks").doc(callerUid).set({

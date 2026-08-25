@@ -6,6 +6,7 @@ import {
 } from "../../src/operations/identityReclaimJob";
 import type { BulkJobRecord } from "../../src/shared/bulkJobs";
 import * as identityMigration from "../../src/shared/identityMigration";
+import { hashRecoveryCode } from "../../src/shared/recoveryCode";
 
 const {
   mockCreateBulkJob,
@@ -14,8 +15,8 @@ const {
   mockCompleteJob,
   mockFailJob,
   mockHandleChunkFailure,
-  mockRecoveryGet,
-  mockSecretGet,
+  mockIndexGet,
+  mockIndexDoc,
   mockBatchUpdate,
   mockBatchSet,
   mockBatchDelete,
@@ -23,16 +24,15 @@ const {
   mockCollection,
   mockBatch,
 } = vi.hoisted(() => {
-  const mockRecoveryGet = vi.fn();
-  const mockSecretGet = vi.fn();
+  const mockIndexGet = vi.fn();
+  const mockIndexDoc = vi.fn((id: string) => ({ id, get: mockIndexGet }));
   const mockBatchUpdate = vi.fn();
   const mockBatchSet = vi.fn();
   const mockBatchDelete = vi.fn();
   const mockBatchCommit = vi.fn().mockResolvedValue(undefined);
 
   const mockCollection = vi.fn((name: string) => {
-    if (name === "identityRecovery") return { doc: (id: string) => ({ id, get: mockRecoveryGet }) };
-    if (name === "identitySecret") return { doc: (id: string) => ({ id, get: mockSecretGet }) };
+    if (name === "identityRecoveryIndex") return { doc: mockIndexDoc };
     return { doc: (id: string) => ({ id }) };
   });
 
@@ -50,8 +50,8 @@ const {
     mockCompleteJob: vi.fn(),
     mockFailJob: vi.fn(),
     mockHandleChunkFailure: vi.fn(),
-    mockRecoveryGet,
-    mockSecretGet,
+    mockIndexGet,
+    mockIndexDoc,
     mockBatchUpdate,
     mockBatchSet,
     mockBatchDelete,
@@ -78,6 +78,9 @@ vi.mock("../../src/shared/identityMigration", () => ({
   computeOwnershipMigrationPlan: vi.fn(),
   migrateCampaignOwnership: vi.fn(),
 }));
+
+const SECRET = "secret";
+const CODE = "DH-SAME-0000";
 
 function makeJob(overrides: Partial<BulkJobRecord> = {}): BulkJobRecord {
   return {
@@ -110,47 +113,38 @@ describe("startIdentityReclaimJob", () => {
   });
 
   it("rejects when the code does not resolve", async () => {
-    mockRecoveryGet.mockResolvedValue({ exists: false });
+    mockIndexGet.mockResolvedValue({ exists: false });
 
-    await expect(startIdentityReclaimJob({ code: "DH-NOPE-0000" }, "new-uid", "idem-key")).rejects.toThrow(
-      expect.objectContaining({ code: "not-found" })
-    );
+    await expect(
+      startIdentityReclaimJob({ code: "DH-NOPE-0000" }, "new-uid", "idem-key", SECRET)
+    ).rejects.toThrow(expect.objectContaining({ code: "not-found" }));
   });
 
   it("rejects reclaiming your own already-registered code", async () => {
-    mockRecoveryGet.mockResolvedValue({ exists: true, data: () => ({ uid: "new-uid" }) });
+    mockIndexGet.mockResolvedValue({ exists: true, data: () => ({ uid: "new-uid" }) });
 
-    await expect(startIdentityReclaimJob({ code: "DH-SAME-0000" }, "new-uid", "idem-key")).rejects.toThrow(
-      expect.objectContaining({ code: "failed-precondition" })
-    );
-  });
-
-  it("rejects when the secret doesn't match the given code", async () => {
-    mockRecoveryGet.mockResolvedValue({ exists: true, data: () => ({ uid: "old-uid" }) });
-    mockSecretGet.mockResolvedValue({ exists: true, data: () => ({ code: "DH-DIFF-0000" }) });
-
-    await expect(startIdentityReclaimJob({ code: "DH-SAME-0000" }, "new-uid", "idem-key")).rejects.toThrow(
-      expect.objectContaining({ code: "not-found" })
-    );
+    await expect(
+      startIdentityReclaimJob({ code: CODE }, "new-uid", "idem-key", SECRET)
+    ).rejects.toThrow(expect.objectContaining({ code: "failed-precondition" }));
   });
 
   it("transfers the identity documents immediately and creates a job on success", async () => {
-    mockRecoveryGet.mockResolvedValue({ exists: true, data: () => ({ uid: "old-uid", role: "dm" }) });
-    mockSecretGet.mockResolvedValue({ exists: true, data: () => ({ code: "DH-SAME-0000" }) });
+    mockIndexGet.mockResolvedValue({ exists: true, data: () => ({ uid: "old-uid", role: "dm" }) });
     vi.mocked(identityMigration.computeOwnershipMigrationPlan).mockResolvedValue({
       campaigns: [{ campaignId: "c1", role: "dm" }],
       totalWriteCount: 1,
     });
     mockCreateBulkJob.mockResolvedValue("job-1");
 
-    const result = await startIdentityReclaimJob({ code: "DH-SAME-0000" }, "new-uid", "idem-key");
+    const result = await startIdentityReclaimJob({ code: CODE }, "new-uid", "idem-key", SECRET);
 
     expect(result).toEqual({ jobId: "job-1", totalCount: 1, role: "dm" });
-    expect(mockBatchUpdate).toHaveBeenCalledWith(expect.objectContaining({ id: "DH-SAME-0000" }), {
+    const expectedHash = hashRecoveryCode(CODE, SECRET);
+    expect(mockBatchUpdate).toHaveBeenCalledWith(expect.objectContaining({ id: expectedHash }), {
       uid: "new-uid",
     });
     expect(mockBatchSet).toHaveBeenCalledWith(expect.objectContaining({ id: "new-uid" }), {
-      code: "DH-SAME-0000",
+      code: CODE,
     });
     expect(mockBatchDelete).toHaveBeenCalledWith(expect.objectContaining({ id: "old-uid" }));
     expect(mockBatchCommit).toHaveBeenCalledOnce();
@@ -164,13 +158,20 @@ describe("startIdentityReclaimJob", () => {
   });
 
   it("defaults to the player role for codes registered before roles were tracked", async () => {
-    mockRecoveryGet.mockResolvedValue({ exists: true, data: () => ({ uid: "old-uid" }) });
-    mockSecretGet.mockResolvedValue({ exists: true, data: () => ({ code: "DH-SAME-0000" }) });
+    mockIndexGet.mockResolvedValue({ exists: true, data: () => ({ uid: "old-uid" }) });
     mockCreateBulkJob.mockResolvedValue("job-1");
 
-    const result = await startIdentityReclaimJob({ code: "DH-SAME-0000" }, "new-uid", "idem-key");
+    const result = await startIdentityReclaimJob({ code: CODE }, "new-uid", "idem-key", SECRET);
 
     expect(result.role).toBe("player");
+  });
+
+  it("resolves the target by the code's HMAC hash, not the raw code", async () => {
+    mockIndexGet.mockResolvedValue({ exists: false });
+
+    await startIdentityReclaimJob({ code: CODE }, "new-uid", "idem-key", SECRET).catch(() => {});
+
+    expect(mockIndexDoc).toHaveBeenCalledWith(hashRecoveryCode(CODE, SECRET));
   });
 });
 

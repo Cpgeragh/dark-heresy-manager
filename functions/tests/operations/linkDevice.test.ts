@@ -1,14 +1,14 @@
 // functions/tests/operations/linkDevice.test.ts
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { linkDevice } from "../../src/operations/linkDevice";
+import { hashRecoveryCode } from "../../src/shared/recoveryCode";
 
-const mockRecoveryGet = vi.fn();
-const mockSecretGet = vi.fn();
+const mockIndexGet = vi.fn();
+const mockIndexDoc = vi.fn(() => ({ get: mockIndexGet }));
 const mockSet = vi.fn();
 
 const mockCollection = vi.fn((name: string) => {
-  if (name === "identityRecovery") return { doc: () => ({ get: mockRecoveryGet }) };
-  if (name === "identitySecret") return { doc: () => ({ get: mockSecretGet }) };
+  if (name === "identityRecoveryIndex") return { doc: mockIndexDoc };
   if (name === "userLinks") return { doc: () => ({ set: mockSet }) };
   throw new Error(`Unexpected collection: ${name}`);
 });
@@ -18,6 +18,9 @@ vi.mock("firebase-admin/firestore", () => ({
   FieldValue: { serverTimestamp: () => "server-timestamp" },
 }));
 
+const SECRET = "secret";
+const CODE = "DH-SAME-0000";
+
 describe("linkDevice", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -25,36 +28,34 @@ describe("linkDevice", () => {
   });
 
   it("rejects when the code does not resolve", async () => {
-    mockRecoveryGet.mockResolvedValue({ exists: false });
+    mockIndexGet.mockResolvedValue({ exists: false });
 
-    await expect(linkDevice({ code: "DH-NOPE-0000" }, "device-uid")).rejects.toThrow(
+    await expect(linkDevice({ code: "DH-NOPE-0000" }, "device-uid", SECRET)).rejects.toThrow(
       expect.objectContaining({ code: "not-found" })
     );
   });
 
   it("rejects linking a device to its own account", async () => {
-    mockRecoveryGet.mockResolvedValue({ exists: true, data: () => ({ uid: "device-uid" }) });
+    mockIndexGet.mockResolvedValue({ exists: true, data: () => ({ uid: "device-uid" }) });
 
-    await expect(linkDevice({ code: "DH-SAME-0000" }, "device-uid")).rejects.toThrow(
+    await expect(linkDevice({ code: CODE }, "device-uid", SECRET)).rejects.toThrow(
       expect.objectContaining({ code: "failed-precondition" })
     );
   });
 
-  it("rejects when the secret doesn't match the given code", async () => {
-    mockRecoveryGet.mockResolvedValue({ exists: true, data: () => ({ uid: "primary-uid" }) });
-    mockSecretGet.mockResolvedValue({ exists: true, data: () => ({ code: "DH-DIFF-0000" }) });
-
-    await expect(linkDevice({ code: "DH-SAME-0000" }, "device-uid")).rejects.toThrow(
-      expect.objectContaining({ code: "not-found" })
-    );
-  });
-
   it("writes the link record on success", async () => {
-    mockRecoveryGet.mockResolvedValue({ exists: true, data: () => ({ uid: "primary-uid" }) });
-    mockSecretGet.mockResolvedValue({ exists: true, data: () => ({ code: "DH-SAME-0000" }) });
+    mockIndexGet.mockResolvedValue({ exists: true, data: () => ({ uid: "primary-uid" }) });
 
-    await linkDevice({ code: "DH-SAME-0000" }, "device-uid");
+    await linkDevice({ code: CODE }, "device-uid", SECRET);
 
     expect(mockSet).toHaveBeenCalledWith({ primaryUid: "primary-uid", linkedAt: "server-timestamp" });
+  });
+
+  it("resolves the target by the code's HMAC hash, not the raw code", async () => {
+    mockIndexGet.mockResolvedValue({ exists: false });
+
+    await linkDevice({ code: CODE }, "device-uid", SECRET).catch(() => {});
+
+    expect(mockIndexDoc).toHaveBeenCalledWith(hashRecoveryCode(CODE, SECRET));
   });
 });

@@ -19,16 +19,16 @@ describe("Functions: linkDevice", () => {
   it(
     "links a second device to the primary account identified by the code",
     async () => {
-      const primaryUid = "primary-account-uid";
-      await adminDb.collection("identityRecovery").doc("DH-LINK-0001").set({
-        uid: primaryUid,
-        role: "player",
-      });
-      await adminDb.collection("identitySecret").doc(primaryUid).set({ code: "DH-LINK-0001" });
+      const primaryUid = await signInTestUser();
+      const registerIdentityCode = httpsCallable<{ role: "dm" | "player" }, { code: string }>(
+        getTestFunctions(),
+        "registerIdentityCode"
+      );
+      const { data: registered } = await registerIdentityCode({ role: "player" });
 
       const deviceUid = await signInTestUser();
       const linkDevice = httpsCallable<{ code: string }, void>(getTestFunctions(), "linkDevice");
-      await linkDevice({ code: "DH-LINK-0001" });
+      await linkDevice({ code: registered.code });
 
       const linkSnapshot = await adminDb.collection("userLinks").doc(deviceUid).get();
       expect(linkSnapshot.data()?.primaryUid).toBe(primaryUid);
@@ -43,6 +43,27 @@ describe("Functions: linkDevice", () => {
       const linkDevice = httpsCallable(getTestFunctions(), "linkDevice");
 
       await expect(linkDevice({ code: "DH-0000-0000" })).rejects.toMatchObject({
+        code: "functions/not-found",
+      });
+    },
+    15000
+  );
+
+  it(
+    "rejects a code that has already been rotated away",
+    async () => {
+      await signInTestUser();
+      const registerIdentityCode = httpsCallable<{ role: "dm" | "player" }, { code: string }>(
+        getTestFunctions(),
+        "registerIdentityCode"
+      );
+      const { data: first } = await registerIdentityCode({ role: "player" });
+      await registerIdentityCode({ role: "player" });
+
+      await signInTestUser();
+      const linkDevice = httpsCallable(getTestFunctions(), "linkDevice");
+
+      await expect(linkDevice({ code: first.code })).rejects.toMatchObject({
         code: "functions/not-found",
       });
     },

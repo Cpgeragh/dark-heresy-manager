@@ -5,13 +5,19 @@
 // actually recover an account past that point. Replaced with a resumable
 // bulkJobs.ts job, chunking the ownership migration the same way
 // character/campaign deletion already do. The identity documents
-// (identityRecovery/identitySecret/users.onboarded) transfer immediately in
-// start, before the job is created — a second reclaim attempt on the same
-// code while a job is still mid-flight then chains onto the new owner
-// instead of racing it for the same campaigns/characters.
+// (identityRecoveryIndex/identitySecret/users.onboarded) transfer
+// immediately in start, before the job is created — a second reclaim
+// attempt on the same code while a job is still mid-flight then chains onto
+// the new owner instead of racing it for the same campaigns/characters.
+//
+// Stage 5.4c-i: the code lookup moved from the raw-code-keyed
+// identityRecovery collection to the HMAC-hashed identityRecoveryIndex —
+// same trust boundary claimCharacter already relies on, a hash match alone
+// is proof the caller knew the real code.
 
 import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
+import { hashRecoveryCode } from "../shared/recoveryCode.js";
 import {
   createBulkJob,
   acquireJobLease,
@@ -54,17 +60,20 @@ export interface ProcessIdentityReclaimChunkResult {
 export async function startIdentityReclaimJob(
   input: StartIdentityReclaimJobInput,
   callerUid: string,
-  idempotencyKey: string | null
+  idempotencyKey: string | null,
+  hmacSecret: string
 ): Promise<{ jobId: string; totalCount: number; role: "dm" | "player" }> {
   const db = getFirestore();
   const code = input.code.trim();
+  const hash = hashRecoveryCode(code, hmacSecret);
 
-  const recoverySnapshot = await db.collection("identityRecovery").doc(code).get();
-  if (!recoverySnapshot.exists) {
+  const indexRef = db.collection("identityRecoveryIndex").doc(hash);
+  const indexSnapshot = await indexRef.get();
+  if (!indexSnapshot.exists) {
     throw new HttpsError("not-found", "Recovery code not found.");
   }
 
-  const { uid: oldUid, role } = recoverySnapshot.data() as {
+  const { uid: oldUid, role } = indexSnapshot.data() as {
     uid: string;
     role?: "dm" | "player";
   };
@@ -75,15 +84,10 @@ export async function startIdentityReclaimJob(
     );
   }
 
-  const secretSnapshot = await db.collection("identitySecret").doc(oldUid).get();
-  if (!secretSnapshot.exists || secretSnapshot.data()?.code !== code) {
-    throw new HttpsError("not-found", "Recovery code not found.");
-  }
-
   const plan = await computeOwnershipMigrationPlan(db, oldUid);
 
   const transferBatch = db.batch();
-  transferBatch.update(db.collection("identityRecovery").doc(code), { uid: callerUid });
+  transferBatch.update(indexRef, { uid: callerUid });
   transferBatch.set(db.collection("identitySecret").doc(callerUid), { code });
   transferBatch.delete(db.collection("identitySecret").doc(oldUid));
   transferBatch.set(db.collection("users").doc(callerUid), { onboarded: true }, { merge: true });
