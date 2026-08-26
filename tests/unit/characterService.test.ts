@@ -16,6 +16,7 @@ const {
   mockGetDocs,
   mockRunTransaction,
   mockTransaction,
+  mockUpdateDoc,
 } = vi.hoisted(() => {
   const mockTransaction = {
     get: vi.fn(),
@@ -59,6 +60,7 @@ const {
       operation(mockTransaction)
     ),
     mockTransaction,
+    mockUpdateDoc: vi.fn().mockResolvedValue(undefined),
   };
 });
 
@@ -77,7 +79,7 @@ vi.mock("firebase/firestore", () => ({
   serverTimestamp: () => "server-timestamp",
   setDoc: vi.fn(),
   startAfter: (...args: unknown[]) => ({ type: "startAfter", args }),
-  updateDoc: vi.fn(),
+  updateDoc: (...args: unknown[]) => mockUpdateDoc(...args),
   writeBatch: () => mockBatch,
 }));
 
@@ -106,6 +108,8 @@ vi.mock("../../src/firebase/converters", () => ({
   characterDocRef: (campaignId: string, characterId: string) =>
     `character:${campaignId}:${characterId}`,
   charactersCollectionRef: (campaignId: string) => `characters-collection:${campaignId}`,
+  characterSummaryDocRef: (campaignId: string, characterId: string) =>
+    `character-summary:${campaignId}:${characterId}`,
 }));
 
 import {
@@ -120,6 +124,7 @@ import {
   registerRecoveryCode,
   releaseCharacter,
   revokeRecoveryCode,
+  updateCharacter,
 } from "../../src/services/characterService";
 import { createEmptyCharacterData } from "../../src/utils/characterFactory";
 import type { Character } from "../../src/types/Character";
@@ -137,6 +142,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   mockAuth.currentUser = { uid: "actor-1" };
   mockBatch.commit.mockResolvedValue(undefined);
+  mockUpdateDoc.mockResolvedValue(undefined);
   mockGetDoc.mockImplementation(async (reference: string) => ({
     ref: reference,
     exists: () => true,
@@ -180,6 +186,23 @@ describe("character claiming operations", () => {
 
     expect(mockCallRegisterRecoveryCode).toHaveBeenCalledOnce();
     expect(code).toBe("DH-NEWC-0DE1");
+  });
+
+  it("writes the character and its summary together in one batch", async () => {
+    mockCallRegisterRecoveryCode.mockResolvedValue({ data: { code: "DH-NEWC-0DE1" } });
+
+    await createNewCharacter("camp-1", "Brother Corvus");
+
+    expect(mockBatch.set).toHaveBeenCalledTimes(2);
+    expect(mockBatch.set).toHaveBeenCalledWith(
+      "character-summary:camp-1:new-char-id",
+      expect.objectContaining({
+        id: "new-char-id",
+        campaignId: "camp-1",
+        characterName: "Brother Corvus",
+      })
+    );
+    expect(mockBatch.commit).toHaveBeenCalledOnce();
   });
 
   it("retries registering the code up to 3 times before giving up", async () => {
@@ -464,6 +487,90 @@ describe("importCharacter", () => {
 
     expect(mockCallRegisterRecoveryCode).toHaveBeenCalledOnce();
     expect(name).toBe("Brother Corvus");
+  });
+
+  it("writes the imported character and its summary together in one batch", async () => {
+    mockCallRegisterRecoveryCode.mockResolvedValue({ data: { code: "DH-IMPC-0DE1" } });
+    const payload = createEmptyCharacterData({ campaignId: "camp-1", characterName: "Brother Corvus" });
+
+    await importCharacter("camp-1", payload);
+
+    expect(mockBatch.set).toHaveBeenCalledTimes(2);
+    expect(mockBatch.set).toHaveBeenCalledWith(
+      "character-summary:camp-1:new-char-id",
+      expect.objectContaining({
+        id: "new-char-id",
+        campaignId: "camp-1",
+        characterName: "Brother Corvus",
+      })
+    );
+    expect(mockBatch.commit).toHaveBeenCalledOnce();
+  });
+});
+
+describe("updateCharacter", () => {
+  it("writes non-summary fields directly, without touching the summary", async () => {
+    await updateCharacter("camp-1", "char-1", { experience: { ranks: [], total: 500, spent: 0 } });
+
+    expect(mockUpdateDoc).toHaveBeenCalledWith("character:camp-1:char-1", {
+      experience: { ranks: [], total: 500, spent: 0 },
+    });
+    expect(mockRunTransaction).not.toHaveBeenCalled();
+    expect(mockTransaction.set).not.toHaveBeenCalled();
+  });
+
+  it("writes a header change and the derived summary together in one transaction", async () => {
+    mockTransaction.get.mockResolvedValue({
+      exists: () => true,
+      data: () => ({
+        id: "char-1",
+        campaignId: "camp-1",
+        header: { characterName: "Old Name", playerName: "Sam" },
+        portraitUrl: "data:old",
+      }),
+    });
+
+    await updateCharacter("camp-1", "char-1", {
+      header: { characterName: "New Name", playerName: "Sam" },
+    } as Partial<Character>);
+
+    expect(mockUpdateDoc).not.toHaveBeenCalled();
+    expect(mockTransaction.update).toHaveBeenCalledWith("character:camp-1:char-1", {
+      header: { characterName: "New Name", playerName: "Sam" },
+    });
+    expect(mockTransaction.set).toHaveBeenCalledWith(
+      "character-summary:camp-1:char-1",
+      expect.objectContaining({
+        id: "char-1",
+        campaignId: "camp-1",
+        characterName: "New Name",
+        playerName: "Sam",
+        portraitUrl: "data:old",
+      })
+    );
+  });
+
+  it("writes a portrait-only change and the derived summary together in one transaction", async () => {
+    mockTransaction.get.mockResolvedValue({
+      exists: () => true,
+      data: () => ({
+        id: "char-1",
+        campaignId: "camp-1",
+        header: { characterName: "Existing Name" },
+      }),
+    });
+
+    await updateCharacter("camp-1", "char-1", { portraitUrl: "data:new" } as Partial<Character>);
+
+    expect(mockTransaction.set).toHaveBeenCalledWith(
+      "character-summary:camp-1:char-1",
+      expect.objectContaining({
+        id: "char-1",
+        campaignId: "camp-1",
+        characterName: "Existing Name",
+        portraitUrl: "data:new",
+      })
+    );
   });
 });
 

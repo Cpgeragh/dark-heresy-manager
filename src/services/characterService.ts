@@ -3,9 +3,8 @@
 import {
   getDoc,
   runTransaction,
-  setDoc,
   updateDoc,
-  addDoc,
+  writeBatch,
   collection,
   doc,
   type UpdateData,
@@ -13,9 +12,14 @@ import {
 import { httpsCallable } from "firebase/functions";
 
 import { db, auth, functions } from "../firebase";
-import { characterDocRef, charactersCollectionRef } from "../firebase/converters";
+import {
+  characterDocRef,
+  charactersCollectionRef,
+  characterSummaryDocRef,
+} from "../firebase/converters";
 
 import type { Character } from "../types/Character";
+import type { CharacterSummaryWithId } from "../types/Firestore";
 import { createEmptyCharacterData } from "../utils/characterFactory";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
 import { validateCharacterName } from "../utils/validation";
@@ -51,25 +55,44 @@ export async function loadCharacter(
 }
 
 /**
- * Save (overwrite) a full character document.
- *
- * Assumes:
- * - character.id is the Firestore document id
- * - character.campaignId matches the campaign path
- *
- * Converter will strip `id` when writing, but TypeScript still
- * wants a full Character here (which is exactly what we have).
+ * Derives the restricted character-summary shape from a full character.
+ * Never includes the Recovery Code or any other sheet data.
  */
-export async function saveCharacter(character: Character): Promise<void> {
-  if (!character.id) {
-    throw new Error("saveCharacter: Character must have an id");
-  }
-  assertCharacterPayload(character, true);
+export function computeCharacterSummary(character: Character): CharacterSummaryWithId {
+  return stripUndefined({
+    id: character.id,
+    campaignId: character.campaignId,
+    characterName: character.header.characterName,
+    playerName: character.header.playerName,
+    career: character.header.career,
+    rank: character.header.rank,
+    portraitUrl: character.portraitUrl,
+  }) as CharacterSummaryWithId;
+}
 
-  await runSingleFlight("character:save", [character.campaignId, character.id, character], () => {
-    const ref = characterDocRef(character.campaignId, character.id);
-    // Converter will ignore `id` and keep `campaignId` in the stored data.
-    return setDoc(ref, character);
+/** True when a partial character write touches a field the summary carries. */
+function touchesCharacterSummary(partial: Partial<Character>): boolean {
+  return "header" in partial || "portraitUrl" in partial;
+}
+
+/**
+ * Reads the current character, applies a partial on top, and writes both
+ * the character and its derived summary atomically. Used whenever a write
+ * touches a summary-relevant field, so the summary is never left out of
+ * date or missing required fields, regardless of what's already stored.
+ */
+export async function writeCharacterFieldsWithSummary(
+  campaignId: string,
+  characterId: string,
+  partial: Partial<Character>
+): Promise<void> {
+  const ref = characterDocRef(campaignId, characterId);
+  await runTransaction(db, async (transaction) => {
+    const snapshot = await transaction.get(ref);
+    if (!snapshot.exists()) throw new Error("Character not found.");
+    const merged = { ...snapshot.data(), ...partial } as Character;
+    transaction.update(ref, partial as UpdateData<Character>);
+    transaction.set(characterSummaryDocRef(campaignId, characterId), computeCharacterSummary(merged));
   });
 }
 
@@ -90,6 +113,9 @@ export async function updateCharacter(
   const cleanPartial = stripUndefined(partial);
   assertCharacterPayload(cleanPartial);
   await runSingleFlight("character:update", [campaignId, characterId, cleanPartial], () => {
+    if (touchesCharacterSummary(cleanPartial)) {
+      return writeCharacterFieldsWithSummary(campaignId, characterId, cleanPartial);
+    }
     const ref = characterDocRef(campaignId, characterId);
     return updateDoc(ref, cleanPartial as UpdateData<Character>);
   });
@@ -122,44 +148,6 @@ export async function reconcileCharacterSpentXp(
       return true;
     })
   );
-}
-
-/**
- * Create a new character document.
- *
- * - Caller provides everything *except* id and campaignId.
- * - Service injects campaignId.
- * - Converter strips id (we pass an empty string just to satisfy types).
- * - Firestore assigns the real id, which converter adds on read.
- */
-export async function createCharacter(
-  campaignId: string,
-  data: Omit<Character, "id" | "campaignId">
-): Promise<Character> {
-  assertFirestoreDocumentId(campaignId, "Campaign ID");
-  assertCharacterPayload({ ...data, campaignId }, true);
-  return runSingleFlight("character:create", [campaignId, data], async () => {
-    const colRef = charactersCollectionRef(campaignId);
-
-    // Build a full Character object for TypeScript,
-    // but use a dummy id; converter will strip it.
-    const toStore: Character = {
-      ...data,
-      campaignId,
-      id: "", // placeholder, ignored by converter.toFirestore
-    };
-    const docRef = await addDoc(colRef, toStore);
-
-    // Re-fetch to get the typed document (with real id)
-    const snap = await getDoc(docRef);
-    const stored = snap.data();
-
-    if (!stored) {
-      throw new Error("Failed to create character");
-    }
-
-    return stored;
-  });
 }
 
 const callClaimCharacter = httpsCallable<{ code: string }, { campaignId: string; characterId: string }>(
@@ -367,7 +355,13 @@ export async function importCharacter(
     // Imported JSON is deliberately written through a plain reference because it is
     // only structurally known after import validation, not as a compile-time Character.
     const charRef = doc(collection(db, "campaigns", campaignId, "characters"));
-    await setDoc(charRef, importData);
+    const batch = writeBatch(db);
+    batch.set(charRef, importData);
+    batch.set(
+      characterSummaryDocRef(campaignId, charRef.id),
+      computeCharacterSummary({ ...importData, id: charRef.id } as Character)
+    );
+    await batch.commit();
 
     await registerRecoveryCodeAfterCreate(campaignId, charRef.id);
     return importedName.trim();
@@ -394,7 +388,10 @@ export async function createNewCharacter(campaignId: string, name: string): Prom
     const charRef = doc(charactersCollectionRef(campaignId));
     const character: Character = { ...characterData, id: charRef.id };
     assertCharacterPayload(character, true);
-    await setDoc(charRef, character);
+    const batch = writeBatch(db);
+    batch.set(charRef, character);
+    batch.set(characterSummaryDocRef(campaignId, charRef.id), computeCharacterSummary(character));
+    await batch.commit();
 
     return registerRecoveryCodeAfterCreate(campaignId, charRef.id);
   });
