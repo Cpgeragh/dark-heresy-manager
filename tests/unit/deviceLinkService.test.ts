@@ -1,23 +1,26 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockDeleteDoc, mockDoc, mockGetDoc, mockServerTimestamp, mockSetDoc } = vi.hoisted(() => ({
+const { mockDeleteDoc, mockDoc, mockCallLinkDevice } = vi.hoisted(() => ({
   mockDeleteDoc: vi.fn(),
   mockDoc: vi.fn((...args: unknown[]) => args.slice(1).join("/")),
-  mockGetDoc: vi.fn(),
-  mockServerTimestamp: vi.fn(() => "server-timestamp"),
-  mockSetDoc: vi.fn(),
+  mockCallLinkDevice: vi.fn(),
 }));
 
 vi.mock("firebase/firestore", () => ({
   deleteDoc: (...args: unknown[]) => mockDeleteDoc(...args),
   doc: (...args: unknown[]) => mockDoc(...args),
-  getDoc: (...args: unknown[]) => mockGetDoc(...args),
-  serverTimestamp: () => mockServerTimestamp(),
-  setDoc: (...args: unknown[]) => mockSetDoc(...args),
+}));
+
+vi.mock("firebase/functions", () => ({
+  httpsCallable: vi.fn((_functions: unknown, name: string) => {
+    if (name === "linkDevice") return mockCallLinkDevice;
+    throw new Error(`Unexpected callable: ${name}`);
+  }),
 }));
 
 vi.mock("../../src/firebase", () => ({
   db: "mock-db",
+  functions: "mock-functions",
 }));
 
 import { linkDeviceToAccount, unlinkDevice } from "../../src/services/deviceLinkService";
@@ -25,71 +28,42 @@ import { linkDeviceToAccount, unlinkDevice } from "../../src/services/deviceLink
 beforeEach(() => {
   vi.clearAllMocks();
   mockDeleteDoc.mockResolvedValue(undefined);
-  mockGetDoc.mockResolvedValue({ exists: () => true, data: () => ({ uid: "primary-uid" }) });
-  mockSetDoc.mockResolvedValue(undefined);
+  mockCallLinkDevice.mockResolvedValue({ data: undefined });
 });
 
 describe("device link operations", () => {
-  it("reuses one recovery lookup for a duplicate in-flight device link", async () => {
+  it("reuses one in-flight call for a duplicate device-link attempt", async () => {
     let finish!: (value: unknown) => void;
     const pending = new Promise((resolve) => {
       finish = resolve;
     });
-    mockGetDoc.mockReturnValueOnce(pending);
+    mockCallLinkDevice.mockReturnValueOnce(pending);
 
     const first = linkDeviceToAccount("duplicate-device", "DH-VALI-CODE");
     const duplicate = linkDeviceToAccount("duplicate-device", "DH-VALI-CODE");
     await Promise.resolve();
 
-    expect(mockGetDoc).toHaveBeenCalledOnce();
-    finish({ exists: () => true, data: () => ({ uid: "primary-uid" }) });
+    expect(mockCallLinkDevice).toHaveBeenCalledOnce();
+    finish({ data: undefined });
     await Promise.all([first, duplicate]);
-    expect(mockSetDoc).toHaveBeenCalledTimes(2);
   });
 
-  it("rejects a malformed recovery code before reading Firestore", async () => {
+  it("rejects a malformed recovery code before calling the Function", async () => {
     await expect(linkDeviceToAccount("device-uid", "not-a-code")).rejects.toThrow("DH-XXXX-YYYY");
-    expect(mockGetDoc).not.toHaveBeenCalled();
+    expect(mockCallLinkDevice).not.toHaveBeenCalled();
   });
 
-  it("rejects an unknown recovery code", async () => {
-    mockGetDoc.mockResolvedValue({ exists: () => false });
-
-    await expect(linkDeviceToAccount("device-uid", "DH-UNKN-OWN0")).rejects.toThrow(
-      "No account found with that recovery code."
-    );
-    expect(mockSetDoc).not.toHaveBeenCalled();
-  });
-
-  it("rejects an attempt to link a device to itself", async () => {
-    mockGetDoc.mockResolvedValue({ exists: () => true, data: () => ({ uid: "device-uid" }) });
-
-    await expect(linkDeviceToAccount("device-uid", "DH-SELF-CODE")).rejects.toThrow(
-      "This recovery code belongs to this device."
-    );
-  });
-
-  it("creates the proof and link, then removes the proof", async () => {
+  it("calls linkDevice with the trimmed code", async () => {
     await linkDeviceToAccount("device-uid", "  DH-VALI-CODE  ");
 
-    expect(mockGetDoc).toHaveBeenCalledWith("identityRecovery/DH-VALI-CODE");
-    expect(mockSetDoc).toHaveBeenNthCalledWith(1, "linkProofs/device-uid", {
-      primaryUid: "primary-uid",
-      code: "DH-VALI-CODE",
-    });
-    expect(mockSetDoc).toHaveBeenNthCalledWith(2, "userLinks/device-uid", {
-      primaryUid: "primary-uid",
-      linkedAt: "server-timestamp",
-    });
-    expect(mockDeleteDoc).toHaveBeenCalledWith("linkProofs/device-uid");
+    expect(mockCallLinkDevice).toHaveBeenCalledWith({ code: "DH-VALI-CODE" });
   });
 
-  it("removes the proof when writing the link fails", async () => {
-    const error = new Error("link write failed");
-    mockSetDoc.mockResolvedValueOnce(undefined).mockRejectedValueOnce(error);
+  it("propagates a rejection from the Function", async () => {
+    const error = new Error("Recovery code not found.");
+    mockCallLinkDevice.mockRejectedValue(error);
 
-    await expect(linkDeviceToAccount("device-uid", "DH-VALI-CODE")).rejects.toBe(error);
-    expect(mockDeleteDoc).toHaveBeenCalledWith("linkProofs/device-uid");
+    await expect(linkDeviceToAccount("device-uid", "DH-UNKN-OWN0")).rejects.toBe(error);
   });
 
   it("unlinks the current device", async () => {
