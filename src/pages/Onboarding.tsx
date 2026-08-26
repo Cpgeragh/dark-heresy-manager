@@ -36,6 +36,9 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
   const [code, setCode] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const busyRef = useRef(false);
+  const [reclaimProgress, setReclaimProgress] = useState<
+    { processedCount: number; totalCount: number } | null
+  >(null);
   const [error, setError] = useState<string | null>(null);
   const [reclaimCode, setReclaimCode] = useState("");
   const [name, setName] = useState("");
@@ -114,8 +117,9 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
     busyRef.current = true;
     setBusy(true);
     setError(null);
+    setReclaimProgress(null);
     try {
-      await reclaimIdentity(user.uid, trimmed);
+      await reclaimIdentity(trimmed, setReclaimProgress);
       setSearchParams({}, { replace: true });
       onComplete();
     } catch (err) {
@@ -128,6 +132,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
     } finally {
       busyRef.current = false;
       setBusy(false);
+      setReclaimProgress(null);
     }
   }
 
@@ -234,7 +239,11 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
                 onClick={handleReclaim}
                 disabled={busy || !reclaimCode.trim()}
               >
-                {busy ? "Reclaiming…" : "Reclaim Identity"}
+                {busy
+                  ? reclaimProgress && reclaimProgress.totalCount > 0
+                    ? `Reclaiming… (${reclaimProgress.processedCount}/${reclaimProgress.totalCount})`
+                    : "Reclaiming…"
+                  : "Reclaim Identity"}
               </Button>
 
               {error && <p className={`${uiTextError} text-center`}>{error}</p>}
