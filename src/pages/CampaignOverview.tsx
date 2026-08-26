@@ -12,7 +12,11 @@ import { CharacterRow } from "./CampaignOverview/CharacterRow";
 import { DMInbox } from "./CampaignOverview/DMInbox";
 import { CustomItemLibraryAdmin } from "./CampaignOverview/CustomItemLibraryAdmin";
 import { applySessionXp } from "../services/sessionService";
-import { createNewCharacter, importCharacter } from "../services/characterService";
+import {
+  createNewCharacter,
+  importCharacter,
+  repairCharacterSummaries,
+} from "../services/characterService";
 import { validateCharacterName } from "../utils/validation";
 import { readCharacterImportFile } from "../utils/firebaseValidation";
 import { useToast } from "../components/Toast";
@@ -68,6 +72,8 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
   const creatingCharacterRef = useRef(false);
   const [importingCharacter, setImportingCharacter] = useState(false);
   const importingCharacterRef = useRef(false);
+  const [repairingSummaries, setRepairingSummaries] = useState(false);
+  const repairingSummariesRef = useRef(false);
 
   const handleCreate = useCallback(async () => {
     if (creatingCharacterRef.current) return;
@@ -126,6 +132,22 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
     [campaignId, toast]
   );
 
+  const handleRepairSummaries = useCallback(async () => {
+    if (repairingSummariesRef.current || !campaignId) return;
+    repairingSummariesRef.current = true;
+    setRepairingSummaries(true);
+    try {
+      const count = await repairCharacterSummaries(campaignId);
+      toast.success(`Repaired ${count} character ${count === 1 ? "summary" : "summaries"}.`);
+    } catch (err) {
+      console.error("Failed to repair character summaries:", err);
+      toast.error(err instanceof Error ? err.message : "Failed to repair character summaries.");
+    } finally {
+      repairingSummariesRef.current = false;
+      setRepairingSummaries(false);
+    }
+  }, [campaignId, toast]);
+
   // Inject Import JSON into header kebab for DMs
   useEffect(() => {
     if (!isDM) {
@@ -147,10 +169,26 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
             disabled={importingCharacter}
           />
         </label>
+        <button
+          type="button"
+          onClick={handleRepairSummaries}
+          disabled={repairingSummaries}
+          className={`block w-full text-left px-2 lg:px-3 py-1 lg:py-1.5 text-xs lg:text-sm rounded bg-slate-700 border border-slate-500 text-slate-100 ${repairingSummaries ? "opacity-50 cursor-not-allowed" : "hover:bg-slate-600 cursor-pointer"}`}
+        >
+          {repairingSummaries ? "Repairing…" : "Repair Character Summaries"}
+        </button>
       </div>
     );
     return () => clearKebabContent();
-  }, [isDM, importingCharacter, handleImport, setKebabContent, clearKebabContent]);
+  }, [
+    isDM,
+    importingCharacter,
+    handleImport,
+    repairingSummaries,
+    handleRepairSummaries,
+    setKebabContent,
+    clearKebabContent,
+  ]);
 
   if (!campaignId) {
     return <div className="text-slate-300 text-center py-10">No campaign selected.</div>;

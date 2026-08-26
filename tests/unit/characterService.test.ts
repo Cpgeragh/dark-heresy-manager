@@ -123,6 +123,7 @@ import {
   reconcileCharacterSpentXp,
   registerRecoveryCode,
   releaseCharacter,
+  repairCharacterSummaries,
   revokeRecoveryCode,
   updateCharacter,
 } from "../../src/services/characterService";
@@ -571,6 +572,42 @@ describe("updateCharacter", () => {
         portraitUrl: "data:new",
       })
     );
+  });
+});
+
+describe("repairCharacterSummaries", () => {
+  it("returns 0 and writes nothing when the campaign has no characters", async () => {
+    mockGetDocs.mockResolvedValue({ empty: true, docs: [] });
+
+    const count = await repairCharacterSummaries("camp-1");
+
+    expect(count).toBe(0);
+    expect(mockBatch.set).not.toHaveBeenCalled();
+    expect(mockBatch.commit).not.toHaveBeenCalled();
+  });
+
+  it("rewrites every character's summary in one batch", async () => {
+    mockGetDocs.mockResolvedValue({
+      empty: false,
+      docs: [
+        { data: () => ({ id: "char-1", campaignId: "camp-1", header: { characterName: "Corvus" } }) },
+        { data: () => ({ id: "char-2", campaignId: "camp-1", header: { characterName: "Thane" } }) },
+      ],
+    });
+
+    const count = await repairCharacterSummaries("camp-1");
+
+    expect(count).toBe(2);
+    expect(mockBatch.set).toHaveBeenCalledTimes(2);
+    expect(mockBatch.set).toHaveBeenCalledWith(
+      "character-summary:camp-1:char-1",
+      expect.objectContaining({ id: "char-1", characterName: "Corvus" })
+    );
+    expect(mockBatch.set).toHaveBeenCalledWith(
+      "character-summary:camp-1:char-2",
+      expect.objectContaining({ id: "char-2", characterName: "Thane" })
+    );
+    expect(mockBatch.commit).toHaveBeenCalledOnce();
   });
 });
 

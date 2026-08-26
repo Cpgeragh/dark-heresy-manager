@@ -2,6 +2,7 @@
 
 import {
   getDoc,
+  getDocs,
   runTransaction,
   updateDoc,
   writeBatch,
@@ -93,6 +94,29 @@ export async function writeCharacterFieldsWithSummary(
     const merged = { ...snapshot.data(), ...partial } as Character;
     transaction.update(ref, partial as UpdateData<Character>);
     transaction.set(characterSummaryDocRef(campaignId, characterId), computeCharacterSummary(merged));
+  });
+}
+
+/**
+ * Recomputes and rewrites every character's summary in a campaign, in one
+ * batch. For characters created before Stage 7, or any summary that's
+ * drifted out of sync. A campaign is capped at 100 characters, comfortably
+ * inside Firestore's 500-write batch limit.
+ */
+export async function repairCharacterSummaries(campaignId: string): Promise<number> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  return runSingleFlight("character:repair-summaries", [campaignId], async () => {
+    const snapshot = await getDocs(charactersCollectionRef(campaignId));
+    if (snapshot.empty) return 0;
+
+    const batch = writeBatch(db);
+    snapshot.docs.forEach((docSnapshot) => {
+      const character = docSnapshot.data();
+      batch.set(characterSummaryDocRef(campaignId, character.id), computeCharacterSummary(character));
+    });
+    await batch.commit();
+
+    return snapshot.docs.length;
   });
 }
 
