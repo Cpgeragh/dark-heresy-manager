@@ -8,7 +8,6 @@ import {
   addDoc,
   collection,
   doc,
-  type DocumentReference,
   type UpdateData,
 } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
@@ -18,17 +17,12 @@ import { characterDocRef, charactersCollectionRef } from "../firebase/converters
 
 import type { Character } from "../types/Character";
 import { createEmptyCharacterData } from "../utils/characterFactory";
-import { deleteRefsAtomically } from "../utils/firestoreBatchDelete";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
 import { validateCharacterName } from "../utils/validation";
 import { stripUndefined } from "../utils/stripUndefined";
 import { runSingleFlight } from "../utils/singleFlight";
 import { getSpentXp } from "../features/experience/xpSpent";
-import {
-  assertSafeDestructivePreflight,
-  BoundedDeletionCollector,
-  type DestructiveOperationPreflight,
-} from "../utils/destructiveOperationPreflight";
+import { driveJobToCompletion } from "../utils/bulkJobClient";
 import {
   assertCharacterImportData,
   assertCharacterPayload,
@@ -239,99 +233,48 @@ export async function forceAssignCharacter(
   });
 }
 
-interface CharacterDeletionPlan {
-  preflight: DestructiveOperationPreflight;
-  references: DocumentReference[];
-}
+const callStartCharacterDeletionJob = httpsCallable<
+  { campaignId: string; characterId: string },
+  { jobId: string; totalCount: number }
+>(functions, "startCharacterDeletionJob");
 
-async function buildCharacterDeletionPlan(
-  campaignId: string,
-  characterId: string,
-  recoveryCode?: string
-): Promise<CharacterDeletionPlan> {
-  assertFirestoreDocumentId(campaignId, "Campaign ID");
-  assertFirestoreDocumentId(characterId, "Character ID");
-  if (recoveryCode !== undefined) assertRecoveryCode(recoveryCode);
+const callProcessCharacterDeletionChunk = httpsCallable<
+  { jobId: string },
+  { done: boolean; processedCount: number; totalCount: number }
+>(functions, "processCharacterDeletionChunk");
 
-  const collector = new BoundedDeletionCollector();
-  const characterRef = characterDocRef(campaignId, characterId);
-  const characterSnapshot = await getDoc(characterRef);
-  collector.addSnapshot(characterSnapshot, "characters");
-
-  if (!characterSnapshot.exists()) {
-    return { preflight: collector.result(false), references: [] };
-  }
-
-  if (!recoveryCode) {
-    return {
-      preflight: collector.result(
-        true,
-        "This character has no usable Recovery Code, so its Recovery Index cannot be removed safely."
-      ),
-      references: [],
-    };
-  }
-
-  await collector.addQuery(
-    collection(db, "campaigns", campaignId, "characters", characterId, "claimLog"),
-    "claimLogs"
-  );
-  if (!collector.exceeded) {
-    await collector.addQuery(
-      collection(db, "campaigns", campaignId, "characters", characterId, "xpProposals"),
-      "xpProposals"
-    );
-  }
-  if (!collector.exceeded) {
-    await collector.addQuery(
-      collection(db, "campaigns", campaignId, "threads", characterId, "messages"),
-      "messages"
-    );
-  }
-
-  const threadRef = doc(db, "campaigns", campaignId, "threads", characterId);
-  if (!collector.exceeded) collector.addSnapshot(await getDoc(threadRef), "threads");
-  if (!collector.exceeded) {
-    collector.addSnapshot(
-      await getDoc(doc(db, "recoveryIndex", recoveryCode.trim())),
-      "recoveryIndex"
-    );
-  }
-
-  const preflight = collector.result(true);
-  return {
-    preflight,
-    references: preflight.safe ? collector.references() : [],
-  };
-}
-
+/**
+ * Starts a resumable character-deletion job and returns its exact document
+ * count, without deleting anything yet — the preview step for a delete
+ * confirmation. Pass the returned jobId to deleteCharacter to run it.
+ */
 export async function preflightCharacterDeletion(
   campaignId: string,
-  characterId: string,
-  recoveryCode?: string
-): Promise<DestructiveOperationPreflight> {
-  return (await buildCharacterDeletionPlan(campaignId, characterId, recoveryCode)).preflight;
+  characterId: string
+): Promise<{ jobId: string; totalCount: number }> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(characterId, "Character ID");
+  const { data } = await callStartCharacterDeletionJob({ campaignId, characterId });
+  return data;
 }
 
 /**
- * Deletes a character and every known dependent document in one atomic,
- * preflighted batch. Oversized or unindexable deletions wait for Stage 3's
- * protected resumable bulk job instead of leaving partial data behind.
+ * Drives a character-deletion job (from preflightCharacterDeletion) to
+ * completion via the resumable startCharacterDeletionJob/
+ * processCharacterDeletionChunk Functions, chunked and resumable if a call
+ * drops mid-way. onProgress, if given, is called after each chunk.
  */
 export async function deleteCharacter(
-  campaignId: string,
-  characterId: string,
-  recoveryCode?: string
+  jobId: string,
+  onProgress?: (progress: { processedCount: number; totalCount: number }) => void
 ): Promise<void> {
-  assertFirestoreDocumentId(campaignId, "Campaign ID");
-  assertFirestoreDocumentId(characterId, "Character ID");
-  if (recoveryCode !== undefined) assertRecoveryCode(recoveryCode);
-
-  await runSingleFlight("character:delete", [campaignId, characterId], async () => {
-    const plan = await buildCharacterDeletionPlan(campaignId, characterId, recoveryCode);
-    assertSafeDestructivePreflight(plan.preflight, "Character");
-    await deleteRefsAtomically(db, plan.references);
-  });
+  await runSingleFlight("character:delete", [jobId], () =>
+    driveJobToCompletion(
+      jobId,
+      async (id) => (await callProcessCharacterDeletionChunk({ jobId: id })).data,
+      (chunk) => onProgress?.({ processedCount: chunk.processedCount, totalCount: chunk.totalCount })
+    )
+  );
 }
 
 const callRegisterRecoveryCode = httpsCallable<

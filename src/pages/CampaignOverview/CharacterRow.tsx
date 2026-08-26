@@ -6,7 +6,6 @@ import type { Timestamp } from "firebase/firestore";
 import { useClaimLogs } from "../../hooks/useClaimLogs";
 import { useToast } from "../../components/Toast";
 import { deleteCharacter, preflightCharacterDeletion } from "../../services/characterService";
-import type { DestructiveOperationPreflight } from "../../utils/destructiveOperationPreflight";
 import { uiSection } from "../../ui/editableStyles";
 import { Button } from "../../ui/Button";
 import { ConfirmInline } from "../../ui/ConfirmInline";
@@ -63,9 +62,12 @@ export function CharacterRow({
   const [showHistory, setShowHistory] = useState(false);
   const [deletePreflight, setDeletePreflight] = useState<{
     loading: boolean;
-    result?: DestructiveOperationPreflight;
+    result?: { jobId: string; totalCount: number };
     error?: string;
   }>({ loading: false });
+  const [deleteProgress, setDeleteProgress] = useState<
+    { processedCount: number; totalCount: number } | null
+  >(null);
   const {
     logs,
     loading: logsLoading,
@@ -74,18 +76,22 @@ export function CharacterRow({
   const toast = useToast();
 
   const handleDelete = useCallback(async () => {
+    if (!deletePreflight.result) return;
+    setDeleteProgress(null);
     try {
-      await deleteCharacter(campaignId, characterId, recoveryCode);
+      await deleteCharacter(deletePreflight.result.jobId, setDeleteProgress);
     } catch (err) {
       console.error("Character deletion error:", err);
       toast.error(err instanceof Error ? err.message : "Failed to delete character.");
+    } finally {
+      setDeleteProgress(null);
     }
-  }, [campaignId, characterId, recoveryCode, toast]);
+  }, [deletePreflight.result, toast]);
 
   const loadDeletePreflight = useCallback(async () => {
     setDeletePreflight({ loading: true });
     try {
-      const result = await preflightCharacterDeletion(campaignId, characterId, recoveryCode);
+      const result = await preflightCharacterDeletion(campaignId, characterId);
       setDeletePreflight({ loading: false, result });
     } catch (error) {
       setDeletePreflight({
@@ -93,20 +99,15 @@ export function CharacterRow({
         error: error instanceof Error ? error.message : "Unable to check this deletion.",
       });
     }
-  }, [campaignId, characterId, recoveryCode]);
+  }, [campaignId, characterId]);
 
   const deleteDetails = deletePreflight.loading ? (
     <span className="text-xs text-slate-500">Checking affected documents…</span>
   ) : deletePreflight.error ? (
     <span className="text-xs text-red-400">{deletePreflight.error}</span>
   ) : deletePreflight.result ? (
-    <span
-      className={deletePreflight.result.safe ? "text-xs text-slate-500" : "text-xs text-red-400"}
-    >
-      {deletePreflight.result.safe
-        ? `This permanently deletes ${deletePreflight.result.affectedDocuments} document${deletePreflight.result.affectedDocuments === 1 ? "" : "s"}.`
-        : (deletePreflight.result.reason ??
-          `This affects more than ${deletePreflight.result.limit} documents and is disabled until the protected bulk job is available.`)}
+    <span className="text-xs text-slate-500">
+      {`This permanently deletes ${deletePreflight.result.totalCount} document${deletePreflight.result.totalCount === 1 ? "" : "s"}.`}
     </span>
   ) : null;
 
@@ -163,8 +164,13 @@ export function CharacterRow({
                   size="sm"
                   onArm={loadDeletePreflight}
                   details={deleteDetails}
-                  confirmDisabled={!deletePreflight.result?.safe}
+                  confirmDisabled={deletePreflight.loading || !deletePreflight.result}
                   onConfirm={handleDelete}
+                  busyLabel={
+                    deleteProgress && deleteProgress.totalCount > 0
+                      ? `Deleting… (${deleteProgress.processedCount}/${deleteProgress.totalCount})`
+                      : "Deleting…"
+                  }
                 />
               </>
             )}

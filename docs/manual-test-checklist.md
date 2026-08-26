@@ -953,7 +953,7 @@ Use a disposable campaign with at least two players, several characters, one app
 - [ ] Export JSON from a character sheet's kebab menu (available to the DM or the owning player), then re-import that same file — confirm the re-imported copy gets its own new recovery code rather than colliding with the original's
 - [ ] There is no Clone Character action; export and import remain available for deliberate copying, and an imported character receives a fresh recovery code
 - [ ] DM: Delete a character — confirm the old recovery code genuinely stops resolving anywhere afterwards (claim lookup, reclaim, etc.), not just that the character vanishes from this list
-- [ ] With a deliberately seeded character above the 440-document claim-log/XP-proposal safety ceiling, deletion refuses before removing the character or its audit history and directs the DM to the protected bulk job
+- [ ] With a deliberately seeded character with far more claim-log/XP-proposal/message documents than a single batch could hold, deletion still succeeds — it runs as a resumable job with live chunk progress shown on the confirm button, rather than refusing above a fixed document ceiling
 - [ ] Per-character "History" modal lists claim/release/force-assign/force-release events newest-first, with a readable date on each
 - [ ] Only the DM sees the per-character History action; opening and closing it repeatedly loads normally each time without leaving a stale loading or error state
 - [ ] Leave Campaign Overview open while another profile edits a character — the roster, session attendee names and DM inbox character names all update together from the same roster state
@@ -1078,9 +1078,10 @@ For each boundary, try the largest valid value and then one unit over it. For ro
 - [ ] Type multi-digit Height and Weight values — no write occurs for intermediate digits, blur or Enter commits once, and focusing then blurring an unchanged value performs no write
 - [ ] Deliberately store an incorrect `experience.spent`, open the editable character and observe one correction of only that nested field; leave the sheet open after the corrected snapshot and confirm it does not loop or write again
 - [ ] Open the same stale-XP character in two editable tabs at once — after both reconciliation attempts settle, the computed Spent XP is correct, unrelated XP fields are unchanged, and Firestore records only one committed correction
-- [ ] Open character deletion as a DM — confirmation remains unavailable while the preflight runs, then shows the exact total for the character, Recovery Index, thread, messages, claim logs and XP proposals before enabling deletion
-- [ ] Seed a character deletion with more than 440 total documents, or remove its usable Recovery Code — the interface explains why deletion is disabled and no document is removed
-- [ ] Delete a normal character while forcing the atomic batch to fail — the character and every dependent document remain present; retrying succeeds as one operation without orphaned records
+- [ ] Open character deletion as a DM — confirmation remains unavailable while the job starts, then shows the exact total document count before enabling deletion
+- [ ] Remove a character's usable Recovery Code, then attempt deletion — the interface explains deletion is blocked and no document is removed
+- [ ] Delete a character with far more dependent documents than a single batch could hold — the confirm button shows live chunk progress (e.g. "Deleting… (400/1200)") and every dependent document is eventually removed
+- [ ] Delete a character while forcing a chunk to fail partway through — documents already deleted in earlier chunks stay deleted; re-arming and confirming again finishes the deletion without orphaning or duplicating anything
 - [ ] Open permanent campaign deletion for both an active and archived campaign — the exact combined count for the campaign and all known descendants appears before typed confirmation can complete
 - [ ] Seed a campaign deletion above 440 documents — confirmation stays disabled, the protected-bulk-job explanation appears and no descendant or campaign document is removed
 - [ ] Apply session XP with two attendees — the button reports 3 affected documents; after application, delete the session and toggle XP reversal to see the impact change from 1 to 3 before confirming

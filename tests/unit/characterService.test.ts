@@ -3,13 +3,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const {
   mockAuth,
   mockBatch,
-  mockBatchDeleteRefs,
   mockCallClaimCharacter,
   mockCallForceAssignCharacter,
   mockCallForceReleaseCharacter,
   mockCallRegisterRecoveryCode,
   mockCallReleaseCharacter,
   mockCallRevokeRecoveryCode,
+  mockCallStartCharacterDeletionJob,
+  mockCallProcessCharacterDeletionChunk,
   mockDoc,
   mockGetDoc,
   mockGetDocs,
@@ -33,29 +34,24 @@ const {
       currentUser: { uid: string } | null;
     },
     mockBatch,
-    mockBatchDeleteRefs: vi.fn().mockResolvedValue(undefined),
     mockCallClaimCharacter: vi.fn(),
     mockCallForceAssignCharacter: vi.fn(),
     mockCallForceReleaseCharacter: vi.fn(),
     mockCallRegisterRecoveryCode: vi.fn(),
     mockCallReleaseCharacter: vi.fn(),
     mockCallRevokeRecoveryCode: vi.fn(),
-    // Single-arg calls are the auto-ID form used by doc(collectionRef); keep
-    // returning the old constant there. Multi-arg calls (doc(db, "a", "b"))
-    // are the explicit-path form deleteCharacter uses — join into a path so
-    // different refs are distinguishable in assertions.
+    mockCallStartCharacterDeletionJob: vi.fn(),
+    mockCallProcessCharacterDeletionChunk: vi.fn(),
+    // The auto-ID form used by doc(collectionRef) for a new character.
     mockDoc: vi.fn((...args: unknown[]) => {
-      if (args.length <= 1) {
-        const ref = args[0];
-        if (
-          typeof ref === "string" &&
-          (ref.startsWith("characters-collection:") || ref.endsWith("/characters"))
-        ) {
-          return { id: "new-char-id" };
-        }
-        return "claim-log-ref";
+      const ref = args[0];
+      if (
+        typeof ref === "string" &&
+        (ref.startsWith("characters-collection:") || ref.endsWith("/characters"))
+      ) {
+        return { id: "new-char-id" };
       }
-      return args.slice(1).join("/");
+      return "claim-log-ref";
     }),
     mockGetDoc: vi.fn(),
     mockGetDocs: vi.fn(),
@@ -93,6 +89,8 @@ vi.mock("firebase/functions", () => ({
     if (name === "forceReleaseCharacter") return mockCallForceReleaseCharacter;
     if (name === "forceAssignCharacter") return mockCallForceAssignCharacter;
     if (name === "revokeRecoveryCode") return mockCallRevokeRecoveryCode;
+    if (name === "startCharacterDeletionJob") return mockCallStartCharacterDeletionJob;
+    if (name === "processCharacterDeletionChunk") return mockCallProcessCharacterDeletionChunk;
     throw new Error(`Unexpected callable: ${name}`);
   }),
 }));
@@ -110,10 +108,6 @@ vi.mock("../../src/firebase/converters", () => ({
   charactersCollectionRef: (campaignId: string) => `characters-collection:${campaignId}`,
 }));
 
-vi.mock("../../src/utils/firestoreBatchDelete", () => ({
-  deleteRefsAtomically: (...args: unknown[]) => mockBatchDeleteRefs(...args),
-}));
-
 import {
   claimCharacter,
   createNewCharacter,
@@ -121,6 +115,7 @@ import {
   forceAssignCharacter,
   forceReleaseCharacter,
   importCharacter,
+  preflightCharacterDeletion,
   reconcileCharacterSpentXp,
   registerRecoveryCode,
   releaseCharacter,
@@ -142,7 +137,6 @@ beforeEach(() => {
   vi.clearAllMocks();
   mockAuth.currentUser = { uid: "actor-1" };
   mockBatch.commit.mockResolvedValue(undefined);
-  mockBatchDeleteRefs.mockResolvedValue(undefined);
   mockGetDoc.mockImplementation(async (reference: string) => ({
     ref: reference,
     exists: () => true,
@@ -370,61 +364,69 @@ describe("XP-spent reconciliation", () => {
   });
 });
 
-describe("deleteCharacter", () => {
-  it("preflights messages and atomically removes audit children, recovery entry, thread, and character", async () => {
-    mockGetDocs.mockImplementation(async (path: string) => {
-      switch (path) {
-        case "campaigns/camp-1/characters/char-1/claimLog":
-          return snapshot([
-            { id: "log-1", ref: "campaigns/camp-1/characters/char-1/claimLog/log-1" },
-          ]);
-        case "campaigns/camp-1/characters/char-1/xpProposals":
-          return snapshot([
-            { id: "prop-1", ref: "campaigns/camp-1/characters/char-1/xpProposals/prop-1" },
-          ]);
-        case "campaigns/camp-1/threads/char-1/messages":
-          return snapshot([{ id: "msg-1", ref: "campaigns/camp-1/threads/char-1/messages/msg-1" }]);
-        default:
-          return emptySnapshot;
-      }
+describe("preflightCharacterDeletion", () => {
+  it("calls the Function and returns the job id and total count", async () => {
+    mockCallStartCharacterDeletionJob.mockResolvedValue({
+      data: { jobId: "job-1", totalCount: 6 },
     });
 
-    await deleteCharacter("camp-1", "char-1", "DH-AAAA-1111");
+    const result = await preflightCharacterDeletion("camp-1", "char-1");
 
-    expect(mockBatchDeleteRefs).toHaveBeenCalledOnce();
-    const [dbArg, refs] = mockBatchDeleteRefs.mock.calls[0];
-    expect(dbArg).toBe("mock-db");
-    expect(refs).toEqual(
-      expect.arrayContaining([
-        "campaigns/camp-1/characters/char-1/claimLog/log-1",
-        "campaigns/camp-1/characters/char-1/xpProposals/prop-1",
-        "campaigns/camp-1/threads/char-1/messages/msg-1",
-        "campaigns/camp-1/threads/char-1",
-        "recoveryIndex/DH-AAAA-1111",
-        "character:camp-1:char-1",
-      ])
-    );
-    expect(refs).toHaveLength(6);
-    expect(mockBatch.commit).not.toHaveBeenCalled();
+    expect(mockCallStartCharacterDeletionJob).toHaveBeenCalledWith({
+      campaignId: "camp-1",
+      characterId: "char-1",
+    });
+    expect(result).toEqual({ jobId: "job-1", totalCount: 6 });
+  });
+});
+
+describe("deleteCharacter", () => {
+  beforeEach(() => {
+    mockCallProcessCharacterDeletionChunk.mockResolvedValue({
+      data: { done: true, processedCount: 6, totalCount: 6 },
+    });
   });
 
-  it("pushes the thread ref even when the character never had any messages", async () => {
-    mockGetDocs.mockResolvedValue(emptySnapshot);
+  it("drives the job to completion", async () => {
+    await deleteCharacter("job-1");
 
-    await deleteCharacter("camp-2", "char-2", "DH-BBBB-2222");
-
-    const [, refs] = mockBatchDeleteRefs.mock.calls[0];
-    expect(refs).toEqual(
-      expect.arrayContaining(["campaigns/camp-2/threads/char-2", "character:camp-2:char-2"])
-    );
+    expect(mockCallProcessCharacterDeletionChunk).toHaveBeenCalledWith({ jobId: "job-1" });
   });
 
-  it("propagates failures from the batch delete", async () => {
-    mockGetDocs.mockResolvedValue(emptySnapshot);
+  it("keeps calling process until the job reports done, reporting progress", async () => {
+    mockCallProcessCharacterDeletionChunk
+      .mockResolvedValueOnce({ data: { done: false, processedCount: 3, totalCount: 6 } })
+      .mockResolvedValueOnce({ data: { done: true, processedCount: 6, totalCount: 6 } });
+    const onProgress = vi.fn();
+
+    await deleteCharacter("job-1", onProgress);
+
+    expect(mockCallProcessCharacterDeletionChunk).toHaveBeenCalledTimes(2);
+    expect(onProgress).toHaveBeenNthCalledWith(1, { processedCount: 3, totalCount: 6 });
+    expect(onProgress).toHaveBeenNthCalledWith(2, { processedCount: 6, totalCount: 6 });
+  });
+
+  it("propagates failures from the chunk Function", async () => {
     const error = new Error("delete failed");
-    mockBatchDeleteRefs.mockRejectedValueOnce(error);
+    mockCallProcessCharacterDeletionChunk.mockRejectedValueOnce(error);
 
-    await expect(deleteCharacter("camp-3", "char-3", "DH-CCCC-3333")).rejects.toBe(error);
+    await expect(deleteCharacter("job-1")).rejects.toBe(error);
+  });
+
+  it("reuses one in-flight drive for a duplicate call with the same jobId", async () => {
+    let finish!: (value: unknown) => void;
+    const pending = new Promise((resolve) => {
+      finish = resolve;
+    });
+    mockCallProcessCharacterDeletionChunk.mockReturnValueOnce(pending);
+
+    const first = deleteCharacter("job-1");
+    const duplicate = deleteCharacter("job-1");
+    await Promise.resolve();
+
+    expect(mockCallProcessCharacterDeletionChunk).toHaveBeenCalledOnce();
+    finish({ data: { done: true, processedCount: 6, totalCount: 6 } });
+    await Promise.all([first, duplicate]);
   });
 });
 
