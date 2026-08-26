@@ -333,7 +333,7 @@ export const linkDevice = onCall<LinkDeviceInput>(
 );
 
 export const startCharacterDeletionJob = onCall<StartCharacterDeletionJobInput>(
-  { timeoutSeconds: 30 },
+  { secrets: [recoveryCodeHmacSecret], timeoutSeconds: 30 },
   (request) => {
     const callerUid = request.auth?.uid ?? "anonymous";
     const idempotencyKey = `start-character-deletion-job:${callerUid}:${request.data?.campaignId ?? ""}:${request.data?.characterId ?? ""}`;
@@ -347,13 +347,14 @@ export const startCharacterDeletionJob = onCall<StartCharacterDeletionJobInput>(
         { key: `start-character-deletion-job:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 },
       ],
       idempotencyKey,
-      handler: ({ uid, data }) => runStartCharacterDeletionJob(data, uid, idempotencyKey),
+      handler: ({ uid, data }) =>
+        runStartCharacterDeletionJob(data, uid, idempotencyKey, recoveryCodeHmacSecret.value()),
     });
   }
 );
 
 export const processCharacterDeletionChunk = onCall<ProcessCharacterDeletionChunkInput>(
-  { timeoutSeconds: 30 },
+  { secrets: [recoveryCodeHmacSecret], timeoutSeconds: 30 },
   (request) => {
     const callerUid = request.auth?.uid ?? "anonymous";
     return protectedCallable<ProcessCharacterDeletionChunkInput, ProcessCharacterDeletionChunkResult>({
@@ -365,13 +366,14 @@ export const processCharacterDeletionChunk = onCall<ProcessCharacterDeletionChun
       rateLimits: [
         { key: `process-character-deletion-chunk:${callerUid}`, limit: 300, windowMs: 60 * 60 * 1000 },
       ],
-      handler: ({ uid, data }) => runProcessCharacterDeletionChunk(data, uid),
+      handler: ({ uid, data }) =>
+        runProcessCharacterDeletionChunk(data, uid, recoveryCodeHmacSecret.value()),
     });
   }
 );
 
 export const startCampaignDeletionJob = onCall<StartCampaignDeletionJobInput>(
-  { timeoutSeconds: 30 },
+  { secrets: [recoveryCodeHmacSecret], timeoutSeconds: 30 },
   (request) => {
     const callerUid = request.auth?.uid ?? "anonymous";
     const idempotencyKey = `start-campaign-deletion-job:${callerUid}:${request.data?.campaignId ?? ""}`;
@@ -385,13 +387,14 @@ export const startCampaignDeletionJob = onCall<StartCampaignDeletionJobInput>(
         { key: `start-campaign-deletion-job:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 },
       ],
       idempotencyKey,
-      handler: ({ uid, data }) => runStartCampaignDeletionJob(data, uid, idempotencyKey),
+      handler: ({ uid, data }) =>
+        runStartCampaignDeletionJob(data, uid, idempotencyKey, recoveryCodeHmacSecret.value()),
     });
   }
 );
 
 export const processCampaignDeletionChunk = onCall<ProcessCampaignDeletionChunkInput>(
-  { timeoutSeconds: 30 },
+  { secrets: [recoveryCodeHmacSecret], timeoutSeconds: 30 },
   (request) => {
     const callerUid = request.auth?.uid ?? "anonymous";
     return protectedCallable<ProcessCampaignDeletionChunkInput, ProcessCampaignDeletionChunkResult>({
@@ -403,7 +406,8 @@ export const processCampaignDeletionChunk = onCall<ProcessCampaignDeletionChunkI
       rateLimits: [
         { key: `process-campaign-deletion-chunk:${callerUid}`, limit: 300, windowMs: 60 * 60 * 1000 },
       ],
-      handler: ({ uid, data }) => runProcessCampaignDeletionChunk(data, uid),
+      handler: ({ uid, data }) =>
+        runProcessCampaignDeletionChunk(data, uid, recoveryCodeHmacSecret.value()),
     });
   }
 );

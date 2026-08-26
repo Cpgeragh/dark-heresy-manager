@@ -43,12 +43,16 @@ describe("Functions: campaign deletion job", () => {
       await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: [] });
 
       const characterRef = campaignRef.collection("characters").doc();
-      const recoveryCode = "DH-CAMP-0001";
-      await characterRef.set({ campaignId: campaignRef.id, recoveryCode });
-      await adminDb
-        .collection("recoveryIndex")
-        .doc(recoveryCode)
-        .set({ campaignId: campaignRef.id, characterId: characterRef.id });
+      await characterRef.set({ campaignId: campaignRef.id });
+      const registerRecoveryCode = httpsCallable<
+        { campaignId: string; characterId: string },
+        { code: string }
+      >(getTestFunctions(), "registerRecoveryCode");
+      const { data: registered } = await registerRecoveryCode({
+        campaignId: campaignRef.id,
+        characterId: characterRef.id,
+      });
+      const recoveryCode = registered.code;
       await characterRef.collection("claimLog").add({ action: "claim", actorUid: dmUid });
       await characterRef.collection("xpProposals").add({ amount: 100 });
 
@@ -76,11 +80,15 @@ describe("Functions: campaign deletion job", () => {
       expect(final.done).toBe(true);
       expect(final.processedCount).toBe(12);
 
+      const lookupRecoveryCode = httpsCallable<{ code: string }, { status: string }>(
+        getTestFunctions(),
+        "lookupRecoveryCode"
+      );
       expect((await campaignRef.get()).exists).toBe(false);
       expect((await characterRef.get()).exists).toBe(false);
       expect((await threadRef.get()).exists).toBe(false);
       expect((await customItemRef.get()).exists).toBe(false);
-      expect((await adminDb.collection("recoveryIndex").doc(recoveryCode).get()).exists).toBe(false);
+      expect((await lookupRecoveryCode({ code: recoveryCode })).data.status).toBe("not-found");
       expect((await characterRef.collection("claimLog").get()).empty).toBe(true);
       expect((await characterRef.collection("xpProposals").get()).empty).toBe(true);
       expect((await threadRef.collection("messages").get()).empty).toBe(true);

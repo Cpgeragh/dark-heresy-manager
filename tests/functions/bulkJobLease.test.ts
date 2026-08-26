@@ -36,13 +36,17 @@ describe("Functions: bulk job lease recovery", () => {
       const dmUid = await signInTestUser();
       const campaignRef = adminDb.collection("campaigns").doc();
       const characterRef = campaignRef.collection("characters").doc();
-      const recoveryCode = "DH-TEST-0003";
       await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: [] });
-      await characterRef.set({ campaignId: campaignRef.id, recoveryCode });
-      await adminDb
-        .collection("recoveryIndex")
-        .doc(recoveryCode)
-        .set({ campaignId: campaignRef.id, characterId: characterRef.id });
+      await characterRef.set({ campaignId: campaignRef.id });
+      const registerRecoveryCode = httpsCallable<
+        { campaignId: string; characterId: string },
+        { code: string }
+      >(getTestFunctions(), "registerRecoveryCode");
+      const { data: registered } = await registerRecoveryCode({
+        campaignId: campaignRef.id,
+        characterId: characterRef.id,
+      });
+      const recoveryCode = registered.code;
       await characterRef.collection("claimLog").add({ action: "claim", actorUid: dmUid });
       await characterRef.collection("claimLog").add({ action: "release", actorUid: dmUid });
       const threadRef = campaignRef.collection("threads").doc(characterRef.id);
@@ -88,10 +92,14 @@ describe("Functions: bulk job lease recovery", () => {
         result = (await processChunk({ jobId: started.jobId })).data;
       }
 
+      const lookupRecoveryCode = httpsCallable<{ code: string }, { status: string }>(
+        getTestFunctions(),
+        "lookupRecoveryCode"
+      );
       expect(result.processedCount).toBe(6);
       expect((await characterRef.get()).exists).toBe(false);
       expect((await threadRef.get()).exists).toBe(false);
-      expect((await adminDb.collection("recoveryIndex").doc(recoveryCode).get()).exists).toBe(false);
+      expect((await lookupRecoveryCode({ code: recoveryCode })).data.status).toBe("not-found");
     },
     15000
   );

@@ -41,13 +41,17 @@ describe("Functions: character deletion job", () => {
       const dmUid = await signInTestUser();
       const campaignRef = adminDb.collection("campaigns").doc();
       const characterRef = campaignRef.collection("characters").doc();
-      const recoveryCode = "DH-TEST-0001";
       await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: [] });
-      await characterRef.set({ campaignId: campaignRef.id, recoveryCode });
-      await adminDb
-        .collection("recoveryIndex")
-        .doc(recoveryCode)
-        .set({ campaignId: campaignRef.id, characterId: characterRef.id });
+      await characterRef.set({ campaignId: campaignRef.id });
+      const registerRecoveryCode = httpsCallable<
+        { campaignId: string; characterId: string },
+        { code: string }
+      >(getTestFunctions(), "registerRecoveryCode");
+      const { data: registered } = await registerRecoveryCode({
+        campaignId: campaignRef.id,
+        characterId: characterRef.id,
+      });
+      const recoveryCode = registered.code;
       await characterRef.collection("claimLog").add({ action: "claim", actorUid: dmUid });
       const threadRef = campaignRef.collection("threads").doc(characterRef.id);
       await threadRef.set({ characterId: characterRef.id });
@@ -69,9 +73,13 @@ describe("Functions: character deletion job", () => {
       expect(final.done).toBe(true);
       expect(final.processedCount).toBe(6);
 
+      const lookupRecoveryCode = httpsCallable<{ code: string }, { status: string }>(
+        getTestFunctions(),
+        "lookupRecoveryCode"
+      );
       expect((await characterRef.get()).exists).toBe(false);
       expect((await threadRef.get()).exists).toBe(false);
-      expect((await adminDb.collection("recoveryIndex").doc(recoveryCode).get()).exists).toBe(false);
+      expect((await lookupRecoveryCode({ code: recoveryCode })).data.status).toBe("not-found");
       expect((await characterRef.collection("claimLog").get()).empty).toBe(true);
       expect((await threadRef.collection("messages").get()).empty).toBe(true);
     },
@@ -84,13 +92,17 @@ describe("Functions: character deletion job", () => {
       const dmUid = await signInTestUser();
       const campaignRef = adminDb.collection("campaigns").doc();
       const characterRef = campaignRef.collection("characters").doc();
-      const recoveryCode = "DH-TEST-0002";
       await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: [] });
-      await characterRef.set({ campaignId: campaignRef.id, recoveryCode });
-      await adminDb
-        .collection("recoveryIndex")
-        .doc(recoveryCode)
-        .set({ campaignId: campaignRef.id, characterId: characterRef.id });
+      await characterRef.set({ campaignId: campaignRef.id });
+      const registerRecoveryCode = httpsCallable<
+        { campaignId: string; characterId: string },
+        { code: string }
+      >(getTestFunctions(), "registerRecoveryCode");
+      const { data: registered } = await registerRecoveryCode({
+        campaignId: campaignRef.id,
+        characterId: characterRef.id,
+      });
+      const recoveryCode = registered.code;
       await characterRef.collection("claimLog").add({ action: "claim", actorUid: dmUid });
       await characterRef.collection("claimLog").add({ action: "release", actorUid: dmUid });
       const threadRef = campaignRef.collection("threads").doc(characterRef.id);
@@ -113,6 +125,10 @@ describe("Functions: character deletion job", () => {
         getTestFunctions(),
         "processCharacterDeletionChunk"
       );
+      const lookupRecoveryCode = httpsCallable<{ code: string }, { status: string }>(
+        getTestFunctions(),
+        "lookupRecoveryCode"
+      );
 
       // Process exactly the claimLog phase, then stop, simulating a dropped
       // connection or closed tab right after the first phase finishes.
@@ -126,7 +142,7 @@ describe("Functions: character deletion job", () => {
       expect((await characterRef.collection("claimLog").get()).empty).toBe(true);
       expect((await threadRef.collection("messages").get()).docs).toHaveLength(1);
       expect((await threadRef.get()).exists).toBe(true);
-      expect((await adminDb.collection("recoveryIndex").doc(recoveryCode).get()).exists).toBe(true);
+      expect((await lookupRecoveryCode({ code: recoveryCode })).data.status).toBe("found");
       expect((await characterRef.get()).exists).toBe(true);
 
       // Resume later (a fresh call, exactly what a reconnecting client would
@@ -140,7 +156,7 @@ describe("Functions: character deletion job", () => {
       expect(result.processedCount).toBe(6);
       expect((await characterRef.get()).exists).toBe(false);
       expect((await threadRef.get()).exists).toBe(false);
-      expect((await adminDb.collection("recoveryIndex").doc(recoveryCode).get()).exists).toBe(false);
+      expect((await lookupRecoveryCode({ code: recoveryCode })).data.status).toBe("not-found");
       expect((await threadRef.collection("messages").get()).empty).toBe(true);
     },
     15000

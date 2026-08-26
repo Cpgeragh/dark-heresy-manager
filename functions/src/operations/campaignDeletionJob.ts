@@ -17,6 +17,7 @@
 
 import { FieldPath, getFirestore, type CollectionReference, type Firestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
+import { hashRecoveryCode } from "../shared/recoveryCode.js";
 import {
   acquireJobLease,
   advanceJobCheckpoint,
@@ -76,7 +77,8 @@ export interface StartCampaignDeletionJobInput {
 export async function startCampaignDeletionJob(
   input: StartCampaignDeletionJobInput,
   callerUid: string,
-  idempotencyKey: string | null
+  idempotencyKey: string | null,
+  hmacSecret: string
 ): Promise<{ jobId: string; totalCount: number }> {
   const db = getFirestore();
   const campaignRef = db.collection("campaigns").doc(input.campaignId);
@@ -106,7 +108,12 @@ export async function startCampaignDeletionJob(
     Promise.all(characters.map((c) => c.ref.collection("claimLog").count().get())),
     Promise.all(characters.map((c) => c.ref.collection("xpProposals").count().get())),
     Promise.all(
-      characters.map((c) => db.collection("recoveryIndex").doc(c.data().recoveryCode as string).get())
+      characters.map((c) =>
+        db
+          .collection("recoveryIndex")
+          .doc(hashRecoveryCode(c.data().recoveryCode as string, hmacSecret))
+          .get()
+      )
     ),
   ]);
 
@@ -234,7 +241,8 @@ async function sweepNestedPhase(
 async function processRecoveryIndexPage(
   db: Firestore,
   charactersCollection: CollectionReference,
-  checkpoint: Checkpoint
+  checkpoint: Checkpoint,
+  hmacSecret: string
 ): Promise<{ processed: number; nextCheckpoint: Checkpoint }> {
   let pageQuery = charactersCollection.orderBy(FieldPath.documentId()).limit(CHUNK_SIZE);
   if (checkpoint.cursor) pageQuery = pageQuery.startAfter(checkpoint.cursor);
@@ -250,7 +258,9 @@ async function processRecoveryIndexPage(
   const codes = page.docs
     .map((docSnapshot) => docSnapshot.data().recoveryCode as string | undefined)
     .filter((code): code is string => typeof code === "string");
-  const recoveryRefs = codes.map((code) => db.collection("recoveryIndex").doc(code));
+  const recoveryRefs = codes.map((code) =>
+    db.collection("recoveryIndex").doc(hashRecoveryCode(code, hmacSecret))
+  );
   const recoverySnapshots = await Promise.all(recoveryRefs.map((ref) => ref.get()));
   const existingRefs = recoveryRefs.filter((_, index) => recoverySnapshots[index].exists);
 
@@ -272,7 +282,8 @@ async function processRecoveryIndexPage(
 async function processPhase(
   db: Firestore,
   campaignId: string,
-  checkpoint: Checkpoint
+  checkpoint: Checkpoint,
+  hmacSecret: string
 ): Promise<{ processed: number; nextCheckpoint: Checkpoint | null }> {
   const campaignRef = db.collection("campaigns").doc(campaignId);
 
@@ -292,7 +303,7 @@ async function processPhase(
         "characterXpProposals"
       );
     case "characterRecoveryIndex":
-      return processRecoveryIndexPage(db, campaignRef.collection("characters"), checkpoint);
+      return processRecoveryIndexPage(db, campaignRef.collection("characters"), checkpoint, hmacSecret);
     case "characters":
       return deleteFlatPage(campaignRef.collection("characters"), checkpoint, "characters");
     case "sessions":
@@ -328,7 +339,8 @@ export interface ProcessCampaignDeletionChunkResult {
 
 export async function processCampaignDeletionChunk(
   input: ProcessCampaignDeletionChunkInput,
-  callerUid: string
+  callerUid: string,
+  hmacSecret: string
 ): Promise<ProcessCampaignDeletionChunkResult> {
   const { job, leaseId } = await acquireJobLease(input.jobId, callerUid);
   if (job.type !== "campaign-deletion") {
@@ -345,7 +357,7 @@ export async function processCampaignDeletionChunk(
     }
 
     const checkpoint = parseCheckpoint(job.checkpoint);
-    const { processed, nextCheckpoint } = await processPhase(db, campaignId, checkpoint);
+    const { processed, nextCheckpoint } = await processPhase(db, campaignId, checkpoint, hmacSecret);
 
     if (nextCheckpoint === null) {
       await completeJob(input.jobId, leaseId);

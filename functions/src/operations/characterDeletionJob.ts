@@ -15,6 +15,7 @@
 
 import { FieldPath, getFirestore, type Firestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
+import { hashRecoveryCode } from "../shared/recoveryCode.js";
 import {
   acquireJobLease,
   advanceJobCheckpoint,
@@ -58,7 +59,8 @@ export interface StartCharacterDeletionJobInput {
 export async function startCharacterDeletionJob(
   input: StartCharacterDeletionJobInput,
   callerUid: string,
-  idempotencyKey: string | null
+  idempotencyKey: string | null,
+  hmacSecret: string
 ): Promise<{ jobId: string; totalCount: number }> {
   const db = getFirestore();
   const campaignRef = db.collection("campaigns").doc(input.campaignId);
@@ -86,7 +88,7 @@ export async function startCharacterDeletionJob(
   }
 
   const threadRef = campaignRef.collection("threads").doc(input.characterId);
-  const recoveryRef = db.collection("recoveryIndex").doc(recoveryCode);
+  const recoveryRef = db.collection("recoveryIndex").doc(hashRecoveryCode(recoveryCode, hmacSecret));
 
   const [claimLogCount, xpProposalsCount, messagesCount, threadSnapshot, recoverySnapshot] =
     await Promise.all([
@@ -128,7 +130,8 @@ async function processPhase(
   campaignId: string,
   characterId: string,
   recoveryCode: string,
-  checkpoint: Checkpoint
+  checkpoint: Checkpoint,
+  hmacSecret: string
 ): Promise<{ processed: number; nextCheckpoint: Checkpoint | null }> {
   const campaignRef = db.collection("campaigns").doc(campaignId);
   const characterRef = campaignRef.collection("characters").doc(characterId);
@@ -169,7 +172,7 @@ async function processPhase(
       return { processed: threadSnapshot.exists ? 1 : 0, nextCheckpoint: { phase: nextPhase("thread")!, cursor: null } };
     }
     case "recoveryIndex": {
-      const recoveryRef = db.collection("recoveryIndex").doc(recoveryCode);
+      const recoveryRef = db.collection("recoveryIndex").doc(hashRecoveryCode(recoveryCode, hmacSecret));
       const recoverySnapshot = await recoveryRef.get();
       if (recoverySnapshot.exists) await recoveryRef.delete();
       return {
@@ -196,7 +199,8 @@ export interface ProcessCharacterDeletionChunkResult {
 
 export async function processCharacterDeletionChunk(
   input: ProcessCharacterDeletionChunkInput,
-  callerUid: string
+  callerUid: string,
+  hmacSecret: string
 ): Promise<ProcessCharacterDeletionChunkResult> {
   const { job, leaseId } = await acquireJobLease(input.jobId, callerUid);
   if (job.type !== "character-deletion") {
@@ -222,7 +226,8 @@ export async function processCharacterDeletionChunk(
       campaignId,
       characterId,
       recoveryCode,
-      checkpoint
+      checkpoint,
+      hmacSecret
     );
 
     if (nextCheckpoint === null) {
