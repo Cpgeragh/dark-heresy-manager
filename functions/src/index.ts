@@ -124,9 +124,9 @@ export const registerIdentityCode = onCall<RegisterIdentityCodeInput>(
     return protectedCallable<RegisterIdentityCodeInput, { code: string }>({
       request,
       operation: "register-identity-code",
-      allowedFields: ["role"],
+      allowedFields: ["role", "targetUid"],
       requiredFields: ["role"],
-      fieldShapes: { role: { enum: ["dm", "player"] } },
+      fieldShapes: { role: { enum: ["dm", "player"] }, targetUid: "string" },
       rateLimits: [
         { key: `register-identity-code:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 },
       ],

@@ -52,4 +52,43 @@ describe("Functions: registerIdentityCode", () => {
     },
     15000
   );
+
+  it(
+    "a linked device can register an identity code for the primary account it's linked to",
+    async () => {
+      const primaryUid = await signInTestUser();
+      const deviceUid = await signInTestUser();
+      await adminDb.collection("userLinks").doc(deviceUid).set({ primaryUid });
+
+      const registerIdentityCode = httpsCallable<
+        { role: "dm" | "player"; targetUid?: string },
+        { code: string }
+      >(getTestFunctions(), "registerIdentityCode");
+
+      const result = await registerIdentityCode({ role: "player", targetUid: primaryUid });
+
+      expect(result.data.code).toMatch(/^DH-[0-9A-Z]{4}-[0-9A-Z]{4}$/);
+      const primarySecret = await adminDb.collection("identitySecret").doc(primaryUid).get();
+      expect(primarySecret.data()?.code).toBe(result.data.code);
+      const deviceSecret = await adminDb.collection("identitySecret").doc(deviceUid).get();
+      expect(deviceSecret.exists).toBe(false);
+    },
+    15000
+  );
+
+  it(
+    "rejects a targetUid the caller isn't linked to",
+    async () => {
+      await signInTestUser();
+      const registerIdentityCode = httpsCallable<
+        { role: "dm" | "player"; targetUid?: string },
+        { code: string }
+      >(getTestFunctions(), "registerIdentityCode");
+
+      await expect(
+        registerIdentityCode({ role: "player", targetUid: "some-unlinked-account" })
+      ).rejects.toThrow();
+    },
+    15000
+  );
 });

@@ -16,8 +16,8 @@ import {
   limit,
   type DocumentReference,
 } from "firebase/firestore";
-import { db } from "../firebase";
-import { generateRecoveryCode } from "../utils/recoveryCode";
+import { httpsCallable } from "firebase/functions";
+import { db, functions } from "../firebase";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
 import {
   assertBulkOperationCount,
@@ -25,8 +25,6 @@ import {
   assertRecoveryCode,
 } from "../utils/firebaseValidation";
 import { runSingleFlight } from "../utils/singleFlight";
-
-type Role = "dm" | "player";
 
 const IDENTITY_RECLAIM_CAMPAIGN_LIMIT = 50;
 const IDENTITY_RECLAIM_CHARACTERS_PER_CAMPAIGN_LIMIT = 20;
@@ -38,38 +36,10 @@ function protectedReclaimError(): Error {
   );
 }
 
-/**
- * Generates a recovery code for the given user and writes it atomically to:
- *   identityRecovery/{code}  → { uid, role }   (reverse lookup)
- *   identitySecret/{uid}     → { code }         (proof store, rule-side only)
- *
- * Pass existingCode when rotating an existing code — the old identityRecovery
- * entry will be removed in the same batch so no orphan is left behind.
- *
- * Returns the new code so the UI can display it to the user.
- */
-export async function registerIdentityRecovery(
-  uid: string,
-  role: Role = "player",
-  existingCode?: string
-): Promise<string> {
-  assertFirestoreDocumentId(uid, "User ID");
-  if (role !== "dm" && role !== "player") throw new Error("Recovery role is invalid.");
-  if (existingCode !== undefined) assertRecoveryCode(existingCode);
-  const code = generateRecoveryCode();
-  const batch = writeBatch(db);
-
-  // Remove old reverse-lookup entry if rotating the code
-  if (existingCode) {
-    batch.delete(doc(db, "identityRecovery", existingCode.trim()));
-  }
-
-  batch.set(doc(db, "identityRecovery", code), { uid, role });
-  batch.set(doc(db, "identitySecret", uid), { code });
-
-  await batch.commit();
-  return code;
-}
+const callRegisterIdentityCode = httpsCallable<
+  { role: "dm" | "player"; targetUid?: string },
+  { code: string }
+>(functions, "registerIdentityCode");
 
 /**
  * Reclaims an identity on a new device using a previously issued recovery code.
@@ -230,9 +200,11 @@ export async function getRecoveryCode(uid: string): Promise<string | null> {
 }
 
 /**
- * Rotates the user's recovery code.
- * Fetches the current code, then calls registerIdentityRecovery with it so the
- * old identityRecovery entry is cleaned up atomically.
+ * Rotates (or first-generates) the identity recovery code for uid, via the
+ * registerIdentityCode Function. uid may be the caller's own account, or —
+ * from a linked secondary device — the primary account it's linked to; the
+ * Function verifies that server-side, mirroring firestore.rules'
+ * playerOwnsOrLinked.
  * Returns the new code so the UI can display it.
  */
 export async function rotateRecoveryCode(
@@ -242,8 +214,8 @@ export async function rotateRecoveryCode(
   assertFirestoreDocumentId(uid, "User ID");
   if (role !== "dm" && role !== "player") throw new Error("Recovery role is invalid.");
   return runSingleFlight("identity:rotate-recovery", [uid, role], async () => {
-    const existingCode = await getRecoveryCode(uid);
-    return registerIdentityRecovery(uid, role, existingCode ?? undefined);
+    const { data } = await callRegisterIdentityCode({ role, targetUid: uid });
+    return data.code;
   });
 }
 

@@ -17,10 +17,14 @@ const mockSecretDoc = vi.fn(() => ({}));
 const mockSecretCollection = { doc: mockSecretDoc };
 const mockIndexDoc = vi.fn(() => ({}));
 const mockIndexCollection = { doc: mockIndexDoc };
+const mockLinkGet = vi.fn();
+const mockLinkDoc = vi.fn(() => ({ get: mockLinkGet }));
+const mockLinkCollection = { doc: mockLinkDoc };
 
 const mockCollection = vi.fn((name: string) => {
   if (name === "identitySecret") return mockSecretCollection;
   if (name === "identityRecoveryIndex") return mockIndexCollection;
+  if (name === "userLinks") return mockLinkCollection;
   throw new Error(`Unexpected collection: ${name}`);
 });
 
@@ -66,5 +70,51 @@ describe("registerIdentityCode", () => {
 
     expect(mockTransactionGet).toHaveBeenCalledWith(expect.anything());
     expect(mockSecretDoc).toHaveBeenCalledWith("user-1");
+  });
+
+  it("registers for the caller's own uid when targetUid matches the caller, without checking userLinks", async () => {
+    mockTransactionGet.mockResolvedValue({ exists: false });
+
+    await registerIdentityCode({ role: "player", targetUid: "user-1" }, "user-1", "secret");
+
+    expect(mockLinkGet).not.toHaveBeenCalled();
+    expect(mockSecretDoc).toHaveBeenCalledWith("user-1");
+  });
+
+  it("registers for the target uid when the caller is a linked device of it", async () => {
+    mockLinkGet.mockResolvedValue({ exists: true, data: () => ({ primaryUid: "primary-1" }) });
+    mockTransactionGet.mockResolvedValue({ exists: false });
+
+    const result = await registerIdentityCode(
+      { role: "player", targetUid: "primary-1" },
+      "device-1",
+      "secret"
+    );
+
+    expect(mockLinkDoc).toHaveBeenCalledWith("device-1");
+    expect(mockSecretDoc).toHaveBeenCalledWith("primary-1");
+    expect(mockTransactionSet).toHaveBeenCalledWith(expect.anything(), {
+      uid: "primary-1",
+      role: "player",
+    });
+    expect(result.code).toMatch(/^DH-[0-9A-Z]{4}-[0-9A-Z]{4}$/);
+  });
+
+  it("rejects when the caller has no userLinks entry at all", async () => {
+    mockLinkGet.mockResolvedValue({ exists: false });
+
+    await expect(
+      registerIdentityCode({ role: "player", targetUid: "primary-1" }, "device-1", "secret")
+    ).rejects.toThrow("This device is not linked to the requested account.");
+    expect(mockRunTransaction).not.toHaveBeenCalled();
+  });
+
+  it("rejects when the caller is linked to a different account than the requested target", async () => {
+    mockLinkGet.mockResolvedValue({ exists: true, data: () => ({ primaryUid: "someone-else" }) });
+
+    await expect(
+      registerIdentityCode({ role: "player", targetUid: "primary-1" }, "device-1", "secret")
+    ).rejects.toThrow("This device is not linked to the requested account.");
+    expect(mockRunTransaction).not.toHaveBeenCalled();
   });
 });

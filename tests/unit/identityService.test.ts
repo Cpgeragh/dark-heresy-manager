@@ -1,7 +1,8 @@
 // tests/unit/identityService.test.ts
 //
-// Tests for registerIdentityRecovery and clearIdentityRecovery.
-// Firebase and generateRecoveryCode are fully mocked — no emulator needed.
+// Tests for clearIdentityRecovery, reclaimIdentity, getRecoveryCode, and
+// rotateRecoveryCode. Firebase and the registerIdentityCode Function are
+// fully mocked — no emulator needed.
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
@@ -22,7 +23,6 @@ const mockBatch = {
 const {
   mockWriteBatch,
   mockDoc,
-  mockGenerateRecoveryCode,
   mockGetDoc,
   mockGetDocs,
   mockQuery,
@@ -32,10 +32,10 @@ const {
   mockUpdateDoc,
   mockDeleteDoc,
   mockLimit,
+  mockCallRegisterIdentityCode,
 } = vi.hoisted(() => ({
   mockWriteBatch: vi.fn(),
   mockDoc: vi.fn((...args: unknown[]) => `${args[1]}/${args[2]}`),
-  mockGenerateRecoveryCode: vi.fn(() => "DH-GENE-CODE"),
   mockGetDoc: vi.fn(),
   mockGetDocs: vi.fn(),
   mockQuery: vi.fn((...args: unknown[]) => args),
@@ -45,6 +45,7 @@ const {
   mockUpdateDoc: vi.fn(),
   mockDeleteDoc: vi.fn(),
   mockLimit: vi.fn((value: number) => ({ limit: value })),
+  mockCallRegisterIdentityCode: vi.fn(),
 }));
 
 vi.mock("firebase/firestore", () => ({
@@ -61,16 +62,19 @@ vi.mock("firebase/firestore", () => ({
   limit: (...args: unknown[]) => mockLimit(...args),
 }));
 
-vi.mock("../../src/firebase", () => ({
-  db: "mock-db",
+vi.mock("firebase/functions", () => ({
+  httpsCallable: vi.fn((_functions: unknown, name: string) => {
+    if (name === "registerIdentityCode") return mockCallRegisterIdentityCode;
+    throw new Error(`Unexpected callable: ${name}`);
+  }),
 }));
 
-vi.mock("../../src/utils/recoveryCode", () => ({
-  generateRecoveryCode: () => mockGenerateRecoveryCode(),
+vi.mock("../../src/firebase", () => ({
+  db: "mock-db",
+  functions: "mock-functions",
 }));
 
 import {
-  registerIdentityRecovery,
   clearIdentityRecovery,
   reclaimIdentity,
   getRecoveryCode,
@@ -85,51 +89,6 @@ beforeEach(() => {
   mockSetDoc.mockResolvedValue(undefined);
   mockUpdateDoc.mockResolvedValue(undefined);
   mockDeleteDoc.mockResolvedValue(undefined);
-});
-
-// ── registerIdentityRecovery ───────────────────────────────────────────────
-
-describe("registerIdentityRecovery", () => {
-  it("writes identityRecovery entry with uid and role", async () => {
-    await registerIdentityRecovery("uid-1", "dm");
-
-    expect(mockBatchSet).toHaveBeenCalledWith("identityRecovery/DH-GENE-CODE", {
-      uid: "uid-1",
-      role: "dm",
-    });
-  });
-
-  it("writes identitySecret entry with the generated code", async () => {
-    await registerIdentityRecovery("uid-1", "dm");
-
-    expect(mockBatchSet).toHaveBeenCalledWith("identitySecret/uid-1", {
-      code: "DH-GENE-CODE",
-    });
-  });
-
-  it("returns the generated code", async () => {
-    const result = await registerIdentityRecovery("uid-1", "player");
-
-    expect(result).toBe("DH-GENE-CODE");
-  });
-
-  it("deletes the old identityRecovery entry when existingCode is provided", async () => {
-    await registerIdentityRecovery("uid-1", "dm", "DH-0OLD-C0DE");
-
-    expect(mockBatchDelete).toHaveBeenCalledWith("identityRecovery/DH-0OLD-C0DE");
-  });
-
-  it("does not call delete when existingCode is not provided", async () => {
-    await registerIdentityRecovery("uid-1", "dm");
-
-    expect(mockBatchDelete).not.toHaveBeenCalled();
-  });
-
-  it("commits the batch exactly once", async () => {
-    await registerIdentityRecovery("uid-1", "dm");
-
-    expect(mockBatchCommit).toHaveBeenCalledOnce();
-  });
 });
 
 // ── clearIdentityRecovery ─────────────────────────────────────────────────
@@ -379,56 +338,50 @@ describe("getRecoveryCode", () => {
 // ── rotateRecoveryCode ────────────────────────────────────────────────────
 
 describe("rotateRecoveryCode", () => {
+  it("calls registerIdentityCode with the uid as targetUid and the given role", async () => {
+    mockCallRegisterIdentityCode.mockResolvedValue({ data: { code: "DH-GENE-CODE" } });
+
+    const result = await rotateRecoveryCode("uid-1", "dm");
+
+    expect(mockCallRegisterIdentityCode).toHaveBeenCalledWith({ role: "dm", targetUid: "uid-1" });
+    expect(result).toBe("DH-GENE-CODE");
+  });
+
+  it("defaults to the player role when none is given", async () => {
+    mockCallRegisterIdentityCode.mockResolvedValue({ data: { code: "DH-GENE-CODE" } });
+
+    await rotateRecoveryCode("uid-1");
+
+    expect(mockCallRegisterIdentityCode).toHaveBeenCalledWith({
+      role: "player",
+      targetUid: "uid-1",
+    });
+  });
+
   it("generates only one code for a duplicate in-flight rotation", async () => {
     let finish!: (value: unknown) => void;
     const pending = new Promise((resolve) => {
       finish = resolve;
     });
-    mockGetDoc.mockReturnValueOnce(pending);
+    mockCallRegisterIdentityCode.mockReturnValueOnce(pending);
 
     const first = rotateRecoveryCode("uid-duplicate", "dm");
     const duplicate = rotateRecoveryCode("uid-duplicate", "dm");
     await Promise.resolve();
 
-    expect(mockGetDoc).toHaveBeenCalledOnce();
-    finish({ exists: () => false, data: () => null });
+    expect(mockCallRegisterIdentityCode).toHaveBeenCalledOnce();
+    finish({ data: { code: "DH-GENE-CODE" } });
     await expect(Promise.all([first, duplicate])).resolves.toEqual([
       "DH-GENE-CODE",
       "DH-GENE-CODE",
     ]);
-    expect(mockGenerateRecoveryCode).toHaveBeenCalledOnce();
-    expect(mockBatchCommit).toHaveBeenCalledOnce();
   });
 
-  it("fetches the current code and passes it as existingCode to registerIdentityRecovery", async () => {
-    // getRecoveryCode returns the current code
-    mockGetDoc.mockResolvedValue({
-      exists: () => true,
-      data: () => ({ code: "DH-0OLD-C0DE" }),
-    });
-
-    await rotateRecoveryCode("uid-1", "dm");
-
-    // The batch delete should remove the OLD identityRecovery entry
-    expect(mockBatchDelete).toHaveBeenCalledWith("identityRecovery/DH-0OLD-C0DE");
-  });
-
-  it("returns the newly generated code", async () => {
-    mockGetDoc.mockResolvedValue({
-      exists: () => true,
-      data: () => ({ code: "DH-0OLD-C0DE" }),
-    });
-
-    const result = await rotateRecoveryCode("uid-1", "player");
-
-    expect(result).toBe("DH-GENE-CODE");
-  });
-
-  it("handles no existing code gracefully (first-time rotate)", async () => {
-    mockGetDoc.mockResolvedValue({ exists: () => false, data: () => null });
-
-    // Should not throw; registerIdentityRecovery called without existingCode
-    await expect(rotateRecoveryCode("uid-1", "dm")).resolves.toBe("DH-GENE-CODE");
-    expect(mockBatchDelete).not.toHaveBeenCalled();
+  it("rejects an invalid role before calling the Function", async () => {
+    // @ts-expect-error testing runtime guard against an invalid role
+    await expect(rotateRecoveryCode("uid-1", "invalid")).rejects.toThrow(
+      "Recovery role is invalid."
+    );
+    expect(mockCallRegisterIdentityCode).not.toHaveBeenCalled();
   });
 });
