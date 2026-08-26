@@ -368,70 +368,6 @@ service cloud.firestore {
       allow delete:
         if dmOwnsOrLinked(resource.data.dmId);
 
-      // Any authenticated user can add themselves to memberIds (claim flow).
-      // Guards: only memberIds may change, they must be in the result, and no
-      // existing members may be removed.
-      allow update:
-        if request.auth != null &&
-           validCampaignData(request.resource.data) &&
-           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberIds']) &&
-           (
-             request.auth.uid in request.resource.data.get('memberIds', []) ||
-             (
-               exists(/databases/$(database)/documents/userLinks/$(request.auth.uid)) &&
-               get(/databases/$(database)/documents/userLinks/$(request.auth.uid)).data.primaryUid
-                 in request.resource.data.get('memberIds', [])
-             )
-           ) &&
-           request.resource.data.get('memberIds', []).hasAll(resource.data.get('memberIds', []));
-
-      // Identity reclaim: allow transferring dmId to the reclaimer's new uid
-      // when a valid reclaim document confirms they're taking over the old dmId.
-      allow update:
-        if request.auth != null &&
-           validCampaignData(request.resource.data) &&
-           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['dmId']) &&
-           request.resource.data.dmId == request.auth.uid &&
-           exists(/databases/$(database)/documents/identityReclaims/$(request.auth.uid)) &&
-           get(/databases/$(database)/documents/identityReclaims/$(request.auth.uid)).data.oldUid
-             == resource.data.dmId;
-
-      // Identity reclaim (player): swap the old uid out of memberIds and the new uid in.
-      // Guards: only memberIds changes; new uid is present; old uid is absent;
-      // every other previous member is still present (no one else was removed).
-      allow update:
-        if request.auth != null &&
-           validCampaignData(request.resource.data) &&
-           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberIds']) &&
-           request.auth.uid in request.resource.data.get('memberIds', []) &&
-           exists(/databases/$(database)/documents/identityReclaims/$(request.auth.uid)) &&
-           !(get(/databases/$(database)/documents/identityReclaims/$(request.auth.uid)).data.oldUid
-               in request.resource.data.get('memberIds', [])) &&
-           request.resource.data.get('memberIds', []).hasAll(
-             resource.data.get('memberIds', []).removeAll([
-               get(/databases/$(database)/documents/identityReclaims/$(request.auth.uid)).data.oldUid
-             ])
-           );
-
-      // A DM may also be a member of their own campaign when they genuinely
-      // own a character. Reclaim both roles in one document write so the
-      // ownership migration stays atomic and does not write the same document
-      // twice in one batch.
-      allow update:
-        if request.auth != null &&
-           validCampaignData(request.resource.data) &&
-           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['dmId', 'memberIds']) &&
-           request.resource.data.diff(resource.data).affectedKeys().hasAll(['dmId', 'memberIds']) &&
-           request.resource.data.dmId == request.auth.uid &&
-           request.auth.uid in request.resource.data.get('memberIds', []) &&
-           exists(/databases/$(database)/documents/identityReclaims/$(request.auth.uid)) &&
-           get(/databases/$(database)/documents/identityReclaims/$(request.auth.uid)).data.oldUid
-             == resource.data.dmId &&
-           !(resource.data.dmId in request.resource.data.get('memberIds', [])) &&
-           request.resource.data.get('memberIds', []).hasAll(
-             resource.data.get('memberIds', []).removeAll([resource.data.dmId])
-           );
-
       // ============================
       // CAMPAIGN CUSTOM ITEM LIBRARY
       // ============================
@@ -766,27 +702,6 @@ service cloud.firestore {
                  resource.data.isEditableByPlayer == true &&
                  request.resource.data.userId == resource.data.userId &&
                  request.resource.data.isEditableByPlayer == resource.data.isEditableByPlayer
-               ) ||
-               (
-                 resource.data.userId == null &&
-                 request.resource.data.diff(resource.data).affectedKeys().hasOnly(['userId']) &&
-                 playerOwnsOrLinked(request.resource.data.userId)
-               ) ||
-               (
-                 playerOwnsOrLinked(resource.data.userId) &&
-                 request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-                   'userId', 'isEditableByPlayer'
-                 ]) &&
-                 request.resource.data.userId == null &&
-                 request.resource.data.isEditableByPlayer == false
-               ) ||
-               (
-                 request.auth != null &&
-                 request.resource.data.diff(resource.data).affectedKeys().hasOnly(['userId']) &&
-                 request.resource.data.userId == request.auth.uid &&
-                 exists(/databases/$(database)/documents/identityReclaims/$(request.auth.uid)) &&
-                 resource.data.userId ==
-                   get(/databases/$(database)/documents/identityReclaims/$(request.auth.uid)).data.oldUid
                )
              );
 
@@ -802,98 +717,8 @@ service cloud.firestore {
             return camp != null && dmOwnsOrLinked(camp.data.dmId);
           }
 
-          function characterBefore() {
-            return get(
-              /databases/$(database)/documents/campaigns/$(campaignId)/characters/$(characterId)
-            );
-          }
-
-          function characterAfter() {
-            return getAfter(
-              /databases/$(database)/documents/campaigns/$(campaignId)/characters/$(characterId)
-            );
-          }
-
-          function validClaimLog(data) {
-            return data.keys().hasOnly([
-                     'action', 'actorUid', 'previousOwnerUid', 'newOwnerUid', 'timestamp'
-                   ]) &&
-                   data.keys().hasAll([
-                     'action', 'actorUid', 'previousOwnerUid', 'newOwnerUid', 'timestamp'
-                   ]) &&
-                   data.action in ['claim', 'release', 'force-assign', 'force-release'] &&
-                   data.actorUid is string && data.actorUid.size() > 0 &&
-                   data.actorUid.size() <= 1500 &&
-                   (data.previousOwnerUid == null ||
-                     (data.previousOwnerUid is string && data.previousOwnerUid.size() > 0 &&
-                      data.previousOwnerUid.size() <= 1500)) &&
-                   (data.newOwnerUid == null ||
-                     (data.newOwnerUid is string && data.newOwnerUid.size() > 0 &&
-                      data.newOwnerUid.size() <= 1500)) &&
-                   data.timestamp is timestamp;
-          }
-
-          function matchesClaimTransition(data) {
-            let before = characterBefore();
-            let after = characterAfter();
-            return before != null && after != null &&
-                   before.data.userId == null &&
-                   after.data.userId != null &&
-                   data.previousOwnerUid == null &&
-                   data.newOwnerUid == after.data.userId &&
-                   playerOwnsOrLinked(after.data.userId);
-          }
-
-          function matchesReleaseTransition(data) {
-            let before = characterBefore();
-            let after = characterAfter();
-            return before != null && after != null &&
-                   before.data.userId != null &&
-                   playerOwnsOrLinked(before.data.userId) &&
-                   after.data.userId == null &&
-                   data.previousOwnerUid == before.data.userId &&
-                   data.newOwnerUid == null;
-          }
-
-          function matchesForceAssignTransition(data) {
-            let before = characterBefore();
-            let after = characterAfter();
-            return before != null && after != null &&
-                   after.data.userId != null &&
-                   after.data.userId != before.data.userId &&
-                   data.previousOwnerUid == before.data.userId &&
-                   data.newOwnerUid == after.data.userId;
-          }
-
-          function matchesForceReleaseTransition(data) {
-            let before = characterBefore();
-            let after = characterAfter();
-            return before != null && after != null &&
-                   before.data.userId != null &&
-                   after.data.userId == null &&
-                   data.previousOwnerUid == before.data.userId &&
-                   data.newOwnerUid == null;
-          }
-
           allow get: if dmOwnsCampaign();
           allow list: if dmOwnsCampaign() && boundedQuery(440);
-
-          allow create:
-            if request.auth != null &&
-               validClaimLog(request.resource.data) &&
-               request.resource.data.actorUid == request.auth.uid &&
-               (
-                 (request.resource.data.action == 'claim' &&
-                   matchesClaimTransition(request.resource.data)) ||
-                 (request.resource.data.action == 'release' &&
-                   matchesReleaseTransition(request.resource.data)) ||
-                 (dmOwnsCampaign() &&
-                   request.resource.data.action == 'force-assign' &&
-                   matchesForceAssignTransition(request.resource.data)) ||
-                 (dmOwnsCampaign() &&
-                   request.resource.data.action == 'force-release' &&
-                   matchesForceReleaseTransition(request.resource.data))
-               );
 
           allow update: if false;
 
@@ -948,38 +773,6 @@ service cloud.firestore {
     }
 
     // ============================
-    // IDENTITY RECOVERY — reverse lookup (code → uid + role)
-    // ============================
-    // Readable by authenticated users so the reclaim flow can look up a code.
-    // Only the owner can create or delete their own entry.
-    match /identityRecovery/{code} {
-      allow get:    if request.auth != null;
-      allow list:   if false;
-      allow create: if request.auth != null &&
-                       validRecoveryCode(code) &&
-                       request.resource.data.keys().hasOnly(['uid', 'role']) &&
-                       request.resource.data.keys().hasAll(['uid', 'role']) &&
-                       validDocumentId(request.resource.data.uid) &&
-                       request.resource.data.role in ['dm', 'player'] &&
-                       playerOwnsOrLinked(request.resource.data.uid);
-      allow delete: if request.auth != null &&
-                       playerOwnsOrLinked(resource.data.uid);
-      // Identity reclaim: allow transferring this code's uid to the reclaimer's
-      // new uid when a valid reclaim document confirms the handshake.
-      allow update:
-        if request.auth != null &&
-           validRecoveryCode(code) &&
-           request.resource.data.keys().hasOnly(['uid', 'role']) &&
-           request.resource.data.keys().hasAll(['uid', 'role']) &&
-           validDocumentId(request.resource.data.uid) &&
-           request.resource.data.role in ['dm', 'player'] &&
-           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['uid']) &&
-           request.resource.data.uid == request.auth.uid &&
-           get(/databases/$(database)/documents/identityReclaims/$(request.auth.uid)).data.oldUid
-             == resource.data.uid;
-    }
-
-    // ============================
     // IDENTITY SECRET — proof store (uid → code), rule-side only
     // ============================
     // Never readable by clients — only accessed via get() in security rule
@@ -996,32 +789,6 @@ service cloud.firestore {
     }
 
     // ============================
-    // IDENTITY RECLAIMS — temporary proof documents during identity migration
-    // ============================
-    // Written by the reclaimer to prove they know the old uid's secret code.
-    // The create rule verifies the code against identitySecret before allowing it.
-    // Deleted by the reclaimer once migration is complete.
-    match /identityReclaims/{uid} {
-      // Owner can read their own reclaim document (needed during the migration flow).
-      allow read:   if request.auth != null && uid == request.auth.uid;
-      // Owner can initiate a reclaim — only if their provided code matches the
-      // secret stored for the old uid they're claiming.
-      allow create:
-        if request.auth != null &&
-           uid == request.auth.uid &&
-           request.resource.data.keys().hasOnly(['oldUid', 'code']) &&
-           request.resource.data.keys().hasAll(['oldUid', 'code']) &&
-           validDocumentId(request.resource.data.oldUid) &&
-           request.resource.data.oldUid != uid &&
-           validRecoveryCode(request.resource.data.code) &&
-           get(/databases/$(database)/documents/identitySecret/$(request.resource.data.oldUid)).data.code
-             == request.resource.data.code;
-      // Owner can delete once migration is done.
-      allow delete: if request.auth != null && uid == request.auth.uid;
-      allow update: if false;
-    }
-
-    // ============================
     // USER LINKS — multi-device access
     // ============================
     // A secondary device writes its own UID as the document key, with
@@ -1030,39 +797,6 @@ service cloud.firestore {
       // A device can read its own link doc.
       allow get: if request.auth != null && uid == request.auth.uid;
       allow delete: if request.auth != null && uid == request.auth.uid;
-      allow create, update:
-        if request.auth != null &&
-           uid == request.auth.uid &&
-           request.resource.data.keys().hasOnly(['primaryUid', 'linkedAt']) &&
-           request.resource.data.keys().hasAll(['primaryUid', 'linkedAt']) &&
-           validDocumentId(request.resource.data.primaryUid) &&
-           request.resource.data.primaryUid != request.auth.uid &&
-           request.resource.data.linkedAt is timestamp &&
-           exists(/databases/$(database)/documents/linkProofs/$(request.auth.uid)) &&
-           get(/databases/$(database)/documents/linkProofs/$(request.auth.uid)).data.primaryUid
-             == request.resource.data.primaryUid;
-    }
-
-    // ============================
-    // LINK PROOFS — temporary proof that the linker knows the target account's
-    // recovery code. The create rule verifies the supplied code against
-    // identitySecret; the userLinks create rule then requires a matching proof.
-    // The proof is owner-readable only and deleted right after linking.
-    // ============================
-    match /linkProofs/{uid} {
-      allow read: if request.auth != null && uid == request.auth.uid;
-      allow create:
-        if request.auth != null &&
-           uid == request.auth.uid &&
-           request.resource.data.keys().hasOnly(['primaryUid', 'code']) &&
-           request.resource.data.keys().hasAll(['primaryUid', 'code']) &&
-           validDocumentId(request.resource.data.primaryUid) &&
-           request.resource.data.primaryUid != uid &&
-           validRecoveryCode(request.resource.data.code) &&
-           get(/databases/$(database)/documents/identitySecret/$(request.resource.data.primaryUid)).data.code
-             == request.resource.data.code;
-      allow delete: if request.auth != null && uid == request.auth.uid;
-      allow update: if false;
     }
 
     // ============================

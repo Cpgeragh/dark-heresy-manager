@@ -101,7 +101,7 @@ describe("Firestore Rules: Character Ownership Protection", () => {
     ).rejects.toThrow();
   });
 
-  it("allows a DM to genuinely claim a character in their own campaign and become a member", async () => {
+  it("DM can directly assign an unclaimed character and update membership, but claimLog is server-side only", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, characterId, {
@@ -114,18 +114,21 @@ describe("Firestore Rules: Character Ownership Protection", () => {
       userId: "dm-1",
     });
     batch.update(dmDb.doc(`campaigns/${campaignId}`), { memberIds: ["dm-1"] });
-    batch.set(dmDb.doc(`campaigns/${campaignId}/characters/${characterId}/claimLog/dm-claim`), {
-      action: "claim",
-      actorUid: "dm-1",
-      previousOwnerUid: null,
-      newOwnerUid: "dm-1",
-      timestamp: new Date(),
-    });
 
     await expect(batch.commit()).resolves.toBeUndefined();
     const character = await dmDb.doc(`campaigns/${campaignId}/characters/${characterId}`).get();
     expect(character.data()?.userId).toBe("dm-1");
     const campaign = await dmDb.doc(`campaigns/${campaignId}`).get();
     expect(campaign.data()?.memberIds).toContain("dm-1");
+
+    await expect(
+      dmDb.doc(`campaigns/${campaignId}/characters/${characterId}/claimLog/dm-claim`).set({
+        action: "claim",
+        actorUid: "dm-1",
+        previousOwnerUid: null,
+        newOwnerUid: "dm-1",
+        timestamp: new Date(),
+      })
+    ).rejects.toThrow();
   });
 });

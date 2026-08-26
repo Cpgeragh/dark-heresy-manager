@@ -5,22 +5,10 @@ import { getTestEnv } from "../setup";
 import type { RulesTestEnvironment, RulesTestContext } from "@firebase/rules-unit-testing";
 import {
   dbAs,
-  dbAnon,
   createIdentitySecretEntry,
   createCampaign,
   createCharacter,
 } from "../helpers";
-
-// Create a linkProofs doc bypassing rules (for userLinks tests).
-async function createLinkProof(
-  env: RulesTestEnvironment,
-  uid: string,
-  data: Record<string, unknown>
-) {
-  await env.withSecurityRulesDisabled(async (ctx: RulesTestContext) => {
-    await ctx.firestore().collection("linkProofs").doc(uid).set(data);
-  });
-}
 
 // Create a userLinks doc bypassing rules (to simulate an already-linked device).
 async function createUserLink(env: RulesTestEnvironment, uid: string, primaryUid: string) {
@@ -30,74 +18,27 @@ async function createUserLink(env: RulesTestEnvironment, uid: string, primaryUid
 }
 
 // ============================================================
-// linkProofs/{uid} — proof the linker knows the target's recovery code
+// linkProofs/{uid} — retired collection, nothing writes to it anymore
 // ============================================================
-describe("Firestore Rules: linkProofs", () => {
+describe("Firestore Rules: linkProofs (retired collection)", () => {
   afterEach(async () => {
     const env = await getTestEnv();
     await env.clearFirestore();
   });
 
-  it("can create a proof when the code matches the target's identitySecret", async () => {
+  it("cannot create a linkProofs document at all — collection is sealed", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
     await createIdentitySecretEntry(env, "primary-1", { code: "DH-LINK-0001" });
 
     await expect(
       dbAs(env, "device-1").collection("linkProofs").doc("device-1")
         .set({ primaryUid: "primary-1", code: "DH-LINK-0001" })
-    ).resolves.toBeUndefined();
-  });
-
-  it("cannot create a proof with the wrong code", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    await createIdentitySecretEntry(env, "primary-1", { code: "DH-LINK-0001" });
-
-    await expect(
-      dbAs(env, "device-1").collection("linkProofs").doc("device-1")
-        .set({ primaryUid: "primary-1", code: "DH-WRNG-0001" })
-    ).rejects.toThrow();
-  });
-
-  it("cannot create a proof under a doc id that isn't your uid", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    await createIdentitySecretEntry(env, "primary-1", { code: "DH-LINK-0001" });
-
-    await expect(
-      dbAs(env, "device-1").collection("linkProofs").doc("device-2")
-        .set({ primaryUid: "primary-1", code: "DH-LINK-0001" })
-    ).rejects.toThrow();
-  });
-
-  it("unauthenticated user cannot create a proof", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    await createIdentitySecretEntry(env, "primary-1", { code: "DH-LINK-0001" });
-
-    await expect(
-      dbAnon(env).collection("linkProofs").doc("device-1")
-        .set({ primaryUid: "primary-1", code: "DH-LINK-0001" })
-    ).rejects.toThrow();
-  });
-
-  it("rejects malformed codes, self-targets, and unexpected proof fields", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    await createIdentitySecretEntry(env, "primary-1", { code: "DH-LINK-0001" });
-    await createIdentitySecretEntry(env, "device-1", { code: "DH-SELF-0001" });
-    const proof = dbAs(env, "device-1").collection("linkProofs").doc("device-1");
-
-    await expect(
-      proof.set({ primaryUid: "primary-1", code: "bad" })
-    ).rejects.toThrow();
-    await expect(
-      proof.set({ primaryUid: "device-1", code: "DH-SELF-0001" })
-    ).rejects.toThrow();
-    await expect(
-      proof.set({ primaryUid: "primary-1", code: "DH-LINK-0001", unexpected: true })
     ).rejects.toThrow();
   });
 });
 
 // ============================================================
-// userLinks/{uid} — requires a matching proof to create
+// userLinks/{uid} — create/update retired, linking goes through linkDevice
 // ============================================================
 describe("Firestore Rules: userLinks", () => {
   afterEach(async () => {
@@ -105,63 +46,18 @@ describe("Firestore Rules: userLinks", () => {
     await env.clearFirestore();
   });
 
-  it("can create a link when a matching proof exists", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    await createLinkProof(env, "device-1", { primaryUid: "primary-1", code: "DH-LINK-0001" });
-
-    await expect(
-      dbAs(env, "device-1").collection("userLinks").doc("device-1")
-        .set({ primaryUid: "primary-1", linkedAt: new Date() })
-    ).resolves.toBeUndefined();
-  });
-
-  it("cannot create a link without a proof (forged link blocked)", async () => {
+  it("cannot create a link directly — device linking goes through the linkDevice Function", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await expect(
       dbAs(env, "device-1").collection("userLinks").doc("device-1")
         .set({ primaryUid: "victim-1", linkedAt: 1 })
-    ).rejects.toThrow();
-  });
-
-  it("cannot create a link to a different primary than the proof names", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    await createLinkProof(env, "device-1", { primaryUid: "primary-1", code: "DH-LINK-0001" });
-
-    await expect(
-      dbAs(env, "device-1").collection("userLinks").doc("device-1")
-        .set({ primaryUid: "victim-1", linkedAt: 1 })
-    ).rejects.toThrow();
-  });
-
-  it("cannot link a device to itself", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    await createLinkProof(env, "device-1", { primaryUid: "device-1", code: "DH-LINK-0001" });
-
-    await expect(
-      dbAs(env, "device-1").collection("userLinks").doc("device-1")
-        .set({ primaryUid: "device-1", linkedAt: 1 })
-    ).rejects.toThrow();
-  });
-
-  it("rejects oversized and unexpected device-link fields", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    await createLinkProof(env, "device-1", { primaryUid: "primary-1", code: "DH-LINK-0001" });
-    const link = dbAs(env, "device-1").collection("userLinks").doc("device-1");
-
-    await expect(
-      link.set({ primaryUid: "x".repeat(1501), linkedAt: new Date() })
-    ).rejects.toThrow();
-    await expect(
-      link.set({ primaryUid: "primary-1", linkedAt: new Date(), unexpected: true })
     ).rejects.toThrow();
   });
 
   it("can delete your own link", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
-    await createLinkProof(env, "device-1", { primaryUid: "primary-1", code: "DH-LINK-0001" });
-    await dbAs(env, "device-1").collection("userLinks").doc("device-1")
-      .set({ primaryUid: "primary-1", linkedAt: new Date() });
+    await createUserLink(env, "device-1", "primary-1");
 
     await expect(
       dbAs(env, "device-1").collection("userLinks").doc("device-1").delete()
@@ -178,7 +74,7 @@ describe("Firestore Rules: character claim ownership", () => {
     await env.clearFirestore();
   });
 
-  it("player can claim an unclaimed character as themselves", async () => {
+  it("cannot claim an unclaimed character via direct update — claiming goes through the claimCharacter Function", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, "c1", "dm-1");
     await createCharacter(env, "c1", "char-1", { userId: null });
@@ -186,35 +82,12 @@ describe("Firestore Rules: character claim ownership", () => {
     await expect(
       dbAs(env, "player-1").collection("campaigns/c1/characters").doc("char-1")
         .update({ userId: "player-1" })
-    ).resolves.toBeUndefined();
-  });
-
-  it("linked device can claim as its primary account", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    await createCampaign(env, "c1", "dm-1");
-    await createCharacter(env, "c1", "char-1", { userId: null });
-    await createUserLink(env, "device-1", "primary-1");
-
-    await expect(
-      dbAs(env, "device-1").collection("campaigns/c1/characters").doc("char-1")
-        .update({ userId: "primary-1" })
-    ).resolves.toBeUndefined();
-  });
-
-  it("cannot claim a character as an arbitrary third party", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    await createCampaign(env, "c1", "dm-1");
-    await createCharacter(env, "c1", "char-1", { userId: null });
-
-    await expect(
-      dbAs(env, "player-1").collection("campaigns/c1/characters").doc("char-1")
-        .update({ userId: "someone-else" })
     ).rejects.toThrow();
   });
 });
 
 // ============================================================
-// Campaign membership — add self or linked primary
+// Campaign membership — self-add is retired, claiming goes through Functions
 // ============================================================
 describe("Firestore Rules: campaign membership (claim)", () => {
   afterEach(async () => {
@@ -222,31 +95,12 @@ describe("Firestore Rules: campaign membership (claim)", () => {
     await env.clearFirestore();
   });
 
-  it("player can add themselves to memberIds", async () => {
+  it("cannot self-add to memberIds via direct update — claiming goes through the claimCharacter Function", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, "c1", "dm-1", { memberIds: [] });
 
     await expect(
       dbAs(env, "player-1").collection("campaigns").doc("c1").update({ memberIds: ["player-1"] })
-    ).resolves.toBeUndefined();
-  });
-
-  it("linked device can add its primary to memberIds", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    await createCampaign(env, "c1", "dm-1", { memberIds: [] });
-    await createUserLink(env, "device-1", "primary-1");
-
-    await expect(
-      dbAs(env, "device-1").collection("campaigns").doc("c1").update({ memberIds: ["primary-1"] })
-    ).resolves.toBeUndefined();
-  });
-
-  it("cannot add an arbitrary third party to memberIds", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    await createCampaign(env, "c1", "dm-1", { memberIds: [] });
-
-    await expect(
-      dbAs(env, "player-1").collection("campaigns").doc("c1").update({ memberIds: ["evil-1"] })
     ).rejects.toThrow();
   });
 });

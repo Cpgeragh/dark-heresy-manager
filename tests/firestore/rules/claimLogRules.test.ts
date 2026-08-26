@@ -43,7 +43,7 @@ describe("Firestore Rules: ClaimLog Rules", () => {
     await expect(playerDb.collection(logPath).doc("log1").get()).rejects.toThrow();
   });
 
-  it("rejects a standalone claim-log create even when its fields look valid", async () => {
+  it("rejects any claimLog create — writes are server-side only now", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, characterId, { userId: null });
@@ -51,89 +51,16 @@ describe("Firestore Rules: ClaimLog Rules", () => {
     await expect(
       dbAs(env, "player-1")
         .collection(logPath)
-        .doc("standalone")
+        .doc("claim")
         .set(logPayload("claim", "player-1", null, "player-1"))
     ).rejects.toThrow();
-  });
 
-  it("allows a player claim log only with the matching ownership transition", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    await createCampaign(env, campaignId, "dm-1");
-    await createCharacter(env, campaignId, characterId, { userId: null });
-
-    const playerDb = dbAs(env, "player-1");
-    const batch = playerDb.batch();
-    batch.update(playerDb.doc(characterPath), { userId: "player-1" });
-    batch.update(playerDb.doc(`campaigns/${campaignId}`), { memberIds: ["player-1"] });
-    batch.set(
-      playerDb.collection(logPath).doc("claim"),
-      logPayload("claim", "player-1", null, "player-1")
-    );
-
-    await expect(batch.commit()).resolves.toBeUndefined();
-  });
-
-  it("allows a player release log only with the matching ownership transition", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    await createCampaign(env, campaignId, "dm-1", { memberIds: ["player-1"] });
-    await createCharacter(env, campaignId, characterId, {
-      userId: "player-1",
-      isEditableByPlayer: true,
-    });
-
-    const playerDb = dbAs(env, "player-1");
-    const batch = playerDb.batch();
-    batch.update(playerDb.doc(characterPath), { userId: null, isEditableByPlayer: false });
-    batch.set(
-      playerDb.collection(logPath).doc("release"),
-      logPayload("release", "player-1", "player-1", null)
-    );
-
-    await expect(batch.commit()).resolves.toBeUndefined();
-  });
-
-  it("allows DM force ownership logs only with matching transitions", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    await createCampaign(env, campaignId, "dm-1", { memberIds: ["player-1"] });
-    await createCharacter(env, campaignId, characterId, {
-      userId: "player-1",
-      isEditableByPlayer: true,
-    });
-
-    const dmDb = dbAs(env, "dm-1");
-    const assign = dmDb.batch();
-    assign.update(dmDb.doc(characterPath), { userId: "player-2", isEditableByPlayer: true });
-    assign.update(dmDb.doc(`campaigns/${campaignId}`), {
-      memberIds: ["player-1", "player-2"],
-    });
-    assign.set(
-      dmDb.collection(logPath).doc("assign"),
-      logPayload("force-assign", "dm-1", "player-1", "player-2")
-    );
-    await expect(assign.commit()).resolves.toBeUndefined();
-
-    const release = dmDb.batch();
-    release.update(dmDb.doc(characterPath), { userId: null, isEditableByPlayer: false });
-    release.set(
-      dmDb.collection(logPath).doc("force-release"),
-      logPayload("force-release", "dm-1", "player-2", null)
-    );
-    await expect(release.commit()).resolves.toBeUndefined();
-  });
-
-  it("rejects spoofed actors, unexpected fields, and mismatched transitions", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    await createCampaign(env, campaignId, "dm-1");
-    await createCharacter(env, campaignId, characterId, { userId: null });
-
-    const playerDb = dbAs(env, "player-1");
-    const batch = playerDb.batch();
-    batch.update(playerDb.doc(characterPath), { userId: "player-1" });
-    batch.set(playerDb.collection(logPath).doc("bad"), {
-      ...logPayload("claim", "player-2", null, "player-1"),
-      unexpected: true,
-    });
-    await expect(batch.commit()).rejects.toThrow();
+    await expect(
+      dbAs(env, "dm-1")
+        .collection(logPath)
+        .doc("force-assign")
+        .set(logPayload("force-assign", "dm-1", "player-1", "player-2"))
+    ).rejects.toThrow();
   });
 
   it("keeps logs immutable and permits deletion only with character deletion", async () => {
