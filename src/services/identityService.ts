@@ -2,7 +2,7 @@
 // Generates and stores a user's identity recovery record.
 // One record per user — covers all their campaigns and characters.
 
-import { doc, writeBatch, getDoc } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
 import { db, functions } from "../firebase";
 import { assertFirestoreDocumentId, assertRecoveryCode } from "../utils/firebaseValidation";
@@ -83,17 +83,4 @@ export async function rotateRecoveryCode(
     const { data } = await callRegisterIdentityCode({ role, targetUid: uid });
     return data.code;
   });
-}
-
-/**
- * Removes both identity recovery documents for a user.
- * Called when a user explicitly opts out of recovery, or before re-registering.
- */
-export async function clearIdentityRecovery(uid: string, code: string): Promise<void> {
-  assertFirestoreDocumentId(uid, "User ID");
-  assertRecoveryCode(code);
-  const batch = writeBatch(db);
-  batch.delete(doc(db, "identityRecovery", code.trim()));
-  batch.delete(doc(db, "identitySecret", uid));
-  await batch.commit();
 }

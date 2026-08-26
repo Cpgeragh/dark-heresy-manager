@@ -1,35 +1,21 @@
 // tests/unit/identityService.test.ts
 //
-// Tests for clearIdentityRecovery, reclaimIdentity, getRecoveryCode, and
-// rotateRecoveryCode. Firebase and the registerIdentityCode/
-// startIdentityReclaimJob/processIdentityReclaimChunk Functions are fully
-// mocked — no emulator needed.
+// Tests for reclaimIdentity, getRecoveryCode, and rotateRecoveryCode.
+// Firebase and the registerIdentityCode/startIdentityReclaimJob/
+// processIdentityReclaimChunk Functions are fully mocked — no emulator
+// needed.
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // ── Mocks ──────────────────────────────────────────────────────────────────
 
-const mockBatchSet = vi.fn();
-const mockBatchDelete = vi.fn();
-const mockBatchCommit = vi.fn().mockResolvedValue(undefined);
-const mockBatchUpdate = vi.fn();
-
-const mockBatch = {
-  set: mockBatchSet,
-  delete: mockBatchDelete,
-  commit: mockBatchCommit,
-  update: mockBatchUpdate,
-};
-
 const {
-  mockWriteBatch,
   mockDoc,
   mockGetDoc,
   mockCallRegisterIdentityCode,
   mockCallStartIdentityReclaimJob,
   mockCallProcessIdentityReclaimChunk,
 } = vi.hoisted(() => ({
-  mockWriteBatch: vi.fn(),
   mockDoc: vi.fn((...args: unknown[]) => `${args[1]}/${args[2]}`),
   mockGetDoc: vi.fn(),
   mockCallRegisterIdentityCode: vi.fn(),
@@ -38,7 +24,6 @@ const {
 }));
 
 vi.mock("firebase/firestore", () => ({
-  writeBatch: (...args: unknown[]) => mockWriteBatch(...args),
   doc: (...args: unknown[]) => mockDoc(...args),
   getDoc: (...args: unknown[]) => mockGetDoc(...args),
 }));
@@ -58,7 +43,6 @@ vi.mock("../../src/firebase", () => ({
 }));
 
 import {
-  clearIdentityRecovery,
   reclaimIdentity,
   getRecoveryCode,
   rotateRecoveryCode,
@@ -68,29 +52,6 @@ import {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockWriteBatch.mockReturnValue(mockBatch);
-});
-
-// ── clearIdentityRecovery ─────────────────────────────────────────────────
-
-describe("clearIdentityRecovery", () => {
-  it("deletes the identityRecovery entry by code", async () => {
-    await clearIdentityRecovery("uid-1", "DH-CODE-CLER");
-
-    expect(mockBatchDelete).toHaveBeenCalledWith("identityRecovery/DH-CODE-CLER");
-  });
-
-  it("deletes the identitySecret entry by uid", async () => {
-    await clearIdentityRecovery("uid-1", "DH-CODE-CLER");
-
-    expect(mockBatchDelete).toHaveBeenCalledWith("identitySecret/uid-1");
-  });
-
-  it("commits the batch exactly once", async () => {
-    await clearIdentityRecovery("uid-1", "DH-CODE-CLER");
-
-    expect(mockBatchCommit).toHaveBeenCalledOnce();
-  });
 });
 
 // ── reclaimIdentity ───────────────────────────────────────────────────────
