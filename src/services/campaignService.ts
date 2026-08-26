@@ -1,26 +1,14 @@
 // src/services/campaignService.ts
 // Firestore operations for campaign documents.
 
-import {
-  collection,
-  doc,
-  getDoc,
-  serverTimestamp,
-  setDoc,
-  updateDoc,
-  type DocumentReference,
-} from "firebase/firestore";
-import { db } from "../firebase";
+import { collection, doc, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
+import { httpsCallable } from "firebase/functions";
+import { db, functions } from "../firebase";
 import type { CampaignDocument } from "../types/Firestore";
-import { deleteRefsAtomically } from "../utils/firestoreBatchDelete";
 import { validateCampaignName } from "../utils/validation";
 import { assertFirestoreDocumentId, assertString } from "../utils/firebaseValidation";
 import { runSingleFlight } from "../utils/singleFlight";
-import {
-  assertSafeDestructivePreflight,
-  BoundedDeletionCollector,
-  type DestructiveOperationPreflight,
-} from "../utils/destructiveOperationPreflight";
+import { driveJobToCompletion } from "../utils/bulkJobClient";
 
 /**
  * Creates a new campaign owned by the given DM.
@@ -89,92 +77,44 @@ export async function restoreCampaign(campaignId: string): Promise<void> {
   );
 }
 
-interface CampaignDeletionPlan {
-  preflight: DestructiveOperationPreflight;
-  references: DocumentReference[];
-}
+const callStartCampaignDeletionJob = httpsCallable<
+  { campaignId: string },
+  { jobId: string; totalCount: number }
+>(functions, "startCampaignDeletionJob");
 
-async function buildCampaignDeletionPlan(campaignId: string): Promise<CampaignDeletionPlan> {
-  assertFirestoreDocumentId(campaignId, "Campaign ID");
-  const collector = new BoundedDeletionCollector();
-  const campaignRef = doc(db, "campaigns", campaignId);
-  const campaignSnapshot = await getDoc(campaignRef);
-  collector.addSnapshot(campaignSnapshot, "campaigns");
+const callProcessCampaignDeletionChunk = httpsCallable<
+  { jobId: string },
+  { done: boolean; processedCount: number; totalCount: number }
+>(functions, "processCampaignDeletionChunk");
 
-  if (!campaignSnapshot.exists()) {
-    return { preflight: collector.result(false), references: [] };
-  }
-
-  let unsafeReason: string | undefined;
-  const characters = await collector.addQuery(
-    collection(db, "campaigns", campaignId, "characters"),
-    "characters"
-  );
-  for (const character of characters) {
-    if (collector.exceeded) break;
-    await collector.addQuery(collection(character.ref, "claimLog"), "claimLogs");
-    if (collector.exceeded) break;
-    await collector.addQuery(collection(character.ref, "xpProposals"), "xpProposals");
-    if (collector.exceeded) break;
-
-    const recoveryCode = (character.data() as { recoveryCode?: unknown }).recoveryCode;
-    if (typeof recoveryCode !== "string" || !/^DH-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(recoveryCode)) {
-      unsafeReason ??=
-        "At least one character has no usable Recovery Code, so its Recovery Index cannot be removed safely.";
-      continue;
-    }
-    collector.addSnapshot(await getDoc(doc(db, "recoveryIndex", recoveryCode)), "recoveryIndex");
-  }
-
-  if (!collector.exceeded) {
-    await collector.addQuery(collection(db, "campaigns", campaignId, "sessions"), "sessions");
-  }
-
-  if (!collector.exceeded) {
-    const threads = await collector.addQuery(
-      collection(db, "campaigns", campaignId, "threads"),
-      "threads"
-    );
-    for (const thread of threads) {
-      if (collector.exceeded) break;
-      await collector.addQuery(collection(thread.ref, "messages"), "messages");
-    }
-  }
-
-  if (!collector.exceeded) {
-    const customItems = await collector.addQuery(
-      collection(db, "campaigns", campaignId, "customItems"),
-      "customItems"
-    );
-    for (const customItem of customItems) {
-      if (collector.exceeded) break;
-      await collector.addQuery(collection(customItem.ref, "versions"), "customItemVersions");
-    }
-  }
-
-  const preflight = collector.result(true, unsafeReason);
-  return {
-    preflight,
-    references: preflight.safe ? collector.references() : [],
-  };
-}
-
+/**
+ * Starts a resumable campaign-deletion job and returns its exact document
+ * count, without deleting anything yet — the preview step for a delete
+ * confirmation. Pass the returned jobId to deleteCampaign to run it.
+ */
 export async function preflightCampaignDeletion(
   campaignId: string
-): Promise<DestructiveOperationPreflight> {
-  return (await buildCampaignDeletionPlan(campaignId)).preflight;
+): Promise<{ jobId: string; totalCount: number }> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  const { data } = await callStartCampaignDeletionJob({ campaignId });
+  return data;
 }
 
 /**
- * Deletes a campaign and all known descendants in one atomic batch after a
- * bounded preflight. Campaigns over the client safety ceiling wait for the
- * protected resumable bulk job instead of being partially deleted.
+ * Drives a campaign-deletion job (from preflightCampaignDeletion) to
+ * completion via the resumable startCampaignDeletionJob/
+ * processCampaignDeletionChunk Functions, chunked and resumable if a call
+ * drops mid-way. onProgress, if given, is called after each chunk.
  */
-export async function deleteCampaign(campaignId: string): Promise<void> {
-  assertFirestoreDocumentId(campaignId, "Campaign ID");
-  await runSingleFlight("campaign:delete", [campaignId], async () => {
-    const plan = await buildCampaignDeletionPlan(campaignId);
-    assertSafeDestructivePreflight(plan.preflight, "Campaign");
-    await deleteRefsAtomically(db, plan.references);
-  });
+export async function deleteCampaign(
+  jobId: string,
+  onProgress?: (progress: { processedCount: number; totalCount: number }) => void
+): Promise<void> {
+  await runSingleFlight("campaign:delete", [jobId], () =>
+    driveJobToCompletion(
+      jobId,
+      async (id) => (await callProcessCampaignDeletionChunk({ jobId: id })).data,
+      (chunk) => onProgress?.({ processedCount: chunk.processedCount, totalCount: chunk.totalCount })
+    )
+  );
 }

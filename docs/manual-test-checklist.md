@@ -1083,7 +1083,7 @@ For each boundary, try the largest valid value and then one unit over it. For ro
 - [ ] Delete a character with far more dependent documents than a single batch could hold — the confirm button shows live chunk progress (e.g. "Deleting… (400/1200)") and every dependent document is eventually removed
 - [ ] Delete a character while forcing a chunk to fail partway through — documents already deleted in earlier chunks stay deleted; re-arming and confirming again finishes the deletion without orphaning or duplicating anything
 - [ ] Open permanent campaign deletion for both an active and archived campaign — the exact combined count for the campaign and all known descendants appears before typed confirmation can complete
-- [ ] Seed a campaign deletion above 440 documents — confirmation stays disabled, the protected-bulk-job explanation appears and no descendant or campaign document is removed
+- [ ] Seed a campaign deletion with far more descendants than a single batch could hold — typed confirmation still completes, showing live chunk progress, rather than staying disabled above a fixed document ceiling
 - [ ] Apply session XP with two attendees — the button reports 3 affected documents; after application, delete the session and toggle XP reversal to see the impact change from 1 to 3 before confirming
 - [ ] Corrupt a stored applied session with duplicate, invalid or over-limit attendees, then request XP reversal — the transaction stops before updating a character or deleting the session
 - [ ] Open Archive or Update All Copies for a custom item — the confirmation reports affected character documents and linked copies before enabling the action, and the committed changes match that count

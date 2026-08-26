@@ -30,7 +30,6 @@ import {
   restoreCampaign,
   updateCampaignName,
 } from "../services/campaignService";
-import type { DestructiveOperationPreflight } from "../utils/destructiveOperationPreflight";
 import type { CampaignWithId, CharacterListItem } from "../types/Firestore";
 import { uiSection, editableInputClass, uiTextError } from "../ui/editableStyles";
 import { Button } from "../ui/Button";
@@ -57,7 +56,7 @@ interface Props {
 
 interface DeletePreflightState {
   loading: boolean;
-  result?: DestructiveOperationPreflight;
+  result?: { jobId: string; totalCount: number };
   error?: string;
 }
 
@@ -67,11 +66,8 @@ function deleteImpactDetails(state?: DeletePreflightState) {
   if (state.error) return <span className="text-xs text-red-400">{state.error}</span>;
   if (!state.result) return null;
   return (
-    <span className={state.result.safe ? "text-xs text-slate-500" : "text-xs text-red-400"}>
-      {state.result.safe
-        ? `This permanently deletes ${state.result.affectedDocuments} document${state.result.affectedDocuments === 1 ? "" : "s"}.`
-        : (state.result.reason ??
-          `This affects more than ${state.result.limit} documents and is disabled until the protected bulk job is available.`)}
+    <span className="text-xs text-slate-500">
+      {`This permanently deletes ${state.result.totalCount} document${state.result.totalCount === 1 ? "" : "s"}.`}
     </span>
   );
 }
@@ -219,6 +215,9 @@ function DmCampaignList({
   const [editing, setEditing] = useState(false);
   const editingRef = useRef(false);
   const [deleting, setDeleting] = useState(false);
+  const [deleteProgress, setDeleteProgress] = useState<
+    { processedCount: number; totalCount: number } | null
+  >(null);
   const [deletePreflights, setDeletePreflights] = useState<Record<string, DeletePreflightState>>(
     {}
   );
@@ -307,9 +306,12 @@ function DmCampaignList({
 
   const handleDeleteConfirm = useCallback(
     async (campaignId: string) => {
+      const jobId = deletePreflights[campaignId]?.result?.jobId;
+      if (!jobId) return;
       setDeleting(true);
+      setDeleteProgress(null);
       try {
-        await deleteCampaign(campaignId);
+        await deleteCampaign(jobId, setDeleteProgress);
         toast.success("Campaign deleted.");
       } catch (err) {
         console.error("Failed to delete campaign:", err);
@@ -318,9 +320,10 @@ function DmCampaignList({
         );
       } finally {
         setDeleting(false);
+        setDeleteProgress(null);
       }
     },
-    [toast]
+    [deletePreflights, toast]
   );
 
   const loadDeletePreflight = useCallback(async (campaignId: string) => {
@@ -447,8 +450,15 @@ function DmCampaignList({
                     busy={deleting}
                     onArm={() => loadDeletePreflight(campaign.id)}
                     details={deleteImpactDetails(deletePreflights[campaign.id])}
-                    confirmDisabled={!deletePreflights[campaign.id]?.result?.safe}
+                    confirmDisabled={
+                      deletePreflights[campaign.id]?.loading || !deletePreflights[campaign.id]?.result
+                    }
                     onConfirm={() => handleDeleteConfirm(campaign.id)}
+                    busyLabel={
+                      deleteProgress && deleteProgress.totalCount > 0
+                        ? `Deleting… (${deleteProgress.processedCount}/${deleteProgress.totalCount})`
+                        : "Deleting…"
+                    }
                   />
                 </Link>
               )
@@ -501,8 +511,15 @@ function DmCampaignList({
                       busy={deleting}
                       onArm={() => loadDeletePreflight(campaign.id)}
                       details={deleteImpactDetails(deletePreflights[campaign.id])}
-                      confirmDisabled={!deletePreflights[campaign.id]?.result?.safe}
+                      confirmDisabled={
+                        deletePreflights[campaign.id]?.loading || !deletePreflights[campaign.id]?.result
+                      }
                       onConfirm={() => handleDeleteConfirm(campaign.id)}
+                      busyLabel={
+                        deleteProgress && deleteProgress.totalCount > 0
+                          ? `Deleting… (${deleteProgress.processedCount}/${deleteProgress.totalCount})`
+                          : "Deleting…"
+                      }
                     />
                   </div>
                 ))}

@@ -1,93 +1,56 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
-  mockBatch,
-  mockBatchDeleteRefs,
-  mockDeleteCharacter,
-  mockDeleteDoc,
   mockDoc,
-  mockGetDoc,
-  mockGetDocs,
   mockServerTimestamp,
   mockSetDoc,
   mockUpdateDoc,
+  mockCallStartCampaignDeletionJob,
+  mockCallProcessCampaignDeletionChunk,
 } = vi.hoisted(() => ({
-  mockBatch: {
-    commit: vi.fn().mockResolvedValue(undefined),
-    delete: vi.fn(),
-  },
-  mockBatchDeleteRefs: vi.fn().mockResolvedValue(undefined),
-  mockDeleteCharacter: vi.fn().mockResolvedValue(undefined),
-  mockDeleteDoc: vi.fn().mockResolvedValue(undefined),
   mockDoc: vi.fn((...args: unknown[]) => args.slice(1).join("/")),
-  mockGetDoc: vi.fn(),
-  mockGetDocs: vi.fn(),
   mockServerTimestamp: vi.fn(() => "server-timestamp"),
   mockSetDoc: vi.fn().mockResolvedValue(undefined),
   mockUpdateDoc: vi.fn().mockResolvedValue(undefined),
+  mockCallStartCampaignDeletionJob: vi.fn(),
+  mockCallProcessCampaignDeletionChunk: vi.fn(),
 }));
 
 vi.mock("firebase/firestore", () => ({
   collection: (...args: unknown[]) =>
     args.length === 2 ? args.join("/") : args.slice(1).join("/"),
-  deleteDoc: (...args: unknown[]) => mockDeleteDoc(...args),
-  documentId: () => "__name__",
   doc: (...args: unknown[]) => mockDoc(...args),
-  getDoc: (...args: unknown[]) => mockGetDoc(...args),
-  getDocs: (...args: unknown[]) => mockGetDocs(...args),
-  limit: (value: number) => ({ type: "limit", value }),
-  orderBy: (...args: unknown[]) => ({ type: "orderBy", args }),
-  query: (source: unknown) => source,
   serverTimestamp: () => mockServerTimestamp(),
   setDoc: (...args: unknown[]) => mockSetDoc(...args),
-  startAfter: (...args: unknown[]) => ({ type: "startAfter", args }),
   updateDoc: (...args: unknown[]) => mockUpdateDoc(...args),
-  writeBatch: () => mockBatch,
+}));
+
+vi.mock("firebase/functions", () => ({
+  httpsCallable: vi.fn((_functions: unknown, name: string) => {
+    if (name === "startCampaignDeletionJob") return mockCallStartCampaignDeletionJob;
+    if (name === "processCampaignDeletionChunk") return mockCallProcessCampaignDeletionChunk;
+    throw new Error(`Unexpected callable: ${name}`);
+  }),
 }));
 
 vi.mock("../../src/firebase", () => ({
   db: "mock-db",
-}));
-
-vi.mock("../../src/utils/firestoreBatchDelete", () => ({
-  deleteRefsAtomically: (...args: unknown[]) => mockBatchDeleteRefs(...args),
-}));
-
-vi.mock("../../src/services/characterService", () => ({
-  deleteCharacter: (...args: unknown[]) => mockDeleteCharacter(...args),
+  functions: "mock-functions",
 }));
 
 import {
   archiveCampaign,
   createCampaign,
   deleteCampaign,
+  preflightCampaignDeletion,
   restoreCampaign,
   updateCampaignName,
 } from "../../src/services/campaignService";
 
-// A fake QuerySnapshot: `getDocs` is stubbed per collection path below.
-function snapshot(docs: { id: string; ref: string; data?: Record<string, unknown> }[]) {
-  return {
-    docs: docs.map((d) => ({ id: d.id, ref: d.ref, data: () => d.data ?? {} })),
-    empty: docs.length === 0,
-  };
-}
-
-const emptySnapshot = snapshot([]);
-
 beforeEach(() => {
   vi.clearAllMocks();
   mockUpdateDoc.mockResolvedValue(undefined);
-  mockBatchDeleteRefs.mockResolvedValue(undefined);
-  mockDeleteCharacter.mockResolvedValue(undefined);
-  mockDeleteDoc.mockResolvedValue(undefined);
-  mockBatch.commit.mockResolvedValue(undefined);
   mockSetDoc.mockResolvedValue(undefined);
-  mockGetDoc.mockImplementation(async (reference: string) => ({
-    ref: reference,
-    exists: () => true,
-    data: () => ({}),
-  }));
 });
 
 describe("campaign input validation", () => {
@@ -153,72 +116,74 @@ describe("campaign archive operations", () => {
   });
 });
 
-describe("deleteCampaign", () => {
-  it("preflights every known descendant and deletes the complete plan atomically", async () => {
-    mockGetDocs.mockImplementation(async (path: string) => {
-      switch (path) {
-        case "campaigns/camp-1/characters":
-          return snapshot([
-            {
-              id: "char-1",
-              ref: "campaigns/camp-1/characters/char-1",
-              data: { recoveryCode: "DH-AAAA-1111" },
-            },
-          ]);
-        case "campaigns/camp-1/sessions":
-          return snapshot([{ id: "sess-1", ref: "campaigns/camp-1/sessions/sess-1" }]);
-        case "campaigns/camp-1/threads":
-          return snapshot([{ id: "char-1", ref: "campaigns/camp-1/threads/char-1" }]);
-        case "campaigns/camp-1/threads/char-1/messages":
-          return snapshot([{ id: "msg-1", ref: "campaigns/camp-1/threads/char-1/messages/msg-1" }]);
-        case "campaigns/camp-1/customItems":
-          return snapshot([{ id: "item-1", ref: "campaigns/camp-1/customItems/item-1" }]);
-        case "campaigns/camp-1/customItems/item-1/versions":
-          return snapshot([
-            { id: "ver-1", ref: "campaigns/camp-1/customItems/item-1/versions/ver-1" },
-          ]);
-        default:
-          return emptySnapshot;
-      }
+describe("preflightCampaignDeletion", () => {
+  it("calls the Function and returns the job id and total count", async () => {
+    mockCallStartCampaignDeletionJob.mockResolvedValue({
+      data: { jobId: "job-1", totalCount: 12 },
     });
 
-    await deleteCampaign("camp-1");
+    const result = await preflightCampaignDeletion("camp-1");
 
-    expect(mockBatchDeleteRefs).toHaveBeenCalledOnce();
-    expect(mockBatchDeleteRefs).toHaveBeenCalledWith(
-      "mock-db",
-      expect.arrayContaining([
-        "campaigns/camp-1",
-        "campaigns/camp-1/characters/char-1",
-        "recoveryIndex/DH-AAAA-1111",
-        "campaigns/camp-1/sessions/sess-1",
-        "campaigns/camp-1/threads/char-1",
-        "campaigns/camp-1/threads/char-1/messages/msg-1",
-        "campaigns/camp-1/customItems/item-1",
-        "campaigns/camp-1/customItems/item-1/versions/ver-1",
-      ])
+    expect(mockCallStartCampaignDeletionJob).toHaveBeenCalledWith({ campaignId: "camp-1" });
+    expect(result).toEqual({ jobId: "job-1", totalCount: 12 });
+  });
+
+  it("propagates a rejection when a character has no usable Recovery Code", async () => {
+    const error = new Error(
+      "At least one character has no usable Recovery Code, so its Recovery Index cannot be removed safely."
     );
-  });
+    mockCallStartCampaignDeletionJob.mockRejectedValue(error);
 
-  it("stops before deleting when a character has no usable Recovery Code", async () => {
-    mockGetDocs.mockImplementation(async (path: string) => {
-      if (path === "campaigns/camp-2/characters") {
-        return snapshot([{ id: "char-1", ref: "campaigns/camp-2/characters/char-1", data: {} }]);
-      }
-      return emptySnapshot;
+    await expect(preflightCampaignDeletion("camp-2")).rejects.toBe(error);
+  });
+});
+
+describe("deleteCampaign", () => {
+  beforeEach(() => {
+    mockCallProcessCampaignDeletionChunk.mockResolvedValue({
+      data: { done: true, processedCount: 12, totalCount: 12 },
     });
-
-    await expect(deleteCampaign("camp-2")).rejects.toThrow("no usable Recovery Code");
-
-    expect(mockBatchDeleteRefs).not.toHaveBeenCalled();
   });
 
-  it("propagates failures from the atomic delete without falling back to partial writes", async () => {
-    mockGetDocs.mockResolvedValue(emptySnapshot);
-    const error = new Error("delete failed");
-    mockBatchDeleteRefs.mockRejectedValueOnce(error);
+  it("drives the job to completion", async () => {
+    await deleteCampaign("job-1");
 
-    await expect(deleteCampaign("camp-3")).rejects.toBe(error);
-    expect(mockDeleteDoc).not.toHaveBeenCalled();
+    expect(mockCallProcessCampaignDeletionChunk).toHaveBeenCalledWith({ jobId: "job-1" });
+  });
+
+  it("keeps calling process until the job reports done, reporting progress", async () => {
+    mockCallProcessCampaignDeletionChunk
+      .mockResolvedValueOnce({ data: { done: false, processedCount: 6, totalCount: 12 } })
+      .mockResolvedValueOnce({ data: { done: true, processedCount: 12, totalCount: 12 } });
+    const onProgress = vi.fn();
+
+    await deleteCampaign("job-1", onProgress);
+
+    expect(mockCallProcessCampaignDeletionChunk).toHaveBeenCalledTimes(2);
+    expect(onProgress).toHaveBeenNthCalledWith(1, { processedCount: 6, totalCount: 12 });
+    expect(onProgress).toHaveBeenNthCalledWith(2, { processedCount: 12, totalCount: 12 });
+  });
+
+  it("propagates failures from the chunk Function", async () => {
+    const error = new Error("delete failed");
+    mockCallProcessCampaignDeletionChunk.mockRejectedValueOnce(error);
+
+    await expect(deleteCampaign("job-1")).rejects.toBe(error);
+  });
+
+  it("reuses one in-flight drive for a duplicate call with the same jobId", async () => {
+    let finish!: (value: unknown) => void;
+    const pending = new Promise((resolve) => {
+      finish = resolve;
+    });
+    mockCallProcessCampaignDeletionChunk.mockReturnValueOnce(pending);
+
+    const first = deleteCampaign("job-1");
+    const duplicate = deleteCampaign("job-1");
+    await Promise.resolve();
+
+    expect(mockCallProcessCampaignDeletionChunk).toHaveBeenCalledOnce();
+    finish({ data: { done: true, processedCount: 12, totalCount: 12 } });
+    await Promise.all([first, duplicate]);
   });
 });
