@@ -1,19 +1,13 @@
 // src/pages/Dashboard.tsx
 //
 // Unified dashboard — shows both sections on one screen:
-//   • DM section  (create / manage campaigns, QR codes) — hidden when installMode is "player"
+//   • DM section  (create / manage campaigns, QR codes)
 //   • Player section (campaigns you play in, claim character)
-//
-// installMode is set permanently in localStorage the first time the app is
-// opened with ?invite=player in the URL. Player-only installs never see the
-// DM section and can never become a DM.
 
 import { useState, useCallback, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { QRCodeSVG } from "qrcode.react";
 import type { User } from "firebase/auth";
 import { useCampaignsContext } from "../context/useCampaignsContext";
-import { useInstallMode } from "../hooks/useInstallMode";
 import { usePlayerCharacters } from "../hooks/usePlayerCharacters";
 import { useArchivedCampaigns } from "../hooks/useArchivedCampaigns";
 import { useToast } from "../components/Toast";
@@ -34,10 +28,9 @@ import type { CampaignWithId, CharacterListItem } from "../types/Firestore";
 import { uiSection, editableInputClass, uiTextError } from "../ui/editableStyles";
 import { Button } from "../ui/Button";
 import { ExpandChevron } from "../ui/ExpandChevron";
-import { ModalHeader } from "../ui/ModalHeader";
-import { ModalShell } from "../ui/ModalShell";
 import { PageShell } from "../ui/PageShell";
 import { Panel } from "../ui/Panel";
+import { QrModal } from "../ui/QrModal";
 import { SectionHeader } from "../ui/SectionHeader";
 import { ErrorState } from "../ui/ErrorState";
 import { LoadingState } from "../ui/LoadingState";
@@ -532,50 +525,22 @@ function DmCampaignList({
   );
 }
 
-// ─── QR code modal ────────────────────────────────────────────────────────────
-
-function QrModal({ title, url, onClose }: { title: string; url: string; onClose: () => void }) {
-  return (
-    <ModalShell
-      ariaLabel={title}
-      onClose={onClose}
-      className="max-w-xs lg:max-w-sm overflow-y-auto"
-    >
-      <ModalHeader title={title} onClose={onClose} />
-      <div className="p-5 lg:p-6 space-y-4">
-        <div className="p-3 bg-white rounded-lg flex justify-center">
-          <QRCodeSVG value={url} size={220} />
-        </div>
-        <p className="text-xs lg:text-sm text-slate-500 break-all text-center">{url}</p>
-      </div>
-    </ModalShell>
-  );
-}
+// ─── QR code panel ────────────────────────────────────────────────────────────
 
 function QrPanel() {
-  const [open, setOpen] = useState<"full" | "player" | null>(null);
-  const origin = window.location.origin;
-  const fullUrl = `${origin}?invite=full`;
-  const playerUrl = `${origin}?invite=player`;
+  const [open, setOpen] = useState(false);
+  const url = window.location.origin;
 
   return (
     <>
       <div>
         <SectionHeader className="mb-3">Share App</SectionHeader>
-        <div className="flex gap-2">
-          <Button variant="secondary" className="flex-1" onClick={() => setOpen("full")}>
-            Share full app
-          </Button>
-          <Button variant="secondary" className="flex-1" onClick={() => setOpen("player")}>
-            Share player invite
-          </Button>
-        </div>
+        <Button variant="secondary" className="w-full" onClick={() => setOpen(true)}>
+          Share App
+        </Button>
       </div>
 
-      {open === "full" && <QrModal title="Full App" url={fullUrl} onClose={() => setOpen(null)} />}
-      {open === "player" && (
-        <QrModal title="Player Invite" url={playerUrl} onClose={() => setOpen(null)} />
-      )}
+      {open && <QrModal title="Share App" url={url} onClose={() => setOpen(false)} />}
     </>
   );
 }
@@ -661,7 +626,6 @@ function ClaimCharacterSection() {
 export default function Dashboard({ user, effectiveUserId, isLinked, firstName }: Props) {
   const { dmCampaigns, playerCampaigns, dmLoading, playerLoading, dmError, playerError } =
     useCampaignsContext();
-  const installMode = useInstallMode();
   const {
     characters: playerCharacters,
     loading: playerCharactersLoading,
@@ -674,21 +638,17 @@ export default function Dashboard({ user, effectiveUserId, isLinked, firstName }
 
       <Panel>
         {/* ── DM section ───────────────────────────────────────────────── */}
-        {installMode === "full" && (
-          <>
-            <DmCampaignList
-              userUid={effectiveUserId}
-              campaigns={dmCampaigns}
-              loading={dmLoading}
-              error={dmError}
-            />
+        <DmCampaignList
+          userUid={effectiveUserId}
+          campaigns={dmCampaigns}
+          loading={dmLoading}
+          error={dmError}
+        />
 
-            {/* QR codes — only show once the user has at least one campaign */}
-            {dmCampaigns.length > 0 && !isLinked && <QrPanel />}
+        {/* QR codes — only show once the user has at least one campaign */}
+        {dmCampaigns.length > 0 && !isLinked && <QrPanel />}
 
-            <hr className="border-slate-700" />
-          </>
-        )}
+        <hr className="border-slate-700" />
 
         {/* ── Player section ───────────────────────────────────────────── */}
         <SectionHeader>Campaigns You Play In</SectionHeader>
