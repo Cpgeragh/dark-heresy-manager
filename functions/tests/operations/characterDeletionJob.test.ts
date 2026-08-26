@@ -29,6 +29,9 @@ const {
   mockRecoveryGet,
   mockRecoveryDelete,
   mockRecoveryDoc,
+  mockSummaryGet,
+  mockSummaryDelete,
+  mockSummaryDoc,
   mockBatchDelete,
   mockBatchCommit,
   claimLog,
@@ -59,6 +62,9 @@ const {
   const mockRecoveryGet = vi.fn();
   const mockRecoveryDelete = vi.fn();
   const mockRecoveryDoc = vi.fn(() => ({ get: mockRecoveryGet, delete: mockRecoveryDelete }));
+  const mockSummaryGet = vi.fn();
+  const mockSummaryDelete = vi.fn();
+  const mockSummaryDoc = vi.fn(() => ({ get: mockSummaryGet, delete: mockSummaryDelete }));
   const mockBatchDelete = vi.fn();
   const mockBatchCommit = vi.fn();
 
@@ -84,6 +90,7 @@ const {
     collection: vi.fn((name: string) => {
       if (name === "characters") return { doc: vi.fn(() => mockCharacterRef) };
       if (name === "threads") return { doc: vi.fn(() => mockThreadRef) };
+      if (name === "characterSummaries") return { doc: mockSummaryDoc };
       throw new Error(`Unexpected campaign subcollection: ${name}`);
     }),
   };
@@ -111,6 +118,9 @@ const {
     mockRecoveryGet,
     mockRecoveryDelete,
     mockRecoveryDoc,
+    mockSummaryGet,
+    mockSummaryDelete,
+    mockSummaryDoc,
     mockBatchDelete,
     mockBatchCommit,
     claimLog,
@@ -163,6 +173,7 @@ function makeJob(overrides: Partial<BulkJobRecord> = {}): BulkJobRecord {
 describe("startCharacterDeletionJob", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockSummaryGet.mockResolvedValue({ exists: false });
   });
 
   it("rejects when the campaign does not exist", async () => {
@@ -207,6 +218,7 @@ describe("startCharacterDeletionJob", () => {
     messages.countGet.mockResolvedValue({ data: () => ({ count: 250 }) });
     mockThreadGet.mockResolvedValue({ exists: true });
     mockRecoveryGet.mockResolvedValue({ exists: true });
+    mockSummaryGet.mockResolvedValue({ exists: true });
     mockCreateBulkJob.mockResolvedValue("job-1");
 
     const result = await startCharacterDeletionJob(
@@ -216,12 +228,12 @@ describe("startCharacterDeletionJob", () => {
       "secret"
     );
 
-    expect(result).toEqual({ jobId: "job-1", totalCount: 256 });
+    expect(result).toEqual({ jobId: "job-1", totalCount: 257 });
     expect(mockCreateBulkJob).toHaveBeenCalledWith(
       "character-deletion",
       DM_UID,
       { campaignId: CAMPAIGN_ID, characterId: CHARACTER_ID, recoveryCode: RECOVERY_CODE },
-      256,
+      257,
       "idem-key"
     );
   });
@@ -374,6 +386,39 @@ describe("processCharacterDeletionChunk", () => {
 
     expect(mockRecoveryDoc).toHaveBeenCalledWith(hashRecoveryCode(RECOVERY_CODE, "secret"));
     expect(mockRecoveryDelete).toHaveBeenCalled();
+  });
+
+  it("deletes the character summary when reaching the characterSummary phase", async () => {
+    mockAcquireJobLease.mockResolvedValue({
+      job: makeJob({ checkpoint: JSON.stringify({ phase: "characterSummary", cursor: null }) }),
+      leaseId: "lease-1",
+    });
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: DM_UID }) });
+    mockSummaryGet.mockResolvedValue({ exists: true });
+
+    const result = await processCharacterDeletionChunk({ jobId: "job-1" }, DM_UID, "secret");
+
+    expect(mockSummaryDelete).toHaveBeenCalled();
+    expect(mockAdvanceJobCheckpoint).toHaveBeenCalledWith(
+      "job-1",
+      "lease-1",
+      JSON.stringify({ phase: "character", cursor: null }),
+      1
+    );
+    expect(result.processedCount).toBe(1);
+  });
+
+  it("skips deleting the character summary when none exists", async () => {
+    mockAcquireJobLease.mockResolvedValue({
+      job: makeJob({ checkpoint: JSON.stringify({ phase: "characterSummary", cursor: null }) }),
+      leaseId: "lease-1",
+    });
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: DM_UID }) });
+    mockSummaryGet.mockResolvedValue({ exists: false });
+
+    await processCharacterDeletionChunk({ jobId: "job-1" }, DM_UID, "secret");
+
+    expect(mockSummaryDelete).not.toHaveBeenCalled();
   });
 
   it("completes the job after deleting the character document in the final phase", async () => {

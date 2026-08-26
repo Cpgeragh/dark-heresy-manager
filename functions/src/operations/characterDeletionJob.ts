@@ -27,13 +27,21 @@ import {
 
 const CHUNK_SIZE = 400;
 
-type Phase = "claimLog" | "xpProposals" | "messages" | "thread" | "recoveryIndex" | "character";
+type Phase =
+  | "claimLog"
+  | "xpProposals"
+  | "messages"
+  | "thread"
+  | "recoveryIndex"
+  | "characterSummary"
+  | "character";
 const PHASE_ORDER: readonly Phase[] = [
   "claimLog",
   "xpProposals",
   "messages",
   "thread",
   "recoveryIndex",
+  "characterSummary",
   "character",
 ];
 
@@ -89,14 +97,16 @@ export async function startCharacterDeletionJob(
 
   const threadRef = campaignRef.collection("threads").doc(input.characterId);
   const recoveryRef = db.collection("recoveryIndex").doc(hashRecoveryCode(recoveryCode, hmacSecret));
+  const summaryRef = campaignRef.collection("characterSummaries").doc(input.characterId);
 
-  const [claimLogCount, xpProposalsCount, messagesCount, threadSnapshot, recoverySnapshot] =
+  const [claimLogCount, xpProposalsCount, messagesCount, threadSnapshot, recoverySnapshot, summarySnapshot] =
     await Promise.all([
       characterRef.collection("claimLog").count().get(),
       characterRef.collection("xpProposals").count().get(),
       threadRef.collection("messages").count().get(),
       threadRef.get(),
       recoveryRef.get(),
+      summaryRef.get(),
     ]);
 
   const totalCount =
@@ -105,6 +115,7 @@ export async function startCharacterDeletionJob(
     messagesCount.data().count +
     (threadSnapshot.exists ? 1 : 0) +
     (recoverySnapshot.exists ? 1 : 0) +
+    (summarySnapshot.exists ? 1 : 0) +
     1;
 
   if (totalCount > MAX_JOB_TOTAL_COUNT) {
@@ -178,6 +189,15 @@ async function processPhase(
       return {
         processed: recoverySnapshot.exists ? 1 : 0,
         nextCheckpoint: { phase: nextPhase("recoveryIndex")!, cursor: null },
+      };
+    }
+    case "characterSummary": {
+      const summaryRef = campaignRef.collection("characterSummaries").doc(characterId);
+      const summarySnapshot = await summaryRef.get();
+      if (summarySnapshot.exists) await summaryRef.delete();
+      return {
+        processed: summarySnapshot.exists ? 1 : 0,
+        nextCheckpoint: { phase: nextPhase("characterSummary")!, cursor: null },
       };
     }
     case "character": {

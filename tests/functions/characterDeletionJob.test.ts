@@ -57,6 +57,8 @@ describe("Functions: character deletion job", () => {
       await threadRef.set({ characterId: characterRef.id });
       await threadRef.collection("messages").add({ text: "hello" });
       await threadRef.collection("messages").add({ text: "world" });
+      const summaryRef = campaignRef.collection("characterSummaries").doc(characterRef.id);
+      await summaryRef.set({ campaignId: campaignRef.id, characterName: "Test Acolyte" });
 
       const startJob = httpsCallable<
         { campaignId: string; characterId: string },
@@ -67,11 +69,11 @@ describe("Functions: character deletion job", () => {
         characterId: characterRef.id,
       });
 
-      expect(started.totalCount).toBe(6);
+      expect(started.totalCount).toBe(7);
 
       const final = await drainJob(started.jobId);
       expect(final.done).toBe(true);
-      expect(final.processedCount).toBe(6);
+      expect(final.processedCount).toBe(7);
 
       const lookupRecoveryCode = httpsCallable<{ code: string }, { status: string }>(
         getTestFunctions(),
@@ -79,6 +81,7 @@ describe("Functions: character deletion job", () => {
       );
       expect((await characterRef.get()).exists).toBe(false);
       expect((await threadRef.get()).exists).toBe(false);
+      expect((await summaryRef.get()).exists).toBe(false);
       expect((await lookupRecoveryCode({ code: recoveryCode })).data.status).toBe("not-found");
       expect((await characterRef.collection("claimLog").get()).empty).toBe(true);
       expect((await threadRef.collection("messages").get()).empty).toBe(true);
@@ -108,6 +111,8 @@ describe("Functions: character deletion job", () => {
       const threadRef = campaignRef.collection("threads").doc(characterRef.id);
       await threadRef.set({ characterId: characterRef.id });
       await threadRef.collection("messages").add({ text: "hello" });
+      const summaryRef = campaignRef.collection("characterSummaries").doc(characterRef.id);
+      await summaryRef.set({ campaignId: campaignRef.id, characterName: "Test Acolyte" });
 
       const startJob = httpsCallable<
         { campaignId: string; characterId: string },
@@ -118,8 +123,9 @@ describe("Functions: character deletion job", () => {
         characterId: characterRef.id,
       });
 
-      // 2 claimLog + 0 xpProposals + 1 message + 1 thread + 1 recoveryIndex + 1 character = 6
-      expect(started.totalCount).toBe(6);
+      // 2 claimLog + 0 xpProposals + 1 message + 1 thread + 1 recoveryIndex
+      // + 1 characterSummary + 1 character = 7
+      expect(started.totalCount).toBe(7);
 
       const processChunk = httpsCallable<{ jobId: string }, ChunkResult>(
         getTestFunctions(),
@@ -142,6 +148,7 @@ describe("Functions: character deletion job", () => {
       expect((await characterRef.collection("claimLog").get()).empty).toBe(true);
       expect((await threadRef.collection("messages").get()).docs).toHaveLength(1);
       expect((await threadRef.get()).exists).toBe(true);
+      expect((await summaryRef.get()).exists).toBe(true);
       expect((await lookupRecoveryCode({ code: recoveryCode })).data.status).toBe("found");
       expect((await characterRef.get()).exists).toBe(true);
 
@@ -153,9 +160,10 @@ describe("Functions: character deletion job", () => {
         result = response.data;
       }
 
-      expect(result.processedCount).toBe(6);
+      expect(result.processedCount).toBe(7);
       expect((await characterRef.get()).exists).toBe(false);
       expect((await threadRef.get()).exists).toBe(false);
+      expect((await summaryRef.get()).exists).toBe(false);
       expect((await lookupRecoveryCode({ code: recoveryCode })).data.status).toBe("not-found");
       expect((await threadRef.collection("messages").get()).empty).toBe(true);
     },

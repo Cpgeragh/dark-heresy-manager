@@ -34,6 +34,7 @@ type Phase =
   | "characterClaimLogs"
   | "characterXpProposals"
   | "characterRecoveryIndex"
+  | "characterSummaries"
   | "characters"
   | "sessions"
   | "threadMessages"
@@ -46,6 +47,7 @@ const PHASE_ORDER: readonly Phase[] = [
   "characterClaimLogs",
   "characterXpProposals",
   "characterRecoveryIndex",
+  "characterSummaries",
   "characters",
   "sessions",
   "threadMessages",
@@ -128,6 +130,7 @@ export async function startCampaignDeletionJob(
   );
 
   const sessionsCount = await campaignRef.collection("sessions").count().get();
+  const characterSummariesCount = await campaignRef.collection("characterSummaries").count().get();
 
   const sum = (counts: { data: () => { count: number } }[]) =>
     counts.reduce((total, c) => total + c.data().count, 0);
@@ -137,6 +140,7 @@ export async function startCampaignDeletionJob(
     sum(claimLogCounts) +
     sum(xpProposalCounts) +
     recoverySnapshots.filter((s) => s.exists).length +
+    characterSummariesCount.data().count +
     threads.length +
     sum(messageCounts) +
     customItems.length +
@@ -304,6 +308,8 @@ async function processPhase(
       );
     case "characterRecoveryIndex":
       return processRecoveryIndexPage(db, campaignRef.collection("characters"), checkpoint, hmacSecret);
+    case "characterSummaries":
+      return deleteFlatPage(campaignRef.collection("characterSummaries"), checkpoint, "characterSummaries");
     case "characters":
       return deleteFlatPage(campaignRef.collection("characters"), checkpoint, "characters");
     case "sessions":

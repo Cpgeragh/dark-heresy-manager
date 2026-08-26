@@ -68,17 +68,20 @@ describe("Functions: campaign deletion job", () => {
       await campaignRef.collection("sessions").add({ summary: "Session one" });
       await campaignRef.collection("sessions").add({ summary: "Session two" });
 
+      const summaryRef = campaignRef.collection("characterSummaries").doc(characterRef.id);
+      await summaryRef.set({ campaignId: campaignRef.id, characterName: "Test Acolyte" });
+
       const startJob = httpsCallable<{ campaignId: string }, { jobId: string; totalCount: number }>(
         getTestFunctions(),
         "startCampaignDeletionJob"
       );
       const { data: started } = await startJob({ campaignId: campaignRef.id });
 
-      expect(started.totalCount).toBe(12);
+      expect(started.totalCount).toBe(13);
 
       const final = await drainJob(started.jobId);
       expect(final.done).toBe(true);
-      expect(final.processedCount).toBe(12);
+      expect(final.processedCount).toBe(13);
 
       const lookupRecoveryCode = httpsCallable<{ code: string }, { status: string }>(
         getTestFunctions(),
@@ -88,6 +91,7 @@ describe("Functions: campaign deletion job", () => {
       expect((await characterRef.get()).exists).toBe(false);
       expect((await threadRef.get()).exists).toBe(false);
       expect((await customItemRef.get()).exists).toBe(false);
+      expect((await summaryRef.get()).exists).toBe(false);
       expect((await lookupRecoveryCode({ code: recoveryCode })).data.status).toBe("not-found");
       expect((await characterRef.collection("claimLog").get()).empty).toBe(true);
       expect((await characterRef.collection("xpProposals").get()).empty).toBe(true);

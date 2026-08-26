@@ -30,6 +30,7 @@ const {
   threads,
   customItems,
   sessions,
+  characterSummaries,
   claimLogChild,
   xpProposalsChild,
   messagesChild,
@@ -89,6 +90,7 @@ const {
   }));
 
   const sessions = makeCollectionMock();
+  const characterSummaries = makeCollectionMock();
 
   const mockCampaignGet = vi.fn();
   const mockCampaignDelete = vi.fn();
@@ -100,6 +102,7 @@ const {
       if (name === "threads") return threads.ref;
       if (name === "customItems") return customItems.ref;
       if (name === "sessions") return sessions.ref;
+      if (name === "characterSummaries") return characterSummaries.ref;
       throw new Error(`Unexpected campaign subcollection: ${name}`);
     }),
   };
@@ -141,6 +144,7 @@ const {
     threads,
     customItems,
     sessions,
+    characterSummaries,
     claimLogChild,
     xpProposalsChild,
     messagesChild,
@@ -251,6 +255,7 @@ describe("startCampaignDeletionJob", () => {
       docs: [{ ref: { collection: () => ({ count: () => ({ get: () => Promise.resolve({ data: () => ({ count: 3 }) }) }) }) } }],
     });
     sessions.countGet.mockResolvedValue({ data: () => ({ count: 4 }) });
+    characterSummaries.countGet.mockResolvedValue({ data: () => ({ count: 2 }) });
     mockRecoveryGetImpl.mockImplementation((hash: string) =>
       Promise.resolve({ exists: hash === hashRecoveryCode("DH-AAAA-1111", "secret") })
     );
@@ -259,14 +264,15 @@ describe("startCampaignDeletionJob", () => {
     const result = await startCampaignDeletionJob({ campaignId: CAMPAIGN_ID }, DM_UID, "idem-key", "secret");
 
     // 2 characters + (2+1 claimLog/xp for char-1) + (0+0 for char-2)
-    // + 1 recoveryIndex entry (only char-1's exists) + 1 thread + 5 messages
-    // + 1 customItem + 3 versions + 4 sessions + 1 campaign = 21
-    expect(result).toEqual({ jobId: "job-1", totalCount: 21 });
+    // + 1 recoveryIndex entry (only char-1's exists) + 2 characterSummaries
+    // + 1 thread + 5 messages + 1 customItem + 3 versions + 4 sessions
+    // + 1 campaign = 23
+    expect(result).toEqual({ jobId: "job-1", totalCount: 23 });
     expect(mockCreateBulkJob).toHaveBeenCalledWith(
       "campaign-deletion",
       DM_UID,
       { campaignId: CAMPAIGN_ID },
-      21,
+      23,
       "idem-key"
     );
   });
@@ -277,6 +283,7 @@ describe("startCampaignDeletionJob", () => {
     threads.pageGet.mockResolvedValue({ docs: [] });
     customItems.pageGet.mockResolvedValue({ docs: [] });
     sessions.countGet.mockResolvedValue({ data: () => ({ count: 20_000 }) });
+    characterSummaries.countGet.mockResolvedValue({ data: () => ({ count: 0 }) });
 
     await expect(
       startCampaignDeletionJob({ campaignId: CAMPAIGN_ID }, DM_UID, "idem-key", "secret")
@@ -450,6 +457,27 @@ describe("processCampaignDeletionChunk", () => {
     expect(mockRecoveryDoc).toHaveBeenCalledWith(hashRecoveryCode("DH-BBBB-2222", "secret"));
     expect(mockBatchDelete).toHaveBeenCalledTimes(1);
     expect(result.processedCount).toBe(1);
+  });
+
+  it("deletes a flat characterSummaries page and moves to the next phase when short", async () => {
+    mockAcquireJobLease.mockResolvedValue({
+      job: makeJob({
+        checkpoint: JSON.stringify({ phase: "characterSummaries", parentCursor: null, cursor: null }),
+      }),
+      leaseId: "lease-1",
+    });
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: DM_UID }) });
+    characterSummaries.pageGet.mockResolvedValue({ empty: false, docs: [{ id: "char-1", ref: {} }] });
+
+    await processCampaignDeletionChunk({ jobId: "job-1" }, DM_UID, "secret");
+
+    expect(mockBatchDelete).toHaveBeenCalledTimes(1);
+    expect(mockAdvanceJobCheckpoint).toHaveBeenCalledWith(
+      "job-1",
+      "lease-1",
+      JSON.stringify({ phase: "characters", parentCursor: null, cursor: null }),
+      1
+    );
   });
 
   it("deletes the campaign document and completes the job in the final phase", async () => {
