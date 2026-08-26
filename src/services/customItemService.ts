@@ -10,19 +10,15 @@ import {
   writeBatch,
   type DocumentReference,
 } from "firebase/firestore";
-import { db } from "../firebase";
-import { charactersCollectionRef } from "../firebase/converters";
-import type { Character } from "../types/Character";
+import { httpsCallable } from "firebase/functions";
+import { db, functions } from "../firebase";
 import type {
   CampaignCustomItem,
   CampaignCustomItemVersion,
-  CustomArmourData,
   CustomItemCategory,
   CustomItemCreator,
   CustomItemDataByCategory,
   CustomItemStatus,
-  CustomPsychicPowerData,
-  CustomWeaponData,
 } from "../types/CustomItems";
 import { stripUndefined } from "../utils/stripUndefined";
 import { runSingleFlight } from "../utils/singleFlight";
@@ -38,6 +34,7 @@ import {
   type DestructiveOperationPreflight,
 } from "../utils/destructiveOperationPreflight";
 import { deleteRefsAtomically } from "../utils/firestoreBatchDelete";
+import { driveJobToCompletion } from "../utils/bulkJobClient";
 
 export interface CreateDraftCustomItemArgs<TCategory extends CustomItemCategory> {
   campaignId: string;
@@ -72,19 +69,6 @@ export interface CustomItemOperationPreflight extends DestructiveOperationPrefli
   affectedCharacterDocuments: number;
   affectedCopies: number;
   scannedCharacters: number;
-}
-
-interface CharacterMutation {
-  reference: DocumentReference;
-  fields: Partial<Character>;
-}
-
-interface CustomItemMutationPlan {
-  preflight: CustomItemOperationPreflight;
-  mutations: CharacterMutation[];
-  item?: CampaignCustomItem;
-  version?: CampaignCustomItemVersion;
-  versionId?: string;
 }
 
 export function customItemsCollectionRef(campaignId: string) {
@@ -362,178 +346,6 @@ function customItemPreflight(
   };
 }
 
-async function buildCustomItemMutationPlan({
-  campaignId,
-  customItemId,
-  mode,
-  versionId,
-  fixedDocuments,
-}: {
-  campaignId: string;
-  customItemId: string;
-  mode: "update" | "remove";
-  versionId?: string;
-  fixedDocuments: number;
-}): Promise<CustomItemMutationPlan> {
-  assertFirestoreDocumentId(campaignId, "Campaign ID");
-  assertFirestoreDocumentId(customItemId, "Custom-item ID");
-  if (versionId !== undefined) assertFirestoreDocumentId(versionId, "Version ID");
-
-  const itemSnap = await getDoc(customItemDocRef(campaignId, customItemId));
-  if (!itemSnap.exists()) {
-    return {
-      preflight: customItemPreflight(0, false, 0, 0, 0),
-      mutations: [],
-    };
-  }
-
-  const item = itemSnap.data() as CampaignCustomItem;
-  let version: CampaignCustomItemVersion | undefined;
-  let targetVersionId: string | undefined;
-  if (mode === "update") {
-    targetVersionId =
-      versionId ?? item.draftVersionId ?? item.publishedVersionId ?? item.latestVersionId;
-    if (!targetVersionId) {
-      return {
-        preflight: customItemPreflight(
-          fixedDocuments,
-          true,
-          0,
-          0,
-          0,
-          "Custom item has no version to apply."
-        ),
-        mutations: [],
-        item,
-      };
-    }
-    const versionSnap = await getDoc(
-      customItemVersionDocRef(campaignId, customItemId, targetVersionId)
-    );
-    if (!versionSnap.exists()) {
-      return {
-        preflight: customItemPreflight(
-          fixedDocuments,
-          true,
-          0,
-          0,
-          0,
-          "Custom item version no longer exists."
-        ),
-        mutations: [],
-        item,
-        versionId: targetVersionId,
-      };
-    }
-    version = versionSnap.data() as CampaignCustomItemVersion;
-    assertCustomItemData(version.category, stripUndefined(version.data));
-  }
-
-  const characterCollector = new BoundedDeletionCollector(PRODUCT_LIMITS.charactersPerCampaign);
-  const characterDocuments = await characterCollector.addQuery(
-    charactersCollectionRef(campaignId),
-    "characters"
-  );
-  if (characterCollector.exceeded) {
-    return {
-      preflight: customItemPreflight(
-        fixedDocuments + characterCollector.affectedDocuments,
-        true,
-        0,
-        0,
-        characterCollector.affectedDocuments,
-        `This campaign has more than ${PRODUCT_LIMITS.charactersPerCampaign} characters. The operation is disabled until the protected bulk job is available.`
-      ),
-      mutations: [],
-      item,
-      version,
-      versionId: targetVersionId,
-    };
-  }
-
-  const mutations: CharacterMutation[] = [];
-  let affectedCopies = 0;
-  for (const characterDocument of characterDocuments) {
-    if (mode === "update") {
-      const result = buildCharacterCopyUpdate(
-        characterDocument.data(),
-        item.category,
-        customItemId,
-        targetVersionId!,
-        version!.data
-      );
-      if (!result) continue;
-      const { updatedCopies, ...fields } = result;
-      affectedCopies += updatedCopies;
-      mutations.push({ reference: characterDocument.ref, fields });
-    } else {
-      const result = buildCharacterCopyRemoval(characterDocument.data(), customItemId);
-      if (!result) continue;
-      const { removedCopies, ...fields } = result;
-      affectedCopies += removedCopies;
-      mutations.push({ reference: characterDocument.ref, fields });
-    }
-  }
-
-  const affectedDocuments = fixedDocuments + mutations.length;
-  return {
-    preflight: customItemPreflight(
-      affectedDocuments,
-      true,
-      mutations.length,
-      affectedCopies,
-      characterDocuments.length
-    ),
-    mutations,
-    item,
-    version,
-    versionId: targetVersionId,
-  };
-}
-
-async function commitCharacterMutations(mutations: CharacterMutation[]): Promise<void> {
-  if (mutations.length === 0) return;
-  const batch = writeBatch(db);
-  mutations.forEach(({ reference, fields }) => batch.update(reference, stripUndefined(fields)));
-  await batch.commit();
-}
-
-export async function preflightCustomItemUpdateAllCopies({
-  campaignId,
-  customItemId,
-  versionId,
-}: Pick<
-  UpdateAllCopiesArgs,
-  "campaignId" | "customItemId" | "versionId"
->): Promise<CustomItemOperationPreflight> {
-  return (
-    await buildCustomItemMutationPlan({
-      campaignId,
-      customItemId,
-      mode: "update",
-      versionId,
-      fixedDocuments: 2,
-    })
-  ).preflight;
-}
-
-export async function preflightCustomItemArchive({
-  campaignId,
-  customItemId,
-}: Pick<
-  CustomItemActorArgs,
-  "campaignId" | "customItemId"
->): Promise<CustomItemOperationPreflight> {
-  return (
-    await buildCustomItemMutationPlan({
-      campaignId,
-      customItemId,
-      mode: "remove",
-      fixedDocuments: 1,
-    })
-  ).preflight;
-}
-
 export async function permanentlyDeleteCustomItem({
   campaignId,
   customItemId,
@@ -603,300 +415,157 @@ export async function preflightPermanentCustomItemDeletion({
   return (await buildPermanentCustomItemDeletionPlan(campaignId, customItemId)).preflight;
 }
 
+type CustomItemMutationMode = "publish-and-update" | "update" | "remove" | "archive-and-remove";
+
+const callStartCustomItemMutationJob = httpsCallable<
+  {
+    campaignId: string;
+    customItemId: string;
+    mode: CustomItemMutationMode;
+    versionId?: string;
+    actorUserId: string;
+  },
+  { jobId: string; totalCount: number }
+>(functions, "startCustomItemMutationJob");
+
+const callProcessCustomItemMutationChunk = httpsCallable<
+  { jobId: string },
+  { done: boolean; processedCount: number; totalCount: number; mutatedThisChunk: number }
+>(functions, "processCustomItemMutationChunk");
+
+async function driveCustomItemMutationJob(
+  jobId: string,
+  onProgress?: (progress: { processedCount: number; totalCount: number }) => void
+): Promise<number> {
+  let mutatedTotal = 0;
+  await driveJobToCompletion(
+    jobId,
+    async (id) => {
+      const chunk = (await callProcessCustomItemMutationChunk({ jobId: id })).data;
+      mutatedTotal += chunk.mutatedThisChunk;
+      return chunk;
+    },
+    (chunk) => onProgress?.({ processedCount: chunk.processedCount, totalCount: chunk.totalCount })
+  );
+  return mutatedTotal;
+}
+
+/**
+ * Publishes the target version and propagates it to every character copy,
+ * via the resumable startCustomItemMutationJob/processCustomItemMutationChunk
+ * Functions (mode "publish-and-update"). Runs start and drain together as
+ * one call — the item-level publish transition happens immediately once
+ * called, so there is no separate non-mutating preview step. Returns the
+ * number of copies actually updated.
+ */
 export async function publishAndUpdateAllCopies({
   campaignId,
   customItemId,
   actorUserId,
-}: CustomItemActorArgs): Promise<number> {
+  onProgress,
+}: CustomItemActorArgs & {
+  onProgress?: (progress: { processedCount: number; totalCount: number }) => void;
+}): Promise<number> {
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   assertFirestoreDocumentId(customItemId, "Custom-item ID");
   assertFirestoreDocumentId(actorUserId, "Actor user ID");
   return runSingleFlight("custom-item:publish-propagate", [campaignId, customItemId], async () => {
-    const plan = await buildCustomItemMutationPlan({
+    const { data: started } = await callStartCustomItemMutationJob({
       campaignId,
       customItemId,
-      mode: "update",
-      fixedDocuments: 2,
-    });
-    assertSafeDestructivePreflight(plan.preflight, "Custom-item propagation");
-    if (!plan.versionId) throw new Error("Custom item has no version to publish.");
-    await publishCustomItem({
-      campaignId,
-      customItemId,
+      mode: "publish-and-update",
       actorUserId,
-      versionId: plan.versionId,
     });
-    await commitCharacterMutations(plan.mutations);
-    return plan.preflight.affectedCopies;
+    return driveCustomItemMutationJob(started.jobId, onProgress);
   });
 }
 
+/**
+ * Propagates an already-resolved version to every character copy, via the
+ * resumable job (mode "update"), without publishing anything new. Returns
+ * the number of copies actually updated.
+ */
 export async function updateAllCustomItemCopies({
   campaignId,
   customItemId,
   versionId,
-}: UpdateAllCopiesArgs): Promise<number> {
+  actorUserId,
+  onProgress,
+}: UpdateAllCopiesArgs & {
+  onProgress?: (progress: { processedCount: number; totalCount: number }) => void;
+}): Promise<number> {
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   assertFirestoreDocumentId(customItemId, "Custom-item ID");
+  assertFirestoreDocumentId(actorUserId, "Actor user ID");
   if (versionId !== undefined) assertFirestoreDocumentId(versionId, "Version ID");
   return runSingleFlight("custom-item:propagate", [campaignId, customItemId], async () => {
-    const plan = await buildCustomItemMutationPlan({
+    const { data: started } = await callStartCustomItemMutationJob({
       campaignId,
       customItemId,
       mode: "update",
       versionId,
-      fixedDocuments: 0,
+      actorUserId,
     });
-    assertSafeDestructivePreflight(plan.preflight, "Custom-item propagation");
-    await commitCharacterMutations(plan.mutations);
-    return plan.preflight.affectedCopies;
+    return driveCustomItemMutationJob(started.jobId, onProgress);
   });
 }
 
-export function buildCharacterCopyUpdate(
-  character: Character,
-  category: CustomItemCategory,
-  customItemId: string,
-  customLibraryVersionId: string,
-  data: CampaignCustomItemVersion["data"]
-): ({ updatedCopies: number } & Partial<Character>) | null {
-  if (category === "weapon") {
-    const weaponData = data as CustomWeaponData;
-    if (weaponData.weaponKind === "ranged") {
-      return updateLinkedArray(
-        "rangedWeapons",
-        character.rangedWeapons,
-        customItemId,
-        customLibraryVersionId,
-        stripKindFields(weaponData)
-      );
-    }
-    if (weaponData.weaponKind === "melee") {
-      return updateLinkedArray(
-        "meleeWeapons",
-        character.meleeWeapons,
-        customItemId,
-        customLibraryVersionId,
-        stripKindFields(weaponData)
-      );
-    }
-    return updateLinkedArray(
-      "grenades",
-      character.grenades,
-      customItemId,
-      customLibraryVersionId,
-      stripKindFields(weaponData)
-    );
-  }
-
-  if (category === "armour") {
-    const armourData = data as CustomArmourData;
-    return armourData.armourKind === "shield"
-      ? updateLinkedArray(
-          "shields",
-          character.shields,
-          customItemId,
-          customLibraryVersionId,
-          stripKindFields(armourData)
-        )
-      : updateLinkedArray(
-          "armour",
-          character.armour,
-          customItemId,
-          customLibraryVersionId,
-          stripKindFields(armourData)
-        );
-  }
-
-  if (category === "power") {
-    const powerField = (data as CustomPsychicPowerData).isMinor ? "minorPowers" : "majorPowers";
-    const items = character.psychic[powerField];
-    if (!items.length) return null;
-
-    let updatedCopies = 0;
-    const next = items.map((item) => {
-      if (item.customLibraryId !== customItemId) return item;
-      updatedCopies += 1;
-      return { ...item, ...data, customLibraryId: customItemId, customLibraryVersionId };
-    });
-
-    if (updatedCopies === 0) return null;
-    return { psychic: { ...character.psychic, [powerField]: next }, updatedCopies };
-  }
-
-  switch (category) {
-    case "gear":
-      return updateLinkedArray("gear", character.gear, customItemId, customLibraryVersionId, data);
-    case "consumable":
-      return updateLinkedArray(
-        "consumables",
-        character.consumables,
-        customItemId,
-        customLibraryVersionId,
-        data
-      );
-    case "drug":
-      return updateLinkedArray(
-        "drugs",
-        character.drugs,
-        customItemId,
-        customLibraryVersionId,
-        data
-      );
-    case "cybernetic":
-      return updateLinkedArray(
-        "cybernetics",
-        character.cybernetics,
-        customItemId,
-        customLibraryVersionId,
-        data
-      );
-    case "archeotech":
-      return updateLinkedArray(
-        "archeotech",
-        character.archeotech,
-        customItemId,
-        customLibraryVersionId,
-        data
-      );
-    default:
-      return null;
-  }
-}
-
-function updateLinkedArray<
-  TItem extends { customLibraryId?: string; customLibraryVersionId?: string },
->(
-  field: keyof Character,
-  items: TItem[] | undefined,
-  customLibraryId: string,
-  customLibraryVersionId: string,
-  definitionData: object
-): ({ updatedCopies: number } & Partial<Character>) | null {
-  if (!items?.length) return null;
-
-  let updatedCopies = 0;
-  const next = items.map((item) => {
-    if (item.customLibraryId !== customLibraryId) return item;
-    updatedCopies += 1;
-    return {
-      ...item,
-      ...definitionData,
-      customLibraryId,
-      customLibraryVersionId,
-    };
-  });
-
-  if (updatedCopies === 0) return null;
-  return { [field]: next, updatedCopies } as { updatedCopies: number } & Partial<Character>;
-}
-
+/**
+ * Strips every character copy of this item, via the resumable job (mode
+ * "remove"), without archiving the definition. Returns the number of
+ * copies actually removed.
+ */
 export async function removeAllCustomItemCopies({
   campaignId,
   customItemId,
-}: Pick<CustomItemActorArgs, "campaignId" | "customItemId">): Promise<number> {
+  actorUserId,
+  onProgress,
+}: CustomItemActorArgs & {
+  onProgress?: (progress: { processedCount: number; totalCount: number }) => void;
+}): Promise<number> {
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   assertFirestoreDocumentId(customItemId, "Custom-item ID");
+  assertFirestoreDocumentId(actorUserId, "Actor user ID");
   return runSingleFlight("custom-item:remove-copies", [campaignId, customItemId], async () => {
-    const plan = await buildCustomItemMutationPlan({
+    const { data: started } = await callStartCustomItemMutationJob({
       campaignId,
       customItemId,
       mode: "remove",
-      fixedDocuments: 0,
+      actorUserId,
     });
-    assertSafeDestructivePreflight(plan.preflight, "Custom-item copy removal");
-    await commitCharacterMutations(plan.mutations);
-    return plan.preflight.affectedCopies;
+    return driveCustomItemMutationJob(started.jobId, onProgress);
   });
 }
 
+/**
+ * Archives the definition and strips every character copy, via the
+ * resumable job (mode "archive-and-remove"). Runs start and drain together
+ * as one call — the archive transition happens immediately once called, so
+ * there is no separate non-mutating preview step. Returns the number of
+ * copies actually removed.
+ */
 export async function archiveAndRemoveAllCustomItemCopies({
   campaignId,
   customItemId,
   actorUserId,
-}: CustomItemActorArgs): Promise<number> {
+  onProgress,
+}: CustomItemActorArgs & {
+  onProgress?: (progress: { processedCount: number; totalCount: number }) => void;
+}): Promise<number> {
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   assertFirestoreDocumentId(customItemId, "Custom-item ID");
   assertFirestoreDocumentId(actorUserId, "Actor user ID");
   return runSingleFlight("custom-item:archive-remove", [campaignId, customItemId], async () => {
-    const plan = await buildCustomItemMutationPlan({
+    const { data: started } = await callStartCustomItemMutationJob({
       campaignId,
       customItemId,
-      mode: "remove",
-      fixedDocuments: 1,
+      mode: "archive-and-remove",
+      actorUserId,
     });
-    assertSafeDestructivePreflight(plan.preflight, "Custom-item archive");
-
-    const batch = writeBatch(db);
-    batch.update(customItemDocRef(campaignId, customItemId), {
-      status: "archived",
-      archivedAt: serverTimestamp(),
-      archivedByUserId: actorUserId,
-      updatedAt: serverTimestamp(),
-      updatedBy: { userId: actorUserId },
-    });
-    plan.mutations.forEach(({ reference, fields }) =>
-      batch.update(reference, stripUndefined(fields))
-    );
-    await batch.commit();
-    return plan.preflight.affectedCopies;
+    return driveCustomItemMutationJob(started.jobId, onProgress);
   });
-}
-
-export function buildCharacterCopyRemoval(
-  character: Character,
-  customItemId: string
-): ({ removedCopies: number } & Partial<Character>) | null {
-  const fields = [
-    "gear",
-    "consumables",
-    "drugs",
-    "cybernetics",
-    "archeotech",
-    "rangedWeapons",
-    "meleeWeapons",
-    "grenades",
-    "armour",
-    "shields",
-  ] as const;
-
-  let removedCopies = 0;
-  const update: Record<string, unknown> = {};
-
-  for (const field of fields) {
-    const items = character[field] as Array<{ customLibraryId?: string }> | undefined;
-    if (!items?.length) continue;
-    const filtered = items.filter((item) => item.customLibraryId !== customItemId);
-    if (filtered.length < items.length) {
-      removedCopies += items.length - filtered.length;
-      update[field] = filtered;
-    }
-  }
-
-  const nextPsychic = { ...character.psychic };
-  let psychicChanged = false;
-  for (const field of ["minorPowers", "majorPowers"] as const) {
-    const items = character.psychic[field];
-    const filtered = items.filter((item) => item.customLibraryId !== customItemId);
-    if (filtered.length < items.length) {
-      removedCopies += items.length - filtered.length;
-      nextPsychic[field] = filtered;
-      psychicChanged = true;
-    }
-  }
-  if (psychicChanged) update.psychic = nextPsychic;
-
-  if (removedCopies === 0) return null;
-  return { ...update, removedCopies } as { removedCopies: number } & Partial<Character>;
 }
 
 export function inferCustomItemStatus(item: { customLibraryVersionId?: string }): CustomItemStatus {
   return item.customLibraryVersionId ? "published" : "draft";
-}
-
-function stripKindFields<TData extends object>(data: TData): object {
-  const copy = { ...data } as Record<string, unknown>;
-  delete copy.weaponKind;
-  delete copy.armourKind;
-  return copy;
 }

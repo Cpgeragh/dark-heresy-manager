@@ -8,8 +8,6 @@ import { ConfirmInline } from "../../ui/ConfirmInline";
 import { useToast } from "../../components/Toast";
 import {
   permanentlyDeleteCustomItem,
-  preflightCustomItemArchive,
-  preflightCustomItemUpdateAllCopies,
   preflightPermanentCustomItemDeletion,
   restoreCustomItem,
   type CustomItemOperationPreflight,
@@ -50,8 +48,6 @@ export function CustomItemAdminRow({
   const [managementBusyAction, setManagementBusyAction] = useState<ManagementBusyAction | null>(
     null
   );
-  const [archivePreflight, setArchivePreflight] = useState<PreflightState>({ loading: false });
-  const [updatePreflight, setUpdatePreflight] = useState<PreflightState>({ loading: false });
   const [deletePreflight, setDeletePreflight] = useState<PreflightState>({ loading: false });
   const toast = useToast();
   const { publishDefinition, archiveDefinition, updateAllCopies, getBusyAction } =
@@ -133,13 +129,6 @@ export function CustomItemAdminRow({
               variant="warning"
               size="xs"
               busy={busy}
-              onArm={() =>
-                loadPreflight(setArchivePreflight, () =>
-                  preflightCustomItemArchive({ campaignId, customItemId: item.id })
-                )
-              }
-              details={impactDetails(archivePreflight)}
-              confirmDisabled={!archivePreflight.result?.safe}
               onConfirm={() => archiveDefinition(item)}
             />
           )}
@@ -150,17 +139,6 @@ export function CustomItemAdminRow({
               variant="warning"
               size="xs"
               busy={busy}
-              onArm={() =>
-                loadPreflight(setUpdatePreflight, () =>
-                  preflightCustomItemUpdateAllCopies({
-                    campaignId,
-                    customItemId: item.id,
-                    versionId: item.draftVersionId ?? undefined,
-                  })
-                )
-              }
-              details={impactDetails(updatePreflight)}
-              confirmDisabled={!updatePreflight.result?.safe}
               onConfirm={() => updateAllCopies(item)}
             />
           )}
