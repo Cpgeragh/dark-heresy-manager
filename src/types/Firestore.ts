@@ -87,6 +87,29 @@ export interface CharacterListItem {
 }
 
 /**
+ * Character summary document stored in
+ * /campaigns/{campaignId}/characterSummaries/{characterId}
+ * A restricted, campaign-member-readable view of a character — name,
+ * player name, career, rank, and portrait only. Never the Recovery Code
+ * or any other sheet data. Kept in sync with the real character document
+ * by characterService.ts's write functions.
+ */
+export interface CharacterSummaryDocument {
+  campaignId: string;
+  characterName: string;
+  playerName?: string;
+  career?: string;
+  rank?: string;
+  portraitUrl?: string;
+}
+
+/**
+ * Character summary document with its Firestore document id injected.
+ * Used as the converter type for characterSummariesCollectionRef.
+ */
+export type CharacterSummaryWithId = CharacterSummaryDocument & { id: string };
+
+/**
  * Session document stored in /campaigns/{campaignId}/sessions/{sessionId}
  */
 export interface SessionDocument {

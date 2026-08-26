@@ -123,6 +123,23 @@ export async function createClaimLog(
 }
 
 /**
+ * Create a characterSummaries entry bypassing rules.
+ */
+export async function createCharacterSummary(
+  env: RulesTestEnvironment,
+  campaignId: string,
+  characterId: string,
+  data: Record<string, unknown>
+) {
+  await env.withSecurityRulesDisabled(async (ctx: RulesTestContext) => {
+    await ctx.firestore()
+      .collection(`campaigns/${campaignId}/characterSummaries`)
+      .doc(characterId)
+      .set(data);
+  });
+}
+
+/**
  * Create a recoveryIndex entry bypassing rules.
  */
 export async function createRecoveryIndexEntry(

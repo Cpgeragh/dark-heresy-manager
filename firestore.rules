@@ -805,6 +805,61 @@ service cloud.firestore {
     }
 
     // ============================
+    // CHARACTER SUMMARIES
+    // Restricted, campaign-member-readable view of a character. Kept in
+    // sync with the real character document by characterService.ts; never
+    // contains the Recovery Code or any other sheet data.
+    // ============================
+    match /campaigns/{campaignId}/characterSummaries/{characterId} {
+
+      function dmOwnsCampaign() {
+        let camp = get(/databases/$(database)/documents/campaigns/$(campaignId));
+        return camp != null && dmOwnsOrLinked(camp.data.dmId);
+      }
+
+      function campaignMember(uid) {
+        let camp = get(/databases/$(database)/documents/campaigns/$(campaignId));
+        return camp != null && uid in camp.data.get('memberIds', []);
+      }
+
+      function ownsCharacter() {
+        let char = get(
+          /databases/$(database)/documents/campaigns/$(campaignId)/characters/$(characterId)
+        );
+        return char != null && playerOwnsOrLinked(char.data.userId);
+      }
+
+      function validCharacterSummary(data) {
+        return data.keys().hasOnly([
+                 'campaignId', 'characterName', 'playerName', 'career', 'rank', 'portraitUrl'
+               ]) &&
+               data.keys().hasAll(['campaignId', 'characterName']) &&
+               data.campaignId == campaignId &&
+               data.characterName is string &&
+               data.characterName.size() > 0 &&
+               data.characterName.size() <= 100 &&
+               validOptionalString(data, 'playerName', 50) &&
+               validOptionalString(data, 'career', 100) &&
+               validOptionalString(data, 'rank', 100) &&
+               (!('portraitUrl' in data) ||
+                 (data.portraitUrl is string && data.portraitUrl.size() <= 350000));
+      }
+
+      allow get: if dmOwnsCampaign() || (request.auth != null && campaignMember(request.auth.uid));
+      allow list:
+        if (dmOwnsCampaign() || (request.auth != null && campaignMember(request.auth.uid))) &&
+           boundedQuery(100);
+
+      allow create, update:
+        if validCharacterSummary(request.resource.data) &&
+           (dmOwnsCampaign() || ownsCharacter());
+
+      allow delete:
+        if dmOwnsCampaign() &&
+           !existsAfter(/databases/$(database)/documents/campaigns/$(campaignId)/characters/$(characterId));
+    }
+
+    // ============================
     // SESSIONS
     // ============================
     match /campaigns/{campaignId}/sessions/{sessionId} {

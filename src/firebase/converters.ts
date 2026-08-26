@@ -11,7 +11,7 @@ import {
 
 import { db } from "../firebase";
 import type { Character } from "../types/Character";
-import type { CampaignWithId, UserDocument } from "../types/Firestore";
+import type { CampaignWithId, CharacterSummaryWithId, UserDocument } from "../types/Firestore";
 
 /**
  * CHARACTER CONVERTER
@@ -69,6 +69,32 @@ export function campaignsCollectionRef() {
 
 export function campaignDocRef(campaignId: string) {
   return doc(db, "campaigns", campaignId).withConverter(campaignConverter);
+}
+
+/**
+ * CHARACTER SUMMARY CONVERTER
+ * - Strips `id` on write
+ * - Injects `id` from document path on read
+ */
+export const characterSummaryConverter: FirestoreDataConverter<CharacterSummaryWithId> = {
+  toFirestore({ id: _id, ...rest }: CharacterSummaryWithId) {
+    return rest;
+  },
+  fromFirestore(snapshot: QueryDocumentSnapshot, options: SnapshotOptions) {
+    return { ...snapshot.data(options), id: snapshot.id } as CharacterSummaryWithId;
+  },
+};
+
+export function characterSummaryDocRef(campaignId: string, characterId: string) {
+  return doc(db, "campaigns", campaignId, "characterSummaries", characterId).withConverter(
+    characterSummaryConverter
+  );
+}
+
+export function characterSummariesCollectionRef(campaignId: string) {
+  return collection(db, "campaigns", campaignId, "characterSummaries").withConverter(
+    characterSummaryConverter
+  );
 }
 
 /**
