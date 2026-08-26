@@ -17,30 +17,49 @@ describe("Firestore Rules: Campaigns", () => {
     await env.clearFirestore();
   });
 
-  it("authenticated users may read campaign documents", async () => {
+  it("the DM may read their own campaign document", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
 
-    await createCampaign(env, "c1", "dm-1", {
-      name: "Sample Campaign",
-    });
+    await createCampaign(env, "c1", "dm-1", { name: "Sample Campaign" });
 
-    const playerDb = dbAs(env, "player-1");
-
-    await expect(playerDb.collection("campaigns").doc("c1").get()).resolves.toBeDefined();
+    await expect(dbAs(env, "dm-1").collection("campaigns").doc("c1").get()).resolves.toBeDefined();
   });
 
-  it("authenticated users may list campaigns", async () => {
+  it("a member may read a campaign they belong to", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+
+    await createCampaign(env, "c1", "dm-1", { name: "Sample Campaign", memberIds: ["player-1"] });
+
+    await expect(dbAs(env, "player-1").collection("campaigns").doc("c1").get()).resolves.toBeDefined();
+  });
+
+  it("an unrelated authenticated user cannot read a campaign they're not part of", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+
+    await createCampaign(env, "c1", "dm-1", { name: "Sample Campaign" });
+
+    await expect(dbAs(env, "player-1").collection("campaigns").doc("c1").get()).rejects.toThrow();
+  });
+
+  it("the DM may list their own campaigns", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+
+    await createCampaign(env, "c1", "dm-1", { name: "One" });
+    await createCampaign(env, "c2", "dm-1", { name: "Two" });
+
+    const campaigns = dbAs(env, "dm-1").collection("campaigns").where("dmId", "==", "dm-1");
+    await expect(campaigns.limit(100).get()).resolves.toBeDefined();
+  });
+
+  it("an unrelated authenticated user cannot list campaigns they're not part of", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
 
     await createCampaign(env, "c1", "dm-1", { name: "One" });
     await createCampaign(env, "c2", "dm-2", { name: "Two" });
 
-    const playerDb = dbAs(env, "player-1");
-
-    const campaigns = playerDb.collection("campaigns");
-    await expect(campaigns.limit(100).get()).resolves.toBeDefined();
-    await expect(campaigns.get()).rejects.toThrow();
-    await expect(campaigns.limit(101).get()).rejects.toThrow();
+    await expect(
+      dbAs(env, "player-1").collection("campaigns").limit(100).get()
+    ).rejects.toThrow();
   });
 
   it("player membership query returns only active campaigns containing that player", async () => {

@@ -14,25 +14,47 @@ describe("Firestore Rules: Character Rules", () => {
     await env.clearFirestore();
   });
 
-  it("any authenticated user may read characters", async () => {
+  it("the owning player may read their own character", async () => {
     const env = await getTestEnv() as RulesTestEnvironment;
-
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
       userId: "player-1",
       isEditableByPlayer: true,
     });
 
-    const readerDb = dbAs(env, "reader");
-
     await expect(
-      readerDb.collection(`campaigns/${campaignId}/characters`).doc("char1").get()
+      dbAs(env, "player-1").collection(`campaigns/${campaignId}/characters`).doc("char1").get()
     ).resolves.toBeDefined();
   });
 
-  it("any authenticated user may list characters in a campaign", async () => {
+  it("the DM may read any character in their campaign", async () => {
     const env = await getTestEnv() as RulesTestEnvironment;
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, "char1", {
+      userId: "player-1",
+      isEditableByPlayer: true,
+    });
 
+    await expect(
+      dbAs(env, "dm-1").collection(`campaigns/${campaignId}/characters`).doc("char1").get()
+    ).resolves.toBeDefined();
+  });
+
+  it("an unrelated authenticated user cannot read someone else's character", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, "char1", {
+      userId: "player-1",
+      isEditableByPlayer: true,
+    });
+
+    await expect(
+      dbAs(env, "reader").collection(`campaigns/${campaignId}/characters`).doc("char1").get()
+    ).rejects.toThrow();
+  });
+
+  it("the DM may list all characters in their own campaign", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, "char1", {
       userId: "player-1",
@@ -43,12 +65,23 @@ describe("Firestore Rules: Character Rules", () => {
       isEditableByPlayer: false,
     });
 
-    const readerDb = dbAs(env, "reader");
-
-    const characters = readerDb.collection(`campaigns/${campaignId}/characters`);
+    const characters = dbAs(env, "dm-1").collection(`campaigns/${campaignId}/characters`);
     await expect(characters.limit(100).get()).resolves.toBeDefined();
     await expect(characters.get()).rejects.toThrow();
     await expect(characters.limit(101).get()).rejects.toThrow();
+  });
+
+  it("an unrelated authenticated user cannot list characters in a campaign they're not in", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, "char1", {
+      userId: "player-1",
+      isEditableByPlayer: true,
+    });
+
+    await expect(
+      dbAs(env, "reader").collection(`campaigns/${campaignId}/characters`).limit(100).get()
+    ).rejects.toThrow();
   });
 
   it("player may update their own character when editable", async () => {

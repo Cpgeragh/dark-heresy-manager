@@ -6,7 +6,7 @@ import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
 import { dbAs, createCampaign, createCharacter } from "../helpers";
 
 describe("Firestore Rules: Character Query Operations", () => {
-  it("players can order characters by name", async () => {
+  it("the DM can order characters by name", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
     const campaignId = `camp-order-${Date.now()}`;
 
@@ -29,10 +29,10 @@ describe("Firestore Rules: Character Query Operations", () => {
       name: `${uniquePrefix}-Beta`,
     });
 
-    const playerDb = dbAs(env, "player-1");
+    const dmDb = dbAs(env, "dm-1");
 
     // Query only our test characters
-    const snapshot = await playerDb
+    const snapshot = await dmDb
       .collection(`campaigns/${campaignId}/characters`)
       .where("name", ">=", uniquePrefix)
       .where("name", "<=", uniquePrefix + "\uf8ff")
@@ -46,7 +46,7 @@ describe("Firestore Rules: Character Query Operations", () => {
     expect(snapshot.docs[2].data().name).toBe(`${uniquePrefix}-Zebra`);
   });
 
-  it("players can limit character queries", async () => {
+  it("the DM can limit character queries", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
     const campaignId = `camp-limit-${Date.now()}`;
 
@@ -64,14 +64,14 @@ describe("Firestore Rules: Character Query Operations", () => {
       isEditableByPlayer: true,
     });
 
-    const playerDb = dbAs(env, "player-1");
+    const dmDb = dbAs(env, "dm-1");
 
-    const snapshot = await playerDb.collection(`campaigns/${campaignId}/characters`).limit(2).get();
+    const snapshot = await dmDb.collection(`campaigns/${campaignId}/characters`).limit(2).get();
 
     expect(snapshot.docs.length).toBe(2);
   });
 
-  it("players can combine multiple where clauses on characters", async () => {
+  it("a player can combine where clauses on their own characters", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
     const campaignId = `camp-multi-${Date.now()}`;
 
@@ -94,7 +94,7 @@ describe("Firestore Rules: Character Query Operations", () => {
       career: "Adept",
     });
 
-    const playerDb = dbAs(env, "player-1");
+    const playerDb = dbAs(env, testUserId);
 
     const snapshot = await playerDb
       .collection(`campaigns/${campaignId}/characters`)
@@ -132,7 +132,7 @@ describe("Firestore Rules: Character Query Operations", () => {
     expect(snapshot.docs.length).toBe(3);
   });
 
-  it("players can query characters with startAt/endAt", async () => {
+  it("the DM can query characters with startAt/endAt", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
     const campaignId = `camp-range-${Date.now()}`;
 
@@ -155,9 +155,9 @@ describe("Firestore Rules: Character Query Operations", () => {
       name: `${prefix}-Gamma`,
     });
 
-    const playerDb = dbAs(env, "player-1");
+    const dmDb = dbAs(env, "dm-1");
 
-    const snapshot = await playerDb
+    const snapshot = await dmDb
       .collection(`campaigns/${campaignId}/characters`)
       .orderBy("name")
       .startAt(`${prefix}-Beta`)

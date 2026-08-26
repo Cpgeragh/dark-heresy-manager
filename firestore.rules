@@ -336,10 +336,14 @@ service cloud.firestore {
     // ============================
     match /campaigns/{campaignId} {
 
-      // Any authenticated user can read campaign metadata (name, dmId, memberIds).
-      // Sensitive data lives in characters and sessions, which are separately restricted.
-      allow get: if request.auth != null;
-      allow list: if request.auth != null && boundedQuery(100);
+      // DM (or a linked device) or a current member can read campaign metadata.
+      // A restricted per-character summary for a wider "party roster" view is
+      // Stage 7's job; full campaign metadata stays locked to DM + members.
+      allow get: if dmOwnsOrLinked(resource.data.dmId) ||
+                     (request.auth != null && request.auth.uid in resource.data.get('memberIds', []));
+      allow list: if (dmOwnsOrLinked(resource.data.dmId) ||
+                       (request.auth != null && request.auth.uid in resource.data.get('memberIds', []))) &&
+                     boundedQuery(100);
 
       allow create:
         if request.auth != null &&
@@ -675,10 +679,11 @@ service cloud.firestore {
           return camp != null && dmOwnsOrLinked(camp.data.dmId);
         }
 
-        // Any authenticated user can read characters (needed for party overview
-        // and claim preview before membership is established).
-        allow get: if request.auth != null;
-        allow list: if request.auth != null && boundedQuery(100);
+        // Only the owning player (or a linked device) or the campaign's DM can
+        // read a character. Claim preview no longer needs a direct read here —
+        // lookupRecoveryCode returns its own minimal preview server-side.
+        allow get: if playerOwnsOrLinked(resource.data.userId) || dmOwnsCampaign();
+        allow list: if (dmOwnsCampaign() || playerOwnsOrLinked(resource.data.userId)) && boundedQuery(100);
 
         allow create:
           if dmOwnsCampaign() &&
