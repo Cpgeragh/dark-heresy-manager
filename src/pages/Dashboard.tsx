@@ -8,10 +8,8 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import type { User } from "firebase/auth";
 import { useCampaignsContext } from "../context/useCampaignsContext";
-import { usePlayerCharacters } from "../hooks/usePlayerCharacters";
 import { useArchivedCampaigns } from "../hooks/useArchivedCampaigns";
 import { useToast } from "../components/Toast";
-import { PortraitUpload } from "../components/PortraitUpload";
 import { RecoveryBackupBanner } from "../components/RecoveryBackupBanner";
 import { validateCampaignName, validateInquisitorName } from "../utils/validation";
 import { buildRoute } from "../constants/routes";
@@ -24,7 +22,7 @@ import {
   restoreCampaign,
   updateCampaignDetails,
 } from "../services/campaignService";
-import type { CampaignWithId, CharacterListItem } from "../types/Firestore";
+import type { CampaignWithId } from "../types/Firestore";
 import { uiSection, editableInputClass, uiTextError } from "../ui/editableStyles";
 import { Button } from "../ui/Button";
 import { ExpandChevron } from "../ui/ExpandChevron";
@@ -65,120 +63,22 @@ function deleteImpactDetails(state?: DeletePreflightState) {
   );
 }
 
-// ─── Player character card ────────────────────────────────────────────────────
-
-function CharacterCard({
-  character,
-  campaignId,
-}: {
-  character: CharacterListItem;
-  campaignId: string;
-}) {
-  const name = character.header?.characterName ?? "Unnamed Character";
-  const career = character.header?.career;
-  const rank = character.header?.rank;
-  const xpLeft = character.experience
-    ? character.experience.total - character.experience.spent
-    : null;
-
-  return (
-    <Link
-      to={buildRoute.characterSheet(campaignId, character.id)}
-      className="border border-slate-700 rounded-lg p-4 bg-slate-900/60 block hover:bg-slate-800 transition-colors"
-    >
-      <div className="flex items-center gap-3">
-        <div onClick={(e) => e.stopPropagation()}>
-          <PortraitUpload
-            campaignId={campaignId}
-            characterId={character.id}
-            currentPortraitUrl={character.portraitUrl}
-            canEdit={true}
-          />
-        </div>
-        <div className="flex-1 space-y-1">
-          <div className="font-semibold text-slate-200 leading-tight lg:text-lg">{name}</div>
-          {(career || rank) && (
-            <div className="text-sm lg:text-base text-slate-400">
-              {[career, rank].filter(Boolean).join(" · ")}
-            </div>
-          )}
-          {(character.wounds || xpLeft !== null) && (
-            <div className="flex flex-wrap gap-3 text-xs lg:text-sm text-slate-400">
-              {character.wounds && (
-                <span>
-                  ❤{" "}
-                  <span
-                    className={
-                      character.wounds.current <= 2
-                        ? "text-red-400 font-semibold"
-                        : "text-slate-200"
-                    }
-                  >
-                    {character.wounds.current}
-                  </span>
-                  <span className="text-slate-600"> / </span>
-                  <span className="text-slate-200">{character.wounds.total}</span> Wounds
-                </span>
-              )}
-              {xpLeft !== null && (
-                <span>
-                  ✦{" "}
-                  <span className={xpLeft < 0 ? "text-red-400 font-semibold" : "text-slate-200"}>
-                    {xpLeft}
-                  </span>{" "}
-                  XP remaining
-                </span>
-              )}
-            </div>
-          )}
-          <div className="text-xs lg:text-sm text-slate-600 font-code">
-            Recovery: {character.recoveryCode}
-          </div>
-        </div>
-      </div>
-    </Link>
-  );
-}
-
 // ─── Player campaign row ──────────────────────────────────────────────────────
 
 function PlayerCampaignRow({
   campaignId,
   campaignName,
-  characters,
-  loading,
-  error,
 }: {
   campaignId: string;
   campaignName: string;
-  characters: CharacterListItem[];
-  loading: boolean;
-  error: Error | null;
 }) {
   return (
-    <div>
-      <SectionHeader className="mb-3">{campaignName}</SectionHeader>
-
-      {error ? (
-        <ErrorState>Unable to load characters. Please refresh the page.</ErrorState>
-      ) : loading ? (
-        <LoadingState>Loading characters…</LoadingState>
-      ) : null}
-
-      {!error && !loading && characters.length === 0 && (
-        <p className="text-sm lg:text-base text-slate-500">
-          No characters claimed in this campaign.
-        </p>
-      )}
-
-      {!error && !loading && characters.length > 0 && (
-        <div className="space-y-3">
-          {characters.map((c) => (
-            <CharacterCard key={c.id} character={c} campaignId={campaignId} />
-          ))}
-        </div>
-      )}
-    </div>
+    <Link
+      to={buildRoute.campaignOverview(campaignId)}
+      className={uiSection + " flex items-center gap-2 hover:bg-slate-800 transition-colors"}
+    >
+      <span className="flex-1 font-medium text-slate-200 lg:text-lg">{campaignName}</span>
+    </Link>
   );
 }
 
@@ -679,11 +579,6 @@ function ClaimCharacterSection() {
 export default function Dashboard({ user, effectiveUserId, isLinked, firstName }: Props) {
   const { dmCampaigns, playerCampaigns, dmLoading, playerLoading, dmError, playerError } =
     useCampaignsContext();
-  const {
-    characters: playerCharacters,
-    loading: playerCharactersLoading,
-    error: playerCharactersError,
-  } = usePlayerCharacters(effectiveUserId);
 
   return (
     <PageShell title={firstName ? `${firstName}'s Dashboard` : "Dashboard"}>
@@ -723,16 +618,7 @@ export default function Dashboard({ user, effectiveUserId, isLinked, firstName }
         {!playerError && !playerLoading && playerCampaigns.length > 0 && (
           <div className="space-y-4">
             {playerCampaigns.map((campaign) => (
-              <PlayerCampaignRow
-                key={campaign.id}
-                campaignId={campaign.id}
-                campaignName={campaign.name}
-                characters={playerCharacters.filter(
-                  (character) => character.campaignId === campaign.id
-                )}
-                loading={playerCharactersLoading}
-                error={playerCharactersError}
-              />
+              <PlayerCampaignRow key={campaign.id} campaignId={campaign.id} campaignName={campaign.name} />
             ))}
           </div>
         )}

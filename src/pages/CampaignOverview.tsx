@@ -22,7 +22,7 @@ import { readCharacterImportFile } from "../utils/firebaseValidation";
 import { useToast } from "../components/Toast";
 import { IMPORTANT_TOAST_DURATION } from "../constants/ui";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
-import { editableInputClass, uiSubheading } from "../ui/editableStyles";
+import { editableInputClass, uiSubheading, uiTextLabel } from "../ui/editableStyles";
 import { Button } from "../ui/Button";
 import { PageShell } from "../ui/PageShell";
 import { Panel } from "../ui/Panel";
@@ -30,6 +30,9 @@ import { SectionHeader } from "../ui/SectionHeader";
 import { ErrorState } from "../ui/ErrorState";
 import { LoadingState } from "../ui/LoadingState";
 import { useHeaderExtensionSetters } from "../context/useHeaderExtension";
+import { useCampaignCharacterSummaries } from "../hooks/useCampaignCharacterSummaries";
+import { MyCharacterCard } from "./CampaignOverview/MyCharacterCard";
+import { PartyRosterTile } from "./CampaignOverview/PartyRosterTile";
 
 export default function CampaignOverview({ effectiveUserId }: { effectiveUserId: string }) {
   const params = useParams<{ campaignId: string }>();
@@ -53,6 +56,16 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
     loading: charactersLoading,
     error: charactersError,
   } = useCampaignCharacters(campaignId ?? null);
+  const {
+    summaries: partySummaries,
+    loading: partySummariesLoading,
+    error: partySummariesError,
+  } = useCampaignCharacterSummaries(!isDM && campaignId ? campaignId : null);
+  const ownCharacterIds = useMemo(() => new Set(characters.map((c) => c.id)), [characters]);
+  const partyMembers = useMemo(
+    () => partySummaries.filter((s) => !ownCharacterIds.has(s.id)),
+    [partySummaries, ownCharacterIds]
+  );
   const summaries = useMemo(
     () =>
       characters.map((character) => ({
@@ -219,6 +232,22 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
   return (
     <PageShell title={campaign?.name ?? "Campaign Overview"}>
       <Panel>
+        {/* GM / Inquisitor name — shown to everyone */}
+        {(campaign.gmName || campaign.inquisitorName) && (
+          <div className="flex flex-wrap gap-x-4 gap-y-1">
+            {campaign.gmName && (
+              <span className="text-sm lg:text-base text-slate-300">
+                <span className={uiTextLabel}>GM</span> {campaign.gmName}
+              </span>
+            )}
+            {campaign.inquisitorName && (
+              <span className="text-sm lg:text-base text-slate-300">
+                <span className={uiTextLabel}>Inquisitor</span> {campaign.inquisitorName}
+              </span>
+            )}
+          </div>
+        )}
+
         {/* Session form — shown inline when creating */}
         {isDM && showSessionForm && (
           <SessionForm
@@ -228,22 +257,22 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
           />
         )}
 
-        {/* CHARACTERS */}
-        <div>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
-            <SectionHeader>Characters</SectionHeader>
-            <input
-              placeholder="Search…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className={
-                editableInputClass(true) +
-                " w-full sm:w-36 lg:w-48 text-xs lg:text-sm py-1 lg:py-1.5"
-              }
-            />
-          </div>
+        {/* CHARACTERS — DM admin view */}
+        {isDM && (
+          <div>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+              <SectionHeader>Characters</SectionHeader>
+              <input
+                placeholder="Search…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className={
+                  editableInputClass(true) +
+                  " w-full sm:w-36 lg:w-48 text-xs lg:text-sm py-1 lg:py-1.5"
+                }
+              />
+            </div>
 
-          {isDM && (
             <div className="flex flex-col sm:flex-row gap-2 mb-3">
               <input
                 className={editableInputClass(true) + " flex-1"}
@@ -259,29 +288,67 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
                 {creatingCharacter ? "Creating…" : "Create"}
               </Button>
             </div>
-          )}
 
-          <div className="space-y-3">
-            {filteredCharacters.length === 0 ? (
+            <div className="space-y-3">
+              {filteredCharacters.length === 0 ? (
+                <p className="text-slate-400 text-sm lg:text-base">
+                  {search.trim() ? `No characters match "${search}".` : "No characters yet."}
+                </p>
+              ) : (
+                filteredCharacters.map((char) => (
+                  <CharacterRow
+                    key={char.id}
+                    campaignId={campaignId}
+                    characterId={char.id}
+                    characterName={char.header?.characterName ?? "Unnamed Character"}
+                    userId={char.userId ?? null}
+                    recoveryCode={char.recoveryCode}
+                    portraitUrl={char.portraitUrl}
+                    isDM={isDM}
+                  />
+                ))
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* MY CHARACTERS — player view */}
+        {!isDM && (
+          <div>
+            <SectionHeader className="mb-3">My Characters</SectionHeader>
+            {characters.length === 0 ? (
               <p className="text-slate-400 text-sm lg:text-base">
-                {search.trim() ? `No characters match "${search}".` : "No characters yet."}
+                You haven't claimed a character in this campaign yet.
               </p>
             ) : (
-              filteredCharacters.map((char) => (
-                <CharacterRow
-                  key={char.id}
-                  campaignId={campaignId}
-                  characterId={char.id}
-                  characterName={char.header?.characterName ?? "Unnamed Character"}
-                  userId={char.userId ?? null}
-                  recoveryCode={char.recoveryCode}
-                  portraitUrl={char.portraitUrl}
-                  isDM={isDM}
-                />
-              ))
+              <div className="space-y-3">
+                {characters.map((c) => (
+                  <MyCharacterCard key={c.id} character={c} campaignId={campaignId} />
+                ))}
+              </div>
             )}
           </div>
-        </div>
+        )}
+
+        {/* PARTY — player view */}
+        {!isDM && (
+          <div>
+            <SectionHeader className="mb-3">Party</SectionHeader>
+            {partySummariesError ? (
+              <ErrorState>Unable to load the party roster. Please refresh the page.</ErrorState>
+            ) : partySummariesLoading ? (
+              <LoadingState>Loading the party roster…</LoadingState>
+            ) : partyMembers.length === 0 ? (
+              <p className="text-slate-400 text-sm lg:text-base">No one else has joined yet.</p>
+            ) : (
+              <div className="space-y-3">
+                {partyMembers.map((s) => (
+                  <PartyRosterTile key={s.id} summary={s} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* MESSAGES — DM only */}
         {isDM && (

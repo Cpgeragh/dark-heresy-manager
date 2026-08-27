@@ -25,11 +25,6 @@ vi.mock("../../src/context/useCampaignsContext", () => ({
   useCampaignsContext: () => useCampaignsContextMock(),
 }));
 
-const usePlayerCharactersMock = vi.fn();
-vi.mock("../../src/hooks/usePlayerCharacters", () => ({
-  usePlayerCharacters: (...args: unknown[]) => usePlayerCharactersMock(...args),
-}));
-
 const useArchivedCampaignsMock = vi.fn();
 vi.mock("../../src/hooks/useArchivedCampaigns", () => ({
   useArchivedCampaigns: (...args: unknown[]) => useArchivedCampaignsMock(...args),
@@ -121,24 +116,12 @@ vi.mock("../../src/pages/ClaimCharacter/ClaimPreview", () => ({
 }));
 
 import Dashboard from "../../src/pages/Dashboard";
-import type { CampaignWithId, CharacterListItem } from "../../src/types/Firestore";
+import type { CampaignWithId } from "../../src/types/Firestore";
 
 const user1 = { uid: "user-1" } as User;
 
 function dmCampaign(over: Partial<CampaignWithId> = {}): CampaignWithId {
   return { id: "campaign-1", name: "The Lathe Run", dmId: "user-1", ...over } as CampaignWithId;
-}
-
-function playerCharacter(over: Partial<CharacterListItem> = {}): CharacterListItem {
-  return {
-    id: "char-1",
-    campaignId: "campaign-2",
-    userId: "user-1",
-    isEditableByPlayer: true,
-    recoveryCode: "DH-AAAA-BBBB",
-    header: { characterName: "Vex" },
-    ...over,
-  } as CharacterListItem;
 }
 
 function renderDashboard(props: Partial<React.ComponentProps<typeof Dashboard>> = {}) {
@@ -165,7 +148,6 @@ beforeEach(() => {
     dmError: null,
     playerError: null,
   });
-  usePlayerCharactersMock.mockReturnValue({ characters: [], loading: false, error: null });
   useArchivedCampaignsMock.mockReturnValue({ campaigns: [], loading: false, error: null });
   useRecoveryLookupMock.mockReturnValue({ loading: false, error: null, data: null, lookup: vi.fn() });
 });
@@ -346,28 +328,21 @@ describe("Dashboard player section", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders a campaign row with only that campaign's characters", () => {
+  it("renders a clickable row for each campaign the player is in", () => {
     useCampaignsContextMock.mockReturnValue({
       dmCampaigns: [],
-      playerCampaigns: [{ id: "campaign-2", name: "Second Campaign" }],
+      playerCampaigns: [{ id: "campaign-2", name: "Second Campaign" }] as CampaignWithId[],
       dmLoading: false,
       playerLoading: false,
       dmError: null,
       playerError: null,
     });
-    usePlayerCharactersMock.mockReturnValue({
-      characters: [
-        playerCharacter({ id: "c1", campaignId: "campaign-2" }),
-        playerCharacter({ id: "c2", campaignId: "campaign-3", header: { characterName: "Other" } }),
-      ],
-      loading: false,
-      error: null,
-    });
     renderDashboard();
 
-    expect(screen.getByText("Second Campaign")).toBeInTheDocument();
-    expect(screen.getByText("Vex")).toBeInTheDocument();
-    expect(screen.queryByText("Other")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Second Campaign" })).toHaveAttribute(
+      "href",
+      "/campaign/campaign-2"
+    );
   });
 });
 

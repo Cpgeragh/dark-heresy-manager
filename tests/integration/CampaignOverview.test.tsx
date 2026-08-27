@@ -82,6 +82,23 @@ vi.mock("../../src/pages/CampaignOverview/CharacterRow", () => ({
   ),
 }));
 
+const useCampaignCharacterSummariesMock = vi.fn();
+vi.mock("../../src/hooks/useCampaignCharacterSummaries", () => ({
+  useCampaignCharacterSummaries: (...args: unknown[]) => useCampaignCharacterSummariesMock(...args),
+}));
+
+vi.mock("../../src/pages/CampaignOverview/MyCharacterCard", () => ({
+  MyCharacterCard: ({ character }: { character: { header?: { characterName?: string } } }) => (
+    <div>Mock MyCharacterCard: {character.header?.characterName}</div>
+  ),
+}));
+
+vi.mock("../../src/pages/CampaignOverview/PartyRosterTile", () => ({
+  PartyRosterTile: ({ summary }: { summary: { characterName: string } }) => (
+    <div>Mock PartyRosterTile: {summary.characterName}</div>
+  ),
+}));
+
 vi.mock("../../src/pages/CampaignOverview/SessionForm", () => ({
   SessionForm: ({ onClose }: { onClose: () => void }) => (
     <div>
@@ -150,6 +167,7 @@ beforeEach(() => {
     updateSession: vi.fn(),
   });
   useCampaignCharactersMock.mockReturnValue({ characters: [], loading: false, error: null });
+  useCampaignCharacterSummariesMock.mockReturnValue({ summaries: [], loading: false, error: null });
 });
 
 function renderPage(effectiveUserId = "player-1") {
@@ -193,7 +211,7 @@ describe("CampaignOverview", () => {
       loading: false,
       error: null,
     });
-    renderPage();
+    renderPage("dm-1");
 
     expect(screen.getByText("Mock CharacterRow: Vex")).toBeInTheDocument();
     expect(screen.getByText("Mock CharacterRow: Thrun")).toBeInTheDocument();
@@ -243,15 +261,23 @@ describe("CampaignOverview", () => {
   });
 
   it("only shows DM-only sections and the Create-character controls for the DM", () => {
+    useCampaignCharactersMock.mockReturnValue({
+      characters: [character({ id: "c1", header: { characterName: "Vex" } })],
+      loading: false,
+      error: null,
+    });
     renderPage("player-1");
     expect(screen.queryByText("Mock DMInbox")).not.toBeInTheDocument();
     expect(screen.queryByText("Mock CustomItemLibraryAdmin")).not.toBeInTheDocument();
     expect(screen.queryByPlaceholderText("Character Name")).not.toBeInTheDocument();
+    expect(screen.queryByPlaceholderText("Search…")).not.toBeInTheDocument();
+    expect(screen.queryByText("Mock CharacterRow: Vex")).not.toBeInTheDocument();
 
     renderPage("dm-1");
     expect(screen.getByText("Mock DMInbox")).toBeInTheDocument();
     expect(screen.getByText("Mock CustomItemLibraryAdmin")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Character Name")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Search…")).toBeInTheDocument();
   });
 
   it("wires SessionCard's delete/save/apply-XP handlers only for the DM", () => {
@@ -327,5 +353,97 @@ describe("CampaignOverview", () => {
     await waitFor(() =>
       expect(mockToastSuccess).toHaveBeenCalledWith("Repaired 3 character summaries.")
     );
+  });
+});
+
+describe("CampaignOverview — GM and Inquisitor name", () => {
+  it("shows the GM and Inquisitor name when both are set, for DM and player alike", () => {
+    useCampaignMock.mockReturnValue({
+      campaign: campaign({ gmName: "Cain", inquisitorName: "Inquisitor Vail" }),
+      loading: false,
+      error: null,
+    });
+    renderPage("dm-1");
+    expect(screen.getByText("Cain")).toBeInTheDocument();
+    expect(screen.getByText("Inquisitor Vail")).toBeInTheDocument();
+
+    renderPage("player-1");
+    expect(screen.getAllByText("Cain")).toHaveLength(2);
+    expect(screen.getAllByText("Inquisitor Vail")).toHaveLength(2);
+  });
+
+  it("shows neither line when both are unset", () => {
+    renderPage("dm-1");
+    expect(screen.queryByText("GM")).not.toBeInTheDocument();
+  });
+});
+
+describe("CampaignOverview — player-facing My Characters and Party", () => {
+  it("shows My Characters instead of the DM Characters admin view, for a player", () => {
+    useCampaignCharactersMock.mockReturnValue({
+      characters: [character({ id: "c1", header: { characterName: "Vex" } })],
+      loading: false,
+      error: null,
+    });
+    renderPage("player-1");
+
+    expect(screen.getByText("Mock MyCharacterCard: Vex")).toBeInTheDocument();
+    expect(screen.queryByPlaceholderText("Search…")).not.toBeInTheDocument();
+  });
+
+  it("shows an empty state when the player has no character in this campaign", () => {
+    renderPage("player-1");
+    expect(
+      screen.getByText("You haven't claimed a character in this campaign yet.")
+    ).toBeInTheDocument();
+  });
+
+  it("shows the party roster, excluding the viewer's own character", () => {
+    useCampaignCharactersMock.mockReturnValue({
+      characters: [character({ id: "c1", header: { characterName: "Vex" } })],
+      loading: false,
+      error: null,
+    });
+    useCampaignCharacterSummariesMock.mockReturnValue({
+      summaries: [
+        { id: "c1", campaignId: "campaign-1", characterName: "Vex" },
+        { id: "c2", campaignId: "campaign-1", characterName: "Thrun" },
+      ],
+      loading: false,
+      error: null,
+    });
+    renderPage("player-1");
+
+    expect(screen.queryByText("Mock PartyRosterTile: Vex")).not.toBeInTheDocument();
+    expect(screen.getByText("Mock PartyRosterTile: Thrun")).toBeInTheDocument();
+  });
+
+  it("shows an empty state when no one else has joined", () => {
+    renderPage("player-1");
+    expect(screen.getByText("No one else has joined yet.")).toBeInTheDocument();
+  });
+
+  it("shows a loading state for the party roster", () => {
+    useCampaignCharacterSummariesMock.mockReturnValue({ summaries: [], loading: true, error: null });
+    renderPage("player-1");
+    expect(screen.getByText("Loading the party roster…")).toBeInTheDocument();
+  });
+
+  it("shows an error state for the party roster", () => {
+    useCampaignCharacterSummariesMock.mockReturnValue({
+      summaries: [],
+      loading: false,
+      error: new Error("x"),
+    });
+    renderPage("player-1");
+    expect(
+      screen.getByText("Unable to load the party roster. Please refresh the page.")
+    ).toBeInTheDocument();
+  });
+
+  it("does not show My Characters or Party for the DM", () => {
+    renderPage("dm-1");
+    expect(screen.queryByText("My Characters")).not.toBeInTheDocument();
+    expect(screen.queryByText("Party")).not.toBeInTheDocument();
   });
 });
