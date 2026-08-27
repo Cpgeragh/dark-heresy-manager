@@ -3,6 +3,8 @@
 import {
   getDoc,
   getDocs,
+  limit,
+  query,
   runTransaction,
   updateDoc,
   writeBatch,
@@ -23,6 +25,7 @@ import type { Character } from "../types/Character";
 import type { CharacterSummaryWithId } from "../types/Firestore";
 import { createEmptyCharacterData } from "../utils/characterFactory";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
+import { FIRESTORE_QUERY_LIMITS } from "../constants/firestoreLimits";
 import { validateCharacterName } from "../utils/validation";
 import { stripUndefined } from "../utils/stripUndefined";
 import { runSingleFlight } from "../utils/singleFlight";
@@ -106,7 +109,9 @@ export async function writeCharacterFieldsWithSummary(
 export async function repairCharacterSummaries(campaignId: string): Promise<number> {
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   return runSingleFlight("character:repair-summaries", [campaignId], async () => {
-    const snapshot = await getDocs(charactersCollectionRef(campaignId));
+    const snapshot = await getDocs(
+      query(charactersCollectionRef(campaignId), limit(FIRESTORE_QUERY_LIMITS.charactersPerCampaign))
+    );
     if (snapshot.empty) return 0;
 
     const batch = writeBatch(db);

@@ -128,6 +128,29 @@ describe("Firestore Rules: characterSummaries", () => {
     ).rejects.toThrow();
   });
 
+  it("the DM can list every character in the campaign (bounded) and batch-write a summary for each", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await createCampaign(env, "c1", "dm-1");
+    await createCharacter(env, "c1", "char1", { userId: "player-1" });
+    await createCharacter(env, "c1", "char2", { userId: "player-2" });
+
+    const dmDb = dbAs(env, "dm-1");
+    const charactersSnapshot = await dmDb
+      .collection("campaigns/c1/characters")
+      .limit(100)
+      .get();
+    expect(charactersSnapshot.docs.length).toBe(2);
+
+    const batch = dmDb.batch();
+    charactersSnapshot.docs.forEach((doc) => {
+      batch.set(dmDb.collection("campaigns/c1/characterSummaries").doc(doc.id), {
+        campaignId: "c1",
+        characterName: "Repaired",
+      });
+    });
+    await expect(batch.commit()).resolves.toBeUndefined();
+  });
+
   it("keeps a summary deletable only as a consequence of the character itself being deleted", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, "c1", "dm-1");
