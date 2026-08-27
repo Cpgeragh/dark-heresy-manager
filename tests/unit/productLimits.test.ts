@@ -12,6 +12,7 @@ describe("hard product limits", () => {
       campaignNameCharacters: 100,
       characterNameCharacters: 100,
       firstNameCharacters: 50,
+      inquisitorNameCharacters: 100,
       messageCharacters: 2_000,
       threadSummaryPreviewCharacters: 500,
       messagesPerPage: 100,

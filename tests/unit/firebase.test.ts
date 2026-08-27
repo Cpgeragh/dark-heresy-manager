@@ -24,6 +24,13 @@ vi.mock("firebase/functions", () => ({
   getFunctions: vi.fn(() => ({})),
 }));
 
+const mockInitializeAppCheck = vi.fn();
+const mockReCaptchaV3Provider = vi.fn();
+vi.mock("firebase/app-check", () => ({
+  initializeAppCheck: (...args: unknown[]) => mockInitializeAppCheck(...args),
+  ReCaptchaV3Provider: mockReCaptchaV3Provider,
+}));
+
 function stubAllEnvVars() {
   for (const key of REQUIRED_ENV_VARS) {
     vi.stubEnv(key, `test-${key}`);
@@ -49,5 +56,34 @@ describe("src/firebase.ts config validation", () => {
     stubAllEnvVars();
     vi.stubEnv(missingKey, "");
     await expect(import("../../src/firebase")).rejects.toThrow(missingKey);
+  });
+});
+
+describe("src/firebase.ts App Check", () => {
+  beforeEach(() => {
+    vi.resetModules();
+    vi.unstubAllEnvs();
+    mockInitializeAppCheck.mockClear();
+    mockReCaptchaV3Provider.mockClear();
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("initialises App Check when a reCAPTCHA site key is configured", async () => {
+    stubAllEnvVars();
+    vi.stubEnv("VITE_RECAPTCHA_SITE_KEY", "test-site-key");
+    await import("../../src/firebase");
+
+    expect(mockReCaptchaV3Provider).toHaveBeenCalledWith("test-site-key");
+    expect(mockInitializeAppCheck).toHaveBeenCalledOnce();
+  });
+
+  it("does not initialise App Check when no site key is configured", async () => {
+    stubAllEnvVars();
+    await import("../../src/firebase");
+
+    expect(mockInitializeAppCheck).not.toHaveBeenCalled();
   });
 });
