@@ -4,8 +4,10 @@
 import { useRef, useState } from "react";
 import type { User } from "firebase/auth";
 import { getRecoveryCode, rotateRecoveryCode } from "../services/identityService";
+import { saveFirstName } from "../services/profileService";
 import { useLinkDevice } from "../hooks/useLinkDevice";
 import { useToast } from "../components/Toast";
+import { PRODUCT_LIMITS } from "../constants/productLimits";
 import { uiSection, uiTextError } from "../ui/editableStyles";
 import { Button } from "../ui/Button";
 import { ConfirmInline } from "../ui/ConfirmInline";
@@ -16,12 +18,25 @@ import { SectionHeader } from "../ui/SectionHeader";
 interface Props {
   user: User;
   effectiveUserId: string;
+  firstName: string;
   isLinked: boolean;
   unlink: () => Promise<void>;
 }
 
-export default function Settings({ user: _user, effectiveUserId, isLinked, unlink }: Props) {
+export default function Settings({
+  user: _user,
+  effectiveUserId,
+  firstName,
+  isLinked,
+  unlink,
+}: Props) {
   const toast = useToast();
+
+  // ── Display name state ───────────────────────────────────────────────────
+  const [nameDraft, setNameDraft] = useState(firstName);
+  const [savingName, setSavingName] = useState(false);
+  const savingNameRef = useRef(false);
+  const [nameError, setNameError] = useState<string | null>(null);
 
   // ── Recovery code state ──────────────────────────────────────────────────
   const [revealedCode, setRevealedCode] = useState<string | null>(null);
@@ -35,6 +50,25 @@ export default function Settings({ user: _user, effectiveUserId, isLinked, unlin
   const [linkCode, setLinkCode] = useState("");
   const [unlinking, setUnlinking] = useState(false);
   const unlinkingRef = useRef(false);
+
+  async function handleSaveName() {
+    if (savingNameRef.current) return;
+    const trimmed = nameDraft.trim();
+    if (!trimmed || trimmed === firstName) return;
+    savingNameRef.current = true;
+    setSavingName(true);
+    setNameError(null);
+    try {
+      await saveFirstName(effectiveUserId, trimmed);
+      toast.success("Display name updated.");
+    } catch (err) {
+      console.error("Failed to save display name:", err);
+      setNameError("Failed to save display name. Please try again.");
+    } finally {
+      savingNameRef.current = false;
+      setSavingName(false);
+    }
+  }
 
   async function handleReveal() {
     if (revealingRef.current) return;
@@ -101,6 +135,34 @@ export default function Settings({ user: _user, effectiveUserId, isLinked, unlin
   return (
     <PageShell title="Settings">
       <Panel>
+        {/* ── Display Name ───────────────────────────────────────────────── */}
+        <div>
+          <SectionHeader className="mb-3">Display Name</SectionHeader>
+          <section className={uiSection + " space-y-3"}>
+            <p className="text-slate-400 text-sm lg:text-base">
+              Your first name, shown on your dashboard and character sheets. If you DM a campaign,
+              it's also shown to your players as the GM's name.
+            </p>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={nameDraft}
+                onChange={(e) => setNameDraft(e.target.value.replace(/\s/g, ""))}
+                maxLength={PRODUCT_LIMITS.firstNameCharacters}
+                placeholder="e.g. David"
+                className="flex-1 px-3 lg:px-4 py-2 lg:py-2.5 rounded-lg bg-slate-800 border border-slate-600 text-slate-100 text-sm lg:text-base placeholder:text-slate-500 focus:outline-none focus:border-amber-500"
+              />
+              <Button
+                onClick={handleSaveName}
+                disabled={savingName || !nameDraft.trim() || nameDraft.trim() === firstName}
+              >
+                {savingName ? "Saving…" : "Save"}
+              </Button>
+            </div>
+            {nameError && <p className={uiTextError}>{nameError}</p>}
+          </section>
+        </div>
+
         {/* ── Recovery Code ───────────────────────────────────────────────── */}
         <div>
           <SectionHeader className="mb-3">Recovery Code</SectionHeader>

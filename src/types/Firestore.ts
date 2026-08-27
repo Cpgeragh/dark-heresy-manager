@@ -13,6 +13,8 @@ export interface CampaignDocument {
   memberIds: string[];
   createdAt: Timestamp | Date | FieldValue;
   archivedAt: Timestamp | Date | null;
+  gmName?: string;
+  inquisitorName?: string;
 }
 
 /**

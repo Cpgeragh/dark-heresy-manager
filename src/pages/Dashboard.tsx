@@ -13,7 +13,7 @@ import { useArchivedCampaigns } from "../hooks/useArchivedCampaigns";
 import { useToast } from "../components/Toast";
 import { PortraitUpload } from "../components/PortraitUpload";
 import { RecoveryBackupBanner } from "../components/RecoveryBackupBanner";
-import { validateCampaignName } from "../utils/validation";
+import { validateCampaignName, validateInquisitorName } from "../utils/validation";
 import { buildRoute } from "../constants/routes";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
 import {
@@ -22,7 +22,7 @@ import {
   deleteCampaign,
   preflightCampaignDeletion,
   restoreCampaign,
-  updateCampaignName,
+  updateCampaignDetails,
 } from "../services/campaignService";
 import type { CampaignWithId, CharacterListItem } from "../types/Firestore";
 import { uiSection, editableInputClass, uiTextError } from "../ui/editableStyles";
@@ -189,11 +189,13 @@ function DmCampaignList({
   campaigns,
   loading,
   error,
+  firstName,
 }: {
   userUid: string;
   campaigns: CampaignWithId[];
   loading: boolean;
   error: Error | null;
+  firstName: string | null;
 }) {
   const {
     campaigns: archivedCampaigns,
@@ -201,10 +203,12 @@ function DmCampaignList({
     error: archivedError,
   } = useArchivedCampaigns(userUid);
   const [newCampaignName, setNewCampaignName] = useState("");
+  const [newInquisitorName, setNewInquisitorName] = useState("");
   const [creating, setCreating] = useState(false);
   const creatingRef = useRef(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
+  const [editInquisitorName, setEditInquisitorName] = useState("");
   const [editing, setEditing] = useState(false);
   const editingRef = useRef(false);
   const [deleting, setDeleting] = useState(false);
@@ -227,11 +231,20 @@ function DmCampaignList({
       toast.warning(validation.error ?? "Invalid campaign name");
       return;
     }
+    const inquisitorName = newInquisitorName.trim();
+    if (inquisitorName) {
+      const inquisitorValidation = validateInquisitorName(inquisitorName);
+      if (!inquisitorValidation.isValid) {
+        toast.warning(inquisitorValidation.error ?? "Invalid Inquisitor name");
+        return;
+      }
+    }
     creatingRef.current = true;
     setCreating(true);
     try {
-      await createCampaign(name, userUid);
+      await createCampaign(name, userUid, firstName ?? undefined, inquisitorName || undefined);
       setNewCampaignName("");
+      setNewInquisitorName("");
       toast.success("Campaign created successfully");
     } catch (error) {
       console.error("Failed to create campaign:", error);
@@ -240,7 +253,7 @@ function DmCampaignList({
       creatingRef.current = false;
       setCreating(false);
     }
-  }, [newCampaignName, userUid, toast]);
+  }, [newCampaignName, newInquisitorName, userUid, firstName, toast]);
 
   const handleEditSave = useCallback(async () => {
     if (!editingId || editingRef.current) return;
@@ -250,20 +263,29 @@ function DmCampaignList({
       toast.warning(validation.error ?? "Invalid campaign name");
       return;
     }
+    const inquisitorName = editInquisitorName.trim();
+    if (inquisitorName) {
+      const inquisitorValidation = validateInquisitorName(inquisitorName);
+      if (!inquisitorValidation.isValid) {
+        toast.warning(inquisitorValidation.error ?? "Invalid Inquisitor name");
+        return;
+      }
+    }
     editingRef.current = true;
     setEditing(true);
     try {
-      await updateCampaignName(editingId, name);
+      await updateCampaignDetails(editingId, name, inquisitorName);
       setEditingId(null);
       setEditName("");
+      setEditInquisitorName("");
     } catch (err) {
-      console.error("Failed to update campaign name:", err);
-      toast.error("Failed to update campaign name");
+      console.error("Failed to update campaign:", err);
+      toast.error("Failed to update campaign");
     } finally {
       editingRef.current = false;
       setEditing(false);
     }
-  }, [editingId, editName, toast]);
+  }, [editingId, editName, editInquisitorName, toast]);
 
   const handleArchive = useCallback(
     async (campaignId: string) => {
@@ -346,9 +368,20 @@ function DmCampaignList({
       {/* Create */}
       <div>
         <SectionHeader className="mb-3">Create Campaign</SectionHeader>
-        <div className="flex gap-2">
+        <div className="space-y-2">
           <input
-            className={editableInputClass(true) + " flex-1"}
+            className={editableInputClass(true)}
+            placeholder="Inquisitor Name (optional)"
+            value={newInquisitorName}
+            maxLength={PRODUCT_LIMITS.inquisitorNameCharacters}
+            onChange={(e) => setNewInquisitorName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") void handleCreate();
+            }}
+            aria-label="Inquisitor name"
+          />
+          <input
+            className={editableInputClass(true)}
             placeholder="Campaign Name"
             value={newCampaignName}
             maxLength={PRODUCT_LIMITS.campaignNameCharacters}
@@ -378,29 +411,40 @@ function DmCampaignList({
           <div className="flex flex-col gap-3">
             {campaigns.map((campaign) =>
               editingId === campaign.id ? (
-                <div key={campaign.id} className={uiSection + " flex items-center gap-2"}>
+                <div key={campaign.id} className={uiSection + " space-y-2"}>
                   <input
-                    className={editableInputClass(true) + " flex-1"}
+                    className={editableInputClass(true)}
+                    value={editInquisitorName}
+                    maxLength={PRODUCT_LIMITS.inquisitorNameCharacters}
+                    onChange={(e) => setEditInquisitorName(e.target.value)}
+                    placeholder="Inquisitor Name (optional)"
+                    aria-label="Edit Inquisitor name"
+                  />
+                  <input
+                    className={editableInputClass(true)}
                     value={editName}
                     maxLength={PRODUCT_LIMITS.campaignNameCharacters}
                     onChange={(e) => setEditName(e.target.value)}
                     autoFocus
                     aria-label="Edit campaign name"
                   />
-                  <Button size="sm" onClick={handleEditSave} disabled={editing}>
-                    {editing ? "Saving…" : "Save"}
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    disabled={editing}
-                    onClick={() => {
-                      setEditingId(null);
-                      setEditName("");
-                    }}
-                  >
-                    Cancel
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button size="sm" onClick={handleEditSave} disabled={editing}>
+                      {editing ? "Saving…" : "Save"}
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      disabled={editing}
+                      onClick={() => {
+                        setEditingId(null);
+                        setEditName("");
+                        setEditInquisitorName("");
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
                 </div>
               ) : (
                 <Link
@@ -421,6 +465,7 @@ function DmCampaignList({
                       e.preventDefault();
                       setEditingId(campaign.id);
                       setEditName(campaign.name);
+                      setEditInquisitorName(campaign.inquisitorName ?? "");
                     }}
                   >
                     Edit
@@ -651,6 +696,7 @@ export default function Dashboard({ user, effectiveUserId, isLinked, firstName }
           campaigns={dmCampaigns}
           loading={dmLoading}
           error={dmError}
+          firstName={firstName}
         />
 
         {/* QR codes — only show once the user has at least one campaign */}

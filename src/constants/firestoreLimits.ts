@@ -11,6 +11,7 @@ import { PRODUCT_LIMITS } from "./productLimits";
 export const FIRESTORE_QUERY_LIMITS = {
   activeCampaignsPerRole: 50,
   archivedCampaigns: 100,
+  dmCampaignsForNameSync: 100,
   charactersPerCampaign: PRODUCT_LIMITS.charactersPerCampaign,
   playerCharactersPerUser: 1_000,
   sessionsPerCampaign: 200,

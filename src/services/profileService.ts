@@ -8,6 +8,7 @@ import { db } from "../firebase";
 import type { UserProfileDocument } from "../types/Firestore";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
 import { assertFirestoreDocumentId, assertString } from "../utils/firebaseValidation";
+import { syncGmNameAcrossCampaigns } from "./campaignService";
 
 export async function getFirstName(uid: string): Promise<string | null> {
   assertFirestoreDocumentId(uid, "User ID");
@@ -27,4 +28,5 @@ export async function saveFirstName(uid: string, firstName: string): Promise<voi
   }
 
   await setDoc(doc(db, "userProfiles", uid), { firstName: trimmedName });
+  await syncGmNameAcrossCampaigns(uid, trimmedName);
 }

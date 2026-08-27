@@ -151,6 +151,7 @@ export default function App() {
                       <Settings
                         user={currentUser}
                         effectiveUserId={effectiveUserId}
+                        firstName={firstName}
                         isLinked={isLinked}
                         unlink={unlink}
                       />

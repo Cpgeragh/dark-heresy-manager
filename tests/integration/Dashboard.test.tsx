@@ -53,14 +53,14 @@ vi.mock("../../src/components/Toast", () => ({
 }));
 
 const createCampaignMock = vi.fn();
-const updateCampaignNameMock = vi.fn();
+const updateCampaignDetailsMock = vi.fn();
 const archiveCampaignMock = vi.fn();
 const restoreCampaignMock = vi.fn();
 const preflightCampaignDeletionMock = vi.fn();
 const deleteCampaignMock = vi.fn();
 vi.mock("../../src/services/campaignService", () => ({
   createCampaign: (...args: unknown[]) => createCampaignMock(...args),
-  updateCampaignName: (...args: unknown[]) => updateCampaignNameMock(...args),
+  updateCampaignDetails: (...args: unknown[]) => updateCampaignDetailsMock(...args),
   archiveCampaign: (...args: unknown[]) => archiveCampaignMock(...args),
   restoreCampaign: (...args: unknown[]) => restoreCampaignMock(...args),
   preflightCampaignDeletion: (...args: unknown[]) => preflightCampaignDeletionMock(...args),
@@ -178,8 +178,24 @@ describe("Dashboard DM campaign list", () => {
     await user.type(screen.getByPlaceholderText("Campaign Name"), "New Crusade");
     await user.click(screen.getByRole("button", { name: "Create" }));
 
-    expect(createCampaignMock).toHaveBeenCalledWith("New Crusade", "user-1");
+    expect(createCampaignMock).toHaveBeenCalledWith("New Crusade", "user-1", "Alice", undefined);
     await waitFor(() => expect(mockToastSuccess).toHaveBeenCalledWith("Campaign created successfully"));
+  });
+
+  it("passes a typed Inquisitor Name through to createCampaign", async () => {
+    const user = userEvent.setup();
+    renderDashboard();
+
+    await user.type(screen.getByPlaceholderText("Inquisitor Name (optional)"), "Inquisitor Vail");
+    await user.type(screen.getByPlaceholderText("Campaign Name"), "New Crusade");
+    await user.click(screen.getByRole("button", { name: "Create" }));
+
+    expect(createCampaignMock).toHaveBeenCalledWith(
+      "New Crusade",
+      "user-1",
+      "Alice",
+      "Inquisitor Vail"
+    );
   });
 
   it("shows a warning toast and does not create a campaign for an invalid name", async () => {
@@ -210,7 +226,33 @@ describe("Dashboard DM campaign list", () => {
     await user.type(input, "Renamed Crusade");
     await user.click(screen.getByRole("button", { name: "Save" }));
 
-    expect(updateCampaignNameMock).toHaveBeenCalledWith("campaign-1", "Renamed Crusade");
+    expect(updateCampaignDetailsMock).toHaveBeenCalledWith("campaign-1", "Renamed Crusade", "");
+  });
+
+  it("seeds and edits the Inquisitor Name alongside the campaign name", async () => {
+    const user = userEvent.setup();
+    useCampaignsContextMock.mockReturnValue({
+      dmCampaigns: [dmCampaign({ inquisitorName: "Inquisitor Vail" })],
+      playerCampaigns: [],
+      dmLoading: false,
+      playerLoading: false,
+      dmError: null,
+      playerError: null,
+    });
+    renderDashboard();
+
+    await user.click(screen.getByRole("button", { name: "Edit" }));
+    const inquisitorInput = screen.getByLabelText("Edit Inquisitor name");
+    expect(inquisitorInput).toHaveValue("Inquisitor Vail");
+    await user.clear(inquisitorInput);
+    await user.type(inquisitorInput, "Inquisitor Rey");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(updateCampaignDetailsMock).toHaveBeenCalledWith(
+      "campaign-1",
+      "The Lathe Run",
+      "Inquisitor Rey"
+    );
   });
 
   it("archives a campaign", async () => {

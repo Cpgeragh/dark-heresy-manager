@@ -234,6 +234,13 @@ export function validateCampaignName(name: string): ValidationResult {
 }
 
 /**
+ * Validate Inquisitor name (optional field — only checked when non-empty)
+ */
+export function validateInquisitorName(name: string): ValidationResult {
+  return validateStringLength(name, 1, PRODUCT_LIMITS.inquisitorNameCharacters, "Inquisitor name");
+}
+
+/**
  * Validate character name
  */
 export function validateCharacterName(name: string): ValidationResult {

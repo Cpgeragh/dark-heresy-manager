@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockDoc, mockSetDoc } = vi.hoisted(() => ({
+const { mockDoc, mockSetDoc, mockSyncGmNameAcrossCampaigns } = vi.hoisted(() => ({
   mockDoc: vi.fn(() => "profile-ref"),
   mockSetDoc: vi.fn().mockResolvedValue(undefined),
+  mockSyncGmNameAcrossCampaigns: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock("firebase/firestore", () => ({
@@ -12,6 +13,10 @@ vi.mock("firebase/firestore", () => ({
 }));
 
 vi.mock("../../src/firebase", () => ({ db: "mock-db" }));
+
+vi.mock("../../src/services/campaignService", () => ({
+  syncGmNameAcrossCampaigns: (...args: unknown[]) => mockSyncGmNameAcrossCampaigns(...args),
+}));
 
 import { saveFirstName } from "../../src/services/profileService";
 
@@ -27,15 +32,23 @@ describe("saveFirstName", () => {
     expect(mockSetDoc).toHaveBeenCalledWith("profile-ref", { firstName: "Ibram" });
   });
 
-  it("rejects an empty first name before writing", async () => {
-    await expect(saveFirstName("user-1", "   ")).rejects.toThrow("First name is required.");
-    expect(mockSetDoc).not.toHaveBeenCalled();
+  it("syncs the trimmed name to every campaign the user DMs", async () => {
+    await saveFirstName("user-1", "  Ibram  ");
+
+    expect(mockSyncGmNameAcrossCampaigns).toHaveBeenCalledWith("user-1", "Ibram");
   });
 
-  it("rejects a first name over 50 characters before writing", async () => {
+  it("rejects an empty first name before writing or syncing", async () => {
+    await expect(saveFirstName("user-1", "   ")).rejects.toThrow("First name is required.");
+    expect(mockSetDoc).not.toHaveBeenCalled();
+    expect(mockSyncGmNameAcrossCampaigns).not.toHaveBeenCalled();
+  });
+
+  it("rejects a first name over 50 characters before writing or syncing", async () => {
     await expect(saveFirstName("user-1", "x".repeat(51))).rejects.toThrow(
       "First name cannot exceed 50 characters."
     );
     expect(mockSetDoc).not.toHaveBeenCalled();
+    expect(mockSyncGmNameAcrossCampaigns).not.toHaveBeenCalled();
   });
 });

@@ -12,6 +12,11 @@ vi.mock("../../src/services/identityService", () => ({
   rotateRecoveryCode: (...args: unknown[]) => rotateRecoveryCodeMock(...args),
 }));
 
+const saveFirstNameMock = vi.fn();
+vi.mock("../../src/services/profileService", () => ({
+  saveFirstName: (...args: unknown[]) => saveFirstNameMock(...args),
+}));
+
 const linkDeviceMock = vi.fn();
 const useLinkDeviceMock = vi.fn();
 vi.mock("../../src/hooks/useLinkDevice", () => ({
@@ -36,10 +41,69 @@ beforeEach(() => {
 function renderSettings(props: Partial<React.ComponentProps<typeof Settings>> = {}) {
   const unlink = vi.fn().mockResolvedValue(undefined);
   render(
-    <Settings user={user1} effectiveUserId="user-1" isLinked={false} unlink={unlink} {...props} />
+    <Settings
+      user={user1}
+      effectiveUserId="user-1"
+      firstName="Alice"
+      isLinked={false}
+      unlink={unlink}
+      {...props}
+    />
   );
   return { unlink };
 }
+
+describe("Settings display name", () => {
+  it("pre-fills the input with the current first name", () => {
+    renderSettings();
+    expect(screen.getByPlaceholderText("e.g. David")).toHaveValue("Alice");
+  });
+
+  it("disables Save until the draft actually changes", () => {
+    renderSettings();
+    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+  });
+
+  it("saves a changed name and shows a success toast", async () => {
+    const user = userEvent.setup();
+    saveFirstNameMock.mockResolvedValue(undefined);
+    renderSettings();
+
+    const input = screen.getByPlaceholderText("e.g. David");
+    await user.clear(input);
+    await user.type(input, "Cain");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(saveFirstNameMock).toHaveBeenCalledWith("user-1", "Cain");
+    await waitFor(() => expect(mockToastSuccess).toHaveBeenCalledWith("Display name updated."));
+  });
+
+  it("strips spaces as they're typed", async () => {
+    const user = userEvent.setup();
+    renderSettings();
+
+    const input = screen.getByPlaceholderText("e.g. David");
+    await user.clear(input);
+    await user.type(input, "Cain Marko");
+
+    expect(input).toHaveValue("CainMarko");
+  });
+
+  it("shows an error when saving fails", async () => {
+    const user = userEvent.setup();
+    saveFirstNameMock.mockRejectedValue(new Error("network"));
+    renderSettings();
+
+    const input = screen.getByPlaceholderText("e.g. David");
+    await user.clear(input);
+    await user.type(input, "Cain");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() =>
+      expect(screen.getByText("Failed to save display name. Please try again.")).toBeInTheDocument()
+    );
+  });
+});
 
 describe("Settings recovery code", () => {
   it("reveals an existing code without generating a new one", async () => {
