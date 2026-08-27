@@ -25,6 +25,42 @@ describe("CharacterKebabContent Recovery Code section", () => {
     expect(screen.getByRole("button", { name: "Revoke" })).toBeInTheDocument();
   });
 
+  it("shows a Share button that opens a QR modal with the character's code URL", () => {
+    render(
+      <CharacterKebabContent
+        recoveryCode="DH-TEST-0001"
+        canManageRecoveryCode={true}
+        onGenerateRecoveryCode={vi.fn()}
+        onRevokeRecoveryCode={vi.fn()}
+        canExport={false}
+        onExport={noop}
+        canPlayerRelease={false}
+        onPlayerRelease={noop}
+        isReleasing={false}
+      />
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Share" }));
+    expect(screen.getByText("Share Character")).toBeInTheDocument();
+    expect(screen.getByText(`${window.location.origin}?code=DH-TEST-0001`)).toBeInTheDocument();
+  });
+
+  it("shows no Share button when there's no code", () => {
+    render(
+      <CharacterKebabContent
+        recoveryCode=""
+        canManageRecoveryCode={false}
+        onGenerateRecoveryCode={vi.fn()}
+        onRevokeRecoveryCode={vi.fn()}
+        canExport={false}
+        onExport={noop}
+        canPlayerRelease={false}
+        onPlayerRelease={noop}
+        isReleasing={false}
+      />
+    );
+    expect(screen.queryByRole("button", { name: "Share" })).not.toBeInTheDocument();
+  });
+
   it("shows the code and a copy button, but no revoke button, when the caller cannot manage it", () => {
     render(
       <CharacterKebabContent

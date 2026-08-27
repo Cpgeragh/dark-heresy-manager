@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { COPY_FEEDBACK_DURATION } from "../../constants/ui";
 import { Button } from "../../ui/Button";
 import { uiSubheading } from "../../ui/editableStyles";
+import { QrModal } from "../../ui/QrModal";
 
 interface Props {
   recoveryCode?: string;
@@ -33,6 +34,7 @@ export function CharacterKebabContent({
   const [generateError, setGenerateError] = useState<string | null>(null);
   const [revoking, setRevoking] = useState(false);
   const [revokeError, setRevokeError] = useState<string | null>(null);
+  const [showQr, setShowQr] = useState(false);
 
   const copyCode = useCallback(async () => {
     if (!recoveryCode) return;
@@ -88,6 +90,14 @@ export function CharacterKebabContent({
               className="shrink-0"
             >
               {copied ? "Copied" : "Copy"}
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setShowQr(true)}
+              className="shrink-0"
+            >
+              Share
             </Button>
             {canManageRecoveryCode && (
               <Button
@@ -155,6 +165,14 @@ export function CharacterKebabContent({
             {isReleasing ? "Releasing…" : "Release Character"}
           </Button>
         </div>
+      )}
+
+      {recoveryCode && showQr && (
+        <QrModal
+          title="Share Character"
+          url={`${window.location.origin}?code=${recoveryCode}`}
+          onClose={() => setShowQr(false)}
+        />
       )}
     </div>
   );

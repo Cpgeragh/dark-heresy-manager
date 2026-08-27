@@ -4,7 +4,7 @@
 //   • DM section  (create / manage campaigns, QR codes)
 //   • Player section (campaigns you play in, claim character)
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import type { User } from "firebase/auth";
 import { useCampaignsContext } from "../context/useCampaignsContext";
@@ -557,6 +557,14 @@ function ClaimCharacterSection() {
 
   const { loading, error, data, lookup } = useRecoveryLookup();
   const { claimCharacter } = useClaimActions();
+
+  useEffect(() => {
+    const codeParam = new URLSearchParams(window.location.search).get("code");
+    if (codeParam) {
+      setCode(codeParam);
+      lookup(codeParam);
+    }
+  }, [lookup]);
 
   const handleLookup = useCallback(() => {
     lookup(code);
