@@ -25,10 +25,10 @@ vi.mock("firebase/functions", () => ({
 }));
 
 const mockInitializeAppCheck = vi.fn();
-const mockReCaptchaV3Provider = vi.fn();
+const mockReCaptchaEnterpriseProvider = vi.fn();
 vi.mock("firebase/app-check", () => ({
   initializeAppCheck: (...args: unknown[]) => mockInitializeAppCheck(...args),
-  ReCaptchaV3Provider: mockReCaptchaV3Provider,
+  ReCaptchaEnterpriseProvider: mockReCaptchaEnterpriseProvider,
 }));
 
 function stubAllEnvVars() {
@@ -64,7 +64,7 @@ describe("src/firebase.ts App Check", () => {
     vi.resetModules();
     vi.unstubAllEnvs();
     mockInitializeAppCheck.mockClear();
-    mockReCaptchaV3Provider.mockClear();
+    mockReCaptchaEnterpriseProvider.mockClear();
   });
 
   afterEach(() => {
@@ -76,7 +76,7 @@ describe("src/firebase.ts App Check", () => {
     vi.stubEnv("VITE_RECAPTCHA_SITE_KEY", "test-site-key");
     await import("../../src/firebase");
 
-    expect(mockReCaptchaV3Provider).toHaveBeenCalledWith("test-site-key");
+    expect(mockReCaptchaEnterpriseProvider).toHaveBeenCalledWith("test-site-key");
     expect(mockInitializeAppCheck).toHaveBeenCalledOnce();
   });
 
@@ -84,6 +84,15 @@ describe("src/firebase.ts App Check", () => {
     stubAllEnvVars();
     await import("../../src/firebase");
 
+    expect(mockInitializeAppCheck).not.toHaveBeenCalled();
+  });
+
+  it("fails fast when the staging project has no App Check site key", async () => {
+    stubAllEnvVars();
+    vi.stubEnv("VITE_FIREBASE_PROJECT_ID", "dark-heresy-manager-staging");
+    vi.stubEnv("VITE_RECAPTCHA_SITE_KEY", "");
+
+    await expect(import("../../src/firebase")).rejects.toThrow("VITE_RECAPTCHA_SITE_KEY");
     expect(mockInitializeAppCheck).not.toHaveBeenCalled();
   });
 });

@@ -5,12 +5,23 @@ import { spawnSync } from "node:child_process";
 
 const checkerPath = resolve(process.cwd(), "scripts/checkLocalSafety.mjs");
 const temporaryDirectories: string[] = [];
+const APPROVED_PUBLIC_ENV_NAMES = [
+  "VITE_FIREBASE_API_KEY",
+  "VITE_FIREBASE_AUTH_DOMAIN",
+  "VITE_FIREBASE_PROJECT_ID",
+  "VITE_FIREBASE_STORAGE_BUCKET",
+  "VITE_FIREBASE_MESSAGING_SENDER_ID",
+  "VITE_FIREBASE_APP_ID",
+  "VITE_RECAPTCHA_SITE_KEY",
+] as const;
 
 function createFixture() {
   const root = mkdtempSync(resolve(tmpdir(), "dh-local-safety-"));
   temporaryDirectories.push(root);
   mkdirSync(resolve(root, "src"));
   mkdirSync(resolve(root, "tests"));
+  mkdirSync(resolve(root, "functions", "src"), { recursive: true });
+  mkdirSync(resolve(root, "functions", "tests"), { recursive: true });
 
   const dependencies = { react: "^19.2.0" };
   const packageJson = {
@@ -53,15 +64,20 @@ afterEach(() => {
 });
 
 describe("local safety checker", () => {
-  it("passes a consistent lockfile and the approved public browser setting", () => {
+  it("passes a consistent lockfile and the exact approved public browser settings", () => {
     const root = createFixture();
-    writeFileSync(resolve(root, ".env"), "VITE_FIREBASE_API_KEY=fixture-public-value\n");
+    writeFileSync(
+      resolve(root, ".env"),
+      APPROVED_PUBLIC_ENV_NAMES.map((name) => `${name}=fixture-${name}`).join("\n") + "\n"
+    );
 
     const result = runChecker(root);
 
     expect(result.status).toBe(0);
     expect(result.stdout).toContain("no network requests or source uploads");
-    expect(result.stdout).not.toContain("fixture-public-value");
+    for (const name of APPROVED_PUBLIC_ENV_NAMES) {
+      expect(result.stdout).not.toContain(`fixture-${name}`);
+    }
   });
 
   it("rejects environment variables that would expose sensitive build values", () => {
@@ -116,6 +132,42 @@ describe("local safety checker", () => {
     for (const token of tokens) expect(result.stdout).not.toContain(token);
   });
 
+  it("rejects OAuth access and refresh tokens without printing their values", () => {
+    const root = createFixture();
+    const accessToken = ["ya", `29.${"a".repeat(30)}`].join("");
+    const refreshToken = ["refresh", "token-value-that-must-not-print"].join("-");
+    writeFileSync(
+      resolve(root, "oauth-session.json"),
+      JSON.stringify({ access_token: accessToken, refresh_token: refreshToken })
+    );
+
+    const result = runChecker(root, "--secrets");
+
+    expect(result.status).toBe(1);
+    expect(result.stdout).toContain("Google OAuth access token");
+    expect(result.stdout).toContain("OAuth refresh token field");
+    expect(result.stdout).not.toContain(accessToken);
+    expect(result.stdout).not.toContain(refreshToken);
+  });
+
+  it("scans generated browser and compiled Functions output", () => {
+    const root = createFixture();
+    const browserToken = ["ghp", "b".repeat(36)].join("_");
+    const functionToken = ["sk", `live_${"c".repeat(20)}`].join("_");
+    mkdirSync(resolve(root, "dist", "assets"), { recursive: true });
+    mkdirSync(resolve(root, "functions", "lib"), { recursive: true });
+    writeFileSync(resolve(root, "dist", "assets", "app.js"), browserToken);
+    writeFileSync(resolve(root, "functions", "lib", "index.js"), functionToken);
+
+    const result = runChecker(root, "--secrets");
+
+    expect(result.status).toBe(1);
+    expect(result.stdout).toContain("dist/assets/app.js");
+    expect(result.stdout).toContain("functions/lib/index.js");
+    expect(result.stdout).not.toContain(browserToken);
+    expect(result.stdout).not.toContain(functionToken);
+  });
+
   it("permits Recovery Code fixtures only in tests and documentation", () => {
     const root = createFixture();
     const fixtureCode = ["DH", "TEST", "0001"].join("-");
@@ -123,9 +175,16 @@ describe("local safety checker", () => {
       resolve(root, "tests/recovery-fixture.ts"),
       `export const code = "${fixtureCode}";`
     );
+    writeFileSync(
+      resolve(root, "functions/tests/recovery-fixture.ts"),
+      `export const code = "${fixtureCode}";`
+    );
     expect(runChecker(root, "--secrets").status).toBe(0);
 
-    writeFileSync(resolve(root, "src/recovery-leak.ts"), `export const code = "${fixtureCode}";`);
+    writeFileSync(
+      resolve(root, "functions/src/recovery-leak.ts"),
+      `export const code = "${fixtureCode}";`
+    );
     const result = runChecker(root, "--secrets");
 
     expect(result.status).toBe(1);

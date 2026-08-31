@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "firebase/app-check";
 import {
   initializeFirestore,
   persistentLocalCache,
@@ -37,9 +37,14 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+if (requiredEnvVars.VITE_FIREBASE_PROJECT_ID === "dark-heresy-manager-staging" && !recaptchaSiteKey) {
+  throw new Error(
+    'Missing Firebase config value "VITE_RECAPTCHA_SITE_KEY" for staging App Check.',
+  );
+}
 if (recaptchaSiteKey) {
   initializeAppCheck(app, {
-    provider: new ReCaptchaV3Provider(recaptchaSiteKey),
+    provider: new ReCaptchaEnterpriseProvider(recaptchaSiteKey),
     isTokenAutoRefreshEnabled: true,
   });
 }

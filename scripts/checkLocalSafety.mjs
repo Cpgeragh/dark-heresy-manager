@@ -6,12 +6,19 @@ const EXCLUDED_DIRECTORIES = new Set([
   ".firebase",
   ".git",
   "coverage",
-  "dist",
   "node_modules",
   "reference-images",
 ]);
 const SAMPLE_ENV_FILES = new Set([".env.example", ".env.sample"]);
-const APPROVED_PUBLIC_ENV_NAMES = new Set(["VITE_FIREBASE_API_KEY"]);
+const APPROVED_PUBLIC_ENV_NAMES = new Set([
+  "VITE_FIREBASE_API_KEY",
+  "VITE_FIREBASE_AUTH_DOMAIN",
+  "VITE_FIREBASE_PROJECT_ID",
+  "VITE_FIREBASE_STORAGE_BUCKET",
+  "VITE_FIREBASE_MESSAGING_SENDER_ID",
+  "VITE_FIREBASE_APP_ID",
+  "VITE_RECAPTCHA_SITE_KEY",
+]);
 const APPROVED_BUILD_ENV_NAMES = new Set([
   "BASE_URL",
   "DEV",
@@ -37,6 +44,12 @@ const GITHUB_TOKEN = new RegExp(
 const AWS_ACCESS_KEY = new RegExp(joinPattern("AK", "IA[0-9A-Z]{16}"));
 const SLACK_TOKEN = new RegExp(joinPattern("xox", "[baprs]-[A-Za-z0-9-]{20,}"));
 const STRIPE_SECRET = new RegExp(joinPattern("sk_", "live_[A-Za-z0-9]{16,}"));
+const GOOGLE_OAUTH_ACCESS_TOKEN = new RegExp(
+  joinPattern("ya", "29\\.[A-Za-z0-9._~-]{20,}")
+);
+const REFRESH_TOKEN_FIELD = new RegExp(
+  joinPattern('"refresh', '_token"\\s*:\\s*"[^"\\r\\n]{10,}"')
+);
 const RECOVERY_CODE = new RegExp(joinPattern("\\bDH-", "[A-Z0-9]{4}-[A-Z0-9]{4}\\b"), "g");
 const RECOVERY_CODE_PLACEHOLDERS = new Set([
   ["DH", "XXXX", "XXXX"].join("-"),
@@ -52,6 +65,8 @@ const KNOWN_SECRET_PATTERNS = [
   ["AWS access key", AWS_ACCESS_KEY],
   ["Slack access token", SLACK_TOKEN],
   ["live Stripe secret key", STRIPE_SECRET],
+  ["Google OAuth access token", GOOGLE_OAUTH_ACCESS_TOKEN],
+  ["OAuth refresh token field", REFRESH_TOKEN_FIELD],
 ];
 
 function normaliseRelativePath(rootDir, absolutePath) {
@@ -133,7 +148,11 @@ function parseEnvironmentNames(text) {
 
 function isRecoveryFixturePath(relativePath) {
   const [firstSegment] = relativePath.split("/");
-  return RECOVERY_FIXTURE_DIRECTORIES.has(firstSegment) || relativePath.endsWith(".log");
+  return (
+    RECOVERY_FIXTURE_DIRECTORIES.has(firstSegment) ||
+    relativePath.startsWith("functions/tests/") ||
+    relativePath.endsWith(".log")
+  );
 }
 
 function isPlaceholderRecoveryCode(code) {
@@ -144,6 +163,8 @@ function isProductionBuildFile(relativePath) {
   return (
     relativePath.startsWith("src/") ||
     relativePath.startsWith("public/") ||
+    relativePath.startsWith("dist/") ||
+    relativePath.startsWith("functions/lib/") ||
     relativePath === "index.html" ||
     relativePath === "vite.config.ts"
   );
