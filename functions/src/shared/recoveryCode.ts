@@ -1,6 +1,6 @@
 // functions/src/shared/recoveryCode.ts
 //
-// Stage 3.2a: server-side Recovery Code generation and HMAC hashing. The
+// Server-side Recovery Code generation and HMAC hashing. The
 // generation format (prefix, segment lengths, alphabet) deliberately
 // mirrors src/utils/recoveryCode.ts and src/constants/ui.ts exactly — the
 // two projects are independent (functions/ can't import from src/), so if

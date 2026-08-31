@@ -898,7 +898,7 @@ Use a new disposable browser profile for each path: new user, reclaim, and refre
 - [ ] Browser Back/Forward moves correctly between Welcome → Show Code and Welcome → Reclaim, matching whichever path you took
 - [ ] Refresh the page while sitting on the show-code step — the code is re-fetched from the server rather than lost (it was never only in local state); if no code exists server-side for some reason, it quietly falls back to the Welcome step instead of showing a blank code
 - [ ] "Returning user? Reclaim your identity" path — entering a previously-issued recovery code from another device migrates every DM-owned campaign and every player-owned character over to this device's account in one go
-- [ ] With a deliberately seeded account above a Stage 2 reclaim ceiling, recovery stops with the protected-recovery message before any campaign or character changes owner; retrying a normal-sized recovery afterwards still works, proving the temporary proof record was cleaned up
+- [ ] With a deliberately seeded account above the identity-reclaim ceiling, recovery stops with the protected-recovery message before any campaign or character changes owner; retrying a normal-sized recovery afterwards still works, proving the temporary proof record was cleaned up
 - [ ] After onboarding completes once, closing and reopening the app never shows onboarding again; if an onboarded account is missing its required profile, the app fails closed with an account-profile loading error and never asks the user to recreate the name
 - [ ] Reclaim an identity that already has a saved first name on a fresh anonymous-auth device — the reclaim control stays on "Finishing recovery…" until the existing name is live, then the dashboard opens directly and the obsolete profile under the old UID no longer exists
 
@@ -935,7 +935,7 @@ Use a DM with active and archived campaigns, an owning player with multiple clai
 - [ ] Looking up a valid code shows character name, campaign name, and one of four distinct ownership states: unclaimed (green, claimable) / already yours / claimed by another player / claimed and locked by the DM — confirm the last two show different explanatory text even though both are equally un-claimable right now
 - [ ] Claiming an unclaimed character navigates straight to its character sheet afterwards
 - [ ] Recovery backup banner appears only under its intended account/device conditions; copying the code works, and rotating the code replaces any stale code shown by the banner
-- [ ] Entering an exact valid character recovery code still resolves normally after the Stage 2 rules update; automated rule tests separately confirm that listing or querying the recovery index is denied
+- [ ] Entering an exact valid character recovery code still resolves normally; automated rule tests separately confirm that listing or querying the recovery index is denied
 
 ## 26. Campaign Overview
 
@@ -1047,7 +1047,7 @@ Use one editable character and one read-only character. Open the sheet on phone 
 
 ## 31. Hard Product Limits
 
-These are the authoritative Stage 2 ceilings from `constants/productLimits.ts`. Complete the checks as the corresponding client, rules, throttling and bulk-operation enforcement is added. Use disposable data and verify that a rejected boundary attempt performs no Firebase write.
+These are the authoritative product ceilings from `constants/productLimits.ts`. Complete the checks as the corresponding client, rules, throttling and bulk-operation enforcement is added. Use disposable data and verify that a rejected boundary attempt performs no Firebase write.
 
 ### How to test this system
 
@@ -1099,7 +1099,7 @@ These checks exercise the repository's offline dependency, credential and build 
 
 ### How to test this system
 
-Run each focused command from the project folder. Restore every temporary synthetic fixture after confirming the expected failure. The existing `serviceAccountKey.json` remains an expected blocker until Stage 4 replaces and revokes that credential, so distinguish that deliberate finding from a checker malfunction.
+Run each focused command from the project folder. Restore every temporary synthetic fixture after confirming the expected failure.
 
 - [ ] Run `npm run check:secrets` with the current project — it states that it performs no network request or upload, prints only the exact approved Firebase web configuration variable names (never their values), and fails closed on a service-account file without exposing any credential field value
 - [ ] Add a temporary ignored environment fixture containing the exact Firebase web configuration allowlist, then try an unapproved or secret-named variable — the public settings are accepted when ignored, while the other variable is rejected by name without its value appearing in output
@@ -1108,22 +1108,22 @@ Run each focused command from the project folder. Restore every temporary synthe
 - [ ] Put a synthetic `DH-XXXX-XXXX`-shaped non-placeholder value in both `tests/` locations (`tests/` and `functions/tests/`) and then in production source — both test fixtures are allowed, the production copy is rejected, and the code itself is not printed
 - [ ] Reference a secret-named `VITE_` variable or expose the complete `import.meta.env` object from production source — the checker rejects the browser exposure; the exact Firebase web configuration allowlist and Vite's built-in environment flags continue to pass
 - [ ] Run `npm run check:lockfile`, then create disposable direct-dependency drift or a second lockfile — the current lock passes offline, while either inconsistent fixture fails before a build begins
-- [ ] After Stage 4 removes the service-account blocker, run `npm run check:deployment:local` — it completes the local safety checks, production build, application tests and Firestore emulator rules tests; no online vulnerability audit runs unless network access is separately approved, and no source or secret is uploaded to an external scanner
+- [ ] Run `npm run check:deployment:local` — it completes the local safety checks, production build, application tests and Firestore emulator rules tests; no online vulnerability audit runs unless network access is separately approved, and no source or secret is uploaded to an external scanner
 
-## 33. Stage 2 Completion Verification
+## 33. Complete Local Verification
 
-These checks close Stage 2 without contacting or changing production Firebase. Run them from the project folder against the checked-in configuration and the local `dh-test` emulator project. A focused run is useful for diagnosing a failure, but the completion result comes from the production build and both complete suites.
+These checks verify the full local test suite without contacting or changing production Firebase. Run them from the project folder against the checked-in configuration and the local `dh-test` emulator project. A focused run is useful for diagnosing a failure, but the completion result comes from the production build and both complete suites.
 
 ### How to test this system
 
-Do not deploy between these checks. Confirm the Firebase project remains on Spark before and after verification. The known local service-account-file finding from §32 remains scheduled for Stage 4 and is not a failed application or Firestore-rules test.
+Do not deploy between these checks.
 
 - [ ] Run the focused bounded-query, subscription and message-drawer tests — disabled queries create no listener, enabling creates one listener, changing/disabling/unmounting cleans it up, a closed drawer has no thread consumer, and older messages or claim history are fetched only after their explicit activation
 - [ ] Run the focused input-boundary tests — imports, portraits, messages, sessions, character arrays, custom-item values and bulk counts accept their exact maximum valid values, while the first oversized value is rejected before a Firebase write
 - [ ] Run the focused Firestore rules tests — unexpected campaign, character, session, message, thread, custom-item and version fields are rejected; campaign members may create drafts, outsiders cannot, and only the authorised creator/DM transitions remain available
 - [ ] Run the duplicate-submission, batch/preflight and XP-reconciliation tests — identical in-flight mutations share one operation, 440-document atomic work succeeds while 441 is stopped before a batch, and stale `experience.spent` converges after one committed correction
 - [ ] Run the Firebase configuration test — the CSP still permits the app's required Firebase/Auth, image, frame and worker destinations without unsafe script execution; the build hook, SPA rewrite, service-worker revalidation and immutable hashed-asset caching remain intact
-- [ ] Run `npm run build`, `npm run test:run` and `npm run test:rules` once after all Stage 2 test edits — all complete successfully using only the local project and Firestore emulator, no production deployment occurs, and the Firebase billing plan remains Spark
+- [ ] Run `npm run build`, `npm run test:run` and `npm run test:rules` once after a batch of test edits — all complete successfully using only the local project and Firestore emulator, and no production deployment occurs
 
 ---
 

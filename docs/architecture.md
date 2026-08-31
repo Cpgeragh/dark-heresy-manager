@@ -228,7 +228,7 @@ These limits are cost and abuse circuit-breakers, not substitutes for write-time
 
 ### Hard product limits
 
-`constants/productLimits.ts` is the authoritative numerical policy for user-created data and costly operations. Stage 2 records the complete policy before adding its remaining rules, throttling and bulk-operation enforcement. A value appearing in this table therefore means “must be enforced by the end of the relevant Stage 2 section,” not that every layer already enforces it today.
+`constants/productLimits.ts` is the authoritative numerical policy for user-created data and costly operations. A value appearing in this table records the agreed policy; enforcement is layered across client validation, Firestore rules and the protected backend as each is built, so not every layer necessarily enforces every value yet.
 
 | Area                      |                                                                                      Limit | Rationale                                                                                                                             |
 | ------------------------- | -----------------------------------------------------------------------------------------: | ------------------------------------------------------------------------------------------------------------------------------------- |
@@ -254,7 +254,7 @@ These limits are cost and abuse circuit-breakers, not substitutes for write-time
 | Recovery/link attempts    |                                                5 of each per device per rolling 15 minutes | Slows code guessing without blocking ordinary correction of typing mistakes                                                           |
 | Bulk operation            |                                                      440 affected documents per invocation | Leaves explicit headroom below Firestore's 500-write batch ceiling                                                                    |
 
-Limits use decimal bytes because browser `File.size`, encoded strings and Firestore document budgeting are compared as byte counts rather than marketed storage units. Rate and attempt windows are rolling windows. Server-authoritative enforcement that cannot be made abuse-resistant on Spark remains explicitly identified for Stage 3; Stage 2 still applies the strongest safe local and rules-based containment available.
+Limits use decimal bytes because browser `File.size`, encoded strings and Firestore document budgeting are compared as byte counts rather than marketed storage units. Rate and attempt windows are rolling windows. Server-authoritative enforcement lives in the protected Cloud Functions layer (see `functions/src/shared/rateLimit.ts`); client validation and Firestore rules apply the strongest containment available at each of those layers.
 
 UI constraints provide immediate feedback, services reject invalid work before contacting Firebase, and Firestore rules mirror every security-relevant limit they can evaluate. None of those layers substitutes for another.
 
@@ -272,7 +272,7 @@ These checks are usability and cost-control measures. They reduce accidental rea
 
 Campaign creation and renaming include their submitted names in the operation identity. Character and session edits, and message sends, include their validated payloads, so an identical repeated update is collapsed without discarding a different update made while the first is pending. Destructive and security-sensitive actions use their stable target IDs. Portrait uploads allow one pending write per character. Custom-item publish and propagation actions retain their existing synchronous per-item UI guard and also use the shared service boundary.
 
-Buttons and forms continue to expose busy states, and synchronous refs close the same-render click gap for shared confirmations, campaign and character creation, imports, session actions, recovery screens and device linking. These protections exist within one running client only. They cannot deduplicate retries from another tab, device, process or modified client; Stage 3 therefore adds server-side idempotency for expensive and security-sensitive operations.
+Buttons and forms continue to expose busy states, and synchronous refs close the same-render click gap for shared confirmations, campaign and character creation, imports, session actions, recovery screens and device linking. These protections exist within one running client only. They cannot deduplicate retries from another tab, device, process or modified client; server-side idempotency for expensive and security-sensitive operations is provided by the protected Cloud Functions layer (see `functions/src/shared/idempotency.ts`).
 
 Compound consumers remain explicit:
 
@@ -389,28 +389,28 @@ Firestore rules are the authoritative boundary for client access. In addition to
 
 New-device onboarding and the missing-profile recovery route first validate the supplied identity code through a protected, rate-limited mode check. If any `userLinks` document still points to that account, the interface exposes only non-destructive **Link This Device** and the reclaim operation independently refuses to run. If no linked-device records remain, the link action is replaced by **Reclaim Identity**. An onboarded browser whose local identity no longer has a public profile is never asked to recreate the name and is not left on a loading screen. The existing live link and profile subscriptions open a linked account without moving its primary identity.
 
-Recovery lookup is intentionally transitional. Authenticated clients may fetch one exact `recoveryIndex/{code}` document so the current claim flow remains usable, but collection listing and filtered queries are denied. A character can be created only when the same atomic write creates the matching index record. An index record must use the exact Recovery Code format and point to a character storing that same code; it cannot be repointed, and it can be deleted only when the indexed character is deleted in the same atomic operation. [ADR 0008](./adr/0008-keep-exact-recovery-lookup-temporarily.md) records this boundary until Stage 3 moves lookup behind HMAC-derived server-side identifiers.
+Character creation writes the character document directly with an empty Recovery Code (`recoveryCode: ''`); registering the real code, and everything about recovery lookup and claiming, is handled entirely by protected Cloud Functions through the Admin SDK (see `functions/src/operations/registerRecoveryCode.ts`, `lookupRecoveryCode.ts` and `claimCharacter.ts`). `recoveryIndex/{code}` denies all client read and write access; only the Admin SDK ever touches it, keyed by an HMAC-derived identifier rather than the raw code.
 
 Message owners may update a thread summary only through the send-message state transition: the last message and timestamp change and the unread count rises by exactly one. A DM summary write must be one of three shapes: a reply changing only preview/timestamp, a non-zero unread count changing to zero, or a clear operation producing an empty preview/timestamp and zero unread count. Preview text is capped at 500 characters. Linked devices may identify the effective primary account, while unrelated sender identities are rejected.
 
-Claim-log documents are exact-schema, append-only audit records. A create is allowed only when `getAfter()` observes the matching character ownership transition in the same atomic operation; a plausible-looking standalone log therefore fails. Log deletion is allowed only as part of deletion of the parent character. The broad direct claim and campaign-membership transitions remain temporarily available for the existing claim interface and are replaced by the protected Stage 3 operation.
+Claim-log documents are exact-schema, append-only audit records. A create is allowed only when `getAfter()` observes the matching character ownership transition in the same atomic operation; a plausible-looking standalone log therefore fails. Log deletion is allowed only as part of deletion of the parent character. Character ownership transitions (claim, release, force-assign, force-release) go through the protected callables in `functions/src/operations/`, which write the matching claim-log entry inside the same transaction.
 
 Custom-item drafts may be created only by the campaign DM or a user present in the campaign membership array, with linked devices acting as their primary identity. Item and version documents have exact top-level schemas, bounded names, text, maps, arrays and version numbers. Only the DM may publish, archive, restore or permanently remove library definitions.
 
-Firestore list operations must carry a compatible explicit limit. Current rule ceilings are 100 campaigns, 100 characters in one campaign, 1,000 owned characters through the collection group, 200 full sessions or member-safe session summaries, 100 thread summaries, 100 messages, 200 custom items, 100 versions, and 440 claim-log or legacy XP-proposal records for protected cleanup compatibility. Public user profiles and both Recovery Index collections are exact-document lookup surfaces and cannot be listed.
+Firestore list operations must carry a compatible explicit limit. Current rule ceilings are 100 campaigns, 100 characters in one campaign, 1,000 owned characters through the collection group, 200 full sessions or member-safe session summaries, 100 thread summaries, 100 messages, 200 custom items, 100 versions, and 440 claim-log or legacy XP-proposal records for protected cleanup compatibility. Public user profiles are an exact-document lookup surface and cannot be listed; both Recovery Index collections deny all client access outright and are managed exclusively by Cloud Functions.
 
 ### Bounded bulk operations
 
-Client-side destructive work first reads only enough stable document-ID pages to calculate an exact safe impact or prove that the operation is too large. Campaign deletion, character deletion and permanent custom-item deletion proceed only when every known target fits in one atomic batch of at most 440 writes. The confirmation interface shows the document count. A missing Recovery Index key, a count above the ceiling or another incomplete deletion plan disables confirmation before the first write; no client-side multi-batch partial deletion is attempted. [ADR 0010](./adr/0010-preflight-client-wide-operations.md) records this temporary boundary until Stage 3 provides protected resumable bulk jobs.
+Client-side destructive work first reads only enough stable document-ID pages to calculate an exact safe impact or prove that the operation is too large. Campaign deletion, character deletion and permanent custom-item deletion proceed only when every known target fits in one atomic batch of at most 440 writes. The confirmation interface shows the document count. Campaign deletion, character deletion and permanent custom-item deletion commit directly in one atomic batch when every known target fits within 440 writes; above that ceiling, the client starts the corresponding resumable bulk job instead (`functions/src/operations/campaignDeletionJob.ts`, `characterDeletionJob.ts`, `customItemMutationJob.ts`), which processes the operation in checkpointed chunks.
 
-Campaign-wide custom-item propagation and removal scan at most the product ceiling of 100 characters, calculate both affected character documents and linked copies, and commit all character mutations in one batch. Archive-and-remove includes the library item update in that same batch. Publishing a pending definition and updating copies remains a two-step retryable operation, but the complete read/write impact is preflighted before publication begins. A campaign already beyond the character ceiling is disabled for these client-wide operations until the protected backend path exists.
+Campaign-wide custom-item propagation and removal scan at most the product ceiling of 100 characters, calculate both affected character documents and linked copies, and commit all character mutations in one batch. Archive-and-remove includes the library item update in that same batch. Publishing a pending definition and updating copies remains a two-step retryable operation, but the complete read/write impact is preflighted before publication begins. A campaign already beyond the character ceiling routes to the protected `customItemMutationJob` resumable job instead of the direct client batch.
 
 Session XP application and reversal count the private session, its member-safe summary, and one write per unique attendee. Attendees are bounded to 100 and the total is checked against the 440-document client ceiling before the transaction stages any write. The interface states this total before application or reversal.
 
 Other operations that must preserve one atomic ownership or audit boundary also fail closed before staging writes if they cannot remain safely below Firestore's 500-write batch ceiling:
 
 - identity reclaim reads at most 50 DM campaigns, 50 member campaigns and 20 owned characters per member campaign, then permits at most 440 ownership writes in total; its protected start operation requires and moves the approved first-name profile to the recovered UID in the same batch as the recovery secret and onboarding state, while the client waits for that live profile before opening the dashboard;
-- exceeding a ceiling produces a protected-operation error, performs no ownership migration, and leaves the larger resumable workflow to the protected bulk-job design in Stage 3.
+- exceeding a ceiling produces a protected-operation error, performs no ownership migration, and leaves the larger migration to the resumable `identityReclaimJob` bulk job instead.
 
 These ceilings are safety boundaries rather than product entitlements. They prevent a browser from issuing an unbounded read or constructing an invalid oversized batch while preserving retryable normal operations.
 
@@ -451,15 +451,15 @@ The repeatable commands are:
 - `npm run check:safety` for both local scopes;
 - `npm run check:deployment:local` for the safety checks followed by the production build and both existing automated test suites.
 
-The safety gate currently fails closed because `serviceAccountKey.json` is still stored in the project folder and contains a service-account private key. The file is ignored and the guard leaves it untouched, but ignore rules do not remove the credential or prevent OneDrive synchronisation and local copies. Stage 4 replaces and revokes that credential, removes the JSON from the project workspace, and switches local administration to credentials held outside the repository; until then, a failed secret check is the intended safe result.
+The safety gate passes cleanly now that `serviceAccountKey.json` has been removed from the project folder; Cloud Functions get their runtime credentials automatically once deployed, so no local key file is needed for that.
 
 An online dependency-vulnerability audit is deliberately absent from the local gate. It may contact a package registry and disclose dependency metadata, so it requires separate network approval and must never be represented as part of an offline check. No source or secrets may be submitted to any external scanning service.
 
-### Stage 2 automated verification
+### Automated verification
 
-Stage 2 security and cost controls are protected by behavioural tests rather than by source-text assertions. The test responsibilities are deliberately split so each boundary is exercised at the layer that enforces it:
+Security and cost controls are protected by behavioural tests rather than by source-text assertions. The test responsibilities are deliberately split so each boundary is exercised at the layer that enforces it:
 
-| Stage 2 contract | Primary automated coverage |
+| Contract | Primary automated coverage |
 | ---------------- | -------------------------- |
 | Bounded live queries and on-demand older history | `boundedFirestoreQueries.test.tsx`, `firestoreQueryPages.test.ts`, and the bounded-query Firestore rules tests verify server-side filters, hard limits, stable pagination, disabled history queries and explicit older-message loading |
 | Listener activation, source changes and cleanup | `useFirestoreSubscription.test.tsx` covers disabled, enabled, changed, disabled-again and unmounted document/query subscriptions; `messageDrawer.test.tsx` proves a closed drawer does not retain its thread consumer |
@@ -471,7 +471,7 @@ Stage 2 security and cost controls are protected by behavioural tests rather tha
 | Hosting policy compatibility | `firebaseConfiguration.test.ts` verifies the build hook, SPA rewrite, Firebase/Auth network destinations, PWA image/worker requirements, restrictive directives, response headers and cache policy from `firebase.json` |
 | Existing DM and player workflows | Campaign, character, ownership, session, message and custom-item rules tests preserve self-service campaign creation, player-owned editing, DM administration and the agreed DM-as-genuine-character-owner workflow |
 
-Stage 2 completion uses one production build, the complete application suite and the complete Firestore emulator rules suite. Focused tests are used while editing, then each complete suite is run once after the final Stage 2 test changes. These commands remain local and the emulator project is `dh-test`; they do not deploy rules, indexes or hosting, enable Cloud Functions, change the production plan or require Blaze. The project therefore remains on Spark throughout this verification.
+Full verification uses one production build and all four test layers (`npm run test:all`: client suite, rules emulator, Functions unit, Functions emulator integration). Focused tests are used while editing, then the complete set is run once after a batch of changes. These commands all run locally against the `dh-test` emulator project and never deploy rules, indexes, hosting or Functions to a real project.
 
 ### Service responsibilities
 

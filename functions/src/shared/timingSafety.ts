@@ -1,6 +1,6 @@
 // functions/src/shared/timingSafety.ts
 //
-// Stage 3: normalizes response latency for operations that resolve a
+// Normalizes response latency for operations that resolve a
 // caller-supplied secret (a Recovery Code) against an index, so an attacker
 // can't distinguish "wrong code" from "right code" by how many Firestore
 // round-trips the response took — a wrong code fails after one lookup, a

@@ -1,9 +1,9 @@
 /**
  * Authoritative product ceilings for user-created and stored Firebase data.
  *
- * Some limits are already enforced. The remaining enforcement is added by
- * the relevant Stage 2 validation, rules, throttling, and bulk-operation
- * sections. Keeping every agreed number here prevents those layers drifting.
+ * Some limits are already enforced; the rest is enforced by the relevant
+ * validation, rules, throttling, and bulk-operation code. Keeping every
+ * agreed number here prevents those layers drifting.
  */
 export const PRODUCT_LIMITS = {
   campaignCreationsPerWindow: 10,

@@ -1,6 +1,6 @@
 // functions/src/operations/registerRecoveryCode.ts
 //
-// Stage 3.2a: (re)generates a character's Recovery Code and registers its
+// (Re)generates a character's Recovery Code and registers its
 // HMAC-derived lookup entry. The raw code is never chosen by the client —
 // only this operation mints one, which is what makes the derived lookup ID
 // real protection rather than a hash of something the client controls. The

@@ -39,3 +39,6 @@ service-account*.json
 
 # Reference screenshots (local only)
 reference-images/
+
+# Scratch/extraction working files (local only)
+tmp/

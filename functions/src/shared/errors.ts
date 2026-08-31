@@ -1,6 +1,6 @@
 // functions/src/shared/errors.ts
 //
-// Stage 3.1: shared safe-error handling for every protected callable.
+// Shared safe-error handling for every protected callable.
 // A callable that throws HttpsError is throwing a deliberate, already-safe
 // error — it passes through unchanged. Anything else is an unexpected
 // failure: the real error is logged server-side only, and the client only

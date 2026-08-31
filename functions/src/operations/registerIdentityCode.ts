@@ -1,6 +1,6 @@
 // functions/src/operations/registerIdentityCode.ts
 //
-// Stage 5.4c-i: mints and hashes a user's identity recovery code — the
+// Mints and hashes a user's identity recovery code — the
 // first server-side registration point for whole-account recovery, mirrors
 // registerRecoveryCode.ts's exact HMAC pattern but for identity codes
 // rather than a single character. identitySecret/{uid}'s plaintext display
@@ -8,7 +8,7 @@
 // not the security boundary — the hash-derived identityRecoveryIndex/{hash}
 // entry is.
 //
-// Stage 5.4c-ii: targetUid lets a linked secondary device act for the
+// targetUid lets a linked secondary device act for the
 // primary account it's linked to, mirroring firestore.rules'
 // playerOwnsOrLinked exactly — this Function grants no more access than the
 // rules already allow for revealing/rotating the primary's identity code.

@@ -1,6 +1,6 @@
 // functions/src/operations/releaseCharacter.ts
 //
-// Stage 3.3: a player releases their own claimed character. Existence and
+// A player releases their own claimed character. Existence and
 // ownership are checked inside the transaction, not as a pre-read, same
 // race-safety reasoning as claimCharacter.
 
@@ -41,7 +41,7 @@ export async function releaseCharacter(
       currentOwner,
       null
     );
-  // Stage 5.3's membership-removal check queries the characters subcollection,
+  // The membership-removal check below queries the characters subcollection,
   // widening this transaction's read set beyond the single document it used
   // to touch, and racing against another ownership-transition on the same
   // character (which runs the same query) increases retry contention.

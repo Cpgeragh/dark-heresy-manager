@@ -1,6 +1,6 @@
 // functions/src/shared/validation.ts
 //
-// Stage 3.1: shared request-field validation for every protected callable.
+// Shared request-field validation for every protected callable.
 // Each callable defines its own allowed and required field names; this
 // enforces the shape uniformly and throws a safe, deliberate error rather
 // than letting mismatched requests through with silently-ignored fields.

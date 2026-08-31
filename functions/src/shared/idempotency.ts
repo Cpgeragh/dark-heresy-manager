@@ -1,6 +1,6 @@
 // functions/src/shared/idempotency.ts
 //
-// Stage 3.1: shared idempotency/replay protection for protected callables.
+// Shared idempotency/replay protection for protected callables.
 // A client-supplied key identifies one logical attempt at an operation. A
 // key already recorded as completed returns its original result instead of
 // re-running the handler; a key still in progress is rejected rather than

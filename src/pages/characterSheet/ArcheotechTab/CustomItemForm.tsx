@@ -184,7 +184,7 @@ export function CustomItemForm({
     }
   }
 
-  // ── Phase 1: type selector ─────────────────────────────────────────────────
+  // ── Type selector ─────────────────────────────────────────────────────────
 
   if (phase === "select") {
     return (
@@ -217,7 +217,7 @@ export function CustomItemForm({
     );
   }
 
-  // ── Phase 2: details form ──────────────────────────────────────────────────
+  // ── Details form ──────────────────────────────────────────────────────────
 
   const isWeaponType = selectedType === "Weapon" || selectedType === "Integrated Weapon";
   const isGrenadeType = selectedType === "Grenade" || selectedType === "Mine";

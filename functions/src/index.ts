@@ -1,9 +1,9 @@
 // functions/src/index.ts
 //
-// Stage 3.0 scaffolding: proves a Function can be written, emulated, and
-// called from the client end to end. Nothing here is protected yet — auth,
-// App Check, rate limiting, and every other Stage 3.1 requirement land once
-// the shared foundation is built.
+// Cloud Functions entry point. Every exported callable is wrapped by
+// protectedCallable (see ./shared/protectedCallable.ts), which handles
+// auth, App Check, rate limiting, validation, idempotency, and
+// audit/metrics uniformly.
 
 import { initializeApp } from "firebase-admin/app";
 initializeApp();
@@ -168,9 +168,8 @@ export const lookupRecoveryCode = onCall<LookupRecoveryCodeInput>(
           windowMs: 15 * 60 * 1000,
         },
         {
-          // Matches recoveryCodeAttemptsPerWindow / codeAttemptWindowMs,
-          // already recorded in src/constants/productLimits.ts since Stage 2
-          // but never enforced anywhere until now.
+          // Matches recoveryCodeAttemptsPerWindow / codeAttemptWindowMs in
+          // src/constants/productLimits.ts, enforced here.
           key: `recovery-lookup:code:${hashRecoveryCode(request.data?.code ?? "", recoveryCodeHmacSecret.value())}`,
           limit: 5,
           windowMs: 15 * 60 * 1000,

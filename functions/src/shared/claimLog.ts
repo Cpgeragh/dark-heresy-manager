@@ -1,6 +1,6 @@
 // functions/src/shared/claimLog.ts
 //
-// Stage 3.3: server-side claim-log entries, mirroring
+// Server-side claim-log entries, mirroring
 // src/utils/claimLog.ts's buildClaimLogPayload exactly. Every ownership
 // transition (claim, release, force-assign, force-release) writes one of
 // these as part of its atomic transaction.

@@ -1,8 +1,8 @@
 // functions/src/operations/claimCharacter.ts
 //
-// Stage 3.3: replaces the current insecure direct claim (which only needs
-// a campaignId/characterId, no Recovery Code proof at all — the exact gap
-// named in Stage 1's findings). The client only ever supplies the code;
+// Server-side character claim, replacing a direct client write that only
+// needed a campaignId/characterId, no Recovery Code proof at all. The
+// client only ever supplies the code;
 // the server resolves which character that actually is, so claiming is
 // only possible by someone who genuinely has the code. Both the existence
 // and ownership checks happen inside the transaction, not as a pre-read,

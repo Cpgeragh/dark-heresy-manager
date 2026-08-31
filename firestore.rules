@@ -240,7 +240,7 @@ service cloud.firestore {
 
       // DM (or a linked device) or a current member can read campaign metadata.
       // A restricted per-character summary for a wider "party roster" view is
-      // Stage 7's job; full campaign metadata stays locked to DM + members.
+      // a possible future addition; full campaign metadata stays locked to DM + members.
       allow get: if dmOwnsOrLinked(resource.data.dmId) ||
                      (
                        request.auth != null &&

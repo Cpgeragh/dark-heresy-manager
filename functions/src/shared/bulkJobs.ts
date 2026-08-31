@@ -1,6 +1,6 @@
 // functions/src/shared/bulkJobs.ts
 //
-// Stage 3.4: shared resumable bulk-job infrastructure. A job record tracks
+// Shared resumable bulk-job infrastructure. A job record tracks
 // progress/checkpoint state in Firestore; the client repeatedly calls a
 // "process next chunk" callable until the job reports done, resuming from
 // the last checkpoint if a call drops mid-way. Retry-safe via a lease: only

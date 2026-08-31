@@ -1,6 +1,6 @@
 // functions/src/operations/customItemMutationJob.ts
 //
-// Stage 3.4: the third resumable bulk job, replacing the client's "scans
+// A resumable bulk job, replacing the client's "scans
 // every character, refused above charactersPerCampaign (100)" ceiling for
 // custom-item propagation and removal (src/services/customItemService.ts)
 // with a chunked, checkpointed job that can finish a sweep of any size.

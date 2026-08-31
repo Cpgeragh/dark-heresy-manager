@@ -1,6 +1,6 @@
 // functions/src/shared/audit.ts
 //
-// Stage 3.1: shared audit-record writing for protected callables. Records
+// Shared audit-record writing for protected callables. Records
 // are deliberately bounded — a small number of primitive metadata fields,
 // each capped in length — so a caller can't accidentally (or deliberately)
 // dump an entire request payload, a Recovery Code, or other sensitive data

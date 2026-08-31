@@ -3,7 +3,7 @@ import { FIRESTORE_QUERY_LIMITS } from "../../src/constants/firestoreLimits";
 import { PRODUCT_LIMITS } from "../../src/constants/productLimits";
 
 describe("hard product limits", () => {
-  it("records every agreed Stage 2 numerical ceiling", () => {
+  it("records every agreed product-limit ceiling", () => {
     expect(PRODUCT_LIMITS).toEqual({
       campaignCreationsPerWindow: 10,
       campaignCreationWindowMs: 86_400_000,

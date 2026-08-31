@@ -1,6 +1,6 @@
 // functions/src/operations/forceReleaseCharacter.ts
 //
-// Stage 3.3: a DM force-releases a character from its current owner
+// A DM force-releases a character from its current owner
 // (whoever that is, or nobody). Existence is checked fresh inside the
 // transaction; the DM permission check happens before opening it.
 
@@ -47,7 +47,7 @@ export async function forceReleaseCharacter(
       currentOwner,
       null
     );
-  // See releaseCharacter.ts: Stage 5.3's membership-removal check widens this
+  // See releaseCharacter.ts: the membership-removal check there widens this
   // transaction's read set, so it gets the same extra retry headroom.
   }, { maxAttempts: 10 });
 }

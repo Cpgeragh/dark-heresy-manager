@@ -1,7 +1,7 @@
 // functions/src/shared/protectedCallable.ts
 //
-// Stage 3.1: the composed protected-operation foundation. Every real
-// callable built in 3.2+ goes through this once, rather than assembling
+// The composed protected-operation foundation. Every real
+// callable goes through this once, rather than assembling
 // the six independent pieces (errors, auth, validation, rate limiting,
 // idempotency, audit/metrics) by hand each time.
 //

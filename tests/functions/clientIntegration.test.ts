@@ -1,6 +1,6 @@
 // tests/functions/clientIntegration.test.ts
 //
-// Stage 5.2: proves the actual client service functions (recoveryLookupService.ts,
+// Proves the actual client service functions (recoveryLookupService.ts,
 // characterService.ts), not a mocked httpsCallable, correctly wire up to real
 // deployed callables. Everything else about Function behaviour is already
 // proven by tests/functions/*'s direct httpsCallable tests; this only proves

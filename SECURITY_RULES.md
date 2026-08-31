@@ -40,13 +40,11 @@ Creators may edit only the approved draft/version fields and cannot change immut
 
 ## Character recovery and account/device recovery
 
-`/recoveryIndex/{code}` currently allows an authenticated client to fetch one exact document. Listing and filtered queries are denied. Only the campaign DM may create or update the exact `{campaignId, characterId}` mapping, including ownership checks against an existing mapping. The campaign DM may delete it. This exact-get exception is transitional and recorded in [ADR 0008](./docs/adr/0008-keep-exact-recovery-lookup-temporarily.md); Stage 3 replaces it with HMAC-derived lookup identifiers.
+`/recoveryIndex/{code}` and `/identityRecoveryIndex/{hash}` are managed exclusively by trusted Cloud Functions through the Admin SDK; clients have no read or write access to either. Character claiming, Recovery Code lookup/registration/revocation, and identity-code registration/reclaim all go through the corresponding protected callables (see `functions/src/operations/`) rather than direct Firestore access.
 
-`/identityRecovery/{code}` follows the same exact-get/no-list boundary. Its effective owner may create or delete a strictly shaped `{uid, role}` record. A successful reclaim may transfer only its UID.
+`/identitySecret/{uid}` contains only a bounded recovery code and is readable/writable by that effective account (owner or a linked device) so Settings can reveal or rotate it; a write must contain exactly one `code` field passing `validRecoveryCode`.
 
-`/identitySecret/{uid}` contains only a bounded recovery code and is readable/writable by that effective account so Settings and linked devices can reveal or rotate it. `/identityReclaims/{uid}` and `/linkProofs/{uid}` are temporary, owner-scoped proof documents whose creation is accepted only when the supplied code matches the target account's secret. Proof updates are denied.
-
-`/userLinks/{uid}` is readable/deletable only by that secondary UID. Creating or changing a link requires a matching temporary proof, a different primary UID and a valid timestamp.
+`/userLinks/{uid}` is readable and deletable only by that secondary UID; creating or updating a link happens through the `linkDevice` callable rather than a direct client write.
 
 ## Sessions and messaging
 

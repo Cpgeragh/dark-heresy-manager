@@ -103,7 +103,7 @@ export async function writeCharacterFieldsWithSummary(
 
 /**
  * Recomputes and rewrites every character's summary in a campaign, in one
- * batch. For characters created before Stage 7, or any summary that's
+ * batch. For characters created before summary computation existed, or any summary that's
  * drifted out of sync. A campaign is capped at 100 characters, comfortably
  * inside Firestore's 500-write batch limit.
  */

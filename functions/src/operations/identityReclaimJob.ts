@@ -1,6 +1,6 @@
 // functions/src/operations/identityReclaimJob.ts
 //
-// Stage 3, gap-audit item 12: reclaimIdentity's original single-batch
+// reclaimIdentity's original single-batch
 // approach refused outright past 440 combined writes, with no way to
 // actually recover an account past that point. Replaced with a resumable
 // bulkJobs.ts job, chunking the ownership migration the same way
@@ -10,7 +10,7 @@
 // attempt on the same code while a job is still mid-flight then chains onto
 // the new owner instead of racing it for the same campaigns/characters.
 //
-// Stage 5.4c-i: the code lookup moved from the raw-code-keyed
+// The code lookup moved from the raw-code-keyed
 // identityRecovery collection to the HMAC-hashed identityRecoveryIndex —
 // same trust boundary claimCharacter already relies on, a hash match alone
 // is proof the caller knew the real code.

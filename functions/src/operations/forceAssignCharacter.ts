@@ -65,7 +65,7 @@ export async function forceAssignCharacter(
       input.targetUid,
       { newOwnerAlreadyMember: true }
     );
-  // See releaseCharacter.ts: Stage 5.3's membership-removal check widens this
+  // See releaseCharacter.ts: the membership-removal check there widens this
   // transaction's read set, so it gets the same extra retry headroom.
   }, { maxAttempts: 10 });
 }

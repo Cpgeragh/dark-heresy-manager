@@ -1,6 +1,6 @@
 // functions/src/shared/rateLimit.ts
 //
-// Stage 3.1: shared server-side rate limiting for protected callables.
+// Shared server-side rate limiting for protected callables.
 // Firestore-backed rolling window: attempts are timestamped and filtered
 // to the live window on every check, inside a transaction so concurrent
 // calls can't both slip through past the limit.

@@ -1,11 +1,11 @@
 // functions/src/shared/ownershipTransition.ts
 //
-// Stage 3.3: the character-ownership + claim-log writes shared by release,
+// The character-ownership + claim-log writes shared by release,
 // force-assign, and force-release. Each caller does its own permission
 // check and its own fresh-inside-transaction precondition check; this only
 // bundles the write shape once that's verified.
 //
-// Stage 5.3: also removes the previous owner from the campaign's memberIds
+// Also removes the previous owner from the campaign's memberIds
 // when this transition takes away their last character in the campaign,
 // covering release and force-release, since either can leave someone with
 // no characters left here. Force-assign now accepts only unclaimed characters.

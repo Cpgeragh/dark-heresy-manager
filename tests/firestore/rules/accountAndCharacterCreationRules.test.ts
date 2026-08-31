@@ -3,7 +3,7 @@ import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
 import { getTestEnv } from "../setup";
 import { createCampaign, createCharacter, dbAs, validCharacterDocument } from "../helpers";
 
-describe("Firestore Rules: retained Phase 0A protections", () => {
+describe("Firestore Rules: account and character-creation protections", () => {
   afterEach(async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
     await env.clearFirestore();

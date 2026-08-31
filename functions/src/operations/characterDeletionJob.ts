@@ -1,6 +1,6 @@
 // functions/src/operations/characterDeletionJob.ts
 //
-// Stage 3.4: the first resumable bulk job, replacing the client's "fits in
+// A resumable bulk job, replacing the client's "fits in
 // one 440-document atomic batch, or the operation is refused" ceiling for
 // character deletion (src/services/characterService.ts,
 // src/utils/firestoreBatchDelete.ts) with a chunked, checkpointed job that

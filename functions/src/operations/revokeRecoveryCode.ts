@@ -1,6 +1,6 @@
 // functions/src/operations/revokeRecoveryCode.ts
 //
-// Stage 3: invalidates a character's current Recovery Code without issuing
+// Invalidates a character's current Recovery Code without issuing
 // a replacement — for when a DM knows a code has leaked and wants it dead
 // immediately, decoupled from generating and distributing a new one. An
 // empty string represents "no usable code," the same convention

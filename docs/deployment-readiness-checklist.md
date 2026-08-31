@@ -1,6 +1,6 @@
 # Deployment Readiness Checklist
 
-A reusable checklist to run through before deploying anything (rules, Functions, hosting) to any real Firebase project, staging first, later production. This covers infrastructure readiness built in Stage 4. It does not replace Stage 11's fuller security/cost/restore/functionality verification pass, which is specifically required before any real production deployment, not staging.
+A reusable checklist to run through before deploying anything (rules, Functions, hosting) to any real Firebase project, staging first, later production. This covers infrastructure readiness. It does not replace the fuller security/cost/restore/functionality verification pass that's still required before any real production deployment, not staging.
 
 ## Firestore
 
@@ -12,7 +12,7 @@ A reusable checklist to run through before deploying anything (rules, Functions,
 
 - [ ] All Functions build cleanly (`npm --prefix functions run build`)
 - [ ] `recoveryCodeHmacSecret` configured in Secret Manager for the target project, not the local `.secret.local` placeholder
-- [ ] App Check confirmed wired in monitoring mode (not yet enforced, per Stage 11's own gating), intentional for the target environment
+- [ ] App Check confirmed wired in monitoring mode (not yet enforced, that's intentional for the target environment)
 - [ ] Rate limits, idempotency, and audit logging confirmed working against a real deployed callable, not only the emulator
 
 ## Client configuration

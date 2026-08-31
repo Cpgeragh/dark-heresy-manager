@@ -1,6 +1,6 @@
 // functions/src/shared/secrets.ts
 //
-// Stage 3.2a: Cloud Functions Secret Manager parameter definitions. Real
+// Cloud Functions Secret Manager parameter definitions. Real
 // values are set via `firebase functions:secrets:set` for deployment, and
 // via functions/.secret.local (gitignored) for local emulator testing.
 

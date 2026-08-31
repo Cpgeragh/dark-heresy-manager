@@ -1,6 +1,6 @@
 // functions/src/shared/identityMigration.ts
 //
-// Stage 3: computes the ownership-migration plan used by identity reclaim,
+// Computes the ownership-migration plan used by identity reclaim,
 // and applies it one campaign at a time. Split into a cheap "which campaigns,
 // how many total writes" plan (computeOwnershipMigrationPlan) and a per-
 // campaign apply step (migrateCampaignOwnership) so a resumable bulk job can

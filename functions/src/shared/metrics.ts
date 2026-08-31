@@ -1,8 +1,8 @@
 // functions/src/shared/metrics.ts
 //
-// Stage 3.1: shared feature-usage metrics for protected callables. A
-// simple per-feature invocation counter, durable and queryable locally via
-// Firestore. Real Cloud Monitoring integration is Stage 4 billing-
+// Shared feature-usage metrics for protected callables. A simple
+// per-feature invocation counter, durable and queryable locally via
+// Firestore. Real Cloud Monitoring integration is future billing-
 // protection work, once the project is actually on Blaze.
 
 import { getFirestore, FieldValue } from "firebase-admin/firestore";

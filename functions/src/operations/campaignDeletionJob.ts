@@ -1,6 +1,6 @@
 // functions/src/operations/campaignDeletionJob.ts
 //
-// Stage 3.4: the second resumable bulk job, replacing the client's "fits in
+// A resumable bulk job, replacing the client's "fits in
 // one 440-document atomic batch, or the operation is refused" ceiling for
 // campaign deletion (src/services/campaignService.ts's
 // buildCampaignDeletionPlan) with a chunked, checkpointed job that can

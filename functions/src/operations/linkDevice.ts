@@ -1,6 +1,6 @@
 // functions/src/operations/linkDevice.ts
 //
-// Stage 3.3, updated in Stage 5.4c-i: links a secondary device to a primary
+// Links a secondary device to a primary
 // account using an identity recovery code. Looks the code up by its
 // HMAC-derived hash in identityRecoveryIndex — the same trust boundary
 // claimCharacter already relies on for character codes, a hash match alone

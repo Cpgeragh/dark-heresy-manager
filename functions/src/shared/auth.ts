@@ -1,9 +1,9 @@
 // functions/src/shared/auth.ts
 //
-// Stage 3.1: shared auth + App Check gate for every protected callable.
-// Every callable requires a signed-in caller. App Check is verified and
-// recorded, not yet enforced — Stage 11 requires App Check monitoring to
-// run cleanly before it's ever allowed to block a real call.
+// Shared auth + App Check gate for every protected callable. Every
+// callable requires a signed-in caller. App Check is verified and
+// recorded, not yet enforced — it needs a period of clean App Check
+// monitoring in production before it's allowed to block a real call.
 
 import { HttpsError } from "firebase-functions/v2/https";
 import type { CallableRequest } from "firebase-functions/v2/https";

@@ -1,6 +1,6 @@
 // functions/src/shared/recoveryCodeRotation.ts
 //
-// Stage 3.3: the recovery-index rotation writes, factored out of
+// The recovery-index rotation writes, factored out of
 // registerRecoveryCode so claimCharacter can reuse them inside its own
 // transaction. Takes an already-open transaction rather than owning one,
 // since each caller has its own permission check and its own additional
