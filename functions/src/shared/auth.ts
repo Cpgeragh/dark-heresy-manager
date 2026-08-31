@@ -21,9 +21,7 @@ export function requireAuth(request: CallableRequest): CallerContext {
 
   const appCheckVerified = request.app !== undefined;
   if (!appCheckVerified) {
-    logger.warn("Callable invoked without a verified App Check token", {
-      uid: request.auth.uid,
-    });
+    logger.warn("Callable invoked without a verified App Check token");
   }
 
   return { uid: request.auth.uid, appCheckVerified };

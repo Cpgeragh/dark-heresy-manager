@@ -1,6 +1,6 @@
 // functions/tests/shared/audit.test.ts
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { recordAuditEntry } from "../../src/shared/audit";
+import { hashAuditActorUid, recordAuditEntry } from "../../src/shared/audit";
 
 const mockAdd = vi.fn();
 const mockCollection = vi.fn(() => ({ add: mockAdd }));
@@ -27,11 +27,12 @@ describe("recordAuditEntry", () => {
     expect(mockAdd).toHaveBeenCalledWith(
       expect.objectContaining({
         operation: "character:claim",
-        actorUid: "user-1",
+        actorHash: hashAuditActorUid("user-1"),
         outcome: "success",
         metadata: { campaignId: "c1" },
       })
     );
+    expect(mockAdd.mock.calls[0][0]).not.toHaveProperty("actorUid");
   });
 
   it("defaults metadata to an empty object when omitted", async () => {

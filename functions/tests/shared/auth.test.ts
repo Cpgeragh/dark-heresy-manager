@@ -45,8 +45,8 @@ describe("requireAuth", () => {
 
     expect(requireAuth(request)).toEqual({ uid: "user-1", appCheckVerified: false });
     expect(logger.warn).toHaveBeenCalledWith(
-      "Callable invoked without a verified App Check token",
-      { uid: "user-1" }
+      "Callable invoked without a verified App Check token"
     );
+    expect(JSON.stringify(vi.mocked(logger.warn).mock.calls)).not.toContain("user-1");
   });
 });

@@ -7,6 +7,7 @@
 // into a durable log. Callers still choose which fields are safe to record
 // for their own operation; this only bounds the shape.
 
+import { createHash } from "node:crypto";
 import { getFirestore } from "firebase-admin/firestore";
 
 const AUDIT_LOG_COLLECTION = "auditLog";
@@ -32,13 +33,17 @@ function assertBoundedMetadata(metadata: Record<string, string | number | boolea
   }
 }
 
+export function hashAuditActorUid(uid: string): string {
+  return createHash("sha256").update("audit-actor:v1:").update(uid).digest("hex");
+}
+
 export async function recordAuditEntry(entry: AuditEntryInput): Promise<void> {
   if (entry.metadata) assertBoundedMetadata(entry.metadata);
 
   const db = getFirestore();
   await db.collection(AUDIT_LOG_COLLECTION).add({
     operation: entry.operation,
-    actorUid: entry.actorUid,
+    actorHash: hashAuditActorUid(entry.actorUid),
     outcome: entry.outcome,
     metadata: entry.metadata ?? {},
     timestamp: Date.now(),

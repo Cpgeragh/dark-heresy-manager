@@ -35,14 +35,21 @@ describe("withSafeErrors", () => {
     ).rejects.toMatchObject({ code: "internal", message: "Something went wrong. Please try again." });
   });
 
-  it("logs the real error server-side, not just the generic message", async () => {
-    const realError = new Error("raw internal detail");
+  it("logs only bounded error type and code, never the error's sensitive details", async () => {
+    const realError = Object.assign(new Error("raw internal detail with DH-LEAK-0001"), {
+      code: "firestore/unavailable",
+    });
     await expect(
       withSafeErrors("test-op", async () => {
         throw realError;
       })
     ).rejects.toThrow();
-    expect(logger.error).toHaveBeenCalledWith("test-op failed", realError);
+    expect(logger.error).toHaveBeenCalledWith("test-op failed", {
+      errorType: "Error",
+      errorCode: "firestore/unavailable",
+    });
+    expect(JSON.stringify(vi.mocked(logger.error).mock.calls)).not.toContain("raw internal detail");
+    expect(JSON.stringify(vi.mocked(logger.error).mock.calls)).not.toContain("DH-LEAK-0001");
   });
 
   it("never logs when an HttpsError is thrown deliberately, since it isn't a bug", async () => {

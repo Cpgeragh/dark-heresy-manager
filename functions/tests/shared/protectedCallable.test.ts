@@ -1,6 +1,7 @@
 // functions/tests/shared/protectedCallable.test.ts
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { CallableRequest } from "firebase-functions/v2/https";
+import { logger } from "firebase-functions";
 import { protectedCallable } from "../../src/shared/protectedCallable";
 import { withSafeErrors } from "../../src/shared/errors";
 import { requireAuth } from "../../src/shared/auth";
@@ -9,6 +10,10 @@ import { enforceRateLimit } from "../../src/shared/rateLimit";
 import { withIdempotency } from "../../src/shared/idempotency";
 import { recordAuditEntry } from "../../src/shared/audit";
 import { recordUsageMetric } from "../../src/shared/metrics";
+
+vi.mock("firebase-functions", () => ({
+  logger: { warn: vi.fn() },
+}));
 
 vi.mock("../../src/shared/errors", () => ({
   withSafeErrors: vi.fn((_operation: string, handler: () => Promise<unknown>) => handler()),
@@ -61,6 +66,26 @@ describe("protectedCallable", () => {
       expect.objectContaining({ operation: "test-op", actorUid: "user-1", outcome: "success" })
     );
     expect(recordUsageMetric).toHaveBeenCalledWith("test-op");
+  });
+
+  it("never forwards a raw Recovery Code to audit or usage metrics", async () => {
+    const code = "DH-ABCD-1234";
+
+    await protectedCallable({
+      request: makeRequest({ code }),
+      operation: "claim-character",
+      allowedFields: ["code"],
+      handler: async () => "ok",
+    });
+
+    expect(JSON.stringify(vi.mocked(recordAuditEntry).mock.calls)).not.toContain(code);
+    expect(JSON.stringify(vi.mocked(recordUsageMetric).mock.calls)).not.toContain(code);
+    expect(recordAuditEntry).toHaveBeenCalledWith({
+      operation: "claim-character",
+      actorUid: "user-1",
+      outcome: "success",
+    });
+    expect(recordUsageMetric).toHaveBeenCalledWith("claim-character");
   });
 
   it("enforces every configured rate limit, in order, before running the handler", async () => {
@@ -122,7 +147,7 @@ describe("protectedCallable", () => {
   });
 
   it("does not let an audit/metric recording failure mask a successful result", async () => {
-    vi.mocked(recordAuditEntry).mockRejectedValue(new Error("audit write failed"));
+    vi.mocked(recordAuditEntry).mockRejectedValue(new Error("audit write failed with secret"));
 
     const result = await protectedCallable({
       request: makeRequest(),
@@ -132,6 +157,8 @@ describe("protectedCallable", () => {
     });
 
     expect(result).toBe("handler-result");
+    expect(logger.warn).toHaveBeenCalledWith("Failed to record audit/metric for test-op");
+    expect(JSON.stringify(vi.mocked(logger.warn).mock.calls)).not.toContain("secret");
   });
 
   it("wraps the whole operation in withSafeErrors", async () => {

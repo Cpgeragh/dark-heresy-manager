@@ -45,8 +45,8 @@ async function recordOutcome(
   try {
     await recordAuditEntry({ operation, actorUid, outcome });
     await recordUsageMetric(operation);
-  } catch (error) {
-    logger.warn(`Failed to record audit/metric for ${operation}`, error);
+  } catch {
+    logger.warn(`Failed to record audit/metric for ${operation}`);
   }
 }
 
