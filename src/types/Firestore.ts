@@ -112,18 +112,23 @@ export interface CharacterSummaryDocument {
  */
 export type CharacterSummaryWithId = CharacterSummaryDocument & { id: string };
 
-/**
- * Session document stored in /campaigns/{campaignId}/sessions/{sessionId}
- */
-export interface SessionDocument {
+/** Safe session fields stored in /sessionSummaries for campaign members. */
+export interface SessionSummaryDocument {
   date: Timestamp | Date | FieldValue;
   summary: string;
-  dmNotes: string;
   xpAwarded: number;
   attendees: string[];
   createdAt: Timestamp | Date | FieldValue;
   xpApplied?: boolean;
 }
+
+/** Full DM-only document stored in /campaigns/{campaignId}/sessions/{sessionId}. */
+export interface SessionDocument extends SessionSummaryDocument {
+  dmNotes: string;
+}
+
+/** Role-dependent session shape rendered by Campaign Overview. */
+export type SessionListDocument = SessionSummaryDocument & { dmNotes?: string };
 
 /**
  * A single message in a player-DM thread.

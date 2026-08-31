@@ -25,13 +25,34 @@ async function createSession(
   });
 }
 
+async function createSessionSummary(
+  env: RulesTestEnvironment,
+  campaignId: string,
+  sessionId: string,
+  data: Record<string, unknown> = {}
+) {
+  await env.withSecurityRulesDisabled(async (ctx) => {
+    await ctx.firestore()
+      .collection(`campaigns/${campaignId}/sessionSummaries`)
+      .doc(sessionId)
+      .set({
+        date: new Date(),
+        summary: "Member-safe session recap",
+        xpAwarded: 100,
+        attendees: [],
+        createdAt: new Date(),
+        ...data,
+      });
+  });
+}
+
 describe("Firestore Rules: Sessions", () => {
   afterEach(async () => {
     const env = await getTestEnv();
     await env.clearFirestore();
   });
 
-  it("authenticated player can read a session", async () => {
+  it("non-DM cannot read a full session by exact ID", async () => {
     const env = await getTestEnv() as RulesTestEnvironment;
     await createCampaign(env, "c1", "dm-1");
     await createSession(env, "c1", "s1");
@@ -39,19 +60,91 @@ describe("Firestore Rules: Sessions", () => {
     const playerDb = dbAs(env, "player-1");
     await expect(
       playerDb.collection("campaigns/c1/sessions").doc("s1").get()
-    ).resolves.toBeDefined();
+    ).rejects.toThrow();
   });
 
-  it("authenticated player can list sessions", async () => {
+  it("only the DM can list full sessions and the query must remain bounded", async () => {
     const env = await getTestEnv() as RulesTestEnvironment;
     await createCampaign(env, "c1", "dm-1");
     await createSession(env, "c1", "s1");
 
-    const playerDb = dbAs(env, "player-1");
-    const sessions = playerDb.collection("campaigns/c1/sessions");
-    await expect(sessions.limit(200).get()).resolves.toBeDefined();
-    await expect(sessions.get()).rejects.toThrow();
-    await expect(sessions.limit(201).get()).rejects.toThrow();
+    const playerSessions = dbAs(env, "player-1").collection("campaigns/c1/sessions");
+    await expect(playerSessions.limit(200).get()).rejects.toThrow();
+
+    const dmSessions = dbAs(env, "dm-1").collection("campaigns/c1/sessions");
+    await expect(dmSessions.limit(200).get()).resolves.toBeDefined();
+    await expect(dmSessions.get()).rejects.toThrow();
+    await expect(dmSessions.limit(201).get()).rejects.toThrow();
+  });
+
+  it("campaign members can read and list safe session summaries", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+    await createCampaign(env, "c1", "dm-1", { memberIds: ["player-1"] });
+    await createSessionSummary(env, "c1", "s1");
+
+    const summaries = dbAs(env, "player-1").collection("campaigns/c1/sessionSummaries");
+    await expect(summaries.doc("s1").get()).resolves.toBeDefined();
+    await expect(summaries.limit(200).get()).resolves.toBeDefined();
+    await expect(summaries.get()).rejects.toThrow();
+    await expect(summaries.limit(201).get()).rejects.toThrow();
+  });
+
+  it("a linked device for a campaign member can read safe session summaries", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+    await createCampaign(env, "c1", "dm-1", { memberIds: ["player-1"] });
+    await createSessionSummary(env, "c1", "s1");
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await ctx.firestore().collection("userLinks").doc("linked-device").set({
+        primaryUid: "player-1",
+      });
+    });
+
+    await expect(
+      dbAs(env, "linked-device").collection("campaigns/c1/sessionSummaries").doc("s1").get()
+    ).resolves.toBeDefined();
+  });
+
+  it("authenticated strangers cannot read safe summaries by ID or query", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+    await createCampaign(env, "c1", "dm-1", { memberIds: ["player-1"] });
+    await createSessionSummary(env, "c1", "s1");
+    const summaries = dbAs(env, "stranger").collection("campaigns/c1/sessionSummaries");
+
+    await expect(summaries.doc("s1").get()).rejects.toThrow();
+    await expect(summaries.limit(200).get()).rejects.toThrow();
+  });
+
+  it("DM can write a safe summary but cannot include private DM notes", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+    await createCampaign(env, "c1", "dm-1", { memberIds: ["player-1"] });
+    const summary = {
+      date: new Date(),
+      summary: "Safe recap",
+      xpAwarded: 50,
+      attendees: [],
+      createdAt: new Date(),
+    };
+    const summaries = dbAs(env, "dm-1").collection("campaigns/c1/sessionSummaries");
+
+    await expect(summaries.doc("safe").set(summary)).resolves.toBeUndefined();
+    await expect(
+      summaries.doc("unsafe").set({ ...summary, dmNotes: "must remain private" })
+    ).rejects.toThrow();
+  });
+
+  it("campaign members cannot write session summaries", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+    await createCampaign(env, "c1", "dm-1", { memberIds: ["player-1"] });
+
+    await expect(
+      dbAs(env, "player-1").collection("campaigns/c1/sessionSummaries").doc("s1").set({
+        date: new Date(),
+        summary: "Forged recap",
+        xpAwarded: 0,
+        attendees: [],
+        createdAt: new Date(),
+      })
+    ).rejects.toThrow();
   });
 
   it("unauthenticated user cannot read sessions", async () => {

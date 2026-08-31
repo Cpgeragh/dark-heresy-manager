@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef } from "react";
 import type { Timestamp } from "firebase/firestore";
-import type { SessionDocument } from "../../types/Firestore";
+import type { SessionListDocument } from "../../types/Firestore";
 import {
   getSessionXpAffectedDocumentCount,
   type SessionUpdateData,
@@ -23,7 +23,7 @@ interface Character {
   characterName: string;
 }
 
-type SessionWithId = SessionDocument & { id: string };
+type SessionWithId = SessionListDocument & { id: string };
 
 interface Props {
   session: SessionWithId;
@@ -34,14 +34,14 @@ interface Props {
   onApplyXp?: () => Promise<void>;
 }
 
-function toDate(value: SessionDocument["date"]): Date {
+function toDate(value: SessionListDocument["date"]): Date {
   if (value instanceof Date) return value;
   if (value && typeof (value as Timestamp).toDate === "function")
     return (value as Timestamp).toDate();
   return new Date();
 }
 
-function toInputDate(value: SessionDocument["date"]): string {
+function toInputDate(value: SessionListDocument["date"]): string {
   return toDate(value).toISOString().split("T")[0];
 }
 
@@ -59,7 +59,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
 
   const [date, setDate] = useState(toInputDate(session.date));
   const [summary, setSummary] = useState(session.summary);
-  const [dmNotes, setDmNotes] = useState(session.dmNotes);
+  const [dmNotes, setDmNotes] = useState(session.dmNotes ?? "");
   const [xpAwarded, setXpAwarded] = useState(session.xpAwarded);
   const [attendees, setAttendees] = useState<Set<string>>(new Set(session.attendees));
 
@@ -105,7 +105,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
   const handleCancelEdit = useCallback(() => {
     setDate(toInputDate(session.date));
     setSummary(session.summary);
-    setDmNotes(session.dmNotes);
+    setDmNotes(session.dmNotes ?? "");
     setXpAwarded(session.xpAwarded);
     setAttendees(new Set(session.attendees));
     setMode("view");
@@ -278,8 +278,7 @@ export function SessionCard({ session, characters, isDM, onDelete, onSave, onApp
                     Also remove {session.xpAwarded} XP from attendees
                   </label>
                   <span className="text-xs lg:text-sm text-slate-500">
-                    This will affect {reverseXp ? xpAffectedDocuments : 1} document
-                    {(reverseXp ? xpAffectedDocuments : 1) === 1 ? "" : "s"}.
+                    This will affect {reverseXp ? xpAffectedDocuments : 2} documents.
                   </span>
                   <div className="flex items-center gap-1">
                     <Button

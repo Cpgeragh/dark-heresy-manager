@@ -4,7 +4,7 @@ import { useCallback } from "react";
 import { collection, limit, orderBy, query } from "firebase/firestore";
 import { FIRESTORE_QUERY_LIMITS } from "../constants/firestoreLimits";
 import { db } from "../firebase";
-import type { SessionDocument } from "../types/Firestore";
+import type { SessionListDocument } from "../types/Firestore";
 import { useQuerySubscription } from "./useFirestoreSubscription";
 import {
   deleteSession as deleteSessionDocument,
@@ -12,9 +12,9 @@ import {
   type SessionUpdateData,
 } from "../services/sessionService";
 
-type SessionWithId = SessionDocument & { id: string };
+type SessionWithId = SessionListDocument & { id: string };
 
-export function useSessions(campaignId: string | undefined): {
+export function useSessions(campaignId: string | undefined, isDM: boolean | null): {
   sessions: SessionWithId[];
   loading: boolean;
   error: Error | null;
@@ -26,18 +26,18 @@ export function useSessions(campaignId: string | undefined): {
     loading,
     error,
   } = useQuerySubscription(
-    campaignId
+    campaignId && isDM !== null
       ? query(
-          collection(db, "campaigns", campaignId, "sessions"),
+          collection(db, "campaigns", campaignId, isDM ? "sessions" : "sessionSummaries"),
           orderBy("date", "desc"),
           limit(FIRESTORE_QUERY_LIMITS.sessionsPerCampaign)
         )
       : null,
-    campaignId ? `sessions:${campaignId}` : null,
+    campaignId && isDM !== null ? `sessions:${campaignId}:${isDM ? "dm" : "member"}` : null,
     (snapshot) =>
       snapshot.docs.map((sessionDocument) => ({
         id: sessionDocument.id,
-        ...(sessionDocument.data() as Omit<SessionDocument, "id">),
+        ...(sessionDocument.data() as SessionListDocument),
       }))
   );
 

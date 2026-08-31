@@ -11,7 +11,7 @@ import { SessionCard } from "./CampaignOverview/SessionCard";
 import { CharacterRow } from "./CampaignOverview/CharacterRow";
 import { DMInbox } from "./CampaignOverview/DMInbox";
 import { CustomItemLibraryAdmin } from "./CampaignOverview/CustomItemLibraryAdmin";
-import { applySessionXp } from "../services/sessionService";
+import { applySessionXp, repairSessionSummaries } from "../services/sessionService";
 import {
   createNewCharacter,
   importCharacter,
@@ -51,7 +51,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
     error: sessionsError,
     deleteSession,
     updateSession,
-  } = useSessions(campaignId);
+  } = useSessions(campaignId, campaign ? isDM : null);
   const {
     characters,
     loading: charactersLoading,
@@ -80,6 +80,20 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
       })),
     [characters]
   );
+  const sessionCharacters = useMemo(
+    () =>
+      isDM
+        ? summaries
+        : [
+            ...summaries,
+            ...partyMembers.map((summary) => ({
+              id: summary.id,
+              characterName: summary.characterName,
+              userId: null,
+            })),
+          ],
+    [isDM, partyMembers, summaries]
+  );
   const toast = useToast();
   const { setKebabContent, clearKebabContent } = useHeaderExtensionSetters();
 
@@ -92,6 +106,8 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
   const importingCharacterRef = useRef(false);
   const [repairingSummaries, setRepairingSummaries] = useState(false);
   const repairingSummariesRef = useRef(false);
+  const [repairingSessionSummaries, setRepairingSessionSummaries] = useState(false);
+  const repairingSessionSummariesRef = useRef(false);
 
   const handleCreate = useCallback(async () => {
     if (creatingCharacterRef.current) return;
@@ -166,6 +182,22 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
     }
   }, [campaignId, toast]);
 
+  const handleRepairSessionSummaries = useCallback(async () => {
+    if (repairingSessionSummariesRef.current || !campaignId) return;
+    repairingSessionSummariesRef.current = true;
+    setRepairingSessionSummaries(true);
+    try {
+      const count = await repairSessionSummaries(campaignId);
+      toast.success(`Repaired ${count} session ${count === 1 ? "summary" : "summaries"}.`);
+    } catch (err) {
+      console.error("Failed to repair session summaries:", err);
+      toast.error(err instanceof Error ? err.message : "Failed to repair session summaries.");
+    } finally {
+      repairingSessionSummariesRef.current = false;
+      setRepairingSessionSummaries(false);
+    }
+  }, [campaignId, toast]);
+
   // Inject Import JSON into header kebab for DMs
   useEffect(() => {
     if (!isDM) {
@@ -195,6 +227,14 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
         >
           {repairingSummaries ? "Repairing…" : "Repair Character Summaries"}
         </button>
+        <button
+          type="button"
+          onClick={handleRepairSessionSummaries}
+          disabled={repairingSessionSummaries}
+          className={`block w-full text-left px-2 lg:px-3 py-1 lg:py-1.5 text-xs lg:text-sm rounded bg-slate-700 border border-slate-500 text-slate-100 ${repairingSessionSummaries ? "opacity-50 cursor-not-allowed" : "hover:bg-slate-600 cursor-pointer"}`}
+        >
+          {repairingSessionSummaries ? "Repairing…" : "Repair Session Summaries"}
+        </button>
       </div>
     );
     return () => clearKebabContent();
@@ -204,6 +244,8 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
     handleImport,
     repairingSummaries,
     handleRepairSummaries,
+    repairingSessionSummaries,
+    handleRepairSessionSummaries,
     setKebabContent,
     clearKebabContent,
   ]);
@@ -390,7 +432,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
                 <SessionCard
                   key={session.id}
                   session={session}
-                  characters={summaries}
+                  characters={sessionCharacters}
                   isDM={isDM}
                   onDelete={isDM ? (reverseXp) => deleteSession(session.id, reverseXp) : undefined}
                   onSave={isDM ? (data) => updateSession(session.id, data) : undefined}

@@ -43,7 +43,11 @@ vi.mock("firebase/firestore", () => ({
   where: (field: string, operator: string, value: unknown) => mockWhere(field, operator, value),
 }));
 
-vi.mock("../../src/firebase", () => ({ db: "db" }));
+vi.mock("firebase/functions", () => ({
+  httpsCallable: vi.fn(() => vi.fn()),
+}));
+
+vi.mock("../../src/firebase", () => ({ db: "db", functions: "functions" }));
 
 vi.mock("../../src/services/customItemService", () => ({
   customItemsCollectionRef: (campaignId: string) => ({
@@ -54,15 +58,25 @@ vi.mock("../../src/services/customItemService", () => ({
 
 vi.mock("../../src/firebase/converters", () => ({
   charactersCollectionGroupRef: () => ({ type: "characters-collection-group" }),
+  charactersCollectionRef: (campaignId: string) => ({
+    type: "characters-collection",
+    campaignId,
+  }),
 }));
 
 vi.mock("../../src/hooks/useFirestoreSubscription", () => ({
   useQuerySubscription: (...args: unknown[]) => mockUseQuerySubscription(...args),
 }));
 
+vi.mock("../../src/components/Toast/ToastContext", () => ({
+  useToast: () => ({ error: vi.fn() }),
+}));
+
 import { useClaimLogs } from "../../src/hooks/useClaimLogs";
+import { useCampaignCharacters } from "../../src/hooks/useCampaignCharacters";
 import { useCampaignCustomItems } from "../../src/hooks/useCampaignCustomItems";
 import { usePlayerCharacters } from "../../src/hooks/usePlayerCharacters";
+import { useSessions } from "../../src/hooks/useSessions";
 import { useThreadMessages } from "../../src/hooks/useThreadMessages";
 
 beforeEach(() => {
@@ -72,6 +86,78 @@ beforeEach(() => {
 });
 
 describe("bounded Firestore hooks", () => {
+  it("filters a campaign character query to the current owner for a player", () => {
+    renderHook(() => useCampaignCharacters("campaign-1", "player-1", false));
+
+    expect(mockWhere).toHaveBeenCalledWith("userId", "==", "player-1");
+    expect(mockLimit).toHaveBeenCalledWith(100);
+    expect(mockUseQuerySubscription).toHaveBeenCalledWith(
+      expect.anything(),
+      "campaign-characters:campaign-1:owner:player-1",
+      expect.any(Function)
+    );
+  });
+
+  it("allows the DM's bounded campaign character query without an owner filter", () => {
+    renderHook(() => useCampaignCharacters("campaign-1", "dm-1", true));
+
+    expect(mockWhere).not.toHaveBeenCalled();
+    expect(mockLimit).toHaveBeenCalledWith(100);
+    expect(mockUseQuerySubscription).toHaveBeenCalledWith(
+      expect.anything(),
+      "campaign-characters:campaign-1:dm",
+      expect.any(Function)
+    );
+  });
+
+  it("does not query campaign characters until the campaign role is known", () => {
+    renderHook(() => useCampaignCharacters("campaign-1", "user-1", null));
+
+    expect(mockQuery).not.toHaveBeenCalled();
+    expect(mockUseQuerySubscription).toHaveBeenCalledWith(null, null, expect.any(Function));
+  });
+
+  it("subscribes the DM to bounded full session documents", () => {
+    renderHook(() => useSessions("campaign-1", true));
+
+    expect(mockCollection).toHaveBeenCalledWith(
+      "db",
+      "campaigns",
+      "campaign-1",
+      "sessions"
+    );
+    expect(mockLimit).toHaveBeenCalledWith(200);
+    expect(mockUseQuerySubscription).toHaveBeenCalledWith(
+      expect.anything(),
+      "sessions:campaign-1:dm",
+      expect.any(Function)
+    );
+  });
+
+  it("subscribes a player only to bounded member-safe session summaries", () => {
+    renderHook(() => useSessions("campaign-1", false));
+
+    expect(mockCollection).toHaveBeenCalledWith(
+      "db",
+      "campaigns",
+      "campaign-1",
+      "sessionSummaries"
+    );
+    expect(mockLimit).toHaveBeenCalledWith(200);
+    expect(mockUseQuerySubscription).toHaveBeenCalledWith(
+      expect.anything(),
+      "sessions:campaign-1:member",
+      expect.any(Function)
+    );
+  });
+
+  it("does not query sessions until the campaign role is known", () => {
+    renderHook(() => useSessions("campaign-1", null));
+
+    expect(mockQuery).not.toHaveBeenCalled();
+    expect(mockUseQuerySubscription).toHaveBeenCalledWith(null, null, expect.any(Function));
+  });
+
   it("filters a player's characters on the server and caps the result", () => {
     renderHook(() => usePlayerCharacters("user-1"));
 

@@ -95,6 +95,11 @@ import {
   deleteAccount as runDeleteAccount,
   type DeleteAccountResult,
 } from "./operations/deleteAccount.js";
+import {
+  repairSessionSummaries as runRepairSessionSummaries,
+  type RepairSessionSummariesInput,
+  type RepairSessionSummariesResult,
+} from "./operations/repairSessionSummaries.js";
 
 export const ping = onCall({ timeoutSeconds: 30 }, () => {
   return { ok: true };
@@ -558,3 +563,24 @@ export const deleteAccount = onCall(
   }
 );
 
+export const repairSessionSummaries = onCall<RepairSessionSummariesInput>(
+  { timeoutSeconds: 30 },
+  (request) => {
+    const callerUid = request.auth?.uid ?? "anonymous";
+    return protectedCallable<RepairSessionSummariesInput, RepairSessionSummariesResult>({
+      request,
+      operation: "repair-session-summaries",
+      allowedFields: ["campaignId"],
+      requiredFields: ["campaignId"],
+      fieldShapes: { campaignId: "string" },
+      rateLimits: [
+        {
+          key: `repair-session-summaries:${callerUid}`,
+          limit: 10,
+          windowMs: 60 * 60 * 1000,
+        },
+      ],
+      handler: ({ uid, data }) => runRepairSessionSummaries(data, uid),
+    });
+  }
+);

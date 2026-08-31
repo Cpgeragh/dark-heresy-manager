@@ -3,15 +3,14 @@
 
 import {
   collection,
-  deleteDoc,
   doc,
   increment,
   runTransaction,
   serverTimestamp,
-  updateDoc,
   writeBatch,
 } from "firebase/firestore";
-import { db } from "../firebase";
+import { httpsCallable } from "firebase/functions";
+import { db, functions } from "../firebase";
 import type { SessionDocument } from "../types/Firestore";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
 import {
@@ -30,7 +29,7 @@ interface SessionData {
   attendees: string[];
 }
 
-const SESSION_XP_FIXED_DOCUMENTS = 1;
+const SESSION_XP_FIXED_DOCUMENTS = 2;
 export const SESSION_XP_FAN_OUT_LIMIT = Math.min(
   PRODUCT_LIMITS.sessionAttendees,
   PRODUCT_LIMITS.bulkOperationDocuments - SESSION_XP_FIXED_DOCUMENTS
@@ -44,10 +43,21 @@ export type SessionUpdateData = Partial<
   Pick<SessionDocument, "date" | "summary" | "dmNotes" | "xpAwarded" | "attendees">
 >;
 
-/**
- * Creates a new session document and distributes XP to all attendees atomically.
- * If xpAwarded is 0, no character documents are updated.
- */
+const callRepairSessionSummaries = httpsCallable<
+  { campaignId: string },
+  { repairedCount: number }
+>(functions, "repairSessionSummaries");
+
+/** Rebuilds every safe session summary through the protected DM-only operation. */
+export async function repairSessionSummaries(campaignId: string): Promise<number> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  return runSingleFlight("session:repair-summaries", [campaignId], async () => {
+    const response = await callRepairSessionSummaries({ campaignId });
+    return response.data.repairedCount;
+  });
+}
+
+/** Creates the DM-only session and its member-safe summary atomically. */
 export async function createSession(campaignId: string, session: SessionData): Promise<void> {
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   validateSessionData(session);
@@ -55,19 +65,22 @@ export async function createSession(campaignId: string, session: SessionData): P
   await runSingleFlight("session:create", [campaignId, session], async () => {
     const batch = writeBatch(db);
     const sessionRef = doc(collection(db, "campaigns", campaignId, "sessions"));
-
-    batch.set(sessionRef, {
+    const summaryRef = doc(db, "campaigns", campaignId, "sessionSummaries", sessionRef.id);
+    const createdAt = serverTimestamp();
+    const summaryData = {
       date: session.date,
       summary: session.summary,
-      dmNotes: session.dmNotes,
       xpAwarded: session.xpAwarded,
       attendees: session.attendees,
-      createdAt: serverTimestamp(),
-      // XP is not auto-applied at creation — the DM uses the Apply XP button.
-      // xpApplied: false means "ready to apply"; undefined means "created before
-      // this tracking existed and XP state is unknown — don't show the button."
+      createdAt,
       ...(session.xpAwarded > 0 ? { xpApplied: false } : {}),
+    };
+
+    batch.set(sessionRef, {
+      ...summaryData,
+      dmNotes: session.dmNotes,
     });
+    batch.set(summaryRef, summaryData);
 
     await batch.commit();
   });
@@ -83,12 +96,22 @@ export async function updateSession(
   assertFirestoreDocumentId(sessionId, "Session ID");
   validateSessionUpdate(data);
 
-  await runSingleFlight("session:update", [campaignId, sessionId, data], () =>
-    updateDoc(
+  await runSingleFlight("session:update", [campaignId, sessionId, data], async () => {
+    const batch = writeBatch(db);
+    batch.update(
       doc(db, "campaigns", campaignId, "sessions", sessionId),
       data as Record<string, unknown>
-    )
-  );
+    );
+
+    const { dmNotes: _dmNotes, ...summaryUpdate } = data;
+    if (Object.keys(summaryUpdate).length > 0) {
+      batch.update(
+        doc(db, "campaigns", campaignId, "sessionSummaries", sessionId),
+        summaryUpdate as Record<string, unknown>
+      );
+    }
+    await batch.commit();
+  });
 }
 
 function validateSessionData(session: SessionData): void {
@@ -196,9 +219,13 @@ export async function deleteSession(
   assertBoolean(reverseXp, "Reverse-XP flag");
   await runSingleFlight("session:delete", [campaignId, sessionId], async () => {
     const sessionRef = doc(db, "campaigns", campaignId, "sessions", sessionId);
+    const summaryRef = doc(db, "campaigns", campaignId, "sessionSummaries", sessionId);
 
     if (!reverseXp) {
-      await deleteDoc(sessionRef);
+      const batch = writeBatch(db);
+      batch.delete(sessionRef);
+      batch.delete(summaryRef);
+      await batch.commit();
       return;
     }
 
@@ -235,6 +262,7 @@ export async function deleteSession(
         }
       }
       transaction.delete(sessionRef);
+      transaction.delete(summaryRef);
     });
   });
 }
@@ -287,6 +315,10 @@ export async function applySessionXp(
       }
 
       transaction.update(sessionRef, { xpApplied: true });
+      transaction.update(
+        doc(db, "campaigns", campaignId, "sessionSummaries", sessionId),
+        { xpApplied: true }
+      );
 
       for (const characterId of attendeeIds) {
         transaction.update(doc(db, "campaigns", campaignId, "characters", characterId), {

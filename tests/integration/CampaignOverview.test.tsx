@@ -61,8 +61,10 @@ vi.mock("../../src/services/characterService", () => ({
 }));
 
 const applySessionXpMock = vi.fn();
+const repairSessionSummariesMock = vi.fn();
 vi.mock("../../src/services/sessionService", () => ({
   applySessionXp: (...args: unknown[]) => applySessionXpMock(...args),
+  repairSessionSummaries: (...args: unknown[]) => repairSessionSummariesMock(...args),
 }));
 
 const readCharacterImportFileMock = vi.fn();
@@ -173,6 +175,26 @@ beforeEach(() => {
 function renderPage(effectiveUserId = "player-1") {
   render(<CampaignOverview effectiveUserId={effectiveUserId} />);
 }
+
+describe("CampaignOverview — character query role", () => {
+  it("requests only the current player's full character documents", () => {
+    renderPage("player-1");
+
+    expect(useSessionsMock).toHaveBeenCalledWith("campaign-1", false);
+    expect(useCampaignCharactersMock).toHaveBeenCalledWith(
+      "campaign-1",
+      "player-1",
+      false
+    );
+  });
+
+  it("requests the DM campaign character view only for the campaign DM", () => {
+    renderPage("dm-1");
+
+    expect(useSessionsMock).toHaveBeenCalledWith("campaign-1", true);
+    expect(useCampaignCharactersMock).toHaveBeenCalledWith("campaign-1", "dm-1", true);
+  });
+});
 
 describe("CampaignOverview", () => {
   it("shows a message when no campaign is selected", () => {
@@ -357,6 +379,21 @@ describe("CampaignOverview", () => {
     expect(repairCharacterSummariesMock).toHaveBeenCalledWith("campaign-1");
     await waitFor(() =>
       expect(mockToastSuccess).toHaveBeenCalledWith("Repaired 3 character summaries.")
+    );
+  });
+
+  it("repairs historical session summaries and shows a count-aware success toast", async () => {
+    const user = userEvent.setup();
+    repairSessionSummariesMock.mockResolvedValue(2);
+    renderPage("dm-1");
+
+    const kebabContent = setKebabContentMock.mock.calls.at(-1)?.[0];
+    render(kebabContent);
+    await user.click(screen.getByRole("button", { name: "Repair Session Summaries" }));
+
+    expect(repairSessionSummariesMock).toHaveBeenCalledWith("campaign-1");
+    await waitFor(() =>
+      expect(mockToastSuccess).toHaveBeenCalledWith("Repaired 2 session summaries.")
     );
   });
 });

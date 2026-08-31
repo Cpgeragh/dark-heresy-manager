@@ -781,10 +781,50 @@ service cloud.firestore {
                (!('xpApplied' in data) || data.xpApplied is bool);
       }
 
-      // Any authenticated user can read sessions.
-      allow get: if request.auth != null;
-      allow list: if request.auth != null && boundedQuery(200);
+      // Full session records contain private DM notes and are DM-only.
+      allow get: if dmOwnsCampaign();
+      allow list: if dmOwnsCampaign() && boundedQuery(200);
       allow create, update: if dmOwnsCampaign() && validSessionData(request.resource.data);
+      allow delete: if dmOwnsCampaign();
+    }
+
+    // Member-facing session history deliberately excludes private DM notes.
+    match /campaigns/{campaignId}/sessionSummaries/{sessionId} {
+
+      function dmOwnsCampaign() {
+        return dmOwnsOrLinked(
+          get(/databases/$(database)/documents/campaigns/$(campaignId)).data.dmId
+        );
+      }
+
+      function validSessionSummaryData(data) {
+        return data.keys().hasOnly([
+                 'date',
+                 'summary',
+                 'xpAwarded',
+                 'attendees',
+                 'createdAt',
+                 'xpApplied'
+               ]) &&
+               data.date is timestamp &&
+               data.summary is string &&
+               data.summary.size() <= 4000 &&
+               data.xpAwarded is int &&
+               data.xpAwarded >= 0 &&
+               data.xpAwarded <= 100000 &&
+               data.attendees is list &&
+               data.attendees.size() <= 100 &&
+               data.attendees.toSet().size() == data.attendees.size() &&
+               data.createdAt is timestamp &&
+               (!('xpApplied' in data) || data.xpApplied is bool);
+      }
+
+      allow get:
+        if dmOwnsCampaign() || campaignMemberOrLinked(campaignId);
+      allow list:
+        if (dmOwnsCampaign() || campaignMemberOrLinked(campaignId)) && boundedQuery(200);
+      allow create, update:
+        if dmOwnsCampaign() && validSessionSummaryData(request.resource.data);
       allow delete: if dmOwnsCampaign();
     }
 

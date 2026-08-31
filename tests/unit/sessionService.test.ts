@@ -1,46 +1,88 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
-  mockDeleteDoc,
+  mockBatch,
+  mockBatchCommit,
+  mockBatchDelete,
+  mockBatchSet,
+  mockBatchUpdate,
+  mockCallRepairSessionSummaries,
   mockDoc,
   mockIncrement,
   mockRunTransaction,
   mockTransaction,
-  mockUpdateDoc,
 } = vi.hoisted(() => {
+  const mockBatchSet = vi.fn();
+  const mockBatchUpdate = vi.fn();
+  const mockBatchDelete = vi.fn();
+  const mockBatchCommit = vi.fn().mockResolvedValue(undefined);
+  const mockBatch = {
+    set: mockBatchSet,
+    update: mockBatchUpdate,
+    delete: mockBatchDelete,
+    commit: mockBatchCommit,
+  };
+  const mockCallRepairSessionSummaries = vi.fn();
   const mockTransaction = {
     get: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
   };
   return {
-    mockDeleteDoc: vi.fn().mockResolvedValue(undefined),
-    mockDoc: vi.fn((...args: unknown[]) => args.slice(1).join("/")),
+    mockBatch,
+    mockBatchCommit,
+    mockBatchDelete,
+    mockBatchSet,
+    mockBatchUpdate,
+    mockCallRepairSessionSummaries,
+    mockDoc: vi.fn((...args: unknown[]) => {
+      if (args.length === 1) {
+        const parent = args[0] as { path: string };
+        return { id: "generated-session", path: `${parent.path}/generated-session` };
+      }
+      const path = args.slice(1).join("/");
+      return { id: String(args.at(-1)), path };
+    }),
     mockIncrement: vi.fn((amount: number) => `increment:${amount}`),
     mockRunTransaction: vi.fn(async (_db: unknown, operation: (transaction: unknown) => unknown) =>
       operation(mockTransaction)
     ),
     mockTransaction,
-    mockUpdateDoc: vi.fn().mockResolvedValue(undefined),
   };
 });
 
 vi.mock("firebase/firestore", () => ({
-  collection: vi.fn(),
-  deleteDoc: (...args: unknown[]) => mockDeleteDoc(...args),
+  collection: vi.fn((...args: unknown[]) => ({ path: args.slice(1).join("/") })),
   doc: (...args: unknown[]) => mockDoc(...args),
   increment: (...args: [number]) => mockIncrement(...args),
   runTransaction: (...args: unknown[]) => mockRunTransaction(...args),
-  serverTimestamp: vi.fn(),
-  updateDoc: (...args: unknown[]) => mockUpdateDoc(...args),
-  writeBatch: vi.fn(),
+  serverTimestamp: vi.fn(() => "server-timestamp"),
+  writeBatch: vi.fn(() => mockBatch),
 }));
 
 vi.mock("../../src/firebase", () => ({
   db: "mock-db",
+  functions: "mock-functions",
 }));
 
-import { applySessionXp, deleteSession, updateSession } from "../../src/services/sessionService";
+vi.mock("firebase/functions", () => ({
+  httpsCallable: vi.fn((_functions: unknown, name: string) => {
+    if (name === "repairSessionSummaries") return mockCallRepairSessionSummaries;
+    throw new Error(`Unexpected callable: ${name}`);
+  }),
+}));
+
+import {
+  applySessionXp,
+  createSession,
+  deleteSession,
+  repairSessionSummaries,
+  updateSession,
+} from "../../src/services/sessionService";
+
+function ref(path: string) {
+  return expect.objectContaining({ path });
+}
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -56,14 +98,14 @@ describe("session write operations", () => {
     const pending = new Promise<void>((resolve) => {
       finish = resolve;
     });
-    mockUpdateDoc.mockReturnValueOnce(pending);
+    mockBatchCommit.mockReturnValueOnce(pending);
     const update = { summary: "One edit" };
 
     const first = updateSession("camp-1", "session-duplicate", update);
     const duplicate = updateSession("camp-1", "session-duplicate", update);
     await Promise.resolve();
 
-    expect(mockUpdateDoc).toHaveBeenCalledOnce();
+    expect(mockBatchCommit).toHaveBeenCalledOnce();
     finish();
     await Promise.all([first, duplicate]);
   });
@@ -79,7 +121,14 @@ describe("session write operations", () => {
     await updateSession("camp-1", "session-1", update);
 
     expect(mockDoc).toHaveBeenCalledWith("mock-db", "campaigns", "camp-1", "sessions", "session-1");
-    expect(mockUpdateDoc).toHaveBeenCalledWith("campaigns/camp-1/sessions/session-1", update);
+    expect(mockBatchUpdate).toHaveBeenCalledWith(
+      ref("campaigns/camp-1/sessions/session-1"),
+      update
+    );
+    expect(mockBatchUpdate).toHaveBeenCalledWith(
+      ref("campaigns/camp-1/sessionSummaries/session-1"),
+      { summary: "The acolytes survived.", xpAwarded: 200, attendees: ["char-1"] }
+    );
   });
 
   it("accepts every editable session field at its exact maximum", async () => {
@@ -92,19 +141,26 @@ describe("session write operations", () => {
 
     await updateSession("camp-1", "session-max", update);
 
-    expect(mockUpdateDoc).toHaveBeenCalledWith("campaigns/camp-1/sessions/session-max", update);
+    expect(mockBatchUpdate).toHaveBeenCalledWith(
+      ref("campaigns/camp-1/sessions/session-max"),
+      update
+    );
   });
 
   it("deletes the requested session", async () => {
     await deleteSession("camp-2", "session-2");
 
     expect(mockDoc).toHaveBeenCalledWith("mock-db", "campaigns", "camp-2", "sessions", "session-2");
-    expect(mockDeleteDoc).toHaveBeenCalledWith("campaigns/camp-2/sessions/session-2");
+    expect(mockBatchDelete).toHaveBeenCalledWith(ref("campaigns/camp-2/sessions/session-2"));
+    expect(mockBatchDelete).toHaveBeenCalledWith(
+      ref("campaigns/camp-2/sessionSummaries/session-2")
+    );
+    expect(mockBatchCommit).toHaveBeenCalledOnce();
   });
 
   it("preserves Firestore failures for the caller to handle", async () => {
     const error = new Error("write failed");
-    mockUpdateDoc.mockRejectedValueOnce(error);
+    mockBatchCommit.mockRejectedValueOnce(error);
 
     await expect(updateSession("camp-3", "session-3", { summary: "No change" })).rejects.toBe(
       error
@@ -115,14 +171,14 @@ describe("session write operations", () => {
     await expect(
       updateSession("camp-1", "session-1", { dmNotes: "x".repeat(4_001) })
     ).rejects.toThrow("DM notes cannot exceed 4000 characters.");
-    expect(mockUpdateDoc).not.toHaveBeenCalled();
+    expect(mockBatchUpdate).not.toHaveBeenCalled();
   });
 
   it("rejects duplicate attendees before writing", async () => {
     await expect(
       updateSession("camp-1", "session-1", { attendees: ["char-1", "char-1"] })
     ).rejects.toThrow("A character cannot be listed as a session attendee more than once.");
-    expect(mockUpdateDoc).not.toHaveBeenCalled();
+    expect(mockBatchUpdate).not.toHaveBeenCalled();
   });
 
   it("rejects invalid session field types and attendee IDs before writing", async () => {
@@ -132,7 +188,60 @@ describe("session write operations", () => {
     await expect(updateSession("camp-1", "session-1", { attendees: ["bad/id"] })).rejects.toThrow(
       "Session attendee ID is invalid"
     );
-    expect(mockUpdateDoc).not.toHaveBeenCalled();
+    expect(mockBatchUpdate).not.toHaveBeenCalled();
+  });
+
+  it("creates the private session and safe member summary atomically", async () => {
+    const date = new Date("2026-08-28T00:00:00.000Z");
+    await createSession("camp-1", {
+      date,
+      summary: "Public recap",
+      dmNotes: "Private plan",
+      xpAwarded: 100,
+      attendees: ["char-1"],
+    });
+
+    expect(mockBatchSet).toHaveBeenCalledWith(
+      ref("campaigns/camp-1/sessions/generated-session"),
+      expect.objectContaining({ summary: "Public recap", dmNotes: "Private plan" })
+    );
+    expect(mockBatchSet).toHaveBeenCalledWith(
+      ref("campaigns/camp-1/sessionSummaries/generated-session"),
+      {
+        date,
+        summary: "Public recap",
+        xpAwarded: 100,
+        attendees: ["char-1"],
+        createdAt: "server-timestamp",
+        xpApplied: false,
+      }
+    );
+    expect(mockBatchCommit).toHaveBeenCalledOnce();
+  });
+
+  it("keeps a DM-notes-only edit out of the member summary", async () => {
+    await updateSession("camp-1", "session-1", { dmNotes: "Private change" });
+
+    expect(mockBatchUpdate).toHaveBeenCalledOnce();
+    expect(mockBatchUpdate).toHaveBeenCalledWith(
+      ref("campaigns/camp-1/sessions/session-1"),
+      { dmNotes: "Private change" }
+    );
+    expect(mockBatchCommit).toHaveBeenCalledOnce();
+  });
+});
+
+describe("repairSessionSummaries", () => {
+  it("returns the protected operation's repaired count", async () => {
+    mockCallRepairSessionSummaries.mockResolvedValue({ data: { repairedCount: 3 } });
+
+    await expect(repairSessionSummaries("camp-1")).resolves.toBe(3);
+    expect(mockCallRepairSessionSummaries).toHaveBeenCalledWith({ campaignId: "camp-1" });
+  });
+
+  it("validates the campaign ID before invoking the protected operation", async () => {
+    await expect(repairSessionSummaries("bad/id")).rejects.toThrow("Campaign ID is invalid");
+    expect(mockCallRepairSessionSummaries).not.toHaveBeenCalled();
   });
 });
 
@@ -141,14 +250,18 @@ describe("applySessionXp", () => {
     await applySessionXp("camp-1", "sess-1", ["char-1", "char-2"], 200);
 
     expect(mockRunTransaction).toHaveBeenCalledWith("mock-db", expect.any(Function));
-    expect(mockTransaction.get).toHaveBeenCalledWith("campaigns/camp-1/sessions/sess-1");
-    expect(mockTransaction.update).toHaveBeenCalledWith("campaigns/camp-1/sessions/sess-1", {
+    expect(mockTransaction.get).toHaveBeenCalledWith(ref("campaigns/camp-1/sessions/sess-1"));
+    expect(mockTransaction.update).toHaveBeenCalledWith(ref("campaigns/camp-1/sessions/sess-1"), {
       xpApplied: true,
     });
-    expect(mockTransaction.update).toHaveBeenCalledWith("campaigns/camp-1/characters/char-1", {
+    expect(mockTransaction.update).toHaveBeenCalledWith(
+      ref("campaigns/camp-1/sessionSummaries/sess-1"),
+      { xpApplied: true }
+    );
+    expect(mockTransaction.update).toHaveBeenCalledWith(ref("campaigns/camp-1/characters/char-1"), {
       "experience.total": "increment:200",
     });
-    expect(mockTransaction.update).toHaveBeenCalledWith("campaigns/camp-1/characters/char-2", {
+    expect(mockTransaction.update).toHaveBeenCalledWith(ref("campaigns/camp-1/characters/char-2"), {
       "experience.total": "increment:200",
     });
   });
@@ -196,7 +309,8 @@ describe("deleteSession with XP reversal", () => {
     await deleteSession("camp-1", "sess-1", false);
 
     expect(mockRunTransaction).not.toHaveBeenCalled();
-    expect(mockDeleteDoc).toHaveBeenCalledTimes(2);
+    expect(mockBatchDelete).toHaveBeenCalledTimes(4);
+    expect(mockBatchCommit).toHaveBeenCalledTimes(2);
   });
 
   it("reverses XP from every attendee and deletes the session when applied", async () => {
@@ -209,13 +323,16 @@ describe("deleteSession with XP reversal", () => {
 
     expect(mockRunTransaction).toHaveBeenCalledWith("mock-db", expect.any(Function));
     expect(mockIncrement).toHaveBeenCalledWith(-200);
-    expect(mockTransaction.update).toHaveBeenCalledWith("campaigns/camp-1/characters/char-1", {
+    expect(mockTransaction.update).toHaveBeenCalledWith(ref("campaigns/camp-1/characters/char-1"), {
       "experience.total": "increment:-200",
     });
-    expect(mockTransaction.update).toHaveBeenCalledWith("campaigns/camp-1/characters/char-2", {
+    expect(mockTransaction.update).toHaveBeenCalledWith(ref("campaigns/camp-1/characters/char-2"), {
       "experience.total": "increment:-200",
     });
-    expect(mockTransaction.delete).toHaveBeenCalledWith("campaigns/camp-1/sessions/sess-1");
+    expect(mockTransaction.delete).toHaveBeenCalledWith(ref("campaigns/camp-1/sessions/sess-1"));
+    expect(mockTransaction.delete).toHaveBeenCalledWith(
+      ref("campaigns/camp-1/sessionSummaries/sess-1")
+    );
   });
 
   it("deletes the session without touching any character when XP was never applied", async () => {
@@ -227,7 +344,10 @@ describe("deleteSession with XP reversal", () => {
     await deleteSession("camp-1", "sess-1", true);
 
     expect(mockTransaction.update).not.toHaveBeenCalled();
-    expect(mockTransaction.delete).toHaveBeenCalledWith("campaigns/camp-1/sessions/sess-1");
+    expect(mockTransaction.delete).toHaveBeenCalledWith(ref("campaigns/camp-1/sessions/sess-1"));
+    expect(mockTransaction.delete).toHaveBeenCalledWith(
+      ref("campaigns/camp-1/sessionSummaries/sess-1")
+    );
   });
 
   it("still deletes cleanly if the session is already gone", async () => {
@@ -235,7 +355,10 @@ describe("deleteSession with XP reversal", () => {
 
     await expect(deleteSession("camp-1", "sess-1", true)).resolves.toBeUndefined();
     expect(mockTransaction.update).not.toHaveBeenCalled();
-    expect(mockTransaction.delete).toHaveBeenCalledWith("campaigns/camp-1/sessions/sess-1");
+    expect(mockTransaction.delete).toHaveBeenCalledWith(ref("campaigns/camp-1/sessions/sess-1"));
+    expect(mockTransaction.delete).toHaveBeenCalledWith(
+      ref("campaigns/camp-1/sessionSummaries/sess-1")
+    );
   });
 
   it("stops an over-limit stored XP reversal before staging any write or delete", async () => {
