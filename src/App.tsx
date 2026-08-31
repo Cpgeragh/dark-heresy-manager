@@ -21,8 +21,8 @@ import Dashboard from "./pages/Dashboard";
 import CharacterSheet from "./pages/CharacterSheet";
 import CampaignOverview from "./pages/CampaignOverview";
 import Onboarding from "./pages/Onboarding";
-import NameGate from "./pages/NameGate";
 import Settings from "./pages/Settings";
+import MissingProfileRecovery from "./pages/MissingProfileRecovery";
 
 // Shows a one-off toast if a service-worker update started downloading but
 // stalled (flag set in main.tsx). Must live inside ToastProvider.
@@ -90,14 +90,18 @@ export default function App() {
         user={currentUser}
         onComplete={() => setOnboarded(true)}
         effectiveUserId={effectiveUserId}
+        firstName={firstName}
       />
     );
   }
 
-  // Existing users who onboarded before first names existed must add one
-  // before using the app again.
+  // A completed account must always have a profile. New onboarding writes the
+  // name before issuing a recovery code, and reclaim/link operations preserve
+  // that profile. If this browser contains an identity that was superseded by
+  // a reclaim elsewhere, offer the non-destructive device-link route instead
+  // of asking the user to recreate their name or trapping them on an error.
   if (!firstName) {
-    return <NameGate effectiveUserId={effectiveUserId} />;
+    return <MissingProfileRecovery />;
   }
 
   // -------------------------------------------------

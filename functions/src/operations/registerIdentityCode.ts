@@ -20,6 +20,7 @@ import { generateRecoveryCode, hashRecoveryCode } from "../shared/recoveryCode.j
 const IDENTITY_INDEX_COLLECTION = "identityRecoveryIndex";
 const IDENTITY_SECRET_COLLECTION = "identitySecret";
 const USER_LINKS_COLLECTION = "userLinks";
+const USER_PROFILES_COLLECTION = "userProfiles";
 
 export interface RegisterIdentityCodeInput {
   role: "dm" | "player";
@@ -46,11 +47,25 @@ export async function registerIdentityCode(
   }
 
   const secretRef = db.collection(IDENTITY_SECRET_COLLECTION).doc(identityUid);
+  const profileRef = db.collection(USER_PROFILES_COLLECTION).doc(identityUid);
 
   let newCode = "";
 
   await db.runTransaction(async (transaction) => {
     const secretSnapshot = await transaction.get(secretRef);
+    const profileSnapshot = await transaction.get(profileRef);
+    const firstName = profileSnapshot.exists ? profileSnapshot.data()?.firstName : undefined;
+    if (
+      !profileSnapshot.exists ||
+      typeof firstName !== "string" ||
+      firstName.length === 0 ||
+      firstName.length > 50
+    ) {
+      throw new HttpsError(
+        "failed-precondition",
+        "Save a valid first name before creating an identity recovery code."
+      );
+    }
     const previousCode = secretSnapshot.exists
       ? (secretSnapshot.data()?.code as string | undefined)
       : undefined;

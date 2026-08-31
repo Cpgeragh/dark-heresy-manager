@@ -1,5 +1,6 @@
 // tests/unit/identityService.test.ts
 //
+// @vitest-environment jsdom
 // Tests for reclaimIdentity, getRecoveryCode, and rotateRecoveryCode.
 // Firebase and the registerIdentityCode/startIdentityReclaimJob/
 // processIdentityReclaimChunk Functions are fully mocked — no emulator
@@ -15,12 +16,16 @@ const {
   mockCallRegisterIdentityCode,
   mockCallStartIdentityReclaimJob,
   mockCallProcessIdentityReclaimChunk,
+  mockCallRevokeIdentityCode,
+  mockCallGetIdentityRecoveryMode,
 } = vi.hoisted(() => ({
   mockDoc: vi.fn((...args: unknown[]) => `${args[1]}/${args[2]}`),
   mockGetDoc: vi.fn(),
   mockCallRegisterIdentityCode: vi.fn(),
   mockCallStartIdentityReclaimJob: vi.fn(),
   mockCallProcessIdentityReclaimChunk: vi.fn(),
+  mockCallRevokeIdentityCode: vi.fn(),
+  mockCallGetIdentityRecoveryMode: vi.fn(),
 }));
 
 vi.mock("firebase/firestore", () => ({
@@ -33,6 +38,8 @@ vi.mock("firebase/functions", () => ({
     if (name === "registerIdentityCode") return mockCallRegisterIdentityCode;
     if (name === "startIdentityReclaimJob") return mockCallStartIdentityReclaimJob;
     if (name === "processIdentityReclaimChunk") return mockCallProcessIdentityReclaimChunk;
+    if (name === "revokeIdentityCode") return mockCallRevokeIdentityCode;
+    if (name === "getIdentityRecoveryMode") return mockCallGetIdentityRecoveryMode;
     throw new Error(`Unexpected callable: ${name}`);
   }),
 }));
@@ -46,12 +53,15 @@ import {
   reclaimIdentity,
   getRecoveryCode,
   rotateRecoveryCode,
+  revokeIdentityRecoveryCode,
+  getIdentityRecoveryMode,
 } from "../../src/services/identityService";
 
 // ── Setup ──────────────────────────────────────────────────────────────────
 
 beforeEach(() => {
   vi.clearAllMocks();
+  localStorage.clear();
 });
 
 // ── reclaimIdentity ───────────────────────────────────────────────────────
@@ -59,7 +69,7 @@ beforeEach(() => {
 describe("reclaimIdentity", () => {
   beforeEach(() => {
     mockCallStartIdentityReclaimJob.mockResolvedValue({
-      data: { jobId: "job-1", totalCount: 0, role: "player" },
+      data: { jobId: "job-1", totalCount: 0, role: "player", profileTransferred: false },
     });
     mockCallProcessIdentityReclaimChunk.mockResolvedValue({
       data: { done: true, processedCount: 0, totalCount: 0 },
@@ -79,22 +89,22 @@ describe("reclaimIdentity", () => {
 
   it("drives chunks to completion and returns the reclaimed role", async () => {
     mockCallStartIdentityReclaimJob.mockResolvedValue({
-      data: { jobId: "job-1", totalCount: 2, role: "dm" },
+      data: { jobId: "job-1", totalCount: 2, role: "dm", profileTransferred: true },
     });
     mockCallProcessIdentityReclaimChunk
       .mockResolvedValueOnce({ data: { done: false, processedCount: 1, totalCount: 2 } })
       .mockResolvedValueOnce({ data: { done: true, processedCount: 2, totalCount: 2 } });
 
-    const role = await reclaimIdentity("DH-C0DE-0001");
+    const result = await reclaimIdentity("DH-C0DE-0001");
 
-    expect(role).toBe("dm");
+    expect(result).toEqual({ role: "dm", profileTransferred: true });
     expect(mockCallProcessIdentityReclaimChunk).toHaveBeenCalledTimes(2);
     expect(mockCallProcessIdentityReclaimChunk).toHaveBeenCalledWith({ jobId: "job-1" });
   });
 
   it("reports progress after the job starts and after each chunk", async () => {
     mockCallStartIdentityReclaimJob.mockResolvedValue({
-      data: { jobId: "job-1", totalCount: 2, role: "player" },
+      data: { jobId: "job-1", totalCount: 2, role: "player", profileTransferred: false },
     });
     mockCallProcessIdentityReclaimChunk.mockResolvedValue({
       data: { done: true, processedCount: 2, totalCount: 2 },
@@ -127,8 +137,47 @@ describe("reclaimIdentity", () => {
     await Promise.resolve();
 
     expect(mockCallStartIdentityReclaimJob).toHaveBeenCalledOnce();
-    finishStart({ data: { jobId: "job-1", totalCount: 0, role: "player" } });
-    await expect(Promise.all([first, duplicate])).resolves.toEqual(["player", "player"]);
+    finishStart({
+      data: { jobId: "job-1", totalCount: 0, role: "player", profileTransferred: false },
+    });
+    await expect(Promise.all([first, duplicate])).resolves.toEqual([
+      { role: "player", profileTransferred: false },
+      { role: "player", profileTransferred: false },
+    ]);
+  });
+
+  it("blocks the sixth valid reclaim attempt before calling Firebase", async () => {
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      await reclaimIdentity(`DH-RCLM-000${attempt}`);
+    }
+
+    await expect(reclaimIdentity("DH-RCLM-0005")).rejects.toThrow(
+      "Too many recovery-code attempts. Try again in 15 minutes."
+    );
+    expect(mockCallStartIdentityReclaimJob).toHaveBeenCalledTimes(5);
+  });
+});
+
+describe("getIdentityRecoveryMode", () => {
+  it("returns link when connected device records remain", async () => {
+    mockCallGetIdentityRecoveryMode.mockResolvedValue({ data: { mode: "link" } });
+
+    await expect(getIdentityRecoveryMode("  DH-C0DE-0001  ")).resolves.toBe("link");
+    expect(mockCallGetIdentityRecoveryMode).toHaveBeenCalledWith({ code: "DH-C0DE-0001" });
+  });
+
+  it("returns reclaim when no connected device records remain", async () => {
+    mockCallGetIdentityRecoveryMode.mockResolvedValue({ data: { mode: "reclaim" } });
+
+    await expect(getIdentityRecoveryMode("DH-C0DE-0001")).resolves.toBe("reclaim");
+  });
+
+  it("rejects an unexpected server mode", async () => {
+    mockCallGetIdentityRecoveryMode.mockResolvedValue({ data: { mode: "unknown" } });
+
+    await expect(getIdentityRecoveryMode("DH-C0DE-0001")).rejects.toThrow(
+      "Recovery mode is invalid."
+    );
   });
 });
 
@@ -204,5 +253,32 @@ describe("rotateRecoveryCode", () => {
       "Recovery role is invalid."
     );
     expect(mockCallRegisterIdentityCode).not.toHaveBeenCalled();
+  });
+});
+
+describe("revokeIdentityRecoveryCode", () => {
+  it("calls the protected revoke Function with an empty payload", async () => {
+    mockCallRevokeIdentityCode.mockResolvedValue({ data: undefined });
+
+    await revokeIdentityRecoveryCode();
+
+    expect(mockCallRevokeIdentityCode).toHaveBeenCalledWith({});
+  });
+
+  it("reuses one in-flight revocation", async () => {
+    let finish!: (value: unknown) => void;
+    mockCallRevokeIdentityCode.mockReturnValueOnce(
+      new Promise((resolve) => {
+        finish = resolve;
+      })
+    );
+
+    const first = revokeIdentityRecoveryCode();
+    const duplicate = revokeIdentityRecoveryCode();
+    await Promise.resolve();
+
+    expect(mockCallRevokeIdentityCode).toHaveBeenCalledOnce();
+    finish({ data: undefined });
+    await expect(Promise.all([first, duplicate])).resolves.toEqual([undefined, undefined]);
   });
 });

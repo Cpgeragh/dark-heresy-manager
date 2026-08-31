@@ -20,6 +20,7 @@ describe("Functions: registerIdentityCode", () => {
     "generates an identity code for the caller and stores the plaintext display copy",
     async () => {
       const uid = await signInTestUser();
+      await adminDb.collection("userProfiles").doc(uid).set({ firstName: "Player" });
       const registerIdentityCode = httpsCallable<{ role: "dm" | "player" }, { code: string }>(
         getTestFunctions(),
         "registerIdentityCode"
@@ -38,6 +39,7 @@ describe("Functions: registerIdentityCode", () => {
     "rotating produces a different code and updates the stored copy",
     async () => {
       const uid = await signInTestUser();
+      await adminDb.collection("userProfiles").doc(uid).set({ firstName: "Player" });
       const registerIdentityCode = httpsCallable<{ role: "dm" | "player" }, { code: string }>(
         getTestFunctions(),
         "registerIdentityCode"
@@ -57,6 +59,7 @@ describe("Functions: registerIdentityCode", () => {
     "a linked device can register an identity code for the primary account it's linked to",
     async () => {
       const primaryUid = await signInTestUser();
+      await adminDb.collection("userProfiles").doc(primaryUid).set({ firstName: "Primary" });
       const deviceUid = await signInTestUser();
       await adminDb.collection("userLinks").doc(deviceUid).set({ primaryUid });
 

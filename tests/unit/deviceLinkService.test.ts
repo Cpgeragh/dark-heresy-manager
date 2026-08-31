@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { mockDeleteDoc, mockDoc, mockCallLinkDevice } = vi.hoisted(() => ({
@@ -27,6 +29,7 @@ import { linkDeviceToAccount, unlinkDevice } from "../../src/services/deviceLink
 
 beforeEach(() => {
   vi.clearAllMocks();
+  localStorage.clear();
   mockDeleteDoc.mockResolvedValue(undefined);
   mockCallLinkDevice.mockResolvedValue({ data: undefined });
 });
@@ -64,6 +67,17 @@ describe("device link operations", () => {
     mockCallLinkDevice.mockRejectedValue(error);
 
     await expect(linkDeviceToAccount("device-uid", "DH-UNKN-OWN0")).rejects.toBe(error);
+  });
+
+  it("blocks the sixth valid device-link attempt before calling Firebase", async () => {
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      await linkDeviceToAccount("device-uid", `DH-LINK-000${attempt}`);
+    }
+
+    await expect(linkDeviceToAccount("device-uid", "DH-LINK-0005")).rejects.toThrow(
+      "Too many device-link code attempts. Try again in 15 minutes."
+    );
+    expect(mockCallLinkDevice).toHaveBeenCalledTimes(5);
   });
 
   it("unlinks the current device", async () => {

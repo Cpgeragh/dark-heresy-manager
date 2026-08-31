@@ -20,6 +20,7 @@ describe("Functions: linkDevice", () => {
     "links a second device to the primary account identified by the code",
     async () => {
       const primaryUid = await signInTestUser();
+      await adminDb.collection("userProfiles").doc(primaryUid).set({ firstName: "Primary" });
       const registerIdentityCode = httpsCallable<{ role: "dm" | "player" }, { code: string }>(
         getTestFunctions(),
         "registerIdentityCode"
@@ -52,7 +53,8 @@ describe("Functions: linkDevice", () => {
   it(
     "rejects a code that has already been rotated away",
     async () => {
-      await signInTestUser();
+      const primaryUid = await signInTestUser();
+      await adminDb.collection("userProfiles").doc(primaryUid).set({ firstName: "Primary" });
       const registerIdentityCode = httpsCallable<{ role: "dm" | "player" }, { code: string }>(
         getTestFunctions(),
         "registerIdentityCode"

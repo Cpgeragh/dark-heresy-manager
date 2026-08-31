@@ -8,6 +8,7 @@ import { db, functions } from "../firebase";
 import { assertFirestoreDocumentId, assertRecoveryCode } from "../utils/firebaseValidation";
 import { runSingleFlight } from "../utils/singleFlight";
 import { driveJobToCompletion } from "../utils/bulkJobClient";
+import { recordClientCodeAttempt } from "../utils/clientCodeAttemptLimit";
 
 const callRegisterIdentityCode = httpsCallable<
   { role: "dm" | "player"; targetUid?: string },
@@ -16,13 +17,41 @@ const callRegisterIdentityCode = httpsCallable<
 
 const callStartIdentityReclaimJob = httpsCallable<
   { code: string },
-  { jobId: string; totalCount: number; role: "dm" | "player" }
+  {
+    jobId: string;
+    totalCount: number;
+    role: "dm" | "player";
+    profileTransferred: boolean;
+  }
 >(functions, "startIdentityReclaimJob");
 
 const callProcessIdentityReclaimChunk = httpsCallable<
   { jobId: string },
   { done: boolean; processedCount: number; totalCount: number }
 >(functions, "processIdentityReclaimChunk");
+
+const callRevokeIdentityCode = httpsCallable<Record<string, never>, void>(
+  functions,
+  "revokeIdentityCode"
+);
+
+const callGetIdentityRecoveryMode = httpsCallable<
+  { code: string },
+  { mode: "link" | "reclaim" }
+>(functions, "getIdentityRecoveryMode");
+
+export async function getIdentityRecoveryMode(code: string): Promise<"link" | "reclaim"> {
+  assertRecoveryCode(code);
+  const normalisedCode = code.trim();
+  return runSingleFlight("identity:recovery-mode", [normalisedCode], async () => {
+    recordClientCodeAttempt("recovery");
+    const { data } = await callGetIdentityRecoveryMode({ code: normalisedCode });
+    if (data.mode !== "link" && data.mode !== "reclaim") {
+      throw new Error("Recovery mode is invalid.");
+    }
+    return data.mode;
+  });
+}
 
 /**
  * Reclaims an identity on a new device using a previously issued recovery
@@ -34,13 +63,19 @@ const callProcessIdentityReclaimChunk = httpsCallable<
  * processed/total counts.
  * Returns the reclaimed role so the caller can update local app state.
  */
+export interface ReclaimIdentityResult {
+  role: "dm" | "player";
+  profileTransferred: boolean;
+}
+
 export async function reclaimIdentity(
   code: string,
   onProgress?: (progress: { processedCount: number; totalCount: number }) => void
-): Promise<"dm" | "player"> {
+): Promise<ReclaimIdentityResult> {
   assertRecoveryCode(code);
   const normalisedCode = code.trim();
   return runSingleFlight("identity:reclaim", [normalisedCode], async () => {
+    recordClientCodeAttempt("recovery");
     const { data: started } = await callStartIdentityReclaimJob({ code: normalisedCode });
     onProgress?.({ processedCount: 0, totalCount: started.totalCount });
     await driveJobToCompletion(
@@ -48,7 +83,10 @@ export async function reclaimIdentity(
       async (jobId) => (await callProcessIdentityReclaimChunk({ jobId })).data,
       (chunk) => onProgress?.({ processedCount: chunk.processedCount, totalCount: chunk.totalCount })
     );
-    return started.role;
+    return {
+      role: started.role,
+      profileTransferred: started.profileTransferred,
+    };
   });
 }
 
@@ -82,5 +120,12 @@ export async function rotateRecoveryCode(
   return runSingleFlight("identity:rotate-recovery", [uid, role], async () => {
     const { data } = await callRegisterIdentityCode({ role, targetUid: uid });
     return data.code;
+  });
+}
+
+/** Revokes the current account-level recovery code without replacing it. */
+export async function revokeIdentityRecoveryCode(): Promise<void> {
+  await runSingleFlight("identity:revoke-recovery", [], async () => {
+    await callRevokeIdentityCode({});
   });
 }

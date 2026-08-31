@@ -6,6 +6,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const {
   mockCompleteOnboarding,
   mockGetRecoveryCode,
+  mockGetIdentityRecoveryMode,
+  mockLinkDevice,
   mockMarkRecoveryCodeBackedUp,
   mockNeedsRecoveryCodeBackup,
   mockReclaimIdentity,
@@ -16,6 +18,8 @@ const {
 } = vi.hoisted(() => ({
   mockCompleteOnboarding: vi.fn(),
   mockGetRecoveryCode: vi.fn(),
+  mockGetIdentityRecoveryMode: vi.fn(),
+  mockLinkDevice: vi.fn(),
   mockMarkRecoveryCodeBackedUp: vi.fn(),
   mockNeedsRecoveryCodeBackup: vi.fn(),
   mockReclaimIdentity: vi.fn(),
@@ -27,12 +31,21 @@ const {
 
 vi.mock("../../src/services/identityService", () => ({
   getRecoveryCode: mockGetRecoveryCode,
+  getIdentityRecoveryMode: mockGetIdentityRecoveryMode,
   reclaimIdentity: mockReclaimIdentity,
   rotateRecoveryCode: mockRotateRecoveryCode,
 }));
 
 vi.mock("../../src/services/profileService", () => ({
   saveFirstName: mockSaveFirstName,
+}));
+
+vi.mock("../../src/hooks/useLinkDevice", () => ({
+  useLinkDevice: () => ({
+    linkDevice: mockLinkDevice,
+    loading: false,
+    error: null,
+  }),
 }));
 
 vi.mock("../../src/services/userAccountService", () => ({
@@ -57,9 +70,11 @@ beforeEach(() => {
   vi.clearAllMocks();
   mockCompleteOnboarding.mockResolvedValue(undefined);
   mockGetRecoveryCode.mockResolvedValue("RECOVERY-CODE");
+  mockGetIdentityRecoveryMode.mockResolvedValue("link");
+  mockLinkDevice.mockResolvedValue(undefined);
   mockMarkRecoveryCodeBackedUp.mockResolvedValue(undefined);
   mockNeedsRecoveryCodeBackup.mockResolvedValue(false);
-  mockReclaimIdentity.mockResolvedValue("player");
+  mockReclaimIdentity.mockResolvedValue({ role: "player", profileTransferred: true });
   mockRotateRecoveryCode.mockResolvedValue("NEW-CODE");
   mockSaveFirstName.mockResolvedValue(undefined);
 });
@@ -67,10 +82,33 @@ beforeEach(() => {
 function renderCodeStep(onComplete = vi.fn()) {
   render(
     <MemoryRouter initialEntries={["/?step=show-code"]}>
-      <Onboarding user={user} effectiveUserId="user-1" onComplete={onComplete} />
+      <Onboarding
+        user={user}
+        effectiveUserId="user-1"
+        firstName={null}
+        onComplete={onComplete}
+      />
     </MemoryRouter>
   );
   return onComplete;
+}
+
+function renderLinkStep(
+  effectiveUserId = "user-1",
+  firstName: string | null = null,
+  onComplete = vi.fn()
+) {
+  const view = render(
+    <MemoryRouter initialEntries={["/?step=link"]}>
+      <Onboarding
+        user={user}
+        effectiveUserId={effectiveUserId}
+        firstName={firstName}
+        onComplete={onComplete}
+      />
+    </MemoryRouter>
+  );
+  return { ...view, onComplete };
 }
 
 async function confirmSavedCode() {
@@ -113,6 +151,68 @@ describe("onboarding error propagation", () => {
       await screen.findByText("Couldn't load your recovery code. Please try again.")
     ).toBeVisible();
     expect(screen.getByRole("heading", { name: "Welcome" })).toBeVisible();
+  });
+});
+
+describe("new-device linking", () => {
+  it("links without reclaiming and waits for the shared profile before completing", async () => {
+    const { rerender, onComplete } = renderLinkStep();
+
+    fireEvent.change(screen.getByLabelText("Recovery code"), {
+      target: { value: "DH-C0DE-0001" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    await screen.findByRole("button", { name: "Link This Device" });
+    fireEvent.click(screen.getByRole("button", { name: "Link This Device" }));
+
+    expect(mockLinkDevice).toHaveBeenCalledWith("DH-C0DE-0001");
+    expect(await screen.findByRole("button", { name: "Opening account…" })).toBeDisabled();
+    expect(onComplete).not.toHaveBeenCalled();
+
+    rerender(
+      <MemoryRouter initialEntries={["/?step=link"]}>
+        <Onboarding
+          user={user}
+          effectiveUserId="primary-user"
+          firstName="ExistingUser"
+          onComplete={onComplete}
+        />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => expect(mockCompleteOnboarding).toHaveBeenCalledWith("user-1"));
+    await waitFor(() => expect(onComplete).toHaveBeenCalledOnce());
+  });
+
+  it("presents linking as the normal returning-user action", () => {
+    render(
+      <MemoryRouter>
+        <Onboarding
+          user={user}
+          effectiveUserId="user-1"
+          firstName={null}
+          onComplete={vi.fn()}
+        />
+      </MemoryRouter>
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Already have an account? Connect this device" })
+    ).toBeVisible();
+    expect(screen.queryByRole("button", { name: "Reclaim Identity" })).not.toBeInTheDocument();
+  });
+
+  it("shows only reclaim when the server reports no linked devices", async () => {
+    mockGetIdentityRecoveryMode.mockResolvedValue("reclaim");
+    renderLinkStep();
+
+    fireEvent.change(screen.getByLabelText("Recovery code"), {
+      target: { value: "DH-C0DE-0001" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+
+    expect(await screen.findByRole("button", { name: "Reclaim Identity" })).toBeVisible();
+    expect(screen.queryByRole("button", { name: "Link This Device" })).not.toBeInTheDocument();
   });
 });
 

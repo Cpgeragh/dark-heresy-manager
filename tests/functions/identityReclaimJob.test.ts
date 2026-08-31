@@ -39,6 +39,7 @@ describe("Functions: identity reclaim job", () => {
     "migrates a DM campaign and a member campaign's owned characters across chunked calls, and transfers the identity documents immediately",
     async () => {
       const oldUid = await signInTestUser();
+      await adminDb.collection("userProfiles").doc(oldUid).set({ firstName: "ExistingUser" });
       const registerIdentityCode = httpsCallable<{ role: "dm" | "player" }, { code: string }>(
         getTestFunctions(),
         "registerIdentityCode"
@@ -82,6 +83,10 @@ describe("Functions: identity reclaim job", () => {
         (await adminDb.collection("identitySecret").doc(newUid).get()).data()?.code
       ).toBe(registered.code);
       expect((await adminDb.collection("identitySecret").doc(oldUid).get()).exists).toBe(false);
+      expect((await adminDb.collection("userProfiles").doc(newUid).get()).data()).toEqual({
+        firstName: "ExistingUser",
+      });
+      expect((await adminDb.collection("userProfiles").doc(oldUid).get()).exists).toBe(false);
     },
     15000
   );

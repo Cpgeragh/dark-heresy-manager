@@ -34,6 +34,20 @@ export async function linkDevice(
     throw new HttpsError("failed-precondition", "This code belongs to this device.");
   }
 
+  const profileSnapshot = await db.collection("userProfiles").doc(primaryUid).get();
+  const firstName = profileSnapshot.exists ? profileSnapshot.data()?.firstName : undefined;
+  if (
+    !profileSnapshot.exists ||
+    typeof firstName !== "string" ||
+    firstName.length === 0 ||
+    firstName.length > 50
+  ) {
+    throw new HttpsError(
+      "failed-precondition",
+      "This recovery identity has no valid profile and cannot be linked."
+    );
+  }
+
   await db.collection("userLinks").doc(callerUid).set({
     primaryUid,
     linkedAt: FieldValue.serverTimestamp(),

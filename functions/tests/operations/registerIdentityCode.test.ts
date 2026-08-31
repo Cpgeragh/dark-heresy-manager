@@ -13,18 +13,21 @@ const mockRunTransaction = vi.fn(async (callback: (transaction: unknown) => Prom
   });
 });
 
-const mockSecretDoc = vi.fn(() => ({}));
+const mockSecretDoc = vi.fn((id: string) => ({ id, collectionName: "identitySecret" }));
 const mockSecretCollection = { doc: mockSecretDoc };
 const mockIndexDoc = vi.fn(() => ({}));
 const mockIndexCollection = { doc: mockIndexDoc };
 const mockLinkGet = vi.fn();
 const mockLinkDoc = vi.fn(() => ({ get: mockLinkGet }));
 const mockLinkCollection = { doc: mockLinkDoc };
+const mockProfileDoc = vi.fn((id: string) => ({ id, collectionName: "userProfiles" }));
+const mockProfileCollection = { doc: mockProfileDoc };
 
 const mockCollection = vi.fn((name: string) => {
   if (name === "identitySecret") return mockSecretCollection;
   if (name === "identityRecoveryIndex") return mockIndexCollection;
   if (name === "userLinks") return mockLinkCollection;
+  if (name === "userProfiles") return mockProfileCollection;
   throw new Error(`Unexpected collection: ${name}`);
 });
 
@@ -38,11 +41,14 @@ vi.mock("firebase-admin/firestore", () => ({
 describe("registerIdentityCode", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockTransactionGet.mockImplementation(async (reference: { collectionName?: string }) =>
+      reference.collectionName === "userProfiles"
+        ? { exists: true, data: () => ({ firstName: "ExistingUser" }) }
+        : { exists: false }
+    );
   });
 
   it("generates a new code and writes the index entry when there was no previous code", async () => {
-    mockTransactionGet.mockResolvedValue({ exists: false });
-
     const result = await registerIdentityCode({ role: "player" }, "user-1", "secret");
 
     expect(result.code).toMatch(/^DH-[0-9A-Z]{4}-[0-9A-Z]{4}$/);
@@ -55,7 +61,11 @@ describe("registerIdentityCode", () => {
   });
 
   it("deletes the previous index entry when rotating an existing code", async () => {
-    mockTransactionGet.mockResolvedValue({ exists: true, data: () => ({ code: "DH-OLDC-ODE1" }) });
+    mockTransactionGet.mockImplementation(async (reference: { collectionName?: string }) =>
+      reference.collectionName === "userProfiles"
+        ? { exists: true, data: () => ({ firstName: "ExistingUser" }) }
+        : { exists: true, data: () => ({ code: "DH-OLDC-ODE1" }) }
+    );
 
     await registerIdentityCode({ role: "dm" }, "user-1", "secret");
 
@@ -64,8 +74,6 @@ describe("registerIdentityCode", () => {
   });
 
   it("reads the secret document fresh inside the transaction", async () => {
-    mockTransactionGet.mockResolvedValue({ exists: false });
-
     await registerIdentityCode({ role: "player" }, "user-1", "secret");
 
     expect(mockTransactionGet).toHaveBeenCalledWith(expect.anything());
@@ -73,8 +81,6 @@ describe("registerIdentityCode", () => {
   });
 
   it("registers for the caller's own uid when targetUid matches the caller, without checking userLinks", async () => {
-    mockTransactionGet.mockResolvedValue({ exists: false });
-
     await registerIdentityCode({ role: "player", targetUid: "user-1" }, "user-1", "secret");
 
     expect(mockLinkGet).not.toHaveBeenCalled();
@@ -83,8 +89,6 @@ describe("registerIdentityCode", () => {
 
   it("registers for the target uid when the caller is a linked device of it", async () => {
     mockLinkGet.mockResolvedValue({ exists: true, data: () => ({ primaryUid: "primary-1" }) });
-    mockTransactionGet.mockResolvedValue({ exists: false });
-
     const result = await registerIdentityCode(
       { role: "player", targetUid: "primary-1" },
       "device-1",
@@ -116,5 +120,17 @@ describe("registerIdentityCode", () => {
       registerIdentityCode({ role: "player", targetUid: "primary-1" }, "device-1", "secret")
     ).rejects.toThrow("This device is not linked to the requested account.");
     expect(mockRunTransaction).not.toHaveBeenCalled();
+  });
+
+  it("rejects issuing a recovery code when the account has no saved profile", async () => {
+    mockTransactionGet.mockImplementation(async (reference: { collectionName?: string }) =>
+      reference.collectionName === "userProfiles" ? { exists: false } : { exists: false }
+    );
+
+    await expect(
+      registerIdentityCode({ role: "player" }, "user-1", "secret")
+    ).rejects.toThrow(expect.objectContaining({ code: "failed-precondition" }));
+
+    expect(mockTransactionSet).not.toHaveBeenCalled();
   });
 });

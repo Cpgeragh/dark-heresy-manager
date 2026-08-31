@@ -1,34 +1,36 @@
 // src/pages/Onboarding.tsx
-// First-launch screen: the user gets a recovery code, or reclaims an existing
-// identity. Only shown once — after completion the user doc is marked
+// First-launch screen: the user gets a recovery code, or links this browser to
+// an existing identity. Only shown once — after completion the user doc is marked
 // onboarded: true and this screen is never shown again.
 
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import type { User } from "firebase/auth";
-import { rotateRecoveryCode, reclaimIdentity, getRecoveryCode } from "../services/identityService";
+import { rotateRecoveryCode, getRecoveryCode } from "../services/identityService";
 import { completeOnboarding } from "../services/userAccountService";
-import { formatRecoveryCodeInput } from "../utils/recoveryCode";
 import { saveFirstName } from "../services/profileService";
 import { uiSectionHeader, uiTextError } from "../ui/editableStyles";
 import { Button } from "../ui/Button";
 import { ArrowLeft, ArrowRight } from "../ui/PickerArrows";
 import { Panel } from "../ui/Panel";
+import { IdentityRecoveryForm } from "../components/IdentityRecoveryForm";
+import { useIdentityRecoveryFlow } from "../hooks/useIdentityRecoveryFlow";
 
-type Step = "welcome" | "show-code" | "reclaim";
+type Step = "welcome" | "show-code" | "link";
 
 interface Props {
   user: User;
   onComplete: () => void;
   effectiveUserId: string;
+  firstName: string | null;
 }
 
-export default function Onboarding({ user, onComplete, effectiveUserId }: Props) {
+export default function Onboarding({ user, onComplete, effectiveUserId, firstName }: Props) {
   // The current step lives in the URL (?step=…) so browser/phone Back and
   // Forward move between steps natively. Unknown/absent values → welcome.
   const [searchParams, setSearchParams] = useSearchParams();
   const rawStep = searchParams.get("step");
-  const step: Step = rawStep === "show-code" || rawStep === "reclaim" ? rawStep : "welcome";
+  const step: Step = rawStep === "show-code" || rawStep === "link" ? rawStep : "welcome";
 
   const goToStep = (next: Step, replace = false) =>
     setSearchParams(next === "welcome" ? {} : { step: next }, { replace });
@@ -36,14 +38,90 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
   const [code, setCode] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const busyRef = useRef(false);
-  const [reclaimProgress, setReclaimProgress] = useState<
-    { processedCount: number; totalCount: number } | null
-  >(null);
   const [error, setError] = useState<string | null>(null);
-  const [reclaimCode, setReclaimCode] = useState("");
   const [name, setName] = useState("");
   const [savedConfirmed, setSavedConfirmed] = useState(false);
   const [copied, setCopied] = useState(false);
+  const recoveryFlow = useIdentityRecoveryFlow();
+  const failRecoveryCompletion = recoveryFlow.failCompletion;
+  const resetRecoveryFlow = recoveryFlow.reset;
+  const [awaitingLinkedProfile, setAwaitingLinkedProfile] = useState(false);
+  const linkCompletionRef = useRef(false);
+  const [awaitingReclaimedProfile, setAwaitingReclaimedProfile] = useState(false);
+  const reclaimCompletionRef = useRef(false);
+
+  // Linking is non-destructive. Wait until the live device-link and profile
+  // subscriptions have resolved the primary identity, then mark this local
+  // browser's user document as onboarded and open the shared account.
+  useEffect(() => {
+    if (
+      !awaitingLinkedProfile ||
+      effectiveUserId === user.uid ||
+      !firstName ||
+      linkCompletionRef.current
+    ) {
+      return;
+    }
+
+    linkCompletionRef.current = true;
+    let ignore = false;
+    completeOnboarding(user.uid)
+      .then(() => {
+        if (ignore) return;
+        setSearchParams({}, { replace: true });
+        onComplete();
+      })
+      .catch((err) => {
+        if (ignore) return;
+        console.error("Failed to finish device linking:", err);
+        linkCompletionRef.current = false;
+        setAwaitingLinkedProfile(false);
+        failRecoveryCompletion(
+          "This device was linked, but setup could not be completed. Please try again."
+        );
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [
+    awaitingLinkedProfile,
+    effectiveUserId,
+    firstName,
+    onComplete,
+    setSearchParams,
+    user.uid,
+    failRecoveryCompletion,
+  ]);
+
+  useEffect(() => {
+    if (!awaitingLinkedProfile) return;
+    const timeout = window.setTimeout(() => {
+      setAwaitingLinkedProfile(false);
+      failRecoveryCompletion(
+        "This device was linked, but the account is still loading. Please try again."
+      );
+    }, 15_000);
+    return () => window.clearTimeout(timeout);
+  }, [awaitingLinkedProfile, failRecoveryCompletion]);
+
+  useEffect(() => {
+    if (!awaitingReclaimedProfile || !firstName || reclaimCompletionRef.current) return;
+    reclaimCompletionRef.current = true;
+    setSearchParams({}, { replace: true });
+    onComplete();
+  }, [awaitingReclaimedProfile, firstName, onComplete, setSearchParams]);
+
+  useEffect(() => {
+    if (!awaitingReclaimedProfile) return;
+    const timeout = window.setTimeout(() => {
+      setAwaitingReclaimedProfile(false);
+      failRecoveryCompletion(
+        "Your identity was reclaimed, but the account is still loading. Please try again."
+      );
+    }, 15_000);
+    return () => window.clearTimeout(timeout);
+  }, [awaitingReclaimedProfile, failRecoveryCompletion]);
 
   // On a reload that lands back on the code step, the code value is gone from
   // memory — rehydrate it from the server. If none exists, fall back to welcome.
@@ -110,32 +188,6 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
     }
   }
 
-  async function handleReclaim() {
-    if (busyRef.current) return;
-    const trimmed = reclaimCode.trim().toUpperCase();
-    if (!trimmed) return;
-    busyRef.current = true;
-    setBusy(true);
-    setError(null);
-    setReclaimProgress(null);
-    try {
-      await reclaimIdentity(trimmed, setReclaimProgress);
-      setSearchParams({}, { replace: true });
-      onComplete();
-    } catch (err) {
-      console.error("Reclaim error:", err);
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Something went wrong. Please check your code and try again."
-      );
-    } finally {
-      busyRef.current = false;
-      setBusy(false);
-      setReclaimProgress(null);
-    }
-  }
-
   return (
     <div className="min-h-svh bg-slate-950 text-slate-100 flex items-center justify-center p-6">
       <div className="max-w-sm lg:max-w-md w-full">
@@ -181,25 +233,27 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
                 type="button"
                 onClick={() => {
                   setError(null);
-                  goToStep("reclaim");
+                  resetRecoveryFlow();
+                  goToStep("link");
                 }}
                 className="w-full text-sm lg:text-base text-slate-300 hover:text-slate-100 transition flex items-center justify-center gap-2"
               >
-                <span>Returning user? Reclaim your identity</span>
+                <span>Already have an account? Connect this device</span>
                 <ArrowRight />
               </button>
             </Panel>
           </div>
         )}
 
-        {/* ── Reclaim ── */}
-        {step === "reclaim" && (
+        {/* ── Link existing account ── */}
+        {step === "link" && (
           <div className="space-y-6 text-slate-100">
             <div className="relative flex items-center justify-center">
               <button
                 type="button"
                 onClick={() => {
                   setError(null);
+                  resetRecoveryFlow();
                   goToStep("welcome");
                 }}
                 className="absolute left-0 text-sm lg:text-base text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5"
@@ -207,46 +261,24 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
                 <ArrowLeft />
                 <span>Back</span>
               </button>
-              <h1 className="text-lg lg:text-xl font-semibold text-slate-100 text-center">
-                Returning User
+              <h1 className="text-lg lg:text-xl font-semibold text-center">
+                Connect Existing Account
               </h1>
             </div>
 
             <Panel spacing="compact">
-              <p className="text-slate-300 text-sm lg:text-base">
-                Enter the recovery code you saved when you first set up the app.
-              </p>
-
-              <label className="block">
-                <span className={uiSectionHeader}>Recovery code</span>
-                <input
-                  type="text"
-                  value={reclaimCode}
-                  onChange={(e) => setReclaimCode(formatRecoveryCodeInput(e.target.value))}
-                  placeholder="DH-XXXX-YYYY"
-                  autoCapitalize="characters"
-                  autoComplete="off"
-                  spellCheck={false}
-                  maxLength={12}
-                  disabled={busy}
-                  className="mt-1 w-full px-4 lg:px-5 py-3 lg:py-3.5 rounded-lg bg-slate-800 border border-slate-600 text-slate-100 font-code [font-feature-settings:'zero'] text-base lg:text-lg placeholder:text-slate-600 focus:outline-none focus:border-amber-500 disabled:opacity-50"
-                />
-              </label>
-
-              <Button
-                fullWidth
-                size="lg"
-                onClick={handleReclaim}
-                disabled={busy || !reclaimCode.trim()}
-              >
-                {busy
-                  ? reclaimProgress && reclaimProgress.totalCount > 0
-                    ? `Reclaiming… (${reclaimProgress.processedCount}/${reclaimProgress.totalCount})`
-                    : "Reclaiming…"
-                  : "Reclaim Identity"}
-              </Button>
-
-              {error && <p className={`${uiTextError} text-center`}>{error}</p>}
+              <IdentityRecoveryForm
+                flow={recoveryFlow}
+                deviceNoun="device"
+                description={
+                  <>
+                    Enter the recovery code. The account's connected-device records determine the
+                    one available action.
+                  </>
+                }
+                onLinked={() => setAwaitingLinkedProfile(true)}
+                onReclaimed={() => setAwaitingReclaimedProfile(true)}
+              />
             </Panel>
           </div>
         )}
@@ -270,8 +302,7 @@ export default function Onboarding({ user, onComplete, effectiveUserId }: Props)
 
             <Panel spacing="compact">
               <p className="text-slate-300 text-sm lg:text-base text-center">
-                If you ever lose access to this device, use this code to reclaim your campaigns and
-                characters.
+                Use this code to connect your account on another device.
               </p>
               <p className="text-slate-100 text-sm lg:text-base text-center font-semibold">
                 Write it down somewhere safe.

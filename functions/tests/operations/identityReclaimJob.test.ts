@@ -9,7 +9,9 @@ import * as identityMigration from "../../src/shared/identityMigration";
 import { hashRecoveryCode } from "../../src/shared/recoveryCode";
 
 const {
-  mockCreateBulkJob,
+  mockPrepareBulkJob,
+  mockPreparedJobRef,
+  mockPreparedJobRecord,
   mockAcquireJobLease,
   mockAdvanceJobCheckpoint,
   mockCompleteJob,
@@ -17,6 +19,8 @@ const {
   mockHandleChunkFailure,
   mockIndexGet,
   mockIndexDoc,
+  mockProfileGet,
+  mockLinksGet,
   mockBatchUpdate,
   mockBatchSet,
   mockBatchDelete,
@@ -25,7 +29,9 @@ const {
   mockBatch,
 } = vi.hoisted(() => {
   const mockIndexGet = vi.fn();
-  const mockIndexDoc = vi.fn((id: string) => ({ id, get: mockIndexGet }));
+  const mockProfileGet = vi.fn();
+  const mockLinksGet = vi.fn();
+  const mockIndexDoc = vi.fn((id: string) => ({ id, collectionName: "identityRecoveryIndex", get: mockIndexGet }));
   const mockBatchUpdate = vi.fn();
   const mockBatchSet = vi.fn();
   const mockBatchDelete = vi.fn();
@@ -33,7 +39,19 @@ const {
 
   const mockCollection = vi.fn((name: string) => {
     if (name === "identityRecoveryIndex") return { doc: mockIndexDoc };
-    return { doc: (id: string) => ({ id }) };
+    if (name === "userProfiles") {
+      return {
+        doc: (id: string) => ({ id, collectionName: name, get: mockProfileGet }),
+      };
+    }
+    if (name === "userLinks") {
+      return {
+        where: vi.fn(() => ({
+          limit: vi.fn(() => ({ get: mockLinksGet })),
+        })),
+      };
+    }
+    return { doc: (id: string) => ({ id, collectionName: name }) };
   });
 
   const mockBatch = vi.fn(() => ({
@@ -43,8 +61,17 @@ const {
     commit: mockBatchCommit,
   }));
 
+  const mockPreparedJobRef = { id: "job-1", collectionName: "bulkJobs" };
+  const mockPreparedJobRecord = { type: "identity-reclaim", status: "pending" };
+
   return {
-    mockCreateBulkJob: vi.fn(),
+    mockPrepareBulkJob: vi.fn(() => ({
+      jobId: "job-1",
+      ref: mockPreparedJobRef,
+      record: mockPreparedJobRecord,
+    })),
+    mockPreparedJobRef,
+    mockPreparedJobRecord,
     mockAcquireJobLease: vi.fn(),
     mockAdvanceJobCheckpoint: vi.fn(),
     mockCompleteJob: vi.fn(),
@@ -52,6 +79,8 @@ const {
     mockHandleChunkFailure: vi.fn(),
     mockIndexGet,
     mockIndexDoc,
+    mockProfileGet,
+    mockLinksGet,
     mockBatchUpdate,
     mockBatchSet,
     mockBatchDelete,
@@ -66,7 +95,7 @@ vi.mock("firebase-admin/firestore", () => ({
 }));
 
 vi.mock("../../src/shared/bulkJobs", () => ({
-  createBulkJob: mockCreateBulkJob,
+  prepareBulkJob: mockPrepareBulkJob,
   acquireJobLease: mockAcquireJobLease,
   advanceJobCheckpoint: mockAdvanceJobCheckpoint,
   completeJob: mockCompleteJob,
@@ -106,6 +135,11 @@ function makeJob(overrides: Partial<BulkJobRecord> = {}): BulkJobRecord {
 describe("startIdentityReclaimJob", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockProfileGet.mockResolvedValue({
+      exists: true,
+      data: () => ({ firstName: "ExistingUser" }),
+    });
+    mockLinksGet.mockResolvedValue({ empty: true });
     vi.mocked(identityMigration.computeOwnershipMigrationPlan).mockResolvedValue({
       campaigns: [],
       totalWriteCount: 0,
@@ -128,17 +162,36 @@ describe("startIdentityReclaimJob", () => {
     ).rejects.toThrow(expect.objectContaining({ code: "failed-precondition" }));
   });
 
+  it("rejects reclaim while any linked device remains connected", async () => {
+    mockIndexGet.mockResolvedValue({ exists: true, data: () => ({ uid: "old-uid" }) });
+    mockLinksGet.mockResolvedValue({ empty: false });
+
+    await expect(
+      startIdentityReclaimJob({ code: CODE }, "new-uid", "idem-key", SECRET)
+    ).rejects.toThrow(expect.objectContaining({ code: "failed-precondition" }));
+
+    expect(identityMigration.computeOwnershipMigrationPlan).not.toHaveBeenCalled();
+    expect(mockBatch).not.toHaveBeenCalled();
+  });
+
   it("transfers the identity documents immediately and creates a job on success", async () => {
     mockIndexGet.mockResolvedValue({ exists: true, data: () => ({ uid: "old-uid", role: "dm" }) });
+    mockProfileGet.mockResolvedValue({
+      exists: true,
+      data: () => ({ firstName: "ExistingUser" }),
+    });
     vi.mocked(identityMigration.computeOwnershipMigrationPlan).mockResolvedValue({
       campaigns: [{ campaignId: "c1", role: "dm" }],
       totalWriteCount: 1,
     });
-    mockCreateBulkJob.mockResolvedValue("job-1");
-
     const result = await startIdentityReclaimJob({ code: CODE }, "new-uid", "idem-key", SECRET);
 
-    expect(result).toEqual({ jobId: "job-1", totalCount: 1, role: "dm" });
+    expect(result).toEqual({
+      jobId: "job-1",
+      totalCount: 1,
+      role: "dm",
+      profileTransferred: true,
+    });
     const expectedHash = hashRecoveryCode(CODE, SECRET);
     expect(mockBatchUpdate).toHaveBeenCalledWith(expect.objectContaining({ id: expectedHash }), {
       uid: "new-uid",
@@ -147,8 +200,17 @@ describe("startIdentityReclaimJob", () => {
       code: CODE,
     });
     expect(mockBatchDelete).toHaveBeenCalledWith(expect.objectContaining({ id: "old-uid" }));
+    expect(mockBatchSet).toHaveBeenCalledWith(
+      expect.objectContaining({ collectionName: "userProfiles", id: "new-uid" }),
+      { firstName: "ExistingUser" }
+    );
+    expect(mockBatchDelete).toHaveBeenCalledWith(
+      expect.objectContaining({ collectionName: "userProfiles", id: "old-uid" })
+    );
+    expect(mockBatchSet).toHaveBeenCalledWith(mockPreparedJobRef, mockPreparedJobRecord);
     expect(mockBatchCommit).toHaveBeenCalledOnce();
-    expect(mockCreateBulkJob).toHaveBeenCalledWith(
+    expect(mockPrepareBulkJob).toHaveBeenCalledWith(
+      expect.anything(),
       "identity-reclaim",
       "new-uid",
       { oldUid: "old-uid", newUid: "new-uid", campaigns: [{ campaignId: "c1", role: "dm" }] },
@@ -157,13 +219,36 @@ describe("startIdentityReclaimJob", () => {
     );
   });
 
+  it("rejects a recovery identity with no profile before transferring anything", async () => {
+    mockIndexGet.mockResolvedValue({ exists: true, data: () => ({ uid: "old-uid", role: "dm" }) });
+    mockProfileGet.mockResolvedValue({ exists: false });
+
+    await expect(
+      startIdentityReclaimJob({ code: CODE }, "new-uid", "idem-key", SECRET)
+    ).rejects.toThrow(expect.objectContaining({ code: "failed-precondition" }));
+
+    expect(mockBatch).not.toHaveBeenCalled();
+    expect(mockBatchCommit).not.toHaveBeenCalled();
+  });
+
+  it("rejects an invalid stored profile before transferring any identity data", async () => {
+    mockIndexGet.mockResolvedValue({ exists: true, data: () => ({ uid: "old-uid", role: "dm" }) });
+    mockProfileGet.mockResolvedValue({ exists: true, data: () => ({ firstName: "" }) });
+
+    await expect(
+      startIdentityReclaimJob({ code: CODE }, "new-uid", "idem-key", SECRET)
+    ).rejects.toThrow(expect.objectContaining({ code: "failed-precondition" }));
+
+    expect(mockBatch).not.toHaveBeenCalled();
+    expect(mockBatchCommit).not.toHaveBeenCalled();
+  });
+
   it("defaults to the player role for codes registered before roles were tracked", async () => {
     mockIndexGet.mockResolvedValue({ exists: true, data: () => ({ uid: "old-uid" }) });
-    mockCreateBulkJob.mockResolvedValue("job-1");
 
     const result = await startIdentityReclaimJob({ code: CODE }, "new-uid", "idem-key", SECRET);
 
-    expect(result.role).toBe("player");
+    expect(result).toMatchObject({ role: "player", profileTransferred: true });
   });
 
   it("resolves the target by the code's HMAC hash, not the raw code", async () => {
@@ -172,6 +257,27 @@ describe("startIdentityReclaimJob", () => {
     await startIdentityReclaimJob({ code: CODE }, "new-uid", "idem-key", SECRET).catch(() => {});
 
     expect(mockIndexDoc).toHaveBeenCalledWith(hashRecoveryCode(CODE, SECRET));
+  });
+
+  it("rejects an oversized migration before transferring identity documents", async () => {
+    mockIndexGet.mockResolvedValue({ exists: true, data: () => ({ uid: "old-uid" }) });
+    vi.mocked(identityMigration.computeOwnershipMigrationPlan).mockResolvedValue({
+      campaigns: [],
+      totalWriteCount: 10_001,
+    });
+    mockPrepareBulkJob.mockImplementationOnce(() => {
+      throw Object.assign(new Error("too large"), { code: "resource-exhausted" });
+    });
+
+    await expect(
+      startIdentityReclaimJob({ code: CODE }, "new-uid", "idem-key", SECRET)
+    ).rejects.toThrow(expect.objectContaining({ code: "resource-exhausted" }));
+
+    expect(mockBatch).not.toHaveBeenCalled();
+    expect(mockBatchUpdate).not.toHaveBeenCalled();
+    expect(mockBatchSet).not.toHaveBeenCalled();
+    expect(mockBatchDelete).not.toHaveBeenCalled();
+    expect(mockBatchCommit).not.toHaveBeenCalled();
   });
 });
 

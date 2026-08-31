@@ -5,10 +5,13 @@ import { hashRecoveryCode } from "../../src/shared/recoveryCode";
 
 const mockIndexGet = vi.fn();
 const mockIndexDoc = vi.fn(() => ({ get: mockIndexGet }));
+const mockProfileGet = vi.fn();
+const mockProfileDoc = vi.fn(() => ({ get: mockProfileGet }));
 const mockSet = vi.fn();
 
 const mockCollection = vi.fn((name: string) => {
   if (name === "identityRecoveryIndex") return { doc: mockIndexDoc };
+  if (name === "userProfiles") return { doc: mockProfileDoc };
   if (name === "userLinks") return { doc: () => ({ set: mockSet }) };
   throw new Error(`Unexpected collection: ${name}`);
 });
@@ -25,6 +28,10 @@ describe("linkDevice", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockSet.mockResolvedValue(undefined);
+    mockProfileGet.mockResolvedValue({
+      exists: true,
+      data: () => ({ firstName: "ExistingUser" }),
+    });
   });
 
   it("rejects when the code does not resolve", async () => {
@@ -57,5 +64,16 @@ describe("linkDevice", () => {
     await linkDevice({ code: CODE }, "device-uid", SECRET).catch(() => {});
 
     expect(mockIndexDoc).toHaveBeenCalledWith(hashRecoveryCode(CODE, SECRET));
+  });
+
+  it("rejects linking to a recovery identity with no saved profile", async () => {
+    mockIndexGet.mockResolvedValue({ exists: true, data: () => ({ uid: "primary-uid" }) });
+    mockProfileGet.mockResolvedValue({ exists: false });
+
+    await expect(linkDevice({ code: CODE }, "device-uid", SECRET)).rejects.toThrow(
+      expect.objectContaining({ code: "failed-precondition" })
+    );
+
+    expect(mockSet).not.toHaveBeenCalled();
   });
 });

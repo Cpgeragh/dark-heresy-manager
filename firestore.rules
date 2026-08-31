@@ -31,6 +31,18 @@ service cloud.firestore {
       );
     }
 
+    function campaignMemberOrLinked(campaignId) {
+      let campaign = get(/databases/$(database)/documents/campaigns/$(campaignId));
+      return request.auth != null && (
+        request.auth.uid in campaign.data.get('memberIds', []) ||
+        (
+          exists(/databases/$(database)/documents/userLinks/$(request.auth.uid)) &&
+          get(/databases/$(database)/documents/userLinks/$(request.auth.uid)).data.primaryUid
+            in campaign.data.get('memberIds', [])
+        )
+      );
+    }
+
     function boundedQuery(maximum) {
       return request.query.limit != null &&
              request.query.limit > 0 &&
@@ -230,9 +242,29 @@ service cloud.firestore {
       // A restricted per-character summary for a wider "party roster" view is
       // Stage 7's job; full campaign metadata stays locked to DM + members.
       allow get: if dmOwnsOrLinked(resource.data.dmId) ||
-                     (request.auth != null && request.auth.uid in resource.data.get('memberIds', []));
+                     (
+                       request.auth != null &&
+                       (
+                         request.auth.uid in resource.data.get('memberIds', []) ||
+                         (
+                           exists(/databases/$(database)/documents/userLinks/$(request.auth.uid)) &&
+                           get(/databases/$(database)/documents/userLinks/$(request.auth.uid)).data.primaryUid
+                             in resource.data.get('memberIds', [])
+                         )
+                       )
+                     );
       allow list: if (dmOwnsOrLinked(resource.data.dmId) ||
-                       (request.auth != null && request.auth.uid in resource.data.get('memberIds', []))) &&
+                       (
+                         request.auth != null &&
+                         (
+                           request.auth.uid in resource.data.get('memberIds', []) ||
+                           (
+                             exists(/databases/$(database)/documents/userLinks/$(request.auth.uid)) &&
+                             get(/databases/$(database)/documents/userLinks/$(request.auth.uid)).data.primaryUid
+                               in resource.data.get('memberIds', [])
+                           )
+                         )
+                       )) &&
                      boundedQuery(100);
 
       allow create:

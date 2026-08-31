@@ -3,6 +3,7 @@ import { httpsCallable } from "firebase/functions";
 import { db, functions } from "../firebase";
 import { assertFirestoreDocumentId, assertRecoveryCode } from "../utils/firebaseValidation";
 import { runSingleFlight } from "../utils/singleFlight";
+import { recordClientCodeAttempt } from "../utils/clientCodeAttemptLimit";
 
 const callLinkDevice = httpsCallable<{ code: string }, void>(functions, "linkDevice");
 
@@ -15,6 +16,7 @@ export async function linkDeviceToAccount(currentUid: string, recoveryCode: stri
   assertRecoveryCode(recoveryCode);
   const code = recoveryCode.trim();
   await runSingleFlight("device:link", [currentUid, code], async () => {
+    recordClientCodeAttempt("device-link");
     await callLinkDevice({ code });
   });
 }

@@ -3,7 +3,12 @@
 
 import { useRef, useState } from "react";
 import type { User } from "firebase/auth";
-import { getRecoveryCode, rotateRecoveryCode } from "../services/identityService";
+import {
+  getRecoveryCode,
+  revokeIdentityRecoveryCode,
+  rotateRecoveryCode,
+} from "../services/identityService";
+import { deleteCurrentAccount } from "../services/userAccountService";
 import { saveFirstName } from "../services/profileService";
 import { useLinkDevice } from "../hooks/useLinkDevice";
 import { useToast } from "../components/Toast";
@@ -14,6 +19,7 @@ import { ConfirmInline } from "../ui/ConfirmInline";
 import { PageShell } from "../ui/PageShell";
 import { Panel } from "../ui/Panel";
 import { SectionHeader } from "../ui/SectionHeader";
+import { RecoveryCodeInput } from "../ui/RecoveryCodeInput";
 
 interface Props {
   user: User;
@@ -44,12 +50,16 @@ export default function Settings({
   const revealingRef = useRef(false);
   const [rotating, setRotating] = useState(false);
   const rotatingRef = useRef(false);
+  const [revoking, setRevoking] = useState(false);
+  const revokingRef = useRef(false);
 
   // ── Device link state ────────────────────────────────────────────────────
   const { linkDevice, loading: linking, error: linkError } = useLinkDevice();
   const [linkCode, setLinkCode] = useState("");
   const [unlinking, setUnlinking] = useState(false);
   const unlinkingRef = useRef(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
+  const deletingAccountRef = useRef(false);
 
   async function handleSaveName() {
     if (savingNameRef.current) return;
@@ -107,6 +117,23 @@ export default function Settings({
     }
   }
 
+  async function handleRevoke() {
+    if (revokingRef.current) return;
+    revokingRef.current = true;
+    setRevoking(true);
+    try {
+      await revokeIdentityRecoveryCode();
+      setRevealedCode(null);
+      toast.success("Recovery code revoked.");
+    } catch (err) {
+      console.error("Failed to revoke recovery code:", err);
+      toast.error("Failed to revoke recovery code. Please try again.");
+    } finally {
+      revokingRef.current = false;
+      setRevoking(false);
+    }
+  }
+
   async function handleLinkDevice() {
     try {
       await linkDevice(linkCode);
@@ -129,6 +156,21 @@ export default function Settings({
     } finally {
       unlinkingRef.current = false;
       setUnlinking(false);
+    }
+  }
+
+  async function handleDeleteAccount() {
+    if (deletingAccountRef.current) return;
+    deletingAccountRef.current = true;
+    setDeletingAccount(true);
+    try {
+      await deleteCurrentAccount();
+    } catch (err) {
+      console.error("Failed to delete account:", err);
+      toast.error(err instanceof Error ? err.message : "Failed to delete account. Please try again.");
+    } finally {
+      deletingAccountRef.current = false;
+      setDeletingAccount(false);
     }
   }
 
@@ -201,13 +243,33 @@ export default function Settings({
                       cancelLabel="Cancel"
                       busyLabel="Rotating…"
                     />
+                    <ConfirmInline
+                      triggerLabel="Revoke Code"
+                      question="Revoke code?"
+                      onConfirm={handleRevoke}
+                      busy={revoking}
+                      confirmLabel="Yes, revoke"
+                      cancelLabel="Cancel"
+                      busyLabel="Revoking…"
+                    />
                   </div>
                 </div>
               </>
             ) : (
-              <Button onClick={handleReveal} disabled={revealing}>
-                {revealing ? "Loading…" : "Reveal Recovery Code"}
-              </Button>
+              <div className="flex gap-3">
+                <Button onClick={handleReveal} disabled={revealing}>
+                  {revealing ? "Loading…" : "Reveal Recovery Code"}
+                </Button>
+                <ConfirmInline
+                  triggerLabel="Revoke Code"
+                  question="Revoke code?"
+                  onConfirm={handleRevoke}
+                  busy={revoking}
+                  confirmLabel="Yes, revoke"
+                  cancelLabel="Cancel"
+                  busyLabel="Revoking…"
+                />
+              </div>
             )}
           </section>
         </div>
@@ -239,12 +301,13 @@ export default function Settings({
                   Enter the recovery code from your other device to access all its campaigns and
                   characters here.
                 </p>
-                <input
-                  type="text"
+                <RecoveryCodeInput
                   value={linkCode}
-                  onChange={(e) => setLinkCode(e.target.value)}
+                  onValueChange={setLinkCode}
+                  disabled={linking}
+                  label={null}
+                  ariaLabel="Recovery code for linked device"
                   placeholder="Paste recovery code here"
-                  className="w-full px-3 lg:px-4 py-2 lg:py-2.5 rounded-lg bg-slate-800 border border-slate-600 text-slate-100 text-sm lg:text-base placeholder:text-slate-500 focus:outline-none focus:border-amber-500"
                 />
                 {linkError && <p className={uiTextError}>{linkError}</p>}
                 <Button onClick={handleLinkDevice} disabled={linking || !linkCode.trim()}>
@@ -254,6 +317,29 @@ export default function Settings({
             )}
           </section>
         </div>
+
+        {!isLinked && (
+          <div>
+            <SectionHeader className="mb-3">Delete Account</SectionHeader>
+            <section className={uiSection + " space-y-3 border-red-900/70"}>
+              <p className="text-slate-400 text-sm lg:text-base">
+                This releases your claimed characters, removes your profile and linked devices,
+                revokes account recovery, and permanently deletes this anonymous account. You must
+                delete or transfer every campaign you own first.
+              </p>
+              <ConfirmInline
+                triggerLabel="Delete Account"
+                onConfirm={handleDeleteAccount}
+                requireText="DELETE"
+                requirePrompt="Type DELETE to permanently delete this account"
+                busy={deletingAccount}
+                confirmLabel="Delete permanently"
+                cancelLabel="Cancel"
+                busyLabel="Deleting…"
+              />
+            </section>
+          </div>
+        )}
       </Panel>
     </PageShell>
   );

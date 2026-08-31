@@ -7,9 +7,16 @@ import "@testing-library/jest-dom";
 
 const getRecoveryCodeMock = vi.fn();
 const rotateRecoveryCodeMock = vi.fn();
+const revokeIdentityRecoveryCodeMock = vi.fn();
 vi.mock("../../src/services/identityService", () => ({
   getRecoveryCode: (...args: unknown[]) => getRecoveryCodeMock(...args),
   rotateRecoveryCode: (...args: unknown[]) => rotateRecoveryCodeMock(...args),
+  revokeIdentityRecoveryCode: (...args: unknown[]) => revokeIdentityRecoveryCodeMock(...args),
+}));
+
+const deleteCurrentAccountMock = vi.fn();
+vi.mock("../../src/services/userAccountService", () => ({
+  deleteCurrentAccount: (...args: unknown[]) => deleteCurrentAccountMock(...args),
 }));
 
 const saveFirstNameMock = vi.fn();
@@ -186,6 +193,33 @@ describe("Settings recovery code", () => {
       expect(mockToastError).toHaveBeenCalledWith("Failed to rotate recovery code. Please try again.")
     );
   });
+
+  it("revokes the identity recovery code after confirmation", async () => {
+    const user = userEvent.setup();
+    revokeIdentityRecoveryCodeMock.mockResolvedValue(undefined);
+    renderSettings();
+
+    await user.click(screen.getByRole("button", { name: "Revoke Code" }));
+    await user.click(screen.getByRole("button", { name: "Yes, revoke" }));
+
+    expect(revokeIdentityRecoveryCodeMock).toHaveBeenCalledOnce();
+    await waitFor(() => expect(mockToastSuccess).toHaveBeenCalledWith("Recovery code revoked."));
+  });
+
+  it("reports a failed identity-code revocation", async () => {
+    const user = userEvent.setup();
+    revokeIdentityRecoveryCodeMock.mockRejectedValue(new Error("failed"));
+    renderSettings();
+
+    await user.click(screen.getByRole("button", { name: "Revoke Code" }));
+    await user.click(screen.getByRole("button", { name: "Yes, revoke" }));
+
+    await waitFor(() =>
+      expect(mockToastError).toHaveBeenCalledWith(
+        "Failed to revoke recovery code. Please try again."
+      )
+    );
+  });
 });
 
 describe("Settings linked device", () => {
@@ -239,6 +273,46 @@ describe("Settings linked device", () => {
 
     await waitFor(() =>
       expect(mockToastError).toHaveBeenCalledWith("Failed to unlink device. Please try again.")
+    );
+  });
+});
+
+describe("Settings account deletion", () => {
+  it("requires typing DELETE before deleting the primary account", async () => {
+    const user = userEvent.setup();
+    deleteCurrentAccountMock.mockResolvedValue(undefined);
+    renderSettings();
+
+    await user.click(screen.getByRole("button", { name: "Delete Account" }));
+    const confirm = screen.getByRole("button", { name: "Delete permanently" });
+    expect(confirm).toBeDisabled();
+    await user.type(screen.getByPlaceholderText("DELETE"), "DELETE");
+    await user.click(confirm);
+
+    expect(deleteCurrentAccountMock).toHaveBeenCalledOnce();
+  });
+
+  it("does not offer primary-account deletion from a linked secondary device", () => {
+    renderSettings({ isLinked: true });
+
+    expect(screen.queryByRole("button", { name: "Delete Account" })).not.toBeInTheDocument();
+  });
+
+  it("shows the server rejection when account deletion is blocked", async () => {
+    const user = userEvent.setup();
+    deleteCurrentAccountMock.mockRejectedValue(
+      new Error("Delete or transfer every campaign you own before deleting your account.")
+    );
+    renderSettings();
+
+    await user.click(screen.getByRole("button", { name: "Delete Account" }));
+    await user.type(screen.getByPlaceholderText("DELETE"), "DELETE");
+    await user.click(screen.getByRole("button", { name: "Delete permanently" }));
+
+    await waitFor(() =>
+      expect(mockToastError).toHaveBeenCalledWith(
+        "Delete or transfer every campaign you own before deleting your account."
+      )
     );
   });
 });

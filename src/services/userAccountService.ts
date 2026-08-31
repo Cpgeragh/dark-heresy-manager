@@ -1,7 +1,15 @@
+import { signOut } from "firebase/auth";
 import { doc, getDoc, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
-import { db } from "../firebase";
+import { httpsCallable } from "firebase/functions";
+import { auth, db, functions } from "../firebase";
 import type { UserDocument } from "../types/Firestore";
 import { assertFirestoreDocumentId } from "../utils/firebaseValidation";
+import { runSingleFlight } from "../utils/singleFlight";
+
+const callDeleteAccount = httpsCallable<
+  Record<string, never>,
+  { releasedCharacters: number; removedLinkedDevices: number }
+>(functions, "deleteAccount");
 
 /**
  * Ensures the anonymous-auth user has an account document and returns whether
@@ -53,5 +61,13 @@ export async function completeOnboarding(uid: string): Promise<void> {
   await updateDoc(doc(db, "users", uid), {
     onboarded: true,
     recoveryBackedUp: true,
+  });
+}
+
+/** Deletes the current primary account, then clears the deleted local session. */
+export async function deleteCurrentAccount(): Promise<void> {
+  await runSingleFlight("account:delete", [], async () => {
+    await callDeleteAccount({});
+    await signOut(auth);
   });
 }

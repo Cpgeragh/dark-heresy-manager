@@ -19,7 +19,7 @@ import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import { hashRecoveryCode } from "../shared/recoveryCode.js";
 import {
-  createBulkJob,
+  prepareBulkJob,
   acquireJobLease,
   advanceJobCheckpoint,
   completeJob,
@@ -57,12 +57,19 @@ export interface ProcessIdentityReclaimChunkResult {
   totalCount: number;
 }
 
+export interface StartIdentityReclaimJobResult {
+  jobId: string;
+  totalCount: number;
+  role: "dm" | "player";
+  profileTransferred: boolean;
+}
+
 export async function startIdentityReclaimJob(
   input: StartIdentityReclaimJobInput,
   callerUid: string,
   idempotencyKey: string | null,
   hmacSecret: string
-): Promise<{ jobId: string; totalCount: number; role: "dm" | "player" }> {
+): Promise<StartIdentityReclaimJobResult> {
   const db = getFirestore();
   const code = input.code.trim();
   const hash = hashRecoveryCode(code, hmacSecret);
@@ -84,16 +91,50 @@ export async function startIdentityReclaimJob(
     );
   }
 
+  // Reclaim is destructive: it moves the primary identity and invalidates the
+  // old primary UID. Any remaining secondary link proves another device is
+  // still connected to that primary, so the safe operation is another link,
+  // not a reclaim. Repeat this server-side even if the client preflight already
+  // selected a mode so the interface cannot be bypassed.
+  const linkedDevicesSnapshot = await db
+    .collection("userLinks")
+    .where("primaryUid", "==", oldUid)
+    .limit(1)
+    .get();
+  if (!linkedDevicesSnapshot.empty) {
+    throw new HttpsError(
+      "failed-precondition",
+      "This account still has a linked device. Link this device instead of reclaiming."
+    );
+  }
+
   const plan = await computeOwnershipMigrationPlan(db, oldUid);
 
-  const transferBatch = db.batch();
-  transferBatch.update(indexRef, { uid: callerUid });
-  transferBatch.set(db.collection("identitySecret").doc(callerUid), { code });
-  transferBatch.delete(db.collection("identitySecret").doc(oldUid));
-  transferBatch.set(db.collection("users").doc(callerUid), { onboarded: true }, { merge: true });
-  await transferBatch.commit();
+  // The public first-name profile belongs to the recovered identity, not to
+  // the disposable anonymous-auth UID that previously represented it. Read
+  // only the approved profile field and move it in the same batch as the
+  // recovery secret and onboarding state so a successful reclaim cannot
+  // complete with the original name stranded under oldUid.
+  const oldProfileRef = db.collection("userProfiles").doc(oldUid);
+  const oldProfileSnapshot = await oldProfileRef.get();
+  const firstName = oldProfileSnapshot.exists
+    ? oldProfileSnapshot.data()?.firstName
+    : undefined;
+  if (
+    !oldProfileSnapshot.exists ||
+    typeof firstName !== "string" ||
+    firstName.length === 0 ||
+    firstName.length > 50
+  ) {
+    throw new HttpsError(
+      "failed-precondition",
+      "The recovered account has no valid profile. No identity data was transferred."
+    );
+  }
+  const recoveredFirstName = firstName;
 
-  const jobId = await createBulkJob(
+  const preparedJob = prepareBulkJob(
+    db,
     "identity-reclaim",
     callerUid,
     { oldUid, newUid: callerUid, campaigns: plan.campaigns } satisfies IdentityReclaimJobData,
@@ -101,7 +142,24 @@ export async function startIdentityReclaimJob(
     idempotencyKey
   );
 
-  return { jobId, totalCount: plan.totalWriteCount, role: role ?? "player" };
+  const transferBatch = db.batch();
+  transferBatch.update(indexRef, { uid: callerUid });
+  transferBatch.set(db.collection("identitySecret").doc(callerUid), { code });
+  transferBatch.delete(db.collection("identitySecret").doc(oldUid));
+  transferBatch.set(db.collection("users").doc(callerUid), { onboarded: true }, { merge: true });
+  transferBatch.set(db.collection("userProfiles").doc(callerUid), {
+    firstName: recoveredFirstName,
+  });
+  transferBatch.delete(oldProfileRef);
+  transferBatch.set(preparedJob.ref, preparedJob.record);
+  await transferBatch.commit();
+
+  return {
+    jobId: preparedJob.jobId,
+    totalCount: plan.totalWriteCount,
+    role: role ?? "player",
+    profileTransferred: true,
+  };
 }
 
 export async function processIdentityReclaimChunk(
