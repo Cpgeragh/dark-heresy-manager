@@ -33,19 +33,16 @@ describe("Firestore Rules: bounded field validation", () => {
         .update({ memberIds: Array.from({ length: 100 }, (_, index) => `player-${index}`) })
     ).resolves.toBeUndefined();
 
-    const code = "DH-MAXX-0001";
-    const batch = dmDb.batch();
-    batch.set(
-      dmDb.collection("campaigns/maximum/characters").doc("maximum-character"),
-      validCharacterDocument("maximum", code, {
-        skills: Array.from({ length: 200 }, (_, index) => ({ id: `skill-${index}` })),
-      })
-    );
-    batch.set(dmDb.collection("recoveryIndex").doc(code), {
-      campaignId: "maximum",
-      characterId: "maximum-character",
-    });
-    await expect(batch.commit()).resolves.toBeUndefined();
+    await expect(
+      dmDb
+        .collection("campaigns/maximum/characters")
+        .doc("maximum-character")
+        .set(
+          validCharacterDocument("maximum", "", {
+            skills: Array.from({ length: 200 }, (_, index) => ({ id: `skill-${index}` })),
+          })
+        )
+    ).resolves.toBeUndefined();
   });
 
   it("rejects campaign names, member arrays, types, and unexpected fields outside bounds", async () => {
@@ -82,21 +79,16 @@ describe("Firestore Rules: bounded field validation", () => {
     ).rejects.toThrow();
   });
 
-  it("accepts a complete character only with its matching Recovery Index", async () => {
+  it("accepts a complete character with no client-supplied Recovery Code", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, "c1", "dm-1");
     const dmDb = dbAs(env, "dm-1");
-    const code = "DH-CHAR-0001";
-    const batch = dmDb.batch();
-    batch.set(
-      dmDb.collection("campaigns/c1/characters").doc("char1"),
-      validCharacterDocument("c1", code)
-    );
-    batch.set(dmDb.collection("recoveryIndex").doc(code), {
-      campaignId: "c1",
-      characterId: "char1",
-    });
-    await expect(batch.commit()).resolves.toBeUndefined();
+    await expect(
+      dmDb
+        .collection("campaigns/c1/characters")
+        .doc("char1")
+        .set(validCharacterDocument("c1", ""))
+    ).resolves.toBeUndefined();
   });
 
   it("rejects malformed, oversized, and unexpected character data", async () => {
@@ -106,19 +98,15 @@ describe("Firestore Rules: bounded field validation", () => {
 
     for (const [id, code, overrides] of [
       ["bad-code", "not-a-code", {}],
-      ["too-many-skills", "DH-SKIL-0001", { skills: Array.from({ length: 201 }, () => ({})) }],
-      ["unexpected", "DH-FILD-0001", { unexpected: true }],
+      ["too-many-skills", "", { skills: Array.from({ length: 201 }, () => ({})) }],
+      ["unexpected", "", { unexpected: true }],
     ] as const) {
-      const batch = dmDb.batch();
-      batch.set(
-        dmDb.collection("campaigns/c1/characters").doc(id),
-        validCharacterDocument("c1", code, overrides)
-      );
-      batch.set(dmDb.collection("recoveryIndex").doc(code), {
-        campaignId: "c1",
-        characterId: id,
-      });
-      await expect(batch.commit()).rejects.toThrow();
+      await expect(
+        dmDb
+          .collection("campaigns/c1/characters")
+          .doc(id)
+          .set(validCharacterDocument("c1", code, overrides))
+      ).rejects.toThrow();
     }
   });
 });

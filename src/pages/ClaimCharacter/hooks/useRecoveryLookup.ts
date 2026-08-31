@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { lookupRecoveryCharacter } from "../../../services/recoveryLookupService";
 import type { RecoveryLookupResult } from "../../../types/Recovery";
+import { ClientCodeAttemptLimitError } from "../../../utils/clientCodeAttemptLimit";
 
 export function useRecoveryLookup() {
   const [loading, setLoading] = useState(false);
@@ -28,7 +29,11 @@ export function useRecoveryLookup() {
         setData(outcome.result);
       } catch (err) {
         console.error(err);
-        setError("Unexpected error during lookup.");
+        setError(
+          err instanceof ClientCodeAttemptLimitError
+            ? err.message
+            : "Unexpected error during lookup."
+        );
       } finally {
         setLoading(false);
       }

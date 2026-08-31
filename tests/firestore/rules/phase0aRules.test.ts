@@ -27,7 +27,7 @@ describe("Firestore Rules: retained Phase 0A protections", () => {
     await expect(user.update({ onboarded: true })).resolves.toBeUndefined();
   });
 
-  it("requires unclaimed, non-editable character creation with a matching index", async () => {
+  it("requires code-less, unclaimed, non-editable character creation", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, "c1", "dm-1");
     const dmDb = dbAs(env, "dm-1");
@@ -36,17 +36,12 @@ describe("Firestore Rules: retained Phase 0A protections", () => {
       ["claimed", { userId: "player-1" }],
       ["editable", { isEditableByPlayer: true }],
     ] as const) {
-      const code = id === "claimed" ? "DH-CLMD-0001" : "DH-EDIT-0001";
-      const batch = dmDb.batch();
-      batch.set(
-        dmDb.collection("campaigns/c1/characters").doc(id),
-        validCharacterDocument("c1", code, overrides)
-      );
-      batch.set(dmDb.collection("recoveryIndex").doc(code), {
-        campaignId: "c1",
-        characterId: id,
-      });
-      await expect(batch.commit()).rejects.toThrow();
+      await expect(
+        dmDb
+          .collection("campaigns/c1/characters")
+          .doc(id)
+          .set(validCharacterDocument("c1", "", overrides))
+      ).rejects.toThrow();
     }
   });
 

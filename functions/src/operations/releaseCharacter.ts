@@ -11,6 +11,7 @@ import { applyOwnershipTransition } from "../shared/ownershipTransition.js";
 export interface ReleaseCharacterInput {
   campaignId: string;
   characterId: string;
+  operationId?: string;
 }
 
 export async function releaseCharacter(

@@ -25,6 +25,11 @@ import { ToastProvider } from "../../src/components/Toast";
 import type { Character } from "../../src/types/Character";
 
 const character = { id: "char-1", userId: "owner-1", isEditableByPlayer: true } as Character;
+const unclaimedCharacter = {
+  id: "char-1",
+  userId: null,
+  isEditableByPlayer: false,
+} as Character;
 
 function renderAdminTab(overrides: Partial<React.ComponentProps<typeof AdminTab>> = {}) {
   const onDMForceRelease = vi.fn();
@@ -53,19 +58,24 @@ beforeEach(() => {
 
 describe("AdminTab Force Assign", () => {
   it("disables the Force Assign button when the campaign has no members", () => {
-    renderAdminTab({ memberIds: [] });
+    renderAdminTab({ character: unclaimedCharacter, memberIds: [] });
     expect(screen.getByRole("button", { name: "Force Assign To…" })).toBeDisabled();
   });
 
-  it("enables the Force Assign button when the campaign has members", () => {
-    renderAdminTab();
+  it("disables the Force Assign button when the character is already claimed", () => {
+    renderAdminTab({ memberIds: ["owner-1", "uid-2"] });
+    expect(screen.getByRole("button", { name: "Force Assign To…" })).toBeDisabled();
+  });
+
+  it("enables the Force Assign button for an unclaimed character when the campaign has members", () => {
+    renderAdminTab({ character: unclaimedCharacter });
     expect(screen.getByRole("button", { name: "Force Assign To…" })).toBeEnabled();
   });
 
   it("opens the player picker when Force Assign To… is clicked", async () => {
     const user = userEvent.setup();
     mockGetFirstName.mockResolvedValue("Bob");
-    renderAdminTab();
+    renderAdminTab({ character: unclaimedCharacter });
 
     await user.click(screen.getByRole("button", { name: "Force Assign To…" }));
 
@@ -75,7 +85,7 @@ describe("AdminTab Force Assign", () => {
   it("calls onDMForceAssign with the selected uid and closes the picker", async () => {
     const user = userEvent.setup();
     mockGetFirstName.mockResolvedValue("Bob");
-    const { onDMForceAssign } = renderAdminTab();
+    const { onDMForceAssign } = renderAdminTab({ character: unclaimedCharacter });
 
     await user.click(screen.getByRole("button", { name: "Force Assign To…" }));
     await waitFor(() => expect(screen.getAllByText("Bob")).toHaveLength(2));
@@ -88,7 +98,7 @@ describe("AdminTab Force Assign", () => {
   it("closes the picker without calling onDMForceAssign when dismissed", async () => {
     const user = userEvent.setup();
     mockGetFirstName.mockResolvedValue("Bob");
-    const { onDMForceAssign } = renderAdminTab();
+    const { onDMForceAssign } = renderAdminTab({ character: unclaimedCharacter });
 
     await user.click(screen.getByRole("button", { name: "Force Assign To…" }));
     await user.click(screen.getByRole("button", { name: "Close" }));
@@ -98,7 +108,7 @@ describe("AdminTab Force Assign", () => {
   });
 
   it("shows Assigning… and disables the button while isDmForceAssigning is true", () => {
-    renderAdminTab({ isDmForceAssigning: true });
+    renderAdminTab({ character: unclaimedCharacter, isDmForceAssigning: true });
     const button = screen.getByRole("button", { name: "Assigning…" });
     expect(button).toBeDisabled();
   });

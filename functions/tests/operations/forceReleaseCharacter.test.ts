@@ -23,9 +23,11 @@ const mockCharactersCollection = {
 };
 const mockCampaignRef = { get: mockCampaignGet, collection: vi.fn(() => mockCharactersCollection) };
 const mockCampaignsCollection = { doc: vi.fn(() => mockCampaignRef) };
+const mockUserLinkGet = vi.fn();
 
 const mockCollection = vi.fn((name: string) => {
   if (name === "campaigns") return mockCampaignsCollection;
+  if (name === "userLinks") return { doc: vi.fn(() => ({ get: mockUserLinkGet })) };
   throw new Error(`Unexpected collection: ${name}`);
 });
 
@@ -56,6 +58,7 @@ function setupTransactionGet(
 describe("forceReleaseCharacter", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockUserLinkGet.mockResolvedValue({ exists: false });
   });
 
   it("rejects when the campaign does not exist", async () => {

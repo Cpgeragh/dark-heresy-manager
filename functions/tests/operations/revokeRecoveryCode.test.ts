@@ -25,10 +25,14 @@ const mockCampaignRef = { get: mockCampaignGet, collection: vi.fn(() => mockChar
 const mockCampaignsCollection = { doc: vi.fn(() => mockCampaignRef) };
 const mockIndexDoc = vi.fn(() => ({}));
 const mockIndexCollection = { doc: mockIndexDoc };
+const mockUserLinkGet = vi.fn();
+const mockUserLinkDoc = vi.fn(() => ({ get: mockUserLinkGet }));
+const mockUserLinksCollection = { doc: mockUserLinkDoc };
 
 const mockCollection = vi.fn((name: string) => {
   if (name === "campaigns") return mockCampaignsCollection;
   if (name === "recoveryIndex") return mockIndexCollection;
+  if (name === "userLinks") return mockUserLinksCollection;
   throw new Error(`Unexpected collection: ${name}`);
 });
 
@@ -48,6 +52,7 @@ const CODE = "DH-ABCD-1234";
 describe("revokeRecoveryCode", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockUserLinkGet.mockResolvedValue({ exists: false });
   });
 
   it("rejects when the campaign does not exist", async () => {
@@ -64,6 +69,20 @@ describe("revokeRecoveryCode", () => {
     await expect(
       revokeRecoveryCode({ campaignId: "c1", characterId: "char-1" }, "dm-1", SECRET)
     ).rejects.toThrow(expect.objectContaining({ code: "permission-denied" }));
+  });
+
+  it("allows a device linked to the campaign DM", async () => {
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
+    mockUserLinkGet.mockResolvedValue({
+      exists: true,
+      data: () => ({ primaryUid: "dm-1" }),
+    });
+    mockTransactionGet.mockResolvedValue({ exists: true, data: () => ({ recoveryCode: CODE }) });
+
+    await expect(
+      revokeRecoveryCode({ campaignId: "c1", characterId: "char-1" }, "linked-device", SECRET)
+    ).resolves.toBeUndefined();
+    expect(mockUserLinkDoc).toHaveBeenCalledWith("linked-device");
   });
 
   it("rejects when the character does not exist", async () => {

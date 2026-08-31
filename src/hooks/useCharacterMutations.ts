@@ -102,18 +102,20 @@ export function useCharacterMutations({
   // ================================================================
   // RELEASE CHARACTER (PLAYER ACTION)
   // ================================================================
-  const releaseCharacter = useCallback(async (): Promise<void> => {
-    if (!character) return;
+  const releaseCharacter = useCallback(async (): Promise<boolean> => {
+    if (!character) return false;
 
     setIsReleasing(true);
     try {
       await releaseCharacterInService(campaignId, characterId);
 
       toast.success("Character released successfully");
+      return true;
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to release character";
       toast.error(`Release failed: ${message}`);
       console.error("Failed to release character:", err);
+      return false;
     } finally {
       setIsReleasing(false);
     }

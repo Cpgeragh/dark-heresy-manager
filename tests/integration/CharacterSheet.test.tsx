@@ -56,6 +56,7 @@ vi.mock("../../src/pages/characterSheet/CharacterKebabContent", () => ({
       Mock CharacterKebabContent
       <button onClick={() => (props.onGenerateRecoveryCode as () => void)()}>Mock Generate</button>
       <button onClick={() => (props.onRevokeRecoveryCode as () => void)()}>Mock Revoke</button>
+      <button onClick={() => (props.onPlayerRelease as () => void)()}>Mock Release</button>
     </div>
   ),
 }));
@@ -155,17 +156,23 @@ beforeEach(() => {
 
 function renderSheet(initialPath = "/campaign/campaign-1/character/char-1?tab=stats") {
   const onOpenMessages = vi.fn();
-  render(
+  const renderRoutes = () => (
     <MemoryRouter initialEntries={[initialPath]}>
       <Routes>
         <Route
           path="/campaign/:campaignId/character/:characterId"
           element={<CharacterSheet effectiveUserId="player-1" onOpenMessages={onOpenMessages} />}
         />
+        <Route path="/" element={<div>Mock Shared Dashboard</div>} />
       </Routes>
     </MemoryRouter>
   );
-  return { onOpenMessages };
+  const view = render(renderRoutes());
+  return {
+    ...view,
+    onOpenMessages,
+    rerenderSheet: () => view.rerender(renderRoutes()),
+  };
 }
 
 describe("CharacterSheet loading/error states", () => {
@@ -181,10 +188,53 @@ describe("CharacterSheet loading/error states", () => {
     expect(screen.getByText("Loading character…")).toBeInTheDocument();
   });
 
-  it("shows an error state", () => {
-    useCharacterSheetMock.mockReturnValue(baseSheetResult({ characterError: new Error("x") }));
+  it("keeps the release transition neutral if access is revoked before navigation completes", () => {
+    useCharacterSheetMock.mockReturnValue(
+      baseSheetResult({
+        character: undefined,
+        characterError: new Error("permission-denied"),
+        isReleasing: true,
+      })
+    );
     renderSheet();
-    expect(screen.getByText("Unable to load this character. Please refresh the page.")).toBeInTheDocument();
+
+    expect(screen.getByText("Releasing character…")).toBeInTheDocument();
+    expect(screen.queryByText(/Unable to load this character/)).not.toBeInTheDocument();
+  });
+
+  it("shows an error state", () => {
+    const initialAccessError = Object.assign(new Error("permission-denied"), {
+      code: "permission-denied",
+    });
+    useCharacterSheetMock.mockReturnValue(
+      baseSheetResult({ character: null, characterError: initialAccessError })
+    );
+    renderSheet();
+    expect(
+      screen.getByText(
+        "Unable to load this character. You may no longer have access, or there may be a temporary connection problem."
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Try Again" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Return to Dashboard" })).toBeInTheDocument();
+  });
+
+  it("returns to the dashboard when access is revoked after the character loaded", async () => {
+    let sheetResult = baseSheetResult();
+    useCharacterSheetMock.mockImplementation(() => sheetResult);
+    const { rerenderSheet } = renderSheet();
+
+    expect(screen.getByText("Mock CharacteristicsTab")).toBeInTheDocument();
+    await waitFor(() => expect(setKebabContentMock).toHaveBeenCalled());
+
+    const revokedError = Object.assign(new Error("permission-denied"), {
+      code: "permission-denied",
+    });
+    sheetResult = baseSheetResult({ character: null, characterError: revokedError });
+    rerenderSheet();
+
+    expect(await screen.findByText("Mock Shared Dashboard")).toBeInTheDocument();
+    expect(screen.queryByText(/Unable to load this character/)).not.toBeInTheDocument();
   });
 
   it("shows Character not found when there is no character", () => {
@@ -239,6 +289,20 @@ describe("CharacterSheet tabs", () => {
     expect(screen.getByText("Mock AdminTab")).toBeInTheDocument();
   });
 
+  it("returns a player who enters the Admin URL to Characteristics", async () => {
+    renderSheet("/campaign/campaign-1/character/char-1?tab=admin");
+
+    expect(await screen.findByText("Mock CharacteristicsTab")).toBeInTheDocument();
+    expect(screen.queryByText("Mock AdminTab")).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Admin" })).not.toBeInTheDocument();
+  });
+
+  it("returns an unknown tab URL to Characteristics", async () => {
+    renderSheet("/campaign/campaign-1/character/char-1?tab=not-a-real-tab");
+
+    expect(await screen.findByText("Mock CharacteristicsTab")).toBeInTheDocument();
+  });
+
   it("calls onOpenMessages from the Messages button", async () => {
     const user = userEvent.setup();
     const { onOpenMessages } = renderSheet();
@@ -282,6 +346,39 @@ describe("CharacterSheet kebab content", () => {
 
     await user.click(screen.getByText("Mock Revoke"));
     expect(revokeRecoveryCodeMock).toHaveBeenCalledWith("campaign-1", "char-1");
+  });
+
+  it("returns to the player dashboard after a successful release", async () => {
+    const user = userEvent.setup();
+    const releaseCharacter = vi.fn().mockResolvedValue(true);
+    useCharacterSheetMock.mockReturnValue(
+      baseSheetResult({ canPlayerRelease: true, releaseCharacter })
+    );
+    renderSheet();
+
+    await waitFor(() => expect(setKebabContentMock).toHaveBeenCalled());
+    render(setKebabContentMock.mock.calls.at(-1)?.[0]);
+    await user.click(screen.getByText("Mock Release"));
+
+    expect(releaseCharacter).toHaveBeenCalledOnce();
+    expect(await screen.findByText("Mock Shared Dashboard")).toBeInTheDocument();
+  });
+
+  it("stays on the character sheet when release fails", async () => {
+    const user = userEvent.setup();
+    const releaseCharacter = vi.fn().mockResolvedValue(false);
+    useCharacterSheetMock.mockReturnValue(
+      baseSheetResult({ canPlayerRelease: true, releaseCharacter })
+    );
+    renderSheet();
+
+    await waitFor(() => expect(setKebabContentMock).toHaveBeenCalled());
+    render(setKebabContentMock.mock.calls.at(-1)?.[0]);
+    await user.click(screen.getByText("Mock Release"));
+
+    expect(releaseCharacter).toHaveBeenCalledOnce();
+    expect(screen.queryByText("Mock Shared Dashboard")).not.toBeInTheDocument();
+    expect(screen.getByText("Mock CharacteristicsTab")).toBeInTheDocument();
   });
 });
 

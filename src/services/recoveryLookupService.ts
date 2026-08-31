@@ -2,6 +2,7 @@ import { httpsCallable } from "firebase/functions";
 import { functions } from "../firebase";
 import type { RecoveryLookupResult } from "../types/Recovery";
 import { assertRecoveryCode } from "../utils/firebaseValidation";
+import { recordClientCodeAttempt } from "../utils/clientCodeAttemptLimit";
 
 export type RecoveryLookupOutcome =
   | { status: "found"; result: RecoveryLookupResult }
@@ -21,7 +22,9 @@ const callLookupRecoveryCode = httpsCallable<{ code: string }, LookupRecoveryCod
 /** Resolves a Recovery Code to a minimal claim preview via the protected server-side operation. */
 export async function lookupRecoveryCharacter(code: string): Promise<RecoveryLookupOutcome> {
   assertRecoveryCode(code);
-  const { data } = await callLookupRecoveryCode({ code: code.trim() });
+  const normalisedCode = code.trim();
+  recordClientCodeAttempt("recovery");
+  const { data } = await callLookupRecoveryCode({ code: normalisedCode });
   if (data.status === "found") return { status: "found", result: data.preview };
   return { status: data.status };
 }

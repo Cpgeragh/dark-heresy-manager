@@ -45,21 +45,17 @@ describe("Firestore Rules: Batch Operations", () => {
     await expect(batch.commit()).resolves.toBeUndefined();
   });
 
-  it("allows paired character and Recovery Index creation in one batch", async () => {
+  it("allows multiple code-less characters to be created in one batch", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, "c1", "dm-1");
     const dmDb = dbAs(env, "dm-1");
     const batch = dmDb.batch();
 
-    for (const [id, code] of [["char1", "DH-BATC-0001"], ["char2", "DH-BATC-0002"]]) {
+    for (const id of ["char1", "char2"]) {
       batch.set(
         dmDb.collection("campaigns/c1/characters").doc(id),
-        validCharacterDocument("c1", code)
+        validCharacterDocument("c1", "")
       );
-      batch.set(dmDb.collection("recoveryIndex").doc(code), {
-        campaignId: "c1",
-        characterId: id,
-      });
     }
     await expect(batch.commit()).resolves.toBeUndefined();
   });

@@ -181,12 +181,17 @@ describe("CampaignOverview", () => {
     expect(screen.getByText("No campaign selected.")).toBeInTheDocument();
   });
 
-  it("shows an error state when campaign or character data fails to load", () => {
+  it("shows safe recovery actions when campaign or character data fails to load", () => {
     useCampaignMock.mockReturnValue({ campaign: undefined, loading: false, error: new Error("x") });
     renderPage();
     expect(
-      screen.getByText("Unable to load this campaign. Please refresh the page.")
+      screen.getByText(
+        "Unable to load this campaign. You may no longer have access, or there may be a temporary connection problem."
+      )
     ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Try Again" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Return to Dashboard" })).toBeInTheDocument();
+    expect(useCampaignCharacterSummariesMock).toHaveBeenLastCalledWith(null);
   });
 
   it("shows a loading state", () => {

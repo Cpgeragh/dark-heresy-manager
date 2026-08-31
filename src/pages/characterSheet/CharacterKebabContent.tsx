@@ -79,37 +79,36 @@ export function CharacterKebabContent({
           <p className={uiSubheading}>
             Recovery Code
           </p>
-          <div className="flex items-center gap-2">
-            <code className="flex-1 px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-800 border border-slate-600 rounded text-amber-300 text-sm lg:text-base break-all">
+          <div className="space-y-2">
+            <code className="block w-full px-2 lg:px-3 py-1 lg:py-1.5 bg-slate-800 border border-slate-600 rounded text-amber-300 text-sm lg:text-base break-all">
               {recoveryCode}
             </code>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={copyCode}
-              className="shrink-0"
-            >
-              {copied ? "Copied" : "Copy"}
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setShowQr(true)}
-              className="shrink-0"
-            >
-              Share
-            </Button>
-            {canManageRecoveryCode && (
+            <div className="flex flex-wrap gap-2">
               <Button
-                variant="danger"
+                variant="secondary"
                 size="sm"
-                onClick={handleRevoke}
-                disabled={revoking}
-                className="shrink-0"
+                onClick={copyCode}
               >
-                {revoking ? "Revoking…" : "Revoke"}
+                {copied ? "Copied" : "Copy"}
               </Button>
-            )}
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setShowQr(true)}
+              >
+                Share
+              </Button>
+              {canManageRecoveryCode && (
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={handleRevoke}
+                  disabled={revoking}
+                >
+                  {revoking ? "Revoking…" : "Revoke"}
+                </Button>
+              )}
+            </div>
           </div>
           {revokeError && (
             <p className="text-xs lg:text-sm text-red-400">{revokeError}</p>

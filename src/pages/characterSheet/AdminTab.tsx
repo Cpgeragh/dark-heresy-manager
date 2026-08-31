@@ -44,6 +44,8 @@ export function AdminTab({
   } = useClaimLogs(campaignId, character.id, showClaimHistory);
 
   const latest = claimLog.length > 0 ? claimLog[0] : null;
+  const eligibleMemberIds = memberIds.filter((uid) => uid !== character.userId);
+  const canAssign = character.userId === null && eligibleMemberIds.length > 0;
   // Show the current owner's real name when the character is claimed; fall back
   // to the actor UID for unclaimed characters or events with no resolvable name.
   const latestActorLabel = (character.userId && ownerName) || latest?.actorUid;
@@ -108,16 +110,16 @@ export function AdminTab({
           <Button
             variant="warning"
             onClick={() => setShowPlayerPicker(true)}
-            disabled={isDmForceAssigning || memberIds.length === 0}
+            disabled={isDmForceAssigning || !canAssign}
           >
             {isDmForceAssigning ? "Assigning…" : "Force Assign To…"}
           </Button>
         </div>
       </section>
 
-      {showPlayerPicker && (
+      {showPlayerPicker && canAssign && (
         <PlayerPicker
-          memberIds={memberIds}
+          memberIds={eligibleMemberIds}
           onSelect={(uid) => {
             onDMForceAssign(uid);
             setShowPlayerPicker(false);

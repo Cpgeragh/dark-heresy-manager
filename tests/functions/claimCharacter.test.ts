@@ -18,7 +18,7 @@ describe("Functions: claimCharacter", () => {
   });
 
   it(
-    "claims an unclaimed character for the calling player, leaving the code valid",
+    "claims an unclaimed character and atomically rotates the consumed code",
     async () => {
       const dmUid = await signInTestUser();
       const campaignRef = adminDb.collection("campaigns").doc();
@@ -46,7 +46,15 @@ describe("Functions: claimCharacter", () => {
 
       const characterSnapshot = await characterRef.get();
       expect(characterSnapshot.data()?.userId).toBe(playerUid);
-      expect(characterSnapshot.data()?.recoveryCode).toBe(registered.code);
+      expect(characterSnapshot.data()?.recoveryCode).toMatch(/^DH-[0-9A-Z]{4}-[0-9A-Z]{4}$/);
+      expect(characterSnapshot.data()?.recoveryCode).not.toBe(registered.code);
+
+      const lookupRecoveryCode = httpsCallable<
+        { code: string },
+        { status: string }
+      >(getTestFunctions(), "lookupRecoveryCode");
+      const consumedLookup = await lookupRecoveryCode({ code: registered.code });
+      expect(consumedLookup.data).toEqual({ status: "not-found" });
 
       const campaignSnapshot = await campaignRef.get();
       expect(campaignSnapshot.data()?.memberIds).toContain(playerUid);
@@ -64,7 +72,7 @@ describe("Functions: claimCharacter", () => {
   );
 
   it(
-    "rejects reclaiming an already-claimed character, even though the code itself is still valid",
+    "rejects reusing a code after its successful claim consumed it",
     async () => {
       const dmUid = await signInTestUser();
       const campaignRef = adminDb.collection("campaigns").doc();
@@ -90,7 +98,7 @@ describe("Functions: claimCharacter", () => {
 
       await signInTestUser();
       await expect(claimCharacter({ code: registered.code })).rejects.toMatchObject({
-        code: "functions/failed-precondition",
+        code: "functions/not-found",
       });
     },
     15000

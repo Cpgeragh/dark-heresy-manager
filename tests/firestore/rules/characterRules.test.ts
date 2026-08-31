@@ -53,6 +53,24 @@ describe("Firestore Rules: Character Rules", () => {
     ).rejects.toThrow();
   });
 
+  it("a campaign member may read another character's summary but not their full sheet", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await createCampaign(env, campaignId, "dm-1", {
+      memberIds: ["player-1", "player-2"],
+    });
+    await createCharacter(env, campaignId, "char1", {
+      userId: "player-1",
+      isEditableByPlayer: true,
+    });
+
+    await expect(
+      dbAs(env, "player-2")
+        .collection(`campaigns/${campaignId}/characters`)
+        .doc("char1")
+        .get()
+    ).rejects.toThrow();
+  });
+
   it("the DM may list all characters in their own campaign", async () => {
     const env = await getTestEnv() as RulesTestEnvironment;
     await createCampaign(env, campaignId, "dm-1");
@@ -189,17 +207,47 @@ describe("Firestore Rules: Character Rules", () => {
 
     const dmDb = dbAs(env, "dm-1");
 
-    const recoveryCode = "DH-NEWW-0001";
-    const batch = dmDb.batch();
-    batch.set(
-      dmDb.collection(`campaigns/${campaignId}/characters`).doc("dm-char"),
-      createEmptyCharacterData({ campaignId, recoveryCode, characterName: "New Acolyte" })
-    );
-    batch.set(dmDb.collection("recoveryIndex").doc(recoveryCode), {
-      campaignId,
-      characterId: "dm-char",
+    await expect(
+      dmDb.collection(`campaigns/${campaignId}/characters`).doc("dm-char").set(
+        createEmptyCharacterData({ campaignId, characterName: "New Acolyte" })
+      )
+    ).resolves.toBeUndefined();
+  });
+
+  it("DM cannot pre-populate a Recovery Code during character creation", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+
+    await createCampaign(env, campaignId, "dm-1");
+
+    await expect(
+      dbAs(env, "dm-1")
+        .collection(`campaigns/${campaignId}/characters`)
+        .doc("dm-char")
+        .set(
+          createEmptyCharacterData({
+            campaignId,
+            recoveryCode: "DH-NEWW-0001",
+            characterName: "New Acolyte",
+          })
+        )
+    ).rejects.toThrow();
+  });
+
+  it("DM can edit a character after its Recovery Code is revoked", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, "revoked-char", {
+      userId: null,
+      recoveryCode: "",
     });
-    await expect(batch.commit()).resolves.toBeUndefined();
+
+    await expect(
+      dbAs(env, "dm-1")
+        .collection(`campaigns/${campaignId}/characters`)
+        .doc("revoked-char")
+        .update({ "header.characterName": "Edited after revocation" })
+    ).resolves.toBeUndefined();
   });
 
   it("DM cannot create a character in a non-existent campaign", async () => {

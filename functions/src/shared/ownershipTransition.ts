@@ -7,8 +7,8 @@
 //
 // Stage 5.3: also removes the previous owner from the campaign's memberIds
 // when this transition takes away their last character in the campaign,
-// covering release, force-release, and force-assign, since any of the
-// three can leave someone with no characters left here.
+// covering release and force-release, since either can leave someone with
+// no characters left here. Force-assign now accepts only unclaimed characters.
 
 import { FieldValue } from "firebase-admin/firestore";
 import type { Transaction, DocumentReference } from "firebase-admin/firestore";
@@ -21,7 +21,8 @@ export async function applyOwnershipTransition(
   action: ClaimLogAction,
   actorUid: string,
   previousOwnerUid: string | null,
-  newOwnerUid: string | null
+  newOwnerUid: string | null,
+  options: { newOwnerAlreadyMember?: boolean } = {}
 ): Promise<void> {
   const losingOwner = previousOwnerUid !== null && previousOwnerUid !== newOwnerUid;
 
@@ -36,15 +37,14 @@ export async function applyOwnershipTransition(
   let membershipUpdate: { memberIds: unknown } | null = null;
   if (newOwnerUid !== null && removeFromMembership) {
     // Firestore can't apply arrayUnion and arrayRemove to the same field in
-    // one write, so this combined case (force-assign taking someone's last
-    // character straight to a new owner) reads the current list and writes
-    // the replacement directly instead.
+    // one write, so a direct ownership replacement reads the current list
+    // and writes the replacement directly instead.
     const campaignSnapshot = await transaction.get(campaignRef);
     const currentMemberIds = (campaignSnapshot.data()?.memberIds as string[] | undefined) ?? [];
     const nextMemberIds = currentMemberIds.filter((id) => id !== previousOwnerUid);
     if (!nextMemberIds.includes(newOwnerUid)) nextMemberIds.push(newOwnerUid);
     membershipUpdate = { memberIds: nextMemberIds };
-  } else if (newOwnerUid !== null) {
+  } else if (newOwnerUid !== null && !options.newOwnerAlreadyMember) {
     membershipUpdate = { memberIds: FieldValue.arrayUnion(newOwnerUid) };
   } else if (removeFromMembership) {
     membershipUpdate = { memberIds: FieldValue.arrayRemove(previousOwnerUid) };

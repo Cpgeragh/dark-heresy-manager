@@ -65,6 +65,41 @@ describe("Functions: ownership operations", () => {
   );
 
   it(
+    "releaseCharacter: a later release after the character is claimed again is not replayed as stale success",
+    async () => {
+      const playerUid = await signInTestUser();
+      const campaignRef = adminDb.collection("campaigns").doc();
+      const characterRef = campaignRef.collection("characters").doc();
+      await campaignRef.set({ dmId: "some-dm", name: "Test Campaign", memberIds: [playerUid] });
+      await characterRef.set({ campaignId: campaignRef.id, userId: playerUid });
+
+      const releaseCharacter = httpsCallable<
+        { campaignId: string; characterId: string; operationId: string },
+        void
+      >(getTestFunctions(), "releaseCharacter");
+
+      await releaseCharacter({
+        campaignId: campaignRef.id,
+        characterId: characterRef.id,
+        operationId: "first-release",
+      });
+
+      await characterRef.update({ userId: playerUid, isEditableByPlayer: true });
+      await campaignRef.update({ memberIds: [playerUid] });
+
+      await releaseCharacter({
+        campaignId: campaignRef.id,
+        characterId: characterRef.id,
+        operationId: "second-release",
+      });
+
+      expect((await characterRef.get()).data()?.userId).toBeNull();
+      expect((await campaignRef.get()).data()?.memberIds).not.toContain(playerUid);
+    },
+    20000
+  );
+
+  it(
     "forceReleaseCharacter: the DM releases a player's character",
     async () => {
       const dmUid = await signInTestUser();
@@ -94,7 +129,11 @@ describe("Functions: ownership operations", () => {
       const dmUid = await signInTestUser();
       const campaignRef = adminDb.collection("campaigns").doc();
       const characterRef = campaignRef.collection("characters").doc();
-      await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: [] });
+      await campaignRef.set({
+        dmId: dmUid,
+        name: "Test Campaign",
+        memberIds: ["target-player"],
+      });
       await characterRef.set({ campaignId: campaignRef.id, userId: null });
 
       const forceAssignCharacter = httpsCallable<
@@ -117,26 +156,33 @@ describe("Functions: ownership operations", () => {
   );
 
   it(
-    "forceAssignCharacter: reassigning someone's last character removes them and adds the new owner in the same write",
+    "forceAssignCharacter: an already claimed character must be released before assignment",
     async () => {
       const dmUid = await signInTestUser();
       const campaignRef = adminDb.collection("campaigns").doc();
       const characterRef = campaignRef.collection("characters").doc();
-      await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: ["old-player"] });
+      await campaignRef.set({
+        dmId: dmUid,
+        name: "Test Campaign",
+        memberIds: ["old-player", "new-player"],
+      });
       await characterRef.set({ campaignId: campaignRef.id, userId: "old-player" });
 
       const forceAssignCharacter = httpsCallable<
         { campaignId: string; characterId: string; targetUid: string },
         void
       >(getTestFunctions(), "forceAssignCharacter");
-      await forceAssignCharacter({
-        campaignId: campaignRef.id,
-        characterId: characterRef.id,
-        targetUid: "new-player",
-      });
+      await expect(
+        forceAssignCharacter({
+          campaignId: campaignRef.id,
+          characterId: characterRef.id,
+          targetUid: "new-player",
+        })
+      ).rejects.toMatchObject({ code: "functions/failed-precondition" });
 
       const campaignSnapshot = await campaignRef.get();
-      expect(campaignSnapshot.data()?.memberIds).not.toContain("old-player");
+      expect((await characterRef.get()).data()?.userId).toBe("old-player");
+      expect(campaignSnapshot.data()?.memberIds).toContain("old-player");
       expect(campaignSnapshot.data()?.memberIds).toContain("new-player");
     },
     15000
@@ -149,7 +195,11 @@ describe("Functions: ownership operations", () => {
       const dm = await createIndependentClient("release-race-dm");
       const campaignRef = adminDb.collection("campaigns").doc();
       const characterRef = campaignRef.collection("characters").doc();
-      await campaignRef.set({ dmId: dm.uid, name: "Test Campaign", memberIds: [player.uid] });
+      await campaignRef.set({
+        dmId: dm.uid,
+        name: "Test Campaign",
+        memberIds: [player.uid, "target-player"],
+      });
       await characterRef.set({ campaignId: campaignRef.id, userId: player.uid });
 
       try {
@@ -175,21 +225,14 @@ describe("Functions: ownership operations", () => {
         const campaignSnapshot = await campaignRef.get();
 
         if (forceAssignResult.status === "fulfilled") {
-          // force-assign is unconditional, so once it commits the character
-          // ends up owned by the target regardless of what release did, and
-          // the player's release only ends up rejected if it genuinely lost
-          // the race (target already owned it by the time release re-read).
+          // The release committed first, leaving the character unclaimed, so
+          // the retried assignment could then commit for the existing member.
           expect(characterSnapshot.data()?.userId).toBe("target-player");
           expect(campaignSnapshot.data()?.memberIds).toContain("target-player");
-          if (releaseResult.status === "rejected") {
-            expect(releaseResult.reason).toMatchObject({ code: "functions/permission-denied" });
-          }
+          expect(releaseResult.status).toBe("fulfilled");
         } else {
-          // Extremely rare under this test's deliberately extreme
-          // contention (both calls racing the same membership-check query
-          // on the exact same character): if force-assign genuinely
-          // exhausted its retries, release must have been the one that
-          // actually committed.
+          // Assignment observed an existing owner and was correctly refused;
+          // the player's release still completes normally.
           expect(releaseResult.status).toBe("fulfilled");
           expect(characterSnapshot.data()?.userId).toBeNull();
           expect(campaignSnapshot.data()?.memberIds).not.toContain(player.uid);

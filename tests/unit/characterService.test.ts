@@ -268,6 +268,7 @@ describe("releaseCharacter", () => {
     expect(mockCallReleaseCharacter).toHaveBeenCalledWith({
       campaignId: "camp-1",
       characterId: "char-1",
+      operationId: expect.any(String),
     });
   });
 
@@ -288,6 +289,7 @@ describe("forceReleaseCharacter", () => {
     expect(mockCallForceReleaseCharacter).toHaveBeenCalledWith({
       campaignId: "camp-1",
       characterId: "char-1",
+      operationId: expect.any(String),
     });
   });
 
@@ -309,6 +311,7 @@ describe("forceAssignCharacter", () => {
       campaignId: "camp-1",
       characterId: "char-1",
       targetUid: "target-uid",
+      operationId: expect.any(String),
     });
   });
 
@@ -620,6 +623,7 @@ describe("revokeRecoveryCode", () => {
     expect(mockCallRevokeRecoveryCode).toHaveBeenCalledWith({
       campaignId: "camp-1",
       characterId: "char-1",
+      operationId: expect.any(String),
     });
   });
 });

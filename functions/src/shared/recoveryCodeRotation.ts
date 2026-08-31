@@ -20,7 +20,8 @@ export function rotateRecoveryCodeInTransaction(
   campaignId: string,
   characterId: string,
   previousCode: string | undefined,
-  hmacSecret: string
+  hmacSecret: string,
+  additionalCharacterUpdates: Record<string, unknown> = {}
 ): string {
   const newCode = generateRecoveryCode();
   const newHash = hashRecoveryCode(newCode, hmacSecret);
@@ -37,7 +38,10 @@ export function rotateRecoveryCodeInTransaction(
     campaignId,
     characterId,
   });
-  transaction.update(characterRef, { recoveryCode: newCode });
+  transaction.update(characterRef, {
+    ...additionalCharacterUpdates,
+    recoveryCode: newCode,
+  });
 
   return newCode;
 }

@@ -31,7 +31,7 @@ import { CompleteBackgroundSetupModal } from "./characterSheet/CompleteBackgroun
 import { WeaponTrainingTab } from "./characterSheet/WeaponTrainingTab";
 import { CompanionsTab } from "./characterSheet/CompanionsTab";
 
-import type { TabId } from "./characterSheet/types";
+import { isTabId, type TabId } from "./characterSheet/types";
 import type {
   CharacterHeader,
   WoundsBlock,
@@ -67,8 +67,15 @@ import {
 } from "../services/characterService";
 import { SectionDrawer } from "../components/SectionDrawer";
 import { useUserProfile } from "../hooks/useUserProfile";
-import { ErrorState } from "../ui/ErrorState";
 import { LoadingState } from "../ui/LoadingState";
+import { ROUTES } from "../constants/routes";
+import { RouteLoadError } from "../ui/RouteLoadError";
+
+function isPermissionDenied(error: Error | null): boolean {
+  if (!error) return false;
+  const code = (error as Error & { code?: unknown }).code;
+  return code === "permission-denied" || error.message.includes("permission-denied");
+}
 
 // ================================================================
 // COMPONENT
@@ -123,7 +130,15 @@ export default function CharacterSheet({
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const activeTab = (searchParams.get("tab") as TabId) ?? "stats";
+  const requestedTab = searchParams.get("tab");
+  const requestedTabIsAllowed =
+    isTabId(requestedTab) && (requestedTab !== "admin" || isDM);
+  const activeTab: TabId = requestedTabIsAllowed ? requestedTab : "stats";
+
+  useEffect(() => {
+    if (isDMLoading || requestedTab === null || requestedTabIsAllowed) return;
+    navigate("?tab=stats", { replace: true });
+  }, [isDMLoading, navigate, requestedTab, requestedTabIsAllowed]);
 
   // The owner's player name is derived live from their public profile so it
   // stays in sync with their account first name (falls back to the legacy
@@ -199,6 +214,24 @@ export default function CharacterSheet({
   const { setBackHref, clearBackHref, setKebabContent, clearKebabContent } =
     useHeaderExtensionSetters();
 
+  const characterRouteKey = path ? `${path.campaignId}/${path.characterId}` : null;
+  const [loadedCharacterRouteKey, setLoadedCharacterRouteKey] = useState<string | null>(null);
+
+  if (character && characterRouteKey && loadedCharacterRouteKey !== characterRouteKey) {
+    setLoadedCharacterRouteKey(characterRouteKey);
+  }
+
+  const accessWasRevoked =
+    characterRouteKey !== null &&
+    loadedCharacterRouteKey === characterRouteKey &&
+    isPermissionDenied(characterError);
+
+  useEffect(() => {
+    if (!accessWasRevoked) return;
+    clearKebabContent();
+    navigate(ROUTES.DASHBOARD, { replace: true });
+  }, [accessWasRevoked, clearKebabContent, navigate]);
+
   const handleGenerateRecoveryCode = useCallback(async () => {
     if (!params.campaignId || !params.characterId) return;
     await registerRecoveryCode(params.campaignId, params.characterId);
@@ -209,10 +242,17 @@ export default function CharacterSheet({
     await revokeRecoveryCode(params.campaignId, params.characterId);
   }, [params.campaignId, params.characterId]);
 
+  const handlePlayerRelease = useCallback(async () => {
+    const released = await releaseCharacter();
+    if (!released) return;
+    clearKebabContent();
+    navigate(ROUTES.DASHBOARD, { replace: true });
+  }, [releaseCharacter, clearKebabContent, navigate]);
+
   useEffect(() => {
     if (!character || isDMLoading) return;
 
-    setBackHref(isDM ? "/dm" : "/player");
+    setBackHref(ROUTES.DASHBOARD);
 
     setKebabContent(
       <CharacterKebabContent
@@ -223,7 +263,7 @@ export default function CharacterSheet({
         canExport={isDM || isOwner}
         onExport={() => exportCharacterJson(character)}
         canPlayerRelease={canPlayerRelease}
-        onPlayerRelease={releaseCharacter}
+        onPlayerRelease={handlePlayerRelease}
         isReleasing={isReleasing}
       />
     );
@@ -238,7 +278,7 @@ export default function CharacterSheet({
     isDMLoading,
     isOwner,
     canPlayerRelease,
-    releaseCharacter,
+    handlePlayerRelease,
     handleGenerateRecoveryCode,
     handleRevokeRecoveryCode,
     isReleasing,
@@ -370,16 +410,20 @@ export default function CharacterSheet({
     return <div className="text-slate-300 text-center py-10">Invalid character route.</div>;
   }
 
+  if (isReleasing) {
+    return <LoadingState className="text-center py-10">Releasing character…</LoadingState>;
+  }
+
+  if (accessWasRevoked) {
+    return <LoadingState className="text-center py-10">Returning to dashboard…</LoadingState>;
+  }
+
   if (characterLoading || isDMLoading) {
     return <LoadingState className="text-center py-10">Loading character…</LoadingState>;
   }
 
   if (characterError) {
-    return (
-      <ErrorState className="text-center py-10">
-        Unable to load this character. Please refresh the page.
-      </ErrorState>
-    );
+    return <RouteLoadError resource="character" />;
   }
 
   if (!character) {
@@ -406,7 +450,7 @@ export default function CharacterSheet({
         onUpdateCybernetics={handleUpdateCybernetics}
         gear={character.gear ?? []}
         onUpdateGear={handleUpdateGear}
-        onReturnToDashboard={() => navigate("/player")}
+        onReturnToDashboard={() => navigate(ROUTES.DASHBOARD)}
         onComplete={() => {
           void updateField("backgroundComplete", true);
         }}

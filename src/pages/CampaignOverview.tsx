@@ -33,6 +33,7 @@ import { useHeaderExtensionSetters } from "../context/useHeaderExtension";
 import { useCampaignCharacterSummaries } from "../hooks/useCampaignCharacterSummaries";
 import { MyCharacterCard } from "./CampaignOverview/MyCharacterCard";
 import { PartyRosterTile } from "./CampaignOverview/PartyRosterTile";
+import { RouteLoadError } from "../ui/RouteLoadError";
 
 export default function CampaignOverview({ effectiveUserId }: { effectiveUserId: string }) {
   const params = useParams<{ campaignId: string }>();
@@ -55,12 +56,16 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
     characters,
     loading: charactersLoading,
     error: charactersError,
-  } = useCampaignCharacters(campaignId ?? null);
+  } = useCampaignCharacters(
+    campaignId ?? null,
+    effectiveUserId,
+    campaign ? isDM : null
+  );
   const {
     summaries: partySummaries,
     loading: partySummariesLoading,
     error: partySummariesError,
-  } = useCampaignCharacterSummaries(!isDM && campaignId ? campaignId : null);
+  } = useCampaignCharacterSummaries(campaign && !isDM && campaignId ? campaignId : null);
   const ownCharacterIds = useMemo(() => new Set(characters.map((c) => c.id)), [characters]);
   const partyMembers = useMemo(
     () => partySummaries.filter((s) => !ownCharacterIds.has(s.id)),
@@ -208,11 +213,7 @@ export default function CampaignOverview({ effectiveUserId }: { effectiveUserId:
   }
 
   if (campaignError || charactersError) {
-    return (
-      <ErrorState className="text-center py-10">
-        Unable to load this campaign. Please refresh the page.
-      </ErrorState>
-    );
+    return <RouteLoadError resource="campaign" />;
   }
 
   if (campaignLoading || charactersLoading) {

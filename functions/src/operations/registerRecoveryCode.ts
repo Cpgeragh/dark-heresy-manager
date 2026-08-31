@@ -9,6 +9,7 @@
 
 import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
+import { callerIsPrimaryOrLinked } from "../shared/linkedIdentity.js";
 import { rotateRecoveryCodeInTransaction } from "../shared/recoveryCodeRotation.js";
 
 export interface RegisterRecoveryCodeInput {
@@ -29,7 +30,7 @@ export async function registerRecoveryCode(
   if (!campaignSnapshot.exists) {
     throw new HttpsError("not-found", "Campaign not found.");
   }
-  if (campaignSnapshot.data()?.dmId !== callerUid) {
+  if (!(await callerIsPrimaryOrLinked(db, callerUid, campaignSnapshot.data()?.dmId))) {
     throw new HttpsError("permission-denied", "Only the campaign DM can generate a Recovery Code.");
   }
 

@@ -6,11 +6,13 @@
 
 import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
+import { callerIsPrimaryOrLinked } from "../shared/linkedIdentity.js";
 import { applyOwnershipTransition } from "../shared/ownershipTransition.js";
 
 export interface ForceReleaseCharacterInput {
   campaignId: string;
   characterId: string;
+  operationId?: string;
 }
 
 export async function forceReleaseCharacter(
@@ -25,7 +27,7 @@ export async function forceReleaseCharacter(
   if (!campaignSnapshot.exists) {
     throw new HttpsError("not-found", "Campaign not found.");
   }
-  if (campaignSnapshot.data()?.dmId !== callerUid) {
+  if (!(await callerIsPrimaryOrLinked(db, callerUid, campaignSnapshot.data()?.dmId))) {
     throw new HttpsError("permission-denied", "Only the campaign DM can force-release a character.");
   }
 

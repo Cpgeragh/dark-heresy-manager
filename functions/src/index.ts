@@ -13,6 +13,7 @@ import { protectedCallable } from "./shared/protectedCallable.js";
 import { withMinimumDuration } from "./shared/timingSafety.js";
 import { recoveryCodeHmacSecret, identityCodeHmacSecret } from "./shared/secrets.js";
 import { hashRecoveryCode, hashForKey } from "./shared/recoveryCode.js";
+import { buildOperationIdempotencyKey } from "./shared/operationIdempotency.js";
 import {
   registerRecoveryCode as runRegisterRecoveryCode,
   type RegisterRecoveryCodeInput,
@@ -147,7 +148,7 @@ export const lookupRecoveryCode = onCall<LookupRecoveryCodeInput>(
       rateLimits: [
         {
           key: `recovery-lookup:user:${request.auth?.uid ?? "anonymous"}`,
-          limit: 20,
+          limit: 5,
           windowMs: 15 * 60 * 1000,
         },
         {
@@ -175,16 +176,21 @@ export const revokeRecoveryCode = onCall<RevokeRecoveryCodeInput>(
   { secrets: [recoveryCodeHmacSecret], timeoutSeconds: 30 },
   (request) => {
     const callerUid = request.auth?.uid ?? "anonymous";
+    const operationId = request.data?.operationId;
     return protectedCallable<RevokeRecoveryCodeInput, void>({
       request,
       operation: "revoke-recovery-code",
-      allowedFields: ["campaignId", "characterId"],
+      allowedFields: ["campaignId", "characterId", "operationId"],
       requiredFields: ["campaignId", "characterId"],
-      fieldShapes: { campaignId: "string", characterId: "string" },
+      fieldShapes: { campaignId: "string", characterId: "string", operationId: "string" },
       rateLimits: [
         { key: `revoke-recovery-code:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 },
       ],
-      idempotencyKey: `revoke-recovery-code:${callerUid}:${request.data?.campaignId ?? ""}:${request.data?.characterId ?? ""}`,
+      idempotencyKey: buildOperationIdempotencyKey(
+        "revoke-recovery-code",
+        callerUid,
+        operationId
+      ),
       handler: ({ uid, data }) => runRevokeRecoveryCode(data, uid, recoveryCodeHmacSecret.value()),
     });
   }
@@ -216,14 +222,15 @@ export const claimCharacter = onCall<ClaimCharacterInput>(
 
 export const releaseCharacter = onCall<ReleaseCharacterInput>({ timeoutSeconds: 30 }, (request) => {
   const callerUid = request.auth?.uid ?? "anonymous";
+  const operationId = request.data?.operationId;
   return protectedCallable<ReleaseCharacterInput, void>({
     request,
     operation: "release-character",
-    allowedFields: ["campaignId", "characterId"],
+    allowedFields: ["campaignId", "characterId", "operationId"],
     requiredFields: ["campaignId", "characterId"],
-    fieldShapes: { campaignId: "string", characterId: "string" },
+    fieldShapes: { campaignId: "string", characterId: "string", operationId: "string" },
     rateLimits: [{ key: `release-character:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 }],
-    idempotencyKey: `release-character:${callerUid}:${request.data?.campaignId ?? ""}:${request.data?.characterId ?? ""}`,
+    idempotencyKey: buildOperationIdempotencyKey("release-character", callerUid, operationId),
     handler: ({ uid, data }) => runReleaseCharacter(data, uid),
   });
 });
@@ -232,16 +239,21 @@ export const forceReleaseCharacter = onCall<ForceReleaseCharacterInput>(
   { timeoutSeconds: 30 },
   (request) => {
     const callerUid = request.auth?.uid ?? "anonymous";
+    const operationId = request.data?.operationId;
     return protectedCallable<ForceReleaseCharacterInput, void>({
       request,
       operation: "force-release-character",
-      allowedFields: ["campaignId", "characterId"],
+      allowedFields: ["campaignId", "characterId", "operationId"],
       requiredFields: ["campaignId", "characterId"],
-      fieldShapes: { campaignId: "string", characterId: "string" },
+      fieldShapes: { campaignId: "string", characterId: "string", operationId: "string" },
       rateLimits: [
         { key: `force-release-character:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 },
       ],
-      idempotencyKey: `force-release-character:${callerUid}:${request.data?.campaignId ?? ""}:${request.data?.characterId ?? ""}`,
+      idempotencyKey: buildOperationIdempotencyKey(
+        "force-release-character",
+        callerUid,
+        operationId
+      ),
       handler: ({ uid, data }) => runForceReleaseCharacter(data, uid),
     });
   }
@@ -251,16 +263,26 @@ export const forceAssignCharacter = onCall<ForceAssignCharacterInput>(
   { timeoutSeconds: 30 },
   (request) => {
     const callerUid = request.auth?.uid ?? "anonymous";
+    const operationId = request.data?.operationId;
     return protectedCallable<ForceAssignCharacterInput, void>({
       request,
       operation: "force-assign-character",
-      allowedFields: ["campaignId", "characterId", "targetUid"],
+      allowedFields: ["campaignId", "characterId", "targetUid", "operationId"],
       requiredFields: ["campaignId", "characterId", "targetUid"],
-      fieldShapes: { campaignId: "string", characterId: "string", targetUid: "string" },
+      fieldShapes: {
+        campaignId: "string",
+        characterId: "string",
+        targetUid: "string",
+        operationId: "string",
+      },
       rateLimits: [
         { key: `force-assign-character:${callerUid}`, limit: 20, windowMs: 60 * 60 * 1000 },
       ],
-      idempotencyKey: `force-assign-character:${callerUid}:${request.data?.campaignId ?? ""}:${request.data?.characterId ?? ""}:${request.data?.targetUid ?? ""}`,
+      idempotencyKey: buildOperationIdempotencyKey(
+        "force-assign-character",
+        callerUid,
+        operationId
+      ),
       handler: ({ uid, data }) => runForceAssignCharacter(data, uid),
     });
   }

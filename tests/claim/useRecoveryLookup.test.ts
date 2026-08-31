@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useRecoveryLookup } from "../../src/pages/ClaimCharacter/hooks/useRecoveryLookup";
 import { lookupRecoveryCharacter } from "../../src/services/recoveryLookupService";
+import { ClientCodeAttemptLimitError } from "../../src/utils/clientCodeAttemptLimit";
 
 vi.mock("../../src/services/recoveryLookupService", () => ({
   lookupRecoveryCharacter: vi.fn(),
@@ -60,5 +61,18 @@ describe("useRecoveryLookup", () => {
 
     expect(result.current.data).toBeNull();
     expect(result.current.error).toBe("Unexpected error during lookup.");
+  });
+
+  it("shows the retry time when the local attempt limit is reached", async () => {
+    mockLookup.mockRejectedValue(
+      new ClientCodeAttemptLimitError("recovery", Date.now() + 15 * 60 * 1_000, Date.now())
+    );
+
+    const { result } = renderHook(() => useRecoveryLookup());
+    await act(() => result.current.lookup("DH-TEST-0005"));
+
+    expect(result.current.error).toBe(
+      "Too many recovery-code attempts. Try again in 15 minutes."
+    );
   });
 });

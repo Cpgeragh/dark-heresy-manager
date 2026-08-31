@@ -11,6 +11,7 @@
 
 import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
+import { callerIsPrimaryOrLinked } from "../shared/linkedIdentity.js";
 import { hashRecoveryCode } from "../shared/recoveryCode.js";
 import { RECOVERY_CODE_HISTORY_COLLECTION, buildRecoveryCodeHistoryPayload } from "../shared/recoveryCodeHistory.js";
 
@@ -20,6 +21,7 @@ const CODE_FORMAT = /^DH-[0-9A-Z]{4}-[0-9A-Z]{4}$/;
 export interface RevokeRecoveryCodeInput {
   campaignId: string;
   characterId: string;
+  operationId?: string;
 }
 
 export async function revokeRecoveryCode(
@@ -35,7 +37,7 @@ export async function revokeRecoveryCode(
   if (!campaignSnapshot.exists) {
     throw new HttpsError("not-found", "Campaign not found.");
   }
-  if (campaignSnapshot.data()?.dmId !== callerUid) {
+  if (!(await callerIsPrimaryOrLinked(db, callerUid, campaignSnapshot.data()?.dmId))) {
     throw new HttpsError("permission-denied", "Only the campaign DM can revoke a Recovery Code.");
   }
 

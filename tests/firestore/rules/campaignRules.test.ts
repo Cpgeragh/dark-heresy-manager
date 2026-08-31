@@ -8,8 +8,21 @@ import {
   createCampaign,
   createCharacter,
   createIdentityReclaimEntry,
-  createRecoveryIndexEntry,
 } from "../helpers";
+
+async function createUserLink(
+  env: RulesTestEnvironment,
+  linkedUid: string,
+  primaryUid: string
+) {
+  await env.withSecurityRulesDisabled(async (context) => {
+    await context
+      .firestore()
+      .collection("userLinks")
+      .doc(linkedUid)
+      .set({ primaryUid, linkedAt: new Date() });
+  });
+}
 
 describe("Firestore Rules: Campaigns", () => {
   afterEach(async () => {
@@ -31,6 +44,17 @@ describe("Firestore Rules: Campaigns", () => {
     await createCampaign(env, "c1", "dm-1", { name: "Sample Campaign", memberIds: ["player-1"] });
 
     await expect(dbAs(env, "player-1").collection("campaigns").doc("c1").get()).resolves.toBeDefined();
+  });
+
+  it("a linked device may read a campaign belonging to its primary member", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+
+    await createCampaign(env, "c1", "dm-1", { memberIds: ["player-1"] });
+    await createUserLink(env, "player-device", "player-1");
+
+    await expect(
+      dbAs(env, "player-device").collection("campaigns").doc("c1").get()
+    ).resolves.toBeDefined();
   });
 
   it("an unrelated authenticated user cannot read a campaign they're not part of", async () => {
@@ -78,6 +102,24 @@ describe("Firestore Rules: Campaigns", () => {
     });
 
     const snapshot = await dbAs(env, "player-1")
+      .collection("campaigns")
+      .where("memberIds", "array-contains", "player-1")
+      .where("archivedAt", "==", null)
+      .limit(100)
+      .get();
+
+    expect(snapshot.docs.map((document) => document.id)).toEqual(["active-member"]);
+  });
+
+  it("a linked device may run the primary member's active-campaign query", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    await createCampaign(env, "active-member", "dm-1", {
+      memberIds: ["player-1"],
+      archivedAt: null,
+    });
+    await createUserLink(env, "player-device", "player-1");
+
+    const snapshot = await dbAs(env, "player-device")
       .collection("campaigns")
       .where("memberIds", "array-contains", "player-1")
       .where("archivedAt", "==", null)
@@ -211,47 +253,6 @@ describe("Firestore Rules: Campaigns", () => {
     const dmDb = dbAs(env, "dm-1");
 
     await expect(dmDb.collection("campaigns").doc("c1").delete()).resolves.toBeUndefined();
-  });
-
-  it("DM can atomically delete a campaign and its known descendant tree", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
-    const recoveryCode = "DH-TEST-0001";
-    await createCampaign(env, "c1", "dm-1", { name: "Sample" });
-    await createCharacter(env, "c1", "char-1", { recoveryCode });
-    await createRecoveryIndexEntry(env, recoveryCode, {
-      campaignId: "c1",
-      characterId: "char-1",
-    });
-    await env.withSecurityRulesDisabled(async (context) => {
-      const db = context.firestore();
-      await Promise.all([
-        db.doc("campaigns/c1/characters/char-1/claimLog/log-1").set({ seeded: true }),
-        db.doc("campaigns/c1/characters/char-1/xpProposals/proposal-1").set({ seeded: true }),
-        db.doc("campaigns/c1/sessions/session-1").set({ seeded: true }),
-        db.doc("campaigns/c1/threads/char-1").set({ seeded: true }),
-        db.doc("campaigns/c1/threads/char-1/messages/message-1").set({ seeded: true }),
-        db.doc("campaigns/c1/customItems/item-1").set({ status: "published" }),
-        db.doc("campaigns/c1/customItems/item-1/versions/version-1").set({ seeded: true }),
-      ]);
-    });
-
-    const dmDb = dbAs(env, "dm-1");
-    const paths = [
-      "campaigns/c1/characters/char-1/claimLog/log-1",
-      "campaigns/c1/characters/char-1/xpProposals/proposal-1",
-      "campaigns/c1/threads/char-1/messages/message-1",
-      "campaigns/c1/threads/char-1",
-      "recoveryIndex/DH-TEST-0001",
-      "campaigns/c1/characters/char-1",
-      "campaigns/c1/sessions/session-1",
-      "campaigns/c1/customItems/item-1/versions/version-1",
-      "campaigns/c1/customItems/item-1",
-      "campaigns/c1",
-    ];
-    const batch = dmDb.batch();
-    paths.forEach((path) => batch.delete(dmDb.doc(path)));
-
-    await expect(batch.commit()).resolves.toBeUndefined();
   });
 
   it("DM can archive their own campaign", async () => {

@@ -31,6 +31,7 @@ import { stripUndefined } from "../utils/stripUndefined";
 import { runSingleFlight } from "../utils/singleFlight";
 import { getSpentXp } from "../features/experience/xpSpent";
 import { driveJobToCompletion } from "../utils/bulkJobClient";
+import { createLocalId } from "../utils/createLocalId";
 import {
   assertCharacterImportData,
   assertCharacterPayload,
@@ -197,7 +198,10 @@ export async function claimCharacter(
   });
 }
 
-const callReleaseCharacter = httpsCallable<{ campaignId: string; characterId: string }, void>(
+const callReleaseCharacter = httpsCallable<
+  { campaignId: string; characterId: string; operationId: string },
+  void
+>(
   functions,
   "releaseCharacter"
 );
@@ -209,11 +213,18 @@ export async function releaseCharacter(campaignId: string, characterId: string):
   if (!user) throw new Error("Not signed in.");
 
   await runSingleFlight("character:release", [campaignId, characterId], async () => {
-    await callReleaseCharacter({ campaignId, characterId });
+    await callReleaseCharacter({
+      campaignId,
+      characterId,
+      operationId: createLocalId("release-character"),
+    });
   });
 }
 
-const callForceReleaseCharacter = httpsCallable<{ campaignId: string; characterId: string }, void>(
+const callForceReleaseCharacter = httpsCallable<
+  { campaignId: string; characterId: string; operationId: string },
+  void
+>(
   functions,
   "forceReleaseCharacter"
 );
@@ -225,12 +236,16 @@ export async function forceReleaseCharacter(campaignId: string, characterId: str
   if (!user) throw new Error("Not signed in.");
 
   await runSingleFlight("character:force-release", [campaignId, characterId], async () => {
-    await callForceReleaseCharacter({ campaignId, characterId });
+    await callForceReleaseCharacter({
+      campaignId,
+      characterId,
+      operationId: createLocalId("force-release-character"),
+    });
   });
 }
 
 const callForceAssignCharacter = httpsCallable<
-  { campaignId: string; characterId: string; targetUid: string },
+  { campaignId: string; characterId: string; targetUid: string; operationId: string },
   void
 >(functions, "forceAssignCharacter");
 
@@ -246,7 +261,12 @@ export async function forceAssignCharacter(
   if (!user) throw new Error("Not signed in.");
 
   await runSingleFlight("character:force-assign", [campaignId, characterId, targetUid], async () => {
-    await callForceAssignCharacter({ campaignId, characterId, targetUid });
+    await callForceAssignCharacter({
+      campaignId,
+      characterId,
+      targetUid,
+      operationId: createLocalId("force-assign-character"),
+    });
   });
 }
 
@@ -307,7 +327,10 @@ export async function registerRecoveryCode(campaignId: string, characterId: stri
   return data.code;
 }
 
-const callRevokeRecoveryCode = httpsCallable<{ campaignId: string; characterId: string }, void>(
+const callRevokeRecoveryCode = httpsCallable<
+  { campaignId: string; characterId: string; operationId: string },
+  void
+>(
   functions,
   "revokeRecoveryCode"
 );
@@ -316,7 +339,11 @@ const callRevokeRecoveryCode = httpsCallable<{ campaignId: string; characterId: 
 export async function revokeRecoveryCode(campaignId: string, characterId: string): Promise<void> {
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   assertFirestoreDocumentId(characterId, "Character ID");
-  await callRevokeRecoveryCode({ campaignId, characterId });
+  await callRevokeRecoveryCode({
+    campaignId,
+    characterId,
+    operationId: createLocalId("revoke-recovery-code"),
+  });
 }
 
 const REGISTER_CODE_RETRY_ATTEMPTS = 3;

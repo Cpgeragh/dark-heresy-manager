@@ -5,6 +5,20 @@ import { getTestEnv } from "../setup";
 import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
 import { dbAs, createCampaign, createCharacter } from "../helpers";
 
+async function createUserLink(
+  env: RulesTestEnvironment,
+  linkedUid: string,
+  primaryUid: string
+) {
+  await env.withSecurityRulesDisabled(async (context) => {
+    await context
+      .firestore()
+      .collection("userLinks")
+      .doc(linkedUid)
+      .set({ primaryUid, linkedAt: new Date() });
+  });
+}
+
 describe("Firestore Rules: Character Query Operations", () => {
   it("the DM can order characters by name", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
@@ -105,6 +119,52 @@ describe("Firestore Rules: Character Query Operations", () => {
 
     expect(snapshot.docs.length).toBe(1);
     expect(snapshot.docs[0].id).toBe("char1");
+  });
+
+  it("a player may run the exact campaign-page query for all of their own characters", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const campaignId = `camp-player-page-${Date.now()}`;
+    const playerUid = `player-${Date.now()}`;
+
+    await createCampaign(env, campaignId, "dm-1", { memberIds: [playerUid] });
+    await createCharacter(env, campaignId, "owned", {
+      userId: playerUid,
+      isEditableByPlayer: false,
+    });
+    await createCharacter(env, campaignId, "other", {
+      userId: "another-player",
+      isEditableByPlayer: true,
+    });
+
+    const snapshot = await dbAs(env, playerUid)
+      .collection(`campaigns/${campaignId}/characters`)
+      .where("userId", "==", playerUid)
+      .limit(100)
+      .get();
+
+    expect(snapshot.docs.map((document) => document.id)).toEqual(["owned"]);
+  });
+
+  it("a linked device may run the campaign-page query for its primary player's characters", async () => {
+    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const campaignId = `camp-linked-player-page-${Date.now()}`;
+    const primaryUid = `primary-${Date.now()}`;
+    const linkedUid = `linked-${Date.now()}`;
+
+    await createCampaign(env, campaignId, "dm-1", { memberIds: [primaryUid] });
+    await createCharacter(env, campaignId, "owned", {
+      userId: primaryUid,
+      isEditableByPlayer: false,
+    });
+    await createUserLink(env, linkedUid, primaryUid);
+
+    const snapshot = await dbAs(env, linkedUid)
+      .collection(`campaigns/${campaignId}/characters`)
+      .where("userId", "==", primaryUid)
+      .limit(100)
+      .get();
+
+    expect(snapshot.docs.map((document) => document.id)).toEqual(["owned"]);
   });
 
   it("DM can query all characters regardless of userId", async () => {

@@ -44,7 +44,8 @@ export interface UserProfileDocument {
 }
 
 /**
- * Recovery index document stored in /recoveryIndex/{code}
+ * Recovery index document stored under an HMAC-derived document ID.
+ * Client access is denied; trusted Cloud Functions manage these entries.
  */
 export interface RecoveryIndexDocument {
   campaignId: string;
