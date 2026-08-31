@@ -58,7 +58,7 @@ describe("AppHeader", () => {
     expect(screen.queryByRole("button", { name: "Options" })).not.toBeInTheDocument();
   });
 
-  it("opens the kebab menu and shows its content, then closes on backdrop click", async () => {
+  it("opens the kebab menu and closes when the user clicks outside it", async () => {
     const user = userEvent.setup();
     useHeaderExtensionMock.mockReturnValue({
       backHref: null,
@@ -69,10 +69,23 @@ describe("AppHeader", () => {
     await user.click(screen.getByRole("button", { name: "Options" }));
     expect(screen.getByText("Kebab options here")).toBeInTheDocument();
 
-    // The backdrop is the first of the two elements rendered alongside the
-    // menu panel once open; click it directly rather than by role/text.
-    const backdrop = document.querySelector(".fixed.inset-0.z-40") as HTMLElement;
-    await user.click(backdrop);
+    await user.click(document.body);
+
+    expect(screen.queryByText("Kebab options here")).not.toBeInTheDocument();
+  });
+
+  it("closes the open kebab menu with Escape", async () => {
+    const user = userEvent.setup();
+    useHeaderExtensionMock.mockReturnValue({
+      backHref: null,
+      kebabContent: <div>Kebab options here</div>,
+    });
+    renderHeader("/");
+
+    await user.click(screen.getByRole("button", { name: "Options" }));
+    expect(screen.getByText("Kebab options here")).toBeInTheDocument();
+
+    await user.keyboard("{Escape}");
 
     expect(screen.queryByText("Kebab options here")).not.toBeInTheDocument();
   });

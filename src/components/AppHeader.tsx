@@ -1,6 +1,6 @@
 // src/components/AppHeader.tsx
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useMatch } from "react-router-dom";
 import { useHeaderExtension } from "../context/useHeaderExtension";
 import { ROUTES } from "../constants/routes";
@@ -12,7 +12,31 @@ interface AppHeaderProps {
 export function AppHeader({ currentPath }: AppHeaderProps) {
   const { backHref, kebabContent } = useHeaderExtension();
   const [kebabOpen, setKebabOpen] = useState(false);
+  const kebabRef = useRef<HTMLDivElement>(null);
   const isOnDashboard = !!useMatch(ROUTES.DASHBOARD);
+
+  useEffect(() => {
+    if (!kebabOpen) return;
+
+    function closeFromOutside(event: PointerEvent) {
+      if (!kebabRef.current?.contains(event.target as Node)) {
+        setKebabOpen(false);
+      }
+    }
+
+    function closeFromEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setKebabOpen(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", closeFromOutside);
+    document.addEventListener("keydown", closeFromEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeFromOutside);
+      document.removeEventListener("keydown", closeFromEscape);
+    };
+  }, [kebabOpen]);
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-900/80 backdrop-blur">
@@ -82,7 +106,7 @@ export function AppHeader({ currentPath }: AppHeaderProps) {
 
           {/* Kebab menu */}
           {kebabContent && (
-            <div className="relative">
+            <div className="relative" ref={kebabRef}>
               <button type="button"
                 onClick={() => setKebabOpen((v) => !v)}
                 aria-label="Options"
@@ -92,12 +116,9 @@ export function AppHeader({ currentPath }: AppHeaderProps) {
               </button>
 
               {kebabOpen && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setKebabOpen(false)} />
-                  <div className="absolute right-0 top-full mt-2 z-50 w-72 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-4">
-                    {kebabContent}
-                  </div>
-                </>
+                <div className="absolute right-0 top-full mt-2 z-50 w-72 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-4">
+                  {kebabContent}
+                </div>
               )}
             </div>
           )}
