@@ -29,6 +29,7 @@
 
 import { FieldPath, FieldValue, getFirestore, type Firestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
+import { callerIsPrimaryOrLinked } from "../shared/linkedIdentity.js";
 import {
   acquireJobLease,
   advanceJobCheckpoint,
@@ -36,6 +37,7 @@ import {
   createBulkJob,
   handleChunkFailure,
   MAX_JOB_TOTAL_COUNT,
+  prepareBulkJob,
 } from "../shared/bulkJobs.js";
 import {
   buildCharacterCopyRemoval,
@@ -69,12 +71,17 @@ export interface StartCustomItemMutationJobInput {
   actorUserId: string;
 }
 
-async function publishTargetVersion(
+async function publishTargetVersionAndCreateJob(
   db: Firestore,
   itemRef: FirebaseFirestore.DocumentReference,
   requestedVersionId: string | undefined,
-  actorUserId: string
-): Promise<string> {
+  actorUserId: string,
+  callerUid: string,
+  campaignId: string,
+  customItemId: string,
+  totalCount: number,
+  idempotencyKey: string | null
+): Promise<{ targetVersionId: string; jobId: string }> {
   return db.runTransaction(async (transaction) => {
     const itemSnapshot = await transaction.get(itemRef);
     if (!itemSnapshot.exists) throw new HttpsError("not-found", "Custom item not found.");
@@ -97,6 +104,20 @@ async function publishTargetVersion(
       versionNumber: number;
     };
     const timestamp = FieldValue.serverTimestamp();
+    const preparedJob = prepareBulkJob(
+      db,
+      "custom-item-mutation",
+      callerUid,
+      {
+        campaignId,
+        customItemId,
+        mode: "publish-and-update",
+        targetVersionId,
+        actorUserId,
+      },
+      totalCount,
+      idempotencyKey
+    );
 
     transaction.update(versionRef, {
       status: "published",
@@ -118,8 +139,9 @@ async function publishTargetVersion(
       updatedAt: timestamp,
       updatedBy: { userId: actorUserId },
     });
+    transaction.set(preparedJob.ref, preparedJob.record);
 
-    return targetVersionId;
+    return { targetVersionId, jobId: preparedJob.jobId };
   }, { maxAttempts: 5 });
 }
 
@@ -157,7 +179,7 @@ export async function startCustomItemMutationJob(
   if (!campaignSnapshot.exists) {
     throw new HttpsError("not-found", "Campaign not found.");
   }
-  if (campaignSnapshot.data()?.dmId !== callerUid) {
+  if (!(await callerIsPrimaryOrLinked(db, callerUid, campaignSnapshot.data()?.dmId))) {
     throw new HttpsError("permission-denied", "Only the campaign DM can perform this operation.");
   }
 
@@ -179,17 +201,46 @@ export async function startCustomItemMutationJob(
   let targetVersionId: string | null = null;
 
   if (input.mode === "publish-and-update") {
-    targetVersionId = await publishTargetVersion(db, itemRef, input.versionId, input.actorUserId);
+    const published = await publishTargetVersionAndCreateJob(
+      db,
+      itemRef,
+      input.versionId,
+      input.actorUserId,
+      callerUid,
+      input.campaignId,
+      input.customItemId,
+      totalCount,
+      idempotencyKey
+    );
+    return { jobId: published.jobId, totalCount };
   } else if (input.mode === "update") {
     targetVersionId = await resolveUpdateTargetVersionId(itemRef, input.versionId);
   } else if (input.mode === "archive-and-remove") {
-    await itemRef.update({
+    const preparedJob = prepareBulkJob(
+      db,
+      "custom-item-mutation",
+      callerUid,
+      {
+        campaignId: input.campaignId,
+        customItemId: input.customItemId,
+        mode: input.mode,
+        targetVersionId: null,
+        actorUserId: input.actorUserId,
+      },
+      totalCount,
+      idempotencyKey
+    );
+    const batch = db.batch();
+    batch.update(itemRef, {
       status: "archived",
       archivedAt: FieldValue.serverTimestamp(),
       archivedByUserId: input.actorUserId,
       updatedAt: FieldValue.serverTimestamp(),
       updatedBy: { userId: input.actorUserId },
     });
+    batch.set(preparedJob.ref, preparedJob.record);
+    await batch.commit();
+    return { jobId: preparedJob.jobId, totalCount };
   }
 
   const jobId = await createBulkJob(
@@ -241,7 +292,10 @@ export async function processCustomItemMutationChunk(
   try {
     const campaignRef = db.collection("campaigns").doc(campaignId);
     const campaignSnapshot = await campaignRef.get();
-    if (!campaignSnapshot.exists || campaignSnapshot.data()?.dmId !== callerUid) {
+    if (
+      !campaignSnapshot.exists ||
+      !(await callerIsPrimaryOrLinked(db, callerUid, campaignSnapshot.data()?.dmId))
+    ) {
       throw new HttpsError("permission-denied", "Only the campaign DM can perform this operation.");
     }
 

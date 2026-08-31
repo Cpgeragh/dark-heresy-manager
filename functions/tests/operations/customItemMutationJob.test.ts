@@ -11,6 +11,7 @@ import type { BulkJobRecord } from "../../src/shared/bulkJobs";
 
 const {
   mockCreateBulkJob,
+  mockPrepareBulkJob,
   mockAcquireJobLease,
   mockAdvanceJobCheckpoint,
   mockCompleteJob,
@@ -19,14 +20,17 @@ const {
   mockCollection,
   mockBatch,
   mockBatchUpdate,
+  mockBatchSet,
   mockBatchCommit,
   mockRunTransaction,
   mockTransactionGet,
   mockTransactionUpdate,
+  mockTransactionSet,
   mockCampaignGet,
   mockItemGet,
   mockItemUpdate,
   mockVersionGet,
+  mockUserLinkGet,
   characters,
 } = vi.hoisted(() => {
   function makeCollectionMock() {
@@ -44,19 +48,26 @@ const {
   const characters = makeCollectionMock();
 
   const mockBatchUpdate = vi.fn();
+  const mockBatchSet = vi.fn();
   const mockBatchCommit = vi.fn();
-  const mockBatch = vi.fn(() => ({ update: mockBatchUpdate, commit: mockBatchCommit }));
+  const mockBatch = vi.fn(() => ({
+    update: mockBatchUpdate,
+    set: mockBatchSet,
+    commit: mockBatchCommit,
+  }));
 
   const mockTransactionGet = vi.fn();
   const mockTransactionUpdate = vi.fn();
+  const mockTransactionSet = vi.fn();
   const mockRunTransaction = vi.fn(async (callback: (transaction: unknown) => Promise<unknown>) =>
-    callback({ get: mockTransactionGet, update: mockTransactionUpdate })
+    callback({ get: mockTransactionGet, update: mockTransactionUpdate, set: mockTransactionSet })
   );
 
   const mockCampaignGet = vi.fn();
   const mockItemGet = vi.fn();
   const mockItemUpdate = vi.fn();
   const mockVersionGet = vi.fn();
+  const mockUserLinkGet = vi.fn();
   const mockVersionRef = { get: mockVersionGet };
   const mockItemRef = {
     get: mockItemGet,
@@ -76,6 +87,13 @@ const {
   };
 
   const mockCreateBulkJob = vi.fn();
+  const preparedJobRef = { id: "job-1" };
+  const preparedJobRecord = { type: "custom-item-mutation", status: "pending" };
+  const mockPrepareBulkJob = vi.fn(() => ({
+    jobId: "job-1",
+    ref: preparedJobRef,
+    record: preparedJobRecord,
+  }));
   const mockAcquireJobLease = vi.fn();
   const mockAdvanceJobCheckpoint = vi.fn();
   const mockCompleteJob = vi.fn();
@@ -84,11 +102,13 @@ const {
 
   const mockCollection = vi.fn((name: string) => {
     if (name === "campaigns") return { doc: vi.fn(() => mockCampaignRef) };
+    if (name === "userLinks") return { doc: vi.fn(() => ({ get: mockUserLinkGet })) };
     throw new Error(`Unexpected collection: ${name}`);
   });
 
   return {
     mockCreateBulkJob,
+    mockPrepareBulkJob,
     mockAcquireJobLease,
     mockAdvanceJobCheckpoint,
     mockCompleteJob,
@@ -97,20 +117,24 @@ const {
     mockCollection,
     mockBatch,
     mockBatchUpdate,
+    mockBatchSet,
     mockBatchCommit,
     mockRunTransaction,
     mockTransactionGet,
     mockTransactionUpdate,
+    mockTransactionSet,
     mockCampaignGet,
     mockItemGet,
     mockItemUpdate,
     mockVersionGet,
+    mockUserLinkGet,
     characters,
   };
 });
 
 vi.mock("../../src/shared/bulkJobs", () => ({
   createBulkJob: mockCreateBulkJob,
+  prepareBulkJob: mockPrepareBulkJob,
   acquireJobLease: mockAcquireJobLease,
   advanceJobCheckpoint: mockAdvanceJobCheckpoint,
   completeJob: mockCompleteJob,
@@ -163,6 +187,7 @@ function makeJob(overrides: Partial<BulkJobRecord> = {}): BulkJobRecord {
 describe("startCustomItemMutationJob", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockUserLinkGet.mockResolvedValue({ exists: false });
   });
 
   it("rejects when the campaign does not exist", async () => {
@@ -253,13 +278,11 @@ describe("startCustomItemMutationJob", () => {
     );
   });
 
-  it("mode archive-and-remove: archives the item before creating the job", async () => {
+  it("mode archive-and-remove: archives the item and creates the job atomically", async () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: DM_UID }) });
     mockItemGet.mockResolvedValue({ exists: true });
     characters.countGet.mockResolvedValue({ data: () => ({ count: 5 }) });
-    mockCreateBulkJob.mockResolvedValue("job-1");
-
-    await startCustomItemMutationJob(
+    const result = await startCustomItemMutationJob(
       {
         campaignId: CAMPAIGN_ID,
         customItemId: CUSTOM_ITEM_ID,
@@ -270,9 +293,44 @@ describe("startCustomItemMutationJob", () => {
       "idem-key"
     );
 
-    expect(mockItemUpdate).toHaveBeenCalledWith(
+    expect(mockItemUpdate).not.toHaveBeenCalled();
+    expect(mockCreateBulkJob).not.toHaveBeenCalled();
+    expect(mockBatchUpdate).toHaveBeenCalledWith(
+      expect.anything(),
       expect.objectContaining({ status: "archived", archivedByUserId: DM_UID })
     );
+    expect(mockBatchSet).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "job-1" }),
+      expect.objectContaining({ type: "custom-item-mutation", status: "pending" })
+    );
+    expect(mockBatchCommit).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({ jobId: "job-1", totalCount: 5 });
+  });
+
+  it("mode archive-and-remove: does not archive when job preparation fails", async () => {
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: DM_UID }) });
+    mockItemGet.mockResolvedValue({ exists: true });
+    characters.countGet.mockResolvedValue({ data: () => ({ count: 5 }) });
+    mockPrepareBulkJob.mockImplementationOnce(() => {
+      throw new Error("job preparation failed");
+    });
+
+    await expect(
+      startCustomItemMutationJob(
+        {
+          campaignId: CAMPAIGN_ID,
+          customItemId: CUSTOM_ITEM_ID,
+          mode: "archive-and-remove",
+          actorUserId: DM_UID,
+        },
+        DM_UID,
+        "idem-key"
+      )
+    ).rejects.toThrow("job preparation failed");
+
+    expect(mockItemUpdate).not.toHaveBeenCalled();
+    expect(mockBatchUpdate).not.toHaveBeenCalled();
+    expect(mockBatchCommit).not.toHaveBeenCalled();
   });
 
   it("mode update: resolves the target version without mutating the item", async () => {
@@ -318,7 +376,7 @@ describe("startCustomItemMutationJob", () => {
     ).rejects.toThrow(expect.objectContaining({ code: "failed-precondition" }));
   });
 
-  it("mode publish-and-update: publishes the resolved version transactionally", async () => {
+  it("mode publish-and-update: publishes the resolved version and creates the job atomically", async () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: DM_UID }) });
     mockItemGet.mockResolvedValue({ exists: true });
     mockTransactionGet
@@ -328,8 +386,6 @@ describe("startCustomItemMutationJob", () => {
         data: () => ({ data: { name: "Blade" }, versionNumber: 2 }),
       });
     characters.countGet.mockResolvedValue({ data: () => ({ count: 7 }) });
-    mockCreateBulkJob.mockResolvedValue("job-1");
-
     const result = await startCustomItemMutationJob(
       {
         campaignId: CAMPAIGN_ID,
@@ -349,8 +405,14 @@ describe("startCustomItemMutationJob", () => {
       expect.anything(),
       expect.objectContaining({ status: "published", publishedVersionId: "v2" })
     );
+    expect(mockTransactionSet).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "job-1" }),
+      expect.objectContaining({ type: "custom-item-mutation", status: "pending" })
+    );
     expect(result.jobId).toBe("job-1");
-    expect(mockCreateBulkJob).toHaveBeenCalledWith(
+    expect(mockCreateBulkJob).not.toHaveBeenCalled();
+    expect(mockPrepareBulkJob).toHaveBeenCalledWith(
+      expect.anything(),
       "custom-item-mutation",
       DM_UID,
       expect.objectContaining({ mode: "publish-and-update", targetVersionId: "v2" }),
@@ -358,11 +420,44 @@ describe("startCustomItemMutationJob", () => {
       "idem-key"
     );
   });
+
+  it("mode publish-and-update: does not publish when job preparation fails", async () => {
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: DM_UID }) });
+    mockItemGet.mockResolvedValue({ exists: true });
+    mockTransactionGet
+      .mockResolvedValueOnce({ exists: true, data: () => ({ draftVersionId: "v2", latestVersionId: "v2" }) })
+      .mockResolvedValueOnce({
+        exists: true,
+        data: () => ({ data: { name: "Blade" }, versionNumber: 2 }),
+      });
+    characters.countGet.mockResolvedValue({ data: () => ({ count: 7 }) });
+    mockPrepareBulkJob.mockImplementationOnce(() => {
+      throw new Error("job preparation failed");
+    });
+
+    await expect(
+      startCustomItemMutationJob(
+        {
+          campaignId: CAMPAIGN_ID,
+          customItemId: CUSTOM_ITEM_ID,
+          mode: "publish-and-update",
+          actorUserId: DM_UID,
+        },
+        DM_UID,
+        "idem-key"
+      )
+    ).rejects.toThrow("job preparation failed");
+
+    expect(mockTransactionUpdate).not.toHaveBeenCalled();
+    expect(mockTransactionSet).not.toHaveBeenCalled();
+    expect(mockCreateBulkJob).not.toHaveBeenCalled();
+  });
 });
 
 describe("processCustomItemMutationChunk", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockUserLinkGet.mockResolvedValue({ exists: false });
   });
 
   it("rejects when the job is not a custom-item-mutation job, without touching Firestore", async () => {

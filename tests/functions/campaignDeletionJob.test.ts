@@ -67,6 +67,8 @@ describe("Functions: campaign deletion job", () => {
 
       await campaignRef.collection("sessions").add({ summary: "Session one" });
       await campaignRef.collection("sessions").add({ summary: "Session two" });
+      await campaignRef.collection("sessionSummaries").add({ summary: "Session one" });
+      await campaignRef.collection("sessionSummaries").add({ summary: "Session two" });
 
       const summaryRef = campaignRef.collection("characterSummaries").doc(characterRef.id);
       await summaryRef.set({ campaignId: campaignRef.id, characterName: "Test Acolyte" });
@@ -77,11 +79,11 @@ describe("Functions: campaign deletion job", () => {
       );
       const { data: started } = await startJob({ campaignId: campaignRef.id });
 
-      expect(started.totalCount).toBe(13);
+      expect(started.totalCount).toBe(15);
 
       const final = await drainJob(started.jobId);
       expect(final.done).toBe(true);
-      expect(final.processedCount).toBe(13);
+      expect(final.processedCount).toBe(15);
 
       const lookupRecoveryCode = httpsCallable<{ code: string }, { status: string }>(
         getTestFunctions(),
@@ -98,6 +100,7 @@ describe("Functions: campaign deletion job", () => {
       expect((await threadRef.collection("messages").get()).empty).toBe(true);
       expect((await customItemRef.collection("versions").get()).empty).toBe(true);
       expect((await campaignRef.collection("sessions").get()).empty).toBe(true);
+      expect((await campaignRef.collection("sessionSummaries").get()).empty).toBe(true);
     },
     20000
   );

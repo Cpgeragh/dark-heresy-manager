@@ -19,7 +19,6 @@ export const PRODUCT_LIMITS = {
   messageCharacters: 2_000,
   threadSummaryPreviewCharacters: 500,
   messagesPerPage: 100,
-  messagesRetainedPerThread: 5_000,
   claimHistoryEntriesPerPage: 50,
 
   sessionSummaryCharacters: 4_000,
@@ -29,7 +28,6 @@ export const PRODUCT_LIMITS = {
 
   xpProposalsPerCharacter: 50,
   customItemsPerCampaign: 200,
-  customItemVersions: 50,
   customItemNameCharacters: 100,
   customItemTextCharacters: 4_000,
   customItemDataBytes: 100_000,

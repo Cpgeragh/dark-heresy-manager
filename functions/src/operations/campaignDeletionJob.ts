@@ -9,7 +9,8 @@
 // Mirrors the client's dependent-document tree exactly: every character's
 // claimLog and xpProposals subcollections plus its derived recoveryIndex
 // entry, every thread's messages, every custom item's versions, the flat
-// sessions collection, then the character/thread/customItem documents
+// sessions and member-safe sessionSummaries collections, then the
+// character/thread/customItem documents
 // themselves, then the campaign document last. Like the client, the whole
 // deletion is refused upfront if any character lacks a valid-format
 // Recovery Code, since that's the only way its recoveryIndex entry can be
@@ -17,6 +18,7 @@
 
 import { FieldPath, getFirestore, type CollectionReference, type Firestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
+import { callerIsPrimaryOrLinked } from "../shared/linkedIdentity.js";
 import { hashRecoveryCode } from "../shared/recoveryCode.js";
 import {
   acquireJobLease,
@@ -37,6 +39,7 @@ type Phase =
   | "characterSummaries"
   | "characters"
   | "sessions"
+  | "sessionSummaries"
   | "threadMessages"
   | "threads"
   | "customItemVersions"
@@ -50,6 +53,7 @@ const PHASE_ORDER: readonly Phase[] = [
   "characterSummaries",
   "characters",
   "sessions",
+  "sessionSummaries",
   "threadMessages",
   "threads",
   "customItemVersions",
@@ -89,7 +93,7 @@ export async function startCampaignDeletionJob(
   if (!campaignSnapshot.exists) {
     throw new HttpsError("not-found", "Campaign not found.");
   }
-  if (campaignSnapshot.data()?.dmId !== callerUid) {
+  if (!(await callerIsPrimaryOrLinked(db, callerUid, campaignSnapshot.data()?.dmId))) {
     throw new HttpsError("permission-denied", "Only the campaign DM can delete a campaign.");
   }
 
@@ -130,6 +134,7 @@ export async function startCampaignDeletionJob(
   );
 
   const sessionsCount = await campaignRef.collection("sessions").count().get();
+  const sessionSummariesCount = await campaignRef.collection("sessionSummaries").count().get();
   const characterSummariesCount = await campaignRef.collection("characterSummaries").count().get();
 
   const sum = (counts: { data: () => { count: number } }[]) =>
@@ -146,6 +151,7 @@ export async function startCampaignDeletionJob(
     customItems.length +
     sum(versionCounts) +
     sessionsCount.data().count +
+    sessionSummariesCount.data().count +
     1;
 
   if (totalCount > MAX_JOB_TOTAL_COUNT) {
@@ -314,6 +320,12 @@ async function processPhase(
       return deleteFlatPage(campaignRef.collection("characters"), checkpoint, "characters");
     case "sessions":
       return deleteFlatPage(campaignRef.collection("sessions"), checkpoint, "sessions");
+    case "sessionSummaries":
+      return deleteFlatPage(
+        campaignRef.collection("sessionSummaries"),
+        checkpoint,
+        "sessionSummaries"
+      );
     case "threadMessages":
       return sweepNestedPhase(campaignRef.collection("threads"), "messages", checkpoint, "threadMessages");
     case "threads":
@@ -358,7 +370,10 @@ export async function processCampaignDeletionChunk(
 
   try {
     const campaignSnapshot = await db.collection("campaigns").doc(campaignId).get();
-    if (!campaignSnapshot.exists || campaignSnapshot.data()?.dmId !== callerUid) {
+    if (
+      !campaignSnapshot.exists ||
+      !(await callerIsPrimaryOrLinked(db, callerUid, campaignSnapshot.data()?.dmId))
+    ) {
       throw new HttpsError("permission-denied", "Only the campaign DM can delete this campaign.");
     }
 

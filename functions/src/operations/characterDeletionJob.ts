@@ -11,10 +11,12 @@
 // character document itself, deleted last so nothing is ever left pointing
 // at a character that no longer exists. Unlike the client, the Recovery Code
 // used to find the recoveryIndex entry is read from the character document
-// server-side rather than accepted as a caller-supplied field.
+// server-side rather than accepted as a caller-supplied field. Only its
+// HMAC-derived lookup ID is stored with the resumable job.
 
 import { FieldPath, getFirestore, type Firestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
+import { callerIsPrimaryOrLinked } from "../shared/linkedIdentity.js";
 import { hashRecoveryCode } from "../shared/recoveryCode.js";
 import {
   acquireJobLease,
@@ -78,7 +80,7 @@ export async function startCharacterDeletionJob(
   if (!campaignSnapshot.exists) {
     throw new HttpsError("not-found", "Campaign not found.");
   }
-  if (campaignSnapshot.data()?.dmId !== callerUid) {
+  if (!(await callerIsPrimaryOrLinked(db, callerUid, campaignSnapshot.data()?.dmId))) {
     throw new HttpsError("permission-denied", "Only the campaign DM can delete a character.");
   }
 
@@ -95,8 +97,9 @@ export async function startCharacterDeletionJob(
     );
   }
 
+  const recoveryIndexId = hashRecoveryCode(recoveryCode, hmacSecret);
   const threadRef = campaignRef.collection("threads").doc(input.characterId);
-  const recoveryRef = db.collection("recoveryIndex").doc(hashRecoveryCode(recoveryCode, hmacSecret));
+  const recoveryRef = db.collection("recoveryIndex").doc(recoveryIndexId);
   const summaryRef = campaignRef.collection("characterSummaries").doc(input.characterId);
 
   const [claimLogCount, xpProposalsCount, messagesCount, threadSnapshot, recoverySnapshot, summarySnapshot] =
@@ -128,7 +131,7 @@ export async function startCharacterDeletionJob(
   const jobId = await createBulkJob(
     "character-deletion",
     callerUid,
-    { campaignId: input.campaignId, characterId: input.characterId, recoveryCode },
+    { campaignId: input.campaignId, characterId: input.characterId, recoveryIndexId },
     totalCount,
     idempotencyKey
   );
@@ -140,9 +143,8 @@ async function processPhase(
   db: Firestore,
   campaignId: string,
   characterId: string,
-  recoveryCode: string,
-  checkpoint: Checkpoint,
-  hmacSecret: string
+  recoveryIndexId: string,
+  checkpoint: Checkpoint
 ): Promise<{ processed: number; nextCheckpoint: Checkpoint | null }> {
   const campaignRef = db.collection("campaigns").doc(campaignId);
   const characterRef = campaignRef.collection("characters").doc(characterId);
@@ -183,7 +185,7 @@ async function processPhase(
       return { processed: threadSnapshot.exists ? 1 : 0, nextCheckpoint: { phase: nextPhase("thread")!, cursor: null } };
     }
     case "recoveryIndex": {
-      const recoveryRef = db.collection("recoveryIndex").doc(hashRecoveryCode(recoveryCode, hmacSecret));
+      const recoveryRef = db.collection("recoveryIndex").doc(recoveryIndexId);
       const recoverySnapshot = await recoveryRef.get();
       if (recoverySnapshot.exists) await recoveryRef.delete();
       return {
@@ -219,8 +221,7 @@ export interface ProcessCharacterDeletionChunkResult {
 
 export async function processCharacterDeletionChunk(
   input: ProcessCharacterDeletionChunkInput,
-  callerUid: string,
-  hmacSecret: string
+  callerUid: string
 ): Promise<ProcessCharacterDeletionChunkResult> {
   const { job, leaseId } = await acquireJobLease(input.jobId, callerUid);
   if (job.type !== "character-deletion") {
@@ -228,15 +229,18 @@ export async function processCharacterDeletionChunk(
   }
 
   const db = getFirestore();
-  const { campaignId, characterId, recoveryCode } = job.data as {
+  const { campaignId, characterId, recoveryIndexId } = job.data as {
     campaignId: string;
     characterId: string;
-    recoveryCode: string;
+    recoveryIndexId: string;
   };
 
   try {
     const campaignSnapshot = await db.collection("campaigns").doc(campaignId).get();
-    if (!campaignSnapshot.exists || campaignSnapshot.data()?.dmId !== callerUid) {
+    if (
+      !campaignSnapshot.exists ||
+      !(await callerIsPrimaryOrLinked(db, callerUid, campaignSnapshot.data()?.dmId))
+    ) {
       throw new HttpsError("permission-denied", "Only the campaign DM can delete this character.");
     }
 
@@ -245,9 +249,8 @@ export async function processCharacterDeletionChunk(
       db,
       campaignId,
       characterId,
-      recoveryCode,
-      checkpoint,
-      hmacSecret
+      recoveryIndexId,
+      checkpoint
     );
 
     if (nextCheckpoint === null) {

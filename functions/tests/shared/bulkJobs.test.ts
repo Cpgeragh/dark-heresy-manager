@@ -10,6 +10,7 @@ import {
   handleChunkFailure,
   isRetriableChunkError,
   MAX_CHUNK_RETRIES,
+  MAX_JOB_TOTAL_COUNT,
   type BulkJobRecord,
 } from "../../src/shared/bulkJobs";
 
@@ -78,6 +79,24 @@ describe("createBulkJob", () => {
     await createBulkJob("test-job", "user-1", {}, 10, null);
 
     expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({ idempotencyKey: null }));
+  });
+
+  it("rejects a job above the global safety ceiling before writing anything", async () => {
+    await expect(
+      createBulkJob("test-job", "user-1", {}, MAX_JOB_TOTAL_COUNT + 1, null)
+    ).rejects.toThrow(expect.objectContaining({ code: "resource-exhausted" }));
+
+    expect(mockCollection).not.toHaveBeenCalled();
+    expect(mockSet).not.toHaveBeenCalled();
+  });
+
+  it("rejects an invalid job size before writing anything", async () => {
+    await expect(createBulkJob("test-job", "user-1", {}, -1, null)).rejects.toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+
+    expect(mockCollection).not.toHaveBeenCalled();
+    expect(mockSet).not.toHaveBeenCalled();
   });
 });
 

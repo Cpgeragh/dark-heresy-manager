@@ -30,6 +30,7 @@ const {
   threads,
   customItems,
   sessions,
+  sessionSummaries,
   characterSummaries,
   claimLogChild,
   xpProposalsChild,
@@ -38,6 +39,7 @@ const {
   mockRecoveryDoc,
   mockRecoveryGetImpl,
   mockRecoveryDelete,
+  mockUserLinkGet,
 } = vi.hoisted(() => {
   function makeCollectionMock() {
     const countGet = vi.fn();
@@ -90,6 +92,7 @@ const {
   }));
 
   const sessions = makeCollectionMock();
+  const sessionSummaries = makeCollectionMock();
   const characterSummaries = makeCollectionMock();
 
   const mockCampaignGet = vi.fn();
@@ -102,6 +105,7 @@ const {
       if (name === "threads") return threads.ref;
       if (name === "customItems") return customItems.ref;
       if (name === "sessions") return sessions.ref;
+      if (name === "sessionSummaries") return sessionSummaries.ref;
       if (name === "characterSummaries") return characterSummaries.ref;
       throw new Error(`Unexpected campaign subcollection: ${name}`);
     }),
@@ -113,6 +117,7 @@ const {
     get: () => mockRecoveryGetImpl(code),
     delete: mockRecoveryDelete,
   }));
+  const mockUserLinkGet = vi.fn();
 
   const mockCreateBulkJob = vi.fn();
   const mockAcquireJobLease = vi.fn();
@@ -124,6 +129,7 @@ const {
   const mockCollection = vi.fn((name: string) => {
     if (name === "campaigns") return { doc: vi.fn(() => mockCampaignRef) };
     if (name === "recoveryIndex") return { doc: mockRecoveryDoc };
+    if (name === "userLinks") return { doc: vi.fn(() => ({ get: mockUserLinkGet })) };
     throw new Error(`Unexpected collection: ${name}`);
   });
 
@@ -144,6 +150,7 @@ const {
     threads,
     customItems,
     sessions,
+    sessionSummaries,
     characterSummaries,
     claimLogChild,
     xpProposalsChild,
@@ -152,6 +159,7 @@ const {
     mockRecoveryDoc,
     mockRecoveryGetImpl,
     mockRecoveryDelete,
+    mockUserLinkGet,
   };
 });
 
@@ -211,6 +219,7 @@ function makeCharacterDoc(id: string, recoveryCode: string, claimLogCount: numbe
 describe("startCampaignDeletionJob", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockUserLinkGet.mockResolvedValue({ exists: false });
   });
 
   it("rejects when the campaign does not exist", async () => {
@@ -255,6 +264,7 @@ describe("startCampaignDeletionJob", () => {
       docs: [{ ref: { collection: () => ({ count: () => ({ get: () => Promise.resolve({ data: () => ({ count: 3 }) }) }) }) } }],
     });
     sessions.countGet.mockResolvedValue({ data: () => ({ count: 4 }) });
+    sessionSummaries.countGet.mockResolvedValue({ data: () => ({ count: 4 }) });
     characterSummaries.countGet.mockResolvedValue({ data: () => ({ count: 2 }) });
     mockRecoveryGetImpl.mockImplementation((hash: string) =>
       Promise.resolve({ exists: hash === hashRecoveryCode("DH-AAAA-1111", "secret") })
@@ -266,13 +276,13 @@ describe("startCampaignDeletionJob", () => {
     // 2 characters + (2+1 claimLog/xp for char-1) + (0+0 for char-2)
     // + 1 recoveryIndex entry (only char-1's exists) + 2 characterSummaries
     // + 1 thread + 5 messages + 1 customItem + 3 versions + 4 sessions
-    // + 1 campaign = 23
-    expect(result).toEqual({ jobId: "job-1", totalCount: 23 });
+    // + 4 member-safe session summaries + 1 campaign = 27
+    expect(result).toEqual({ jobId: "job-1", totalCount: 27 });
     expect(mockCreateBulkJob).toHaveBeenCalledWith(
       "campaign-deletion",
       DM_UID,
       { campaignId: CAMPAIGN_ID },
-      23,
+      27,
       "idem-key"
     );
   });
@@ -283,6 +293,7 @@ describe("startCampaignDeletionJob", () => {
     threads.pageGet.mockResolvedValue({ docs: [] });
     customItems.pageGet.mockResolvedValue({ docs: [] });
     sessions.countGet.mockResolvedValue({ data: () => ({ count: 20_000 }) });
+    sessionSummaries.countGet.mockResolvedValue({ data: () => ({ count: 0 }) });
     characterSummaries.countGet.mockResolvedValue({ data: () => ({ count: 0 }) });
 
     await expect(
@@ -295,6 +306,7 @@ describe("startCampaignDeletionJob", () => {
 describe("processCampaignDeletionChunk", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockUserLinkGet.mockResolvedValue({ exists: false });
   });
 
   it("rejects when the job is not a campaign-deletion job, without touching Firestore", async () => {
@@ -501,6 +513,33 @@ describe("processCampaignDeletionChunk", () => {
     });
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: DM_UID }) });
     sessions.pageGet.mockResolvedValue({ empty: false, docs: [{ id: "s1", ref: {} }] });
+
+    await processCampaignDeletionChunk({ jobId: "job-1" }, DM_UID, "secret");
+
+    expect(mockAdvanceJobCheckpoint).toHaveBeenCalledWith(
+      "job-1",
+      "lease-1",
+      JSON.stringify({ phase: "sessionSummaries", parentCursor: null, cursor: null }),
+      1
+    );
+  });
+
+  it("deletes a flat sessionSummaries page and then advances to thread messages", async () => {
+    mockAcquireJobLease.mockResolvedValue({
+      job: makeJob({
+        checkpoint: JSON.stringify({
+          phase: "sessionSummaries",
+          parentCursor: null,
+          cursor: null,
+        }),
+      }),
+      leaseId: "lease-1",
+    });
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: DM_UID }) });
+    sessionSummaries.pageGet.mockResolvedValue({
+      empty: false,
+      docs: [{ id: "s1", ref: {} }],
+    });
 
     await processCampaignDeletionChunk({ jobId: "job-1" }, DM_UID, "secret");
 

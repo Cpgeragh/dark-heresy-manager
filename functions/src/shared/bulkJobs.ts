@@ -9,7 +9,12 @@
 // fresh lease ID per acquisition stops a delayed, zombie call from an
 // earlier holder writing after a newer holder has taken over.
 
-import { getFirestore, FieldValue } from "firebase-admin/firestore";
+import {
+  getFirestore,
+  FieldValue,
+  type DocumentReference,
+  type Firestore,
+} from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import { randomUUID } from "node:crypto";
 import { IDEMPOTENCY_COLLECTION } from "./idempotency.js";
@@ -49,14 +54,35 @@ export interface BulkJobRecord {
   updatedAt: number;
 }
 
-export async function createBulkJob(
+export interface PreparedBulkJob {
+  jobId: string;
+  ref: DocumentReference;
+  record: BulkJobRecord;
+}
+
+/**
+ * Validates and prepares a bulk-job write without committing it. Operations
+ * that must atomically create a job alongside other state changes can add
+ * the returned ref/record to their own transaction or batch.
+ */
+export function prepareBulkJob(
+  db: Firestore,
   type: string,
   actorUid: string,
   data: Record<string, unknown>,
   totalCount: number,
   idempotencyKey: string | null
-): Promise<string> {
-  const db = getFirestore();
+): PreparedBulkJob {
+  if (!Number.isSafeInteger(totalCount) || totalCount < 0) {
+    throw new HttpsError("invalid-argument", "Bulk-job size is invalid.");
+  }
+  if (totalCount > MAX_JOB_TOTAL_COUNT) {
+    throw new HttpsError(
+      "resource-exhausted",
+      `This operation would affect more than ${MAX_JOB_TOTAL_COUNT} documents, which is too large to process safely right now.`
+    );
+  }
+
   const jobId = randomUUID();
   const now = Date.now();
   const record: BulkJobRecord = {
@@ -76,8 +102,25 @@ export async function createBulkJob(
     createdAt: now,
     updatedAt: now,
   };
-  await db.collection(BULK_JOBS_COLLECTION).doc(jobId).set(record);
-  return jobId;
+
+  return {
+    jobId,
+    ref: db.collection(BULK_JOBS_COLLECTION).doc(jobId),
+    record,
+  };
+}
+
+export async function createBulkJob(
+  type: string,
+  actorUid: string,
+  data: Record<string, unknown>,
+  totalCount: number,
+  idempotencyKey: string | null
+): Promise<string> {
+  const db = getFirestore();
+  const prepared = prepareBulkJob(db, type, actorUid, data, totalCount, idempotencyKey);
+  await prepared.ref.set(prepared.record);
+  return prepared.jobId;
 }
 
 export async function acquireJobLease(

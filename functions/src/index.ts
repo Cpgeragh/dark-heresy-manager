@@ -392,7 +392,7 @@ export const startCharacterDeletionJob = onCall<StartCharacterDeletionJobInput>(
 );
 
 export const processCharacterDeletionChunk = onCall<ProcessCharacterDeletionChunkInput>(
-  { secrets: [recoveryCodeHmacSecret], timeoutSeconds: 30 },
+  { timeoutSeconds: 30 },
   (request) => {
     const callerUid = request.auth?.uid ?? "anonymous";
     return protectedCallable<ProcessCharacterDeletionChunkInput, ProcessCharacterDeletionChunkResult>({
@@ -404,8 +404,7 @@ export const processCharacterDeletionChunk = onCall<ProcessCharacterDeletionChun
       rateLimits: [
         { key: `process-character-deletion-chunk:${callerUid}`, limit: 300, windowMs: 60 * 60 * 1000 },
       ],
-      handler: ({ uid, data }) =>
-        runProcessCharacterDeletionChunk(data, uid, recoveryCodeHmacSecret.value()),
+      handler: ({ uid, data }) => runProcessCharacterDeletionChunk(data, uid),
     });
   }
 );

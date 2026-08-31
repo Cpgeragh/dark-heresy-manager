@@ -16,7 +16,6 @@ describe("hard product limits", () => {
       messageCharacters: 2_000,
       threadSummaryPreviewCharacters: 500,
       messagesPerPage: 100,
-      messagesRetainedPerThread: 5_000,
       claimHistoryEntriesPerPage: 50,
       sessionSummaryCharacters: 4_000,
       sessionDmNotesCharacters: 4_000,
@@ -24,7 +23,6 @@ describe("hard product limits", () => {
       sessionAttendees: 100,
       xpProposalsPerCharacter: 50,
       customItemsPerCampaign: 200,
-      customItemVersions: 50,
       customItemNameCharacters: 100,
       customItemTextCharacters: 4_000,
       customItemDataBytes: 100_000,
@@ -47,9 +45,6 @@ describe("hard product limits", () => {
   });
 
   it("keeps page, encoded-data, and bulk ceilings inside their parent boundaries", () => {
-    expect(PRODUCT_LIMITS.messagesPerPage).toBeLessThanOrEqual(
-      PRODUCT_LIMITS.messagesRetainedPerThread
-    );
     expect(PRODUCT_LIMITS.portraitEncodedBytes).toBeLessThan(PRODUCT_LIMITS.characterDocumentBytes);
     expect(PRODUCT_LIMITS.characterImportBytes).toBeLessThan(PRODUCT_LIMITS.characterDocumentBytes);
     expect(PRODUCT_LIMITS.bulkOperationDocuments).toBeLessThan(500);
