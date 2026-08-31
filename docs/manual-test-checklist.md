@@ -827,9 +827,8 @@ Keep the DM on Admin and the owning player on the same character in a second pro
 - [ ] No XP-proposal approval or rejection controls appear: the current product has no proposal workflow, and legacy proposal documents cannot be created or changed by the client
 - [ ] Claim history stays closed initially; pressing Open History loads at most the latest 50 events, shows the correct owner name (not just a raw ID) for the most recent claim, and Close History removes the list without stale content when reopened
 - [ ] Force Release Ownership actually unclaims the character (owner becomes "None") separately from Toggle Player Edit Permission, which only flips whether the _current_ owner can edit — confirm these are doing two different things, not the same thing twice
-- [ ] Force Assign To… opens a picker listing every campaign member by resolved first name (falling back to their raw UID for a member with no profile name yet); selecting one immediately assigns the character to them and turns Player Edit Permission on
-- [ ] Force Assign To… is disabled when the campaign has no members yet
-- [ ] Force-assigning a character that already has a different owner reassigns it directly with no release step in between — confirm the previous owner loses access and the new owner gains it immediately
+- [ ] On an unclaimed character, Force Assign To… opens a picker listing every campaign member by resolved first name (falling back to their raw UID for a member with no profile name yet); selecting one immediately assigns the character to them and turns Player Edit Permission on
+- [ ] Force Assign To… is disabled when the character is already claimed or when the campaign has no members yet; the current owner is never offered as an assignment target
 - [ ] Tab is genuinely invisible/inaccessible to non-DM players
 
 ## 21. Custom Item Library
@@ -892,7 +891,7 @@ in the URL (`?step=`), not just component state.
 
 ### How to test this page
 
-Use a new disposable browser profile for each path: new user, reclaim, refresh-on-code, and legacy user needing NameGate. Copy the generated recovery code to a secure scratch record and prove it on a second profile. At every step test refresh, Back, and Forward before completing onboarding.
+Use a new disposable browser profile for each path: new user, reclaim, and refresh-on-code. Copy the generated recovery code to a secure scratch record and prove it on a second profile. At every step test refresh, Back, and Forward before completing onboarding.
 
 - [ ] Welcome step — "Get Started" stays disabled until a first name is entered; spaces are stripped as you type, not just trimmed on submit
 - [ ] Get Started generates and displays a recovery code once — the "Copy code" button must actually be pressed (button label flips to "Copied") before the "I've saved my recovery code" checkbox becomes checkable, and "I've saved my code" stays disabled until both the copy and the checkbox are done
@@ -900,7 +899,8 @@ Use a new disposable browser profile for each path: new user, reclaim, refresh-o
 - [ ] Refresh the page while sitting on the show-code step — the code is re-fetched from the server rather than lost (it was never only in local state); if no code exists server-side for some reason, it quietly falls back to the Welcome step instead of showing a blank code
 - [ ] "Returning user? Reclaim your identity" path — entering a previously-issued recovery code from another device migrates every DM-owned campaign and every player-owned character over to this device's account in one go
 - [ ] With a deliberately seeded account above a Stage 2 reclaim ceiling, recovery stops with the protected-recovery message before any campaign or character changes owner; retrying a normal-sized recovery afterwards still works, proving the temporary proof record was cleaned up
-- [ ] After onboarding completes once, closing and reopening the app never shows onboarding again — an existing user who was onboarded before first names existed gets sent to the shorter NameGate screen instead (name field only, no recovery code step) rather than back through full onboarding
+- [ ] After onboarding completes once, closing and reopening the app never shows onboarding again; if an onboarded account is missing its required profile, the app fails closed with an account-profile loading error and never asks the user to recreate the name
+- [ ] Reclaim an identity that already has a saved first name on a fresh anonymous-auth device — the reclaim control stays on "Finishing recovery…" until the existing name is live, then the dashboard opens directly and the obsolete profile under the old UID no longer exists
 
 ## 25. Dashboard
 
@@ -1101,12 +1101,12 @@ These checks exercise the repository's offline dependency, credential and build 
 
 Run each focused command from the project folder. Restore every temporary synthetic fixture after confirming the expected failure. The existing `serviceAccountKey.json` remains an expected blocker until Stage 4 replaces and revokes that credential, so distinguish that deliberate finding from a checker malfunction.
 
-- [ ] Run `npm run check:secrets` with the current project — it states that it performs no network request or upload, prints only the approved `VITE_FIREBASE_API_KEY` variable name (not its value), and fails closed on the existing service-account file without exposing any credential field value
-- [ ] Add a temporary ignored environment fixture containing only `VITE_FIREBASE_API_KEY`, then try an unapproved or secret-named variable — the public setting is accepted when ignored, while the other variable is rejected by name without its value appearing in output
+- [ ] Run `npm run check:secrets` with the current project — it states that it performs no network request or upload, prints only the exact approved Firebase web configuration variable names (never their values), and fails closed on a service-account file without exposing any credential field value
+- [ ] Add a temporary ignored environment fixture containing the exact Firebase web configuration allowlist, then try an unapproved or secret-named variable — the public settings are accepted when ignored, while the other variable is rejected by name without its value appearing in output
 - [ ] In a disposable fixture directory, add synthetic service-account fields, a synthetic private-key marker and credential-like filenames — each is rejected locally, and neither the synthetic key body nor field values are printed
 - [ ] Exercise the supported synthetic GitHub, AWS, Slack and live Stripe token shapes — each produces a blocking path/type finding without echoing the matched token
-- [ ] Put a synthetic `DH-XXXX-XXXX`-shaped non-placeholder value in `tests/` and then in production source — the test fixture is allowed, the production copy is rejected, and the code itself is not printed
-- [ ] Reference a secret-named `VITE_` variable or expose the complete `import.meta.env` object from production source — the checker rejects the browser exposure; the approved Firebase public key and Vite's built-in environment flags continue to pass
+- [ ] Put a synthetic `DH-XXXX-XXXX`-shaped non-placeholder value in both `tests/` locations (`tests/` and `functions/tests/`) and then in production source — both test fixtures are allowed, the production copy is rejected, and the code itself is not printed
+- [ ] Reference a secret-named `VITE_` variable or expose the complete `import.meta.env` object from production source — the checker rejects the browser exposure; the exact Firebase web configuration allowlist and Vite's built-in environment flags continue to pass
 - [ ] Run `npm run check:lockfile`, then create disposable direct-dependency drift or a second lockfile — the current lock passes offline, while either inconsistent fixture fails before a build begins
 - [ ] After Stage 4 removes the service-account blocker, run `npm run check:deployment:local` — it completes the local safety checks, production build, application tests and Firestore emulator rules tests; no online vulnerability audit runs unless network access is separately approved, and no source or secret is uploaded to an external scanner
 
@@ -1156,11 +1156,11 @@ static roll-range label rather than an interactive roller; no
 manual roll-button test is therefore required.
 
 **App-shell and account-system source review (§23–33):** The reviewed scope
-includes `App.tsx` (route shell, auth gate, onboarding gate, NameGate),
+includes `App.tsx` (route shell, auth gate and onboarding/profile-integrity gates),
 `useAuth`, `useDeviceLink`,
 `useLinkDevice`, `identityService.ts`, `deviceLinkService.ts`,
 `userAccountService.ts`, `profileService.ts`, `Settings.tsx`,
-`Onboarding.tsx`, `NameGate.tsx`, `Dashboard.tsx` and all its inline
+`Onboarding.tsx`, `Dashboard.tsx` and all its inline
 sub-components, `CampaignOverview.tsx` plus every file under
 `pages/CampaignOverview/` (`SessionForm`, `SessionCard`, `CharacterRow`,
 `CustomItemLibraryAdmin`, `CustomItemAdminRow`), the `ClaimCharacter/` flow
