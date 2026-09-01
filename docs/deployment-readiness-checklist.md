@@ -12,8 +12,12 @@ A reusable checklist to run through before deploying anything (rules, Functions,
 
 - [ ] All Functions build cleanly (`npm --prefix functions run build`)
 - [ ] `recoveryCodeHmacSecret` configured in Secret Manager for the target project, not the local `.secret.local` placeholder
-- [ ] App Check confirmed wired in monitoring mode (not yet enforced, that's intentional for the target environment)
+- [ ] App Check confirmed wired in monitoring mode, deliberately not blocking requests for the target environment
 - [ ] Rate limits, idempotency, and audit logging confirmed working against a real deployed callable, not only the emulator
+
+## Observability
+
+- [ ] App Check verification log-based metrics (`appcheck-successes`, `appcheck-failures`), the alert policy, and the dashboard chart recreated for the target project; these are per-project in Cloud Monitoring and do not carry over from staging
 
 ## Client configuration
 
@@ -29,11 +33,11 @@ A reusable checklist to run through before deploying anything (rules, Functions,
 ## Credential hygiene
 
 - [ ] No service-account key file present anywhere in what's being deployed, Functions get runtime credentials automatically once deployed, no key file is ever needed for that
-- [ ] Confirm which Google account and which project a deploy is actually targeting before running `firebase deploy`, a real, demonstrated risk this session during 4.0's setup
+- [ ] Confirm which Google account and which project a deploy is actually targeting before running `firebase deploy`, a real, demonstrated risk found during earlier deployment setup
 
 ## Cost protections
 
-- [ ] Billing/budget alert live and correctly scoped for the target environment (4.3)
+- [ ] Billing/budget alert live and correctly scoped for the target environment
 - [ ] `MAX_JOB_TOTAL_COUNT` and other bulk-job ceilings still appropriate for the target environment's expected usage
 
 ## Backups
