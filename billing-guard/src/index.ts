@@ -56,33 +56,40 @@ export async function disableBillingForProject(projectId: string, accessToken: s
   }
 }
 
-export const billingGuard = onMessagePublished("budget-alerts", async (event) => {
-  const notification = parseBudgetNotification(event.data.message.data);
-  logger.info("Received budget notification", { notification });
+export const billingGuard = onMessagePublished(
+  {
+    topic: "budget-alerts",
+    region: "europe-west2",
+    serviceAccount: "billing-guard-runner@dark-heresy-billing-guard.iam.gserviceaccount.com",
+  },
+  async (event) => {
+    const notification = parseBudgetNotification(event.data.message.data);
+    logger.info("Received budget notification", { notification });
 
-  if (!hasReachedCap(notification)) {
-    logger.info("Spend below budget cap, no action taken.", {
-      costAmount: notification.costAmount,
-      budgetAmount: notification.budgetAmount,
-    });
-    return;
+    if (!hasReachedCap(notification)) {
+      logger.info("Spend below budget cap, no action taken.", {
+        costAmount: notification.costAmount,
+        budgetAmount: notification.budgetAmount,
+      });
+      return;
+    }
+
+    const dryRun = process.env.BILLING_GUARD_DRY_RUN === "true";
+    logger.warn(
+      dryRun
+        ? `Budget cap reached (${notification.costAmount} >= ${notification.budgetAmount}). Dry run: billing not disabled.`
+        : `Budget cap reached (${notification.costAmount} >= ${notification.budgetAmount}). Disabling billing for monitored projects.`,
+      { monitoredProjectIds: MONITORED_PROJECT_IDS }
+    );
+
+    if (dryRun) {
+      return;
+    }
+
+    const accessToken = await getBillingAccessToken();
+    await Promise.all(
+      MONITORED_PROJECT_IDS.map((projectId) => disableBillingForProject(projectId, accessToken))
+    );
+    logger.warn("Billing disabled for monitored projects.", { monitoredProjectIds: MONITORED_PROJECT_IDS });
   }
-
-  const dryRun = process.env.BILLING_GUARD_DRY_RUN === "true";
-  logger.warn(
-    dryRun
-      ? `Budget cap reached (${notification.costAmount} >= ${notification.budgetAmount}). Dry run: billing not disabled.`
-      : `Budget cap reached (${notification.costAmount} >= ${notification.budgetAmount}). Disabling billing for monitored projects.`,
-    { monitoredProjectIds: MONITORED_PROJECT_IDS }
-  );
-
-  if (dryRun) {
-    return;
-  }
-
-  const accessToken = await getBillingAccessToken();
-  await Promise.all(
-    MONITORED_PROJECT_IDS.map((projectId) => disableBillingForProject(projectId, accessToken))
-  );
-  logger.warn("Billing disabled for monitored projects.", { monitoredProjectIds: MONITORED_PROJECT_IDS });
-});
+);

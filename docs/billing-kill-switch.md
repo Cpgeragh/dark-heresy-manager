@@ -10,7 +10,7 @@ Fires when actual spend reaches the same €10 monthly amount already configured
 
 ## Architecture
 
-A dedicated GCP project, `dark-heresy-manager-billing-guard`, holds one Pub/Sub-triggered Cloud Function and nothing else. The existing budget publishes a notification to a Pub/Sub topic in this project on every threshold evaluation, in addition to its existing email alerts. The function reads each notification, and when the reported cost has reached the budget amount, calls the Cloud Billing API to detach billing from both monitored projects by name.
+A dedicated GCP project, `dark-heresy-billing-guard`, holds one Pub/Sub-triggered Cloud Function and nothing else. The existing budget publishes a notification to a Pub/Sub topic in this project on every threshold evaluation, in addition to its existing email alerts. The function reads each notification, and when the reported cost has reached the budget amount, calls the Cloud Billing API to detach billing from both monitored projects by name.
 
 The function never modifies billing on its own host project. Its service account holds the Project Billing Manager role (`roles/billing.projectManager`), granted individually on each of the two monitored projects, not the broader Billing Account Administrator role.
 
@@ -38,6 +38,8 @@ Relinking billing restores both projects. No other recovery step exists or is ne
 
 Console: for each project, open the project's Billing page and link the billing account (`018888-6B5370-BF916B`).
 
+Precise navigation: Firebase Console → open the project → Settings in the menu → Usage and billing → Details & settings tab → Modify plan → Blaze → select the existing billing account.
+
 Command line, per project:
 
     gcloud billing projects link <PROJECT_ID> --billing-account=018888-6B5370-BF916B
@@ -46,4 +48,4 @@ The exact time services take to resume accepting requests after relinking has no
 
 ## Removal
 
-This mechanism is separate from the underlying app and the shared budget's email alerts. Removing it means deleting the Pub/Sub topic's connection to the budget and, if no longer wanted at all, deleting the `dark-heresy-manager-billing-guard` project. Both monitored projects and the existing email alerts are unaffected by its removal.
+This mechanism is separate from the underlying app and the shared budget's email alerts. Removing it means deleting the Pub/Sub topic's connection to the budget and, if no longer wanted at all, deleting the `dark-heresy-billing-guard` project. Both monitored projects and the existing email alerts are unaffected by its removal.
