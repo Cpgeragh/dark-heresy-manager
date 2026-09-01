@@ -1,9 +1,12 @@
 // functions/src/shared/auth.ts
 //
 // Shared auth + App Check gate for every protected callable. Every
-// callable requires a signed-in caller. App Check is verified and
-// recorded, not yet enforced — it needs a period of clean App Check
-// monitoring in production before it's allowed to block a real call.
+// callable requires a signed-in caller. App Check verification result
+// is checked and recorded on every call, but a failed or missing
+// check never blocks the request by itself, only signed-in-caller
+// status does. Recording without blocking is what makes it possible
+// to catch a false positive without ever locking out a real user
+// over it.
 
 import { HttpsError } from "firebase-functions/v2/https";
 import type { CallableRequest } from "firebase-functions/v2/https";

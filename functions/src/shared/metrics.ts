@@ -2,8 +2,8 @@
 //
 // Shared feature-usage metrics for protected callables. A simple
 // per-feature invocation counter, durable and queryable locally via
-// Firestore. Real Cloud Monitoring integration is future billing-
-// protection work, once the project is actually on Blaze.
+// Firestore rather than Cloud Monitoring, avoiding any additional
+// billing-plan dependency for basic usage counting.
 
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 

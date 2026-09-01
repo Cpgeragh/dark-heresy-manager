@@ -239,8 +239,7 @@ service cloud.firestore {
     match /campaigns/{campaignId} {
 
       // DM (or a linked device) or a current member can read campaign metadata.
-      // A restricted per-character summary for a wider "party roster" view is
-      // a possible future addition; full campaign metadata stays locked to DM + members.
+      // Full campaign metadata stays locked to DM + members.
       allow get: if dmOwnsOrLinked(resource.data.dmId) ||
                      (
                        request.auth != null &&

@@ -7,7 +7,7 @@ Status: manual staging export and restore have been verified. Scheduled exports 
 - **Firestore data** — the actual target. Every active collection, including `campaigns`, characters and their subcollections, threads and messages, custom items and versions, private sessions and member-safe session summaries, `recoveryIndex`, `identityRecoveryIndex`, `identitySecret`, `users`, `userProfiles`, `userLinks`, and operational records.
 - **Cloud Functions source and Firestore security rules** — already covered by git, no separate backup mechanism needed.
 - **Firebase Authentication** — deliberately out of scope. The app uses only anonymous auth; no data of independent value lives on the Auth record itself, everything meaningful lives in Firestore documents keyed by UID, already covered above.
-- **The Recovery Code HMAC secret** (`recoveryCodeHmacSecret`, Secret Manager) — losing it would make every existing Recovery Code's index entry unverifiable, though affected codes could be rotated. Whether this needs its own secure backup (e.g. a copy kept in a password manager, outside Secret Manager) is a decision still open, not resolved by this document.
+- **The Recovery Code HMAC secret** (`recoveryCodeHmacSecret`, Secret Manager) — losing it would make every existing Recovery Code's index entry unverifiable, though affected codes could be rotated. It currently has no backup outside Secret Manager.
 
 ## Mechanism
 
@@ -15,7 +15,7 @@ Firestore's managed export/import to a dedicated Cloud Storage bucket. A manual 
 
 ## Frequency and retention
 
-Manual exports remain until deliberately deleted or covered by a separately configured bucket lifecycle rule. Daily exports and 30-day rolling retention remain a proposal, not an active guarantee.
+Manual exports remain until deliberately deleted or covered by a separately configured bucket lifecycle rule. There is no scheduled export or automatic retention policy.
 
 ## Restore
 

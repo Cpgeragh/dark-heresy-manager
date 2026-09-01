@@ -38,4 +38,4 @@ A character Recovery Code can be revoked independently. Claiming consumes the su
 
 ## Backups and exports
 
-Manual staging exports remain in their selected Cloud Storage destination until deliberately deleted or covered by a separately configured bucket lifecycle rule. Primary deletion does not retroactively alter an existing export. Scheduled exports and automatic 30-day retention are not currently active.
+Manual staging exports remain in their selected Cloud Storage destination until deliberately deleted or covered by a separately configured bucket lifecycle rule. Primary deletion does not retroactively alter an existing export. There is no scheduled export or automatic retention policy.
