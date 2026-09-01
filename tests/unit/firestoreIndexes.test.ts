@@ -63,7 +63,10 @@ describe("reviewed Firestore index configuration", () => {
       {
         collectionGroup: "characters",
         fieldPath: "userId",
-        indexes: [{ order: "ASCENDING", queryScope: "COLLECTION_GROUP" }],
+        indexes: [
+          { order: "ASCENDING", queryScope: "COLLECTION" },
+          { order: "ASCENDING", queryScope: "COLLECTION_GROUP" },
+        ],
       },
     ]);
   });
