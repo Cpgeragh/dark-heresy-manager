@@ -421,6 +421,35 @@ describe("startCustomItemMutationJob", () => {
     );
   });
 
+  it("does not touch any other version's document when publishing a new one", async () => {
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: DM_UID }) });
+    mockItemGet.mockResolvedValue({ exists: true });
+    mockTransactionGet
+      .mockResolvedValueOnce({ exists: true, data: () => ({ draftVersionId: "v2", latestVersionId: "v1" }) })
+      .mockResolvedValueOnce({
+        exists: true,
+        data: () => ({ data: { name: "Blade" }, versionNumber: 2 }),
+      });
+    characters.countGet.mockResolvedValue({ data: () => ({ count: 7 }) });
+
+    await startCustomItemMutationJob(
+      {
+        campaignId: CAMPAIGN_ID,
+        customItemId: CUSTOM_ITEM_ID,
+        mode: "publish-and-update",
+        actorUserId: DM_UID,
+      },
+      DM_UID,
+      "idem-key"
+    );
+
+    // Exactly two writes happen inside the transaction: the target version and
+    // the item itself. The mocked transaction has no delete() at all, so any
+    // attempt to remove the previous version (v1) would throw here rather than
+    // silently succeed.
+    expect(mockTransactionUpdate).toHaveBeenCalledTimes(2);
+  });
+
   it("mode publish-and-update: does not publish when job preparation fails", async () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: DM_UID }) });
     mockItemGet.mockResolvedValue({ exists: true });
