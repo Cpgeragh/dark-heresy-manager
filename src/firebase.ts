@@ -55,4 +55,4 @@ export const db = initializeFirestore(app, {
   }),
 });
 export const auth = getAuth(app);
-export const functions = getFunctions(app);
+export const functions = getFunctions(app, "europe-west2");

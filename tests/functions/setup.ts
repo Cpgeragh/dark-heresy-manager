@@ -19,7 +19,7 @@ function ensureApp(): FirebaseApp {
 
 export function getTestFunctions(): Functions {
   if (!functions) {
-    functions = getFunctions(ensureApp());
+    functions = getFunctions(ensureApp(), "europe-west2");
     connectFunctionsEmulator(functions, "127.0.0.1", 5001);
   }
   return functions;
@@ -49,7 +49,7 @@ export async function createIndependentClient(name: string) {
   const app = initializeApp({ projectId: "dh-test", apiKey: "test-api-key" }, name);
   const auth = getAuth(app);
   connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
-  const functions = getFunctions(app);
+  const functions = getFunctions(app, "europe-west2");
   connectFunctionsEmulator(functions, "127.0.0.1", 5001);
   const credential = await signInAnonymously(auth);
   return { app, functions, uid: credential.user.uid };

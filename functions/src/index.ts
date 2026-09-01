@@ -9,6 +9,7 @@ import { initializeApp } from "firebase-admin/app";
 initializeApp();
 
 import { onCall } from "firebase-functions/v2/https";
+import { setGlobalOptions } from "firebase-functions/v2";
 import { protectedCallable } from "./shared/protectedCallable.js";
 import { withMinimumDuration } from "./shared/timingSafety.js";
 import { recoveryCodeHmacSecret, identityCodeHmacSecret } from "./shared/secrets.js";
@@ -100,6 +101,8 @@ import {
   type RepairSessionSummariesInput,
   type RepairSessionSummariesResult,
 } from "./operations/repairSessionSummaries.js";
+
+setGlobalOptions({ region: "europe-west2" });
 
 export const ping = onCall({ timeoutSeconds: 30 }, () => {
   return { ok: true };
