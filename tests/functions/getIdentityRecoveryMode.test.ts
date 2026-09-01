@@ -27,12 +27,12 @@ describe("Functions: identity recovery mode", () => {
       const { data: registered } = await registerIdentityCode({ role: "player" });
 
       await signInTestUser();
-      const getMode = httpsCallable<{ code: string }, { mode: "link" | "reclaim" }>(
-        getTestFunctions(),
-        "getIdentityRecoveryMode"
-      );
+      const getMode = httpsCallable<
+        { code: string },
+        { status: "found"; mode: "link" | "reclaim" }
+      >(getTestFunctions(), "getIdentityRecoveryMode");
       await expect(getMode({ code: registered.code })).resolves.toMatchObject({
-        data: { mode: "reclaim" },
+        data: { status: "found", mode: "reclaim" },
       });
 
       const linkDevice = httpsCallable<{ code: string }, void>(getTestFunctions(), "linkDevice");
@@ -40,7 +40,7 @@ describe("Functions: identity recovery mode", () => {
 
       await signInTestUser();
       await expect(getMode({ code: registered.code })).resolves.toMatchObject({
-        data: { mode: "link" },
+        data: { status: "found", mode: "link" },
       });
 
       const startReclaim = httpsCallable(getTestFunctions(), "startIdentityReclaimJob");

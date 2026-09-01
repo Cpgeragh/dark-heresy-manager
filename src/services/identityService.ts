@@ -37,7 +37,10 @@ const callRevokeIdentityCode = httpsCallable<Record<string, never>, void>(
 
 const callGetIdentityRecoveryMode = httpsCallable<
   { code: string },
-  { mode: "link" | "reclaim" }
+  | { status: "found"; mode: "link" | "reclaim" }
+  | { status: "not-found" }
+  | { status: "own-code" }
+  | { status: "missing-data" }
 >(functions, "getIdentityRecoveryMode");
 
 export async function getIdentityRecoveryMode(code: string): Promise<"link" | "reclaim"> {
@@ -46,8 +49,14 @@ export async function getIdentityRecoveryMode(code: string): Promise<"link" | "r
   return runSingleFlight("identity:recovery-mode", [normalisedCode], async () => {
     recordClientCodeAttempt("recovery");
     const { data } = await callGetIdentityRecoveryMode({ code: normalisedCode });
-    if (data.mode !== "link" && data.mode !== "reclaim") {
-      throw new Error("Recovery mode is invalid.");
+    if (data.status === "not-found") {
+      throw new Error("Recovery code not found.");
+    }
+    if (data.status === "own-code") {
+      throw new Error("This code belongs to this device.");
+    }
+    if (data.status === "missing-data") {
+      throw new Error("Recovery identity is invalid.");
     }
     return data.mode;
   });

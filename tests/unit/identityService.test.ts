@@ -160,23 +160,39 @@ describe("reclaimIdentity", () => {
 
 describe("getIdentityRecoveryMode", () => {
   it("returns link when connected device records remain", async () => {
-    mockCallGetIdentityRecoveryMode.mockResolvedValue({ data: { mode: "link" } });
+    mockCallGetIdentityRecoveryMode.mockResolvedValue({ data: { status: "found", mode: "link" } });
 
     await expect(getIdentityRecoveryMode("  DH-C0DE-0001  ")).resolves.toBe("link");
     expect(mockCallGetIdentityRecoveryMode).toHaveBeenCalledWith({ code: "DH-C0DE-0001" });
   });
 
   it("returns reclaim when no connected device records remain", async () => {
-    mockCallGetIdentityRecoveryMode.mockResolvedValue({ data: { mode: "reclaim" } });
+    mockCallGetIdentityRecoveryMode.mockResolvedValue({ data: { status: "found", mode: "reclaim" } });
 
     await expect(getIdentityRecoveryMode("DH-C0DE-0001")).resolves.toBe("reclaim");
   });
 
-  it("rejects an unexpected server mode", async () => {
-    mockCallGetIdentityRecoveryMode.mockResolvedValue({ data: { mode: "unknown" } });
+  it("rejects an unknown recovery code", async () => {
+    mockCallGetIdentityRecoveryMode.mockResolvedValue({ data: { status: "not-found" } });
 
     await expect(getIdentityRecoveryMode("DH-C0DE-0001")).rejects.toThrow(
-      "Recovery mode is invalid."
+      "Recovery code not found."
+    );
+  });
+
+  it("rejects a code that already belongs to this device", async () => {
+    mockCallGetIdentityRecoveryMode.mockResolvedValue({ data: { status: "own-code" } });
+
+    await expect(getIdentityRecoveryMode("DH-C0DE-0001")).rejects.toThrow(
+      "This code belongs to this device."
+    );
+  });
+
+  it("rejects a recovery identity with missing data", async () => {
+    mockCallGetIdentityRecoveryMode.mockResolvedValue({ data: { status: "missing-data" } });
+
+    await expect(getIdentityRecoveryMode("DH-C0DE-0001")).rejects.toThrow(
+      "Recovery identity is invalid."
     );
   });
 });

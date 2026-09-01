@@ -42,6 +42,7 @@ beforeEach(() => {
 describe("getIdentityRecoveryMode", () => {
   it("selects link when a linked-device record remains", async () => {
     await expect(getIdentityRecoveryMode({ code: CODE }, "new-uid", SECRET)).resolves.toEqual({
+      status: "found",
       mode: "link",
     });
   });
@@ -50,24 +51,31 @@ describe("getIdentityRecoveryMode", () => {
     mockLinksGet.mockResolvedValue({ empty: true });
 
     await expect(getIdentityRecoveryMode({ code: CODE }, "new-uid", SECRET)).resolves.toEqual({
+      status: "found",
       mode: "reclaim",
     });
   });
 
-  it("rejects an unknown recovery code", async () => {
+  it("returns not-found for an unknown recovery code", async () => {
     mockIndexGet.mockResolvedValue({ exists: false });
 
-    await expect(getIdentityRecoveryMode({ code: CODE }, "new-uid", SECRET)).rejects.toThrow(
-      expect.objectContaining({ code: "not-found" })
-    );
+    await expect(getIdentityRecoveryMode({ code: CODE }, "new-uid", SECRET)).resolves.toEqual({
+      status: "not-found",
+    });
   });
 
-  it("rejects a recovery identity without a valid profile", async () => {
+  it("returns own-code when the caller already owns the code", async () => {
+    await expect(getIdentityRecoveryMode({ code: CODE }, "primary-uid", SECRET)).resolves.toEqual({
+      status: "own-code",
+    });
+  });
+
+  it("returns missing-data for a recovery identity without a valid profile", async () => {
     mockProfileGet.mockResolvedValue({ exists: false });
 
-    await expect(getIdentityRecoveryMode({ code: CODE }, "new-uid", SECRET)).rejects.toThrow(
-      expect.objectContaining({ code: "failed-precondition" })
-    );
+    await expect(getIdentityRecoveryMode({ code: CODE }, "new-uid", SECRET)).resolves.toEqual({
+      status: "missing-data",
+    });
   });
 
   it("looks up the HMAC hash rather than the raw code", async () => {
