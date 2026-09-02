@@ -1,15 +1,12 @@
 // src/services/portraitService.ts
 
-import { runTransaction } from "firebase/firestore";
-import { db } from "../firebase";
-import { characterDocRef, characterSummaryDocRef } from "../firebase/converters";
 import {
   assertEncodedPortrait,
   assertFirestoreDocumentId,
   assertPortraitSource,
 } from "../utils/firebaseValidation";
 import { runSingleFlight } from "../utils/singleFlight";
-import { computeCharacterSummary } from "./characterService";
+import { patchCharacterField } from "./characterService";
 
 function blobToBase64(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -40,16 +37,7 @@ export async function uploadPortrait(
   return runSingleFlight("character:portrait", [campaignId, characterId], async () => {
     const base64 = await blobToBase64(blob);
     assertEncodedPortrait(base64);
-
-    const characterRef = characterDocRef(campaignId, characterId);
-    await runTransaction(db, async (transaction) => {
-      const snapshot = await transaction.get(characterRef);
-      if (!snapshot.exists()) throw new Error("Character not found.");
-      const merged = { ...snapshot.data(), portraitUrl: base64 };
-      transaction.update(characterRef, { portraitUrl: base64 });
-      transaction.set(characterSummaryDocRef(campaignId, characterId), computeCharacterSummary(merged));
-    });
-
+    await patchCharacterField(campaignId, characterId, "portraitUrl", base64);
     return base64;
   });
 }

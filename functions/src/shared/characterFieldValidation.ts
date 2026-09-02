@@ -146,11 +146,30 @@ function assertHeaderValue(value: unknown): void {
   assertFieldNestedBounds(value, "Character header");
 }
 
+const PORTRAIT_ENCODED_BYTES = 350_000; // matches PRODUCT_LIMITS.portraitEncodedBytes
+const PORTRAIT_DATA_URL_PATTERN = /^data:image\/(jpeg|png|webp);base64,/;
+
+function assertPortraitUrlValue(value: unknown): void {
+  if (typeof value !== "string") {
+    throw new HttpsError("invalid-argument", "Portrait must be text.");
+  }
+  if (!PORTRAIT_DATA_URL_PATTERN.test(value)) {
+    throw new HttpsError("invalid-argument", "Encoded portrait type is invalid.");
+  }
+  if (new TextEncoder().encode(value).byteLength > PORTRAIT_ENCODED_BYTES) {
+    throw new HttpsError(
+      "invalid-argument",
+      `Portrait cannot exceed ${PORTRAIT_ENCODED_BYTES} encoded bytes.`
+    );
+  }
+}
+
 export type CharacterFieldValidator = (value: unknown) => void;
 
 const CHARACTER_FIELD_VALIDATORS: Record<string, CharacterFieldValidator> = {
   notes: assertNotesValue,
   header: assertHeaderValue,
+  portraitUrl: assertPortraitUrlValue,
 };
 
 export function assertValidCharacterFieldValue(field: string, value: unknown): void {

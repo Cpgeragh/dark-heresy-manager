@@ -249,6 +249,40 @@ describe("Firestore Rules: Character Rules", () => {
     ).rejects.toThrow();
   });
 
+  it("DM cannot change portraitUrl with a direct write", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, "char1", {
+      userId: "player-1",
+      isEditableByPlayer: true,
+    });
+
+    await expect(
+      dbAs(env, "dm-1")
+        .collection(`campaigns/${campaignId}/characters`)
+        .doc("char1")
+        .update({ portraitUrl: "data:image/jpeg;base64,aaaa" })
+    ).rejects.toThrow();
+  });
+
+  it("an editable player cannot change portraitUrl with a direct write", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, "char1", {
+      userId: "player-1",
+      isEditableByPlayer: true,
+    });
+
+    await expect(
+      dbAs(env, "player-1")
+        .collection(`campaigns/${campaignId}/characters`)
+        .doc("char1")
+        .update({ portraitUrl: "data:image/jpeg;base64,aaaa" })
+    ).rejects.toThrow();
+  });
+
   it("DM can update any character", async () => {
     const env = await getTestEnv() as RulesTestEnvironment;
 

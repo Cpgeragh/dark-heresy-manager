@@ -118,6 +118,51 @@ describe("assertValidCharacterFieldValue: header", () => {
   });
 });
 
+describe("assertValidCharacterFieldValue: portraitUrl", () => {
+  const validPortrait = `data:image/jpeg;base64,${"a".repeat(100)}`;
+
+  it("accepts a well-formed encoded JPEG", () => {
+    expect(() => assertValidCharacterFieldValue("portraitUrl", validPortrait)).not.toThrow();
+  });
+
+  it("accepts a well-formed encoded PNG", () => {
+    expect(() =>
+      assertValidCharacterFieldValue("portraitUrl", `data:image/png;base64,${"a".repeat(100)}`)
+    ).not.toThrow();
+  });
+
+  it("accepts a well-formed encoded WebP", () => {
+    expect(() =>
+      assertValidCharacterFieldValue("portraitUrl", `data:image/webp;base64,${"a".repeat(100)}`)
+    ).not.toThrow();
+  });
+
+  it("rejects a non-string value", () => {
+    expect(() => assertValidCharacterFieldValue("portraitUrl", 12345)).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+
+  it("rejects a string with the wrong data URL format", () => {
+    expect(() => assertValidCharacterFieldValue("portraitUrl", "not-a-data-url")).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+
+  it("rejects an unsupported image type", () => {
+    expect(() =>
+      assertValidCharacterFieldValue("portraitUrl", `data:image/svg+xml;base64,${"a".repeat(100)}`)
+    ).toThrow(expect.objectContaining({ code: "invalid-argument" }));
+  });
+
+  it("rejects a portrait over the encoded byte limit", () => {
+    const oversized = `data:image/jpeg;base64,${"a".repeat(350_000)}`;
+    expect(() => assertValidCharacterFieldValue("portraitUrl", oversized)).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+});
+
 describe("assertValidCharacterFieldValue: unknown fields", () => {
   it("rejects a field with no registered validator", () => {
     expect(() => assertValidCharacterFieldValue("experience", { total: 100 })).toThrow(

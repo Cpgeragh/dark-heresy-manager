@@ -57,7 +57,7 @@ export function useCharacterMutations({
     [allowedToEdit, character, campaignId, characterId, toast]
   );
 
-  type PatchableCharacterField = "notes" | "header";
+  type PatchableCharacterField = "notes" | "header" | "portraitUrl";
 
   const patchField = useCallback(
     async <K extends PatchableCharacterField>(field: K, value: Character[K]): Promise<void> => {

@@ -5,13 +5,23 @@ import { patchCharacterField } from "../../src/operations/patchCharacterField";
 const mockCampaignGet = vi.fn();
 const mockTransactionGet = vi.fn();
 const mockTransactionUpdate = vi.fn();
+const mockTransactionSet = vi.fn();
 const mockRunTransaction = vi.fn(async (callback: (transaction: unknown) => Promise<void>) => {
-  await callback({ get: mockTransactionGet, update: mockTransactionUpdate });
+  await callback({ get: mockTransactionGet, update: mockTransactionUpdate, set: mockTransactionSet });
 });
 
 const mockCharacterRef = {};
+const mockSummaryRef = {};
 const mockCharactersCollection = { doc: vi.fn(() => mockCharacterRef) };
-const mockCampaignRef = { get: mockCampaignGet, collection: vi.fn(() => mockCharactersCollection) };
+const mockSummariesCollection = { doc: vi.fn(() => mockSummaryRef) };
+const mockCampaignRef = {
+  get: mockCampaignGet,
+  collection: vi.fn((name: string) => {
+    if (name === "characters") return mockCharactersCollection;
+    if (name === "characterSummaries") return mockSummariesCollection;
+    throw new Error(`Unexpected subcollection: ${name}`);
+  }),
+};
 const mockCampaignsCollection = { doc: vi.fn(() => mockCampaignRef) };
 const mockUserLinkGet = vi.fn();
 const mockUserLinkDoc = vi.fn(() => ({ get: mockUserLinkGet }));
@@ -87,6 +97,67 @@ describe("patchCharacterField", () => {
     expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, {
       header: { characterName: "Brother Corvus" },
     });
+  });
+
+  it("also writes the character summary when patching the header", async () => {
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () => ({
+        campaignId: "c1",
+        userId: "player-1",
+        isEditableByPlayer: false,
+        header: { characterName: "Old Name" },
+      }),
+    });
+
+    await patchCharacterField(
+      { campaignId: "c1", characterId: "char-1", field: "header", value: { characterName: "Brother Corvus" } },
+      "dm-1"
+    );
+
+    expect(mockTransactionSet).toHaveBeenCalledWith(mockSummaryRef, {
+      campaignId: "c1",
+      characterName: "Brother Corvus",
+    });
+  });
+
+  it("allows the DM to patch the portrait and updates the summary", async () => {
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () => ({
+        campaignId: "c1",
+        userId: "player-1",
+        isEditableByPlayer: false,
+        header: { characterName: "Brother Corvus" },
+      }),
+    });
+
+    const portrait = `data:image/jpeg;base64,${"a".repeat(100)}`;
+    await patchCharacterField(
+      { campaignId: "c1", characterId: "char-1", field: "portraitUrl", value: portrait },
+      "dm-1"
+    );
+
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, { portraitUrl: portrait });
+    expect(mockTransactionSet).toHaveBeenCalledWith(mockSummaryRef, {
+      campaignId: "c1",
+      characterName: "Brother Corvus",
+      portraitUrl: portrait,
+    });
+  });
+
+  it("does not write the character summary when patching notes", async () => {
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () => ({ userId: "player-1", isEditableByPlayer: false }),
+    });
+
+    await patchCharacterField({ campaignId: "c1", characterId: "char-1", field: "notes", value: "hi" }, "dm-1");
+
+    expect(mockTransactionSet).not.toHaveBeenCalled();
   });
 
   it("allows the owning player to patch notes when the character is editable", async () => {

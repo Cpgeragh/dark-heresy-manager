@@ -14,6 +14,7 @@ import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import { assertCanEditCharacter } from "../shared/characterAuthorization.js";
 import { assertValidCharacterFieldValue } from "../shared/characterFieldValidation.js";
+import { computeCharacterSummary, isSummaryRelevantField } from "../shared/characterSummary.js";
 
 export interface PatchCharacterFieldInput {
   campaignId: string;
@@ -44,7 +45,13 @@ export async function patchCharacterField(
     if (!characterSnapshot.exists) {
       throw new HttpsError("not-found", "Character not found.");
     }
-    await assertCanEditCharacter(db, callerUid, dmId, characterSnapshot.data() ?? {});
+    const characterData = characterSnapshot.data() ?? {};
+    await assertCanEditCharacter(db, callerUid, dmId, characterData);
     transaction.update(characterRef, { [input.field]: input.value });
+    if (isSummaryRelevantField(input.field)) {
+      const merged = { ...characterData, [input.field]: input.value };
+      const summaryRef = campaignRef.collection("characterSummaries").doc(input.characterId);
+      transaction.set(summaryRef, computeCharacterSummary(merged));
+    }
   }, { maxAttempts: 5 });
 }

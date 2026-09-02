@@ -63,6 +63,100 @@ describe("Functions: patchCharacterField", () => {
 
       const snapshot = await characterRef.get();
       expect(snapshot.data()?.header).toEqual({ characterName: "Brother Corvus", career: "Guardsman" });
+
+      const summarySnapshot = await campaignRef.collection("characterSummaries").doc(characterRef.id).get();
+      expect(summarySnapshot.data()).toEqual({
+        campaignId: campaignRef.id,
+        characterName: "Brother Corvus",
+        career: "Guardsman",
+      });
+    },
+    15000
+  );
+
+  it(
+    "does not touch the character summary when patching notes",
+    async () => {
+      const dmUid = await signInTestUser();
+      const campaignRef = adminDb.collection("campaigns").doc();
+      const characterRef = campaignRef.collection("characters").doc();
+      await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: [] });
+      await characterRef.set({ campaignId: campaignRef.id, userId: null, isEditableByPlayer: false, notes: "" });
+
+      const patchCharacterField = httpsCallable(getTestFunctions(), "patchCharacterField");
+      await patchCharacterField({
+        campaignId: campaignRef.id,
+        characterId: characterRef.id,
+        field: "notes",
+        value: "A private note.",
+      });
+
+      const summarySnapshot = await campaignRef.collection("characterSummaries").doc(characterRef.id).get();
+      expect(summarySnapshot.exists).toBe(false);
+    },
+    15000
+  );
+
+  it(
+    "lets the DM patch a character's portrait and updates the summary",
+    async () => {
+      const dmUid = await signInTestUser();
+      const campaignRef = adminDb.collection("campaigns").doc();
+      const characterRef = campaignRef.collection("characters").doc();
+      await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: [] });
+      await characterRef.set({
+        campaignId: campaignRef.id,
+        userId: null,
+        isEditableByPlayer: false,
+        header: { characterName: "Brother Corvus" },
+      });
+
+      const portrait = `data:image/jpeg;base64,${"a".repeat(100)}`;
+      const patchCharacterField = httpsCallable(getTestFunctions(), "patchCharacterField");
+      await patchCharacterField({
+        campaignId: campaignRef.id,
+        characterId: characterRef.id,
+        field: "portraitUrl",
+        value: portrait,
+      });
+
+      const snapshot = await characterRef.get();
+      expect(snapshot.data()?.portraitUrl).toBe(portrait);
+
+      const summarySnapshot = await campaignRef.collection("characterSummaries").doc(characterRef.id).get();
+      expect(summarySnapshot.data()).toEqual({
+        campaignId: campaignRef.id,
+        characterName: "Brother Corvus",
+        portraitUrl: portrait,
+      });
+    },
+    15000
+  );
+
+  it(
+    "rejects an oversized portrait",
+    async () => {
+      const dmUid = await signInTestUser();
+      const campaignRef = adminDb.collection("campaigns").doc();
+      const characterRef = campaignRef.collection("characters").doc();
+      await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: [] });
+      await characterRef.set({
+        campaignId: campaignRef.id,
+        userId: null,
+        isEditableByPlayer: false,
+        header: { characterName: "Brother Corvus" },
+      });
+
+      const oversized = `data:image/jpeg;base64,${"a".repeat(350_000)}`;
+      const patchCharacterField = httpsCallable(getTestFunctions(), "patchCharacterField");
+      await expect(
+        patchCharacterField({
+          campaignId: campaignRef.id,
+          characterId: characterRef.id,
+          field: "portraitUrl",
+          value: oversized,
+        })
+      ).rejects.toMatchObject({ code: "functions/invalid-argument" });
     },
     15000
   );
