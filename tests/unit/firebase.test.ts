@@ -82,6 +82,7 @@ describe("src/firebase.ts App Check", () => {
 
   it("does not initialise App Check when no site key is configured", async () => {
     stubAllEnvVars();
+    vi.stubEnv("VITE_RECAPTCHA_SITE_KEY", "");
     await import("../../src/firebase");
 
     expect(mockInitializeAppCheck).not.toHaveBeenCalled();
