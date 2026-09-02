@@ -89,27 +89,26 @@ describe("Firestore Rules: Protected Fields with Same Values", () => {
     ).resolves.toBeUndefined();
   });
 
-  it("DM can change ownership fields while the Recovery Code remains stable", async () => {
+  it("DM can change isEditableByPlayer while the Recovery Code remains stable", async () => {
     const env = await getTestEnv() as RulesTestEnvironment;
-    
+
     // Use a unique campaign for this test
     const dmCampaignId = `camp-dm-${Date.now()}`;
     await createCampaign(env, dmCampaignId, "dm-1");
-    
+
     await new Promise(resolve => setTimeout(resolve, 50));
-    
+
     await createCharacter(env, dmCampaignId, "char-dm", {
       userId: "player-1",
       isEditableByPlayer: true,
     });
-    
+
     const dmDb = dbAs(env, "dm-1");
-    
+
     await expect(
       dmDb.collection(`campaigns/${dmCampaignId}/characters`)
         .doc("char-dm")
         .update({
-          userId: "player-2", // changed
           isEditableByPlayer: false, // changed
           recoveryCode: "DH-TEST-0001" // unchanged
         })

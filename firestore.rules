@@ -631,16 +631,21 @@ service cloud.firestore {
           return !changedKeys.hasAny(patchedFields);
         }
 
+        // Ownership changes (claim, release, force-release, force-assign) all
+        // go through their own dedicated Cloud Functions now, none of which
+        // touch this rule (Admin SDK bypasses rules entirely). Direct writes
+        // never legitimately change userId any more, for either the DM or
+        // the owning player, so it's pinned unconditionally here.
         allow update:
           if validCharacterData(request.resource.data, campaignId) &&
              request.resource.data.recoveryCode == resource.data.recoveryCode &&
+             request.resource.data.userId == resource.data.userId &&
              noPatchedFieldsChanged() &&
              (
                dmOwnsCampaign() ||
                (
                  playerOwnsOrLinked(resource.data.userId) &&
                  resource.data.isEditableByPlayer == true &&
-                 request.resource.data.userId == resource.data.userId &&
                  request.resource.data.isEditableByPlayer == resource.data.isEditableByPlayer
                )
              );

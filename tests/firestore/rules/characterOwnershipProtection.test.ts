@@ -79,7 +79,7 @@ describe("Firestore Rules: Character Ownership Protection", () => {
     ).resolves.toBeUndefined();
   });
 
-  it("DM can change ownership flags but cannot silently replace the Recovery Code", async () => {
+  it("DM can change isEditableByPlayer directly but cannot change userId or silently replace the Recovery Code", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
     await setup(env);
 
@@ -87,7 +87,6 @@ describe("Firestore Rules: Character Ownership Protection", () => {
 
     await expect(
       dmDb.collection(`campaigns/${campaignId}/characters`).doc(characterId).update({
-        userId: "newplayer",
         isEditableByPlayer: false,
         recoveryCode: "DH-TEST-0001",
       })
@@ -97,11 +96,18 @@ describe("Firestore Rules: Character Ownership Protection", () => {
       dmDb
         .collection(`campaigns/${campaignId}/characters`)
         .doc(characterId)
+        .update({ userId: "newplayer" })
+    ).rejects.toThrow();
+
+    await expect(
+      dmDb
+        .collection(`campaigns/${campaignId}/characters`)
+        .doc(characterId)
         .update({ recoveryCode: "DH-NEWW-0001" })
     ).rejects.toThrow();
   });
 
-  it("DM can directly assign an unclaimed character and update membership, but claimLog is server-side only", async () => {
+  it("DM cannot directly assign an unclaimed character any more, assignment goes through the forceAssignCharacter Function", async () => {
     const env = (await getTestEnv()) as RulesTestEnvironment;
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, characterId, {
@@ -115,20 +121,6 @@ describe("Firestore Rules: Character Ownership Protection", () => {
     });
     batch.update(dmDb.doc(`campaigns/${campaignId}`), { memberIds: ["dm-1"] });
 
-    await expect(batch.commit()).resolves.toBeUndefined();
-    const character = await dmDb.doc(`campaigns/${campaignId}/characters/${characterId}`).get();
-    expect(character.data()?.userId).toBe("dm-1");
-    const campaign = await dmDb.doc(`campaigns/${campaignId}`).get();
-    expect(campaign.data()?.memberIds).toContain("dm-1");
-
-    await expect(
-      dmDb.doc(`campaigns/${campaignId}/characters/${characterId}/claimLog/dm-claim`).set({
-        action: "claim",
-        actorUid: "dm-1",
-        previousOwnerUid: null,
-        newOwnerUid: "dm-1",
-        timestamp: new Date(),
-      })
-    ).rejects.toThrow();
+    await expect(batch.commit()).rejects.toThrow();
   });
 });

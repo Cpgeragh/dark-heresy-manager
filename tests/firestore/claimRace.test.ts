@@ -8,7 +8,7 @@ import {
 import { getTestEnv } from "./setup";
 
 describe("Claim race safety", () => {
-  it("prevents ownership overwrite after a character is claimed", async () => {
+  it("prevents ownership overwrite of an already-claimed character", async () => {
     const env = await getTestEnv();
 
     const campaignId = "campaign-race";
@@ -18,26 +18,13 @@ describe("Claim race safety", () => {
     const playerA = "player-a";
     const playerB = "player-b";
 
-    // Setup campaign + character
+    // Setup campaign + character, already assigned to Player A
     await createCampaign(env, campaignId, dmUid);
 
     await createCharacter(env, campaignId, characterId, {
-      userId: "UNASSIGNED",
+      userId: playerA,
       isEditableByPlayer: true,
     });
-
-    // DM assigns ownership to Player A (legal path)
-    await setDoc(
-      doc(
-        dbAs(env, dmUid),
-        "campaigns",
-        campaignId,
-        "characters",
-        characterId
-      ),
-      { userId: playerA },
-      { merge: true }
-    );
 
     // Player B attempts to steal ownership (must fail)
     let error: unknown = null;
