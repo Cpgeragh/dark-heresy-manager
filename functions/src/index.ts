@@ -37,6 +37,10 @@ import {
   type PatchCharacterFieldInput,
 } from "./operations/patchCharacterField.js";
 import {
+  reconcileCharacterSpentXp as runReconcileCharacterSpentXp,
+  type ReconcileCharacterSpentXpInput,
+} from "./operations/reconcileCharacterSpentXp.js";
+import {
   claimCharacter as runClaimCharacter,
   type ClaimCharacterInput,
   type ClaimCharacterResult,
@@ -628,6 +632,7 @@ export const patchCharacterField = onCall<PatchCharacterFieldInput>(
             "fate",
             "corruption",
             "movement",
+            "experience",
           ],
         },
         operationId: "string",
@@ -642,6 +647,29 @@ export const patchCharacterField = onCall<PatchCharacterFieldInput>(
         (request.data as PatchCharacterFieldInput | undefined)?.operationId
       ),
       handler: ({ uid, data }) => runPatchCharacterField(data, uid),
+    });
+  }
+);
+
+export const reconcileCharacterSpentXp = onCall<ReconcileCharacterSpentXpInput>(
+  { timeoutSeconds: 30 },
+  (request) => {
+    const callerUid = request.auth?.uid ?? "anonymous";
+    return protectedCallable<ReconcileCharacterSpentXpInput, { updated: boolean }>({
+      request,
+      operation: "reconcile-character-spent-xp",
+      allowedFields: ["campaignId", "characterId", "spent", "operationId"],
+      requiredFields: ["campaignId", "characterId", "spent"],
+      fieldShapes: { campaignId: "string", characterId: "string", operationId: "string" },
+      rateLimits: [
+        { key: `reconcile-character-spent-xp:${callerUid}`, limit: 300, windowMs: 60 * 60 * 1000 },
+      ],
+      idempotencyKey: buildOperationIdempotencyKey(
+        "reconcile-character-spent-xp",
+        callerUid,
+        (request.data as ReconcileCharacterSpentXpInput | undefined)?.operationId
+      ),
+      handler: ({ uid, data }) => runReconcileCharacterSpentXp(data, uid),
     });
   }
 );

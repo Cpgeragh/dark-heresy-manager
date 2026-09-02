@@ -138,7 +138,8 @@ describe("Firestore Rules: Character Rules", () => {
         .doc("char1")
         .update({
           backgroundComplete: true,
-          "experience.total": 100,
+          userId: "player-1", // protected but same, proves a multi-key write still succeeds
+          isEditableByPlayer: true, // protected but same
         })
     ).resolves.toBeUndefined();
   });
@@ -654,6 +655,23 @@ describe("Firestore Rules: Character Rules", () => {
         .collection(`campaigns/${campaignId}/characters`)
         .doc("char1")
         .update({ movement: { half: 3, full: 6, charge: 9, run: 18 } })
+    ).rejects.toThrow();
+  });
+
+  it("DM cannot change experience with a direct write", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, "char1", {
+      userId: "player-1",
+      isEditableByPlayer: true,
+    });
+
+    await expect(
+      dbAs(env, "dm-1")
+        .collection(`campaigns/${campaignId}/characters`)
+        .doc("char1")
+        .update({ experience: { ranks: [], total: 500, spent: 100 } })
     ).rejects.toThrow();
   });
 

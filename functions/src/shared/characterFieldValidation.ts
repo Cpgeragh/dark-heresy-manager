@@ -251,6 +251,7 @@ const CHARACTER_FIELD_VALIDATORS: Record<string, CharacterFieldValidator> = {
   fate: makeRecordValidator("Fate"),
   corruption: makeRecordValidator("Corruption"),
   movement: makeRecordValidator("Movement"),
+  experience: makeRecordValidator("Experience"),
 };
 
 export function assertValidCharacterFieldValue(field: string, value: unknown): void {

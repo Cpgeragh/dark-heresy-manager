@@ -470,7 +470,7 @@ describe("Functions: patchCharacterField", () => {
         patchCharacterField({
           campaignId: campaignRef.id,
           characterId: characterRef.id,
-          field: "experience",
+          field: "notARealCharacterField",
           value: { total: 999999, spent: 0 },
         })
       ).rejects.toMatchObject({ code: "functions/invalid-argument" });

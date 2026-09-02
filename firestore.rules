@@ -626,7 +626,7 @@ service cloud.firestore {
             'weaponTraining', 'psychic', 'insanity', 'cybernetics', 'rangedWeapons',
             'meleeWeapons', 'archeotech', 'gear', 'consumables', 'drugs', 'grenades',
             'shields', 'armour', 'companions', 'skills', 'wounds', 'fate', 'corruption',
-            'movement'
+            'movement', 'experience'
           ];
           return !changedKeys.hasAny(patchedFields);
         }

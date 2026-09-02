@@ -81,7 +81,6 @@ describe("Firestore Rules: Protected Fields with Same Values", () => {
       playerDb.collection(`campaigns/${campaignId}/characters`)
         .doc(characterId)
         .update({
-          "experience.total": 100, // ordinary, still-writable field
           backgroundComplete: true, // ordinary, still-writable field
           userId: "player-1", // protected but same
           isEditableByPlayer: true, // protected but same

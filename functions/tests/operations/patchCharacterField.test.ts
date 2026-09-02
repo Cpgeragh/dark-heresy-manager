@@ -48,7 +48,10 @@ describe("patchCharacterField", () => {
 
   it("rejects a field with no registered validator before touching Firestore", async () => {
     await expect(
-      patchCharacterField({ campaignId: "c1", characterId: "char-1", field: "experience", value: {} }, "dm-1")
+      patchCharacterField(
+        { campaignId: "c1", characterId: "char-1", field: "notARealCharacterField", value: {} },
+        "dm-1"
+      )
     ).rejects.toThrow(expect.objectContaining({ code: "invalid-argument" }));
     expect(mockCampaignGet).not.toHaveBeenCalled();
   });

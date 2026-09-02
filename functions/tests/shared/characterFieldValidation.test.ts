@@ -290,6 +290,7 @@ describe.each([
   ["fate", { total: 3, current: 2 }],
   ["corruption", { points: 5, malignancies: [] }],
   ["movement", { half: 3, full: 6, charge: 9, run: 18 }],
+  ["experience", { total: 500, spent: 250, ranks: [] }],
 ])("assertValidCharacterFieldValue: %s (object-shaped field)", (field, validValue) => {
   it("accepts a well-formed object", () => {
     expect(() => assertValidCharacterFieldValue(field, validValue)).not.toThrow();
@@ -341,7 +342,7 @@ describe.each([
 
 describe("assertValidCharacterFieldValue: unknown fields", () => {
   it("rejects a field with no registered validator", () => {
-    expect(() => assertValidCharacterFieldValue("experience", { total: 100 })).toThrow(
+    expect(() => assertValidCharacterFieldValue("notARealCharacterField", { total: 100 })).toThrow(
       expect.objectContaining({ code: "invalid-argument" })
     );
   });

@@ -29,7 +29,6 @@ import { FIRESTORE_QUERY_LIMITS } from "../constants/firestoreLimits";
 import { validateCharacterName } from "../utils/validation";
 import { stripUndefined } from "../utils/stripUndefined";
 import { runSingleFlight } from "../utils/singleFlight";
-import { getSpentXp } from "../features/experience/xpSpent";
 import { driveJobToCompletion } from "../utils/bulkJobClient";
 import { createLocalId } from "../utils/createLocalId";
 import {
@@ -151,33 +150,34 @@ export async function updateCharacter(
   });
 }
 
+const callReconcileCharacterSpentXp = httpsCallable<
+  { campaignId: string; characterId: string; spent: number; operationId: string },
+  { updated: boolean }
+>(functions, "reconcileCharacterSpentXp");
+
 /**
- * Repairs the derived XP-spent total from a fresh transactional snapshot.
- * Updating only the nested total avoids overwriting concurrent XP changes.
+ * Repairs the derived XP-spent total via the protected server-side operation.
+ * The caller supplies the freshly-recomputed value (src/features/experience/
+ * xpSpent.ts's getSpentXp); the server merges only experience.spent from a
+ * fresh read, so concurrent XP changes are never overwritten.
  */
 export async function reconcileCharacterSpentXp(
   campaignId: string,
-  characterId: string
+  characterId: string,
+  spent: number
 ): Promise<boolean> {
   assertFirestoreDocumentId(campaignId, "Campaign ID");
   assertFirestoreDocumentId(characterId, "Character ID");
 
-  return runSingleFlight("character:reconcile-spent-xp", [campaignId, characterId], () =>
-    runTransaction(db, async (transaction) => {
-      const reference = characterDocRef(campaignId, characterId);
-      const snapshot = await transaction.get(reference);
-      if (!snapshot.exists()) return false;
-
-      const character = snapshot.data();
-      const computedSpent = getSpentXp(character);
-      if (character.experience.spent === computedSpent) return false;
-
-      transaction.update(reference, {
-        "experience.spent": computedSpent,
-      } as UpdateData<Character>);
-      return true;
-    })
-  );
+  return runSingleFlight("character:reconcile-spent-xp", [campaignId, characterId, spent], async () => {
+    const { data } = await callReconcileCharacterSpentXp({
+      campaignId,
+      characterId,
+      spent,
+      operationId: createLocalId("reconcile-character-spent-xp"),
+    });
+    return data.updated;
+  });
 }
 
 const callClaimCharacter = httpsCallable<{ code: string }, { campaignId: string; characterId: string }>(

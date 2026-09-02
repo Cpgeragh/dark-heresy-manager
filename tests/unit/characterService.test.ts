@@ -9,6 +9,7 @@ const {
   mockCallRegisterRecoveryCode,
   mockCallReleaseCharacter,
   mockCallPatchCharacterField,
+  mockCallReconcileCharacterSpentXp,
   mockCallRevokeRecoveryCode,
   mockCallStartCharacterDeletionJob,
   mockCallProcessCharacterDeletionChunk,
@@ -42,6 +43,7 @@ const {
     mockCallRegisterRecoveryCode: vi.fn(),
     mockCallReleaseCharacter: vi.fn(),
     mockCallPatchCharacterField: vi.fn(),
+    mockCallReconcileCharacterSpentXp: vi.fn(),
     mockCallRevokeRecoveryCode: vi.fn(),
     mockCallStartCharacterDeletionJob: vi.fn(),
     mockCallProcessCharacterDeletionChunk: vi.fn(),
@@ -94,6 +96,7 @@ vi.mock("firebase/functions", () => ({
     if (name === "forceAssignCharacter") return mockCallForceAssignCharacter;
     if (name === "revokeRecoveryCode") return mockCallRevokeRecoveryCode;
     if (name === "patchCharacterField") return mockCallPatchCharacterField;
+    if (name === "reconcileCharacterSpentXp") return mockCallReconcileCharacterSpentXp;
     if (name === "startCharacterDeletionJob") return mockCallStartCharacterDeletionJob;
     if (name === "processCharacterDeletionChunk") return mockCallProcessCharacterDeletionChunk;
     throw new Error(`Unexpected callable: ${name}`);
@@ -329,69 +332,40 @@ describe("forceAssignCharacter", () => {
   });
 });
 
-function characterWithStoredSpent(spent: number): Character {
-  return {
-    ...createEmptyCharacterData({
+describe("reconcileCharacterSpentXp", () => {
+  it("calls the Function with the recomputed spent value and returns whether it updated", async () => {
+    mockCallReconcileCharacterSpentXp.mockResolvedValue({ data: { updated: true } });
+
+    await expect(reconcileCharacterSpentXp("camp-1", "char-1", 100)).resolves.toBe(true);
+
+    expect(mockCallReconcileCharacterSpentXp).toHaveBeenCalledWith({
       campaignId: "camp-1",
-      recoveryCode: "DH-ABCD-1234",
-    }),
-    id: "char-1",
-    experience: {
-      ranks: [],
-      total: 500,
-      spent,
-    },
-  };
-}
-
-describe("XP-spent reconciliation", () => {
-  it("corrects only the derived nested field from a fresh transaction snapshot", async () => {
-    mockTransaction.get.mockResolvedValue({
-      exists: () => true,
-      data: () => characterWithStoredSpent(100),
-    });
-
-    await expect(reconcileCharacterSpentXp("camp-1", "char-1")).resolves.toBe(true);
-
-    expect(mockTransaction.update).toHaveBeenCalledOnce();
-    expect(mockTransaction.update).toHaveBeenCalledWith("character:camp-1:char-1", {
-      "experience.spent": 0,
+      characterId: "char-1",
+      spent: 100,
+      operationId: expect.any(String),
     });
   });
 
-  it("settles without a write when the stored total is already correct", async () => {
-    mockTransaction.get.mockResolvedValue({
-      exists: () => true,
-      data: () => characterWithStoredSpent(0),
+  it("returns false when the server reports nothing changed", async () => {
+    mockCallReconcileCharacterSpentXp.mockResolvedValue({ data: { updated: false } });
+
+    await expect(reconcileCharacterSpentXp("camp-1", "char-1", 100)).resolves.toBe(false);
+  });
+
+  it("starts only one Function call for duplicate in-flight reconciliations", async () => {
+    let finish!: (value: { data: { updated: boolean } }) => void;
+    const pending = new Promise<{ data: { updated: boolean } }>((resolve) => {
+      finish = resolve;
     });
+    mockCallReconcileCharacterSpentXp.mockReturnValueOnce(pending);
 
-    await expect(reconcileCharacterSpentXp("camp-1", "char-1")).resolves.toBe(false);
-    expect(mockTransaction.update).not.toHaveBeenCalled();
-  });
+    const first = reconcileCharacterSpentXp("camp-1", "char-1", 100);
+    const duplicate = reconcileCharacterSpentXp("camp-1", "char-1", 100);
+    await Promise.resolve();
 
-  it("allows two tab reconciliations to settle after one committed correction", async () => {
-    mockTransaction.get
-      .mockResolvedValueOnce({
-        exists: () => true,
-        data: () => characterWithStoredSpent(100),
-      })
-      .mockResolvedValueOnce({
-        exists: () => true,
-        data: () => characterWithStoredSpent(0),
-      });
-
-    await expect(reconcileCharacterSpentXp("camp-1", "char-1")).resolves.toBe(true);
-    await expect(reconcileCharacterSpentXp("camp-1", "char-1")).resolves.toBe(false);
-
-    expect(mockRunTransaction).toHaveBeenCalledTimes(2);
-    expect(mockTransaction.update).toHaveBeenCalledOnce();
-  });
-
-  it("does not write when the character disappeared before reconciliation", async () => {
-    mockTransaction.get.mockResolvedValue({ exists: () => false });
-
-    await expect(reconcileCharacterSpentXp("camp-1", "char-1")).resolves.toBe(false);
-    expect(mockTransaction.update).not.toHaveBeenCalled();
+    expect(mockCallReconcileCharacterSpentXp).toHaveBeenCalledOnce();
+    finish({ data: { updated: true } });
+    await Promise.all([first, duplicate]);
   });
 });
 

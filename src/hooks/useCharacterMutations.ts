@@ -82,7 +82,8 @@ export function useCharacterMutations({
     | "wounds"
     | "fate"
     | "corruption"
-    | "movement";
+    | "movement"
+    | "experience";
 
   const patchField = useCallback(
     async <K extends PatchableCharacterField>(field: K, value: Character[K]): Promise<void> => {
