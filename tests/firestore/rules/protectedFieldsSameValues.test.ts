@@ -28,7 +28,7 @@ describe("Firestore Rules: Protected Fields with Same Values", () => {
       playerDb.collection(`campaigns/${campaignId}/characters`)
         .doc(characterId)
         .update({
-          "header.characterName": "New Name",
+          armour: [], // ordinary, still-writable field
           userId: "player-1", // same as before
           isEditableByPlayer: true, // same as before
           recoveryCode: "DH-TEST-0001" // same as before
@@ -81,9 +81,9 @@ describe("Firestore Rules: Protected Fields with Same Values", () => {
       playerDb.collection(`campaigns/${campaignId}/characters`)
         .doc(characterId)
         .update({
-          "header.characterName": "New Name",
-          "header.career": "New Career",
-          "header.rank": "New Rank",
+          armour: [], // ordinary, still-writable field
+          gear: [], // ordinary, still-writable field
+          consumables: [], // ordinary, still-writable field
           userId: "player-1", // protected but same
           isEditableByPlayer: true, // protected but same
           recoveryCode: "DH-TEST-0001" // protected but same
@@ -129,7 +129,7 @@ describe("Firestore Rules: Protected Fields with Same Values", () => {
       playerDb.collection(`campaigns/${campaignId}/characters`)
         .doc(characterId)
         .update({
-          "header.characterName": "New Name",
+          armour: [], // ordinary, still-writable field
           userId: "player-1",
           isEditableByPlayer: true,
           recoveryCode: "RCODE " // extra space - should fail

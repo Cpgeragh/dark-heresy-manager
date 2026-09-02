@@ -36,6 +36,7 @@ vi.mock("../../src/hooks/useCharacterHelpers", () => ({
 const mutationsResult = {
   updateField: vi.fn(),
   updateFields: vi.fn(),
+  patchField: vi.fn(),
   updateCharacteristic: vi.fn(),
   releaseCharacter: vi.fn(),
   dmForceRelease: vi.fn(),
@@ -165,6 +166,7 @@ describe("useCharacterSheet", () => {
     expect(result.current.canPlayerRelease).toBe(true);
     expect(result.current.getCharField).toBe(helpersResult.getCharField);
     expect(result.current.updateField).toBe(mutationsResult.updateField);
+    expect(result.current.patchField).toBe(mutationsResult.patchField);
     expect(result.current.releaseCharacter).toBe(mutationsResult.releaseCharacter);
     expect(result.current.isReleasing).toBe(false);
   });

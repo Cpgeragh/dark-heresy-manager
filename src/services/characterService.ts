@@ -346,6 +346,29 @@ export async function revokeRecoveryCode(campaignId: string, characterId: string
   });
 }
 
+const callPatchCharacterField = httpsCallable<
+  { campaignId: string; characterId: string; field: string; value: unknown; operationId: string },
+  void
+>(functions, "patchCharacterField");
+
+/** Patches a single character field via the protected server-side operation. */
+export async function patchCharacterField(
+  campaignId: string,
+  characterId: string,
+  field: string,
+  value: unknown
+): Promise<void> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(characterId, "Character ID");
+  await callPatchCharacterField({
+    campaignId,
+    characterId,
+    field,
+    value: stripUndefined(value),
+    operationId: createLocalId("patch-character-field"),
+  });
+}
+
 const REGISTER_CODE_RETRY_ATTEMPTS = 3;
 
 /**

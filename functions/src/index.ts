@@ -33,6 +33,10 @@ import {
   type RevokeRecoveryCodeInput,
 } from "./operations/revokeRecoveryCode.js";
 import {
+  patchCharacterField as runPatchCharacterField,
+  type PatchCharacterFieldInput,
+} from "./operations/patchCharacterField.js";
+import {
   claimCharacter as runClaimCharacter,
   type ClaimCharacterInput,
   type ClaimCharacterResult,
@@ -582,6 +586,35 @@ export const repairSessionSummaries = onCall<RepairSessionSummariesInput>(
         },
       ],
       handler: ({ uid, data }) => runRepairSessionSummaries(data, uid),
+    });
+  }
+);
+
+export const patchCharacterField = onCall<PatchCharacterFieldInput>(
+  { timeoutSeconds: 30 },
+  (request) => {
+    const callerUid = request.auth?.uid ?? "anonymous";
+    return protectedCallable<PatchCharacterFieldInput, void>({
+      request,
+      operation: "patch-character-field",
+      allowedFields: ["campaignId", "characterId", "field", "value", "operationId"],
+      requiredFields: ["campaignId", "characterId", "field", "value"],
+      fieldShapes: {
+        campaignId: "string",
+        characterId: "string",
+        field: { enum: ["notes", "header"] },
+        operationId: "string",
+      },
+      payloadBounds: { maxBytes: 900_000, maxStringCharacters: 4_000 },
+      rateLimits: [
+        { key: `patch-character-field:${callerUid}`, limit: 300, windowMs: 60 * 60 * 1000 },
+      ],
+      idempotencyKey: buildOperationIdempotencyKey(
+        "patch-character-field",
+        callerUid,
+        (request.data as PatchCharacterFieldInput | undefined)?.operationId
+      ),
+      handler: ({ uid, data }) => runPatchCharacterField(data, uid),
     });
   }
 );

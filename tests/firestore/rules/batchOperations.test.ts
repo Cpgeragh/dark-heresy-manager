@@ -69,10 +69,10 @@ describe("Firestore Rules: Batch Operations", () => {
     const playerDb = dbAs(env, "player-1");
     const batch = playerDb.batch();
     batch.update(playerDb.collection("campaigns/c1/characters").doc("char1"), {
-      "header.characterName": "Allowed alone",
+      armour: [],
     });
     batch.update(playerDb.collection("campaigns/c1/characters").doc("char2"), {
-      "header.characterName": "Not allowed",
+      armour: [],
     });
     await expect(batch.commit()).rejects.toThrow();
   });

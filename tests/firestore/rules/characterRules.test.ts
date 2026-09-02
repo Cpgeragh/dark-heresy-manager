@@ -117,7 +117,7 @@ describe("Firestore Rules: Character Rules", () => {
       playerDb
         .collection(`campaigns/${campaignId}/characters`)
         .doc("char1")
-        .update({ "header.characterName": "Updated" })
+        .update({ armour: [] })
     ).resolves.toBeUndefined();
   });
 
@@ -137,8 +137,8 @@ describe("Firestore Rules: Character Rules", () => {
         .collection(`campaigns/${campaignId}/characters`)
         .doc("char1")
         .update({
-          "header.characterName": "Updated",
-          "header.career": "Guardsman",
+          armour: [],
+          gear: [],
         })
     ).resolves.toBeUndefined();
   });
@@ -158,7 +158,7 @@ describe("Firestore Rules: Character Rules", () => {
       playerDb
         .collection(`campaigns/${campaignId}/characters`)
         .doc("char1")
-        .update({ "header.characterName": "NewName" })
+        .update({ armour: [] })
     ).rejects.toThrow();
   });
 
@@ -177,7 +177,75 @@ describe("Firestore Rules: Character Rules", () => {
       otherPlayerDb
         .collection(`campaigns/${campaignId}/characters`)
         .doc("char1")
-        .update({ "header.characterName": "Illegal update" })
+        .update({ armour: [] })
+    ).rejects.toThrow();
+  });
+
+  it("DM cannot change notes with a direct write", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, "char1", {
+      userId: "player-1",
+      isEditableByPlayer: true,
+    });
+
+    await expect(
+      dbAs(env, "dm-1")
+        .collection(`campaigns/${campaignId}/characters`)
+        .doc("char1")
+        .update({ notes: "Snuck in via a direct write." })
+    ).rejects.toThrow();
+  });
+
+  it("an editable player cannot change notes with a direct write", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, "char1", {
+      userId: "player-1",
+      isEditableByPlayer: true,
+    });
+
+    await expect(
+      dbAs(env, "player-1")
+        .collection(`campaigns/${campaignId}/characters`)
+        .doc("char1")
+        .update({ notes: "Snuck in via a direct write." })
+    ).rejects.toThrow();
+  });
+
+  it("DM cannot change header with a direct write", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, "char1", {
+      userId: "player-1",
+      isEditableByPlayer: true,
+    });
+
+    await expect(
+      dbAs(env, "dm-1")
+        .collection(`campaigns/${campaignId}/characters`)
+        .doc("char1")
+        .update({ header: { characterName: "Snuck in via a direct write" } })
+    ).rejects.toThrow();
+  });
+
+  it("an editable player cannot change header with a direct write", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, "char1", {
+      userId: "player-1",
+      isEditableByPlayer: true,
+    });
+
+    await expect(
+      dbAs(env, "player-1")
+        .collection(`campaigns/${campaignId}/characters`)
+        .doc("char1")
+        .update({ header: { characterName: "Snuck in via a direct write" } })
     ).rejects.toThrow();
   });
 
@@ -196,7 +264,7 @@ describe("Firestore Rules: Character Rules", () => {
       dmDb
         .collection(`campaigns/${campaignId}/characters`)
         .doc("char1")
-        .update({ "header.characterName": "DM update" })
+        .update({ armour: [] })
     ).resolves.toBeUndefined();
   });
 
@@ -246,7 +314,7 @@ describe("Firestore Rules: Character Rules", () => {
       dbAs(env, "dm-1")
         .collection(`campaigns/${campaignId}/characters`)
         .doc("revoked-char")
-        .update({ "header.characterName": "Edited after revocation" })
+        .update({ armour: [] })
     ).resolves.toBeUndefined();
   });
 

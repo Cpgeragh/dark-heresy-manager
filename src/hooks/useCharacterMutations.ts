@@ -7,6 +7,7 @@ import { stripUndefined } from "../utils/stripUndefined";
 import {
   forceAssignCharacter,
   forceReleaseCharacter,
+  patchCharacterField,
   releaseCharacter as releaseCharacterInService,
   updateCharacter,
 } from "../services/characterService";
@@ -45,6 +46,26 @@ export function useCharacterMutations({
         await updateCharacter(campaignId, characterId, {
           [field]: stripUndefined(value),
         } as Partial<Character>);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Failed to update field";
+        toast.error(`Update failed: ${message}`);
+        console.error("Failed to update field:", err);
+      } finally {
+        setIsUpdating(false);
+      }
+    },
+    [allowedToEdit, character, campaignId, characterId, toast]
+  );
+
+  type PatchableCharacterField = "notes" | "header";
+
+  const patchField = useCallback(
+    async <K extends PatchableCharacterField>(field: K, value: Character[K]): Promise<void> => {
+      if (!allowedToEdit || !character) return;
+
+      setIsUpdating(true);
+      try {
+        await patchCharacterField(campaignId, characterId, field, stripUndefined(value));
       } catch (err) {
         const message = err instanceof Error ? err.message : "Failed to update field";
         toast.error(`Update failed: ${message}`);
@@ -190,6 +211,7 @@ export function useCharacterMutations({
     // Mutations
     updateField,
     updateFields,
+    patchField,
     updateCharacteristic,
     releaseCharacter,
     dmForceRelease,

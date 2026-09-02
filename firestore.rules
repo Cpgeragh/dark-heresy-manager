@@ -616,6 +616,8 @@ service cloud.firestore {
         allow update:
           if validCharacterData(request.resource.data, campaignId) &&
              request.resource.data.recoveryCode == resource.data.recoveryCode &&
+             request.resource.data.get('notes', null) == resource.data.get('notes', null) &&
+             request.resource.data.get('header', null) == resource.data.get('header', null) &&
              (
                dmOwnsCampaign() ||
                (

@@ -8,6 +8,7 @@ const {
   mockCallForceReleaseCharacter,
   mockCallRegisterRecoveryCode,
   mockCallReleaseCharacter,
+  mockCallPatchCharacterField,
   mockCallRevokeRecoveryCode,
   mockCallStartCharacterDeletionJob,
   mockCallProcessCharacterDeletionChunk,
@@ -40,6 +41,7 @@ const {
     mockCallForceReleaseCharacter: vi.fn(),
     mockCallRegisterRecoveryCode: vi.fn(),
     mockCallReleaseCharacter: vi.fn(),
+    mockCallPatchCharacterField: vi.fn(),
     mockCallRevokeRecoveryCode: vi.fn(),
     mockCallStartCharacterDeletionJob: vi.fn(),
     mockCallProcessCharacterDeletionChunk: vi.fn(),
@@ -91,6 +93,7 @@ vi.mock("firebase/functions", () => ({
     if (name === "forceReleaseCharacter") return mockCallForceReleaseCharacter;
     if (name === "forceAssignCharacter") return mockCallForceAssignCharacter;
     if (name === "revokeRecoveryCode") return mockCallRevokeRecoveryCode;
+    if (name === "patchCharacterField") return mockCallPatchCharacterField;
     if (name === "startCharacterDeletionJob") return mockCallStartCharacterDeletionJob;
     if (name === "processCharacterDeletionChunk") return mockCallProcessCharacterDeletionChunk;
     throw new Error(`Unexpected callable: ${name}`);
@@ -119,6 +122,7 @@ import {
   forceAssignCharacter,
   forceReleaseCharacter,
   importCharacter,
+  patchCharacterField,
   preflightCharacterDeletion,
   reconcileCharacterSpentXp,
   registerRecoveryCode,
@@ -623,6 +627,38 @@ describe("revokeRecoveryCode", () => {
     expect(mockCallRevokeRecoveryCode).toHaveBeenCalledWith({
       campaignId: "camp-1",
       characterId: "char-1",
+      operationId: expect.any(String),
+    });
+  });
+});
+
+describe("patchCharacterField", () => {
+  it("calls the Function with campaignId, characterId, field, and value", async () => {
+    mockCallPatchCharacterField.mockResolvedValue({ data: undefined });
+
+    await patchCharacterField("camp-1", "char-1", "notes", "hello");
+
+    expect(mockCallPatchCharacterField).toHaveBeenCalledWith({
+      campaignId: "camp-1",
+      characterId: "char-1",
+      field: "notes",
+      value: "hello",
+      operationId: expect.any(String),
+    });
+  });
+
+  it("strips undefined values out of the payload before sending", async () => {
+    mockCallPatchCharacterField.mockResolvedValue({ data: undefined });
+
+    await patchCharacterField("camp-1", "char-1", "notes", [
+      { id: "n1", title: "T", text: "x", updatedAt: "now", extra: undefined },
+    ]);
+
+    expect(mockCallPatchCharacterField).toHaveBeenCalledWith({
+      campaignId: "camp-1",
+      characterId: "char-1",
+      field: "notes",
+      value: [{ id: "n1", title: "T", text: "x", updatedAt: "now" }],
       operationId: expect.any(String),
     });
   });

@@ -111,6 +111,7 @@ export default function CharacterSheet({
     updateCharacteristic,
     updateField,
     updateFields,
+    patchField,
     releaseCharacter,
     dmForceRelease,
     dmForceAssign,
@@ -293,8 +294,8 @@ export default function CharacterSheet({
   // ================================================================
 
   const handleUpdateHeader = useCallback(
-    (next: CharacterHeader) => updateField("header", next),
-    [updateField]
+    (next: CharacterHeader) => patchField("header", next),
+    [patchField]
   );
 
   const handleUpdateWounds = useCallback(
@@ -388,8 +389,8 @@ export default function CharacterSheet({
   );
 
   const handleUpdateNotes = useCallback(
-    (value: string | NoteEntry[]) => updateField("notes", value),
-    [updateField]
+    (value: string | NoteEntry[]) => patchField("notes", value),
+    [patchField]
   );
 
   const handleUpdateExperience = useCallback(

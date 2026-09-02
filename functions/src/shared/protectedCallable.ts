@@ -32,6 +32,7 @@ export interface ProtectedCallableOptions<TData, TResult> {
   allowedFields: readonly string[];
   requiredFields?: readonly string[];
   fieldShapes?: Record<string, FieldShape>;
+  payloadBounds?: { maxBytes: number; maxStringCharacters: number };
   rateLimits?: readonly { key: string; limit: number; windowMs: number }[];
   idempotencyKey?: string;
   handler: (context: { uid: string; appCheckVerified: boolean; data: TData }) => Promise<TResult>;
@@ -59,7 +60,10 @@ export async function protectedCallable<TData, TResult>(
     if (options.fieldShapes) {
       assertFieldShapes(options.request.data, options.fieldShapes);
     }
-    assertRequestPayloadBounds(options.request.data, { maxBytes: 4_000, maxStringCharacters: 500 });
+    assertRequestPayloadBounds(
+      options.request.data,
+      options.payloadBounds ?? { maxBytes: 4_000, maxStringCharacters: 500 }
+    );
 
     if (options.rateLimits) {
       for (const rateLimit of options.rateLimits) {
