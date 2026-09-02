@@ -164,12 +164,55 @@ function assertPortraitUrlValue(value: unknown): void {
   }
 }
 
+const CHARACTERISTIC_KEYS = ["ws", "bs", "s", "t", "ag", "int", "per", "wp", "fel"];
+const CHARACTERISTIC_FIELD_KEYS = new Set(["base", "advances", "advancePurchases"]);
+
+function assertCharacteristicsValue(value: unknown): void {
+  if (!isRecord(value)) {
+    throw new HttpsError("invalid-argument", "Characteristics must be an object.");
+  }
+  const unknownKey = Object.keys(value).find((key) => !CHARACTERISTIC_KEYS.includes(key));
+  if (unknownKey) {
+    throw new HttpsError(
+      "invalid-argument",
+      `Characteristics contains an unexpected field: ${unknownKey}.`
+    );
+  }
+  for (const key of CHARACTERISTIC_KEYS) {
+    if (!(key in value)) {
+      throw new HttpsError("invalid-argument", `Characteristics is missing "${key}".`);
+    }
+    const field = (value as Record<string, unknown>)[key];
+    if (!isRecord(field)) {
+      throw new HttpsError("invalid-argument", `Characteristic "${key}" must be an object.`);
+    }
+    const unknownFieldKey = Object.keys(field).find((k) => !CHARACTERISTIC_FIELD_KEYS.has(k));
+    if (unknownFieldKey) {
+      throw new HttpsError(
+        "invalid-argument",
+        `Characteristic "${key}" contains an unexpected field: ${unknownFieldKey}.`
+      );
+    }
+    if (typeof field.base !== "number" || !Number.isFinite(field.base)) {
+      throw new HttpsError("invalid-argument", `Characteristic "${key}".base must be a finite number.`);
+    }
+    if (typeof field.advances !== "number" || !Number.isInteger(field.advances)) {
+      throw new HttpsError(
+        "invalid-argument",
+        `Characteristic "${key}".advances must be a whole number.`
+      );
+    }
+  }
+  assertFieldNestedBounds(value, "Characteristics");
+}
+
 export type CharacterFieldValidator = (value: unknown) => void;
 
 const CHARACTER_FIELD_VALIDATORS: Record<string, CharacterFieldValidator> = {
   notes: assertNotesValue,
   header: assertHeaderValue,
   portraitUrl: assertPortraitUrlValue,
+  characteristics: assertCharacteristicsValue,
 };
 
 export function assertValidCharacterFieldValue(field: string, value: unknown): void {

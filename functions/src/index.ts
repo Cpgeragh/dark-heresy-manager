@@ -602,7 +602,7 @@ export const patchCharacterField = onCall<PatchCharacterFieldInput>(
       fieldShapes: {
         campaignId: "string",
         characterId: "string",
-        field: { enum: ["notes", "header", "portraitUrl"] },
+        field: { enum: ["notes", "header", "portraitUrl", "characteristics"] },
         operationId: "string",
       },
       payloadBounds: { maxBytes: 900_000, maxStringCharacters: 4_000 },

@@ -148,6 +148,33 @@ describe("patchCharacterField", () => {
     });
   });
 
+  it("allows the DM to patch characteristics without touching the summary", async () => {
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () => ({ userId: "player-1", isEditableByPlayer: false }),
+    });
+
+    const characteristics = {
+      ws: { base: 30, advances: 1 },
+      bs: { base: 30, advances: 0 },
+      s: { base: 30, advances: 0 },
+      t: { base: 30, advances: 0 },
+      ag: { base: 30, advances: 0 },
+      int: { base: 30, advances: 0 },
+      per: { base: 30, advances: 0 },
+      wp: { base: 30, advances: 0 },
+      fel: { base: 30, advances: 0 },
+    };
+    await patchCharacterField(
+      { campaignId: "c1", characterId: "char-1", field: "characteristics", value: characteristics },
+      "dm-1"
+    );
+
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, { characteristics });
+    expect(mockTransactionSet).not.toHaveBeenCalled();
+  });
+
   it("does not write the character summary when patching notes", async () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
     mockTransactionGet.mockResolvedValue({

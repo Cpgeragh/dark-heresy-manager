@@ -283,6 +283,40 @@ describe("Firestore Rules: Character Rules", () => {
     ).rejects.toThrow();
   });
 
+  it("DM cannot change characteristics with a direct write", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, "char1", {
+      userId: "player-1",
+      isEditableByPlayer: true,
+    });
+
+    await expect(
+      dbAs(env, "dm-1")
+        .collection(`campaigns/${campaignId}/characters`)
+        .doc("char1")
+        .update({ "characteristics.ws.advances": 5 })
+    ).rejects.toThrow();
+  });
+
+  it("an editable player cannot change characteristics with a direct write", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, "char1", {
+      userId: "player-1",
+      isEditableByPlayer: true,
+    });
+
+    await expect(
+      dbAs(env, "player-1")
+        .collection(`campaigns/${campaignId}/characters`)
+        .doc("char1")
+        .update({ "characteristics.ws.advances": 5 })
+    ).rejects.toThrow();
+  });
+
   it("DM can update any character", async () => {
     const env = await getTestEnv() as RulesTestEnvironment;
 

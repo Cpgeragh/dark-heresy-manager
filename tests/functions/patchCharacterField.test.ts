@@ -162,6 +162,80 @@ describe("Functions: patchCharacterField", () => {
   );
 
   it(
+    "lets the DM patch characteristics without touching the summary",
+    async () => {
+      const dmUid = await signInTestUser();
+      const campaignRef = adminDb.collection("campaigns").doc();
+      const characterRef = campaignRef.collection("characters").doc();
+      await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: [] });
+      await characterRef.set({
+        campaignId: campaignRef.id,
+        userId: null,
+        isEditableByPlayer: false,
+        header: { characterName: "Brother Corvus" },
+      });
+
+      const characteristics = {
+        ws: { base: 30, advances: 1 },
+        bs: { base: 30, advances: 0 },
+        s: { base: 30, advances: 0 },
+        t: { base: 30, advances: 0 },
+        ag: { base: 30, advances: 0 },
+        int: { base: 30, advances: 0 },
+        per: { base: 30, advances: 0 },
+        wp: { base: 30, advances: 0 },
+        fel: { base: 30, advances: 0 },
+      };
+      const patchCharacterField = httpsCallable(getTestFunctions(), "patchCharacterField");
+      await patchCharacterField({
+        campaignId: campaignRef.id,
+        characterId: characterRef.id,
+        field: "characteristics",
+        value: characteristics,
+      });
+
+      const snapshot = await characterRef.get();
+      expect(snapshot.data()?.characteristics).toEqual(characteristics);
+
+      const summarySnapshot = await campaignRef.collection("characterSummaries").doc(characterRef.id).get();
+      expect(summarySnapshot.exists).toBe(false);
+    },
+    15000
+  );
+
+  it(
+    "rejects a characteristics patch missing a stat",
+    async () => {
+      const dmUid = await signInTestUser();
+      const campaignRef = adminDb.collection("campaigns").doc();
+      const characterRef = campaignRef.collection("characters").doc();
+      await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: [] });
+      await characterRef.set({ campaignId: campaignRef.id, userId: null, isEditableByPlayer: false });
+
+      const incomplete = {
+        ws: { base: 30, advances: 0 },
+        bs: { base: 30, advances: 0 },
+        s: { base: 30, advances: 0 },
+        t: { base: 30, advances: 0 },
+        ag: { base: 30, advances: 0 },
+        int: { base: 30, advances: 0 },
+        per: { base: 30, advances: 0 },
+        wp: { base: 30, advances: 0 },
+      };
+      const patchCharacterField = httpsCallable(getTestFunctions(), "patchCharacterField");
+      await expect(
+        patchCharacterField({
+          campaignId: campaignRef.id,
+          characterId: characterRef.id,
+          field: "characteristics",
+          value: incomplete,
+        })
+      ).rejects.toMatchObject({ code: "functions/invalid-argument" });
+    },
+    15000
+  );
+
+  it(
     "rejects a header patch missing characterName",
     async () => {
       const dmUid = await signInTestUser();

@@ -108,7 +108,7 @@ export function useCharacterMutations({
         [statKey]: value,
       });
 
-        await updateCharacter(campaignId, characterId, { characteristics: updated });
+        await patchCharacterField(campaignId, characterId, "characteristics", updated);
       } catch (err) {
         const message = err instanceof Error ? err.message : "Failed to update characteristic";
         toast.error(`Update failed: ${message}`);

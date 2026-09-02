@@ -619,6 +619,7 @@ service cloud.firestore {
              request.resource.data.get('notes', null) == resource.data.get('notes', null) &&
              request.resource.data.get('header', null) == resource.data.get('header', null) &&
              request.resource.data.get('portraitUrl', null) == resource.data.get('portraitUrl', null) &&
+             request.resource.data.get('characteristics', null) == resource.data.get('characteristics', null) &&
              (
                dmOwnsCampaign() ||
                (

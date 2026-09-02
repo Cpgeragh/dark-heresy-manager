@@ -163,6 +163,78 @@ describe("assertValidCharacterFieldValue: portraitUrl", () => {
   });
 });
 
+function makeCharacteristics(overrides: Record<string, unknown> = {}) {
+  const base = {
+    ws: { base: 30, advances: 2 },
+    bs: { base: 30, advances: 0 },
+    s: { base: 30, advances: 0 },
+    t: { base: 30, advances: 0 },
+    ag: { base: 30, advances: 0 },
+    int: { base: 30, advances: 0 },
+    per: { base: 30, advances: 0 },
+    wp: { base: 30, advances: 0 },
+    fel: { base: 30, advances: 0 },
+  };
+  return { ...base, ...overrides };
+}
+
+describe("assertValidCharacterFieldValue: characteristics", () => {
+  it("accepts a well-formed set of all nine characteristics", () => {
+    expect(() => assertValidCharacterFieldValue("characteristics", makeCharacteristics())).not.toThrow();
+  });
+
+  it("accepts advancePurchases as an extra allowed field", () => {
+    expect(() =>
+      assertValidCharacterFieldValue(
+        "characteristics",
+        makeCharacteristics({
+          ws: { base: 30, advances: 1, advancePurchases: { simple: { rankId: "conscript", xpCost: 100 } } },
+        })
+      )
+    ).not.toThrow();
+  });
+
+  it("rejects a non-object value", () => {
+    expect(() => assertValidCharacterFieldValue("characteristics", "not-an-object")).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+
+  it("rejects a set missing one of the nine stats", () => {
+    const { fel: _fel, ...missingFel } = makeCharacteristics();
+    expect(() => assertValidCharacterFieldValue("characteristics", missingFel)).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+
+  it("rejects an unexpected top-level stat key", () => {
+    expect(() =>
+      assertValidCharacterFieldValue("characteristics", makeCharacteristics({ notAStat: { base: 30, advances: 0 } }))
+    ).toThrow(expect.objectContaining({ code: "invalid-argument" }));
+  });
+
+  it("rejects a non-finite base", () => {
+    expect(() =>
+      assertValidCharacterFieldValue("characteristics", makeCharacteristics({ ws: { base: NaN, advances: 0 } }))
+    ).toThrow(expect.objectContaining({ code: "invalid-argument" }));
+  });
+
+  it("rejects a non-integer advances", () => {
+    expect(() =>
+      assertValidCharacterFieldValue("characteristics", makeCharacteristics({ ws: { base: 30, advances: 1.5 } }))
+    ).toThrow(expect.objectContaining({ code: "invalid-argument" }));
+  });
+
+  it("rejects an unexpected field on a single stat", () => {
+    expect(() =>
+      assertValidCharacterFieldValue(
+        "characteristics",
+        makeCharacteristics({ ws: { base: 30, advances: 0, notAllowed: true } })
+      )
+    ).toThrow(expect.objectContaining({ code: "invalid-argument" }));
+  });
+});
+
 describe("assertValidCharacterFieldValue: unknown fields", () => {
   it("rejects a field with no registered validator", () => {
     expect(() => assertValidCharacterFieldValue("experience", { total: 100 })).toThrow(
