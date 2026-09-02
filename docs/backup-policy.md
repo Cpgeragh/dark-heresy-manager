@@ -1,6 +1,6 @@
 # Backup Policy
 
-Status: manual staging export and restore have been verified. Scheduled exports and automatic retention are not active.
+Status: production has Firestore's native Scheduled Backups running daily with 30-day retention. Staging has no backup mechanism configured.
 
 ## Scope
 
@@ -11,16 +11,16 @@ Status: manual staging export and restore have been verified. Scheduled exports 
 
 ## Mechanism
 
-Firestore's managed export/import to a dedicated Cloud Storage bucket. A manual staging export and non-production restore have succeeded. No scheduled trigger is currently configured.
+Firestore's native Scheduled Backups feature (Console: Firestore → Databases → the database → Edit disaster-recovery settings). Configured directly on the database, no separate Cloud Storage bucket or export job to manage.
 
 ## Frequency and retention
 
-Manual exports remain until deliberately deleted or covered by a separately configured bucket lifecycle rule. There is no scheduled export or automatic retention policy.
+Production: daily, 30-day retention. Staging: not configured — no scheduled backup exists for staging data. A backup is automatically deleted once it passes the retention window; storage cost stays flat rather than growing over the app's lifetime.
 
 ## Restore
 
-Firestore's import operation reverses export, into the same or a different database. Restoring into a separate database (not the live one) is the safe way to test a restore without risking live data.
+A scheduled backup restores only into a new database (`gcloud alpha firestore databases restore --source-backup=... --destination-database=...`), never back into the source database in place — that isn't a safety choice to opt into, it's the only restore path the mechanism supports. The original database is untouched throughout, so the restored copy can be checked before anything is cut over to it.
 
 ## Point-in-time recovery (PITR)
 
-A separate, complementary Firestore feature gives continuous recovery within a rolling window and is distinct from export-based backups. Its live status is not asserted by this repository document and must be verified in the intended Firebase project before relying on it.
+A separate, complementary Firestore feature giving continuous recovery within a rolling window, distinct from scheduled backups. This document does not track its live status — verify directly in the Firebase Console before relying on it.
