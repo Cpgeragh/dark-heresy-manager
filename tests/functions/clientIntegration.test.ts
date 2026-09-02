@@ -26,6 +26,7 @@ const CLIENT_ENV_VARS = {
   VITE_FIREBASE_STORAGE_BUCKET: "dh-test.appspot.com",
   VITE_FIREBASE_MESSAGING_SENDER_ID: "0",
   VITE_FIREBASE_APP_ID: "1:0:web:0",
+  VITE_RECAPTCHA_SITE_KEY: "",
 };
 
 /** Loads a fresh instance of the real client Firebase + service modules, redirected to the local emulator. */
