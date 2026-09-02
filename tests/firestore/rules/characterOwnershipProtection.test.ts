@@ -75,7 +75,7 @@ describe("Firestore Rules: Character Ownership Protection", () => {
       playerDb
         .collection(`campaigns/${campaignId}/characters`)
         .doc(characterId)
-        .update({ armour: [] })
+        .update({ backgroundComplete: true })
     ).resolves.toBeUndefined();
   });
 

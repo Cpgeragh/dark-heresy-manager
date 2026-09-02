@@ -70,7 +70,19 @@ export function useCharacterMutations({
     | "rangedWeapons"
     | "meleeWeapons"
     | "archeotech"
-    | "insanity";
+    | "insanity"
+    | "gear"
+    | "consumables"
+    | "drugs"
+    | "grenades"
+    | "shields"
+    | "armour"
+    | "companions"
+    | "skills"
+    | "wounds"
+    | "fate"
+    | "corruption"
+    | "movement";
 
   const patchField = useCallback(
     async <K extends PatchableCharacterField>(field: K, value: Character[K]): Promise<void> => {

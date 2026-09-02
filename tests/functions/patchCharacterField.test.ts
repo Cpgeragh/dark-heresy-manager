@@ -330,6 +330,42 @@ describe("Functions: patchCharacterField", () => {
     15000
   );
 
+  it.each([
+    ["gear", [{ id: "g1", name: "Rope" }]],
+    ["consumables", [{ id: "c1", name: "Ration Pack" }]],
+    ["drugs", [{ id: "d1", name: "Obscura" }]],
+    ["grenades", [{ id: "gr1", name: "Frag Grenade" }]],
+    ["shields", [{ id: "s1", name: "Riot Shield" }]],
+    ["armour", [{ id: "a1", name: "Flak Vest" }]],
+    ["companions", [{ id: "co1", name: "Cyber-mastiff" }]],
+    ["skills", [{ id: "sk1", level: "trained" }]],
+    ["wounds", { total: 10, current: 8, criticalDamage: 0, fatigue: 0 }],
+    ["fate", { total: 3, current: 2 }],
+    ["corruption", { points: 5, malignancies: [] }],
+    ["movement", { half: 3, full: 6, charge: 9, run: 18 }],
+  ])(
+    "lets the DM patch %s",
+    async (field, value) => {
+      const dmUid = await signInTestUser();
+      const campaignRef = adminDb.collection("campaigns").doc();
+      const characterRef = campaignRef.collection("characters").doc();
+      await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: [] });
+      await characterRef.set({ campaignId: campaignRef.id, userId: null, isEditableByPlayer: false });
+
+      const patchCharacterField = httpsCallable(getTestFunctions(), "patchCharacterField");
+      await patchCharacterField({
+        campaignId: campaignRef.id,
+        characterId: characterRef.id,
+        field,
+        value,
+      });
+
+      const snapshot = await characterRef.get();
+      expect(snapshot.data()?.[field]).toEqual(value);
+    },
+    15000
+  );
+
   it(
     "rejects a header patch missing characterName",
     async () => {

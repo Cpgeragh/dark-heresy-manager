@@ -21,7 +21,7 @@ describe("Firestore Rules: Player Editing Permissions", () => {
       dbAs(env, "player-2")
         .collection("campaigns/test/characters")
         .doc("char1")
-        .update({ armour: [] })
+        .update({ backgroundComplete: true })
     ).rejects.toThrow();
   });
 
@@ -37,7 +37,7 @@ describe("Firestore Rules: Player Editing Permissions", () => {
       dbAs(env, "dm-123")
         .collection("campaigns/test/characters")
         .doc("char2")
-        .update({ armour: [] })
+        .update({ backgroundComplete: true })
     ).resolves.toBeUndefined();
   });
 });

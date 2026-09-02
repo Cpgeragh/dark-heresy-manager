@@ -285,6 +285,60 @@ describe.each([
   });
 });
 
+describe.each([
+  ["wounds", { total: 10, current: 8, criticalDamage: 0, fatigue: 0 }],
+  ["fate", { total: 3, current: 2 }],
+  ["corruption", { points: 5, malignancies: [] }],
+  ["movement", { half: 3, full: 6, charge: 9, run: 18 }],
+])("assertValidCharacterFieldValue: %s (object-shaped field)", (field, validValue) => {
+  it("accepts a well-formed object", () => {
+    expect(() => assertValidCharacterFieldValue(field, validValue)).not.toThrow();
+  });
+
+  it("rejects an array", () => {
+    expect(() => assertValidCharacterFieldValue(field, [])).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+
+  it("rejects a string", () => {
+    expect(() => assertValidCharacterFieldValue(field, "not an object")).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+});
+
+describe.each([
+  ["gear", [{ id: "g1", name: "Rope" }]],
+  ["consumables", [{ id: "c1", name: "Ration Pack" }]],
+  ["drugs", [{ id: "d1", name: "Obscura" }]],
+  ["grenades", [{ id: "gr1", name: "Frag Grenade" }]],
+  ["shields", [{ id: "s1", name: "Riot Shield" }]],
+  ["armour", [{ id: "a1", name: "Flak Vest" }]],
+  ["companions", [{ id: "co1", name: "Cyber-mastiff" }]],
+  ["skills", [{ id: "sk1", level: "trained" }]],
+])("assertValidCharacterFieldValue: %s (array-shaped field)", (field, validValue) => {
+  it("accepts a well-formed array", () => {
+    expect(() => assertValidCharacterFieldValue(field, validValue)).not.toThrow();
+  });
+
+  it("accepts an empty array", () => {
+    expect(() => assertValidCharacterFieldValue(field, [])).not.toThrow();
+  });
+
+  it("rejects a plain object", () => {
+    expect(() => assertValidCharacterFieldValue(field, { notAnArray: true })).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+
+  it("rejects a string", () => {
+    expect(() => assertValidCharacterFieldValue(field, "not an array")).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+});
+
 describe("assertValidCharacterFieldValue: unknown fields", () => {
   it("rejects a field with no registered validator", () => {
     expect(() => assertValidCharacterFieldValue("experience", { total: 100 })).toThrow(

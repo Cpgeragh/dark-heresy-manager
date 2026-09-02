@@ -69,10 +69,10 @@ describe("Firestore Rules: Batch Operations", () => {
     const playerDb = dbAs(env, "player-1");
     const batch = playerDb.batch();
     batch.update(playerDb.collection("campaigns/c1/characters").doc("char1"), {
-      armour: [],
+      backgroundComplete: true,
     });
     batch.update(playerDb.collection("campaigns/c1/characters").doc("char2"), {
-      armour: [],
+      backgroundComplete: true,
     });
     await expect(batch.commit()).rejects.toThrow();
   });

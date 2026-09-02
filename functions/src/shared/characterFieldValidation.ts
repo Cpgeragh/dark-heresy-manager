@@ -239,6 +239,18 @@ const CHARACTER_FIELD_VALIDATORS: Record<string, CharacterFieldValidator> = {
   rangedWeapons: makeArrayValidator("Ranged weapons"),
   meleeWeapons: makeArrayValidator("Melee weapons"),
   archeotech: makeArrayValidator("Archeotech"),
+  gear: makeArrayValidator("Gear"),
+  consumables: makeArrayValidator("Consumables"),
+  drugs: makeArrayValidator("Drugs"),
+  grenades: makeArrayValidator("Grenades"),
+  shields: makeArrayValidator("Shields"),
+  armour: makeArrayValidator("Armour"),
+  companions: makeArrayValidator("Companions"),
+  skills: makeArrayValidator("Skills"),
+  wounds: makeRecordValidator("Wounds"),
+  fate: makeRecordValidator("Fate"),
+  corruption: makeRecordValidator("Corruption"),
+  movement: makeRecordValidator("Movement"),
 };
 
 export function assertValidCharacterFieldValue(field: string, value: unknown): void {

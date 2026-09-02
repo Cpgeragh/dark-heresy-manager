@@ -117,7 +117,7 @@ describe("Firestore Rules: Character Rules", () => {
       playerDb
         .collection(`campaigns/${campaignId}/characters`)
         .doc("char1")
-        .update({ armour: [] })
+        .update({ backgroundComplete: true })
     ).resolves.toBeUndefined();
   });
 
@@ -137,8 +137,8 @@ describe("Firestore Rules: Character Rules", () => {
         .collection(`campaigns/${campaignId}/characters`)
         .doc("char1")
         .update({
-          armour: [],
-          gear: [],
+          backgroundComplete: true,
+          "experience.total": 100,
         })
     ).resolves.toBeUndefined();
   });
@@ -158,7 +158,7 @@ describe("Firestore Rules: Character Rules", () => {
       playerDb
         .collection(`campaigns/${campaignId}/characters`)
         .doc("char1")
-        .update({ armour: [] })
+        .update({ backgroundComplete: true })
     ).rejects.toThrow();
   });
 
@@ -177,7 +177,7 @@ describe("Firestore Rules: Character Rules", () => {
       otherPlayerDb
         .collection(`campaigns/${campaignId}/characters`)
         .doc("char1")
-        .update({ armour: [] })
+        .update({ backgroundComplete: true })
     ).rejects.toThrow();
   });
 
@@ -453,6 +453,210 @@ describe("Firestore Rules: Character Rules", () => {
     ).rejects.toThrow();
   });
 
+  it("DM cannot change gear with a direct write", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, "char1", {
+      userId: "player-1",
+      isEditableByPlayer: true,
+    });
+
+    await expect(
+      dbAs(env, "dm-1")
+        .collection(`campaigns/${campaignId}/characters`)
+        .doc("char1")
+        .update({ gear: [{ id: "g1", name: "Rope" }] })
+    ).rejects.toThrow();
+  });
+
+  it("DM cannot change consumables with a direct write", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, "char1", {
+      userId: "player-1",
+      isEditableByPlayer: true,
+    });
+
+    await expect(
+      dbAs(env, "dm-1")
+        .collection(`campaigns/${campaignId}/characters`)
+        .doc("char1")
+        .update({ consumables: [{ id: "c1", name: "Ration Pack" }] })
+    ).rejects.toThrow();
+  });
+
+  it("DM cannot change drugs with a direct write", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, "char1", {
+      userId: "player-1",
+      isEditableByPlayer: true,
+    });
+
+    await expect(
+      dbAs(env, "dm-1")
+        .collection(`campaigns/${campaignId}/characters`)
+        .doc("char1")
+        .update({ drugs: [{ id: "d1", name: "Obscura" }] })
+    ).rejects.toThrow();
+  });
+
+  it("DM cannot change grenades with a direct write", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, "char1", {
+      userId: "player-1",
+      isEditableByPlayer: true,
+    });
+
+    await expect(
+      dbAs(env, "dm-1")
+        .collection(`campaigns/${campaignId}/characters`)
+        .doc("char1")
+        .update({ grenades: [{ id: "gr1", name: "Frag Grenade" }] })
+    ).rejects.toThrow();
+  });
+
+  it("DM cannot change shields with a direct write", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, "char1", {
+      userId: "player-1",
+      isEditableByPlayer: true,
+    });
+
+    await expect(
+      dbAs(env, "dm-1")
+        .collection(`campaigns/${campaignId}/characters`)
+        .doc("char1")
+        .update({ shields: [{ id: "s1", name: "Riot Shield" }] })
+    ).rejects.toThrow();
+  });
+
+  it("DM cannot change armour with a direct write", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, "char1", {
+      userId: "player-1",
+      isEditableByPlayer: true,
+    });
+
+    await expect(
+      dbAs(env, "dm-1")
+        .collection(`campaigns/${campaignId}/characters`)
+        .doc("char1")
+        .update({ armour: [{ id: "a1", name: "Flak Vest" }] })
+    ).rejects.toThrow();
+  });
+
+  it("DM cannot change companions with a direct write", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, "char1", {
+      userId: "player-1",
+      isEditableByPlayer: true,
+    });
+
+    await expect(
+      dbAs(env, "dm-1")
+        .collection(`campaigns/${campaignId}/characters`)
+        .doc("char1")
+        .update({ companions: [{ id: "co1", name: "Cyber-mastiff" }] })
+    ).rejects.toThrow();
+  });
+
+  it("DM cannot change skills with a direct write", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, "char1", {
+      userId: "player-1",
+      isEditableByPlayer: true,
+    });
+
+    await expect(
+      dbAs(env, "dm-1")
+        .collection(`campaigns/${campaignId}/characters`)
+        .doc("char1")
+        .update({ skills: [{ id: "sk1", level: "trained" }] })
+    ).rejects.toThrow();
+  });
+
+  it("DM cannot change wounds with a direct write", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, "char1", {
+      userId: "player-1",
+      isEditableByPlayer: true,
+    });
+
+    await expect(
+      dbAs(env, "dm-1")
+        .collection(`campaigns/${campaignId}/characters`)
+        .doc("char1")
+        .update({ wounds: { total: 10, current: 8, criticalDamage: 0, fatigue: 0 } })
+    ).rejects.toThrow();
+  });
+
+  it("DM cannot change fate with a direct write", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, "char1", {
+      userId: "player-1",
+      isEditableByPlayer: true,
+    });
+
+    await expect(
+      dbAs(env, "dm-1")
+        .collection(`campaigns/${campaignId}/characters`)
+        .doc("char1")
+        .update({ fate: { total: 3, current: 2 } })
+    ).rejects.toThrow();
+  });
+
+  it("DM cannot change corruption with a direct write", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, "char1", {
+      userId: "player-1",
+      isEditableByPlayer: true,
+    });
+
+    await expect(
+      dbAs(env, "dm-1")
+        .collection(`campaigns/${campaignId}/characters`)
+        .doc("char1")
+        .update({ corruption: { points: 5, malignancies: [] } })
+    ).rejects.toThrow();
+  });
+
+  it("DM cannot change movement with a direct write", async () => {
+    const env = await getTestEnv() as RulesTestEnvironment;
+
+    await createCampaign(env, campaignId, "dm-1");
+    await createCharacter(env, campaignId, "char1", {
+      userId: "player-1",
+      isEditableByPlayer: true,
+    });
+
+    await expect(
+      dbAs(env, "dm-1")
+        .collection(`campaigns/${campaignId}/characters`)
+        .doc("char1")
+        .update({ movement: { half: 3, full: 6, charge: 9, run: 18 } })
+    ).rejects.toThrow();
+  });
+
   it("DM can update any character", async () => {
     const env = await getTestEnv() as RulesTestEnvironment;
 
@@ -468,7 +672,7 @@ describe("Firestore Rules: Character Rules", () => {
       dmDb
         .collection(`campaigns/${campaignId}/characters`)
         .doc("char1")
-        .update({ armour: [] })
+        .update({ backgroundComplete: true })
     ).resolves.toBeUndefined();
   });
 
@@ -518,7 +722,7 @@ describe("Firestore Rules: Character Rules", () => {
       dbAs(env, "dm-1")
         .collection(`campaigns/${campaignId}/characters`)
         .doc("revoked-char")
-        .update({ armour: [] })
+        .update({ backgroundComplete: true })
     ).resolves.toBeUndefined();
   });
 

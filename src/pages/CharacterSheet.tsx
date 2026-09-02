@@ -299,13 +299,13 @@ export default function CharacterSheet({
   );
 
   const handleUpdateWounds = useCallback(
-    (next: WoundsBlock) => updateField("wounds", next),
-    [updateField]
+    (next: WoundsBlock) => patchField("wounds", next),
+    [patchField]
   );
 
   const handleUpdateFate = useCallback(
-    (next: FateBlock) => updateField("fate", next),
-    [updateField]
+    (next: FateBlock) => patchField("fate", next),
+    [patchField]
   );
 
   const handleUpdateInsanity = useCallback(
@@ -314,13 +314,13 @@ export default function CharacterSheet({
   );
 
   const handleUpdateCorruption = useCallback(
-    (next: CorruptionBlock) => updateField("corruption", next),
-    [updateField]
+    (next: CorruptionBlock) => patchField("corruption", next),
+    [patchField]
   );
 
   const handleUpdateSkills = useCallback(
-    (next: SkillEntry[]) => updateField("skills", next),
-    [updateField]
+    (next: SkillEntry[]) => patchField("skills", next),
+    [patchField]
   );
 
   const handleUpdateTalents = useCallback(
@@ -344,8 +344,8 @@ export default function CharacterSheet({
   );
 
   const handleUpdateArmour = useCallback(
-    (next: WornArmourPiece[]) => updateField("armour", next),
-    [updateField]
+    (next: WornArmourPiece[]) => patchField("armour", next),
+    [patchField]
   );
 
   const handleUpdatePsychic = useCallback(
@@ -354,33 +354,33 @@ export default function CharacterSheet({
   );
 
   const handleUpdateGear = useCallback(
-    (next: GearItem[]) => updateField("gear", next),
-    [updateField]
+    (next: GearItem[]) => patchField("gear", next),
+    [patchField]
   );
 
   const handleUpdateCompanions = useCallback(
-    (next: CompanionItem[]) => updateField("companions", next),
-    [updateField]
+    (next: CompanionItem[]) => patchField("companions", next),
+    [patchField]
   );
 
   const handleUpdateConsumables = useCallback(
-    (next: ConsumableItem[]) => updateField("consumables", next),
-    [updateField]
+    (next: ConsumableItem[]) => patchField("consumables", next),
+    [patchField]
   );
 
   const handleUpdateDrugs = useCallback(
-    (next: DrugItem[]) => updateField("drugs", next),
-    [updateField]
+    (next: DrugItem[]) => patchField("drugs", next),
+    [patchField]
   );
 
   const handleUpdateGrenades = useCallback(
-    (next: GrenadeItem[]) => updateField("grenades", next),
-    [updateField]
+    (next: GrenadeItem[]) => patchField("grenades", next),
+    [patchField]
   );
 
   const handleUpdateShields = useCallback(
-    (next: ShieldItem[]) => updateField("shields", next),
-    [updateField]
+    (next: ShieldItem[]) => patchField("shields", next),
+    [patchField]
   );
 
   const handleUpdateCybernetics = useCallback(
