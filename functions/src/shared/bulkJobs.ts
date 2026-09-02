@@ -28,11 +28,10 @@ const LEASE_DURATION_MS = 60 * 1000;
 // out of scope until this app is actually deployed.
 const JOB_EXPIRY_MS = 24 * 60 * 60 * 1000;
 
-// Spark-plan safety limit: the whole app shares one daily Firestore write/
-// delete quota (~20,000 of each), so a single job must not be able to
-// consume it alone. No override — a job over this ceiling is refused
-// outright at creation. Revisit once real billing/budget protections exist.
-export const MAX_JOB_TOTAL_COUNT = 10_000;
+// Cost is no longer the constraint on Blaze (even 100,000 deletes costs
+// cents) — this ceiling now exists to keep a single job's processing time
+// and blast radius bounded, not to protect a shared free-tier quota.
+export const MAX_JOB_TOTAL_COUNT = 100_000;
 
 export type BulkJobStatus = "pending" | "running" | "completed" | "failed" | "cancelled";
 
