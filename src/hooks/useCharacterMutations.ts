@@ -8,6 +8,7 @@ import {
   forceAssignCharacter,
   forceReleaseCharacter,
   patchCharacterField,
+  patchCharacterFields,
   releaseCharacter as releaseCharacterInService,
   updateCharacter,
 } from "../services/characterService";
@@ -57,7 +58,19 @@ export function useCharacterMutations({
     [allowedToEdit, character, campaignId, characterId, toast]
   );
 
-  type PatchableCharacterField = "notes" | "header" | "portraitUrl";
+  type PatchableCharacterField =
+    | "notes"
+    | "header"
+    | "portraitUrl"
+    | "characteristics"
+    | "talentsAndTraits"
+    | "weaponTraining"
+    | "psychic"
+    | "cybernetics"
+    | "rangedWeapons"
+    | "meleeWeapons"
+    | "archeotech"
+    | "insanity";
 
   const patchField = useCallback(
     async <K extends PatchableCharacterField>(field: K, value: Character[K]): Promise<void> => {
@@ -77,12 +90,12 @@ export function useCharacterMutations({
     [allowedToEdit, character, campaignId, characterId, toast]
   );
 
-  const updateFields = useCallback(
-    async (partial: Partial<Character>): Promise<void> => {
+  const patchFields = useCallback(
+    async (partial: Record<string, unknown>): Promise<void> => {
       if (!allowedToEdit || !character) return;
       setIsUpdating(true);
       try {
-        await updateCharacter(campaignId, characterId, stripUndefined(partial));
+        await patchCharacterFields(campaignId, characterId, stripUndefined(partial));
       } catch (err) {
         const message = err instanceof Error ? err.message : "Failed to update character";
         toast.error(`Update failed: ${message}`);
@@ -210,8 +223,8 @@ export function useCharacterMutations({
   return {
     // Mutations
     updateField,
-    updateFields,
     patchField,
+    patchFields,
     updateCharacteristic,
     releaseCharacter,
     dmForceRelease,

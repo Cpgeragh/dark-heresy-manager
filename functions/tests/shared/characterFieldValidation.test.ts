@@ -235,6 +235,56 @@ describe("assertValidCharacterFieldValue: characteristics", () => {
   });
 });
 
+describe.each([
+  ["talentsAndTraits", { talents: [], traits: [] }],
+  ["weaponTraining", { trained: [] }],
+  ["psychic", { psyRating: 1 }],
+  ["insanity", { points: 5 }],
+])("assertValidCharacterFieldValue: %s (object-shaped field)", (field, validValue) => {
+  it("accepts a well-formed object", () => {
+    expect(() => assertValidCharacterFieldValue(field, validValue)).not.toThrow();
+  });
+
+  it("rejects an array", () => {
+    expect(() => assertValidCharacterFieldValue(field, [])).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+
+  it("rejects a string", () => {
+    expect(() => assertValidCharacterFieldValue(field, "not an object")).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+});
+
+describe.each([
+  ["cybernetics", [{ id: "c1", name: "Bionic Arm" }]],
+  ["rangedWeapons", [{ id: "r1", name: "Laspistol" }]],
+  ["meleeWeapons", [{ id: "m1", name: "Chainsword" }]],
+  ["archeotech", [{ id: "a1", name: "Digital Weapon" }]],
+])("assertValidCharacterFieldValue: %s (array-shaped field)", (field, validValue) => {
+  it("accepts a well-formed array", () => {
+    expect(() => assertValidCharacterFieldValue(field, validValue)).not.toThrow();
+  });
+
+  it("accepts an empty array", () => {
+    expect(() => assertValidCharacterFieldValue(field, [])).not.toThrow();
+  });
+
+  it("rejects a plain object", () => {
+    expect(() => assertValidCharacterFieldValue(field, { notAnArray: true })).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+
+  it("rejects a string", () => {
+    expect(() => assertValidCharacterFieldValue(field, "not an array")).toThrow(
+      expect.objectContaining({ code: "invalid-argument" })
+    );
+  });
+});
+
 describe("assertValidCharacterFieldValue: unknown fields", () => {
   it("rejects a field with no registered validator", () => {
     expect(() => assertValidCharacterFieldValue("experience", { total: 100 })).toThrow(

@@ -620,6 +620,14 @@ service cloud.firestore {
              request.resource.data.get('header', null) == resource.data.get('header', null) &&
              request.resource.data.get('portraitUrl', null) == resource.data.get('portraitUrl', null) &&
              request.resource.data.get('characteristics', null) == resource.data.get('characteristics', null) &&
+             request.resource.data.get('talentsAndTraits', null) == resource.data.get('talentsAndTraits', null) &&
+             request.resource.data.get('weaponTraining', null) == resource.data.get('weaponTraining', null) &&
+             request.resource.data.get('psychic', null) == resource.data.get('psychic', null) &&
+             request.resource.data.get('insanity', null) == resource.data.get('insanity', null) &&
+             request.resource.data.get('cybernetics', null) == resource.data.get('cybernetics', null) &&
+             request.resource.data.get('rangedWeapons', null) == resource.data.get('rangedWeapons', null) &&
+             request.resource.data.get('meleeWeapons', null) == resource.data.get('meleeWeapons', null) &&
+             request.resource.data.get('archeotech', null) == resource.data.get('archeotech', null) &&
              (
                dmOwnsCampaign() ||
                (

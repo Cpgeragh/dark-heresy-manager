@@ -236,6 +236,101 @@ describe("Functions: patchCharacterField", () => {
   );
 
   it(
+    "patches talentsAndTraits and psychic together in one atomic call, mirroring a talent acquisition granting a discipline",
+    async () => {
+      const dmUid = await signInTestUser();
+      const campaignRef = adminDb.collection("campaigns").doc();
+      const characterRef = campaignRef.collection("characters").doc();
+      await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: [] });
+      await characterRef.set({
+        campaignId: campaignRef.id,
+        userId: null,
+        isEditableByPlayer: false,
+        talentsAndTraits: { talents: [], traits: [] },
+        psychic: { psyRating: 0, disciplines: [] },
+      });
+
+      const talentsAndTraits = {
+        talents: [{ uid: "t1", talentId: "sanctioned-psyker", name: "Sanctioned Psyker" }],
+        traits: [],
+      };
+      const psychic = { psyRating: 1, disciplines: ["divination"] };
+
+      const patchCharacterField = httpsCallable(getTestFunctions(), "patchCharacterField");
+      await patchCharacterField({
+        campaignId: campaignRef.id,
+        characterId: characterRef.id,
+        fields: { talentsAndTraits, psychic },
+      });
+
+      const snapshot = await characterRef.get();
+      expect(snapshot.data()?.talentsAndTraits).toEqual(talentsAndTraits);
+      expect(snapshot.data()?.psychic).toEqual(psychic);
+    },
+    15000
+  );
+
+  it(
+    "rejects a multi-field patch when one field is invalid, applying neither",
+    async () => {
+      const dmUid = await signInTestUser();
+      const campaignRef = adminDb.collection("campaigns").doc();
+      const characterRef = campaignRef.collection("characters").doc();
+      await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: [] });
+      await characterRef.set({
+        campaignId: campaignRef.id,
+        userId: null,
+        isEditableByPlayer: false,
+        talentsAndTraits: { talents: [], traits: [] },
+        psychic: { psyRating: 0 },
+      });
+
+      const patchCharacterField = httpsCallable(getTestFunctions(), "patchCharacterField");
+      await expect(
+        patchCharacterField({
+          campaignId: campaignRef.id,
+          characterId: characterRef.id,
+          fields: { talentsAndTraits: { talents: [], traits: [] }, psychic: "not-an-object" },
+        })
+      ).rejects.toMatchObject({ code: "functions/invalid-argument" });
+
+      const snapshot = await characterRef.get();
+      expect(snapshot.data()?.talentsAndTraits).toEqual({ talents: [], traits: [] });
+    },
+    15000
+  );
+
+  it.each([
+    ["weaponTraining", { trained: ["basic"] }],
+    ["insanity", { points: 5 }],
+    ["cybernetics", [{ id: "c1", name: "Bionic Arm" }]],
+    ["rangedWeapons", [{ id: "r1", name: "Laspistol" }]],
+    ["meleeWeapons", [{ id: "m1", name: "Chainsword" }]],
+    ["archeotech", [{ id: "a1", name: "Digital Weapon" }]],
+  ])(
+    "lets the DM patch %s",
+    async (field, value) => {
+      const dmUid = await signInTestUser();
+      const campaignRef = adminDb.collection("campaigns").doc();
+      const characterRef = campaignRef.collection("characters").doc();
+      await campaignRef.set({ dmId: dmUid, name: "Test Campaign", memberIds: [] });
+      await characterRef.set({ campaignId: campaignRef.id, userId: null, isEditableByPlayer: false });
+
+      const patchCharacterField = httpsCallable(getTestFunctions(), "patchCharacterField");
+      await patchCharacterField({
+        campaignId: campaignRef.id,
+        characterId: characterRef.id,
+        field,
+        value,
+      });
+
+      const snapshot = await characterRef.get();
+      expect(snapshot.data()?.[field]).toEqual(value);
+    },
+    15000
+  );
+
+  it(
     "rejects a header patch missing characterName",
     async () => {
       const dmUid = await signInTestUser();

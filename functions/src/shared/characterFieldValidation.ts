@@ -208,11 +208,37 @@ function assertCharacteristicsValue(value: unknown): void {
 
 export type CharacterFieldValidator = (value: unknown) => void;
 
+function makeRecordValidator(label: string): CharacterFieldValidator {
+  return (value) => {
+    if (typeof value !== "object" || value === null || Array.isArray(value)) {
+      throw new HttpsError("invalid-argument", `${label} must be an object.`);
+    }
+    assertFieldNestedBounds(value, label);
+  };
+}
+
+function makeArrayValidator(label: string): CharacterFieldValidator {
+  return (value) => {
+    if (!Array.isArray(value)) {
+      throw new HttpsError("invalid-argument", `${label} must be an array.`);
+    }
+    assertFieldNestedBounds(value, label);
+  };
+}
+
 const CHARACTER_FIELD_VALIDATORS: Record<string, CharacterFieldValidator> = {
   notes: assertNotesValue,
   header: assertHeaderValue,
   portraitUrl: assertPortraitUrlValue,
   characteristics: assertCharacteristicsValue,
+  talentsAndTraits: makeRecordValidator("Talents and traits"),
+  weaponTraining: makeRecordValidator("Weapon training"),
+  psychic: makeRecordValidator("Psychic"),
+  insanity: makeRecordValidator("Insanity"),
+  cybernetics: makeArrayValidator("Cybernetics"),
+  rangedWeapons: makeArrayValidator("Ranged weapons"),
+  meleeWeapons: makeArrayValidator("Melee weapons"),
+  archeotech: makeArrayValidator("Archeotech"),
 };
 
 export function assertValidCharacterFieldValue(field: string, value: unknown): void {

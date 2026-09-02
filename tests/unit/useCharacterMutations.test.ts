@@ -2,13 +2,17 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useCharacterMutations } from "../../src/hooks/useCharacterMutations";
-import { patchCharacterField as patchCharacterFieldService } from "../../src/services/characterService";
+import {
+  patchCharacterField as patchCharacterFieldService,
+  patchCharacterFields as patchCharacterFieldsService,
+} from "../../src/services/characterService";
 import type { Character } from "../../src/types/Character";
 
 vi.mock("../../src/services/characterService", () => ({
   forceAssignCharacter: vi.fn(),
   forceReleaseCharacter: vi.fn(),
   patchCharacterField: vi.fn(),
+  patchCharacterFields: vi.fn(),
   releaseCharacter: vi.fn(),
   updateCharacter: vi.fn(),
 }));
@@ -19,6 +23,7 @@ vi.mock("../../src/components/Toast", () => ({
 }));
 
 const mockPatchCharacterField = vi.mocked(patchCharacterFieldService);
+const mockPatchCharacterFields = vi.mocked(patchCharacterFieldsService);
 
 const baseCharacter = {
   id: "char-1",
@@ -139,6 +144,67 @@ describe("useCharacterMutations: updateCharacteristic", () => {
     );
 
     await act(() => result.current.updateCharacteristic("ws", { base: 30, advances: 2 }));
+
+    expect(mockToastError).toHaveBeenCalledWith(expect.stringContaining("permission-denied"));
+  });
+});
+
+describe("useCharacterMutations: patchFields", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("calls patchCharacterFields with the campaign, character, and the fields map", async () => {
+    mockPatchCharacterFields.mockResolvedValue(undefined);
+    const { result } = renderHook(() =>
+      useCharacterMutations({
+        campaignId: "camp-1",
+        characterId: "char-1",
+        character: baseCharacter,
+        allowedToEdit: true,
+      })
+    );
+
+    await act(() =>
+      result.current.patchFields({
+        talentsAndTraits: { talents: [], traits: [] },
+        psychic: { psyRating: 1 },
+      })
+    );
+
+    expect(mockPatchCharacterFields).toHaveBeenCalledWith("camp-1", "char-1", {
+      talentsAndTraits: { talents: [], traits: [] },
+      psychic: { psyRating: 1 },
+    });
+  });
+
+  it("does nothing when not allowed to edit", async () => {
+    const { result } = renderHook(() =>
+      useCharacterMutations({
+        campaignId: "camp-1",
+        characterId: "char-1",
+        character: baseCharacter,
+        allowedToEdit: false,
+      })
+    );
+
+    await act(() => result.current.patchFields({ psychic: { psyRating: 1 } }));
+
+    expect(mockPatchCharacterFields).not.toHaveBeenCalled();
+  });
+
+  it("shows an error toast and does not throw when the Function call fails", async () => {
+    mockPatchCharacterFields.mockRejectedValue(new Error("permission-denied"));
+    const { result } = renderHook(() =>
+      useCharacterMutations({
+        campaignId: "camp-1",
+        characterId: "char-1",
+        character: baseCharacter,
+        allowedToEdit: true,
+      })
+    );
+
+    await act(() => result.current.patchFields({ psychic: { psyRating: 1 } }));
 
     expect(mockToastError).toHaveBeenCalledWith(expect.stringContaining("permission-denied"));
   });

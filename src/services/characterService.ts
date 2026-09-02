@@ -369,6 +369,27 @@ export async function patchCharacterField(
   });
 }
 
+const callPatchCharacterFields = httpsCallable<
+  { campaignId: string; characterId: string; fields: Record<string, unknown>; operationId: string },
+  void
+>(functions, "patchCharacterField");
+
+/** Patches several character fields atomically via the protected server-side operation. */
+export async function patchCharacterFields(
+  campaignId: string,
+  characterId: string,
+  fields: Record<string, unknown>
+): Promise<void> {
+  assertFirestoreDocumentId(campaignId, "Campaign ID");
+  assertFirestoreDocumentId(characterId, "Character ID");
+  await callPatchCharacterFields({
+    campaignId,
+    characterId,
+    fields: stripUndefined(fields),
+    operationId: createLocalId("patch-character-field"),
+  });
+}
+
 const REGISTER_CODE_RETRY_ATTEMPTS = 3;
 
 /**

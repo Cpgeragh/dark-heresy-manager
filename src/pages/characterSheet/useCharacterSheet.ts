@@ -106,8 +106,8 @@ export function useCharacterSheet({
 
     // Mutations
     updateField: mutations.updateField,
-    updateFields: mutations.updateFields,
     patchField: mutations.patchField,
+    patchFields: mutations.patchFields,
     updateCharacteristic: mutations.updateCharacteristic,
     releaseCharacter: mutations.releaseCharacter,
     dmForceRelease: mutations.dmForceRelease,

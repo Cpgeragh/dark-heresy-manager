@@ -175,6 +175,86 @@ describe("patchCharacterField", () => {
     expect(mockTransactionSet).not.toHaveBeenCalled();
   });
 
+  it("patches several fields atomically via the fields shape", async () => {
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () => ({ userId: "player-1", isEditableByPlayer: false }),
+    });
+
+    const talentsAndTraits = { talents: [], traits: [] };
+    const psychic = { psyRating: 1 };
+    await patchCharacterField(
+      {
+        campaignId: "c1",
+        characterId: "char-1",
+        fields: { talentsAndTraits, psychic },
+      },
+      "dm-1"
+    );
+
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(mockCharacterRef, { talentsAndTraits, psychic });
+  });
+
+  it("rejects the whole multi-field patch when one field is invalid, writing nothing", async () => {
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
+
+    await expect(
+      patchCharacterField(
+        {
+          campaignId: "c1",
+          characterId: "char-1",
+          fields: { talentsAndTraits: { talents: [], traits: [] }, psychic: "not-an-object" },
+        },
+        "dm-1"
+      )
+    ).rejects.toThrow(expect.objectContaining({ code: "invalid-argument" }));
+    expect(mockCampaignGet).not.toHaveBeenCalled();
+    expect(mockTransactionUpdate).not.toHaveBeenCalled();
+  });
+
+  it("rejects when both field/value and fields are provided", async () => {
+    await expect(
+      patchCharacterField(
+        {
+          campaignId: "c1",
+          characterId: "char-1",
+          field: "notes",
+          value: "hi",
+          fields: { psychic: { psyRating: 1 } },
+        },
+        "dm-1"
+      )
+    ).rejects.toThrow(expect.objectContaining({ code: "invalid-argument" }));
+  });
+
+  it("rejects an empty fields object", async () => {
+    await expect(
+      patchCharacterField({ campaignId: "c1", characterId: "char-1", fields: {} }, "dm-1")
+    ).rejects.toThrow(expect.objectContaining({ code: "invalid-argument" }));
+  });
+
+  it("writes the summary once from the merged result when a multi-field patch touches a summary-relevant field", async () => {
+    mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
+    mockTransactionGet.mockResolvedValue({
+      exists: true,
+      data: () => ({ campaignId: "c1", userId: "player-1", isEditableByPlayer: false }),
+    });
+
+    const header = { characterName: "Brother Corvus" };
+    const psychic = { psyRating: 1 };
+    await patchCharacterField(
+      { campaignId: "c1", characterId: "char-1", fields: { header, psychic } },
+      "dm-1"
+    );
+
+    expect(mockTransactionSet).toHaveBeenCalledTimes(1);
+    expect(mockTransactionSet).toHaveBeenCalledWith(mockSummaryRef, {
+      campaignId: "c1",
+      characterName: "Brother Corvus",
+    });
+  });
+
   it("does not write the character summary when patching notes", async () => {
     mockCampaignGet.mockResolvedValue({ exists: true, data: () => ({ dmId: "dm-1" }) });
     mockTransactionGet.mockResolvedValue({

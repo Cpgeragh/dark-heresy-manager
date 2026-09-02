@@ -19,16 +19,42 @@ import { computeCharacterSummary, isSummaryRelevantField } from "../shared/chara
 export interface PatchCharacterFieldInput {
   campaignId: string;
   characterId: string;
-  field: string;
-  value: unknown;
+  field?: string;
+  value?: unknown;
+  fields?: Record<string, unknown>;
   operationId?: string;
+}
+
+function normalizePatch(input: PatchCharacterFieldInput): Record<string, unknown> {
+  if (input.fields !== undefined) {
+    if (input.field !== undefined || input.value !== undefined) {
+      throw new HttpsError(
+        "invalid-argument",
+        "Provide either field and value, or fields, not both."
+      );
+    }
+    if (typeof input.fields !== "object" || input.fields === null || Array.isArray(input.fields)) {
+      throw new HttpsError("invalid-argument", "fields must be an object.");
+    }
+    if (Object.keys(input.fields).length === 0) {
+      throw new HttpsError("invalid-argument", "fields cannot be empty.");
+    }
+    return input.fields;
+  }
+  if (input.field === undefined) {
+    throw new HttpsError("invalid-argument", "Missing field or fields.");
+  }
+  return { [input.field]: input.value };
 }
 
 export async function patchCharacterField(
   input: PatchCharacterFieldInput,
   callerUid: string
 ): Promise<void> {
-  assertValidCharacterFieldValue(input.field, input.value);
+  const patch = normalizePatch(input);
+  for (const [field, value] of Object.entries(patch)) {
+    assertValidCharacterFieldValue(field, value);
+  }
 
   const db = getFirestore();
   const campaignRef = db.collection("campaigns").doc(input.campaignId);
@@ -47,9 +73,9 @@ export async function patchCharacterField(
     }
     const characterData = characterSnapshot.data() ?? {};
     await assertCanEditCharacter(db, callerUid, dmId, characterData);
-    transaction.update(characterRef, { [input.field]: input.value });
-    if (isSummaryRelevantField(input.field)) {
-      const merged = { ...characterData, [input.field]: input.value };
+    transaction.update(characterRef, patch);
+    if (Object.keys(patch).some(isSummaryRelevantField)) {
+      const merged = { ...characterData, ...patch };
       const summaryRef = campaignRef.collection("characterSummaries").doc(input.characterId);
       transaction.set(summaryRef, computeCharacterSummary(merged));
     }

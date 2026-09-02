@@ -110,8 +110,8 @@ export default function CharacterSheet({
     getCharBonus,
     updateCharacteristic,
     updateField,
-    updateFields,
     patchField,
+    patchFields,
     releaseCharacter,
     dmForceRelease,
     dmForceAssign,
@@ -309,8 +309,8 @@ export default function CharacterSheet({
   );
 
   const handleUpdateInsanity = useCallback(
-    (next: InsanityBlock) => updateField("insanity", next),
-    [updateField]
+    (next: InsanityBlock) => patchField("insanity", next),
+    [patchField]
   );
 
   const handleUpdateCorruption = useCallback(
@@ -324,23 +324,23 @@ export default function CharacterSheet({
   );
 
   const handleUpdateTalents = useCallback(
-    (next: TalentsAndTraitsBlock) => updateField("talentsAndTraits", next),
-    [updateField]
+    (next: TalentsAndTraitsBlock) => patchField("talentsAndTraits", next),
+    [patchField]
   );
 
   const handleUpdateWeaponTraining = useCallback(
-    (next: WeaponTrainingBlock) => updateField("weaponTraining", next),
-    [updateField]
+    (next: WeaponTrainingBlock) => patchField("weaponTraining", next),
+    [patchField]
   );
 
   const handleUpdateRangedWeapons = useCallback(
-    (next: RangedWeapon[]) => updateField("rangedWeapons", next),
-    [updateField]
+    (next: RangedWeapon[]) => patchField("rangedWeapons", next),
+    [patchField]
   );
 
   const handleUpdateMeleeWeapons = useCallback(
-    (next: MeleeWeapon[]) => updateField("meleeWeapons", next),
-    [updateField]
+    (next: MeleeWeapon[]) => patchField("meleeWeapons", next),
+    [patchField]
   );
 
   const handleUpdateArmour = useCallback(
@@ -349,8 +349,8 @@ export default function CharacterSheet({
   );
 
   const handleUpdatePsychic = useCallback(
-    (next: PsychicBlock) => updateField("psychic", next),
-    [updateField]
+    (next: PsychicBlock) => patchField("psychic", next),
+    [patchField]
   );
 
   const handleUpdateGear = useCallback(
@@ -384,8 +384,8 @@ export default function CharacterSheet({
   );
 
   const handleUpdateCybernetics = useCallback(
-    (next: CyberneticItem[]) => updateField("cybernetics", next),
-    [updateField]
+    (next: CyberneticItem[]) => patchField("cybernetics", next),
+    [patchField]
   );
 
   const handleUpdateNotes = useCallback(
@@ -399,8 +399,8 @@ export default function CharacterSheet({
   );
 
   const handleUpdateArcheotech = useCallback(
-    (next: ArcheotechItem[]) => updateField("archeotech", next),
-    [updateField]
+    (next: ArcheotechItem[]) => patchField("archeotech", next),
+    [patchField]
   );
 
   // ================================================================
@@ -638,7 +638,7 @@ export default function CharacterSheet({
               isDM={isDM}
               editable={allowedToEdit}
               onUpdateTalents={handleUpdateTalents}
-              onUpdateCharacter={updateFields}
+              onUpdateCharacter={patchFields}
             />
           )}
 
