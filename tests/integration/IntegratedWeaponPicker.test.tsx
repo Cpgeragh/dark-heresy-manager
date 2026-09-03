@@ -4,8 +4,8 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { IntegratedWeaponPicker } from "../../src/pages/characterSheet/weapons/IntegratedWeaponPicker";
-import { INTEGRATED_RANGED_REFS, INTEGRATED_MELEE_REFS } from "../../src/utils/weaponUtils";
+import { IntegratedWeaponPicker } from "../../src/pages/CharacterSheet/weapons/IntegratedWeaponPicker";
+import { INTEGRATED_RANGED_REFS, INTEGRATED_MELEE_REFS } from "../../src/pages/CharacterSheet/weapons/weaponHelpers";
 import type { CampaignCustomItem } from "../../src/types/CustomItems";
 
 // Real weapons with a description have their own Rules InfoModal titled with

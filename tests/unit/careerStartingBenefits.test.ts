@@ -5,7 +5,7 @@ import {
   getDerivedCareerSkillIds,
   getDerivedCareerTalentGrants,
   TECH_PRIEST_MECHANICUS_IMPLANT_GRANT_UID,
-} from "../../src/features/career/careerStartingBenefits";
+} from "../../src/mechanics/career/careerStartingBenefits";
 import type { CyberneticItem } from "../../src/types/Character";
 
 describe("getDerivedCareerSkillIds", () => {

@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { QrModal } from "../../src/ui/QrModal";
+import { QrModal } from "../../src/ui/modals/QrModal";
 
 describe("QrModal", () => {
   it("shows the title and the URL as text", () => {

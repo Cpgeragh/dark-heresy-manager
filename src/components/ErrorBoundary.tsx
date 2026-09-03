@@ -2,7 +2,7 @@
 
 import React, { Component } from "react";
 import type { ReactNode } from "react";
-import { Button } from "../ui/Button";
+import { Button } from "../ui/buttons/Button";
 
 interface Props {
   children: ReactNode;

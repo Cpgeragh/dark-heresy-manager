@@ -18,12 +18,12 @@ import {
   repairCharacterSummaries,
 } from "../services/characterService";
 import { validateCharacterName } from "../utils/validation";
-import { readCharacterImportFile } from "../utils/firebaseValidation";
+import { readCharacterImportFile } from "../firestore/firebaseValidation";
 import { useToast } from "../components/Toast";
 import { IMPORTANT_TOAST_DURATION } from "../constants/ui";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
-import { editableInputClass, uiSubheading, uiTextLabel } from "../ui/editableStyles";
-import { Button } from "../ui/Button";
+import { editableInputClass, uiSubheading, uiTextLabel } from "../ui/styles/editableStyles";
+import { Button } from "../ui/buttons/Button";
 import { PageShell } from "../ui/PageShell";
 import { Panel } from "../ui/Panel";
 import { SectionHeader } from "../ui/SectionHeader";

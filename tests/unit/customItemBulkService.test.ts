@@ -41,7 +41,7 @@ vi.mock("../../src/firebase", () => ({ db: "mock-db", functions: "mock-functions
 vi.mock("../../src/firebase/converters", () => ({
   charactersCollectionRef: (campaignId: string) => `campaigns/${campaignId}/characters`,
 }));
-vi.mock("../../src/utils/firestoreBatchDelete", () => ({
+vi.mock("../../src/firestore/firestoreBatchDelete", () => ({
   deleteRefsAtomically: (...args: unknown[]) => mockAtomicDelete(...args),
 }));
 

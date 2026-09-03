@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { naturalArmourBonus } from "../../src/pages/characterSheet/ArmourTab/armourHelpers";
+import { naturalArmourBonus } from "../../src/pages/CharacterSheet/ArmourTab/armourHelpers";
 import type { TalentEntry } from "../../src/types/Character";
 
 describe("naturalArmourBonus", () => {

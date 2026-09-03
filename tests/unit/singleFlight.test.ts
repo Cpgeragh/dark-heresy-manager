@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { runSingleFlight } from "../../src/utils/singleFlight";
+import { runSingleFlight } from "../../src/firestore/singleFlight";
 
 function deferred<T>() {
   let resolve!: (value: T) => void;

@@ -7,7 +7,7 @@
 // the <label> instead — those are not document sections.
 
 import type { ReactNode } from "react";
-import { uiSectionHeader } from "./editableStyles";
+import { uiSectionHeader } from "./styles/editableStyles";
 
 export function SectionHeader({
   as: Heading = "h2",

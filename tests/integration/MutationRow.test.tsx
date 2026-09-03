@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { MutationRow } from "../../src/features/corruption/MutationRow";
+import { MutationRow } from "../../src/mechanics/corruption/MutationRow";
 import type { CorruptionMutationEntry } from "../../src/types/Character";
 
 function palsyLikeEntry(overrides: Partial<CorruptionMutationEntry> = {}): CorruptionMutationEntry {

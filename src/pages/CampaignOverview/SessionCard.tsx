@@ -8,15 +8,15 @@ import {
   type SessionUpdateData,
 } from "../../services/sessionService";
 import { useToast } from "../../components/Toast";
-import { Button } from "../../ui/Button";
-import { ConfirmInline } from "../../ui/ConfirmInline";
+import { Button } from "../../ui/buttons/Button";
+import { ConfirmInline } from "../../ui/forms/ConfirmInline";
 import { SectionHeader } from "../../ui/SectionHeader";
 import {
   editableInputClass,
   editableTextareaClass,
   uiFormLabelSecondary,
   uiSection,
-} from "../../ui/editableStyles";
+} from "../../ui/styles/editableStyles";
 
 interface Character {
   id: string;

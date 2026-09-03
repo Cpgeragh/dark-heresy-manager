@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { CorruptionMalignancyPicker } from "../../src/features/corruption/CorruptionMalignancyPicker";
+import { CorruptionMalignancyPicker } from "../../src/mechanics/corruption/CorruptionMalignancyPicker";
 
 function setup(editable = true) {
   const onAdd = vi.fn();

@@ -40,9 +40,9 @@ const { MOCK_TALENT_LIST } = vi.hoisted(() => ({
   ],
 }));
 
-vi.mock("../../src/data/talentData", () => ({ TALENT_LIST: MOCK_TALENT_LIST }));
+vi.mock("../../src/data/reference/talentData", () => ({ TALENT_LIST: MOCK_TALENT_LIST }));
 
-import { TalentsTab } from "../../src/pages/characterSheet/TalentsTab";
+import { TalentsTab } from "../../src/mechanics/talents/TalentsTab";
 import type { PsychicBlock, TalentEntry, TalentsAndTraitsBlock } from "../../src/types/Character";
 
 const emptyPsychic: PsychicBlock = { psyRating: 0, minorPowers: [], majorPowers: [] };

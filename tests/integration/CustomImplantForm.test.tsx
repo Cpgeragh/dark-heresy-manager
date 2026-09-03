@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { CustomImplantForm } from "../../src/pages/characterSheet/CyberneticsTab/CustomImplantForm";
+import { CustomImplantForm } from "../../src/pages/CharacterSheet/CyberneticsTab/CustomImplantForm";
 
 function renderForm(props: Partial<React.ComponentProps<typeof CustomImplantForm>> = {}) {
   const onAdd = vi.fn();

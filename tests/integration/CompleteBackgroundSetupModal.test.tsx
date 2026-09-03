@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { CharacterHeader, TalentsAndTraitsBlock } from "../../src/types/Character";
-import { CompleteBackgroundSetupModal } from "../../src/pages/characterSheet/CompleteBackgroundSetupModal";
+import { CompleteBackgroundSetupModal } from "../../src/pages/CharacterSheet/CompleteBackgroundSetupModal";
 
 function modalProps(overrides: {
   header?: CharacterHeader;

@@ -23,20 +23,20 @@ import {
   updateCampaignDetails,
 } from "../services/campaignService";
 import type { CampaignWithId } from "../types/Firestore";
-import { uiSection, editableInputClass, uiTextError } from "../ui/editableStyles";
-import { Button } from "../ui/Button";
-import { ExpandChevron } from "../ui/ExpandChevron";
+import { uiSection, editableInputClass, uiTextError } from "../ui/styles/editableStyles";
+import { Button } from "../ui/buttons/Button";
+import { ExpandChevron } from "../ui/icons/ExpandChevron";
 import { PageShell } from "../ui/PageShell";
 import { Panel } from "../ui/Panel";
-import { QrModal } from "../ui/QrModal";
+import { QrModal } from "../ui/modals/QrModal";
 import { SectionHeader } from "../ui/SectionHeader";
 import { ErrorState } from "../ui/ErrorState";
 import { LoadingState } from "../ui/LoadingState";
-import { ConfirmInline } from "../ui/ConfirmInline";
+import { ConfirmInline } from "../ui/forms/ConfirmInline";
 import { ClaimForm } from "./ClaimCharacter/ClaimForm";
 import { ClaimPreview } from "./ClaimCharacter/ClaimPreview";
-import { useRecoveryLookup } from "./ClaimCharacter/hooks/useRecoveryLookup";
-import { useClaimActions } from "./ClaimCharacter/hooks/useClaimActions";
+import { useRecoveryLookup } from "../hooks/useRecoveryLookup";
+import { useClaimActions } from "../hooks/useClaimActions";
 
 interface Props {
   user: User;

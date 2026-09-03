@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { WeaponTrainingTab } from "../../src/pages/characterSheet/WeaponTrainingTab";
+import { WeaponTrainingTab } from "../../src/pages/CharacterSheet/WeaponTrainingTab";
 import type { WeaponTrainingBlock } from "../../src/types/Character";
 
 function makeBlock(over: Partial<WeaponTrainingBlock> = {}): WeaponTrainingBlock {

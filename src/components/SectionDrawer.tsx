@@ -1,9 +1,9 @@
 // src/components/SectionDrawer.tsx
 
 import { useState, useEffect, useCallback } from "react";
-import type { TabId } from "../pages/characterSheet/types";
-import { CloseButton } from "../ui/CloseButton";
-import { ArrowLeft, ArrowRight } from "../ui/PickerArrows";
+import type { TabId } from "../pages/CharacterSheet/types";
+import { CloseButton } from "../ui/buttons/CloseButton";
+import { ArrowLeft, ArrowRight } from "../ui/icons/PickerArrows";
 
 // ================================================================
 // NAVIGATION STRUCTURE

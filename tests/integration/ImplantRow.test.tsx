@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
-import { ImplantRow } from "../../src/pages/characterSheet/CyberneticsTab/ImplantRow";
+import { ImplantRow } from "../../src/pages/CharacterSheet/CyberneticsTab/ImplantRow";
 import type { CyberneticItem } from "../../src/types/Character";
 import type { CampaignCustomItem } from "../../src/types/CustomItems";
 

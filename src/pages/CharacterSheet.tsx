@@ -3,35 +3,35 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useHeaderExtensionSetters } from "../context/useHeaderExtension";
-import { CharacterKebabContent } from "./characterSheet/CharacterKebabContent";
+import { CharacterKebabContent } from "./CharacterSheet/CharacterKebabContent";
 
-import { useCharacterSheet } from "./characterSheet/useCharacterSheet";
+import { useCharacterSheet } from "./CharacterSheet/useCharacterSheet";
 import { ErrorBoundary } from "../components/ErrorBoundary";
-import { Button } from "../ui/Button";
+import { Button } from "../ui/buttons/Button";
 
-import { VitalsTab } from "./characterSheet/VitalsTab";
-import { InsanityTab } from "./characterSheet/InsanityTab";
-import { CorruptionTab } from "./characterSheet/CorruptionTab";
-import { CharacteristicsTab } from "./characterSheet/CharacteristicsTab";
-import { SkillsTab } from "./characterSheet/SkillsTab";
-import { TalentsTab } from "./characterSheet/TalentsTab";
-import { TraitsTab } from "./characterSheet/TraitsTab";
-import { WeaponsTab } from "./characterSheet/WeaponsTab";
-import { ArmourTab } from "./characterSheet/ArmourTab";
-import { CyberneticsTab } from "./characterSheet/CyberneticsTab";
-import { PsychicTab } from "./characterSheet/PsychicTab";
-import { GearTab } from "./characterSheet/GearTab";
-import { DrugsTab } from "./characterSheet/DrugsTab";
-import { ExperienceTab } from "./characterSheet/ExperienceTab";
-import { NotesTab } from "./characterSheet/NotesTab";
-import { AdminTab } from "./characterSheet/AdminTab";
-import { ArcheotechTab } from "./characterSheet/ArcheotechTab";
-import { BackgroundTab } from "./characterSheet/BackgroundTab";
-import { CompleteBackgroundSetupModal } from "./characterSheet/CompleteBackgroundSetupModal";
-import { WeaponTrainingTab } from "./characterSheet/WeaponTrainingTab";
-import { CompanionsTab } from "./characterSheet/CompanionsTab";
+import { VitalsTab } from "./CharacterSheet/VitalsTab";
+import { InsanityTab } from "./CharacterSheet/InsanityTab";
+import { CorruptionTab } from "./CharacterSheet/CorruptionTab";
+import { CharacteristicsTab } from "./CharacterSheet/CharacteristicsTab";
+import { SkillsTab } from "./CharacterSheet/SkillsTab";
+import { TalentsTab } from "../mechanics/talents/TalentsTab";
+import { TraitsTab } from "../mechanics/traits/TraitsTab";
+import { WeaponsTab } from "./CharacterSheet/WeaponsTab";
+import { ArmourTab } from "./CharacterSheet/ArmourTab";
+import { CyberneticsTab } from "./CharacterSheet/CyberneticsTab";
+import { PsychicTab } from "./CharacterSheet/PsychicTab";
+import { GearTab } from "./CharacterSheet/GearTab";
+import { DrugsTab } from "./CharacterSheet/DrugsTab";
+import { ExperienceTab } from "./CharacterSheet/ExperienceTab";
+import { NotesTab } from "./CharacterSheet/NotesTab";
+import { AdminTab } from "./CharacterSheet/AdminTab";
+import { ArcheotechTab } from "./CharacterSheet/ArcheotechTab";
+import { BackgroundTab } from "./CharacterSheet/BackgroundTab";
+import { CompleteBackgroundSetupModal } from "./CharacterSheet/CompleteBackgroundSetupModal";
+import { WeaponTrainingTab } from "./CharacterSheet/WeaponTrainingTab";
+import { CompanionsTab } from "./CharacterSheet/CompanionsTab";
 
-import { isTabId, type TabId } from "./characterSheet/types";
+import { isTabId, type TabId } from "./CharacterSheet/types";
 import type {
   CharacterHeader,
   WoundsBlock,
@@ -59,7 +59,7 @@ import type {
 
 import { exportCharacterJson } from "../utils/exportCharacter";
 import { isBackgroundComplete } from "../utils/characterFactory";
-import { getSpentXp } from "../features/experience/xpSpent";
+import { getSpentXp } from "../mechanics/experience/xpSpent";
 import {
   reconcileCharacterSpentXp,
   registerRecoveryCode,

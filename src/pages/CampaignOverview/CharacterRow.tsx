@@ -6,11 +6,11 @@ import type { Timestamp } from "firebase/firestore";
 import { useClaimLogs } from "../../hooks/useClaimLogs";
 import { useToast } from "../../components/Toast";
 import { deleteCharacter, preflightCharacterDeletion } from "../../services/characterService";
-import { uiSection } from "../../ui/editableStyles";
-import { Button } from "../../ui/Button";
-import { ConfirmInline } from "../../ui/ConfirmInline";
-import { ModalHeader } from "../../ui/ModalHeader";
-import { ModalShell } from "../../ui/ModalShell";
+import { uiSection } from "../../ui/styles/editableStyles";
+import { Button } from "../../ui/buttons/Button";
+import { ConfirmInline } from "../../ui/forms/ConfirmInline";
+import { ModalHeader } from "../../ui/modals/ModalHeader";
+import { ModalShell } from "../../ui/modals/ModalShell";
 import type { ClaimLogAction } from "../../utils/claimLog";
 import { PortraitUpload } from "../../components/PortraitUpload";
 

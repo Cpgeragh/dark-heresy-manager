@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { GrenadeCard } from "../../src/pages/characterSheet/weapons/GrenadeCard";
+import { GrenadeCard } from "../../src/pages/CharacterSheet/weapons/GrenadeCard";
 import type { GrenadeItem } from "../../src/types/Character";
 
 const baseItem: GrenadeItem = {

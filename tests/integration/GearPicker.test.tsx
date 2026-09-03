@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { GearPicker } from "../../src/pages/characterSheet/GearTab/GearPicker";
+import { GearPicker } from "../../src/pages/CharacterSheet/GearTab/GearPicker";
 import { GEAR_REFERENCE } from "../../src/data/reference/gearReference";
 import { SkillSource } from "../../src/types/SkillSource";
 

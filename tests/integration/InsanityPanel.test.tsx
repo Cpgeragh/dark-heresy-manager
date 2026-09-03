@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { InsanityPanel } from "../../src/features/insanity/InsanityPanel";
+import { InsanityPanel } from "../../src/mechanics/insanity/InsanityPanel";
 import type { InsanityBlock } from "../../src/types/Character";
 
 function InsanityWiring({ initial, editable = true }: { initial: InsanityBlock; editable?: boolean }) {

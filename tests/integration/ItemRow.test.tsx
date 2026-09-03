@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
-import { ItemRow } from "../../src/pages/characterSheet/GearTab/ItemRow";
+import { ItemRow } from "../../src/pages/CharacterSheet/GearTab/ItemRow";
 import type { GearItem } from "../../src/types/Character";
 
 function gearItem(overrides: Partial<GearItem> = {}): GearItem {

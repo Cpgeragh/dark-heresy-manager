@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { ConsumablePicker } from "../../src/pages/characterSheet/GearTab/ConsumablePicker";
+import { ConsumablePicker } from "../../src/pages/CharacterSheet/GearTab/ConsumablePicker";
 
 const CONSUMABLE_NAME = "Amasec";
 

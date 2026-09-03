@@ -5,7 +5,7 @@ import {
   applyXpTransaction,
   clearRankUpXpCost,
   setRankUpXpCost,
-} from "../../src/features/experience/xpTransactions";
+} from "../../src/mechanics/experience/xpTransactions";
 
 const experience: ExperienceBlock = { total: 700, spent: 500, ranks: [] };
 

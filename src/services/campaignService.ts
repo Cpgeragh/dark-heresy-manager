@@ -18,9 +18,9 @@ import { httpsCallable } from "firebase/functions";
 import { db, functions } from "../firebase";
 import type { CampaignDocument } from "../types/Firestore";
 import { validateCampaignName, validateInquisitorName } from "../utils/validation";
-import { assertFirestoreDocumentId, assertString } from "../utils/firebaseValidation";
-import { runSingleFlight } from "../utils/singleFlight";
-import { driveJobToCompletion } from "../utils/bulkJobClient";
+import { assertFirestoreDocumentId, assertString } from "../firestore/firebaseValidation";
+import { runSingleFlight } from "../firestore/singleFlight";
+import { driveJobToCompletion } from "../firestore/bulkJobClient";
 import { campaignsCollectionRef } from "../firebase/converters";
 import { FIRESTORE_QUERY_LIMITS } from "../constants/firestoreLimits";
 

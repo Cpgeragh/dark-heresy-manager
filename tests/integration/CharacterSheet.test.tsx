@@ -15,7 +15,7 @@ import "@testing-library/jest-dom";
 import type { Character } from "../../src/types/Character";
 
 const useCharacterSheetMock = vi.fn();
-vi.mock("../../src/pages/characterSheet/useCharacterSheet", () => ({
+vi.mock("../../src/pages/CharacterSheet/useCharacterSheet", () => ({
   useCharacterSheet: (...args: unknown[]) => useCharacterSheetMock(...args),
 }));
 
@@ -41,7 +41,7 @@ const getSpentXpMock = vi.fn();
 const reconcileCharacterSpentXpMock = vi.fn();
 const registerRecoveryCodeMock = vi.fn();
 const revokeRecoveryCodeMock = vi.fn();
-vi.mock("../../src/features/experience/xpSpent", () => ({
+vi.mock("../../src/mechanics/experience/xpSpent", () => ({
   getSpentXp: (...args: unknown[]) => getSpentXpMock(...args),
 }));
 vi.mock("../../src/services/characterService", () => ({
@@ -50,7 +50,7 @@ vi.mock("../../src/services/characterService", () => ({
   revokeRecoveryCode: (...args: unknown[]) => revokeRecoveryCodeMock(...args),
 }));
 
-vi.mock("../../src/pages/characterSheet/CharacterKebabContent", () => ({
+vi.mock("../../src/pages/CharacterSheet/CharacterKebabContent", () => ({
   CharacterKebabContent: (props: Record<string, unknown>) => (
     <div>
       Mock CharacterKebabContent
@@ -61,7 +61,7 @@ vi.mock("../../src/pages/characterSheet/CharacterKebabContent", () => ({
   ),
 }));
 
-vi.mock("../../src/pages/characterSheet/CompleteBackgroundSetupModal", () => ({
+vi.mock("../../src/pages/CharacterSheet/CompleteBackgroundSetupModal", () => ({
   CompleteBackgroundSetupModal: () => <div>Mock CompleteBackgroundSetupModal</div>,
 }));
 
@@ -75,26 +75,26 @@ vi.mock("../../src/components/SectionDrawer", () => ({
 // are hoisted by static analysis, so these must be literal top-level calls,
 // not generated in a loop (a loop compiles fine but breaks at runtime since
 // the hoist happens before the loop variable exists).
-vi.mock("../../src/pages/characterSheet/VitalsTab", () => ({ VitalsTab: () => <div>Mock VitalsTab</div> }));
-vi.mock("../../src/pages/characterSheet/InsanityTab", () => ({ InsanityTab: () => <div>Mock InsanityTab</div> }));
-vi.mock("../../src/pages/characterSheet/CorruptionTab", () => ({ CorruptionTab: () => <div>Mock CorruptionTab</div> }));
-vi.mock("../../src/pages/characterSheet/CharacteristicsTab", () => ({ CharacteristicsTab: () => <div>Mock CharacteristicsTab</div> }));
-vi.mock("../../src/pages/characterSheet/SkillsTab", () => ({ SkillsTab: () => <div>Mock SkillsTab</div> }));
-vi.mock("../../src/pages/characterSheet/TalentsTab", () => ({ TalentsTab: () => <div>Mock TalentsTab</div> }));
-vi.mock("../../src/pages/characterSheet/TraitsTab", () => ({ TraitsTab: () => <div>Mock TraitsTab</div> }));
-vi.mock("../../src/pages/characterSheet/WeaponsTab", () => ({ WeaponsTab: () => <div>Mock WeaponsTab</div> }));
-vi.mock("../../src/pages/characterSheet/ArmourTab", () => ({ ArmourTab: () => <div>Mock ArmourTab</div> }));
-vi.mock("../../src/pages/characterSheet/CyberneticsTab", () => ({ CyberneticsTab: () => <div>Mock CyberneticsTab</div> }));
-vi.mock("../../src/pages/characterSheet/PsychicTab", () => ({ PsychicTab: () => <div>Mock PsychicTab</div> }));
-vi.mock("../../src/pages/characterSheet/GearTab", () => ({ GearTab: () => <div>Mock GearTab</div> }));
-vi.mock("../../src/pages/characterSheet/DrugsTab", () => ({ DrugsTab: () => <div>Mock DrugsTab</div> }));
-vi.mock("../../src/pages/characterSheet/ExperienceTab", () => ({ ExperienceTab: () => <div>Mock ExperienceTab</div> }));
-vi.mock("../../src/pages/characterSheet/NotesTab", () => ({ NotesTab: () => <div>Mock NotesTab</div> }));
-vi.mock("../../src/pages/characterSheet/AdminTab", () => ({ AdminTab: () => <div>Mock AdminTab</div> }));
-vi.mock("../../src/pages/characterSheet/ArcheotechTab", () => ({ ArcheotechTab: () => <div>Mock ArcheotechTab</div> }));
-vi.mock("../../src/pages/characterSheet/BackgroundTab", () => ({ BackgroundTab: () => <div>Mock BackgroundTab</div> }));
-vi.mock("../../src/pages/characterSheet/WeaponTrainingTab", () => ({ WeaponTrainingTab: () => <div>Mock WeaponTrainingTab</div> }));
-vi.mock("../../src/pages/characterSheet/CompanionsTab", () => ({ CompanionsTab: () => <div>Mock CompanionsTab</div> }));
+vi.mock("../../src/pages/CharacterSheet/VitalsTab", () => ({ VitalsTab: () => <div>Mock VitalsTab</div> }));
+vi.mock("../../src/pages/CharacterSheet/InsanityTab", () => ({ InsanityTab: () => <div>Mock InsanityTab</div> }));
+vi.mock("../../src/pages/CharacterSheet/CorruptionTab", () => ({ CorruptionTab: () => <div>Mock CorruptionTab</div> }));
+vi.mock("../../src/pages/CharacterSheet/CharacteristicsTab", () => ({ CharacteristicsTab: () => <div>Mock CharacteristicsTab</div> }));
+vi.mock("../../src/pages/CharacterSheet/SkillsTab", () => ({ SkillsTab: () => <div>Mock SkillsTab</div> }));
+vi.mock("../../src/mechanics/talents/TalentsTab", () => ({ TalentsTab: () => <div>Mock TalentsTab</div> }));
+vi.mock("../../src/mechanics/traits/TraitsTab", () => ({ TraitsTab: () => <div>Mock TraitsTab</div> }));
+vi.mock("../../src/pages/CharacterSheet/WeaponsTab", () => ({ WeaponsTab: () => <div>Mock WeaponsTab</div> }));
+vi.mock("../../src/pages/CharacterSheet/ArmourTab", () => ({ ArmourTab: () => <div>Mock ArmourTab</div> }));
+vi.mock("../../src/pages/CharacterSheet/CyberneticsTab", () => ({ CyberneticsTab: () => <div>Mock CyberneticsTab</div> }));
+vi.mock("../../src/pages/CharacterSheet/PsychicTab", () => ({ PsychicTab: () => <div>Mock PsychicTab</div> }));
+vi.mock("../../src/pages/CharacterSheet/GearTab", () => ({ GearTab: () => <div>Mock GearTab</div> }));
+vi.mock("../../src/pages/CharacterSheet/DrugsTab", () => ({ DrugsTab: () => <div>Mock DrugsTab</div> }));
+vi.mock("../../src/pages/CharacterSheet/ExperienceTab", () => ({ ExperienceTab: () => <div>Mock ExperienceTab</div> }));
+vi.mock("../../src/pages/CharacterSheet/NotesTab", () => ({ NotesTab: () => <div>Mock NotesTab</div> }));
+vi.mock("../../src/pages/CharacterSheet/AdminTab", () => ({ AdminTab: () => <div>Mock AdminTab</div> }));
+vi.mock("../../src/pages/CharacterSheet/ArcheotechTab", () => ({ ArcheotechTab: () => <div>Mock ArcheotechTab</div> }));
+vi.mock("../../src/pages/CharacterSheet/BackgroundTab", () => ({ BackgroundTab: () => <div>Mock BackgroundTab</div> }));
+vi.mock("../../src/pages/CharacterSheet/WeaponTrainingTab", () => ({ WeaponTrainingTab: () => <div>Mock WeaponTrainingTab</div> }));
+vi.mock("../../src/pages/CharacterSheet/CompanionsTab", () => ({ CompanionsTab: () => <div>Mock CompanionsTab</div> }));
 
 import CharacterSheet from "../../src/pages/CharacterSheet";
 

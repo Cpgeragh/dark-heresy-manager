@@ -1,8 +1,8 @@
 // src/pages/ClaimCharacter/ClaimForm.tsx
 
 import { useCallback } from "react";
-import { Button } from "../../ui/Button";
-import { RecoveryCodeInput } from "../../ui/RecoveryCodeInput";
+import { Button } from "../../ui/buttons/Button";
+import { RecoveryCodeInput } from "../../ui/forms/RecoveryCodeInput";
 import { formatRecoveryCodeInput } from "../../utils/recoveryCode";
 import { validateRecoveryCode } from "../../utils/validation";
 

@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
-import { ConcealedWeaponBionicInstaller } from "../../src/pages/characterSheet/CyberneticsTab/ConcealedWeaponBionicInstaller";
+import { ConcealedWeaponBionicInstaller } from "../../src/pages/CharacterSheet/CyberneticsTab/ConcealedWeaponBionicInstaller";
 import type { CyberneticItem, RangedWeapon, MeleeWeapon } from "../../src/types/Character";
 
 // "cr-bionic-arm" is the real Bionic Arm reference id (src/data/reference/cyberneticsReference.ts).

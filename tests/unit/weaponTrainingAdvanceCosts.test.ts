@@ -3,7 +3,7 @@ import {
   getWeaponTrainingCost,
   getUnlockedExoticWeaponSlots,
   getWeaponTrainingSpent,
-} from "../../src/features/experience/weaponTrainingAdvanceCosts";
+} from "../../src/mechanics/experience/weaponTrainingAdvanceCosts";
 import { createEmptyCharacterData } from "../../src/utils/characterFactory";
 import type { Character, WeaponTrainingTalentId } from "../../src/types/Character";
 

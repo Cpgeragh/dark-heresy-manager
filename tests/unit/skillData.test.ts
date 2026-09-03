@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_SKILLS } from "../../src/data/defaultSkills";
-import { SKILL_DESCRIPTIONS } from "../../src/data/skillDescriptions";
+import { DEFAULT_SKILLS } from "../../src/data/reference/defaultSkills";
+import { SKILL_DESCRIPTIONS } from "../../src/data/reference/skillDescriptions";
 
 const descriptionFor = (name: string): string => {
   const description = SKILL_DESCRIPTIONS[name];

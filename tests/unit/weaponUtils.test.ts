@@ -6,7 +6,7 @@ import {
   modifyDamageBonus,
   meleeDamageForCraftsmanship,
   compareWeaponEntries,
-} from "../../src/utils/weaponUtils";
+} from "../../src/pages/CharacterSheet/weapons/weaponHelpers";
 
 // ============================================================
 // normaliseName

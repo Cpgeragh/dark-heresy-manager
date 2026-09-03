@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { CyberneticWeaponCard } from "../../src/pages/characterSheet/weapons/CyberneticWeaponCard";
+import { CyberneticWeaponCard } from "../../src/pages/CharacterSheet/weapons/CyberneticWeaponCard";
 import type { CyberneticWeapon } from "../../src/data/reference/cyberneticsReference";
 import type { WeaponCraftsmanship } from "../../src/types/Character";
 

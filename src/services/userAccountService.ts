@@ -3,8 +3,8 @@ import { doc, getDoc, serverTimestamp, setDoc, updateDoc } from "firebase/firest
 import { httpsCallable } from "firebase/functions";
 import { auth, db, functions } from "../firebase";
 import type { UserDocument } from "../types/Firestore";
-import { assertFirestoreDocumentId } from "../utils/firebaseValidation";
-import { runSingleFlight } from "../utils/singleFlight";
+import { assertFirestoreDocumentId } from "../firestore/firebaseValidation";
+import { runSingleFlight } from "../firestore/singleFlight";
 
 const callDeleteAccount = httpsCallable<
   Record<string, never>,

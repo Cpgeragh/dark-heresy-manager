@@ -4,8 +4,8 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { CharacteristicsTab } from "../../src/pages/characterSheet/CharacteristicsTab";
-import { getCharacteristicModifierTotals } from "../../src/features/corruption/characteristicModifierTotals";
+import { CharacteristicsTab } from "../../src/pages/CharacterSheet/CharacteristicsTab";
+import { getCharacteristicModifierTotals } from "../../src/mechanics/corruption/characteristicModifierTotals";
 import { CHARACTERISTIC_BONUS_DIVISOR } from "../../src/constants/gameRules";
 import type { CharField } from "../../src/types/Character";
 import type { Characteristics, CorruptionBlock } from "../../src/types/Character";

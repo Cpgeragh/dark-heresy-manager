@@ -14,7 +14,7 @@ vi.mock("firebase/firestore", () => ({
 import {
   assertSafeDestructivePreflight,
   BoundedDeletionCollector,
-} from "../../src/utils/destructiveOperationPreflight";
+} from "../../src/firestore/destructiveOperationPreflight";
 
 function documents(count: number) {
   return Array.from({ length: count }, (_, index) => ({

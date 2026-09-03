@@ -3,7 +3,7 @@ import {
   getCorruptionTrackEntry,
   getNextCorruptionTrackEntry,
   getNextMalignancyTestPoints,
-} from "../../src/features/corruption/corruptionReference";
+} from "../../src/mechanics/corruption/corruptionReference";
 
 describe("getCorruptionTrackEntry", () => {
   it("treats 0 as Tainted even though the first band's min is 1", () => {

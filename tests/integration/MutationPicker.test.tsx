@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { MutationPicker } from "../../src/features/corruption/MutationPicker";
+import { MutationPicker } from "../../src/mechanics/corruption/MutationPicker";
 
 function setup(tier: "minor" | "major" = "minor", editable = true) {
   const onAdd = vi.fn();

@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import type { ReactNode } from "react";
-import { CloseButton } from "../ui/CloseButton";
-import { ModalHeader } from "../ui/ModalHeader";
-import { ModalShell } from "../ui/ModalShell";
+import { CloseButton } from "../ui/buttons/CloseButton";
+import { ModalHeader } from "../ui/modals/ModalHeader";
+import { ModalShell } from "../ui/modals/ModalShell";
 
 interface InfoModalProps {
   title: string;

@@ -7,7 +7,7 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import type { UserProfileDocument } from "../types/Firestore";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
-import { assertFirestoreDocumentId, assertString } from "../utils/firebaseValidation";
+import { assertFirestoreDocumentId, assertString } from "../firestore/firebaseValidation";
 import { syncGmNameAcrossCampaigns } from "./campaignService";
 
 export async function getFirstName(uid: string): Promise<string | null> {

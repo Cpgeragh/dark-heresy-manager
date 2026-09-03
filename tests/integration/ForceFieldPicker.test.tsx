@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { ForceFieldPicker } from "../../src/pages/characterSheet/ArmourTab/ForceFieldPicker";
+import { ForceFieldPicker } from "../../src/pages/CharacterSheet/ArmourTab/ForceFieldPicker";
 import type { CampaignCustomItem } from "../../src/types/CustomItems";
 
 const FIELD_A = "Refraction Bracer";

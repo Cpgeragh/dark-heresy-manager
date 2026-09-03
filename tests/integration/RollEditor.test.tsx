@@ -3,8 +3,8 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { RollEditor } from "../../src/features/corruption/RollEditor";
-import type { CharacteristicModifier } from "../../src/features/corruption/characteristicModifiers";
+import { RollEditor } from "../../src/mechanics/corruption/RollEditor";
+import type { CharacteristicModifier } from "../../src/mechanics/corruption/characteristicModifiers";
 
 const TOX_BLOOD_MODIFIERS: CharacteristicModifier[] = [
   { characteristic: "int", kind: "roll1d10", sign: -1 },

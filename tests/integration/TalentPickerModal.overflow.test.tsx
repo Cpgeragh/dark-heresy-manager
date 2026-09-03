@@ -3,8 +3,8 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { useState } from "react";
-import { TalentPickerModal, type AnyListItem } from "../../src/pages/characterSheet/talentComponents";
-import { TALENT_LIST } from "../../src/data/talentData";
+import { TalentPickerModal, type AnyListItem } from "../../src/mechanics/talents/talentComponents";
+import { TALENT_LIST } from "../../src/data/reference/talentData";
 import type { TalentEntry } from "../../src/types/Character";
 
 // Real Guardsman Conscript data (careerAdvancesReference.ts): Sound Constitution,

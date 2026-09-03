@@ -15,7 +15,7 @@ vi.mock("firebase/firestore", () => ({
   writeBatch: (...args: unknown[]) => mockWriteBatch(...args),
 }));
 
-import { batchDeleteRefs, deleteRefsAtomically } from "../../src/utils/firestoreBatchDelete";
+import { batchDeleteRefs, deleteRefsAtomically } from "../../src/firestore/firestoreBatchDelete";
 
 function fakeRefs(count: number) {
   return Array.from({ length: count }, (_, i) => `ref-${i}` as unknown as never);

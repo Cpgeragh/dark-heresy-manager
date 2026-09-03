@@ -5,7 +5,7 @@ import { fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { RangedPicker } from "../../src/pages/characterSheet/weapons/RangedPicker";
+import { RangedPicker } from "../../src/pages/CharacterSheet/weapons/RangedPicker";
 import type { RangedWeaponRef } from "../../src/data/reference/weaponReference";
 import type { CampaignCustomItem } from "../../src/types/CustomItems";
 import { SkillSource } from "../../src/types/SkillSource";

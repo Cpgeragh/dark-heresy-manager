@@ -2,8 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
-import { TalentsTab } from "../../src/pages/characterSheet/TalentsTab";
-import { TraitsTab } from "../../src/pages/characterSheet/TraitsTab";
+import { TalentsTab } from "../../src/mechanics/talents/TalentsTab";
+import { TraitsTab } from "../../src/mechanics/traits/TraitsTab";
 import { ToastProvider } from "../../src/components/Toast";
 import type { PsychicBlock, TalentsAndTraitsBlock } from "../../src/types/Character";
 

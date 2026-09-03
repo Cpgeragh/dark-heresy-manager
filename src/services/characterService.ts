@@ -28,8 +28,8 @@ import { PRODUCT_LIMITS } from "../constants/productLimits";
 import { FIRESTORE_QUERY_LIMITS } from "../constants/firestoreLimits";
 import { validateCharacterName } from "../utils/validation";
 import { stripUndefined } from "../utils/stripUndefined";
-import { runSingleFlight } from "../utils/singleFlight";
-import { driveJobToCompletion } from "../utils/bulkJobClient";
+import { runSingleFlight } from "../firestore/singleFlight";
+import { driveJobToCompletion } from "../firestore/bulkJobClient";
 import { createLocalId } from "../utils/createLocalId";
 import {
   assertCharacterImportData,
@@ -37,7 +37,7 @@ import {
   assertFirestoreDocumentId,
   assertRecoveryCode,
   assertString,
-} from "../utils/firebaseValidation";
+} from "../firestore/firebaseValidation";
 
 /**
  * Load a single character with full typing.
@@ -157,7 +157,7 @@ const callReconcileCharacterSpentXp = httpsCallable<
 
 /**
  * Repairs the derived XP-spent total via the protected server-side operation.
- * The caller supplies the freshly-recomputed value (src/features/experience/
+ * The caller supplies the freshly-recomputed value (src/mechanics/experience/
  * xpSpent.ts's getSpentXp); the server merges only experience.spent from a
  * fresh read, so concurrent XP changes are never overwritten.
  */

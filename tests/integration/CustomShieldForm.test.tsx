@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { CustomShieldForm } from "../../src/pages/characterSheet/weapons/CustomShieldForm";
+import { CustomShieldForm } from "../../src/pages/CharacterSheet/weapons/CustomShieldForm";
 
 function renderForm(props: Partial<React.ComponentProps<typeof CustomShieldForm>> = {}) {
   const onAdd = vi.fn();

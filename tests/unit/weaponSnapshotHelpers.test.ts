@@ -14,7 +14,7 @@ import {
   buildFallbackWeaponLibraryItem,
   buildFallbackGrenadeLibraryItem,
   buildFallbackShieldLibraryItem,
-} from "../../src/pages/characterSheet/weapons/weaponSnapshotHelpers";
+} from "../../src/pages/CharacterSheet/weapons/weaponSnapshotHelpers";
 import type { RangedWeapon, MeleeWeapon, GrenadeItem, ShieldItem } from "../../src/types/Character";
 
 describe("toCustomRangedWeaponData", () => {

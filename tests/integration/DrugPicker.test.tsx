@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { DrugPicker } from "../../src/pages/characterSheet/DrugsTab/DrugPicker";
+import { DrugPicker } from "../../src/pages/CharacterSheet/DrugsTab/DrugPicker";
 
 const DRUG_NAME = "Frenzon";
 

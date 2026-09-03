@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { CorruptionPanel } from "../../src/features/corruption/CorruptionPanel";
+import { CorruptionPanel } from "../../src/mechanics/corruption/CorruptionPanel";
 import type { CorruptionBlock } from "../../src/types/Character";
 
 function CorruptionWiring({ initial, editable = true }: { initial: CorruptionBlock; editable?: boolean }) {

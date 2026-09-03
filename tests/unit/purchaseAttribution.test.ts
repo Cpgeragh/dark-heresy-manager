@@ -3,7 +3,7 @@ import {
   getCurrentCareerRank,
   makeCurrentRankPurchase,
   makeSourceRankPurchase,
-} from "../../src/features/experience/purchaseAttribution";
+} from "../../src/mechanics/experience/purchaseAttribution";
 
 describe("XP purchase attribution", () => {
   it("resolves stable Career and Rank ids from their display names", () => {

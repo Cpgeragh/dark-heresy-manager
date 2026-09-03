@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { CustomConsumableForm } from "../../src/pages/characterSheet/GearTab/CustomConsumableForm";
+import { CustomConsumableForm } from "../../src/pages/CharacterSheet/GearTab/CustomConsumableForm";
 
 function renderForm(props: Partial<React.ComponentProps<typeof CustomConsumableForm>> = {}) {
   const onAdd = vi.fn();

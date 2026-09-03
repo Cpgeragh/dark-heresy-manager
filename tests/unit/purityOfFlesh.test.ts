@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   getPurityFatePoints,
   getPurityRemovalInventory,
-} from "../../src/features/talents/purityOfFlesh";
+} from "../../src/mechanics/talents/purityOfFlesh";
 
 describe("Purity of Flesh removal inventory", () => {
   it("counts installed bionics and integrated weapons while excluding Mechadendrites from Fate", () => {

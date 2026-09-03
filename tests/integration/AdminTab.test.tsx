@@ -20,7 +20,7 @@ vi.mock("../../src/services/profileService", () => ({
   getFirstName: mockGetFirstName,
 }));
 
-import { AdminTab } from "../../src/pages/characterSheet/AdminTab";
+import { AdminTab } from "../../src/pages/CharacterSheet/AdminTab";
 import { ToastProvider } from "../../src/components/Toast";
 import type { Character } from "../../src/types/Character";
 

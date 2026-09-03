@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
-import { ArcheotechWeaponCard } from "../../src/pages/characterSheet/weapons/ArcheotechWeaponCard";
+import { ArcheotechWeaponCard } from "../../src/pages/CharacterSheet/weapons/ArcheotechWeaponCard";
 import type { ArcheotechItem } from "../../src/types/Character";
 
 function renderCard(item: ArcheotechItem) {

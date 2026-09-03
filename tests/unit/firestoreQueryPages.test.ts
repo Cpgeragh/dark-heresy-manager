@@ -28,7 +28,7 @@ vi.mock("firebase/firestore", () => ({
   writeBatch: (...args: unknown[]) => mockWriteBatch(...args),
 }));
 
-import { deleteQueryDocsInPages, forEachQueryPage } from "../../src/utils/firestoreQueryPages";
+import { deleteQueryDocsInPages, forEachQueryPage } from "../../src/firestore/firestoreQueryPages";
 
 function makePage(count: number, offset = 0) {
   const docs = Array.from({ length: count }, (_, index) => ({

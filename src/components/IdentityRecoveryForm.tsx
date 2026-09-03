@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 import type { IdentityRecoveryFlow } from "../hooks/useIdentityRecoveryFlow";
-import { Button } from "../ui/Button";
-import { RecoveryCodeInput } from "../ui/RecoveryCodeInput";
-import { uiTextError } from "../ui/editableStyles";
+import { Button } from "../ui/buttons/Button";
+import { RecoveryCodeInput } from "../ui/forms/RecoveryCodeInput";
+import { uiTextError } from "../ui/styles/editableStyles";
 
 interface IdentityRecoveryFormProps {
   flow: IdentityRecoveryFlow;

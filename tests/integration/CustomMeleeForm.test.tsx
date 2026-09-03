@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { CustomMeleeForm } from "../../src/pages/characterSheet/weapons/CustomMeleeForm";
+import { CustomMeleeForm } from "../../src/pages/CharacterSheet/weapons/CustomMeleeForm";
 
 function renderForm(props: Partial<React.ComponentProps<typeof CustomMeleeForm>> = {}) {
   const onAdd = vi.fn();

@@ -4,7 +4,7 @@ import { render, screen, within, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { BackgroundTab } from "../../src/pages/characterSheet/BackgroundTab";
+import { BackgroundTab } from "../../src/pages/CharacterSheet/BackgroundTab";
 import type { CharacterHeader, TalentsAndTraitsBlock } from "../../src/types/Character";
 
 function renderTab(props: Partial<React.ComponentProps<typeof BackgroundTab>> = {}) {

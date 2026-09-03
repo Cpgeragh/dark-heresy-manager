@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   getCharacteristicModifierTotals,
   getCharacteristicModifierSources,
-} from "../../src/features/corruption/characteristicModifierTotals";
+} from "../../src/mechanics/corruption/characteristicModifierTotals";
 import type { CorruptionBlock, CorruptionMalignancyEntry, CorruptionMutationEntry } from "../../src/types/Character";
 
 function malignancy(referenceId: string, extra: Partial<CorruptionMalignancyEntry> = {}): CorruptionMalignancyEntry {

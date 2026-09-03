@@ -4,7 +4,7 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { GrenadePicker } from "../../src/pages/characterSheet/weapons/GrenadePicker";
+import { GrenadePicker } from "../../src/pages/CharacterSheet/weapons/GrenadePicker";
 import type { CampaignCustomItem } from "../../src/types/CustomItems";
 
 // Real reference entries (GrenadePicker has no override prop, it always reads

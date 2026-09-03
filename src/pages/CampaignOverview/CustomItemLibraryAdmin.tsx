@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { CustomItemCategory, CustomItemStatus } from "../../types/CustomItems";
 import { useCampaignCustomItems } from "../../hooks/useCampaignCustomItems";
 import { CustomItemAdminRow } from "./CustomItemAdminRow";
-import { Chip } from "../../ui/Chip";
+import { Chip } from "../../ui/chips/Chip";
 import { ErrorState } from "../../ui/ErrorState";
 import { LoadingState } from "../../ui/LoadingState";
 import {

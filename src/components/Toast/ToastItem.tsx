@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { useToast, type Toast } from "./ToastContext";
 import { COPY_FEEDBACK_DURATION } from "../../constants/ui";
-import { CloseIcon } from "../../ui/CloseButton";
+import { CloseIcon } from "../../ui/buttons/CloseButton";
 
 interface ToastItemProps {
   toast: Toast;

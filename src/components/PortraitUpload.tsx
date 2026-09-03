@@ -4,11 +4,11 @@ import { useState, useCallback, useRef } from "react";
 import Cropper from "react-easy-crop";
 import type { Point, Area } from "react-easy-crop";
 import { uploadPortrait } from "../services/portraitService";
-import { Button } from "../ui/Button";
-import { ModalHeader } from "../ui/ModalHeader";
-import { ModalShell } from "../ui/ModalShell";
+import { Button } from "../ui/buttons/Button";
+import { ModalHeader } from "../ui/modals/ModalHeader";
+import { ModalShell } from "../ui/modals/ModalShell";
 import { useToast } from "./Toast";
-import { ACCEPTED_PORTRAIT_MIME_TYPES, assertPortraitSource } from "../utils/firebaseValidation";
+import { ACCEPTED_PORTRAIT_MIME_TYPES, assertPortraitSource } from "../firestore/firebaseValidation";
 
 // ── Canvas helper ─────────────────────────────────────────────────────────────
 

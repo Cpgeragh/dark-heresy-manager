@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { TRAIT_LIST } from "../../src/data/traitData";
-import { TRAIT_DESCRIPTIONS } from "../../src/data/traitDescriptions";
+import { TRAIT_LIST } from "../../src/data/reference/traitData";
+import { TRAIT_DESCRIPTIONS } from "../../src/data/reference/traitDescriptions";
 
 function find(id: string) {
   return TRAIT_LIST.find((trait) => trait.id === id)!;

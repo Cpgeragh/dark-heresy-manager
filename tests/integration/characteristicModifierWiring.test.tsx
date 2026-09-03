@@ -4,10 +4,10 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { CharacteristicsTab } from "../../src/pages/characterSheet/CharacteristicsTab";
-import { CorruptionMalignancyPicker } from "../../src/features/corruption/CorruptionMalignancyPicker";
-import { MutationRow } from "../../src/features/corruption/MutationRow";
-import { getCharacteristicModifierTotals } from "../../src/features/corruption/characteristicModifierTotals";
+import { CharacteristicsTab } from "../../src/pages/CharacterSheet/CharacteristicsTab";
+import { CorruptionMalignancyPicker } from "../../src/mechanics/corruption/CorruptionMalignancyPicker";
+import { MutationRow } from "../../src/mechanics/corruption/MutationRow";
+import { getCharacteristicModifierTotals } from "../../src/mechanics/corruption/characteristicModifierTotals";
 import { CHARACTERISTIC_BONUS_DIVISOR } from "../../src/constants/gameRules";
 import type { Characteristics, CorruptionBlock, CorruptionMalignancyEntry } from "../../src/types/Character";
 

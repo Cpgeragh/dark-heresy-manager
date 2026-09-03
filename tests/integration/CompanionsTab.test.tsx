@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import { CompanionsTab } from "../../src/pages/characterSheet/CompanionsTab";
+import { CompanionsTab } from "../../src/pages/CharacterSheet/CompanionsTab";
 
 describe("CompanionsTab", () => {
   it("adds the Adeptus Arbites Cyber-Mastiff from the companion picker", () => {

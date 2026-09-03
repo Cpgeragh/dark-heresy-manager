@@ -31,12 +31,12 @@ vi.mock("../../src/hooks/useArchivedCampaigns", () => ({
 }));
 
 const useRecoveryLookupMock = vi.fn();
-vi.mock("../../src/pages/ClaimCharacter/hooks/useRecoveryLookup", () => ({
+vi.mock("../../src/hooks/useRecoveryLookup", () => ({
   useRecoveryLookup: () => useRecoveryLookupMock(),
 }));
 
 const claimCharacterMock = vi.fn();
-vi.mock("../../src/pages/ClaimCharacter/hooks/useClaimActions", () => ({
+vi.mock("../../src/hooks/useClaimActions", () => ({
   useClaimActions: () => ({ claimCharacter: claimCharacterMock }),
 }));
 
@@ -70,7 +70,7 @@ vi.mock("../../src/components/RecoveryBackupBanner", () => ({
   RecoveryBackupBanner: () => <div>Mock RecoveryBackupBanner</div>,
 }));
 
-vi.mock("../../src/ui/QrModal", () => ({
+vi.mock("../../src/ui/modals/QrModal", () => ({
   QrModal: ({ onClose }: { onClose: () => void }) => (
     <div>
       Mock QrModal

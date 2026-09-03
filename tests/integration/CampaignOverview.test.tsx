@@ -68,9 +68,9 @@ vi.mock("../../src/services/sessionService", () => ({
 }));
 
 const readCharacterImportFileMock = vi.fn();
-vi.mock("../../src/utils/firebaseValidation", async () => {
-  const actual = await vi.importActual<typeof import("../../src/utils/firebaseValidation")>(
-    "../../src/utils/firebaseValidation"
+vi.mock("../../src/firestore/firebaseValidation", async () => {
+  const actual = await vi.importActual<typeof import("../../src/firestore/firebaseValidation")>(
+    "../../src/firestore/firebaseValidation"
   );
   return {
     ...actual,

@@ -1,5 +1,5 @@
 import { useRef, type KeyboardEvent } from "react";
-import { segmentedTabId, segmentedTabPanelId } from "./segmentedTabStyles";
+import { segmentedTabId, segmentedTabPanelId } from "./styles/segmentedTabStyles";
 
 export interface SegmentedTabOption<T extends string> {
   value: T;

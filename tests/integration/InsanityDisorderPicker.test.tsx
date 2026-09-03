@@ -4,7 +4,7 @@ import { fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { InsanityDisorderPicker } from "../../src/features/insanity/InsanityDisorderPicker";
+import { InsanityDisorderPicker } from "../../src/mechanics/insanity/InsanityDisorderPicker";
 
 function setup(existingReferenceIds = new Set<string>(), editable = true) {
   const onAdd = vi.fn();

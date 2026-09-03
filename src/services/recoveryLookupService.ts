@@ -1,7 +1,7 @@
 import { httpsCallable } from "firebase/functions";
 import { functions } from "../firebase";
 import type { RecoveryLookupResult } from "../types/Recovery";
-import { assertRecoveryCode } from "../utils/firebaseValidation";
+import { assertRecoveryCode } from "../firestore/firebaseValidation";
 import { recordClientCodeAttempt } from "../utils/clientCodeAttemptLimit";
 
 export type RecoveryLookupOutcome =

@@ -9,7 +9,7 @@ import {
   concealedWeaponBionicDescription,
   craftsmanshipValue,
   craftsmanshipAvailability,
-} from "../../src/pages/characterSheet/CyberneticsTab/cyberneticsHelpers";
+} from "../../src/pages/CharacterSheet/CyberneticsTab/cyberneticsHelpers";
 import { CYBERNETICS_REFERENCE } from "../../src/data/reference/cyberneticsReference";
 
 // Real reference entries (src/data/reference/cyberneticsReference.ts), not fabricated:

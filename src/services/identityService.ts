@@ -5,9 +5,9 @@
 import { doc, getDoc } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
 import { db, functions } from "../firebase";
-import { assertFirestoreDocumentId, assertRecoveryCode } from "../utils/firebaseValidation";
-import { runSingleFlight } from "../utils/singleFlight";
-import { driveJobToCompletion } from "../utils/bulkJobClient";
+import { assertFirestoreDocumentId, assertRecoveryCode } from "../firestore/firebaseValidation";
+import { runSingleFlight } from "../firestore/singleFlight";
+import { driveJobToCompletion } from "../firestore/bulkJobClient";
 import { recordClientCodeAttempt } from "../utils/clientCodeAttemptLimit";
 
 const callRegisterIdentityCode = httpsCallable<

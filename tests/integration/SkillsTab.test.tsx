@@ -5,7 +5,7 @@ import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { useState } from "react";
 
-import { SkillsTab } from "../../src/pages/characterSheet/SkillsTab";
+import { SkillsTab } from "../../src/pages/CharacterSheet/SkillsTab";
 import type { SkillEntry, Characteristics } from "../../src/types/Character";
 import type { CharField } from "../../src/types/Character";
 

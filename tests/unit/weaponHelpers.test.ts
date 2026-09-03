@@ -17,10 +17,10 @@ import {
   rangedCraftsmanshipDescription,
   meleeClassChips,
   meleeCraftsmanshipDescription,
-} from "../../src/pages/characterSheet/weapons/weaponHelpers";
+} from "../../src/pages/CharacterSheet/weapons/weaponHelpers";
 import { WEAPON_UPGRADE_REFERENCE } from "../../src/data/reference/weaponUpgradeReference";
 import { AMMO_REFERENCE } from "../../src/data/reference/ammoReference";
-import { colourOrange, colourAmberFaint } from "../../src/ui/colourTokens";
+import { colourOrange, colourAmberFaint } from "../../src/ui/styles/colourTokens";
 import type { RangedWeapon, MeleeWeapon } from "../../src/types/Character";
 
 function upgrade(id: string) {

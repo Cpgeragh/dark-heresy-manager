@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
-import { StatChip } from "../../src/ui/StatChip";
+import { StatChip } from "../../src/ui/chips/StatChip";
 
 describe("StatChip", () => {
   it.each([

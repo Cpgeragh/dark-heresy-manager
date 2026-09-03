@@ -1,8 +1,8 @@
 // src/components/FormField.tsx
 
 import { useCallback } from "react";
-import { uiFormLabel } from "../ui/editableStyles";
-import { fieldControlClass } from "../ui/fieldStyles";
+import { uiFormLabel } from "../ui/styles/editableStyles";
+import { fieldControlClass } from "../ui/styles/fieldStyles";
 import { useDebouncedDraft } from "../hooks/useDebouncedDraft";
 
 interface FormFieldProps {

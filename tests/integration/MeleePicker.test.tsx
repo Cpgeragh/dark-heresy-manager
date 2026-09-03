@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { MeleePicker } from "../../src/pages/characterSheet/weapons/MeleePicker";
+import { MeleePicker } from "../../src/pages/CharacterSheet/weapons/MeleePicker";
 import type { MeleeWeaponRef } from "../../src/data/reference/weaponReference";
 import type { CampaignCustomItem } from "../../src/types/CustomItems";
 import { SkillSource } from "../../src/types/SkillSource";

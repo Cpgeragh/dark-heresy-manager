@@ -33,7 +33,7 @@ vi.mock("../../src/services/customItemService", async () => {
   };
 });
 
-vi.mock("../../src/pages/characterSheet/CyberneticsTab/ImplantPicker", () => ({
+vi.mock("../../src/pages/CharacterSheet/CyberneticsTab/ImplantPicker", () => ({
   ImplantPicker: ({
     onSelect,
     onSelectCustomItem,
@@ -81,7 +81,7 @@ vi.mock("../../src/pages/characterSheet/CyberneticsTab/ImplantPicker", () => ({
   ),
 }));
 
-vi.mock("../../src/pages/characterSheet/CyberneticsTab/ImplantRow", () => ({
+vi.mock("../../src/pages/CharacterSheet/CyberneticsTab/ImplantRow", () => ({
   ImplantRow: ({
     item,
     onCycleQuality,
@@ -99,7 +99,7 @@ vi.mock("../../src/pages/characterSheet/CyberneticsTab/ImplantRow", () => ({
   ),
 }));
 
-vi.mock("../../src/pages/characterSheet/CyberneticsTab/CustomImplantForm", () => ({
+vi.mock("../../src/pages/CharacterSheet/CyberneticsTab/CustomImplantForm", () => ({
   CustomImplantForm: ({
     onAdd,
     onCancel,
@@ -118,7 +118,7 @@ vi.mock("../../src/pages/characterSheet/CyberneticsTab/CustomImplantForm", () =>
   ),
 }));
 
-vi.mock("../../src/pages/characterSheet/CyberneticsTab/ConcealedWeaponBionicInstaller", () => ({
+vi.mock("../../src/pages/CharacterSheet/CyberneticsTab/ConcealedWeaponBionicInstaller", () => ({
   ConcealedWeaponBionicInstaller: ({
     onInstall,
     onClose,
@@ -135,7 +135,7 @@ vi.mock("../../src/pages/characterSheet/CyberneticsTab/ConcealedWeaponBionicInst
   ),
 }));
 
-vi.mock("../../src/pages/characterSheet/weapons/IntegratedWeaponPicker", () => ({
+vi.mock("../../src/pages/CharacterSheet/weapons/IntegratedWeaponPicker", () => ({
   IntegratedWeaponPicker: ({
     onSelectRanged,
     onCustomRanged,
@@ -161,7 +161,7 @@ vi.mock("../../src/pages/characterSheet/weapons/IntegratedWeaponPicker", () => (
   ),
 }));
 
-vi.mock("../../src/pages/characterSheet/weapons/CustomRangedForm", () => ({
+vi.mock("../../src/pages/CharacterSheet/weapons/CustomRangedForm", () => ({
   // The real form sets `integrated` on the submitted weapon from its own
   // `integrated` prop (CyberneticsTab always passes it true here), so the mock
   // replicates that instead of hardcoding it, matching real behaviour.
@@ -193,11 +193,11 @@ vi.mock("../../src/pages/characterSheet/weapons/CustomRangedForm", () => ({
   ),
 }));
 
-vi.mock("../../src/pages/characterSheet/weapons/CustomMeleeForm", () => ({
+vi.mock("../../src/pages/CharacterSheet/weapons/CustomMeleeForm", () => ({
   CustomMeleeForm: () => <div>Mock Custom Melee Form</div>,
 }));
 
-import { CyberneticsTab } from "../../src/pages/characterSheet/CyberneticsTab";
+import { CyberneticsTab } from "../../src/pages/CharacterSheet/CyberneticsTab";
 import { ToastProvider } from "../../src/components/Toast";
 import type { CyberneticItem, RangedWeapon } from "../../src/types/Character";
 

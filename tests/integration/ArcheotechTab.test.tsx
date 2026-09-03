@@ -26,8 +26,8 @@ vi.mock("../../src/services/customItemService", async () => {
   };
 });
 
-vi.mock("../../src/pages/characterSheet/ArcheotechTab/CustomItemForm", () => ({
-  CustomItemForm: ({
+vi.mock("../../src/pages/CharacterSheet/ArcheotechTab/CustomArcheotechForm", () => ({
+  CustomArcheotechForm: ({
     onAdd,
     onCancel,
   }: {
@@ -47,7 +47,7 @@ vi.mock("../../src/pages/characterSheet/ArcheotechTab/CustomItemForm", () => ({
   ),
 }));
 
-import { ArcheotechTab } from "../../src/pages/characterSheet/ArcheotechTab";
+import { ArcheotechTab } from "../../src/pages/CharacterSheet/ArcheotechTab";
 import { ToastProvider } from "../../src/components/Toast";
 import type { ArcheotechItem } from "../../src/types/Character";
 

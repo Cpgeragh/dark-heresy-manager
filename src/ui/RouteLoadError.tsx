@@ -1,5 +1,5 @@
 import { ROUTES } from "../constants/routes";
-import { Button } from "./Button";
+import { Button } from "./buttons/Button";
 import { ErrorState } from "./ErrorState";
 
 interface RouteLoadErrorProps {

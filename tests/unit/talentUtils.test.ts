@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import { DEFAULT_SKILLS } from "../../src/data/defaultSkills";
-import { TALENT_LIST } from "../../src/data/talentData";
+import { DEFAULT_SKILLS } from "../../src/data/reference/defaultSkills";
+import { TALENT_LIST } from "../../src/data/reference/talentData";
 import {
   getAvailablePsychicTalentPurchases,
   getAvailableTalentChoices,
@@ -10,7 +10,7 @@ import {
   isTalentAvailableInPicker,
   linkPowerToTalentPurchase,
   makeTalentEntry,
-} from "../../src/pages/characterSheet/talentUtils";
+} from "../../src/mechanics/talents/talentUtils";
 import type {
   PsychicBlock,
   TalentEntry,

@@ -11,7 +11,7 @@ import {
   assertPortraitSource,
   encodedByteLength,
   readCharacterImportFile,
-} from "../../src/utils/firebaseValidation";
+} from "../../src/firestore/firebaseValidation";
 
 function validImport() {
   return createEmptyCharacterData({

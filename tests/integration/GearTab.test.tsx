@@ -26,8 +26,8 @@ vi.mock("../../src/services/customItemService", async () => {
   };
 });
 
-vi.mock("../../src/pages/characterSheet/GearTab/CustomItemForm", () => ({
-  CustomItemForm: ({
+vi.mock("../../src/pages/CharacterSheet/GearTab/CustomGearForm", () => ({
+  CustomGearForm: ({
     onAdd,
     onCancel,
   }: {
@@ -43,7 +43,7 @@ vi.mock("../../src/pages/characterSheet/GearTab/CustomItemForm", () => ({
   ),
 }));
 
-vi.mock("../../src/pages/characterSheet/GearTab/CustomConsumableForm", () => ({
+vi.mock("../../src/pages/CharacterSheet/GearTab/CustomConsumableForm", () => ({
   CustomConsumableForm: ({
     onAdd,
     onCancel,
@@ -60,7 +60,7 @@ vi.mock("../../src/pages/characterSheet/GearTab/CustomConsumableForm", () => ({
   ),
 }));
 
-import { GearTab } from "../../src/pages/characterSheet/GearTab";
+import { GearTab } from "../../src/pages/CharacterSheet/GearTab";
 import { ToastProvider } from "../../src/components/Toast";
 import type { GearItem, ConsumableItem } from "../../src/types/Character";
 

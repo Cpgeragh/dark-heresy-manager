@@ -18,8 +18,8 @@ import {
   assertBoolean,
   assertFirestoreDocumentId,
   assertString,
-} from "../utils/firebaseValidation";
-import { runSingleFlight } from "../utils/singleFlight";
+} from "../firestore/firebaseValidation";
+import { runSingleFlight } from "../firestore/singleFlight";
 
 interface SessionData {
   date: Date;

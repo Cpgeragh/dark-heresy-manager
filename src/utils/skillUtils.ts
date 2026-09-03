@@ -1,6 +1,6 @@
 // src/utils/skillUtils.ts
 
-import { DEFAULT_SKILLS } from "../data/defaultSkills";
+import { DEFAULT_SKILLS } from "../data/reference/defaultSkills";
 import type { SkillEntry } from "../types/Character";
 
 /**

@@ -4,7 +4,7 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { ShieldPicker } from "../../src/pages/characterSheet/weapons/ShieldPicker";
+import { ShieldPicker } from "../../src/pages/CharacterSheet/weapons/ShieldPicker";
 import type { CampaignCustomItem } from "../../src/types/CustomItems";
 
 // Real reference entries (ShieldPicker has no override prop, it always reads

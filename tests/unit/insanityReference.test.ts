@@ -5,7 +5,7 @@ import {
   getNextInsanityDegreeEntry,
   getInsanityDisorderRef,
   getMentalTraumaRef,
-} from "../../src/features/insanity/insanityReference";
+} from "../../src/mechanics/insanity/insanityReference";
 
 describe("getInsanityTrackEntry", () => {
   it("finds the right band at each boundary", () => {

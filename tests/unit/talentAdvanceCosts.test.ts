@@ -4,7 +4,7 @@ import {
   getTalentRankChips,
   hasAnyUnlockedTalentOption,
   isTalentMaxedAtCurrentRank,
-} from "../../src/features/experience/talentAdvanceCosts";
+} from "../../src/mechanics/experience/talentAdvanceCosts";
 import type { TalentEntry } from "../../src/types/Character";
 
 function entry(talentId: string, specialisation?: string): TalentEntry {

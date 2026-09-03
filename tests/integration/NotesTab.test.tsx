@@ -4,7 +4,7 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { NotesTab } from "../../src/pages/characterSheet/NotesTab";
+import { NotesTab } from "../../src/pages/CharacterSheet/NotesTab";
 import type { NoteEntry } from "../../src/types/Character";
 
 function NotesWiring({

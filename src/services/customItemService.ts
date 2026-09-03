@@ -21,20 +21,20 @@ import type {
   CustomItemStatus,
 } from "../types/CustomItems";
 import { stripUndefined } from "../utils/stripUndefined";
-import { runSingleFlight } from "../utils/singleFlight";
+import { runSingleFlight } from "../firestore/singleFlight";
 import {
   assertCustomItemCreator,
   assertCustomItemData,
   assertFirestoreDocumentId,
-} from "../utils/firebaseValidation";
+} from "../firestore/firebaseValidation";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
 import {
   assertSafeDestructivePreflight,
   BoundedDeletionCollector,
   type DestructiveOperationPreflight,
-} from "../utils/destructiveOperationPreflight";
-import { deleteRefsAtomically } from "../utils/firestoreBatchDelete";
-import { driveJobToCompletion } from "../utils/bulkJobClient";
+} from "../firestore/destructiveOperationPreflight";
+import { deleteRefsAtomically } from "../firestore/firestoreBatchDelete";
+import { driveJobToCompletion } from "../firestore/bulkJobClient";
 
 export interface CreateDraftCustomItemArgs<TCategory extends CustomItemCategory> {
   campaignId: string;

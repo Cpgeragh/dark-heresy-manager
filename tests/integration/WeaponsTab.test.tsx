@@ -38,7 +38,7 @@ vi.mock("../../src/services/customItemService", async () => {
   };
 });
 
-import { WeaponsTab } from "../../src/pages/characterSheet/WeaponsTab";
+import { WeaponsTab } from "../../src/pages/CharacterSheet/WeaponsTab";
 import { ToastProvider } from "../../src/components/Toast";
 import type {
   RangedWeapon,

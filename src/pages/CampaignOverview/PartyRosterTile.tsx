@@ -1,7 +1,7 @@
 // src/pages/CampaignOverview/PartyRosterTile.tsx
 
 import { PortraitUpload } from "../../components/PortraitUpload";
-import { uiSection, uiCardTitle } from "../../ui/editableStyles";
+import { uiSection, uiCardTitle } from "../../ui/styles/editableStyles";
 import type { CharacterSummaryWithId } from "../../types/Firestore";
 
 export function PartyRosterTile({ summary }: { summary: CharacterSummaryWithId }) {

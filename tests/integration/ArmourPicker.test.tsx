@@ -4,7 +4,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { ArmourPicker } from "../../src/pages/characterSheet/ArmourTab/ArmourPicker";
+import { ArmourPicker } from "../../src/pages/CharacterSheet/ArmourTab/ArmourPicker";
 import type { CampaignCustomItem } from "../../src/types/CustomItems";
 
 const ARMOUR_A = "Flak Jacket";

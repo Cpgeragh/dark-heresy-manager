@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildRankCards } from "../../src/features/experience/rankCards";
+import { buildRankCards } from "../../src/mechanics/experience/rankCards";
 import type { Character } from "../../src/types/Character";
 import { createEmptyCharacterData } from "../../src/utils/characterFactory";
 

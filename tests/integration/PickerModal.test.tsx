@@ -4,7 +4,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { PickerModal, PickerRow } from "../../src/ui/PickerModal";
+import { PickerModal, PickerRow } from "../../src/ui/pickers/PickerModal";
 
 function setup(overrides: Partial<React.ComponentProps<typeof PickerModal>> = {}) {
   const onClose = vi.fn();

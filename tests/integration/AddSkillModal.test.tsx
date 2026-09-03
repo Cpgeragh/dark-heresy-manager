@@ -4,8 +4,8 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { AddSkillModal } from "../../src/pages/characterSheet/SkillsTab/AddSkillModal";
-import type { SkillWithComputed } from "../../src/pages/characterSheet/SkillsTab/skillsConstants";
+import { AddSkillModal } from "../../src/pages/CharacterSheet/SkillsTab/AddSkillModal";
+import type { SkillWithComputed } from "../../src/pages/CharacterSheet/SkillsTab/skillsConstants";
 
 const untrainedSkills: SkillWithComputed[] = [
   {

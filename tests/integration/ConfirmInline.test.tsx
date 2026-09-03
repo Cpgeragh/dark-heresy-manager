@@ -4,7 +4,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { ConfirmInline } from "../../src/ui/ConfirmInline";
+import { ConfirmInline } from "../../src/ui/forms/ConfirmInline";
 
 describe("ConfirmInline", () => {
   it("runs a rapid repeated confirmation only once while the action is pending", async () => {

@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { CAREER_LIST } from "../../src/data/careerData";
-import { DEFAULT_SKILLS } from "../../src/data/defaultSkills";
-import { TALENT_LIST } from "../../src/data/talentData";
-import { WEAPON_TRAINING_GROUPS } from "../../src/data/weaponTrainingData";
+import { CAREER_LIST } from "../../src/data/reference/careerData";
+import { DEFAULT_SKILLS } from "../../src/data/reference/defaultSkills";
+import { TALENT_LIST } from "../../src/data/reference/talentData";
+import { WEAPON_TRAINING_GROUPS } from "../../src/data/reference/weaponTrainingData";
 
 const skillIds = new Set(DEFAULT_SKILLS.map((skill) => skill.id));
 const talentById = new Map(TALENT_LIST.map((talent) => [talent.id, talent]));

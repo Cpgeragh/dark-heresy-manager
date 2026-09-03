@@ -11,13 +11,13 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
-import { deleteQueryDocsInPages } from "../utils/firestoreQueryPages";
+import { deleteQueryDocsInPages } from "../firestore/firestoreQueryPages";
 import {
   assertBoolean,
   assertFirestoreDocumentId,
   assertString,
-} from "../utils/firebaseValidation";
-import { runSingleFlight } from "../utils/singleFlight";
+} from "../firestore/firebaseValidation";
+import { runSingleFlight } from "../firestore/singleFlight";
 
 /**
  * Sends a message in a character-DM thread and updates the thread summary.

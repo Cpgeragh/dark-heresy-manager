@@ -26,7 +26,7 @@ vi.mock("../../src/services/customItemService", async () => {
   };
 });
 
-vi.mock("../../src/pages/characterSheet/DrugsTab/CustomDrugForm", () => ({
+vi.mock("../../src/pages/CharacterSheet/DrugsTab/CustomDrugForm", () => ({
   CustomDrugForm: ({
     onAdd,
     onCancel,
@@ -43,7 +43,7 @@ vi.mock("../../src/pages/characterSheet/DrugsTab/CustomDrugForm", () => ({
   ),
 }));
 
-import { DrugsTab } from "../../src/pages/characterSheet/DrugsTab";
+import { DrugsTab } from "../../src/pages/CharacterSheet/DrugsTab";
 import { ToastProvider } from "../../src/components/Toast";
 import type { DrugItem } from "../../src/types/Character";
 

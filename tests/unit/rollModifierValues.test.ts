@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { CharacteristicModifier } from "../../src/features/corruption/characteristicModifiers";
+import type { CharacteristicModifier } from "../../src/mechanics/corruption/characteristicModifiers";
 import {
   areRollModifierValuesValid,
   getRoll1d10Modifiers,
-} from "../../src/features/corruption/rollModifierValues";
+} from "../../src/mechanics/corruption/rollModifierValues";
 
 const MODIFIERS: CharacteristicModifier[] = [
   { characteristic: "s", kind: "flat", sign: 1, value: 10 },

@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { ForceFieldRow } from "../../src/pages/characterSheet/ArmourTab/ForceFieldRow";
+import { ForceFieldRow } from "../../src/pages/CharacterSheet/ArmourTab/ForceFieldRow";
 import type { WornArmourPiece } from "../../src/types/Character";
 
 const basePiece: WornArmourPiece = {

@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { getRecoveryCode, rotateRecoveryCode } from "../services/identityService";
 import { markRecoveryCodeBackedUp, needsRecoveryCodeBackup } from "../services/userAccountService";
 import { useToast } from "./Toast";
-import { Button } from "../ui/Button";
+import { Button } from "../ui/buttons/Button";
 
 interface Props {
   ownUid: string;

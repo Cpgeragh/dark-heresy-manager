@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
-import { CustomTraitForm } from "../../src/pages/characterSheet/CustomTraitForm";
+import { CustomTraitForm } from "../../src/mechanics/traits/CustomTraitForm";
 
 describe("CustomTraitForm", () => {
   it("disables submit until name, origin, and rules text are all filled", async () => {

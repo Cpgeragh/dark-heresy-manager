@@ -107,7 +107,7 @@ vi.mock("../../src/data/reference/psychicReference", async () => {
   };
 });
 
-import { PsychicTab } from "../../src/pages/characterSheet/PsychicTab";
+import { PsychicTab } from "../../src/pages/CharacterSheet/PsychicTab";
 import { ToastProvider } from "../../src/components/Toast";
 import type { PsychicBlock, TalentsAndTraitsBlock } from "../../src/types/Character";
 import type { CampaignCustomItem } from "../../src/types/CustomItems";

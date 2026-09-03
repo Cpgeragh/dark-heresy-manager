@@ -7,7 +7,7 @@ import { sendMessage } from "../services/messageService";
 import { MessageThread } from "./MessageThread";
 import { MessageInput } from "./MessageInput";
 import { useToast } from "./Toast";
-import { CloseButton } from "../ui/CloseButton";
+import { CloseButton } from "../ui/buttons/CloseButton";
 import { ErrorState } from "../ui/ErrorState";
 
 // ── PlayerThread ──────────────────────────────────────────────────────────────

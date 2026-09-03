@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getAllCareerAdvances, getUnlockedCareerAdvances } from "../../src/features/experience/careerAdvanceAccess";
+import { getAllCareerAdvances, getUnlockedCareerAdvances } from "../../src/mechanics/experience/careerAdvanceAccess";
 
 describe("getAllCareerAdvances", () => {
   it("returns every rank's advances for Guardsman, including ranks far beyond any starting point", () => {

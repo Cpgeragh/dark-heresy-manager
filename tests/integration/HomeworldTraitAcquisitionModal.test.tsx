@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import "@testing-library/jest-dom";
-import { HomeworldTraitAcquisitionModal } from "../../src/pages/characterSheet/HomeworldTraitAcquisitionModal";
+import { HomeworldTraitAcquisitionModal } from "../../src/pages/CharacterSheet/HomeworldTraitAcquisitionModal";
 
 describe("HomeworldTraitAcquisitionModal", () => {
   it("records Noble Born's additional Peer group", async () => {

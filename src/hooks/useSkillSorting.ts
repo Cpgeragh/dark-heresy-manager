@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import type { SkillWithComputed } from "./useSkillComputation";
-import { GROUP_ORDER, type SortMode } from "../pages/characterSheet/SkillsTab/skillsConstants";
+import { GROUP_ORDER, type SortMode } from "../pages/CharacterSheet/SkillsTab/skillsConstants";
 
 interface UseSkillSortingArgs {
   skills: SkillWithComputed[];

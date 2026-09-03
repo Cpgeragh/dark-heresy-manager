@@ -1,8 +1,8 @@
 import { deleteDoc, doc } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
 import { db, functions } from "../firebase";
-import { assertFirestoreDocumentId, assertRecoveryCode } from "../utils/firebaseValidation";
-import { runSingleFlight } from "../utils/singleFlight";
+import { assertFirestoreDocumentId, assertRecoveryCode } from "../firestore/firebaseValidation";
+import { runSingleFlight } from "../firestore/singleFlight";
 import { recordClientCodeAttempt } from "../utils/clientCodeAttemptLimit";
 
 const callLinkDevice = httpsCallable<{ code: string }, void>(functions, "linkDevice");

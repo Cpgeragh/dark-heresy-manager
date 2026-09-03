@@ -7,8 +7,8 @@ import { sendMessage, markThreadRead, clearThread } from "../../services/message
 import { MessageThread } from "../../components/MessageThread";
 import { MessageInput } from "../../components/MessageInput";
 import { useToast } from "../../components/Toast";
-import { ConfirmInline } from "../../ui/ConfirmInline";
-import { ExpandChevron } from "../../ui/ExpandChevron";
+import { ConfirmInline } from "../../ui/forms/ConfirmInline";
+import { ExpandChevron } from "../../ui/icons/ExpandChevron";
 import { ErrorState } from "../../ui/ErrorState";
 import { LoadingState } from "../../ui/LoadingState";
 import type { CharacterListItem } from "../../types/Firestore";

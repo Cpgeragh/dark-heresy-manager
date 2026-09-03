@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
-import { useClaimActions } from "../../src/pages/ClaimCharacter/hooks/useClaimActions";
+import { useClaimActions } from "../../src/hooks/useClaimActions";
 import { claimCharacter as claimCharacterService } from "../../src/services/characterService";
 
 vi.mock("../../src/services/characterService", () => ({

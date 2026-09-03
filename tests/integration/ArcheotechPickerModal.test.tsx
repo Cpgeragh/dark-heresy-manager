@@ -5,7 +5,7 @@ import { fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { ArcheotechPickerModal } from "../../src/pages/characterSheet/ArcheotechTab/ArcheotechPickerModal";
+import { ArcheotechPickerModal } from "../../src/pages/CharacterSheet/ArcheotechTab/ArcheotechPickerModal";
 
 // "Belecane-Pattern Stasis Grenade" has a fixed (non-variable) cost and
 // availability, so clicking it calls onSelect directly with no GM-input step.

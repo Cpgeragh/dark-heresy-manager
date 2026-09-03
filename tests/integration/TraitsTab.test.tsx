@@ -81,9 +81,9 @@ const { MOCK_TRAIT_LIST } = vi.hoisted(() => {
   return { MOCK_TRAIT_LIST: traits };
 });
 
-vi.mock("../../src/data/traitData", () => ({ TRAIT_LIST: MOCK_TRAIT_LIST }));
+vi.mock("../../src/data/reference/traitData", () => ({ TRAIT_LIST: MOCK_TRAIT_LIST }));
 
-import { TraitsTab } from "../../src/pages/characterSheet/TraitsTab";
+import { TraitsTab } from "../../src/mechanics/traits/TraitsTab";
 import { ToastProvider } from "../../src/components/Toast";
 import type { TalentEntry, TalentsAndTraitsBlock } from "../../src/types/Character";
 

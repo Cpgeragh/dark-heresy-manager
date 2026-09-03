@@ -12,7 +12,7 @@ vi.mock("../../src/services/profileService", () => ({
   getFirstName: mockGetFirstName,
 }));
 
-import { PlayerPicker } from "../../src/pages/characterSheet/PlayerPicker";
+import { PlayerPicker } from "../../src/pages/CharacterSheet/PlayerPicker";
 
 function renderPicker(memberIds: string[]) {
   const onSelect = vi.fn();

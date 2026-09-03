@@ -2,8 +2,8 @@
 
 import { useCallback } from "react";
 import type { OwnershipState } from "../../types/Recovery";
-import { Button } from "../../ui/Button";
-import { uiTextError } from "../../ui/editableStyles";
+import { Button } from "../../ui/buttons/Button";
+import { uiTextError } from "../../ui/styles/editableStyles";
 
 interface ClaimPreviewProps {
   characterName: string;

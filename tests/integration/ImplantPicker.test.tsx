@@ -4,10 +4,10 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { ImplantPicker } from "../../src/pages/characterSheet/CyberneticsTab/ImplantPicker";
+import { ImplantPicker } from "../../src/pages/CharacterSheet/CyberneticsTab/ImplantPicker";
 import { CYBERNETICS_REFERENCE } from "../../src/data/reference/cyberneticsReference";
 import { SkillSource } from "../../src/types/SkillSource";
-import { craftsmanshipValue } from "../../src/pages/characterSheet/CyberneticsTab/cyberneticsHelpers";
+import { craftsmanshipValue } from "../../src/pages/CharacterSheet/CyberneticsTab/cyberneticsHelpers";
 
 // "Auger Arrays" is a real reference entry with no requiresLocation and a
 // fixed (non-variable) cost, so clicking it goes straight to the

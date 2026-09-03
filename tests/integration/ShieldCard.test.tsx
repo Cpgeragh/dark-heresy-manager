@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { ShieldCard } from "../../src/pages/characterSheet/weapons/ShieldCard";
+import { ShieldCard } from "../../src/pages/CharacterSheet/weapons/ShieldCard";
 import type { ShieldItem } from "../../src/types/Character";
 
 const baseItem: ShieldItem = {

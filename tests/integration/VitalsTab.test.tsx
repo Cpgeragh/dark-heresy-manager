@@ -3,7 +3,7 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { VitalsTab } from "../../src/pages/characterSheet/VitalsTab";
+import { VitalsTab } from "../../src/pages/CharacterSheet/VitalsTab";
 import { createEmptyCharacterData } from "../../src/utils/characterFactory";
 import type { Character, WoundsBlock, FateBlock } from "../../src/types/Character";
 

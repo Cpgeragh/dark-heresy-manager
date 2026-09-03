@@ -3,7 +3,7 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { useState } from "react";
-import { TalentsTab } from "../../src/pages/characterSheet/TalentsTab";
+import { TalentsTab } from "../../src/mechanics/talents/TalentsTab";
 import type { PsychicBlock, TalentsAndTraitsBlock } from "../../src/types/Character";
 
 const emptyPsychic: PsychicBlock = { psyRating: 0, minorPowers: [], majorPowers: [] };

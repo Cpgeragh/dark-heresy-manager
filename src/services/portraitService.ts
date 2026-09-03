@@ -4,8 +4,8 @@ import {
   assertEncodedPortrait,
   assertFirestoreDocumentId,
   assertPortraitSource,
-} from "../utils/firebaseValidation";
-import { runSingleFlight } from "../utils/singleFlight";
+} from "../firestore/firebaseValidation";
+import { runSingleFlight } from "../firestore/singleFlight";
 import { patchCharacterField } from "./characterService";
 
 function blobToBase64(blob: Blob): Promise<string> {

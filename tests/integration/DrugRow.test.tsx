@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
-import { DrugRow } from "../../src/pages/characterSheet/DrugsTab/DrugRow";
+import { DrugRow } from "../../src/pages/CharacterSheet/DrugsTab/DrugRow";
 import type { DrugItem } from "../../src/types/Character";
 import type { CampaignCustomItem } from "../../src/types/CustomItems";
 

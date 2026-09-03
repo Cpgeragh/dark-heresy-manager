@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { OptionPickerScreen } from "../../src/ui/OptionPickerScreen";
+import { OptionPickerScreen } from "../../src/ui/pickers/OptionPickerScreen";
 
 const OPTIONS = ["Common", "Rare", "Very Rare"] as const;
 

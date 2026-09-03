@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
-import { ArcheotechImplantRow } from "../../src/pages/characterSheet/CyberneticsTab/ArcheotechImplantRow";
+import { ArcheotechImplantRow } from "../../src/pages/CharacterSheet/CyberneticsTab/ArcheotechImplantRow";
 import type { ArcheotechItem } from "../../src/types/Character";
 
 function item(over: Partial<ArcheotechItem> = {}): ArcheotechItem {

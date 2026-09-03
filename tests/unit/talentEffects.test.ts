@@ -18,11 +18,11 @@ import {
   getTalentInsanityModifierSources,
   getTalentSkillEffects,
   getTalentWoundModifierSources,
-} from "../../src/features/talents/talentEffects";
+} from "../../src/mechanics/talents/talentEffects";
 import {
   getAvailablePsyRatingPowerGrants,
   linkPowerToPsyRatingGrant,
-} from "../../src/pages/characterSheet/talentUtils";
+} from "../../src/mechanics/talents/talentUtils";
 
 function entry(
   uid: string,

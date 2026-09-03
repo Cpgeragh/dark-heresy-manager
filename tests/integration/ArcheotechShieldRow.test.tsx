@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { ArcheotechShieldRow } from "../../src/pages/characterSheet/weapons/ArcheotechShieldRow";
+import { ArcheotechShieldRow } from "../../src/pages/CharacterSheet/weapons/ArcheotechShieldRow";
 import type { ArcheotechItem } from "../../src/types/Character";
 
 const baseItem: ArcheotechItem = {

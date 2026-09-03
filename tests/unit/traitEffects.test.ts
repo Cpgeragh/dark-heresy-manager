@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_SKILLS } from "../../src/data/defaultSkills";
+import { DEFAULT_SKILLS } from "../../src/data/reference/defaultSkills";
 import {
   getActiveTraitEntries,
   getDerivedTraitEntries,
@@ -11,7 +11,7 @@ import {
   getTraitMovementEffects,
   getTraitSkillEffects,
   getWaryInitiativeBonus,
-} from "../../src/features/traits/traitEffects";
+} from "../../src/mechanics/traits/traitEffects";
 import type { TalentEntry, TalentsAndTraitsBlock } from "../../src/types/Character";
 
 function block(over: Partial<TalentsAndTraitsBlock> = {}): TalentsAndTraitsBlock {

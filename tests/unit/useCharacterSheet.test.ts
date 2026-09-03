@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook } from "@testing-library/react";
-import { useCharacterSheet } from "../../src/pages/characterSheet/useCharacterSheet";
+import { useCharacterSheet } from "../../src/pages/CharacterSheet/useCharacterSheet";
 import type { Character } from "../../src/types/Character";
 
 const useCampaignMock = vi.fn();

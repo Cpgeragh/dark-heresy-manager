@@ -13,13 +13,13 @@ import { saveFirstName } from "../services/profileService";
 import { useLinkDevice } from "../hooks/useLinkDevice";
 import { useToast } from "../components/Toast";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
-import { uiSection, uiTextError } from "../ui/editableStyles";
-import { Button } from "../ui/Button";
-import { ConfirmInline } from "../ui/ConfirmInline";
+import { uiSection, uiTextError } from "../ui/styles/editableStyles";
+import { Button } from "../ui/buttons/Button";
+import { ConfirmInline } from "../ui/forms/ConfirmInline";
 import { PageShell } from "../ui/PageShell";
 import { Panel } from "../ui/Panel";
 import { SectionHeader } from "../ui/SectionHeader";
-import { RecoveryCodeInput } from "../ui/RecoveryCodeInput";
+import { RecoveryCodeInput } from "../ui/forms/RecoveryCodeInput";
 
 interface Props {
   user: User;

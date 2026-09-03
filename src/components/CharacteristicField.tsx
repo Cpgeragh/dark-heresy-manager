@@ -7,10 +7,10 @@ import {
   CHARACTERISTIC_ADVANCE_INCREMENT,
 } from "../constants/gameRules";
 import { validateCharacteristicBase, validateCharacteristicTotal } from "../utils/validation";
-import { Button } from "../ui/Button";
-import { PickerBody, PickerModal } from "../ui/PickerModal";
-import { uiTextBody } from "../ui/editableStyles";
-import { colourAmberPlain } from "../ui/colourTokens";
+import { Button } from "../ui/buttons/Button";
+import { PickerBody, PickerModal } from "../ui/pickers/PickerModal";
+import { uiTextBody } from "../ui/styles/editableStyles";
+import { colourAmberPlain } from "../ui/styles/colourTokens";
 
 interface Props {
   label: string;

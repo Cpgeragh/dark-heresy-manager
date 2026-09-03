@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { CustomDrugForm } from "../../src/pages/characterSheet/DrugsTab/CustomDrugForm";
+import { CustomDrugForm } from "../../src/pages/CharacterSheet/DrugsTab/CustomDrugForm";
 
 function renderForm(props: Partial<React.ComponentProps<typeof CustomDrugForm>> = {}) {
   const onAdd = vi.fn();

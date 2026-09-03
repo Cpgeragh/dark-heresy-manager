@@ -3,7 +3,7 @@
 import { useState, useCallback, useRef } from "react";
 import { useToast } from "../../components/Toast";
 import { createSession } from "../../services/sessionService";
-import { Button } from "../../ui/Button";
+import { Button } from "../../ui/buttons/Button";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { PRODUCT_LIMITS } from "../../constants/productLimits";
 import {
@@ -11,7 +11,7 @@ import {
   editableTextareaClass,
   uiFormLabelSecondary,
   uiSection,
-} from "../../ui/editableStyles";
+} from "../../ui/styles/editableStyles";
 
 interface Character {
   id: string;

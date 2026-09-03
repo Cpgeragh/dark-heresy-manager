@@ -3,7 +3,7 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { ExperienceTab } from "../../src/pages/characterSheet/ExperienceTab";
+import { ExperienceTab } from "../../src/pages/CharacterSheet/ExperienceTab";
 import { createEmptyCharacterData } from "../../src/utils/characterFactory";
 import type { Character } from "../../src/types/Character";
 

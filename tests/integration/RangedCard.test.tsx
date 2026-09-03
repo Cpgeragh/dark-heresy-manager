@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { RangedCard } from "../../src/pages/characterSheet/weapons/RangedCard";
+import { RangedCard } from "../../src/pages/CharacterSheet/weapons/RangedCard";
 import type { RangedWeapon, GrenadeItem } from "../../src/types/Character";
 
 const baseWeapon: RangedWeapon = {

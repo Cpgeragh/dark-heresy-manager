@@ -5,7 +5,7 @@ import {
   formatMoneyForDisplay,
   formatMoneyInput,
   sanitizeMoneyInput,
-} from "../../src/ui/moneyFormat";
+} from "../../src/ui/format/moneyFormat";
 
 describe("money formatting", () => {
   it("renders a symbol, formatted whole number, and Thrones", () => {

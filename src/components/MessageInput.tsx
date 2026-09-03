@@ -1,7 +1,7 @@
 // src/components/MessageInput.tsx
 
 import { useState } from "react";
-import { Button } from "../ui/Button";
+import { Button } from "../ui/buttons/Button";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
 
 export function MessageInput({

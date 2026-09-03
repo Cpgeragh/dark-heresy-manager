@@ -3,12 +3,12 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
-import { CareerStartingChoiceModal } from "../../src/pages/characterSheet/CareerStartingChoiceModal";
-import { CAREER_LIST } from "../../src/data/careerData";
+import { CareerStartingChoiceModal } from "../../src/pages/CharacterSheet/CareerStartingChoiceModal";
+import { CAREER_LIST } from "../../src/data/reference/careerData";
 
 // Real career with genuine "or" starting choices (2 skill grants, 3 talent
 // grants, each with 2 options) — not fabricated, read directly from
-// src/data/careerData.ts.
+// src/data/reference/careerData.ts.
 const ADEPT = CAREER_LIST.find((c) => c.id === "adept")!;
 
 describe("CareerStartingChoiceModal", () => {

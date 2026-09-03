@@ -2,8 +2,8 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import "@testing-library/jest-dom";
-import { TRAIT_LIST } from "../../src/data/traitData";
-import { TraitAcquisitionModal } from "../../src/pages/characterSheet/TraitAcquisitionModal";
+import { TRAIT_LIST } from "../../src/data/reference/traitData";
+import { TraitAcquisitionModal } from "../../src/mechanics/traits/TraitAcquisitionModal";
 
 function renderAcquisition(traitId: string) {
   const trait = TRAIT_LIST.find((item) => item.id === traitId)!;

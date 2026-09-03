@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { MalignancyRow } from "../../src/features/corruption/CorruptionPanel";
+import { MalignancyRow } from "../../src/mechanics/corruption/MalignancyRow";
 import type { CorruptionMalignancyEntry } from "../../src/types/Character";
 
 function palsyLikeEntry(overrides: Partial<CorruptionMalignancyEntry> = {}): CorruptionMalignancyEntry {

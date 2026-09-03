@@ -35,7 +35,7 @@ const { MOCK_DEFAULT_SKILLS } = vi.hoisted(() => {
   return { MOCK_DEFAULT_SKILLS: skills };
 });
 
-vi.mock("../../src/data/defaultSkills", () => ({
+vi.mock("../../src/data/reference/defaultSkills", () => ({
   DEFAULT_SKILLS: MOCK_DEFAULT_SKILLS,
 }));
 

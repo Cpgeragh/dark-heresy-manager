@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import type { CampaignCustomItem, CustomItemCategory } from "../../types/CustomItems";
-import { Button } from "../../ui/Button";
-import { uiSection } from "../../ui/editableStyles";
-import { ConfirmInline } from "../../ui/ConfirmInline";
+import { Button } from "../../ui/buttons/Button";
+import { uiSection } from "../../ui/styles/editableStyles";
+import { ConfirmInline } from "../../ui/forms/ConfirmInline";
 import { useToast } from "../../components/Toast";
 import {
   permanentlyDeleteCustomItem,
@@ -12,7 +12,7 @@ import {
   restoreCustomItem,
   type CustomItemOperationPreflight,
 } from "../../services/customItemService";
-import { StatusBadge } from "../../ui/StatusBadge";
+import { StatusBadge } from "../../ui/chips/StatusBadge";
 import { useCustomItemLibraryActions } from "../../hooks/useCustomItemLibraryActions";
 import { CUSTOM_ITEM_CATEGORY_LABELS } from "../../constants/customItems";
 

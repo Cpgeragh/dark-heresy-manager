@@ -7,7 +7,7 @@ vi.mock("../../src/hooks/useCampaignCustomItems", () => ({
   useCampaignCustomItems: () => ({ items: [], loading: false, error: null }),
 }));
 
-import { ArmourTab } from "../../src/pages/characterSheet/ArmourTab";
+import { ArmourTab } from "../../src/pages/CharacterSheet/ArmourTab";
 import { ToastProvider } from "../../src/components/Toast";
 import type { WornArmourPiece, CyberneticItem } from "../../src/types/Character";
 

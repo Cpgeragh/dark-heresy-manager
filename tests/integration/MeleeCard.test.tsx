@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { MeleeCard } from "../../src/pages/characterSheet/weapons/MeleeCard";
+import { MeleeCard } from "../../src/pages/CharacterSheet/weapons/MeleeCard";
 import type { MeleeWeapon } from "../../src/types/Character";
 
 const baseWeapon: MeleeWeapon = {

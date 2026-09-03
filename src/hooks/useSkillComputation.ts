@@ -3,10 +3,10 @@
 import { useMemo } from "react";
 import type { SkillEntry, Characteristics, SkillAdvanceLevel, TalentsAndTraitsBlock } from "../types/Character";
 import type { CharField } from "../types/Character";
-import type { CharacteristicTotals } from "../features/corruption/characteristicModifierTotals";
+import type { CharacteristicTotals } from "../mechanics/corruption/characteristicModifierTotals";
 import { SKILL_ADVANCE_VALUES, SKILL_HALF_DIVISOR } from "../constants/gameRules";
 import { calculateCharacteristicTotal } from "../utils/stats";
-import { getTalentSkillEffects, type TalentModifierSource } from "../features/talents/talentEffects";
+import { getTalentSkillEffects, type TalentModifierSource } from "../mechanics/talents/talentEffects";
 
 export type SkillWithComputed = SkillEntry & {
   total: number | null;

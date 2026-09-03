@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { driveJobToCompletion } from "../../src/utils/bulkJobClient";
+import { driveJobToCompletion } from "../../src/firestore/bulkJobClient";
 
 describe("driveJobToCompletion", () => {
   it("calls processChunk exactly once when the first chunk already reports done", async () => {

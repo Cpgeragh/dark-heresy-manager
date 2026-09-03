@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { CustomGrenadeForm } from "../../src/pages/characterSheet/weapons/CustomGrenadeForm";
+import { CustomGrenadeForm } from "../../src/pages/CharacterSheet/weapons/CustomGrenadeForm";
 
 function renderForm(props: Partial<React.ComponentProps<typeof CustomGrenadeForm>> = {}) {
   const onAdd = vi.fn();
