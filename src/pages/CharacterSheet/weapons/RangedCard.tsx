@@ -74,7 +74,7 @@ import {
   rangedRulesForCraftsmanship,
   removeSpecialRule,
 } from "./weaponHelpers";
-import { computeMeleeTotalDamage } from "./weaponSharedUtils";
+import { computeMeleeTotalDamage } from "./weaponDamageFormatting";
 import { CONCEALED_WEAPON_BIONIC_RULES } from "./concealedWeaponBionicRules";
 
 // ─── Ammo Entry Row ───────────────────────────────────────────────────────────

@@ -1,4 +1,5 @@
-// src/pages/CharacterSheet/psychicStyles.ts
+// src/pages/CharacterSheet/PsychicTab/psychicStyles.ts
+// Separate from its consumers because it's shared between PsychicTab and PowerCard, not inlined into either.
 
 import type { CSSProperties } from "react";
 import {
@@ -9,7 +10,7 @@ import {
   colourOrange,
   colourSky,
   colourFuchsia,
-} from "../../ui/styles/colourTokens";
+} from "../../../ui/styles/colourTokens";
 
 export const disciplineColours: Record<string, string> = {
   Minor: colourViolet,

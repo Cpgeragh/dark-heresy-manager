@@ -27,7 +27,7 @@ import { NotesTab } from "./CharacterSheet/NotesTab";
 import { AdminTab } from "./CharacterSheet/AdminTab";
 import { ArcheotechTab } from "./CharacterSheet/ArcheotechTab";
 import { BackgroundTab } from "./CharacterSheet/BackgroundTab";
-import { CompleteBackgroundSetupModal } from "./CharacterSheet/CompleteBackgroundSetupModal";
+import { CompleteBackgroundSetupModal } from "./CharacterSheet/BackgroundTab/CompleteBackgroundSetupModal";
 import { WeaponTrainingTab } from "./CharacterSheet/WeaponTrainingTab";
 import { CompanionsTab } from "./CharacterSheet/CompanionsTab";
 

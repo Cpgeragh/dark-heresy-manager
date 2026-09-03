@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { WEAPON_QUALITY_OPTIONS } from "./weaponSharedUtils";
+import { WEAPON_QUALITY_OPTIONS } from "./weaponDamageFormatting";
 
 const PARAMETERIZED_WEAPON_QUALITIES = new Set([
   "Blast",

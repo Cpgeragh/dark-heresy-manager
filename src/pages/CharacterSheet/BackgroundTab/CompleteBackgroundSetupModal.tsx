@@ -3,9 +3,9 @@ import type {
   CyberneticItem,
   GearItem,
   TalentsAndTraitsBlock,
-} from "../../types/Character";
-import { Button } from "../../ui/buttons/Button";
-import { ModalShell } from "../../ui/modals/ModalShell";
+} from "../../../types/Character";
+import { Button } from "../../../ui/buttons/Button";
+import { ModalShell } from "../../../ui/modals/ModalShell";
 import { BackgroundSetupFields } from "./BackgroundSetupFields";
 
 interface CompleteBackgroundSetupModalProps {

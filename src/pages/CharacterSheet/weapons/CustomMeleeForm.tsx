@@ -22,7 +22,7 @@ import {
   DAMAGE_TYPE_OPTIONS,
   formatDamageInput,
   isValidDiceInput,
-} from "./weaponSharedUtils";
+} from "./weaponDamageFormatting";
 import { useWeaponQualityPicker } from "./useWeaponQualityPicker";
 
 const CUSTOM_MELEE_CLASS_OPTIONS = ["Melee", "Melee (Two-Handed)", "Melee / Thrown"] as const;

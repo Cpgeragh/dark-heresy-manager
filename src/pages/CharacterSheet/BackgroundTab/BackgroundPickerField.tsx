@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import { Button } from "../../ui/buttons/Button";
-import { uiFormLabel, uiSectionShell, uiTextPlaceholder } from "../../ui/styles/editableStyles";
+import { Button } from "../../../ui/buttons/Button";
+import { uiFormLabel, uiSectionShell, uiTextPlaceholder } from "../../../ui/styles/editableStyles";
 
 interface BackgroundPickerFieldProps {
   label: string;

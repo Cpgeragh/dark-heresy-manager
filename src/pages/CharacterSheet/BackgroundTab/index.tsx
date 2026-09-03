@@ -1,9 +1,9 @@
-// src/pages/CharacterSheet/BackgroundTab.tsx
+// src/pages/CharacterSheet/BackgroundTab/index.tsx
 
 import { useCallback, useState } from "react";
-import type { CharacterHeader, CyberneticItem, GearItem, TalentsAndTraitsBlock } from "../../types/Character";
-import { FormField } from "../../components/FormField";
-import { InfoModal } from "../../components/InfoModal";
+import type { CharacterHeader, CyberneticItem, GearItem, TalentsAndTraitsBlock } from "../../../types/Character";
+import { FormField } from "../../../components/FormField";
+import { InfoModal } from "../../../components/InfoModal";
 import {
   editableInputClass,
   uiFormLabel,
@@ -11,28 +11,28 @@ import {
   uiItemName,
   uiSection,
   uiTextPlaceholder,
-} from "../../ui/styles/editableStyles";
-import { SectionHeader } from "../../ui/SectionHeader";
-import { findDivinationByResult, type DivinationData } from "../../data/reference/divinationData";
-import { EYE_OPTIONS, HAIR_OPTIONS, SKIN_OPTIONS } from "../../data/reference/appearanceData";
-import { Chip } from "../../ui/chips/Chip";
-import { colourActiveRose, colourActiveSky, colourMeta } from "../../ui/styles/colourTokens";
-import { RollChip } from "../../ui/chips/RollChip";
-import { sourceColour } from "../../ui/styles/sourceStyles";
-import { useSwipeableTabs } from "../../hooks/useSwipeableTabs";
-import { SegmentedTabs, type SegmentedTabOption } from "../../ui/SegmentedTabs";
+} from "../../../ui/styles/editableStyles";
+import { SectionHeader } from "../../../ui/SectionHeader";
+import { findDivinationByResult, type DivinationData } from "../../../data/reference/divinationData";
+import { EYE_OPTIONS, HAIR_OPTIONS, SKIN_OPTIONS } from "../../../data/reference/appearanceData";
+import { Chip } from "../../../ui/chips/Chip";
+import { colourActiveRose, colourActiveSky, colourMeta } from "../../../ui/styles/colourTokens";
+import { RollChip } from "../../../ui/chips/RollChip";
+import { sourceColour } from "../../../ui/styles/sourceStyles";
+import { useSwipeableTabs } from "../../../hooks/useSwipeableTabs";
+import { SegmentedTabs, type SegmentedTabOption } from "../../../ui/SegmentedTabs";
 import {
   segmentedTabId,
   segmentedTabPanelId,
   uiSwipeableTabPanel,
-} from "../../ui/styles/segmentedTabStyles";
-import { DivinationInfoContent, DivinationPicker } from "./DivinationPicker";
-import { AppearanceTraitPicker } from "./AppearanceTraitPicker";
-import { GenderPicker } from "./GenderPicker";
-import { QuirkPicker } from "./QuirkPicker";
-import { AddButton } from "../../ui/buttons/AddButton";
-import { CloseIcon } from "../../ui/buttons/CloseButton";
-import { uiDismissButton } from "../../ui/styles/buttonStyles";
+} from "../../../ui/styles/segmentedTabStyles";
+import { DivinationInfoContent, DivinationPicker } from "../DivinationPicker";
+import { AppearanceTraitPicker } from "../AppearanceTraitPicker";
+import { GenderPicker } from "../GenderPicker";
+import { QuirkPicker } from "../QuirkPicker";
+import { AddButton } from "../../../ui/buttons/AddButton";
+import { CloseIcon } from "../../../ui/buttons/CloseButton";
+import { uiDismissButton } from "../../../ui/styles/buttonStyles";
 import { BackgroundPickerField } from "./BackgroundPickerField";
 import { BackgroundSetupFields } from "./BackgroundSetupFields";
 

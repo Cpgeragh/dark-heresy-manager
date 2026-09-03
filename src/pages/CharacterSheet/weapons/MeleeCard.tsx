@@ -38,7 +38,7 @@ import {
   UpgradeCard,
   EquipToggle,
 } from "./weaponShared";
-import { computeMeleeTotalDamage } from "./weaponSharedUtils";
+import { computeMeleeTotalDamage } from "./weaponDamageFormatting";
 import {
   addSpecialRule,
   ammoFamilyChip,

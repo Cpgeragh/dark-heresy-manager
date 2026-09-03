@@ -26,7 +26,7 @@ import {
   DAMAGE_TYPE_OPTIONS,
   formatDamageInput,
   isValidDiceInput,
-} from "./weaponSharedUtils";
+} from "./weaponDamageFormatting";
 import { useWeaponQualityPicker } from "./useWeaponQualityPicker";
 import { CUSTOM_AMMO_FAMILY_OPTIONS, type AmmoTrackingMode } from "./weaponHelpers";
 

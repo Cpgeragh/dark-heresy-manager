@@ -1,34 +1,34 @@
-// src/pages/CharacterSheet/PsychicTab.tsx
+// src/pages/CharacterSheet/PsychicTab/index.tsx
 
 import { useState, useCallback, useRef } from "react";
-import type { PsychicBlock, PsychicPower, TalentsAndTraitsBlock } from "../../types/Character";
-import { useSwipeableTabs } from "../../hooks/useSwipeableTabs";
+import type { PsychicBlock, PsychicPower, TalentsAndTraitsBlock } from "../../../types/Character";
+import { useSwipeableTabs } from "../../../hooks/useSwipeableTabs";
 import {
   PSYCHIC_POWER_REFERENCE,
   PSYCHIC_DISCIPLINES,
   getPsychicPowerDescription,
   type PsychicPowerRef,
   type PsychicDiscipline,
-} from "../../data/reference/psychicReference";
+} from "../../../data/reference/psychicReference";
 import {
   editableInputClass,
   editableTextareaClass,
   uiSection,
   uiFormLabel,
   uiItemName,
-} from "../../ui/styles/editableStyles";
-import { Button } from "../../ui/buttons/Button";
-import { AddButton } from "../../ui/buttons/AddButton";
-import { ViewButton } from "../../ui/buttons/ViewButton";
-import { Chip } from "../../ui/chips/Chip";
-import { SectionHeader } from "../../ui/SectionHeader";
+} from "../../../ui/styles/editableStyles";
+import { Button } from "../../../ui/buttons/Button";
+import { AddButton } from "../../../ui/buttons/AddButton";
+import { ViewButton } from "../../../ui/buttons/ViewButton";
+import { Chip } from "../../../ui/chips/Chip";
+import { SectionHeader } from "../../../ui/SectionHeader";
 import { PowerCard } from "./PowerCard";
-import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../ui/pickers/PickerModal";
-import { ArrowLeft, ArrowRight } from "../../ui/icons/PickerArrows";
-import { uiPickerPressFeedback } from "../../ui/styles/buttonStyles";
-import { OptionPickerScreen } from "../../ui/pickers/OptionPickerScreen";
-import { InfoModal } from "../../components/InfoModal";
-import { TALENT_DESCRIPTIONS } from "../../data/reference/talentDescriptions";
+import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
+import { ArrowLeft, ArrowRight } from "../../../ui/icons/PickerArrows";
+import { uiPickerPressFeedback } from "../../../ui/styles/buttonStyles";
+import { OptionPickerScreen } from "../../../ui/pickers/OptionPickerScreen";
+import { InfoModal } from "../../../components/InfoModal";
+import { TALENT_DESCRIPTIONS } from "../../../data/reference/talentDescriptions";
 import {
   disciplineActiveColours,
   disciplineColours,
@@ -36,27 +36,27 @@ import {
   psyRatingPulseVars,
   psychicSelectionSourceColours,
 } from "./psychicStyles";
-import { colourActiveSky, colourActiveRose } from "../../ui/styles/colourTokens";
-import { SegmentedTabs, type SegmentedTabOption } from "../../ui/SegmentedTabs";
+import { colourActiveSky, colourActiveRose } from "../../../ui/styles/colourTokens";
+import { SegmentedTabs, type SegmentedTabOption } from "../../../ui/SegmentedTabs";
 import {
   segmentedTabId,
   segmentedTabPanelId,
   uiSwipeableTabPanel,
-} from "../../ui/styles/segmentedTabStyles";
-import type { CustomItemOrigin } from "../../constants/customItems";
-import { OriginSelector } from "../../ui/forms/OriginSelector";
-import { useCampaignCustomItems } from "../../hooks/useCampaignCustomItems";
-import { useCustomItemLibraryActions } from "../../hooks/useCustomItemLibraryActions";
-import { createDraftCustomItem, saveDraftCustomItem } from "../../services/customItemService";
-import { useToast } from "../../components/Toast";
-import type { CampaignCustomItem, CustomPsychicPowerData } from "../../types/CustomItems";
-import type { CustomItemLibraryAction } from "../../types/CustomItemActions";
+} from "../../../ui/styles/segmentedTabStyles";
+import type { CustomItemOrigin } from "../../../constants/customItems";
+import { OriginSelector } from "../../../ui/forms/OriginSelector";
+import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
+import { useCustomItemLibraryActions } from "../../../hooks/useCustomItemLibraryActions";
+import { createDraftCustomItem, saveDraftCustomItem } from "../../../services/customItemService";
+import { useToast } from "../../../components/Toast";
+import type { CampaignCustomItem, CustomPsychicPowerData } from "../../../types/CustomItems";
+import type { CustomItemLibraryAction } from "../../../types/CustomItemActions";
 import {
   getAvailablePsychicTalentPurchases,
   getAvailablePsyRatingPowerGrants,
   linkPowerToPsyRatingGrant,
   linkPowerToTalentPurchase,
-} from "../../mechanics/talents/talentUtils";
+} from "../../../mechanics/talents/talentUtils";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

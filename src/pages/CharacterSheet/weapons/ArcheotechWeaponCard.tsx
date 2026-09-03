@@ -27,7 +27,7 @@ import {
   SpecialRulesContent,
   EquipToggle,
 } from "./weaponShared";
-import { computeMeleeTotalDamage } from "./weaponSharedUtils";
+import { computeMeleeTotalDamage } from "./weaponDamageFormatting";
 import { weaponClassChip } from "./weaponHelpers";
 import { ExplosiveMishapsContent } from "./ExplosiveMishapsContent";
 import { RemoveButton } from "../../../ui/buttons/RemoveButton";

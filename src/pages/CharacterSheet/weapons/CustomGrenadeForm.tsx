@@ -23,7 +23,7 @@ import {
   DAMAGE_TYPE_OPTIONS,
   formatDamageInput,
   isValidDiceInput,
-} from "./weaponSharedUtils";
+} from "./weaponDamageFormatting";
 import { useWeaponQualityPicker } from "./useWeaponQualityPicker";
 
 const CUSTOM_GRENADE_TYPE_OPTIONS = ["Grenade", "Mine"] as const;

@@ -61,7 +61,7 @@ vi.mock("../../src/pages/CharacterSheet/CharacterKebabContent", () => ({
   ),
 }));
 
-vi.mock("../../src/pages/CharacterSheet/CompleteBackgroundSetupModal", () => ({
+vi.mock("../../src/pages/CharacterSheet/BackgroundTab/CompleteBackgroundSetupModal", () => ({
   CompleteBackgroundSetupModal: () => <div>Mock CompleteBackgroundSetupModal</div>,
 }));
 

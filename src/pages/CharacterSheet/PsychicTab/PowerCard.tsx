@@ -1,10 +1,10 @@
-// src/pages/CharacterSheet/PowerCard.tsx
+// src/pages/CharacterSheet/PsychicTab/PowerCard.tsx
 
-import { InfoModal } from "../../components/InfoModal";
+import { InfoModal } from "../../../components/InfoModal";
 import { useState } from "react";
-import { Chip } from "../../ui/chips/Chip";
-import { sourceColour } from "../../ui/styles/sourceStyles";
-import type { PsychicPower } from "../../types/Character";
+import { Chip } from "../../../ui/chips/Chip";
+import { sourceColour } from "../../../ui/styles/sourceStyles";
+import type { PsychicPower } from "../../../types/Character";
 import { disciplineColours, psychicSelectionSourceColours } from "./psychicStyles";
 import {
   uiCardTitle,
@@ -12,15 +12,15 @@ import {
   uiSectionShell,
   uiTextBody,
   uiTextPlaceholder,
-} from "../../ui/styles/editableStyles";
-import { Button } from "../../ui/buttons/Button";
-import { PickerBody, PickerModal } from "../../ui/pickers/PickerModal";
-import { RemoveButton } from "../../ui/buttons/RemoveButton";
-import { StatChip } from "../../ui/chips/StatChip";
-import { ExpandChevron } from "../../ui/icons/ExpandChevron";
-import { CustomItemActionButtons } from "../../ui/forms/CustomItemActionButtons";
-import type { CustomItemLibraryActionProps } from "../../types/CustomItemActions";
-import { uiPickerPressFeedback } from "../../ui/styles/buttonStyles";
+} from "../../../ui/styles/editableStyles";
+import { Button } from "../../../ui/buttons/Button";
+import { PickerBody, PickerModal } from "../../../ui/pickers/PickerModal";
+import { RemoveButton } from "../../../ui/buttons/RemoveButton";
+import { StatChip } from "../../../ui/chips/StatChip";
+import { ExpandChevron } from "../../../ui/icons/ExpandChevron";
+import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButtons";
+import type { CustomItemLibraryActionProps } from "../../../types/CustomItemActions";
+import { uiPickerPressFeedback } from "../../../ui/styles/buttonStyles";
 
 interface PowerCardProps extends CustomItemLibraryActionProps<"power"> {
   power: PsychicPower;

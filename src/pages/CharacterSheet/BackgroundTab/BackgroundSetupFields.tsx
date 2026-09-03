@@ -4,27 +4,27 @@ import type {
   CyberneticItem,
   GearItem,
   TalentsAndTraitsBlock,
-} from "../../types/Character";
-import { HOMEWORLD_LIST } from "../../data/reference/homeworldData";
-import { findCareerByName, type CareerData } from "../../data/reference/careerData";
-import { SANCTIONING_RESULTS } from "../../mechanics/traits/sanctioningReference";
-import { TRAIT_LIST } from "../../data/reference/traitData";
-import { applyTechPriestImplants, careerNeedsStartingChoice } from "../../mechanics/career/careerStartingBenefits";
-import { Chip } from "../../ui/chips/Chip";
-import { colourMeta, colourRank } from "../../ui/styles/colourTokens";
-import { RollChip } from "../../ui/chips/RollChip";
-import { sourceColour } from "../../ui/styles/sourceStyles";
-import { InfoModal } from "../../components/InfoModal";
-import { uiInfoModalWrapper, uiItemName } from "../../ui/styles/editableStyles";
+} from "../../../types/Character";
+import { HOMEWORLD_LIST } from "../../../data/reference/homeworldData";
+import { findCareerByName, type CareerData } from "../../../data/reference/careerData";
+import { SANCTIONING_RESULTS } from "../../../mechanics/traits/sanctioningReference";
+import { TRAIT_LIST } from "../../../data/reference/traitData";
+import { applyTechPriestImplants, careerNeedsStartingChoice } from "../../../mechanics/career/careerStartingBenefits";
+import { Chip } from "../../../ui/chips/Chip";
+import { colourMeta, colourRank } from "../../../ui/styles/colourTokens";
+import { RollChip } from "../../../ui/chips/RollChip";
+import { sourceColour } from "../../../ui/styles/sourceStyles";
+import { InfoModal } from "../../../components/InfoModal";
+import { uiInfoModalWrapper, uiItemName } from "../../../ui/styles/editableStyles";
 import { BackgroundPickerField } from "./BackgroundPickerField";
-import { CareerInfoContent, CareerPicker, RankInfoContent } from "./CareerPicker";
-import { HomeworldInfoContent, HomeworldPicker } from "./HomeworldPicker";
-import { TraitAcquisitionModal } from "../../mechanics/traits/TraitAcquisitionModal";
-import { CareerStartingChoiceModal } from "./CareerStartingChoiceModal";
+import { CareerInfoContent, CareerPicker, RankInfoContent } from "../CareerPicker";
+import { HomeworldInfoContent, HomeworldPicker } from "../HomeworldPicker";
+import { TraitAcquisitionModal } from "../../../mechanics/traits/TraitAcquisitionModal";
+import { CareerStartingChoiceModal } from "../CareerStartingChoiceModal";
 import {
   HomeworldTraitAcquisitionModal,
   homeworldNeedsTraitAcquisition,
-} from "./HomeworldTraitAcquisitionModal";
+} from "../HomeworldTraitAcquisitionModal";
 
 export interface BackgroundSetupFieldsProps {
   header: CharacterHeader;

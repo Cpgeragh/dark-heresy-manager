@@ -15,7 +15,7 @@ import {
   DamageTypeChip,
   SpecialRulesContent,
 } from "./weaponShared";
-import { computeMeleeTotalDamage } from "./weaponSharedUtils";
+import { computeMeleeTotalDamage } from "./weaponDamageFormatting";
 import {
   weaponClassChip,
   rangedCraftsmanshipDescription,

@@ -23,7 +23,7 @@ import {
 import { uiDismissButton } from "../../../ui/styles/buttonStyles";
 import { colourEmerald, colourEmeraldPlain, colourMeta } from "../../../ui/styles/colourTokens";
 import { sanitizePositiveIntegerInput } from "../../../utils/formInput";
-import { parseDamageType } from "./weaponSharedUtils";
+import { parseDamageType } from "./weaponDamageFormatting";
 
 export function WeaponQualitySelector({
   selected,

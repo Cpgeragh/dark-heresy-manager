@@ -19,7 +19,7 @@ import {
   DAMAGE_TYPE_OPTIONS,
   formatDamageInput,
   isValidDiceInput,
-} from "./weaponSharedUtils";
+} from "./weaponDamageFormatting";
 import { useWeaponQualityPicker } from "./useWeaponQualityPicker";
 
 function parseInitialShieldDamage(damage: string | undefined): {
