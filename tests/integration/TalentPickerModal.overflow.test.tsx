@@ -12,6 +12,10 @@ import type { TalentEntry } from "../../src/types/Character";
 // and never appears on Guardsman's table at all, a genuine off-career example.
 const soundConstitution = TALENT_LIST.find((t) => t.id === "sound-constitution")!;
 const mechadendriteUse = TALENT_LIST.find((t) => t.id === "mechadendrite-use")!;
+const mechadendriteOptions =
+  mechadendriteUse.behaviour?.kind === "fixed-repeatable"
+    ? mechadendriteUse.behaviour.options
+    : [];
 // Ordinary, non-repeatable, no career association at all, real precedent for
 // "already owned once, should never reappear even on the overflow screen".
 const chemGeld = TALENT_LIST.find((t) => t.id === "chem-geld")!;
@@ -46,6 +50,31 @@ function StatefulOverflowPicker() {
     <TalentPickerModal
       title="Add Talent"
       listData={listData}
+      entries={entries}
+      useTalentBehaviours
+      editable
+      isDM
+      onAdd={(entry) => setEntries((current) => [...current, entry])}
+      onClose={() => undefined}
+      career="Guardsman"
+      rank="Conscript"
+    />
+  );
+}
+
+function ExhaustibleChoiceOverflowPicker() {
+  const [entries, setEntries] = useState<TalentEntry[]>(() =>
+    mechadendriteOptions.slice(0, -1).map((specialisation, index) => ({
+      uid: `owned-${index}`,
+      talentId: mechadendriteUse.id,
+      name: `${mechadendriteUse.name} (${specialisation})`,
+      specialisation,
+    }))
+  );
+  return (
+    <TalentPickerModal
+      title="Add Talent"
+      listData={[mechadendriteUse]}
       entries={entries}
       useTalentBehaviours
       editable
@@ -143,6 +172,20 @@ describe("TalentPickerModal, career-aware overflow screen", () => {
     const dialog = await screen.findByRole("dialog", { name: "Type" });
     expect(within(dialog).queryByText("Optical")).not.toBeInTheDocument();
     expect(within(dialog).getByText("Manipulator")).toBeInTheDocument();
+  });
+
+  it("returns to the overflow list after the final available choice is bought", async () => {
+    const user = userEvent.setup();
+    const finalChoice = mechadendriteOptions.at(-1)!;
+    render(<ExhaustibleChoiceOverflowPicker />);
+    await user.click(screen.getByRole("button", { name: "Show all" }));
+    await user.click(screen.getByText("Mechadendrite Use"));
+    await user.click(within(screen.getByRole("dialog", { name: "Type" })).getByText(finalChoice));
+    await user.type(screen.getByPlaceholderText("0"), "100");
+    await user.click(screen.getByRole("button", { name: "Buy Mechadendrite Use" }));
+
+    expect(await screen.findByRole("dialog", { name: "Add Talent" })).toBeInTheDocument();
+    expect(screen.queryByRole("dialog", { name: "Type" })).not.toBeInTheDocument();
   });
 
   it("removes an already-owned one-time talent from the overflow screen entirely", async () => {

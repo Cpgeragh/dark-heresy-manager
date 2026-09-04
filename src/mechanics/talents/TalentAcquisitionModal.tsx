@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { HOMEWORLD_LIST } from "../../data/reference/homeworldData";
 import { TALENT_LIST } from "../../data/reference/talentData";
 import { CYBERNETICS_REFERENCE } from "../../data/reference/cyberneticsReference";
@@ -49,10 +49,8 @@ import {
   isPurityArcheotech,
 } from "./purityOfFlesh";
 import { getPsyRatingAcquisitionGrants } from "./talentUtils";
-import {
-  HomeworldTraitAcquisitionModal,
-  homeworldNeedsTraitAcquisition,
-} from "../../pages/CharacterSheet/HomeworldTraitAcquisitionModal";
+import { HomeworldTraitAcquisitionModal } from "../../pages/CharacterSheet/HomeworldTraitAcquisitionModal";
+import { homeworldNeedsTraitAcquisition } from "../traits/traitEffects";
 
 export interface TalentAcquisitionResult {
   entry: TalentEntry;
@@ -145,25 +143,6 @@ function locationOptions(kind: "arm" | "leg" | undefined): { value: ArmourLocati
     { value: "leftLeg", label: "Left Leg" },
   ];
   return [];
-}
-
-export function needsTalentAcquisition(entry: TalentEntry, talents: TalentsAndTraitsBlock): boolean {
-  if (/^psy-rating-[3-6]$/.test(entry.talentId)) return true;
-  if (entry.talentId === "cult-briefing") {
-    return ["Heretek", "Pleasure", "Blood", "Culture"].includes(entry.specialisation ?? "");
-  }
-  if (entry.talentId === "sicarius-tutoring") {
-    return ["Guardsman", "Scum"].includes(entry.specialisation ?? "");
-  }
-  if (["touched-by-the-fates", "purity-of-flesh", "rite-of-pure-thought"].includes(entry.talentId)) {
-    return true;
-  }
-  if (entry.talentId === "reformed-skin") {
-    return talents.talents.some(
-      (owned) => owned.talentId === "purity-of-flesh" && (owned.acquisition?.purity?.fatePointsGained ?? 0) > 0
-    );
-  }
-  return false;
 }
 
 export function TalentAcquisitionModal({
@@ -274,7 +253,7 @@ export function TalentAcquisitionModal({
     ? "Reformed Skin Acquisition"
     : `${entry.name} Acquisition`;
 
-  const canComplete = useMemo(() => {
+  const canComplete = (() => {
     if (entry.talentId === "cult-briefing") {
       if (entry.specialisation === "Heretek") {
         return Boolean(
@@ -305,22 +284,7 @@ export function TalentAcquisitionModal({
       return Boolean(primaryChoice && (rating === 3 || secondaryChoice));
     }
     return true;
-  }, [
-    entry,
-    primaryChoice,
-    secondaryChoice,
-    selectedCybernetic,
-    replacement,
-    concealedWeaponChoice,
-    selectingConcealedWeapon,
-    confirmed,
-    purityStage,
-    fatalRemovalItems,
-    fatalReplacements,
-    removedDisorderIds,
-    replacementDisorders,
-    homeworldTraitChoices,
-  ]);
+  })();
 
   const complete = () => {
     if (!canComplete) return;

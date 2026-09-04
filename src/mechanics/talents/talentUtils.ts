@@ -32,6 +32,30 @@ export function getPsyRatingAcquisitionGrants(
   };
 }
 
+export function needsTalentAcquisition(
+  entry: TalentEntry,
+  talents: TalentsAndTraitsBlock
+): boolean {
+  if (/^psy-rating-[3-6]$/.test(entry.talentId)) return true;
+  if (entry.talentId === "cult-briefing") {
+    return ["Heretek", "Pleasure", "Blood", "Culture"].includes(entry.specialisation ?? "");
+  }
+  if (entry.talentId === "sicarius-tutoring") {
+    return ["Guardsman", "Scum"].includes(entry.specialisation ?? "");
+  }
+  if (["touched-by-the-fates", "purity-of-flesh", "rite-of-pure-thought"].includes(entry.talentId)) {
+    return true;
+  }
+  if (entry.talentId === "reformed-skin") {
+    return talents.talents.some(
+      (owned) =>
+        owned.talentId === "purity-of-flesh" &&
+        (owned.acquisition?.purity?.fatePointsGained ?? 0) > 0
+    );
+  }
+  return false;
+}
+
 export function normaliseSources(source: SkillSource | SkillSource[]): SkillSource[] {
   return Array.isArray(source) ? source : [source];
 }

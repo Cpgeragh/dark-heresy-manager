@@ -73,6 +73,7 @@ import {
   addSpecialRule,
   rangedRulesForCraftsmanship,
   removeSpecialRule,
+  calcEntryWeight,
 } from "./weaponHelpers";
 import { computeMeleeTotalDamage } from "./weaponDamageFormatting";
 import { CONCEALED_WEAPON_BIONIC_RULES } from "./concealedWeaponBionicRules";
@@ -335,35 +336,6 @@ export function AmmoPicker({
       ))}
     </PickerModal>
   );
-}
-
-// ─── Ammo Weight ─────────────────────────────────────────────────────────────
-// CR rule: a full clip weighs 10% of the weapon's weight.
-
-export function calcEntryWeight(
-  weaponWeight: string | undefined,
-  clip: string | undefined,
-  entry: WeaponAmmoEntry,
-  ammoTracking: AmmoTrackingMode,
-  ammunitionCapacity?: string
-): number {
-  const weaponKg = parseFloat(weaponWeight ?? "0");
-  if (!weaponKg) return 0;
-  const clipSize = parseFloat(ammunitionCapacity ?? clip ?? "1") || 1;
-  const ammoRef = entry.referenceId
-    ? AMMO_REFERENCE.find((ammo) => ammo.id === entry.referenceId)
-    : undefined;
-  const clipWeight = ammoRef?.unitWeightKg ?? weaponKg * 0.1;
-  if (ammoTracking === "loose") {
-    return (entry.rounds + entry.clips * clipSize) * (clipWeight / clipSize);
-  }
-  if (ammoRef?.id === "cr-hot-shot-charge") {
-    return entry.clips * clipWeight;
-  }
-  if (usesUnitAmmoTracking(ammoRef)) {
-    return entry.clips * (clipWeight / clipSize);
-  }
-  return entry.clips * clipWeight + (entry.rounds / clipSize) * clipWeight;
 }
 
 function formatWeight(kg: number): string {

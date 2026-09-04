@@ -30,10 +30,10 @@ import {
 import {
   getAvailablePsychicTalentPurchases,
   getTalentBehaviour,
+  needsTalentAcquisition,
 } from "./talentUtils";
 import { getGrantedTalentEntries, filterTalentEntriesCoveredByGrants } from "./talentEffects";
 import {
-  needsTalentAcquisition,
   TalentAcquisitionModal,
   type TalentAcquisitionResult,
 } from "./TalentAcquisitionModal";

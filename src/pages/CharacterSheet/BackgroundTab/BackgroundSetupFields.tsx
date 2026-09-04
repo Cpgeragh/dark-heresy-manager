@@ -20,11 +20,9 @@ import { BackgroundPickerField } from "./BackgroundPickerField";
 import { CareerInfoContent, CareerPicker, RankInfoContent } from "../CareerPicker";
 import { HomeworldInfoContent, HomeworldPicker } from "../HomeworldPicker";
 import { TraitAcquisitionModal } from "../../../mechanics/traits/TraitAcquisitionModal";
+import { homeworldNeedsTraitAcquisition } from "../../../mechanics/traits/traitEffects";
 import { CareerStartingChoiceModal } from "../CareerStartingChoiceModal";
-import {
-  HomeworldTraitAcquisitionModal,
-  homeworldNeedsTraitAcquisition,
-} from "../HomeworldTraitAcquisitionModal";
+import { HomeworldTraitAcquisitionModal } from "../HomeworldTraitAcquisitionModal";
 
 export interface BackgroundSetupFieldsProps {
   header: CharacterHeader;

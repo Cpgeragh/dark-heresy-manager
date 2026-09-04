@@ -92,21 +92,18 @@ export function VitalsTab({
     (v: number) => onUpdateFate({ ...fate, current: v }),
     [fate, onUpdateFate]
   );
-  const handleFateTotalChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const raw = e.target.value;
-      if (raw === "") {
-        setFateTotalDraft(raw);
-        return;
-      }
-      const n = parseInt(raw, 10);
-      if (!isNaN(n) && n >= 0) {
-        setFateTotalDraft(null);
-        onUpdateFate({ ...fate, total: n });
-      }
-    },
-    [fate, onUpdateFate]
-  );
+  const handleFateTotalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value;
+    if (raw === "") {
+      setFateTotalDraft(raw);
+      return;
+    }
+    const n = parseInt(raw, 10);
+    if (!isNaN(n) && n >= 0) {
+      setFateTotalDraft(null);
+      onUpdateFate({ ...fate, total: n });
+    }
+  };
 
   function dangerClass(value: number, criticalThreshold: number): string {
     return value <= criticalThreshold ? "text-red-400 font-semibold" : "";

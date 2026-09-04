@@ -39,6 +39,22 @@ describe("PlayerPicker", () => {
     );
   });
 
+  it("returns to loading when the member list changes", async () => {
+    const onSelect = vi.fn();
+    const onClose = vi.fn();
+    mockGetFirstName.mockResolvedValueOnce("Alice").mockResolvedValueOnce("Bob");
+    const { rerender } = render(
+      <PlayerPicker memberIds={["uid-1"]} onSelect={onSelect} onClose={onClose} />
+    );
+
+    await waitFor(() => expect(screen.getByText("Alice")).toBeInTheDocument());
+    rerender(<PlayerPicker memberIds={["uid-2"]} onSelect={onSelect} onClose={onClose} />);
+
+    expect(screen.getByText("Loading players…")).toBeInTheDocument();
+    expect(screen.queryByText("Alice")).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText("Bob")).toBeInTheDocument());
+  });
+
   it("resolves and displays each member's first name, sorted alphabetically", async () => {
     mockGetFirstName.mockImplementation(async (uid: string) =>
       uid === "uid-1" ? "Zephyr" : "Alice"

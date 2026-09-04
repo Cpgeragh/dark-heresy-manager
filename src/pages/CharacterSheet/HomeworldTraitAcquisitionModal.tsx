@@ -27,10 +27,6 @@ const WEAPON_OPTIONS: readonly PickerOption[] = [
 
 type ChoicePicker = "peer" | "basic" | "pistol" | null;
 
-export function homeworldNeedsTraitAcquisition(homeworldId: string): boolean {
-  return ["noble-born", "schola-progenium", "mind-cleansed"].includes(homeworldId);
-}
-
 export function HomeworldTraitAcquisitionModal({
   homeworldId,
   onComplete,

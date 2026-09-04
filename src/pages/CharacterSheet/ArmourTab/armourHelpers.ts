@@ -8,8 +8,32 @@ import type {
   TalentEntry,
   WornArmourPiece,
 } from "../../../types/Character";
-import type { ArmourUpgradeRef } from "../../../data/reference/armourUpgradeReference";
+import {
+  ARMOUR_UPGRADE_REFERENCE,
+  type ArmourUpgradeRef,
+} from "../../../data/reference/armourUpgradeReference";
+import { ARMOUR_REFERENCE } from "../../../data/reference/armourReference";
 import { ARMOUR_LOCATION_LABELS } from "../../../constants/locations";
+
+export function compatibleArmourUpgrades(piece: WornArmourPiece): ArmourUpgradeRef[] {
+  const reference = piece.referenceId
+    ? ARMOUR_REFERENCE.find((entry) => entry.id === piece.referenceId)
+    : ARMOUR_REFERENCE.find((entry) => entry.name === piece.name && entry.source === piece.source);
+
+  if (!reference) return [];
+
+  const name = reference.name.toLowerCase();
+  const isCarapaceBreastplateOrSuit =
+    reference.locations.includes("body") && name.includes("carapace");
+  const isPowerArmour = name.includes("power armour") || name.includes("powered armour");
+
+  const generallyCompatible = isCarapaceBreastplateOrSuit || isPowerArmour;
+  return ARMOUR_UPGRADE_REFERENCE.filter((upgrade) =>
+    upgrade.restrictedToArmourIds
+      ? upgrade.restrictedToArmourIds.includes(reference.id)
+      : generallyCompatible
+  );
+}
 
 /** AP contributed by one piece to one location */
 export function pieceApAt(piece: WornArmourPiece, loc: ArmourLocationKey): number {

@@ -27,6 +27,10 @@ export interface TraitSkillEffects {
   sources: TraitModifierSource[];
 }
 
+export function homeworldNeedsTraitAcquisition(homeworldId: string): boolean {
+  return ["noble-born", "schola-progenium", "mind-cleansed"].includes(homeworldId);
+}
+
 function traitReference(name: string, source: string) {
   return TRAIT_LIST.find((trait) => trait.name === name && trait.source === source);
 }

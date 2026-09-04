@@ -42,6 +42,7 @@ import { computeMeleeTotalDamage } from "./weaponDamageFormatting";
 import {
   addSpecialRule,
   ammoFamilyChip,
+  calcEntryWeight,
   effectiveMeleeStats,
   getCompatibleUpgrades,
   meleeClassChips,
@@ -50,7 +51,7 @@ import {
   removeSpecialRule,
 } from "./weaponHelpers";
 import { CONCEALED_WEAPON_BIONIC_RULES } from "./concealedWeaponBionicRules";
-import { AmmoEntryRow, AmmoPicker, calcEntryWeight } from "./RangedCard";
+import { AmmoEntryRow, AmmoPicker } from "./RangedCard";
 
 function hasMultipleMeleeProfiles(damage?: string): boolean {
   return !!damage && /\bLow:\s|\bHigh:\s|;/.test(damage);

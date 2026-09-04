@@ -20,12 +20,14 @@ interface Props {
 }
 
 export function PlayerPicker({ memberIds, onSelect, onClose }: Props) {
-  const [loading, setLoading] = useState(true);
-  const [players, setPlayers] = useState<PlayerOption[]>([]);
+  const memberIdsKey = JSON.stringify(memberIds);
+  const [resolvedPlayers, setResolvedPlayers] = useState<{
+    memberIdsKey: string;
+    players: PlayerOption[];
+  } | null>(null);
 
   useEffect(() => {
     let ignore = false;
-    setLoading(true);
 
     Promise.all(
       memberIds.map(async (uid) => ({
@@ -34,14 +36,19 @@ export function PlayerPicker({ memberIds, onSelect, onClose }: Props) {
       }))
     ).then((resolved) => {
       if (ignore) return;
-      setPlayers(resolved.sort((a, b) => a.label.localeCompare(b.label)));
-      setLoading(false);
+      setResolvedPlayers({
+        memberIdsKey,
+        players: resolved.sort((a, b) => a.label.localeCompare(b.label)),
+      });
     });
 
     return () => {
       ignore = true;
     };
-  }, [memberIds]);
+  }, [memberIds, memberIdsKey]);
+
+  const loading = resolvedPlayers?.memberIdsKey !== memberIdsKey;
+  const players = resolvedPlayers?.memberIdsKey === memberIdsKey ? resolvedPlayers.players : [];
 
   const emptyMessage = loading ? "Loading players…" : "No players in this campaign yet.";
 

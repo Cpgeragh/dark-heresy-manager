@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type {
   Character,
   CharacterHeader,
@@ -663,9 +663,14 @@ export function ExperienceTab({
   const [xpAction, setXpAction] = useState<XpAction | null>(null);
   const [rankUpOpen, setRankUpOpen] = useState(false);
   const currentRankCardId = rankCards.find((card) => card.isCurrent)?.rankId;
-  const [expandedRankIds, setExpandedRankIds] = useState<Set<string>>(
-    () => new Set(currentRankCardId ? [currentRankCardId] : [])
-  );
+  const [rankExpansion, setRankExpansion] = useState(() => ({
+    currentRankCardId,
+    expandedRankIds: new Set(currentRankCardId ? [currentRankCardId] : []),
+  }));
+  const expandedRankIds =
+    rankExpansion.currentRankCardId === currentRankCardId
+      ? rankExpansion.expandedRankIds
+      : new Set(currentRankCardId ? [currentRankCardId] : []);
   const canAddXp = editable;
   const canManageXp = isDM && editable;
   const canUseXpAction = xpAction === "add" ? canAddXp : canManageXp;
@@ -674,16 +679,18 @@ export function ExperienceTab({
       Number(right.isCurrent) - Number(left.isCurrent) || right.tier - left.tier
   );
 
-  useEffect(() => {
-    setExpandedRankIds(new Set(currentRankCardId ? [currentRankCardId] : []));
-  }, [currentRankCardId]);
-
   const toggleRankCard = (rankId: string) => {
-    setExpandedRankIds((current) => {
-      const next = new Set(current);
+    setRankExpansion((current) => {
+      const next = new Set(
+        current.currentRankCardId === currentRankCardId
+          ? current.expandedRankIds
+          : currentRankCardId
+            ? [currentRankCardId]
+            : []
+      );
       if (next.has(rankId)) next.delete(rankId);
       else next.add(rankId);
-      return next;
+      return { currentRankCardId, expandedRankIds: next };
     });
   };
 

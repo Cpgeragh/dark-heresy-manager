@@ -1,6 +1,6 @@
 // Shared picker and card components used by TalentsTab and TraitsTab.
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { TalentEntry } from "../../types/Character";
 import type { TalentData } from "../../data/reference/talentData";
 import type { TraitData } from "../../data/reference/traitData";
@@ -46,7 +46,6 @@ import { PickerBody, PickerCustomAction, PickerModal, PickerRow } from "../../ui
 import { OptionPickerScreen, type PickerOption } from "../../ui/pickers/OptionPickerScreen";
 import { ArrowLeft, ArrowRight } from "../../ui/icons/PickerArrows";
 import { ExpandChevron } from "../../ui/icons/ExpandChevron";
-import { needsTalentAcquisition } from "./TalentAcquisitionModal";
 import { sanitizeNonNegativeIntegerInput, sanitizePositiveIntegerInput } from "../../utils/formInput";
 import {
   getAvailableTalentChoices,
@@ -54,6 +53,7 @@ import {
   hasTalentChoice,
   isTalentAvailableInPicker,
   makeTalentEntry,
+  needsTalentAcquisition,
   normaliseSources,
 } from "./talentUtils";
 
@@ -239,6 +239,8 @@ export function TalentPickerModal({
             .filter((option) => showOverflow || option.cost !== undefined);
         })()
     : [];
+  const choicePickerUnavailable =
+    showChoicePicker && picked !== null && choiceOptions.length === 0;
   const composedSpecialisation = detailChoice?.displayPrefix
     ? `${detailChoice.displayPrefix}: ${specialisation.trim()}`
     : specialisation.trim();
@@ -265,11 +267,6 @@ export function TalentPickerModal({
     setDetailChoice(null);
     setShowChoicePicker(false);
   };
-
-  useEffect(() => {
-    if (!showChoicePicker || !picked || choiceOptions.length > 0) return;
-    resetPicked();
-  }, [choiceOptions.length, picked, showChoicePicker]);
 
   const returnToChoicePicker = () => {
     setSpecialisation("");
@@ -394,7 +391,7 @@ export function TalentPickerModal({
     );
   }
 
-  if (showOverflow && !picked && !showChoicePicker) {
+  if (showOverflow && ((!picked && !showChoicePicker) || choicePickerUnavailable)) {
     return (
       <PickerModal
         title={modalTitle}
@@ -508,7 +505,7 @@ export function TalentPickerModal({
     );
   }
 
-  if (showChoicePicker && talentData) {
+  if (showChoicePicker && talentData && !choicePickerUnavailable) {
     return (
       <OptionPickerScreen
         title={talentData.specialisationLabel ?? "Choice"}
@@ -520,7 +517,7 @@ export function TalentPickerModal({
     );
   }
 
-  if (picked && talentData) {
+  if (picked && talentData && !choicePickerUnavailable) {
     return (
       <PickerModal
         title={detailChoice?.detailLabel ?? talentData.specialisationLabel ?? "Specialisation"}

@@ -16,6 +16,7 @@ export default defineConfig({
       "tests/firestore/**",
       "tests/functions/**",
       "tests/integration/TalentsTab.test.tsx",
+      "tests/integration/TalentsTab.overflowFlows.test.tsx",
     ],
 
     // Test files are isolated by Vitest, so they can safely use separate workers.

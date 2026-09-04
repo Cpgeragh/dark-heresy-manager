@@ -131,6 +131,39 @@ describe("ExperienceTab named Career Rank ledger", () => {
       .toHaveAttribute("aria-expanded", "false");
   });
 
+  it("resets expansion to the new current rank when the character ranks up", () => {
+    const onUpdate = vi.fn();
+    const onUpdateHeader = vi.fn();
+    const scoutCharacter = makeCharacter();
+    const veteranCharacter = makeCharacter({
+      header: { ...scoutCharacter.header, rank: "Veteran", careerPath: undefined },
+    });
+    const { rerender } = render(
+      <ExperienceTab
+        character={veteranCharacter}
+        isDM
+        editable
+        onUpdate={onUpdate}
+        onUpdateHeader={onUpdateHeader}
+      />
+    );
+
+    rerender(
+      <ExperienceTab
+        character={scoutCharacter}
+        isDM
+        editable
+        onUpdate={onUpdate}
+        onUpdateHeader={onUpdateHeader}
+      />
+    );
+
+    expect(screen.getByRole("button", { name: "Collapse Scout Rank Card" }))
+      .toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("button", { name: "Expand Veteran Rank Card" }))
+      .toHaveAttribute("aria-expanded", "false");
+  });
+
   it("shows career purchases when a previous Rank Card is expanded", async () => {
     const user = userEvent.setup();
     renderTab();

@@ -5,7 +5,12 @@ import { RemoveButton } from "../../../ui/buttons/RemoveButton";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
 import { StatChip } from "../../../ui/chips/StatChip";
 import { InfoModal } from "../../../components/InfoModal";
-import { apBreakdown, armourCraftsmanshipDescription, effectiveArmourWeight } from "./armourHelpers";
+import {
+  apBreakdown,
+  armourCraftsmanshipDescription,
+  compatibleArmourUpgrades,
+  effectiveArmourWeight,
+} from "./armourHelpers";
 import { locationLabel } from "../../../utils/armourLocations";
 import { ARMOUR_REFERENCE } from "../../../data/reference/armourReference";
 import { ARMOUR_SPECIAL_RULES } from "../../../data/reference/armourSpecialRules";
@@ -18,7 +23,6 @@ import { ARMOUR_UPGRADE_REFERENCE } from "../../../data/reference/armourUpgradeR
 import {
   ArmourUpgradeCard,
   ArmourUpgradePicker,
-  compatibleArmourUpgrades,
 } from "./ArmourUpgradePicker";
 
 interface Props extends CustomItemLibraryActionProps<"armour"> {

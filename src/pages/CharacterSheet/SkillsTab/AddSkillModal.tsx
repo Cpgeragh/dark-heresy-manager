@@ -1,6 +1,6 @@
 // src/pages/CharacterSheet/SkillsTab/AddSkillModal.tsx
 
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef } from "react";
 import {
   CHAR_LABEL,
   getSkillGroupCharacteristics,
@@ -112,15 +112,13 @@ export function AddSkillModal({
 
   const listItems = useMemo(() => groupSkills(visibleSkills, search), [visibleSkills, search]);
   const overflowListItems = useMemo(() => groupSkills(untrainedSkills, search), [untrainedSkills, search]);
-
-  useEffect(() => {
-    if (!isOpen || !openCategory) return;
-    const sourceItems = showOverflow ? overflowListItems : listItems;
-    const categoryStillHasSkills = sourceItems.some(
-      (item) => item.type === "group" && item.category === openCategory && item.skills.length > 0
-    );
-    if (!categoryStillHasSkills) setOpenCategory(null);
-  }, [isOpen, listItems, openCategory, overflowListItems, showOverflow]);
+  const categorySourceItems = showOverflow ? overflowListItems : listItems;
+  const openGroup = openCategory
+    ? categorySourceItems.find(
+        (item): item is Extract<ListItem, { type: "group" }> =>
+          item.type === "group" && item.category === openCategory && item.skills.length > 0
+      )
+    : undefined;
 
   if (!isOpen) return null;
 
@@ -167,12 +165,8 @@ export function AddSkillModal({
     );
   }
 
-  if (openCategory) {
-    const sourceItems = showOverflow ? overflowListItems : listItems;
-    const group = sourceItems.find(
-      (i): i is Extract<ListItem, { type: "group" }> => i.type === "group" && i.category === openCategory
-    );
-    const skills = group?.skills ?? [];
+  if (openCategory && openGroup) {
+    const skills = openGroup.skills;
     const canSelect = editable && (!showOverflow || canConfirmManualCostPurchase(isDM));
 
     return (

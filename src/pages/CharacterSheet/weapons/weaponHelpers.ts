@@ -1,8 +1,17 @@
 // src/pages/CharacterSheet/weapons/weaponHelpers.ts
 // Pure stat-calculation helpers (no React, no JSX).
 
-import type { RangedWeapon, MeleeWeapon, WeaponCraftsmanship } from "../../../types/Character";
-import type { AmmoRef } from "../../../data/reference/ammoReference";
+import type {
+  RangedWeapon,
+  MeleeWeapon,
+  WeaponAmmoEntry,
+  WeaponCraftsmanship,
+} from "../../../types/Character";
+import {
+  AMMO_REFERENCE,
+  usesUnitAmmoTracking,
+  type AmmoRef,
+} from "../../../data/reference/ammoReference";
 import {
   WEAPON_UPGRADE_REFERENCE,
   type WeaponUpgradeRef,
@@ -415,6 +424,32 @@ export function rangedRulesForCraftsmanship(rules: string, craftsmanship: Weapon
 // ─── Weapon Class & Ammo Family Display ───────────────────────────────────
 
 export type AmmoTrackingMode = NonNullable<RangedWeapon["ammoTracking"]>;
+
+export function calcEntryWeight(
+  weaponWeight: string | undefined,
+  clip: string | undefined,
+  entry: WeaponAmmoEntry,
+  ammoTracking: AmmoTrackingMode,
+  ammunitionCapacity?: string
+): number {
+  const weaponKg = parseFloat(weaponWeight ?? "0");
+  if (!weaponKg) return 0;
+  const clipSize = parseFloat(ammunitionCapacity ?? clip ?? "1") || 1;
+  const ammoRef = entry.referenceId
+    ? AMMO_REFERENCE.find((ammo) => ammo.id === entry.referenceId)
+    : undefined;
+  const clipWeight = ammoRef?.unitWeightKg ?? weaponKg * 0.1;
+  if (ammoTracking === "loose") {
+    return (entry.rounds + entry.clips * clipSize) * (clipWeight / clipSize);
+  }
+  if (ammoRef?.id === "cr-hot-shot-charge") {
+    return entry.clips * clipWeight;
+  }
+  if (usesUnitAmmoTracking(ammoRef)) {
+    return entry.clips * (clipWeight / clipSize);
+  }
+  return entry.clips * clipWeight + (entry.rounds / clipSize) * clipWeight;
+}
 
 const WEAPON_CLASS_STYLES: Record<string, { active: string; inactive: string }> = {
   Pistol: { active: colourSky, inactive: "border-sky-500/30 bg-sky-500/5 text-sky-400/50" },

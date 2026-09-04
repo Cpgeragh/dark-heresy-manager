@@ -1,9 +1,4 @@
-import type { WornArmourPiece } from "../../../types/Character";
-import {
-  ARMOUR_UPGRADE_REFERENCE,
-  type ArmourUpgradeRef,
-} from "../../../data/reference/armourUpgradeReference";
-import { ARMOUR_REFERENCE } from "../../../data/reference/armourReference";
+import type { ArmourUpgradeRef } from "../../../data/reference/armourUpgradeReference";
 import { Button } from "../../../ui/buttons/Button";
 import { InfoModal } from "../../../components/InfoModal";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
@@ -16,26 +11,6 @@ import {
   uiTextLabel,
   uiTextPlaceholder,
 } from "../../../ui/styles/editableStyles";
-
-export function compatibleArmourUpgrades(piece: WornArmourPiece): ArmourUpgradeRef[] {
-  const reference = piece.referenceId
-    ? ARMOUR_REFERENCE.find((entry) => entry.id === piece.referenceId)
-    : ARMOUR_REFERENCE.find((entry) => entry.name === piece.name && entry.source === piece.source);
-
-  if (!reference) return [];
-
-  const name = reference.name.toLowerCase();
-  const isCarapaceBreastplateOrSuit =
-    reference.locations.includes("body") && name.includes("carapace");
-  const isPowerArmour = name.includes("power armour") || name.includes("powered armour");
-
-  const generallyCompatible = isCarapaceBreastplateOrSuit || isPowerArmour;
-  return ARMOUR_UPGRADE_REFERENCE.filter((upgrade) =>
-    upgrade.restrictedToArmourIds
-      ? upgrade.restrictedToArmourIds.includes(reference.id)
-      : generallyCompatible
-  );
-}
 
 export function ArmourUpgradeCard({
   upgrade,

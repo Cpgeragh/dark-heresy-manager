@@ -12,7 +12,7 @@
     "test:ui": "vitest --ui --config vitest.config.fast.ts",
     "test:fast": "vitest run --config vitest.config.fast.ts",
     "test:changed": "vitest run --config vitest.config.fast.ts --changed",
-    "test:heavy": "vitest run tests/integration/TalentsTab.test.tsx",
+    "test:heavy": "vitest run tests/integration/TalentsTab.test.tsx tests/integration/TalentsTab.overflowFlows.test.tsx",
     "test:run": "npm run test:fast && npm run test:heavy",
     "test:run:serial": "vitest run",
     "test:rules": "firebase emulators:exec --only firestore --project dh-test \"vitest run --config vitest.config.rules.ts\"",

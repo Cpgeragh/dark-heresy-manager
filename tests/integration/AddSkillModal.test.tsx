@@ -23,7 +23,7 @@ const untrainedSkills: SkillWithComputed[] = [
 function setup(props: Partial<React.ComponentProps<typeof AddSkillModal>> = {}) {
   const onAdd = vi.fn();
   const onClose = vi.fn();
-  render(
+  const rendered = render(
     <AddSkillModal
       isOpen
       editable
@@ -33,7 +33,7 @@ function setup(props: Partial<React.ComponentProps<typeof AddSkillModal>> = {}) 
       {...props}
     />
   );
-  return { onAdd, onClose };
+  return { onAdd, onClose, ...rendered };
 }
 
 describe("AddSkillModal skill row", () => {
@@ -91,6 +91,30 @@ describe("AddSkillModal skill row", () => {
     const groupButton = screen.getByRole("button", { name: /Trade/ });
     expect(groupButton).toHaveTextContent("S");
     expect(groupButton).toHaveTextContent("Int");
+  });
+
+  it("returns to the list when the open category no longer has skills", async () => {
+    const user = userEvent.setup();
+    const groupedSkills = [
+      { ...untrainedSkills[0], category: "Trade", name: "Trade (Agri)", advanced: true },
+      { ...untrainedSkills[0], id: "s2", category: "Trade", name: "Trade (Cook)", advanced: true },
+    ];
+    const { onAdd, onClose, rerender } = setup({ untrainedSkills: groupedSkills });
+    await user.click(screen.getByRole("button", { name: /Trade/ }));
+    expect(screen.getByRole("dialog", { name: "Trade" })).toBeInTheDocument();
+
+    rerender(
+      <AddSkillModal
+        isOpen
+        editable
+        onClose={onClose}
+        untrainedSkills={[]}
+        onAdd={onAdd}
+      />
+    );
+
+    expect(screen.queryByRole("dialog", { name: "Trade" })).not.toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Add Skill" })).toBeInTheDocument();
   });
 });
 
