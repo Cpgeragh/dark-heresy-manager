@@ -137,15 +137,6 @@ import {
 import { createEmptyCharacterData } from "../../src/utils/characterFactory";
 import type { Character } from "../../src/types/Character";
 
-function snapshot(docs: { id: string; ref: string }[]) {
-  return {
-    docs: docs.map((d) => ({ id: d.id, ref: d.ref, data: () => ({}) })),
-    empty: docs.length === 0,
-  };
-}
-
-const emptySnapshot = snapshot([]);
-
 beforeEach(() => {
   vi.clearAllMocks();
   mockAuth.currentUser = { uid: "actor-1" };

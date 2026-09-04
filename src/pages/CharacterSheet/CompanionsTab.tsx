@@ -41,10 +41,10 @@ const CHARACTERISTICS: { key: keyof CompanionRef["characteristics"]; label: stri
 const NO_ADDITIONAL_RULES = "No additional rules text is supplied for this entry.";
 
 function CompanionPickerCard({
-  ref,
+  companionReference,
   onSelect,
 }: {
-  ref: CompanionRef;
+  companionReference: CompanionRef;
   onSelect?: () => void;
 }) {
   const [expanded, setExpanded] = useState(false);
@@ -59,16 +59,16 @@ function CompanionPickerCard({
           aria-expanded={onSelect ? undefined : expanded}
           aria-label={
             onSelect
-              ? `Select ${ref.name}`
-              : `${expanded ? "Collapse" : "Expand"} ${ref.name} details`
+              ? `Select ${companionReference.name}`
+              : `${expanded ? "Collapse" : "Expand"} ${companionReference.name} details`
           }
           className={`absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 ${uiPickerPressFeedback(Boolean(onSelect))}`}
         />
         <div className={`${uiExpandButton} relative pointer-events-none flex items-center gap-2`}>
           <div className="flex items-center gap-1.5">
-            <span className={`${uiItemName} group-hover:text-white`}>{ref.name}</span>
+            <span className={`${uiItemName} group-hover:text-white`}>{companionReference.name}</span>
             <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
-              <InfoModal title={ref.name} content={ref.description} as="span" />
+              <InfoModal title={companionReference.name} content={companionReference.description} as="span" />
             </span>
           </div>
           <button
@@ -85,7 +85,7 @@ function CompanionPickerCard({
 
       {expanded && (
         <div className="px-3 lg:px-4 pb-3 lg:pb-4 pt-2 lg:pt-3 border-t border-slate-600 space-y-3">
-          <CompanionProfileDetails ref={ref} statSize="sm" modalAs="span" />
+          <CompanionProfileDetails companionReference={companionReference} statSize="sm" modalAs="span" />
         </div>
       )}
     </div>
@@ -100,10 +100,10 @@ function CompanionPicker({
 }: {
   editable: boolean;
   currentIds: string[];
-  onSelect: (ref: CompanionRef) => void;
+  onSelect: (companionReference: CompanionRef) => void;
   onClose: () => void;
 }) {
-  const available = COMPANION_REFERENCE.filter((ref) => !currentIds.includes(ref.id));
+  const available = COMPANION_REFERENCE.filter((companionReference) => !currentIds.includes(companionReference.id));
 
   return (
     <PickerModal
@@ -116,11 +116,11 @@ function CompanionPicker({
       hideSearch
       footer={<Button variant="secondary" fullWidth onClick={onClose}>Done</Button>}
     >
-      {available.map((ref) => (
+      {available.map((companionReference) => (
         <CompanionPickerCard
-          key={ref.id}
-          ref={ref}
-          onSelect={editable ? () => onSelect(ref) : undefined}
+          key={companionReference.id}
+          companionReference={companionReference}
+          onSelect={editable ? () => onSelect(companionReference) : undefined}
         />
       ))}
     </PickerModal>
@@ -202,11 +202,11 @@ function ProfileEntries({
 }
 
 function CompanionProfileDetails({
-  ref,
+  companionReference,
   statSize,
   modalAs,
 }: {
-  ref: CompanionRef;
+  companionReference: CompanionRef;
   statSize?: "sm" | "md";
   modalAs?: "button" | "span";
 }) {
@@ -214,46 +214,46 @@ function CompanionProfileDetails({
     <>
       <div className="flex flex-wrap gap-1.5 mt-2">
         {CHARACTERISTICS.map(({ key, label }) => (
-          <StatChip key={key} size={statSize} label={label} value={ref.characteristics[key]} />
+          <StatChip key={key} size={statSize} label={label} value={companionReference.characteristics[key]} />
         ))}
-        <StatChip size={statSize} label="Move" value={ref.movement} />
-        <StatChip size={statSize} label="Wounds" value={ref.wounds} />
+        <StatChip size={statSize} label="Move" value={companionReference.movement} />
+        <StatChip size={statSize} label="Wounds" value={companionReference.wounds} />
       </div>
 
       <div className="space-y-1 border-t border-slate-800 pt-2 mt-2">
         <SectionHeader as="h3" className="mb-2">Abilities</SectionHeader>
-        <ProfileEntries companionName={ref.name} title="Skills" entries={ref.skills} describe={skillModalText} modalAs={modalAs} />
-        <ProfileEntries companionName={ref.name} title="Talents" entries={ref.talents} describe={talentModalText} modalAs={modalAs} />
-        <ProfileEntries companionName={ref.name} title="Traits" entries={ref.traits} describe={traitModalText} modalAs={modalAs} />
+        <ProfileEntries companionName={companionReference.name} title="Skills" entries={companionReference.skills} describe={skillModalText} modalAs={modalAs} />
+        <ProfileEntries companionName={companionReference.name} title="Talents" entries={companionReference.talents} describe={talentModalText} modalAs={modalAs} />
+        <ProfileEntries companionName={companionReference.name} title="Traits" entries={companionReference.traits} describe={traitModalText} modalAs={modalAs} />
       </div>
 
       <div className="space-y-1 border-t border-slate-800 pt-2 mt-2">
         <SectionHeader as="h3" className="mb-2">Equipment</SectionHeader>
         <ProfileEntries
-          companionName={ref.name}
+          companionName={companionReference.name}
           title="Armour"
-          entries={ref.armour}
+          entries={companionReference.armour}
           describe={() => NO_ADDITIONAL_RULES}
           modalAs={modalAs}
         />
         <ProfileEntries
-          companionName={ref.name}
+          companionName={companionReference.name}
           title="Gear"
-          entries={ref.gear}
+          entries={companionReference.gear}
           describe={gearModalText}
           modalAs={modalAs}
         />
         <ProfileEntries
-          companionName={ref.name}
+          companionName={companionReference.name}
           title="Weapons"
-          entries={ref.weapons}
+          entries={companionReference.weapons}
           describe={() => NO_ADDITIONAL_RULES}
           modalAs={modalAs}
         />
       </div>
 
       <div className="flex flex-wrap gap-1.5 border-t border-slate-800 pt-2 mt-2">
-        <ItemMetaChips source={ref.source} bare size="sm" />
+        <ItemMetaChips source={companionReference.source} bare size="sm" />
       </div>
     </>
   );
@@ -269,8 +269,8 @@ function CompanionCard({
   onRemove: () => void;
 }) {
   const [expanded, setExpanded] = useState(true);
-  const ref = COMPANION_REFERENCE.find((entry) => entry.id === companion.referenceId);
-  if (!ref) return null;
+  const companionReference = COMPANION_REFERENCE.find((entry) => entry.id === companion.referenceId);
+  if (!companionReference) return null;
 
   return (
     <div className={`${uiSectionShell} overflow-hidden`}>
@@ -279,14 +279,14 @@ function CompanionCard({
           type="button"
           onClick={() => setExpanded((current) => !current)}
           aria-expanded={expanded}
-          aria-label={`${expanded ? "Collapse" : "Expand"} ${ref.name} details`}
+          aria-label={`${expanded ? "Collapse" : "Expand"} ${companionReference.name} details`}
           className="absolute inset-0 w-full rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
         />
         <div className={`${uiExpandButton} relative pointer-events-none`}>
           <div className="flex items-center gap-1.5">
-            <h3 className={uiItemName}>{ref.name}</h3>
+            <h3 className={uiItemName}>{companionReference.name}</h3>
             <span className={`${uiInfoModalWrapper} pointer-events-auto`}>
-              <InfoModal title={ref.name} content={ref.description} />
+              <InfoModal title={companionReference.name} content={companionReference.description} />
             </span>
           </div>
         </div>
@@ -299,10 +299,10 @@ function CompanionCard({
         <div className="px-3 pb-3 lg:px-4 lg:pb-4 space-y-3">
           {editable && (
             <div className="flex justify-end">
-              <RemoveButton onClick={onRemove} label={`Remove ${ref.name}`} />
+              <RemoveButton onClick={onRemove} label={`Remove ${companionReference.name}`} />
             </div>
           )}
-          <CompanionProfileDetails ref={ref} modalAs="button" />
+          <CompanionProfileDetails companionReference={companionReference} modalAs="button" />
         </div>
       )}
     </div>
@@ -350,10 +350,10 @@ export function CompanionsTab({
         <CompanionPicker
           editable={editable}
           currentIds={companions.map((companion) => companion.referenceId)}
-          onSelect={(ref) => {
+          onSelect={(companionReference) => {
             onUpdate([
               ...companions,
-              { id: crypto.randomUUID(), referenceId: ref.id, name: ref.name, source: ref.source },
+              { id: crypto.randomUUID(), referenceId: companionReference.id, name: companionReference.name, source: companionReference.source },
             ]);
           }}
           onClose={() => setShowPicker(false)}

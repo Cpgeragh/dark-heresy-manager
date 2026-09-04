@@ -6,7 +6,6 @@ import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
 import {
   dbAs,
   createCampaign,
-  createCharacter,
   createIdentityReclaimEntry,
 } from "../helpers";
 

@@ -33,12 +33,8 @@ const {
   sessionSummaries,
   characterSummaries,
   claimLogChild,
-  xpProposalsChild,
-  messagesChild,
-  versionsChild,
   mockRecoveryDoc,
   mockRecoveryGetImpl,
-  mockRecoveryDelete,
   mockUserLinkGet,
 } = vi.hoisted(() => {
   function makeCollectionMock() {

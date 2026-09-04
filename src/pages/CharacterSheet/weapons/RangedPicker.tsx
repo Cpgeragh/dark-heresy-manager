@@ -30,25 +30,25 @@ import {
   rangedCraftsmanshipDescription,
 } from "./weaponHelpers";
 
-function RangedWeaponCardPickerRow({ ref, editable, onSelect }: { ref: RangedWeaponRef; editable: boolean; onSelect: () => void }) {
+function RangedWeaponCardPickerRow({ weaponReference, editable, onSelect }: { weaponReference: RangedWeaponRef; editable: boolean; onSelect: () => void }) {
   const weapon: RangedWeapon = {
-    id: `picker-${ref.id}`,
-    referenceId: ref.id,
-    name: ref.name,
-    class: ref.class,
-    range: ref.range,
-    rof: ref.rof,
-    damage: ref.damage,
-    pen: String(ref.pen),
-    clip: String(ref.clip),
-    rld: ref.reload,
-    specialRules: ref.specialRules,
-    weight: ref.weight,
-    value: ref.value,
-    availability: ref.availability,
-    source: ref.source,
-    ammoType: ref.ammoType,
-    ammoTracking: ref.ammoTracking,
+    id: `picker-${weaponReference.id}`,
+    referenceId: weaponReference.id,
+    name: weaponReference.name,
+    class: weaponReference.class,
+    range: weaponReference.range,
+    rof: weaponReference.rof,
+    damage: weaponReference.damage,
+    pen: String(weaponReference.pen),
+    clip: String(weaponReference.clip),
+    rld: weaponReference.reload,
+    specialRules: weaponReference.specialRules,
+    weight: weaponReference.weight,
+    value: weaponReference.value,
+    availability: weaponReference.availability,
+    source: weaponReference.source,
+    ammoType: weaponReference.ammoType,
+    ammoTracking: weaponReference.ammoTracking,
     craftsmanship: "Common",
     upgrades: [],
     ammoEntries: [],
@@ -153,7 +153,7 @@ export function RangedPicker({
 }: {
   editable?: boolean;
   customItems?: CampaignCustomItem<"weapon">[];
-  onSelect: (ref: RangedWeaponRef, craftsmanship: WeaponCraftsmanship) => void;
+  onSelect: (weaponReference: RangedWeaponRef, craftsmanship: WeaponCraftsmanship) => void;
   onSelectCustomItem?: (item: CampaignCustomItem<"weapon">) => void;
     onCustom: () => void;
     onClose: () => void;
@@ -199,7 +199,7 @@ export function RangedPicker({
     .sort((a, b) => a.name.localeCompare(b.name));
   const pickerEntries = [
     ...filteredCustom.map((item) => ({ kind: "custom" as const, name: item.name, item })),
-    ...filtered.map((ref) => ({ kind: "reference" as const, name: ref.name, ref })),
+    ...filtered.map((weaponReference) => ({ kind: "reference" as const, name: weaponReference.name, weaponReference })),
   ].sort((a, b) => a.name.localeCompare(b.name));
   const modalTitle = editable ? title : `${title.replace(/^Add /, "View ")}s`;
 
@@ -328,13 +328,13 @@ export function RangedPicker({
     >
       {pickerEntries.map((entry) => {
         if (entry.kind === "reference") {
-          const ref = entry.ref;
+          const weaponReference = entry.weaponReference;
           return (
             <RangedWeaponCardPickerRow
-              key={ref.id}
-              ref={ref}
+              key={weaponReference.id}
+              weaponReference={weaponReference}
               editable={editable}
-              onSelect={() => setSelected(ref)}
+              onSelect={() => setSelected(weaponReference)}
             />
           );
         }

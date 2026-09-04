@@ -26,19 +26,19 @@ import {
   meleeCraftsmanshipDescription,
 } from "./weaponHelpers";
 
-function MeleeWeaponCardPickerRow({ ref, editable, strengthBonus, onSelect }: { ref: MeleeWeaponRef; editable: boolean; strengthBonus: number; onSelect: () => void }) {
+function MeleeWeaponCardPickerRow({ weaponReference, editable, strengthBonus, onSelect }: { weaponReference: MeleeWeaponRef; editable: boolean; strengthBonus: number; onSelect: () => void }) {
   const weapon: MeleeWeapon = {
-    id: `picker-${ref.id}`,
-    referenceId: ref.id,
-    name: ref.name,
-    class: ref.class,
-    damage: ref.damage,
-    pen: String(ref.pen),
-    specialRules: ref.specialRules,
-    weight: ref.weight,
-    value: ref.value,
-    availability: ref.availability,
-    source: ref.source,
+    id: `picker-${weaponReference.id}`,
+    referenceId: weaponReference.id,
+    name: weaponReference.name,
+    class: weaponReference.class,
+    damage: weaponReference.damage,
+    pen: String(weaponReference.pen),
+    specialRules: weaponReference.specialRules,
+    weight: weaponReference.weight,
+    value: weaponReference.value,
+    availability: weaponReference.availability,
+    source: weaponReference.source,
     craftsmanship: "Common",
     upgrades: [],
   };
@@ -136,7 +136,7 @@ export function MeleePicker({
   editable?: boolean;
   strengthBonus?: number;
   customItems?: CampaignCustomItem<"weapon">[];
-  onSelect: (ref: MeleeWeaponRef, craftsmanship: WeaponCraftsmanship) => void;
+  onSelect: (weaponReference: MeleeWeaponRef, craftsmanship: WeaponCraftsmanship) => void;
   onSelectCustomItem?: (item: CampaignCustomItem<"weapon">) => void;
     onCustom: () => void;
     onClose: () => void;
@@ -160,7 +160,7 @@ export function MeleePicker({
     .sort((a, b) => a.name.localeCompare(b.name));
   const pickerEntries = [
     ...filteredCustom.map((item) => ({ kind: "custom" as const, name: item.name, item })),
-    ...filtered.map((ref) => ({ kind: "reference" as const, name: ref.name, ref })),
+    ...filtered.map((weaponReference) => ({ kind: "reference" as const, name: weaponReference.name, weaponReference })),
   ].sort((a, b) => a.name.localeCompare(b.name));
   const modalTitle = editable ? title : `${title.replace(/^Add /, "View ")}s`;
 
@@ -240,14 +240,14 @@ export function MeleePicker({
     >
       {pickerEntries.map((entry) => {
         if (entry.kind === "reference") {
-          const ref = entry.ref;
+          const weaponReference = entry.weaponReference;
           return (
             <MeleeWeaponCardPickerRow
-              key={ref.id}
-              ref={ref}
+              key={weaponReference.id}
+              weaponReference={weaponReference}
               editable={editable}
               strengthBonus={strengthBonus}
-              onSelect={() => setSelected(ref)}
+              onSelect={() => setSelected(weaponReference)}
             />
           );
         }

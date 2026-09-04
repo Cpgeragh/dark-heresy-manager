@@ -31,7 +31,6 @@ const {
   mockRecoveryDoc,
   mockSummaryGet,
   mockSummaryDelete,
-  mockSummaryDoc,
   mockUserLinkGet,
   mockBatchDelete,
   mockBatchCommit,

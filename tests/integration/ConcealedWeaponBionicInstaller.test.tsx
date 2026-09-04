@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { ConcealedWeaponBionicInstaller } from "../../src/pages/CharacterSheet/CyberneticsTab/ConcealedWeaponBionicInstaller";
-import type { CyberneticItem, RangedWeapon, MeleeWeapon } from "../../src/types/Character";
+import type { CyberneticItem, RangedWeapon } from "../../src/types/Character";
 
 // "cr-bionic-arm" is the real Bionic Arm reference id (src/data/reference/cyberneticsReference.ts).
 const BIONIC_ARM_REF_ID = "cr-bionic-arm";
