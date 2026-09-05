@@ -102,9 +102,16 @@ async function collectFiles(rootDir) {
   return files;
 }
 
-async function readTextFile(absolutePath) {
+async function readTextFile(absolutePath, relativePath, findings) {
   const metadata = await stat(absolutePath);
-  if (metadata.size > MAX_SCANNED_FILE_BYTES) return null;
+  if (metadata.size > MAX_SCANNED_FILE_BYTES) {
+    addFinding(findings, {
+      level: "notice",
+      path: relativePath,
+      message: `file exceeds ${MAX_SCANNED_FILE_BYTES} bytes and was skipped by the secret/credential scan`,
+    });
+    return null;
+  }
 
   const buffer = await readFile(absolutePath);
   if (buffer.includes(0)) return null;
@@ -327,7 +334,7 @@ async function runSecretChecks(rootDir) {
     const relativePath = normaliseRelativePath(rootDir, absolutePath);
     inspectSensitiveFileName(relativePath, findings);
 
-    const text = await readTextFile(absolutePath);
+    const text = await readTextFile(absolutePath, relativePath, findings);
     if (text === null) continue;
     if (isEnvironmentFile(path.basename(absolutePath))) {
       inspectEnvironmentFile(relativePath, text, gitignore, findings);

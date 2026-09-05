@@ -27,7 +27,7 @@ export function useRecoveryLookup() {
       }
       setData(outcome.result);
     } catch (err) {
-      console.error(err);
+      console.error("Recovery code lookup failed:", err);
       setError(
         err instanceof ClientCodeAttemptLimitError ? err.message : "Unexpected error during lookup."
       );

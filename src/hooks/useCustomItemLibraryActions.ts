@@ -45,7 +45,7 @@ export function useCustomItemLibraryActions<TCategory extends CustomItemCategory
       } catch (error) {
         const errorMessage = getErrorMessage(action, itemLabel, messageStyle);
         if (messageStyle === "namedItem") {
-          console.error(error);
+          console.error(`Failed to ${action}:`, error);
         } else {
           console.error(errorMessage.replace(/\.$/, ":"), error);
         }

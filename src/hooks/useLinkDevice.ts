@@ -24,6 +24,7 @@ export function useLinkDevice() {
         await linkDeviceToAccount(user.uid, recoveryCode);
       } catch (err) {
         const message = err instanceof Error ? err.message : "Failed to link device.";
+        console.error("Failed to link device:", err);
         setError(message);
         throw err;
       } finally {

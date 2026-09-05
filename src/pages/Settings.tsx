@@ -151,7 +151,8 @@ export default function Settings({
     try {
       await unlink();
       toast.success("Device unlinked.");
-    } catch {
+    } catch (err) {
+      console.error("Failed to unlink device:", err);
       toast.error("Failed to unlink device. Please try again.");
     } finally {
       unlinkingRef.current = false;

@@ -81,7 +81,7 @@ export function CustomItemAdminRow({
       await restoreCustomItem({ campaignId, customItemId: item.id, actorUserId: userId });
       toast.success(`${item.name} restored.`);
     } catch (err) {
-      console.error(err);
+      console.error("Failed to restore item:", err);
       toast.error("Failed to restore item.");
     } finally {
       setManagementBusyAction(null);
@@ -94,7 +94,7 @@ export function CustomItemAdminRow({
       await permanentlyDeleteCustomItem({ campaignId, customItemId: item.id });
       toast.success(`${item.name} permanently deleted.`);
     } catch (err) {
-      console.error(err);
+      console.error("Failed to delete item:", err);
       toast.error("Failed to delete item.");
     } finally {
       setManagementBusyAction(null);
