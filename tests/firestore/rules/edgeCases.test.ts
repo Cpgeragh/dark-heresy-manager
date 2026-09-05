@@ -2,7 +2,6 @@
 
 import { describe, it, expect, afterEach } from "vitest";
 import { getTestEnv } from "../setup";
-import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
 import { dbAs, validCampaignDocument } from "../helpers";
 
 describe("Firestore Rules: Edge Cases", () => {
@@ -12,7 +11,7 @@ describe("Firestore Rules: Edge Cases", () => {
   });
 
   it("cannot update non-existent campaign even as authenticated user", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     const dmDb = dbAs(env, "dm-1");
 
@@ -24,7 +23,7 @@ describe("Firestore Rules: Edge Cases", () => {
   });
 
   it("DM can create campaign with special characters in name", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     const dmDb = dbAs(env, "dm-1");
 
@@ -37,7 +36,7 @@ describe("Firestore Rules: Edge Cases", () => {
   });
 
   it("DM can create campaign with timestamp fields", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     const dmDb = dbAs(env, "dm-1");
 
@@ -55,7 +54,7 @@ describe("Firestore Rules: Edge Cases", () => {
   });
 
   it("campaign can have document ID different from campaign name", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     const dmDb = dbAs(env, "dm-1");
 
@@ -68,7 +67,7 @@ describe("Firestore Rules: Edge Cases", () => {
   });
 
   it("DM can create campaign with null values in optional fields", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     const dmDb = dbAs(env, "dm-1");
 
@@ -81,7 +80,7 @@ describe("Firestore Rules: Edge Cases", () => {
   });
 
   it("user cannot add profile or email fields to their private account document", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     const userDb = dbAs(env, "user-special-123");
 

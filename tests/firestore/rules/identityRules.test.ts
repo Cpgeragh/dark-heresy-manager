@@ -2,7 +2,6 @@
 
 import { describe, it, expect, afterEach } from "vitest";
 import { getTestEnv } from "../setup";
-import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
 import {
   dbAs,
   createIdentityRecoveryEntry,
@@ -21,7 +20,7 @@ describe("Firestore Rules: identityRecovery (retired collection)", () => {
   });
 
   it("is fully sealed — no get, create, or update", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createIdentityRecoveryEntry(env, "CODE-123", { uid: "uid-1", role: "dm" });
 
     await expect(
@@ -48,7 +47,7 @@ describe("Firestore Rules: identitySecret", () => {
   });
 
   it("owner can read their own identity secret entry", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createIdentitySecretEntry(env, "uid-1", { code: "CODE-XYZ" });
 
     await expect(
@@ -57,7 +56,7 @@ describe("Firestore Rules: identitySecret", () => {
   });
 
   it("another user cannot read someone else's identity secret entry", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createIdentitySecretEntry(env, "uid-1", { code: "CODE-XYZ" });
 
     await expect(
@@ -66,7 +65,7 @@ describe("Firestore Rules: identitySecret", () => {
   });
 
   it("owner can write their own identity secret entry", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     await expect(
       dbAs(env, "uid-1").collection("identitySecret").doc("uid-1").set({ code: "DH-SECR-0001" })
@@ -74,7 +73,7 @@ describe("Firestore Rules: identitySecret", () => {
   });
 
   it("identity secrets accept only the exact recovery-code shape and field set", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     const secret = dbAs(env, "uid-1").collection("identitySecret").doc("uid-1");
 
     await expect(secret.set({ code: "not-a-code" })).rejects.toThrow();
@@ -82,7 +81,7 @@ describe("Firestore Rules: identitySecret", () => {
   });
 
   it("user cannot write to another user's identity secret document", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     await expect(
       dbAs(env, "uid-1").collection("identitySecret").doc("uid-2").set({ code: "DH-SECR-0001" })
@@ -101,7 +100,7 @@ describe("Firestore Rules: identityReclaims (retired collection)", () => {
   });
 
   it("is fully sealed — no read or create", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createIdentitySecretEntry(env, "uid-old", { code: "DH-CORR-0001" });
     await createIdentityReclaimEntry(env, "uid-new", { oldUid: "uid-old", code: "DH-CORR-0001" });
 

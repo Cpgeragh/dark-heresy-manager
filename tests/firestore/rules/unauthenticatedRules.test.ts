@@ -2,12 +2,12 @@
 
 import { describe, it, expect } from "vitest";
 import { getTestEnv } from "../setup";
-import type { RulesTestEnvironment, RulesTestContext } from "@firebase/rules-unit-testing";
+import type { RulesTestContext } from "@firebase/rules-unit-testing";
 import { dbAnon, createCampaign, createCharacter, createRecoveryIndexEntry } from "../helpers";
 
 describe("Firestore Rules: Unauthenticated access", () => {
   it("unauthenticated user cannot read campaigns", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     await createCampaign(env, "test-camp", "dm-123", { name: "Example" });
 
@@ -17,7 +17,7 @@ describe("Firestore Rules: Unauthenticated access", () => {
   });
 
   it("unauthenticated user cannot list campaigns", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     await createCampaign(env, "c1", "dm-1", { name: "One" });
 
@@ -27,7 +27,7 @@ describe("Firestore Rules: Unauthenticated access", () => {
   });
 
   it("unauthenticated user cannot write campaigns", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     const anonDb = dbAnon(env);
 
@@ -40,7 +40,7 @@ describe("Firestore Rules: Unauthenticated access", () => {
   });
 
   it("unauthenticated user cannot read users", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     await env.withSecurityRulesDisabled(async (ctx: RulesTestContext) => {
       await ctx.firestore().collection("users").doc("u1").set({ role: "player" });
@@ -52,7 +52,7 @@ describe("Firestore Rules: Unauthenticated access", () => {
   });
 
   it("unauthenticated user cannot list users", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     await env.withSecurityRulesDisabled(async (ctx: RulesTestContext) => {
       const db = ctx.firestore();
@@ -66,7 +66,7 @@ describe("Firestore Rules: Unauthenticated access", () => {
   });
 
   it("unauthenticated user cannot write users", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     const anonDb = dbAnon(env);
 
@@ -74,7 +74,7 @@ describe("Firestore Rules: Unauthenticated access", () => {
   });
 
   it("unauthenticated user cannot read recoveryIndex", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     await createRecoveryIndexEntry(env, "CODE-1", {
       campaignId: "camp1",
@@ -87,7 +87,7 @@ describe("Firestore Rules: Unauthenticated access", () => {
   });
 
   it("unauthenticated user cannot list recoveryIndex", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     await createRecoveryIndexEntry(env, "CODE-1", {
       campaignId: "camp1",
@@ -100,7 +100,7 @@ describe("Firestore Rules: Unauthenticated access", () => {
   });
 
   it("unauthenticated user cannot write recoveryIndex", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     const anonDb = dbAnon(env);
 
@@ -113,7 +113,7 @@ describe("Firestore Rules: Unauthenticated access", () => {
   });
 
   it("unauthenticated user cannot read characters", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     await createCampaign(env, "camp1", "dm-1");
     await createCharacter(env, "camp1", "char1", {
@@ -129,7 +129,7 @@ describe("Firestore Rules: Unauthenticated access", () => {
   });
 
   it("unauthenticated user cannot list characters", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     await createCampaign(env, "camp1", "dm-1");
     await createCharacter(env, "camp1", "char1", {
@@ -143,7 +143,7 @@ describe("Firestore Rules: Unauthenticated access", () => {
   });
 
   it("unauthenticated user cannot write characters", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     const anonDb = dbAnon(env);
 
@@ -156,7 +156,7 @@ describe("Firestore Rules: Unauthenticated access", () => {
   });
 
   it("unauthenticated user cannot delete any campaign or character", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     await createCampaign(env, "camp1", "dm-1");
     await createCharacter(env, "camp1", "char1", {

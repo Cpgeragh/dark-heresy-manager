@@ -18,7 +18,7 @@ describe("Firestore Rules: Protected Fields with Same Values", () => {
   }
 
   it("player can update normal fields while protected fields remain unchanged", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await setup(env);
 
     const playerDb = dbAs(env, "player-1");
@@ -35,7 +35,7 @@ describe("Firestore Rules: Protected Fields with Same Values", () => {
   });
 
   it("player can update with only protected fields at same values", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await setup(env);
 
     const playerDb = dbAs(env, "player-1");
@@ -51,7 +51,7 @@ describe("Firestore Rules: Protected Fields with Same Values", () => {
   });
 
   it("player cannot change even one protected field among unchanged ones", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await setup(env);
 
     const playerDb = dbAs(env, "player-1");
@@ -66,7 +66,7 @@ describe("Firestore Rules: Protected Fields with Same Values", () => {
   });
 
   it("player can update multiple normal fields while protected stay same", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await setup(env);
 
     const playerDb = dbAs(env, "player-1");
@@ -82,7 +82,7 @@ describe("Firestore Rules: Protected Fields with Same Values", () => {
   });
 
   it("DM can change isEditableByPlayer while the Recovery Code remains stable", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     // Use a unique campaign for this test
     const dmCampaignId = `camp-dm-${Date.now()}`;
@@ -106,7 +106,7 @@ describe("Firestore Rules: Protected Fields with Same Values", () => {
   });
 
   it("player update fails if any protected field differs slightly", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await setup(env);
 
     const playerDb = dbAs(env, "player-1");

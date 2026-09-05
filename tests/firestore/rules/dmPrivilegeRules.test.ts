@@ -29,7 +29,7 @@ describe("Firestore Rules: DM Privileges", () => {
   }
 
   it("DM can delete any character", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await setupAll(env);
 
     const dm = env.authenticatedContext("dm-1");
@@ -40,7 +40,7 @@ describe("Firestore Rules: DM Privileges", () => {
   });
 
   it("player cannot delete characters", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await setupAll(env);
 
     const p = env.authenticatedContext("player-1");

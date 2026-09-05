@@ -2,7 +2,6 @@
 
 import { describe, it, expect, afterEach } from "vitest";
 import { getTestEnv } from "../setup";
-import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
 import { dbAs, createCampaign, createCharacter, createCharacterSummary } from "../helpers";
 
 describe("Firestore Rules: characterSummaries", () => {
@@ -12,7 +11,7 @@ describe("Firestore Rules: characterSummaries", () => {
   });
 
   it("the DM may read any character summary in their campaign", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1");
     await createCharacterSummary(env, "c1", "char1", {
       campaignId: "c1",
@@ -25,7 +24,7 @@ describe("Firestore Rules: characterSummaries", () => {
   });
 
   it("a campaign member may read another member's character summary", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1", { memberIds: ["player-1", "player-2"] });
     await createCharacterSummary(env, "c1", "char1", {
       campaignId: "c1",
@@ -38,7 +37,7 @@ describe("Firestore Rules: characterSummaries", () => {
   });
 
   it("an unrelated authenticated user cannot read a character summary", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1");
     await createCharacterSummary(env, "c1", "char1", {
       campaignId: "c1",
@@ -51,7 +50,7 @@ describe("Firestore Rules: characterSummaries", () => {
   });
 
   it("a member may list character summaries in their campaign", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1", { memberIds: ["player-1"] });
     await createCharacterSummary(env, "c1", "char1", {
       campaignId: "c1",
@@ -64,7 +63,7 @@ describe("Firestore Rules: characterSummaries", () => {
   });
 
   it("an unrelated authenticated user cannot list character summaries", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1");
     await createCharacterSummary(env, "c1", "char1", {
       campaignId: "c1",
@@ -77,7 +76,7 @@ describe("Firestore Rules: characterSummaries", () => {
   });
 
   it("the owning player may write their own character's summary", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1");
     await createCharacter(env, "c1", "char1", { userId: "player-1" });
 
@@ -90,7 +89,7 @@ describe("Firestore Rules: characterSummaries", () => {
   });
 
   it("the DM may write a summary for any character in their campaign", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1");
     await createCharacter(env, "c1", "char1", { userId: "player-1" });
 
@@ -103,7 +102,7 @@ describe("Firestore Rules: characterSummaries", () => {
   });
 
   it("an unrelated player cannot write another player's character summary", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1");
     await createCharacter(env, "c1", "char1", { userId: "player-1" });
 
@@ -116,7 +115,7 @@ describe("Firestore Rules: characterSummaries", () => {
   });
 
   it("rejects a summary containing the Recovery Code or any other unexpected field", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1");
     await createCharacter(env, "c1", "char1", { userId: "player-1" });
 
@@ -129,7 +128,7 @@ describe("Firestore Rules: characterSummaries", () => {
   });
 
   it("the DM can list every character in the campaign (bounded) and batch-write a summary for each", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1");
     await createCharacter(env, "c1", "char1", { userId: "player-1" });
     await createCharacter(env, "c1", "char2", { userId: "player-2" });
@@ -149,7 +148,7 @@ describe("Firestore Rules: characterSummaries", () => {
   });
 
   it("keeps a summary deletable only as a consequence of the character itself being deleted", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1");
     await createCharacter(env, "c1", "char1", { userId: "player-1" });
     await createCharacterSummary(env, "c1", "char1", {

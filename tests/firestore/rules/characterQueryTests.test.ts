@@ -17,7 +17,7 @@ async function createUserLink(env: RulesTestEnvironment, linkedUid: string, prim
 
 describe("Firestore Rules: Character Query Operations", () => {
   it("the DM can order characters by name", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     const campaignId = `camp-order-${Date.now()}`;
 
     await createCampaign(env, campaignId, "dm-1");
@@ -57,7 +57,7 @@ describe("Firestore Rules: Character Query Operations", () => {
   });
 
   it("the DM can limit character queries", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     const campaignId = `camp-limit-${Date.now()}`;
 
     await createCampaign(env, campaignId, "dm-1");
@@ -82,7 +82,7 @@ describe("Firestore Rules: Character Query Operations", () => {
   });
 
   it("a player can combine where clauses on their own characters", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     const campaignId = `camp-multi-${Date.now()}`;
 
     await createCampaign(env, campaignId, "dm-1");
@@ -118,7 +118,7 @@ describe("Firestore Rules: Character Query Operations", () => {
   });
 
   it("a player may run the exact campaign-page query for all of their own characters", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     const campaignId = `camp-player-page-${Date.now()}`;
     const playerUid = `player-${Date.now()}`;
 
@@ -142,7 +142,7 @@ describe("Firestore Rules: Character Query Operations", () => {
   });
 
   it("a linked device may run the campaign-page query for its primary player's characters", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     const campaignId = `camp-linked-player-page-${Date.now()}`;
     const primaryUid = `primary-${Date.now()}`;
     const linkedUid = `linked-${Date.now()}`;
@@ -164,7 +164,7 @@ describe("Firestore Rules: Character Query Operations", () => {
   });
 
   it("DM can query all characters regardless of userId", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     const campaignId = `camp-dm-${Date.now()}`;
 
     await createCampaign(env, campaignId, "dm-1");
@@ -189,7 +189,7 @@ describe("Firestore Rules: Character Query Operations", () => {
   });
 
   it("the DM can query characters with startAt/endAt", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     const campaignId = `camp-range-${Date.now()}`;
 
     await createCampaign(env, campaignId, "dm-1");
@@ -225,7 +225,7 @@ describe("Firestore Rules: Character Query Operations", () => {
   });
 
   it("requires an owner filter and a 1,000-document ceiling for collection-group reads", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     const firstCampaignId = `camp-owned-a-${Date.now()}`;
     const secondCampaignId = `camp-owned-b-${Date.now()}`;
     const ownerId = `collection-owner-${Date.now()}`;

@@ -96,7 +96,7 @@ describe("Firestore Rules: Campaign Custom Items", () => {
   });
 
   it("creator may create a draft custom item and draft version in one batch", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCustomItemCampaign(env);
 
     const playerDb = dbAs(env, "player-1");
@@ -108,7 +108,7 @@ describe("Firestore Rules: Campaign Custom Items", () => {
   });
 
   it("accepts custom-item names and text at their exact maximum lengths", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCustomItemCampaign(env);
     const playerDb = dbAs(env, "player-1");
     const maximumName = "n".repeat(100);
@@ -124,7 +124,7 @@ describe("Firestore Rules: Campaign Custom Items", () => {
   });
 
   it("rejects custom-item creation by an authenticated user outside the campaign", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, campaignId, "dm-1");
 
     const outsiderDb = dbAs(env, "player-1");
@@ -135,7 +135,7 @@ describe("Firestore Rules: Campaign Custom Items", () => {
   });
 
   it("rejects unexpected item, nested-data, and version fields", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCustomItemCampaign(env);
     const playerDb = dbAs(env, "player-1");
 
@@ -156,7 +156,7 @@ describe("Firestore Rules: Campaign Custom Items", () => {
   });
 
   it("rejects a version without a matching parent item", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCustomItemCampaign(env);
     const dmDb = dbAs(env, "dm-1");
 
@@ -172,7 +172,7 @@ describe("Firestore Rules: Campaign Custom Items", () => {
   });
 
   it("creator and DM may read drafts, but another player may not", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCustomItemCampaign(env);
     await seedCustomItem(env);
 
@@ -182,7 +182,7 @@ describe("Firestore Rules: Campaign Custom Items", () => {
   });
 
   it("published custom items are readable by authenticated campaign users", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCustomItemCampaign(env);
     await seedCustomItem(
       env,
@@ -202,7 +202,7 @@ describe("Firestore Rules: Campaign Custom Items", () => {
   });
 
   it("picker queries may list published items and a creator's own drafts", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCustomItemCampaign(env);
     await seedCustomItem(env);
     await seedCustomItem(
@@ -247,7 +247,7 @@ describe("Firestore Rules: Campaign Custom Items", () => {
   });
 
   it("creator may update draft definition fields but may not publish", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCustomItemCampaign(env);
     await seedCustomItem(env);
 
@@ -270,7 +270,7 @@ describe("Firestore Rules: Campaign Custom Items", () => {
   });
 
   it("DM may publish/archive/delete custom items", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCustomItemCampaign(env);
     await seedCustomItem(env);
 
@@ -308,7 +308,7 @@ describe("Firestore Rules: Campaign Custom Items", () => {
   });
 
   it("creator can transition a published item back to draft when saving an edit", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCustomItemCampaign(env);
     await seedCustomItem(env, {
       status: "published",
@@ -333,7 +333,7 @@ describe("Firestore Rules: Campaign Custom Items", () => {
   });
 
   it("creator cannot transition draft to published", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCustomItemCampaign(env);
     await seedCustomItem(env);
 
@@ -351,7 +351,7 @@ describe("Firestore Rules: Campaign Custom Items", () => {
   });
 
   it("creator cannot transition to archived", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCustomItemCampaign(env);
     await seedCustomItem(env, {
       status: "published",
@@ -373,7 +373,7 @@ describe("Firestore Rules: Campaign Custom Items", () => {
   });
 
   it("non-DM creator may not archive or delete custom items", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCustomItemCampaign(env);
     await seedCustomItem(env);
 
@@ -390,7 +390,7 @@ describe("Firestore Rules: Campaign Custom Items", () => {
   });
 
   it("DM can restore an archived item that was previously published", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCustomItemCampaign(env);
     await seedCustomItem(env, {
       status: "archived",
@@ -408,7 +408,7 @@ describe("Firestore Rules: Campaign Custom Items", () => {
   });
 
   it("non-DM cannot restore an archived item", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCustomItemCampaign(env);
     await seedCustomItem(env, {
       status: "archived",
@@ -425,7 +425,7 @@ describe("Firestore Rules: Campaign Custom Items", () => {
   });
 
   it("DM can permanently delete an archived item", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCustomItemCampaign(env);
     await seedCustomItem(env, {
       status: "archived",
@@ -438,7 +438,7 @@ describe("Firestore Rules: Campaign Custom Items", () => {
   });
 
   it("DM cannot permanently delete a draft item", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCustomItemCampaign(env);
     await seedCustomItem(env);
 
@@ -447,7 +447,7 @@ describe("Firestore Rules: Campaign Custom Items", () => {
   });
 
   it("DM cannot permanently delete a published item", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCustomItemCampaign(env);
     await seedCustomItem(env, {
       status: "published",
@@ -459,7 +459,7 @@ describe("Firestore Rules: Campaign Custom Items", () => {
   });
 
   it("DM can delete a non-archived item as part of deleting the campaign in the same batch", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCustomItemCampaign(env);
     await seedCustomItem(env); // draft status — normally undeletable on its own
 

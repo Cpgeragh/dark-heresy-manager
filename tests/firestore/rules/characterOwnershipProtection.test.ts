@@ -24,7 +24,7 @@ describe("Firestore Rules: Character Ownership Protection", () => {
   }
 
   it("player CANNOT change userId", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await setup(env);
 
     const playerDb = dbAs(env, "player-1");
@@ -38,7 +38,7 @@ describe("Firestore Rules: Character Ownership Protection", () => {
   });
 
   it("player CANNOT change isEditableByPlayer", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await setup(env);
 
     const playerDb = dbAs(env, "player-1");
@@ -52,7 +52,7 @@ describe("Firestore Rules: Character Ownership Protection", () => {
   });
 
   it("player CANNOT change recoveryCode", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await setup(env);
 
     const playerDb = dbAs(env, "player-1");
@@ -66,7 +66,7 @@ describe("Firestore Rules: Character Ownership Protection", () => {
   });
 
   it("player CAN change normal editable fields", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await setup(env);
 
     const playerDb = dbAs(env, "player-1");
@@ -80,7 +80,7 @@ describe("Firestore Rules: Character Ownership Protection", () => {
   });
 
   it("DM can change isEditableByPlayer directly but cannot change userId or silently replace the Recovery Code", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await setup(env);
 
     const dmDb = dbAs(env, "dm-1");
@@ -108,7 +108,7 @@ describe("Firestore Rules: Character Ownership Protection", () => {
   });
 
   it("DM cannot directly assign an unclaimed character any more, assignment goes through the forceAssignCharacter Function", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, characterId, {
       userId: null,

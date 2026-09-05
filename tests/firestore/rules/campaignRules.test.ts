@@ -22,7 +22,7 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("the DM may read their own campaign document", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     await createCampaign(env, "c1", "dm-1", { name: "Sample Campaign" });
 
@@ -30,7 +30,7 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("a member may read a campaign they belong to", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     await createCampaign(env, "c1", "dm-1", { name: "Sample Campaign", memberIds: ["player-1"] });
 
@@ -40,7 +40,7 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("a linked device may read a campaign belonging to its primary member", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     await createCampaign(env, "c1", "dm-1", { memberIds: ["player-1"] });
     await createUserLink(env, "player-device", "player-1");
@@ -51,7 +51,7 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("an unrelated authenticated user cannot read a campaign they're not part of", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     await createCampaign(env, "c1", "dm-1", { name: "Sample Campaign" });
 
@@ -59,7 +59,7 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("the DM may list their own campaigns", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     await createCampaign(env, "c1", "dm-1", { name: "One" });
     await createCampaign(env, "c2", "dm-1", { name: "Two" });
@@ -69,7 +69,7 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("an unrelated authenticated user cannot list campaigns they're not part of", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     await createCampaign(env, "c1", "dm-1", { name: "One" });
     await createCampaign(env, "c2", "dm-2", { name: "Two" });
@@ -78,7 +78,7 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("player membership query returns only active campaigns containing that player", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "active-member", "dm-1", {
       memberIds: ["player-1"],
       archivedAt: null,
@@ -103,7 +103,7 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("a linked device may run the primary member's active-campaign query", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "active-member", "dm-1", {
       memberIds: ["player-1"],
       archivedAt: null,
@@ -121,7 +121,7 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("DM may create a campaign when dmId matches their uid", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     const dmDb = dbAs(env, "dm-1");
 
@@ -137,7 +137,7 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("an authenticated player may create a campaign and thereby become its DM", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     const userDb = dbAs(env, "player-creator");
 
     await expect(
@@ -154,7 +154,7 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("DM cannot create a campaign with unrecognised fields", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     const dmDb = dbAs(env, "dm-1");
 
@@ -169,7 +169,7 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("cannot create a campaign without dmId", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     const dmDb = dbAs(env, "dm-1");
 
@@ -181,7 +181,7 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("non-DM cannot create campaign with mismatched dmId", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     const playerDb = dbAs(env, "player-1");
 
@@ -194,7 +194,7 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("non-DM cannot write campaign metadata", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     await createCampaign(env, "c1", "dm-1", { name: "Original" });
 
@@ -208,7 +208,7 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("DM may write campaign metadata when dmId matches them (even if dmId not in update payload)", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     await createCampaign(env, "c1", "dm-1", { name: "Original" });
 
@@ -223,7 +223,7 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("DM cannot change campaign dmId to someone else", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     await createCampaign(env, "c1", "dm-1", { name: "Sample" });
 
@@ -237,7 +237,7 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("DM can delete their own campaign", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     await createCampaign(env, "c1", "dm-1", { name: "Sample" });
 
@@ -247,7 +247,7 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("DM can archive their own campaign", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     await createCampaign(env, "c1", "dm-1", { name: "Sample" });
 
@@ -259,7 +259,7 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("non-DM cannot archive a campaign", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     await createCampaign(env, "c1", "dm-1", { name: "Sample" });
 
@@ -271,7 +271,7 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("DM can restore their own archived campaign", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     await createCampaign(env, "c1", "dm-1", { name: "Sample", archivedAt: new Date() });
 
@@ -283,7 +283,7 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("non-DM cannot restore someone else's archived campaign", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     await createCampaign(env, "c1", "dm-1", { name: "Sample", archivedAt: new Date() });
 
@@ -295,7 +295,7 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("dmId can never be changed via update, even with a forged reclaim doc", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-old", { name: "Sample" });
     await createIdentityReclaimEntry(env, "dm-new", { oldUid: "dm-old", code: "DH-CODE" });
 
@@ -305,7 +305,7 @@ describe("Firestore Rules: Campaigns", () => {
   });
 
   it("memberIds can never be self-added via update, even with a forged reclaim doc", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1", {
       name: "Sample",
       memberIds: ["player-old", "player-other"],

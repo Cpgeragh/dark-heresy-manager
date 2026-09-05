@@ -15,7 +15,7 @@ describe("Firestore Rules: Users", () => {
   }
 
   it("user can read their own user document", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await seedUsers(env);
 
     const u1Db = dbAs(env, "u1");
@@ -24,7 +24,7 @@ describe("Firestore Rules: Users", () => {
   });
 
   it("user cannot read another user's document", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await seedUsers(env);
 
     const u1Db = dbAs(env, "u1");
@@ -33,7 +33,7 @@ describe("Firestore Rules: Users", () => {
   });
 
   it("user cannot write to another user's document", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await seedUsers(env);
 
     const u1Db = dbAs(env, "u1");
@@ -42,7 +42,7 @@ describe("Firestore Rules: Users", () => {
   });
 
   it("user can write only their own user document", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await seedUsers(env);
 
     const u1Db = dbAs(env, "u1");
@@ -53,7 +53,7 @@ describe("Firestore Rules: Users", () => {
   });
 
   it("user cannot delete someone else's user document", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await seedUsers(env);
 
     const u1Db = dbAs(env, "u1");
@@ -62,7 +62,7 @@ describe("Firestore Rules: Users", () => {
   });
 
   it("user can create their own user document", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     const u3Db = dbAs(env, "u3");
 
@@ -72,7 +72,7 @@ describe("Firestore Rules: Users", () => {
   });
 
   it("user cannot list all users (because some docs are not theirs)", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await seedUsers(env);
 
     const u1Db = dbAs(env, "u1");
@@ -81,7 +81,7 @@ describe("Firestore Rules: Users", () => {
   });
 
   it("unauthenticated users cannot read any users", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await seedUsers(env);
 
     const anonDb = dbAnon(env);
@@ -90,7 +90,7 @@ describe("Firestore Rules: Users", () => {
   });
 
   it("allows authenticated exact profile reads but denies profile listing", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await env.withSecurityRulesDisabled(async (ctx: RulesTestContext) => {
       await ctx.firestore().collection("userProfiles").doc("u1").set({ firstName: "Iona" });
     });
@@ -102,7 +102,7 @@ describe("Firestore Rules: Users", () => {
   });
 
   it("rejects unexpected or oversized public-profile fields", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     const profile = dbAs(env, "u1").collection("userProfiles").doc("u1");
     await expect(profile.set({ firstName: "x".repeat(51) })).rejects.toThrow();
     await expect(

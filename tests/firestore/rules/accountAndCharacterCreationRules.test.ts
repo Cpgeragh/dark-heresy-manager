@@ -1,16 +1,15 @@
 import { afterEach, describe, expect, it } from "vitest";
-import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
 import { getTestEnv } from "../setup";
 import { createCampaign, createCharacter, dbAs, validCharacterDocument } from "../helpers";
 
 describe("Firestore Rules: account and character-creation protections", () => {
   afterEach(async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await env.clearFirestore();
   });
 
   it("does not allow a user to delete their private account document", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await env.withSecurityRulesDisabled(async (ctx) => {
       await ctx.firestore().collection("users").doc("user-1").set({ role: "player" });
     });
@@ -18,7 +17,7 @@ describe("Firestore Rules: account and character-creation protections", () => {
   });
 
   it("still allows a user to read and validly update their own account", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await env.withSecurityRulesDisabled(async (ctx) => {
       await ctx.firestore().collection("users").doc("user-2").set({ role: "player" });
     });
@@ -28,7 +27,7 @@ describe("Firestore Rules: account and character-creation protections", () => {
   });
 
   it("requires code-less, unclaimed, non-editable character creation", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1");
     const dmDb = dbAs(env, "dm-1");
 
@@ -46,7 +45,7 @@ describe("Firestore Rules: account and character-creation protections", () => {
   });
 
   it("rejects standalone claim and release logs", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1");
     await createCharacter(env, "c1", "char1", { userId: "player-1" });
     const logs = dbAs(env, "player-1").collection("campaigns/c1/characters/char1/claimLog");

@@ -55,7 +55,7 @@ describe("Firestore Rules: Sessions", () => {
   });
 
   it("non-DM cannot read a full session by exact ID", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1");
     await createSession(env, "c1", "s1");
 
@@ -64,7 +64,7 @@ describe("Firestore Rules: Sessions", () => {
   });
 
   it("only the DM can list full sessions and the query must remain bounded", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1");
     await createSession(env, "c1", "s1");
 
@@ -78,7 +78,7 @@ describe("Firestore Rules: Sessions", () => {
   });
 
   it("campaign members can read and list safe session summaries", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1", { memberIds: ["player-1"] });
     await createSessionSummary(env, "c1", "s1");
 
@@ -90,7 +90,7 @@ describe("Firestore Rules: Sessions", () => {
   });
 
   it("a linked device for a campaign member can read safe session summaries", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1", { memberIds: ["player-1"] });
     await createSessionSummary(env, "c1", "s1");
     await env.withSecurityRulesDisabled(async (ctx) => {
@@ -105,7 +105,7 @@ describe("Firestore Rules: Sessions", () => {
   });
 
   it("authenticated strangers cannot read safe summaries by ID or query", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1", { memberIds: ["player-1"] });
     await createSessionSummary(env, "c1", "s1");
     const summaries = dbAs(env, "stranger").collection("campaigns/c1/sessionSummaries");
@@ -115,7 +115,7 @@ describe("Firestore Rules: Sessions", () => {
   });
 
   it("DM can write a safe summary but cannot include private DM notes", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1", { memberIds: ["player-1"] });
     const summary = {
       date: new Date(),
@@ -133,7 +133,7 @@ describe("Firestore Rules: Sessions", () => {
   });
 
   it("campaign members cannot write session summaries", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1", { memberIds: ["player-1"] });
 
     await expect(
@@ -148,7 +148,7 @@ describe("Firestore Rules: Sessions", () => {
   });
 
   it("unauthenticated user cannot read sessions", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1");
     await createSession(env, "c1", "s1");
 
@@ -157,7 +157,7 @@ describe("Firestore Rules: Sessions", () => {
   });
 
   it("DM can create a session", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1");
 
     const dmDb = dbAs(env, "dm-1");
@@ -174,7 +174,7 @@ describe("Firestore Rules: Sessions", () => {
   });
 
   it("non-DM player cannot create a session", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1");
 
     const playerDb = dbAs(env, "player-1");
@@ -191,7 +191,7 @@ describe("Firestore Rules: Sessions", () => {
   });
 
   it("DM cannot create a session with oversized private notes", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1");
 
     await expect(
@@ -210,7 +210,7 @@ describe("Firestore Rules: Sessions", () => {
   });
 
   it("DM cannot create a session outside the XP range", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1");
 
     await expect(
@@ -226,7 +226,7 @@ describe("Firestore Rules: Sessions", () => {
   });
 
   it("DM cannot create a session with duplicate attendees or unexpected fields", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1");
     const sessions = dbAs(env, "dm-1").collection("campaigns/c1/sessions");
     const valid = {
@@ -245,7 +245,7 @@ describe("Firestore Rules: Sessions", () => {
   });
 
   it("DM can update a session", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1");
     await createSession(env, "c1", "s1");
 
@@ -256,7 +256,7 @@ describe("Firestore Rules: Sessions", () => {
   });
 
   it("non-DM player cannot update a session", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1");
     await createSession(env, "c1", "s1");
 
@@ -267,7 +267,7 @@ describe("Firestore Rules: Sessions", () => {
   });
 
   it("DM can delete a session", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1");
     await createSession(env, "c1", "s1");
 
@@ -278,7 +278,7 @@ describe("Firestore Rules: Sessions", () => {
   });
 
   it("non-DM player cannot delete a session", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1");
     await createSession(env, "c1", "s1");
 

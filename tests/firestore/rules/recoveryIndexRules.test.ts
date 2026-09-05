@@ -1,5 +1,4 @@
 import { afterEach, describe, expect, it } from "vitest";
-import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
 import { getTestEnv } from "../setup";
 import { createRecoveryIndexEntry, dbAnon, dbAs } from "../helpers";
 
@@ -8,12 +7,12 @@ const indexData = { campaignId: "c1", characterId: "char1" };
 
 describe("Firestore Rules: Recovery Index", () => {
   afterEach(async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await env.clearFirestore();
   });
 
   it("denies exact reads and collection queries to every client", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createRecoveryIndexEntry(env, indexId, indexData);
 
     await expect(
@@ -27,7 +26,7 @@ describe("Firestore Rules: Recovery Index", () => {
   });
 
   it("denies index creation to authenticated and anonymous clients", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     await expect(
       dbAs(env, "dm-1").collection("recoveryIndex").doc(indexId).set(indexData)
@@ -41,7 +40,7 @@ describe("Firestore Rules: Recovery Index", () => {
   });
 
   it("denies index updates and deletions to every client", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createRecoveryIndexEntry(env, indexId, indexData);
 
     await expect(

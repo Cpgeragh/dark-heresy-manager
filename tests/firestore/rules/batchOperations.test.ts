@@ -1,5 +1,4 @@
 import { afterEach, describe, expect, it } from "vitest";
-import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
 import { getTestEnv } from "../setup";
 import {
   createCampaign,
@@ -11,12 +10,12 @@ import {
 
 describe("Firestore Rules: Batch Operations", () => {
   afterEach(async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await env.clearFirestore();
   });
 
   it("allows a DM to create multiple valid campaigns in one batch", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     const dmDb = dbAs(env, "dm-1");
     const batch = dmDb.batch();
     for (const id of ["c1", "c2", "c3"]) {
@@ -26,7 +25,7 @@ describe("Firestore Rules: Batch Operations", () => {
   });
 
   it("rejects the whole batch when one campaign has an invalid shape", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     const dmDb = dbAs(env, "dm-1");
     const batch = dmDb.batch();
     batch.set(dmDb.collection("campaigns").doc("valid"), validCampaignDocument("dm-1"));
@@ -35,7 +34,7 @@ describe("Firestore Rules: Batch Operations", () => {
   });
 
   it("allows a DM to update multiple valid campaigns in one batch", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1");
     await createCampaign(env, "c2", "dm-1");
     const dmDb = dbAs(env, "dm-1");
@@ -46,7 +45,7 @@ describe("Firestore Rules: Batch Operations", () => {
   });
 
   it("allows multiple code-less characters to be created in one batch", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1");
     const dmDb = dbAs(env, "dm-1");
     const batch = dmDb.batch();
@@ -61,7 +60,7 @@ describe("Firestore Rules: Batch Operations", () => {
   });
 
   it("rejects a player batch containing another player's character update", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1");
     await createCharacter(env, "c1", "char1", { userId: "player-1", isEditableByPlayer: true });
     await createCharacter(env, "c1", "char2", { userId: "player-2", isEditableByPlayer: true });

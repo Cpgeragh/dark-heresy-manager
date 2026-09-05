@@ -2,12 +2,11 @@
 
 import { describe, it, expect } from "vitest";
 import { getTestEnv } from "../setup";
-import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
 import { dbAs, dbAnon, createCampaign, createCharacter } from "../helpers";
 
 describe("Firestore Rules: Advanced Query Operations", () => {
   it("a DM can query their own campaigns with an additional where clause", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     const timestamp = Date.now();
     await createCampaign(env, `query-c1-${timestamp}`, "dm-query-1", {
@@ -36,7 +35,7 @@ describe("Firestore Rules: Advanced Query Operations", () => {
   });
 
   it("a DM can use orderBy on their own campaigns", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     const timestamp = Date.now();
     const prefix = `OrderTest-${timestamp}`;
@@ -61,7 +60,7 @@ describe("Firestore Rules: Advanced Query Operations", () => {
   });
 
   it("a DM can use limit on their own campaigns", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     const timestamp = Date.now();
     await createCampaign(env, `limit-${timestamp}-1`, "dm-limit-1", { name: "One" });
@@ -80,7 +79,7 @@ describe("Firestore Rules: Advanced Query Operations", () => {
   });
 
   it("unauthenticated users cannot query campaigns", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     await createCampaign(env, "anon-query-test", "dm-anon", { name: "Alpha" });
 
@@ -92,7 +91,7 @@ describe("Firestore Rules: Advanced Query Operations", () => {
   });
 
   it("an unrelated authenticated user cannot query campaigns without a membership-proving where clause", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     const timestamp = Date.now();
     await createCampaign(env, `bystander-${timestamp}`, "dm-bystander", { name: "Alpha" });
@@ -103,7 +102,7 @@ describe("Firestore Rules: Advanced Query Operations", () => {
   });
 
   it("a player can query their own characters by userId within a campaign", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     const campaignId = `camp-query-${Date.now()}`;
 
     await createCampaign(env, campaignId, "dm-1");
@@ -135,7 +134,7 @@ describe("Firestore Rules: Advanced Query Operations", () => {
   });
 
   it("an unrelated player cannot query another player's characters by userId", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     const campaignId = `camp-query-unrelated-${Date.now()}`;
 
     await createCampaign(env, campaignId, "dm-1");
@@ -154,7 +153,7 @@ describe("Firestore Rules: Advanced Query Operations", () => {
   });
 
   it("the DM can query editable characters in their campaign", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     const campaignId = `camp-editable-${Date.now()}`;
 
     await createCampaign(env, campaignId, "dm-1");
@@ -183,7 +182,7 @@ describe("Firestore Rules: Advanced Query Operations", () => {
   });
 
   it("a player can combine where clauses with orderBy on their own characters", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     const campaignId = `camp-complex-${Date.now()}`;
 
     await createCampaign(env, campaignId, "dm-1");

@@ -1,16 +1,15 @@
 import { afterEach, describe, expect, it } from "vitest";
-import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
 import { getTestEnv } from "../setup";
 import { createCampaign, dbAs, validCampaignDocument, validCharacterDocument } from "../helpers";
 
 describe("Firestore Rules: bounded field validation", () => {
   afterEach(async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await env.clearFirestore();
   });
 
   it("accepts the exact campaign create shape", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await expect(
       dbAs(env, "dm-1")
         .collection("campaigns")
@@ -20,7 +19,7 @@ describe("Firestore Rules: bounded field validation", () => {
   });
 
   it("accepts campaign and character collection fields at their exact maxima", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     const dmDb = dbAs(env, "dm-1");
     await dmDb
       .collection("campaigns")
@@ -46,7 +45,7 @@ describe("Firestore Rules: bounded field validation", () => {
   });
 
   it("rejects campaign names, member arrays, types, and unexpected fields outside bounds", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     const dmDb = dbAs(env, "dm-1");
 
     await expect(
@@ -80,7 +79,7 @@ describe("Firestore Rules: bounded field validation", () => {
   });
 
   it("accepts a complete character with no client-supplied Recovery Code", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1");
     const dmDb = dbAs(env, "dm-1");
     await expect(
@@ -89,7 +88,7 @@ describe("Firestore Rules: bounded field validation", () => {
   });
 
   it("rejects malformed, oversized, and unexpected character data", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, "c1", "dm-1");
     const dmDb = dbAs(env, "dm-1");
 

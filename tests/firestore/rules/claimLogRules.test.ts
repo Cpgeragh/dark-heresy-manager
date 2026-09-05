@@ -1,5 +1,4 @@
 import { afterEach, describe, expect, it } from "vitest";
-import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
 import { getTestEnv } from "../setup";
 import { createCampaign, createCharacter, createClaimLog, dbAs } from "../helpers";
 
@@ -19,12 +18,12 @@ function logPayload(
 
 describe("Firestore Rules: ClaimLog Rules", () => {
   afterEach(async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await env.clearFirestore();
   });
 
   it("allows only the DM to get and bounded-list claim history", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, characterId, { userId: "player-1" });
     await createClaimLog(
@@ -44,7 +43,7 @@ describe("Firestore Rules: ClaimLog Rules", () => {
   });
 
   it("rejects any claimLog create — writes are server-side only now", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, characterId, { userId: null });
 
@@ -64,7 +63,7 @@ describe("Firestore Rules: ClaimLog Rules", () => {
   });
 
   it("keeps logs immutable and permits deletion only with character deletion", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createCampaign(env, campaignId, "dm-1");
     await createCharacter(env, campaignId, characterId, { userId: "player-1" });
     await createClaimLog(

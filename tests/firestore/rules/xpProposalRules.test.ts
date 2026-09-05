@@ -22,12 +22,12 @@ async function setup(env: RulesTestEnvironment) {
 
 describe("Firestore Rules: closed XP proposal surface", () => {
   afterEach(async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await env.clearFirestore();
   });
 
   it("allows the DM and character owner to get legacy proposals", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await setup(env);
 
     await expect(
@@ -42,7 +42,7 @@ describe("Firestore Rules: closed XP proposal surface", () => {
   });
 
   it("requires a bounded query for legacy proposal cleanup reads", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await setup(env);
 
     const dmProposals = dbAs(env, "dm-1").collection(proposalsPath);
@@ -52,7 +52,7 @@ describe("Firestore Rules: closed XP proposal surface", () => {
   });
 
   it("rejects all direct proposal creates and updates", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await setup(env);
 
     const payload = {
@@ -74,7 +74,7 @@ describe("Firestore Rules: closed XP proposal surface", () => {
   });
 
   it("allows DM deletion only as part of deleting the character", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await setup(env);
 
     const dmDb = dbAs(env, "dm-1");

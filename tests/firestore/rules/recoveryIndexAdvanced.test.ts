@@ -1,16 +1,15 @@
 import { afterEach, describe, expect, it } from "vitest";
-import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
 import { getTestEnv } from "../setup";
 import { createRecoveryIndexEntry, dbAs } from "../helpers";
 
 describe("Firestore Rules: Recovery Index abuse resistance", () => {
   afterEach(async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await env.clearFirestore();
   });
 
   it("denies writes even when the index payload looks valid", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
 
     const index = dbAs(env, "dm-1").collection("recoveryIndex");
     await expect(
@@ -19,7 +18,7 @@ describe("Firestore Rules: Recovery Index abuse resistance", () => {
   });
 
   it("denies attempts to overwrite an existing server-created index", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     const indexId = "hmac-derived-index-id";
     await createRecoveryIndexEntry(env, indexId, { campaignId: "c1", characterId: "char1" });
 
@@ -32,7 +31,7 @@ describe("Firestore Rules: Recovery Index abuse resistance", () => {
   });
 
   it("denies all Recovery Index queries, including filtered or bounded queries", async () => {
-    const env = (await getTestEnv()) as RulesTestEnvironment;
+    const env = await getTestEnv();
     await createRecoveryIndexEntry(env, "hmac-derived-index-id", {
       campaignId: "c1",
       characterId: "char1",
