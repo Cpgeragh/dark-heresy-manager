@@ -3,8 +3,7 @@
 // Server-side mirror of firestore.rules' character `allow update`
 // authorization: the campaign's DM (or a linked device), or the character's
 // own owning player (or a linked device) while the DM has left the character
-// editable. Used by patchCharacterField and every later Stage 12
-// character-patch operation.
+// editable. Shared by the server-side character update operations.
 
 import type { Firestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";

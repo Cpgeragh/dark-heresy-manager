@@ -2,13 +2,12 @@
 //
 // Corrects the derived experience.spent total from a client-supplied
 // recomputation (src/features/experience/xpSpent.ts's getSpentXp — pure
-// arithmetic over already-owned purchases, not re-validated here, matching
-// Stage 12's shallow-validation precedent elsewhere: no field's game-rule
-// correctness is checked, only its structure). Reads the character fresh
-// inside its own transaction and merges only experience.spent, mirroring
-// the exact safety property the old client-side implementation had: never
-// touching experience.total/.ranks/.transactions, so a concurrent XP award
-// or Rank Up can never be clobbered by a stale reconciliation.
+// arithmetic over already-owned purchases). This operation validates the
+// value's structure but does not re-evaluate its game-rule correctness. It
+// reads the character inside its own transaction and merges only
+// experience.spent, leaving experience.total/.ranks/.transactions untouched
+// so a concurrent XP award or Rank Up cannot be clobbered by a stale
+// reconciliation.
 
 import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";

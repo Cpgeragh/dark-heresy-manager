@@ -1,14 +1,10 @@
 // functions/src/operations/patchCharacterField.ts
 //
-// Generic dispatcher for narrowly-scoped character field patches — the
-// Stage 12 replacement for letting the client write arbitrary character
-// fields directly under firestore.rules' shallow validation. Loads the
-// document, checks the same DM-or-editable-player authorization the rules
-// use today, validates the field's new value with its trusted server-side
+// Generic dispatcher for narrowly scoped character field patches. Loads the
+// document, checks the same DM-or-editable-player authorization used by the
+// Firestore rules, validates each new value with its trusted server-side
 // validator, and writes transactionally. Only fields with a registered
-// validator in characterFieldValidation.ts can be patched this way; every
-// other field stays on its existing direct-write path until its own stage
-// migrates it.
+// validator in characterFieldValidation.ts can be patched this way.
 
 import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";

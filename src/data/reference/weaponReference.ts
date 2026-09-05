@@ -4983,7 +4983,7 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     availability: "Uncommon",
   },
 
-  // â”€â”€ Inquisitor's Handbook â€” Hive Worlds â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Inquisitor's Handbook — Hive Worlds ────────────────────────
   {
     id: "ih-chain-knife",
     name: "Chain Knife",
@@ -5019,7 +5019,7 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     class: "Melee (Primitive)",
     damage: "2d5 R",
     pen: 2,
-    specialRules: "â€”",
+    specialRules: "—",
     description:
       "Owing its origins to the time long ago when the hive world of Malfi was once largely covered in dense jungle, the bolo is a heavy single-edged cutting tool that for centuries has doubled as a brutally effective weapon. Crafted from mono-serrated plexsteel, the average bolo has a distinctive 40 centimetre long, inwardly curving blade that widens somewhat before the tip. This shape makes the bolo perfect for heavy slashing blows and, in skilled hands, it can lop-off limbs or open-up a man gut to gullet in a single stroke. Still used on Malfi as an everyday tool, it retains a murderous reputation and a favoured place in local folklore. The bolo is also favoured as a gang weapon among Malfi’s jacker-gangs and dacoits, who traditionally mark noteworthy kills and exploits by acid-etching their blades with crude murder-glyphs known as ‘gris’. It has Common Availability on Malfi and is Rare elsewhere.",
     weight: "2 kg",
@@ -5062,7 +5062,7 @@ export const MELEE_WEAPON_REFERENCE: MeleeWeaponRef[] = [
     class: "Melee (Primitive)",
     damage: "1d10 I",
     pen: 0,
-    specialRules: "â€”",
+    specialRules: "—",
     description:
       "A byword for brutality on Scintilla, this heavy baton is not intended to incapacitate or capture but rather to smash limbs, crack skulls and wantonly crush any resistance with overwhelming force. The baton is a polymer sheathed, metre-long rod of strengthened plasteel with a hollow core part-filled with a dense liquid metal alloy to augment the force of blows struck with it. These weapons are widely carried by many enforcer cadres as a cheap and effective alternative to shock weapons, and many also find their way into ‘private’ hands where they command equal fear.",
     weight: "3 kg",
