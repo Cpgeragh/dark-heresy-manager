@@ -8,7 +8,8 @@ import type {
   TalentEntry,
 } from "../../types/Character";
 import { TRAIT_LIST } from "../../data/reference/traitData";
-import { EntryCard, TalentPickerModal } from "../talents/talentComponents";
+import { EntryCard } from "../talents/TalentEntryCards";
+import { TalentPickerModal } from "../talents/TalentPickerModal";
 import { getActiveTraitEntries } from "./traitEffects";
 import { AddButton } from "../../ui/buttons/AddButton";
 import { ViewButton } from "../../ui/buttons/ViewButton";

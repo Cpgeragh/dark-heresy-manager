@@ -54,7 +54,8 @@ import {
   removeSpecialRule,
 } from "./weaponHelpers";
 import { CONCEALED_WEAPON_BIONIC_RULES } from "./concealedWeaponBionicRules";
-import { AmmoEntryRow, AmmoPicker } from "./RangedCard";
+import { AmmoEntryRow } from "./AmmoEntryRow";
+import { AmmoPicker } from "./AmmoPicker";
 
 function hasMultipleMeleeProfiles(damage?: string): boolean {
   return !!damage && /\bLow:\s|\bHigh:\s|;/.test(damage);

@@ -22,7 +22,8 @@ import {
   segmentedTabPanelId,
   uiSwipeableTabPanel,
 } from "../../ui/styles/segmentedTabStyles";
-import { EntryCard, TalentGroupCard, TalentPickerModal } from "./talentComponents";
+import { EntryCard, TalentGroupCard } from "./TalentEntryCards";
+import { TalentPickerModal } from "./TalentPickerModal";
 import {
   getAvailablePsychicTalentPurchases,
   getTalentBehaviour,

@@ -4,11 +4,7 @@ import { useState, useCallback, useMemo } from "react";
 import type { GearItem, ConsumableItem } from "../../../types/Character";
 import type { GearRef } from "../../../data/reference/gearReference";
 import type { ConsumableRef } from "../../../data/reference/consumablesReference";
-import type {
-  CampaignCustomItem,
-  CustomConsumableData,
-  CustomGearData,
-} from "../../../types/CustomItems";
+import type { CampaignCustomItem } from "../../../types/CustomItems";
 import { ConsumableRow } from "./ConsumableRow";
 import { ConsumablePicker } from "./ConsumablePicker";
 import { ItemRow } from "./ItemRow";
@@ -31,12 +27,16 @@ import {
   segmentedTabPanelId,
   uiSwipeableTabPanel,
 } from "../../../ui/styles/segmentedTabStyles";
-import {
-  createDraftCustomItem,
-  inferCustomItemStatus,
-  saveDraftCustomItem,
-} from "../../../services/customItemService";
+import { createDraftCustomItem, saveDraftCustomItem } from "../../../services/customItemService";
 import { useToast } from "../../../components/Toast";
+import {
+  buildConsumableSnapshot,
+  buildFallbackConsumableLibraryItem,
+  buildFallbackGearLibraryItem,
+  buildGearSnapshot,
+  toCustomConsumableData,
+  toCustomGearData,
+} from "./gearSnapshotHelpers";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -714,141 +714,4 @@ export function GearTab({
       )}
     </div>
   );
-}
-
-function toCustomGearData(item: GearItem): CustomGearData {
-  const {
-    id: _id,
-    referenceId: _referenceId,
-    customLibraryId: _customLibraryId,
-    customLibraryVersionId: _customLibraryVersionId,
-    ...data
-  } = item;
-
-  return data;
-}
-
-function toCustomConsumableData(item: ConsumableItem): CustomConsumableData {
-  const {
-    id: _id,
-    referenceId: _referenceId,
-    customLibraryId: _customLibraryId,
-    customLibraryVersionId: _customLibraryVersionId,
-    quantity: _quantity,
-    ...data
-  } = item;
-
-  return data;
-}
-
-function buildGearSnapshot(
-  id: string,
-  data: CustomGearData,
-  customLibraryId: string,
-  customLibraryVersionId: string
-): GearItem {
-  return {
-    id,
-    ...data,
-    customLibraryId,
-    customLibraryVersionId,
-  };
-}
-
-function buildConsumableSnapshot(
-  id: string,
-  quantity: number,
-  data: CustomConsumableData,
-  customLibraryId: string,
-  customLibraryVersionId: string
-): ConsumableItem {
-  return {
-    id,
-    ...data,
-    quantity,
-    customLibraryId,
-    customLibraryVersionId,
-  };
-}
-
-function buildFallbackGearLibraryItem({
-  campaignId,
-  item,
-  userId,
-  characterId,
-  characterName,
-}: {
-  campaignId: string;
-  item: GearItem;
-  userId: string | null;
-  characterId: string;
-  characterName?: string;
-}): CampaignCustomItem<"gear"> {
-  const data = toCustomGearData(item);
-  const creator = {
-    userId: userId ?? "",
-    characterId,
-    characterName,
-  };
-
-  return {
-    id: item.customLibraryId ?? "",
-    campaignId,
-    category: "gear",
-    status: inferCustomItemStatus(item),
-    name: item.name,
-    creator,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    createdBy: creator,
-    updatedBy: creator,
-    publishedVersionId: null,
-    draftVersionId: item.customLibraryVersionId ?? null,
-    latestVersionId: item.customLibraryVersionId ?? "",
-    latestVersionNumber: 1,
-    archivedAt: null,
-    archivedByUserId: null,
-    data,
-  };
-}
-
-function buildFallbackConsumableLibraryItem({
-  campaignId,
-  item,
-  userId,
-  characterId,
-  characterName,
-}: {
-  campaignId: string;
-  item: ConsumableItem;
-  userId: string | null;
-  characterId: string;
-  characterName?: string;
-}): CampaignCustomItem<"consumable"> {
-  const data = toCustomConsumableData(item);
-  const creator = {
-    userId: userId ?? "",
-    characterId,
-    characterName,
-  };
-
-  return {
-    id: item.customLibraryId ?? "",
-    campaignId,
-    category: "consumable",
-    status: inferCustomItemStatus(item),
-    name: item.name,
-    creator,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    createdBy: creator,
-    updatedBy: creator,
-    publishedVersionId: null,
-    draftVersionId: item.customLibraryVersionId ?? null,
-    latestVersionId: item.customLibraryVersionId ?? "",
-    latestVersionNumber: 1,
-    archivedAt: null,
-    archivedByUserId: null,
-    data,
-  };
 }

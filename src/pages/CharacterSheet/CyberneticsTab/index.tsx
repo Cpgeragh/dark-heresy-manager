@@ -11,7 +11,7 @@ import type {
 } from "../../../types/Character";
 import type { CyberneticRef } from "../../../data/reference/cyberneticsReference";
 import type { RangedWeaponRef, MeleeWeaponRef } from "../../../data/reference/weaponReference";
-import type { CampaignCustomItem, CustomCyberneticData } from "../../../types/CustomItems";
+import type { CampaignCustomItem } from "../../../types/CustomItems";
 import type { ArcheotechItem } from "../../../types/Character";
 import { ImplantPicker } from "./ImplantPicker";
 import { ImplantRow } from "./ImplantRow";
@@ -31,11 +31,7 @@ import { Chip } from "../../../ui/chips/Chip";
 import { sourceColour } from "../../../ui/styles/sourceStyles";
 import { useCampaignCustomItems } from "../../../hooks/useCampaignCustomItems";
 import { useCustomItemLibraryActions } from "../../../hooks/useCustomItemLibraryActions";
-import {
-  createDraftCustomItem,
-  inferCustomItemStatus,
-  saveDraftCustomItem,
-} from "../../../services/customItemService";
+import { createDraftCustomItem, saveDraftCustomItem } from "../../../services/customItemService";
 import { useToast } from "../../../components/Toast";
 import { IntegratedWeaponPicker } from "../weapons/IntegratedWeaponPicker";
 import { RangedCard } from "../weapons/RangedCard";
@@ -52,6 +48,11 @@ import {
 } from "../weapons/weaponSnapshotHelpers";
 import { ArcheotechImplantRow } from "./ArcheotechImplantRow";
 import { ConcealedWeaponBionicInstaller } from "./ConcealedWeaponBionicInstaller";
+import {
+  buildCyberneticSnapshot,
+  buildFallbackCyberneticLibraryItem,
+  toCustomCyberneticData,
+} from "./cyberneticSnapshotHelpers";
 import {
   isIntegratedRangedWeapon,
   isIntegratedMeleeWeapon,
@@ -997,74 +998,4 @@ export function CyberneticsTab({
       )}
     </div>
   );
-}
-
-function toCustomCyberneticData(item: CyberneticItem): CustomCyberneticData {
-  const {
-    id: _id,
-    referenceId: _referenceId,
-    customLibraryId: _customLibraryId,
-    customLibraryVersionId: _customLibraryVersionId,
-    bodyLocation: _bodyLocation,
-    ...data
-  } = item;
-
-  return data;
-}
-
-function buildCyberneticSnapshot(
-  id: string,
-  bodyLocation: ArmourLocationKey[] | undefined,
-  data: CustomCyberneticData,
-  customLibraryId: string,
-  customLibraryVersionId: string
-): CyberneticItem {
-  return {
-    id,
-    ...data,
-    customLibraryId,
-    customLibraryVersionId,
-    ...(bodyLocation ? { bodyLocation } : {}),
-  };
-}
-
-function buildFallbackCyberneticLibraryItem({
-  campaignId,
-  item,
-  userId,
-  characterId,
-  characterName,
-}: {
-  campaignId: string;
-  item: CyberneticItem;
-  userId: string | null;
-  characterId: string;
-  characterName?: string;
-}): CampaignCustomItem<"cybernetic"> {
-  const data = toCustomCyberneticData(item);
-  const creator = {
-    userId: userId ?? "",
-    characterId,
-    characterName,
-  };
-
-  return {
-    id: item.customLibraryId ?? "",
-    campaignId,
-    category: "cybernetic",
-    status: inferCustomItemStatus(item),
-    name: item.name,
-    creator,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    createdBy: creator,
-    updatedBy: creator,
-    publishedVersionId: null,
-    draftVersionId: item.customLibraryVersionId ?? null,
-    latestVersionId: item.customLibraryVersionId ?? "",
-    latestVersionNumber: 1,
-    archivedAt: null,
-    archivedByUserId: null,
-    data,
-  };
 }

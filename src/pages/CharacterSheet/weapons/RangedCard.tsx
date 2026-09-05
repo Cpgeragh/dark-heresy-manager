@@ -1,5 +1,5 @@
 // src/pages/CharacterSheet/weapons/RangedCard.tsx
-// RangedCard, AmmoEntryRow, AmmoPicker — see RangedPicker.tsx and CustomRangedForm.tsx for the weapon picker and custom-weapon form.
+// RangedCard — see RangedPicker.tsx and CustomRangedForm.tsx for the weapon picker and custom-weapon form.
 
 import { useState, useEffect } from "react";
 import type {
@@ -18,10 +18,8 @@ import { CustomItemActionButtons } from "../../../ui/forms/CustomItemActionButto
 import { StatusBadge } from "../../../ui/chips/StatusBadge";
 import {
   AMMO_REFERENCE,
-  RECHARGING_POWER_PACKS_TEXT,
   ammoCapacityForWeapon,
   formatAmmoName,
-  isChargePackAmmoName,
   isSoldAsFullClip,
   usesUnitAmmoTracking,
 } from "../../../data/reference/ammoReference";
@@ -49,7 +47,6 @@ import { AddButton } from "../../../ui/buttons/AddButton";
 import { ViewButton } from "../../../ui/buttons/ViewButton";
 import { Chip } from "../../../ui/chips/Chip";
 import { ItemMetaChips } from "../../../ui/chips/ItemMetaChips";
-import { PickerModal, PickerRow } from "../../../ui/pickers/PickerModal";
 import { QuantityControl } from "../../../ui/QuantityControl";
 import { formatWeightForDisplay } from "../../../ui/format/weightFormat";
 import { InfoModal } from "../../../components/InfoModal";
@@ -79,288 +76,9 @@ import {
 } from "./weaponHelpers";
 import { computeMeleeTotalDamage, getKnownSpecialRuleNames } from "./weaponDamageFormatting";
 import { CONCEALED_WEAPON_BIONIC_RULES } from "./concealedWeaponBionicRules";
-
-// ─── Ammo Entry Row ───────────────────────────────────────────────────────────
-
-export function AmmoEntryRow({
-  entry,
-  isLoaded,
-  editable,
-  clipSize,
-  ammoTracking,
-  weightKg,
-  onSetLoaded,
-  onRemove,
-  onUpdateClips,
-  onUpdateRounds,
-  onSetLooseRounds,
-}: {
-  entry: WeaponAmmoEntry;
-  isLoaded: boolean;
-  editable: boolean;
-  clipSize?: string;
-  ammoTracking: AmmoTrackingMode;
-  weightKg?: number;
-  onSetLoaded: () => void;
-  onRemove: () => void;
-  onUpdateClips: (qty: number) => void;
-  onUpdateRounds: (qty: number) => void;
-  onSetLooseRounds: (qty: number) => void;
-}) {
-  const ammoRef = entry.referenceId
-    ? AMMO_REFERENCE.find((ammo) => ammo.id === entry.referenceId)
-    : undefined;
-  const displayName = formatAmmoName(ammoRef?.name ?? entry.name);
-  const isChargePack = isChargePackAmmoName(displayName);
-  const hasAmmoInfo = !!ammoRef?.description || isChargePack;
-  const clipSizeNumber = parseFloat(clipSize ?? "0") || 0;
-  const looseRoundCount = entry.rounds + entry.clips * (clipSizeNumber || 1);
-  const clipSizeLabel =
-    clipSize && clipSize !== "0" && clipSize !== "—" && clipSize !== "N/A"
-      ? `${clipSize}/clip`
-      : undefined;
-  const visibleClipSizeLabel = ammoTracking === "clip" ? clipSizeLabel : undefined;
-
-  return (
-    <div className="rounded border border-slate-500 bg-slate-800/60 px-2 lg:px-3 py-1.5 lg:py-2 space-y-1.5">
-      {/* Name row */}
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5 min-w-0">
-          <button
-            type="button"
-            onClick={editable ? onSetLoaded : undefined}
-            disabled={!editable}
-            aria-label={isLoaded ? `${displayName} loaded` : `Mark ${displayName} as loaded`}
-            title={isLoaded ? "Loaded" : "Mark as loaded"}
-            className={`w-2 h-2 rounded-full shrink-0 transition ${
-              isLoaded
-                ? "bg-green-400"
-                : editable
-                  ? "bg-slate-600 hover:bg-green-500"
-                  : "bg-slate-600"
-            }`}
-          />
-          <span className={`${uiItemName} truncate`}>{displayName}</span>
-          {isLoaded && (
-            <span className="text-[10px] lg:text-xs text-green-500 uppercase tracking-wide shrink-0">
-              Loaded
-            </span>
-          )}
-        </div>
-        {editable && (
-          <Button size="xs" onClick={onRemove} className="shrink-0">
-            Remove
-          </Button>
-        )}
-      </div>
-
-      {(ammoRef || visibleClipSizeLabel || weightKg !== undefined) && (
-        <div className="flex flex-wrap items-center gap-1.5 text-[10px] lg:text-xs">
-          {visibleClipSizeLabel && (
-            <Chip size="sm" className={`border-slate-700 bg-slate-900/40 ${uiTextMuted}`}>
-              {visibleClipSizeLabel}
-            </Chip>
-          )}
-          {ammoRef && (
-            <ItemMetaChips
-              value={ammoRef.cost}
-              purchaseAmount={ammoRef.purchaseAmount}
-              availability={ammoRef.availability}
-              size="sm"
-              bare
-            />
-          )}
-          <Chip size="sm" className={`border-slate-700 bg-slate-900/40 ${uiTextMuted}`}>
-            ⚖ {formatWeightForDisplay(formatWeight(weightKg ?? 0))}
-          </Chip>
-        </div>
-      )}
-
-      {hasAmmoInfo && (
-        <div className="flex items-center gap-1.5">
-          <span className={uiTextLabel}>Rules</span>
-          <span className={uiInfoModalWrapper}>
-            <InfoModal
-              title={displayName}
-              content={
-                <div className="space-y-2">
-                  {ammoRef?.description && (
-                    <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                      {ammoRef.description}
-                    </p>
-                  )}
-                  {isChargePack && (
-                    <div className="space-y-1">
-                      <p className="text-sm lg:text-base font-semibold text-slate-100">
-                        Recharging Power Packs
-                      </p>
-                      <p className={`text-sm lg:text-base ${uiTextBody} leading-relaxed`}>
-                        {RECHARGING_POWER_PACKS_TEXT}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              }
-            />
-          </span>
-        </div>
-      )}
-
-      {/* Count */}
-      <div className="flex items-center gap-4">
-        {ammoTracking === "loose" ? (
-          <div className="flex items-center gap-1.5">
-            <span className={uiTextLabel}>Rounds</span>
-            <QuantityControl
-              quantity={looseRoundCount}
-              editable={editable}
-              size="xs"
-              onUpdate={onSetLooseRounds}
-            />
-          </div>
-        ) : (
-          <div className="flex flex-col items-start gap-1.5">
-            <div className="flex items-center gap-1.5">
-              <span className={uiTextLabel}>Clips</span>
-              <QuantityControl
-                quantity={entry.clips}
-                editable={editable}
-                size="xs"
-                onUpdate={onUpdateClips}
-              />
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className={uiTextLabel}>Rounds</span>
-              <QuantityControl
-                quantity={entry.rounds}
-                editable={editable}
-                size="xs"
-                onUpdate={onUpdateRounds}
-              />
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ─── Ammo Picker ──────────────────────────────────────────────────────────────
-
-export function AmmoPicker({
-  compatibleIds,
-  existingNames,
-  allowDuplicates = false,
-  showCustom = true,
-  title,
-  editable = true,
-  closeOnSelect = true,
-  onSelect,
-  onClose,
-}: {
-  compatibleIds?: readonly string[];
-  existingNames: Set<string>;
-  allowDuplicates?: boolean;
-  showCustom?: boolean;
-  title?: string;
-  editable?: boolean;
-  closeOnSelect?: boolean;
-  onSelect: (name: string, referenceId?: string) => void;
-  onClose: () => void;
-}) {
-  const [query, setQuery] = useState("");
-  const [customName, setCustomName] = useState("");
-
-  const pool = compatibleIds
-    ? AMMO_REFERENCE.filter((a) => compatibleIds.includes(a.id))
-    : AMMO_REFERENCE;
-
-  const options = query.trim()
-    ? pool.filter((a) => a.name.toLowerCase().includes(query.toLowerCase()))
-    : pool;
-
-  return (
-    <PickerModal
-      title={title ?? (editable ? "Add Ammo Type" : "View Ammo Types")}
-      placeholder="Search ammo…"
-      query={query}
-      onQueryChange={setQuery}
-      onClose={onClose}
-      isEmpty={options.length === 0}
-      footer={
-        editable && showCustom ? (
-          <div className="space-y-2">
-            <p className={`text-xs lg:text-sm ${uiTextMuted}`}>Custom / unlisted ammo</p>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={customName}
-                onChange={(e) => setCustomName(e.target.value)}
-                placeholder="Ammo name…"
-                className="flex-1 text-sm lg:text-base bg-slate-800 border border-slate-600 rounded px-2 lg:px-3 py-1 lg:py-1.5 text-slate-100 focus:outline-none focus:border-indigo-500"
-              />
-              <Button
-                onClick={() => {
-                  if (customName.trim()) {
-                    onSelect(customName.trim());
-                    if (closeOnSelect) onClose();
-                    else setCustomName("");
-                  }
-                }}
-                disabled={
-                  !customName.trim() || (!allowDuplicates && existingNames.has(customName.trim()))
-                }
-              >
-                Add
-              </Button>
-            </div>
-            {!closeOnSelect && (
-              <Button variant="secondary" fullWidth onClick={onClose}>
-                Done
-              </Button>
-            )}
-          </div>
-        ) : undefined
-      }
-    >
-      {options.map((ammo) => (
-        <PickerRow
-          key={ammo.id}
-          interactive={editable}
-          onClick={() => {
-            onSelect(formatAmmoName(ammo.name), ammo.id);
-            if (closeOnSelect) onClose();
-          }}
-          disabled={editable && !allowDuplicates && existingNames.has(formatAmmoName(ammo.name))}
-        >
-          <div className="flex items-center justify-between gap-2">
-            <span className={`${uiItemName} group-hover:text-white`}>
-              {formatAmmoName(ammo.name)}
-            </span>
-            <div className="flex items-center gap-1.5 shrink-0">
-              <ItemMetaChips
-                availability={ammo.availability}
-                value={ammo.cost}
-                purchaseAmount={ammo.purchaseAmount}
-                bare
-              />
-            </div>
-          </div>
-          {ammo.description && (
-            <p className={`text-xs lg:text-sm ${uiTextMuted} mt-0.5 line-clamp-2`}>
-              {ammo.description}
-            </p>
-          )}
-        </PickerRow>
-      ))}
-    </PickerModal>
-  );
-}
-
-function formatWeight(kg: number): string {
-  // Drop trailing zeros: 0.700 → "0.7", 0.500 → "0.5", 1.000 → "1"
-  return parseFloat(kg.toFixed(2)).toString();
-}
+import { AmmoEntryRow } from "./AmmoEntryRow";
+import { AmmoPicker } from "./AmmoPicker";
+import { formatAmmoWeight } from "./formatAmmoWeight";
 
 // ─── Ranged Card ──────────────────────────────────────────────────────────────
 
@@ -1078,7 +796,7 @@ export function RangedCard({
                             size="sm"
                             className={`border-slate-700 bg-slate-900/40 ${uiTextMuted}`}
                           >
-                            ⚖ {formatWeightForDisplay(formatWeight(magazineWeight))}
+                            ⚖ {formatWeightForDisplay(formatAmmoWeight(magazineWeight))}
                           </Chip>
                         </div>
                       )}
