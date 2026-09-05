@@ -26,12 +26,10 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
-    "@fontsource/cinzel": "^5.2.8",
     "@fontsource/im-fell-english": "^5.2.6",
     "@fontsource/roboto": "^5.2.10",
     "@fontsource/roboto-mono": "^5.2.9",
     "firebase": "^12.6.0",
-    "firebase-admin": "^13.6.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -54,6 +52,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
+    "firebase-admin": "^13.6.0",
     "firebase-tools": "^14.27.0",
     "globals": "^16.5.0",
     "jsdom": "^27.2.0",
