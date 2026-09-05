@@ -4,6 +4,7 @@ import {
   MAX_CHARACTERISTIC_VALUE,
   MIN_CHARACTERISTIC_VALUE,
   MAX_CHARACTERISTIC_ADVANCES,
+  CHARACTERISTIC_ADVANCE_INCREMENT,
 } from "../constants/gameRules";
 import { PRODUCT_LIMITS } from "../constants/productLimits";
 
@@ -151,7 +152,7 @@ export function validateCharacteristicAdvances(value: number): ValidationResult 
  * Validate characteristic total doesn't exceed 100
  */
 export function validateCharacteristicTotal(base: number, advances: number): ValidationResult {
-  const total = base + advances * 5;
+  const total = base + advances * CHARACTERISTIC_ADVANCE_INCREMENT;
 
   if (total > MAX_CHARACTERISTIC_VALUE) {
     return {
@@ -249,4 +250,3 @@ export function validateCharacterName(name: string): ValidationResult {
 
   return validateStringLength(name, 1, PRODUCT_LIMITS.characterNameCharacters, "Character name");
 }
-

@@ -35,11 +35,13 @@ export function useCharacterMutations({
 
   const toast = useToast();
 
+  type DirectWriteCharacterField = "isEditableByPlayer" | "backgroundComplete";
+
   // ================================================================
   // UPDATE FIELD (GENERIC)
   // ================================================================
   const updateField = useCallback(
-    async <K extends keyof Character>(field: K, value: Character[K]): Promise<void> => {
+    async <K extends DirectWriteCharacterField>(field: K, value: Character[K]): Promise<void> => {
       if (!allowedToEdit || !character) return;
 
       setIsUpdating(true);

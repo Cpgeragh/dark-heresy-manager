@@ -78,7 +78,12 @@ export function applyTechPriestImplants(
   );
   if (careerName !== "Tech-Priest") return withoutOld;
   const granted: CyberneticItem[] = TECH_PRIEST_IMPLANT_REFERENCE_IDS.map((referenceId) => {
-    const reference = CYBERNETICS_REFERENCE.find((ref) => ref.id === referenceId)!;
+    const reference = CYBERNETICS_REFERENCE.find((ref) => ref.id === referenceId);
+    if (!reference) {
+      throw new Error(
+        `Tech-Priest implant reference "${referenceId}" is missing from CYBERNETICS_REFERENCE.`
+      );
+    }
     return {
       id: `${TECH_PRIEST_MECHANICUS_IMPLANT_GRANT_UID}:${referenceId}`,
       referenceId,

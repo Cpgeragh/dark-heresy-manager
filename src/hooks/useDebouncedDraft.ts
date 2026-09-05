@@ -25,7 +25,10 @@ export function useDebouncedDraft(
     sourceValueRef.current = value;
     if (!dirtyRef.current) {
       draftRef.current = value;
-      // A persisted or remote value is the source for this controlled draft.
+      // Suppressed deliberately: this syncs local draft state to an external
+      // value (the persisted/remote source), gated on dirtyRef, a ref that
+      // render logic must not read — so the sync can't be computed inline
+      // during render and has to happen here instead.
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setDraft(value);
     }
