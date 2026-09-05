@@ -19,6 +19,7 @@ const APPROVED_PUBLIC_ENV_NAMES = new Set([
   "VITE_FIREBASE_APP_ID",
   "VITE_RECAPTCHA_SITE_KEY",
 ]);
+const APPROVED_BILLING_GUARD_ENV_NAMES = new Set(["BILLING_GUARD_DRY_RUN"]);
 const APPROVED_BUILD_ENV_NAMES = new Set([
   "BASE_URL",
   "DEV",
@@ -28,6 +29,7 @@ const APPROVED_BUILD_ENV_NAMES = new Set([
   ...APPROVED_PUBLIC_ENV_NAMES,
 ]);
 const RECOVERY_FIXTURE_DIRECTORIES = new Set(["docs", "tests"]);
+const PACKAGE_DIRECTORIES = [".", "functions", "billing-guard"];
 const MAX_SCANNED_FILE_BYTES = 16 * 1024 * 1024;
 
 const joinPattern = (...parts) => parts.join("");
@@ -170,9 +172,23 @@ function isProductionBuildFile(relativePath) {
   );
 }
 
+function approvedEnvironmentSettings(relativePath) {
+  if (relativePath.startsWith("billing-guard/")) {
+    return {
+      names: APPROVED_BILLING_GUARD_ENV_NAMES,
+      description: "billing guard runtime",
+    };
+  }
+  return {
+    names: APPROVED_PUBLIC_ENV_NAMES,
+    description: "public browser",
+  };
+}
+
 function inspectEnvironmentFile(relativePath, text, gitignore, findings) {
   const fileName = path.posix.basename(relativePath);
   const { names, invalidLines } = parseEnvironmentNames(text);
+  const approvedSettings = approvedEnvironmentSettings(relativePath);
 
   if (SAMPLE_ENV_FILES.has(fileName)) {
     addFinding(findings, {
@@ -189,11 +205,11 @@ function inspectEnvironmentFile(relativePath, text, gitignore, findings) {
   }
 
   for (const name of names) {
-    if (!APPROVED_PUBLIC_ENV_NAMES.has(name)) {
+    if (!approvedSettings.names.has(name)) {
       addFinding(findings, {
         level: "error",
         path: relativePath,
-        message: `environment variable ${name} is not an approved public browser setting`,
+        message: `environment variable ${name} is not an approved ${approvedSettings.description} setting`,
       });
     }
   }
@@ -206,11 +222,11 @@ function inspectEnvironmentFile(relativePath, text, gitignore, findings) {
     });
   }
 
-  if (names.length > 0 && names.every((name) => APPROVED_PUBLIC_ENV_NAMES.has(name))) {
+  if (names.length > 0 && names.every((name) => approvedSettings.names.has(name))) {
     addFinding(findings, {
       level: "notice",
       path: relativePath,
-      message: `approved public browser setting(s) found: ${names.join(", ")}; values were not printed`,
+      message: `approved ${approvedSettings.description} setting(s) found: ${names.join(", ")}; values were not printed`,
     });
   }
 }
@@ -345,14 +361,17 @@ async function readJson(absolutePath, label, findings) {
   }
 }
 
-async function runLockfileChecks(rootDir) {
-  const findings = [];
+async function inspectPackageLockfile(rootDir, packageDirectory, findings) {
+  const packageRoot = path.join(rootDir, packageDirectory);
+  const displayPath = (fileName) =>
+    packageDirectory === "." ? fileName : `${packageDirectory}/${fileName}`;
+  const initialFindingCount = findings.length;
   const lockfiles = ["package-lock.json", "pnpm-lock.yaml", "yarn.lock", "bun.lock", "bun.lockb"];
   const presentLockfiles = [];
 
   for (const lockfile of lockfiles) {
     try {
-      await stat(path.join(rootDir, lockfile));
+      await stat(path.join(packageRoot, lockfile));
       presentLockfiles.push(lockfile);
     } catch {
       // The absence of lockfile formats not used by this project is expected.
@@ -362,24 +381,28 @@ async function runLockfileChecks(rootDir) {
   if (presentLockfiles.length !== 1 || presentLockfiles[0] !== "package-lock.json") {
     addFinding(findings, {
       level: "error",
-      path: ".",
+      path: packageDirectory,
       message: `expected only package-lock.json; found ${presentLockfiles.join(", ") || "no lockfile"}`,
     });
-    return findings;
+    return;
   }
 
-  const packageJson = await readJson(path.join(rootDir, "package.json"), "package.json", findings);
-  const lockfile = await readJson(
-    path.join(rootDir, "package-lock.json"),
-    "package-lock.json",
+  const packageJson = await readJson(
+    path.join(packageRoot, "package.json"),
+    displayPath("package.json"),
     findings
   );
-  if (!packageJson || !lockfile) return findings;
+  const lockfile = await readJson(
+    path.join(packageRoot, "package-lock.json"),
+    displayPath("package-lock.json"),
+    findings
+  );
+  if (!packageJson || !lockfile) return;
 
   if (lockfile.lockfileVersion !== 3) {
     addFinding(findings, {
       level: "error",
-      path: "package-lock.json",
+      path: displayPath("package-lock.json"),
       message: `expected npm lockfileVersion 3, found ${String(lockfile.lockfileVersion)}`,
     });
   }
@@ -388,17 +411,17 @@ async function runLockfileChecks(rootDir) {
   if (!lockRoot) {
     addFinding(findings, {
       level: "error",
-      path: "package-lock.json",
+      path: displayPath("package-lock.json"),
       message: "missing the root package entry",
     });
-    return findings;
+    return;
   }
 
   for (const dependencyType of ["dependencies", "devDependencies"]) {
     if (!dependencyMapsMatch(packageJson[dependencyType], lockRoot[dependencyType])) {
       addFinding(findings, {
         level: "error",
-        path: "package-lock.json",
+        path: displayPath("package-lock.json"),
         message: `${dependencyType} do not exactly match package.json`,
       });
     }
@@ -407,7 +430,7 @@ async function runLockfileChecks(rootDir) {
       if (!lockfile.packages?.[`node_modules/${dependencyName}`]) {
         addFinding(findings, {
           level: "error",
-          path: "package-lock.json",
+          path: displayPath("package-lock.json"),
           message: `direct ${dependencyType} entry ${dependencyName} has no locked package`,
         });
       }
@@ -417,24 +440,39 @@ async function runLockfileChecks(rootDir) {
   if (lockfile.name !== packageJson.name || lockRoot.name !== packageJson.name) {
     addFinding(findings, {
       level: "error",
-      path: "package-lock.json",
+      path: displayPath("package-lock.json"),
       message: "root package name does not match package.json",
     });
   }
   if (lockfile.version !== packageJson.version || lockRoot.version !== packageJson.version) {
     addFinding(findings, {
       level: "error",
-      path: "package-lock.json",
+      path: displayPath("package-lock.json"),
       message: "root package version does not match package.json",
     });
   }
 
-  if (findings.length === 0) {
+  if (findings.length === initialFindingCount) {
     addFinding(findings, {
       level: "notice",
-      path: "package-lock.json",
+      path: displayPath("package-lock.json"),
       message: "lockfile exactly matches package.json direct dependencies",
     });
+  }
+}
+
+async function runLockfileChecks(rootDir) {
+  const findings = [];
+
+  for (const packageDirectory of PACKAGE_DIRECTORIES) {
+    if (packageDirectory !== ".") {
+      try {
+        await stat(path.join(rootDir, packageDirectory, "package.json"));
+      } catch {
+        continue;
+      }
+    }
+    await inspectPackageLockfile(rootDir, packageDirectory, findings);
   }
 
   return findings;

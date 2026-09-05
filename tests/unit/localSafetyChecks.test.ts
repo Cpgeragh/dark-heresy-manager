@@ -51,6 +51,31 @@ function createFixture() {
   return root;
 }
 
+function createPackageFixture(root: string, directory: string, name: string) {
+  const packageRoot = resolve(root, directory);
+  const dependencies = { typescript: "~5.9.3" };
+  const packageJson = {
+    name,
+    version: "1.0.0",
+    dependencies,
+    devDependencies: {},
+  };
+  const packageLock = {
+    name,
+    version: "1.0.0",
+    lockfileVersion: 3,
+    requires: true,
+    packages: {
+      "": packageJson,
+      "node_modules/typescript": { version: "5.9.3" },
+    },
+  };
+
+  mkdirSync(packageRoot, { recursive: true });
+  writeFileSync(resolve(packageRoot, "package.json"), JSON.stringify(packageJson));
+  writeFileSync(resolve(packageRoot, "package-lock.json"), JSON.stringify(packageLock));
+}
+
 function runChecker(root: string, scope?: "--secrets" | "--lockfile") {
   return spawnSync(process.execPath, [checkerPath, "--root", root, ...(scope ? [scope] : [])], {
     encoding: "utf8",
@@ -93,6 +118,29 @@ describe("local safety checker", () => {
     expect(result.status).toBe(1);
     expect(result.stdout).toContain("VITE_ADMIN_SECRET");
     expect(result.stdout).not.toContain("do-not-print-this-value");
+  });
+
+  it("permits the approved billing guard runtime setting only inside billing-guard", () => {
+    const root = createFixture();
+    mkdirSync(resolve(root, "billing-guard"));
+    writeFileSync(resolve(root, "billing-guard", ".env.example"), "BILLING_GUARD_DRY_RUN=\n");
+
+    const approved = runChecker(root, "--secrets");
+
+    expect(approved.status).toBe(0);
+    expect(approved.stdout).toContain("approved billing guard runtime setting(s)");
+
+    writeFileSync(resolve(root, ".env.local"), "BILLING_GUARD_DRY_RUN=do-not-print\n");
+    writeFileSync(
+      resolve(root, "billing-guard", ".env.example"),
+      "BILLING_GUARD_DRY_RUN=\nBILLING_GUARD_TOKEN=do-not-print\n"
+    );
+    const rejected = runChecker(root, "--secrets");
+
+    expect(rejected.status).toBe(1);
+    expect(rejected.stdout).toContain("BILLING_GUARD_DRY_RUN");
+    expect(rejected.stdout).toContain("BILLING_GUARD_TOKEN");
+    expect(rejected.stdout).not.toContain("do-not-print");
   });
 
   it("rejects service-account JSON and private-key material without printing values", () => {
@@ -203,5 +251,28 @@ describe("local safety checker", () => {
 
     expect(result.status).toBe(1);
     expect(result.stdout).toContain("dependencies do not exactly match package.json");
+  });
+
+  it("checks Functions and billing-guard lockfiles as independent packages", () => {
+    const root = createFixture();
+    createPackageFixture(root, "functions", "functions");
+    createPackageFixture(root, "billing-guard", "billing-guard");
+
+    const consistent = runChecker(root, "--lockfile");
+
+    expect(consistent.status).toBe(0);
+    expect(consistent.stdout).toContain("functions/package-lock.json");
+    expect(consistent.stdout).toContain("billing-guard/package-lock.json");
+
+    const lockPath = resolve(root, "billing-guard", "package-lock.json");
+    const inconsistentLock = JSON.parse(readFileSync(lockPath, "utf8"));
+    inconsistentLock.packages[""].dependencies.typescript = "~5.8.0";
+    writeFileSync(lockPath, JSON.stringify(inconsistentLock));
+
+    const inconsistent = runChecker(root, "--lockfile");
+
+    expect(inconsistent.status).toBe(1);
+    expect(inconsistent.stdout).toContain("billing-guard/package-lock.json");
+    expect(inconsistent.stdout).toContain("dependencies do not exactly match package.json");
   });
 });
