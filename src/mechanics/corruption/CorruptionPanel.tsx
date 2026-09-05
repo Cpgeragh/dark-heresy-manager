@@ -26,6 +26,7 @@ import {
 } from "../../ui/styles/editableStyles";
 import { SectionHeader } from "../../ui/SectionHeader";
 import { SegmentedTabs, type SegmentedTabOption } from "../../ui/SegmentedTabs";
+import { SegmentedTimeline } from "../../ui/SegmentedTimeline";
 import {
   segmentedTabId,
   segmentedTabPanelId,
@@ -83,64 +84,6 @@ const CORRUPTION_TABS = ENTRY_GROUPS.map((group) => ({
 })) satisfies readonly SegmentedTabOption<EntryGroup>[];
 const CORRUPTION_TABS_ID = "corruption-entry-groups";
 
-function CorruptionTimeline({ points }: { points: number }) {
-  const progressPct = Math.min(100, (points / CORRUPTION_TIMELINE_TOTAL_WIDTH) * 100);
-
-  const breakpoints: number[] = [];
-  let cumulative = 0;
-  for (let i = 0; i < CORRUPTION_TIMELINE_SEGMENTS.length - 1; i++) {
-    cumulative += CORRUPTION_TIMELINE_SEGMENTS[i].width;
-    breakpoints.push(cumulative);
-  }
-
-  return (
-    <div className="w-full">
-      <div className="relative">
-        <div className="relative h-2 rounded-full overflow-hidden border border-slate-600">
-          <div className="absolute inset-0 flex">
-            {CORRUPTION_TIMELINE_SEGMENTS.map((segment) => (
-              <div
-                key={segment.degree}
-                className={segment.dimColourClass}
-                style={{ flexGrow: segment.width, flexBasis: 0, flexShrink: 0 }}
-              />
-            ))}
-          </div>
-          <div
-            className="absolute inset-0 flex"
-            style={{ clipPath: `inset(0 ${100 - progressPct}% 0 0)` }}
-          >
-            {CORRUPTION_TIMELINE_SEGMENTS.map((segment) => (
-              <div
-                key={segment.degree}
-                className={segment.colourClass}
-                style={{ flexGrow: segment.width, flexBasis: 0, flexShrink: 0 }}
-              />
-            ))}
-          </div>
-        </div>
-        <div
-          className="absolute top-1/2 h-3.5 w-0.5 -translate-x-1/2 -translate-y-1/2 bg-slate-100"
-          style={{ left: `${progressPct}%` }}
-        />
-      </div>
-      <div className="relative h-4 mt-1.5 text-xs lg:text-sm font-semibold text-slate-200">
-        <span className="absolute left-0 -translate-x-1/2">0</span>
-        {breakpoints.map((value) => (
-          <span
-            key={value}
-            className="absolute -translate-x-1/2 text-[10px] lg:text-xs font-normal text-slate-300"
-            style={{ left: `${(value / CORRUPTION_TIMELINE_TOTAL_WIDTH) * 100}%` }}
-          >
-            {value}
-          </span>
-        ))}
-        <span className="absolute left-full -translate-x-1/2">100</span>
-      </div>
-    </div>
-  );
-}
-
 function CorruptionStatusChips({ points }: { points: number }) {
   const safePoints = Math.max(0, Math.floor(points || 0));
   const entry = getCorruptionTrackEntry(safePoints);
@@ -149,7 +92,11 @@ function CorruptionStatusChips({ points }: { points: number }) {
 
   return (
     <div className="w-full max-w-md space-y-3">
-      <CorruptionTimeline points={safePoints} />
+      <SegmentedTimeline
+        value={safePoints}
+        segments={CORRUPTION_TIMELINE_SEGMENTS}
+        totalWidth={CORRUPTION_TIMELINE_TOTAL_WIDTH}
+      />
 
       <div className="flex justify-center items-center gap-1.5">
         <Chip size="lg" className={corruptionDegreeChipClass(entry)}>

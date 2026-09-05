@@ -1,4 +1,5 @@
 import type { InsanityDisorderSeverity } from "../../types/Character";
+import type { SegmentedTimelineSegment } from "../../ui/SegmentedTimeline";
 import {
   colourAmberFaint,
   colourBlue,
@@ -98,28 +99,22 @@ function degreeSegmentColours(degree: string): { bright: string; dim: string } {
   }
 }
 
-export interface InsanityTimelineSegment {
-  degree: string;
-  width: number;
-  colourClass: string;
-  dimColourClass: string;
-}
-
-export const INSANITY_TIMELINE_SEGMENTS: InsanityTimelineSegment[] = INSANITY_TRACK.filter(
-  (entry) => !entry.terminal
-).reduce<InsanityTimelineSegment[]>((segments, entry) => {
-  const width = entry.max !== undefined ? entry.max - entry.min + 1 : 0;
-  const last = segments[segments.length - 1];
-  if (last && last.degree === entry.degree) {
-    last.width += width;
-    return segments;
-  }
-  const colours = degreeSegmentColours(entry.degree);
-  return [
-    ...segments,
-    { degree: entry.degree, width, colourClass: colours.bright, dimColourClass: colours.dim },
-  ];
-}, []);
+export const INSANITY_TIMELINE_SEGMENTS: (SegmentedTimelineSegment & { degree: string })[] =
+  INSANITY_TRACK.filter((entry) => !entry.terminal).reduce<
+    (SegmentedTimelineSegment & { degree: string })[]
+  >((segments, entry) => {
+    const width = entry.max !== undefined ? entry.max - entry.min + 1 : 0;
+    const last = segments[segments.length - 1];
+    if (last && last.degree === entry.degree) {
+      last.width += width;
+      return segments;
+    }
+    const colours = degreeSegmentColours(entry.degree);
+    return [
+      ...segments,
+      { degree: entry.degree, width, colourClass: colours.bright, dimColourClass: colours.dim },
+    ];
+  }, []);
 
 export const INSANITY_TIMELINE_TOTAL_WIDTH = INSANITY_TIMELINE_SEGMENTS.reduce(
   (sum, segment) => sum + segment.width,
